@@ -1,0 +1,19 @@
+# SEGMENTER transcribe (scripts/transcribe.py)
+deepgram-sdk>=6.0.0
+# SEGMENTER multicam (scripts/multicam_pipeline.py)
+scipy
+# CLIPPER transcribe stereo-channel isolation (scripts/clipper_transcribe.py) + multicam
+numpy>=1.26
+# FRAME.IO REVIEW on-screen-text QC (scripts/frameio/*): perceptual-hash dedup + Claude vision.
+# Also PRODUCER hook-card rendering (scripts/producer/overlays.py): RGBA card PNGs.
+Pillow>=10.0
+imagehash>=4.3
+anthropic>=0.40
+# FRAME.IO REVIEW OCR-selector mode (scripts/frameio/ocr_dedup.py): needs system `tesseract` on PATH
+pytesseract>=0.3.10
+rapidfuzz>=3.0
+# PRODUCER face-aware 9:16 reframe (scripts/producer/face_track.py): OpenCV Haar
+# cascade + bundled cascade data. Pinned <5: opencv 5.0 dropped CascadeClassifier
+# and stopped bundling the haarcascades XML; the 4.x line (cp37-abi3 wheels,
+# installs on 3.14) keeps both. numpy (above) is a shared transitive dep.
+opencv-python-headless>=4.8,<5

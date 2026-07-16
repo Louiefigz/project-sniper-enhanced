@@ -1,0 +1,231 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"chip1","type":"string","label":"Chip 1","default":"Instagram"},
+    {"id":"chip2","type":"string","label":"Chip 2 (empty = omit)","default":"TikTok"},
+    {"id":"chip3","type":"string","label":"Chip 3 (empty = omit)","default":"YouTube"},
+    {"id":"chip4","type":"string","label":"Chip 4 (empty = omit)","default":""},
+    {"id":"icon1","type":"string","label":"Chip 1 icon (file under /icons, empty = dot)","default":""},
+    {"id":"icon2","type":"string","label":"Chip 2 icon (file under /icons, empty = dot)","default":""},
+    {"id":"icon3","type":"string","label":"Chip 3 icon (file under /icons, empty = dot)","default":""},
+    {"id":"icon4","type":"string","label":"Chip 4 icon (file under /icons, empty = dot)","default":""},
+    {"id":"at1","type":"number","label":"Chip 1 land time (s)","default":0.2,"min":0,"max":30,"step":0.05,"unit":"s"},
+    {"id":"at2","type":"number","label":"Chip 2 land time (s)","default":0.55,"min":0,"max":30,"step":0.05,"unit":"s"},
+    {"id":"at3","type":"number","label":"Chip 3 land time (s)","default":0.9,"min":0,"max":30,"step":0.05,"unit":"s"},
+    {"id":"at4","type":"number","label":"Chip 4 land time (s)","default":1.25,"min":0,"max":30,"step":0.05,"unit":"s"},
+    {"id":"accent","type":"color","label":"Accent color","default":"#054BC9"}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · Motion template: CHIP-ROW (MG-3)
+    Trigger it serves: named entities ("Instagram, TikTok, YouTube", app/brand/product lists).
+    Transparent 1080x1920 overlay -> render with `--format mov` (ProRes 4444) for alpha.
+
+    CONTRACT for the PRODUCER compositing stage:
+      - CONTENT (chip1..4), PER-CHIP LAND TIMES (at1..4, seconds), and accent are
+        `data-composition-variables` — fill with --variables. The land times are how
+        chips sync to spoken words: set atN to the transcript time of the entity name
+        (relative to the overlay's outStart).
+      - An empty chipN string OMITS that pill; the row re-centers to the remaining chips.
+        1-3 chips lay out on ONE centered row; 4 chips wrap to a centered 2x2 grid.
+      - Each chip is a rounded white pill with a leading accent icon dot — the entity
+        analog of list-build's checkmark rows, laid out horizontally instead of stacked.
+      - OPTIONAL per-chip icons (icon1..4): a filename under the icons/ web root
+        (e.g. "codex.svg" from scripts/producer/icon_library.py). When set, the real
+        brand mark replaces that chip's accent dot (56px, vertical-centered, accent
+        blue). Leave a chipN's icon empty to keep the plain accent dot — the no-icon
+        path is byte-identical to the pre-icon template.
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (see stat-card note) — set it
+        directly per render. Make it comfortably past the last atN so the row holds
+        before the fade.
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>SNIPER · chip-row</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: var(--canvas-w);
+        height: var(--canvas-h);
+        overflow: hidden;
+        background: transparent;
+        font-family: var(--font);
+      }
+      #chip-root { position: relative; width: var(--canvas-w); height: var(--canvas-h); }
+
+      /* .stage OWNS the centering transform (x=495 visual center, free-band center).
+         .row is a plain flex-wrap so GSAP can drift/fade it without clobbering the
+         centering transform. */
+      .stage {
+        position: absolute;
+        left: var(--visual-center-x);
+        top: 855px;
+        transform: translate(-50%, -50%);
+        display: flex;
+        justify-content: center;
+      }
+      #chip-wrap {
+        display: flex;
+        flex-wrap: nowrap;               /* 1-3 chips ride on one centered row */
+        justify-content: center;
+        align-items: center;
+        gap: 24px;
+        will-change: transform, opacity;
+      }
+      /* 4 chips wrap to a centered 2x2. The explicit WIDTH is what forces the break
+         after two: a wrapping flex container inside a shrink-to-fit absolute parent
+         (.stage) otherwise collapses to its widest single chip and stacks 1-per-row. */
+      #chip-wrap[data-count="4"] {
+        flex-wrap: wrap;
+        width: var(--safe-width);
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 20px;
+        background: var(--card-bg);
+        border-radius: 999px;                 /* full pill */
+        padding: 22px 38px 22px 28px;
+        box-shadow: var(--card-shadow);
+        will-change: transform, opacity;
+      }
+      .chip-dot {
+        flex: 0 0 auto;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 8px var(--accent-soft);   /* soft accent halo — the "icon" */
+        will-change: transform;
+      }
+      /* Real brand mark that replaces the dot when a chipN has an icon. 56px reads
+         clearly at 1080p without crowding the pill; contain preserves the square
+         Simple Icons viewBox. The SVG is pre-recolored to --accent at fetch time
+         (icon_library.py), so it matches the dot it stands in for. */
+      .chip-icon {
+        flex: 0 0 auto;
+        width: 56px;
+        height: 56px;
+        object-fit: contain;
+        display: block;
+        will-change: transform;
+      }
+      .chip-text {
+        font-weight: 700;
+        font-size: 50px;
+        line-height: 1.02;
+        color: var(--ink);
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="chip-root"
+      data-composition-id="chip-row"
+      data-width="1080"
+      data-height="1920"
+      data-duration="3"
+    >
+      <div class="stage">
+        <div id="chip-wrap">
+          <div id="chip-1" class="chip clip" data-slot="1" data-start="0" data-duration="60" data-track-index="1">
+            <span class="chip-dot"></span><span class="chip-text"></span>
+          </div>
+          <div id="chip-2" class="chip clip" data-slot="2" data-start="0" data-duration="60" data-track-index="2">
+            <span class="chip-dot"></span><span class="chip-text"></span>
+          </div>
+          <div id="chip-3" class="chip clip" data-slot="3" data-start="0" data-duration="60" data-track-index="3">
+            <span class="chip-dot"></span><span class="chip-text"></span>
+          </div>
+          <div id="chip-4" class="chip clip" data-slot="4" data-start="0" data-duration="60" data-track-index="4">
+            <span class="chip-dot"></span><span class="chip-text"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("chip-root");
+        const D = parseFloat(root.dataset.duration) || 3;
+
+        const defaults = {
+          chip1: "Instagram", chip2: "TikTok", chip3: "YouTube", chip4: "",
+          icon1: "", icon2: "", icon3: "", icon4: "",
+          at1: 0.2, at2: 0.55, at3: 0.9, at4: 1.25, accent: "#054BC9",
+        };
+        const HF = window.__hyperframes;
+        const vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
+        document.documentElement.style.setProperty("--accent", vars.accent);
+
+        const items = [
+          { text: vars.chip1, icon: vars.icon1, at: Number(vars.at1) },
+          { text: vars.chip2, icon: vars.icon2, at: Number(vars.at2) },
+          { text: vars.chip3, icon: vars.icon3, at: Number(vars.at3) },
+          { text: vars.chip4, icon: vars.icon4, at: Number(vars.at4) },
+        ];
+
+        // Resolve a chipN icon var to a rooted /icons src; empty stays the dot.
+        function iconSrc(raw) {
+          const v = (raw == null ? "" : String(raw)).trim();
+          if (!v) return "";
+          if (v.charAt(0) === "/") return v;             // already a rooted path
+          return "/icons/" + (v.indexOf(".") >= 0 ? v : v + ".svg");
+        }
+
+        // Fill / prune the four static chips; drop empties before the timeline is built.
+        const chips = Array.prototype.slice.call(document.querySelectorAll(".chip"));
+        const active = [];
+        chips.forEach(function (chip, i) {
+          const it = items[i];
+          const text = (it.text == null ? "" : String(it.text)).trim();
+          if (!text) { chip.remove(); return; }
+          chip.querySelector(".chip-text").textContent = text;
+          // Marker = the real brand mark when this chip has an icon, else the
+          // accent dot (untouched — the no-icon path stays byte-stable).
+          const dot = chip.querySelector(".chip-dot");
+          const src = iconSrc(it.icon);
+          let marker = dot;
+          if (src) {
+            const img = document.createElement("img");
+            img.className = "chip-icon";
+            img.setAttribute("alt", "");
+            img.src = src;
+            chip.insertBefore(img, dot);   // icon takes the dot's leading slot
+            dot.remove();                  // dot fully gone when an icon is present
+            marker = img;
+          }
+          active.push({ chip: chip, marker: marker, at: isFinite(it.at) ? it.at : 0.2 });
+        });
+        // Count drives the 2x2 wrap rule for a full house of four.
+        document.getElementById("chip-wrap").setAttribute("data-count", String(active.length));
+
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        active.forEach(function (a) {
+          // Hidden state pinned at t=0 so opacity is a pure function of timeline time.
+          tl.set(a.chip, { opacity: 0, y: 26, scale: 0.86 }, 0);
+          tl.set(a.marker, { scale: 0.2 }, 0);
+          const at = Math.max(0, Math.min(a.at, D - 0.5)); // keep the entrance inside the render
+          tl.to(a.chip, { opacity: 1, y: 0, scale: 1, duration: 0.46, ease: "back.out(1.7)" }, at);
+          tl.to(a.marker, { scale: 1, duration: 0.4, ease: "back.out(2.6)" }, at + 0.06);
+        });
+
+        // Fade the whole row out — ends exactly at D so timeline length == render length.
+        const fadeDur = Math.min(0.42, D * 0.18);
+        tl.to("#chip-wrap", { opacity: 0, y: -14, duration: fadeDur, ease: "power2.in" }, D - fadeDur);
+
+        tl.seek(0);
+        window.__timelines["chip-row"] = tl;
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,163 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"title","type":"string","label":"Chapter title (<= 5 words)","default":"The Six Shifts"},
+    {"id":"accent","type":"color","label":"Sweep / background color","default":"#054BC9"}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · Motion template: STINGER-WIPE (MG-3)
+    Trigger it serves: topic boundaries — chapter/section changes (long-form) or a
+    hard subject switch (shorts). A fast full-frame takeover that HIDES the cut.
+    FULL-FRAME OPAQUE TAKEOVER (not transparent) -> render to MP4 (default format).
+    Same doctrine as kinetic-quote (PLAN §3.3): the compositor crossfades the base
+    video under this stinger at the two chapter cut points, so the stinger's own job
+    is to be a solid brand-blue field (background solid from FRAME 1 = the crossfade
+    base) with a bright sweep + a title that wipes in behind it.
+
+    CONTRACT for the PRODUCER compositing stage:
+      - title / accent are `data-composition-variables` (fill with --variables). The
+        `accent` sets BOTH the solid background field AND is the family the gold
+        underline/white sweep read against — pass the brand blue by default.
+      - Keep title <= 5 words (transition doctrine, PLAN §2 — never dwell on a stinger).
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (see stat-card note); keep it
+        <= 1.2s (stinger doctrine). Set it directly per render. The title HOLDS to the
+        end; the compositor owns both crossfades (in at the first cut, out at the second).
+      - This renders OPAQUE (MP4): the background is solid from frame 1 and lives on a
+        full-bleed CHILD (never the root) so the compositor's frame handling can drop
+        the root's own background without punching a hole in the field.
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>SNIPER · stinger-wipe</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: var(--canvas-w);
+        height: var(--canvas-h);
+        overflow: hidden;
+        background: transparent;
+        font-family: var(--font);
+      }
+      #stinger-root { position: relative; width: var(--canvas-w); height: var(--canvas-h); overflow: hidden; }
+
+      /* Full-bleed solid field lives on a CHILD (never the root) — the producer's
+         frame compositing can drop the root's own background (frame renders black). */
+      #stinger-bg { position: absolute; inset: 0; background: var(--accent); }
+
+      /* A bright, softly-lit diagonal gleam that sweeps across the field once — the
+         visible "wipe" motion on the solid blue. Skewed so it reads as a light sweep. */
+      #stinger-gleam {
+        position: absolute;
+        top: -10%;
+        left: 0;
+        width: 420px;
+        height: 120%;
+        transform: translateX(-700px) skewX(-14deg);
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.30) 50%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        will-change: transform;
+      }
+
+      /* Centered title band. The clip window hides the title until it slides in. */
+      .stage {
+        position: absolute;
+        left: var(--visual-center-x);
+        top: 960px;
+        transform: translate(-50%, -50%);
+        width: var(--safe-width);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 28px;
+      }
+      #title-clip { overflow: hidden; max-width: 100%; padding: 8px 0; }
+      #stinger-title {
+        display: block;
+        font-weight: 700;
+        font-size: 104px;
+        line-height: 1.04;
+        letter-spacing: -0.02em;
+        color: #FFFFFF;
+        text-align: center;
+        white-space: nowrap;
+        will-change: transform;
+      }
+      #title-rule {
+        display: block;
+        width: 220px;
+        height: 10px;
+        border-radius: 6px;
+        background: var(--gold);            /* gold accent rule — brand secondary */
+        transform-origin: center;
+        will-change: transform;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="stinger-root"
+      data-composition-id="stinger-wipe"
+      data-width="1080"
+      data-height="1920"
+      data-duration="1.2"
+    >
+      <div id="stinger-bg"></div>
+      <div id="stinger-gleam" class="clip" data-start="0" data-duration="60" data-track-index="1"></div>
+      <div class="stage">
+        <div id="title-clip" class="clip" data-start="0" data-duration="60" data-track-index="2">
+          <span id="stinger-title">The Six Shifts</span>
+        </div>
+        <div id="title-rule" class="clip" data-start="0" data-duration="60" data-track-index="3"></div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("stinger-root");
+        // Single source of truth for render length: the root data-duration attr.
+        const D = parseFloat(root.dataset.duration) || 1.2;
+
+        const defaults = { title: "The Six Shifts", accent: "#054BC9" };
+        const HF = window.__hyperframes;
+        const vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
+        document.documentElement.style.setProperty("--accent", vars.accent);
+        document.getElementById("stinger-title").textContent = vars.title;
+
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // 1) Gleam sweeps the full width once (left -> right), off-screen at both ends.
+        tl.fromTo(
+          "#stinger-gleam",
+          { x: -700 },
+          { x: 1500, duration: Math.min(0.6, D * 0.6), ease: "power1.inOut" },
+          0
+        );
+
+        // 2) Title wipes in from the left behind the clip window, in the gleam's wake.
+        tl.fromTo(
+          "#stinger-title",
+          { xPercent: -115 },
+          { xPercent: 0, duration: 0.42, ease: "power3.out" },
+          0.16
+        );
+        // 3) Gold rule draws out from center under the title.
+        tl.fromTo("#title-rule", { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power2.out" }, 0.32);
+
+        // Title HOLDS to the end — the compositor owns the out-crossfade at the second cut.
+        tl.seek(0);
+        window.__timelines["stinger-wipe"] = tl;
+      })();
+    </script>
+  </body>
+</html>

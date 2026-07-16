@@ -1,0 +1,260 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"num","type":"string","label":"Section number (renders as #N; empty = no numeral)","default":""},
+    {"id":"title","type":"string","label":"Section title (accent, lands second)","default":""},
+    {"id":"sub","type":"string","label":"Subline (gray, builds word-by-word third)","default":""},
+    {"id":"accentColor","type":"color","label":"Title accent color (per-video brand token, R23)","default":"#054BC9"},
+    {"id":"at1","type":"number","label":"Numeral drift-in start (s)","default":0.3,"min":0,"max":30,"step":0.05,"unit":"s"},
+    {"id":"at2","type":"number","label":"Title land time (s)","default":1.5,"min":0,"max":30,"step":0.05,"unit":"s"},
+    {"id":"at3","type":"number","label":"Subline build start (s)","default":2.5,"min":0,"max":30,"step":0.05,"unit":"s"}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · Motion template: SECTION-TAKEOVER (16:9 own-screen)
+    Reference: the operator's "angle generator" long-form section card
+    (REFERENCE_STYLE_STUDY R24 — "section takeovers with drifting ghost
+    numerals"). Frames: study2 burst section1_259 (t259.2→261.7: white frame,
+    giant soft-gray ghost "#1" captured MID-DRIFT across consecutive frames,
+    legs dissolving in a vertical fade) + state sheet_24 295→299 (t259.5→265:
+    numeral settles left-third; azure title lands right of it; gray subline
+    builds word-by-word beneath the title). Reference title azure is
+    tokenized: accentColor, default Project Sniper #054BC9 (color = token, R23;
+    structure matches the reference).
+
+    CONTRACT for the PRODUCER compositing stage:
+      - anchor "own-screen" -> render `--format mp4` (OPAQUE takeover; it
+        REPLACES the frame for its window). The white field is opaque from
+        FRAME 1 on a full-bleed CHILD (never the root — compositing drops
+        root backgrounds).
+      - num / title / sub / accentColor / at1 / at2 / at3 are
+        `data-composition-variables`. Build order is the reference grammar:
+        numeral DRIFTS IN from the right edge at at1 (slow power ease into
+        its left-third settle, then keeps a barely-perceptible residual
+        drift through the hold), title lands at at2, subline builds
+        word-by-word from at3 (~90ms cadence, compressed to finish by D-0.3).
+      - EMPTY-DEFAULTS LAW (G21): num, title, sub default EMPTY — an unset
+        var renders NOTHING. Demo content activates ONLY when all three are
+        unset; setting any renders exactly what was set, no sample leak.
+      - EXIT: simple hold to the end — the compositor owns both seams.
+        TODO(phase-2): the reference exits by PANNING OUT to the next canvas
+        (camera-move across a larger whiteboard, sheet_24 299 -> next state).
+        That pan-out belongs to a multi-canvas host comp, not this card.
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
+        rewrites it per window; --variables never sets it).
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>SNIPER · section-takeover</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #fcfcfb;               /* opaque — this comp owns the whole frame */
+        font-family: var(--font);
+      }
+      #st-root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+
+      /* Opaque warm-white field on a full-bleed CHILD (reference ~#fcfcfa). */
+      #st-bg { position: absolute; inset: 0; background: #fcfcfb; }
+
+      /* Giant ghost numeral — soft gray dissolving downward (reference: solid
+         at the top, legs fade out by ~78% height). background-clip:text keeps
+         the gradient INSIDE the glyphs; GSAP animates transform only. */
+      #st-num {
+        position: absolute;
+        left: 280px;
+        top: 30px;
+        will-change: transform, opacity;
+      }
+      /* Inner span owns a static scaleX condense (reference glyphs are a tall
+         condensed face; Inter 900 squeezed ~0.82 approximates it) so GSAP's
+         x-drift on #st-num never fights a CSS transform. */
+      #st-num-inner {
+        display: inline-block;
+        transform: scaleX(0.82);
+        transform-origin: left top;
+        font-size: 780px;
+        font-weight: 900;
+        line-height: 0.95;
+        letter-spacing: -0.05em;
+        background: linear-gradient(
+          180deg,
+          #b9bdbc 0%,
+          #c6cac9 40%,
+          rgba(198, 202, 201, 0) 78%
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      /* Title + subline column, centered in the space right of the numeral
+         (sheet_24 297: title centered ~x0.65W, ~y0.37H). */
+      #st-panel {
+        position: absolute;
+        left: 780px;
+        top: 360px;
+        width: 980px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+      }
+      #st-title {
+        font-size: 66px;
+        font-weight: 800;
+        line-height: 1.15;
+        letter-spacing: -0.01em;
+        color: var(--accent);
+        text-align: center;
+        will-change: transform, opacity;
+      }
+      #st-sub {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px 13px;
+        max-width: 860px;
+        will-change: transform, opacity;
+      }
+      #st-sub .word {
+        display: inline-block;             /* transforms need block-level + size */
+        font-size: 38px;
+        font-weight: 500;
+        line-height: 1.35;
+        color: #999ea1;
+        will-change: transform, opacity;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="st-root"
+      data-composition-id="section-takeover"
+      data-width="1920"
+      data-height="1080"
+      data-duration="6"
+    >
+      <div id="st-bg"></div>
+      <div id="st-num" class="clip" data-start="0" data-duration="60" data-track-index="1"><span id="st-num-inner"></span></div>
+      <div id="st-panel">
+        <div id="st-title" class="clip" data-start="0" data-duration="60" data-track-index="2"></div>
+        <div id="st-sub" class="clip" data-start="0" data-duration="60" data-track-index="3"></div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("st-root");
+        const D = parseFloat(root.dataset.duration) || 6;
+
+        // Content defaults are EMPTY (G21 — unset renders NOTHING).
+        const defaults = {
+          num: "", title: "", sub: "",
+          accentColor: "#054BC9", at1: 0.3, at2: 1.5, at3: 2.5,
+        };
+        // PREVIEW-ONLY demo content (the reference card itself, sheet_24
+        // 295→299). Activates ONLY when num AND title AND sub are all unset.
+        const SAMPLE = {
+          num: "1",
+          title: "Not get more ideas from AI",
+          sub: "It's give AI real pain that it can actually work with",
+        };
+        const HF = window.__hyperframes;
+        let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
+        const contentKeys = ["num", "title", "sub"];
+        const isPreview = contentKeys.every(function (k) {
+          return !(vars[k] == null ? "" : String(vars[k])).trim();
+        });
+        if (isPreview) vars = Object.assign({}, vars, SAMPLE);
+        document.documentElement.style.setProperty("--accent", vars.accentColor);
+
+        const clampAt = function (raw, fallback) {
+          const v = isFinite(Number(raw)) ? Number(raw) : fallback;
+          return Math.max(0, Math.min(v, Math.max(0, D - 0.4)));
+        };
+        const at1 = clampAt(vars.at1, 0.3);
+        const at2 = clampAt(vars.at2, 1.5);
+        const at3 = clampAt(vars.at3, 2.5);
+
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // Field micro-settle — imperceptible, keeps the timeline non-empty even
+        // for a numeral-only card (the base <body> is the same opaque white, so
+        // frame 1 stays fully lit — own-screen law).
+        tl.fromTo("#st-bg", { opacity: 0.985 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, 0);
+
+        // --- 1) Ghost numeral drifts in FROM THE RIGHT EDGE (burst grammar:
+        //        consecutive frames catch it mid-slide), settles left-third,
+        //        and keeps a slow residual drift through the hold. ---
+        const numEl = document.getElementById("st-num");
+        const numText = (vars.num == null ? "" : String(vars.num)).trim().replace(/^#+/, "");
+        if (numText) {
+          document.getElementById("st-num-inner").textContent = "#" + numText;
+          const driftDur = Math.min(1.2, Math.max(0.5, D - at1 - 0.2));
+          tl.set(numEl, { x: 1440, opacity: 0 }, 0);
+          tl.to(numEl, { opacity: 1, duration: 0.4, ease: "power1.out" }, at1);
+          tl.to(numEl, { x: 26, duration: driftDur, ease: "power3.out" }, at1);
+          const holdFrom = at1 + driftDur;
+          if (D - holdFrom > 0.1) {
+            // Still slightly moving through the hold (reference is never static).
+            tl.to(numEl, { x: 0, duration: D - holdFrom, ease: "none" }, holdFrom);
+          }
+        } else {
+          numEl.remove();                  // unset var renders NOTHING
+        }
+
+        // --- 2) Accent title lands second. ---
+        const titleEl = document.getElementById("st-title");
+        const titleText = (vars.title == null ? "" : String(vars.title)).trim();
+        if (titleText) {
+          titleEl.textContent = titleText;
+          if (titleText.length > 34) titleEl.style.fontSize = "56px";
+          tl.set(titleEl, { opacity: 0, y: 28 }, 0);
+          tl.to(titleEl, { opacity: 1, y: 0, duration: 0.38, ease: "power2.out" }, at2);
+        } else {
+          titleEl.remove();                // unset var renders NOTHING
+        }
+
+        // --- 3) Gray subline builds word-by-word third (fixed final layout,
+        //        ~90ms cadence, compressed to finish by D-0.3). ---
+        const subEl = document.getElementById("st-sub");
+        const subText = (vars.sub == null ? "" : String(vars.sub)).trim();
+        if (subText) {
+          const words = subText.split(/\s+/).filter(Boolean);
+          const spans = words.map(function (w) {
+            const el = document.createElement("span");
+            el.className = "word";
+            el.textContent = w;
+            subEl.appendChild(el);
+            return el;
+          });
+          let gap = 0.09;
+          if (spans.length > 1) {
+            gap = Math.min(gap, Math.max(0.03, (D - 0.3 - at3) / (spans.length - 1)));
+          }
+          spans.forEach(function (el, i) {
+            tl.set(el, { opacity: 0, y: 10 }, 0);
+            tl.to(el, { opacity: 1, y: 0, duration: 0.1, ease: "power1.out" }, at3 + i * gap);
+          });
+        } else {
+          subEl.remove();                  // unset var renders NOTHING
+        }
+
+        // No self exit — holds to the end; the compositor owns both seams.
+        // TODO(phase-2): reference pan-out-to-next-canvas exit (see header).
+        tl.seek(0);
+        window.__timelines["section-takeover"] = tl;
+      })();
+    </script>
+  </body>
+</html>

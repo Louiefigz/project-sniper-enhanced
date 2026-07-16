@@ -1,0 +1,473 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"eyebrow","type":"string","label":"Eyebrow microtext (mono caps + dot; empty = omit)","default":""},
+    {"id":"eyebrowAccent","type":"enum","label":"Eyebrow dot semantic accent","default":"ink","options":[{"value":"ink","label":"Ink (neutral)"},{"value":"process","label":"Process (cyan)"},{"value":"result","label":"Result (lime)"}]},
+    {"id":"headlineLines","type":"string","label":"Thesis headline, pipe-separated lines (2 max)","default":""},
+    {"id":"explainer","type":"string","label":"1-2 line gray explainer (empty = omit)","default":""},
+    {"id":"axisLabel","type":"string","label":"Axis / cap label (mono, above the tracks; empty = omit)","default":""},
+    {"id":"bars","type":"string","label":"Bullet bars, pipe-separated: num~value~pct (pct 0-100 of the axis; value lands WITH the tip)","default":""},
+    {"id":"threshPct","type":"number","label":"Amber threshold tick position (0-100 of the track)","default":100,"min":0,"max":100,"step":1},
+    {"id":"verdict","type":"string","label":"Verdict footnote (lime mono + dot, lands after the bars; empty = omit)","default":""},
+    {"id":"spectrum","type":"string","label":"Spectrum rail, pipe-separated 2-3 labels (BEGINNING|VOICE HELD|END; empty = omit)","default":""},
+    {"id":"moduleLands","type":"string","label":"Narration-paced lands (s, comp-relative, pipe/comma) — one per PRESENT module [head, chart, verdict, spectrum]; empty = 0.2 + k*0.9","default":""},
+    {"id":"exit","type":"enum","label":"Exit","default":"hold","options":[{"value":"hold","label":"Hold to end (compositor owns the seam)"},{"value":"blur-recede","label":"Blur-recede 0.15s (whole field — the face beside stays sharp)"}]}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · LONG-FORM template: NATEHERK-BULLET-BARS (16:9, 1920x1080)
+    Reference: docs/studies/NATEHERK_CARDS.md §1.2 form #12 — bullet-bar chart (CREAM
+    split-panel chassis), 94.5-104s:
+      `• VOICE CONSISTENCY / Four short generations.`; axis `0 ... 60 SEC
+      PRODUCTION CAP`; 4 lime-on-gray bullet bars 40.4/48.1/47.4/45.4 vs an
+      AMBER threshold tick at the cap; footnote `• 4 OF 4 UNDER 60 SEC`
+      (lime); spectrum rail `BEGINNING —— VOICE HELD —— END`.
+    Info pattern: measured bars vs a limit line + verdict footnote — the
+    "measurements vs a limit" proof lane (§1.4). Build: bars fill, verdict
+    footnote last (§1.2 #12). Evidence: contact sheet state 034_t0094.5.
+    (This window is also the doc's method-note frame band: found by the
+    0.5s-step contact pass.) Timing +-1 frame (~40ms); N=1 priors.
+
+    CONTRACT for the PRODUCER compositing stage:
+      - ALPHA OVERLAY, anchor "free-band" (render --format mov). NOT
+        own-screen — the cream panel wipes in from the LEFT edge (~0.3s,
+        HARD vertical edge) and the live footage stays full-frame right; the
+        face is NEVER covered (§1.1). Settled width 720px = 37.5%W — inside
+        the §1.1 measured 33-40% band; the chart needs the wider end for bar
+        runway. Pair the plan entry with the face-anchored `recompose` move
+        (footage face lands centered in the remaining ~62%W).
+      - Bar grammar (§1.3 + STUDY §3 rank 7): chart panel + labels + empty
+        tracks + amber tick land as a SKELETON, one unit; fills start
+        +SKELETON_GAP_S (MG-1 skeleton -> hold -> fill); every fill runs
+        BAR_FILL_S=0.75 power1.out (§1.3 "bar fills 0.75-1.0s"; the #9 lime
+        fill ~0.75s); each VALUE LABEL lands WITH its bar tip (rank 7).
+        Bars all fill from the same beat — the module land is the narration
+        lock; the verdict is the payoff and lands on ITS land, after.
+      - AMBER IS RESERVED (§1.1): the threshold tick is the only amber in
+        this comp. threshPct outside [0,100] FAILS LOUDLY; pct > 100 (a bar
+        over the cap) FAILS LOUDLY too — an over-limit measurement is a
+        DIFFERENT story the brain must tell another way, not a clipped bar.
+      - moduleLands: one land per PRESENT module in order [head, chart,
+        verdict, spectrum]. Count mismatch FAILS LOUDLY. Empty = 0.2 + k*0.9.
+      - UNSET content renders NOTHING (G21); the SAMPLE (form #12 verbatim)
+        activates only when EVERY content variable is unset.
+      - RENDER LENGTH is the root data-duration ATTRIBUTE (graphics_render
+        rewrites it per window; --variables never sets it).
+      - exit:"blur-recede" (T-D) targets the WHOLE FIELD (alpha layer; the
+        cream never outlives the stage). Default "hold".
+      - Brandable via CSS vars: --rail-cream / --rail-cream-ink /
+        --accent-result / --accent-process / --accent-warn (reference values
+        are the fallbacks; amber's hex is a token default — the study fixes
+        amber's ROLE, not a value).
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>SNIPER · nateherk-bullet-bars</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="/motion-tokens.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: transparent;
+        font-family: var(--font);
+      }
+      #nbb-root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+
+      /* Cream field: grows 0 -> 720px (37.5%W) from the LEFT edge — hard
+         vertical edge; overflow-hidden reveals the pinned stage. */
+      #nbb-field {
+        position: absolute;
+        left: 0; top: 0;
+        width: 720px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--rail-cream, #f0f0e6);
+        will-change: width, opacity, filter;
+      }
+      #nbb-stage {
+        position: absolute;
+        left: 60px; top: 0;
+        width: 600px; height: 1080px;
+        padding: 88px 0;
+        display: flex; flex-direction: column;
+        justify-content: center;
+        gap: 28px;
+      }
+      .module { will-change: opacity; }
+
+      #nbb-eyebrow {
+        display: flex; align-items: center; gap: 14px;
+        font-family: var(--eyebrow-font);
+        font-weight: 700; font-size: 24px; line-height: 1;
+        letter-spacing: 4px; text-transform: uppercase;
+        color: rgba(26, 26, 26, 0.72);
+      }
+      #nbb-eyebrow .dot {
+        width: 12px; height: 12px; border-radius: 50%;
+        background: var(--rail-cream-ink, #1a1a1a);
+        flex: 0 0 auto;
+      }
+      #nbb-eyebrow.process .dot { background: var(--accent-process, #35b6d9); }
+      #nbb-eyebrow.result .dot { background: var(--accent-result, #c6f542); }
+
+      #nbb-headline {
+        font-weight: 800;
+        font-size: 60px;
+        line-height: 1.06;
+        letter-spacing: -1.5px;
+        color: var(--rail-cream-ink, #1a1a1a);
+      }
+      #nbb-headline .line { display: block; will-change: opacity; }
+
+      #nbb-explainer {
+        font-weight: 500; font-size: 25px; line-height: 1.32;
+        color: rgba(26, 26, 26, 0.58);
+      }
+
+      /* Chart panel — white hairline card; label | track | value grid. */
+      #nbb-chart {
+        background: #ffffff;
+        border: 1px solid rgba(26, 26, 26, 0.12);
+        border-radius: 8px;
+        padding: 24px 26px;
+        box-shadow: 0 2px 8px rgba(26, 26, 26, 0.05);
+        display: flex; flex-direction: column; gap: 22px;
+      }
+      #nbb-axis {
+        display: flex; justify-content: space-between;
+        font-family: var(--eyebrow-font);
+        font-weight: 700; font-size: 16px;
+        letter-spacing: 2px; text-transform: uppercase;
+        color: rgba(26, 26, 26, 0.5);
+      }
+      .bar-row {
+        display: grid;
+        grid-template-columns: 44px 1fr 84px;
+        align-items: center;
+        gap: 18px;
+      }
+      .bar-num {
+        font-family: var(--eyebrow-font);
+        font-weight: 700; font-size: 17px;
+        color: rgba(26, 26, 26, 0.45);
+      }
+      .bar-track {
+        position: relative;
+        height: 16px;
+        background: rgba(26, 26, 26, 0.08);
+        border-radius: 4px;
+      }
+      .bar-fill {
+        position: absolute; left: 0; top: 0; bottom: 0;
+        width: 0;
+        border-radius: 4px;
+        background: var(--accent-result, #c6f542);
+      }
+      /* The amber limit tick — the ONLY amber in the comp (§1.1 reserved). */
+      .bar-tick {
+        position: absolute; top: -5px; bottom: -5px;
+        width: 3px;
+        border-radius: 1.5px;
+        background: var(--accent-warn, #e8a13c);
+      }
+      .bar-value {
+        font-family: var(--eyebrow-font);
+        font-weight: 700; font-size: 19px;
+        color: var(--rail-cream-ink, #1a1a1a);
+        text-align: right;
+        will-change: opacity;
+      }
+
+      /* Verdict footnote — lime mono + dot (the payoff, lands after bars). */
+      #nbb-verdict {
+        display: flex; align-items: center; gap: 12px;
+        font-family: var(--eyebrow-font);
+        font-weight: 700; font-size: 20px;
+        letter-spacing: 2.5px; text-transform: uppercase;
+        color: var(--rail-cream-ink, #1a1a1a);
+      }
+      #nbb-verdict .dot {
+        width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto;
+        background: var(--accent-result, #c6f542);
+      }
+
+      /* Spectrum rail: mono labels joined by hairline segments. */
+      #nbb-spectrum {
+        display: flex; align-items: center; gap: 16px;
+        font-family: var(--eyebrow-font);
+        font-weight: 700; font-size: 16px;
+        letter-spacing: 2.5px; text-transform: uppercase;
+        color: rgba(26, 26, 26, 0.55);
+      }
+      #nbb-spectrum .seg {
+        flex: 1 1 auto;
+        height: 2px;
+        background: rgba(26, 26, 26, 0.2);
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="nbb-root"
+      data-composition-id="nateherk-bullet-bars"
+      data-width="1920"
+      data-height="1080"
+      data-duration="8"
+    >
+      <div id="nbb-field">
+        <div id="nbb-stage">
+          <div id="nbb-eyebrow" class="module clip" data-start="0" data-duration="60" data-track-index="1"><span class="dot"></span><span id="nbb-eyebrow-text"></span></div>
+          <div id="nbb-headline" class="module clip" data-start="0" data-duration="60" data-track-index="2"></div>
+          <div id="nbb-explainer" class="module clip" data-start="0" data-duration="60" data-track-index="3"></div>
+          <div id="nbb-chart" class="module clip" data-start="0" data-duration="60" data-track-index="4">
+            <div id="nbb-axis"><span>0</span><span id="nbb-axis-label"></span></div>
+          </div>
+          <div id="nbb-verdict" class="module clip" data-start="0" data-duration="60" data-track-index="5"><span class="dot"></span><span id="nbb-verdict-text"></span></div>
+          <div id="nbb-spectrum" class="module clip" data-start="0" data-duration="60" data-track-index="6"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("nbb-root");
+        const D = parseFloat(root.dataset.duration) || 8;
+        const M = window.__motionTokens;
+
+        // Measured constants:
+        const RAIL_WIPE_S = 0.3;      // §1.1 left-edge wipe ~0.3s
+        const RAIL_WIDTH_PX = 720;    // 37.5%W (§1.1 33-40% band, wide end)
+        const BAR_FILL_S = 0.75;      // §1.3 bar fills 0.75-1.0s (#9 ~0.75s)
+        const LINE_STAGGER_S = 0.12;
+        const LAND_DEFAULT_START_S = 0.2;
+        const LAND_DEFAULT_GAP_S = 0.9;
+
+        const defaults = {
+          eyebrow: "", eyebrowAccent: "ink", headlineLines: "", explainer: "",
+          axisLabel: "", bars: "", threshPct: 100, verdict: "", spectrum: "",
+          moduleLands: "", exit: "hold",
+        };
+        const CONTENT_KEYS = ["eyebrow", "headlineLines", "explainer",
+          "axisLabel", "bars", "verdict", "spectrum"];
+        // PREVIEW-ONLY demo — form #12 verbatim (94.5-104s).
+        const SAMPLE = {
+          eyebrow: "VOICE CONSISTENCY",
+          headlineLines: "Four short generations.",
+          explainer: "Each section stayed below a self-imposed 60-second production cap.",
+          axisLabel: "60 SEC PRODUCTION CAP",
+          bars: "01~40.4~67|02~48.1~80|03~47.4~79|04~45.4~76",
+          threshPct: 100,
+          verdict: "4 OF 4 UNDER 60 SEC",
+          spectrum: "BEGINNING|VOICE HELD|END",
+        };
+        const HF = window.__hyperframes;
+        let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
+        const isPreview = CONTENT_KEYS.every(function (k) {
+          return !(vars[k] == null ? "" : String(vars[k])).trim();
+        });
+        if (isPreview) vars = Object.assign({}, vars, SAMPLE);
+
+        function str(k) { return (vars[k] == null ? "" : String(vars[k])).trim(); }
+
+        // ---- Fill / prune modules (unset content renders NOTHING) ----
+        const ebText = str("eyebrow");
+        const ebEl = document.getElementById("nbb-eyebrow");
+        if (ebText) {
+          document.getElementById("nbb-eyebrow-text").textContent = ebText;
+          const ea = str("eyebrowAccent") || "ink";
+          if (ea === "process" || ea === "result") ebEl.classList.add(ea);
+          else if (ea !== "ink") {
+            throw new Error("nateherk-bullet-bars: eyebrowAccent '" + ea +
+              "' not in ink|process|result");
+          }
+        } else { ebEl.remove(); }
+
+        const headEl = document.getElementById("nbb-headline");
+        const heads = str("headlineLines");
+        if (heads) {
+          const lines = heads.split("|").map(function (s) { return s.trim(); });
+          if (lines.length > 2) {
+            throw new Error("nateherk-bullet-bars: headlineLines is 2 lines " +
+              "max (§1.1 thesis grammar), got " + lines.length);
+          }
+          lines.forEach(function (line) {
+            const el = document.createElement("span");
+            el.className = "line";
+            el.textContent = line;
+            headEl.appendChild(el);
+          });
+        } else { headEl.remove(); }
+
+        const expText = str("explainer");
+        const expEl = document.getElementById("nbb-explainer");
+        if (expText) expEl.textContent = expText;
+        else expEl.remove();
+
+        // Threshold: fail loudly outside [0,100]; unset keeps the 100
+        // default (tick AT the cap — Number("") would silently mean 0).
+        const threshRaw = vars.threshPct;
+        const threshPct = (threshRaw == null || String(threshRaw).trim() === "")
+          ? 100 : Number(threshRaw);
+        if (!isFinite(threshPct) || threshPct < 0 || threshPct > 100) {
+          throw new Error("nateherk-bullet-bars: threshPct must be 0-100, got '" +
+            vars.threshPct + "'");
+        }
+
+        // Bars: num~value~pct rows; the amber tick rides every track.
+        const chartEl = document.getElementById("nbb-chart");
+        const axisText = str("axisLabel");
+        if (axisText) document.getElementById("nbb-axis-label").textContent = axisText;
+        else document.getElementById("nbb-axis").remove();
+        const barsRaw = str("bars");
+        const bars = [];
+        if (barsRaw) {
+          barsRaw.split("|").forEach(function (line, i) {
+            const f = line.split("~").map(function (s) { return s.trim(); });
+            const pct = parseFloat(f[2]);
+            if (f.length !== 3 || !f[0] || !f[1] || !isFinite(pct)) {
+              throw new Error("nateherk-bullet-bars: bar " + (i + 1) +
+                " needs num~value~pct, got '" + line + "'");
+            }
+            if (pct < 0 || pct > 100) {
+              throw new Error("nateherk-bullet-bars: bar " + (i + 1) +
+                " pct must be 0-100 (an over-cap measurement is a different " +
+                "story — never a clipped bar), got " + pct);
+            }
+            const row = document.createElement("div");
+            row.className = "bar-row";
+            const num = document.createElement("span");
+            num.className = "bar-num";
+            num.textContent = f[0];
+            const track = document.createElement("span");
+            track.className = "bar-track";
+            const fill = document.createElement("span");
+            fill.className = "bar-fill";
+            track.appendChild(fill);
+            const tick = document.createElement("span");
+            tick.className = "bar-tick";
+            tick.style.left = "calc(" + threshPct + "% - 1.5px)";
+            track.appendChild(tick);
+            const value = document.createElement("span");
+            value.className = "bar-value";
+            value.textContent = f[1];
+            row.appendChild(num);
+            row.appendChild(track);
+            row.appendChild(value);
+            chartEl.appendChild(row);
+            bars.push({ fill: fill, value: value, pct: pct });
+          });
+        } else if (!axisText) {
+          chartEl.remove();
+        }
+
+        const verdictText = str("verdict");
+        const verdictEl = document.getElementById("nbb-verdict");
+        if (verdictText) document.getElementById("nbb-verdict-text").textContent = verdictText;
+        else verdictEl.remove();
+
+        const specEl = document.getElementById("nbb-spectrum");
+        const specTexts = str("spectrum") ? str("spectrum").split("|")
+          .map(function (s) { return s.trim(); }).filter(Boolean) : [];
+        if (specTexts.length) {
+          specTexts.forEach(function (t, i) {
+            if (i > 0) {
+              const seg = document.createElement("span");
+              seg.className = "seg";
+              specEl.appendChild(seg);
+            }
+            const label = document.createElement("span");
+            label.textContent = t;
+            specEl.appendChild(label);
+          });
+        } else { specEl.remove(); }
+
+        // ---- Narration-paced lands ([head, chart, verdict, spectrum]) ----
+        const modules = [];
+        if (ebText || heads || expText) modules.push("head");
+        if (bars.length || axisText) modules.push("chart");
+        if (verdictText) modules.push("verdict");
+        if (specTexts.length) modules.push("spectrum");
+        let lands = [];
+        const landsVar = vars.moduleLands;
+        const landsRaw = Array.isArray(landsVar)
+          ? landsVar.map(String) : String(landsVar == null ? "" : landsVar).trim()
+            ? String(landsVar).split(/[|,]/) : [];
+        if (landsRaw.length) {
+          lands = landsRaw.map(function (s) { return parseFloat(s); });
+          if (lands.length !== modules.length || lands.some(function (t) { return !isFinite(t); })) {
+            throw new Error("nateherk-bullet-bars: moduleLands needs " +
+              modules.length + " finite times for modules [" +
+              modules.join(", ") + "], got '" + landsRaw.join(",") + "'");
+          }
+        } else {
+          modules.forEach(function (_, k) {
+            lands.push(LAND_DEFAULT_START_S + k * LAND_DEFAULT_GAP_S);
+          });
+        }
+        const landOf = {};
+        modules.forEach(function (name, k) { landOf[name] = lands[k]; });
+
+        // ---- Build ----
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // Field wipes in from the LEFT edge (hard vertical edge, §1.1).
+        tl.fromTo("#nbb-field", { width: 0 },
+          { width: RAIL_WIDTH_PX, duration: RAIL_WIPE_S, ease: "power2.out" }, 0);
+
+        if (landOf.head != null) {
+          const t0 = landOf.head;
+          let headAt = t0;
+          if (ebText) {
+            M.textRamp(tl, ebEl, t0);
+            headAt = t0 + M.EYEBROW_LEAD_S;     // eyebrow leads (rank 3)
+          }
+          let lastAt = headAt;
+          if (heads) {
+            headEl.querySelectorAll(".line").forEach(function (lineEl, j) {
+              lastAt = headAt + j * LINE_STAGGER_S;
+              M.textRamp(tl, lineEl, lastAt);   // in-place ghost-resolve
+            });
+          }
+          if (expText) M.textRamp(tl, expEl, lastAt + LINE_STAGGER_S);
+        }
+
+        // Chart: skeleton (panel + labels + empty tracks + amber tick) lands
+        // as ONE unit, THEN the fills start +SKELETON_GAP_S (MG-1). Fills
+        // run 0.75s power1.out; each value label lands WITH its tip (rank 7).
+        if (landOf.chart != null) {
+          const tC = landOf.chart;
+          M.textRamp(tl, chartEl, tC);
+          const fillAt = tC + M.SKELETON_GAP_S;
+          bars.forEach(function (b) {
+            tl.fromTo(b.fill, { width: "0%" },
+              { width: b.pct + "%", duration: BAR_FILL_S, ease: "power1.out" },
+              fillAt);
+            M.textRamp(tl, b.value, fillAt + BAR_FILL_S - M.TEXT_RAMP_S);
+          });
+        }
+
+        // Verdict = the payoff footnote, lands on ITS narration land (after
+        // the bars — §1.2 #12 "bars fill, verdict footnote last").
+        if (landOf.verdict != null) M.textRamp(tl, verdictEl, landOf.verdict);
+        if (landOf.spectrum != null) M.textRamp(tl, specEl, landOf.spectrum);
+
+        // exit:"blur-recede" (T-D): the whole FIELD (alpha layer — the live
+        // face beside it stays sharp; cream never outlives the stage).
+        if (String(vars.exit) === "blur-recede") {
+          M.blurRecede(tl, "#nbb-field", D - M.EXIT_BLUR_S);
+        }
+
+        tl.seek(0);
+        window.__timelines["nateherk-bullet-bars"] = tl;
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "all_valid": { "type": "boolean" },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "clip_index": { "type": "integer", "minimum": 0 },
+          "action": { "type": "string", "enum": ["REMOVE", "FLAG"] },
+          "reason": { "type": "string", "minLength": 1 }
+        },
+        "required": ["clip_index", "action", "reason"]
+      }
+    }
+  },
+  "required": ["all_valid", "issues"]
+}

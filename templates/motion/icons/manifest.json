@@ -1,0 +1,132 @@
+{
+  "license": "Simple Icons (CC0 1.0); brand marks are trademarks of their owners \u2014 editorial use only",
+  "source": "https://cdn.simpleicons.org",
+  "icons": {
+    "anthropic": {
+      "name": "anthropic",
+      "slug": "anthropic",
+      "source_url": "https://cdn.simpleicons.org/anthropic",
+      "fetched": "2026-07-05",
+      "color": "#054BC9",
+      "license": "Simple Icons (CC0 1.0); brand marks are trademarks of their owners \u2014 editorial use only",
+      "file": "anthropic.svg"
+    },
+    "claude": {
+      "name": "claude",
+      "slug": "claude",
+      "source_url": "https://cdn.simpleicons.org/claude",
+      "fetched": "2026-07-05",
+      "color": "#054BC9",
+      "license": "Simple Icons (CC0 1.0); brand marks are trademarks of their owners \u2014 editorial use only",
+      "file": "claude.svg"
+    },
+    "codex": {
+      "name": "codex",
+      "slug": "openai",
+      "source_url": "https://cdn.simpleicons.org/openai",
+      "fetched": "2026-07-05",
+      "color": "#054BC9",
+      "license": "Simple Icons (CC0 1.0); brand marks are trademarks of their owners \u2014 editorial use only",
+      "file": "codex.svg"
+    },
+    "cursor": {
+      "name": "cursor",
+      "slug": "cursor",
+      "source_url": "https://cdn.simpleicons.org/cursor",
+      "fetched": "2026-07-05",
+      "color": "#054BC9",
+      "license": "Simple Icons (CC0 1.0); brand marks are trademarks of their owners \u2014 editorial use only",
+      "file": "cursor.svg"
+    },
+    "figma": {
+      "name": "figma",
+      "slug": "figma",
+      "source_url": "https://cdn.simpleicons.org/figma",
+      "fetched": "2026-07-05",
+      "color": "#054BC9",
+      "license": "Simple Icons (CC0 1.0); brand marks are trademarks of their owners \u2014 editorial use only",
+      "file": "figma.svg"
+    },
+    "gemini": {
+      "name": "gemini",
+      "slug": "googlegemini",
+      "source_url": "https://cdn.simpleicons.org/googlegemini",
+      "fetched": "2026-07-05",
+      "color": "#054BC9",
+      "license": "Simple Icons (CC0 1.0); brand marks are trademarks of their owners \u2014 editorial use only",
+      "file": "gemini.svg"
+    },
+    "github": {
+      "name": "github",
+      "slug": "github",
+      "source_url": "https://cdn.simpleicons.org/github",
+      "fetched": "2026-07-05",
+      "color": "#054BC9",
+      "license": "Simple Icons (CC0 1.0); brand marks are trademarks of their owners \u2014 editorial use only",
+      "file": "github.svg"
+    },
+    "instagram": {
+      "name": "instagram",
+      "slug": "instagram",
+      "source_url": "https://cdn.simpleicons.org/instagram",
+      "fetched": "2026-07-05",
+      "color": "#054BC9",
+      "license": "Simple Icons (CC0 1.0); brand marks are trademarks of their owners \u2014 editorial use only",
+      "file": "instagram.svg"
+    },
+    "notion": {
+      "name": "notion",
+      "slug": "notion",
+      "source_url": "https://cdn.simpleicons.org/notion",
+      "fetched": "2026-07-05",
+      "color": "#054BC9",
+      "license": "Simple Icons (CC0 1.0); brand marks are trademarks of their owners \u2014 editorial use only",
+      "file": "notion.svg"
+    },
+    "openai": {
+      "name": "openai",
+      "slug": "openai",
+      "source_url": "https://cdn.simpleicons.org/openai",
+      "fetched": "2026-07-05",
+      "color": "#054BC9",
+      "license": "Simple Icons (CC0 1.0); brand marks are trademarks of their owners \u2014 editorial use only",
+      "file": "openai.svg"
+    },
+    "perplexity": {
+      "name": "perplexity",
+      "slug": "perplexity",
+      "source_url": "https://cdn.simpleicons.org/perplexity",
+      "fetched": "2026-07-05",
+      "color": "#054BC9",
+      "license": "Simple Icons (CC0 1.0); brand marks are trademarks of their owners \u2014 editorial use only",
+      "file": "perplexity.svg"
+    },
+    "tiktok": {
+      "name": "tiktok",
+      "slug": "tiktok",
+      "source_url": "https://cdn.simpleicons.org/tiktok",
+      "fetched": "2026-07-05",
+      "color": "#054BC9",
+      "license": "Simple Icons (CC0 1.0); brand marks are trademarks of their owners \u2014 editorial use only",
+      "file": "tiktok.svg"
+    },
+    "x": {
+      "name": "x",
+      "slug": "x",
+      "source_url": "https://cdn.simpleicons.org/x",
+      "fetched": "2026-07-05",
+      "color": "#054BC9",
+      "license": "Simple Icons (CC0 1.0); brand marks are trademarks of their owners \u2014 editorial use only",
+      "file": "x.svg"
+    },
+    "youtube": {
+      "name": "youtube",
+      "slug": "youtube",
+      "source_url": "https://cdn.simpleicons.org/youtube",
+      "fetched": "2026-07-05",
+      "color": "#054BC9",
+      "license": "Simple Icons (CC0 1.0); brand marks are trademarks of their owners \u2014 editorial use only",
+      "file": "youtube.svg"
+    }
+  }
+}

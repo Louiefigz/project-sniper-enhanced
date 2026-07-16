@@ -1,0 +1,4 @@
+interface:
+  display_name: "Reference Editor"
+  short_description: "Study references and reproduce their edit grammar"
+  default_prompt: "Use $reference-editor to study this reference frame by frame, save its editing grammar, and apply it to my source in Palmier."

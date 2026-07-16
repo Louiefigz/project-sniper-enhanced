@@ -1,0 +1,131 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"text","type":"string","label":"Text","default":"Your text here"},
+    {"id":"fontSize","type":"number","label":"Font size (px)","default":64,"min":24,"max":220,"step":2,"unit":"px"},
+    {"id":"weight","type":"number","label":"Font weight (100-900)","default":700,"min":100,"max":900,"step":100},
+    {"id":"color","type":"color","label":"Text color","default":"#FFFFFF"},
+    {"id":"align","type":"enum","label":"Text align","default":"center","options":[{"value":"left","label":"Left"},{"value":"center","label":"Center"},{"value":"right","label":"Right"}]}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · Motion template: TEXT-ELEMENT (Primitives)
+    A bare, placeable TEXT primitive — no card, no pill, no icon: one text block
+    the operator drops anywhere (editor drag → entry.placement {x, y[, scale]})
+    and pairs with container-shape for a card look. The layout-primitive half of
+    the editor's Elements > Primitives section.
+    Transparent 1080x1920 overlay -> render with `--format mov` (ProRes 4444).
+    LANDSCAPE SIBLING: text-element-wide.html (paired -wide variant, repo
+    convention — canvas is fixed per comp via data-width/height).
+
+    CONTRACT for the PRODUCER compositing stage:
+      - text / fontSize (px) / weight (100-900) / color / align are
+        `data-composition-variables` — fill with --variables. Empty text renders
+        nothing and the render pipeline fails loudly on the empty alpha bbox.
+      - The block centers on the free band (visual-center-x, y 855) so the
+        unplaced anchor path has slack in every direction; an explicit
+        entry.placement pin overrides all of that at composite time.
+      - Motion: brief house fade/slide-in (rise + power3.out), hold, house
+        fade-out ending exactly at D (chip-row exit language).
+      - A subtle text-shadow keeps raw glyphs legible over footage; it is soft
+        enough to barely register in the measured alpha bbox.
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
+        rewrites it per window; --variables never sets it — see stat-card note).
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>SNIPER · text-element</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: var(--canvas-w);
+        height: var(--canvas-h);
+        overflow: hidden;
+        background: transparent;          /* alpha overlay — the frame owns nothing */
+        font-family: var(--font);
+      }
+      #te-root { position: relative; width: var(--canvas-w); height: var(--canvas-h); }
+
+      /* .stage OWNS the centering transform (free-band center, like chip-row);
+         GSAP animates only the inner block so centering stays intact. */
+      .stage {
+        position: absolute;
+        left: var(--visual-center-x);
+        top: 855px;
+        transform: translate(-50%, -50%);
+      }
+      /* EXPLICIT width (not max-width): a shrink-to-fit block inside an
+         absolutely positioned .stage would wrap at (canvas − left) px, not the
+         safe width — the chip-row 2x2 lesson. align positions text within it. */
+      #te-text {
+        width: var(--safe-width);
+        line-height: 1.14;
+        letter-spacing: -0.01em;
+        text-wrap: balance;
+        /* An unbroken over-long token WRAPS (visibly) instead of clipping
+           mid-word at the canvas edge — overflow past the block would be cut
+           by the canvas overflow:hidden with no warning anywhere. */
+        overflow-wrap: break-word;
+        text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+        will-change: transform, opacity;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="te-root"
+      data-composition-id="text-element"
+      data-width="1080"
+      data-height="1920"
+      data-duration="3"
+    >
+      <div class="stage">
+        <div id="te-text" class="clip" data-start="0" data-duration="60" data-track-index="1"></div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("te-root");
+        const D = parseFloat(root.dataset.duration) || 3;
+
+        const defaults = {
+          text: "Your text here", fontSize: 64, weight: 700,
+          color: "#FFFFFF", align: "center",
+        };
+        const HF = window.__hyperframes;
+        const vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
+
+        const el = document.getElementById("te-text");
+        el.textContent = String(vars.text);
+        const size = Math.min(220, Math.max(24, Number(vars.fontSize) || 64));
+        const weight = Math.min(900, Math.max(100, Number(vars.weight) || 700));
+        const align = ["left", "center", "right"].indexOf(String(vars.align)) >= 0
+          ? String(vars.align) : "center";
+        el.style.fontSize = size + "px";
+        el.style.fontWeight = String(weight);
+        el.style.color = String(vars.color);
+        el.style.textAlign = align;
+
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // Brief house fade/slide-in: rise from below, power3.out settle.
+        tl.fromTo("#te-text", { opacity: 0, y: 24 },
+          { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 0);
+
+        // House exit — fade ends exactly at D so timeline length == render length.
+        const fadeDur = Math.min(0.42, D * 0.18);
+        tl.to("#te-text", { opacity: 0, y: -14, duration: fadeDur, ease: "power2.in" }, D - fadeDur);
+
+        tl.seek(0);
+        window.__timelines["text-element"] = tl;
+      })();
+    </script>
+  </body>
+</html>

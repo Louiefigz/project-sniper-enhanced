@@ -1,0 +1,167 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"eyebrow","type":"string","label":"Left eyebrow (empty = pure backdrop)","default":""},
+    {"id":"title","type":"string","label":"Left title (empty = pure backdrop)","default":""},
+    {"id":"accent","type":"color","label":"Accent color","default":"#054BC9"}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · LONG-FORM glass template: GLASS-TAKEOVER-BG (16:9)
+    Reference: longform-ref lf-2 full-frame stage — the "spotlight grid" the
+    camera hands the frame to during a takeover. OPAQUE 1920x1080 -> render with
+    `--format mp4` (H.264, anchor "own-screen"): it REPLACES the frame for its
+    window instead of stacking on it.
+
+    CONTRACT for the PRODUCER + pip_takeover renderer:
+      - This is the BACKDROP (sky base + 120px grid + soft radial glow) plus an
+        OPTIONAL left content region (eyebrow + title; both empty = pure backdrop,
+        the default, so the glass-rail overlay can own the left half).
+      - It RESERVES the right-side region x[1180,1820] y[140,940] empty — no grid
+        glyphs, no copy — because pip_takeover.py composites the shrunken face
+        PiP (a rounded 4:5 card) there. Changing that rect means changing
+        pip_takeover's TAKEOVER_PIP default in lock-step.
+      - The sky base is OPAQUE from frame 0 (no flash of the base video underneath
+        at the takeover seam); only the grid, glow and optional copy settle in.
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
+        rewrites it per window; --variables never sets it — see stat-card note).
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>SNIPER · glass-takeover-bg</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      :root {
+        --sky: #ddf4ff;                 /* spotlight-grid base */
+        --grid: #74dff6;                /* thin grid lines */
+        --glass-ink: #0a1a4d;
+        --glass-slate: #5e687d;
+      }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--sky);         /* OPAQUE — this comp owns the whole frame */
+        font-family: var(--font);
+      }
+      #bg-root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+
+      /* Thin 120px-cell grid over the sky base. */
+      #bg-grid {
+        position: absolute;
+        inset: -2px;
+        background-image:
+          linear-gradient(to right, var(--grid) 0 1.5px, transparent 1.5px),
+          linear-gradient(to bottom, var(--grid) 0 1.5px, transparent 1.5px);
+        background-size: 120px 120px, 120px 120px;
+        opacity: 0.34;
+        will-change: opacity, transform;
+      }
+      /* Strong soft-white radial glow behind the focal area (center-right, where
+         the face PiP lands) — lifts the subject off the grid. */
+      #bg-glow {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(1100px 900px at 1400px 500px,
+            rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.55) 34%,
+            rgba(221,244,255,0.0) 70%);
+        will-change: opacity, transform;
+      }
+
+      /* Optional left content region (empty by default). Kept clear of the
+         reserved PiP rect on the right. */
+      #bg-left {
+        position: absolute;
+        left: 130px;
+        top: 150px;
+        width: 940px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      #bg-eyebrow {
+        font-weight: 700;
+        font-size: 32px;
+        line-height: 1;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--accent);
+        will-change: transform, opacity;
+      }
+      #bg-title {
+        font-weight: 900;
+        font-size: 92px;
+        line-height: 0.98;
+        letter-spacing: -2.5px;
+        color: var(--glass-ink);
+        will-change: transform, opacity;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="bg-root"
+      data-composition-id="glass-takeover-bg"
+      data-width="1920"
+      data-height="1080"
+      data-duration="5"
+    >
+      <div id="bg-grid" class="clip" data-start="0" data-duration="60" data-track-index="1"></div>
+      <div id="bg-glow" class="clip" data-start="0" data-duration="60" data-track-index="2"></div>
+      <div id="bg-left">
+        <div id="bg-eyebrow" class="clip" data-start="0" data-duration="60" data-track-index="3"></div>
+        <div id="bg-title" class="clip" data-start="0" data-duration="60" data-track-index="4"></div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("bg-root");
+        const D = parseFloat(root.dataset.duration) || 5;
+
+        const defaults = { eyebrow: "", title: "", accent: "#054BC9" };
+        const HF = window.__hyperframes;
+        const vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
+        document.documentElement.style.setProperty("--accent", vars.accent);
+
+        const eyebrow = document.getElementById("bg-eyebrow");
+        const title = document.getElementById("bg-title");
+        const ebText = (vars.eyebrow == null ? "" : String(vars.eyebrow)).trim();
+        const tText = (vars.title == null ? "" : String(vars.title)).trim();
+        if (ebText) eyebrow.textContent = ebText; else eyebrow.remove();
+        if (tText) title.textContent = tText; else title.remove();
+        if (!ebText && !tText) document.getElementById("bg-left").remove();
+
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // Sky base is opaque from frame 0; the grid + glow settle in so the stage
+        // "builds" rather than snapping. Deterministic, seek-safe (no fade-out —
+        // an opaque backdrop holds the whole window; pip_takeover owns the seam).
+        tl.set("#bg-grid", { opacity: 0 }, 0);
+        tl.to("#bg-grid", { opacity: 0.34, duration: 0.5, ease: "power2.out" }, 0.05);
+        tl.set("#bg-glow", { opacity: 0.4, scale: 1.06, transformOrigin: "1400px 500px" }, 0);
+        tl.to("#bg-glow", { opacity: 1, scale: 1, duration: 0.6, ease: "power2.out" }, 0);
+
+        if (ebText || tText) {
+          const build = [];
+          if (ebText) build.push(eyebrow);
+          if (tText) build.push(title);
+          build.forEach(function (el, i) {
+            tl.set(el, { opacity: 0, y: 20 }, 0);
+            tl.to(el, { opacity: 1, y: 0, duration: 0.44, ease: "power3.out" }, 0.2 + i * 0.12);
+          });
+        }
+
+        tl.seek(0);
+        window.__timelines["glass-takeover-bg"] = tl;
+      })();
+    </script>
+  </body>
+</html>

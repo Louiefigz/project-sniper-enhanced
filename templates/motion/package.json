@@ -1,0 +1,11 @@
+{
+  "name": "motion",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes hyperframes@0.7.33 preview",
+    "check": "npx --yes hyperframes@0.7.33 lint && npx --yes hyperframes@0.7.33 validate && npx --yes hyperframes@0.7.33 inspect",
+    "render": "npx --yes hyperframes@0.7.33 render",
+    "publish": "npx --yes hyperframes@0.7.33 publish"
+  }
+}

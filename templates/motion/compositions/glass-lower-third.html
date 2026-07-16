@@ -1,0 +1,279 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"eyebrow","type":"string","label":"Eyebrow (small-caps, accent; empty = omit)","default":""},
+    {"id":"eyebrowDot","type":"boolean","label":"Leading bullet dot on the eyebrow","default":true},
+    {"id":"titleBase","type":"string","label":"Title — base words (ink)","default":""},
+    {"id":"titleHighlight","type":"string","label":"Title — highlighted word (white-on-accent pill, empty = none)","default":""},
+    {"id":"iconFile","type":"string","label":"Badge icon file under /icons (empty = no badge)","default":""},
+    {"id":"side","type":"enum","label":"Which side the card pops from","default":"left","options":[{"value":"left","label":"Lower-left"},{"value":"right","label":"Lower-right"}]},
+    {"id":"accent","type":"color","label":"Accent color","default":"#054BC9"}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · LONG-FORM glass template: GLASS-LOWER-THIRD (16:9)
+    Reference: longform-ref lf-1 / lf-3 — a frosted BRIGHT glass lower-third that
+    pops in from the side the speaker gestures to. Transparent 1920x1080 overlay
+    -> render with `--format mov` (ProRes 4444) for alpha (anchor "free-band").
+
+    CONTRACT for the PRODUCER compositing stage:
+      - CONTENT (eyebrow / titleBase / titleHighlight), the optional badge
+        `iconFile` (a file under templates/motion/icons/, e.g. "claude.svg"),
+        `side`, and `accent` are `data-composition-variables` — fill with --variables.
+      - UNSET content renders NOTHING (all content defaults are empty — G21).
+        The demo copy in the script's SAMPLE block is a PREVIEW default only:
+        it activates when EVERY content variable (eyebrow / titleBase /
+        titleHighlight / iconFile) is unset, i.e. a bare preview/render with
+        no --variables. A card with no content at all is removed entirely.
+      - TWO-TONE TITLE: titleBase renders in ink; titleHighlight (if non-empty)
+        renders as ONE white-on-accent pill inline after it (lf-3's "end-to-end").
+        Empty titleHighlight = plain ink title (lf-1).
+      - SIDE flips BOTH the slide direction (x:-60 left / x:+60 right) AND the
+        card's screen position (lower-left / lower-right) — "pop from where he
+        points" (liquid-glass style doc, DESIGN TOOLBOX).
+      - The glass reads on its OWN semi-opaque white fill (not backdrop-blur), so
+        the isolated alpha render composites identically over any footage
+        (liquid-glass "THE glass surface" note).
+      - YouTube-safe: the card's bottom edge stays above y=970 (110px hover
+        scrubber + margin); copy stays inside title-safe (192px H / 108px V).
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
+        rewrites it per window; --variables never sets it — see stat-card note).
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>SNIPER · glass-lower-third</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: transparent;              /* alpha overlay — frame owns nothing */
+        font-family: var(--font);
+      }
+      /* Liquid-glass token layer (long-form): brand accent stays #054BC9; the
+         ink/slate neutrals are the glass doc's deep-navy set, adapted. */
+      :root {
+        --glass-ink: #0a1a4d;                 /* deep-navy title text */
+        --glass-slate: #5e687d;               /* muted labels */
+        --peri: #879cff;
+      }
+      #lt-root { position: relative; width: 1920px; height: 1080px; }
+
+      /* THE glass surface — frosted BRIGHT translucent white (liquid-glass doc). */
+      .glass {
+        background: linear-gradient(155deg, rgba(255,255,255,0.90), rgba(238,244,255,0.78));
+        backdrop-filter: blur(22px) saturate(160%);
+        -webkit-backdrop-filter: blur(22px) saturate(160%);
+        border: 1.5px solid rgba(255,255,255,0.85);
+        border-radius: 26px;
+        box-shadow: 0 26px 60px rgba(10,26,77,0.34),
+                    inset 0 2px 0 rgba(255,255,255,0.95),
+                    inset 0 -1px 0 rgba(135,156,255,0.30);
+      }
+
+      /* Card sits in a lower corner; JS sets .side-left / .side-right. Bottom edge
+         held above y=970 via bottom:120px (card bottom -> y=960). */
+      #lt-card {
+        position: absolute;
+        bottom: 120px;
+        max-width: 1180px;
+        padding: 40px 54px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        will-change: transform, opacity;
+      }
+      #lt-card.side-left  { left: 130px; align-items: flex-start; }
+      #lt-card.side-right { right: 130px; align-items: flex-start; }
+
+      .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-weight: 700;
+        font-size: 30px;
+        line-height: 1;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--accent);
+        will-change: transform, opacity;
+      }
+      .eb-dot {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        background: var(--accent);
+        flex: 0 0 auto;
+      }
+      .title {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 20px;
+        max-width: 1080px;
+      }
+      .t-base {
+        font-weight: 900;
+        font-size: 84px;
+        line-height: 0.98;
+        letter-spacing: -2px;
+        color: var(--glass-ink);
+      }
+      /* ONE highlighted word: white text on an accent pill (lf-3 "end-to-end"). */
+      .t-pill {
+        font-weight: 900;
+        font-size: 84px;
+        line-height: 0.98;
+        letter-spacing: -2px;
+        color: var(--accent-ink);
+        background: var(--accent);
+        border-radius: 20px;
+        padding: 4px 26px 12px;
+        box-shadow: 0 10px 26px rgba(5,75,201,0.34);
+        will-change: transform, opacity;
+      }
+
+      /* Square icon badge hanging off the card's left (right) edge — lf-3's
+         mascot. It overlaps the card corner by ~60% of its width. */
+      #lt-badge {
+        position: absolute;
+        bottom: 96px;
+        width: 148px;
+        height: 148px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 30px;
+        will-change: transform, opacity;
+      }
+      #lt-badge.side-left  { left: 74px; }
+      #lt-badge.side-right { right: 74px; }
+      #lt-badge img { width: 88px; height: 88px; object-fit: contain; display: block; }
+    </style>
+  </head>
+  <body>
+    <div
+      id="lt-root"
+      data-composition-id="glass-lower-third"
+      data-width="1920"
+      data-height="1080"
+      data-duration="3.5"
+    >
+      <div id="lt-badge" class="glass clip" data-start="0" data-duration="60" data-track-index="3">
+        <img alt="" />
+      </div>
+      <div id="lt-card" class="glass clip" data-start="0" data-duration="60" data-track-index="1">
+        <div id="lt-eyebrow" class="eyebrow">
+          <span class="eb-dot"></span><span class="eb-text"></span>
+        </div>
+        <div class="title">
+          <span id="lt-base" class="t-base"></span
+          ><span id="lt-pill" class="t-pill" data-track-index="2"></span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("lt-root");
+        const D = parseFloat(root.dataset.duration) || 3.5;
+
+        // All content defaults are EMPTY: unset fields render NOTHING (G21 —
+        // sample copy must never leak into a plan that sets only some fields).
+        const defaults = {
+          eyebrow: "", eyebrowDot: true,
+          titleBase: "", titleHighlight: "",
+          iconFile: "", side: "left", accent: "#054BC9",
+        };
+        // PREVIEW-ONLY demo copy. Activates ONLY when EVERY content variable
+        // is unset (a bare preview/render with no --variables).
+        const SAMPLE = {
+          eyebrow: "100% edited by Claude",
+          titleBase: "edited", titleHighlight: "end-to-end",
+        };
+        const HF = window.__hyperframes;
+        let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
+        const isPreview = ["eyebrow", "titleBase", "titleHighlight", "iconFile"].every(
+          function (k) { return !(vars[k] == null ? "" : String(vars[k])).trim(); });
+        if (isPreview) vars = Object.assign({}, vars, SAMPLE);
+        document.documentElement.style.setProperty("--accent", vars.accent);
+
+        const side = vars.side === "right" ? "right" : "left";
+        const card = document.getElementById("lt-card");
+        const badge = document.getElementById("lt-badge");
+        card.classList.add("side-" + side);
+        badge.classList.add("side-" + side);
+
+        // Eyebrow: optional leading dot + uppercase text (empty text hides it).
+        const ebText = (vars.eyebrow == null ? "" : String(vars.eyebrow)).trim();
+        const eyebrow = document.getElementById("lt-eyebrow");
+        if (ebText) {
+          eyebrow.querySelector(".eb-text").textContent = ebText;
+          if (!vars.eyebrowDot) eyebrow.querySelector(".eb-dot").remove();
+        } else {
+          eyebrow.remove();
+        }
+
+        // Two-tone title: base ink words + ONE optional white-on-accent pill.
+        const base = (vars.titleBase == null ? "" : String(vars.titleBase)).trim();
+        document.getElementById("lt-base").textContent = base;
+        const pill = document.getElementById("lt-pill");
+        const hi = (vars.titleHighlight == null ? "" : String(vars.titleHighlight)).trim();
+        if (hi) pill.textContent = hi; else pill.remove();
+
+        // No content at all -> no empty glass shell (G21).
+        const hasCard = !!(ebText || base || hi);
+        if (!hasCard) card.remove();
+
+        // Optional badge: resolve the icon file to a rooted /icons src, else drop.
+        function iconSrc(raw) {
+          const v = (raw == null ? "" : String(raw)).trim();
+          if (!v) return "";
+          if (v.charAt(0) === "/") return v;
+          return "/icons/" + (v.indexOf(".") >= 0 ? v : v + ".svg");
+        }
+        const bsrc = iconSrc(vars.iconFile);
+        if (bsrc) badge.querySelector("img").src = bsrc; else badge.remove();
+
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // Entrance: the whole card slides + fades in from the pointed-to side
+        // (x:-60 left / +60 right, power3.out) — "pop from where he points".
+        const dx = side === "right" ? 60 : -60;
+        if (hasCard) {
+          tl.set(card, { opacity: 0, x: dx, y: 12 }, 0);
+          tl.to(card, { opacity: 1, x: 0, y: 0, duration: 0.42, ease: "power3.out" }, 0);
+        }
+
+        // Progressive disclosure (R9): accent pill pops AFTER the card lands, and
+        // the badge stamps in last — ~100-170ms flourishes, never pop-from-nothing.
+        if (hi) {
+          tl.set(pill, { scale: 0.6, opacity: 0, transformOrigin: "left center" }, 0);
+          tl.to(pill, { scale: 1, opacity: 1, duration: 0.34, ease: "back.out(2.2)" }, 0.30);
+        }
+        if (bsrc) {
+          tl.set(badge, { opacity: 0, scale: 0.4, x: dx * 0.5 }, 0);
+          tl.to(badge, { opacity: 1, scale: 1, x: 0, duration: 0.4, ease: "back.out(2.4)" }, 0.36);
+        }
+
+        // Fade-out — ends exactly at D so timeline length == render length.
+        const fadeDur = Math.min(0.4, D * 0.18);
+        const fadeTargets = [hasCard ? card : null, bsrc ? badge : null].filter(Boolean);
+        if (fadeTargets.length) {
+          tl.to(fadeTargets,
+            { opacity: 0, y: -14, duration: fadeDur, ease: "power2.in" }, D - fadeDur);
+        }
+
+        tl.seek(0);
+        window.__timelines["glass-lower-third"] = tl;
+      })();
+    </script>
+  </body>
+</html>

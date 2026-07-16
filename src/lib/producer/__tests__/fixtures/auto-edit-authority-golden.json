@@ -1,0 +1,16 @@
+{
+  "requestKey": "daef0c6a06458c4b6b27f4d7e0ab05491877d470359f4b8815b3a8318d1afcf6",
+  "snapshot": {
+    "schemaVersion": 1,
+    "qualityPolicyVersion": 1,
+    "scope": "produced",
+    "planHash": "24998ba807fc1fac0176f80ff2d64ff7c525443f835d79ff35820167a99a8e5e",
+    "planContentHash": "735d8562955c6671e046cf776c3d81df6362d8c58eb777962e7a12fd91d713de",
+    "manifestHash": "0ed4d70878555aac89cbc27c9f3978e9540ab3e6813f51bc8d18922bb8ac2589",
+    "operatorIntentDigest": "a0cb733a7aa72a6d19084049ebf90bf466704850877481968012d88271f238d4",
+    "transcriptDigest": "c58fe8e230a58e3328519d45a15b6fbb0ac43617610d9a407131323b5a07f1eb",
+    "referenceDigest": "1ad60556ba39f79ddfd51763b2c77bb2fdbb8534243695b43f7c80df83cf0dcd",
+    "pipelineDigest": "bf8a13ed06bc47e5d76fe9ca3955decb87a0278c8e408ede47c8be493356149c",
+    "digest": "04178bb779acc06d5ab51da88ff34cac4a3528ca021b21362c14d189e5ee4a35"
+  }
+}

@@ -1,0 +1,238 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"l1","type":"string","label":"Left pill @ keyframe 1","default":"10k"},
+    {"id":"r1","type":"string","label":"Right pill @ keyframe 1","default":"50k"},
+    {"id":"at1","type":"number","label":"Keyframe 1 time (s)","default":0.3,"min":0,"max":60,"step":0.05,"unit":"s"},
+    {"id":"l2","type":"string","label":"Left pill @ keyframe 2 (empty = omit onward)","default":"50k"},
+    {"id":"r2","type":"string","label":"Right pill @ keyframe 2","default":"100k"},
+    {"id":"at2","type":"number","label":"Keyframe 2 time (s)","default":1.6,"min":0,"max":60,"step":0.05,"unit":"s"},
+    {"id":"l3","type":"string","label":"Left pill @ keyframe 3 (empty = omit onward)","default":"100k"},
+    {"id":"r3","type":"string","label":"Right pill @ keyframe 3","default":"200k"},
+    {"id":"at3","type":"number","label":"Keyframe 3 time (s)","default":2.9,"min":0,"max":60,"step":0.05,"unit":"s"},
+    {"id":"l4","type":"string","label":"Left pill @ keyframe 4 (empty = omit)","default":""},
+    {"id":"r4","type":"string","label":"Right pill @ keyframe 4","default":""},
+    {"id":"at4","type":"number","label":"Keyframe 4 time (s)","default":4.2,"min":0,"max":60,"step":0.05,"unit":"s"},
+    {"id":"arrowInAt","type":"number","label":"Staged: arrow entrance offset after left pill (s); 0 = together (default)","default":0,"min":0,"max":10,"step":0.05,"unit":"s"},
+    {"id":"rightInAt","type":"number","label":"Staged: right pill entrance offset after left pill (s)","default":0,"min":0,"max":10,"step":0.05,"unit":"s"},
+    {"id":"accent","type":"color","label":"Accent color","default":"#054BC9"}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · Motion template: WIDGET-PILLS (MG-3.5, R6)
+    Class it serves: a PERSISTENT parametric widget (Reference Style Study R6) —
+    a "from -> to" counter (left pill, arrow, right pill) whose values STEP with
+    the narrative (ref-3's 10k -> 50k -> 100k -> 200k follower run), pinned in the
+    headroom. A widget with STATE, not a one-shot pop.
+    Transparent 1080x1920 overlay -> render with `--format mov` (ProRes 4444) for alpha.
+
+    CONTRACT for the PRODUCER compositing stage:
+      - up to FOUR keyframes: (lN left value, rN right value, atN seconds relative
+        to this overlay's outStart) are `data-composition-variables` — fill with
+        --variables. A keyframe with an EMPTY lN OR rN is dropped (and everything
+        after it): 3 steps = leave l4/r4 empty.
+      - At atN the pair (lN -> rN) becomes the shown state and the RIGHT (target)
+        pill POPS. Before at1 the widget is hidden; after the last keyframe it
+        holds. The shown pair + the pop are pure functions of timeline time
+        (hyperframes-keyframes seek-safe doctrine) — no .call()/stateful swaps.
+      - STAGED ENTRANCE (R9, deep-pass correction): arrowInAt / rightInAt offset
+        the arrow and the right (target) pill AFTER the left pill so the widget
+        BUILDS (left pill -> arrow -> right pill pops) instead of appearing whole.
+        DEFAULTS ARE 0 = the original single group fade (backward compatible — old
+        specs render identically). The value hand-off (rN -> next lN) is unchanged.
+      - HEADROOM placement (R3): high on the canvas (y~150-260), face clear. The
+        comp is full-canvas; the PRODUCER may TRANSLATE it face-relative via
+        anchor "headroom" + a measured faceBBoxNorm (graphics_stage).
+      - The widget PERSISTS to the end (no out-fade); the compositor gates it to
+        the window and the base returns after.
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (see stat-card note).
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>SNIPER · widget-pills</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: var(--canvas-w);
+        height: var(--canvas-h);
+        overflow: hidden;
+        background: transparent;          /* alpha overlay — the frame owns nothing */
+        font-family: var(--font);
+      }
+      #pills-root { position: relative; width: var(--canvas-w); height: var(--canvas-h); }
+
+      /* HEADROOM band (R3): high on the canvas, centered on the visual center. */
+      .stage {
+        position: absolute;
+        left: var(--visual-center-x);
+        top: 170px;
+        transform: translateX(-50%);
+        width: var(--safe-width);
+        display: flex;
+        justify-content: center;
+      }
+      .pills {
+        display: inline-flex;
+        align-items: center;
+        gap: 22px;
+        will-change: transform, opacity;
+      }
+      .pill {
+        font-weight: 700;
+        font-size: 56px;
+        line-height: 1;
+        letter-spacing: -0.01em;
+        padding: 20px 34px;
+        border-radius: 999px;
+        font-variant-numeric: tabular-nums;   /* counters don't jitter width */
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.30);
+        white-space: nowrap;
+      }
+      /* Left = where we were (accent field); right = the target (gold field). */
+      .pill.left  { background: var(--accent); color: var(--accent-ink); }
+      .pill.right {
+        background: var(--gold);
+        color: var(--ink);
+        transform-origin: center;
+        will-change: transform;
+      }
+      .arrow {
+        flex: 0 0 auto;
+        width: 0;
+        height: 0;
+        border-top: 20px solid transparent;
+        border-bottom: 20px solid transparent;
+        border-left: 30px solid #FFFFFF;      /* points left -> right */
+        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="pills-root"
+      data-composition-id="widget-pills"
+      data-width="1080"
+      data-height="1920"
+      data-duration="5"
+    >
+      <div class="stage">
+        <div
+          id="pills-el"
+          class="pills clip"
+          data-start="0"
+          data-duration="60"
+          data-track-index="1"
+        >
+          <span id="pill-left" class="pill left">10k</span>
+          <span id="pill-arrow" class="arrow"></span>
+          <span id="pill-right" class="pill right">50k</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("pills-root");
+        // Single source of truth for render length: the root data-duration attr.
+        const D = parseFloat(root.dataset.duration) || 5;
+
+        const defaults = {
+          l1: "10k", r1: "50k", at1: 0.3,
+          l2: "50k", r2: "100k", at2: 1.6,
+          l3: "100k", r3: "200k", at3: 2.9,
+          l4: "", r4: "", at4: 4.2,
+          arrowInAt: 0, rightInAt: 0, accent: "#054BC9",
+        };
+        const HF = window.__hyperframes;
+        const vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
+        document.documentElement.style.setProperty("--accent", vars.accent);
+
+        // Build the keyframe list: a pair needs BOTH sides; an empty side drops
+        // that keyframe and everything after it (like versus-split's row prune).
+        const raw = [
+          { l: vars.l1, r: vars.r1, at: Number(vars.at1) },
+          { l: vars.l2, r: vars.r2, at: Number(vars.at2) },
+          { l: vars.l3, r: vars.r3, at: Number(vars.at3) },
+          { l: vars.l4, r: vars.r4, at: Number(vars.at4) },
+        ];
+        const kfs = [];
+        for (let i = 0; i < raw.length; i++) {
+          const l = (raw[i].l == null ? "" : String(raw[i].l)).trim();
+          const r = (raw[i].r == null ? "" : String(raw[i].r)).trim();
+          if (!l || !r) break;
+          const at = isFinite(raw[i].at) ? Math.max(0, raw[i].at) : 0;
+          kfs.push({ l: l, r: r, at: (i > 0 ? Math.max(at, kfs[i - 1].at + 0.05) : at) });
+        }
+
+        const group = document.getElementById("pills-el");
+        const leftEl = document.getElementById("pill-left");
+        const arrowEl = document.getElementById("pill-arrow");
+        const rightEl = document.getElementById("pill-right");
+
+        // Staged entrance offsets (R9). 0 = the left/arrow/right fade together from
+        // the first keyframe (byte-identical to the original single group fade).
+        const arrowInAt = Math.max(0, Number(vars.arrowInAt) || 0);
+        const rightInAt = Math.max(0, Number(vars.rightInAt) || 0);
+
+        // Resting DOM state = first pair, hidden (correct before any onUpdate). The
+        // group stays visible; per-element opacity does the fade/stagger.
+        leftEl.textContent = kfs[0].l;
+        rightEl.textContent = kfs[0].r;
+        group.style.opacity = "1";
+        leftEl.style.opacity = "0";
+        arrowEl.style.opacity = "0";
+        rightEl.style.opacity = "0";
+
+        // A short overshoot bump (0 -> peak -> 0) as a pure function of dt seconds.
+        function pop(dt) {
+          const T = 0.32;
+          if (dt < 0 || dt > T) return 1;
+          return 1 + 0.22 * Math.sin(Math.PI * (dt / T));
+        }
+        // Linear 0->1 opacity ramp over 0.3s (the original group-fade rate).
+        function ramp(dt) { return Math.max(0, Math.min(1, dt / 0.3)); }
+
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // One linear driver; everything below is derived from its time in seconds,
+        // so a render seek to any frame reconstructs the exact shown state.
+        const proxy = { v: 0 };
+        tl.to(proxy, {
+          v: 1,
+          duration: D,
+          ease: "none",
+          onUpdate: function () {
+            const t = proxy.v * D;
+            let idx = -1;
+            for (let i = 0; i < kfs.length; i++) { if (kfs[i].at <= t) idx = i; }
+            if (idx < 0) {
+              leftEl.style.opacity = "0";
+              arrowEl.style.opacity = "0";
+              rightEl.style.opacity = "0";
+              return;
+            }
+            const k = kfs[idx];
+            leftEl.textContent = k.l;
+            rightEl.textContent = k.r;
+            // Per-element fade over 0.3s from the first keyframe; arrow + right pill
+            // offset by arrowInAt / rightInAt (both 0 => the original group fade).
+            const t0 = kfs[0].at;
+            leftEl.style.opacity = String(ramp(t - t0));
+            arrowEl.style.opacity = String(ramp(t - (t0 + arrowInAt)));
+            rightEl.style.opacity = String(ramp(t - (t0 + rightInAt)));
+            rightEl.style.transform = "scale(" + pop(t - k.at) + ")";
+          },
+        }, 0);
+
+        tl.seek(0);
+        window.__timelines["widget-pills"] = tl;
+      })();
+    </script>
+  </body>
+</html>

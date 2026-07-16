@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/reference-style-profile.schema.json",
+  "title": "Project Sniper Reference Style Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "referenceId",
+    "title",
+    "source",
+    "suggestedMode",
+    "suggestedKnownStyle",
+    "mechanics",
+    "quality",
+    "representativeFrames"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "referenceId": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["video", "sha256", "width", "height", "fps", "durationS", "aspect"],
+      "properties": {
+        "video": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^([0-9a-f]{64})?$" },
+        "width": { "type": ["integer", "null"], "minimum": 1 },
+        "height": { "type": ["integer", "null"], "minimum": 1 },
+        "fps": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "durationS": { "type": ["number", "null"], "minimum": 0 },
+        "aspect": { "type": ["string", "null"] }
+      }
+    },
+    "suggestedMode": { "type": ["string", "null"], "enum": ["short", "longform", null] },
+    "suggestedKnownStyle": {
+      "type": ["string", "null"],
+      "enum": ["caleb", "jadenly", "angela", null]
+    },
+    "mechanics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cutsPerMin",
+        "shotMedianS",
+        "longestStaticS",
+        "eventCounts",
+        "eventRatesPerMin",
+        "transitionClasses",
+        "captions",
+        "colors",
+        "audio"
+      ],
+      "properties": {
+        "cutsPerMin": { "type": ["number", "null"], "minimum": 0 },
+        "shotMedianS": { "type": ["number", "null"], "minimum": 0 },
+        "longestStaticS": { "type": ["number", "null"], "minimum": 0 },
+        "eventCounts": { "$ref": "#/$defs/nonNegativeNumberMap" },
+        "eventRatesPerMin": { "$ref": "#/$defs/nonNegativeNumberMap" },
+        "transitionClasses": { "$ref": "#/$defs/nonNegativeNumberMap" },
+        "captions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["detected", "positionBand", "cuesPerMin", "wordsPerCueMean", "karaoke"],
+          "properties": {
+            "detected": { "type": ["boolean", "null"] },
+            "positionBand": { "type": ["string", "null"] },
+            "cuesPerMin": { "type": ["number", "null"], "minimum": 0 },
+            "wordsPerCueMean": { "type": ["number", "null"], "minimum": 0 },
+            "karaoke": { "type": ["boolean", "null"] }
+          }
+        },
+        "colors": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["text", "background"],
+          "properties": {
+            "text": { "$ref": "#/$defs/colorList" },
+            "background": { "$ref": "#/$defs/colorList" }
+          }
+        },
+        "audio": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["integratedLufs", "musicLabel", "musicConfidence"],
+          "properties": {
+            "integratedLufs": { "type": ["number", "null"] },
+            "musicLabel": { "type": ["string", "null"] },
+            "musicConfidence": { "type": ["string", "null"] }
+          }
+        }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unclassifiedRuns", "wordLockAvailable", "wordLockWithin150msPct", "semanticsRan"],
+      "properties": {
+        "unclassifiedRuns": { "type": ["integer", "null"], "minimum": 0 },
+        "wordLockAvailable": { "type": "boolean" },
+        "wordLockWithin150msPct": { "type": ["number", "null"], "minimum": 0, "maximum": 100 },
+        "semanticsRan": { "type": "boolean" }
+      }
+    },
+    "representativeFrames": {
+      "type": "array",
+      "maxItems": 12,
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "nonNegativeNumberMap": {
+      "type": "object",
+      "additionalProperties": { "type": "number", "minimum": 0 }
+    },
+    "colorList": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+      "uniqueItems": true
+    }
+  }
+}

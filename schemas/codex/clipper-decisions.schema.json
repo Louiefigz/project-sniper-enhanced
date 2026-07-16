@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "index": { "type": "integer", "minimum": 0 },
+          "action": { "type": "string", "enum": ["KEEP", "REMOVE", "TRIM"] },
+          "trimmed_text": { "type": ["string", "null"] }
+        },
+        "required": ["index", "action", "trimmed_text"]
+      }
+    }
+  },
+  "required": ["decisions"]
+}

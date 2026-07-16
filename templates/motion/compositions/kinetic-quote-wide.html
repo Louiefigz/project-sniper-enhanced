@@ -1,0 +1,231 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"words","type":"string","label":"The full quote (builds word by word)","default":""},
+    {"id":"emphasisWords","type":"string","label":"Emphasis words (space/comma-separated subset, rendered yellow)","default":""},
+    {"id":"at1","type":"number","label":"Build start time (s)","default":0.2,"min":0,"max":30,"step":0.05,"unit":"s"},
+    {"id":"wordGapMs","type":"number","label":"Gap between word lands (ms)","default":130,"min":40,"max":400,"step":5,"unit":"ms"},
+    {"id":"bg","type":"enum","label":"Background","default":"dark","options":[{"value":"dark","label":"Dark takeover (own-screen)"},{"value":"transparent","label":"Transparent (on-head overlay)"}]}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · Motion template: KINETIC-QUOTE-WIDE (16:9 talking-head longform)
+    Reference: the pro's B&W quote cutaway (INTRO_MACHINE_VS_PRO_AUDIT §2 row 17,
+    §3 "Word-by-word quote build"; REFERENCE_STYLE_STUDY R18/R19). A
+    FULL-FRAME dark takeover:
+    big centered bold white type building WORD BY WORD at speech cadence
+    (~100-150ms/word), designated payoff words in yellow (#FFD60A), and the text
+    RE-CENTERING as words land. 16:9 sibling of kinetic-quote (9:16).
+
+    CONTRACT for the PRODUCER compositing stage:
+      - anchor "own-screen" -> render `--format mp4` (opaque takeover; R19: this
+        is the seam-cover card). No self out-transition — the compositor owns
+        both seams. Background is opaque from FRAME 1.
+      - words / emphasisWords / at1 / wordGapMs are `data-composition-variables`.
+        wordGapMs is the land cadence (sync to the timeline map's word timings:
+        ~100-150ms for the reference read); at1 is the first word's land time
+        relative to the overlay's outStart. Emphasis matching is
+        punctuation/case-insensitive; every occurrence of a listed word is yellow.
+      - UNSET everything renders the PREVIEW SAMPLE only (glass-rail G21
+        pattern): demo content activates when words AND emphasisWords are both
+        unset; setting either renders exactly what was set — no sample leak.
+      - Re-centering is transform-only (seek-safe): line geometry is measured
+        ONCE at build; per land the line's words shift so the landed subset sits
+        centered, and the block re-centers vertically as new lines open. The
+        settled layout is pure centered flex (measurement never affects it).
+      - If the build would overrun, the gap compresses so the last word lands
+        by D-0.5 (same budget rule as kinetic-quote).
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
+        rewrites it per window; --variables never sets it).
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>SNIPER · kinetic-quote-wide</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #101014;             /* opaque — this comp owns the whole frame.
+           Floor stays ABOVE blackdetect's 10% luma threshold: a takeover that
+           reads as pure black for its build-in trips Audit B and, worse, reads
+           as dead air — the pro's dark takeovers keep a visible lit surface
+           from frame 1 (audit §3). */
+        font-family: var(--font);
+      }
+      #kq-root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+
+      /* Full-bleed near-black + subtle vignette on a CHILD (never the root). */
+      #kq-bg {
+        position: absolute; inset: 0;
+        background: radial-gradient(ellipse 1400px 900px at 50% 46%,
+          #2a2a33 0%, #16161c 62%, #0d0d11 100%);
+      }
+
+      .stage {
+        position: absolute; inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #kq-line {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px 30px;                    /* row-gap col-gap */
+        max-width: 1460px;
+        will-change: transform;
+      }
+      .word {
+        display: inline-block;             /* transforms need block-level + intrinsic size */
+        font-weight: 800;
+        font-size: 96px;                   /* JS scales down for long quotes */
+        line-height: 1.12;
+        letter-spacing: -0.02em;
+        color: #ffffff;
+        text-shadow: 0 4px 26px rgba(0, 0, 0, 0.55);
+        will-change: transform, opacity;
+      }
+      .word.em { color: #ffd60a; }         /* payoff-word yellow (reference grammar) */
+    </style>
+  </head>
+  <body>
+    <div
+      id="kq-root"
+      data-composition-id="kinetic-quote-wide"
+      data-width="1920"
+      data-height="1080"
+      data-duration="3"
+    >
+      <div id="kq-bg"></div>
+      <div class="stage">
+        <div id="kq-line" class="clip" data-start="0" data-duration="60" data-track-index="1"></div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("kq-root");
+        const D = parseFloat(root.dataset.duration) || 3;
+
+        // Content defaults are EMPTY (G21 — no sample leak).
+        const defaults = { words: "", emphasisWords: "", at1: 0.2, wordGapMs: 130, bg: "dark" };
+        // PREVIEW-ONLY demo content (the reference quote itself). Activates ONLY
+        // when words AND emphasisWords are both unset.
+        const SAMPLE = { words: "Thinking that I needed more tactics", emphasisWords: "more tactics" };
+        const HF = window.__hyperframes;
+        let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
+        // bg "transparent" = the PRO on-head overlay mode (text lives ON the
+        // footage; the compositor supplies any dim/scrim). Render --format mov
+        // (ProRes4444 alpha). blackdetect/audit floor does not apply here — the
+        // footage shows through. Default "dark" keeps the own-screen contract.
+        if (String(vars.bg) === "transparent") {
+          document.documentElement.style.background = "transparent";
+          document.body.style.background = "transparent";
+          const bgEl = document.getElementById("kq-bg");
+          if (bgEl) bgEl.style.display = "none";
+          // On-footage legibility: the dark mode reads against its own bg; over
+          // live footage the type needs a stroke+glow (the pro's on-head text
+          // carries a heavy stroke). Shadow stack ≈ stroke — shader-safe CSS.
+          const st = document.createElement("style");
+          st.textContent = "#kq-line .word { text-shadow: 0 0 2px rgba(0,0,0,.95), 0 2px 6px rgba(0,0,0,.85), 0 4px 18px rgba(0,0,0,.6); }";
+          document.head.appendChild(st);
+        }
+        const isPreview = ["words", "emphasisWords"].every(function (k) {
+          return !(vars[k] == null ? "" : String(vars[k])).trim();
+        });
+        if (isPreview) vars = Object.assign({}, vars, SAMPLE);
+
+        const norm = function (w) { return w.toLowerCase().replace(/[^a-z0-9']/g, ""); };
+        const emSet = {};
+        String(vars.emphasisWords == null ? "" : vars.emphasisWords)
+          .split(/[\s,]+/).filter(Boolean)
+          .forEach(function (w) { const k = norm(w); if (k) emSet[k] = true; });
+
+        const line = document.getElementById("kq-line");
+        const words = String(vars.words == null ? "" : vars.words).trim().split(/\s+/).filter(Boolean);
+        // Long quotes scale down so they hold 1460px x <=3 lines without shrinking
+        // the flagship 96px look for the normal 4-10 word read.
+        const fpx = words.length <= 10 ? 96 : (words.length <= 16 ? 80 : 66);
+        line.style.fontSize = fpx + "px";
+        const spans = words.map(function (w) {
+          const el = document.createElement("span");
+          el.className = emSet[norm(w)] ? "word em" : "word";
+          el.textContent = w;
+          line.appendChild(el);
+          return el;
+        });
+
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // Vignette settles slightly (also keeps the timeline non-empty for a
+        // no-content render) — the base is opaque from frame 0 regardless.
+        tl.fromTo("#kq-bg", { opacity: 0.82 }, { opacity: 1, duration: 0.7, ease: "power2.out" }, 0);
+
+        if (spans.length) {
+          // Land cadence: at1 + i*gap, compressed so the last word lands by D-0.5.
+          const at1 = Math.max(0, Math.min(isFinite(Number(vars.at1)) ? Number(vars.at1) : 0.2, D - 0.5));
+          let gap = Math.max(0.04, Math.min(isFinite(Number(vars.wordGapMs)) ? Number(vars.wordGapMs) : 130, 400) / 1000);
+          if (spans.length > 1) {
+            gap = Math.min(gap, Math.max(0.04, (D - 0.5 - at1) / (spans.length - 1)));
+          }
+
+          // Measure the settled layout ONCE (before any transforms): group words
+          // into wrapped lines, then bake transform-only re-centering into the
+          // timeline. The settled state is the pure CSS layout (all offsets 0).
+          const geo = spans.map(function (el) {
+            return { el: el, left: el.offsetLeft, top: el.offsetTop, w: el.offsetWidth };
+          });
+          const lines = [];
+          geo.forEach(function (g) {
+            const last = lines[lines.length - 1];
+            if (last && Math.abs(g.top - last.top) < fpx * 0.5) last.words.push(g);
+            else lines.push({ top: g.top, words: [g] });
+          });
+          const totalH = line.offsetHeight;
+
+          const xDur = Math.max(0.05, gap * 0.8);   // ends before the next land (no tween overlap)
+          let idx = 0;
+          lines.forEach(function (ln, li) {
+            const first = ln.words[0];
+            const lastW = ln.words[ln.words.length - 1];
+            const lineW = (lastW.left + lastW.w) - first.left;
+            const usedH = ln.top + first.el.offsetHeight - lines[0].top;
+            const blockY = (totalH - usedH) / 2;    // centers lines 1..li mid-build
+            ln.words.forEach(function (g, wi) {
+              const t = at1 + idx * gap;
+              idx += 1;
+              const landedW = (g.left + g.w) - first.left;
+              const xOff = (lineW - landedW) / 2;   // landed subset sits centered
+              if (wi === 0) {
+                // Line opens: pin every word of this line at its first offset,
+                // and re-center the whole block vertically for the new line.
+                ln.words.forEach(function (h) { tl.set(h.el, { x: xOff }, 0); });
+                if (li === 0) tl.set(line, { y: blockY }, 0);
+                else tl.to(line, { y: blockY, duration: xDur, ease: "power2.out" }, t);
+              } else {
+                ln.words.forEach(function (h) {
+                  tl.to(h.el, { x: xOff, duration: xDur, ease: "power2.out" }, t);
+                });
+              }
+              // The word itself pops in fast (~120ms, reference cadence).
+              tl.set(g.el, { opacity: 0, scale: 0.8, y: 18 }, 0);
+              tl.to(g.el, { opacity: 1, scale: 1, y: 0, duration: 0.12, ease: "power2.out" }, t);
+            });
+          });
+        }
+
+        // No self fade-out: own-screen takeover holds; the compositor owns both seams.
+        tl.seek(0);
+        window.__timelines["kinetic-quote-wide"] = tl;
+      })();
+    </script>
+  </body>
+</html>

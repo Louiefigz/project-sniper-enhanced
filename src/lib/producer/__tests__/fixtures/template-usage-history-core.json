@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "kind": "producer-template-usage-history",
+  "mode": "longform",
+  "windowProjects": 8,
+  "projectCount": 1,
+  "projects": [
+    {
+      "projectId": "canonical-order",
+      "approvedAt": "2026-07-13T00:00:00.000Z",
+      "planHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "uses": {
+        "statement-card": 2
+      }
+    }
+  ],
+  "counts": {
+    "statement-card": {
+      "uses": 2,
+      "projects": 1,
+      "lastUsedAt": "2026-07-13T00:00:00.000Z"
+    }
+  },
+  "overusedKinds": [],
+  "policy": {
+    "minProjects": 3,
+    "minProjectShare": 0.5
+  }
+}

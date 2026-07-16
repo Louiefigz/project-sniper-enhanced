@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clipper"
+  short_description: "Tighten one clip at word level"
+  default_prompt: "Use $clipper to tighten this clip and export the requested clean deliverables."

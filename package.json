@@ -9,7 +9,7 @@
     "start": "node scripts/infra/next_supervisor.mjs start",
     "start:local": "node scripts/infra/next_supervisor.mjs start --local",
     "lint": "eslint",
-    "test": "node scripts/tests/next_supervisor.test.mjs && for f in src/lib/clipper/__tests__/*.test.ts src/lib/producer/__tests__/*.test.ts src/lib/segmenter/__tests__/*.test.ts src/lib/server/__tests__/*.test.ts; do echo \"$f\"; node --import tsx \"$f\" || exit 1; done; echo 'all tests passed'",
+    "test": "node scripts/tests/next_supervisor.test.mjs && node scripts/tests/skill_surface.test.mjs && for f in src/lib/clipper/__tests__/*.test.ts src/lib/producer/__tests__/*.test.ts src/lib/segmenter/__tests__/*.test.ts src/lib/server/__tests__/*.test.ts; do echo \"$f\"; node --import tsx \"$f\" || exit 1; done; echo 'all tests passed'",
     "test:supervisor": "node scripts/tests/next_supervisor.test.mjs",
     "type-check": "tsc --noEmit"
   },

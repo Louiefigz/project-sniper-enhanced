@@ -18,6 +18,7 @@ const eslintConfig = defineConfig([
     ".claude/worktrees/**",
     ".venv/**",
     "templates/motion/vendor/**",
+    "vendor/hyperframes-skills/**",
   ]),
 ]);
 

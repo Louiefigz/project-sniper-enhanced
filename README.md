@@ -3,10 +3,9 @@
 > A local-first AI video editing system for Claude Code desktop, rendered files,
 > Final Cut Pro, and editable Palmier Pro timelines.
 
-Project Sniper Enhanced is more than the four-tab web app. The repository ships
-with **26 conversational editing/creation skills**, **3 slash commands**, **4 GUI
-workspaces**, **46 registered motion compositions**, **36 caption identities**, a
-deterministic render pipeline, and an incremental Palmier revision system.
+Project Sniper Enhanced combines **5 focused video-editing skills**, **7 slash
+commands**, **4 GUI workspaces**, **46 registered Producer motion compositions**,
+a deterministic render pipeline, and an incremental Palmier revision system.
 
 Use it in whichever surface fits the job:
 
@@ -48,9 +47,6 @@ element; a full master is rendered and audited once the batch is ready to ship.
   editable Palmier delivery.
 - **🔍 FRAME.IO REVIEW** — inspect an MP4 for visible typos, spelling,
   grammar, and broken text formatting using representative-frame selection.
-- **🎨 HYPERFRAMES WORKFLOWS** — create motion graphics, explainers, launch
-  videos, website videos, PR explainers, music-driven videos, slideshows, and
-  custom HTML-rendered compositions.
 - **🧪 REFERENCE EDITOR** — study a finished reference or raw+edited pair
   frame by frame, prove reusable templates, compile a style pack, and apply its
   mechanics without copying the source creator's identity or assets.
@@ -97,74 +93,125 @@ jobs also keep authority, operation, element-ledger, QC, and resume receipts the
 > same pipeline — it is not required for the default flow, and you should not need to
 > start a dev server just to make an edit.
 
-## Claude Code slash commands
+## Activating and using the skills
 
-| Command | Function |
+Open the **`PROJECT_SNIPER` directory itself** in Claude Code desktop. Claude
+automatically discovers the five skills in [`.claude/skills/`](./.claude/skills/);
+there is no separate activation switch. You can either describe the job in
+plain language or use a slash command when you want deterministic routing.
+
+Codex-compatible adapters for the same five skills live in
+[`.agents/skills/`](./.agents/skills/). Upstream HyperFrames recipe documents
+are archived under [`vendor/hyperframes-skills/`](./vendor/hyperframes-skills/)
+and are deliberately outside both discovery directories. They are not Project
+Sniper product capabilities.
+
+In **Claude Code**, use the `/produce`, `/clip`, `/segment`,
+`/reference-edit`, or `/producer-study` commands below. In **Codex**, invoke the
+matching `$producer`, `$clipper`, `$segmenter`, `$reference-editor`, or
+`$producer-study` skill. Natural-language routing works in both, but explicit
+invocation is easiest to verify.
+
+### Claude Code slash commands
+
+| Command | Use it for |
 |---|---|
-| [`/setup`](./.claude/commands/setup.md) | Audits the machine, reports missing dependencies, and asks before installing system tools or the local Whisper model. |
-| [`/reference-edit`](./.claude/commands/reference-edit.md) | Runs the meticulous reference-study → template proof → style-pack → apply workflow. |
-| [`/produce-palmier`](./.claude/commands/produce-palmier.md) | Runs the staged Claude Code desktop → editable Palmier workflow with durable authority, exact operations, QC, and approvals. |
+| [`/setup`](./.claude/commands/setup.md) | Check the machine and install only missing prerequisites with approval. |
+| [`/produce`](./.claude/commands/produce.md) | Produce or revise a short, long-form edit, or trim-only render. |
+| [`/produce-palmier`](./.claude/commands/produce-palmier.md) | Build or revise an editable Palmier timeline. |
+| [`/clip`](./.claude/commands/clip.md) | Tighten one clip at word level and export MP4/FCPXML. |
+| [`/segment`](./.claude/commands/segment.md) | Split a long recording into separate topic/guest clips. |
+| [`/reference-edit`](./.claude/commands/reference-edit.md) | Study one benchmark meticulously and apply its mechanics to new footage. |
+| [`/producer-study`](./.claude/commands/producer-study.md) | Teach the system reusable rules/templates from several references. |
 
-The commands are conveniences, not the only interface. Plain-language requests
-such as *"make a 30-second product launch video,"* *"add cinematic captions,"*
-or *"change the text in the card at 6:42"* route to the matching skill.
+## The five real Project Sniper skills
 
-## Complete agent skill catalog (26)
+### 1. Producer — complete short and long-form editing
 
-These are the skills shipped in [`.claude/skills/`](./.claude/skills/). A skill
-is an operational contract for Claude Code—not necessarily a separate GUI tab.
-Provider-backed features still require their provider credentials; the
-deterministic/local fallbacks are documented inside each skill.
+[`producer`](./.claude/skills/producer/SKILL.md) is the main workflow. Use it
+for trim-only edits, produced shorts, full long-form videos, revisions, and
+rendered-file or editable-Palmier delivery.
 
-### Editing, analysis, and existing-footage workflows
+```text
+/produce ~/Desktop/raw.mp4 Make a 45-second 9:16 produced short. Open on the
+strongest claim, remove false starts and dead air, use varied graphics that
+match each information beat, add captions, no music, and show me the plan first.
+```
 
-| Skill | Use it for | Main capability |
-|---|---|---|
-| [`producer`](./.claude/skills/producer/SKILL.md) | Fully editing raw footage into shorts or long-form | Gated plans, cuts, pacing, reframe, captions, graphics, motion, b-roll, audio, QC, feedback, file render, and editable Palmier delivery |
-| [`reference-editor`](./.claude/skills/reference-editor/SKILL.md) | Meticulously emulating the mechanics of a reference | Source-cadence frame study, two independent reviews, adjudication, template proof, release-ready style pack, and governed application |
-| [`producer-study`](./.claude/skills/producer-study/SKILL.md) | Learning new reusable edit doctrine from examples | Deterministic fingerprints, graphic extraction, rule writing, template building, and verification |
-| [`talking-head-recut`](./.claude/skills/talking-head-recut/SKILL.md) | Packaging a playing talking-head/interview/podcast | Timed title, lower-third, data, quote, side-panel, and PIP graphic overlays |
-| [`clipper`](./.claude/skills/clipper/SKILL.md) | Polishing one clip | Word-level transcript decisions, clean-cut MP4, −14 LUFS master, and FCPXML |
-| [`segmenter`](./.claude/skills/segmenter/SKILL.md) | Splitting one long recording into many clips | Transcript-led topic boundaries and fast single/multicam clip export |
-| [`embedded-captions`](./.claude/skills/embedded-captions/SKILL.md) | Adding designed captions to a single-subject clip | 36 identities across rail, embedded/occluded, and full themed caption treatments |
+```text
+/produce ~/Desktop/interview.mov Trim only. Remove retakes, false starts, and
+excess dead air. Keep natural pauses. No graphics, zooms, transitions, b-roll,
+or music. Deliver a 16:9 MP4 with SRT and chapters.
+```
 
-### New-video and composition workflows
+```text
+/produce ~/Desktop/session.mov Create the full 16:9 long-form edit. Preserve
+clean takes, tighten pauses, use graphics only when the content earns them,
+vary card forms, add restrained motion and motivated transitions, and keep
+music off. Build an editable Palmier version while we iterate.
+```
 
-| Skill | Use it for | Main capability |
-|---|---|---|
-| [`hyperframes`](./.claude/skills/hyperframes/SKILL.md) | Any video, animation, or motion-graphic request | Entry router that selects the right specialized HyperFrames workflow |
-| [`general-video`](./.claude/skills/general-video/SKILL.md) | Freeform, long, multi-scene, montage, brand, or sizzle work | Input/length-agnostic custom HTML video composition |
-| [`faceless-explainer`](./.claude/skills/faceless-explainer/SKILL.md) | Turning text, notes, a topic, or an article into a video | Invented typography, diagrams, data-viz, narration, and shot-sequence storytelling |
-| [`product-launch-video`](./.claude/skills/product-launch-video/SKILL.md) | Product, app, feature, SaaS, or company launches | Brand capture, marketing narrative, shot planning, and promo render |
-| [`website-to-video`](./.claude/skills/website-to-video/SKILL.md) | Turning a general URL into a tour/showcase/social clip | Browser capture, screenshots, brand assets, and an authored site story |
-| [`pr-to-video`](./.claude/skills/pr-to-video/SKILL.md) | Explaining a GitHub pull request | Diff/commit/file analysis rendered as a code-change explainer |
-| [`music-to-video`](./.claude/skills/music-to-video/SKILL.md) | Making a beat-synced lyric/slideshow/promo video | One-pass music analysis, beat grid, per-frame plan, and optional supplied media |
-| [`motion-graphics`](./.claude/skills/motion-graphics/SKILL.md) | Short design-led animation, usually under 30 seconds | Kinetic type, stat hits, charts, logo stings, callouts, lower-thirds, overlays, and transparent output |
-| [`slideshow`](./.claude/skills/slideshow/SKILL.md) | Presentations and interactive decks | Slides, fragment reveals, branches, hotspots, and page-to-deck authoring |
-| [`remotion-to-hyperframes`](./.claude/skills/remotion-to-hyperframes/SKILL.md) | Explicitly porting existing Remotion source | One-way Remotion/React → seek-safe HyperFrames conversion with unsupported-pattern guards |
+For a small revision, point at the existing project and use output time:
 
-### HyperFrames platform and media domain skills
+```text
+/produce ~/ProjectSniper/my-video At 06:42 change the existing card text to
+"Three systems, one workflow." Keep its timing, card kind, position, animation,
+and every unrelated element unchanged. Use the surgical Palmier repair path.
+```
 
-| Skill | Use it for | Main capability |
-|---|---|---|
-| [`hyperframes-core`](./.claude/skills/hyperframes-core/SKILL.md) | Building a valid renderable composition | DOM timing contract, tracks, clips, sub-compositions, variables, media ownership, and determinism |
-| [`hyperframes-creative`](./.claude/skills/hyperframes-creative/SKILL.md) | Art direction | Palettes, typography, narration, beat planning, brand/style, and composition direction |
-| [`hyperframes-animation`](./.claude/skills/hyperframes-animation/SKILL.md) | Motion strategy and runtime selection | Atomic rules, blueprints, transitions, techniques, and seven runtime adapters |
-| [`hyperframes-keyframes`](./.claude/skills/hyperframes-keyframes/SKILL.md) | Detailed seek-safe animation | 2D/3D keyframes, paths, masks, SVG morph/draw, FLIP, trails, cursors, and diagnostics |
-| [`hyperframes-media`](./.claude/skills/hyperframes-media/SKILL.md) | Audio, transcription, and media generation | Multi-provider TTS, BGM/SFX, Whisper, captions, lyrics/karaoke, and background removal |
-| [`hyperframes-cli`](./.claude/skills/hyperframes-cli/SKILL.md) | Developing, inspecting, validating, rendering, or publishing | Complete CLI loop, browser/capture tools, diagnostics, and optional Lambda rendering |
-| [`hyperframes-registry`](./.claude/skills/hyperframes-registry/SKILL.md) | Reusable component wiring | Upstream blocks/components; in this repo, documents the local 46-composition catalog contract |
-| [`media-use`](./.claude/skills/media-use/SKILL.md) | Resolving BGM, SFX, images, and icons | Cache/catalog lookup, local freeze, content ledger, and stable asset paths |
-| [`figma`](./.claude/skills/figma/SKILL.md) | Bringing Figma work into video | Static assets, tokens, components, storyboards, Figma Motion, and shaders |
+### 2. Clipper — polish one clip
 
-### Animation runtimes
+[`clipper`](./.claude/skills/clipper/SKILL.md) removes filler, repetitions,
+false starts, and dead air from one clip. It is not the full graphics pipeline.
 
-HyperFrames compositions can use **GSAP** (default), **Lottie**, **Three.js**,
-**Anime.js**, **CSS keyframes**, the **Web Animations API**, or **TypeGPU**.
-Every runtime must remain paused, seek-safe, and deterministic under the shared
-HyperFrames timeline.
+```text
+/clip ~/Desktop/answer-03.mp4 Tighten this answer. Remove filler, repeated
+phrases, and the abandoned first take, but keep the speaker's natural cadence.
+Export the clean MP4 and Final Cut Pro FCPXML.
+```
 
-## Graphics and caption library
+### 3. Segmenter — split a long recording into rough clips
+
+[`segmenter`](./.claude/skills/segmenter/SKILL.md) finds topic/guest boundaries
+and exports separate files for downstream editing.
+
+```text
+/segment ~/Desktop/podcast-raw.mp4 Split this into standalone topic clips.
+Each clip should make sense without the previous section. Keep five seconds of
+pre/post-roll, show me the boundaries first, then export the approved clips.
+```
+
+For multicam, name the synchronized sources and lav tracks in the same request.
+
+### 4. Reference Editor — match one benchmark
+
+[`reference-editor`](./.claude/skills/reference-editor/SKILL.md) is the public
+workflow for *"edit mine like this."* It studies the reference frame by frame,
+proves required templates, builds a style pack, and applies only its mechanics.
+
+```text
+/reference-edit ~/Desktop/benchmark.mp4 ~/Desktop/my-raw-footage.mp4 mimic
+Study only the sections marked as AI-edited. Analyze every cut, card, layout,
+animation, transition, caption, audio cue, and pacing decision. Build and prove
+the missing templates, then apply that grammar to my footage in editable Palmier.
+Do not copy the creator's words, branding, assets, music, or identity.
+```
+
+### 5. Producer Study — improve the system itself
+
+[`producer-study`](./.claude/skills/producer-study/SKILL.md) is a maintainer
+workflow. Use it when several references should permanently improve Sniper's
+template catalog or doctrine. For a one-off mimic, use `reference-editor`.
+
+```text
+/producer-study ~/Desktop/reference-set/ Learn the recurring card families,
+graphic-selection rules, transition grammar, motion timing, and layout behavior
+across these examples. Measure the evidence, identify what our current catalog
+cannot express, build only the justified reusable templates, verify every one,
+and document the new selection rules. Learn only; do not edit new footage yet.
+```
+
+## Producer graphics library
 
 The Producer registry currently contains **46 source-authored HTML motion
 compositions** in [`templates/motion/compositions/`](./templates/motion/compositions/).
@@ -209,22 +256,9 @@ widget-gauge                 widget-pills
 
 </details>
 
-Designed captions have **36 identities** in the
-[`embedded-captions` catalog](./.claude/skills/embedded-captions/CATALOG.md).
-`anchor` is the restrained verbatim default; embedded typography is meant to be
-a scarce climax rather than a behind-the-subject effect on every word.
-
-<details>
-<summary>All 36 caption identities</summary>
-
-`cream`, `ink`, `editorial`, `keynote`, `documentary`, `loud`, `neon`,
-`glitch`, `chrome`, `velocity`, `anchor`, `ordnance`, `terminal`, `neonsign`,
-`stardust`, `stomp`, `scoreboard`, `transit`, `vhs`, `arcade`, `dossier`,
-`laser`, `thunder`, `hologram`, `biolume`, `aurora`, `spectrum`, `papercut`,
-`popup`, `chalkboard`, `graffiti`, `brush`, `inkwater`, `ransom`, `lastpage`,
-`nightcity`.
-
-</details>
+Producer captions are transcript-derived karaoke/kinetic burns for shorts and
+SRT or selective bursts for long-form. The archived upstream caption identity
+catalog is not presented as a Sniper capability.
 
 ## Producer functionality
 
@@ -363,8 +397,7 @@ The Python pipeline is also runnable on its own:
 
 ## Requirements
 
-- Node.js 20.9+ for the Next.js app; Node.js 22+ is recommended when using the
-  complete HyperFrames CLI/tooling surface
+- Node.js 20.9+ (Next.js 16 requires `node >=20.9.0`)
 - Python 3.9+
 - ffmpeg (+ ffprobe, included with ffmpeg)
 - Claude Code CLI — `claude` on PATH with a subscription login; the default
@@ -552,4 +585,4 @@ canonical pipeline doctrine in [`docs/PIPELINE.md`](./docs/PIPELINE.md)):
 - 🎛️ **Palmier setup** — [`docs/palmier/PALMIER_MCP_SETUP.md`](./docs/palmier/PALMIER_MCP_SETUP.md)
 - 🧩 **Incremental Palmier repairs** — [`docs/palmier/PALMIER_HYBRID_LAYERED_REPAIR_PLAN.md`](./docs/palmier/PALMIER_HYBRID_LAYERED_REPAIR_PLAN.md)
 - 🧪 **Reference workflow** — [`reference-editor`](./.claude/skills/reference-editor/SKILL.md)
-- 🎨 **Caption catalog** — [`.claude/skills/embedded-captions/CATALOG.md`](./.claude/skills/embedded-captions/CATALOG.md)
+- 🎨 **Producer composition catalog** — [`templates/motion/compositions/`](./templates/motion/compositions/)

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Producer Study"
+  short_description: "Teach Sniper reusable editing rules"
+  default_prompt: "Use $producer-study to extract reusable Producer doctrine and templates from these references."

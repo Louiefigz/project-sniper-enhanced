@@ -12,7 +12,7 @@ Next.js 16 + Python video pipeline bundling four tools that share one shell:
   final. Python engine in
   `scripts/producer/` (module map: `scripts/producer/CLAUDE.md`), canonical doctrine =
   `.claude/skills/producer/SKILL.md` with Codex adapter at `.agents/skills/producer/SKILL.md`.
-  Local mode uses Codex subscription auth; live mode preserves the Claude Code CLI.
+  Claude Code is the default editor brain; Codex is an explicit configured alternative.
 - **FRAME.IO REVIEW** (auxiliary QC, `/frameio-review`) — an MP4 → ffmpeg extracts 1 frame/sec →
   perceptual-hash **dedup** → Claude **vision** flags on-screen text errors (typos/spelling/
   grammar/formatting) → in-tab player + sortable flag list, plus `results.json` + standalone
@@ -31,9 +31,22 @@ The SEGMENTER/CLIPPER/FRAME.IO flows are independent (no automated handoff). The
 
 User-facing setup + the easiest way to run it: `README.md`. More references/docs: `docs/README.md`.
 
-**Skills layout.** `.claude/skills/*` are **symlinks into `.agents/skills/`** (single source — do NOT "reconcile" the trees by copying). The only real files in `.claude/skills/` are `producer/` (the canonical doctrine) and `producer-study/`. `.agents/skills/producer/SKILL.md` is a thin **Codex adapter** that just points at the canonical file; both are pinned in `PRODUCER_CORE_DOCTRINE_PATHS`. `producer-study` has no `.agents` adapter, so it routes only under Claude Code, not the Codex/local brain.
+**Skills layout.** The only active Project Sniper skills are `producer`,
+`clipper`, `segmenter`, `reference-editor`, and `producer-study`.
+`.claude/skills/<name>/SKILL.md` is the canonical Claude Code doctrine;
+`.agents/skills/<name>/SKILL.md` is the Codex adapter and must point back to the
+canonical file instead of duplicating it. Commands in `.claude/commands/` make
+routing explicit, but natural-language trigger descriptions remain supported.
 
-**SNIPER ↔ HyperFrames — two different worlds.** Raw footage → edit = **PRODUCER** (`/producer`, `scripts/producer/`, `edit_plan.json`, optional Palmier mirror). The ~20 HyperFrames/recipe skills (`hyperframes*`, `slideshow`, `talking-head-recut`, `product-launch-video`, `faceless-explainer`, …) are **vendored upstream HeyGen docs** for authoring a video from text/URL/PR/song/deck — a *different* toolchain. This repo uses HyperFrames itself only as the pinned `hyperframes@0.7.33 render` graphics subprocess (`scripts/producer/graphics/graphics_render.py`). Do NOT route a footage-edit job into those skills, and do not expect their `init`/registry/`lint` commands to work here.
+**SNIPER ↔ HyperFrames — two different worlds.** Raw footage → edit =
+**PRODUCER** (`/producer`, `scripts/producer/`, `edit_plan.json`, optional
+Palmier). The upstream HyperFrames recipe documents for videos from
+text/URL/PR/song/deck are archived under `vendor/hyperframes-skills/` for
+provenance only. They are outside `.claude/skills` and `.agents/skills`, are not
+agent-discoverable, and are not Project Sniper capabilities. This repo uses
+HyperFrames only as the pinned `hyperframes@0.7.33 render` graphics subprocess
+(`scripts/producer/graphics/graphics_render.py`). Do not route footage-edit jobs
+into the archived recipes or advertise their workflows.
 
 ## THE PIPELINE (canonical: `docs/PIPELINE.md` — read it before touching PRODUCER)
 

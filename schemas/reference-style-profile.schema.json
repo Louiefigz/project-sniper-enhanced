@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://project-sniper.local/schemas/reference-style-profile.schema.json",
+  "$id": "https://project-sniper-enhanced.local/schemas/reference-style-profile.schema.json",
   "title": "Project Sniper Reference Style Profile",
   "type": "object",
   "additionalProperties": false,

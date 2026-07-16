@@ -1,36 +1,59 @@
-# 🎯 PROJECT SNIPER
+# 🎯 PROJECT SNIPER ENHANCED
 
-> AI video editing for Claude Code desktop and Palmier Pro.
+> A local-first AI video editing system for Claude Code desktop, rendered files,
+> Final Cut Pro, and editable Palmier Pro timelines.
 
-An AI video pipeline with four tools that share one UI. Pick a tool from the landing page,
-or toggle between them in the top nav.
+Project Sniper Enhanced is more than the four-tab web app. The repository ships
+with **26 conversational editing/creation skills**, **3 slash commands**, **4 GUI
+workspaces**, **46 registered motion compositions**, **36 caption identities**, a
+deterministic render pipeline, and an incremental Palmier revision system.
 
-- **🎬 SEGMENTER (Part 1)** — rough-cut long footage into clips. Transcribe, let the
-  configured AI brain identify segments, adjust boundaries, and export MP4 clips
-  (single or multicam) as a zip for downstream trimming.
-- **✂️ CLIPPER (Part 2)** — refine a clip into a polished cut. Transcribe, let the LLM cut
-  filler at the word level, fine-tune in the word editor, and export an FCPXML timeline for
-  Final Cut Pro.
-- **🎛️ PRODUCER (Part 3)** — **the main pipeline.** Upload raw footage, pick your intent
-  on one card — a **Short (9:16)** in a studied style (**Caleb light · Jaden produced ·
-  Angela involved**), or a **Long (16:9)** with a **checklist of exactly what you want**
-  (full workflow, or just certain items: motion, graphics, transitions, captions, b-roll,
-  credibility, music, dialogue cleanup). An AI editor authors a gated edit plan and renders
-  it; the optional destination NLE is **Palmier Pro**. Sniper mirrors the exact
-  approved visual/audio master there as one verified clip, preserves component
-  assets best-effort, and labels which concepts have native controls. Opening the
-  mirror hands control to Palmier; there is no lossy two-way plan sync. See the
-  honest status in [`docs/PIPELINE.md`](./docs/PIPELINE.md).
-- **🔍 FRAME.IO REVIEW** — a standalone QC pass (not a pipeline stage). Scan an MP4 for
-  on-screen text errors — typos, spelling, grammar, broken formatting — and review the
-  flagged timestamps next to a video player.
+Use it in whichever surface fits the job:
 
-**The typical workflow: upload footage into PRODUCER → choose Short (with a style) or Long
-(with your item checklist) → review the approved Sniper render → optionally update the
-verified Palmier mirror and take manual control there** —
-canonical description in [`docs/PIPELINE.md`](./docs/PIPELINE.md). SEGMENTER and CLIPPER
-remain useful standalone (rough-cut a long recording into clips; word-level FCPXML polish),
-and PRODUCER can ingest SEGMENTER/CLIPPER output — but PRODUCER is the through-line.
+| Surface | Best for | What it produces |
+|---|---|---|
+| **Claude Code desktop** | Talking to the editor in plain language; reference matching; building directly in Palmier | A governed edit plan, rendered deliverables, or an editable Palmier timeline |
+| **Web GUI** | Visual ingest, segmentation, word editing, timeline adjustment, Auto Edit, and text QC | MP4 clips, FCPXML, Producer projects, review reports |
+| **Palmier Pro** | Native timeline control and quick changes after an editable build | Stable-ID clips, text, graphic overlays, revisions, and exports |
+| **Headless CLIs** | Automation, debugging, CI, and deterministic stage-by-stage execution | The same manifests, plans, renders, audits, and revision receipts |
+
+## Choose the destination first
+
+The requested destination determines the workflow; these are intentionally
+different products:
+
+1. **Editable Palmier build** — when the operator asks to build or continue in
+   Palmier, Claude Code drives Palmier directly inside a candidate-scoped,
+   resumable authority. The cut lands first, visual treatment follows, and
+   cards/text remain addressable by stable IDs.
+2. **Rendered file** — when the operator asks for an MP4, Sniper's deterministic
+   renderer produces and audits `final.mp4`.
+3. **Approved flat mirror** — when the operator explicitly wants the approved
+   Sniper master mirrored into Palmier, the exact file is placed as one verified
+   clip. It is visually exact but its baked layers are not individually editable.
+
+For long-form work, the recommended model is **Editable Build while iterating +
+one QC Master when publishing**. Small card/text changes touch only the bound
+element; a full master is rendered and audited once the batch is ready to ship.
+
+## Product at a glance
+
+- **🎬 SEGMENTER** — transcribe one long recording, identify topic/guest
+  boundaries, adjust them, and export separate single- or multicam MP4 clips.
+- **✂️ CLIPPER** — remove filler, false starts, repetition, and dead air at
+  word level; export a clean MP4 and/or Final Cut Pro FCPXML.
+- **🎛️ PRODUCER** — the primary editing system for shorts and long-form:
+  retakes, pauses, reframing, captions, graphics, motion, transitions, b-roll,
+  audio, plan review, deterministic gates, rendered QC, feedback revisions, and
+  editable Palmier delivery.
+- **🔍 FRAME.IO REVIEW** — inspect an MP4 for visible typos, spelling,
+  grammar, and broken text formatting using representative-frame selection.
+- **🎨 HYPERFRAMES WORKFLOWS** — create motion graphics, explainers, launch
+  videos, website videos, PR explainers, music-driven videos, slideshows, and
+  custom HTML-rendered compositions.
+- **🧪 REFERENCE EDITOR** — study a finished reference or raw+edited pair
+  frame by frame, prove reusable templates, compile a style pack, and apply its
+  mechanics without copying the source creator's identity or assets.
 
 ## Fastest start (Claude Code desktop)
 
@@ -52,18 +75,21 @@ is inside **Claude Code desktop**:
    or do it by hand from [Requirements](#requirements) + [Setup](#setup): the Python `.venv`,
    `ffmpeg`, the `claude` CLI (the default brain — you already have it in Claude Code desktop),
    and `whisper-cli` + a local model.
-2. **Download and open Palmier Pro** — the AI-native NLE where your edit shows up.
-   It **must be open**: while running it serves the local MCP the pipeline talks to
-   (`http://127.0.0.1:19789/mcp`). Setup + the Claude Desktop bridge:
+2. **If Palmier is your destination, download and open Palmier Pro.** While it is
+   running it serves the local MCP that the editable-build workflow talks to at
+   `http://127.0.0.1:19789/mcp`. Rendered-file, Segmenter, Clipper, and review
+   jobs do not require Palmier. Setup + Claude Desktop bridge:
    [`docs/palmier/PALMIER_MCP_SETUP.md`](./docs/palmier/PALMIER_MCP_SETUP.md).
 3. **Open this project folder in Claude Code desktop** and just ask — e.g.
    *"cut a Jaden-produced short from this footage"* or *"clean-cut this long recording."*
-   Claude loads the **`producer`** skill and drives the whole pipeline (ingest →
-   gated `edit_plan.json` → render → optional Palmier mirror); watch it build in Palmier Pro.
+   Claude loads the **`producer`** skill and chooses the requested destination:
+   governed editable Palmier build, deterministic rendered file, or approved
+   one-clip mirror.
 
-**Where your files go:** everything lands under **`~/ProjectSniper/<slug>/`** — your
-finished **`final.mp4`** and working files are in that project's `producer/` folder;
-reference studies live under `~/ProjectSniper/_references/`.
+**Where your files go:** everything lands under **`~/ProjectSniper/<slug>/`**.
+Rendered outputs and working files are in the project's `producer/` folder;
+reference studies live under `~/ProjectSniper/_references/`. Editable Palmier
+jobs also keep authority, operation, element-ledger, QC, and resume receipts there.
 
 **More references & docs:** [`docs/README.md`](./docs/README.md).
 
@@ -71,12 +97,212 @@ reference studies live under `~/ProjectSniper/_references/`.
 > same pipeline — it is not required for the default flow, and you should not need to
 > start a dev server just to make an edit.
 
+## Claude Code slash commands
+
+| Command | Function |
+|---|---|
+| [`/setup`](./.claude/commands/setup.md) | Audits the machine, reports missing dependencies, and asks before installing system tools or the local Whisper model. |
+| [`/reference-edit`](./.claude/commands/reference-edit.md) | Runs the meticulous reference-study → template proof → style-pack → apply workflow. |
+| [`/produce-palmier`](./.claude/commands/produce-palmier.md) | Runs the staged Claude Code desktop → editable Palmier workflow with durable authority, exact operations, QC, and approvals. |
+
+The commands are conveniences, not the only interface. Plain-language requests
+such as *"make a 30-second product launch video,"* *"add cinematic captions,"*
+or *"change the text in the card at 6:42"* route to the matching skill.
+
+## Complete agent skill catalog (26)
+
+These are the skills shipped in [`.claude/skills/`](./.claude/skills/). A skill
+is an operational contract for Claude Code—not necessarily a separate GUI tab.
+Provider-backed features still require their provider credentials; the
+deterministic/local fallbacks are documented inside each skill.
+
+### Editing, analysis, and existing-footage workflows
+
+| Skill | Use it for | Main capability |
+|---|---|---|
+| [`producer`](./.claude/skills/producer/SKILL.md) | Fully editing raw footage into shorts or long-form | Gated plans, cuts, pacing, reframe, captions, graphics, motion, b-roll, audio, QC, feedback, file render, and editable Palmier delivery |
+| [`reference-editor`](./.claude/skills/reference-editor/SKILL.md) | Meticulously emulating the mechanics of a reference | Source-cadence frame study, two independent reviews, adjudication, template proof, release-ready style pack, and governed application |
+| [`producer-study`](./.claude/skills/producer-study/SKILL.md) | Learning new reusable edit doctrine from examples | Deterministic fingerprints, graphic extraction, rule writing, template building, and verification |
+| [`talking-head-recut`](./.claude/skills/talking-head-recut/SKILL.md) | Packaging a playing talking-head/interview/podcast | Timed title, lower-third, data, quote, side-panel, and PIP graphic overlays |
+| [`clipper`](./.claude/skills/clipper/SKILL.md) | Polishing one clip | Word-level transcript decisions, clean-cut MP4, −14 LUFS master, and FCPXML |
+| [`segmenter`](./.claude/skills/segmenter/SKILL.md) | Splitting one long recording into many clips | Transcript-led topic boundaries and fast single/multicam clip export |
+| [`embedded-captions`](./.claude/skills/embedded-captions/SKILL.md) | Adding designed captions to a single-subject clip | 36 identities across rail, embedded/occluded, and full themed caption treatments |
+
+### New-video and composition workflows
+
+| Skill | Use it for | Main capability |
+|---|---|---|
+| [`hyperframes`](./.claude/skills/hyperframes/SKILL.md) | Any video, animation, or motion-graphic request | Entry router that selects the right specialized HyperFrames workflow |
+| [`general-video`](./.claude/skills/general-video/SKILL.md) | Freeform, long, multi-scene, montage, brand, or sizzle work | Input/length-agnostic custom HTML video composition |
+| [`faceless-explainer`](./.claude/skills/faceless-explainer/SKILL.md) | Turning text, notes, a topic, or an article into a video | Invented typography, diagrams, data-viz, narration, and shot-sequence storytelling |
+| [`product-launch-video`](./.claude/skills/product-launch-video/SKILL.md) | Product, app, feature, SaaS, or company launches | Brand capture, marketing narrative, shot planning, and promo render |
+| [`website-to-video`](./.claude/skills/website-to-video/SKILL.md) | Turning a general URL into a tour/showcase/social clip | Browser capture, screenshots, brand assets, and an authored site story |
+| [`pr-to-video`](./.claude/skills/pr-to-video/SKILL.md) | Explaining a GitHub pull request | Diff/commit/file analysis rendered as a code-change explainer |
+| [`music-to-video`](./.claude/skills/music-to-video/SKILL.md) | Making a beat-synced lyric/slideshow/promo video | One-pass music analysis, beat grid, per-frame plan, and optional supplied media |
+| [`motion-graphics`](./.claude/skills/motion-graphics/SKILL.md) | Short design-led animation, usually under 30 seconds | Kinetic type, stat hits, charts, logo stings, callouts, lower-thirds, overlays, and transparent output |
+| [`slideshow`](./.claude/skills/slideshow/SKILL.md) | Presentations and interactive decks | Slides, fragment reveals, branches, hotspots, and page-to-deck authoring |
+| [`remotion-to-hyperframes`](./.claude/skills/remotion-to-hyperframes/SKILL.md) | Explicitly porting existing Remotion source | One-way Remotion/React → seek-safe HyperFrames conversion with unsupported-pattern guards |
+
+### HyperFrames platform and media domain skills
+
+| Skill | Use it for | Main capability |
+|---|---|---|
+| [`hyperframes-core`](./.claude/skills/hyperframes-core/SKILL.md) | Building a valid renderable composition | DOM timing contract, tracks, clips, sub-compositions, variables, media ownership, and determinism |
+| [`hyperframes-creative`](./.claude/skills/hyperframes-creative/SKILL.md) | Art direction | Palettes, typography, narration, beat planning, brand/style, and composition direction |
+| [`hyperframes-animation`](./.claude/skills/hyperframes-animation/SKILL.md) | Motion strategy and runtime selection | Atomic rules, blueprints, transitions, techniques, and seven runtime adapters |
+| [`hyperframes-keyframes`](./.claude/skills/hyperframes-keyframes/SKILL.md) | Detailed seek-safe animation | 2D/3D keyframes, paths, masks, SVG morph/draw, FLIP, trails, cursors, and diagnostics |
+| [`hyperframes-media`](./.claude/skills/hyperframes-media/SKILL.md) | Audio, transcription, and media generation | Multi-provider TTS, BGM/SFX, Whisper, captions, lyrics/karaoke, and background removal |
+| [`hyperframes-cli`](./.claude/skills/hyperframes-cli/SKILL.md) | Developing, inspecting, validating, rendering, or publishing | Complete CLI loop, browser/capture tools, diagnostics, and optional Lambda rendering |
+| [`hyperframes-registry`](./.claude/skills/hyperframes-registry/SKILL.md) | Reusable component wiring | Upstream blocks/components; in this repo, documents the local 46-composition catalog contract |
+| [`media-use`](./.claude/skills/media-use/SKILL.md) | Resolving BGM, SFX, images, and icons | Cache/catalog lookup, local freeze, content ledger, and stable asset paths |
+| [`figma`](./.claude/skills/figma/SKILL.md) | Bringing Figma work into video | Static assets, tokens, components, storyboards, Figma Motion, and shaders |
+
+### Animation runtimes
+
+HyperFrames compositions can use **GSAP** (default), **Lottie**, **Three.js**,
+**Anime.js**, **CSS keyframes**, the **Web Animations API**, or **TypeGPU**.
+Every runtime must remain paused, seek-safe, and deterministic under the shared
+HyperFrames timeline.
+
+## Graphics and caption library
+
+The Producer registry currently contains **46 source-authored HTML motion
+compositions** in [`templates/motion/compositions/`](./templates/motion/compositions/).
+The catalog includes hook cards, statements, stats, receipts, pipelines,
+scoreboards, rails, gauges, lists, maps, quotes, takeovers, PIP-hole layouts,
+icons, lower-thirds, section markers, transitions, and 16:9 variants.
+
+The system is expected to choose a form from the beat's **information shape**
+(comparison → bars/scoreboard, process → pipeline/rail, evidence →
+receipt/ledger, thesis → statement), check geometry against the face/screen,
+and avoid repeating the same anatomy consecutively. Operators can also name a
+specific composition directly.
+
+<details>
+<summary>All 46 registered motion compositions</summary>
+
+```text
+agenda-slide                 angela-caption-dual-mode
+angela-receipt-cell          angela-staircase-lockup
+angela-takeover-deck         avatar-bio-card
+blur-tease                   canvas-pip-list
+chip-row                     color-wash
+container-shape              container-shape-wide
+fragment-payoff              glass-lower-third
+glass-rail                   glass-takeover-bg
+glitch-hit                   icon-badge
+icon-badge-wide              jaden-shout-lockup
+kinetic-quote                kinetic-quote-wide
+list-build                   logo-card
+nateherk-bullet-bars         nateherk-ledger-dark
+nateherk-pipeline            nateherk-rail
+nateherk-scoreboard          nateherk-takeover
+schedule-stack               section-marker
+section-takeover             stat-card
+statement-card               stinger-wipe
+stroke-draw-badge            text-element
+text-element-wide            underline-circle
+versus-split                 whiteboard-connector
+whiteboard-list              whiteboard-map
+widget-gauge                 widget-pills
+```
+
+</details>
+
+Designed captions have **36 identities** in the
+[`embedded-captions` catalog](./.claude/skills/embedded-captions/CATALOG.md).
+`anchor` is the restrained verbatim default; embedded typography is meant to be
+a scarce climax rather than a behind-the-subject effect on every word.
+
+<details>
+<summary>All 36 caption identities</summary>
+
+`cream`, `ink`, `editorial`, `keynote`, `documentary`, `loud`, `neon`,
+`glitch`, `chrome`, `velocity`, `anchor`, `ordnance`, `terminal`, `neonsign`,
+`stardust`, `stomp`, `scoreboard`, `transit`, `vhs`, `arcade`, `dossier`,
+`laser`, `thunder`, `hologram`, `biolume`, `aurora`, `spectrum`, `papercut`,
+`popup`, `chalkboard`, `graffiti`, `brush`, `inkwater`, `ransom`, `lastpage`,
+`nightcity`.
+
+</details>
+
+## Producer functionality
+
+### Inputs, outputs, and treatment
+
+- **Inputs:** one or more raw files, a project folder, a finished long-form to
+  mine for shorts, optional b-roll/music, or Segmenter/Clipper output.
+- **Outputs:** 9:16 short(s), 16:9 long-form, rough clips, deterministic MP4,
+  FCPXML/SRT/chapters where applicable, or an editable Palmier timeline.
+- **Scopes:** `trim` → `light` → `produced` → `full`, with independent
+  lane overrides for motion, graphics, transitions, captions, b-roll,
+  credibility, music, and dialogue cleanup.
+
+### Editorial and visual system
+
+- Word-timed transcription, source manifests, multi-source reasoning, and
+  transcript-to-output time mapping.
+- Retake detection, abandoned-thought review, false-start/filler removal,
+  pause tightening, protected emphasis pauses, and CTA preservation.
+- Short-form 9:16 face-aware reframe; long-form breathing room and sparse
+  semantic zooms plus subtle aliveness motion.
+- Hook cards, graphics proposals, visual-state/face exclusion, full-screen
+  cutaways, PIP-hole takeovers, b-roll placement, kinetic captions, section
+  changes, and non-stock seam transitions.
+- Grounded claims checks, numeric transcript checks, reference-mechanics gates,
+  graphic-form variety checks, and stored operator-intent enforcement.
+- Dialogue mastering to approximately −14 LUFS, optional music bed/ducking,
+  captions, SRT, chapters, cover frames, and with/without-music variants where
+  that workflow is configured.
+
+### Review, safety, and reliability
+
+- `edit_plan.json` is the deterministic boundary: the same plan and inputs
+  reproduce the same edit.
+- Trim/light plans require at least one independent clean review; produced/full
+  plans require two clean reviews of the same authority, capped at four rounds.
+- Renders are isolated candidates. Audit B, a composition critic, and an
+  editorial critic must all pass before promotion.
+- Detached Auto Edit workers survive browser/Next restarts, keep bounded logs,
+  and resume only hash-current checkpoints.
+- Unknown identifiers, stale plans, missing evidence, unsupported lanes, and
+  active-project mismatches fail closed instead of guessing.
+
+## Editable Palmier revisions and long-form changes
+
+The editable-build path is designed so a two-word change in a 14-minute video
+does not force a 14-minute re-render.
+
+| Requested change | Current route |
+|---|---|
+| Copy/color/style inside one rendered card | Re-render and replace that one ledger-bound card |
+| Presenter missing from a registered PIP-hole card | Rebuild that isolated presenter-card only |
+| Same-duration card move | Native move; no asset render |
+| Card duration change | Replace that card asset; presenter-dependent timing may broaden the revision |
+| Add/remove a card | Stable-ID add/remove with versioned binding/tombstone |
+| Native Palmier text copy | One `update_text` revision-sidecar operation |
+| Several independent changes | One revision set, up to 256 logical changes, checkpointed in pages of at most 24 mutations |
+| Cut/ripple, source replacement, presenter recompose, captions, transitions, audio, or global look | Broader dependency-aware build; local mutation remains fail-closed until live long-form proof exists |
+| Final publish | One complete QC master and full-video audit |
+
+Every editable element has a stable plan ID, content-addressed asset, versioned
+ledger binding, and exact Palmier clip/media reference. Small revisions render
+only pixel-changing elements, reject stale versions before mutation, preserve
+unrelated clips, and inspect dirty windows at before/entrance/middle/exit/after
+frames. Stopping after import or placement is resumable from verified receipts
+without replaying completed work.
+
+**Current proof level:** the first 60-second direct Palmier build was exercised
+live; a synthetic 14-minute/50-graphic plan proved bounded multi-card revisions
+offline. A live 30–60 minute Palmier endurance/parity run is still outstanding,
+so long-duration live-edit performance should not be presented as fully proven.
+
 ## What each tool does
 
 ### SEGMENTER (`/segmenter`)
 1. **Select** your MP4 (and optional B/C-cam + lav tracks) from your local filesystem
 2. **Configure** how to segment — default coaching-show prompt or your own
-3. **Transcribe + Segment** — local whisper.cpp + Codex/Sol in local mode, or the preserved Deepgram + Anthropic path in live mode
+3. **Transcribe + Segment** — local whisper.cpp plus the configured Claude Code/Codex brain in local mode, or the preserved Deepgram + Anthropic path in live mode
 4. **Edit** — adjust boundaries: split with ✂️, merge with ✕, rename by clicking the title
 5. **Export** — stream-copy each kept segment to its own MP4 with ~5s pre/post-roll padding (cuts snap to keyframes; clips may overlap). Near-instant rough footage, delivered as a zip. Multicam export syncs B/C-cam + lav and re-encodes frame-accurately.
 
@@ -137,12 +363,15 @@ The Python pipeline is also runnable on its own:
 
 ## Requirements
 
-- Node.js 20.9+ (Next.js 16 requires `node >=20.9.0`)
+- Node.js 20.9+ for the Next.js app; Node.js 22+ is recommended when using the
+  complete HyperFrames CLI/tooling surface
 - Python 3.9+
 - ffmpeg (+ ffprobe, included with ffmpeg)
-- Codex CLI — `codex` on PATH with a ChatGPT subscription login; required for the localhost Codex/Sol workflow
+- Claude Code CLI — `claude` on PATH with a subscription login; the default
+  Producer editor brain and the conversational desktop surface
+- Codex CLI (optional) — `codex` on PATH with a ChatGPT subscription login;
+  enable it with `SNIPER_BRAIN_PROVIDER=codex`
 - whisper.cpp — `whisper-cli` plus a local model; required for no-audio-egress transcription
-- Claude Code CLI — optional preserved live/legacy PRODUCER brain (`claude` on PATH with subscription login)
 - Palmier Pro (optional) — the AI-native NLE. When it's open it serves a local MCP at `http://127.0.0.1:19789/mcp`; a Claude client can drive it directly for interactive live editing. Setup (incl. the Claude Desktop bridge): [`docs/palmier/PALMIER_MCP_SETUP.md`](./docs/palmier/PALMIER_MCP_SETUP.md). The repo's checked-in `.mcp.json` auto-offers this server to Claude Code.
 - tesseract — only for FRAME.IO REVIEW's optional `--mode ocr`; the default visual mode does not need it
 - macOS — file selection uses a native macOS picker (`osascript`); the app won't be able to pick files on other platforms yet
@@ -183,8 +412,8 @@ a model during a GUI job.
 cp .env.local.example .env.local
 ```
 
-For the localhost Codex/Whisper workflow, API keys are optional. Fill them only
-for the preserved live providers or explicit overrides; every runtime knob is
+For the localhost Claude/Whisper workflow, API keys are optional. Fill them only
+for live providers or explicit overrides; every runtime knob is
 documented in [`.env.local.example`](./.env.local.example):
 
 | Key | Where to get it |
@@ -192,14 +421,18 @@ documented in [`.env.local.example`](./.env.local.example):
 | `DEEPGRAM_API_KEY` | [console.deepgram.com](https://console.deepgram.com) |
 | `ANTHROPIC_API_KEY` | [console.anthropic.com](https://console.anthropic.com) |
 
-### 4. (Optional) Run the web GUI locally with Codex/Sol Ultra
+### 4. (Optional) Run the web GUI
 
 > Optional — this starts the **web GUI**. For the default, no-dev-server path,
 > see [Start here (the easy path)](#start-here-the-easy-path) above.
 
 ```bash
-codex -c 'model_reasoning_effort="ultra"' login status
+# Local Whisper transcription; Claude Code remains the default editor brain
 npm run dev:local
+
+# Optional Codex/Sol brain instead
+codex -c 'model_reasoning_effort="ultra"' login status
+SNIPER_BRAIN_PROVIDER=codex npm run dev:local
 
 # Production-style local server (build first):
 npm run build
@@ -246,10 +479,11 @@ serial request queue; running work refreshes quickly, idle cards refresh every
 60 seconds, and polling pauses/aborts when the tab is hidden. Palmier status
 uses the same no-overlap and hidden-tab rules.
 
-**Status:** verified 2026-07-12 by type-check, full lint, production build, all
-37 TypeScript test files, and a live C0679 restart test: Next restarted while
-the same detached ffmpeg worker continued and the browser reconnected to its
-running status. See the canonical evidence in
+**Historical live proof:** on 2026-07-12, Next restarted while the same detached
+ffmpeg worker continued and the browser reconnected to its running status.
+The current repository has 109 TypeScript test files; use `npm test`,
+`npm run type-check`, `npm run lint`, and `npm run build` as the release gate.
+See the evidence trail in
 [`docs/PIPELINE.md`](./docs/PIPELINE.md).
 
 ### Running more than one project
@@ -263,7 +497,7 @@ CPU/ffmpeg-heavy and running several projects at once has **not** been stress-te
 (single-operator use only). In practice: keep many projects, but run **one active
 edit at a time** and start the next when the current render finishes.
 
-### First edit in 5 steps
+### First GUI-rendered edit in 5 steps
 
 The verified PRODUCER loop (full walkthrough in [`docs/HANDOFF.md`](./docs/HANDOFF.md);
 canonical pipeline doctrine in [`docs/PIPELINE.md`](./docs/PIPELINE.md)):
@@ -271,8 +505,8 @@ canonical pipeline doctrine in [`docs/PIPELINE.md`](./docs/PIPELINE.md)):
 1. **Ingest** — open the PRODUCER tab, pick your footage, and fill in the **intent
    card**: a Short (with a style) or a Long (with your item checklist). The project
    lands in `~/ProjectSniper/<slug>/`.
-2. **Auto-edit** — one click; local mode uses Codex with `gpt-5.6-sol` / Ultra
-   to author `edit_plan.json`
+2. **Auto-edit** — one click; the configured Claude Code or Codex brain authors
+   `edit_plan.json`
    (speech cleanup → cuts → graphics/zooms/captions per your scope + style), the
    gates validate it, and the detached render worker continues even if Next
    restarts. If the worker is interrupted, use **Resume Edit** on the project.
@@ -284,13 +518,28 @@ canonical pipeline doctrine in [`docs/PIPELINE.md`](./docs/PIPELINE.md)):
    window refit).
 5. **Ship** — Reveal `final.mp4` in the project directory.
 
+### First editable Palmier build
+
+1. Open Palmier Pro and the intended project, then ask Claude Code to
+   [`/produce-palmier`](./.claude/commands/produce-palmier.md) from footage or an
+   existing Producer directory.
+2. Sniper binds the exact Palmier project/timeline, authors and gates a cut-only
+   previsual, and lands the cut before waiting on the visual plan.
+3. In the retained session it selects from the composition catalog, gates the
+   full treatment, and executes only the returned content-addressed operations.
+4. Give timestamped notes. Same-card copy/style repairs use the one-element fast
+   path; multiple independent changes are batched into a resumable revision set.
+5. `desktop_cli.py qc` exports and checks the exact candidate. Composition and
+   editorial review receipts must both pass before approval.
+
 ---
 
 ## Notes
 
 - Video files are read directly from your local filesystem. Local-mode media
   transcription and rendering stay local, while transcript/plan context is sent
-  to the remote Codex subscription service; local mode is not offline.
+  to the configured Claude Code or Codex subscription service; local mode is
+  private-by-default but not offline.
 - `npm run dev` preserves Deepgram/Anthropic/Claude behavior. FRAME.IO REVIEW
   remains an explicit Anthropic vision call in either mode.
 
@@ -301,3 +550,6 @@ canonical pipeline doctrine in [`docs/PIPELINE.md`](./docs/PIPELINE.md)):
 - 📚 **Guide index** — [`docs/README.md`](./docs/README.md)
 - 🎬 **Pipeline status** — [`docs/PIPELINE.md`](./docs/PIPELINE.md)
 - 🎛️ **Palmier setup** — [`docs/palmier/PALMIER_MCP_SETUP.md`](./docs/palmier/PALMIER_MCP_SETUP.md)
+- 🧩 **Incremental Palmier repairs** — [`docs/palmier/PALMIER_HYBRID_LAYERED_REPAIR_PLAN.md`](./docs/palmier/PALMIER_HYBRID_LAYERED_REPAIR_PLAN.md)
+- 🧪 **Reference workflow** — [`reference-editor`](./.claude/skills/reference-editor/SKILL.md)
+- 🎨 **Caption catalog** — [`.claude/skills/embedded-captions/CATALOG.md`](./.claude/skills/embedded-captions/CATALOG.md)

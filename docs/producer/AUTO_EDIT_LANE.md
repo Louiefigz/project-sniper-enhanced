@@ -139,7 +139,9 @@ signal, machine failure, or a killed worker group can still interrupt a run.
 
 ## Phase 1 — Initial author
 
-The configured subscription brain runs headless with a 30-minute timeout. Local
+The configured subscription brain runs headless with a 45-minute default
+timeout per authoring spawn (`SNIPER_AUTHORING_TIMEOUT_MIN` in `.env.local`,
+integer minutes 10..240, overrides it — `claude-authoring-process.ts`). Local
 mode uses the Codex bridge; the preserved live provider uses Claude Code. It
 reads the Producer skill, manifest/transcripts, failure ledger, stored intent,
 and optional deep reference study, then writes only `edit_plan.json` plus bounded

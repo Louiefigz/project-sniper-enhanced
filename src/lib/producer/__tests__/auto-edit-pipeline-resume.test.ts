@@ -355,6 +355,56 @@ async function testQualityFailurePropagatesAfterCheckpointSettles(root: string):
   assert.equal(checkpointSettled, true, "the courtesy publish is never left in flight");
 }
 
+async function testDoubleFailureCheckpointRejectionWins(root: string): Promise<void> {
+  const ctx = fixture(path.join(root, "double-reject"));
+  const job = startAutoEditJob({
+    ctx, token: "double-reject", snapshots: 0, bootstrapPlanHash: fileSha256(ctx.planPath),
+  });
+  const counts = { author: 0, planning: 0, assemble: 0, quality: 0 };
+  const deps = dependencies(counts);
+  const unhandled: unknown[] = [];
+  const trap = (reason: unknown): void => { unhandled.push(reason); };
+  process.on("unhandledRejection", trap);
+  let checkpointSettled = false;
+  let qualitySettled = false;
+  // QC fails FIRST (5ms) and the checkpoint fails later (20ms): the
+  // checkpoint rejection must still win (pipeline.ts awaits checkpointFailure
+  // before inspecting the QC round), and the QC error must be observed.
+  deps.checkpoint = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    checkpointSettled = true;
+    throw new Error("palmier checkpoint runner crashed");
+  };
+  deps.quality = async () => {
+    counts.quality += 1;
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    qualitySettled = true;
+    throw new Error("candidate has non-plan-repairable defects");
+  };
+  try {
+    const outcome = await runAutoEditPipeline(runtime(job, []), deps).then(
+      () => null,
+      (error: unknown) => {
+        assert.equal(checkpointSettled, true,
+          "the round must not resolve before the courtesy publish settles");
+        assert.equal(qualitySettled, true,
+          "the round must not resolve before the in-flight QC round settles");
+        return error as Error;
+      },
+    );
+    assert.ok(outcome, "a double failure must reject the pipeline");
+    assert.match(outcome.message, /palmier checkpoint runner crashed/,
+      "the checkpoint rejection wins over the QC rejection");
+    // Give any leaked QC rejection a full macrotask turn to surface.
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    assert.deepEqual(unhandled, [],
+      "the losing QC rejection is observed, never an unhandledRejection");
+  } finally {
+    process.removeListener("unhandledRejection", trap);
+  }
+  assert.equal(counts.quality, 1);
+}
+
 async function main(): Promise<void> {
   const root = mkdtempSync(path.join(os.tmpdir(), "sniper-pipeline-v2-"));
   try {
@@ -366,6 +416,7 @@ async function main(): Promise<void> {
     await testRenderCheckpointOverlapsQuality(root);
     await testCheckpointRejectionStaysFatalAfterQuality(root);
     await testQualityFailurePropagatesAfterCheckpointSettles(root);
+    await testDoubleFailureCheckpointRejectionWins(root);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

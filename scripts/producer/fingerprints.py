@@ -128,21 +128,32 @@ def stage_receipt_current(output_path: str, fingerprint: str) -> bool:
         return False
 
 
-def write_stage_receipt(output_path: str, fingerprint: str) -> None:
-    """Atomically bind one completed intermediate to its stage fingerprint."""
-    sidecar = stage_receipt_path(output_path)
-    directory = os.path.dirname(os.path.abspath(sidecar))
-    fd, staged = tempfile.mkstemp(prefix=f".{os.path.basename(sidecar)}.",
+def write_json_atomic(path: str, payload: object,
+                      indent: int | None = None) -> None:
+    """Durably write ``payload`` as JSON to ``path`` (tmp + fsync + replace).
+
+    The file is never truncated in place: readers see either the old or the
+    new complete document, and once this returns the bytes are fsynced — the
+    ordering guarantee the audio-only intent/commit protocol relies on.
+    """
+    directory = os.path.dirname(os.path.abspath(path))
+    fd, staged = tempfile.mkstemp(prefix=f".{os.path.basename(path)}.",
                                   suffix=".tmp", dir=directory)
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
-            json.dump({"fingerprint": fingerprint}, handle)
+            json.dump(payload, handle, indent=indent)
             handle.flush()
             os.fsync(handle.fileno())
-        os.replace(staged, sidecar)
+        os.replace(staged, path)
     finally:
         if os.path.exists(staged):
             os.remove(staged)
+
+
+def write_stage_receipt(output_path: str, fingerprint: str) -> None:
+    """Atomically bind one completed intermediate to its stage fingerprint."""
+    write_json_atomic(stage_receipt_path(output_path),
+                      {"fingerprint": fingerprint})
 
 
 def base_fingerprint(plan: dict) -> str:
@@ -222,19 +233,7 @@ def invalidate_assembled_sidecar(final_path: str) -> None:
 def write_assembled_sidecar(final_path: str, plan: dict) -> dict:
     """Atomically checkpoint plan and byte authority for a completed MP4."""
     record = assembled_fingerprint_record(plan, final_path)
-    sidecar = assembled_sidecar_path(final_path)
-    directory = os.path.dirname(os.path.abspath(sidecar))
-    prefix = f".{os.path.basename(sidecar)}."
-    fd, staged = tempfile.mkstemp(prefix=prefix, suffix=".tmp", dir=directory)
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as handle:
-            json.dump(record, handle)
-            handle.flush()
-            os.fsync(handle.fileno())
-        os.replace(staged, sidecar)
-    finally:
-        if os.path.exists(staged):
-            os.remove(staged)
+    write_json_atomic(assembled_sidecar_path(final_path), record)
     return record
 
 

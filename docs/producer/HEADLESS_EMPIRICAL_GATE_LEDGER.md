@@ -454,6 +454,22 @@ not belong in this ledger.
   enrollment through trusted worker execution, child sealing, final fence
   recheck, `CURRENT` publication, terminal recovery, and MP4 qualification.
 
+### 2026-07-21 — fence-bound ordered-admission composition recorded; program frozen
+
+- The interrupted 2026-07-20 session landed
+  `scripts/producer/headless/fence_bound_ordered_admission*.py`: prospective
+  unit enrollment, fence reservation/start intent, and ordered V3 admission
+  now execute as one work-disabled composition under the never-unlinked
+  publisher mutex and the cross-ledger order lock
+  (`admit_fence_bound_ordered_work_disabled_v1`);
+  `require_fence_bound_ordered_execution_authorized` rejects unconditionally.
+- The focused fence-family suite passes: 128 tests green across the
+  active-fence, fence-admission-reservation, fence-order-start, and
+  fence-bound ordered-admission test files (rerun 2026-07-21).
+- The composition remains non-authorizing: no worker launch, no render, and no
+  publication authority. The headless program is FROZEN by operator decision
+  2026-07-21. No gate state changed.
+
 ## Release boundary
 
 No entry in this ledger authorizes external/general enablement. That boundary

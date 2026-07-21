@@ -1,6 +1,6 @@
 # PRODUCER auto-edit — latency/reliability optimization punch list
 
-> **STATUS: HISTORICAL TACTICAL PUNCH LIST.** The living [headless execution optimization dossier](HEADLESS_EXECUTION_OPTIMIZATION_DOSSIER.md) now controls optimization order and experiment policy. Keep the current Opus/xhigh settings as the production default, but item 12 does not prohibit isolated frozen-packet model/effort noninferiority tests with seeded-defect and blinded-quality gates.
+> **STATUS: ACTIVE TACTICAL PUNCH LIST (GUI auto-edit lane).** The [headless execution optimization dossier](HEADLESS_EXECUTION_OPTIMIZATION_DOSSIER.md) governs the **headless-program** experiment policy — that program is FROZEN by operator decision 2026-07-21. Tactical GUI auto-edit latency/reliability fixes land via this punchlist (see the Applied 2026-07-14 and Applied 2026-07-21 sections). Keep the current Opus/xhigh settings as the production default; item 12 does not prohibit isolated frozen-packet model/effort noninferiority tests with seeded-defect and blinded-quality gates.
 
 Source: adversarial multi-agent audit (2026-07-14), 30 agents, 18 verified findings
 → 12 actionable items. Every finding was verified against the real code and checked
@@ -92,7 +92,8 @@ minors recorded above as caveats.
 ## PRODUCTION GUARDRAIL — do not downgrade without noninferiority evidence
 
 - **#12** — Do not downgrade **authoring** (`authoring.ts:93`) or **rendered/frame vision
-  critics** (`scripts/producer/palmier/candidate-qc/reviewer.ts`) off Opus during any
+  critics** (`src/app/api/producer/palmier/candidate-qc/reviewer.ts` — its critic spawn
+  now pins `--effort xhigh` explicitly, 2026-07-21) off Opus during any
   latency pass. Those are the craft-judgment spawns; downgrading them trades quality,
   which is the stated non-goal. (The gate-fixer → Sonnet move earlier is fine — it's
   mechanical.)

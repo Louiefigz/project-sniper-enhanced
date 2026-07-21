@@ -59,8 +59,8 @@ from dataclasses import dataclass
 
 from assemble_lock import acquire_lock
 from fingerprints import (_NON_BASE_KEYS, audio_fingerprint,  # noqa: F401 — re-exported
-                          base_fingerprint, fingerprint_record,
-                          graphics_fingerprint, recorded_fingerprints,
+                          base_fingerprint, graphics_fingerprint,
+                          recorded_fingerprints,
                           invalidate_assembled_sidecar, video_fingerprint,
                           write_assembled_sidecar)
 from edit.refit_authority import (commit_pending, make_receipt,
@@ -225,17 +225,24 @@ def _refit_for_rebuild(plan_path: str, plan: dict,
     return refitted, staged
 
 
-def _update_base_records(fingerprint_path: str, plan: dict) -> None:
-    """Refresh base.fingerprint.json (split prints; outputDuration/manifestPath
-    preserved) + the base_plan.json snapshot after an audio-only bus rebuild."""
-    with open(fingerprint_path) as f:
-        rec = json.load(f)
-    rec.update(fingerprint_record(plan))
-    with open(fingerprint_path, "w") as f:
-        json.dump(rec, f)
-    with open(os.path.join(os.path.dirname(fingerprint_path),
-                           "base_plan.json"), "w") as f:
-        json.dump(plan, f, indent=1)
+def _settle_audio_intent(base: str, fingerprint_path: str | None) -> None:
+    """Resolve a crashed audio-only base swap BEFORE any base-records read.
+
+    A worker killed between the base replace and the records update leaves
+    NEW audio bytes beside OLD records; without settlement, eligibility would
+    pass again on resume and the audio effect would be applied a SECOND time
+    onto the already-processed base. The intent sidecar's content hash
+    (audio/base_audio.recover_audio_intent) proves which side of the replace
+    the crash hit — matches-new finalizes the records, anything else discards
+    the intent for an honest redo.
+    """
+    if not fingerprint_path:
+        return
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from audio.base_audio import recover_audio_intent
+    action = recover_audio_intent(base, fingerprint_path)
+    if action:
+        emit(status=f"audio_intent_{action}", path=base)
 
 
 def _audio_only_rebuild(base: str, plan: dict, fingerprint_path: str) -> bool:
@@ -244,9 +251,13 @@ def _audio_only_rebuild(base: str, plan: dict, fingerprint_path: str) -> bool:
     Eligibility (audio/base_audio.audio_fast_path_block) is honest about what
     the base audio can reproduce: pristine bus only, and never audioEnhance
     over baked-in whoosh SFX — those fall back LOUDLY to the full rebuild.
+    The base swap + records update commit through the crash-safe intent
+    protocol (audio/base_audio.commit_audio_base) — no kill window may leave
+    new bytes with old records or vice versa unrecovered.
     """
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    from audio.base_audio import audio_fast_path_block, rebuild_audio_bus
+    from audio.base_audio import (audio_fast_path_block, commit_audio_base,
+                                  rebuild_audio_bus)
     snap = os.path.join(os.path.dirname(fingerprint_path), "base_plan.json")
     old_plan = None
     if os.path.exists(snap):
@@ -260,8 +271,7 @@ def _audio_only_rebuild(base: str, plan: dict, fingerprint_path: str) -> bool:
          note="video fingerprint unchanged — rebuilding the audio bus only")
     work = os.path.join(os.path.dirname(os.path.abspath(base)), "base_work")
     new_base, steps = rebuild_audio_bus(base, plan, work)
-    os.replace(new_base, base)
-    _update_base_records(fingerprint_path, plan)
+    commit_audio_base(base, new_base, plan, fingerprint_path)
     emit(status="audio_bus_rebuilt", path=base, **steps)
     return True
 
@@ -292,6 +302,7 @@ def ensure_base(base: str, plan_path: str, plan: dict,
     resolved state) — state 'audio_only' lets assemble() skip a fresh
     composite when the existing one is provably current.
     """
+    _settle_audio_intent(base, fingerprint_path)
     state = _base_state(base, plan, fingerprint_path)
     if state == "current":
         emit(status="base_current", path=base)
@@ -437,6 +448,7 @@ def assemble(job: AssembleJob) -> dict:
     """
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from audio.music_stage import apply_music
+    _settle_audio_intent(job.base, job.fingerprint_path)
     _check_staleness(job.plan, job.fingerprint_path)
     reuse = _reuse_composite(job)
     invalidate_assembled_sidecar(job.out)

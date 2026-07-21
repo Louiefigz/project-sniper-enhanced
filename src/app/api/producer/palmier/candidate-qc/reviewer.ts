@@ -257,7 +257,10 @@ export async function runCandidateReview(
     review = parseProducerReview(JSON.stringify(value), "rendered");
   } else {
     const result = await runLegacyNative({
-      args: ["-p", prompt, ...claudeModelArgs(),
+      // Rendered-frame critics run at maximum reasoning (Opus xhigh), same as
+      // brain-review-process.ts review modes — never inherit the operator's
+      // global effort default.
+      args: ["-p", prompt, ...claudeModelArgs(), "--effort", "xhigh",
         "--output-format", "stream-json", "--verbose",
         "--permission-mode", "acceptEdits", "--allowedTools", "Read,Glob,Grep",
         ...readDirs.flatMap((item) => ["--add-dir", item])],

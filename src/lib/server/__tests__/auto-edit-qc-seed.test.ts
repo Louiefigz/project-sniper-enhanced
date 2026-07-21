@@ -16,11 +16,17 @@ const GRAPHICS_PLAN = JSON.stringify({
   graphicsTrack: [{ kind: "stat-card", outStart: 1, outEnd: 3 }],
 });
 
-function writePriorRound(dir: string, sidecar?: string, plan: string | null = NO_GRAPHICS_PLAN): string {
+function writePriorRound(
+  dir: string,
+  sidecar?: string,
+  plan: string | null = NO_GRAPHICS_PLAN,
+  currentPlan: string | null = NO_GRAPHICS_PLAN,
+): string {
   const prior = candidateFinalPath(dir, TOKEN, 1);
   prepareQcRound(dir, TOKEN, 1);
   writeFileSync(prior, "prior-composited-video");
   if (plan !== null) writeFileSync(path.join(path.dirname(prior), "edit_plan.json"), plan);
+  if (currentPlan !== null) writeFileSync(path.join(dir, "edit_plan.json"), currentPlan);
   if (sidecar !== undefined) writeFileSync(`${prior}.assembled.json`, sidecar);
   return prior;
 }
@@ -63,11 +69,12 @@ try {
     "the seed is exactly the candidate + sidecar pair",
   );
 
-  // Produced graphics → the prior round's graphics_placements.json rides along
-  // verbatim, so Audit B's fail-closed eye_trace gate keeps its evidence when
-  // assemble's mux fast path skips the composite that would rewrite it.
+  // Produced graphics in BOTH the prior and current plan → the prior round's
+  // graphics_placements.json rides along verbatim, so Audit B's fail-closed
+  // eye_trace gate keeps its evidence when assemble's mux fast path skips the
+  // composite that would rewrite it.
   const graphics = path.join(root, "graphics");
-  const graphicsPrior = writePriorRound(graphics, undefined, GRAPHICS_PLAN);
+  const graphicsPrior = writePriorRound(graphics, undefined, GRAPHICS_PLAN, GRAPHICS_PLAN);
   writeFileSync(`${graphicsPrior}.assembled.json`, validSidecar(graphicsPrior));
   const placementsRaw = JSON.stringify([{ kind: "stat-card", outStart: 1 }]);
   writeFileSync(path.join(path.dirname(graphicsPrior), "graphics_placements.json"), placementsRaw);
@@ -87,11 +94,44 @@ try {
   // Produced graphics but no placements evidence in the prior round →
   // unseeded (seeding would make Audit B's eye_trace gate fail the round).
   const evidenceless = path.join(root, "evidenceless");
-  const evidencelessPrior = writePriorRound(evidenceless, undefined, GRAPHICS_PLAN);
+  const evidencelessPrior = writePriorRound(evidenceless, undefined, GRAPHICS_PLAN, GRAPHICS_PLAN);
   writeFileSync(`${evidencelessPrior}.assembled.json`, validSidecar(evidencelessPrior));
   prepareQcRound(evidenceless, TOKEN, 2);
   assert.equal(seedQcRoundFromPriorCandidate(evidenceless, TOKEN, 2), false);
   assertUnseeded(evidenceless);
+
+  // A seeded repair that REMOVED all graphics: the prior round has graphics +
+  // placements but the CURRENT plan's graphicsTrack is empty. The candidate +
+  // sidecar still seed (assemble's graphics-fingerprint mismatch forces the
+  // full composite, whose empty-track passthrough writes no placements), but
+  // the prior round's stale placements must NOT ride along — they would
+  // otherwise be promoted as this round's eye-trace evidence.
+  const degraphed = path.join(root, "degraphed");
+  const degraphedPrior = writePriorRound(degraphed, undefined, GRAPHICS_PLAN, NO_GRAPHICS_PLAN);
+  writeFileSync(`${degraphedPrior}.assembled.json`, validSidecar(degraphedPrior));
+  writeFileSync(path.join(path.dirname(degraphedPrior), "graphics_placements.json"),
+    JSON.stringify([{ kind: "stat-card", outStart: 1 }]));
+  prepareQcRound(degraphed, TOKEN, 2);
+  assert.equal(seedQcRoundFromPriorCandidate(degraphed, TOKEN, 2), true);
+  const degraphedDestination = candidateFinalPath(degraphed, TOKEN, 2);
+  assert.ok(
+    !existsSync(path.join(path.dirname(degraphedDestination), "graphics_placements.json")),
+    "a repair that removed all graphics must not seed the prior round's stale placements",
+  );
+  assert.deepEqual(
+    readdirSync(path.dirname(degraphedDestination)).sort(),
+    ["final.mp4", "final.mp4.assembled.json"],
+    "the graphics-free seed is exactly the candidate + sidecar pair",
+  );
+
+  // No CURRENT edit_plan.json in the producer dir → provenance unknown →
+  // unseeded (fail closed, same as an unreadable prior plan).
+  const currentPlanless = path.join(root, "current-planless");
+  const currentPlanlessPrior = writePriorRound(currentPlanless, undefined, NO_GRAPHICS_PLAN, null);
+  writeFileSync(`${currentPlanlessPrior}.assembled.json`, validSidecar(currentPlanlessPrior));
+  prepareQcRound(currentPlanless, TOKEN, 2);
+  assert.equal(seedQcRoundFromPriorCandidate(currentPlanless, TOKEN, 2), false);
+  assertUnseeded(currentPlanless);
 
   // No prior edit_plan.json → provenance unknown → unseeded.
   const planless = path.join(root, "planless");

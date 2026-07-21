@@ -1,7 +1,52 @@
 """graphics tests (split from selftest.py)."""
+from __future__ import annotations
+
 import unittest
+from unittest import mock
 
 from _common import *  # noqa: F401,F403
+
+
+class EmptyTrackPlacementsTests(unittest.TestCase):
+    """run_graphics_stage passthrough — an empty plan never strands stale placements.
+
+    A seeded QC round copies the prior candidate's graphics_placements.json
+    beside the output; a repair that emptied graphicsTrack takes the
+    passthrough, which never rewrites the sidecar — the stage must delete the
+    stale copy so the prior round's evidence can't be promoted as this round's.
+    """
+
+    def _run_stage(self, placements_out: str | None) -> tuple[dict, str]:
+        job = gs.GraphicsJob(video_in="in.mp4", video_out="out.mp4",
+                             track=[], placements_out=placements_out)
+        out = io.StringIO()
+        with mock.patch.object(gs, "_run"), contextlib.redirect_stdout(out):
+            summary = gs.run_graphics_stage(job)
+        return summary, out.getvalue()
+
+    def test_empty_track_clears_stale_sidecar(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            stale = os.path.join(tmp, "graphics_placements.json")
+            with open(stale, "w") as f:
+                json.dump([{"kind": "stat-card", "outStart": 1.0}], f)
+            summary, log = self._run_stage(stale)
+            self.assertFalse(os.path.exists(stale),
+                             "the stale placements sidecar must be removed")
+            self.assertEqual(summary["graphics"], 0)
+            self.assertIn('"placements_cleared"', log)
+
+    def test_empty_track_without_sidecar_is_a_noop(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            missing = os.path.join(tmp, "graphics_placements.json")
+            summary, log = self._run_stage(missing)
+            self.assertFalse(os.path.exists(missing))
+            self.assertEqual(summary["graphics"], 0)
+            self.assertNotIn("placements_cleared", log)
+
+    def test_empty_track_without_placements_out(self) -> None:
+        summary, log = self._run_stage(None)
+        self.assertEqual(summary["graphics"], 0)
+        self.assertNotIn("placements_cleared", log)
 
 
 class PipTakeoverTests(unittest.TestCase):

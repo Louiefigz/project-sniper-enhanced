@@ -67,7 +67,13 @@ present state is still earlier than an integrated product experiment:
   release transition, starts no work, is not composed with V3 admission or the
   worker, and does not inspect or advance `CURRENT`. Journal mutation re-scans
   the held descriptor instead of trusting caller summaries and rejects capacity
-  exhaustion before writing;
+  exhaustion before writing. *Correction 2026-07-21: a work-disabled
+  fence-bound ordered-admission composition
+  (`scripts/producer/headless/fence_bound_ordered_admission*.py`) now binds
+  this fence to prospective enrollment and ordered V3 admission and passes its
+  suite (128 fence-family tests); it remains non-authorizing — no
+  worker/render/publication authority — the program is FROZEN by operator
+  decision 2026-07-21, and no gate state changed;*
 - zero natural product units qualify for a 95/95 claim.
 
 Do not start production publisher work until the cheap mechanism and six-project pilot gates below survive.
@@ -313,7 +319,7 @@ Each gate is a hard stop. G0, G1, G2, and G7 corpus collection may run in parall
 | G6 — cut mechanism | A dependency-closed `cutTrack + cutDecisions` private fixture passes previsual, cut critic, refit/drop inspection, approval, and downstream gates | Not run |
 | G7 — development corpus | Six distinct original source/project/first-feedback clusters exist | Two retained source families; zero of six have prospective first-feedback admission evidence |
 | G8 — complete disposable pilot | Six paired AB/BA projects pass the complete latency, quality, failure, cost, and contamination kill rules | Not run |
-| G9 — authority seam | Lineage, headless-only resolver, immutable generation, fence, flock publisher, initialization, recovery, and fault matrix pass | BLOCKED: full selected-genesis payload reobservation, recursive selected-history authentication, prospective unit enrollment, ordered V3 admission, exact R0 graphic receipts, fresh-inode sealing, and a standalone active fence now exist as disjoint non-authorizing primitives. Production lineage/state orchestration, trusted worker execution and quiescence, final fence composition, publisher/`CURRENT`, terminal recovery, capacity admission, and the fault campaign are absent |
+| G9 — authority seam | Lineage, headless-only resolver, immutable generation, fence, flock publisher, initialization, recovery, and fault matrix pass | BLOCKED: full selected-genesis payload reobservation, recursive selected-history authentication, prospective unit enrollment, ordered V3 admission, exact R0 graphic receipts, fresh-inode sealing, and a standalone active fence now exist as disjoint non-authorizing primitives. Production lineage/state orchestration, trusted worker execution and quiescence, final fence composition, publisher/`CURRENT`, terminal recovery, capacity admission, and the fault campaign are absent. Correction 2026-07-21: a work-disabled fence-bound ordered-admission composition now binds the fence to enrollment and ordered V3 admission and passes its suite (128 fence-family tests); still non-authorizing (no worker/render/publication authority), program FROZEN by operator decision 2026-07-21, no gate state changed |
 | G10 — confirmatory readiness | Legacy→wrapped control bridge disposition, exact comparator claim, release lock, analysis/power/coverage harness, population/drift rule, rater protocol, provider identity policy, cost limits, and independent enrollment plan are sealed | Not ready |
 | G11 — release decision | Frozen confirmatory cohort passes every fixed-sequence gate and `release-decision.json == PASS` | Zero qualifying units; external/general enablement forbidden |
 

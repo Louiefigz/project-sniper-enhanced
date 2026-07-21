@@ -22,6 +22,15 @@ for (const file of modelAwareClaudePaths) {
   );
 }
 
+// Guardrail: Opus xhigh stays on all rendered/frame critics. The candidate-QC
+// vision critics (composition + editorial) must pin effort explicitly instead
+// of inheriting the operator's global claude config.
+assert.match(
+  source("src/app/api/producer/palmier/candidate-qc/reviewer.ts"),
+  /claudeModelArgs\(\), "--effort", "xhigh"/,
+  "candidate-qc vision critics must pin --effort xhigh on the Claude spawn",
+);
+
 const semantics = source("scripts/producer/study/deep_semantics.py");
 assert.match(semantics, /"--model", claude_model\(\)/,
   "the optional Python Claude micro-layer must use the same explicit model contract");

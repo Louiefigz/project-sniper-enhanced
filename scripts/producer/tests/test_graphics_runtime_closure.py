@@ -13,6 +13,7 @@ PRODUCER_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PRODUCER_ROOT)
 
 from graphics import graphics_render as gr  # noqa: E402
+from graphics import render_tools as rt  # noqa: E402
 
 EXPECTED_GSAP_SHA256 = (
     "c174bfce53a729418d57a8ad8625e7247c793a22fef8e2851e3cfa3de9cd8280"
@@ -24,8 +25,19 @@ def _sha256(path: str) -> str:
         return hashlib.sha256(handle.read()).hexdigest()
 
 
+def _fake_executable(directory: str, name: str) -> str:
+    path = os.path.join(directory, name)
+    with open(path, "wb") as handle:
+        handle.write(b"executable")
+    os.chmod(path, 0o700)
+    return path
+
+
 class GraphicsRuntimeClosureTests(unittest.TestCase):
     """The offline section-marker closure is local and content-addressed."""
+
+    def setUp(self) -> None:
+        rt._memo = None
 
     def test_section_marker_uses_exact_vendored_gsap(self) -> None:
         with open(gr.comp_path("section-marker"), encoding="utf-8") as handle:
@@ -123,6 +135,91 @@ class GraphicsRuntimeClosureTests(unittest.TestCase):
         self.assertEqual(kwargs["env"]["PRODUCER_LOW_MEMORY_MODE"], "false")
         self.assertIn("--strict-variables", command)
         self.assertNotIn("--strict-all", command)
+
+    def test_live_default_discovers_absolute_tools_without_env_pins(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            node = _fake_executable(tmp, "node")
+            ffmpeg = _fake_executable(tmp, "ffmpeg")
+            ffprobe = _fake_executable(tmp, "ffprobe")
+            cache = os.path.join(tmp, "cache", "mac_arm-152.0.7928.2",
+                                 "chrome-headless-shell-mac-arm64")
+            os.makedirs(cache)
+            browser = _fake_executable(cache, "chrome-headless-shell")
+            which = {"node": node, "ffmpeg": ffmpeg, "ffprobe": ffprobe}
+            with mock.patch.dict(rt.os.environ, {}, clear=True), \
+                    mock.patch.object(rt, "_BROWSER_CACHE_ROOTS",
+                                      (os.path.join(tmp, "cache"),)), \
+                    mock.patch.object(rt.shutil, "which", which.get):
+                tools = rt.resolve_tools()
+        self.assertEqual(tools, {
+            "node": os.path.realpath(node),
+            "ffmpeg": os.path.realpath(ffmpeg),
+            "ffprobe": os.path.realpath(ffprobe),
+            "browser": os.path.realpath(browser),
+        })
+        for path in tools.values():
+            self.assertTrue(os.path.isabs(path))
+
+    def test_browser_discovery_prefers_platform_arch_then_numeric_version(
+            self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = os.path.join(tmp, "cache")
+            expected = None
+            for version_dir in ("mac_arm-9.0.100.0", "mac_arm-10.0.2.0",
+                                "mac_x64-999.0.0.0"):
+                cache = os.path.join(root, version_dir, "shell")
+                os.makedirs(cache)
+                binary = _fake_executable(cache, "chrome-headless-shell")
+                if version_dir == "mac_arm-10.0.2.0":
+                    expected = binary
+            with mock.patch.object(rt, "_BROWSER_CACHE_ROOTS", (root,)), \
+                    mock.patch.object(rt, "_platform_token",
+                                      return_value="mac_arm"):
+                picked = rt._discover_browser()
+        # Foreign-arch mac_x64 loses despite its higher version AND later
+        # lexicographic sort; numeric ranking picks 10 over 9 within the arch.
+        self.assertEqual(picked, os.path.realpath(expected))
+
+    def test_live_explicit_pin_overrides_discovery_per_tool(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            node = _fake_executable(tmp, "node")
+            ffprobe = _fake_executable(tmp, "ffprobe")
+            pinned_ffmpeg = _fake_executable(tmp, "pinned-ffmpeg")
+            cache = os.path.join(tmp, "cache", "v1", "shell")
+            os.makedirs(cache)
+            _fake_executable(cache, "chrome-headless-shell")
+            which = {"node": node, "ffprobe": ffprobe}
+            env = {"HYPERFRAMES_FFMPEG_PATH": pinned_ffmpeg}
+            with mock.patch.dict(rt.os.environ, env, clear=True), \
+                    mock.patch.object(rt, "_BROWSER_CACHE_ROOTS",
+                                      (os.path.join(tmp, "cache"),)), \
+                    mock.patch.object(rt.shutil, "which", which.get):
+                tools = rt.resolve_tools()
+            self.assertEqual(tools["ffmpeg"], os.path.realpath(pinned_ffmpeg))
+            self.assertEqual(tools["node"], os.path.realpath(node))
+
+    def test_live_default_fails_loudly_when_a_tool_is_unfindable(self) -> None:
+        with mock.patch.dict(rt.os.environ, {}, clear=True), \
+                mock.patch.object(rt.shutil, "which", lambda name: None):
+            with self.assertRaises(RuntimeError) as ctx:
+                rt.resolve_tools()
+        self.assertIn("node", str(ctx.exception))
+
+    def test_sealed_mode_keeps_hard_fail_without_env_pins(self) -> None:
+        env = {"SNIPER_RENDER_IMAGE_ID": "sha256:image"}
+        with mock.patch.dict(rt.os.environ, env, clear=True):
+            with self.assertRaises(RuntimeError) as ctx:
+                rt.resolve_tools()
+        self.assertIn("SNIPER_NODE_PATH", str(ctx.exception))
+        self.assertIn("absolute executable path", str(ctx.exception))
+
+    def test_sealed_mode_never_uses_discovery(self) -> None:
+        env = {"SNIPER_RENDER_IMAGE_ID": "sha256:image"}
+        with mock.patch.dict(rt.os.environ, env, clear=True), \
+                mock.patch.object(rt, "_discovered_tool") as discovered:
+            with self.assertRaises(RuntimeError):
+                rt.resolve_tools()
+        discovered.assert_not_called()
 
 
 if __name__ == "__main__":

@@ -464,7 +464,7 @@ documented in [`.env.local.example`](./.env.local.example):
 npm run dev:local
 
 # Optional Codex/Sol brain instead
-codex -c 'model_reasoning_effort="ultra"' login status
+codex -c 'model_reasoning_effort="xhigh"' login status
 SNIPER_BRAIN_PROVIDER=codex npm run dev:local
 
 # Production-style local server (build first):

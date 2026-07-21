@@ -306,6 +306,23 @@ def _passthrough(job: GraphicsJob) -> None:
         suppress_captions(job.ass_in, job.ass_out, [])
 
 
+def _clear_stale_placements(placements_out: str | None) -> None:
+    """Remove a pre-existing placements sidecar an empty plan would strand.
+
+    A seeded QC round copies the prior candidate's ``graphics_placements.json``
+    beside the output; a repair that emptied ``graphicsTrack`` takes the
+    passthrough, which never rewrites the sidecar — without this delete the
+    prior round's stale placements would survive and be promoted as this
+    round's evidence. ``os.remove`` failures raise (fail closed): never leave
+    evidence behind that the current plan did not produce.
+    """
+    if not placements_out or not os.path.exists(placements_out):
+        return
+    os.remove(placements_out)
+    emit(stage="graphics", status="placements_cleared", out=placements_out,
+         reason="empty graphicsTrack owes no placements evidence")
+
+
 def _verify_placements(clips: list[dict], video_out: str) -> None:
     """Opt-in (env SNIPER_VERIFY_PLACEMENT): re-measure the composite; raise on hit.
 
@@ -341,6 +358,7 @@ def _verify_placements(clips: list[dict], video_out: str) -> None:
 def run_graphics_stage(job: GraphicsJob) -> dict:
     """Render → composite → assert frames → suppress takeover captions."""
     if not job.track:
+        _clear_stale_placements(job.placements_out)
         _passthrough(job)
         emit(stage="graphics", status="passthrough", reason="no graphics")
         return {"graphics": 0, "passes": 0, "out": job.video_out}

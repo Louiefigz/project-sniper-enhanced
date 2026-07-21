@@ -32,7 +32,7 @@ product and is not needed for this edit pipeline:
 
 | Tool | Local transcription | Local decision brain | Artifact producer | Preserved live path |
 |---|---|---|---|---|
-| SEGMENTER | whisper.cpp | Codex CLI, `gpt-5.6-sol`, `ultra`, strict segment schema | local FFmpeg; single-camera and multicam MP4 ZIP | Deepgram + Anthropic API |
+| SEGMENTER | whisper.cpp | Codex CLI, `gpt-5.6-sol`, `xhigh`, strict segment schema | local FFmpeg; single-camera and multicam MP4 ZIP | Deepgram + Anthropic API |
 | CLIPPER | whisper.cpp for separate lavs or truly isolated stereo | Codex CLI, strict cut-decision schema | browser-generated FCPXML only | Deepgram diarization + Anthropic API |
 | PRODUCER | whisper.cpp per source | Codex CLI reads the Producer skill, authors and gates the plan | local Python/FFmpeg/HyperFrames; optional loopback Palmier MCP | Deepgram + Claude Code subscription CLI |
 

@@ -14,6 +14,11 @@ from graphics.asset_proof import AssetProofRequest, prove_rendered_asset
 from graphics.composition_transform import set_root_duration
 from graphics.pip_hole import entry_has_hole
 from graphics.render_cache import CacheRequest, materialize
+from graphics.render_tools import (
+    _PINNED_TOOL_ENV,
+    live_tools_identity,
+    resolve_tools,
+)
 from headless.container_io import CompositionInput, SealedInput, create_snapshot
 from headless.runtime_receipt import bind_runtime_receipt
 from headless.container_renderer import (
@@ -40,12 +45,6 @@ NODE_USER_PRELOAD = os.path.join(os.path.dirname(SCRIPT_DIR), "headless",
                                  "node_isolated_user.cjs")
 DEFAULT_CACHE_DIR = os.path.join(MOTION_DIR, "renders", "cache")
 _LOCAL_GSAP_SRC = "/vendor/gsap/gsap.min.js"
-_PINNED_TOOL_ENV = {
-    "node": "SNIPER_NODE_PATH",
-    "browser": "HYPERFRAMES_BROWSER_PATH",
-    "ffmpeg": "HYPERFRAMES_FFMPEG_PATH",
-    "ffprobe": "HYPERFRAMES_FFPROBE_PATH",
-}
 
 
 def hyperframes_bin(runtime_root: str) -> str:
@@ -55,20 +54,6 @@ def hyperframes_bin(runtime_root: str) -> str:
 
 
 HYPERFRAMES_BIN = hyperframes_bin(RUNTIME_ROOT)
-
-def _pinned_tools() -> dict[str, str]:
-    """Resolve required executables without mutable PATH-based discovery."""
-    resolved = {}
-    for name, env_key in _PINNED_TOOL_ENV.items():
-        raw = os.environ.get(env_key, "").strip()
-        if not raw or not os.path.isabs(raw):
-            raise RuntimeError(f"{env_key} must be an absolute executable path")
-        path = os.path.realpath(raw)
-        if not os.path.isfile(path) or not os.access(path, os.X_OK):
-            raise RuntimeError(f"{env_key} is not an executable file: {raw}")
-        resolved[name] = path
-    return resolved
-
 
 def _render_environment(runtime_dir: str, tools: dict[str, str]) -> dict[str, str]:
     """Build a secret-free environment rooted in attempt-owned directories."""
@@ -166,6 +151,8 @@ def content_hash(kind: str, spec: dict, duration: float, comp_html: str) -> str:
             h.update(hashlib.sha1(handle.read()).digest())
     if os.environ.get("SNIPER_RENDER_IMAGE_ID"):
         h.update(container_cache_identity(PIPELINE_ROOT))
+    else:
+        h.update(live_tools_identity())
     return h.hexdigest()
 
 
@@ -179,14 +166,18 @@ def _sealed_hash(kind: str, snapshot: SealedInput) -> str:
 
 
 def _render_to(temp_comp_rel: str, fmt: str, spec: dict, out_path: str) -> None:
-    """Invoke pinned HyperFrames with private ambient state."""
+    """Invoke resolved HyperFrames tools with private ambient state.
+
+    Live default discovers absolute tool paths (explicit env pins win per
+    tool); sealed mode requires every pin — see ``graphics.render_tools``.
+    """
     cli_path = os.path.realpath(HYPERFRAMES_BIN)
     if not os.path.isfile(cli_path):
         raise RuntimeError("pinned HyperFrames install is missing; run npm ci in "
                            f"{MOTION_DIR}")
     if not os.path.isfile(NODE_USER_PRELOAD):
         raise RuntimeError(f"Node isolation preload is missing: {NODE_USER_PRELOAD}")
-    tools = _pinned_tools()
+    tools = resolve_tools()
     out_path = os.path.abspath(out_path)
     cmd = [tools["node"], cli_path, "render", MOTION_DIR,
            "-c", temp_comp_rel, "--format", fmt,

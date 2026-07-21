@@ -15,6 +15,7 @@ RENDER_BUILD_V1_IMPLEMENTATION_PATHS = (
     "scripts/producer/graphics/pip_hole.py",
     "scripts/producer/graphics/pip_takeover.py",
     "scripts/producer/graphics/render_cache.py",
+    "scripts/producer/graphics/render_tools.py",
     "scripts/producer/graphics/sealed_graphics_render.py",
     "scripts/producer/graphics/template_assets.py",
     "scripts/producer/graphics/template_content.py",

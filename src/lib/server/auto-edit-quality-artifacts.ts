@@ -68,15 +68,16 @@ function readSeedSidecar(sidecarPath: string): { raw: string; authorityHash: str
 }
 
 /**
- * Does the seed owe the round a graphics_placements.json? The prior round dir
- * carries the exact plan that produced its candidate (copyAuditInputs), and a
- * non-empty graphicsTrack means the composite wrote a placements sidecar that
- * Audit B's fail-closed eye_trace gate requires in every round dir the mux
- * fast path reuses. An unreadable prior plan is unknown provenance → null.
+ * Does this plan carry produced graphics? The prior round dir holds the exact
+ * plan that produced its candidate (copyAuditInputs); the producer dir holds
+ * the CURRENT plan the repair just authored. A non-empty graphicsTrack means
+ * the composite wrote a placements sidecar that Audit B's fail-closed
+ * eye_trace gate requires in every round dir the mux fast path reuses. An
+ * unreadable plan is unknown provenance → null (the caller fails closed).
  */
-function seedRequiresPlacements(sourceDir: string): boolean | null {
+function planHasGraphics(planPath: string): boolean | null {
   try {
-    const raw = readFileSync(path.join(sourceDir, "edit_plan.json"), "utf8");
+    const raw = readFileSync(planPath, "utf8");
     const track = (JSON.parse(raw) as Record<string, unknown>).graphicsTrack;
     return Array.isArray(track) && track.length > 0;
   } catch {
@@ -95,9 +96,13 @@ function seedRequiresPlacements(sourceDir: string): boolean | null {
  * prior round with produced graphics must also contribute its
  * graphics_placements.json (Audit B's eye_trace evidence — the mux fast path
  * skips the composite that would rewrite it; a changed graphicsTrack forces
- * the full composite, which overwrites the copy). Any mismatch, missing
- * file/evidence, unreadable prior plan, or torn copy leaves the round
- * unseeded — assemble falls back to the full composite (correct but slow).
+ * the full composite, which overwrites the copy) — but ONLY when the CURRENT
+ * plan still has graphics: a repair that removed every graphic takes the
+ * empty-track passthrough, which never rewrites the sidecar, so seeding it
+ * would promote the prior round's stale placements as this round's evidence.
+ * Any mismatch, missing file/evidence, unreadable prior or current plan, or
+ * torn copy leaves the round unseeded — assemble falls back to the full
+ * composite (correct but slow).
  */
 export function seedQcRoundFromPriorCandidate(dir: string, token: string, round: number): boolean {
   if (round <= 1) return false;
@@ -105,10 +110,12 @@ export function seedQcRoundFromPriorCandidate(dir: string, token: string, round:
   const sidecar = readSeedSidecar(`${source}.assembled.json`);
   if (!sidecar || !existsSync(source)) return false;
   const sourceDir = path.dirname(source);
-  const requiresPlacements = seedRequiresPlacements(sourceDir);
+  const priorHasGraphics = planHasGraphics(path.join(sourceDir, "edit_plan.json"));
+  const currentHasGraphics = planHasGraphics(path.join(dir, "edit_plan.json"));
+  if (priorHasGraphics === null || currentHasGraphics === null) return false;
   const placementsSource = path.join(sourceDir, "graphics_placements.json");
-  if (requiresPlacements === null) return false;
-  if (requiresPlacements && !existsSync(placementsSource)) return false;
+  if (priorHasGraphics && !existsSync(placementsSource)) return false;
+  const requiresPlacements = priorHasGraphics && currentHasGraphics;
   const destination = candidateFinalPath(dir, token, round);
   const placementsDestination = path.join(path.dirname(destination), "graphics_placements.json");
   const temporary = `${destination}.${randomUUID()}.seed.tmp`;

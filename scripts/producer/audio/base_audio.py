@@ -28,6 +28,7 @@ audio already carries the whooshes at exactly the amix point, so:
 """
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
@@ -36,6 +37,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) 
 from audio.audio_enhance import run_audio_enhance
 from audio.audio_gain import apply_gain, overlap_error, parse_windows
 from audio.master import build_pass2_afilter, dead_channel_prefix, measure_loudness
+from fingerprints import file_sha256, fingerprint_record, write_json_atomic
 from producer_config import ENCODE
 
 
@@ -124,6 +126,92 @@ def rebuild_audio_bus(base: str, plan: dict, work: str) -> tuple[str, dict]:
     if note:
         steps["remaster_note"] = note
     return mastered, steps
+
+
+def audio_intent_path(fingerprint_path: str) -> str:
+    """The commit-journal sidecar staging an audio-only base swap."""
+    return os.path.join(os.path.dirname(fingerprint_path),
+                        "base_audio.intent.json")
+
+
+def clear_audio_intent(fingerprint_path: str) -> None:
+    """Remove the intent sidecar; absent is fine (already settled)."""
+    try:
+        os.remove(audio_intent_path(fingerprint_path))
+    except FileNotFoundError:
+        pass
+
+
+def update_base_records(fingerprint_path: str, plan: dict) -> None:
+    """Refresh base.fingerprint.json (split prints; outputDuration/manifestPath
+    preserved) + the base_plan.json snapshot after an audio-only bus rebuild.
+
+    Both writes are atomic (tmp + fsync + replace), so a crash mid-update can
+    never leave a truncated record — ``recover_audio_intent`` depends on it.
+    """
+    rec: dict = {}
+    if os.path.exists(fingerprint_path):
+        with open(fingerprint_path) as f:
+            rec = json.load(f)
+    rec.update(fingerprint_record(plan))
+    write_json_atomic(fingerprint_path, rec)
+    write_json_atomic(os.path.join(os.path.dirname(fingerprint_path),
+                                   "base_plan.json"), plan, indent=1)
+
+
+def commit_audio_base(base: str, new_base: str, plan: dict,
+                      fingerprint_path: str) -> None:
+    """Crash-safe promotion of a rebuilt audio bus onto the base.
+
+    Order: stage the intent sidecar (fsynced, carrying the NEW base's content
+    hash + the plan that produced it) → ``os.replace`` the base → finalize
+    the records → clear the intent. A kill at ANY point leaves a state
+    ``recover_audio_intent`` settles without double-processing or a lost
+    update: before the replace the base still hashes OLD (intent discarded,
+    honest redo); after it the base hashes NEW (records finalized from the
+    intent's plan — never re-run the audio effect).
+    """
+    write_json_atomic(
+        audio_intent_path(fingerprint_path),
+        {"newBaseHash": file_sha256(new_base),
+         "oldBaseHash": file_sha256(base) if os.path.exists(base) else None,
+         "plan": plan})
+    os.replace(new_base, base)
+    update_base_records(fingerprint_path, plan)
+    clear_audio_intent(fingerprint_path)
+
+
+def recover_audio_intent(base: str, fingerprint_path: str) -> str | None:
+    """Settle a crashed ``commit_audio_base``; returns the action taken.
+
+    ``"finalized"`` — the base already carries the intent's new bytes (crash
+    landed AFTER the replace): the records are completed from the intent's
+    plan snapshot (idempotent) and the intent cleared, so eligibility now
+    sees the audio fields as baked-in and can never re-apply them.
+    ``"discarded"`` — the base does NOT hash to the intent's new bytes (crash
+    BEFORE the replace, or the base was since rebuilt): the intent is dropped
+    and normal dispatch redoes the work from the unmodified base.
+    ``None`` — no intent sidecar (the common case).
+    """
+    path = audio_intent_path(fingerprint_path)
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path) as f:
+            intent = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        # The intent is fsynced BEFORE the base replace, so an unreadable
+        # sidecar proves the replace never happened — safe to discard + redo.
+        clear_audio_intent(fingerprint_path)
+        return "discarded"
+    current = file_sha256(base) if os.path.exists(base) else None
+    if current == intent.get("newBaseHash") and current is not None \
+            and isinstance(intent.get("plan"), dict):
+        update_base_records(fingerprint_path, intent["plan"])
+        clear_audio_intent(fingerprint_path)
+        return "finalized"
+    clear_audio_intent(fingerprint_path)
+    return "discarded"
 
 
 def mux_audio(video_src: str, audio_src: str, out: str) -> None:

@@ -19,7 +19,16 @@ const eslintConfig = defineConfig([
     ".venv/**",
     "templates/motion/vendor/**",
     "vendor/hyperframes-skills/**",
+    // Frozen gate-run evidence trees (vendored gsap copies, captured project
+    // snapshots) — records, not application source.
+    "artifacts/**",
   ]),
+  {
+    // Node isolation shims are deliberately CommonJS (.cjs) so a bare `node`
+    // subprocess can load them without a loader; require() is the point.
+    files: ["**/*.cjs"],
+    rules: { "@typescript-eslint/no-require-imports": "off" },
+  },
 ]);
 
 export default eslintConfig;

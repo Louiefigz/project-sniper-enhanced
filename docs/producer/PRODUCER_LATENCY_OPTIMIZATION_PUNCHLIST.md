@@ -28,17 +28,48 @@ timeout or a broken salvaged plan today discards 15–40 min of work or wedges t
 All three are pure constant/routing changes — no model, no effort, no invariant, no
 effect on an already-running worker (they harden the next run / any retry).
 
-## Recommended next (low-risk, small — not yet applied)
+## Applied 2026-07-21 (verified: tsc 0, lint 0, npm test all green, Python selftest 2638 OK)
 
 - **#4 — Overlap the render→Palmier courtesy checkpoint with the QC round.**
-  `pipeline.ts:302` — `Promise.all([checkpoint, quality])` instead of serial await
-  (QC reads nothing from the checkpoint). ~24s/round when Palmier is open. Deferred only
-  because it's a hot-path concurrency change worth a careful review.
-- **#7 — Bound total gate-fix work.** `planning-loop.ts` — run-scoped global cap (~3)
-  + no-progress guard (2nd attempt only if the error set shrank). Mostly subsumed by #1.
+  `pipeline.ts` `qualityRoundWithRenderCheckpoint` starts the courtesy publish, runs the
+  QC round concurrently, and injects a `renderCheckpointSettled` barrier that
+  `quality-loop.ts` awaits after its read-only phase and **before** any mutation
+  (promote/revise) — so no plan rewrite or candidate rename can race the checkpoint
+  subprocess reading `edit_plan.json`/candidate media (an adversarial review caught the
+  unbarriered version). Rejection precedence and non-fatal courtesy outcomes match the
+  old serial await exactly; ordering pinned by tests. ~24s/round when Palmier is open.
+  Known non-fatal degradation: a revision-stage courtesy publish that collides with a
+  still-running render checkpoint defers (SyncLock, `queue_if_busy=False`) and that
+  round's revision snapshot is skipped — a later round republishes newer state.
+- **#7 — Bound total gate-fix work.** `planning-loop.ts` — `MAX_GATE_FIX_TOTAL = 3`
+  per planning-loop invocation + no-progress guard (a consecutive fixer spawn is funded
+  only if the gate-error count strictly shrank; counts not identities, because
+  `GATE_<GATE>_<n>` codes are positional and renumber). Denial falls through to the same
+  revision-writer routing as #1. Caveat: the cap is per `runPlanningReviewLoop`
+  invocation — a resumed job gets a fresh budget of 3.
 - **#8 — Separate the Palmier working-checkpoint timeout from the 10-min export mirror.**
-  `palmier-checkpoints.ts:14` — give the sub-minute working checkpoint its own ~5–6 min
-  bound (above the 300s media-import ceiling) so a hung build can't stall 10 min.
+  `palmier-checkpoints.ts` — `WORKING_CHECKPOINT_TIMEOUT_MS = 6 min` for
+  cut/plan/revision/render courtesy checkpoints; `EXPORT_MIRROR_TIMEOUT_MS = 10 min`
+  for the approved mirror (unchanged, fail-loud). A hung working checkpoint now warns at
+  6 min instead of stalling 10. Caveat: a first publish importing two media assets each
+  near the 300s per-import `wait_media` ceiling could exceed 6 min of legitimate work
+  and be cut to a warned outcome (courtesy skipped, run continues).
+- **#6 — Restore audio-only QC composite-reuse.** `auto-edit-quality-artifacts.ts`
+  `seedQcRoundFromPriorCandidate` — rounds ≥ 2 seed the fresh QC round dir with the
+  prior round's `final.mp4` + `.assembled.json`, but only after the copied bytes
+  SHA-256-match the sidecar's recorded `authorityHash` (staged to `.seed.tmp`, renamed
+  after verification; any failure removes all seed files and silently falls back to the
+  full composite). `graphics_placements.json` rides along when the prior plan has a
+  non-empty graphicsTrack — without it Audit B's fail-closed eye-trace gate would doom
+  exactly the seeded rounds (an adversarial review caught this as a blocker). With the
+  seed, an eligible audio-only repair takes the ~12s mux path instead of the ~70–86s
+  composite; any fingerprint mismatch recomposites exactly as before. A dedicated
+  stale-artifact attack on the seed path was run and refuted — no stale frame can reach
+  an approved final without byte-exact hash agreement at every stage.
+
+All four verified end-to-end by two independent adversarial reviewers (concurrency +
+hash-binding lenses); 1 serious + 1 blocker finding fixed before landing, remaining
+minors recorded above as caveats.
 
 ## Deferred — medium risk / cross-module (review before doing)
 
@@ -46,9 +77,6 @@ effect on an already-running worker (they harden the next run / any retry).
   — run the gate bundle on a deadline-salvaged draft; if structurally broken, invalidate
   back to authoring **preserving the approved cut receipt** and re-author only the visual
   lane. Systemic fix for the partial-plan-resume trap (large; cross-module).
-- **#6 — Restore audio-only QC composite-reuse.** `auto-edit-quality-artifacts.ts:47` —
-  seed each QC round dir with the prior round's `final.mp4` + matching sidecar so an
-  audio-only repair muxes (~12s) instead of a full composite (~70–86s).
 - **#9 — Overlap first-clean-review checkpoint with the subsequent assemble render.**
   `planning-clean-progress.ts:67`.
 

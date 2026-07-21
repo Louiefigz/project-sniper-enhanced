@@ -52,6 +52,15 @@ export interface QualityLoopDependencies {
   writeJson: typeof writeQualityJson;
   authority: typeof autoEditAuthoritySnapshot;
   checkpoint: typeof publishPalmierWorkingCheckpoint;
+  /**
+   * Settles the pipeline's overlapped render→Palmier courtesy publish. That
+   * subprocess reads edit_plan.json and the candidate file, so it must be
+   * fully settled before QC's first mutation of either (promote moves the
+   * candidate; revise rewrites the plan and then opens its own Palmier
+   * publish). Rejects with the checkpoint's real failure so a doomed run
+   * never promotes or revises first. Default: no overlap, nothing to await.
+   */
+  renderCheckpointSettled: () => Promise<void>;
 }
 export type QualityLoopResult =
   | { status: "approved"; finalHash: string }
@@ -67,6 +76,7 @@ const DEFAULT_DEPS: QualityLoopDependencies = {
   writeJson: writeQualityJson,
   authority: autoEditAuthoritySnapshot,
   checkpoint: publishPalmierWorkingCheckpoint,
+  renderCheckpointSettled: () => Promise.resolve(),
 };
 function requiredCandidate(job: AutoEditJob): { path: string; round: number; dir: string } {
   if (!job.candidatePath || !job.qcRound) {
@@ -293,6 +303,11 @@ export async function runQualityReviewRound(
   const qualitySummary = evidence
     ? persistSummary(run, audit, aggregate, reviews, authority, evidence, deps)
     : null;
+  // Everything above only READS the render checkpoint's inputs and may safely
+  // overlap it. Both paths below mutate them — approval promotes (moves) the
+  // candidate, repair rewrites edit_plan.json and publishes its own Palmier
+  // checkpoint — so the overlapped publish must be settled first.
+  await deps.renderCheckpointSettled();
   if (!aggregate.materialIssues.length && evidence && qualitySummary) {
     return approveCandidate(run, reviews, authority, evidence, qualitySummary, deps);
   }

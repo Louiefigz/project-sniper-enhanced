@@ -168,6 +168,35 @@ const MAX_GATE_FIX_ATTEMPTS = 2;
 // directly to the strictly-more-capable revision writer. Set generously so
 // genuinely-mechanical batches still take the fast path.
 const MAX_GATE_FIX_ISSUES = 8;
+// Run-scoped ceiling on fixer spawns (never reset): per-cycle attempts reset
+// after every paid revision, so a plan that keeps regressing into gate
+// failures could otherwise fund MAX_GATE_FIX_ATTEMPTS fresh spawns every
+// cycle. Gate errors that survive this many spawns are not mechanical.
+const MAX_GATE_FIX_TOTAL = 3;
+
+interface GateFixBudget {
+  attempts: number; // within the current unpaid chain; the loop resets it per paid cycle
+  totalAttempts: number; // run-scoped; never reset
+  lastIssueCount?: number; // gate errors at this chain's previous funded spawn
+}
+
+/**
+ * Funds one fixer spawn within budget: the per-cycle attempt cap, the
+ * run-scoped total cap, and a no-progress guard — a consecutive spawn is paid
+ * only when the gate-error count strictly shrank (gate issue codes are
+ * positional, so the count is the stable identity across attempts). A denial
+ * makes the caller fall through to the strictly-more-capable revision writer,
+ * exactly like the MAX_GATE_FIX_ISSUES route.
+ */
+function fundGateFix(budget: GateFixBudget, issueCount: number): boolean {
+  if (budget.attempts >= MAX_GATE_FIX_ATTEMPTS) return false;
+  if (budget.totalAttempts >= MAX_GATE_FIX_TOTAL) return false;
+  if (budget.lastIssueCount !== undefined && issueCount >= budget.lastIssueCount) return false;
+  budget.attempts += 1;
+  budget.totalAttempts += 1;
+  budget.lastIssueCount = issueCount;
+  return true;
+}
 
 /**
  * Bounded fixer for gate-only failures (no critic ran): never charges the
@@ -268,7 +297,7 @@ export async function runPlanningReviewLoop(
   // author→review→revise pass, however wide the critic batch.
   let criticRound = run.job.planningRound ?? 0;
   let cycle = run.job.planningCycles ?? run.job.planningRound ?? 0;
-  let gateFixAttempts = 0;
+  const gateFixBudget: GateFixBudget = { attempts: 0, totalAttempts: 0 };
   const initialAuthority = deps.authority(run.job.ctx);
   let cleanRounds = run.job.planningCleanPlanHash === initialAuthority.planHash
       && run.job.planningCleanAuthorityDigest === initialAuthority.digest
@@ -291,21 +320,22 @@ export async function runPlanningReviewLoop(
     // Gate-only failure — no critic ran (the batch returns before launching
     // critics when the deterministic bundle fails). A bounded low-effort
     // fixer handles the machine diagnostics without charging the cycle
-    // budget or zeroing clean credit; on its second failure per paid cycle
-    // it falls through to the full revision path below.
+    // budget or zeroing clean credit; when its budget denies a spawn
+    // (per-cycle cap, run total, or no progress) the failure falls through
+    // to the full revision path below.
     const gateOnly = results.length === 1 && !results[0].gates.ok;
     // For a gate-only failure the review's materialIssues ARE the gate errors,
     // so their count gates whether the mechanical fixer is even worth trying.
     const gateFixable = review.materialIssues.length <= MAX_GATE_FIX_ISSUES;
-    if (gateOnly && gateFixable && gateFixAttempts < MAX_GATE_FIX_ATTEMPTS) {
-      gateFixAttempts += 1;
+    if (gateOnly && gateFixable && fundGateFix(gateFixBudget, review.materialIssues.length)) {
       const fixed = await fixGateFailure(
-        run, review, { round: firstRound, attempt: gateFixAttempts }, deps,
+        run, review, { round: firstRound, attempt: gateFixBudget.attempts }, deps,
       );
       if (fixed) continue;
     }
     cycle += 1;
-    gateFixAttempts = 0;
+    gateFixBudget.attempts = 0;
+    gateFixBudget.lastIssueCount = undefined;
     if (review.materialIssues.length) {
       cleanRounds = 0;
       cleanPlanHash = undefined;

@@ -45,6 +45,19 @@ const FAIL_GATES: GateBundleVerdict = {
   },
 };
 
+function failGates(count: number): GateBundleVerdict {
+  const messages = Array.from({ length: count }, (_, i) => `violation ${i + 1}`);
+  return {
+    ...PASS_GATES,
+    ok: false,
+    errors: messages.map((message) => ({ gate: "plan_lint" as const, message })),
+    gates: {
+      ...PASS_GATES.gates,
+      planLint: { gate: "plan_lint", ok: false, errors: messages, warnings: [], exit: 1 },
+    },
+  };
+}
+
 function ctx(root: string, scope: AutoEditScope): AutoEditCtx {
   const dir = path.join(root, "producer");
   const source = path.join(root, "source");
@@ -293,13 +306,53 @@ async function testGateFixerCapFallsThroughToFullPath(root: string): Promise<voi
     context, [review("pass"), review("pass")], counts, false,
     [FAIL_GATES, FAIL_GATES, FAIL_GATES, PASS_GATES, PASS_GATES],
   ));
-  // Two fixer attempts are free; the third consecutive gate failure charges a
-  // cycle and pays the full revision writer, then the clean batch converges.
+  // Attempt 1 is free; the second identical-size gate failure trips the
+  // no-progress guard and pays the full revision writer; the third failure
+  // starts a fresh fixer chain (attempt 2) before the clean batch converges.
   assert.deepEqual(counts, { gates: 4, reviews: 2, revisions: 1, gateFixes: 2 });
   assert.equal(result.rounds, 5);
   assert.equal(run.job.planningCycles, 2);
   assert.equal(events.filter((event) => event.event === "gate_fix_started").length, 2);
   assert.equal(events.filter((event) => event.event === "revision_started").length, 1);
+}
+
+async function testGateFixNoProgressFallsThrough(root: string): Promise<void> {
+  const context = ctx(path.join(root, "gate-fix-no-progress"), "produced");
+  const counts = { gates: 0, reviews: 0, revisions: 0, gateFixes: 0 };
+  const run = runtime(context, "gate-fix-no-progress");
+  const events: Array<Record<string, unknown>> = [];
+  run.io.send = (event) => events.push(event);
+  const result = await runPlanningReviewLoop(run, deps(
+    context, [review("pass"), review("pass")], counts, false,
+    [failGates(2), failGates(3), PASS_GATES],
+  ));
+  // The first fixer spawn left MORE gate errors than it started with (2 -> 3):
+  // the no-progress guard denies a second consecutive spawn and charges the
+  // grown critique to the full revision writer instead.
+  assert.deepEqual(counts, { gates: 3, reviews: 2, revisions: 1, gateFixes: 1 });
+  assert.equal(result.rounds, 4);
+  assert.equal(events.filter((event) => event.event === "gate_fix_started").length, 1);
+  assert.equal(events.filter((event) => event.event === "revision_started").length, 1);
+}
+
+async function testGateFixRunCapFallsThrough(root: string): Promise<void> {
+  const context = ctx(path.join(root, "gate-fix-run-cap"), "produced");
+  const counts = { gates: 0, reviews: 0, revisions: 0, gateFixes: 0 };
+  const run = runtime(context, "gate-fix-run-cap");
+  const events: Array<Record<string, unknown>> = [];
+  run.io.send = (event) => events.push(event);
+  const result = await runPlanningReviewLoop(run, deps(
+    context, [review("pass"), review("pass")], counts, false,
+    [failGates(5), failGates(4), failGates(3), failGates(2), failGates(1), PASS_GATES],
+  ));
+  // Every failure shrinks the error set, so the no-progress guard stays open —
+  // but five consecutive gate failures buy exactly MAX_GATE_FIX_TOTAL=3 fixer
+  // spawns across the run (attempts 1-2, per-cycle cap -> revision, attempt 3,
+  // run cap -> revision, clean batch). The fourth spawn is never funded.
+  assert.deepEqual(counts, { gates: 6, reviews: 2, revisions: 2, gateFixes: 3 });
+  assert.equal(result.rounds, 7);
+  assert.equal(events.filter((event) => event.event === "gate_fix_started").length, 3);
+  assert.equal(events.filter((event) => event.event === "revision_started").length, 2);
 }
 
 async function testFailedFixerFallsThroughImmediately(root: string): Promise<void> {
@@ -360,6 +413,8 @@ async function main(): Promise<void> {
     await testPacketPrecedesCritic(root);
     await testGateFailureRoutesToBoundedFixer(root);
     await testGateFixerCapFallsThroughToFullPath(root);
+    await testGateFixNoProgressFallsThrough(root);
+    await testGateFixRunCapFallsThrough(root);
     await testFailedFixerFallsThroughImmediately(root);
     await testOnlyFirstCriticCleanPlanPublishes(root);
   } finally {

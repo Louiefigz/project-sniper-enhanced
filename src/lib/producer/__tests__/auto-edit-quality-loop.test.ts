@@ -25,6 +25,7 @@ import {
   approvalPath,
   candidateFinalPath,
   prepareQcRound,
+  promoteApprovedCandidate,
 } from "../../server/auto-edit-quality-artifacts";
 import { diskCheckpointWriter, diskInvalidationWriter } from
   "../../../app/api/producer/auto-edit/pipeline-writers";
@@ -237,11 +238,52 @@ async function testTemporalWarningCannotBeOutvoted(root: string): Promise<void> 
   assert.equal(existsSync(approvalPath(fix.ctx.dir)), false);
 }
 
+async function testMutationsWaitForRenderCheckpoint(root: string): Promise<void> {
+  // Approval path: promote (which MOVES the candidate the overlapped render
+  // checkpoint may still be hashing) must wait for the publish to settle.
+  const fix = fixture(path.join(root, "barrier-approve"), "barrier-approve");
+  const run = runtime(fix, "barrier-approve", 1);
+  const dependencies = passDeps(fix, [review("pass"), review("pass")]);
+  let settled = false;
+  dependencies.renderCheckpointSettled = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    settled = true;
+  };
+  dependencies.promote = (candidate, producerDir, record) => {
+    assert.equal(settled, true, "promote must not move the candidate before the publish settles");
+    promoteApprovedCandidate(candidate, producerDir, record);
+  };
+  const result = await runQualityReviewRound(run, dependencies);
+  assert.equal(result.status, "approved");
+  assert.ok(existsSync(path.join(fix.ctx.dir, "final.mp4")));
+
+  // Repair path: a real checkpoint rejection surfaced by the barrier fails the
+  // round BEFORE revise rewrites edit_plan.json (matching the old serial
+  // order, where a rejected checkpoint preceded any QC mutation).
+  const fix2 = fixture(path.join(root, "barrier-repair"), "barrier-repair");
+  const run2 = runtime(fix2, "barrier-repair", 1);
+  const rejecting = passDeps(fix2, [review("revise"), review("pass")]);
+  let revised = false;
+  rejecting.revise = async () => {
+    revised = true;
+    throw new Error("unreachable");
+  };
+  rejecting.renderCheckpointSettled = () =>
+    Promise.reject(new Error("palmier checkpoint runner crashed"));
+  await assert.rejects(
+    runQualityReviewRound(run2, rejecting),
+    /palmier checkpoint runner crashed/,
+  );
+  assert.equal(revised, false, "a rejected checkpoint must precede any plan rewrite");
+  assert.equal(existsSync(path.join(fix2.ctx.dir, "final.mp4")), false);
+}
+
 async function main(): Promise<void> {
   const root = mkdtempSync(path.join(os.tmpdir(), "sniper-quality-loop-"));
   try {
     await testApproval(root);
     await testRepair(root);
+    await testMutationsWaitForRenderCheckpoint(root);
     await testCapAndMissingEvidence(root);
     await testAuditFailureCannotBeOutvoted(root);
     await testTemporalWarningCannotBeOutvoted(root);

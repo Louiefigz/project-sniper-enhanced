@@ -11,7 +11,14 @@ import type { AutoEditCtx, Send } from "./stream";
 
 const CHECKPOINT = path.join(SCRIPTS_DIR, "producer", "palmier", "checkpoint_cli.py");
 const PUSH = path.join(SCRIPTS_DIR, "producer", "palmier", "push.py");
-const TIMEOUT_MS = 10 * 60 * 1_000;
+/**
+ * Working checkpoints are usually sub-minute, but a first publish may import
+ * media (mcp_client.py wait_media, 300s ceiling) — this bound must stay above
+ * that ceiling while capping a hung publish well under the mirror's bound.
+ */
+export const WORKING_CHECKPOINT_TIMEOUT_MS = 6 * 60 * 1_000;
+/** The approved mirror exports/verifies a full master and keeps the 10-minute bound. */
+export const EXPORT_MIRROR_TIMEOUT_MS = 10 * 60 * 1_000;
 
 export type PalmierCheckpointStage = "cut" | "plan" | "revision" | "render";
 
@@ -46,6 +53,7 @@ export interface PalmierProcessResult {
 type ProcessRunner = (
   args: string[],
   onEvent: (event: Record<string, unknown>) => void,
+  timeoutMs?: number,
 ) => Promise<PalmierProcessResult>;
 
 interface ManagedWorkspace {
@@ -123,6 +131,7 @@ export function approvedMirrorCommand(ctx: AutoEditCtx): string[] {
 export function runPalmierProcess(
   args: string[],
   onEvent: (event: Record<string, unknown>) => void,
+  timeoutMs: number = EXPORT_MIRROR_TIMEOUT_MS,
 ): Promise<PalmierProcessResult> {
   return new Promise((resolve) => {
     const child = trackProcessTree(spawn(pythonInterpreter(), args, {
@@ -146,7 +155,7 @@ export function runPalmierProcess(
     const timer = setTimeout(() => {
       timedOut = true;
       terminateProcessTree(child);
-    }, TIMEOUT_MS);
+    }, timeoutMs);
     child.stdout.on("data", (data: Buffer) => {
       stdout += data.toString();
       consume();
@@ -216,7 +225,7 @@ async function runRequiredCheckpoint(
   runner: ProcessRunner,
 ): Promise<PalmierProcessResult> {
   try {
-    return await runner(args, detailEvent(send, stage));
+    return await runner(args, detailEvent(send, stage), EXPORT_MIRROR_TIMEOUT_MS);
   } catch (error) {
     return failed(send, stage, (error as Error).message);
   }
@@ -257,7 +266,8 @@ export async function publishPalmierWorkingCheckpoint(
   send({ event: "palmier_checkpoint_started", stage: spec.stage, round: spec.round });
   let result: PalmierProcessResult;
   try {
-    result = await runner(checkpointCommand(ctx, spec), detailEvent(send, spec.stage));
+    result = await runner(checkpointCommand(ctx, spec), detailEvent(send, spec.stage),
+      WORKING_CHECKPOINT_TIMEOUT_MS);
   } catch (error) {
     return warned(send, spec.stage, (error as Error).message);
   }
@@ -274,7 +284,7 @@ export async function publishPalmierWorkingCheckpoint(
       ?? "Palmier is busy or unreachable; the checkpoint will publish on a later round."));
   }
   if (result.code !== 0 || result.timedOut || result.event.status !== "checkpoint_ready") {
-    const reason = result.timedOut ? "Palmier checkpoint exceeded its 10-minute safety limit."
+    const reason = result.timedOut ? "Palmier checkpoint exceeded its 6-minute safety limit."
       : String(result.event.reason ?? (result.stderr.trim()
         || "Palmier checkpoint was not published."));
     return warned(send, spec.stage, reason);

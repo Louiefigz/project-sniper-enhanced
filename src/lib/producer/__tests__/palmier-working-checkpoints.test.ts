@@ -5,9 +5,11 @@ import path from "node:path";
 import {
   approvedMirrorCommand,
   checkpointCommand,
+  EXPORT_MIRROR_TIMEOUT_MS,
   publishApprovedPalmierMirror,
   publishPalmierWorkingCheckpoint,
   runPalmierProcess,
+  WORKING_CHECKPOINT_TIMEOUT_MS,
   type PalmierProcessResult,
 } from "../../../app/api/producer/auto-edit/palmier-checkpoints";
 import type { AutoEditCtx } from "../../../app/api/producer/auto-edit/stream";
@@ -35,6 +37,13 @@ function result(event: Record<string, unknown>): PalmierProcessResult {
 }
 
 async function run(): Promise<void> {
+  // Working checkpoint bound must clear the 300s media-import ceiling
+  // (mcp_client.py wait_media) yet undercut the export mirror's 10-minute bound.
+  assert.equal(WORKING_CHECKPOINT_TIMEOUT_MS, 6 * 60 * 1000);
+  assert.equal(EXPORT_MIRROR_TIMEOUT_MS, 10 * 60 * 1000);
+  assert.ok(WORKING_CHECKPOINT_TIMEOUT_MS > 300 * 1000);
+  assert.ok(WORKING_CHECKPOINT_TIMEOUT_MS < EXPORT_MIRROR_TIMEOUT_MS);
+
   const streamed: Record<string, unknown>[] = [];
   const processResult = await runPalmierProcess([
     "-c", "print('{\"status\":\"checkpoint_ready\",\"timelineId\":\"streamed\"}')",
@@ -58,8 +67,9 @@ async function run(): Promise<void> {
   writeState({ schemaVersion: 4, ownership: "sniper", workspaceMode: "managed-draft",
     latestTimelineId: "source" });
   const committed = await publishPalmierWorkingCheckpoint(ctx, { stage: "revision", round: 1 }, send,
-    async (args, onEvent) => {
+    async (args, onEvent, timeoutMs) => {
       assert.equal(args.at(-1), "1");
+      assert.equal(timeoutMs, WORKING_CHECKPOINT_TIMEOUT_MS);
       onEvent({ status: "checkpoint_graphic_ready" });
       onEvent({ status: "checkpoint_transition_ready", kind: "white-flash",
         fidelity: "baked", index: 0, path: "/cache/flash.mov" });
@@ -95,6 +105,13 @@ async function run(): Promise<void> {
   assert.equal(lastEvent().status, "warned");
   assert.ok(!events.some((event) => event.event === "palmier_checkpoint_failed"));
   assert.ok(!events.some((event) => event.event === "palmier_checkpoint_skipped"));
+
+  events.length = 0;
+  const hung = await publishPalmierWorkingCheckpoint(ctx, { stage: "cut", round: 1 }, send,
+    async () => ({ code: 1, event: {}, stderr: "", timedOut: true }));
+  assert.equal(hung.status, "warned");
+  assert.match(String(hung.reason), /6-minute safety limit/);
+  assert.equal(lastEvent().event, "palmier_checkpoint_warned");
 
   events.length = 0;
   const busy = await publishPalmierWorkingCheckpoint(ctx, { stage: "cut", round: 0 }, send,
@@ -144,7 +161,10 @@ async function run(): Promise<void> {
   writeState({ schemaVersion: 4, ownership: "sniper", workspaceMode: "managed-draft",
     latestTimelineId: "source" });
   await publishApprovedPalmierMirror(ctx, send,
-    async () => result({ status: "done" }));
+    async (_args, _onEvent, timeoutMs) => {
+      assert.equal(timeoutMs, EXPORT_MIRROR_TIMEOUT_MS);
+      return result({ status: "done" });
+    });
   assert.equal(lastEvent().event, "palmier_checkpoint_ready");
   assert.equal(lastEvent().stage, "qc-approved");
   assert.equal(lastEvent().verified, true);

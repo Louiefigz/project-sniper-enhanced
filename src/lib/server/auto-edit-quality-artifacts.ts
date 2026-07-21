@@ -15,6 +15,7 @@ import {
   parseApprovalRecord,
   type ApprovalRecord,
 } from "./auto-edit-approval";
+import { fileSha256 } from "./auto-edit-hash";
 
 export type {
   ApprovalRecord,
@@ -49,6 +50,85 @@ export function prepareQcRound(dir: string, token: string, round: number): strin
   rmSync(destination, { recursive: true, force: true });
   mkdirSync(destination, { recursive: true });
   return destination;
+}
+
+/** Parse a candidate's .assembled.json; null unless every reuse hash is present. */
+function readSeedSidecar(sidecarPath: string): { raw: string; authorityHash: string } | null {
+  try {
+    const raw = readFileSync(sidecarPath, "utf8");
+    const value = JSON.parse(raw) as Record<string, unknown>;
+    const authorityHash = value.authorityHash;
+    const reuseHashes = [value.videoFingerprint, value.graphicsFingerprint, value.planHash];
+    if (typeof authorityHash !== "string" || !authorityHash) return null;
+    if (reuseHashes.some((hash) => typeof hash !== "string" || !hash)) return null;
+    return { raw, authorityHash };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Does the seed owe the round a graphics_placements.json? The prior round dir
+ * carries the exact plan that produced its candidate (copyAuditInputs), and a
+ * non-empty graphicsTrack means the composite wrote a placements sidecar that
+ * Audit B's fail-closed eye_trace gate requires in every round dir the mux
+ * fast path reuses. An unreadable prior plan is unknown provenance → null.
+ */
+function seedRequiresPlacements(sourceDir: string): boolean | null {
+  try {
+    const raw = readFileSync(path.join(sourceDir, "edit_plan.json"), "utf8");
+    const track = (JSON.parse(raw) as Record<string, unknown>).graphicsTrack;
+    return Array.isArray(track) && track.length > 0;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Seed a fresh QC round with the prior round's composited final.mp4 + its
+ * .assembled.json provenance so an audio-only repair can take assemble.py's
+ * mux fast path (~12s) instead of a full composite (~70-86s). HASH-BOUND
+ * fail-closed: the seed lands only when the prior sidecar carries every reuse
+ * hash and its recorded authorityHash matches the copied bytes exactly;
+ * assemble.py's _reuse_composite then independently requires the sidecar's
+ * video/graphics fingerprints to match the CURRENT plan before muxing. A
+ * prior round with produced graphics must also contribute its
+ * graphics_placements.json (Audit B's eye_trace evidence — the mux fast path
+ * skips the composite that would rewrite it; a changed graphicsTrack forces
+ * the full composite, which overwrites the copy). Any mismatch, missing
+ * file/evidence, unreadable prior plan, or torn copy leaves the round
+ * unseeded — assemble falls back to the full composite (correct but slow).
+ */
+export function seedQcRoundFromPriorCandidate(dir: string, token: string, round: number): boolean {
+  if (round <= 1) return false;
+  const source = candidateFinalPath(dir, token, round - 1);
+  const sidecar = readSeedSidecar(`${source}.assembled.json`);
+  if (!sidecar || !existsSync(source)) return false;
+  const sourceDir = path.dirname(source);
+  const requiresPlacements = seedRequiresPlacements(sourceDir);
+  const placementsSource = path.join(sourceDir, "graphics_placements.json");
+  if (requiresPlacements === null) return false;
+  if (requiresPlacements && !existsSync(placementsSource)) return false;
+  const destination = candidateFinalPath(dir, token, round);
+  const placementsDestination = path.join(path.dirname(destination), "graphics_placements.json");
+  const temporary = `${destination}.${randomUUID()}.seed.tmp`;
+  try {
+    copyFileSync(source, temporary);
+    if (fileSha256(temporary) !== sidecar.authorityHash) {
+      throw new Error("seeded candidate bytes do not match the prior authority proof");
+    }
+    renameSync(temporary, destination);
+    writeFileSync(`${destination}.assembled.json`, sidecar.raw, { mode: 0o600 });
+    if (requiresPlacements) copyFileSync(placementsSource, placementsDestination);
+    return true;
+  } catch {
+    rmSync(placementsDestination, { force: true });
+    rmSync(`${destination}.assembled.json`, { force: true });
+    rmSync(destination, { force: true });
+    return false;
+  } finally {
+    rmSync(temporary, { force: true });
+  }
 }
 
 export function copyAuditInputs(producerDir: string, candidateDir: string): void {

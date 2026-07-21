@@ -280,6 +280,81 @@ async function testRenderingCrashRetriesSameRound(root: string): Promise<void> {
   assert.equal(run.job.candidatePath, candidateFinalPath(ctx.dir, token, 1));
 }
 
+async function testRenderCheckpointOverlapsQuality(root: string): Promise<void> {
+  const ctx = fixture(path.join(root, "overlap"));
+  const job = startAutoEditJob({
+    ctx, token: "overlap", snapshots: 0, bootstrapPlanHash: fileSha256(ctx.planPath),
+  });
+  const counts = { author: 0, planning: 0, assemble: 0, quality: 0 };
+  const deps = dependencies(counts);
+  const order: string[] = [];
+  deps.checkpoint = async (_ctx, spec) => {
+    order.push(`checkpoint:${spec.stage}`);
+    // A macrotask outlives the microtask-only quality stub, so a regression to
+    // the serial await would land checkpoint:settled before quality.
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    order.push("checkpoint:settled");
+    return { status: "committed" as const };
+  };
+  deps.quality = async (_run, loopDeps) => {
+    counts.quality += 1;
+    order.push("quality");
+    // The read-only phase overlaps the publish; the mutation barrier the
+    // pipeline injects must hold promote/revise until the publish settles.
+    await loopDeps?.renderCheckpointSettled?.();
+    order.push("quality:mutation-barrier");
+    return { status: "approved" as const, finalHash: "approved-in-stub" };
+  };
+  deps.approvedMirror = async () => { order.push("mirror"); };
+  await runAutoEditPipeline(runtime(job, []), deps);
+  assert.deepEqual(order,
+    ["checkpoint:render", "quality", "checkpoint:settled", "quality:mutation-barrier", "mirror"],
+    "QC must start while the courtesy publish is in flight, its mutations must wait for the"
+      + " publish to settle, and the round must not resolve before it settles");
+}
+
+async function testCheckpointRejectionStaysFatalAfterQuality(root: string): Promise<void> {
+  const ctx = fixture(path.join(root, "checkpoint-reject"));
+  const job = startAutoEditJob({
+    ctx, token: "checkpoint-reject", snapshots: 0, bootstrapPlanHash: fileSha256(ctx.planPath),
+  });
+  const counts = { author: 0, planning: 0, assemble: 0, quality: 0 };
+  const deps = dependencies(counts);
+  deps.checkpoint = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    throw new Error("palmier checkpoint runner crashed");
+  };
+  await assert.rejects(
+    runAutoEditPipeline(runtime(job, []), deps),
+    /palmier checkpoint runner crashed/,
+  );
+  assert.equal(counts.quality, 1, "the in-flight QC round is awaited, never abandoned");
+}
+
+async function testQualityFailurePropagatesAfterCheckpointSettles(root: string): Promise<void> {
+  const ctx = fixture(path.join(root, "quality-reject"));
+  const job = startAutoEditJob({
+    ctx, token: "quality-reject", snapshots: 0, bootstrapPlanHash: fileSha256(ctx.planPath),
+  });
+  const counts = { author: 0, planning: 0, assemble: 0, quality: 0 };
+  const deps = dependencies(counts);
+  let checkpointSettled = false;
+  deps.checkpoint = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    checkpointSettled = true;
+    return { status: "committed" as const };
+  };
+  deps.quality = async () => {
+    counts.quality += 1;
+    throw new Error("candidate has non-plan-repairable defects");
+  };
+  await assert.rejects(
+    runAutoEditPipeline(runtime(job, []), deps),
+    /non-plan-repairable defects/,
+  );
+  assert.equal(checkpointSettled, true, "the courtesy publish is never left in flight");
+}
+
 async function main(): Promise<void> {
   const root = mkdtempSync(path.join(os.tmpdir(), "sniper-pipeline-v2-"));
   try {
@@ -288,6 +363,9 @@ async function main(): Promise<void> {
     await testBrokenCandidateFailsClosed(root);
     await testApprovedResumeSkipsCandidate(root);
     await testRenderingCrashRetriesSameRound(root);
+    await testRenderCheckpointOverlapsQuality(root);
+    await testCheckpointRejectionStaysFatalAfterQuality(root);
+    await testQualityFailurePropagatesAfterCheckpointSettles(root);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

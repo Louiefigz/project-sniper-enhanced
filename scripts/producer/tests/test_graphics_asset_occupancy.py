@@ -6,6 +6,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from _common import pl  # noqa: F401
 from graphics import asset_proof as proof
@@ -27,8 +28,8 @@ class SustainedOccupancyTests(unittest.TestCase):
                 "ffmpeg", "-v", "error", "-f", "lavfi", "-i", source,
                 "-c:v", "libx264", "-pix_fmt", "yuv420p", path,
             ], check=True)
-            result = proof.prove_rendered_asset(
-                path, _entry(), "mp4", (64, 64), 0.4, "content-key")
+            result = proof.prove_rendered_asset(proof.AssetProofRequest(
+                path, _entry(), "mp4", (64, 64), 0.4, "content-key", 10.0))
             occupancy = result["occupancy"]
             self.assertEqual(occupancy["mode"], "opaque-measured-content")
             self.assertGreater(occupancy["areaRatio"], 0.0)
@@ -43,8 +44,8 @@ class SustainedOccupancyTests(unittest.TestCase):
                 "-pix_fmt", "yuv420p", path,
             ], check=True)
             with self.assertRaisesRegex(RuntimeError, "blank/flat"):
-                proof.prove_rendered_asset(
-                    path, _entry(), "mp4", (64, 64), 0.4, "black-key")
+                proof.prove_rendered_asset(proof.AssetProofRequest(
+                    path, _entry(), "mp4", (64, 64), 0.4, "black-key", 10.0))
 
     def test_one_frame_alpha_speck_fails_sustained_occupancy(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -57,10 +58,11 @@ class SustainedOccupancyTests(unittest.TestCase):
                 "ffmpeg", "-v", "error", "-f", "lavfi", "-i", source,
                 "-c:v", "qtrle", path,
             ], check=True)
-            with self.assertRaisesRegex(RuntimeError, "sustained meaningful"):
-                proof.prove_rendered_asset(
-                    path, _entry("free-band"), "mov", (64, 64), 1.0,
-                    "speck-key")
+            with mock.patch.object(proof, "_validate_codec"):
+                with self.assertRaisesRegex(RuntimeError, "sustained meaningful"):
+                    proof.prove_rendered_asset(proof.AssetProofRequest(
+                        path, _entry("free-band"), "mov", (64, 64), 1.0,
+                        "speck-key", 10.0))
 
 
 if __name__ == "__main__":

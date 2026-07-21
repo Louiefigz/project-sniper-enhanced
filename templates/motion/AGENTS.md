@@ -14,15 +14,21 @@ workflow here. Ignore any of that — the code below is the whole contract.
 
 ## The one render invocation (pinned)
 
-`graphics_render._render_to` spawns exactly this — nothing else calls hyperframes:
+`graphics_render._render_to` invokes the runtime repository's exact CLI module
+with explicitly configured Node, browser, ffmpeg, and ffprobe executables:
 
 ```bash
-npx --yes hyperframes@0.7.33 render <this-dir> -c compositions/<comp>.html \
-    --format {mov|mp4} --variables <json> -o <out>
+<pinned-node> <runtime-repo>/templates/motion/node_modules/hyperframes/dist/cli.js \
+    render <pipeline>/templates/motion -c compositions/<comp>.html \
+    --format {mov|mp4} --variables <json> -o <out> --fps 30 --quality high \
+    --workers 1 --no-browser-gpu --strict --strict-variables --json
 ```
 
-`hyperframes@0.7.33` is pinned (`HYPERFRAMES_PACKAGE`). The pipeline renders a
-throwaway `_gs-<hash>.html` copy of the target comp (never edits your file).
+`hyperframes@0.7.33` and its transitive closure are pinned in
+`package-lock.json`; install them with `npm ci`. `SNIPER_NODE_PATH`,
+`HYPERFRAMES_BROWSER_PATH`, `HYPERFRAMES_FFMPEG_PATH`, and
+`HYPERFRAMES_FFPROBE_PATH` must be absolute executable paths. The pipeline
+renders a throwaway `_gs-<hash>.html` copy of the target comp.
 
 ## Anchor → format (alpha rule)
 
@@ -48,8 +54,10 @@ throwaway `_gs-<hash>.html` copy of the target comp (never edits your file).
    `graphics_render._set_root_duration`. (Child `.clip` elements keep their own.)
 4. **Determinism only** — no `Date.now()`, no `Math.random()`, no `repeat: -1`,
    no network fetches in comp logic. Renders must be byte-reproducible for the cache.
-5. **GSAP core loads from a CDN** (`cdn.jsdelivr.net/npm/gsap@…`) at render time, so
-   the render host needs network. Comp assets are otherwise self-contained.
+5. **GSAP provenance is explicit.** `section-marker` loads pinned local
+   `vendor/gsap/gsap.min.js` for the G2 offline proof. The remaining comps still
+   load `cdn.jsdelivr.net/npm/gsap@…`, so they still require network until each
+   template is migrated and proven separately.
 
 ## Verification (NOT `npm run check`)
 

@@ -10,7 +10,7 @@ import tempfile
 from dataclasses import dataclass
 
 from fingerprints import file_sha256
-from graphics.asset_proof import prove_rendered_asset
+from graphics.asset_proof import AssetProofRequest, prove_rendered_asset
 from graphics.pip_hole import (crop_for_hole, delivery_hole_rect,
                                entry_has_hole)
 from palmier.mcp_client import PalmierError
@@ -191,9 +191,10 @@ def fill_presenter_entry(request: PresenterRequest) -> dict:
         graph = _filter_graph(request, slices, crop, fps, duration)
         _render(request, output, graph, frames, fps)
     proof_entry = {**request.entry, "presenterFilled": True}
-    proof = prove_rendered_asset(
+    proof = prove_rendered_asset(AssetProofRequest(
         output, proof_entry, "mov", _CANVAS,
-        float(request.entry["outEnd"]) - float(request.entry["outStart"]), key)
+        float(request.entry["outEnd"]) - float(request.entry["outStart"]),
+        key, fps))
     return {"path": output, "cached": cached, "key": key,
             "kind": request.entry["kind"], "fmt": "mov", "proof": proof,
             "presenterFill": {"sourceSlices": slices, "crop": list(crop),

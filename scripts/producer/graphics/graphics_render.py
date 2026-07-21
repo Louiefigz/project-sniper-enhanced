@@ -1,46 +1,31 @@
-#!/usr/bin/env python3
-"""graphics_render — hyperframes render + content-hash cache for one MG entry.
-
-Turns a single ``graphicsTrack`` entry (docs/producer/PRODUCER_MOTION_GRAPHICS_PLAN.md
-§3.1) into a rendered overlay clip, memoized by content hash so a graphic that
-is unchanged across plan revisions reuses the render at $0/0s (§5.5 optimization
-1 — "the single biggest lever for the feedback loop").
-
-Two render products, chosen by ``anchor`` (§2.1 visual-state doctrine):
-
-* ``free-band`` → transparent-alpha ProRes 4444 ``.mov``. The comps are
-  full-canvas 1080x1920 and position their content in the free band internally,
-  so the compositor just overlays at (0,0) and alpha handles the rest. webm is
-  NOT usable — it drops the alpha channel (proven, edge G2).
-* ``own-screen`` → opaque H.264 ``.mp4``. The takeover cutaway (kinetic-quote):
-  it REPLACES the frame for its window instead of stacking on it.
-
-RENDER LENGTH is the composition root's ``data-duration`` ATTRIBUTE — hyperframes
-fixes it at compile time and IGNORES ``--variables`` for it (each comp's header
-comment states this). So this module writes a temp comp copy under
-``compositions/_gs-<key>.html`` with that one attribute rewritten to the entry's
-window length, renders it, then removes the copy. No template is ever edited.
-"""
-
+"""HyperFrames render, proof, and content-hash cache for one graphic entry."""
 from __future__ import annotations
-
 import hashlib
 import json
 import os
 import re
 import subprocess
 import sys
-
+import tempfile
+from dataclasses import dataclass
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # run-by-path: producer pkg root on sys.path
 from fingerprints import json_canon
-from graphics.asset_proof import prove_rendered_asset
+from graphics.asset_proof import AssetProofRequest, prove_rendered_asset
+from graphics.composition_transform import set_root_duration
 from graphics.pip_hole import entry_has_hole
+from graphics.render_cache import CacheRequest, materialize
+from headless.container_io import CompositionInput, SealedInput, create_snapshot
+from headless.runtime_receipt import bind_runtime_receipt
+from headless.container_renderer import (
+    RenderRequest as ContainerRenderRequest,
+    cache_identity as container_cache_identity,
+    render_to as render_in_container,
+)
 from graphics.template_contract import (
     composition_dimensions,
     resolved_assets,
     validate_entry,
 )
-
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PIPELINE_ROOT = os.environ.get(
     "SNIPER_PIPELINE_ROOT",
@@ -50,14 +35,74 @@ MOTION_DIR = os.path.join(PIPELINE_ROOT, "templates", "motion")
 COMPOSITIONS_DIR = os.path.join(MOTION_DIR, "compositions")
 TOKENS_CSS = os.path.join(MOTION_DIR, "tokens.css")
 MOTION_TOKENS_JS = os.path.join(MOTION_DIR, "motion-tokens.js")
+GSAP_CORE = os.path.join(MOTION_DIR, "vendor", "gsap", "gsap.min.js")
+NODE_USER_PRELOAD = os.path.join(os.path.dirname(SCRIPT_DIR), "headless",
+                                 "node_isolated_user.cjs")
 DEFAULT_CACHE_DIR = os.path.join(MOTION_DIR, "renders", "cache")
-HYPERFRAMES_PACKAGE = "hyperframes@0.7.33"
+_LOCAL_GSAP_SRC = "/vendor/gsap/gsap.min.js"
+_PINNED_TOOL_ENV = {
+    "node": "SNIPER_NODE_PATH",
+    "browser": "HYPERFRAMES_BROWSER_PATH",
+    "ffmpeg": "HYPERFRAMES_FFMPEG_PATH",
+    "ffprobe": "HYPERFRAMES_FFPROBE_PATH",
+}
 
-# own-screen takeovers are opaque (mp4); every other anchor overlays with alpha
-# (mov). free-band = the free band; focus-shift = alpha graphic over a BLURRED
-# base (R5); headroom/chest/beside-face = alpha graphic TRANSLATED face-relative
-# (R3/R4). They all render the same transparent ProRes — the anchor only changes
-# how graphics_stage COMPOSITES them, not how graphics_render RENDERS them.
+
+def hyperframes_bin(runtime_root: str) -> str:
+    """Project-local CLI module from executable runtime, not pipeline snapshot."""
+    return os.path.join(runtime_root, "templates", "motion", "node_modules",
+                        "hyperframes", "dist", "cli.js")
+
+
+HYPERFRAMES_BIN = hyperframes_bin(RUNTIME_ROOT)
+
+def _pinned_tools() -> dict[str, str]:
+    """Resolve required executables without mutable PATH-based discovery."""
+    resolved = {}
+    for name, env_key in _PINNED_TOOL_ENV.items():
+        raw = os.environ.get(env_key, "").strip()
+        if not raw or not os.path.isabs(raw):
+            raise RuntimeError(f"{env_key} must be an absolute executable path")
+        path = os.path.realpath(raw)
+        if not os.path.isfile(path) or not os.access(path, os.X_OK):
+            raise RuntimeError(f"{env_key} is not an executable file: {raw}")
+        resolved[name] = path
+    return resolved
+
+
+def _render_environment(runtime_dir: str, tools: dict[str, str]) -> dict[str, str]:
+    """Build a secret-free environment rooted in attempt-owned directories."""
+    dirs = {name: os.path.join(runtime_dir, name)
+            for name in ("user", "tmp", "cache", "config", "data", "state",
+                         "fonts", "extract", "heygen")}
+    for path in dirs.values():
+        os.mkdir(path, mode=0o700)
+    env: dict[str, str] = {}
+    path_dirs = [os.path.dirname(tools[name]) for name in sorted(tools)]
+    env.update({
+        "PATH": os.pathsep.join(dict.fromkeys(path_dirs + ["/usr/bin", "/bin"])),
+        "TMPDIR": dirs["tmp"], "TMP": dirs["tmp"], "TEMP": dirs["tmp"],
+        "XDG_CACHE_HOME": dirs["cache"],
+        "XDG_CONFIG_HOME": dirs["config"], "XDG_DATA_HOME": dirs["data"],
+        "XDG_STATE_HOME": dirs["state"], "HEYGEN_CONFIG_DIR": dirs["heygen"],
+        "PUPPETEER_CACHE_DIR": dirs["cache"],
+        "SNIPER_ISOLATED_USER_DIR": dirs["user"],
+        "NODE_OPTIONS": f"--require={NODE_USER_PRELOAD}",
+        "HYPERFRAMES_BROWSER_PATH": tools["browser"],
+        "PRODUCER_HEADLESS_SHELL_PATH": tools["browser"],
+        "HYPERFRAMES_FFMPEG_PATH": tools["ffmpeg"],
+        "HYPERFRAMES_FFPROBE_PATH": tools["ffprobe"],
+        "HYPERFRAMES_FONT_CACHE_DIR": dirs["fonts"],
+        "HYPERFRAMES_EXTRACT_CACHE_DIR": dirs["extract"],
+        "DO_NOT_TRACK": "1", "HYPERFRAMES_NO_AUTO_INSTALL": "1",
+        "HYPERFRAMES_NO_TELEMETRY": "1",
+        "HYPERFRAMES_NO_UPDATE_CHECK": "1", "HYPERFRAMES_SKIP_SKILLS": "1",
+        "LANG": "C.UTF-8", "LC_ALL": "C.UTF-8", "LC_CTYPE": "C.UTF-8",
+        "TZ": "UTC", "PRODUCER_LOW_MEMORY_MODE": "false", "NO_COLOR": "1",
+        "NO_PROXY": "127.0.0.1,localhost,::1",
+    })
+    return env
+
 _ALPHA = ("mov", "mov")
 _FORMAT_BY_ANCHOR = {
     "own-screen": ("mp4", "mp4"),
@@ -67,20 +112,8 @@ _FORMAT_BY_ANCHOR = {
     "chest": _ALPHA,
     "beside-face": _ALPHA,
 }
-# The composition root carries data-composition-id; its opening tag holds the
-# root data-duration we rewrite. Child `.clip` elements keep their own (="60").
-_ROOT_TAG_RE = re.compile(r'<[^>]*data-composition-id="[^"]*"[^>]*>')
-_DURATION_RE = re.compile(r'data-duration="[^"]*"')
-
-
 def format_for(kind: str, anchor: str, spec: dict | None = None) -> tuple[str, str]:
-    """Render ``(fmt, ext)`` for one entry — the anchor decides, EXCEPT
-    ACTIVE hole-comps (``graphics.pip_hole.entry_has_hole``): they render the
-    frame AROUND a transparent face hole, so they need alpha even at anchor
-    "own-screen" (an opaque mp4 would paint the hole black and bury the footage
-    the compositor scales in underneath — NATEHERK_STUDY §5 item 9). The hole is
-    ACTIVE only for nateherk-takeover or a card whose ``spec.presenterFrame`` is
-    set — a plain opt-out card renders opaque like any own-screen takeover."""
+    """Choose format by anchor, preserving alpha around active face holes."""
     if anchor not in _FORMAT_BY_ANCHOR:
         raise ValueError(f"{kind}: unknown anchor '{anchor}' (free-band|own-screen)")
     if entry_has_hole({"kind": kind, "spec": spec}):
@@ -110,63 +143,61 @@ def comp_path(kind: str) -> str:
     return path
 
 
-def _set_root_duration(html: str, duration: float) -> str:
-    """Rewrite ONLY the composition root's ``data-duration`` to ``duration`` (s).
-
-    The root is the element carrying ``data-composition-id``; the substitution is
-    scoped to that opening tag so the child clips' ``data-duration="60"`` sentinels
-    are untouched. Raises if the root tag/attribute is not found (a malformed
-    template must fail loudly, never silently render at the wrong length).
-    """
-    def _rewrite_tag(match: re.Match) -> str:
-        tag = match.group(0)
-        new_tag, n = _DURATION_RE.subn(f'data-duration="{duration:g}"', tag, count=1)
-        if n != 1:
-            raise ValueError("composition root tag has no data-duration attribute")
-        return new_tag
-
-    html, n = _ROOT_TAG_RE.subn(_rewrite_tag, html, count=1)
-    if n != 1:
-        raise ValueError("composition has no data-composition-id root element")
-    return html
+_set_root_duration = set_root_duration
 
 
 def content_hash(kind: str, spec: dict, duration: float, comp_html: str) -> str:
-    """Content-addressed cache key (§5.5): identical inputs → identical key.
-
-    Folds the kind, the canonical (sorted, integral-float-neutral) spec JSON,
-    the window duration, the composition HTML, tokens.css AND motion-tokens.js
-    (the shared runtime helpers the jaden/nateherk comps consume) — so editing
-    a template or the shared tokens invalidates every cached render that used
-    them. The spec goes through fingerprints.json_canon so a JS save-plan
-    round-trip (30.0 → 30) never busts the cache for an unchanged graphic.
-    """
+    """Hash canonical intent plus every resolved template/runtime input."""
     h = hashlib.sha1()
     h.update(kind.encode("utf-8"))
     h.update(json.dumps(json_canon(spec), sort_keys=True,
                         ensure_ascii=True).encode("utf-8"))
     h.update(f"{duration:.4f}".encode("utf-8"))
     h.update(hashlib.sha1(comp_html.encode("utf-8")).digest())
-    for shared in (TOKENS_CSS, MOTION_TOKENS_JS):
+    shared_files = [TOKENS_CSS, MOTION_TOKENS_JS]
+    if _LOCAL_GSAP_SRC in comp_html:
+        shared_files.append(GSAP_CORE)
+    for shared in shared_files:
         with open(shared, "rb") as f:
             h.update(hashlib.sha1(f.read()).digest())
     for asset in resolved_assets({"kind": kind, "spec": spec}, comp_html):
         with open(asset["path"], "rb") as handle:
             h.update(asset["field"].encode("utf-8"))
             h.update(hashlib.sha1(handle.read()).digest())
+    if os.environ.get("SNIPER_RENDER_IMAGE_ID"):
+        h.update(container_cache_identity(PIPELINE_ROOT))
     return h.hexdigest()
 
 
-def _render_to(temp_comp_rel: str, fmt: str, spec: dict, out_path: str) -> None:
-    """Invoke the hyperframes CLI for one temp comp copy → ``out_path``.
+def _sealed_hash(kind: str, snapshot: SealedInput) -> str:
+    digest = hashlib.sha1()
+    digest.update(b"sealed-render-input-v1")
+    digest.update(kind.encode("utf-8"))
+    digest.update(snapshot.sha256.encode("ascii"))
+    digest.update(container_cache_identity(PIPELINE_ROOT))
+    return digest.hexdigest()
 
-    Runs from the repo root so the ``templates/motion`` project dir and the
-    ``-c compositions/...`` block path resolve exactly as the proven MG-1 render.
-    """
-    cmd = ["npx", "--yes", HYPERFRAMES_PACKAGE, "render", MOTION_DIR,
+
+def _render_to(temp_comp_rel: str, fmt: str, spec: dict, out_path: str) -> None:
+    """Invoke pinned HyperFrames with private ambient state."""
+    cli_path = os.path.realpath(HYPERFRAMES_BIN)
+    if not os.path.isfile(cli_path):
+        raise RuntimeError("pinned HyperFrames install is missing; run npm ci in "
+                           f"{MOTION_DIR}")
+    if not os.path.isfile(NODE_USER_PRELOAD):
+        raise RuntimeError(f"Node isolation preload is missing: {NODE_USER_PRELOAD}")
+    tools = _pinned_tools()
+    out_path = os.path.abspath(out_path)
+    cmd = [tools["node"], cli_path, "render", MOTION_DIR,
            "-c", temp_comp_rel, "--format", fmt,
-           "--variables", json.dumps(spec), "-o", out_path]
-    proc = subprocess.run(cmd, cwd=RUNTIME_ROOT, capture_output=True, text=True)
+           "--variables", json.dumps(spec), "-o", out_path, "--fps", "30",
+           "--quality", "high", "--workers", "1", "--no-browser-gpu",
+           "--strict", "--strict-variables", "--json"]
+    out_dir = os.path.dirname(out_path)
+    with tempfile.TemporaryDirectory(prefix=".hyperframes-", dir=out_dir) as scratch:
+        render_env = _render_environment(scratch, tools)
+        proc = subprocess.run(cmd, cwd=scratch, env=render_env, stdin=subprocess.DEVNULL,
+                              capture_output=True, text=True)
     if proc.returncode != 0:
         tail = "\n".join((proc.stderr or proc.stdout).strip().splitlines()[-10:])
         raise RuntimeError(f"hyperframes render failed for {temp_comp_rel}:\n{tail}")
@@ -174,13 +205,53 @@ def _render_to(temp_comp_rel: str, fmt: str, spec: dict, out_path: str) -> None:
         raise RuntimeError(f"hyperframes reported success but {out_path} is missing")
 
 
-def render_entry(entry: dict, cache_dir: str | None = None) -> dict:
-    """Render (or reuse) one graphicsTrack entry's overlay clip.
+@dataclass(frozen=True)
+class _RenderWork:
+    entry: dict
+    fmt: str
+    dimensions: tuple[int, int]
+    duration: float
+    key: str
+    temp_rel: str
+    temp_abs: str
+    comp_html: str
+    spec: dict
+    snapshot: SealedInput | None
 
-    Returns ``{"path", "cached", "key", "kind", "fmt"}``. On a cache miss the comp
-    is rendered at the entry's window length via a throwaway ``_gs-<key>`` copy;
-    on a hit the render is skipped entirely.
-    """
+
+def _render_candidate(work: _RenderWork, output: str) -> None:
+    if work.snapshot is not None:
+        render_in_container(ContainerRenderRequest(
+            work.temp_rel, work.fmt, output, work.snapshot,
+            os.environ.get("SNIPER_RENDER_CONTAINER_NAME", "")))
+        return
+    try:
+        with open(work.temp_abs, "w", encoding="utf-8") as handle:
+            handle.write(_set_root_duration(work.comp_html, work.duration))
+        _render_to(work.temp_rel, work.fmt, work.spec, output)
+    finally:
+        if os.path.exists(work.temp_abs):
+            os.remove(work.temp_abs)
+
+
+def _prove_candidate(work: _RenderWork, path: str) -> dict:
+    proof = prove_rendered_asset(AssetProofRequest(
+        path, work.entry, work.fmt, work.dimensions, work.duration, work.key,
+        comp_html=work.comp_html, require_terminal_clear=work.fmt == "mov",
+        sealed_asset_inputs=(work.snapshot.asset_bindings
+                             if work.snapshot is not None else None)))
+    return bind_runtime_receipt(path, proof) if work.snapshot is not None else proof
+
+
+def _materialize_work(work: _RenderWork, cache_dir: str, ext: str) -> dict:
+    out_path, cached, proof = materialize(
+        CacheRequest(cache_dir, work.key, ext),
+        lambda path: _render_candidate(work, path),
+        lambda path: _prove_candidate(work, path))
+    return {"path": out_path, "cached": cached, "key": work.key,
+            "kind": work.entry["kind"], "fmt": work.fmt, "proof": proof}
+def render_entry(entry: dict, cache_dir: str | None = None) -> dict:
+    """Render or reuse one proved graphics-track asset."""
     kind = entry["kind"]
     spec = entry.get("spec") or {}
     anchor = entry.get("anchor", "free-band")
@@ -188,30 +259,26 @@ def render_entry(entry: dict, cache_dir: str | None = None) -> dict:
     if duration <= 0:
         raise ValueError(f"{kind}: non-positive window {entry['outStart']}->{entry['outEnd']}")
     fmt, ext = format_for(kind, anchor, spec)
-
     with open(comp_path(kind), encoding="utf-8") as f:
         comp_html = f.read()
     validate_entry(entry, comp_html)
     dimensions = composition_dimensions(comp_html)
-    key = content_hash(kind, spec, duration, comp_html)
     cache_dir = cache_dir or DEFAULT_CACHE_DIR
     os.makedirs(cache_dir, exist_ok=True)
-    out_path = os.path.join(cache_dir, f"{key}.{ext}")
-    if os.path.exists(out_path):
-        proof = prove_rendered_asset(
-            out_path, entry, fmt, dimensions, duration, key)
-        return {"path": out_path, "cached": True, "key": key, "kind": kind,
-                "fmt": fmt, "proof": proof}
-
+    if os.environ.get("SNIPER_RENDER_IMAGE_ID"):
+        with tempfile.TemporaryDirectory(prefix=".sealed-input-",
+                                         dir=cache_dir) as seal_dir:
+            relative = os.path.join("compositions", f"{kind}.html")
+            snapshot = create_snapshot(
+                PIPELINE_ROOT, CompositionInput(relative, comp_html,
+                                                duration=duration),
+                spec, seal_dir)
+            key = _sealed_hash(kind, snapshot)
+            work = _RenderWork(entry, fmt, dimensions, duration, key, relative,
+                               "", comp_html, spec, snapshot)
+            return _materialize_work(work, cache_dir, ext)
+    key = content_hash(kind, spec, duration, comp_html)
     temp_rel = os.path.join("compositions", f"_gs-{key}.html")
-    temp_abs = os.path.join(MOTION_DIR, temp_rel)
-    try:
-        with open(temp_abs, "w", encoding="utf-8") as f:
-            f.write(_set_root_duration(comp_html, duration))
-        _render_to(temp_rel, fmt, spec, out_path)
-    finally:
-        if os.path.exists(temp_abs):
-            os.remove(temp_abs)
-    proof = prove_rendered_asset(out_path, entry, fmt, dimensions, duration, key)
-    return {"path": out_path, "cached": False, "key": key, "kind": kind,
-            "fmt": fmt, "proof": proof}
+    work = _RenderWork(entry, fmt, dimensions, duration, key, temp_rel,
+                       os.path.join(MOTION_DIR, temp_rel), comp_html, spec, None)
+    return _materialize_work(work, cache_dir, ext)

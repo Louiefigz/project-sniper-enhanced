@@ -60,13 +60,13 @@ Explicit overrides remain available:
 SNIPER_EXECUTION_MODE=local
 SNIPER_BRAIN_PROVIDER=codex
 SNIPER_CODEX_MODEL=gpt-5.6-sol
-SNIPER_CODEX_REASONING=ultra
+SNIPER_CODEX_REASONING=xhigh
 SNIPER_TRANSCRIBE_PROVIDER=local-whisper
 ```
 
-`SNIPER_CODEX_REASONING=max` is also accepted as a benchmark alternative.
-Ultra is the local-mode default requested for this project; compare quality,
-latency, and usage on representative edits before changing it.
+Other CLI-recognized levels must not be assumed valid for this model. On
+2026-07-18 the provider-resolved `gpt-5.6-sol-1p-codexswic-ev3` build rejected
+`ultra` and accepted `none`; `xhigh` is the conservative production default.
 
 ## Local setup
 
@@ -77,7 +77,7 @@ latency, and usage on representative edits before changing it.
 
 ```bash
 codex --version
-codex -c 'model_reasoning_effort="ultra"' login status
+codex -c 'model_reasoning_effort="xhigh"' login status
 npm run dev:local
 ```
 
@@ -93,8 +93,9 @@ the requested reasoning syntax, `whisper-cli`, or its local model is unavailable
 
 ### Verified on this workstation
 
-- `codex-cli 0.144.1` accepted `gpt-5.6-sol` with
-  `model_reasoning_effort="ultra"` and reported ChatGPT subscription login.
+- `codex-cli 0.144.1` accepts the local `xhigh` setting and reports ChatGPT
+  subscription login. A live 2026-07-18 probe proved that local enum acceptance
+  is insufficient: the then-resolved build rejected `ultra` at request time.
 - Sniper's strict-schema wrapper completed a live structured-output call.
 - The same wrapper completed from a non-git Producer job directory, then a
   workspace-write smoke read the Producer adapter and wrote only its job file.

@@ -156,6 +156,22 @@ def base_fingerprint(plan: dict) -> str:
                   if k not in _NON_BASE_KEYS and not k.startswith("_")})
 
 
+def base_plan_digest(plan: dict) -> str:
+    """Full authority digest of the exact graphics-free plan projection.
+
+    The legacy 16-hex fingerprint remains a dispatch hint. Headless reuse uses
+    this domain-separated SHA-256 so a base-reuse decision is never authorized
+    by a truncated value.
+    """
+    view = _render_plan_view(plan)
+    projection = {key: value for key, value in view.items()
+                  if key not in _NON_BASE_KEYS and not key.startswith("_")}
+    raw = json.dumps(json_canon(projection), sort_keys=True,
+                     ensure_ascii=True, separators=(",", ":"),
+                     allow_nan=False).encode("ascii")
+    return hashlib.sha256(b"sniper-base-plan-v1\0" + raw).hexdigest()
+
+
 def video_fingerprint(plan: dict) -> str:
     """Base fields EXCEPT the audio-bus fields — the video half of the base."""
     view = _render_plan_view(plan)

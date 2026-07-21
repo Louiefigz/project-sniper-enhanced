@@ -72,7 +72,7 @@ const REVIEW_STAGE_DEADLINE_MS =
   timeoutMinutes("SNIPER_REVIEW_STAGE_TIMEOUT_MIN", 20) * 60 * 1000;
 const GATE_FIX_TIMEOUT_MS = 6 * 60 * 1000;
 // Reviews are bounded, schema-constrained decisions. The app-wide default may
-// remain ultra for open-ended authoring, but even high effort repeatedly
+// remain xhigh for open-ended authoring, but even high effort repeatedly
 // spends most of this stage's deadline before returning its small contract —
 // pin medium (parity with authoring's explicit pins). Revisions use the same
 // bounded effort and still pass through an independent critic afterward.

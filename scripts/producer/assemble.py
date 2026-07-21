@@ -65,12 +65,14 @@ from fingerprints import (_NON_BASE_KEYS, audio_fingerprint,  # noqa: F401 — r
                           write_assembled_sidecar)
 from edit.refit_authority import (commit_pending, make_receipt,
                                   resolve_refit_source, stage_receipt)
+from graphics.composite_smoothness import (
+    YDIF_DUP_FAIL as _YDIF_DUP_FAIL,
+    duplicate_ratio as _dup_ratio,
+    read_inline_ydif as _read_inline_ydif,
+)
 from preview_proxy import write_proxy
 from template_usage_approval import (approval_required as template_approval_required,
                                      require_current as require_template_usage_approval)
-
-_YDIF_DUP_FAIL = 0.08   # >=8% exact-duplicate output frames = the stutter bug
-
 
 def emit(**fields) -> None:
     """One NDJSON status line on stdout (matches the render stages)."""
@@ -115,22 +117,6 @@ def _own_screen_frame_ranges(plan: dict, fps: float) -> list[tuple[int, int]]:
     return ranges
 
 
-def _dup_ratio(lines: list[str],
-               exempt: list[tuple[int, int]] | None = None) -> float:
-    """Fraction of footage-visible YDIF lines reading exactly 0 (frame identical
-    to its predecessor) — shared by the standalone probe and the inline tap.
-    ``exempt`` output-frame spans (own-screen takeover windows) are dropped from
-    BOTH numerator and denominator: a static takeover card is not the stutter bug."""
-    spans = exempt or []
-    counted = [ln for idx, ln in enumerate(lines)
-               if not any(a <= idx < b for a, b in spans)]
-    if not counted:
-        return 0.0
-    dups = sum(1 for ln in counted
-               if ln.rsplit("YDIF=", 1)[1].strip() in ("0", "0.0", "0.000000"))
-    return dups / len(counted)
-
-
 def _ydif_dup_ratio(path: str,
                     exempt: list[tuple[int, int]] | None = None) -> float:
     """STANDALONE smoothness probe: full decode of ``path`` through signalstats.
@@ -153,29 +139,6 @@ def _ydif_dup_ratio(path: str,
                   else "ffmpeg emitted no YDIF lines")
         raise RuntimeError(f"YDIF smoothness probe failed on {path}: {detail} "
                            "— output unreadable, cannot verify smoothness")
-    return _dup_ratio(lines, exempt)
-
-
-def _read_inline_ydif(path: str,
-                      exempt: list[tuple[int, int]] | None = None) -> float:
-    """Dup ratio from the composite pass's inline signalstats dump.
-
-    The tap measures the PRE-encode filtergraph frames (the overlay frame
-    scheduler is what produces the eof_action dup bug, so it is fully visible
-    there); threshold semantics are unchanged. ``exempt`` = own-screen takeover
-    frame spans, excluded from the ratio. Missing/empty dump = the probe
-    failed — raise, never wave the gate through.
-    """
-    try:
-        with open(path) as f:
-            lines = [ln for ln in f if "YDIF=" in ln]
-    except OSError as exc:
-        raise RuntimeError(f"inline YDIF dump unreadable ({exc}) — cannot "
-                           "verify smoothness") from exc
-    if not lines:
-        raise RuntimeError(f"inline YDIF dump {path} has no YDIF lines — "
-                           "cannot verify smoothness")
-    os.remove(path)   # scratch file — consumed
     return _dup_ratio(lines, exempt)
 
 

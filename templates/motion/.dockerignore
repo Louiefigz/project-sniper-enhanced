@@ -1,0 +1,7 @@
+*
+!Dockerfile.g2
+!package.json
+!package-lock.json
+!container/
+!container/render-entrypoint.sh
+!container/node_isolated_user.cjs

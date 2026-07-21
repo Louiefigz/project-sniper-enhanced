@@ -1,5 +1,13 @@
 # GSAP (GreenSock Animation Platform)
 
+## PROJECT_SNIPER vendoring receipt
+
+`gsap.min.js` is the exact GSAP core 3.14.2 file fetched from
+`https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js` on 2026-07-18 for
+offline `section-marker` rendering. Its SHA-256 is
+`c174bfce53a729418d57a8ad8625e7247c793a22fef8e2851e3cfa3de9cd8280`.
+Do not replace it through an unpinned package or CDN alias.
+
 [![GSAP - Animate anything](https://gsap.com/GSAP-share-image.png)](https://gsap.com)
 
 GSAP is a **framework-agnostic** JavaScript animation library that turns developers into animation superheroes. Build high-performance animations that work in **every** major browser. Animate CSS, SVG, canvas, React, Vue, WebGL, colors, strings, motion paths, generic objects... anything JavaScript can touch! GSAP's <a href="https://gsap.com/docs/v3/Plugins/ScrollTrigger/">ScrollTrigger</a> plugin delivers jaw-dropping scroll-based animations with minimal code. <a href="https://gsap.com/docs/v3/GSAP/gsap.matchMedia()">gsap.matchMedia()</a> makes building responsive, accessibility-friendly animations a breeze.

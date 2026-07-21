@@ -2,10 +2,13 @@
   "name": "motion",
   "private": true,
   "type": "module",
+  "dependencies": {
+    "hyperframes": "0.7.33"
+  },
   "scripts": {
-    "dev": "npx --yes hyperframes@0.7.33 preview",
-    "check": "npx --yes hyperframes@0.7.33 lint && npx --yes hyperframes@0.7.33 validate && npx --yes hyperframes@0.7.33 inspect",
-    "render": "npx --yes hyperframes@0.7.33 render",
-    "publish": "npx --yes hyperframes@0.7.33 publish"
+    "dev": "hyperframes preview",
+    "check": "hyperframes lint && hyperframes validate && hyperframes inspect",
+    "render": "hyperframes render",
+    "publish": "hyperframes publish"
   }
 }

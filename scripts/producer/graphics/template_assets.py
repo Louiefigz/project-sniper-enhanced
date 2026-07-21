@@ -37,16 +37,22 @@ def asset_contract(kind: str, declared: dict[str, dict]) -> dict:
 
 def _selector_path(value: str) -> str | None:
     raw = value.strip()
-    if not raw or os.path.isabs(raw) or ".." in raw.split("/"):
+    if (not raw or raw != value or os.path.isabs(raw)
+            or ".." in raw.split("/") or any(char in raw for char in "?#%")
+            or any(ord(char) < 32 for char in raw)):
         return None
     relative = raw if "." in os.path.basename(raw) else raw + ".svg"
+    if os.path.splitext(relative)[1] != ".svg":
+        return None
     root = os.path.realpath(ICONS_DIR)
-    candidate = os.path.realpath(os.path.join(root, relative))
+    lexical = os.path.join(root, relative)
+    candidate = os.path.realpath(lexical)
     try:
         inside = os.path.commonpath((root, candidate)) == root
     except ValueError:
         return None
-    return candidate if inside and os.path.isfile(candidate) else None
+    exact = candidate == lexical
+    return candidate if inside and exact and os.path.isfile(candidate) else None
 
 
 def selector_errors(kind: str, spec: dict,

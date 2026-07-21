@@ -1,0 +1,46 @@
+"""Frozen static-source contract for compositor build manifest V1."""
+
+from __future__ import annotations
+
+COMPOSITOR_BUILD_V1_POLICY = "sniper-prebound-compositor-build-v1"
+COMPOSITOR_BUILD_V1_DIGEST_DOMAIN = b"sniper-prebound-compositor-build-v1\0"
+COMPOSITOR_BUILD_V1_IMPLEMENTATION_PATHS = (
+    "scripts/producer/brand.py",
+    "scripts/producer/fingerprints.py",
+    "scripts/producer/graphics/__init__.py",
+    "scripts/producer/graphics/composite_core.py",
+    "scripts/producer/graphics/composite_smoothness.py",
+    "scripts/producer/graphics/composition_transform.py",
+    "scripts/producer/graphics/template_assets.py",
+    "scripts/producer/graphics/template_content.py",
+    "scripts/producer/graphics/template_contract.py",
+    "scripts/producer/graphics/template_visual_contract.py",
+    "scripts/producer/headless/__init__.py",
+    "scripts/producer/headless/artifact_contract.py",
+    "scripts/producer/headless/composite_media_checks.py",
+    "scripts/producer/headless/compositor_build_manifest_v1_contract.py",
+    "scripts/producer/headless/container_io.py",
+    "scripts/producer/headless/durable_files.py",
+    "scripts/producer/headless/media_probe.py",
+    "scripts/producer/headless/prebound_clips.py",
+    "scripts/producer/headless/prebound_compositor.py",
+    "scripts/producer/headless/prebound_compositor_build.py",
+    "scripts/producer/headless/prebound_compositor_media.py",
+    "scripts/producer/headless/prebound_compositor_receipt.py",
+    "scripts/producer/headless/prebound_compositor_store.py",
+    "scripts/producer/headless/process_runner.py",
+    "scripts/producer/headless/quality_pass_contract.py",
+    "scripts/producer/headless/quality_pass_input.py",
+    "scripts/producer/headless/quality_pass_outputs.py",
+    "scripts/producer/headless/quality_pass_types.py",
+    "scripts/producer/headless/quality_timing.py",
+    "scripts/producer/headless/repair_diff.py",
+    "scripts/producer/headless/repair_intent.py",
+    "scripts/producer/headless/safe_source_files.py",
+    "scripts/producer/headless/sealed_archive.py",
+    "scripts/producer/headless/sealed_tar_format.py",
+    "scripts/producer/headless/source_closure.py",
+    "scripts/producer/headless/wire_identity.py",
+    "scripts/producer/producer_config.py",
+    "templates/motion/tokens.css",
+)

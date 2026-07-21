@@ -26,7 +26,7 @@ import subprocess
 import tempfile
 from dataclasses import dataclass
 
-from graphics.asset_proof import prove_rendered_asset
+from graphics.asset_proof import AssetProofRequest, prove_rendered_asset
 from graphics.graphics_render import DEFAULT_CACHE_DIR
 
 _VERSION = 1
@@ -200,9 +200,9 @@ def render_transition_preview(event: dict, fps: float, width: int,
     path = os.path.join(directory, f"transition-preview-{key}.mov")
     if not os.path.isfile(path):
         _render(path, event, float(fps), render_width, render_height, frames)
-    proof = prove_rendered_asset(
+    proof = prove_rendered_asset(AssetProofRequest(
         path, entry, "mov", (render_width, render_height),
-        frames / float(fps), key)
+        frames / float(fps), key, float(fps)))
     proof["alphaProfile"] = _alpha_profile(kind, path, frames)
     _persist_proof(proof)
     exact = kind == "white-flash"

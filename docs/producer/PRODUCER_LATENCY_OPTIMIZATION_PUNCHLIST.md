@@ -1,5 +1,7 @@
 # PRODUCER auto-edit — latency/reliability optimization punch list
 
+> **STATUS: HISTORICAL TACTICAL PUNCH LIST.** The living [headless execution optimization dossier](HEADLESS_EXECUTION_OPTIMIZATION_DOSSIER.md) now controls optimization order and experiment policy. Keep the current Opus/xhigh settings as the production default, but item 12 does not prohibit isolated frozen-packet model/effort noninferiority tests with seeded-defect and blinded-quality gates.
+
 Source: adversarial multi-agent audit (2026-07-14), 30 agents, 18 verified findings
 → 12 actionable items. Every finding was verified against the real code and checked
 for quality/correctness/invariant safety. **No item trades output quality** — Opus
@@ -59,7 +61,7 @@ effect on an already-running worker (they harden the next run / any retry).
 - **#11 — Recalibrate the gate-fix timeout to the Sonnet/low fixer** now that it's off Opus.
   `brain-review-runner.ts:51`. Small, redundant with #1; measure first.
 
-## GUARDRAIL — do NOT do
+## PRODUCTION GUARDRAIL — do not downgrade without noninferiority evidence
 
 - **#12** — Do not downgrade **authoring** (`authoring.ts:93`) or **rendered/frame vision
   critics** (`scripts/producer/palmier/candidate-qc/reviewer.ts`) off Opus during any

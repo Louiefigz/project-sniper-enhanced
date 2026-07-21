@@ -42,7 +42,7 @@
     <meta name="viewport" content="width=1080, height=1920" />
     <title>SNIPER · section-marker</title>
     <link rel="stylesheet" href="/tokens.css" />
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="/vendor/gsap/gsap.min.js"></script>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       html, body {
@@ -91,7 +91,7 @@
       .title-clip { overflow: hidden; padding: 6px 0; max-width: 100%; }
       .title {
         display: inline-block;
-        font-family: var(--font-serif-accent, "Georgia", "Times New Roman", "Times", serif);
+        font-family: var(--font-serif-accent);
         font-style: italic;
         font-weight: 700;
         font-size: 118px;
@@ -196,9 +196,18 @@
             { opacity: 1, y: 0, duration: 0.36, ease: "power2.out" }, 0.3);
         }
 
-        // Fade the whole marker out — ends exactly at D so timeline length == render length.
+        // Finish on the final sampled 30fps frame, not at the unsampled t=D
+        // endpoint. Otherwise the encoded tail retains part of the scrim and
+        // the compositor cuts it off at the next shot.
+        const RENDER_FPS = 30;
         const fadeDur = Math.min(0.42, D * 0.18);
-        tl.to("#marker-el", { opacity: 0, y: -14, duration: fadeDur, ease: "power2.in" }, D - fadeDur);
+        const fadeEnd = Math.max(0, D - (1 / RENDER_FPS));
+        const fadeStart = Math.max(0, fadeEnd - fadeDur);
+        // Fade the stage, not only marker-el: the contrast scrim is a stage
+        // pseudo-element and otherwise survives until a hard window cutoff.
+        tl.to("#marker-stage", {
+          opacity: 0, y: -14, duration: fadeEnd - fadeStart, ease: "power2.in"
+        }, fadeStart);
 
         tl.seek(0);
         window.__timelines["section-marker"] = tl;

@@ -113,7 +113,10 @@ export function claudeModelArgs(model = claudeSettings().model): ["--model", str
 }
 
 export function codexSettings(): CodexSettings {
-  const reasoning = safeCliValue("SNIPER_CODEX_REASONING", "ultra");
+  // The provider validates effort against the resolved remote build, not just
+  // the local CLI enum. gpt-5.6-sol rejected `ultra` on 2026-07-18 while xhigh
+  // remained accepted, so keep the default inside the model's live contract.
+  const reasoning = safeCliValue("SNIPER_CODEX_REASONING", "xhigh");
   if (!REASONING_LEVELS.has(reasoning)) {
     throw new Error(`SNIPER_CODEX_REASONING is unsupported: ${reasoning}`);
   }

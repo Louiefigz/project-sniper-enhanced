@@ -1,6 +1,7 @@
 """Graphic template intent + rendered-asset proof contracts."""
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
@@ -121,6 +122,14 @@ class GenericTemplateContentTests(unittest.TestCase):
         self.assertTrue(any("at least one non-empty resolved selector" in error
                             for error in errors), errors)
 
+    def test_icon_selector_rejects_non_svg_and_whitespace_aliases(self) -> None:
+        for selector in ("manifest.json", " notion.svg ", "notion.svg?x=1"):
+            with self.subTest(selector=selector):
+                errors = tc.entry_errors(self._graphic(
+                    "logo-card", {"iconFile": selector}))
+                self.assertTrue(any("does not resolve" in error
+                                    for error in errors), errors)
+
     def test_explicit_content_override_must_be_a_string(self) -> None:
         entry = self._graphic("widget-gauge", {"label": None})
         errors = tc.entry_errors(entry)
@@ -200,10 +209,11 @@ class GraphicsStyleDecisionTests(unittest.TestCase):
 
 
 class RenderedAssetProofTests(unittest.TestCase):
-    PROBE = {"streams": [{"codec_name": "h264", "pix_fmt": "yuv420p",
+    PROBE = {"streams": [{"codec_type": "video", "codec_name": "h264",
+                           "profile": "High", "pix_fmt": "yuv420p",
                            "width": 1920, "height": 1080,
                            "duration": "3.500000", "nb_frames": "105",
-                           "avg_frame_rate": "30/1"}],
+                           "avg_frame_rate": "30/1", "r_frame_rate": "30/1"}],
              "format": {"duration": "3.500000", "size": "8"}}
 
     def test_opaque_own_screen_proof_carries_copy_and_occupancy(self) -> None:
@@ -213,10 +223,12 @@ class RenderedAssetProofTests(unittest.TestCase):
             entry = _entry({"variant": "classic", "text": "The *real* copy"})
             measured = {"sustainedRatio": 0.125, "sampledFrames": 35}
             with mock.patch.object(ap, "_probe", return_value=self.PROBE), \
+                    mock.patch.object(ap, "_full_decode",
+                                      return_value={"decoded": True}), \
                     mock.patch.object(ap, "_visible_opaque",
                                       return_value=measured):
-                proof = ap.prove_rendered_asset(
-                    path, entry, "mp4", (1920, 1080), 3.5, "render-key")
+                proof = ap.prove_rendered_asset(ap.AssetProofRequest(
+                    path, entry, "mp4", (1920, 1080), 3.5, "render-key"))
             self.assertEqual(proof["copy"]["expected"], ["The real copy"])
             self.assertEqual(proof["copy"]["renderInputKey"], "render-key")
             self.assertEqual(proof["occupancy"]["mode"], "opaque-measured-content")
@@ -227,12 +239,14 @@ class RenderedAssetProofTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             path = os.path.join(tmp, "overlay.mov")
             Path(path).write_bytes(b"not-empty")
-            with mock.patch.object(ap, "_probe", return_value=self.PROBE):
-                with self.assertRaisesRegex(RuntimeError, "lost alpha"):
-                    ap.prove_rendered_asset(
+            stream = {**self.PROBE["streams"][0], "codec_name": "prores",
+                      "profile": "4444"}
+            with mock.patch.object(ap, "_probe", return_value={"streams": [stream]}):
+                with self.assertRaisesRegex(RuntimeError, "requires pix_fmt"):
+                    ap.prove_rendered_asset(ap.AssetProofRequest(
                         path, _entry({"variant": "classic", "text": "Copy"},
                                      anchor="free-band"),
-                        "mov", (1920, 1080), 3.5, "render-key")
+                        "mov", (1920, 1080), 3.5, "render-key"))
 
     @unittest.skipUnless(shutil.which("ffmpeg"), "ffmpeg required")
     def test_fully_transparent_overlay_fails_visible_pixel_proof(self) -> None:
@@ -245,9 +259,11 @@ class RenderedAssetProofTests(unittest.TestCase):
             ], check=True)
             entry = _entry({"variant": "classic", "text": "Invisible"},
                            anchor="free-band")
-            with self.assertRaisesRegex(RuntimeError, "blank/transparent"):
-                ap.prove_rendered_asset(
-                    path, entry, "mov", (64, 64), 0.2, "transparent-key")
+            with mock.patch.object(ap, "_validate_codec"):
+                with self.assertRaisesRegex(RuntimeError, "blank/transparent"):
+                    ap.prove_rendered_asset(ap.AssetProofRequest(
+                        path, entry, "mov", (64, 64), 0.2,
+                        "transparent-key", 10.0))
 
     def test_wrong_dimensions_fail_before_handoff(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -256,9 +272,9 @@ class RenderedAssetProofTests(unittest.TestCase):
             probe = {"streams": [{**self.PROBE["streams"][0], "width": 1280}]}
             with mock.patch.object(ap, "_probe", return_value=probe):
                 with self.assertRaisesRegex(RuntimeError, "dimensions"):
-                    ap.prove_rendered_asset(
+                    ap.prove_rendered_asset(ap.AssetProofRequest(
                         path, _entry({"variant": "classic", "text": "Copy"}),
-                        "mp4", (1920, 1080), 3.5, "render-key")
+                        "mp4", (1920, 1080), 3.5, "render-key"))
 
     def test_render_entry_always_returns_pre_handoff_proof(self) -> None:
         entry = _entry({"variant": "classic", "text": "Real copy"})
@@ -266,21 +282,18 @@ class RenderedAssetProofTests(unittest.TestCase):
             def fake_render(_rel: str, _fmt: str, _spec: dict, out: str) -> None:
                 Path(out).write_bytes(b"render")
 
+            def fake_prove(request: ap.AssetProofRequest) -> dict:
+                sidecar = request.path + ".proof.json"
+                Path(sidecar).write_text("{}")
+                return {"schemaVersion": 1, "sidecar": sidecar,
+                        "asset": {"sha256": hashlib.sha256(b"render").hexdigest()}}
+
             with mock.patch.object(gr, "_render_to", side_effect=fake_render), \
                     mock.patch.object(gr, "prove_rendered_asset",
-                                      return_value={"schemaVersion": 1}) as prove:
+                                      side_effect=fake_prove) as prove:
                 result = gr.render_entry(entry, tmp)
-            self.assertEqual(result["proof"], {"schemaVersion": 1})
+            self.assertEqual(result["proof"]["schemaVersion"], 1)
             prove.assert_called_once()
-
-    def test_hyperframes_runtime_is_version_pinned(self) -> None:
-        with mock.patch.object(gr.subprocess, "run") as run:
-            run.return_value = mock.Mock(returncode=0, stderr="", stdout="")
-            with mock.patch.object(gr.os.path, "exists", return_value=True):
-                gr._render_to("compositions/card.html", "mp4", {}, "/tmp/card.mp4")
-        command = run.call_args.args[0]
-        self.assertEqual(command[:3], ["npx", "--yes", "hyperframes@0.7.33"])
-
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

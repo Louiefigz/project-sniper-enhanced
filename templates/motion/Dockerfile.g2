@@ -1,0 +1,26 @@
+FROM mcr.microsoft.com/playwright@sha256:d518367161e599b64e4e8b83ff180be45bfe22efb78dde77fc4c2942340fe8ca
+
+USER root
+WORKDIR /opt/sniper-motion
+
+COPY package.json package-lock.json ./
+RUN npm ci --include=optional --no-audit --no-fund \
+    && node -e 'require("esbuild"); require("sharp"); require("onnxruntime-node"); if (require("hyperframes/package.json").version !== "0.7.33") process.exit(1)' \
+    && npm cache clean --force \
+    && chmod -R a-w /opt/sniper-motion
+
+COPY container/ ./container/
+RUN test "$(node --version)" = "v22.20.0" \
+    && test -x /usr/bin/timeout \
+    && test -x /usr/bin/tail \
+    && chmod 0555 /opt/sniper-motion/container/render-entrypoint.sh \
+    && chmod 0444 /opt/sniper-motion/container/node_isolated_user.cjs \
+    && chmod -R a-w /opt/sniper-motion
+
+LABEL io.project-sniper.renderer="hyperframes" \
+      io.project-sniper.hyperframes-version="0.7.33" \
+      io.project-sniper.render-policy="sniper-oci-render-v2" \
+      io.project-sniper.node-version="22.20.0"
+
+USER 1000:1000
+ENTRYPOINT ["/opt/sniper-motion/container/render-entrypoint.sh"]

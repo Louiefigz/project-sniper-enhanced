@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "imageId": "sha256:bc56d3860d2ec1c843f7184bcecd21137aa79fe9fe19c90a67136d3052222ba8",
+  "architecture": "arm64",
+  "os": "linux",
+  "config": {
+    "user": "1000:1000",
+    "entrypoint": [
+      "/opt/sniper-motion/container/render-entrypoint.sh"
+    ],
+    "workingDir": "/opt/sniper-motion",
+    "environment": [
+      "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "LANG=C.UTF-8",
+      "LC_ALL=C.UTF-8",
+      "PLAYWRIGHT_BROWSERS_PATH=/ms-playwright"
+    ],
+    "volumes": null,
+    "healthcheck": null
+  },
+  "labels": {
+    "io.project-sniper.renderer": "hyperframes",
+    "io.project-sniper.hyperframes-version": "0.7.33",
+    "io.project-sniper.render-policy": "sniper-oci-render-v2",
+    "io.project-sniper.node-version": "22.20.0",
+    "org.opencontainers.image.ref.name": "ubuntu",
+    "org.opencontainers.image.version": "22.04"
+  },
+  "rootfs": {
+    "type": "layers",
+    "layers": [
+      "sha256:0d1a800648d7469f0278fe8acc8f0affd3e7199368ec9d0e4bfee32f62775852",
+      "sha256:b92f51fe4108f4a56a289e4016c71dab73e4a2b308cf1d25562090f0c58a646d",
+      "sha256:7b168bc2282c95b0842929795b234ad272ed8d8cdd9b61c897c1ab691e7a39de",
+      "sha256:54bc63465c138470927246ec0a2171b2af045811baa4d263fce2c0e2d76f037d",
+      "sha256:2d8395f518976a86a89334e2b0f0cd4a98466ada84a13408f995a6f7a470703a",
+      "sha256:7c6748e456fb7fb3ac3b9ae46d8329c4b797fca9f27e767d22245b9f843fe99c",
+      "sha256:abfe370f1f5deca215e3cd7db0bbce13d582ab20ebf8229c08793e911d9196b2",
+      "sha256:3d73c418754dc855e7b7b649808e6fc7ca5e7eaff4997f312a73bb6ea34c7689",
+      "sha256:bf982644c839ee1791c2478bd11f219a58a20ed942b75beebd0ebc7c12bb5271"
+    ]
+  },
+  "probedClosure": {
+    "nodeVersion": "v22.20.0",
+    "hyperframesVersion": "0.7.33",
+    "ffmpegVersion": "4.4.2-0ubuntu0.22.04.1",
+    "chromiumVersion": "141.0.7390.37",
+    "sha256": {
+      "/usr/bin/node": "840d5ee21241ce964443ace2e1dd8224c84e51379b6202e3e93cc716325df356",
+      "/usr/bin/ffmpeg": "5b53d938b60170b22003b05d5aa8cbbc73d98c06ff2e2b73e4e0a0cf4448c569",
+      "/usr/bin/ffprobe": "42d8c7efe6c4da3f3e6f09b1f4c86ef32f0505d86432dc82db123ca0f4fd8838",
+      "/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell": "fbf4eae205e49884605b592998593cdf5cf013b880d35b1fb1d64f585f8bd976",
+      "/opt/sniper-motion/node_modules/hyperframes/dist/cli.js": "88cd104e1435ae7a7322469994c72f80f6fde0587d67c2f34b99daa482c597ac",
+      "/opt/sniper-motion/container/render-entrypoint.sh": "9e0d9666d30293d54d2c918894d629768d2d715706748d825557c38243cb1e59",
+      "/opt/sniper-motion/container/node_isolated_user.cjs": "ea365e081db8c91564050b847038e8445883c5e2e61d6c945774c74720eaca50",
+      "/opt/sniper-motion/package-lock.json": "6ea8dc523d94fdde7951783201fbd1b9abe045bf6fad672fc41692dbf511dcea"
+    }
+  }
+}

@@ -30,9 +30,7 @@ import argparse
 import json
 import math
 import os
-import subprocess
 import sys
-import tempfile
 from dataclasses import dataclass
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # run-by-path: producer pkg root on sys.path
@@ -43,233 +41,23 @@ from graphics.delivery_geometry import (
     fallback_placement_evidence as _fallback_placement_evidence,
     fit_delivery_geometry as _delivery_geometry,
 )
+from graphics.composite_core import (
+    CompositeOptions as _PassOpts,
+    build_graph as _build_graph,
+    composite,
+    probe_frames as _probe_frames,
+    run_command as _run,
+)
 from graphics.exit_on_cut import TAKEOVER_BASES
 from graphics.graphics_render import render_entry
 from graphics.pip_hole import entry_has_hole, hole_clip_fields
 from motion.recompose import requires_recompose
-from producer_config import ENCODE, CANVAS, PLACEMENT_SCALE
-
-# Chunk cap on overlay inputs per ffmpeg pass — big filter graphs get fragile
-# (§5.5.3). ≤ this many clips composite in one pass; more spill into extra passes.
-_CHUNK = 8
-
-# Focus-shift blur (R5): a full-frame data graphic over a BLURRED base — the
-# speaker recedes, the data stars, the speaker returns. boxblur luma radius 20
-# is the operator's calibration (docs/studies/REFERENCE_STYLE_STUDY.md R5). The blur is
-# gated to the graphic's own window (split -> blur -> overlay=enable), a hard
-# but ROBUST + deterministic gate — the alpha graphic's own 0.5s fade-in masks
-# the onset, and enable-gating (vs an xfade) keeps the frame count exact so the
-# ±1 timeline assertion still holds. Captions are NOT suppressed under it (unlike
-# own-screen): the screen blurs back, so the speaker keeps talking under it.
-_FOCUS_BLUR = 20
-
-# Blur+desat takeover base (G5 — JADEN_STYLE.md §5.4 E4, 8 instances/4 reels
-# HIGH): the live frame goes gaussian-blurred + DESATURATED mid-shot (measured
-# apply 1-2 frames; σ≈20-30) while VO continues, sharp content pops over it,
-# and a hard cut restores colour/sharp in 1 frame. Gated to an explicit plan
-# request only: entry ``"takeoverBase": "blur-desat"``. Same enable-gate
-# pattern as focus-shift (1-frame on/off = the measured hard apply/restore;
-# pair the entry with ``exitOnCut`` so the restore rides the cut), with
-# gblur (true gaussian) + hue=s=0 instead of boxblur.
-_TAKEOVER_SIGMA = 24
+from producer_config import PLACEMENT_SCALE
 
 
 def emit(**fields) -> None:
     """One NDJSON status line on stdout (matches the sibling render stages)."""
     print(json.dumps(fields), flush=True)
-
-
-def _run(cmd: list[str]) -> None:
-    """Run an ffmpeg command; raise RuntimeError with the stderr tail on failure."""
-    proc = subprocess.run(cmd, capture_output=True, text=True)
-    if proc.returncode != 0:
-        tail = "\n".join((proc.stderr or proc.stdout).strip().splitlines()[-8:])
-        raise RuntimeError(f"{cmd[0]} failed ({proc.returncode}):\n{tail}")
-
-
-def _probe_frames(path: str) -> int:
-    """Exact video frame count via PACKET count (container read, no decode).
-
-    ``-count_frames`` fully DECODES the stream (measured 16.5s on the 108s e2e
-    base). On our own H.264 MP4s every video packet is exactly one access unit
-    = one frame (progressive, one-frame-per-packet muxing — no field pairing),
-    so ``nb_read_packets == nb_read_frames``; verified identical (2598) on the
-    e2e base while running 0.085s instead of 16.5s.
-    """
-    proc = subprocess.run(
-        ["ffprobe", "-v", "error", "-select_streams", "v:0", "-count_packets",
-         "-show_entries", "stream=nb_read_packets", "-of",
-         "default=noprint_wrappers=1:nokey=1", path],
-        capture_output=True, text=True)
-    if proc.returncode != 0:
-        raise RuntimeError(f"ffprobe failed on {path}: {proc.stderr.strip()[-200:]}")
-    return int(proc.stdout.strip())
-
-
-# --------------------------------------------------------------------------- #
-# Compositing — single-pass overlay batching (§5.5.3), chunked for robustness
-# --------------------------------------------------------------------------- #
-@dataclass
-class _Graph:
-    """filter_complex accumulator — carries the parts list + the eof_action mode
-    so ``_overlay_clip`` stays ≤4 params (the house limit)."""
-
-    parts: list[str]
-    eof_pass: bool = False
-
-
-def _overlay_clip(prev: str, clip: dict, idx: int, g: _Graph) -> str:
-    """Composite one clip onto ``prev``; return the new head label.
-
-    focus-shift (R5) first BLURS the base under the window (split → boxblur →
-    overlay=enable), then the alpha graphic composites on top. Every other anchor
-    overlays the graphic directly. A face-relative offset ``x``/``y`` translates
-    the overlay; ``x=0:y=0`` reproduces the byte-stable MG-1 string exactly.
-
-    ``g.eof_pass`` appends ``:eof_action=pass`` to the graphic overlay — MANDATORY
-    when compositing many short clips over a long base (the assemble path): with
-    the ffmpeg default (``repeat``) the frame scheduler juggling several
-    ended-but-repeating inputs duplicates ~1-in-4 OUTPUT frames (a CFR-costumed
-    judder, invisible to frame counts) — the video-editor's incremental-graphics
-    stutter trap. Off by default so the mid-pipeline pass stays byte-stable.
-    """
-    s, e = float(clip["outStart"]), float(clip["outEnd"])
-    gate = f"enable='between(t,{s:.4f},{e:.4f})'"
-    if clip.get("pipHole"):
-        # NATEHERK item 9: fill the hole-comp's transparent face hole — crop
-        # the BASE to the hole's aspect (face-centred), scale it into the
-        # rect and overlay it UNDER the comp, gated to the window. The comp's
-        # rounded mask covers the rectangle's corners (rounding is free) and
-        # its ring/shadow draws over the footage. Timestamps are untouched:
-        # the PIP shows the SAME instant as the base (the live face bridge).
-        cw, ch, cx, cy = clip["pipHole"]["crop"]
-        hx, hy, hw, hh = clip["pipHole"]["rect"]
-        g.parts.append(f"{prev}split[ph{idx}a][ph{idx}b]")
-        g.parts.append(f"[ph{idx}b]crop={cw}:{ch}:{cx}:{cy},"
-                       f"scale={hw}:{hh}:flags=lanczos[ph{idx}s]")
-        based = f"[phb{idx}]"
-        g.parts.append(f"[ph{idx}a][ph{idx}s]overlay=x={hx}:y={hy}:{gate}{based}")
-        prev = based
-    if clip.get("takeoverBase") == "blur-desat":
-        # G5: gaussian blur + desaturate the FOOTAGE under this window (E4).
-        # Enable-gating = the measured 1-2 frame hard apply/restore.
-        g.parts.append(f"{prev}split[tb{idx}a][tb{idx}b]")
-        g.parts.append(f"[tb{idx}b]gblur=sigma={_TAKEOVER_SIGMA},"
-                       f"hue=s=0[tb{idx}bd]")
-        based = f"[tbb{idx}]"
-        g.parts.append(f"[tb{idx}a][tb{idx}bd]overlay={gate}{based}")
-        prev = based
-    if clip.get("anchor") == "focus-shift":
-        g.parts.append(f"{prev}split[fb{idx}a][fb{idx}b]")
-        g.parts.append(f"[fb{idx}b]boxblur={_FOCUS_BLUR}[fb{idx}bl]")
-        blurred = f"[fbl{idx}]"
-        g.parts.append(f"[fb{idx}a][fb{idx}bl]overlay={gate}{blurred}")
-        prev = blurred
-    x, y = int(clip.get("x", 0)), int(clip.get("y", 0))
-    xy = f"x={x}:y={y}:" if (x or y) else ""
-    eof = ":eof_action=pass" if g.eof_pass else ""
-    out = f"[gc{idx}]"
-    g.parts.append(f"{prev}[ov{idx}]overlay={xy}{gate}:format=auto{eof}{out}")
-    return out
-
-
-def _build_graph(clips: list[dict], eof_pass: bool = False) -> tuple[str, str]:
-    """filter_complex overlaying N clips (inputs 1..N) onto the base (input 0).
-
-    Each clip is time-shifted so its frame 0 lands at ``outStart`` and gated to
-    its window; ``format=auto`` lets ProRes alpha blend and opaque takeovers
-    cover. Returns ``(graph, final_label)`` — the proven MG-1 recipe, generalized
-    to N and to the R5 focus-shift + R3/R4 face-relative anchors. A clip with
-    ``scaleDims`` (placement.scale ≠ 1) is resized to those EVEN dims (lanczos —
-    the crispest resampler for graphic edges) before the PTS shift; without the
-    key the chain string is byte-identical to the unscaled recipe.
-    """
-    g = _Graph(parts=[], eof_pass=eof_pass)
-    for i, c in enumerate(clips):
-        s = float(c["outStart"])
-        pre = ""
-        if c.get("scaleDims"):
-            sw, sh = c["scaleDims"]
-            pre = f"scale={sw}:{sh}:flags=lanczos,"
-        g.parts.append(f"[{i + 1}:v]{pre}setpts=PTS-STARTPTS+{s:.4f}/TB[ov{i}]")
-    prev = "[0:v]"
-    for i, c in enumerate(clips):
-        prev = _overlay_clip(prev, c, i, g)
-    return ";".join(g.parts), prev
-
-
-@dataclass
-class _PassOpts:
-    """Per-pass compositing options (keeps the pass functions ≤4 params)."""
-
-    eof_pass: bool = False
-    ydif_file: str | None = None   # inline smoothness tap (final pass only)
-
-
-def _composite_pass(video_in: str, clips: list[dict], video_out: str,
-                    opts: _PassOpts) -> None:
-    """One ffmpeg pass: overlay ``clips`` onto ``video_in`` → mezzanine ``video_out``.
-
-    Video re-encodes at CRF 12 with ``ENCODE['composite_preset']`` (veryfast —
-    measured 16.9s→9.4s vs mezzanine_preset with CRF still governing quality);
-    audio is copied through, and the frame count is preserved (overlay is bound
-    to the main input). With ``opts.ydif_file`` the final label is split and a
-    signalstats YDIF metadata dump rides the same encode pass as a second null
-    output — folding the smoothness probe INTO the composite (one decode
-    instead of a separate 11.6s full-decode probe). NOTE: the tap measures the
-    PRE-encode filtergraph frames — the eof_action dup bug is produced by the
-    overlay frame scheduler, so it is fully visible here (the encoder itself
-    never duplicates frames); the 0.08 threshold in assemble.py is unchanged.
-    """
-    cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i", video_in]
-    for c in clips:
-        cmd += ["-i", c["path"]]
-    graph, final = _build_graph(clips, opts.eof_pass)
-    map_label, extra = final, []
-    if opts.ydif_file:
-        esc = opts.ydif_file.replace("'", r"'\''")
-        graph += (f";{final}split[venc][vchk];"
-                  f"[vchk]signalstats,metadata=print:key=lavfi.signalstats.YDIF"
-                  f":file='{esc}'[vydif]")
-        map_label, extra = "[venc]", ["-map", "[vydif]", "-f", "null", "-"]
-    cmd += ["-filter_complex", graph, "-map", map_label, "-map", "0:a?",
-            "-c:v", ENCODE["vcodec"], "-crf", str(ENCODE["mezzanine_crf"]),
-            "-preset", ENCODE["composite_preset"], "-pix_fmt", CANVAS["pix_fmt"],
-            "-c:a", "copy", "-movflags", "+faststart", video_out, *extra]
-    _run(cmd)
-
-
-def composite(video_in: str, clips: list[dict], video_out: str,
-              opts: _PassOpts | None = None) -> int:
-    """Overlay all ``clips`` onto ``video_in``; chunk into ≤``_CHUNK`` per pass.
-
-    Returns the number of ffmpeg passes. Chunked passes chain through temp
-    intermediates (base of pass k+1 = output of pass k) beside ``video_out``.
-    ``opts`` forwards the stutter-guard eof_action (see ``_overlay_clip``) and
-    the inline YDIF tap — the tap rides the FINAL pass only (it must measure
-    the finished composite, not an intermediate chunk).
-    """
-    opts = opts or _PassOpts()
-    ordered = sorted(clips, key=lambda c: float(c["outStart"]))
-    chunks = [ordered[i:i + _CHUNK] for i in range(0, len(ordered), _CHUNK)]
-    if len(chunks) == 1:
-        _composite_pass(video_in, chunks[0], video_out, opts)
-        return 1
-    mid = _PassOpts(eof_pass=opts.eof_pass, ydif_file=None)
-    tmp = tempfile.mkdtemp(prefix="graphics-passes-",
-                           dir=os.path.dirname(os.path.abspath(video_out)))
-    try:
-        src = video_in
-        for idx, chunk in enumerate(chunks):
-            last = idx == len(chunks) - 1
-            dst = video_out if last else os.path.join(tmp, f"pass_{idx:02d}.mp4")
-            _composite_pass(src, chunk, dst, opts if last else mid)
-            src = dst
-        return len(chunks)
-    finally:
-        for name in os.listdir(tmp):
-            os.remove(os.path.join(tmp, name))
-        os.rmdir(tmp)
 
 
 # --------------------------------------------------------------------------- #

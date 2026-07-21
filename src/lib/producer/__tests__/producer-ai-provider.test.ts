@@ -46,7 +46,7 @@ const ctx: AutoEditCtx = {
 delete process.env.SNIPER_CODEX_MODEL;
 delete process.env.SNIPER_CODEX_REASONING;
 assert.equal(codexSettings().model, "gpt-5.6-sol");
-assert.equal(codexSettings().reasoning, "ultra");
+assert.equal(codexSettings().reasoning, "xhigh");
 
 delete process.env.SNIPER_CLAUDE_MODEL;
 assert.equal(claudeSettings().model, "opus");
@@ -241,7 +241,7 @@ async function testCodexAuthoring(): Promise<void> {
     codex: async (options) => {
       codexCalled = true;
       assert.equal(options.sandbox, "workspace-write");
-      assert.equal(options.reasoning, "ultra");
+      assert.equal(options.reasoning, "xhigh");
       assert.equal(options.cwd, ctx.dir);
       assert.equal(options.addDirs, undefined);
       assert.ok(options.prompt.includes(ctx.planPath));
@@ -265,7 +265,7 @@ async function testCodexAuthoring(): Promise<void> {
   assert.deepEqual(events[0], {
     event: "authoring_reasoning_selected",
     provider: "codex",
-    reasoning: "ultra",
+    reasoning: "xhigh",
     basis: "configured",
     sourceDurationS: undefined,
   });

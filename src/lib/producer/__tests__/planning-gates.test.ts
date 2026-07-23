@@ -48,6 +48,8 @@ assert.deepEqual(baseCommands.map((command) => command.gate), [
   "hook_contract",
   "template_usage",
   "claims_contract",
+  "comp_size",
+  "geometry_feasibility",
 ]);
 assert.deepEqual(baseCommands[0].args.slice(0, 2), [
   baseInput.planPath,
@@ -86,6 +88,15 @@ assert.deepEqual(baseCommands[4].args, [
   "--expected-digest",
   baseInput.templateUsageDigest,
 ]);
+assert.deepEqual(baseCommands[6].args, [baseInput.planPath],
+  "comp_size measures the plan's comps (shared render cache resolves internally)");
+assert.match(baseCommands[6].script, /graphics[/\\]comp_measure\.py$/);
+assert.deepEqual(baseCommands[7].args, [
+  baseInput.planPath,
+  baseInput.manifestPath,
+  "/project/producer",
+], "geometry_feasibility writes geometry_predictions.json into the producer dir");
+assert.match(baseCommands[7].script, /planner[/\\]geometry_feasibility\.py$/);
 
 const referenceInput: GateBundleInput = {
   ...baseInput,
@@ -159,7 +170,8 @@ async function main(): Promise<void> {
   assert.equal(bundle.ok, true);
   assert.deepEqual(seen.map((command) => command.gate), [
     "operator_intent", "transcript_cut", "plan_lint", "hook_contract",
-    "template_usage", "claims_contract", "reference_lint",
+    "template_usage", "claims_contract", "comp_size", "geometry_feasibility",
+    "reference_lint",
   ]);
   assert.equal(bundle.gates.hookContract.scope, "produced");
   assert.deepEqual(bundle.gates.referenceLint?.metrics, { cutsPerMin: 8 });

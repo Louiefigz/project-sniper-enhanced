@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
+import { mkdtempSync, rmSync } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import {
   assembleCommandArgs,
+  runAssemble,
   runAuditB,
   runAuditBOutcome,
 } from "../../../app/api/producer/auto-edit/chain";
@@ -40,6 +43,31 @@ async function main(): Promise<void> {
     /two deterministic checks failed/,
   );
   assert.deepEqual(events, [failed.event]);
+
+  await typedAssembleErrorSurvivesIntoErrTail();
+}
+
+/**
+ * Regression (geometry contract v3 A2): assemble.py emits its typed errors —
+ * including "NoLegalRegion: {...}" — via emit() on STDOUT. runAssemble's
+ * errTail must carry that typed text so the re-plan route can key on it; a
+ * stderr-only tail turned every render-time NoLegalRegion into an untyped
+ * terminal failure. This spawns the REAL assemble.py (no plan file, so it hits
+ * the typed emit path and exits 1) instead of faking the tail.
+ */
+async function typedAssembleErrorSurvivesIntoErrTail(): Promise<void> {
+  const tmp = mkdtempSync(path.join(os.tmpdir(), "sniper-chain-assemble-"));
+  try {
+    const result = await runAssemble(tmp, path.join(tmp, "asset_manifest.json"), () => {});
+    assert.equal(result.code, 1);
+    assert.match(
+      result.errTail, /"error"/,
+      "assemble.py's typed emit() error must land in errTail — the NoLegalRegion re-plan route reads it",
+    );
+    assert.match(result.errTail, /edit_plan\.json/);
+  } finally {
+    rmSync(tmp, { recursive: true, force: true });
+  }
 }
 
 main()

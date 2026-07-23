@@ -41,7 +41,6 @@ import argparse
 import json
 import os
 import shutil
-import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass
@@ -50,6 +49,10 @@ from fractions import Fraction
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from compile_timeline import Segment, compile_plan  # noqa: E402
+# Probe primitives live in media_probe (this file's 300-line budget); the
+# re-import keeps every historical `cut_speed.<probe>` import path working.
+from media_probe import (display_dims, has_audio, probe_duration,  # noqa: E402,F401
+                         probe_video, probe_video_frames, run_ff, _fps_fraction)
 from producer_config import AUDIO, ENCODE  # noqa: E402
 
 # Fast input-seek lands a keyframe at-or-before (src_start - this); the decoder
@@ -67,22 +70,11 @@ AUDIO_CH = ENCODE["audio_channels"]      # 2
 # backstop stays sharp. See PRODUCER_PLAN §4.2 / §8.
 DURATION_TOL_BASE_FRAMES = 1.0
 DURATION_TOL_PER_SEGMENT_FRAMES = 0.5
-# Fallback CFR when a source reports an unusable r_frame_rate (e.g. "0/0").
-CANVAS_FPS_FALLBACK = 30
 
 
 def emit(**fields) -> None:
     """One JSON status object per line on stdout (NDJSON, like the sibling stages)."""
     print(json.dumps(fields), flush=True)
-
-
-def run_ff(cmd: list[str]) -> str:
-    """Run an ffmpeg/ffprobe command; raise RuntimeError with the stderr tail."""
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        tail = (result.stderr or result.stdout).strip().splitlines()[-12:]
-        raise RuntimeError("\n".join(tail) or f"{cmd[0]} failed")
-    return result.stdout.strip()
 
 
 @dataclass(frozen=True)
@@ -105,64 +97,6 @@ class Profile:
         return 1.0 / float(self.fps)
 
 
-def probe_video(path: str) -> dict:
-    """First video stream's geometry/timing params (raises if there is none)."""
-    out = run_ff(["ffprobe", "-v", "error", "-select_streams", "v:0",
-                  "-show_entries",
-                  "stream=width,height,r_frame_rate,pix_fmt:"
-                  "stream_side_data=rotation",
-                  "-of", "json", path])
-    streams = json.loads(out).get("streams", [])
-    if not streams:
-        raise RuntimeError(f"{path}: no video stream")
-    return streams[0]
-
-
-def probe_duration(path: str) -> float:
-    """Container duration in seconds (ffprobe ``format=duration``)."""
-    out = run_ff(["ffprobe", "-v", "error", "-show_entries", "format=duration",
-                  "-of", "default=noprint_wrappers=1:nokey=1", path])
-    return float(out.strip().splitlines()[0])
-
-
-def probe_video_frames(path: str) -> int:
-    """Exact video frame count via packet count (no decode) — the timeline
-    length that matters, free of the AAC padding that inflates format duration."""
-    out = run_ff(["ffprobe", "-v", "error", "-select_streams", "v:0",
-                  "-count_packets", "-show_entries", "stream=nb_read_packets",
-                  "-of", "default=noprint_wrappers=1:nokey=1", path])
-    return int(out.strip().splitlines()[0])
-
-
-def has_audio(path: str) -> bool:
-    """True if the file has at least one audio stream."""
-    out = run_ff(["ffprobe", "-v", "error", "-select_streams", "a:0",
-                  "-show_entries", "stream=codec_type", "-of", "csv=p=0", path])
-    return bool(out.strip())
-
-
-def _fps_fraction(raw: str) -> Fraction:
-    num, den = raw.split("/") if "/" in raw else (raw, "1")
-    frac = Fraction(int(num), int(den))
-    return frac if frac > 0 else Fraction(CANVAS_FPS_FALLBACK, 1)
-
-
-def display_dims(stream: dict) -> tuple[int, int]:
-    """Width/height AS DISPLAYED — phone footage stores landscape pixels plus
-    a display-matrix rotation flag (edge I9: iPhone portrait = 3840x2160 +
-    rotation=-90). ffmpeg's decoder auto-rotates frames, so a canvas built
-    from raw dims letterboxes upright portrait into landscape. Swap on +/-90.
-    """
-    w, h = int(stream["width"]), int(stream["height"])
-    for side in stream.get("side_data_list", []):
-        try:
-            if abs(int(float(side.get("rotation", 0)))) % 180 == 90:
-                return h, w
-        except (TypeError, ValueError):
-            continue
-    return w, h
-
-
 def decide_profile(first_source_path: str) -> Profile:
     """Phase-1 rule: the FIRST source defines the common profile; every other
     source is scaled + letterbox-padded to fit it (PRODUCER_PLAN §6)."""
@@ -171,6 +105,31 @@ def decide_profile(first_source_path: str) -> Profile:
     return Profile(width=width, height=height,
                    fps=_fps_fraction(v["r_frame_rate"]),
                    pix_fmt=v.get("pix_fmt") or ENCODE["pix_fmt"])
+
+
+def proxy_profile(profile: Profile, scale: float) -> Profile:
+    """The DOWNSCALED proxy variant of a profile (geometry contract v3 A1).
+
+    Only the canvas shrinks (even-snapped); fps and pix_fmt are untouched, so
+    every downstream trim/setpts/atempo/fps term — the segment math — runs
+    bit-identically to the full render, just onto smaller frames.
+
+    Args:
+        profile: The full-resolution common profile.
+        scale: Downscale factor in (0, 1].
+
+    Returns:
+        The proxy Profile.
+
+    Raises:
+        ValueError: On a scale outside (0, 1].
+    """
+    if not 0.0 < scale <= 1.0:
+        raise ValueError(f"proxy scale {scale} outside (0, 1]")
+    width = max(2, int(round(profile.width * scale / 2.0)) * 2)
+    height = max(2, int(round(profile.height * scale / 2.0)) * 2)
+    return Profile(width=width, height=height, fps=profile.fps,
+                   pix_fmt=profile.pix_fmt)
 
 
 def _video_chain(seg: Segment, pre_seek: float, profile: Profile) -> str:
@@ -371,9 +330,31 @@ def assert_duration(out_path: str, expected_s: float, profile: Profile,
     return result
 
 
+@dataclass(frozen=True)
+class CutSpeedOptions:
+    """Optional knobs for one cut+speed render (keeps entry points ≤4 params).
+
+    Attributes:
+        work_dir: Where the per-segment parts land.
+        proxy_scale: When set, render a DOWNSCALED proxy mezzanine through the
+            SAME segment math (see :func:`proxy_profile`); ``None`` = full res.
+    """
+
+    work_dir: str
+    proxy_scale: float | None = None
+
+
 def render_cut_speed(plan: dict, manifest: dict, out_path: str,
                      work_dir: str) -> dict:
     """Compile the plan and render its cut+speed mezzanine into ``out_path``."""
+    return render_cut_speed_opts(plan, manifest, out_path,
+                                 CutSpeedOptions(work_dir))
+
+
+def render_cut_speed_opts(plan: dict, manifest: dict, out_path: str,
+                          opts: CutSpeedOptions) -> dict:
+    """Cut+speed render with options (the proxy-capable entry point)."""
+    work_dir = opts.work_dir
     tmap = compile_plan(plan)
     if not tmap.segments:
         raise RuntimeError("plan compiles to zero segments — nothing to render")
@@ -382,6 +363,10 @@ def render_cut_speed(plan: dict, manifest: dict, out_path: str,
     if missing:
         raise RuntimeError(f"sources missing from manifest: {sorted(missing)}")
     profile = decide_profile(id_to_path[tmap.segments[0].source_id])
+    if opts.proxy_scale is not None:
+        profile = proxy_profile(profile, opts.proxy_scale)
+        emit(stage="cut_speed", status="proxy", scale=opts.proxy_scale,
+             width=profile.width, height=profile.height)
     emit(stage="cut_speed", status="profile", width=profile.width,
          height=profile.height, fps=profile.fps_arg, pix_fmt=profile.pix_fmt)
     _warn_off_profile(tmap.segments, id_to_path, profile)

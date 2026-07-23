@@ -10,6 +10,7 @@ import {
   SHORTS_SAFE_BOX,
   canvasToDisplay,
   clampToCanvas,
+  contentBBoxFrom,
   displayToCanvas,
   dragPlacement,
   inSafeRect,
@@ -250,6 +251,23 @@ assert.deepEqual(scaledContentRect({ x: 60, y: 250 }, { w: 300, h: 400 }, 1), {
 
   // degenerate content bbox fails loudly (never guess a scale)
   assert.throws(() => drag("br", 10, 10, 1) && scaleFromCornerDrag({ base: 1, corner: "br", dxPx: 1, dyPx: 1, content: { w: 0, h: 400 }, canvas, box, snap: false }), /degenerate/);
+}
+
+// ---- contentBBoxFrom (v3 item #6e — the stamp the placement commit writes) --
+{
+  // measured origin+size → whole-px [x0, y0, x1, y1]
+  assert.deepEqual(
+    contentBBoxFrom({ x: 120.4, y: 300.6 }, { w: 640.2, h: 200.3 }),
+    [120, 301, 761, 501],
+    "origin+size compose to a whole-px bbox",
+  );
+  // unmeasured halves → null (the commit leaves any previous stamp untouched)
+  assert.equal(contentBBoxFrom(null, { w: 640, h: 200 }), null, "no origin = null");
+  assert.equal(contentBBoxFrom({ x: 10, y: 10 }, null), null, "no size = null");
+  // degenerate / non-finite measurements never stamp a guess
+  assert.equal(contentBBoxFrom({ x: 10, y: 10 }, { w: 0, h: 200 }), null, "zero width = null");
+  assert.equal(contentBBoxFrom({ x: NaN, y: 10 }, { w: 640, h: 200 }), null, "NaN origin = null");
+  assert.equal(contentBBoxFrom({ x: 10, y: 10 }, { w: Infinity, h: 200 }), null, "infinite size = null");
 }
 
 console.log("placement-geometry: all assertions passed");

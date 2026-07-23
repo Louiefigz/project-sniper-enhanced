@@ -164,16 +164,25 @@ export function runAssemble(
   dlog("producer:auto-edit", "spawn assemble.py", { dir, args: args.slice(1) });
   return new Promise((resolve) => {
     const proc = spawn(pythonInterpreter(), args, { env: { ...process.env } });
-    const stderr = tailCollector();
+    // One tail over BOTH streams: assemble.py emits its typed errors (e.g.
+    // "NoLegalRegion: {...}") as NDJSON on STDOUT via emit(), and the geometry
+    // re-plan route keys on that token surviving into errTail (contract v3 A2).
+    // Collecting stderr alone would make every render-time NoLegalRegion an
+    // untyped terminal failure.
+    const tail = tailCollector();
     const lines = lineSplitter(sendRaw);
-    proc.stdout.on("data", (d: Buffer) => lines.push(d.toString()));
+    proc.stdout.on("data", (d: Buffer) => {
+      const text = d.toString();
+      lines.push(text);
+      tail.push(text);
+    });
     proc.stderr.on("data", (d: Buffer) => {
-      stderr.push(d.toString());
+      tail.push(d.toString());
       process.stderr.write(d);
     });
     proc.on("close", (code) => {
       lines.flush();
-      resolve({ code: code ?? 1, errTail: stderr.get() });
+      resolve({ code: code ?? 1, errTail: tail.get() });
     });
     proc.on("error", (err) => resolve({ code: 1, errTail: err.message }));
   });

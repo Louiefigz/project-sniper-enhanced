@@ -3,10 +3,12 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import type { GraphicEntry } from "@/lib/producer/edit-plan";
 import {
+  contentBBoxFrom,
   dragPlacement,
   inSafeRect,
   isShortsCanvas,
   previewTransform,
+  type ContentBBox,
   type Placement,
   type SnappedPlacement,
   type SnappedScale,
@@ -54,8 +56,16 @@ interface Props {
    * Release → ONE commit; null = reset to auto (clears scale too); unsafe =
    * outside the shorts SAFE_BOX. Move commits preserve the committed scale;
    * corner-grip commits carry the new scale (omitted when exactly 1).
+   * `contentBBox` = the in-iframe measured painted-content bbox (comp-canvas
+   * px, unscaled) stamped onto the entry with the placement so the plan
+   * lint's SAFE_BOX check has a real box (v3 item #6e); null = unmeasured
+   * (the commit leaves any previous stamp untouched).
    */
-  onCommitPlacement: (p: (Placement & { scale?: number }) | null, unsafe: boolean) => void;
+  onCommitPlacement: (
+    p: (Placement & { scale?: number }) | null,
+    unsafe: boolean,
+    contentBBox?: ContentBBox | null,
+  ) => void;
 }
 
 interface Box {
@@ -184,7 +194,7 @@ export default function GraphicPreview({ graphic, currentTime, videoRef, forced,
     if (gesture.live && !cancel) {
       // ONE mutatePlan per gesture — a move commit PRESERVES the committed scale.
       const p = { ...gesture.live.p, ...(committedScale !== 1 ? { scale: committedScale } : {}) };
-      onCommitPlacement(p, shorts && !inSafeRect(gesture.live.p, dims));
+      onCommitPlacement(p, shorts && !inSafeRect(gesture.live.p, dims), contentBBoxFrom(origin, size));
     }
     setGesture(null);
   };
@@ -197,7 +207,7 @@ export default function GraphicPreview({ graphic, currentTime, videoRef, forced,
   const commitScale = (s: SnappedScale) => {
     if (!pin || (placed && s.s === committedScale) || (!placed && s.s === 1)) return;
     const p = { x: Math.round(pin.x), y: Math.round(pin.y), ...(s.s !== 1 ? { scale: s.s } : {}) };
-    onCommitPlacement(p, shorts && !inSafeRect(p, dims));
+    onCommitPlacement(p, shorts && !inSafeRect(p, dims), contentBBoxFrom(origin, size));
   };
 
   return (

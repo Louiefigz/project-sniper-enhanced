@@ -10,6 +10,8 @@ export const PLANNING_GATE_IDS = [
   "hook_contract",
   "template_usage",
   "claims_contract",
+  "comp_size",
+  "geometry_feasibility",
   "reference_lint",
 ] as const;
 
@@ -59,6 +61,8 @@ export interface GateBundleVerdict {
     hookContract: PlanningGateVerdict;
     templateUsage: PlanningGateVerdict;
     claimsContract: PlanningGateVerdict;
+    compSize: PlanningGateVerdict;
+    geometryFeasibility: PlanningGateVerdict;
     referenceLint: PlanningGateVerdict | null;
   };
 }

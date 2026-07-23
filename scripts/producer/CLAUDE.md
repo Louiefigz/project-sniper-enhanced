@@ -35,7 +35,8 @@ without the controller.
 
 **Gate/contract modules (top-level, run each plan-review round):**
 `operator_intent_contract.py`, `plan_lint.py` (+ `plan_lint_motion` / `_audio` /
-`_reframe` / `_smooth`, `plan_lint_broll.py`), `hook_contract.py`,
+`_reframe` / `_smooth`, `plan_lint_broll.py`, `plan_lint_overlays.py` —
+title-card + b-roll window checks called from `lint`), `hook_contract.py`,
 `claims_contract.py`, `reference_profile_lint.py`, `transcript_cut_contract.py`
 (+ `_evidence` / `_quality`), `template_usage_contract.py` (+ `_approval`),
 `intro_transition_contract.py`, `brand_lint.py`; `assemble_lock.py` guards
@@ -59,7 +60,11 @@ in `docs/producer/PRODUCER_PLAN.md`. This file is the code map.
    face-aware vertical cut (shorts).
 4. **overlays** → `captions/overlays.py` — hook title cards.
 5. **graphics** → `graphics/graphics_stage.py` — composites MG entries (renders each
-   comp via `graphics/graphics_render.py`, places via `planner/graphics_anchors.py`).
+   comp via `graphics/graphics_render.py`; per-entry offset resolution —
+   explicit pin / rail / own-screen / Placement v2 — lives in
+   `graphics/stage_placement.py`, which places via `planner/graphics_anchors.py`;
+   the plan-time comp-size gate's geometry rules live in
+   `graphics/comp_measure_rules.py`, orchestrated by `graphics/comp_measure.py`).
 6. **punch-ins / motion** → `motion/punch_in.py` — zooms, ramps, brackets, aliveness.
 7. **enhance → transitions → gain / master** → `audio/audio_enhance.py`
    (plan.audioEnhance dialogue cleanup, pre-gain) runs FIRST, on the pure
@@ -230,6 +235,17 @@ veryfast, keyframe every 24 frames (scrub-dense), AAC 96k, faststart. Measured
 warn-and-continue exception (`proxy_failed`) — the deliverable already
 succeeded, a broken preview must not fail the render.
 
+**Draft mode** — `draft_render.py <plan> <manifest> <producer_dir>` = the
+pre-review-wall WATCHABLE candidate (geometry-contract v3 item #8): subprocesses
+`render.py` into `<producer_dir>/draft/` with `--approval-dir <producer_dir>`
+(same delivery-approval receipt the final render enforces; Audit B skipped by
+default, `--audit` opts in), then one fast drawtext pass (veryfast, `-c:a copy`,
+knobs in `producer_config.DRAFT`) burns a center + corner DRAFT watermark into
+`draft/draft.mp4` and deletes the unwatermarked `final.mp4` + its
+`.assembled.json`. A draft can never ship: wrong name/dir for
+`palmier/master.py`'s `final.mp4` path key, no provenance, and it never writes
+`.sniper-qc-approved.json` (refuses to run if one appears in `draft/`).
+
 **Music at assemble** — after the composite + YDIF check, `plan.music =
 {enabled, path|assetId, duck (default true), gapDb}` is applied by
 `audio/music_stage.py`: resolve the track (`path` absolute, or `assetId` via an
@@ -350,6 +366,15 @@ At Palmier handoff this mastered bus replaces the NLE's raw linked audio; see
   converts them to comp-relative `spec.moduleLands` (the comp schedules its
   builds off it); `plan_lint_motion` validates lands (increasing, ≥0.25s
   apart — `MOTION["module_lands"]` — inside the hold).
+- `review_packet.py` — the skill review wall's hash-bound critic evidence
+  packet (SKILL step 4): plan + manifest byte hashes, the cut-segment table
+  with rationales, kept words remapped via `compile_timeline`, cut-boundary
+  neighbor words, the plan_lint/hook_contract/claims_contract verdicts +
+  `gateDigest`, and the pacing report, sealed under a deterministic
+  `contentDigest` (same inputs → same digest). Build ONCE per review round;
+  round-1 concurrent critics all read the SAME packet instead of re-deriving
+  the transcript (mirrors the GUI's `plan-review-packet.ts`). CLI:
+  `review_packet.py <plan> <transcripts_dir> <manifest> --out packet.json`.
 - `edit_scope.py` — resolves the operator's `target.scope` (trim/light/produced/
   full) + `target.lanes` per-lane directives into the active-lane map. Single source
   of truth for "what did the operator ask for"; the contract + planners key on

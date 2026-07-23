@@ -18,9 +18,13 @@ Pipeline for one run:
 3. SUPPRESS captions under own-screen takeovers: any burned-caption ASS event that
    overlaps a takeover window is dropped from ``--ass`` into ``--ass-out`` (§2.1 —
    the screen IS the visual; stacking captions on the takeover is double load).
+4. VERIFY placements default-on (:mod:`graphics.placement_verify`, v3 item #5)
+   + journal predicted-vs-measured geometry residuals to the A3 calibration
+   ledger (:mod:`planner.geometry_calibration`) when ``--producer-dir`` is known.
 
 CLI: graphics_stage.py <video_in> <graphics_track.json> <video_out>
        [--cache-dir DIR] [--ass in.ass --ass-out out.ass]
+       [--occlusions occl.json] [--producer-dir DIR] [--band-y-offset PX]
   graphics_track.json = the plan's ``graphicsTrack`` array. Empty = passthrough.
 """
 
@@ -28,15 +32,13 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import os
 import sys
 from dataclasses import dataclass
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # run-by-path: producer pkg root on sys.path
 from planner.eye_trace import placement_row
-from planner.graphics_anchors import (FACE_ANCHORS, _clip_dims, _content_bbox,
-                              resolve_offset, resolve_offset_v2, scale_geometry)
+from planner.graphics_anchors import _clip_dims
 from graphics.delivery_geometry import (
     fallback_placement_evidence as _fallback_placement_evidence,
     fit_delivery_geometry as _delivery_geometry,
@@ -51,13 +53,10 @@ from graphics.composite_core import (
 from graphics.exit_on_cut import TAKEOVER_BASES
 from graphics.graphics_render import render_entry
 from graphics.pip_hole import entry_has_hole, hole_clip_fields
-from motion.recompose import requires_recompose
-from producer_config import PLACEMENT_SCALE
-
-
-def emit(**fields) -> None:
-    """One NDJSON status line on stdout (matches the sibling render stages)."""
-    print(json.dumps(fields), flush=True)
+from graphics.placement_verify import (VerifyContext, resolve_severity,
+                                       run_verify)
+from graphics.stage_placement import emit, resolve_placement
+from planner import geometry_calibration
 
 
 # --------------------------------------------------------------------------- #
@@ -115,125 +114,12 @@ class GraphicsJob:
     eof_pass: bool = False   # assemble path: guard the 1-in-4 dup stutter
     ydif_file: str | None = None   # inline YDIF metadata dump (assemble path)
     placements_out: str | None = None   # eye-trace placements sidecar (Audit B)
-
-
-def _placement_xy(entry: dict) -> tuple[float, float]:
-    """Validate + unpack an entry's explicit ``placement`` — fail loud, never guess.
-
-    Contract: ``placement = {"x": px, "y": px}`` in COMP-CANVAS px (the comp's
-    authored 1080x1920 / 1920x1080 canvas). ``_delivery_geometry`` scales this
-    authored geometry when delivery is a higher same-aspect resolution.
-    own-screen takeovers are full-frame and never placed.
-    """
-    p = entry["placement"]
-    if entry.get("anchor", "free-band") == "own-screen":
-        raise ValueError("own-screen takeovers are full-frame — placement is illegal")
-    if not isinstance(p, dict):
-        raise ValueError(f"placement must be an object {{x, y}}; got {p!r}")
-    for name in ("x", "y"):
-        v = p.get(name)
-        if isinstance(v, bool) or not isinstance(v, (int, float)) \
-                or not math.isfinite(float(v)):
-            raise ValueError(f"placement.{name} must be a finite number; got {v!r}")
-    return float(p["x"]), float(p["y"])
-
-
-def _placement_scale(entry: dict) -> float:
-    """Validated ``placement.scale`` (1.0 when absent) — fail loud, never clamp.
-
-    Contract: an optional uniform scale on the rendered comp clip, applied about
-    the placement point (the SCALED content bbox top-left stays pinned at
-    {x, y}). Bounds are ``PLACEMENT_SCALE`` — the raster-quality band: comps
-    raster at their authored canvas, so downscaling stays crisp while upscaling
-    interpolates (soft); ≤1.5 keeps that softness invisible at delivery res.
-    own-screen is already unplaceable (``_placement_xy``), so it is unscalable.
-    """
-    s = entry["placement"].get("scale")
-    if s is None:
-        return 1.0
-    if isinstance(s, bool) or not isinstance(s, (int, float)) \
-            or not math.isfinite(float(s)):
-        raise ValueError(f"placement.scale must be a finite number; got {s!r}")
-    lo, hi = PLACEMENT_SCALE["min"], PLACEMENT_SCALE["max"]
-    if not lo <= float(s) <= hi:
-        raise ValueError(f"placement.scale {float(s):g} outside [{lo},{hi}]")
-    return float(s)
-
-
-def _explicit_offset(entry: dict, mov_path: str) -> tuple[int, int, dict]:
-    """Overlay ``(dx, dy)`` pinning the comp's rendered CONTENT top-left at the
-    entry's explicit ``placement`` point (comp-canvas px). The operator's drag
-    WINS over every anchor heuristic; measurement failure raises (an explicit
-    pin must never silently fall back to an anchor guess). An optional
-    ``placement.scale`` resizes the clip uniformly about the pin (the scaled
-    content top-left stays at {x, y}); absent = the untouched 1.0 path — no
-    dims probe, byte-identical offsets and filter graph."""
-    x, y = _placement_xy(entry)
-    scale = _placement_scale(entry)
-    content = _content_bbox(mov_path)
-    meta = {"anchor": entry.get("anchor", "free-band"),
-            "region": "explicit-placement", "fallback": False,
-            "placement": [x, y], "contentBBox": list(content)}
-    if scale == 1.0:
-        dx, dy = int(round(x - content[0])), int(round(y - content[1]))
-        meta["placedBBox"] = [content[0] + dx, content[1] + dy,
-                              content[2] + dx, content[3] + dy]
-        return dx, dy, meta
-    geo = scale_geometry(content, (x, y), _clip_dims(mov_path), scale)
-    meta.update(scale=scale, scaledDims=[geo["w"], geo["h"]],
-                placedBBox=list(geo["placed"]))
-    return geo["dx"], geo["dy"], meta
-
-
-def _fixed_overlay_offset(entry: dict, mov_path: str) -> tuple[int, int, dict]:
-    """Keep a full-canvas edge rail at its authored origin."""
-    content = _content_bbox(mov_path)
-    meta = {"anchor": entry.get("anchor", "beside-face"),
-            "region": "fixed-canvas", "fallback": False,
-            "contentBBox": list(content), "placedBBox": list(content)}
-    return 0, 0, meta
-
-
-def _placement(entry: dict, mov_path: str, video_in: str) -> tuple[int, int, dict]:
-    """Resolve one entry's overlay offset — explicit placement, else anchors.
-
-    PRECEDENCE: an explicit ``entry.placement`` {x, y} wins outright (see
-    ``_explicit_offset``) and never falls back. Otherwise the anchor path is
-    UNTOUCHED: Placement v2 measures the frame's free space + the clip's own
-    footprint and places it into the emptiest legal region (the fix for
-    graphics-on-the-face). If measurement can't run (no cv2, no face + no bbox
-    hint, ffmpeg probe fail) it degrades to the v1 deviation nudge and SAYS SO
-    — never a silent mis-place.
-    """
-    anchor = entry.get("anchor", "free-band")
-    if anchor == "own-screen" and entry.get("placement") is None:
-        comp_w, comp_h = _clip_dims(mov_path)
-        video_w, video_h = _clip_dims(video_in)
-        comp_aspect = comp_w / comp_h
-        video_aspect = video_w / video_h
-        if abs(comp_aspect - video_aspect) > 0.002:
-            raise ValueError(
-                f"own-screen comp {comp_w}x{comp_h} does not match delivery "
-                f"aspect {video_w}x{video_h}")
-        meta = {"anchor": anchor, "region": "full-frame", "fallback": False,
-                "contentBBox": [0, 0, comp_w, comp_h],
-                "placedBBox": [0, 0, video_w, video_h],
-                "canvas": [video_w, video_h]}
-        if (comp_w, comp_h) != (video_w, video_h):
-            meta["scaledDims"] = [video_w, video_h]
-        return 0, 0, meta
-    if entry.get("placement") is not None:
-        return _explicit_offset(entry, mov_path)
-    if requires_recompose(entry):
-        return _fixed_overlay_offset(entry, mov_path)
-    try:
-        x, y, meta = resolve_offset_v2(entry, mov_path, video_in)
-        return x, y, meta
-    except (RuntimeError, ValueError, OSError, ImportError, KeyError) as exc:
-        x, y = resolve_offset(entry)
-        return x, y, {"anchor": entry.get("anchor", "free-band"),
-                      "region": "v1-fallback", "fallback": True,
-                      "reason": str(exc)[:200]}
+    occlusions: dict | None = None   # {broll: [[s,e]..], cards: [[s,e]..]} —
+    #                                  the verify allow-vocabulary windows
+    producer_dir: str | None = None  # dir owning geometry_predictions.json +
+    #                                  the A3 residual ledger (calibration)
+    band_y_offset_px: float = 0.0    # plan captions.bandYOffsetPx — occupancy
+    #                                  models the band where captions render
 
 
 def _clip_record(entry: dict, rendered: dict, video_in: str,
@@ -264,8 +150,8 @@ def _clip_record(entry: dict, rendered: dict, video_in: str,
     return clip
 
 
-def _render_all(track: list[dict], cache_dir: str | None,
-                video_in: str) -> tuple[list[dict], list[dict]]:
+def _render_all(track: list[dict], cache_dir: str | None, video_in: str,
+                band_y_offset_px: float = 0.0) -> tuple[list[dict], list[dict]]:
     """Render/reuse every entry; return ``(overlay clips, eye-trace rows)``.
 
     The anchor (for focus-shift blur) and the resolved face-relative ``(x, y)``
@@ -282,7 +168,8 @@ def _render_all(track: list[dict], cache_dir: str | None,
     for entry in track:
         res = render_entry(entry, cache_dir)
         anchor = entry.get("anchor", "free-band")
-        x, y, meta = _placement(entry, res["path"], video_in)
+        x, y, meta = resolve_placement(entry, res["path"], video_in,
+                                       band_y_offset_px)
         x, y, meta = _delivery_geometry(res["path"], (x, y), meta, canvas)
         meta = _fallback_placement_evidence(res["path"], (x, y), meta, canvas)
         row = placement_row(entry, meta, canvas)
@@ -323,38 +210,6 @@ def _clear_stale_placements(placements_out: str | None) -> None:
          reason="empty graphicsTrack owes no placements evidence")
 
 
-def _verify_placements(clips: list[dict], video_out: str) -> None:
-    """Opt-in (env SNIPER_VERIFY_PLACEMENT): re-measure the composite; raise on hit.
-
-    For each face-anchor clip, probe its content footprint, apply the placement
-    offset, and assert the graphic clears the RE-MEASURED face+hair in the final
-    render (the sibling ``--verify`` concept — an independent post-composite check,
-    not the render-time prediction). Emits a status per clip; raises so a strict
-    verify run exits non-zero. Off by default: no cost / no behaviour change.
-    """
-    from planner.free_space import verify_placement
-
-    failures = []
-    for clip in clips:
-        # An explicit placement is the operator's pin — face clearance is their
-        # call (lint already warned on SAFE_BOX taste); only verify anchor picks.
-        if clip.get("placed") or clip.get("anchor") not in FACE_ANCHORS:
-            continue
-        placed = clip.get("placedBBox")
-        if placed is None:
-            content = _content_bbox(clip["path"])
-            dx, dy = int(clip.get("x", 0)), int(clip.get("y", 0))
-            placed = (content[0] + dx, content[1] + dy,
-                      content[2] + dx, content[3] + dy)
-        ok, detail = verify_placement(video_out, clip["outStart"], clip["outEnd"], placed)
-        emit(stage="graphics", status="placement_verified",
-             anchor=clip.get("anchor"), **detail)
-        if not ok:
-            failures.append(detail)
-    if failures:
-        raise RuntimeError(f"placement verify failed for {len(failures)} graphic(s)")
-
-
 def run_graphics_stage(job: GraphicsJob) -> dict:
     """Render → composite → assert frames → suppress takeover captions."""
     if not job.track:
@@ -363,7 +218,8 @@ def run_graphics_stage(job: GraphicsJob) -> dict:
         emit(stage="graphics", status="passthrough", reason="no graphics")
         return {"graphics": 0, "passes": 0, "out": job.video_out}
 
-    clips, rows = _render_all(job.track, job.cache_dir, job.video_in)
+    clips, rows = _render_all(job.track, job.cache_dir, job.video_in,
+                              job.band_y_offset_px)
     if job.placements_out:
         # Eye-trace placements sidecar (LIAM move 4): the gaze read + landed
         # bbox per entry, persisted where Audit B can find it (advisory WARN).
@@ -381,8 +237,17 @@ def run_graphics_stage(job: GraphicsJob) -> dict:
             f"{frames_out} frames (tolerance 1)")
     emit(stage="graphics", status="composited", passes=passes,
          clips=len(clips), frames_in=frames_in, frames_out=frames_out)
-    if os.environ.get("SNIPER_VERIFY_PLACEMENT"):
-        _verify_placements(clips, job.video_out)
+    if job.producer_dir:
+        # Journal BEFORE verify: even a verify-blocked run yields honest
+        # residual samples (the measurement succeeded; the placement didn't).
+        geometry_calibration.journal_actuals(job.producer_dir, rows, emit)
+    # Default-on post-composite verify (v3 item #5): WARN-with-evidence until
+    # the A3 margin ledger calibrates, then FAIL; allow-vocabulary SKIPs and
+    # operator-pin WARNs inside — a WARN-mode hit NEVER raises.
+    severity, note = resolve_severity(job.producer_dir)
+    run_verify(clips, job.video_out,
+               VerifyContext(severity=severity, occlusions=job.occlusions,
+                             emit=emit, note=note))
 
     summary = {"graphics": len(clips), "passes": passes, "out": job.video_out,
                "frames_in": frames_in, "frames_out": frames_out}
@@ -409,16 +274,32 @@ def main() -> None:
                     help="where the filtered ASS is written (required with --ass)")
     ap.add_argument("--placements-out", default=None,
                     help="write the eye-trace placements sidecar here (Audit B)")
+    ap.add_argument("--occlusions", default=None,
+                    help="JSON file {broll:[[s,e]..], cards:[[s,e]..]} — plan "
+                         "windows the verify allow-vocabulary excuses")
+    ap.add_argument("--producer-dir", default=None,
+                    help="producer dir owning geometry_predictions.json + the "
+                         "A3 residual ledger (flips verify WARN→FAIL)")
+    ap.add_argument("--band-y-offset", type=float, default=0.0,
+                    help="plan captions.bandYOffsetPx — model the caption "
+                         "band where the captions actually render")
     args = ap.parse_args()
     if bool(args.ass_in) != bool(args.ass_out):
         ap.error("--ass and --ass-out must be given together")
     try:
         with open(args.track_path) as f:
             track = json.load(f)
+        occlusions = None
+        if args.occlusions:
+            with open(args.occlusions) as f:
+                occlusions = json.load(f)
         job = GraphicsJob(video_in=args.video_in, video_out=args.video_out,
                           track=track, cache_dir=args.cache_dir,
                           ass_in=args.ass_in, ass_out=args.ass_out,
-                          placements_out=args.placements_out)
+                          placements_out=args.placements_out,
+                          occlusions=occlusions,
+                          producer_dir=args.producer_dir,
+                          band_y_offset_px=args.band_y_offset)
         summary = run_graphics_stage(job)
         emit(status="done", **summary)
     except (OSError, json.JSONDecodeError, KeyError, ValueError, RuntimeError) as exc:

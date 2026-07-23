@@ -32,6 +32,7 @@ CLI: caption_corrections.py <words.json> <corrections.json> <out_words.json>
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from dataclasses import dataclass
@@ -163,6 +164,44 @@ def unmatched_keys(corrections: dict, log: list[dict]) -> list[str]:
     """Correction keys that matched no words in this run (validation warnings)."""
     applied = {entry["heard"] for entry in log}
     return [key for key in corrections if key not in applied]
+
+
+def kept_words(ctx, tmap, emit) -> list:
+    """Gather every source's words, remapped to output time, sorted.
+
+    ``ctx`` is the renderer's duck-typed RenderCtx (``manifest``/``out_dir``);
+    ``emit`` its NDJSON status emitter.
+    """
+    from compile_timeline import remap_words
+    manifest_dir = os.path.dirname(os.path.abspath(
+        ctx.manifest.get("_path", os.path.join(ctx.out_dir, "x"))))
+    words: list = []
+    for src in ctx.manifest.get("sources", []):
+        rel = src.get("transcriptPath")
+        if not rel:
+            emit(status="captions_source_skipped", id=src["id"],
+                 reason="no transcript")
+            continue
+        path = rel if os.path.isabs(rel) else os.path.join(manifest_dir, rel)
+        with open(path) as f:
+            entries = json.load(f).get("transcript", [])
+        flat = [w for e in entries for w in e.get("words", [])]
+        words.extend(remap_words(flat, src["id"], tmap))
+    return sorted(words, key=lambda w: w["start"])
+
+
+def corrected_caption_words(ctx, tmap, emit) -> list:
+    """Kept words after the one grounded caption-correction contract."""
+    from producer_config import CAPTION_AUTO_CORRECTIONS
+    words = kept_words(ctx, tmap, emit)
+    corrections = dict(CAPTION_AUTO_CORRECTIONS)
+    corrections.update((ctx.plan.get("captions") or {}).get("corrections") or {})
+    if not corrections:
+        return words
+    words, corr_log = apply_corrections(words, corrections)
+    emit(status="captions_corrected", applied=len(corr_log),
+         unmatched=unmatched_keys(corrections, corr_log))
+    return words
 
 
 def flatten_words(data: object) -> list[dict]:

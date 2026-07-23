@@ -1,7 +1,7 @@
 """placement.scale contract tests (uniform resize about the placement pin).
 
 Covers the four legs of the CONTRACT:
-  * SCALE MATH — graphics_stage.scale_geometry: even output dims, effective
+  * SCALE MATH — stage_placement.scale_geometry: even output dims, effective
     per-axis factors, the SCALED content bbox top-left pinned at {x, y}.
   * RENDERER — _explicit_offset routes scale into offsets + scaledDims meta;
     _build_graph inserts the lanczos scale filter for scaled clips only.
@@ -17,6 +17,7 @@ from unittest import mock
 from _common import *  # noqa: F401,F403
 
 from graphics import graphics_stage as gs
+from graphics import stage_placement as sp
 from producer_config import PLACEMENT_SCALE
 
 # A synthetic rendered-content footprint (x0, y0, x1, y1) on the comp canvas.
@@ -37,7 +38,7 @@ class ScaleGeometryTests(unittest.TestCase):
     """scale_geometry — the exported pure math."""
 
     def test_even_dims_and_pin(self) -> None:
-        geo = gs.scale_geometry(_CONTENT, (60, 300), _DIMS, 1.3)
+        geo = sp.scale_geometry(_CONTENT, (60, 300), _DIMS, 1.3)
         self.assertEqual((geo["w"], geo["h"]), (1404, 2496))     # 1.3x, even
         self.assertEqual(geo["placed"][:2], (60, 300))           # pin holds
         cw, ch = _CONTENT[2] - _CONTENT[0], _CONTENT[3] - _CONTENT[1]
@@ -46,7 +47,7 @@ class ScaleGeometryTests(unittest.TestCase):
 
     def test_odd_products_round_to_even(self) -> None:
         for scale in (0.33, 0.5, 0.77, 1.01, 1.49):
-            geo = gs.scale_geometry(_CONTENT, (0, 0), _DIMS, scale)
+            geo = sp.scale_geometry(_CONTENT, (0, 0), _DIMS, scale)
             self.assertEqual(geo["w"] % 2, 0, f"scale {scale}: w {geo['w']}")
             self.assertEqual(geo["h"] % 2, 0, f"scale {scale}: h {geo['h']}")
             self.assertAlmostEqual(geo["w"], _DIMS[0] * scale, delta=1)
@@ -55,11 +56,11 @@ class ScaleGeometryTests(unittest.TestCase):
     def test_pin_uses_effective_factors(self) -> None:
         # 0.33 rounds the canvas to 356x634 — sx != sy != 0.33; the pin must
         # still land exactly (the bbox terms use the EFFECTIVE factors).
-        geo = gs.scale_geometry(_CONTENT, (100, 500), _DIMS, 0.33)
+        geo = sp.scale_geometry(_CONTENT, (100, 500), _DIMS, 0.33)
         self.assertEqual(geo["placed"][:2], (100, 500))
 
     def test_wide_canvas(self) -> None:
-        geo = gs.scale_geometry((300, 200, 900, 500), (60, 300),
+        geo = sp.scale_geometry((300, 200, 900, 500), (60, 300),
                                 (1920, 1080), 1.5)
         self.assertEqual((geo["w"], geo["h"]), (2880, 1620))
         self.assertEqual(geo["placed"], (60, 300, 60 + 900, 300 + 450))
@@ -69,24 +70,24 @@ class ScaleValidationTests(unittest.TestCase):
     """_placement_scale — fail loud, never clamp."""
 
     def test_absent_is_one(self) -> None:
-        self.assertEqual(gs._placement_scale(_entry(placement={"x": 1, "y": 2})), 1.0)
+        self.assertEqual(sp._placement_scale(_entry(placement={"x": 1, "y": 2})), 1.0)
 
     def test_band_edges_accepted(self) -> None:
         for ok in (PLACEMENT_SCALE["min"], 0.5, 1.0, 1.3, PLACEMENT_SCALE["max"]):
             e = _entry(placement={"x": 1, "y": 2, "scale": ok})
-            self.assertEqual(gs._placement_scale(e), float(ok))
+            self.assertEqual(sp._placement_scale(e), float(ok))
 
     def test_out_of_band_raises(self) -> None:
         for bad in (0.24, 0.0, -1.0, 1.51, 5.0):
             e = _entry(placement={"x": 1, "y": 2, "scale": bad})
             with self.assertRaisesRegex(ValueError, "outside"):
-                gs._placement_scale(e)
+                sp._placement_scale(e)
 
     def test_non_numbers_raise(self) -> None:
         for bad in ("1.3", True, float("nan"), float("inf"), [1.3]):
             e = _entry(placement={"x": 1, "y": 2, "scale": bad})
             with self.assertRaises(ValueError, msg=f"accepted {bad!r}"):
-                gs._placement_scale(e)
+                sp._placement_scale(e)
 
 
 class ScaledOffsetTests(unittest.TestCase):
@@ -94,9 +95,9 @@ class ScaledOffsetTests(unittest.TestCase):
 
     def test_scaled_offset_and_meta(self) -> None:
         entry = _entry(placement={"x": 60, "y": 300, "scale": 1.3})
-        with mock.patch.object(gs, "_content_bbox", return_value=_CONTENT), \
-             mock.patch.object(gs, "_clip_dims", return_value=_DIMS):
-            x, y, meta = gs._placement(entry, "fake.mov", "base.mp4")
+        with mock.patch.object(sp, "_content_bbox", return_value=_CONTENT), \
+             mock.patch.object(sp, "_clip_dims", return_value=_DIMS):
+            x, y, meta = sp.resolve_placement(entry, "fake.mov", "base.mp4")
         self.assertEqual(meta["scale"], 1.3)
         self.assertEqual(meta["scaledDims"], [1404, 2496])
         self.assertEqual(meta["placedBBox"][:2], [60, 300])
@@ -105,20 +106,20 @@ class ScaledOffsetTests(unittest.TestCase):
 
     def test_absent_scale_probes_no_dims_and_matches_prescale(self) -> None:
         entry = _entry(placement={"x": 60, "y": 300})
-        with mock.patch.object(gs, "_content_bbox", return_value=_CONTENT), \
-             mock.patch.object(gs, "_clip_dims",
+        with mock.patch.object(sp, "_content_bbox", return_value=_CONTENT), \
+             mock.patch.object(sp, "_clip_dims",
                                side_effect=AssertionError("dims probed")):
-            x, y, meta = gs._placement(entry, "fake.mov", "base.mp4")
+            x, y, meta = sp.resolve_placement(entry, "fake.mov", "base.mp4")
         self.assertEqual((x, y), (60 - _CONTENT[0], 300 - _CONTENT[1]))
         self.assertNotIn("scale", meta)
         self.assertNotIn("scaledDims", meta)
 
     def test_explicit_one_is_the_absent_path(self) -> None:
         entry = _entry(placement={"x": 60, "y": 300, "scale": 1.0})
-        with mock.patch.object(gs, "_content_bbox", return_value=_CONTENT), \
-             mock.patch.object(gs, "_clip_dims",
+        with mock.patch.object(sp, "_content_bbox", return_value=_CONTENT), \
+             mock.patch.object(sp, "_clip_dims",
                                side_effect=AssertionError("dims probed")):
-            x, y, meta = gs._placement(entry, "fake.mov", "base.mp4")
+            x, y, meta = sp.resolve_placement(entry, "fake.mov", "base.mp4")
         self.assertEqual((x, y), (60 - _CONTENT[0], 300 - _CONTENT[1]))
         self.assertNotIn("scaledDims", meta)
 

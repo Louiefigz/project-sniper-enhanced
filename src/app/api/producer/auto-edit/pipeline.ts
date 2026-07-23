@@ -25,6 +25,13 @@ import {
   type AuthoringSessionMode,
   type AuthoringStage,
 } from "./authoring";
+import { runProducerRevision } from "./brain-review-runner";
+import { routeGeometryFailure } from "./geometry-replan-stage";
+import {
+  NO_LEGAL_REGION_TOKEN,
+  noLegalRegionEvidence,
+  type GeometryReplanState,
+} from "@/lib/producer/geometry-replan";
 import { runAssemble, runBaseGuard } from "./chain";
 import {
   publishApprovedMirror,
@@ -40,6 +47,7 @@ import {
 } from "../../_lib/plan-refit-transaction";
 import { restoreAutoEditDoctrine } from "@/lib/server/auto-edit-doctrine";
 import { restoreAutoEditPipeline } from "@/lib/server/auto-edit-pipeline-authority";
+import { timedStage } from "@/lib/server/stage-timing";
 import { runAuthorStage } from "./authoring-stage";
 import { markAuthoringSessionEstablished } from "./authoring-session-state";
 import { publishApprovedPalmierMirror, publishPalmierWorkingCheckpoint } from "./palmier-checkpoints";
@@ -68,6 +76,7 @@ export interface PipelineDependencies {
   verifyCut: typeof verifyApprovedCut;
   bindSession: typeof markAuthoringSessionEstablished;
   planning: typeof runPlanningReviewLoop;
+  revise: typeof runProducerRevision;
   baseGuard: typeof runBaseGuard;
   assemble: typeof runAssemble;
   quality: typeof runQualityReviewRound;
@@ -90,6 +99,7 @@ const DEFAULT_DEPS: PipelineDependencies = {
   verifyCut: verifyApprovedCut,
   bindSession: markAuthoringSessionEstablished,
   planning: runPlanningReviewLoop,
+  revise: runProducerRevision,
   baseGuard: runBaseGuard,
   assemble: runAssemble,
   quality: runQualityReviewRound,
@@ -191,6 +201,12 @@ async function renderCandidate(
   await deps.baseGuard(ctx.dir, run.io.sendRaw);
   const result = await deps.assemble(ctx.dir, ctx.manifestPath, run.io.sendRaw, candidate);
   if (result.code !== 0) {
+    // A typed NoLegalRegion payload must survive tail truncation intact —
+    // the geometry re-plan route keys on it (contract v3 A2).
+    const geometry = noLegalRegionEvidence(result.errTail);
+    if (geometry !== null) {
+      throw new AutoEditError(`assemble exited ${result.code}. ${NO_LEGAL_REGION_TOKEN}: ${geometry}`);
+    }
     throw new AutoEditError(`assemble exited ${result.code}. ${result.errTail.slice(-400)}`);
   }
   if (deps.authority(ctx).digest !== capturedAuthority.digest) {
@@ -246,7 +262,7 @@ async function renderStage(run: PipelineRuntime, deps: PipelineDependencies): Pr
     qcRound: round, qcRoundsMax: MAX_QC_RENDER_ROUNDS,
   });
   run.io.send({ event: "phase", phase: "assemble", qcRound: round });
-  await renderCandidate(run, deps, candidate, round);
+  await timedStage(ctx.dir, "render_round", () => renderCandidate(run, deps, candidate, round));
   return false;
 }
 
@@ -274,18 +290,28 @@ export async function runAutoEditPipeline(
     event: "template_usage_history", projectCount: history.projectCount,
     overusedKinds: history.overusedKinds, digest: history.digest,
   });
-  await runAuthorStage(run, deps);
+  await timedStage(run.job.ctx.dir, "authoring", () => runAuthorStage(run, deps));
+  // Typed NoLegalRegion render failures route ONCE back into planning with
+  // the geometry evidence as a critique row (contract v3 A2); everything
+  // else — and a second geometry failure — stays terminal.
+  const geometry: GeometryReplanState = { attempts: 0 };
   while (true) {
     await deps.planning(run);
     validationStage(run, deps);
-    if (await renderStage(run, deps)) {
-      await publishApprovedMirror(run, deps);
-      return;
-    }
-    const result = await qualityRoundWithRenderCheckpoint(run, deps);
-    if (result.status === "approved") {
-      await publishApprovedMirror(run, deps);
-      return;
+    try {
+      if (await renderStage(run, deps)) {
+        await publishApprovedMirror(run, deps);
+        return;
+      }
+      const result = await timedStage(
+        run.job.ctx.dir, "qc_round", () => qualityRoundWithRenderCheckpoint(run, deps),
+      );
+      if (result.status === "approved") {
+        await publishApprovedMirror(run, deps);
+        return;
+      }
+    } catch (error) {
+      await routeGeometryFailure(run, deps, geometry, error);
     }
   }
 }

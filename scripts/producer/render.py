@@ -32,10 +32,10 @@ from typing import Optional
 from motion.baseline_look import apply_baseline_look, parse_spec as parse_baseline_spec
 from broll.broll_insert import (apply_broll_inserts, parse_inserts as parse_broll_inserts,
                           resolve_assets as resolve_broll_assets)
-from captions.caption_corrections import apply_corrections, unmatched_keys
+from captions.caption_corrections import corrected_caption_words
 from captions.captions_ass import build_ass, caption_cfg_for_aspect
 from captions.longform_outputs import build_chapters, write_srt
-from compile_timeline import TimelineMap, compile_plan, remap_words
+from compile_timeline import TimelineMap, compile_plan
 from cut_speed import probe_duration, probe_video, probe_video_frames, render_cut_speed
 from edit_scope import lane_required
 from graphics.exit_on_cut import apply_exit_on_cut
@@ -46,7 +46,8 @@ from plan_lint import lint
 from fingerprints import (fingerprint_record, invalidate_assembled_sidecar,
                           stage_fingerprint, stage_receipt_current,
                           write_assembled_sidecar, write_stage_receipt)
-from producer_config import CAPTIONS, CAPTION_AUTO_CORRECTIONS, MODES
+from stage_timing import timed_stage
+from producer_config import CAPTIONS, MODES
 from motion.punch_in import apply_punch_ins, parse_windows as parse_punch_windows
 from motion.recompose import (apply_recompose, requires_recompose,
                               stamp_entry_face_bboxes)
@@ -83,6 +84,8 @@ class RenderCtx:
     work_dir: str
     resume: bool = False
     skip_graphics: bool = False   # base render: composite graphics later in assemble
+    producer_dir: str | None = None   # dir owning geometry_predictions.json +
+    #                                   the A3 residual ledger (--approval-dir)
 
     def stage_path(self, name: str) -> str:
         """Absolute path to a named intermediate inside the work dir."""
@@ -96,6 +99,7 @@ class RenderCtx:
         return False
 
 
+@timed_stage("lint_gate")
 def gate(ctx: RenderCtx) -> None:
     """Run plan_lint in-process; refuse to render a failing plan."""
     from graphics_planner import output_words  # local: keep module import light
@@ -108,6 +112,7 @@ def gate(ctx: RenderCtx) -> None:
         emit(status="lint_warning", warning=w)
 
 
+@timed_stage("compile")
 def compile_stage(ctx: RenderCtx) -> TimelineMap:
     """Compile the plan and persist timeline_map.json next to the outputs."""
     tmap = compile_plan(ctx.plan)
@@ -119,6 +124,7 @@ def compile_stage(ctx: RenderCtx) -> TimelineMap:
     return tmap
 
 
+@timed_stage("cut_speed")
 def cut_stage(ctx: RenderCtx) -> str:
     """Stage 1: cut+speed mezzanine."""
     mezz = ctx.stage_path("mezzanine.mp4")
@@ -135,6 +141,7 @@ def _strip_rationale(entries: list[dict]) -> list[dict]:
     return [{k: v for k, v in e.items() if k != "rationale"} for e in entries]
 
 
+@timed_stage("audio_channels")
 def channels_stage(ctx: RenderCtx, mezz: str) -> str:
     """Stage 1.2 (C16 part 1): dual-mono a dead source channel EARLY.
 
@@ -159,6 +166,7 @@ def channels_stage(ctx: RenderCtx, mezz: str) -> str:
     return out
 
 
+@timed_stage("baseline_look")
 def baseline_stage(ctx: RenderCtx, mezz: str) -> str:
     """Stage 1.5 (R16): whole-video baseline look — tight recrop + grade.
 
@@ -179,6 +187,7 @@ def baseline_stage(ctx: RenderCtx, mezz: str) -> str:
     return out
 
 
+@timed_stage("recompose")
 def recompose_stage(ctx: RenderCtx, video: str, out_dur: float) -> None:
     """Stage 2.4 (longform): stamp beside-face recompose windows into punchIns.
 
@@ -213,6 +222,7 @@ def recompose_stage(ctx: RenderCtx, video: str, out_dur: float) -> None:
          facesMeasured=measured)
 
 
+@timed_stage("punch_in")
 def punch_stage(ctx: RenderCtx, video: str) -> str:
     """Stage 2.5 (R13/R16): the zoom track — punches, ramps, brackets.
 
@@ -240,6 +250,7 @@ def punch_stage(ctx: RenderCtx, video: str) -> str:
     return out
 
 
+@timed_stage("broll")
 def broll_stage(ctx: RenderCtx, video: str) -> str:
     """Stage 2.7 (audit §2 / R17): b-roll receipts — frames replaced, audio untouched.
 
@@ -265,6 +276,7 @@ def broll_stage(ctx: RenderCtx, video: str) -> str:
     return out
 
 
+@timed_stage("transitions")
 def transitions_stage(ctx: RenderCtx, video: str, out_dur: float) -> str:
     """Stage 4.7 (R15/R19): seam-cover transitions — flash/leak + whoosh.
 
@@ -322,6 +334,7 @@ def _reframe_manual_stage(ctx: RenderCtx, mezz: str, framed: str) -> str:
     return framed
 
 
+@timed_stage("reframe")
 def reframe_stage(ctx: RenderCtx, mezz: str) -> str:
     """Stage 2: 9:16 reframe (shorts). Longform/none passes through.
 
@@ -357,6 +370,7 @@ def reframe_stage(ctx: RenderCtx, mezz: str) -> str:
     return framed
 
 
+@timed_stage("overlays")
 def overlays_stage(ctx: RenderCtx, framed: str) -> str:
     """Stage 3 (Phase 2): composite hook-card overlays on the reframed video.
 
@@ -384,6 +398,7 @@ def overlays_stage(ctx: RenderCtx, framed: str) -> str:
     return overlaid
 
 
+@timed_stage("graphics")
 def graphics_track_stage(ctx: RenderCtx, video: str,
                          ass: str | None) -> tuple[str, str | None]:
     """Stage 3.5 (MG-2): motion graphics — render + composite graphicsTrack.
@@ -412,6 +427,11 @@ def graphics_track_stage(ctx: RenderCtx, video: str,
             # (audit_motion.check_eye_trace — advisory WARN, LIAM move 4).
             "--placements-out", os.path.join(ctx.out_dir,
                                              "graphics_placements.json")]
+    # Verify + A3 calibration wiring (occlusion allow-vocabulary, producer
+    # dir, caption band offset) — shared with assemble via placement_verify.
+    from graphics.placement_verify import stage_cli_args
+    args += stage_cli_args(ctx.plan, ctx.stage_path("graphics_occlusions.json"),
+                           ctx.producer_dir)
     ass_out = ass
     if ass:
         ass_out = ctx.stage_path("captions-final.ass")
@@ -439,6 +459,7 @@ def graphics_track_stage(ctx: RenderCtx, video: str,
     return out, ass_out
 
 
+@timed_stage("audio_enhance")
 def enhance_stage(ctx: RenderCtx, video: str) -> str:
     """Stage 4.4: voice-focus dialogue cleanup (plan.audioEnhance).
 
@@ -459,6 +480,7 @@ def enhance_stage(ctx: RenderCtx, video: str) -> str:
     return out
 
 
+@timed_stage("audio_gain")
 def gain_stage(ctx: RenderCtx, video: str) -> str:
     """Stage 4.5 (MG-2): per-window dialogue gain (plan.audioGain).
 
@@ -477,38 +499,7 @@ def gain_stage(ctx: RenderCtx, video: str) -> str:
     return out
 
 
-def kept_words(ctx: RenderCtx, tmap: TimelineMap) -> list[dict]:
-    """Gather every source's words, remapped to output time, sorted."""
-    manifest_dir = os.path.dirname(os.path.abspath(
-        ctx.manifest.get("_path", os.path.join(ctx.out_dir, "x"))))
-    words: list[dict] = []
-    for src in ctx.manifest.get("sources", []):
-        rel = src.get("transcriptPath")
-        if not rel:
-            emit(status="captions_source_skipped", id=src["id"],
-                 reason="no transcript")
-            continue
-        path = rel if os.path.isabs(rel) else os.path.join(manifest_dir, rel)
-        with open(path) as f:
-            entries = json.load(f).get("transcript", [])
-        flat = [w for e in entries for w in e.get("words", [])]
-        words.extend(remap_words(flat, src["id"], tmap))
-    return sorted(words, key=lambda w: w["start"])
-
-
-def corrected_caption_words(ctx: RenderCtx, tmap: TimelineMap) -> list[dict]:
-    """Return kept words after the one grounded caption-correction contract."""
-    words = kept_words(ctx, tmap)
-    corrections = dict(CAPTION_AUTO_CORRECTIONS)
-    corrections.update((ctx.plan.get("captions") or {}).get("corrections") or {})
-    if not corrections:
-        return words
-    words, corr_log = apply_corrections(words, corrections)
-    emit(status="captions_corrected", applied=len(corr_log),
-         unmatched=unmatched_keys(corrections, corr_log))
-    return words
-
-
+@timed_stage("captions")
 def captions_stage(ctx: RenderCtx, tmap: TimelineMap) -> str | None:
     """Stage 3 (Phase 1 scope): burned captions from kept words."""
     mode = ctx.plan["target"]["mode"]
@@ -516,7 +507,7 @@ def captions_stage(ctx: RenderCtx, tmap: TimelineMap) -> str | None:
     if not cap_cfg.get("burn", MODES[mode]["captions_burn"]):
         emit(status="stage_skipped", stage="captions", reason="burn off")
         return None
-    words = corrected_caption_words(ctx, tmap)
+    words = corrected_caption_words(ctx, tmap, emit)
     if not words:
         # Burn is ON (checked above) but there is nothing real to burn.
         # Shipping a caption-less short as success would violate doctrine
@@ -562,6 +553,7 @@ def captions_stage(ctx: RenderCtx, tmap: TimelineMap) -> str | None:
     return ass_path
 
 
+@timed_stage("longform_srt")
 def longform_sidecar_stage(ctx: RenderCtx, tmap: TimelineMap) -> str | None:
     """Longform SRT sidecar (+ chapters.txt if the plan has them) — the YouTube-CC
     caption deliverable. Longform defaults to NOT burning captions, so without this
@@ -573,7 +565,7 @@ def longform_sidecar_stage(ctx: RenderCtx, tmap: TimelineMap) -> str | None:
     if not lane_required(ctx.plan.get("target") or {}, "captions"):
         emit(status="stage_skipped", stage="longform_srt", reason="caption lane off")
         return None
-    words = corrected_caption_words(ctx, tmap)
+    words = corrected_caption_words(ctx, tmap, emit)
     if not words:
         emit(status="stage_skipped", stage="longform_srt", reason="no words")
         return None
@@ -588,6 +580,7 @@ def longform_sidecar_stage(ctx: RenderCtx, tmap: TimelineMap) -> str | None:
     return srt_path
 
 
+@timed_stage("master")
 def master_stage(ctx: RenderCtx, src: str, ass: str | None,
                  duration: float | None = None) -> dict:
     """Stage 5: loudnorm + final encode + cover frame (clamped to prediction)."""
@@ -618,22 +611,7 @@ def master_stage(ctx: RenderCtx, src: str, ass: str | None,
     return result
 
 
-def _assert_reframe_frames(mezz: str, framed: str, n_segments: int) -> None:
-    """Reframe must not change the timeline: frame counts must match.
-
-    Symmetric with cut_speed's assertion — without it, per-segment rounding in
-    the face path could silently shift captions/crops off the content
-    (review finding, 2026-07-04). Tolerance mirrors stage 1: 1 + 0.5/segment.
-    """
-    n_in, n_out = probe_video_frames(mezz), probe_video_frames(framed)
-    tolerance = 1.0 + 0.5 * n_segments
-    if abs(n_out - n_in) > tolerance:
-        raise RuntimeError(
-            f"reframe changed the timeline: {n_in} -> {n_out} frames "
-            f"(tolerance {tolerance:.1f})")
-    emit(status="reframe_frames_ok", frames_in=n_in, frames_out=n_out)
-
-
+@timed_stage("audit")
 def audit_stage(ctx: RenderCtx) -> Optional[dict]:
     """Audit B on the finished out_dir (auto QC — every render gets audited).
 
@@ -702,7 +680,8 @@ def render(ctx: RenderCtx, audit: bool = True) -> dict:
     based = baseline_stage(ctx, mezz)
     framed = reframe_stage(ctx, based)
     if framed != based:
-        _assert_reframe_frames(based, framed, len(tmap.segments))
+        from motion.reframe import assert_reframe_frames
+        assert_reframe_frames(based, framed, len(tmap.segments), emit)
     recompose_stage(ctx, framed, tmap.output_duration)
     punched = punch_stage(ctx, framed)
     brolled = broll_stage(ctx, punched)
@@ -788,7 +767,8 @@ def main() -> None:
         ctx = RenderCtx(plan=plan, manifest=manifest,
                         out_dir=args.out_dir, work_dir=work,
                         resume=args.resume and args.workdir is not None,
-                        skip_graphics=args.skip_graphics)
+                        skip_graphics=args.skip_graphics,
+                        producer_dir=args.approval_dir or args.out_dir)
         shutil.copy(args.plan_path, os.path.join(args.out_dir, "edit_plan.json"))
         report = render(ctx, audit=not args.no_audit)
         emit(status="done", **report)

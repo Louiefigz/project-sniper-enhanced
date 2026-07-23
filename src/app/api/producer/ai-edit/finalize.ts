@@ -91,6 +91,17 @@ function normalizePlan(planPath: string): Record<string, unknown> {
   return reconciled as Record<string, unknown>;
 }
 
+/** Every plan WRITE increments planVersion (stale-plan detection; excluded
+ * from base fingerprints and planContentHash, so a bump never invalidates a
+ * base or reviewed authority). Runs AFTER the surgical scope assert — the
+ * counter is bookkeeping, never one of the editor's changed fields — and
+ * BEFORE any refit, so refit receipts hash-bind the bumped bytes. */
+function bumpPlanVersion(planPath: string, before: Record<string, unknown>): void {
+  const current = parsedPlan(readFileSync(planPath, "utf8"), "edited plan");
+  const next = { ...current, planVersion: (Number(before.planVersion) || 0) + 1 };
+  atomicWriteFileSync(planPath, `${JSON.stringify(next, null, 1)}\n`);
+}
+
 function promoteCandidate(input: FinalizeSurgicalEditInput): string {
   const authority = input.authorityPlanPath ?? input.planPath;
   if (authority !== input.planPath) {
@@ -127,6 +138,7 @@ export async function finalizeSurgicalEdit(
     const before = parsedPlan(input.originalPlanText, "original plan");
     const after = normalizePlan(input.planPath);
     const changedFields = assertSurgicalPlanChange(before, after, input.scope);
+    bumpPlanVersion(input.planPath, before);
     refit = input.scope.lanes.includes("cuts")
       ? await refitPlanTransaction({
         planPath: input.planPath,

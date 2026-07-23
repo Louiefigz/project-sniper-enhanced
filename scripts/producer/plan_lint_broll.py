@@ -158,7 +158,7 @@ def check_slipcover(plan: dict, manifest: dict, rep: Any) -> None:
             a0 = float(b.get("assetStart", 0.0))
             dur = float(b["outEnd"]) - float(b["outStart"])
         except (KeyError, TypeError, ValueError):
-            continue                       # window shape errors are _check_broll's
+            continue                       # window shape errors are plan_lint_overlays.check_broll's
         if dur <= 0:
             continue
         sid = str(src.get("id"))

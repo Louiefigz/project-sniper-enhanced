@@ -2,10 +2,10 @@
 """plan_lint — the runnable gate between the brain and the renderer.
 
 Validates an ``edit_plan.json`` against its ``asset_manifest.json``: the LLM
-identifier contract (every sourceId/assetId/timestamp must resolve — the brain
-never invents pipeline identifiers), plus the editorial bounds from
-``producer_config``. Exit 0 = plan is renderable (warnings allowed);
-exit 1 = rejected, with machine-readable errors the brain retries against.
+identifier contract (every sourceId/assetId/timestamp must resolve — the
+brain never invents pipeline identifiers) plus the editorial bounds from
+``producer_config``. Exit 0 = renderable (warnings allowed); exit 1 =
+rejected, with machine-readable errors the brain retries against.
 
 Usage:
     plan_lint.py <edit_plan.json> <asset_manifest.json>
@@ -20,14 +20,15 @@ from typing import Any, Optional
 
 from plan_lint_audio import check_audio, check_music_source
 from plan_lint_broll import check_focus_ops, check_slipcover
+from plan_lint_face import check_face_pack
 from plan_lint_motion import check_motion, check_word_lock
+from plan_lint_overlays import check_broll, check_title_cards
 from plan_lint_visual import check_form_shape
 from graphics.intro_semantic_contract import check_intro_graphics
 from graphics.style_profile_contract import check_style_profile
 from plan_lint_reframe import check_reframe
 from producer_config import (
     CAPTION_STYLES,
-    HOOK_CARD,
     LINT,
     MODES,
     PLATFORMS,
@@ -70,11 +71,9 @@ def output_duration_s(cut_track: list[dict]) -> float:
 
 def _check_graphic_ids(plan: dict, rep: Report) -> None:
     """Graphic ids (editor-stamped) must be unique — the editor addresses each
-    graphic by its ``id``, so a collision would let two blocks masquerade as one.
-
-    The field is OPTIONAL (brain-authored / legacy plans carry none; the editor
-    stamps them at load), but any id that IS present must be a non-empty string
-    and unique across the track.
+    graphic by ``id``, so a collision lets two blocks masquerade as one. The
+    field is OPTIONAL (brain-authored / legacy plans carry none; the editor
+    stamps them at load), but a present id must be non-empty and unique.
     """
     seen: set[str] = set()
     for i, g in enumerate(plan.get("graphicsTrack") or []):
@@ -116,9 +115,8 @@ def _check_audio_lead(i: int, cuts: list[dict], tag: str, rep: Report) -> None:
     """``audioLeadMs`` J-cut bounds (LIAM move 2; ``AUDIO['jcut']``).
 
     Hard bounds run through ``compile_timeline.parse_audio_lead`` — the
-    renderer's own validator, so lint and cut_speed can never drift. On top,
-    a WARN when the lead sits outside the measured true-J-lead band
-    (65-95 ms median) — legal, but off the measured grammar.
+    renderer's own validator, so lint and cut_speed can never drift; plus a
+    WARN outside the measured true-J-lead band (65-95 ms median).
     """
     rng = cuts[i]
     if rng.get("audioLeadMs") is None:
@@ -222,83 +220,6 @@ def _check_duration(plan: dict, preset: dict, rep: Report) -> float:
     return out_dur
 
 
-def _check_hook_card_text(text: str, tag: str, rep: Report) -> None:
-    """Operator rule: ≤2 lines, ≤8 words, lines fit the safe box."""
-    words = text.split()
-    lines = text.split("\n")
-    if len(words) > HOOK_CARD["max_words"]:
-        rep.error(f"{tag}: {len(words)} words (max {HOOK_CARD['max_words']})")
-    if len(lines) > HOOK_CARD["max_lines"]:
-        rep.error(f"{tag}: {len(lines)} lines (max {HOOK_CARD['max_lines']})")
-    for ln in lines:
-        if len(ln) > HOOK_CARD["max_chars_per_line"]:
-            rep.error(f"{tag}: line {ln!r} is {len(ln)} chars "
-                      f"(max {HOOK_CARD['max_chars_per_line']})")
-
-
-def _overlaps(span: tuple[float, float], spans: list[tuple[float, float]]) -> bool:
-    """True when ``span`` intersects any already-collected title-card span."""
-    s, e = span
-    return any(s < pe and ps < e for ps, pe in spans)
-
-
-def _check_title_cards(plan: dict, preset: dict, out_dur: float, rep: Report) -> None:
-    """Hook-card presence (shorts), windows, hold times, overlap."""
-    cards = plan.get("titleCards") or []
-    if len(cards) > LINT["max_title_cards"]:
-        rep.error(f"{len(cards)} titleCards (max {LINT['max_title_cards']})")
-    hook_at_zero = False
-    spans: list[tuple[float, float]] = []
-    for i, c in enumerate(cards):
-        tag = f"titleCards[{i}]"
-        s, e = float(c.get("outStart", -1)), float(c.get("outEnd", -1))
-        if not (0 <= s < e <= out_dur + 0.05):
-            rep.error(f"{tag}: window [{s},{e}] outside output duration {out_dur:.1f}s")
-        hold = e - s
-        if hold < HOOK_CARD["hold_min_s"] or hold > HOOK_CARD["hold_max_s"]:
-            rep.error(f"{tag}: hold {hold:.1f}s outside "
-                      f"[{HOOK_CARD['hold_min_s']},{HOOK_CARD['hold_max_s']}]s")
-        _check_hook_card_text(str(c.get("text", "")), tag, rep)
-        if c.get("style") == "hook" and s <= 0.01:
-            hook_at_zero = True
-        if _overlaps((s, e), spans):
-            rep.error(f"{tag}: overlaps another title card")
-        spans.append((s, e))
-    mode = (plan.get("target") or {}).get("mode")
-    if mode == "short" and HOOK_CARD["from_frame_one"] and not hook_at_zero:
-        rep.error("short mode requires a style='hook' title card starting at 0.0 "
-                  "(frame 1 doubles as cover + loop start)")
-
-
-def _check_broll(plan: dict, manifest: dict, preset: dict, rep: Report) -> None:
-    """B-roll identifier / output-window / length / purpose rules.
-
-    ``out_dur`` is recomputed from the (already-validated) cut track — it is a
-    pure function of the plan — so this stays within the 4-argument ceiling.
-    """
-    out_dur = output_duration_s(plan.get("cutTrack") or [])
-    broll_ids = {b["id"] for b in manifest.get("broll", [])}
-    cards = [(float(c["outStart"]), float(c["outEnd"]))
-             for c in plan.get("titleCards") or [] if "outStart" in c]
-    inserts = plan.get("brollTrack") or []
-    if len(inserts) > LINT["max_broll_inserts"]:
-        rep.error(f"{len(inserts)} b-roll inserts (max {LINT['max_broll_inserts']})")
-    for i, b in enumerate(inserts):
-        tag = f"brollTrack[{i}]"
-        if b.get("assetId") not in broll_ids:
-            rep.error(f"{tag}: assetId {b.get('assetId')!r} not in manifest")
-        s, e = float(b.get("outStart", -1)), float(b.get("outEnd", -1))
-        if not (0 <= s < e <= out_dur + 0.05):
-            rep.error(f"{tag}: window [{s},{e}] outside output duration")
-        if (e - s) > preset["broll_insert_max_s"]:
-            rep.error(f"{tag}: insert {e - s:.1f}s exceeds max "
-                      f"{preset['broll_insert_max_s']}s")
-        if not b.get("reason"):
-            rep.error(f"{tag}: missing reason — b-roll must be purposeful")
-        if any(s < ce and cs < e for cs, ce in cards):
-            rep.error(f"{tag}: b-roll under a title card window")
-
-
 def _check_music_and_misc(plan: dict, manifest: dict, preset: dict, rep: Report) -> None:
     """Music variants/asset + reframe contract + caption style + chapter order."""
     music = plan.get("music") or {}
@@ -347,8 +268,9 @@ def lint(plan: dict[str, Any], manifest: dict[str, Any],
     if rep.errors:                      # duration/window math needs valid cuts
         return rep
     out_dur = _check_duration(plan, preset, rep)
-    _check_title_cards(plan, preset, out_dur, rep)
-    _check_broll(plan, manifest, preset, rep)
+    # Title-card + b-roll overlay windows: plan_lint_overlays owns them.
+    check_title_cards(plan, preset, out_dur, rep)
+    check_broll(plan, manifest, preset, rep)
     # Slip-cover windows (same-source b-roll) must pass the cover excludes —
     # retake spans + lip-flap (FAILURE_LEDGER LL-010); plan_lint_broll owns it.
     check_slipcover(plan, manifest, rep)
@@ -358,6 +280,10 @@ def lint(plan: dict[str, Any], manifest: dict[str, Any],
     _check_music_and_misc(plan, manifest, preset, rep)
     check_audio(plan, out_dur, rep)
     check_motion(plan, out_dur, (plan.get("target") or {}).get("mode", ""), rep)
+    # Face-aware placement pack (geometry contract v3 item #6): karaoke band,
+    # hook cards, pip-hole faceCx, b-roll overlap, drag bbox — declared through
+    # the gate-policy layer; plan_lint_face routes verdicts into this Report.
+    check_face_pack(plan, rep)
     check_style_profile(plan, out_dur, rep, words_out)
     if words_out is not None:
         check_word_lock(plan, words_out, rep)

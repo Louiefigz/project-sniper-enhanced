@@ -20,6 +20,7 @@ import type {
 } from "./planning-loop";
 import type { ProducerReview } from "./review-contract";
 import { rejectedBatchResult } from "./review-batch";
+import { timedStage } from "@/lib/server/stage-timing";
 import { AutoEditError } from "./stream";
 
 export interface PlanningRoundResult {
@@ -109,7 +110,9 @@ export async function runPlanningReviewBatch(
   deps: PlanningLoopDependencies,
 ): Promise<PlanningRoundResult[]> {
   const authority = deps.authority(run.job.ctx);
-  const gates = await deps.gate(planningGateInput(run.job));
+  const gates = await timedStage(
+    run.job.ctx.dir, "gate_bundle", () => deps.gate(planningGateInput(run.job)),
+  );
   if (!sameAutoEditAuthority(authority, deps.authority(run.job.ctx))) {
     throw new AutoEditError("planning authority changed while deterministic gates were running");
   }

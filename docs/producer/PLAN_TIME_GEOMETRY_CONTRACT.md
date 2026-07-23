@@ -128,6 +128,12 @@ of v2 above.**
   Journal lint-predicted vs render-measured geometry per run; margin = a
   quantile of that residual, with a named owner. Until the ledger exists the
   lint is WARN-with-evidence, not FAIL.
+  **Flip condition (shipped, item #4):** residuals journal to
+  `<producer_dir>/.sniper-learning/geometry_residuals.jsonl`; once
+  `geometry_calibration.margin_from_residuals` clears its floors (≥20
+  windows across ≥5 runs, `GEOMETRY_CALIBRATION`) the `geometry_feasibility`
+  and `placement_verify` verdicts flip WARN→FAIL via
+  `severity_for(..., calibrated=True)`.
 - The "gate-policy minimal shim" was fiction — zero code exists. Its verdict
   schema (FAIL / WARN / SKIP-with-evidence + severity routing) is an explicit
   prerequisite task, not a shim.

@@ -40,6 +40,7 @@ import {
 } from "./revision-staging";
 import { producerRevisionJsonSchema } from "./review-json-schemas";
 import type { VisualReviewLens } from "./round-policy";
+import { timedStage } from "@/lib/server/stage-timing";
 import type { AutoEditCtx } from "./stream";
 
 // These are hard KILL ceilings: a critic/revision that overruns doesn't just
@@ -245,8 +246,10 @@ export function runProducerReview(
   }
   validateIsolatedRequest(request);
   const provider = (dependencies.provider ?? brainProvider)();
-  if (provider === "codex") return runCodexReview(request, dependencies.codex ?? runCodex);
-  return runLegacyReview(request, dependencies.legacy ?? runLegacyBrainProcess);
+  return timedStage(request.ctx.dir, `critic_${request.stage}`, () =>
+    provider === "codex"
+      ? runCodexReview(request, dependencies.codex ?? runCodex)
+      : runLegacyReview(request, dependencies.legacy ?? runLegacyBrainProcess));
 }
 
 type RevisionMode = "revision" | "gate-fix";

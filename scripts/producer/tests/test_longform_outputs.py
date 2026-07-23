@@ -6,6 +6,7 @@ import unittest
 from unittest import mock
 
 from _common import *  # noqa: F401,F403
+from captions import caption_corrections as cc
 from captions import longform_outputs as lo
 import render as renderer
 
@@ -41,7 +42,7 @@ class SrtSidecarTests(unittest.TestCase):
                              "corrections": {"Hermosibot": "Hormozi bot"}}}
         with tempfile.TemporaryDirectory() as d:
             ctx = renderer.RenderCtx(plan, {}, d, d)
-            with mock.patch.object(renderer, "kept_words", return_value=words), \
+            with mock.patch.object(cc, "kept_words", return_value=words), \
                  mock.patch.object(renderer, "emit"):
                 renderer.longform_sidecar_stage(ctx, mock.Mock())
             with open(os.path.join(d, "captions.srt"), encoding="utf-8") as fh:
@@ -54,7 +55,7 @@ class SrtSidecarTests(unittest.TestCase):
                            "lanes": {"captions": "off"}}}
         with tempfile.TemporaryDirectory() as d:
             ctx = renderer.RenderCtx(plan, {}, d, d)
-            with mock.patch.object(renderer, "kept_words", return_value=self.WORDS), \
+            with mock.patch.object(cc, "kept_words", return_value=self.WORDS), \
                  mock.patch.object(renderer, "emit"):
                 result = renderer.longform_sidecar_stage(ctx, mock.Mock())
             self.assertIsNone(result)

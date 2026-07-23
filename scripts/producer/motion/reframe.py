@@ -144,6 +144,25 @@ def blurpad_filter() -> str:
 # --------------------------------------------------------------------------- #
 # Strategy renderers.
 # --------------------------------------------------------------------------- #
+def assert_reframe_frames(mezz: str, framed: str, n_segments: int,
+                          emit) -> None:
+    """Reframe must not change the timeline: frame counts must match.
+
+    Symmetric with cut_speed's assertion — without it, per-segment rounding in
+    the face path could silently shift captions/crops off the content
+    (review finding, 2026-07-04). Tolerance mirrors stage 1: 1 + 0.5/segment.
+    ``emit`` is the caller's NDJSON status emitter.
+    """
+    from media_probe import probe_video_frames
+    n_in, n_out = probe_video_frames(mezz), probe_video_frames(framed)
+    tolerance = 1.0 + 0.5 * n_segments
+    if abs(n_out - n_in) > tolerance:
+        raise RuntimeError(
+            f"reframe changed the timeline: {n_in} -> {n_out} frames "
+            f"(tolerance {tolerance:.1f})")
+    emit(status="reframe_frames_ok", frames_in=n_in, frames_out=n_out)
+
+
 def reframe_uniform(in_path: str, out_path: str, strategy: str) -> None:
     """One filter over the whole file: center / blurpad / none."""
     if strategy == "none":

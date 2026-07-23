@@ -123,6 +123,25 @@ export function planningGateCommands(input: GateBundleInput): PlanningGateComman
         "--expected-digest", input.templateUsageDigest],
     },
     { gate: "claims_contract", script: gateScript("claims_contract.py"), args: shared },
+    {
+      // Comp-size plan-time measurement (geometry contract v3 item #2):
+      // renders every graphicsTrack comp into the shared content-hash cache
+      // (assemble then cache-hits) and FAILs measured LL-035-class overflow.
+      gate: "comp_size",
+      script: gateScript(path.join("graphics", "comp_measure.py")),
+      args: [input.planPath],
+    },
+    {
+      // Plan-time geometry feasibility lint (geometry contract v3 item #3):
+      // composes the delivery geometry (proxy face track × reframe × punch)
+      // and runs the REAL region chooser on the measured comp bbox. Writes
+      // geometry_predictions.json into the producer dir — the ONLY feeder of
+      // the A3 residual ledger, so the item-#4 WARN→FAIL calibration flip
+      // for geometry_feasibility AND placement_verify can actually happen.
+      gate: "geometry_feasibility",
+      script: gateScript(path.join("planner", "geometry_feasibility.py")),
+      args: [input.planPath, input.manifestPath, path.dirname(input.planPath)],
+    },
   ];
   const reference = referenceCommand(input);
   if (reference) commands.push(reference);
@@ -249,11 +268,14 @@ export function combinePlanningGateVerdicts(
   const hookContract = requiredVerdict(byGate, "hook_contract");
   const templateUsage = requiredVerdict(byGate, "template_usage");
   const claimsContract = requiredVerdict(byGate, "claims_contract");
+  const compSize = requiredVerdict(byGate, "comp_size");
+  const geometryFeasibility = requiredVerdict(byGate, "geometry_feasibility");
   const referenceLint = byGate.get("reference_lint") ?? null;
   const gates = { operatorIntent, transcriptCut, planLint,
-    hookContract, templateUsage, claimsContract, referenceLint };
+    hookContract, templateUsage, claimsContract, compSize,
+    geometryFeasibility, referenceLint };
   const completed = [operatorIntent, transcriptCut, planLint, hookContract,
-    templateUsage, claimsContract,
+    templateUsage, claimsContract, compSize, geometryFeasibility,
     ...(referenceLint ? [referenceLint] : [])];
   const findings = (kind: "errors" | "warnings") => completed.flatMap((verdict) =>
     verdict[kind].map((message) => ({ gate: verdict.gate, message })));

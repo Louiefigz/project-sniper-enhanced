@@ -55,6 +55,7 @@ from planner import pacing as pac
 from graphics import exit_on_cut as eoc
 from graphics import graphics_render as gr
 from graphics import graphics_stage as gs
+from graphics import stage_placement as spl
 from graphics import pip_hole as phole
 from graphics import pip_takeover as pipt
 import plan_lint_nateherk as pln

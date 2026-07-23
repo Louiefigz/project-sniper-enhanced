@@ -416,6 +416,55 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
    author → audit → revise → re-audit, until it stops improving. Minimum **2 audit
    rounds for `produced`/`full`** (1 light pass is fine for `trim`/`light`); cap at
    4 so it terminates.
+   **Round-1 CONCURRENT wall (produced/full) — adopted from the GUI
+   controller.** The GUI already runs its round-1 critics concurrently
+   (`src/app/api/producer/auto-edit/planning-review-batch.ts`,
+   `runPlanningReviewBatch`: the deterministic gate bundle runs ONCE up
+   front; a gate failure returns BEFORE any critic launches; then N critics
+   run via `Promise.allSettled` against separately persisted packets bound to
+   ONE authority snapshot, and the batch throws if the plan/manifest hashes
+   change while critics run). Mirror those semantics exactly so the two lanes
+   cannot drift:
+   - **Gate first, once.** Run the full 4a gate bundle on the frozen plan. If
+     any gate fails, NO critic spawns this round — fix, re-gate, then review
+     (the GUI's batch returns the gate-failure round without launching a
+     critic).
+   - With gates green, round 1 MAY spawn **TWO independent fresh critic
+     subagents CONCURRENTLY** on the SAME plan hash + manifest hash + gate
+     verdict. Build the review packet ONCE for the round (below) and hand the
+     identical packet to both. Neither critic may see the other's verdict or
+     any revision in flight — they are independent spawns with no shared
+     state.
+   - **TWO clean concurrent verdicts on that same authority = the two
+     required clean reviews** for `produced`/`full` — CONVERGED (the GUI's
+     `round-policy.ts` `requiredPlanningRounds` = 2, and `planningCanConverge`
+     accepts a 2-wide clean batch as exactly that).
+   - **ANY material finding from EITHER critic:** fold BOTH punch-lists into
+     ONE revision (the GUI merges the whole batch into a single revision
+     input and zeroes the clean count), then the NEXT round follows the
+     existing sequential rules — fresh critic(s) on the revised plan, same
+     gate-first order.
+   - **Budget:** a 2-wide round 1 charges ONE round against the 4-round cap
+     (GUI `round-policy.ts`: the cap bounds revision CYCLES, not individual
+     critic spawns).
+   - If the plan bytes change for ANY reason while critics are out, BOTH
+     verdicts are VOID (the GUI throws "planning authority changed while
+     independent critics were running") — re-gate and re-review the new
+     bytes.
+   **REVIEW PACKET — build once per round; critics READ it instead of
+   re-deriving the transcript.** After the 4a gates, run
+   `python3 scripts/producer/review_packet.py <plan> <transcripts_dir>
+   <manifest> --out <work>/review_packet.json`. One hash-bound JSON binds:
+   plan + manifest content with exact byte hashes, the compiled cut-segment
+   table with the brain's rationales, every KEPT word remapped to output time
+   (via `compile_timeline`), the words on each side of every cut boundary,
+   the deterministic gate verdicts (plan_lint / hook_contract /
+   claims_contract) + their `gateDigest`, and the pacing report. Its
+   `contentDigest` is deterministic (same inputs → same digest), so equal
+   digests prove both round-1 critics reviewed the same authority — the same
+   evidence pattern as the GUI's `plan-review-packet.ts`. Rebuild the packet
+   after EVERY revision: a packet whose `plan.byteHash` no longer matches the
+   plan on disk is stale evidence — never hand it to a critic.
    **MANDATORY, before round 1:** read
    `scripts/producer/docs/findings/FAILURE_LEDGER.md` — the "## Brain lessons"
    section. Every LESSON line is a hard authoring contract distilled from a
@@ -473,6 +522,29 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
        regex semantics. `evidence*`/`icon*` slots are exempt (receipts cite the
        SOURCE, not the narration). This is the deterministic half; YOUR half is
        in 4b below.
+     - `graphics/comp_measure.py <plan>` — the **comp-size gate** (Plan-Time
+       Geometry Contract v3 item #2, kills the LL-035 class): renders every
+       `graphicsTrack` comp through the SHARED content-hash cache at its
+       assemble-effective duration (post `exitOnCut` clamp — the later
+       assemble/render is then a guaranteed cache hit) and measures the
+       settled content bbox. A comp whose content cannot fit the
+       SAFE_BOX-clamped legal area (or whose placed/own-screen geometry
+       exceeds the delivery canvas) FAILs with the measured numbers. Missing
+       node/browser/cv2 = SKIP-with-evidence in `warnings` (visible, never
+       blocking, never silent — the render itself still fails loud). Budget
+       ~15s/comp, cache-aware; the GUI's planning bundle runs it every round.
+     - `planner/geometry_feasibility.py <plan> <manifest> <producer_dir>` — the
+       **plan-time geometry feasibility lint** (Geometry Contract v3 item #3):
+       composes the delivery geometry the renderer will face (proxy face
+       sampling × reframe crop × max punch scale) and runs the REAL region
+       chooser against the SHARED occupancy predicate with each comp's
+       measured bbox. No legal region = WARN-with-evidence while uncalibrated
+       (A3), flipping to FAIL once the residual ledger clears its floors
+       (item #4). It also writes `<producer_dir>/geometry_predictions.json` —
+       the ONLY feeder of the A3 calibration ledger — so SKIPPING this gate
+       silently kills the whole calibration loop: run it every round, exactly
+       like the GUI's planning bundle does. Out-of-depth plans (baselineLook,
+       manual reframe, broll/card-overlapped windows) SKIP-with-evidence.
      - `operator_intent_contract.py <plan> --expected-json <intent.json>` — when a
        stored operator intent exists (always the case in the GUI), the plan must
        still honor it (scope / lanes / style). The GUI's detached controller runs
@@ -480,8 +552,12 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
        alongside the gates above; hand-run them when a `project.json` intent is
        present.
    - **b. Independent strategy critic — a FRESH subagent that did NOT author the
-     plan** (per round; this is the "audited over and over"). Hand it the plan + the
-     transcript + `docs/studies/MEASURED_EDIT_GRAMMAR.md` + the audit frames of any already-
+     plan** (per round; this is the "audited over and over"; round 1 of
+     produced/full may run TWO of these concurrently — see the concurrent-wall
+     rules above). Hand it the round's REVIEW PACKET (built above — plan, cut
+     table + rationales, kept words, boundary words, gate verdicts, pacing;
+     it reads the packet instead of re-deriving the transcript) +
+     `docs/studies/MEASURED_EDIT_GRAMMAR.md` + the audit frames of any already-
      rendered reference, and make it answer, out loud, for the hook AND the body:
      - **Content** — does every beat earn its place? What is MISSING that the
        content calls for?
@@ -527,6 +603,31 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
 5. **Show the operator the plan** (default; skip only if they said "just
    render"): chosen moments + why, predicted duration, hook text, what got cut, plus
    any residual items the critic flagged that you chose not to resolve.
+5.5 **Draft mode (interactive jobs only) — offer a WATCHABLE draft after the
+   deterministic gates pass and BEFORE the review wall.** Nothing watchable
+   existing until the wall clears is the worst part of the operator's wait;
+   a draft fixes the experienced answer without touching governance. Run
+   `draft_render.py <edit_plan.json> <asset_manifest.json> <producer_dir>`
+   (under `.venv/bin/python3`): it reuses `render.py` into
+   `<producer_dir>/draft/` with the SAME delivery-approval gate the final
+   render enforces. Produced/full plans need the LESSON-039 receipt for the
+   draft render to pass — mint it via `node --import tsx
+   scripts/infra/mint-delivery-approval.ts <producer_dir>` (deterministic
+   gates only) — but that pre-wall mint is **draft-scoped and single-use**:
+   `draft_render.py` CONSUMES it (it deletes
+   `.sniper-template-usage-approved.json` when it finishes, success or
+   failure, emitting `draft_receipt_revoked`), so no ship-unlock ever
+   persists for a plan the critic wall has not reviewed. The SHIP receipt is
+   a different event: mint it ONLY after step 4c critic convergence (the
+   GUI mints post-`planningCanConverge` — the two lanes must not diverge);
+   a final render attempted without that post-wall mint fails closed. The
+   draft itself burns an unmistakable DRAFT watermark (big translucent
+   center mark + solid "DRAFT - NOT FINAL" corner badge) into
+   `draft/draft.mp4` and deletes the unwatermarked intermediate. A draft is
+   NEVER a deliverable: it writes no `.sniper-qc-approved.json`, carries no
+   provenance sidecar, and delivery governance keys on `final.mp4` — never
+   present `draft.mp4` as final, and the review wall (steps 4c critic
+   convergence + 7/7.5) still runs before anything IS presented as final.
 6. **Execute the selected destination.** For Desktop-native Palmier, run the
    `desktop_cli.py advance ... --stage visual` contract above, then execute its
    returned, content-addressed bound worklist in dependency order: imports → graphic/b-roll placement →

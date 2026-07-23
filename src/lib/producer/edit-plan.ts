@@ -41,6 +41,16 @@ export interface GraphicEntry {
    * at {x, y}); absent = 1.0 byte-identical. Own-screen never scales.
    */
   placement?: { x: number; y: number; scale?: number };
+  /**
+   * Measured painted-content bbox [x0, y0, x1, y1] in comp-canvas px
+   * (UNSCALED), stamped by the preview's drag/scale commit from the in-iframe
+   * measurement (use-comp-html.useContentOrigin — the same settled probe
+   * times as the render's alpha probe, minus soft-shadow margins). Feeds the
+   * plan lint's SAFE_BOX box check (plan_lint_motion._placed_box) so a placed
+   * entry's warn net isn't point-degenerate (geometry contract v3 item #6e).
+   * Cleared together with `placement` on auto-position reset.
+   */
+  contentBBox?: [number, number, number, number];
 }
 
 export interface PunchIn {

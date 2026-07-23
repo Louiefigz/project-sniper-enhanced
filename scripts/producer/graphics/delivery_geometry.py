@@ -29,6 +29,27 @@ def _scaled_dims(values: list, sx: float, sy: float) -> list[int]:
             max(2, int(round(float(values[1]) * sy / 2.0)) * 2)]
 
 
+def own_screen_meta(comp_dims: tuple, video_dims: tuple) -> tuple:
+    """Full-frame own-screen takeover geometry: ``(0, 0, meta)``.
+
+    The comp must match the delivery aspect (0.002 tolerance — the same
+    predicate ``comp_measure`` mirrors at plan time); a mismatch raises.
+    """
+    comp_w, comp_h = comp_dims
+    video_w, video_h = video_dims
+    if abs(comp_w / comp_h - video_w / video_h) > 0.002:
+        raise ValueError(
+            f"own-screen comp {comp_w}x{comp_h} does not match delivery "
+            f"aspect {video_w}x{video_h}")
+    meta = {"anchor": "own-screen", "region": "full-frame", "fallback": False,
+            "contentBBox": [0, 0, comp_w, comp_h],
+            "placedBBox": [0, 0, video_w, video_h],
+            "canvas": [video_w, video_h]}
+    if (comp_w, comp_h) != (video_w, video_h):
+        meta["scaledDims"] = [video_w, video_h]
+    return 0, 0, meta
+
+
 def fit_delivery_geometry(mov_path: str, offset: tuple[int, int], meta: dict,
                           delivery: tuple[int, int]) -> tuple[int, int, dict]:
     """Scale a same-aspect full-canvas overlay and its placement geometry.

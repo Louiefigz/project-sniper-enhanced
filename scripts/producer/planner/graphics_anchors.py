@@ -33,6 +33,7 @@ import os
 import subprocess
 import tempfile
 
+from planner.occupancy import NoLegalRegion, no_legal_evidence
 from producer_config import CANVAS, FREE_SPACE, MOTION, SAFE_BOX
 
 # The face-relative anchors this module handles (others → no offset).
@@ -231,7 +232,8 @@ def _choose_region(free_map, anchor: str, content_bbox: tuple,
     return None, True
 
 
-def resolve_offset_v2(entry: dict, mov_path: str, video_in: str) -> tuple:
+def resolve_offset_v2(entry: dict, mov_path: str, video_in: str,
+                      band_y_offset_px: float = 0.0) -> tuple:
     """Absolute overlay ``(dx, dy)`` for a face-relative entry + its rendered clip.
 
     Measures the free space at the entry's window (seeded by the entry's
@@ -252,17 +254,18 @@ def resolve_offset_v2(entry: dict, mov_path: str, video_in: str) -> tuple:
     if anchor not in FACE_ANCHORS:
         return 0, 0, {"anchor": anchor, "region": None}
     out_start, out_end = float(entry["outStart"]), float(entry["outEnd"])
-    free_map = build_free_map(video_in, out_start, out_end,
-                              entry.get("faceBBoxNorm"))
+    free_map = build_free_map(video_in, (out_start, out_end),
+                              entry.get("faceBBoxNorm"), band_y_offset_px)
     content = _content_bbox(mov_path)
     gaze = gaze_xy(entry)
     region, fallback = _choose_region(free_map, anchor, content, gaze)
     gaze_meta = {"gaze": [round(g, 4) for g in gaze]} if gaze else {}
-    if region is None:                              # nothing fits — v1 seed nudge
-        dx, dy = resolve_offset(entry)
-        return dx, dy, {"anchor": anchor, "region": "v1-deviation",
-                        "fallback": True, "contentBBox": list(content),
-                        **gaze_meta}
+    if region is None:
+        # Fail-closed core (geometry contract v3 #1): the v1 seed nudge here
+        # was the silent mis-place path — a typed error now routes the anatomy
+        # evidence to the brain for a re-plan instead.
+        raise NoLegalRegion(no_legal_evidence(anchor, content, free_map,
+                                              (out_start, out_end)))
     dx, dy = place_content(content, region)
     placed = (content[0] + dx, content[1] + dy, content[2] + dx, content[3] + dy)
     return dx, dy, {"anchor": anchor, "region": region.name, "fallback": fallback,

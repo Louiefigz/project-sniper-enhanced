@@ -15,7 +15,7 @@ cut for its output-time window (docs/producer/PRODUCER_PLAN.md §4.3). Two conce
   each with a short alpha fade-out at the tail. Mezzanine-quality re-encode
   (CRF 12); master burns captions on top downstream (bands never collide).
 
-Card TEXT is validated upstream by ``plan_lint._check_title_cards`` (<=2 lines,
+Card TEXT is validated upstream by ``plan_lint_overlays.check_title_cards`` (<=2 lines,
 <=8 words, fits the safe box) — this stage only renders what the gate passed.
 
 CLI: overlays.py <in.mp4> <cards.json> <out.mp4>

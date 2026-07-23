@@ -17,7 +17,7 @@ machinery (same ``broll_catalog.json``, path+mtime keyed):
 * ``annotate <broll_dir> <id> --tags .. --description ..`` — the brain writes
   what it SAW; sets ``cataloged: true``. The tool never invents tags.
 * ``manifest <broll_dir>``  — emit the ``manifest["broll"]`` array (cataloged
-  assets only) in the shape ``plan_lint._check_broll`` (needs ``id``) and
+  assets only) in the shape ``plan_lint_overlays.check_broll`` (needs ``id``) and
   ``broll_insert.resolve_assets`` (needs ``id``/``path``/``kind``) consume.
 * ``resolve <broll_dir> <proposal.json>`` — fill brollReceipts assetIds by
   case-insensitive EXACT token match against catalog TAGS ONLY; a multi-token
@@ -53,7 +53,7 @@ FRAMES_DIR_NAME = ".frames"
 FRAME_POSITIONS = (0.15, 0.50, 0.85)
 RECEIPT_PREFIX = "receipt: "
 RESOLVED_SUFFIX = " — resolved from pool"
-# The manifest["broll"] row contract: plan_lint._check_broll keys on "id";
+# The manifest["broll"] row contract: plan_lint_overlays.check_broll keys on "id";
 # broll_insert.resolve_assets keys on "id"/"path"/"kind" (and probes the file).
 MANIFEST_FIELDS = ("id", "path", "kind", "duration", "resolution",
                    "orientation", "category", "hasSpeech", "tags", "description")

@@ -116,10 +116,14 @@ def placement_row(entry: dict, meta: dict, canvas: tuple) -> dict:
     Fuses the entry's gaze read with the placement meta's landed bbox
     (v2/explicit paths record ``placedBBox``; the v1 fallback doesn't —
     the row then carries ``gazeDistFrac: None`` and the audit skips it).
-    ``canvas`` = the DELIVERY (w, h) px the bbox is expressed on.
+    ``canvas`` = the DELIVERY (w, h) px the bbox is expressed on. The v2
+    path's MEASURED ``expandedFace`` (+ ``hairMeasured``) rides along as
+    the render-time actual the A3 calibration ledger compares against
+    plan-time predictions (``planner.geometry_calibration``).
     """
     gaze = gaze_xy(entry)
     placed = meta.get("placedBBox")
+    expanded = meta.get("expandedFace")
     frac = (round(bbox_dist_frac(tuple(placed), gaze, canvas), 4)
             if gaze is not None and placed else None)
     return {"kind": entry.get("kind"),
@@ -128,6 +132,8 @@ def placement_row(entry: dict, meta: dict, canvas: tuple) -> dict:
             "outEnd": float(entry["outEnd"]),
             "region": meta.get("region"),
             "placedBBox": list(placed) if placed else None,
+            "expandedFace": [float(v) for v in expanded] if expanded else None,
+            "hairMeasured": bool(meta.get("hairMeasured", False)),
             "canvas": [int(canvas[0]), int(canvas[1])],
             "gaze": [round(g, 4) for g in gaze] if gaze else None,
             "gazeDistFrac": frac,

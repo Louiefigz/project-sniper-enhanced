@@ -161,6 +161,32 @@ export function previewTranslate(point: Placement | null, origin: Placement | nu
   return { x: t.x, y: t.y };
 }
 
+/** Measured content bbox [x0, y0, x1, y1] — comp-canvas px, UNSCALED. */
+export type ContentBBox = [number, number, number, number];
+
+/**
+ * The content bbox to stamp onto the entry at placement-commit time (geometry
+ * contract v3 item #6e), assembled from the preview's in-iframe measurement
+ * (use-comp-html.useContentOrigin origin + size). Whole-px rounded, matching
+ * the drag commit's px rounding. Returns null when the measurement is absent,
+ * non-finite, or degenerate — the commit then leaves any previously stamped
+ * bbox untouched rather than writing a guess (the plan lint WARNs on placed
+ * entries whose bbox is missing: plan_lint_face.check_placement_content_bbox).
+ */
+export function contentBBoxFrom(
+  origin: Placement | null,
+  size: CanvasDims | null,
+): ContentBBox | null {
+  if (!origin || !size || !(size.w > 0 && size.h > 0)) return null;
+  if (![origin.x, origin.y, size.w, size.h].every(Number.isFinite)) return null;
+  return [
+    Math.round(origin.x),
+    Math.round(origin.y),
+    Math.round(origin.x + size.w),
+    Math.round(origin.y + size.h),
+  ];
+}
+
 export interface DragArgs {
   base: Placement; // committed placement at gesture start ({0,0} when absent)
   dxPx: number; // pointer delta since pointerdown, video-display px

@@ -31,7 +31,7 @@ against the manifest ``broll`` catalog (paths may be relative to the manifest
 file's dir, the render.py transcriptPath convention); an asset shorter than
 ``assetStart`` + the window is a hard error — never loop or freeze-frame
 silently (no-fallbacks doctrine). Editorial rules (insert count cap, required
-``reason``, title-card collisions) are plan_lint._check_broll's job.
+``reason``, title-card collisions) are plan_lint_overlays.check_broll's job.
 
 IMAGE-FOCUS OPS (LIAM-4-MOVES move 3, additive): an insert may carry a
 ``focusOps`` array (region highlight wipe, darken/blur-surround, signed hue

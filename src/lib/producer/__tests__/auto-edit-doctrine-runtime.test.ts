@@ -48,6 +48,8 @@ const PASS_GATES: GateBundleVerdict = {
     hookContract: { gate: "hook_contract", ok: true, errors: [], warnings: [], exit: 0 },
     templateUsage: { gate: "template_usage", ok: true, errors: [], warnings: [], exit: 0 },
     claimsContract: { gate: "claims_contract", ok: true, errors: [], warnings: [], exit: 0 },
+    compSize: { gate: "comp_size", ok: true, errors: [], warnings: [], exit: 0 },
+    geometryFeasibility: { gate: "geometry_feasibility", ok: true, errors: [], warnings: [], exit: 0 },
     referenceLint: null,
   },
 };

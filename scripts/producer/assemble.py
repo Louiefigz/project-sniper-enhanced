@@ -71,6 +71,7 @@ from graphics.composite_smoothness import (
     read_inline_ydif as _read_inline_ydif,
 )
 from preview_proxy import write_proxy
+from stage_timing import span_for_base
 from template_usage_approval import (approval_required as template_approval_required,
                                      require_current as require_template_usage_approval)
 
@@ -81,26 +82,18 @@ def emit(**fields) -> None:
 
 def _probe_fps(path: str) -> float:
     """Output frame rate (``r_frame_rate``) of a rendered file, as a float."""
-    proc = subprocess.run(
-        ["ffprobe", "-v", "error", "-select_streams", "v:0",
-         "-show_entries", "stream=r_frame_rate", "-of", "csv=p=0", path],
-        capture_output=True, text=True)
-    raw = (proc.stdout or "").strip().splitlines()[0] if proc.stdout.strip() else ""
-    if "/" in raw:
-        num, den = raw.split("/", 1)
-        return float(num) / float(den) if float(den) else 0.0
-    return float(raw) if raw else 0.0
+    from media_probe import _fps_fraction, probe_video
+    return float(_fps_fraction(probe_video(path)["r_frame_rate"]))
 
 
 def _own_screen_frame_ranges(plan: dict, fps: float) -> list[tuple[int, int]]:
-    """Output-frame ``[start, end)`` spans of own-screen takeover graphics.
-
-    A full-frame takeover card legitimately holds still — its footage is
-    REPLACED, not stuttering — exactly the holds Audit B's ``glitch_black`` /
-    ``glitch_freeze`` already treat as intentional. The eof_action stutter this
-    gate hunts is a FOOTAGE-visible artifact, so duplicate frames inside a
-    takeover window are not that bug; exclude them from the ratio (mirroring the
-    other QC gates) so a static takeover doesn't false-fail the smoothness check."""
+    """Output-frame ``[start, end)`` spans of own-screen takeover graphics."""
+    # A full-frame takeover card legitimately holds still — its footage is
+    # REPLACED, not stuttering — exactly the holds Audit B's glitch_black /
+    # glitch_freeze already treat as intentional. The eof_action stutter this
+    # gate hunts is a FOOTAGE-visible artifact, so duplicate frames inside a
+    # takeover window are not that bug; exclude them from the ratio (mirroring
+    # the other QC gates) so a static takeover doesn't false-fail smoothness.
     ranges: list[tuple[int, int]] = []
     if not fps or fps <= 0:
         return ranges
@@ -121,10 +114,9 @@ def _ydif_dup_ratio(path: str,
                     exempt: list[tuple[int, int]] | None = None) -> float:
     """STANDALONE smoothness probe: full decode of ``path`` through signalstats.
 
-    Kept for the paths without an inline tap — the no-graphics passthrough and
-    any CLI/standalone check. The composite path reads the tap file instead
-    (same signalstats semantics, zero extra decode). ``exempt`` = own-screen
-    takeover frame spans, excluded from the ratio.
+    Kept for the paths without an inline tap (no-graphics passthrough, CLI
+    checks); the composite path reads the tap file instead. ``exempt`` =
+    own-screen takeover frame spans, excluded from the ratio.
     """
     proc = subprocess.run(
         ["ffmpeg", "-i", path, "-vf",
@@ -196,7 +188,7 @@ def _refit_for_rebuild(plan_path: str, plan: dict,
              warning="no base_plan.json snapshot — windows not remapped")
         return plan, None
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    from edit.plan_refit import refit_plan
+    from edit.plan_refit import bump_plan_version, refit_plan
     with open(old_path) as f:
         base_plan = json.load(f)
     out_dir = os.path.dirname(fingerprint_path)
@@ -211,6 +203,9 @@ def _refit_for_rebuild(plan_path: str, plan: dict,
     if old_plan is None:
         raise RuntimeError("refit authority returned no proven source timebase")
     refitted, report = refit_plan(old_plan, plan)
+    # Every plan WRITE increments planVersion (stale-plan detection); the bump
+    # rides in the staged bytes so the paired receipt hash-binds it too.
+    refitted = bump_plan_version(refitted)
     for row in report:
         emit(status="refit", **row)
     # The rebuild subprocess reads a FILE. Always stage a changed cut timebase,
@@ -402,12 +397,15 @@ def _composite(job: AssembleJob) -> dict:
     """Graphics composite + the YDIF smoothness gate (inline tap when it ran)."""
     from graphics.exit_on_cut import apply_exit_on_cut
     from graphics.graphics_stage import GraphicsJob, run_graphics_stage
+    from graphics.placement_verify import occlusion_windows
+    from planner.occupancy import plan_band_offset
     # THE EXIT LAW (G4): same deterministic clamp as render.py's graphics
     # stage — an exitOnCut entry dies exactly ON the next cutTrack seam.
     track, clamped = apply_exit_on_cut(job.plan)
     if clamped:
         emit(status="exit_on_cut_clamped", entries=clamped)
     ydif_file = job.out + ".ydif.txt"
+    out_dir = os.path.dirname(os.path.abspath(job.out))
     gjob = GraphicsJob(video_in=job.base, video_out=job.out,
                        track=track,
                        cache_dir=job.cache_dir, eof_pass=True,
@@ -415,9 +413,15 @@ def _composite(job: AssembleJob) -> dict:
                        # Eye-trace placements sidecar beside the output —
                        # Audit B reads the final.mp4 dir (LIAM move 4).
                        placements_out=os.path.join(
-                           os.path.dirname(os.path.abspath(job.out)),
-                           "graphics_placements.json"))
-    summary = run_graphics_stage(gjob)
+                           out_dir, "graphics_placements.json"),
+                       # Verify allow-vocabulary + the A3 calibration loop:
+                       # the output dir is the producer dir in the GUI/skill
+                       # flow (final.mp4 beside geometry_predictions.json).
+                       occlusions=occlusion_windows(job.plan),
+                       producer_dir=out_dir,
+                       band_y_offset_px=plan_band_offset(job.plan))
+    with span_for_base(job.base, "graphics"):
+        summary = run_graphics_stage(gjob)
     # Own-screen takeover holds are legitimately static (footage replaced, not
     # stuttering) — exempt their frames so the eof_action stutter gate measures
     # only the footage-visible frames it is actually meant to police.
@@ -454,21 +458,25 @@ def assemble(job: AssembleJob) -> dict:
     invalidate_assembled_sidecar(job.out)
     if reuse:
         from audio.base_audio import mux_audio
-        mux_audio(job.out, job.base, job.out)
+        with span_for_base(job.base, "audio_mux"):
+            mux_audio(job.out, job.base, job.out)
         emit(status="audio_only_mux", out=job.out,
              note="video + graphics unchanged — new base audio muxed onto the "
                   "existing composite (its YDIF gate already passed)")
         summary = {"audio_only_mux": True, "out": job.out}
     else:
-        summary = _composite(job)
-    mix = apply_music(job.plan, job.out, job.fingerprint_path, job.manifest)
+        with span_for_base(job.base, "composite"):
+            summary = _composite(job)
+    with span_for_base(job.base, "music"):
+        mix = apply_music(job.plan, job.out, job.fingerprint_path, job.manifest)
     if mix is not None:
         summary["music"] = {"applied": True, "final_lufs": mix.get("final_lufs"),
                             "duck_depth": mix.get("duck_depth")}
     provenance = write_assembled_sidecar(job.out, job.plan)
     summary["planHash"] = provenance["planHash"]
     summary["authorityHash"] = provenance["authorityHash"]
-    proxy = write_proxy(job.out)   # WARN-and-continue inside (documented exception)
+    with span_for_base(job.base, "proxy"):
+        proxy = write_proxy(job.out)   # WARN-and-continue inside (documented exception)
     if proxy:
         summary["proxy"] = proxy["path"]
     return summary
@@ -513,8 +521,9 @@ def main() -> None:
             raise RuntimeError("produced/full assemble requires --manifest to verify template history")
         audio_only = False
         if args.auto_base:
-            plan, state = ensure_base(args.base, args.plan_path, plan,
-                                      args.fingerprint, args.manifest)
+            with span_for_base(args.base, "base_check"):
+                plan, state = ensure_base(args.base, args.plan_path, plan,
+                                          args.fingerprint, args.manifest)
             audio_only = state == "audio_only"
         job = AssembleJob(base=args.base, plan=plan, out=args.out,
                           cache_dir=args.cache_dir or default_cache,
@@ -524,6 +533,11 @@ def main() -> None:
         emit(status="done", **summary)
     except (OSError, json.JSONDecodeError, KeyError, ValueError, RuntimeError) as exc:
         emit(error=str(exc))
+        # Mirror the typed error to STDERR too: belt-and-suspenders with the
+        # worker's combined stdout+stderr tail (chain.ts runAssemble) — the
+        # NoLegalRegion re-plan route (geometry-replan.ts) keys on the token
+        # surviving in that tail whichever stream carried it.
+        print(json.dumps({"error": str(exc)}), file=sys.stderr, flush=True)
         sys.exit(1)
     finally:
         # We hold the lock (acquire returned True) — remove on success AND failure.

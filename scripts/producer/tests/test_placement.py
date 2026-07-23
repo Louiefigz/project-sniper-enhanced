@@ -1,7 +1,7 @@
 """Explicit-placement contract tests (entry.placement beats anchor resolution).
 
 Covers the three legs of the contract:
-  * PRECEDENCE — graphics_stage._placement uses the explicit {x, y} pin and
+  * PRECEDENCE — stage_placement.resolve_placement uses the explicit {x, y} pin and
     never consults resolve_offset_v2 / the v1 fallback for a placed entry.
   * ABSENT = UNTOUCHED — entries without placement go down the exact existing
     anchor path (same calls, same values, byte-identical filter graph).
@@ -16,6 +16,7 @@ from _common import *  # noqa: F401,F403
 
 from graphics import delivery_geometry as dg
 from graphics import graphics_stage as gs
+from graphics import stage_placement as sp
 
 # A synthetic rendered-content footprint (x0, y0, x1, y1) on the comp canvas.
 _CONTENT = (200, 855, 880, 1055)
@@ -36,20 +37,20 @@ class PlacementPrecedenceTests(unittest.TestCase):
     def test_placement_beats_anchor_resolution(self) -> None:
         entry = _entry(anchor="headroom", faceBBoxNorm=[0.3, 0.2, 0.3, 0.3],
                        placement={"x": 60, "y": 300})
-        with mock.patch.object(gs, "_content_bbox", return_value=_CONTENT), \
-             mock.patch.object(gs, "resolve_offset_v2",
+        with mock.patch.object(sp, "_content_bbox", return_value=_CONTENT), \
+             mock.patch.object(sp, "resolve_offset_v2",
                                side_effect=AssertionError("anchor path used")), \
-             mock.patch.object(gs, "resolve_offset",
+             mock.patch.object(sp, "resolve_offset",
                                side_effect=AssertionError("v1 path used")):
-            x, y, meta = gs._placement(entry, "fake.mov", "base.mp4")
+            x, y, meta = sp.resolve_placement(entry, "fake.mov", "base.mp4")
         self.assertEqual((x, y), (60 - _CONTENT[0], 300 - _CONTENT[1]))
         self.assertEqual(meta["region"], "explicit-placement")
         self.assertEqual(meta["placedBBox"][:2], [60, 300])
 
     def test_placed_content_lands_at_the_point(self) -> None:
         entry = _entry(placement={"x": 0, "y": 0})
-        with mock.patch.object(gs, "_content_bbox", return_value=_CONTENT):
-            x, y, meta = gs._placement(entry, "fake.mov", "base.mp4")
+        with mock.patch.object(sp, "_content_bbox", return_value=_CONTENT):
+            x, y, meta = sp.resolve_placement(entry, "fake.mov", "base.mp4")
         self.assertEqual(meta["placedBBox"],
                          [0, 0, _CONTENT[2] - _CONTENT[0], _CONTENT[3] - _CONTENT[1]])
         self.assertEqual((x, y), (-_CONTENT[0], -_CONTENT[1]))
@@ -57,23 +58,23 @@ class PlacementPrecedenceTests(unittest.TestCase):
     def test_own_screen_placement_raises(self) -> None:
         entry = _entry(anchor="own-screen", placement={"x": 60, "y": 300})
         with self.assertRaisesRegex(ValueError, "full-frame"):
-            gs._placement(entry, "fake.mov", "base.mp4")
+            sp.resolve_placement(entry, "fake.mov", "base.mp4")
 
     def test_malformed_placement_raises(self) -> None:
         for bad in ([60, 300], {"x": 60}, {"x": "60", "y": 300},
                     {"x": float("nan"), "y": 300}, {"x": True, "y": 300},
                     {"x": float("inf"), "y": 0}):
             with self.assertRaises(ValueError, msg=f"accepted {bad!r}"):
-                gs._placement(_entry(placement=bad), "fake.mov", "base.mp4")
+                sp.resolve_placement(_entry(placement=bad), "fake.mov", "base.mp4")
 
     def test_measurement_failure_is_loud_not_a_fallback(self) -> None:
         entry = _entry(placement={"x": 60, "y": 300})
-        with mock.patch.object(gs, "_content_bbox",
+        with mock.patch.object(sp, "_content_bbox",
                                side_effect=RuntimeError("no alpha content")), \
-             mock.patch.object(gs, "resolve_offset",
+             mock.patch.object(sp, "resolve_offset",
                                side_effect=AssertionError("v1 fallback used")):
             with self.assertRaisesRegex(RuntimeError, "no alpha content"):
-                gs._placement(entry, "fake.mov", "base.mp4")
+                sp.resolve_placement(entry, "fake.mov", "base.mp4")
 
 
 class AbsentPlacementPathTests(unittest.TestCase):
@@ -83,26 +84,26 @@ class AbsentPlacementPathTests(unittest.TestCase):
         content = (0, 0, 633, 1079)
         entry = _entry(kind="nateherk-rail", anchor="beside-face",
                        recompose={"clearX": [0.3302, 1.0]})
-        with mock.patch.object(gs, "_content_bbox", return_value=content), \
-             mock.patch.object(gs, "resolve_offset_v2",
+        with mock.patch.object(sp, "_content_bbox", return_value=content), \
+             mock.patch.object(sp, "resolve_offset_v2",
                                side_effect=AssertionError("rail was floated")):
-            x, y, meta = gs._placement(entry, "rail.mov", "base.mp4")
+            x, y, meta = sp.resolve_placement(entry, "rail.mov", "base.mp4")
         self.assertEqual((x, y), (0, 0))
         self.assertEqual(meta["region"], "fixed-canvas")
         self.assertEqual(meta["placedBBox"], list(content))
 
     def test_absent_placement_uses_v2_verbatim(self) -> None:
         sentinel = (7, 9, {"region": "sentinel"})
-        with mock.patch.object(gs, "resolve_offset_v2", return_value=sentinel), \
-             mock.patch.object(gs, "_content_bbox",
+        with mock.patch.object(sp, "resolve_offset_v2", return_value=sentinel), \
+             mock.patch.object(sp, "_content_bbox",
                                side_effect=AssertionError("content probed")):
-            self.assertEqual(gs._placement(_entry(), "fake.mov", "b.mp4"), sentinel)
+            self.assertEqual(sp.resolve_placement(_entry(), "fake.mov", "b.mp4"), sentinel)
 
     def test_absent_placement_keeps_v1_fallback(self) -> None:
-        with mock.patch.object(gs, "resolve_offset_v2",
+        with mock.patch.object(sp, "resolve_offset_v2",
                                side_effect=RuntimeError("no cv2")), \
-             mock.patch.object(gs, "resolve_offset", return_value=(3, 4)):
-            x, y, meta = gs._placement(_entry(), "fake.mov", "b.mp4")
+             mock.patch.object(sp, "resolve_offset", return_value=(3, 4)):
+            x, y, meta = sp.resolve_placement(_entry(), "fake.mov", "b.mp4")
         self.assertEqual((x, y, meta["region"]), (3, 4, "v1-fallback"))
 
     def test_v1_fallback_still_emits_measured_placement_evidence(self) -> None:
@@ -118,8 +119,8 @@ class AbsentPlacementPathTests(unittest.TestCase):
 
     def test_own_screen_scales_to_the_delivery_canvas(self) -> None:
         dims = {"comp.mp4": (1920, 1080), "base.mp4": (3840, 2160)}
-        with mock.patch.object(gs, "_clip_dims", side_effect=lambda name: dims[name]):
-            x, y, meta = gs._placement(
+        with mock.patch.object(sp, "_clip_dims", side_effect=lambda name: dims[name]):
+            x, y, meta = sp.resolve_placement(
                 _entry(anchor="own-screen"), "comp.mp4", "base.mp4")
         self.assertEqual((x, y), (0, 0))
         self.assertEqual(meta["placedBBox"], [0, 0, 3840, 2160])
@@ -133,9 +134,9 @@ class AbsentPlacementPathTests(unittest.TestCase):
 
     def test_own_screen_rejects_a_mismatched_aspect(self) -> None:
         dims = {"comp.mp4": (1080, 1920), "base.mp4": (3840, 2160)}
-        with mock.patch.object(gs, "_clip_dims", side_effect=lambda name: dims[name]):
+        with mock.patch.object(sp, "_clip_dims", side_effect=lambda name: dims[name]):
             with self.assertRaisesRegex(ValueError, "does not match delivery aspect"):
-                gs._placement(_entry(anchor="own-screen"), "comp.mp4", "base.mp4")
+                sp.resolve_placement(_entry(anchor="own-screen"), "comp.mp4", "base.mp4")
 
     def test_4k_free_band_scales_full_canvas_and_authored_geometry(self) -> None:
         meta = {"anchor": "free-band", "region": "explicit-placement",
@@ -161,7 +162,7 @@ class AbsentPlacementPathTests(unittest.TestCase):
                     "kind": "stat-card", "fmt": "mov"}
         dims = {"base.mp4": (3840, 2160), "comp.mov": (1920, 1080)}
         with mock.patch.object(gs, "render_entry", return_value=rendered), \
-             mock.patch.object(gs, "_placement", return_value=(0, 0, {
+             mock.patch.object(gs, "resolve_placement", return_value=(0, 0, {
                  "anchor": "free-band", "region": None,
              })), mock.patch.object(gs, "_clip_dims",
                                     side_effect=lambda name: dims[name]), \

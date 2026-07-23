@@ -43,6 +43,7 @@ import {
   requiredPlanningRounds,
 } from "./round-policy";
 import type { ProducerReview } from "./review-contract";
+import { timedStage } from "@/lib/server/stage-timing";
 import { AutoEditError, type Send } from "./stream";
 import { publishPalmierWorkingCheckpoint } from "./palmier-checkpoints";
 import { writeTemplateUsageApproval } from "@/lib/server/template-usage-approval";
@@ -131,7 +132,9 @@ async function revisePlan(
   const before = requiredPlanningHash(deps.contentHash(run.job.ctx.planPath), "edit plan content");
   deps.snapshot(run.job.ctx.planPath);
   run.io.send({ event: "revision_started", stage: "plan", round });
-  const result = await deps.revise(run.job.ctx, review, round);
+  const result = await timedStage(
+    run.job.ctx.dir, "planning_revision", () => deps.revise(run.job.ctx, review, round),
+  );
   deps.writeJson(planningReviewArtifactPath(run.job, round, "revision-receipt.json"), result);
   const deferred = deferredFailure(result);
   if (deferred) throw new AutoEditError(deferred);
@@ -224,7 +227,10 @@ export async function runPlanningReviewLoop(
       planningRound: criticRound, planningRoundsRequired: required,
       planningCycles: cycle,
     });
-    const results = await runPlanningReviewBatch(run, firstRound, batchSize, deps);
+    const results = await timedStage(
+      run.job.ctx.dir, "planning_round",
+      () => runPlanningReviewBatch(run, firstRound, batchSize, deps),
+    );
     criticRound += results.length;
     reviewPaths.push(...results.map((result) => result.path));
     const review = mergePlanningResults(results);

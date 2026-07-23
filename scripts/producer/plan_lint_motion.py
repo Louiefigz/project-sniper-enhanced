@@ -223,7 +223,7 @@ def _placement_scale_lint(tag: str, p: dict, rep: Any) -> float | None:
     """Shape+bounds-check ``placement.scale``; 1.0 when absent, None after erroring.
 
     Same band the renderer enforces (producer_config.PLACEMENT_SCALE) so lint
-    and graphics_stage._placement_scale can never drift.
+    and stage_placement._placement_scale can never drift.
     """
     s = p.get("scale")
     if s is None:
@@ -269,7 +269,7 @@ def _check_placement(tag: str, g: dict, mode: str, rep: Any) -> None:
     """Explicit ``placement`` contract: {x, y[, scale]} finite comp-canvas px.
 
     The point pins the comp's rendered CONTENT top-left on the delivery canvas
-    (graphics_stage._explicit_offset); optional ``scale`` resizes the clip
+    (stage_placement._explicit_offset); optional ``scale`` resizes the clip
     uniformly about that pin — outside the PLACEMENT_SCALE band = ERROR.
     Off-canvas point = ERROR. Shorts only: SAFE_BOX tests the SCALED content
     box (``_placed_box``) — WARNING naming the violated edge, taste the

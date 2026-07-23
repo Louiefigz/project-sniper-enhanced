@@ -44,6 +44,23 @@ def emit(**fields) -> None:
     print(json.dumps(fields), flush=True)
 
 
+def bump_plan_version(plan: dict) -> dict:
+    """Return a copy of ``plan`` with ``planVersion`` incremented.
+
+    The bump is owned by whichever seam WRITES the plan, exactly once per
+    write (stale-plan detection: save-plan
+    409s, editor reloads, base staleness). The counter is bookkeeping only —
+    it is excluded from every base fingerprint (fingerprints._NON_BASE_KEYS)
+    and from plan_content_hash, so a bump can never invalidate a base or a
+    reviewed-plan authority.
+    """
+    try:
+        current = int(plan.get("planVersion") or 0)
+    except (TypeError, ValueError):
+        current = 0
+    return {**plan, "planVersion": current + 1}
+
+
 def _mapped_overlap_edge(old_seg: Segment, bounds: tuple[float, float],
                          new: TimelineMap, forward: bool) -> float | None:
     """Map the nearest surviving content within one OLD output segment."""
@@ -217,6 +234,11 @@ def main() -> None:
         for row in report:
             emit(status="refit", **row)
         if args.write:
+            # NO version bump here: every CLI caller (save-plan cut-only saves,
+            # ai-edit finalize) already bumped planVersion before staging the
+            # refit input — a second bump here double-counted (planVersion 1→3
+            # on one save). Python callers that own the write bump explicitly
+            # via bump_plan_version (assemble._refit_for_rebuild).
             with open(args.new_plan, "w") as f:
                 json.dump(plan, f, indent=1)
         emit(status="done", changes=len(report), written=bool(args.write))

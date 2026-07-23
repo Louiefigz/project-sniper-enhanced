@@ -2,7 +2,7 @@
 
 import { useCallback, type Dispatch, type SetStateAction } from "react";
 import type { EditPlan, GraphicEntry } from "@/lib/producer/edit-plan";
-import type { Placement } from "@/lib/producer/placement-geometry";
+import type { ContentBBox, Placement } from "@/lib/producer/placement-geometry";
 import { fmtMmSs, type Win } from "@/lib/producer/timeline-scale";
 import type { StreamEvent } from "@/lib/producer/types";
 import { editorPaths, useEditorPlayback, useEditorUiState } from "./editor-state";
@@ -46,9 +46,20 @@ interface PlacementArgs {
 
 function usePlacementCommit(args: PlacementArgs) {
   const { selected, kind, updateGraphic, addWarningEvent, locked } = args;
-  return useCallback((placement: (Placement & { scale?: number }) | null, unsafe: boolean) => {
+  return useCallback((
+    placement: (Placement & { scale?: number }) | null,
+    unsafe: boolean,
+    contentBBox?: ContentBBox | null,
+  ) => {
     if (selected == null || locked) return;
-    updateGraphic(selected, { placement: placement ?? undefined });
+    // Stamp the preview-measured content bbox WITH the placement (geometry
+    // contract v3 item #6e) — the plan lint's SAFE_BOX check reads it and is
+    // point-degenerate without. Reset-to-auto clears it alongside placement;
+    // an unmeasured commit (null bbox) leaves any previous stamp untouched.
+    const patch: Partial<GraphicEntry> = { placement: placement ?? undefined };
+    if (!placement) patch.contentBBox = undefined;
+    else if (contentBBox) patch.contentBBox = contentBBox;
+    updateGraphic(selected, patch);
     if (!unsafe || !placement) return;
     addWarningEvent({
       status: "placement_unsafe",

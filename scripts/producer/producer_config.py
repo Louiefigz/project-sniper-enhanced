@@ -70,13 +70,50 @@ SAFE_BOX = {
 VISUAL_CENTER_X = 495
 
 # placement.scale band — an explicitly-placed graphic may be resized uniformly
-# about its pin (graphics_stage._explicit_offset + plan_lint_motion read the
+# about its pin (stage_placement._explicit_offset + plan_lint_motion read the
 # SAME band so lint and renderer can never drift). RASTER-QUALITY BOUND: comps
 # raster at their authored canvas resolution, so DOWNSCALING (<1.0) resamples
 # from surplus pixels and stays crisp, while UPSCALING interpolates pixels and
 # softens — 1.5 is the ceiling where that softness is still invisible at
 # delivery resolution. The floor keeps a shrunken graphic legible at all.
 PLACEMENT_SCALE = {"min": 0.25, "max": 1.5}
+
+# Comp-size plan-time measurement gate (graphics/comp_measure.py — Plan-Time
+# Geometry Contract v3 build item #2, kills the LL-035 class at lint).
+COMP_MEASURE = {
+    # Per-comp wall-clock allowance. The budget is checked BETWEEN comps
+    # (an in-flight hyperframes render is never killed); cold renders measure
+    # ~10s on the reference machine, cache hits cost well under 1s.
+    "per_comp_budget_s": 15.0,
+    # A comp whose measured content spans >= this fraction of the canvas in
+    # BOTH dimensions is a designed full-bleed treatment (wash/takeover bg),
+    # not an LL-035 overflow — exempt from the SAFE_BOX fit check. LL-035
+    # itself (one edge-to-edge ROW: full width, small height) still fails.
+    "full_bleed_frac": 0.98,
+}
+
+# Plan-time geometry feasibility lint (planner/geometry_feasibility.py —
+# geometry contract v3 build item #3, A1 proxy-mezzanine). WARN-with-evidence
+# until the A3 margin ledger exists (item #4 flips severity_for calibrated).
+GEOMETRY_FEASIBILITY = {
+    # Proxy mezzanine downscale factor: the REAL cut_speed segment math onto
+    # a smaller canvas. 0.5 keeps a 1080p source at 540p — plenty for the Haar
+    # face sampler (min face 6% of frame height) at a fraction of the encode.
+    "proxy_scale": 0.5,
+    # Host-side sample count for the max punch scale over a graphic window
+    # (via punch_in's pure mirrors — closed forms, samples only bound eases).
+    "punch_samples": 9,
+}
+
+# A3 margin-calibration ledger (planner/geometry_calibration.py — geometry
+# contract v3 build item #4). The margin is an EMPIRICAL residual quantile,
+# never a chosen constant: geometry_feasibility / placement_verify verdicts
+# stay WARN until the residual ledger clears BOTH floors below.
+GEOMETRY_CALIBRATION = {
+    "min_windows": 20,   # distinct (run, window) residual samples required
+    "min_runs": 5,       # distinct runs those samples must span
+    "quantile": 0.95,    # per-axis |residual| quantile → the clearance margin
+}
 
 # ---------------------------------------------------------------------------
 # Mode presets — the shorts vs long-form doctrine
@@ -771,6 +808,22 @@ PROXY = {
     "preset": "veryfast",
     "gop": 24,                      # keyframe every 24 frames = scrub-dense
     "audio_bitrate": "96k",
+}
+
+# Draft mode (draft_render.py) — pre-review-wall watchable candidate. The
+# DRAFT watermark must be UNMISTAKABLE on every frame (big translucent center
+# mark + solid corner badge); the burn is one fast x264 pass with the mastered
+# audio stream-copied. Geometry is height-relative so shorts and longform get
+# proportionate marks. A draft is never a deliverable — see draft_render.py.
+DRAFT = {
+    "center_frac": 0.16,            # center "DRAFT" glyph height / frame height
+    "center_alpha": 0.30,           # translucent: watchable but unmissable
+    "corner_frac": 0.036,           # corner badge text height / frame height
+    "corner_margin_frac": 0.018,    # badge inset from the top-right corner
+    "corner_box_alpha": 0.65,
+    "crf": 20,                      # watchability, not delivery, quality
+    "preset": "veryfast",           # speed is the point of a draft
+    "fontfile": "Inter-Bold.ttf",   # resolved against repo assets/fonts/
 }
 
 # ---------------------------------------------------------------------------

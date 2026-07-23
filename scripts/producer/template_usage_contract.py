@@ -170,8 +170,12 @@ def check(plan: dict, words: list[dict], snapshot: object,
     if errors or target.get("mode") != "longform" \
             or resolve_scope(target) not in ("produced", "full") \
             or not lane_required(target, "graphics"):
+        # Out-of-scope modes (shorts) still bind the VALIDATED history digest:
+        # the approval writer requires metrics.snapshotDigest to equal its
+        # controller-bound authority, and _snapshot_errors already checked it.
+        metrics = {} if errors else {"snapshotDigest": snapshot.get("digest")}
         return {"scope": "template_usage", "ok": not errors,
-                "errors": errors, "warnings": [], "metrics": {}}
+                "errors": errors, "warnings": [], "metrics": metrics}
     out_dur = max((float(word.get("end", 0)) for word in words), default=0.0)
     selected_profile = profile_name(target)
     beats = {beat["beatId"]: beat for beat in semantic_beats(

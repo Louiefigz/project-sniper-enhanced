@@ -133,3 +133,34 @@ class AspectGeometryTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class HookCardCaptionSuppressionTests(unittest.TestCase):
+    """LESSON-022: caption cues overlapping a titleCard window are dropped so
+    the hook zone shows the designed lockup instead of captions."""
+
+    WORDS = [
+        {"word": "your", "start": 0.1, "end": 0.4},
+        {"word": "sign", "start": 0.4, "end": 0.8},
+        {"word": "to", "start": 0.8, "end": 1.0},
+        {"word": "stop", "start": 1.0, "end": 1.6},
+        {"word": "body", "start": 2.6, "end": 3.0},
+        {"word": "starts", "start": 3.0, "end": 3.4},
+    ]
+
+    def test_cues_under_card_dropped_body_cues_survive(self) -> None:
+        import tempfile
+        from graphics.graphics_stage import suppress_captions
+        ass = cap.build_ass(self.WORDS, "minimal",
+                            cap.caption_cfg_for_aspect("9:16"))
+        with tempfile.NamedTemporaryFile("w", suffix=".ass",
+                                         delete=False) as f:
+            f.write(ass)
+            path = f.name
+        dropped = suppress_captions(path, path, [(0.0, 2.2)])
+        self.assertGreater(dropped, 0)
+        with open(path, encoding="utf-8") as f:
+            out = f.read()
+        # Hook-window cues are gone; the first body cue survives verbatim.
+        self.assertNotIn("sign", out)
+        self.assertIn("body", out)

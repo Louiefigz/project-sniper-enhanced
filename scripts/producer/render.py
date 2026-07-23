@@ -39,6 +39,7 @@ from compile_timeline import TimelineMap, compile_plan, remap_words
 from cut_speed import probe_duration, probe_video, probe_video_frames, render_cut_speed
 from edit_scope import lane_required
 from graphics.exit_on_cut import apply_exit_on_cut
+from graphics.graphics_stage import suppress_captions
 from audio.master import MasterSpec, dead_channel_prefix, master
 from captions.overlays import build_card_png, apply_cards
 from plan_lint import lint
@@ -549,6 +550,14 @@ def captions_stage(ctx: RenderCtx, tmap: TimelineMap) -> str | None:
              baseline=cfg["baseline_max_y"])
     with open(ass_path, "w") as f:
         f.write(build_ass(words, style, cfg))
+    cards = [(float(c["outStart"]), float(c["outEnd"]))
+             for c in ctx.plan.get("titleCards") or []]
+    if cards:
+        # LESSON-022: the hook zone shows the designed lockup INSTEAD of
+        # captions — no frame may carry card text and caption cues together.
+        dropped = suppress_captions(ass_path, ass_path, cards)
+        emit(status="captions_suppressed_under_cards", dropped=dropped,
+             cards=len(cards))
     emit(status="stage_done", stage="captions", words=len(words), style=style)
     return ass_path
 

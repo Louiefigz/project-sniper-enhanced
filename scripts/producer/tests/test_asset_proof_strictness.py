@@ -77,6 +77,26 @@ class AssetProofStrictnessTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "retains alpha"):
                 frame_oracles.terminal_alpha("overlay.mov", 75, "/ffmpeg", {})
 
+    def test_legal_fade_tail_passes_terminal_alpha(self) -> None:
+        # One bright speck at the measured fade-tail level, rest clear: the
+        # sub-visible single-frame residue of a fade converging exactly at D.
+        frame = bytearray(96 * 54)
+        frame[0] = 57
+        process = mock.Mock(returncode=0, stdout=bytes(frame), stderr=b"")
+        with mock.patch.object(frame_oracles.subprocess, "run",
+                               return_value=process):
+            proof_row = frame_oracles.terminal_alpha("o.mov", 75, "/ffmpeg", {})
+        self.assertEqual(proof_row["maxAlpha8"], 57)
+
+    def test_wide_low_alpha_residue_is_rejected_by_mean(self) -> None:
+        # A card still faintly visible EVERYWHERE beats the max cap but not the
+        # mean cap - a real unexited overlay, not a fade tail.
+        process = mock.Mock(returncode=0, stdout=b"\x20" * (96 * 54), stderr=b"")
+        with mock.patch.object(frame_oracles.subprocess, "run",
+                               return_value=process):
+            with self.assertRaisesRegex(RuntimeError, "retains alpha"):
+                frame_oracles.terminal_alpha("o.mov", 75, "/ffmpeg", {})
+
     def test_sealed_asset_binding_does_not_reread_live_source(self) -> None:
         sealed = ({"field": "iconFile", "selector": "proof.svg",
                    "path": "motion/icons/proof.svg", "sha256": "0" * 64},)

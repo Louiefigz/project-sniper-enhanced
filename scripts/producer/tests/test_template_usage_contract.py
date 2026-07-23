@@ -144,3 +144,27 @@ class TemplateUsageContractTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ShortModeDigestBindingTests(unittest.TestCase):
+    """Out-of-scope modes (shorts) still bind the validated snapshot digest so
+    the delivery-approval writer can verify its controller-bound authority."""
+
+    def test_short_mode_verdict_carries_validated_snapshot_digest(self) -> None:
+        snapshot = _snapshot()
+        snapshot["mode"] = "short"
+        snapshot["digest"] = tuc._stable_hash(
+            {k: v for k, v in snapshot.items() if k != "digest"})
+        plan = {"target": {"mode": "short", "scope": "produced"},
+                "graphicsTrack": []}
+        verdict = tuc.check(plan, [{"end": 10.0}], snapshot,
+                            expected_digest=snapshot["digest"])
+        self.assertTrue(verdict["ok"])
+        self.assertEqual(verdict["metrics"].get("snapshotDigest"),
+                         snapshot["digest"])
+
+    def test_short_mode_invalid_snapshot_still_empty_metrics(self) -> None:
+        verdict = tuc.check({"target": {"mode": "short", "scope": "produced"}},
+                            [{"end": 10.0}], {"not": "a snapshot"})
+        self.assertFalse(verdict["ok"])
+        self.assertEqual(verdict["metrics"], {})

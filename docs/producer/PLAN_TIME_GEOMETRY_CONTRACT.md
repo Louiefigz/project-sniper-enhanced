@@ -1,97 +1,90 @@
-# Plan-Time Geometry Contract — design (2026-07-23)
+# Plan-Time Geometry Contract — v2, adversarially amended (2026-07-23)
 
-> Operator ask (after the short-20260723 live run): "Do all the planning up
-> front — measure where I am, solve where every graphic goes so it can't block
-> me, then execute once — instead of editing, rendering, discovering, and
-> fixing on the backend. Target ≤20 min for a 30s short."
-> Feasibility study: workflow `wf_bb615628-c4d` (11 agents, all key claims
-> adversarially verified, real timings measured). Verdict: **buildable with
-> existing machinery; kills the entire post-render placement-defect class at
-> ~zero added render cost. Honest budget: ~30 min doctrine-compliant, ~23–26
-> with a shadow-validated delta review round; ≤20 requires also compressing
-> critic round 1.**
+> v1 of this doc proposed solving exact rectangles into `entry.placement` at
+> plan time. A 5-attacker + judge panel (workflow `wf_740b3bb6-001`, all
+> load-bearing claims spot-checked in code) returned **two confirmed KILLs**
+> against v1 and a forced HYBRID verdict. This v2 IS that verdict. v1's
+> authored-placement idea is REJECTED — do not resurrect it.
 
-## Why the live run burned 15 minutes on placement
+## Why v1 died (keep these; they are load-bearing)
 
-The placement solve structurally CANNOT fail before assemble today: its two
-inputs (base pixels, rendered comp) first exist there
-(`graphics_stage._render_all` → `resolve_offset_v2`). When no legal region
-exists, `graphics_anchors.py:261` silently nudges toward frame center
-(v1-deviation, ±220px cap) instead of failing — LL-034. Comp physical size is
-unknown until pixels exist — LL-035. So defects are discovered by vision QC
-after rendering, and every fix is a re-gate + re-assemble loop.
+1. **KILL — the measurement artifact doesn't exist at plan time (shorts).**
+   Every sampler v1 cited (`build_free_map`, `sample_window`,
+   `stamp_entry_face_bboxes`) measures the DELIVERY-CANVAS video — which for
+   shorts is a render product (reframe crops are computed by `face_track`
+   inside `reframe_stage`, render.py:325-357; shorts have no persistent
+   base). Sampling the raw 16:9 source produces confidently-wrong rectangles
+   that would win outright at composite.
+2. **KILL — punch zoom was unmodeled.** `punch_stage` runs BEFORE graphics
+   (render.py:706-708); the motivating defect happened UNDER a 1.12 punch.
+   v1 never mentioned zoom once.
+3. **WOUNDs (all confirmed):** no staleness contract binding a solved rect to
+   the geometry it was solved against (`plan_refit` remaps windows but never
+   placement); solver-authored pixels round-tripping through the LLM every
+   revision round violates the code-owns-numbers doctrine; `_clip_record`
+   has no solveMeta carrier; the Palmier lane discards `entry.placement`
+   wholesale (parity.py:146-147); the caption band (9:16 y 1150-1340) was
+   excluded from the solve; the budget table's critic-compression row was
+   unevidenced; Phase-2 early-base saves ~0 on revision paths
+   (`_NON_BASE_KEYS` is only 5 keys — nearly everything is base-side).
+4. **Scope truth (angle 5):** tight faces are this operator's NORM (44.7% and
+   61.9% face-width on the two real shorts, falsifying the tail-case
+   hypothesis) — but the defect needs a conjunction (planner-seeded unfit
+   anatomy + tight face): the other real short placed 10/10 graphics legally.
+   Expected incidence ~2-4 of 10 runs.
 
-## The architecture (operator's proposal, mapped to code)
+## The judged architecture — build exactly this, in this order
 
-**Phase 1 — plan-time solve, fail-closed (the fix-loop killer):**
-1. *Measure the person per window:* generalize `stamp_entry_face_bboxes`
-   (recompose.py:290 — today longform-rails-only) to every face-anchored
-   graphicsTrack entry, backed by `free_space_sample.sample_window` (median
-   face box + hair top + busy cells from the ACTUAL frames of each window).
-   No new tracker needed — three granularities already exist.
-2. *Know each comp's true size before placement:* render the REAL production
-   asset at plan time through the existing content-hash cache
-   (`render_entry`: measured 3.4–9.5s/comp cold, 0s warm) and measure with
-   the existing `_content_bbox` alpha probe (0.62s). Assemble later is a
-   cache hit — total pipeline cost added ≈ 0. (Static layout math REJECTED —
-   the template authors themselves could not predict chip-row's wrap; a
-   probe-only artifact REJECTED — the real render IS the probe.)
-3. *Solve rectangles into the plan:* run `build_free_map` + `_choose_region`
-   + `place_content` during planning; write the result into
-   `entry.placement {x, y}` + a `solveMeta` sidecar field.
-   `entry.placement` already WINS OUTRIGHT at composite and never falls back
-   (`graphics_stage.py:225`, `_explicit_offset` raises on failure).
-4. *Fail closed, at lint:* `graphics_anchors.py:261` raises typed
-   `NoLegalRegion` (face-width-frac, region dims, content dims) instead of
-   nudging; `graphics_stage.py:232` stops catching geometry failures into a
-   v1 guess (environment failures stay separate). A plan whose comp fits
-   nowhere fails PLANNING → the brain swaps anatomy there (LESSON-047
-   becomes machine-enforced). Chip overflow (LL-035) is caught the same way:
-   measured bbox vs canvas at lint.
-5. *Keep the net:* `verify_placement` (free_space.py:363, today opt-in env
-   var) becomes default-on for solver-authored placements with
-   `verify_min_gap_px > 0`; exemption keys on operator pins (no solveMeta),
-   never solver pins.
+1. **Fail-closed core (S, first):** typed `NoLegalRegion` replaces the v1
+   seed nudge (`graphics_anchors.py:261-264`); `graphics_stage._placement`
+   stops catching geometry failures into the v1 guess (environment failures
+   stay separate); `verify_placement` default-on (operator pins get
+   WARN-with-evidence, never exemption). Declared through the gate-policy
+   layer (minimal shim if unbuilt). NO assemble-time anatomy retry — a
+   post-gate plan mutation breaks the hash-bound authority contract; typed
+   errors route to the brain for re-plan. (Closes LL-034.)
+2. **Comp-size measurement at plan time (S):** render the REAL comp early
+   through the existing content-hash cache + `_content_bbox` probe —
+   comp pixels are video-independent, so this piece has no
+   measurement-artifact problem. Order it AFTER `word_lock` snap and
+   `exitOnCut` clamp so durations are bit-identical to assemble's (cache-hit
+   guarantee). Measured bbox vs canvas = lint FAIL. (Kills the LL-035 class.)
+3. **Geometry feasibility LINT — not authored placement (M):** for shorts'
+   face-anchored, non-recompose entries, COMPOSE delivery geometry from
+   plan-authored transforms: timeline-mapped source-frame face sampling ×
+   planned reframe crop × punch scale mirrors (`ramp_scale_at`/
+   `push_scale_at` are pure) + caption-band exclusion, then run
+   `build_free_map`/`_choose_region` as a fail-closed CHECK with a clearance
+   margin. `NoLegalRegion` surfaces PRE-review with anatomy evidence so the
+   brain swaps forms at zero loop cost. **Write NO `entry.placement`, NO
+   solveMeta** — render-time `resolve_offset_v2` (now fail-closed) remains
+   the placement authority on ground-truth pixels. No persisted solved state
+   → the staleness/authorship/refit/Palmier wounds dissolve by construction.
+4. **Concurrency, only the safe half (S):** decouple the vision critics'
+   evidence packet from Audit B so B ∥ C. Early-base only if round-2
+   revisions become allowlist-constrained; otherwise skip. Re-baseline the
+   budget from durable per-stage timestamps before quoting numbers again.
+5. **Delta round 2 stays an EXPERIMENT:** shadow-gated with the
+   seeded-defect noninferiority pack. Honest operator promise: **~26-30 min
+   now, ~23-26 after step 4; ≤20 is the experiment's success criterion,
+   never a commitment.**
 
-**Phase 2 — legal concurrency (no doctrine change):**
-- Base render starts at round-2 launch, keyed to `base_plan_digest` with a
-  non-base diff allowlist on round-2 revisions (fingerprints.py already
-  splits base vs non-base keys) — with the allowlist it is not even
-  speculative.
-- Audit B ∥ vision critics after decoupling the critics' evidence packet
-  from Audit B's output (today built FROM it — small mechanical split).
+## Judge's value math (next ten 30s shorts)
 
-**Phase 3 — the review wall (shadow-gated; this is where ≤20 lives):**
-- Delta round 2 (3–5 min focused re-verification of changed fields) is
-  legitimate only for revised-plan convergence; validate with the
-  seeded-defect + blinded-quality noninferiority pack (QUALITY_MINING_REPORT
-  Tier-4 item) before adopting — the no-quality-trade guardrail (#12) holds.
-- Round-1 scope shrinks naturally once geometry/fit/contrast are
-  deterministic (the critic stops re-deriving placement by eye).
+~2-4 runs hit a fit conflict. Today: +10-15 min each (post-render discovery +
+re-review). Fail-closed alone: still +10-14 (bounce lands AFTER the review
+wall). Hybrid: conflicts die at lint round 0, cost ~+1 min/run measure pass →
+~25-50 min saved across ten, plus ~2 avoided Opus critic rounds per avoided
+loop. Risk added ≈ 0 persistent state (feasibility recomputed each lint).
 
-## Honest time budget (30s produced short)
+## The single most load-bearing fact
 
-| Stage | Today (clean) | Phase 1 | +Phase 2 | +Phase 3 |
-|---|---|---|---|---|
-| Ingest+transcribe | 1 | 1 | 1 | 1 |
-| Edit-brain + plan + measure pass | 4 | 5 | 5 | 5 |
-| Critic rounds (2× Opus) | 18–24 | 18–24 | 18–24 | ~10–11 |
-| Render + assemble | 4 | 4 | ∥ (0–2) | ∥ |
-| Audit B + C | 6 | 6 | ~4 ∥ | ~4 ∥ |
-| Placement fix-loop | **0–15** | **0** | 0 | 0 |
-| **Total** | **~33–50** | **~30–32** | **~26–28** | **~20–23** |
+The solver's two inputs split cleanly on 9:16 shorts: **comp size is
+video-independent** (plan-time measurable through the render cache), but
+**delivery-canvas face geometry first exists at render** — so plan-time
+placement can only ever be a derived feasibility check, never authored
+truth. That one fact kills v1 §3 and rescues everything else.
 
-The floor is the review wall: even at best, one full critic round + one
-delta round ≈ 10–11 min of the ~20. Everything else is now measurement,
-cache hits, and parallelism.
-
-## Build order
-
-1. Phase 1 (≈ the fix-loop killer, all existing machinery): S/M — highest
-   value per line of code in the pipeline right now.
-2. Phase 2 concurrency: S — two mechanical decouplings.
-3. Phase 3 delta round: M + shadow validation before adoption.
-
-Related: LL-034 (OPEN — closed by Phase 1 §4), LL-035 (comp fix shipped;
-Phase 1 §2 prevents the class), LESSON-047, QUALITY_MINING_REPORT gate-policy
-layer (the fail-closed edits should declare semantics through it).
+Related: LL-034 (closed by step 1), LL-035 (class killed by step 2),
+LESSON-047, QUALITY_MINING_REPORT gate-policy layer (steps 1+3 declare
+through it). Panel: `wf_740b3bb6-001`.

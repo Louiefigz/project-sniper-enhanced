@@ -320,6 +320,26 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
      card. The release gates enforce dense-window coverage, maximum feasible
      contextual form diversity, cream/dark rhythm, presenter holes, module-level
      animation receipts, and the benchmark camera-motion ceiling.
+   - **Comp physics — read `templates/motion/comp_capabilities.json` BEFORE
+     choosing forms** (also re-check in step 4's graphics pass). The matrix is
+     MEASURED data (`graphics/comp_catalog_probe.py`, one real render per
+     comp), not catalog claims — before it existed, capability was discovered
+     by render failure: five comps failed one-at-a-time through the 2026-07-23
+     mint cycles (FAILURE_LEDGER LL-036/LL-037). Two measured classes, one
+     rule each:
+     - **Aspect-illegal** (`aspect`): a comp whose measured canvas differs
+       from the plan's delivery aspect composites RAW and clips — the LL-036
+       fragment case was a free-band 16:9 comp on a 9:16 short. Rule: never
+       bind a kind whose measured `aspect` ≠ the delivery aspect (shorts
+       9:16 / longform 16:9); the planner + allocation seams now enforce it
+       (`graphics.comp_capabilities.is_aspect_legal_kind`), so a matrix
+       mismatch is a hard no, never a placement problem to solve.
+     - **Hold-to-cut** (`fadeClass`): a `hold-to-cut` comp's terminal frame
+       retains alpha — it never fades itself out. Rule: end its window ON a
+       cut seam (`exitOnCut: true`) or cover the exit with a transition;
+       only `fades-clean` comps may end mid-shot, and `partial-fade` needs
+       an eyeball on the exit. (LL-037: the catalog advertised neither
+       property; the matrix encodes both.)
    - Read the table. Apply the earn-its-slot test per row (does the graphic add
      what the ear alone misses?). Present the table to the operator with your
      ACCEPT/VETO recommendation per row; the operator has the final veto.

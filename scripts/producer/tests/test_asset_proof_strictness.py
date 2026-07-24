@@ -107,3 +107,16 @@ class AssetProofStrictnessTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class HoldToCutExitPolicyTests(unittest.TestCase):
+    """Hold-style comps (statement-card etc.) legally end opaque - the overlay
+    enable-window clears them at composite - so the terminal-clear oracle is
+    waived for HOLD_TO_CUT_KINDS and enforced for fade-exit comps."""
+
+    def test_statement_card_is_declared_hold_to_cut(self) -> None:
+        from graphics.template_visual_contract import HOLD_TO_CUT_KINDS
+        self.assertIn("statement-card", HOLD_TO_CUT_KINDS)
+        self.assertIn("kinetic-quote", HOLD_TO_CUT_KINDS)
+        self.assertNotIn("chip-row", HOLD_TO_CUT_KINDS)
+        self.assertNotIn("list-build", HOLD_TO_CUT_KINDS)

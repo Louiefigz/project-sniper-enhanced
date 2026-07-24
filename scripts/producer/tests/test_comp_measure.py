@@ -221,5 +221,77 @@ class SkipAndBudgetTests(unittest.TestCase):
         self.assertEqual(metrics["entries"], 0)
 
 
+class MatrixFailFastTests(unittest.TestCase):
+    """Pre-render fail-fast from the comp-capability matrix (aspect only)."""
+
+    _COMPS = {"chip-row": {"canvas": [1080, 1920],
+                           "fadeClass": "fades-clean"}}
+
+    def test_known_aspect_mismatch_fails_without_rendering(self) -> None:
+        plan = _plan([_entry(anchor="own-screen", exitOnCut=False)])
+        plan["target"]["mode"] = "longform"
+        with mock.patch.object(cmz, "environment_issue", return_value=None), \
+                mock.patch.object(cmz.plan_lint_comps, "load_matrix",
+                                  return_value=(self._COMPS, "")), \
+                mock.patch.object(cmz, "render_entry") as render, \
+                mock.patch.object(cmz, "cache_probe") as probe:
+            verdicts, metrics = cmz.measure_plan(plan, "/cache", 15.0)
+        render.assert_not_called()      # the render was saved
+        probe.assert_not_called()
+        self.assertEqual(len(verdicts), 1)
+        self.assertEqual((verdicts[0].gate, verdicts[0].severity),
+                         ("comp_size", "FAIL"))   # re-tagged onto THIS gate
+        self.assertIn("does not match", verdicts[0].evidence)
+        self.assertEqual(metrics["matrixFailFast"], 1)
+
+    def test_matching_aspect_falls_through_to_the_render_measure(self) -> None:
+        plan = _plan([_entry(anchor="own-screen", exitOnCut=False)])
+        with mock.patch.object(cmz, "environment_issue", return_value=None), \
+                mock.patch.object(cmz.plan_lint_comps, "load_matrix",
+                                  return_value=(self._COMPS, "")), \
+                mock.patch.object(cmz, "cache_probe",
+                                  return_value="/hit.mp4"), \
+                mock.patch.object(cmz, "render_entry",
+                                  return_value=_rendered("mp4")) as render:
+            verdicts, metrics = cmz.measure_plan(plan, "/cache", 15.0)
+        render.assert_called_once()     # authoritative confirmation ran
+        self.assertEqual(verdicts, [])
+        self.assertEqual(metrics["matrixFailFast"], 0)
+        self.assertEqual(metrics["measured"], 1)
+
+    def test_missing_matrix_keeps_the_render_path(self) -> None:
+        plan = _plan([_entry(anchor="own-screen", exitOnCut=False)])
+        plan["target"]["mode"] = "longform"
+        with mock.patch.object(cmz, "environment_issue", return_value=None), \
+                mock.patch.object(cmz.plan_lint_comps, "load_matrix",
+                                  return_value=(None, "matrix file missing")), \
+                mock.patch.object(cmz, "cache_probe",
+                                  return_value="/hit.mp4"), \
+                mock.patch.object(cmz, "render_entry",
+                                  return_value=_rendered("mp4")) as render:
+            verdicts, metrics = cmz.measure_plan(plan, "/cache", 15.0)
+        render.assert_called_once()     # no fast path — same answer, rendered
+        self.assertEqual([v.severity for v in verdicts], ["FAIL"])
+        self.assertEqual(metrics["matrixFailFast"], 0)
+
+    def test_hole_entries_are_exempt_from_the_fast_path(self) -> None:
+        # Hole comps render with alpha and never hit the own-screen mp4
+        # check — the pre-check must mirror that exemption exactly.
+        plan = _plan([_entry(anchor="own-screen", exitOnCut=False)])
+        plan["target"]["mode"] = "longform"
+        with mock.patch.object(cmz, "environment_issue", return_value=None), \
+                mock.patch.object(cmz, "entry_has_hole", return_value=True), \
+                mock.patch.object(cmz.plan_lint_comps, "load_matrix",
+                                  return_value=(self._COMPS, "")), \
+                mock.patch.object(cmz, "cache_probe",
+                                  return_value="/hit.mov"), \
+                mock.patch.object(cmz, "render_entry",
+                                  return_value=_rendered()) as render:
+            verdicts, metrics = cmz.measure_plan(plan, "/cache", 15.0)
+        render.assert_called_once()
+        self.assertEqual(verdicts, [])          # registered hole anatomy
+        self.assertEqual(metrics["matrixFailFast"], 0)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

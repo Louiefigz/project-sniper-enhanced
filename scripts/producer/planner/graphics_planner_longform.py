@@ -48,6 +48,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 from edit_scope import lane_required, resolve_scope
+from graphics.comp_capabilities import measured_aspect
 from planner.graphics_planner_density import reject_cand
 from planner.graphics_planner_items import phrase, whiteboard_maps as _scan_maps
 from planner.graphics_planner_sequences import sequence_beats as _scan_beats
@@ -203,8 +204,21 @@ def _canvas_of(width: int, height: int) -> str:
 def canvas_ok(kind: str, aspect: str) -> bool:
     """MG-4.3: a kind is proposable only on its own canvas ('any' = both).
 
-    Unknown kinds pass (high-recall proposer; the brain reviews)."""
+    The MEASURED matrix (templates/motion/comp_capabilities.json, when the
+    probe has built it) is authoritative and wins over the declared
+    data-width/height derivation — declared dims drifted from the rendered
+    canvas through the 2026-07-23 mint cycles (LL-036/LL-037). Unmeasured
+    kinds fall back to the derived map; unknown kinds pass (high-recall
+    proposer; the brain reviews)."""
+    measured = measured_aspect(kind)
+    if measured is not None:
+        return measured == aspect
     return kind_canvas().get(kind, "any") in ("any", aspect)
+
+
+def effective_canvas(kind: str) -> str:
+    """The canvas the filter judged ``kind`` by (measured wins, for messages)."""
+    return measured_aspect(kind) or kind_canvas().get(kind, "any")
 
 
 def natural_aspect(mode: str) -> str:
@@ -299,7 +313,7 @@ def _retarget_one(cand: dict, ctx: Ctx, wb_maps: list[dict],
             return status, obj
         cand = obj
     if not canvas_ok(cand["kind"], ctx.aspect):
-        canvas = kind_canvas().get(cand["kind"], "any")
+        canvas = effective_canvas(cand["kind"])
         return "reject", reject_cand(cand, f"MG-4.3: {cand['kind']} authors on "
                                      f"a {canvas} canvas — target is {ctx.aspect}")
     if th and cand["anchor"] != "own-screen" \

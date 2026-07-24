@@ -12,6 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) 
 from fingerprints import json_canon
 from graphics.asset_proof import AssetProofRequest, prove_rendered_asset
 from graphics.composition_transform import set_root_duration
+from graphics.template_visual_contract import HOLD_TO_CUT_KINDS
 from graphics.pip_hole import entry_has_hole
 from graphics.render_cache import CacheRequest, materialize
 from graphics.render_tools import (
@@ -228,7 +229,9 @@ def _render_candidate(work: _RenderWork, output: str) -> None:
 def _prove_candidate(work: _RenderWork, path: str) -> dict:
     proof = prove_rendered_asset(AssetProofRequest(
         path, work.entry, work.fmt, work.dimensions, work.duration, work.key,
-        comp_html=work.comp_html, require_terminal_clear=work.fmt == "mov",
+        comp_html=work.comp_html,
+        require_terminal_clear=(work.fmt == "mov" and
+                                work.entry.get("kind") not in HOLD_TO_CUT_KINDS),
         sealed_asset_inputs=(work.snapshot.asset_bindings
                              if work.snapshot is not None else None)))
     return bind_runtime_receipt(path, proof) if work.snapshot is not None else proof

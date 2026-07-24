@@ -76,8 +76,18 @@ from audio import sfx_library as sfxlib
 from planner import icon_library as ilib
 from planner import icon_lucide as ilu
 import plan_lint_smooth as pls
+import plan_lint_comps as plcaps
 from cut_speed import display_dims as ct_display_dims
 from audit import audit_motion as amot
+
+# HERMETIC MATRIX: templates/motion/comp_capabilities.json is repo STATE (the
+# probe may be absent, partial, or complete on any machine) — fixture-based
+# lint tests must never read it, or the suite's verdicts drift with the file.
+# Point the default at a guaranteed-missing path (fresh temp dir, no file);
+# plan_lint_comps resolves this as the documented SKIP-with-evidence path.
+# test_plan_lint_comps passes explicit synthetic fixture paths instead.
+plcaps.DEFAULT_MATRIX_PATH = os.path.join(
+    tempfile.mkdtemp(prefix="sniper-no-matrix-"), "comp_capabilities.json")
 
 # The longform edit-brain tools (retake_scan / pause_scan) reuse study_edit_diff,
 # which needs rapidfuzz. Keep selftest stdlib-runnable: skip their cases if it's

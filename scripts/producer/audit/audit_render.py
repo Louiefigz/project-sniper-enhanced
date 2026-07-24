@@ -107,7 +107,16 @@ def run_audit(out_dir: str) -> AuditReport:
             "format_video", FAIL, "no video stream", "no decodable video")], [])
     probed = Probed(out_dir, final, mode, video, audio)
     checks, duration = _deterministic_checks(probed)
-    frames = extract_review_frames(final, out_dir, plan_frames(plan, duration))
+    # Frame planning must aim inside the DELIVERED stream: predicted duration
+    # runs a few sub-frame roundings long on multi-segment mining cuts, and a
+    # "final" ref past the last frame PTS makes extraction fail spuriously.
+    stream_duration = 0.0
+    try:
+        stream_duration = float(video.get("duration") or 0.0)
+    except (TypeError, ValueError):
+        stream_duration = 0.0
+    frame_horizon = min(duration, stream_duration) if stream_duration > 0 else duration
+    frames = extract_review_frames(final, out_dir, plan_frames(plan, frame_horizon))
     checks.append(check_frame_extraction(frames))
     checks.extend(scan_safe_zone(frames))
     checks.extend(check_composite_visuals(out_dir, plan, frames))

@@ -44,6 +44,16 @@ UNIT_NOUNS = frozenset({
 # Trigger → (short template, longform template). Entities are handled separately
 # (grouping + icon resolution live in graphics_planner). "enumeration" splits on
 # UNIT_NOUNS at call time, so it is resolved in ``template_for`` not this table.
+# ASPECT LEGALITY: each column must hold kinds legal on the mode's canvas
+# (short → 9:16, longform → 16:9). This is ENFORCED downstream, not trusted:
+# every candidate funnels through graphics_planner_longform.canvas_ok in the
+# retarget gauntlet, which consults the MEASURED matrix
+# (templates/motion/comp_capabilities.json via graphics.comp_capabilities.
+# is_aspect_legal_kind) before the declared-dims derivation — a comp whose
+# real canvas drifts from this table's assumption is rejected at propose time
+# with the measured canvas named (LL-036/LL-037; a 16:9 comp composites raw +
+# clipped on a 9:16 delivery). A NEW lane that bypasses the retarget must
+# consume is_aspect_legal_kind itself, like form_allocation does.
 # NOTE — deliberately TRIGGER-LESS kinds (pair-2 templates, 2026-07-06):
 #   * glitch-hit: a 400ms alpha emphasis HIT. There is no transcript signal
 #     that says "hit here" — auto-firing it on any detector reads as strobe,

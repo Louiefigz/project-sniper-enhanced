@@ -7,14 +7,17 @@ _WIDTH = 96
 _HEIGHT = 54
 # A comp whose fade tween converges to opacity 0 exactly at data-duration D can
 # never encode a true-zero final frame: frames sample at t=k/fps, so the last
-# frame sits 1/fps BEFORE D, where the catalog's legal power2.in fade
-# (fadeDur >= min(0.42, 0.18*D)) still carries a sub-visible tail in its
-# brightest downscaled pixel (~57/255 measured on chip-row/list-build at
-# D >= 5; an illegally squeezed 1.0s window measured 117). The bounds accept
-# that single-frame fade tail and still reject a genuinely unexited overlay,
-# which holds max 255 and a mean far above the cap.
-_TERMINAL_MAX_ALPHA_8 = 64
-_TERMINAL_MEAN_ALPHA_8 = 8.0
+# frame sits 1/fps BEFORE D, where a legal fade still carries a sub-visible
+# tail in its brightest downscaled pixel. Measured tails by comp family:
+# chip-row/list-build ~57 (D >= 5), fragment-payoff 67 (D = 1.33s), an
+# illegally squeezed 1.0s chip window 117. The MEAN is the load-bearing
+# discriminator: fade tails measure mean ~1 while a genuinely unexited
+# overlay holds max 255 / mean 255 (statement-card, measured). Bounds set
+# from the three measured families: max admits the brightest legal tail
+# with margin, mean at 4.0 is ~4x the worst legal tail and ~60x below the
+# smallest real-defect signal.
+_TERMINAL_MAX_ALPHA_8 = 72
+_TERMINAL_MEAN_ALPHA_8 = 4.0
 
 
 def terminal_alpha(path: str, frame_count: int, ffmpeg: str,

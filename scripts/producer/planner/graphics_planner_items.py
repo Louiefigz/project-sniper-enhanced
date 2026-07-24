@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import string
 
+from graphics.comp_capabilities import is_aspect_legal_kind
 from graphics.form_allocation import is_gate_executable_kind
 from planner.motion_triggers import _clean, _sentence_starts, _word_text
 from producer_config import MOTION
@@ -236,7 +237,10 @@ def _long_list_candidate(words: list[dict], span: tuple[int, int],
                          items: list[tuple[int, int]], target: tuple) -> dict:
     """A legal long-list cutaway, upgrading to speaker PiP when wired."""
     mode, out_dur = target
-    use_pip = is_gate_executable_kind("canvas-pip-list")
+    # This lane is longform-only (pip_aware_maps' caller gates mode) → 16:9;
+    # the measured matrix must also clear the PiP form before it upgrades.
+    use_pip = is_gate_executable_kind("canvas-pip-list") \
+        and is_aspect_legal_kind("canvas-pip-list", "16:9")
     kind = "canvas-pip-list" if use_pip else "whiteboard-list"
     total = len(items)
     items = items[:PIP_MAX_ITEMS if use_pip else LIST_MAX_ITEMS]

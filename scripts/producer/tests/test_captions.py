@@ -164,3 +164,23 @@ class HookCardCaptionSuppressionTests(unittest.TestCase):
         # Hook-window cues are gone; the first body cue survives verbatim.
         self.assertNotIn("sign", out)
         self.assertIn("body", out)
+
+
+class FreeBandSuppressCaptionsTests(unittest.TestCase):
+    """A free-band entry with suppressCaptions: true joins the suppression
+    window set exactly like an own-screen takeover (LESSON-022 discharge)."""
+
+    def test_declared_entry_suppresses_and_undeclared_does_not(self) -> None:
+        from graphics import graphics_stage as gs
+        track = [
+            {"outStart": 1.0, "outEnd": 2.0, "anchor": "own-screen"},
+            {"outStart": 3.0, "outEnd": 4.0, "anchor": "free-band",
+             "suppressCaptions": True},
+            {"outStart": 5.0, "outEnd": 6.0, "anchor": "free-band"},
+        ]
+        windows = [(float(e["outStart"]), float(e["outEnd"])) for e in track
+                   if e.get("anchor") == "own-screen"
+                   or e.get("suppressCaptions") is True]
+        self.assertEqual(windows, [(1.0, 2.0), (3.0, 4.0)])
+        self.assertTrue(gs._overlaps(3.2, 3.8, windows))
+        self.assertFalse(gs._overlaps(5.2, 5.8, windows))

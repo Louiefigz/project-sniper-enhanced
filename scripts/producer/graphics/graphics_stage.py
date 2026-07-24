@@ -252,8 +252,13 @@ def run_graphics_stage(job: GraphicsJob) -> dict:
     summary = {"graphics": len(clips), "passes": passes, "out": job.video_out,
                "frames_in": frames_in, "frames_out": frames_out}
     if job.ass_in and job.ass_out:
+        # Own-screen takeovers always suppress; a free-band TEXT card whose
+        # copy verbatim-matches the spoken words may declare suppressCaptions
+        # to discharge LESSON-022 (no frame shows captions + card text
+        # simultaneously) - brain-declared intent, render-executed.
         windows = [(float(e["outStart"]), float(e["outEnd"])) for e in job.track
-                   if e.get("anchor") == "own-screen"]
+                   if e.get("anchor") == "own-screen"
+                   or e.get("suppressCaptions") is True]
         dropped = suppress_captions(job.ass_in, job.ass_out, windows)
         emit(stage="graphics", status="captions_suppressed",
              takeovers=len(windows), dropped=dropped, out=job.ass_out)

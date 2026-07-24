@@ -13,6 +13,7 @@ import math
 from typing import Any
 
 from edit_scope import resolve_scope
+from graphics.comp_capabilities import is_aspect_legal_kind
 from graphics.form_allocation import is_gate_executable_kind
 from graphics.intro_semantic_cues import cue_rows, resolve_transcript_asset
 from graphics.intro_semantic_binding import (
@@ -172,9 +173,13 @@ def _wide_forms(row: dict, catalog: dict[str, dict]) -> list[str]:
         forms.append("logo-card" if len(assets) == 1 else "icon-badge-wide")
     forms = [kind for kind in forms if kind not in _ASSET_FORMS
              or row.get("assetSelectorsComplete")]
+    # Declared catalog dims say "wide"; the measured matrix (when built) is
+    # authoritative — a comp whose real canvas probes 9:16 is not a 16:9 form
+    # however its data-* attributes read (LL-036/LL-037).
     return [kind for kind in forms if kind in catalog
             and catalog[kind]["dimensions"][0] > catalog[kind]["dimensions"][1]
-            and is_gate_executable_kind(kind)]
+            and is_gate_executable_kind(kind)
+            and is_aspect_legal_kind(kind, "16:9")]
 
 
 def _beat_id(row: dict) -> str:

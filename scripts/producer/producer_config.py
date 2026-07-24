@@ -90,6 +90,10 @@ COMP_MEASURE = {
     # not an LL-035 overflow — exempt from the SAFE_BOX fit check. LL-035
     # itself (one edge-to-edge ROW: full width, small height) still fails.
     "full_bleed_frac": 0.98,
+    # plan_lint_comps rule (c): a hold-to-cut comp's outEnd counts as "on a
+    # cut" when it lands within this of a cutTrack seam (or the output end).
+    # One frame at 30fps (0.033s) plus slack for 2-decimal plan authoring.
+    "seam_tol_s": 0.05,
 }
 
 # Plan-time geometry feasibility lint (planner/geometry_feasibility.py —

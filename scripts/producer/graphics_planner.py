@@ -18,7 +18,10 @@ candidate assembly (graphics_planner_rules) → density/R12 trim → proposal.
 
 Aspect + longform grammar: the render target's aspect (default = the mode's
 natural aspect: shorts 9:16, longform 16:9) gates every kind through the
-MG-4.3 canvas filter, and talking-head longform zones are retargeted per
+MG-4.3 canvas filter — which consults the MEASURED capability matrix
+(templates/motion/comp_capabilities.json, graphics.comp_capabilities) before
+the declared-dims derivation, so an aspect-illegal comp can never be proposed
+(LL-036/LL-037) — and talking-head longform zones are retargeted per
 R14/R17/R18 (whiteboard cutaways / kinetic burns / receipts b-roll) — see
 graphics_planner_longform.
 

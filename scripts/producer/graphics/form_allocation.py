@@ -4,6 +4,7 @@ from __future__ import annotations
 from collections import Counter
 from typing import Mapping
 
+from graphics.comp_capabilities import is_aspect_legal_kind
 from graphics.style_profiles import form_contract, profile
 
 # These forms are registered templates but cannot survive the deterministic
@@ -11,10 +12,22 @@ from graphics.style_profiles import form_contract, profile
 # semantic discovery and matching use the same executable set.
 GATE_ILLEGAL_KINDS = frozenset({"canvas-pip-list"})
 
+# The semantic-allocation lane is the LONGFORM intro machine: semantic_beats
+# emits "source-derived compatible 16:9 forms" and nothing else feeds this
+# allocator, so a kind the measured matrix pins to a 9:16 canvas is not
+# assignable here (LL-036/LL-037 — measured capability beats catalog claims).
+_ALLOCATION_ASPECT = "16:9"
+
 
 def is_gate_executable_kind(kind: str) -> bool:
     """Whether ``kind`` can currently survive deterministic plan lint."""
     return bool(kind) and kind not in GATE_ILLEGAL_KINDS
+
+
+def _is_allocatable_kind(kind: str) -> bool:
+    """Gate-executable AND aspect-legal on the allocation lane's canvas."""
+    return is_gate_executable_kind(kind) \
+        and is_aspect_legal_kind(kind, _ALLOCATION_ASPECT)
 
 
 def _normalized(beats: list[dict]) -> list[dict]:
@@ -29,7 +42,7 @@ def _normalized(beats: list[dict]) -> list[dict]:
         seen.add(beat_id)
         forms = sorted({str(kind) for kind in beat.get("compatibleKinds") or []
                         if isinstance(kind, str)
-                        and is_gate_executable_kind(kind)})
+                        and _is_allocatable_kind(kind)})
         rows.append({"beatId": beat_id, "compatibleKinds": forms,
                      "outStart": float(beat.get("outStart") or 0.0)})
     return rows
@@ -95,7 +108,7 @@ def _profile_rows(beats: list[dict], selected_profile: str) -> list[dict]:
         forms = []
         for information_form in beat.get("compatibleForms") or []:
             contract = form_contract(selected_profile, str(information_form))
-            if contract and is_gate_executable_kind(str(contract.get("kind") or "")):
+            if contract and _is_allocatable_kind(str(contract.get("kind") or "")):
                 forms.append(str(information_form))
         rows.append({"beatId": beat_id, "compatibleKinds": forms,
                      "preferredForm": beat.get("preferredForm"),

@@ -84,6 +84,62 @@ def _is_produced(plan: dict) -> bool:
     return bool(flags.get("motion") or flags.get("graphics"))
 
 
+def _plan_seam_times(plan: dict) -> list[float]:
+    """Output-time instants of the plan's internal cut seams."""
+    seams: list[float] = []
+    cursor = 0.0
+    track = plan.get("cutTrack") or []
+    for segment in track[:-1]:
+        try:
+            span = float(segment["end"]) - float(segment["start"])
+            speed = float(segment.get("speed", 1.0)) or 1.0
+        except (KeyError, TypeError, ValueError):
+            return []
+        cursor += span / speed
+        seams.append(round(cursor, 4))
+    return seams
+
+
+def _seam_frame_delta(final_path: str, at: float, work: str, tag: str) -> float | None:
+    """Mean abs pixel delta across the frame pair straddling ``at`` (0-255)."""
+    before = os.path.join(work, f"seam-{tag}-a.jpg")
+    after = os.path.join(work, f"seam-{tag}-b.jpg")
+    if not (extract_frame(final_path, max(0.0, at - 0.06), before)
+            and extract_frame(final_path, at + 0.06, after)):
+        return None
+    try:
+        one = np.asarray(Image.open(before).convert("L"), dtype=np.float32)
+        two = np.asarray(Image.open(after).convert("L"), dtype=np.float32)
+    except OSError:
+        return None
+    if one.shape != two.shape:
+        return None
+    return float(np.abs(one - two).mean())
+
+
+def _seams_manifested(final_path: str, plan: dict, work: str) -> tuple[int, int]:
+    """(manifested, checked) mining seams by LOCAL frame-pair delta.
+
+    Whole-file scene-detect is blind to same-scene mining splices (identical
+    framing minutes apart, softened further by punch-step covers), so a zero
+    scene count must not by itself mean "cuts did not manifest". A real splice
+    still steps the pixels locally (pose/hands jump); noise baseline is the
+    same-size delta measured half a second BEFORE the seam.
+    """
+    manifested = 0
+    seams = _plan_seam_times(plan)
+    for index, seam in enumerate(seams):
+        step = _seam_frame_delta(final_path, seam, work, f"{index}")
+        noise = _seam_frame_delta(final_path, max(0.0, seam - 0.5), work,
+                                  f"{index}n")
+        if step is None:
+            continue
+        floor = max(6.0, 2.0 * noise) if noise is not None else 6.0
+        if step > floor:
+            manifested += 1
+    return manifested, len(seams)
+
+
 def _scene_times(final_path: str, duration: float) -> list[float]:
     """Sorted scene-change instants strictly inside ``(0, duration)``.
 
@@ -130,11 +186,21 @@ def check_pacing_rendered(final_path: str, duration: float,
     rendered = len(_scene_times(final_path, duration))
     rate = rendered / duration * 60.0
     if declared_cuts >= 2 and rendered == 0:
+        import tempfile
+        with tempfile.TemporaryDirectory(prefix="seam-probe-") as work:
+            manifested, checked = _seams_manifested(final_path, plan, work)
+        if checked and manifested >= max(1, int(checked * MANIFEST_MIN_FRAC)):
+            return [CheckResult(
+                "motion_pacing", PASS,
+                f"scene-detect blind but {manifested}/{checked} seams prove a "
+                "local frame step (same-scene mining splices)",
+                "per-seam frame-pair delta confirms the declared cuts")]
         return [CheckResult(
             "motion_pacing", FAIL,
-            f"rendered 0 hard changes vs {declared_cuts} plan cuts — "
+            f"rendered 0 hard changes vs {declared_cuts} plan cuts and only "
+            f"{manifested}/{checked} seams show a local frame step — "
             "declared cuts did not manifest",
-            "scene-detect found no evidence of any planned cut")]
+            "neither scene-detect nor per-seam frame deltas find the cuts")]
     if declared_cuts >= 2 and rendered < declared_cuts * MANIFEST_MIN_FRAC:
         return [CheckResult(
             "motion_pacing", WARN,

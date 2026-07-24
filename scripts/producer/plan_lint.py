@@ -20,6 +20,7 @@ from typing import Any, Optional
 
 from plan_lint_audio import check_audio, check_music_source
 from plan_lint_broll import check_focus_ops, check_slipcover
+from plan_lint_comps import check_comp_matrix
 from plan_lint_face import check_face_pack
 from plan_lint_motion import check_motion, check_word_lock
 from plan_lint_overlays import check_broll, check_title_cards
@@ -284,6 +285,10 @@ def lint(plan: dict[str, Any], manifest: dict[str, Any],
     # hook cards, pip-hole faceCx, b-roll overlap, drag bbox — declared through
     # the gate-policy layer; plan_lint_face routes verdicts into this Report.
     check_face_pack(plan, rep)
+    # Measured comp-capability matrix (canvas aspect + terminal fade class):
+    # plan_lint_comps routes gate-policy verdicts into this Report; a missing
+    # matrix is a labeled SKIP, never a crash or a silent pass.
+    check_comp_matrix(plan, rep)
     check_style_profile(plan, out_dur, rep, words_out)
     if words_out is not None:
         check_word_lock(plan, words_out, rep)

@@ -119,7 +119,7 @@ def _retarget_one(cand: dict, ctx: longform.Ctx,
             return status, obj
         cand = obj
     if not _canvas_ok(cand["kind"], ctx.aspect):
-        canvas = longform.kind_canvas().get(cand["kind"], "any")
+        canvas = longform.effective_canvas(cand["kind"])
         return "reject", reject_cand(cand, f"MG-4.3: {cand['kind']} authors on "
                                      f"a {canvas} canvas — target is {ctx.aspect}")
     if th and cand["anchor"] != "own-screen" \

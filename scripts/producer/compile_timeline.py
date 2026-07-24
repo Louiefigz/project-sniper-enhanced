@@ -204,13 +204,26 @@ def remap_words(words: list[dict], source_id: str, tmap: TimelineMap) -> list[di
     """
     out: list[dict] = []
     for w in words:
+        w_start, w_end = float(w["start"]), float(w["end"])
         seg = next((s for s in tmap.segments
-                    if s.contains_src(source_id, float(w["start"]))), None)
+                    if s.contains_src(source_id, w_start)), None)
         if seg is None:
-            continue
-        start_out = seg.src_to_out(float(w["start"]))
-        end_src = min(float(w["end"]), seg.src_end)
-        if end_src <= float(w["start"]) + 1e-6:   # nothing of it is audible
+            # Onset-clipped survivor: a word-safe micro-cut authored from
+            # rounded timestamps can shave a few ms off a word's onset; the
+            # word is still audible from the seam and must not silently
+            # vanish from captions (a real short lost its pivot emphasis
+            # word to a 5ms clip). Attribute it to the segment holding its
+            # MAJORITY span and clamp the start to the seam.
+            seg = next((s for s in tmap.segments
+                        if s.contains_src(source_id, w_end)
+                        and min(w_end, s.src_end) - max(w_start, s.src_start)
+                        >= 0.5 * (w_end - w_start)), None)
+            if seg is None:
+                continue
+            w_start = max(w_start, seg.src_start)
+        start_out = seg.src_to_out(w_start)
+        end_src = min(w_end, seg.src_end)
+        if end_src <= w_start + 1e-6:   # nothing of it is audible
             continue
         out.append({**w,
                     "start": round(start_out, 4),

@@ -85,7 +85,7 @@ def plan_frames(plan: dict, output_duration: float) -> list[FrameRef]:
             "Captions legible + fully on-canvas, in the lower band; subject "
             "framing sane (no chopped forehead / readable screen)?"))
     frames.append(FrameRef(
-        "final", "final", max(0.0, output_duration - 0.1), "",
+        "final", "final", max(0.0, output_duration - 0.15), "",
         "Tail frame clean? Loop-friendly back to the cover?"))
     return frames
 

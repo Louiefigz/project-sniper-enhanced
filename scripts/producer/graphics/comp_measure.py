@@ -9,6 +9,13 @@ comp into the SHARED content-hash cache, (3) measures the settled content bbox
 through :mod:`gate_policy` — killing the LL-035 class (comp content overflowing
 the canvas / the SAFE_BOX-clamped legal area) at lint instead of at Audit C.
 
+Before rendering, the measured capability matrix
+(``templates/motion/comp_capabilities.json``, via :mod:`plan_lint_comps`) is
+consulted: an own-screen delivery-aspect mismatch the matrix already answers
+fails fast WITHOUT spending the render; the render-measure remains the
+authoritative confirmation everywhere else. A missing matrix simply skips
+the fast path (plan_lint_comps reports the SKIP at plan lint).
+
 CLI: comp_measure.py <plan.json> [--cache-dir DIR] [--budget-s S] [--fps N]
 prints the gate contract ``{ok, errors, warnings, metrics}``; exit 0 iff ok.
 """
@@ -52,6 +59,7 @@ from typing import Optional
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # run-by-path: producer pkg root on sys.path
 
+import plan_lint_comps
 from gate_policy import Verdict, to_gate_json
 from graphics.comp_measure_rules import (GATE, _EntryCtx, _free_verdicts,
                                          _ownscreen_verdicts, _placed_verdicts)
@@ -73,6 +81,28 @@ class _Budget:
     started: float
     allowance_s: float
     metrics: dict
+    matrix: Optional[dict] = None   # comp_capabilities comps map (fail-fast)
+
+
+def _matrix_fail_fast(entry: dict, ctx: _EntryCtx,
+                      matrix: Optional[dict]) -> list:
+    """Pre-render aspect fail-fast from the measured capability matrix.
+
+    When the matrix already knows the comp's canvas, an own-screen
+    delivery-aspect mismatch is decided WITHOUT spending the render (the
+    same predicate ``_ownscreen_verdicts`` applies post-render — the render
+    measure stays the authoritative confirmation on every other path).
+    Verdicts are re-tagged onto THIS gate so the comp_size CLI contract is
+    unchanged. Hole comps render with alpha (never the own-screen mp4 path)
+    and are exempt, mirroring ``measure_entry``.
+    """
+    if matrix is None or entry_has_hole(entry):
+        return []
+    row = matrix.get(entry.get("kind")) or {}
+    early = plan_lint_comps.ownscreen_matrix_verdicts(
+        entry, row, ctx.tag, ctx.mode)
+    return [Verdict(GATE, v.severity, v.evidence, lane=v.lane, mode=v.mode)
+            for v in early]
 
 
 def effective_entries(plan: dict, fps: Optional[float] = None) -> list:
@@ -180,6 +210,10 @@ def measure_entry(entry: dict, ctx: _EntryCtx, cache_dir: str) -> list:
 def _measure_one(entry: dict, ctx: _EntryCtx, cache_dir: str,
                  budget: _Budget) -> list:
     """Budget-guarded measurement of one entry; exceptions become verdicts."""
+    fast = _matrix_fail_fast(entry, ctx, budget.matrix)
+    if fast:
+        budget.metrics["matrixFailFast"] += 1
+        return fast
     try:
         cached = cache_probe(entry, cache_dir)
     except (ValueError, OSError, RuntimeError) as exc:
@@ -221,7 +255,7 @@ def measure_plan(plan: dict, cache_dir: str, budget_s: float,
     mode = mode_raw if mode_raw in MODES else None
     entries = effective_entries(plan, fps)
     metrics = {"entries": len(entries), "measured": 0, "cachedHits": 0,
-               "skipped": 0}
+               "skipped": 0, "matrixFailFast": 0}
     if not entries:
         return [], metrics
     issue = environment_issue()
@@ -231,7 +265,9 @@ def measure_plan(plan: dict, cache_dir: str, budget_s: float,
             f"environment unavailable — {issue}; {len(entries)} comp(s) "
             "unmeasured (the render itself still fails loud)"),
             lane="graphics", mode=mode)], metrics
-    budget = _Budget(time.monotonic(), budget_s * len(entries), metrics)
+    matrix, _ = plan_lint_comps.load_matrix()   # None = no fast path
+    budget = _Budget(time.monotonic(), budget_s * len(entries), metrics,
+                     matrix)
     verdicts: list = []
     for i, entry in enumerate(entries):
         ctx = _EntryCtx(f"graphicsTrack[{i}] {entry.get('kind')}", mode)

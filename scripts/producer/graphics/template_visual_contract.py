@@ -19,6 +19,16 @@ _BRAND_COLOR_ASSETS = {
 }
 
 # kind -> (absolute floor, reveal settle, readable dwell, exit runway)
+# Comps that HOLD their final frame by design and exit via a hard clear at a
+# cut seam (the enable-window stops the overlay; nothing leaks past outEnd).
+# The render proof waives the terminal-clear oracle for these kinds ONLY --
+# fade-exit comps keep the strict check (a fade cut short pops off visibly).
+HOLD_TO_CUT_KINDS = frozenset({
+    "statement-card", "kinetic-quote", "kinetic-quote-wide",
+    "nateherk-takeover", "section-takeover", "glass-takeover-bg",
+    "angela-takeover-deck", "benchmark-takeover",
+})
+
 _TIMING_POLICY = {
     "glass-rail": (3.0, 0.46, 1.25, 0.42),
     "icon-badge-wide": (3.0, 0.16, 1.25, 0.42),

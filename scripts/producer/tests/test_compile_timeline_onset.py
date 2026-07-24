@@ -29,3 +29,25 @@ class OnsetClippedWordTests(unittest.TestCase):
         words = [{"word": "data", "start": 25.5, "end": 25.8}]
         kept = remap_words(words, "s", tmap)
         self.assertEqual(len(kept), 1)
+
+
+class TailSliverTests(unittest.TestCase):
+    """An out-edge sliver of a CUT word must not ghost into captions."""
+
+    PLAN = {"cutTrack": [
+        {"sourceId": "s", "start": 10.0, "end": 16.8, "speed": 1.0},
+        {"sourceId": "s", "start": 17.27, "end": 20.0, "speed": 1.0},
+    ]}
+
+    def test_5ms_tail_sliver_dropped(self) -> None:
+        tmap = compile_plan(self.PLAN)
+        # First 'maybe' starts 5ms before the out-edge: cut removed it, but
+        # its onset sliver survives inside segment 0.
+        words = [{"word": "maybe", "start": 16.795, "end": 17.275}]
+        self.assertEqual(remap_words(words, "s", tmap), [])
+
+    def test_60ms_kept_head_still_renders(self) -> None:
+        tmap = compile_plan(self.PLAN)
+        words = [{"word": "thing,", "start": 16.73, "end": 16.99}]
+        kept = remap_words(words, "s", tmap)
+        self.assertEqual(len(kept), 1)

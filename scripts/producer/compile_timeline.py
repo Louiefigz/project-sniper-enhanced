@@ -223,7 +223,12 @@ def remap_words(words: list[dict], source_id: str, tmap: TimelineMap) -> list[di
             w_start = max(w_start, seg.src_start)
         start_out = seg.src_to_out(w_start)
         end_src = min(w_end, seg.src_end)
-        if end_src <= w_start + 1e-6:   # nothing of it is audible
+        # Audibility floor: a word whose kept span is a sub-perceptual sliver
+        # (an out-edge cut authored from rounded timestamps can leave ~5ms of
+        # the NEXT word's onset) must not ghost into captions as a full
+        # rendered word - a cut stutter word reappeared on screen this way.
+        # 40ms is under one frame at 24fps and far below word perception.
+        if end_src - w_start < 0.04:
             continue
         out.append({**w,
                     "start": round(start_out, 4),

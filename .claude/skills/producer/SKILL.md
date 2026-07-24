@@ -155,8 +155,25 @@ CONTENT'S FOCAL SUBJECT (human → face; screen w/ corner human → blurpad;
 ambiguous → ask). GRAPHICS follow the VISUAL STATE: screen-share = screen is the
 star, NO overlay graphics (own-screen cutaways only); talking head = graphics
 AROUND the face (never covering, bbox + margin excluded), text proportionate to
-framing. Ask the creative scope round (treatment level? outputs? b-roll? music?)
-BEFORE any paid step. render.py runs under `.venv/bin/python3` (PIL/cv2 deps).
+framing. render.py runs under `.venv/bin/python3` (PIL/cv2 deps).
+
+**MANDATORY OPERATOR QUESTION ROUND (operator directive 2026-07-24, BOTH
+formats).** Every NEW video request — short OR longform — opens with ONE
+question round BEFORE any paid or expensive step, covering ALL of:
+1. **Style** — simple/trim · light · jadenly · caleb · angela · (or another
+   named grammar) · **auto** (brain + advisor pick from content).
+2. **Graphics involvement** — none · lean (only beats that earn it) · full
+   stack · **auto**.
+3. **Caption style** — minimal · whisper · karaoke · longform: SRT sidecar
+   vs burned bursts · **auto** (mode default).
+4. **Format basics** when not already stored — 9:16/16:9, fill vs split,
+   music, b-roll.
+Every question carries an **auto** escape; "auto everything" is one valid
+answer and then the brain owns the calls. A stored `project.json` intent
+that already answers a question is honored, not re-asked (GUI intent-card
+runs never double-ask). The purpose is calibrating how involved the
+operator wants to be — do NOT silently do the heavy lifting on taste
+decisions the operator may want to own.
 
 ## What you produce — INPUT × OUTPUT × TREATMENT LEVEL
 

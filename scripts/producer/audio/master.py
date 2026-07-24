@@ -361,6 +361,12 @@ def _encode(spec: MasterSpec, audio: bool, afilter: Optional[str]) -> subprocess
                 "-ac", str(ENCODE["audio_channels"])]
         if afilter:
             cmd += ["-af", afilter]
+        # Multi-segment mining at low fps quantizes each video segment DOWN a
+        # sub-frame while audio keeps exact spans - the accumulated audio tail
+        # past the last video frame trips the AV-timing gate (measured +126ms
+        # on a 4-segment 23.976fps cut; gate limit 120ms). The tail is room
+        # tone after the final frame; end both streams together.
+        cmd += ["-shortest"]
     else:
         cmd += ["-an"]
     cmd.append(spec.out)

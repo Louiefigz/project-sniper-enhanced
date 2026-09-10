@@ -144,3 +144,18 @@ not restarted.
 pass. Its provenance is not established by these tests and it is excluded from
 this repair's commit scope. The repair does not delete footage, caches or
 existing final videos.
+
+The subsequent operator-requested commit checkpoints that existing catalog
+separately from repair commit `394029f`. Its exact SHA-256 is
+`3f25ab0810cd0dd47c074ce9eede3a79c2bcc215331cfe0117c175f68f57ac7f`.
+The semantic changes are a one-pixel reduction of the `jaden-shout-lockup`
+bounding box and dimensions, plus the capability and source digests; the rest
+of the textual change is JSON formatting. The bytes were preserved without
+regenerating or relabeling their measurements.
+
+All 53 rows pass the existing integrity, source-freshness, inventory and row
+shape readers. The artifact, source-dependency and plan-lint regression group
+passed 27 tests in 3.004 seconds. These checks do not establish the artifact's
+measurement provenance or constitute new rendered evidence. The eight
+qualification failures above remain open; this is a development checkpoint,
+not a release qualification.

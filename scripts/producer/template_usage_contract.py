@@ -8,6 +8,7 @@ import json
 import re
 from typing import Any
 
+from cross_runtime_canonical_json import canonical_compact_json
 from edit_scope import lane_required, resolve_scope
 from graphics.form_allocation import (assess_kind_reuse,
                                       assess_profile_form_reuse)
@@ -24,8 +25,7 @@ MIN_REUSE_REASON = 30
 
 
 def _stable_hash(value: Any) -> str:
-    raw = json.dumps(value, sort_keys=True, separators=(",", ":"),
-                     ensure_ascii=False)
+    raw = canonical_compact_json(value)
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 

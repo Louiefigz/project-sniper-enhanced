@@ -29,7 +29,10 @@ import functools
 import json
 import os
 import time
+import uuid
 from typing import Callable, Iterator, Protocol, TypeVar
+
+from stage_timing_context import PARENT_SPAN, timing_context, timing_metadata
 
 JOURNAL_NAME = "stage_timings.jsonl"
 _EVENTS = ("start", "end")
@@ -64,34 +67,59 @@ def journal_event(producer_dir: str, stage: str, event: str) -> bool:
     """
     if event not in _EVENTS:
         raise ValueError(f"event must be one of {_EVENTS}, got {event!r}")
-    row = json.dumps({"stage": stage, "event": event,
-                      "ts": time.time(), "mono": time.monotonic()},
-                     ensure_ascii=False)
+    return _append_row(producer_dir, {"stage": stage, "event": event,
+                                     "ts": time.time(), "mono": time.monotonic()})
+
+
+def _append_row(producer_dir: str, fields: dict) -> bool:
+    """Append one bounded telemetry record without changing pipeline outcomes."""
     try:
+        row = json.dumps(fields, ensure_ascii=False)
         fd = os.open(journal_path(producer_dir),
                      os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o600)
         try:
             os.write(fd, (row + "\n").encode("utf-8"))
         finally:
             os.close(fd)
-    except OSError:
+    except (OSError, UnicodeError, ValueError, TypeError):
         return False
     return True
 
 
 @contextlib.contextmanager
-def stage_span(producer_dir: str, stage: str) -> Iterator[None]:
-    """START/END rows around a block of work.
+def stage_span(producer_dir: str, stage: str,
+               metadata: dict | None = None) -> Iterator[None]:
+    """Versioned START/END rows around a block; execution success is not QC approval.
 
     END is written even when the block raises — the failing stage still ended,
     and the exception itself stays the loud signal (the journal never swallows
     or re-wraps it).
     """
-    journal_event(producer_dir, stage, "start")
+    began = time.monotonic()
+    span_id = str(uuid.uuid4())
+    fields = {**timing_context(), "stage": stage, "spanId": span_id,
+              "metadata": timing_metadata(metadata)}
+    _append_row(producer_dir, {**fields, "event": "start",
+                              "ts": time.time(), "mono": began})
+    token = PARENT_SPAN.set(span_id)
+    status = "completed"
     try:
         yield
+    except KeyboardInterrupt:
+        status = "interrupted"
+        raise
+    except SystemExit as exc:
+        status = "completed" if exc.code is None or exc.code == 0 else "failed"
+        raise
+    except BaseException:
+        status = "failed"
+        raise
     finally:
-        journal_event(producer_dir, stage, "end")
+        ended = time.monotonic()
+        PARENT_SPAN.reset(token)
+        _append_row(producer_dir, {**fields, "event": "end", "status": status,
+                                  "ts": time.time(), "mono": ended,
+                                  "elapsedMs": (ended - began) * 1000})
 
 
 def span_for_base(base_path: str, stage: str) -> Iterator[None]:

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/clause-state-v1.schema.json",
+  "title": "ClauseStateV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "clauseId",
+    "text",
+    "state",
+    "disposition",
+    "blockingClauseIds"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "clauseId": { "$ref": "#/$defs/stableId" },
+    "text": { "type": "string", "minLength": 1, "maxLength": 20000 },
+    "state": {
+      "enum": [
+        "pending",
+        "deferred",
+        "compiled",
+        "ambiguous",
+        "unsupported",
+        "conflict",
+        "candidate-executed",
+        "not-promoted",
+        "superseded",
+        "committed"
+      ]
+    },
+    "disposition": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "blockingClauseIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/stableId" }
+    },
+    "supersedesClauseId": { "$ref": "#/$defs/stableId" }
+  },
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]+$"
+    }
+  }
+}

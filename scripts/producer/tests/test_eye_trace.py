@@ -268,6 +268,26 @@ class AuditCheckTests(unittest.TestCase):
         self.assertEqual([r.status for r in results], [FAIL])
         self.assertIn("fixed-edge left rail shifted", results[0].measured)
 
+    def test_glass_rail_pills_pass_inside_their_band(self) -> None:
+        """glass-rail is floating pills, not an edge field: content that stays
+        inside the registered band (width_frac x canvas) is a correct
+        delivery even though it never touches the canvas edges (measured 4K
+        render, 2026-08-28: pills [52, 750, 1214, 1496] on 3840x2160,
+        band bound 0.3302 x 3840 = 1268)."""
+        plan = {**self._PLAN, "graphicsTrack": [{
+            "kind": "glass-rail", "anchor": "free-band",
+            "spec": {"side": "left"},
+        }]}
+        pills = _row(None, kind="glass-rail", anchor="free-band",
+                     region="fixed-canvas", placedBBox=[52, 750, 1214, 1496],
+                     canvas=[3840, 2160])
+        self.assertEqual([r.status for r in self._run([pills], plan)],
+                         [amot.PASS])
+        escaped = {**pills, "placedBBox": [52, 750, 1600, 1496]}
+        results = self._run([escaped], plan)
+        self.assertEqual([r.status for r in results], [FAIL])
+        self.assertIn("registered edge band", results[0].measured)
+
     def test_empty_sidecar_fails_closed(self) -> None:
         results = self._run([])
         self.assertEqual([r.status for r in results], [FAIL])

@@ -178,6 +178,13 @@ assert.equal(
 );
 assert.equal(
   streamProgressMessage({
+    event: "planning_gate_bundle", ok: false, immutableSavedPlan: true,
+    errors: [{ gate: "claims_contract" }],
+  }),
+  "Deterministic planning gates failed with 1 issue · saved plan stays unchanged and no revision writer will run.",
+);
+assert.equal(
+  streamProgressMessage({
     event: "planning_review_completed",
     planningRound: 1,
     planningRoundsRequired: 2,

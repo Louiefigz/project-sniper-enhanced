@@ -1,13 +1,21 @@
 ---
-description: Produce incrementally from Claude Code Desktop into editable Palmier
+description: Exercise an isolated experimental editable Palmier candidate
 argument-hint: <producer-dir-or-source-request>
 ---
 
+> **LEGACY.** Palmier is now an optional legacy export. The default
+> manual-control/review surface is the Studio review lane — use
+> `/produce-studio` (`docs/producer/STUDIO_REVIEW_LANE.md`).
+
 Invoke the `producer` skill and use its **Claude Code Desktop → Palmier** branch.
 
-If the request includes a reference URL/file or asks to mimic an edit, invoke
-the `reference-editor` skill first. Do not reduce a meticulous reference job to
-the aggregate `style_profile.json`; require its release-ready style pack.
+This is a production-shaped local workflow, not a released connected hybrid
+delivery path; P5 remains blocked. Use an isolated disposable candidate. For a
+deliverable, use the exact audited MP4 or its approved one-clip flat mirror.
+
+If the request includes a reference URL/file, invoke the `reference-editor`
+skill first. Use its pack as reference-inspired study/profile guidance; verified
+mimic is not released (P6 0/7).
 
 The operator's request is: $ARGUMENTS
 
@@ -32,5 +40,7 @@ Non-negotiable execution contract:
    anchor, and timing; update its spec and run `desktop_cli.py advance ...
    --stage repair`. Execute only the returned import + `replace-overlay` work.
    Do not regenerate the base, unrelated cards, or a flattened master.
-7. Do not claim completion until `desktop_cli.py qc` passes and both exact-export
-   composition/editorial frame reviews pass `desktop_cli.py approve`.
+7. Do not claim product completion. Record the experimental result only after
+   `desktop_cli.py qc` passes and both exact-export composition/editorial frame
+   reviews pass `desktop_cli.py approve`; connected P5 evidence is still
+   required.

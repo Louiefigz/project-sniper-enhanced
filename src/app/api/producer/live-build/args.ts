@@ -5,7 +5,6 @@ const PALMIER_TOOLS = [
   "get_timeline",
   "get_transcript",
   "inspect_media",
-  "import_media",
   "add_clips",
   "insert_clips",
   "split_clips",

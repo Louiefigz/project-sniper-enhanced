@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 GLOBAL_LANES = {
     "target", "reframe", "baselineLook", "faceBBoxNorm", "audioEnhance",
+    "audioAuthorityMode",
 }
 RIPPLE_LANES = {"cutTrack"}
 NEIGHBOR_LANES = {"transitions", "sfxTrack"}

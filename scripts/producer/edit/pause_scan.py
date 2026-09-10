@@ -24,13 +24,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from dataclasses import asdict, dataclass
 
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # run-by-path: producer pkg root on sys.path
 from producer_config import MODES
-from edit.study_edit_diff import FILLERS, Utt, Word, _is_filler, load
+from edit.study_edit_diff import FILLERS, Utt, Word, _is_filler, flat_words, load
 
 _LF = MODES["longform"]
 # Emphasis-pause protection (doctrine, not tuned per-video): a pause right after
@@ -42,6 +43,8 @@ THESIS_MAX_WORDS = 6
 THESIS_MIN_CONTENT_WORDS = 2
 THESIS_PROTECT_MULT = 1.4
 _SENT_END = ".?!"
+MIN_DIAGNOSTIC_PAIRS = 20
+HIGH_TOUCHING_PAIR_FRACTION = 0.95
 
 
 def _content_words(u: Utt) -> int:
@@ -98,6 +101,39 @@ def _classify(a: Word, gap: float, prev_utt: Utt,
                          else "tighten mid-sentence stall")
 
 
+def timing_diagnostics(utts: list[Utt]) -> dict:
+    """Describe transcript gaps without claiming acoustic silence or accuracy.
+
+    Dense touching timestamps can be legitimate rapid speech or row-wrapping
+    artifacts. This informational warning is not a new cut gate, VAD result,
+    inferred silence range, or permission to retime/remove a word.
+    """
+    words = flat_words(utts)
+    if any(type(value) not in (int, float) or not math.isfinite(value)
+           for word in words for value in (word.start, word.end)):
+        raise ValueError("pause diagnostics require finite numeric word bounds")
+    gaps = [b.start - a.end for a, b in zip(words, words[1:])]
+    if any(not math.isfinite(gap) for gap in gaps):
+        raise ValueError("pause diagnostics require finite derived word gaps")
+    touching = sum(gap == 0 for gap in gaps)
+    fraction = touching / len(gaps) if gaps else 0.0
+    warnings: list[dict] = []
+    if len(gaps) >= MIN_DIAGNOSTIC_PAIRS and fraction >= HIGH_TOUCHING_PAIR_FRACTION:
+        warnings.append({
+            "code": "high_touching_boundary_rate",
+            "message": "Most word boundaries touch. Missing transcript gaps do not "
+                       "establish absent acoustic pauses; review source timing before cutting.",
+        })
+    return {
+        "schemaVersion": 1, "evidenceKind": "transcript-word-gaps-only",
+        "acousticSilenceQualified": False,
+        "wordCount": len(words), "adjacentPairCount": len(gaps),
+        "touchingPairCount": touching, "touchingPairFraction": round(fraction, 6),
+        "maxPositiveGapS": round(max([0.0, *gaps]), 3),
+        "absenceOfPausesEstablished": False, "warnings": warnings,
+    }
+
+
 def propose(utts: list[Utt], threshold: float | None = None,
             residual: float | None = None,
             recover_floor: float | None = None) -> dict:
@@ -123,6 +159,7 @@ def propose(utts: list[Utt], threshold: float | None = None,
     proposed = [t for t in trims if not t.protected]
     protected = [t for t in trims if t.protected]
     return {
+        "timingDiagnostics": timing_diagnostics(utts),
         "thresholdS": threshold,
         "keepResidualS": residual,
         "gapsOverThreshold": len(trims),
@@ -154,7 +191,7 @@ def main() -> int:
         json.dump(report, open(args.out, "w"), indent=2)
     summary = {k: report[k] for k in (
         "thresholdS", "gapsOverThreshold", "proposedTrimCount",
-        "proposedTrimTotalS", "protectedCount", "totalRecoverableS")}
+        "proposedTrimTotalS", "protectedCount", "totalRecoverableS", "timingDiagnostics")}
     summary["top"] = [
         {"at": t["at_s"], "gap": t["gap_s"], "trim": t["trim_s"],
          "kind": t["kind"], "after": t["after"], "before": t["before"]}

@@ -1,0 +1,1297 @@
+[
+ {
+  "name": "ai-chat-reveal",
+  "type": "block",
+  "mechanism": "Measured 750x1624 phone chat UI scaled into 1080x1920; tl.set-driven typing with measured keystroke/word gap tables, caret blink sets, word-stream answer inking grey-to-ink, branded end card fade",
+  "variables": [
+   "botName",
+   "userMessage",
+   "answer1-3",
+   "bullet1-3",
+   "ecHeadline",
+   "ecSub",
+   "ecCta",
+   "brandLogo"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:AI chat conversation cutaway",
+  "quality": "mixed: clean code, HeyGen end-card branding baked",
+  "aspectFlex": "9:16-only",
+  "port": "P1 phone-chat stream is a real gap; strip the branded end card"
+ },
+ {
+  "name": "animated-bar-chart",
+  "type": "component",
+  "mechanism": "Paste-in data card: bar heights via --hf-grow CSS var, line via stroke-dashoffset; host timeline drives one fromTo",
+  "variables": [
+   "--hf-grow",
+   "--hf-dash (host-driven)"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:stat-card",
+  "quality": "clean: tiny, token-aware",
+  "aspectFlex": "responsive",
+  "port": "P2 quick mini-chart card win"
+ },
+ {
+  "name": "app-showcase",
+  "type": "block",
+  "mechanism": "Three fixed phone mockups with hardcoded fitness-app screens float/settle under GSAP; pure demo art",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:hardcoded product showcase demo",
+  "quality": "mixed: 949 lines of baked demo art; Google Fonts @import",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "apple-money-count",
+  "type": "block",
+  "mechanism": "Tabular-numeral money counter via tween-level onUpdate renderAmount (seek-safe), green flash, authored icon burst",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:animated money milestone counter",
+  "quality": "mixed: amount and copy hardcoded, no declared variables",
+  "aspectFlex": "16:9-only",
+  "port": "P2 fun income-content beat but needs variables added"
+ },
+ {
+  "name": "arc-motion-path",
+  "type": "component",
+  "mechanism": "Chips fly along authored SVG cubic paths via GSAP MotionPathPlugin with autorotate; host timeline drives (recipe comment)",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:curved-path callout motion",
+  "quality": "clean: small; needs MotionPathPlugin (not vendored)",
+  "aspectFlex": "responsive",
+  "port": "P2 niche; plugin dependency"
+ },
+ {
+  "name": "ascii-render-pass",
+  "type": "component",
+  "mechanism": "Slot scene rasterized ONCE via SVG foreignObject snapshot; luminance summed-area table; canvas ASCII repaint as pure f(t) from anchor-tween onUpdate; stepped pitch ladder resolve; stateless integer-hash shimmer",
+  "variables": [
+   "charset",
+   "grid",
+   "resolve_at",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": "conditional: async slot-snapshot decode arrives after mount (monogram fallback is synchronous; pure f(t) once raster ready)",
+  "selfContained": true,
+  "fit": "new:ASCII texture reveal",
+  "quality": "clean: rigorous determinism engineering",
+  "aspectFlex": "9:16-ok",
+  "port": "P2 striking but niche texture experiment"
+ },
+ {
+  "name": "ascii-trail-reveal",
+  "type": "component",
+  "mechanism": "24x14 DOM ASCII cell grid; bezier S-curve actor via state tween; index-math staggered 3D cell flips reveal a labeled panel; elastic HOLD breathe",
+  "variables": [
+   "label",
+   "accent",
+   "trail_width"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:grid-flip panel reveal",
+  "quality": "clean",
+  "aspectFlex": "9:16-ok",
+  "port": "P2 stylish dark reveal, off cream brand"
+ },
+ {
+  "name": "aurora-drift",
+  "type": "component",
+  "mechanism": "Three blurred accent-derived blobs drift on one exact sine phase cycle via state tween onUpdate; endpoint phase normalized so loop is seamless",
+  "variables": [
+   "accent",
+   "mood"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:glass-takeover-bg",
+  "quality": "clean: exact-loop math",
+  "aspectFlex": "9:16-ok",
+  "port": "P2 ambient dark backdrop for nateherk family"
+ },
+ {
+  "name": "avatar-cloud",
+  "type": "component",
+  "mechanism": "Index-derived elliptical lettermark cloud; SVG hub links drawn by stroke-dashoffset; envelope IN/HOLD(sine drift)/OUT fade",
+  "variables": [
+   "avatarCount",
+   "showLinks",
+   "label"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:community proof network",
+  "quality": "clean",
+  "aspectFlex": "9:16-ok",
+  "port": "P1 social-proof beat we cannot currently draw"
+ },
+ {
+  "name": "avatar-group-hover",
+  "type": "component",
+  "mechanism": "Overlapping avatar row; host tween lifts via --hf-avatar-y custom property; size/overlap/accent as CSS vars",
+  "variables": [
+   "size",
+   "overlap",
+   "accent"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:avatar-bio-card",
+  "quality": "clean: tiny fragment",
+  "aspectFlex": "responsive",
+  "port": "skip trivial element"
+ },
+ {
+  "name": "badge-pop",
+  "type": "component",
+  "mechanism": "Bell tile plus notification badge; host recipe pops badge with back.out and pulse; token-mapped accent/surface",
+  "variables": [
+   "count",
+   "accent",
+   "surface"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:notification badge pop",
+  "quality": "clean: small",
+  "aspectFlex": "responsive",
+  "port": "P2 fits subscribe/notification CTA beats"
+ },
+ {
+  "name": "bar-chart-race",
+  "type": "block",
+  "mechanism": "Closed-form race: values lerped per period, ranks baked at 10 keyframes/period then smoothstepped, axis rescales continuously; property-SETTER driver repaints rows (fires on seek unlike timeline onUpdate)",
+  "variables": [
+   "title",
+   "subtitle",
+   "periods",
+   "series",
+   "barCount",
+   "periodDuration",
+   "valuePrefix",
+   "valueSuffix",
+   "valueDecimals",
+   "accent"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:animated ranking bar race",
+  "quality": "clean: exemplary closed-form engineering; cream/ink palette matches brand",
+  "aspectFlex": "16:9-only",
+  "port": "P0 data-race cutaway, brand-matching palette, fully variable-driven, exemplary scrub safety"
+ },
+ {
+  "name": "beat-accent",
+  "type": "component",
+  "mechanism": "Single impact sting: expo.out scale snap, radial flash grow/decay, 3-step deterministic shake, all envelope-scaled; dispatches hf:sfx",
+  "variables": [
+   "text",
+   "flashColor",
+   "intensity"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:beat impact word sting",
+  "quality": "clean",
+  "aspectFlex": "9:16-ok",
+  "port": "P2 music-led emphasis; overlaps jaden-shout territory"
+ },
+ {
+  "name": "beat-freeze-cut",
+  "type": "block",
+  "mechanism": "Authored 6s montage over two hardcoded synthetic shots: push-in, hard reframe, speed-ramp into freeze overlay with DROP type, blur-streak hard-cut connector",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:hardcoded music-promo demo scene; CONFIG object not wired to registry variables",
+  "quality": "mixed: technique good, content baked, Google Fonts",
+  "aspectFlex": "16:9-only",
+  "port": "skip mine the cut-connector streak idea only"
+ },
+ {
+  "name": "beat-pulse-background",
+  "type": "component",
+  "mechanism": "Supplied beat-grid (data, not audio) builds attack/decay tween pairs pulsing opacity+saturation of layered radial glows",
+  "variables": [
+   "beats",
+   "accent",
+   "intensity"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:beat-pulsed backdrop",
+  "quality": "clean",
+  "aspectFlex": "9:16-ok",
+  "port": "P2 only for music-led shorts"
+ },
+ {
+  "name": "beat-timeline",
+  "type": "component",
+  "mechanism": "Titled rows pinned to evenly spaced named timeline labels; envelope compresses interval+entrance together; hf:sfx per beat",
+  "variables": [
+   "beatCount",
+   "interval",
+   "labels"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:list-build",
+  "quality": "clean",
+  "aspectFlex": "9:16-ok",
+  "port": "P2 we already own list builds"
+ },
+ {
+  "name": "before-after-wipe",
+  "type": "component",
+  "mechanism": "--baw-split custom property solely owns clip-path wipe and divider position; before/after content SLOTS with token wireframe defaults; one wipe pass then rest; envelope; hf:sfx",
+  "variables": [
+   "label_a",
+   "label_b",
+   "rest_split",
+   "wipe_at",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:before/after slot comparison",
+  "quality": "clean: slot design, single-owner progress var",
+  "aspectFlex": "9:16-ok",
+  "port": "P0 results/comparison beat with real content slots; versus-split cannot wipe"
+ },
+ {
+  "name": "blue-sweater-intro-video",
+  "type": "block",
+  "mechanism": "89-tween fully hardcoded creator brand intro resolving to an X follow card; no variables",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:personal-brand intro for @_blue_sweater_",
+  "quality": "mixed: 1525 lines baked",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "blur-in",
+  "type": "component",
+  "mechanism": "Word spans resolve from blur via host fromTo recipe; wrapped in large hf-ui token sheet",
+  "variables": [
+   "size",
+   "tone",
+   "align"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:text-element",
+  "quality": "mixed: token boilerplate dwarfs the fragment",
+  "aspectFlex": "responsive",
+  "port": "skip covered by existing text comps"
+ },
+ {
+  "name": "blur-out-up",
+  "type": "component",
+  "mechanism": "Directional word exit/entrance recipe: axis/distance/blur multipliers as CSS vars, host drives one offset+blur",
+  "variables": [
+   "direction",
+   "distance",
+   "blur",
+   "tone"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:text-element",
+  "quality": "clean: small",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "bottom-up-letters",
+  "type": "component",
+  "mechanism": "Splits text into letter/word spans with travel/direction CSS vars; host staggers rise; idempotent via data flag",
+  "variables": [
+   "unit",
+   "direction",
+   "travel"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:text-element",
+  "quality": "clean: small",
+  "aspectFlex": "responsive",
+  "port": "skip SplitText already vendored"
+ },
+ {
+  "name": "browser-device-stage",
+  "type": "component",
+  "mechanism": "Token-drawn browser/window/phone chrome around a screen SLOT (img/video/HTML or generated skeleton app); settle entrance, hard swap through bare stage at swap_at, optional exit",
+  "variables": [
+   "chrome",
+   "title",
+   "swap_at",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": "conditional: caller-supplied video slot content would defeat seek purity; skeleton/img/HTML slots fully safe",
+  "selfContained": true,
+  "fit": "new:device chrome screenshot stage",
+  "quality": "clean: disciplined token chrome, no fake branding",
+  "aspectFlex": "9:16-ok",
+  "port": "P0 we show app screens constantly and have no device frame comp"
+ },
+ {
+  "name": "camcorder-hud",
+  "type": "block",
+  "mechanism": "Transparent REC/battery/date/timecode overlay; state tween onUpdate formats counter and derives 0.55s dot blink from state.seconds (pure f(t))",
+  "variables": [
+   "data-hf-counter-start attr"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:camcorder REC overlay",
+  "quality": "clean: small, vmin-based",
+  "aspectFlex": "9:16-ok",
+  "port": "P1 ready-made alpha overlay for vlog/creator beats"
+ },
+ {
+  "name": "camera-dolly-zoom",
+  "type": "block",
+  "mechanism": "CSS-3D vertigo rig: perspective (focal length) SOLVED from dolly distance every frame to hold subject scale (P/d invariant); property-setter driver; demo arch scene included",
+  "variables": [
+   "direction",
+   "strength",
+   "subjectDistance",
+   "easing"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:dolly-zoom rig for layered scenes",
+  "quality": "clean: excellent math docs; demo content replaceable",
+  "aspectFlex": "16:9-only",
+  "port": "P1 signature dramatic move; needs layered content to shine"
+ },
+ {
+  "name": "camera-rig-depth-stack",
+  "type": "component",
+  "mechanism": "Single glass panel with rotateY/rotateX/translateZ CSS vars; host fromTo recipe",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:statement-card",
+  "quality": "clean: trivial",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "camera-scan-gate",
+  "type": "component",
+  "mechanism": "Viewfinder sweep, corner brackets tighten on lock, confirm pulse and label; envelope; hf:sfx lock-chime",
+  "variables": [
+   "scanColor",
+   "targetLabel",
+   "sweepSpeed"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:mobile product-demo interaction prop",
+  "quality": "clean",
+  "aspectFlex": "9:16-ok",
+  "port": "skip"
+ },
+ {
+  "name": "camera-shake",
+  "type": "component",
+  "mechanism": "Deterministic procedural shake: integer-hash value noise per channel (own seed+offset), 9 measured handheld/tele/rig profiles, optional data-cs-z depth parallax compensation; property-setter drive",
+  "variables": [
+   "shakeProfile",
+   "shakeIntensity",
+   "shakeFrequency",
+   "shakeRotation"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:procedural handheld shake wrapper",
+  "quality": "clean: measured profiles, exemplary seek design",
+  "aspectFlex": "responsive",
+  "port": "P1 adds handheld life to any full-frame comp deterministically"
+ },
+ {
+  "name": "caption-blend-difference",
+  "type": "component",
+  "mechanism": "CSS-only: mix-blend-mode difference/exclusion/screen classes auto-invert caption per pixel; requires isolation:isolate on root",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:karaoke caption legibility (auto-invert over any footage)",
+  "quality": "clean: tiny, passive technique",
+  "aspectFlex": "responsive",
+  "port": "P2 one-class legibility trick worth folding into caption styles"
+ },
+ {
+  "name": "caption-camera-follow",
+  "type": "component",
+  "mechanism": "Words laid out self-similarly (each sized vs growing bounding box); camera pulls back exponentially; hand-solved cubic beziers; ONE tweened radial-blur amount multiplied by per-word distance share",
+  "variables": [
+   "accent",
+   "framing",
+   "smear (sentence text baked)"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:camera-follow kinetic caption",
+  "quality": "clean: sophisticated; sentence hardcoded, needs word injection",
+  "aspectFlex": "responsive",
+  "port": "P1 distinctive hook treatment; port must wire transcript words in"
+ },
+ {
+  "name": "caption-clip-wipe",
+  "type": "component",
+  "mechanism": "Karaoke demo: per-word clip-path L-to-R wipe, keyword gold flash, canvas-measure font fit per group, group swap; baked WORDS timings; Google Fonts Poppins",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:producer karaoke caption style (clip-wipe)",
+  "quality": "clean: style portable, demo transcript baked",
+  "aspectFlex": "16:9-only",
+  "port": "P1 clean common style, direct karaoke mapping"
+ },
+ {
+  "name": "caption-editorial-emphasis",
+  "type": "component",
+  "mechanism": "Dual-font emphasis: Inter body vs Playfair Display italic emphasis words at dramatic size contrast; baked line data; Google Fonts",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:producer caption style (editorial)",
+  "quality": "clean: style portable, demo transcript baked",
+  "aspectFlex": "16:9-only",
+  "port": "P2"
+ },
+ {
+  "name": "caption-emoji-pop",
+  "type": "component",
+  "mechanism": "Stroked Gabarito text with emoji spans; horizontal squeeze entrance; keyword/transition word sets over normalized TRANSCRIPT; Google Fonts",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:producer caption style (emoji pop)",
+  "quality": "clean: style portable, demo transcript baked",
+  "aspectFlex": "16:9-only",
+  "port": "P2"
+ },
+ {
+  "name": "caption-glitch-rgb",
+  "type": "component",
+  "mechanism": "Per-word RGB aberration layers plus CRT scanline overlay; glitchPlan per word from baked transcript; Google Fonts Space Grotesk",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:producer caption style (glitch)",
+  "quality": "clean: style portable, demo transcript baked",
+  "aspectFlex": "16:9-only",
+  "port": "P2"
+ },
+ {
+  "name": "caption-gradient-fill",
+  "type": "component",
+  "mechanism": "Gradient-clipped text with elastic bounce entrance per word; baked WORDS; Google Fonts Montserrat",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:producer caption style (gradient)",
+  "quality": "clean: style portable, demo transcript baked",
+  "aspectFlex": "16:9-only",
+  "port": "P2"
+ },
+ {
+  "name": "caption-highlight",
+  "type": "component",
+  "mechanism": "Red background sweep behind the active word, TikTok-style karaoke; baked WORDS; Google Fonts Montserrat",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:producer karaoke caption style (highlight sweep)",
+  "quality": "clean: style portable, demo transcript baked",
+  "aspectFlex": "16:9-only",
+  "port": "P1 the most-requested shorts caption idiom"
+ },
+ {
+  "name": "caption-kinetic-slam",
+  "type": "component",
+  "mechanism": "Full-screen single-word display, alternating entrance directions, Anton uppercase; baked WORDS; Google Fonts",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:producer caption style (slam)",
+  "quality": "clean: style portable, demo transcript baked",
+  "aspectFlex": "16:9-only",
+  "port": "P2 overlaps our kinetic bursts"
+ },
+ {
+  "name": "caption-matrix-decode",
+  "type": "component",
+  "mechanism": "Two seeded scramble layers per word swapped by tl.set before the real word lands (pure set choreography); baked WORDS; Google Fonts",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:producer caption style (decode)",
+  "quality": "clean: style portable, demo transcript baked",
+  "aspectFlex": "16:9-only",
+  "port": "P2"
+ },
+ {
+  "name": "caption-neon-accent",
+  "type": "component",
+  "mechanism": "Multi-color neon glow accent words with wiggle drift; normalized TRANSCRIPT with keyword/transition sets; Google Fonts Montserrat",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:producer caption style (neon accent)",
+  "quality": "clean: style portable, demo transcript baked",
+  "aspectFlex": "16:9-only",
+  "port": "P2"
+ },
+ {
+  "name": "caption-neon-glow",
+  "type": "component",
+  "mechanism": "Cyan/magenta neon glow with keyword accent colors; baked WORDS; Google Fonts Outfit",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:producer caption style (neon)",
+  "quality": "clean: style portable, demo transcript baked",
+  "aspectFlex": "16:9-only",
+  "port": "P2"
+ },
+ {
+  "name": "caption-parallax-layers",
+  "type": "component",
+  "mechanism": "Two text stages: giant scaleX-fit scaleY-2.8 stretched back layer plus serif front layer, vertical depth illusion; baked words; Google Fonts Instrument Serif",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:producer caption style (depth layers)",
+  "quality": "clean: style portable, demo transcript baked",
+  "aspectFlex": "16:9-only",
+  "port": "P2"
+ },
+ {
+  "name": "caption-particle-burst",
+  "type": "component",
+  "mechanism": "mulberry32-seeded particle explosions on keyword words, all particle motion as timeline tweens; baked WORDS; Google Fonts Outfit",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:producer caption style (keyword burst)",
+  "quality": "clean: style portable, demo transcript baked",
+  "aspectFlex": "16:9-only",
+  "port": "P2"
+ },
+ {
+  "name": "caption-pill-karaoke",
+  "type": "component",
+  "mechanism": "Pill container with per-word karaoke color fill over normalized TRANSCRIPT; Google Fonts Poppins",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:producer karaoke caption style (pill)",
+  "quality": "clean: style portable, demo transcript baked",
+  "aspectFlex": "16:9-only",
+  "port": "P1 ubiquitous shorts idiom mapping 1:1 onto karaoke burns"
+ },
+ {
+  "name": "caption-texture",
+  "type": "component",
+  "mechanism": "PNG mask-image texture flowing over Anton uppercase; 6 texture PNGs vendored locally; texture variable; Google Fonts",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:producer caption style (texture)",
+  "quality": "clean: style portable, demo transcript baked",
+  "aspectFlex": "16:9-only",
+  "port": "P2"
+ },
+ {
+  "name": "caption-weight-shift",
+  "type": "component",
+  "mechanism": "Variable font-weight transition between caption lines over normalized TRANSCRIPT; Google Fonts Montserrat",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:producer caption style (weight shift)",
+  "quality": "clean: style portable, demo transcript baked",
+  "aspectFlex": "16:9-only",
+  "port": "P2"
+ },
+ {
+  "name": "card-resize",
+  "type": "component",
+  "mechanism": "Expanding detail card: width/height/copy fade via CSS vars; surface/media/elevation theming written by script",
+  "variables": [
+   "surface",
+   "accent",
+   "elevation"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:expanding detail card",
+  "quality": "clean: small",
+  "aspectFlex": "responsive",
+  "port": "skip generic UI prop"
+ },
+ {
+  "name": "char-slam-explode",
+  "type": "component",
+  "mechanism": "Glyphs hold in a build-time fixed-seed LCG scatter, reassemble with overshoot slam plus 3-frame stage shake; envelope",
+  "variables": [
+   "text",
+   "accent",
+   "spread"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:jaden-shout-lockup",
+  "quality": "clean: authored scatter table",
+  "aspectFlex": "9:16-ok",
+  "port": "P1 higher-energy headline slam than our current lockups"
+ },
+ {
+  "name": "chart-story",
+  "type": "component",
+  "mechanism": "One comp, four chart forms (bars/line/donut/progress) built synchronously as SVG landing exact supplied values; getTotalLength dash draws; emphasized datum callout with authored count frames; envelope+exit",
+  "variables": [
+   "type",
+   "data",
+   "labels",
+   "emphasize",
+   "unit",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:exact-value chart build",
+  "quality": "clean: 740L justified by four forms",
+  "aspectFlex": "9:16-ok",
+  "port": "P0 evidence beats need real charts; ledger/scoreboard cannot draw trends"
+ },
+ {
+  "name": "chat-message",
+  "type": "component",
+  "mechanism": "One iMessage-style bubble arrival (scale .75, 0.12s, corner-anchored) with typed variants recv/sent/emoji/img/link-card",
+  "variables": [
+   "type",
+   "text",
+   "cardTitle",
+   "cardDomain",
+   "tail",
+   "delivered"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:single chat bubble pop",
+  "quality": "clean",
+  "aspectFlex": "9:16-ok",
+  "port": "P2 atom superseded by chat-thread"
+ },
+ {
+  "name": "chat-thread",
+  "type": "component",
+  "mechanism": "Full iMessage scene: status bar, header, typed pipe-separated messages (recv:/sent:/emoji:/img/card:), heights measured at mount drive scroll choreography, typing dots, Delivered receipt",
+  "variables": [
+   "contact",
+   "unread",
+   "messages",
+   "beat",
+   "dots",
+   "receipt"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:iMessage conversation cutaway",
+  "quality": "clean: prefix-typed message DSL",
+  "aspectFlex": "9:16-ok",
+  "port": "P0 storytelling texts are a staple talking-head cutaway we lack entirely"
+ },
+ {
+  "name": "chatgpt-exchange",
+  "type": "block",
+  "mechanism": "1080x1920 ChatGPT-style UI: typed prompt, streamed answer paragraphs, staggered comparison-table assembly; locally vendored Inter woff2 under neutral family",
+  "variables": [
+   "prompt",
+   "intro1",
+   "intro2",
+   "tableHead*",
+   "row1-4 Use/Tool/Why/Chip"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:ChatGPT answer cutaway",
+  "quality": "clean: fully variable-driven, fonts vendored",
+  "aspectFlex": "9:16-only",
+  "port": "P1 AI-content channel staple; heavy but complete"
+ },
+ {
+  "name": "chromatic-aberration-wipe",
+  "type": "component",
+  "mechanism": "Scene-to-scene directional clip-path wipe with white sheen sweep and stepped red/cyan channel-split flash, all CSS vars driven by host recipe",
+  "variables": [
+   "direction",
+   "accent",
+   "aberration"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "transition",
+  "quality": "clean",
+  "aspectFlex": "responsive",
+  "port": "P1 punchy graphics-to-graphics stinger"
+ },
+ {
+  "name": "chromatic-radial-split",
+  "type": "block",
+  "mechanism": "WebGL radial RGB-split crossfade between two demo scenes captured by an approximate DOM-to-canvas rasterizer; shader driven from tl.time() (pure f(t)); registers under id 'main'",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:shader spec-card demo; DOM capture hack; registry id collision",
+  "quality": "mixed: clever shader, fragile capture",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "cinematic-zoom",
+  "type": "block",
+  "mechanism": "Same spec-card scaffold as chromatic-radial-split with a zoom-blur shader; near-identical file, palette and copy swapped",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:shader spec-card demo; duplicate scaffold; id 'main'",
+  "quality": "mixed",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "claude-exchange",
+  "type": "block",
+  "mechanism": "1080x1920 Claude-style UI: prompt, search/reasoning step cards, streamed styled answer; builds timeline synchronously then rebuilds once document.fonts.ready (deterministic either way); local EB Garamond/Inter woff2",
+  "variables": [
+   "prompt + answer content strings"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:Claude answer cutaway",
+  "quality": "clean: careful font-metric handling",
+  "aspectFlex": "9:16-only",
+  "port": "P1 same family as chatgpt-exchange; pick one to port first"
+ },
+ {
+  "name": "code-3d-extrude",
+  "type": "block",
+  "mechanism": "three.js beveled 3D code slab rotating to readable rest; seeded mulberry32 only; paused timeline seeked per frame",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:3D code slab cutaway",
+  "quality": "mixed: three.js r147 CDN dependency",
+  "aspectFlex": "16:9-only",
+  "port": "P2 flashy; vendor three.js first"
+ },
+ {
+  "name": "code-diff",
+  "type": "block",
+  "mechanism": "Shiki Magic Move tokens baked at author time (window.__TOKENS); FLIP measurement inside document.fonts.ready; removed lines collapse red, added expand green on paused timeline",
+  "variables": [
+   "none: code content requires author-time re-bake"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:code diff cutaway",
+  "quality": "clean: shared hf-code-anim engine; content baked",
+  "aspectFlex": "16:9-only",
+  "port": "P1 exactly how a coding channel shows an edit; needs a bake step in port"
+ },
+ {
+  "name": "code-highlight",
+  "type": "block",
+  "mechanism": "Same baked-token engine; highlight band sweeps to a target line while context dims",
+  "variables": [
+   "spec.line via __BLOCK"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:code line highlight sweep",
+  "quality": "clean",
+  "aspectFlex": "16:9-only",
+  "port": "P1 cheap high-frequency teaching beat"
+ },
+ {
+  "name": "code-morph",
+  "type": "block",
+  "mechanism": "Same engine; keyed tokens FLIP-glide between two snippets, leavers fade, enterers fade in",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:code morph between snippets",
+  "quality": "clean: large but engine-shared",
+  "aspectFlex": "16:9-only",
+  "port": "P2"
+ },
+ {
+  "name": "code-particle-assemble",
+  "type": "block",
+  "mechanism": "three.js GPU point cloud flies to exact glyph pixel targets of the code raster; seeded mulberry32",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:particle code assemble",
+  "quality": "mixed: three.js CDN; heavy",
+  "aspectFlex": "16:9-only",
+  "port": "P2"
+ },
+ {
+  "name": "code-scroll",
+  "type": "block",
+  "mechanism": "Same baked-token engine; camera scrolls a long file to center a target line and spotlights it",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:code scroll-to-line",
+  "quality": "clean",
+  "aspectFlex": "16:9-only",
+  "port": "P2"
+ },
+ {
+  "name": "code-shader-dissolve",
+  "type": "block",
+  "mechanism": "three.js fragment shader resolves code texture out of seeded noise with chromatic dissolve",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:shader code dissolve",
+  "quality": "mixed: three.js CDN",
+  "aspectFlex": "16:9-only",
+  "port": "P2"
+ },
+ {
+  "name": "code-snippet-apple-terminal-basic",
+  "type": "block",
+  "mechanism": "macOS Terminal chrome; per-char typing of hardcoded 'ls -la' via tl.add callback closures at fixed times; final prompt appended to DOM by a callback",
+  "variables": [],
+  "scrubSafe": "conditional: callback-driven text writes and a DOM-append at 4.0s do not rewind on backward seeks",
+  "selfContained": true,
+  "fit": "new:terminal typing cutaway (needs parameterization)",
+  "quality": "mixed: callback typing, hardcoded demo content",
+  "aspectFlex": "16:9-only",
+  "port": "P2 code-terminal-run is the better-engineered pick for this job"
+ },
+ {
+  "name": "code-snippet-apple-terminal-clear-dark",
+  "type": "block",
+  "mechanism": "Same scaffold as code-snippet-apple-terminal-basic with the clear-dark Terminal.app color profile (~60 non-color line diff)",
+  "variables": [],
+  "scrubSafe": "conditional: same callback-typing scaffold as basic",
+  "selfContained": true,
+  "fit": "unfit:palette recolor of the basic scaffold",
+  "quality": "mixed: duplicate scaffold",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-apple-terminal-clear-light",
+  "type": "block",
+  "mechanism": "Same scaffold as code-snippet-apple-terminal-basic with the clear-light Terminal.app color profile (~60 non-color line diff)",
+  "variables": [],
+  "scrubSafe": "conditional: same callback-typing scaffold as basic",
+  "selfContained": true,
+  "fit": "unfit:palette recolor of the basic scaffold",
+  "quality": "mixed: duplicate scaffold",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-apple-terminal-grass",
+  "type": "block",
+  "mechanism": "Same scaffold as code-snippet-apple-terminal-basic with the grass Terminal.app color profile (~60 non-color line diff)",
+  "variables": [],
+  "scrubSafe": "conditional: same callback-typing scaffold as basic",
+  "selfContained": true,
+  "fit": "unfit:palette recolor of the basic scaffold",
+  "quality": "mixed: duplicate scaffold",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-apple-terminal-homebrew",
+  "type": "block",
+  "mechanism": "Same scaffold as code-snippet-apple-terminal-basic with the homebrew Terminal.app color profile (~60 non-color line diff)",
+  "variables": [],
+  "scrubSafe": "conditional: same callback-typing scaffold as basic",
+  "selfContained": true,
+  "fit": "unfit:palette recolor of the basic scaffold",
+  "quality": "mixed: duplicate scaffold",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-apple-terminal-man-page",
+  "type": "block",
+  "mechanism": "Same scaffold as code-snippet-apple-terminal-basic with the man-page Terminal.app color profile (~60 non-color line diff)",
+  "variables": [],
+  "scrubSafe": "conditional: same callback-typing scaffold as basic",
+  "selfContained": true,
+  "fit": "unfit:palette recolor of the basic scaffold",
+  "quality": "mixed: duplicate scaffold",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-apple-terminal-novel",
+  "type": "block",
+  "mechanism": "Same scaffold as code-snippet-apple-terminal-basic with the novel Terminal.app color profile (~60 non-color line diff)",
+  "variables": [],
+  "scrubSafe": "conditional: same callback-typing scaffold as basic",
+  "selfContained": true,
+  "fit": "unfit:palette recolor of the basic scaffold",
+  "quality": "mixed: duplicate scaffold",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-apple-terminal-ocean",
+  "type": "block",
+  "mechanism": "Same scaffold as code-snippet-apple-terminal-basic with the ocean Terminal.app color profile (~60 non-color line diff)",
+  "variables": [],
+  "scrubSafe": "conditional: same callback-typing scaffold as basic",
+  "selfContained": true,
+  "fit": "unfit:palette recolor of the basic scaffold",
+  "quality": "mixed: duplicate scaffold",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-apple-terminal-pro",
+  "type": "block",
+  "mechanism": "Same scaffold as code-snippet-apple-terminal-basic with the pro Terminal.app color profile (~60 non-color line diff)",
+  "variables": [],
+  "scrubSafe": "conditional: same callback-typing scaffold as basic",
+  "selfContained": true,
+  "fit": "unfit:palette recolor of the basic scaffold",
+  "quality": "mixed: duplicate scaffold",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-apple-terminal-red-sands",
+  "type": "block",
+  "mechanism": "Same scaffold as code-snippet-apple-terminal-basic with the red-sands Terminal.app color profile (~60 non-color line diff)",
+  "variables": [],
+  "scrubSafe": "conditional: same callback-typing scaffold as basic",
+  "selfContained": true,
+  "fit": "unfit:palette recolor of the basic scaffold",
+  "quality": "mixed: duplicate scaffold",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-apple-terminal-silver-aerogel",
+  "type": "block",
+  "mechanism": "Same scaffold as code-snippet-apple-terminal-basic with the silver-aerogel Terminal.app color profile (~60 non-color line diff)",
+  "variables": [],
+  "scrubSafe": "conditional: same callback-typing scaffold as basic",
+  "selfContained": true,
+  "fit": "unfit:palette recolor of the basic scaffold",
+  "quality": "mixed: duplicate scaffold",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-apple-terminal-solid-colors",
+  "type": "block",
+  "mechanism": "Same scaffold as code-snippet-apple-terminal-basic with the solid-colors Terminal.app color profile (~60 non-color line diff)",
+  "variables": [],
+  "scrubSafe": "conditional: same callback-typing scaffold as basic",
+  "selfContained": true,
+  "fit": "unfit:palette recolor of the basic scaffold",
+  "quality": "mixed: duplicate scaffold",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-dark-2026",
+  "type": "block",
+  "mechanism": "Full VS Code workbench mock (Dark 2026 palette): pre-split .char spans revealed by scheduled tl.set with caret/active-line tracking sets (scrub-safe; only cosmetic class-toggle uses tl.call), terminal panel slide-in, 3D flourish; code content hardcoded",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:VS Code theme showcase recolor",
+  "quality": "mixed: duplicate scaffold; registers under vscode-* id, not its catalog name",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-dark-modern",
+  "type": "block",
+  "mechanism": "Full VS Code workbench mock (Dark Modern palette): pre-split .char spans revealed by scheduled tl.set with caret/active-line tracking sets (scrub-safe; only cosmetic class-toggle uses tl.call), terminal panel slide-in, 3D flourish; code content hardcoded",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:VS Code editor typing cutaway (one representative)",
+  "quality": "mixed: theme-showcase header copy baked; id mismatch vs catalog name",
+  "aspectFlex": "16:9-only",
+  "port": "P2 mine as the one representative if a VS Code frame is ever wanted"
+ },
+ {
+  "name": "code-snippet-dark-plus",
+  "type": "block",
+  "mechanism": "Full VS Code workbench mock (Dark+ palette): pre-split .char spans revealed by scheduled tl.set with caret/active-line tracking sets (scrub-safe; only cosmetic class-toggle uses tl.call), terminal panel slide-in, 3D flourish; code content hardcoded",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:VS Code theme showcase recolor",
+  "quality": "mixed: duplicate scaffold; registers under vscode-* id, not its catalog name",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-flight",
+  "type": "block",
+  "mechanism": "Discrete code snippet blocks fly in from the side and FLIP-assemble into a stacked program on a paused timeline (block-level FLIP, baked tokens)",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:code snippet flight assembly",
+  "quality": "clean: engine-shared",
+  "aspectFlex": "16:9-only",
+  "port": "P2"
+ },
+ {
+  "name": "code-snippet-high-contrast",
+  "type": "block",
+  "mechanism": "Full VS Code workbench mock (High Contrast palette): pre-split .char spans revealed by scheduled tl.set with caret/active-line tracking sets (scrub-safe; only cosmetic class-toggle uses tl.call), terminal panel slide-in, 3D flourish; code content hardcoded",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:VS Code theme showcase recolor",
+  "quality": "mixed: duplicate scaffold; registers under vscode-* id, not its catalog name",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-high-contrast-light",
+  "type": "block",
+  "mechanism": "Full VS Code workbench mock (High Contrast Light palette): pre-split .char spans revealed by scheduled tl.set with caret/active-line tracking sets (scrub-safe; only cosmetic class-toggle uses tl.call), terminal panel slide-in, 3D flourish; code content hardcoded",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:VS Code theme showcase recolor",
+  "quality": "mixed: duplicate scaffold; registers under vscode-* id, not its catalog name",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-light-2026",
+  "type": "block",
+  "mechanism": "Full VS Code workbench mock (Light 2026 palette): pre-split .char spans revealed by scheduled tl.set with caret/active-line tracking sets (scrub-safe; only cosmetic class-toggle uses tl.call), terminal panel slide-in, 3D flourish; code content hardcoded",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:VS Code theme showcase recolor",
+  "quality": "mixed: duplicate scaffold; registers under vscode-* id, not its catalog name",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-light-modern",
+  "type": "block",
+  "mechanism": "Full VS Code workbench mock (Light Modern palette): pre-split .char spans revealed by scheduled tl.set with caret/active-line tracking sets (scrub-safe; only cosmetic class-toggle uses tl.call), terminal panel slide-in, 3D flourish; code content hardcoded",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:VS Code theme showcase recolor",
+  "quality": "mixed: duplicate scaffold; registers under vscode-* id, not its catalog name",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-light-plus",
+  "type": "block",
+  "mechanism": "Full VS Code workbench mock (Light+ palette): pre-split .char spans revealed by scheduled tl.set with caret/active-line tracking sets (scrub-safe; only cosmetic class-toggle uses tl.call), terminal panel slide-in, 3D flourish; code content hardcoded",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:VS Code theme showcase recolor",
+  "quality": "mixed: duplicate scaffold; registers under vscode-* id, not its catalog name",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-monokai",
+  "type": "block",
+  "mechanism": "Full VS Code workbench mock (Monokai palette): pre-split .char spans revealed by scheduled tl.set with caret/active-line tracking sets (scrub-safe; only cosmetic class-toggle uses tl.call), terminal panel slide-in, 3D flourish; code content hardcoded",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:VS Code theme showcase recolor",
+  "quality": "mixed: duplicate scaffold; registers under vscode-* id, not its catalog name",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-solarized-light",
+  "type": "block",
+  "mechanism": "Full VS Code workbench mock (Solarized Light palette): pre-split .char spans revealed by scheduled tl.set with caret/active-line tracking sets (scrub-safe; only cosmetic class-toggle uses tl.call), terminal panel slide-in, 3D flourish; code content hardcoded",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:VS Code theme showcase recolor",
+  "quality": "mixed: duplicate scaffold; registers under vscode-* id, not its catalog name",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-visual-studio-dark",
+  "type": "block",
+  "mechanism": "Full VS Code workbench mock (Visual Studio Dark palette): pre-split .char spans revealed by scheduled tl.set with caret/active-line tracking sets (scrub-safe; only cosmetic class-toggle uses tl.call), terminal panel slide-in, 3D flourish; code content hardcoded",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:VS Code theme showcase recolor",
+  "quality": "mixed: duplicate scaffold; registers under vscode-* id, not its catalog name",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-snippet-visual-studio-light",
+  "type": "block",
+  "mechanism": "Full VS Code workbench mock (Visual Studio Light palette): pre-split .char spans revealed by scheduled tl.set with caret/active-line tracking sets (scrub-safe; only cosmetic class-toggle uses tl.call), terminal panel slide-in, 3D flourish; code content hardcoded",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:VS Code theme showcase recolor",
+  "quality": "mixed: duplicate scaffold; registers under vscode-* id, not its catalog name",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "code-terminal-run",
+  "type": "component",
+  "mechanism": "Slot-authored command+output with span-preserving typing from a synchronous text-at-time row table, integer-cycle caret, seeded LCG 'human' cadence, cue-driven output prints, trailing prompt; envelope; token chrome",
+  "variables": [
+   "prompt_glyph",
+   "cadence",
+   "cues",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:terminal run cutaway",
+  "quality": "clean: typed-prompt law rigorously applied",
+  "aspectFlex": "9:16-ok",
+  "port": "P0 the well-engineered terminal moment for a coding/automation channel"
+ },
+ {
+  "name": "code-typing",
+  "type": "block",
+  "mechanism": "Baked-token engine: token-streamed typing reveal with caret tracking the frontier; explicitly no CSS animation, deterministic sets",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:code typing reveal",
+  "quality": "clean",
+  "aspectFlex": "16:9-only",
+  "port": "P1 core coding-content beat, GSAP-only"
+ },
+ {
+  "name": "comparison-split",
+  "type": "component",
+  "mechanism": "Divider wipe between two BAKED demo art panels via one custom property; predecessor of before-after-wipe which adds real content slots",
+  "variables": [
+   "split",
+   "orientation",
+   "labelA",
+   "labelB"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:superseded by before-after-wipe (same mechanic plus slots)",
+  "quality": "clean",
+  "aspectFlex": "9:16-ok",
+  "port": "skip"
+ },
+ {
+  "name": "confetti",
+  "type": "component",
+  "mechanism": "22 fixed particles burst via index-derived cos/sin targets in host recipe; blurred mesh drift; token colors",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:celebration confetti burst",
+  "quality": "clean: small",
+  "aspectFlex": "responsive",
+  "port": "P2 pairs with scoreboard win beats"
+ },
+ {
+  "name": "conic-progress-ring",
+  "type": "component",
+  "mechanism": "One registered percentage drives a conic-gradient frontier and the synced center count on every update; radial mask cuts the ring; envelope",
+  "variables": [
+   "progress",
+   "thickness",
+   "label"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:widget-gauge",
+  "quality": "clean: single-owner progress",
+  "aspectFlex": "9:16-ok",
+  "port": "P1 crisper attainment ring than widget-gauge"
+ },
+ {
+  "name": "constellation-hub",
+  "type": "component",
+  "mechanism": "Fixed hub plus orbit feature nodes; each connector's real getTotalLength owns dash draw; cue-driven narration order; orbital drift hold; exit",
+  "variables": [
+   "hub_label",
+   "nodes",
+   "cues",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:whiteboard-map",
+  "quality": "clean",
+  "aspectFlex": "9:16-ok",
+  "port": "P1 cue-synced radial build our whiteboard-map lacks"
+ },
+ {
+  "name": "cosmic-orb",
+  "type": "block",
+  "mechanism": "In-file GLSL nebula sphere with hash-based stars; canvas repainted from a property setter (pure f(t)); hue/spin/star variables",
+  "variables": [
+   "hue",
+   "accent",
+   "spin",
+   "stars",
+   "glow"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:off-brand cosmic decoration",
+  "quality": "clean: self-contained shader",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ }
+]

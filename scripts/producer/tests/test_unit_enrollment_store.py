@@ -106,9 +106,10 @@ class UnitEnrollmentStoreTests(unittest.TestCase):
             self.root, "unit-enrollments-v1", result.record_id
         )
         path = os.path.join(directory, "enrollment.json")
-        self.assertEqual(
-            open(path, "rb").read(), request.enrollment.document_json
-        )
+        with open(path, "rb") as handle:
+            self.assertEqual(
+                handle.read(), request.enrollment.document_json
+            )
         self.assertEqual(os.stat(directory).st_mode & 0o777, 0o700)
         self.assertEqual(os.stat(path).st_mode & 0o777, 0o600)
 

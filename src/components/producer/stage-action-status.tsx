@@ -111,7 +111,9 @@ export function RunProgress({ run, align = "right" }: { run: ProducerRunState; a
     <div className={`max-w-[32rem] space-y-0.5 text-[10px] ${align === "right" ? "text-right" : "text-left"}`}>
       <p className="font-medium text-signal">{runPhaseLabel(run.phase)} · {runTimingLabel(run, now)}</p>
       <p className="text-muted-foreground">{message}</p>
-      <p className="text-muted-foreground/80">{brain} · Palmier updates at each governed checkpoint</p>
+      <p className="text-muted-foreground/80">{brain} · {run.deliveryPolicy === "mp4-only"
+        ? "HyperFrames review · isolated render and QC before MP4 approval"
+        : run.deliveryPolicy === "palmier-hybrid" ? "Legacy Palmier checkpoints" : "Delivery policy not yet verified"}</p>
       <p className="text-muted-foreground/70">{runPhaseRemainingLabel(run.phase)}</p>
     </div>
   );

@@ -1,0 +1,526 @@
+{
+  "sourceCommit": "b1afdb1dcbcad39dd27638ea699f132fe44ce6df",
+  "gitFileCount": 1023,
+  "checkedOutTextFiles": 828,
+  "topLevelCounts": {
+    ".agents": 94,
+    ".claude": 95,
+    ".codex": 2,
+    ".env.example": 1,
+    ".gitattributes": 1,
+    ".github": 1,
+    ".gitignore": 1,
+    "AGENTS.md": 1,
+    "CLAUDE.md": 1,
+    "DESIGN.ais-example.md": 1,
+    "LICENSE": 1,
+    "MOTION_PHILOSOPHY.md": 1,
+    "README.md": 1,
+    "THIRD_PARTY_NOTICES.md": 1,
+    "assets": 4,
+    "docs": 14,
+    "examples": 13,
+    "licenses": 2,
+    "package-lock.json": 1,
+    "package.json": 1,
+    "scripts": 14,
+    "skills-lock.json": 1,
+    "style-library": 421,
+    "style-templates": 14,
+    "tests": 2,
+    "video-projects": 334
+  },
+  "uniqueSkills": [
+    "cut-mistakes",
+    "cut-silences",
+    "edit-video",
+    "gsap",
+    "hyperframes",
+    "hyperframes-cli",
+    "hyperframes-registry",
+    "hyperframes-video-beats",
+    "make-a-video",
+    "short-form-edit",
+    "short-form-video",
+    "style-library",
+    "video-storytelling",
+    "website-to-hyperframes"
+  ],
+  "canonicalSkillResources": 94,
+  "rootHelperScripts": [
+    "scripts/build-edl-review.mjs",
+    "scripts/check-kit.mjs",
+    "scripts/new-video.mjs",
+    "scripts/preflight-all.mjs",
+    "scripts/preflight.mjs",
+    "scripts/setup.mjs",
+    "scripts/smoke-media.mjs",
+    "scripts/style-library/build-registry.mjs",
+    "scripts/style-library/gen-kallaway-style.mjs",
+    "scripts/style-library/new-style.mjs",
+    "scripts/sync-codex-skills.mjs",
+    "scripts/transcribe-elevenlabs.mjs",
+    "scripts/validate-beat-sync.mjs",
+    "scripts/video-use-to-hyperframes-transcript.mjs"
+  ],
+  "cards": {
+    "count": 406,
+    "byStyle": {
+      "vox-explainer": 106,
+      "kallaway": 300
+    },
+    "byPurpose": {
+      "section": 78,
+      "stat": 101,
+      "overview": 81,
+      "lower-third": 73,
+      "label": 73
+    },
+    "byTier": {
+      "tier1": 260,
+      "tier2": 146
+    },
+    "dimensions": {
+      "1920x1080": 406
+    },
+    "missingRootDuration": 406,
+    "externalScriptOrStylesheet": 406,
+    "previewFilesPresentInGit": 0,
+    "nonLiteralSlots": [
+      {
+        "id": "vox-explainer.t1.stat.column-chart",
+        "slots": "c1|c2|c3|c4|c5|stat"
+      },
+      {
+        "id": "vox-explainer.t1.stat.heat-strip",
+        "slots": "stat"
+      },
+      {
+        "id": "vox-explainer.t1.overview.vertical-timeline",
+        "slots": "ev1|ev2|ev3|ev4|yr1|yr2|yr3|yr4"
+      },
+      {
+        "id": "kallaway.t2.label.numbercallout",
+        "slots": "term"
+      }
+    ],
+    "individuallyRendered": 0,
+    "admitted": 0
+  },
+  "projects": [
+    {
+      "name": "aisoc-app-release",
+      "metadata": {
+        "id": "aisoc-app-release",
+        "name": "AIS Mobile App Release \u2014 30s Landscape Hype",
+        "createdAt": "2026-04-17T15:00:00.000Z",
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "textPaths": [
+        "video-projects/aisoc-app-release/HANDOFF.md",
+        "video-projects/aisoc-app-release/STORYBOARD.md",
+        "video-projects/aisoc-app-release/assets/brand-tokens.css",
+        "video-projects/aisoc-app-release/compositions/ambient-bg.html",
+        "video-projects/aisoc-app-release/compositions/components/grain-overlay.html",
+        "video-projects/aisoc-app-release/compositions/components/shimmer-sweep.html",
+        "video-projects/aisoc-app-release/compositions/instagram-follow.html",
+        "video-projects/aisoc-app-release/compositions/scene1-hook.html",
+        "video-projects/aisoc-app-release/compositions/scene2-tease.html",
+        "video-projects/aisoc-app-release/compositions/scene3-reveal.html",
+        "video-projects/aisoc-app-release/compositions/scene4-showcase.html",
+        "video-projects/aisoc-app-release/compositions/scene6-instagram.html",
+        "video-projects/aisoc-app-release/compositions/scene7-outro.html",
+        "video-projects/aisoc-app-release/compositions/x-post.html",
+        "video-projects/aisoc-app-release/hyperframes.json",
+        "video-projects/aisoc-app-release/index.html",
+        "video-projects/aisoc-app-release/meta.json"
+      ],
+      "runtimeTested": false
+    },
+    {
+      "name": "aisoc-hype",
+      "metadata": {
+        "id": "aisoc-hype",
+        "name": "AI Automation Society \u2014 30s Brand Hype Film",
+        "createdAt": "2026-04-17T13:00:00.000Z"
+      },
+      "textPaths": [
+        "video-projects/aisoc-hype/assets/brand-tokens.css",
+        "video-projects/aisoc-hype/compositions/components/grain-overlay.html",
+        "video-projects/aisoc-hype/compositions/components/shimmer-sweep.html",
+        "video-projects/aisoc-hype/compositions/s1-hook.html",
+        "video-projects/aisoc-hype/compositions/s2-reveal.html",
+        "video-projects/aisoc-hype/compositions/s3-proof.html",
+        "video-projects/aisoc-hype/compositions/s4-pillars.html",
+        "video-projects/aisoc-hype/compositions/s5-cta.html",
+        "video-projects/aisoc-hype/hyperframes.json",
+        "video-projects/aisoc-hype/index.html",
+        "video-projects/aisoc-hype/meta.json"
+      ],
+      "runtimeTested": false
+    },
+    {
+      "name": "aisoc-lesson-5-1",
+      "metadata": {
+        "id": "lesson-5-1",
+        "name": "Lesson 5.1 Demo \u2014 AIS Educational Lecture",
+        "createdAt": "2026-04-17T15:00:00.000Z",
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "textPaths": [
+        "video-projects/aisoc-lesson-5-1/STORYBOARD.md",
+        "video-projects/aisoc-lesson-5-1/assets/brand-tokens.css",
+        "video-projects/aisoc-lesson-5-1/assets/transcript.json",
+        "video-projects/aisoc-lesson-5-1/compositions/sections/01-hook.html",
+        "video-projects/aisoc-lesson-5-1/compositions/sections/02-cost-of-hesitation.html",
+        "video-projects/aisoc-lesson-5-1/compositions/sections/03-missing-pieces.html",
+        "video-projects/aisoc-lesson-5-1/compositions/sections/04-promise.html",
+        "video-projects/aisoc-lesson-5-1/compositions/sections/05-relationship-tool.html",
+        "video-projects/aisoc-lesson-5-1/compositions/sections/06-cold-prospect.html",
+        "video-projects/aisoc-lesson-5-1/compositions/sections/07-two-paths.html",
+        "video-projects/aisoc-lesson-5-1/compositions/sections/08-when-not-whether.html",
+        "video-projects/aisoc-lesson-5-1/compositions/sections/09-three-signals.html",
+        "video-projects/aisoc-lesson-5-1/hyperframes.json",
+        "video-projects/aisoc-lesson-5-1/index.html",
+        "video-projects/aisoc-lesson-5-1/meta.json"
+      ],
+      "runtimeTested": false
+    },
+    {
+      "name": "claude-edit-intro",
+      "metadata": {
+        "id": "claude-edit-intro",
+        "name": "claude-edit-intro",
+        "createdAt": "2026-04-17T00:00:00.000Z",
+        "width": 1920,
+        "height": 1080,
+        "fps": 60
+      },
+      "textPaths": [
+        "video-projects/claude-edit-intro/.claude/launch.json",
+        "video-projects/claude-edit-intro/.debug-studio.mjs",
+        "video-projects/claude-edit-intro/assets/brand-tokens.css",
+        "video-projects/claude-edit-intro/assets/claude-edit-intro.transcript.json",
+        "video-projects/claude-edit-intro/compositions/01-hook.html",
+        "video-projects/claude-edit-intro/compositions/02-text-on-screen.html",
+        "video-projects/claude-edit-intro/compositions/03-karaoke-captions.html",
+        "video-projects/claude-edit-intro/compositions/04-mg-and-charts.html",
+        "video-projects/claude-edit-intro/compositions/05-pip.html",
+        "video-projects/claude-edit-intro/compositions/components/grain-overlay.html",
+        "video-projects/claude-edit-intro/compositions/components/shimmer-sweep.html",
+        "video-projects/claude-edit-intro/hyperframes.json",
+        "video-projects/claude-edit-intro/index.html",
+        "video-projects/claude-edit-intro/meta.json"
+      ],
+      "runtimeTested": false
+    },
+    {
+      "name": "clickup-demo",
+      "metadata": {
+        "id": "clickup-demo",
+        "name": "ClickUp \u2014 60s SaaS Product Demo",
+        "createdAt": "2026-04-17T14:00:00.000Z"
+      },
+      "textPaths": [
+        "video-projects/clickup-demo/DESIGN.md",
+        "video-projects/clickup-demo/hyperframes.json",
+        "video-projects/clickup-demo/index.html",
+        "video-projects/clickup-demo/meta.json",
+        "video-projects/clickup-demo/scripts/capture-brain.mjs",
+        "video-projects/clickup-demo/scripts/capture-stills.mjs",
+        "video-projects/clickup-demo/scripts/enrich.mjs",
+        "video-projects/clickup-demo/scripts/inventory-full.mjs",
+        "video-projects/clickup-demo/scripts/inventory.mjs",
+        "video-projects/clickup-demo/scripts/open-for-login.mjs",
+        "video-projects/clickup-demo/scripts/populate.mjs",
+        "video-projects/clickup-demo/scripts/probe.mjs",
+        "video-projects/clickup-demo/scripts/recapture-brain.mjs",
+        "video-projects/clickup-demo/scripts/record-flows.mjs",
+        "video-projects/clickup-demo/scripts/snap-cdp.mjs",
+        "video-projects/clickup-demo/scripts/snap-list.mjs",
+        "video-projects/clickup-demo/workspace-context.json"
+      ],
+      "runtimeTested": false
+    },
+    {
+      "name": "first-agent-promo",
+      "metadata": {
+        "id": "hyperframes-editor",
+        "name": "first-agent-promo",
+        "createdAt": "2026-04-17T00:00:00.000Z",
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "textPaths": [
+        "video-projects/first-agent-promo/_design/first-agent-release-video/README.md",
+        "video-projects/first-agent-promo/_design/first-agent-release-video/chats/chat1.md",
+        "video-projects/first-agent-promo/_design/first-agent-release-video/project/First Agent Promo.html",
+        "video-projects/first-agent-promo/_design/first-agent-release-video/project/animations.jsx",
+        "video-projects/first-agent-promo/_design/first-agent-release-video/project/colors_and_type.css",
+        "video-projects/first-agent-promo/_design/first-agent-release-video/project/scenes.jsx",
+        "video-projects/first-agent-promo/_design/first-agent-release-video/project/uploads/Your First AI Agent _standalone_.html",
+        "video-projects/first-agent-promo/_design/first-agent-release-video/project/uploads/extracted_template.html",
+        "video-projects/first-agent-promo/animations.jsx",
+        "video-projects/first-agent-promo/colors_and_type.css",
+        "video-projects/first-agent-promo/index.html",
+        "video-projects/first-agent-promo/meta.json",
+        "video-projects/first-agent-promo/scenes.jsx",
+        "video-projects/first-agent-promo/scripts/capture.mjs",
+        "video-projects/first-agent-promo/scripts/smoke.mjs"
+      ],
+      "runtimeTested": false
+    },
+    {
+      "name": "golden-ratio-demo",
+      "metadata": {
+        "id": "golden-ratio-demo",
+        "name": "Golden Ratio of AI Automation \u2014 AIS Lesson",
+        "createdAt": "2026-04-18T16:30:00.000Z",
+        "width": 1920,
+        "height": 1080,
+        "fps": 60
+      },
+      "textPaths": [
+        "video-projects/golden-ratio-demo/BRIEF.md",
+        "video-projects/golden-ratio-demo/NOTES.md",
+        "video-projects/golden-ratio-demo/STORYBOARD.md",
+        "video-projects/golden-ratio-demo/assets/brand-tokens.css",
+        "video-projects/golden-ratio-demo/assets/transcript/whisper.json",
+        "video-projects/golden-ratio-demo/compositions/01-intro-title.html",
+        "video-projects/golden-ratio-demo/compositions/02-sixty-deterministic.html",
+        "video-projects/golden-ratio-demo/compositions/03-thirty-ai-assisted.html",
+        "video-projects/golden-ratio-demo/compositions/04-ten-human.html",
+        "video-projects/golden-ratio-demo/compositions/05-magic-trash-middle.html",
+        "video-projects/golden-ratio-demo/compositions/06-outro-recap.html",
+        "video-projects/golden-ratio-demo/compositions/ambient-spiral.html",
+        "video-projects/golden-ratio-demo/compositions/components/grain-overlay.html",
+        "video-projects/golden-ratio-demo/hyperframes.json",
+        "video-projects/golden-ratio-demo/index.html",
+        "video-projects/golden-ratio-demo/meta.json"
+      ],
+      "runtimeTested": false
+    },
+    {
+      "name": "hyperframes-sizzle",
+      "metadata": {
+        "id": "hyperframes-sizzle",
+        "name": "Hyperframes \u00d7 Claude Code Sizzle Reel",
+        "createdAt": "2026-04-17T00:00:00.000Z",
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "textPaths": [
+        "video-projects/hyperframes-sizzle/assets/anthropic-capture/.cursorrules",
+        "video-projects/hyperframes-sizzle/assets/anthropic-capture/CLAUDE.md",
+        "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/67ce28d0ec624e2b733f8ad0-dots.svg",
+        "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/67f0a72738c0c95d6dfc7845-dropdown.svg",
+        "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/lottie/animation-0.json",
+        "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/svgs/icon-embed-xsmall.svg",
+        "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/svgs/nav-linkout-icon.svg",
+        "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/svgs/nav-links-svg.svg",
+        "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/svgs/nav-logo-lottie.svg",
+        "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/svgs/nav-logo-wrap.svg",
+        "video-projects/hyperframes-sizzle/assets/anthropic-capture/extracted/animations.json",
+        "video-projects/hyperframes-sizzle/assets/anthropic-capture/extracted/asset-descriptions.md",
+        "video-projects/hyperframes-sizzle/assets/anthropic-capture/extracted/assets-catalog.json",
+        "video-projects/hyperframes-sizzle/assets/anthropic-capture/extracted/detected-libraries.json",
+        "video-projects/hyperframes-sizzle/assets/anthropic-capture/extracted/lottie-manifest.json",
+        "video-projects/hyperframes-sizzle/assets/anthropic-capture/extracted/tokens.json",
+        "video-projects/hyperframes-sizzle/assets/anthropic-capture/extracted/visible-text.txt",
+        "video-projects/hyperframes-sizzle/assets/anthropic-capture/index.html",
+        "video-projects/hyperframes-sizzle/assets/anthropic-capture/meta.json",
+        "video-projects/hyperframes-sizzle/assets/brand-tokens.css",
+        "video-projects/hyperframes-sizzle/compositions/app-showcase.html",
+        "video-projects/hyperframes-sizzle/compositions/chromatic-radial-split.html",
+        "video-projects/hyperframes-sizzle/compositions/cinematic-zoom.html",
+        "video-projects/hyperframes-sizzle/compositions/components/grain-overlay.html",
+        "video-projects/hyperframes-sizzle/compositions/components/grid-pixelate-wipe.html",
+        "video-projects/hyperframes-sizzle/compositions/components/shimmer-sweep.html",
+        "video-projects/hyperframes-sizzle/compositions/cross-warp-morph.html",
+        "video-projects/hyperframes-sizzle/compositions/data-chart.html",
+        "video-projects/hyperframes-sizzle/compositions/domain-warp-dissolve.html",
+        "video-projects/hyperframes-sizzle/compositions/flash-through-white.html",
+        "video-projects/hyperframes-sizzle/compositions/glitch.html",
+        "video-projects/hyperframes-sizzle/compositions/gravitational-lens.html",
+        "video-projects/hyperframes-sizzle/compositions/instagram-follow.html",
+        "video-projects/hyperframes-sizzle/compositions/light-leak.html",
+        "video-projects/hyperframes-sizzle/compositions/logo-outro.html",
+        "video-projects/hyperframes-sizzle/compositions/ridged-burn.html",
+        "video-projects/hyperframes-sizzle/compositions/sdf-iris.html",
+        "video-projects/hyperframes-sizzle/compositions/swirl-vortex.html",
+        "video-projects/hyperframes-sizzle/compositions/thermal-distortion.html",
+        "video-projects/hyperframes-sizzle/compositions/tiktok-follow.html",
+        "video-projects/hyperframes-sizzle/compositions/v00-cold-open.html",
+        "video-projects/hyperframes-sizzle/compositions/v01-kinetic-type.html",
+        "video-projects/hyperframes-sizzle/compositions/v02-data-chart.html",
+        "video-projects/hyperframes-sizzle/compositions/v03-app-showcase.html",
+        "video-projects/hyperframes-sizzle/compositions/v04-audio-reactive.html",
+        "video-projects/hyperframes-sizzle/compositions/v05-web-to-video.html",
+        "video-projects/hyperframes-sizzle/compositions/v07-social-stack.html",
+        "video-projects/hyperframes-sizzle/compositions/v08-caption-sync.html",
+        "video-projects/hyperframes-sizzle/compositions/v09-flowchart.html",
+        "video-projects/hyperframes-sizzle/compositions/v10-logo-outro.html",
+        "video-projects/hyperframes-sizzle/compositions/whip-pan.html",
+        "video-projects/hyperframes-sizzle/compositions/x-post.html",
+        "video-projects/hyperframes-sizzle/compositions/yt-lower-third.html",
+        "video-projects/hyperframes-sizzle/hyperframes.json",
+        "video-projects/hyperframes-sizzle/index.html",
+        "video-projects/hyperframes-sizzle/meta.json"
+      ],
+      "runtimeTested": false
+    },
+    {
+      "name": "linear-promo-30s",
+      "metadata": {
+        "id": "linear-promo-30s",
+        "name": "Linear \u2014 30s Promo (Infinite-style)",
+        "createdAt": "2026-04-17T00:00:00.000Z",
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "textPaths": [
+        "video-projects/linear-promo-30s/NOTES.md",
+        "video-projects/linear-promo-30s/assets/linear-logo.svg",
+        "video-projects/linear-promo-30s/assets/linear-symbol.svg",
+        "video-projects/linear-promo-30s/compositions/01-problem-type.html",
+        "video-projects/linear-promo-30s/compositions/02-card-to-logo.html",
+        "video-projects/linear-promo-30s/compositions/03-brand-reveal.html",
+        "video-projects/linear-promo-30s/compositions/04-benefits-flowchart.html",
+        "video-projects/linear-promo-30s/compositions/05-product-surfaces.html",
+        "video-projects/linear-promo-30s/compositions/06-wheel-pillars.html",
+        "video-projects/linear-promo-30s/compositions/07-foundation.html",
+        "video-projects/linear-promo-30s/compositions/08-cta-outro.html",
+        "video-projects/linear-promo-30s/hyperframes.json",
+        "video-projects/linear-promo-30s/index.html",
+        "video-projects/linear-promo-30s/meta.json",
+        "video-projects/linear-promo-30s/scripts/capture-screens.js",
+        "video-projects/linear-promo-30s/scripts/diag-click.js",
+        "video-projects/linear-promo-30s/scripts/diag-iframe-body.js",
+        "video-projects/linear-promo-30s/scripts/diag-play.js",
+        "video-projects/linear-promo-30s/scripts/diag-sandbox.js",
+        "video-projects/linear-promo-30s/scripts/diag-sizzle.js",
+        "video-projects/linear-promo-30s/scripts/diag-wait.js",
+        "video-projects/linear-promo-30s/scripts/diag2.js",
+        "video-projects/linear-promo-30s/scripts/diag3.js",
+        "video-projects/linear-promo-30s/scripts/diag4.js",
+        "video-projects/linear-promo-30s/scripts/diag5.js",
+        "video-projects/linear-promo-30s/scripts/diagnose-studio.js",
+        "video-projects/linear-promo-30s/scripts/extract-logo.js"
+      ],
+      "runtimeTested": false
+    },
+    {
+      "name": "may-shorts-18",
+      "metadata": {
+        "id": "hyperframes-editor",
+        "name": "may-shorts-18-vertical",
+        "createdAt": "2026-04-17T16:02:00.000Z",
+        "width": 1080,
+        "height": 1920,
+        "fps": 30
+      },
+      "textPaths": [
+        "video-projects/may-shorts-18/assets/brand-tokens.css",
+        "video-projects/may-shorts-18/assets/may_shorts_18.json",
+        "video-projects/may-shorts-18/compositions/ambient-bg.html",
+        "video-projects/may-shorts-18/compositions/captions.html",
+        "video-projects/may-shorts-18/compositions/grain-overlay.html",
+        "video-projects/may-shorts-18/compositions/scene1-hook-killed.html",
+        "video-projects/may-shorts-18/compositions/scene2-not-hype.html",
+        "video-projects/may-shorts-18/compositions/scene3-three-wins.html",
+        "video-projects/may-shorts-18/compositions/scene4-felt-it.html",
+        "video-projects/may-shorts-18/compositions/scene5-too-late.html",
+        "video-projects/may-shorts-18/compositions/scene6-comment-cta.html",
+        "video-projects/may-shorts-18/compositions/seam-treatment.html",
+        "video-projects/may-shorts-18/hyperframes.json",
+        "video-projects/may-shorts-18/index.html",
+        "video-projects/may-shorts-18/meta.json"
+      ],
+      "runtimeTested": false
+    },
+    {
+      "name": "may-shorts-19",
+      "metadata": {
+        "id": "hyperframes-editor",
+        "name": "may-shorts-19-vertical",
+        "createdAt": "2026-04-17T12:44:47.817Z",
+        "width": 1080,
+        "height": 1920,
+        "fps": 30
+      },
+      "textPaths": [
+        "video-projects/may-shorts-19/assets/_archive/figma-cursors.svg",
+        "video-projects/may-shorts-19/assets/_archive/figma-logo-pieces.svg",
+        "video-projects/may-shorts-19/assets/_archive/figma-logo-pills.svg",
+        "video-projects/may-shorts-19/assets/brand-tokens.css",
+        "video-projects/may-shorts-19/assets/may_shorts_19.json",
+        "video-projects/may-shorts-19/compositions/_archive/scene1-logo-intro.html",
+        "video-projects/may-shorts-19/compositions/_archive/scene2-4-canvas.html",
+        "video-projects/may-shorts-19/compositions/_archive/scene5-logo-outro.html",
+        "video-projects/may-shorts-19/compositions/ambient-bg.html",
+        "video-projects/may-shorts-19/compositions/captions.html",
+        "video-projects/may-shorts-19/compositions/scene1-intro.html",
+        "video-projects/may-shorts-19/compositions/scene2-rejection.html",
+        "video-projects/may-shorts-19/compositions/scene3-pointless.html",
+        "video-projects/may-shorts-19/compositions/scene4-six.html",
+        "video-projects/may-shorts-19/compositions/scene5-benefits.html",
+        "video-projects/may-shorts-19/compositions/scene6-only-ones.html",
+        "video-projects/may-shorts-19/compositions/scene7-cta.html",
+        "video-projects/may-shorts-19/compositions/seam-treatment.html",
+        "video-projects/may-shorts-19/hyperframes.json",
+        "video-projects/may-shorts-19/index.html",
+        "video-projects/may-shorts-19/meta.json"
+      ],
+      "runtimeTested": false
+    },
+    {
+      "name": "may-shorts-6",
+      "metadata": {
+        "id": "hyperframes-editor",
+        "name": "may-shorts-6-landscape",
+        "createdAt": "2026-04-18T00:00:00.000Z",
+        "width": 1920,
+        "height": 1080,
+        "fps": 30
+      },
+      "textPaths": [
+        "video-projects/may-shorts-6/assets/brand-tokens.css",
+        "video-projects/may-shorts-6/assets/may_shorts_6.json",
+        "video-projects/may-shorts-6/compositions/ambient-bg.html",
+        "video-projects/may-shorts-6/compositions/captions.html",
+        "video-projects/may-shorts-6/compositions/scene1-hook.html",
+        "video-projects/may-shorts-6/compositions/scene2-not-needed.html",
+        "video-projects/may-shorts-6/compositions/scene3-flashy-list.html",
+        "video-projects/may-shorts-6/compositions/scene4-want-list.html",
+        "video-projects/may-shorts-6/compositions/scene5-thats-it.html",
+        "video-projects/may-shorts-6/compositions/scene6-boring.html",
+        "video-projects/may-shorts-6/compositions/scene7-pay-for.html",
+        "video-projects/may-shorts-6/compositions/scene8-cta-outro.html",
+        "video-projects/may-shorts-6/hyperframes.json",
+        "video-projects/may-shorts-6/index.html",
+        "video-projects/may-shorts-6/meta.json",
+        "video-projects/may-shorts-6/scripts/transcribe.mjs"
+      ],
+      "runtimeTested": false
+    }
+  ],
+  "limitations": [
+    "Text-only source audit. Binary media/fonts/images were not checked out or viewed.",
+    "All card files structurally scanned; selected implementations manually reviewed.",
+    "No current-runtime media, browser, rendering or listening tests.",
+    "Canonical skills reviewed; mirrors compared by Git blob identity except known path-normalization differences."
+  ],
+  "mirrorComparison": {
+    "resources": 94,
+    "identicalBlobs": 91,
+    "pathNormalizationOnly": 3
+  },
+  "coverageNote": "Entry-point/helper review; all 406 cards structurally scanned; selected HTML manually reviewed; all twelve teaching projects source-screened. Not an exhaustive semantic/visual approval of each file."
+}

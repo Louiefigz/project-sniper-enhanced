@@ -34,10 +34,14 @@ import re
 import subprocess
 import sys
 from dataclasses import dataclass
-from typing import Optional
+from typing import Callable, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from guided_source_color_consumption import SourceColorPictureConsumption
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # run-by-path: producer pkg root on sys.path
 from producer_config import AUDIO, ENCODE
+from producer_config import MASTERING_POLICY_VERSION as MASTERING_POLICY_VERSION
 
 _JSON_RE = re.compile(r"\{[^{}]*\}", re.S)
 _LUFS_RE = re.compile(r"\bI:\s*(-?\d+(?:\.\d+)?)\s*LUFS")
@@ -70,10 +74,15 @@ class MasterSpec:
     # ``fps`` (int) stays for GOP size / bitrate-table lookups only.
     fps_exact: Optional[str] = None
     cover: Optional[str] = None
-    # Clamp the master to the timeline-predicted duration (+half frame): per-part
-    # AAC tail padding accumulates through concat and CFR would otherwise pad
-    # video to the audio tail (~1 frame per cut part — edge X9/X19).
+    # Picture-derived duration clamp (+half frame in _encode). Callers should
+    # derive this from frame_count / exact rational FPS, never from an MP4
+    # stream/container duration that may include AAC tail padding (X9/X19).
     duration: Optional[float] = None
+    # Pre-master picture packet count. When present, the final encode is
+    # explicitly capped to this many video frames so CFR can never manufacture
+    # frames from an AAC-padded or timestamp-inflated tail.
+    frame_count: Optional[int] = None
+    picture_consumption: SourceColorPictureConsumption | None = None  # Never a CLI/JSON field.
 
 
 def _run(cmd: list[str]) -> subprocess.CompletedProcess:
@@ -175,11 +184,23 @@ def _linear_eligible(stats: dict) -> bool:
     needs +18 dB, projected TP lands above -2.0, dynamic mode then undershoots
     I (-15.6) and crushes LRA (2.7). Pre-checking here routes those sources to
     the static-gain path instead of letting loudnorm degrade silently."""
+    if not _loudnorm_stats_in_range(stats):
+        return False
     projected_tp = stats["measured_TP"] + (AUDIO["lufs_target"] - stats["measured_I"])
     sentinel = (stats["measured_thresh"] <= -70.0 or stats["measured_TP"] >= 99.0
                 or stats["measured_LRA"] == 0.0 or stats["measured_I"] == 0.0)
     return (not sentinel and projected_tp <= AUDIO["loudnorm_tp_param"]
             and stats["measured_LRA"] <= AUDIO["lra"])
+
+
+def _loudnorm_stats_in_range(stats: dict) -> bool:
+    """Finite float headroom may exceed loudnorm's measured-option domains."""
+    bounds = {
+        "measured_I": (-99, 0), "measured_TP": (-99, 99),
+        "measured_LRA": (0, 99), "measured_thresh": (-99, 0),
+        "offset": (-99, 99),
+    }
+    return all(low <= stats[key] <= high for key, (low, high) in bounds.items())
 
 
 def _tp_limiter() -> str:
@@ -191,7 +212,7 @@ def _tp_limiter() -> str:
     alimiter's default auto-level would re-normalize to full scale."""
     limit = 10.0 ** (AUDIO["loudnorm_tp_param"] / 20.0)
     return (f"aresample=192000,alimiter=limit={limit:.6f}"
-            f":attack=5:release=100:level=false")
+            f":attack=5:release=100:level=false:latency=true")
 
 
 def _static_chain(prefix: Optional[str], gain_db: float) -> str:
@@ -208,7 +229,9 @@ def _measure_chain_lufs(src: str, chain: str) -> Optional[float]:
 
 
 def _static_gain_filter(src: str, prefix: Optional[str],
-                        measured_i: float) -> tuple[str, float]:
+                        measured_i: float,
+                        measure_chain: Optional[Callable[[str], Optional[float]]] = None,
+                        ) -> tuple[str, float]:
     """Static gain to target + TP limiter, trimmed against a measured dry run.
 
     Gain starts at ``target - measured_I``; because the limiter shaves the
@@ -218,7 +241,8 @@ def _static_gain_filter(src: str, prefix: Optional[str],
     gain = AUDIO["lufs_target"] - measured_i
     chain = _static_chain(prefix, gain)
     for _ in range(STATIC_MAX_TRIMS):
-        got = _measure_chain_lufs(src, chain)
+        got = (measure_chain(chain) if measure_chain is not None
+               else _measure_chain_lufs(src, chain))
         if got is None or abs(AUDIO["lufs_target"] - got) <= STATIC_TRIM_TOL_LU:
             break
         gain += AUDIO["lufs_target"] - got
@@ -227,7 +251,9 @@ def _static_gain_filter(src: str, prefix: Optional[str],
 
 
 def _audio_filter(src: str, prefix: Optional[str],
-                  measured: Optional[dict]) -> tuple[str, Optional[str]]:
+                  measured: Optional[dict],
+                  measure_chain: Optional[Callable[[str], Optional[float]]] = None,
+                  ) -> tuple[str, Optional[str]]:
     """Build the pass-2 audio filter. Returns (filter, note); note is None on
     the default linear path, otherwise a warning line for the report.
 
@@ -247,21 +273,25 @@ def _audio_filter(src: str, prefix: Optional[str],
         part = ":".join(f"{k}={v}" for k, v in stats.items())
         return (_with_prefix(prefix, f"{base}:{part}:linear=true"
                              ":print_format=summary"), None)
-    chain, gain = _static_gain_filter(src, prefix, stats["measured_I"])
+    chain, gain = _static_gain_filter(src, prefix, stats["measured_I"], measure_chain)
     projected_tp = stats["measured_TP"] + (AUDIO["lufs_target"] - stats["measured_I"])
-    return chain, (f"quiet source: loudnorm linear ineligible (projected TP "
-                   f"{projected_tp:+.1f} > {AUDIO['loudnorm_tp_param']}) — static "
+    return chain, (f"loudnorm linear ineligible (stats/range or projected TP "
+                   f"{projected_tp:+.1f}; ceiling {AUDIO['loudnorm_tp_param']}) — static "
                    f"gain {gain:+.1f} dB + true-peak limiter (LRA preserved)")
 
 
 def build_pass2_afilter(src: str, prefix: Optional[str],
-                        measured: Optional[dict]) -> tuple[str, Optional[str]]:
+                        measured: Optional[dict],
+                        measure_chain: Optional[Callable[[str], Optional[float]]] = None,
+                        ) -> tuple[str, Optional[str]]:
     """PUBLIC seam over the pass-2 audio-filter builder (linear / static /
     dynamic dispatch — see ``_audio_filter``). Exists so an audio-only
     re-master (audio/base_audio.py) reuses the exact mastering intelligence
-    instead of duplicating it. Same contract: returns (filter, warning|None).
+    instead of duplicating it. A mix caller supplies ``measure_chain`` to measure
+    that exact in-memory sum on static-gain dry runs, not just its dialogue leg.
+    Returns (filter, warning|None).
     """
-    return _audio_filter(src, prefix, measured)
+    return _audio_filter(src, prefix, measured, measure_chain)
 
 
 def _video_opts(fps: int, fps_exact: Optional[str] = None) -> list[str]:
@@ -347,14 +377,19 @@ def extract_cover(src: str, cover: str) -> Optional[list[int]]:
     return [int(dims[0]), int(dims[1])] if len(dims) == 2 else None
 
 
-def _encode(spec: MasterSpec, audio: bool, afilter: Optional[str]) -> subprocess.CompletedProcess:
+def _encode(spec: MasterSpec, audio: bool, afilter: Optional[str],
+            picture_guard: Callable[[], None] | None = None) -> subprocess.CompletedProcess:
     """The single final encode pass (video + optional burn + optional loudnorm)."""
+    from guided_source_color_consumption_hooks import capture_master, run_picture_command
+    consumption = capture_master(spec, picture_guard)
     cmd = ["ffmpeg", "-y", "-hide_banner", "-nostats", "-i", spec.src, "-map", "0:v:0"]
     if spec.duration:
         cmd += ["-t", f"{spec.duration + 0.5 / spec.fps:.4f}"]
     if spec.ass:
         cmd += ["-vf", _subtitles_filter(spec.ass)]
     cmd += _video_opts(spec.fps, spec.fps_exact)
+    if spec.frame_count is not None:
+        cmd += ["-frames:v", str(spec.frame_count)]
     if audio:
         cmd += ["-map", "0:a:0", "-c:a", ENCODE["acodec"],
                 "-b:a", ENCODE["audio_bitrate"], "-ar", str(ENCODE["audio_rate"]),
@@ -370,7 +405,16 @@ def _encode(spec: MasterSpec, audio: bool, afilter: Optional[str]) -> subprocess
     else:
         cmd += ["-an"]
     cmd.append(spec.out)
-    return _run(cmd)
+    if consumption is not None:
+        if audio or afilter is not None:
+            raise RuntimeError("source-color consumption requires the existing picture-only encode")
+        return run_picture_command(consumption, cmd, (picture_guard, _run))
+    if picture_guard is not None:
+        picture_guard()
+    result = _run(cmd)
+    if picture_guard is not None:
+        picture_guard()
+    return result
 
 
 def master(spec: MasterSpec) -> dict:
@@ -398,6 +442,23 @@ def master(spec: MasterSpec) -> dict:
     return _finalize(spec, audio, warnings)
 
 
+def encode_picture_only(spec: MasterSpec, picture_guard: Callable[[], None] | None = None) -> dict:
+    """Run the existing final picture encode without processing any audio bus."""
+    if picture_guard is not None:
+        picture_guard()
+    result = _encode(spec, False, None) if picture_guard is None else _encode(spec, False, None, picture_guard)
+    observed = {"ok": result.returncode == 0 and os.path.isfile(spec.out),
+                "stderr": result.stderr[-1200:] if result.returncode else ""}
+    if picture_guard is not None:
+        picture_guard()
+    return observed
+
+
+def finalize_master(spec: MasterSpec, warnings: list[str]) -> dict:
+    """Retain ordinary cover/report behavior after independently qualified audio."""
+    return _finalize(spec, True, warnings)
+
+
 def _finalize(spec: MasterSpec, audio: bool, warnings: list[str]) -> dict:
     """Post-encode measurements: LUFS tolerance, cover, file-size budget."""
     lufs = measure_integrated_lufs(spec.out) if audio else None
@@ -413,6 +474,7 @@ def _finalize(spec: MasterSpec, audio: bool, warnings: list[str]) -> dict:
         warnings.append(f"output {size_mb}MB exceeds cap {ENCODE['max_file_mb']}MB")
     return {
         "status": "done",
+        "mastering_policy_version": MASTERING_POLICY_VERSION,
         "out": spec.out,
         "fps": spec.fps,
         "burned_captions": bool(spec.ass),

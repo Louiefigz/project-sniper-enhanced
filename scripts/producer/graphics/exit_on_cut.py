@@ -36,6 +36,7 @@ clamp point. JS twin: ``templates/motion/motion-tokens.js`` ``EXIT_BLUR_S`` /
 from __future__ import annotations
 
 from compile_timeline import compile_plan
+from graphics.placement_context import bind_plan_face_bbox
 
 # G5 vocabulary: full-frame gaussian-blur + desaturate of the FOOTAGE as a
 # takeover background (JADEN_STYLE.md §5.4 E4 — 8 instances / 4 reels HIGH).
@@ -85,13 +86,14 @@ def effective_out_end(entry: dict, seams: list[float]) -> float:
 
 
 def apply_exit_on_cut(plan: dict) -> tuple[list[dict], int]:
-    """Clamped COPY of ``plan.graphicsTrack`` + how many entries were clamped.
+    """Effective graphics rows + how many entries were exit-clamped.
 
-    Entries without the flag pass through untouched (same dict identity) so
-    the no-flag path stays byte-stable. The plan itself is never mutated —
-    the clamp is a render-time projection, deterministic from the plan.
+    The render-time projection also materializes a plan-global
+    ``faceBBoxNorm`` onto automatic-placement rows. Entry-level geometry wins,
+    explicit placements stay untouched, and the reviewed plan is never
+    mutated.
     """
-    track = plan.get("graphicsTrack") or []
+    track = bind_plan_face_bbox(plan.get("graphicsTrack") or [], plan)
     if not any(g.get("exitOnCut") for g in track):
         return track, 0
     seams = seams_from_plan(plan)

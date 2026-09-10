@@ -1,6 +1,7 @@
 import { spawn } from "child_process";
 import path from "path";
 import { claudeModelArgs, claudeProcessEnv } from "../../_lib/ai-provider";
+import { admitSubscriptionInvocation } from "../../_lib/subscription-invocation";
 import {
   PROCESS_TERM_GRACE_MS,
   shouldDetachProcessGroup,
@@ -16,6 +17,9 @@ export interface LegacyBrainInvocation {
   args: string[];
   cwd: string;
   timeoutMs: number;
+  /** Optional combined stdout/stderr budget; old callers retain their prior behavior. */
+  maxOutputBytes?: number;
+  signal?: AbortSignal;
 }
 
 export interface BrainProcessResult {
@@ -105,17 +109,26 @@ export function parseClaudeResultStream(stdout: string): string {
   return message;
 }
 
-export function runLegacyBrainProcess(
+export async function runLegacyBrainProcess(
   invocation: LegacyBrainInvocation,
 ): Promise<BrainProcessResult> {
+  if (invocation.maxOutputBytes !== undefined && (!Number.isSafeInteger(invocation.maxOutputBytes)
+      || invocation.maxOutputBytes < 1 || invocation.maxOutputBytes > 16 * 1024 * 1024)) {
+    throw new Error("Claude output budget is invalid");
+  }
+  const admitted = await admitSubscriptionInvocation({ provider: "claude", bin: CLAUDE_BIN,
+    args: invocation.args, cwd: invocation.cwd, env: claudeProcessEnv(),
+    timeoutMs: invocation.timeoutMs, signal: invocation.signal });
   return new Promise((resolve, reject) => {
-    const started = Date.now();
-    const proc = trackProcessTree(spawn(CLAUDE_BIN, invocation.args, {
-      cwd: invocation.cwd,
-      env: claudeProcessEnv(),
+    const timeoutMs = admitted.remainingMs();
+    const proc = trackProcessTree(spawn(admitted.bin, admitted.args, {
+      cwd: admitted.cwd,
+      env: admitted.env,
       detached: shouldDetachProcessGroup(),
     }));
     let stdout = "";
+    const stdoutChunks: Buffer[] = [];
+    let outputBytes = 0;
     let stderr = "";
     let settled = false;
     let stopError: Error | undefined;
@@ -125,10 +138,12 @@ export function runLegacyBrainProcess(
       settled = true;
       clearTimeout(timer);
       if (forceSettle) clearTimeout(forceSettle);
+      invocation.signal?.removeEventListener("abort", abort);
       if (error) reject(error);
       else {
         try {
-          resolve({ message: parseClaudeResultStream(stdout), stderr, ms: Date.now() - started });
+          const text = invocation.maxOutputBytes === undefined ? stdout : Buffer.concat(stdoutChunks).toString("utf8");
+          resolve({ message: parseClaudeResultStream(text), stderr, ms: admitted.elapsedMs() });
         } catch (parseError) {
           reject(parseError);
         }
@@ -140,8 +155,19 @@ export function runLegacyBrainProcess(
       terminateProcessTree(proc);
       forceSettle = setTimeout(() => finish(error), PROCESS_TERM_GRACE_MS + 1_000);
     };
-    proc.stdout.on("data", (data: Buffer) => (stdout += data.toString()));
-    proc.stderr.on("data", (data: Buffer) => (stderr = (stderr + data.toString()).slice(-8_000)));
+    const abort = () => requestStop(new Error("Claude run was cancelled"));
+    const append = (data: Buffer, stream: "stdout" | "stderr") => {
+      if (stopError || settled) return;
+      outputBytes += data.length;
+      if (invocation.maxOutputBytes !== undefined && outputBytes > invocation.maxOutputBytes) {
+        requestStop(new Error(`Claude exceeded its ${invocation.maxOutputBytes}-byte output budget`)); return;
+      }
+      if (stream === "stderr") stderr = (stderr + data.toString()).slice(-8_000);
+      else if (invocation.maxOutputBytes === undefined) stdout += data.toString();
+      else stdoutChunks.push(data);
+    };
+    proc.stdout.on("data", (data: Buffer) => append(data, "stdout"));
+    proc.stderr.on("data", (data: Buffer) => append(data, "stderr"));
     proc.on("error", (error) => finish(stopError ?? error));
     proc.on("close", (code) => {
       if (stopError) return finish(stopError);
@@ -151,6 +177,8 @@ export function runLegacyBrainProcess(
     });
     const timer = setTimeout(() => {
       requestStop(new Error(`Claude timed out after ${Math.round(invocation.timeoutMs / 1_000)}s`));
-    }, invocation.timeoutMs);
+    }, timeoutMs);
+    invocation.signal?.addEventListener("abort", abort, { once: true });
+    if (invocation.signal?.aborted) abort();
   });
 }

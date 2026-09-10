@@ -9,6 +9,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from palmier.checkpoint import (CheckpointInput, _json, _authority,    # noqa: E402
                                 publish_checkpoint)
+from ingest_execution_authority import verify_execution_media_authority  # noqa: E402
 from palmier.mcp_client import (PalmierClient, PalmierError,           # noqa: E402
                                 PalmierWaiting, emit)
 from palmier.sync_lock import SyncLock, SyncLockState                  # noqa: E402
@@ -24,7 +25,16 @@ def _parse(argv: list[str] | None) -> CheckpointInput:
     parser.add_argument("--round", type=int, default=0)
     parser.add_argument("--media")
     parser.add_argument("--cache-dir")
+    policy = parser.add_mutually_exclusive_group()
+    policy.add_argument(
+        "--require-source-set-admission", action="store_true",
+        help="explicitly require source-set admission (the default)")
+    policy.add_argument(
+        "--allow-legacy-unadmitted", action="store_true",
+        help="non-production migration only: accept a legacy manifest")
     args = parser.parse_args(argv)
+    if not args.allow_legacy_unadmitted:
+        os.environ["SNIPER_REQUIRE_SOURCE_SET_ADMISSION"] = "1"
     return CheckpointInput(
         os.path.realpath(args.out_dir), os.path.realpath(args.plan_path),
         os.path.realpath(args.manifest_path), args.stage, max(0, args.round),
@@ -35,6 +45,9 @@ def _parse(argv: list[str] | None) -> CheckpointInput:
 def run(argv: list[str] | None = None) -> int:
     spec = _parse(argv)
     plan = _json(spec.plan_path, "edit plan")
+    manifest = _json(spec.manifest_path, "asset manifest")
+    verify_execution_media_authority(
+        plan, manifest, spec.manifest_path)
     acquired = SyncLock.acquire(
         spec.out_dir, _authority(spec, plan).checkpoint_key,
         queue_if_busy=False)

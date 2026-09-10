@@ -1,12 +1,21 @@
 # Palmier-first canonical timeline workflow
 
-> **STATUS: TARGET DIRECTION (aspirational).** The native-canonical candidate + compare-and-swap promotion described here is **not delivery-wired yet** — see [PALMIER_CANONICAL_IMPLEMENTATION_STATE.md](PALMIER_CANONICAL_IMPLEMENTATION_STATE.md). For what actually ships today — a flat, one-way, byte-exact visual-master mirror (one visible clip = the approved final.mp4) — read [PALMIER_MIRROR_HANDOFF.md](PALMIER_MIRROR_HANDOFF.md) + [PALMIER_PARITY_CONTRACT.md](PALMIER_PARITY_CONTRACT.md).
+> **STATUS: LOCAL PROTOCOL IMPLEMENTED; CONNECTED DELIVERY UNQUALIFIED.** The
+> native-canonical candidate, exact-candidate QC, and compare-and-swap promotion
+> protocol are wired and production-callable in the current tree. That is local
+> mechanism proof, not a representative connected short/long qualification.
+> Editable/hybrid Palmier delivery remains isolated and P5-blocked. The
+> release-safe path is still the approved exact `final.mp4` plus its one-clip
+> flat mirror; see
+> [PALMIER_MIRROR_HANDOFF.md](PALMIER_MIRROR_HANDOFF.md) and
+> [PALMIER_PARITY_CONTRACT.md](PALMIER_PARITY_CONTRACT.md).
 
 **Status:** product authority contract; implementation progress and remaining
-native QC/promotion work are tracked in `PALMIER_CANONICAL_IMPLEMENTATION_STATE.md`.
-Palmier is the primary viewer and canonical editable timeline. Sniper supplies
-reviewed candidate revisions; it may not silently replace a Palmier timeline or
-treat a flattened preview as editable timeline truth.
+connected qualification work are tracked in
+`PALMIER_CANONICAL_IMPLEMENTATION_STATE.md`. Inside a native-candidate
+transaction, Palmier is the primary viewer and canonical editable timeline.
+Sniper supplies reviewed candidate revisions; it may not silently replace a
+Palmier timeline or treat a flattened preview as editable timeline truth.
 
 ## Opening is not ownership
 
@@ -47,6 +56,13 @@ make a complete candidate fork with new ids.
 
 This is compare-and-swap for timelines: the revision is promoted only if the
 baseline it was planned against is still current.
+
+The protocol above can be invoked by production code, but it is not yet a
+release-qualified editable delivery mode. Qualification still requires
+representative connected short and long projects covering complete readback,
+exact candidate export, audio-route authority, failure recovery, manual-edit
+preservation, and promotion. Until then, run it only in an isolated test target
+and use the approved flat mirror for dependable finishing handoff.
 
 ## Fail-closed conditions
 

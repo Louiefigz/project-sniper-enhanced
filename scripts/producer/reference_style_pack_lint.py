@@ -81,6 +81,10 @@ def lint(plan: dict[str, Any], pack: dict[str, Any], reference_id: str) -> dict[
     target = plan.get("target") if isinstance(plan.get("target"), dict) else {}
     if pack.get("schemaVersion") != 1 or pack.get("releaseReady") is not True:
         errors.append("reference style pack is not release-ready schema v1")
+    release_class = pack.get("releaseClass", "reference-inspired")
+    if release_class != "reference-inspired" \
+            or pack.get("verifiedMimicQualified") not in (None, False):
+        errors.append("schema v1 style packs cannot claim verified mimic")
     if pack.get("referenceId") != reference_id:
         errors.append("reference style pack identity does not match the selected reference")
     if target.get("referenceId") != reference_id:
@@ -93,7 +97,8 @@ def lint(plan: dict[str, Any], pack: dict[str, Any], reference_id: str) -> dict[
     errors += _binding_errors(plan.get("punchIns"), windows, "punchIns")
     errors += _variety_error(plan, pack)
     return {"ok": not errors, "errors": errors,
-            "metrics": {"grammarWindows": len(windows),
+            "metrics": {"releaseClass": release_class,
+                        "grammarWindows": len(windows),
                         "boundGraphics": len(plan.get("graphicsTrack") or []),
                         "boundTransitions": len(plan.get("transitions") or []),
                         "boundPunches": len(plan.get("punchIns") or [])}}

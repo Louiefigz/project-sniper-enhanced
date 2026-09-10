@@ -232,52 +232,11 @@ def _allowed(phase: str) -> str:
 
 
 def claude(phase: str) -> dict:
-    state = _read()
-    resume = bool(state.get("sessionStarted"))
-    session = ["--resume", state["sessionId"]] if resume else [
-        "--session-id", state["sessionId"]]
-    args = ["claude", "-p", _prompt(phase), *session, "--model", "sonnet",
-            "--effort", "low", "--output-format", "stream-json", "--verbose",
-            "--settings", str(ROOT / ".claude" / "settings.json"),
-            "--setting-sources", "user", "--include-hook-events",
-            "--mcp-config", MCP_CONFIG, "--strict-mcp-config",
-            "--permission-mode", "dontAsk", "--allowedTools", _allowed(phase)]
-    env = dict(os.environ)
-    env.pop("ANTHROPIC_API_KEY", None)
-    started, names, hooks, result = time.monotonic(), [], [], None
-    process = subprocess.Popen(args, cwd=ROOT, env=env, text=True,
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    assert process.stdout is not None
-    for line in process.stdout:
-        try:
-            event = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        message = event.get("message") if isinstance(event, dict) else None
-        event_type = str(event.get("type") or "")
-        if "hook" in event_type.lower():
-            hooks.append(event)
-            print(json.dumps({"event": "claude_hook", "phase": phase,
-                              "type": event_type,
-                              "hook": event.get("hook_name")}), flush=True)
-        for block in message.get("content", []) if isinstance(message, dict) else []:
-            if isinstance(block, dict) and block.get("type") == "tool_use":
-                names.append(str(block.get("name")))
-                print(json.dumps({"event": "claude_tool", "phase": phase,
-                                  "tool": block.get("name")}), flush=True)
-        if event.get("type") == "result":
-            result = event.get("result")
-    stderr = process.stderr.read() if process.stderr else ""
-    code = process.wait()
-    evidence = {"elapsedS": round(time.monotonic() - started, 3),
-                "exitCode": code, "toolNames": names, "result": result,
-                "hookEventCount": len(hooks), "stderr": stderr[-2000:]}
-    state["sessionStarted"] = True
-    state.setdefault("turns", {})[phase] = evidence
-    _write(state)
-    if code:
-        raise PalmierError(f"Claude {phase} exited {code}: {stderr[-1000:]}")
-    return evidence
+    """Reject mutable user settings/hooks until shared admission is qualified."""
+    raise PalmierError(
+        "Subscription admission not qualified for the legacy desktop Claude "
+        "harness; no provider or session mutation ran. Use an explicitly "
+        "requested Codex subscription-agent review of local evidence instead.")
 
 
 def main() -> None:

@@ -1,17 +1,17 @@
-#!/usr/bin/env python3
 """Durable staged authority for Claude Code Desktop driving Palmier MCP."""
 from __future__ import annotations
-
 import os
 from datetime import datetime, timedelta, timezone
 from typing import Any
-
 from fingerprints import file_sha256
 from palmier.candidate_receipt import load_candidate, save_candidate
+from palmier.desktop_audio_master_guard import require_mastered_stereo_ready
+from palmier.desktop_bound_operations import recover_desktop_operation
 from palmier.desktop_element_types import RecoveryObservation
-from palmier.desktop_elements import recover_bound_operation
+from palmier.desktop_exact_master_contract import require_exact_master_ready
 from palmier.desktop_ledger import refresh_element_ledger
-from palmier.desktop_quality import qc_authority
+from palmier.desktop_operation_snapshot import load_before_snapshot
+from palmier.desktop_quality import export_desktop_candidate, qc_authority, validate_current_desktop_qc
 from palmier.desktop_revision_progress import (initialize_revision_progress,
                                                 record_revision_binding,
                                                 revision_complete)
@@ -27,8 +27,6 @@ REVIEW_CHECKS = {
     "editorial": {"spelling", "wordLock", "graphicVariety",
                   "graphicRelevance", "pacing", "audio"},
 }
-
-
 def _active_project(client: Any) -> dict:
     payload = client.call_json("get_projects", {})
     rows = payload.get("projects") if isinstance(payload, dict) else None
@@ -159,6 +157,8 @@ def _assert_head(client: Any, state: dict) -> Any:
         raise PalmierError("Palmier is not showing the Desktop candidate")
     if found.fingerprint != state["expectedFingerprint"]:
         raise PalmierError("Palmier candidate drifted from the last verified mutation")
+    require_exact_master_ready(state, found.timeline, found.coverage)
+    require_mastered_stereo_ready(state, found.timeline, found.coverage)
     return found
 
 
@@ -220,9 +220,9 @@ def reconcile(client: Any, repo: str, media_ref: str | None = None) -> dict:
         state["pendingOperation"] = None
     else:
         try:
-            recover_bound_operation(RecoveryObservation(
-                state, pending, candidate["timeline"], found.timeline, client,
-                media_ref))
+            recover_desktop_operation(RecoveryObservation(
+                state, pending, load_before_snapshot(state, pending).timeline,
+                found.timeline, client, media_ref, found.coverage))
         except PalmierError:
             state.update({"status": "paused", "updatedAt": now()})
             save_state(repo, state)
@@ -254,13 +254,14 @@ def run_qc(client: Any, repo: str) -> dict:
     if not revision_complete(state):
         raise PalmierError("Desktop Palmier revision still has unverified mutations")
     from palmier.native_qc_audit import run_native_audit
-    from palmier.native_qc_export import export_candidate
-    export = export_candidate(client, state["outDir"], found)
+    export = export_desktop_candidate(client, state, found)
     receipt = {"outDir": state["outDir"], "export": export,
                "authority": qc_authority(state)}
     audit = run_native_audit(state["outDir"], receipt, found)
     state.update({"status": "review-required", "updatedAt": now(),
                   "qc": {"export": export, "audit": audit,
+                         "authority": receipt["authority"],
+                         "audioRouteAuthority": export["audioRouteAuthority"],
                          "reviewContract": {key: sorted(value)
                                             for key, value in REVIEW_CHECKS.items()}}})
     append_journal(state, {"event": "deterministic_qc_passed", "at": now(),
@@ -269,12 +270,12 @@ def run_qc(client: Any, repo: str) -> dict:
 def approve(client: Any, repo: str, reviews_path: str) -> dict:
     """Require composition and editorial reviews bound to the exact export."""
     _path, state = load_pointer(repo)
-    _assert_head(client, state)
+    found = _assert_head(client, state)
     if state.get("status") != "review-required":
         raise PalmierError("Desktop Palmier must pass deterministic QC first")
     reviews = read_record(reviews_path, "reviews")
     rows = reviews.get("reviews") if isinstance(reviews, dict) else None
-    qc = state.get("qc") or {}
+    qc = validate_current_desktop_qc(state, found)
     expected = {"composition", "editorial"}
     valid = reviews.get("schemaVersion") == 1 \
         and isinstance(rows, list) and len(rows) == 2 \

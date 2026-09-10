@@ -10,14 +10,18 @@ from dataclasses import dataclass
 
 from .render_build_manifest_v1_contract import (
     RENDER_BUILD_V1_DIGEST_DOMAIN,
-    RENDER_BUILD_V1_IMPLEMENTATION_PATHS,
     RENDER_BUILD_V1_POLICY,
+)
+from .render_build_manifest_v2_contract import (
+    RENDER_BUILD_V2_DIGEST_DOMAIN,
+    RENDER_BUILD_V2_IMPLEMENTATION_PATHS,
+    RENDER_BUILD_V2_POLICY,
 )
 from .safe_source_files import read_stable_owned_file
 
-BUILD_POLICY = RENDER_BUILD_V1_POLICY
-_IMPLEMENTATION_FILES = RENDER_BUILD_V1_IMPLEMENTATION_PATHS
-_DIGEST_DOMAIN = RENDER_BUILD_V1_DIGEST_DOMAIN
+BUILD_POLICY = RENDER_BUILD_V2_POLICY
+BUILD_SCHEMA_VERSION = 2
+_IMPLEMENTATION_FILES = RENDER_BUILD_V2_IMPLEMENTATION_PATHS
 
 
 @dataclass(frozen=True)
@@ -122,7 +126,7 @@ def render_build_manifest(request: RenderBuildRequest) -> dict:
     ):
         raise RuntimeError("render build closure changed while hashing")
     return {
-        "schemaVersion": 1,
+        "schemaVersion": BUILD_SCHEMA_VERSION,
         "policy": BUILD_POLICY,
         "imageId": request.image_id,
         "userId": request.user_id,
@@ -137,7 +141,20 @@ def render_build_manifest(request: RenderBuildRequest) -> dict:
 
 
 def render_build_manifest_digest(manifest: dict) -> str:
-    """Hash exact canonical build-manifest bytes with a domain separator."""
+    """Hash a declared version; hashing alone does not validate its contents.
+
+    Historical V1 hashing remains reproducible. Current stores/loaders require
+    the closed V2 parser separately and never admit V1 through this dispatcher.
+    """
+    if type(manifest) is not dict or type(manifest.get("schemaVersion")) is not int:
+        raise RuntimeError("render build digest version is invalid")
+    versions = {
+        (1, RENDER_BUILD_V1_POLICY): RENDER_BUILD_V1_DIGEST_DOMAIN,
+        (2, RENDER_BUILD_V2_POLICY): RENDER_BUILD_V2_DIGEST_DOMAIN,
+    }
+    domain = versions.get((manifest["schemaVersion"], manifest.get("policy")))
+    if domain is None:
+        raise RuntimeError("render build digest version is unsupported")
     encoded = json.dumps(
         manifest,
         ensure_ascii=True,
@@ -145,7 +162,7 @@ def render_build_manifest_digest(manifest: dict) -> str:
         sort_keys=True,
         allow_nan=False,
     ).encode("ascii")
-    return hashlib.sha256(_DIGEST_DOMAIN + encoded).hexdigest()
+    return hashlib.sha256(domain + encoded).hexdigest()
 
 
 def render_build_manifests_equal(first: dict, second: dict) -> bool:

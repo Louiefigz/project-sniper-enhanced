@@ -14,6 +14,7 @@ import { readProjectJson } from "../../_lib/workspace";
 import { captureAutoEditDoctrine } from "@/lib/server/auto-edit-doctrine";
 import { captureAutoEditPipeline } from "@/lib/server/auto-edit-pipeline-authority";
 import { atomicWriteJsonSync } from "@/lib/server/atomic-file";
+import { canonicalJsonSha256 } from "@/lib/server/auto-edit-hash";
 import { PALMIER_CANDIDATE_FILE } from "@/lib/server/palmier-candidate-qc";
 
 export interface PalmierNativeQcAuthority {
@@ -105,16 +106,8 @@ export function capturePalmierNativeQcAuthority(
   };
 }
 
-function stableValue(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (!value || typeof value !== "object") return value;
-  return Object.fromEntries(Object.entries(value as Record<string, unknown>)
-    .sort(([left], [right]) => left.localeCompare(right))
-    .map(([key, item]) => [key, stableValue(item)]));
-}
-
-function hashJson(value: unknown): string {
-  return createHash("sha256").update(JSON.stringify(stableValue(value))).digest("hex");
+export function palmierNativePlanHash(value: unknown): string {
+  return canonicalJsonSha256(value);
 }
 
 function hashText(value: string): string {
@@ -165,7 +158,7 @@ export function finalizePalmierNativeQcAuthority(
       requestTextHash,
       lanes: [...input.scope.lanes],
       parent: expectedParent,
-      nativePlanHash: hashJson(nativePlan),
+      nativePlanHash: palmierNativePlanHash(nativePlan),
     },
     ctx: capture.ctx,
   };

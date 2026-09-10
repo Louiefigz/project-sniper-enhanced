@@ -9,10 +9,6 @@ import {
 } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
-import { claudeArgs } from "../../../app/api/producer/auto-edit/authoring";
-import { claudeCutAuthoringBashPatterns } from
-  "../../../app/api/producer/auto-edit/cut-authoring-prompt";
 import type { AutoEditCtx } from "../../../app/api/producer/auto-edit/stream";
 import { autoEditAuthoritySnapshot } from "../../server/auto-edit-authority-snapshot";
 import {
@@ -24,8 +20,15 @@ import { autoEditRequestKey } from "../../server/auto-edit-hash";
 import {
   captureAutoEditPipeline,
   prepareAutoEditRunContext,
-  restoreAutoEditPipeline,
 } from "../../server/auto-edit-pipeline-authority";
+import {
+  assertInputFreshness,
+  assertPinnedCutPermissions,
+  assertPinnedPythonResolver,
+  assertPinnedRuntimeAssets,
+  assertPinnedTemplateResolver,
+  assertSnapshotTamper,
+} from "./_auto-edit-authority-cross-language-assertions";
 
 interface Fixture {
   repo: string;
@@ -39,6 +42,13 @@ interface Golden {
   requestKey: string;
   snapshot: ReturnType<typeof autoEditAuthoritySnapshot>;
 }
+
+const MODEL_PATH = "scripts/producer/audio/models/bd.rnnn";
+const PRELOAD_PATH = "scripts/producer/headless/node_isolated_user.cjs";
+const REGISTRY_PATH =
+  "docs/producer/command-driven-editing/contracts/render-effect-registry-v1.json";
+const REGISTRY_SCHEMA_PATH =
+  "schemas/producer/render-effect-registry-v1.schema.json";
 
 function write(root: string, relative: string, content: string | Buffer): string {
   const destination = path.join(root, relative);
@@ -58,18 +68,43 @@ function doctrineFiles(repo: string): void {
 function pipelineFiles(repo: string): string {
   const probe = write(repo, "scripts/producer/probe.py", "print('PINNED-PIPELINE')\n");
   write(repo, "scripts/producer/producer_config.py", "# deterministic café config\n");
+  for (const relative of [
+    "scripts/producer/render_effect_registry.py",
+    "scripts/producer/contracts/__init__.py",
+    "scripts/producer/contracts/schema_validator.py",
+  ]) write(repo, relative, readFileSync(path.join(process.cwd(), relative)));
   const modelPath = path.join(process.cwd(), "scripts/producer/audio/models/bd.rnnn");
   write(repo, "scripts/producer/audio/models/bd.rnnn", readFileSync(modelPath));
   write(repo, "scripts/producer/audio/models/not-allowlisted.rnnn", "do not capture\n");
+  write(repo, PRELOAD_PATH, readFileSync(path.join(process.cwd(), PRELOAD_PATH)));
+  write(repo, REGISTRY_PATH, readFileSync(path.join(process.cwd(), REGISTRY_PATH)));
+  write(repo, REGISTRY_SCHEMA_PATH,
+    readFileSync(path.join(process.cwd(), REGISTRY_SCHEMA_PATH)));
   write(repo, "templates/motion/tokens.css", ":root { --accent: #abcdef; }\n");
+  write(repo, "templates/motion/hyperframes.json", "{}\n");
+  write(repo, "templates/motion/index.html", "<main></main>\n");
+  write(repo, "templates/motion/motion-tokens.js", "export const motion = {};\n");
+  write(repo, "templates/motion/package.json", "{\"name\":\"motion\"}\n");
+  write(repo, "templates/motion/vendor/gsap/gsap.min.js", "globalThis.gsap={};\n");
+  write(repo, "templates/motion/compositions/card.html", "<main>card</main>\n");
+  write(repo, "assets/fonts/test.ttf", "font");
+  write(repo, "assets/models/test.onnx", "model");
+  write(repo, "assets/music/test.mp3", "music");
+  write(repo, "assets/sfx/test.wav", "sfx");
   write(repo, "src/app/api/producer/auto-edit/example.ts", "export const value = 1;\n");
   write(repo, "src/app/api/producer/ai-edit/native.ts", "export const native = 1;\n");
+  write(repo, "src/app/api/producer/live-build/live.ts", "export const live = 1;\n");
   write(repo, "src/app/api/producer/palmier/qc.ts", "export const qc = 1;\n");
   write(repo, "src/app/api/_lib/audit-gate.ts", "export const audit = true;\n");
+  for (const name of ["files", "evidence", "model"]) write(repo, `src/app/api/producer/studio/import/${name}.ts`, "// TEST captured import dependency\n");
+  write(repo, "src/lib/debug.ts", "// TEST captured debug dependency\n");
+  write(repo, "src/lib/producer/edit-plan.ts", "export const plan = 1;\n");
   write(repo, "src/lib/server/auto-edit-authority.ts", "export const authority = 1;\n");
   write(repo, "src/lib/server/auto-edit-quality-artifacts.ts", "export const quality = 1;\n");
   write(repo, "package.json", "{\"name\":\"golden\"}\n");
   write(repo, "package-lock.json", "{\"lockfileVersion\":3}\n");
+  write(repo, "tsconfig.json", "{\"compilerOptions\":{\"strict\":true}}\n");
+  write(repo, "next.config.ts", "export default {}; // TEST captured build configuration\n");
   return probe;
 }
 
@@ -141,97 +176,43 @@ function fixedRequestContext(ctx: AutoEditCtx): AutoEditCtx {
   };
 }
 
-function assertInputFreshness(fix: Fixture, ctx: AutoEditCtx, initial: string): void {
-  const plan = readFileSync(ctx.planPath, "utf8");
-  writeFileSync(ctx.planPath, "{\"planVersion\":2,\"cutTrack\":[{\"sourceId\":\"clip\",\"in\":0,\"out\":1}]}\n");
-  assert.notEqual(autoEditAuthoritySnapshot(ctx).digest, initial);
-  writeFileSync(ctx.planPath, plan);
-  const manifest = readFileSync(ctx.manifestPath, "utf8");
-  writeFileSync(ctx.manifestPath, manifest.replace("media", "changed-media"));
-  assert.notEqual(autoEditAuthoritySnapshot(ctx).digest, initial);
-  writeFileSync(ctx.manifestPath, manifest);
-  writeFileSync(fix.transcript, "{\"transcript\":[{\"text\":\"changed\"}]}\n");
-  assert.notEqual(autoEditAuthoritySnapshot(ctx).digest, initial);
-  writeFileSync(fix.transcript, "{\"transcript\":[{\"text\":\"héllo 🎬\"}]}\n");
-  writeFileSync(fix.frame, "changed-frame");
-  assert.notEqual(autoEditAuthoritySnapshot(ctx).digest, initial);
-  writeFileSync(fix.frame, "golden-frame");
-  const projectPath = path.join(path.dirname(ctx.dir), "project.json");
-  const project = JSON.parse(readFileSync(projectPath, "utf8"));
-  writeFileSync(projectPath, JSON.stringify({ ...project, intent: { ...project.intent, brief: "changed" } }));
-  assert.notEqual(autoEditAuthoritySnapshot(ctx).digest, initial);
-  writeFileSync(projectPath, JSON.stringify(project));
-  assert.notEqual(autoEditAuthoritySnapshot({
-    ...ctx, intent: { ...ctx.intent!, brief: "changed requested intent" },
-  }).digest, initial);
-  assert.equal(autoEditAuthoritySnapshot(ctx).digest, initial);
-}
-
-function assertSnapshotTamper(ctx: AutoEditCtx): void {
-  const pipeline = ctx.pipeline!;
-  const first = pipeline.files[0];
-  const copy = path.join(pipeline.snapshotRoot, ...first.path.split("/"));
-  const bytes = readFileSync(copy);
-  writeFileSync(copy, "tampered");
-  assert.throws(() => restoreAutoEditPipeline(pipeline), /copy was changed/);
-  writeFileSync(copy, bytes);
-  const lock = readFileSync(pipeline.lockPath);
-  const value = JSON.parse(lock.toString("utf8"));
-  value.digest = "0".repeat(64);
-  writeFileSync(pipeline.lockPath, JSON.stringify(value));
-  assert.throws(() => restoreAutoEditPipeline(pipeline), /does not match/);
-  writeFileSync(pipeline.lockPath, lock);
-}
-
-function assertPinnedPythonResolver(ctx: AutoEditCtx): void {
-  const moduleUrl = pathToFileURL(path.join(
-    process.cwd(), "src", "app", "api", "_lib", "spawn-python.ts",
-  )).href;
-  const code = `import helper from ${JSON.stringify(moduleUrl)}; console.log(helper.SCRIPTS_DIR);`;
-  const result = spawnSync(process.execPath, ["--import", "tsx", "--input-type=module", "-e", code], {
-    encoding: "utf8",
-    env: { ...process.env, SNIPER_PIPELINE_ROOT: ctx.pipeline!.snapshotRoot },
-  });
-  if (result.status !== 0) throw new Error(result.stderr || result.stdout);
-  assert.equal(result.stdout.trim(), path.join(ctx.pipeline!.snapshotRoot, "scripts"));
-}
-
-function assertPinnedTemplateResolver(ctx: AutoEditCtx): void {
-  const runtime = "/runtime/repository";
-  const result = spawnSync(path.join(process.cwd(), ".venv", "bin", "python3"), [
-    "-c",
-    "from graphics.graphics_render import MOTION_DIR, RUNTIME_ROOT; print(MOTION_DIR); print(RUNTIME_ROOT)",
-  ], {
-    encoding: "utf8",
-    env: {
-      ...process.env,
-      PYTHONPATH: path.join(process.cwd(), "scripts", "producer"),
-      SNIPER_PIPELINE_ROOT: ctx.pipeline!.snapshotRoot,
-      SNIPER_RUNTIME_REPO_ROOT: runtime,
-    },
-  });
-  if (result.status !== 0) throw new Error(result.stderr || result.stdout);
-  assert.deepEqual(result.stdout.trim().split("\n"), [
-    path.join(ctx.pipeline!.snapshotRoot, "templates", "motion"), runtime,
-  ]);
-}
-
-function cutAllowedTools(ctx: AutoEditCtx): string {
-  const args = claudeArgs(ctx, "cut");
-  return args[args.indexOf("--allowedTools") + 1];
-}
-
-function assertPinnedCutPermissions(initial: AutoEditCtx, resumed: AutoEditCtx): void {
-  const initialCommands = claudeCutAuthoringBashPatterns(initial);
-  const resumedCommands = claudeCutAuthoringBashPatterns(resumed);
-  assert.deepEqual(resumedCommands, initialCommands,
-    "resume must preserve the exact immutable command spellings");
-  assert.equal(cutAllowedTools(resumed), cutAllowedTools(initial));
-  for (const command of resumedCommands) {
-    assert.ok(command.includes(resumed.pipeline!.snapshotRoot));
-    assert.equal(command.includes(`${process.cwd()}/scripts/producer/`), false,
-      "authoring must never fall back to mutable Producer scripts");
-  }
+function assertAuthorityParity(fix: Fixture, ctx: AutoEditCtx): Golden {
+  assert.ok(ctx.pipeline?.files.some((row) => row.path === MODEL_PATH));
+  assert.ok(ctx.pipeline?.files.some((row) => row.path === PRELOAD_PATH));
+  assert.ok(ctx.pipeline?.files.some((row) => row.path === REGISTRY_PATH));
+  assert.ok(ctx.pipeline?.files.some((row) => row.path === REGISTRY_SCHEMA_PATH));
+  assert.ok(ctx.pipeline?.files.some((row) => row.path === "tsconfig.json"));
+  assert.ok(ctx.pipeline?.files.some((row) => row.path === "next.config.ts"));
+  assert.ok(!ctx.pipeline?.files.some(
+    (row) => row.path.endsWith("not-allowlisted.rnnn")));
+  assert.deepEqual(readFileSync(path.join(
+    ctx.pipeline!.snapshotRoot, ...MODEL_PATH.split("/"))),
+  readFileSync(path.join(process.cwd(), ...MODEL_PATH.split("/"))));
+  const requestCtx = fixedRequestContext(ctx);
+  assert.equal(autoEditRequestKey({ ...requestCtx,
+    brainSessionId: "runtime-only", brainSessionEstablished: true }),
+  autoEditRequestKey(requestCtx));
+  const defaultRequest = { ...requestCtx,
+    deliveryPolicy: "palmier-hybrid" as const };
+  assert.equal(pythonResult(ctx, defaultRequest).requestKey,
+    autoEditRequestKey(requestCtx));
+  const ts = {
+    snapshot: autoEditAuthoritySnapshot(ctx),
+    requestKey: autoEditRequestKey(requestCtx),
+  };
+  assert.deepEqual(
+    pythonResult(ctx, requestCtx), ts,
+    "TypeScript and Python must produce the same complete authority");
+  const legacy = { ...ctx, doctrine: undefined, pipeline: undefined };
+  assert.deepEqual(
+    pythonResult(legacy, fixedRequestContext(legacy)).snapshot,
+    autoEditAuthoritySnapshot(legacy),
+    "legacy managed markers must use the same completely sorted row contract",
+  );
+  const golden = JSON.parse(readFileSync(path.join(
+    __dirname, "fixtures", "auto-edit-authority-golden.json"), "utf8")) as Golden;
+  assert.deepEqual(ts, golden);
+  return ts;
 }
 
 function main(): void {
@@ -239,26 +220,7 @@ function main(): void {
   try {
     const fix = fixture(root);
     const ctx = pinned(fix, "golden-run");
-    const modelPath = "scripts/producer/audio/models/bd.rnnn";
-    assert.ok(ctx.pipeline?.files.some((row) => row.path === modelPath));
-    assert.ok(!ctx.pipeline?.files.some((row) => row.path.endsWith("not-allowlisted.rnnn")));
-    assert.deepEqual(readFileSync(path.join(ctx.pipeline!.snapshotRoot, ...modelPath.split("/"))),
-      readFileSync(path.join(process.cwd(), ...modelPath.split("/"))));
-    const requestCtx = fixedRequestContext(ctx);
-    assert.equal(autoEditRequestKey({ ...requestCtx,
-      brainSessionId: "runtime-only", brainSessionEstablished: true }),
-    autoEditRequestKey(requestCtx));
-    const ts = { snapshot: autoEditAuthoritySnapshot(ctx), requestKey: autoEditRequestKey(requestCtx) };
-    const py = pythonResult(ctx, requestCtx);
-    assert.deepEqual(py, ts, "TypeScript and Python must produce the same complete authority");
-    const legacy = { ...ctx, doctrine: undefined, pipeline: undefined };
-    assert.deepEqual(
-      pythonResult(legacy, fixedRequestContext(legacy)).snapshot,
-      autoEditAuthoritySnapshot(legacy),
-      "legacy managed markers must use the same completely sorted row contract",
-    );
-    const golden = JSON.parse(readFileSync(path.join(__dirname, "fixtures", "auto-edit-authority-golden.json"), "utf8")) as Golden;
-    assert.deepEqual(ts, golden);
+    const ts = assertAuthorityParity(fix, ctx);
     const sourceDigest = ts.snapshot.pipelineDigest;
     writeFileSync(fix.probe, "print('LIVE-CHANGED')\n");
     assert.equal(autoEditAuthoritySnapshot(ctx).pipelineDigest, sourceDigest);
@@ -268,9 +230,10 @@ function main(): void {
     assert.equal(execution.stdout.trim(), "PINNED-PIPELINE");
     assertPinnedPythonResolver(ctx);
     assertPinnedTemplateResolver(ctx);
+    assertPinnedRuntimeAssets(ctx);
     const next = pinned(fix, "next-run");
     assert.notEqual(next.pipeline?.digest, ctx.pipeline?.digest);
-    const sourceModel = path.join(fix.repo, ...modelPath.split("/"));
+    const sourceModel = path.join(fix.repo, ...MODEL_PATH.split("/"));
     const modelBytes = readFileSync(sourceModel);
     writeFileSync(sourceModel, "tampered model");
     assert.throws(

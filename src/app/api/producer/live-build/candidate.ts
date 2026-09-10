@@ -48,17 +48,36 @@ export function prepareLiveBuildCandidate(
   input: LiveBuildPreflight,
   resume: boolean,
   signal?: AbortSignal,
+  expectedFingerprint?: string,
 ): Promise<{ candidate: TimelineIdentity; parent: TimelineIdentity }> {
   const action = resume
-    ? [input.dir, "--resume"]
+    ? [
+      input.dir,
+      "--resume",
+      ...(expectedFingerprint
+        ? ["--expected-candidate-fingerprint", expectedFingerprint] : []),
+    ]
     : [input.dir, "--fork", `Sniper live build · ${new Date().toISOString().slice(11, 19)}`];
   return run(input, action, signal);
+}
+
+export function observeLiveBuildCandidate(
+  input: LiveBuildPreflight,
+  signal?: AbortSignal,
+): Promise<{ candidate: TimelineIdentity; parent: TimelineIdentity }> {
+  return run(input, [input.dir, "--observe"], signal);
 }
 
 export function checkpointLiveBuildCandidate(
   input: LiveBuildPreflight,
   authorityPath: string,
   signal?: AbortSignal,
+  expectedFingerprint?: string,
 ): Promise<{ candidate: TimelineIdentity; parent: TimelineIdentity }> {
-  return run(input, [input.dir, "--checkpoint", authorityPath], signal);
+  return run(input, [
+    input.dir,
+    "--checkpoint", authorityPath,
+    ...(expectedFingerprint
+      ? ["--expected-candidate-fingerprint", expectedFingerprint] : []),
+  ], signal);
 }

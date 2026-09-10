@@ -8,6 +8,7 @@ const COMMANDS = [
   "clip",
   "produce",
   "produce-palmier",
+  "produce-studio",
   "producer-study",
   "reference-edit",
   "segment",

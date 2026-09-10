@@ -10,11 +10,11 @@ import { localWhisperPreflight } from "../_lib/local-whisper-preflight";
 
 export const dynamic = "force-dynamic";
 
-export function GET() {
+export async function GET(request: Request) {
   const mode = executionMode();
   const provider = brainProvider();
   const codex = provider === "codex" ? codexSettings() : null;
-  const preflight = codex ? codexPreflight() : null;
+  const preflight = codex ? await codexPreflight(request.signal) : null;
   const transcription = process.env.SNIPER_TRANSCRIBE_PROVIDER ||
     (mode === "local" ? "local-whisper" : "deepgram");
   const whisper = transcription === "local-whisper" ? localWhisperPreflight() : null;

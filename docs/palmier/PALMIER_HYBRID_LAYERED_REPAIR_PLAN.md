@@ -1,13 +1,22 @@
 # Palmier hybrid layered repair plan
 
+> **STATUS: ISOLATED EXPERIMENT / P5-BLOCKED.** The local mechanisms below are
+> implemented or contract-tested, including scoped element replacement and a
+> synthetic 14-minute exercise. They do not qualify a connected editable
+> Palmier product. The dependable delivery is the approved exact `final.mp4`
+> and its one-clip flat mirror. Representative connected short/long proof and a
+> 30–60 minute endurance run remain open.
+
 ## Decision
 
-Use two coordinated products from the same gated `edit_plan.json`:
+The experimental design produces two coordinated artifacts from the same gated
+`edit_plan.json`:
 
-1. **Editable Build** — persistent Palmier source/cut clips plus deterministic
-   rendered graphic overlays. This is the iteration surface.
-2. **QC Master** — one flattened, fully audited publishing file produced only
-   after an operator-approved batch of changes.
+1. **Editable Build (experimental)** — persistent Palmier source/cut clips plus
+   deterministic rendered graphic overlays. Use only in an isolated target
+   until P5 connected qualification passes.
+2. **QC Master (release-safe)** — one flattened, fully audited publishing file
+   produced only after an operator-approved batch of changes.
 
 The renderer owns card pixels. Palmier owns card timing/stacking. The element
 ledger connects the two.
@@ -26,7 +35,7 @@ ledger connects the two.
 
 ## Delivery phases
 
-### Phase 1 — card copy/style repair (implemented)
+### Phase 1 — card copy/style repair (local mechanism implemented)
 
 - Record graphic id → clip id/media ref/hash/window/track after native placement.
 - Refresh the current track from the stable clip id immediately before repair;
@@ -41,7 +50,7 @@ ledger connects the two.
 - Recover interrupted mutation receipts from exact readback.
 - Reject timing, kind, anchor, cut, motion, and lane changes.
 
-### Phase 2 — graphic timeline deltas (implemented, bounded)
+### Phase 2 — graphic timeline deltas (local mechanism implemented, bounded)
 
 - Add/remove cards with stable ids and versioned ledger bindings.
 - Move same-duration cards without opening the renderer; duration changes render
@@ -66,9 +75,10 @@ ledger connects the two.
   as a broader rebuild. Native ripple mutation remains disabled until a live
   long-form proof verifies caption, transition, keyframe, and audio handles.
 
-### Phase 4 — long-form endurance and parity (offline proof shipped)
+### Phase 4 — long-form endurance and parity (local mechanism proof only)
 
-- Run a 30–60 minute editable build with at least 50 graphic elements.
+- Run a connected 30–60 minute editable build with at least 50 graphic
+  elements.
 - Modify one early, middle, and late card independently.
 - Prove each repair invokes one graphic render and no base render/composite.
 - Stop after import and after placement; resume without replay.
@@ -76,9 +86,11 @@ ledger connects the two.
   fixed frame/fps/color/audio tolerances.
 - Render and audit the full QC Master once after the repair batch.
 
-The deterministic suite now exercises a synthetic 14-minute plan with 50
-graphics and verifies that six early/middle/late changes touch only those six
-stable ids. A live 30–60 minute Palmier endurance run is still required.
+The deterministic suite exercises a synthetic 14-minute plan with 50 graphics
+and verifies scoped stable-id repair while unrelated units are reused. This is
+a local mechanism proof, not a connected Palmier build and not a 30–60 minute
+endurance result. The connected endurance run and representative short/long
+qualification are still required.
 
 ## Edit routing
 
@@ -98,7 +110,8 @@ stable ids. A live 30–60 minute Palmier endurance run is still required.
 
 ## Definition of done
 
-A two-word change on a long timeline must:
+Before editable/hybrid delivery can leave isolation, a two-word change on a
+long timeline must:
 
 - leave the source/base fingerprint unchanged;
 - resolve exactly one graphic asset (one render on a miss, one cache hit on a hit);

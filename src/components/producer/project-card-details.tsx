@@ -8,6 +8,7 @@ import { eventTimestamp, plainRunFailureMessage } from "@/lib/producer/run-statu
 import type { IntentCapabilityDecision } from "@/lib/producer/intent-capabilities";
 import { ingestInto, type IngestedPayload } from "./stage-actions";
 import StageStrip from "./stage-strip";
+import ProjectTimingDetails from "./project-timing-details";
 import type { ProjectStatus } from "./use-project-status";
 
 function PlanRefitReceipt({ status }: { status: ProjectStatus }) {
@@ -68,6 +69,7 @@ export function ProjectDetails({ status }: { status: ProjectStatus }) {
       ))}
       <p className="mt-1 truncate font-mono text-[10px]" title={status.producerDir}>{status.producerDir}</p>
       <PlanRefitReceipt status={status} />
+      <ProjectTimingDetails report={status.timing} />
       {status.run?.events.length ? (
         <details className="mt-2 border-t border-border/60 pt-2 text-[10px]">
           <summary className="cursor-pointer text-muted-foreground">

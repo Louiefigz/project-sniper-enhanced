@@ -13,6 +13,8 @@ delivery pixels; multiplying that offset would silently double-scale it.
 
 from __future__ import annotations
 
+import math
+
 from planner.graphics_anchors import FACE_ANCHORS, _clip_dims, _content_bbox
 
 
@@ -27,6 +29,29 @@ def _scaled_dims(values: list, sx: float, sy: float) -> list[int]:
     """Scale video dimensions and retain ffmpeg's mod-2 requirement."""
     return [max(2, int(round(float(values[0]) * sx / 2.0)) * 2),
             max(2, int(round(float(values[1]) * sy / 2.0)) * 2)]
+
+
+def _pixel_pair(value: object) -> tuple[int, int] | None:
+    """Validate an internal width/height metadata pair."""
+    if not isinstance(value, (list, tuple)) or len(value) != 2:
+        return None
+    if any(isinstance(item, bool) or not isinstance(item, (int, float))
+           or not math.isfinite(float(item)) or float(item) <= 0
+           for item in value):
+        return None
+    return int(value[0]), int(value[1])
+
+
+def _delivery_resolved(meta: dict, authored: tuple,
+                       delivery: tuple) -> bool:
+    """Whether automatic placement is proven to use delivery coordinates."""
+    if _pixel_pair(meta.get("canvas")) != delivery:
+        return False
+    if _pixel_pair(meta.get("authoredCanvas")) != authored:
+        return False
+    scaled = _pixel_pair(meta.get("scaledDims"))
+    return scaled is not None and scaled[0] <= delivery[0] \
+        and scaled[1] <= delivery[1]
 
 
 def own_screen_meta(comp_dims: tuple, video_dims: tuple) -> tuple:
@@ -74,13 +99,21 @@ def fit_delivery_geometry(mov_path: str, offset: tuple[int, int], meta: dict,
     authored = _clip_dims(mov_path)
     if authored == delivery:
         return offset[0], offset[1], meta
-    if abs(authored[0] / authored[1] - delivery[0] / delivery[1]) > 0.002:
-        return offset[0], offset[1], meta
-    if meta.get("anchor") in FACE_ANCHORS \
-            and meta.get("region") != "explicit-placement":
+    automatic_face = (
+        (meta.get("anchor") in FACE_ANCHORS or meta.get("faceAware"))
+        and meta.get("region") != "explicit-placement"
+    )
+    if automatic_face and _delivery_resolved(meta, authored, delivery):
+        result = dict(meta)
+        result["canvasScale"] = [
+            delivery[0] / authored[0], delivery[1] / authored[1]]
+        return offset[0], offset[1], result
+    if automatic_face:
         raise ValueError(
             "face-relative overlay canvas differs from delivery; placement must "
             "be resolved with a delivery-sized footprint")
+    if abs(authored[0] / authored[1] - delivery[0] / delivery[1]) > 0.002:
+        return offset[0], offset[1], meta
     sx, sy = delivery[0] / authored[0], delivery[1] / authored[1]
     result = dict(meta)
     result.update(authoredCanvas=list(authored), canvas=list(delivery),

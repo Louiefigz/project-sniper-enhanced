@@ -50,27 +50,37 @@ missing/stale → full `render.py --skip-graphics` rebuild (manifest from
 """
 from __future__ import annotations
 
-import argparse
 import json
 import os
 import subprocess
 import sys
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from graphics.owned_execution import OwnedGraphicsExecution
 
 from assemble_lock import acquire_lock
+from cut_delivery_authority import (
+    DELIVERY_NAME, seal_assembled_delivery, seal_render_delivery,
+)
+from cut_manifestation_authority import MANIFESTATION_NAME
 from fingerprints import (_NON_BASE_KEYS, audio_fingerprint,  # noqa: F401 — re-exported
-                          base_fingerprint, graphics_fingerprint,
+                          base_fingerprint, caption_fingerprint,
+                          graphics_fingerprint,
                           recorded_fingerprints,
                           invalidate_assembled_sidecar, video_fingerprint,
                           write_assembled_sidecar)
-from edit.refit_authority import (commit_pending, make_receipt,
+from edit.refit_authority import (make_receipt,
                                   resolve_refit_source, stage_receipt)
 from graphics.composite_smoothness import (
     YDIF_DUP_FAIL as _YDIF_DUP_FAIL,
     duplicate_ratio as _dup_ratio,
     read_inline_ydif as _read_inline_ydif,
 )
+from ingest_execution_authority import verify_execution_media_authority
 from preview_proxy import write_proxy
+from render_effect_registry import validate_render_documents
 from stage_timing import span_for_base
 from template_usage_approval import (approval_required as template_approval_required,
                                      require_current as require_template_usage_approval)
@@ -146,7 +156,8 @@ def _check_staleness(plan: dict, fingerprint_path: str | None) -> None:
                      "rendered — re-run `render.py --skip-graphics` before assembling")
 
 
-def _base_state(base: str, plan: dict, fingerprint_path: str | None) -> str:
+def _base_state(base: str, plan: dict, fingerprint_path: str | None,
+                audio_clock_policy: str = "legacy-v1") -> str:
     """'current' | 'audio_stale' | 'stale' | 'missing' | 'unverifiable'.
 
     audio_stale = the VIDEO fingerprint still matches but the audio bus fields
@@ -159,12 +170,37 @@ def _base_state(base: str, plan: dict, fingerprint_path: str | None) -> str:
     if not fingerprint_path or not os.path.exists(fingerprint_path):
         return "unverifiable"
     rec = recorded_fingerprints(fingerprint_path)
+    from audio.master import MASTERING_POLICY_VERSION
+    if type(rec.get("masteringPolicyVersion")) is not int \
+            or rec["masteringPolicyVersion"] != MASTERING_POLICY_VERSION:
+        return "stale"
+    if rec.get("audioClockPolicy", "legacy-v1") != audio_clock_policy:
+        return "stale"
     if rec.get("fingerprint") == base_fingerprint(plan):
+        return "current"
+    if audio_clock_policy == "source-float-v2" and _finishing_invariant_current(plan, fingerprint_path):
         return "current"
     if rec.get("videoFingerprint") and \
             rec["videoFingerprint"] == video_fingerprint(plan):
         return "audio_stale"
     return "stale"
+
+
+def _finishing_invariant_current(plan: dict, fingerprint_path: str) -> bool:
+    """source-float-v2: finishing lives in the program master, never in the base.
+
+    ``audioEnhance``/``audioGain`` and ``transitions[].sfx`` shape neither the v2
+    base picture nor its retained raw dialogue bus, so a finishing-only edit keeps
+    the base current and assemble rebuilds only the program master. The retained
+    base_plan.json is the exact plan the base was rendered from.
+    """
+    from audio.program_finish_contract import finishing_free_plan
+    snapshot = os.path.join(os.path.dirname(fingerprint_path), "base_plan.json")
+    if not os.path.exists(snapshot):
+        return False
+    with open(snapshot) as handle:
+        recorded = json.load(handle)
+    return base_fingerprint(finishing_free_plan(recorded)) == base_fingerprint(finishing_free_plan(plan))
 
 
 def _refit_for_rebuild(plan_path: str, plan: dict,
@@ -267,14 +303,23 @@ def _audio_only_rebuild(base: str, plan: dict, fingerprint_path: str) -> bool:
     work = os.path.join(os.path.dirname(os.path.abspath(base)), "base_work")
     new_base, steps = rebuild_audio_bus(base, plan, work)
     commit_audio_base(base, new_base, plan, fingerprint_path)
+    directory = os.path.dirname(os.path.abspath(base))
+    if os.path.exists(os.path.join(directory, MANIFESTATION_NAME)):
+        seal_render_delivery(directory, base, plan, True)
     emit(status="audio_bus_rebuilt", path=base, **steps)
     return True
 
 
-def _render_sidecars(base_dir: str, out_dir: str) -> list[tuple[str, str]]:
+def _render_sidecars(base_dir: str, out_dir: str,
+                     audio_clock_policy: str = "legacy-v1") -> list[tuple[str, str]]:
     """Validate and return the base render's required QC authority files."""
     required = ("timeline_map.json", "cover.png", "render_report.json")
-    optional = ("captions.srt", "chapters.txt")
+    if audio_clock_policy == "source-float-v2":
+        from audio.render_audio_cache import SOURCE_BUS_POINTER
+        required += (SOURCE_BUS_POINTER,)
+    optional = (
+        "captions.srt", "chapters.txt", MANIFESTATION_NAME, DELIVERY_NAME,
+    )
     missing = [name for name in required
                if not os.path.isfile(os.path.join(base_dir, name))]
     if missing:
@@ -284,9 +329,17 @@ def _render_sidecars(base_dir: str, out_dir: str) -> list[tuple[str, str]]:
     return [(os.path.join(base_dir, name), os.path.join(out_dir, name)) for name in names]
 
 
+@dataclass(frozen=True)
+class BaseManifest:
+    """Explicit opt-in policy with the existing manifest argument/legacy API."""
+
+    path: str | None
+    audio_clock_policy: str = "legacy-v1"
+
+
 def ensure_base(base: str, plan_path: str, plan: dict,
                 fingerprint_path: str | None,
-                manifest: str | None) -> tuple[dict, str]:
+                manifest: str | BaseManifest | None) -> tuple[dict, str]:
     """Smart re-render dispatch: rebuild (only) what the plan outgrew.
 
     current → reuse; audio-only mismatch → audio bus rebuild (seconds);
@@ -297,18 +350,20 @@ def ensure_base(base: str, plan_path: str, plan: dict,
     resolved state) — state 'audio_only' lets assemble() skip a fresh
     composite when the existing one is provably current.
     """
-    _settle_audio_intent(base, fingerprint_path)
-    state = _base_state(base, plan, fingerprint_path)
+    options = manifest if isinstance(manifest, BaseManifest) else BaseManifest(manifest)
+    manifest = options.path
+    if options.audio_clock_policy == "legacy-v1":
+        _settle_audio_intent(base, fingerprint_path)
+    state = _base_state(base, plan, fingerprint_path, options.audio_clock_policy)
     if state == "current":
         emit(status="base_current", path=base)
         return plan, state
     if state == "unverifiable":
-        # A pre-fingerprint base: can't prove staleness, don't block the editor.
         emit(status="base_unverifiable", path=base,
-             warning="no base.fingerprint.json — assembling onto the existing "
-                     "base; re-render the base once to enable smart dispatch")
-        return plan, state
-    if state == "audio_stale" and fingerprint_path:
+             warning="no base.fingerprint.json — rebuilding; existing audio "
+                     "has no current mastering-policy proof")
+        state = "stale"
+    if state == "audio_stale" and fingerprint_path and options.audio_clock_policy == "legacy-v1":
         if _audio_only_rebuild(base, plan, fingerprint_path):
             return plan, "audio_only"
         state = "stale"   # fell back loudly — full rebuild below
@@ -319,40 +374,9 @@ def ensure_base(base: str, plan_path: str, plan: dict,
         raise RuntimeError(
             "base is missing/stale and no manifest is known — pass --manifest "
             "or re-render the base once so base.fingerprint.json records it")
-    staged = None
-    if state == "stale" and fingerprint_path:
-        plan, staged = _refit_for_rebuild(plan_path, plan, fingerprint_path)
-    base_dir = os.path.join(os.path.dirname(os.path.abspath(base)), "base_work")
-    os.makedirs(base_dir, exist_ok=True)
-    emit(status="base_rebuild_start", manifest=manifest,
-         note="timeline/audio fields changed — rebuilding the graphics-free base")
-    render_py = os.path.join(os.path.dirname(os.path.abspath(__file__)), "render.py")
-    proc = subprocess.Popen(
-        [sys.executable, render_py, staged or plan_path, manifest, base_dir,
-         "--skip-graphics", "--approval-dir", os.path.dirname(os.path.abspath(base))],
-        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
-    for line in proc.stdout or []:
-        if line.strip():
-            print(line, end="", flush=True)   # already NDJSON — pass through
-    if proc.wait() != 0:
-        # plan_path is untouched (refit only staged) — a retry re-runs the
-        # identical refit from the same base_plan.json snapshot.
-        raise RuntimeError("base rebuild failed (render.py --skip-graphics)")
-    sidecars = _render_sidecars(base_dir, os.path.dirname(os.path.abspath(base)))
-    if staged:
-        os.replace(staged, plan_path)          # promote the refit on success only
-        commit_pending(os.path.dirname(fingerprint_path), plan_path)
-        emit(status="refit_written", path=plan_path)
-    os.replace(os.path.join(base_dir, "final.mp4"), base)
-    for source, destination in sidecars:
-        os.replace(source, destination)
-    if fingerprint_path:
-        os.replace(os.path.join(base_dir, "base.fingerprint.json"), fingerprint_path)
-        with open(os.path.join(os.path.dirname(fingerprint_path),
-                               "base_plan.json"), "w") as f:
-            json.dump(plan, f, indent=1)
-    emit(status="base_rebuilt", path=base)
-    return plan, "rebuilt"
+    from assemble_base_rebuild import BaseRebuild, rebuild_base
+    return rebuild_base(BaseRebuild(base, plan_path, plan, fingerprint_path,
+                                   manifest, options.audio_clock_policy, state))
 
 
 @dataclass
@@ -366,6 +390,12 @@ class AssembleJob:
     fingerprint_path: str | None = None
     manifest: str | None = None
     audio_only: bool = False   # ensure_base resolved an audio-only base rebuild
+    audio_clock_policy: str = "legacy-v1"
+    plan_path: str | None = None
+    source_bus_receipt_hash: str | None = None
+    held_program_selection: tuple[str, str] | None = None
+    graphic_frame_clock: tuple[str, int] | None = None  # Internal held-program opt-in only.
+    owned_graphics: OwnedGraphicsExecution | None = None  # Internal live owner.
 
 
 def _reuse_composite(job: AssembleJob) -> bool:
@@ -386,7 +416,18 @@ def _reuse_composite(job: AssembleJob) -> bool:
     with open(sidecar) as f:
         rec = json.load(f)
     ok = (rec.get("videoFingerprint") == video_fingerprint(job.plan)
-          and rec.get("graphicsFingerprint") == graphics_fingerprint(job.plan))
+          and rec.get("graphicsFingerprint") == graphics_fingerprint(job.plan)
+          and rec.get("captionFingerprint") == caption_fingerprint(job.plan))
+    caption_path = os.path.join(
+        os.path.dirname(os.path.abspath(job.out)), "caption_authority.json")
+    if ok and caption_fingerprint(job.plan) is not None:
+        try:
+            with open(caption_path, encoding="utf-8") as handle:
+                caption_authority = json.load(handle)
+            ok = (rec.get("captionAuthorityHash")
+                  == caption_authority.get("authorityHash"))
+        except (OSError, json.JSONDecodeError, AttributeError):
+            ok = False
     if not ok:
         emit(status="audio_only_recomposite",
              reason="graphics/video changed since the last assemble")
@@ -409,6 +450,8 @@ def _composite(job: AssembleJob) -> dict:
     gjob = GraphicsJob(video_in=job.base, video_out=job.out,
                        track=track,
                        cache_dir=job.cache_dir, eof_pass=True,
+                       graphic_frame_clock=job.graphic_frame_clock,
+                       owned_graphics=job.owned_graphics,
                        ydif_file=ydif_file,
                        # Eye-trace placements sidecar beside the output —
                        # Audit B reads the final.mp4 dir (LIAM move 4).
@@ -420,7 +463,7 @@ def _composite(job: AssembleJob) -> dict:
                        occlusions=occlusion_windows(job.plan),
                        producer_dir=out_dir,
                        band_y_offset_px=plan_band_offset(job.plan))
-    with span_for_base(job.base, "graphics"):
+    with span_for_base(job.out if job.held_program_selection else job.base, "graphics"):
         summary = run_graphics_stage(gjob)
     # Own-screen takeover holds are legitimately static (footage replaced, not
     # stuttering) — exempt their frames so the eof_action stutter gate measures
@@ -429,7 +472,7 @@ def _composite(job: AssembleJob) -> dict:
     exempt_frames = sum(end - start for start, end in exempt)
     # The inline tap exists only when a composite pass ran; the no-graphics
     # passthrough stream-copies the base, so the standalone probe covers it.
-    dup = (_read_inline_ydif(ydif_file, exempt) if summary.get("passes")
+    dup = (_read_inline_ydif(ydif_file, exempt) if summary.get("passes") and job.owned_graphics is None
            else _ydif_dup_ratio(job.out, exempt))
     summary["ydif_dup_ratio"] = round(dup, 4)
     emit(status="smoothness", ydif_dup_ratio=round(dup, 4),
@@ -442,6 +485,62 @@ def _composite(job: AssembleJob) -> dict:
     return summary
 
 
+def _finalize_assemble(job: AssembleJob, summary: dict) -> dict:
+    """Apply the optional music bed, publish provenance, and build a proxy."""
+    from audio.music_stage import apply_music
+    with span_for_base(job.base, "music"):
+        mix = apply_music(
+            job.plan, job.out, job.fingerprint_path, job.manifest)
+    if mix is not None:
+        summary["music"] = {
+            "applied": True, "final_lufs": mix.get("final_lufs"),
+            "duck_depth": mix.get("duck_depth"),
+        }
+    provenance = write_assembled_sidecar(job.out, job.plan)
+    summary["planHash"] = provenance["planHash"]
+    summary["authorityHash"] = provenance["authorityHash"]
+    lineage = seal_assembled_delivery(job.base, job.out, job.plan)
+    if lineage is not None:
+        summary["cutDeliveryReceiptHash"] = lineage["receiptHash"]
+    with span_for_base(job.base, "proxy"):
+        proxy = write_proxy(job.out)
+    if proxy:
+        summary["proxy"] = proxy["path"]
+    return summary
+
+
+def _assemble_captioned(job: AssembleJob) -> dict:
+    """Reuse or build the caption-free picture, then project timed text."""
+    from graphics.owned_execution import current
+    owned = current(job)
+    if owned is not None and owned.captions is not None:
+        owned.captions.assert_plan(job.plan, job.plan_path)
+        owned.captions.stage(job.out)
+        with span_for_base(job.out, "composite"):
+            summary = _composite(job)
+        summary["captions"] = owned.captions.finish(job.out)
+        return summary
+    from captions.caption_assemble import (
+        checkpoint_caption_free_composite,
+        project_caption_track,
+        restore_caption_free_composite,
+    )
+    restored = restore_caption_free_composite(job)
+    if restored:
+        summary = {"caption_composite_reused": True, "out": job.out}
+        emit(status="caption_composite_reused", out=job.out,
+             note="upstream picture/graphics authority is unchanged")
+    else:
+        with span_for_base(job.out if job.held_program_selection else job.base, "composite"):
+            summary = _composite(job)
+        checkpoint_caption_free_composite(job)
+    with span_for_base(job.out if job.held_program_selection else job.base, "captions"):
+        captions = project_caption_track(job, emit)
+    if captions is not None:
+        summary["captions"] = captions
+    return summary
+
+
 def assemble(job: AssembleJob) -> dict:
     """Composite (or audio-only mux) → music → sidecar → proxy; return a summary.
 
@@ -451,7 +550,16 @@ def assemble(job: AssembleJob) -> dict:
     for render.py (no cv2/hyperframes pulled in just to hash a plan).
     """
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    from audio.music_stage import apply_music
+    from graphics.owned_execution import require_held_assembly
+    require_held_assembly(job)
+    if job.graphic_frame_clock is not None and (job.held_program_selection is None
+                                              or job.audio_clock_policy != "source-float-v2"):
+        raise RuntimeError("exact graphic frame clock requires held source-float-v2 assembly")
+    if job.held_program_selection is not None and job.audio_clock_policy == "legacy-v1":
+        raise RuntimeError("held program preparation cannot use legacy assembly")
+    if job.audio_clock_policy != "legacy-v1":
+        from audio.assemble_source_audio import assemble_source_audio
+        return assemble_source_audio(job)
     _settle_audio_intent(job.base, job.fingerprint_path)
     _check_staleness(job.plan, job.fingerprint_path)
     reuse = _reuse_composite(job)
@@ -465,70 +573,36 @@ def assemble(job: AssembleJob) -> dict:
                   "existing composite (its YDIF gate already passed)")
         summary = {"audio_only_mux": True, "out": job.out}
     else:
-        with span_for_base(job.base, "composite"):
-            summary = _composite(job)
-    with span_for_base(job.base, "music"):
-        mix = apply_music(job.plan, job.out, job.fingerprint_path, job.manifest)
-    if mix is not None:
-        summary["music"] = {"applied": True, "final_lufs": mix.get("final_lufs"),
-                            "duck_depth": mix.get("duck_depth")}
-    provenance = write_assembled_sidecar(job.out, job.plan)
-    summary["planHash"] = provenance["planHash"]
-    summary["authorityHash"] = provenance["authorityHash"]
-    with span_for_base(job.base, "proxy"):
-        proxy = write_proxy(job.out)   # WARN-and-continue inside (documented exception)
-    if proxy:
-        summary["proxy"] = proxy["path"]
-    return summary
+        summary = _assemble_captioned(job)
+    return _finalize_assemble(job, summary)
+
+
+def delivery_authority_dir(plan_path: str) -> str:
+    """Resolve project authority from the plan, never a private output path."""
+    return os.path.dirname(os.path.abspath(plan_path))
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="PRODUCER incremental-graphics assemble")
-    ap.add_argument("base", help="the mastered graphics-free base (render.py --skip-graphics)")
-    ap.add_argument("plan_path")
-    ap.add_argument("out")
-    ap.add_argument("--cache-dir", default=None)
-    ap.add_argument("--fingerprint", default=None,
-                    help="base.fingerprint.json to check the base isn't stale")
-    ap.add_argument("--auto-base", action="store_true",
-                    help="smart re-render: rebuild the base first if it is "
-                         "missing or stale (needs --fingerprint; manifest from "
-                         "--manifest or the fingerprint file); audio-only "
-                         "edits rebuild just the audio bus")
-    ap.add_argument("--manifest", default=None,
-                    help="asset manifest for --auto-base rebuilds AND for "
-                         "resolving music.assetId (wins over the fingerprint's "
-                         "recorded manifestPath)")
-    args = ap.parse_args()
-    default_cache = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                 "..", "..", "templates", "motion", "renders", "cache")
+    """Run the admitted ordinary assembler while owning exactly one output lock."""
+    from assemble_arguments import default_cache_directory, load_documents, parse_arguments
+    args = parse_arguments()
     lock_path = os.path.join(os.path.dirname(os.path.abspath(args.out)),
                              ".assemble.lock")
     if not acquire_lock(lock_path):
         sys.exit(1)   # a LIVE run holds the dir — never remove its lock
     try:
-        with open(args.plan_path) as f:
-            plan = json.load(f)
-        manifest = args.manifest
-        if not manifest and args.fingerprint and os.path.exists(args.fingerprint):
-            with open(args.fingerprint) as handle:
-                manifest = json.load(handle).get("manifestPath")
-        if manifest:
-            require_template_usage_approval(
-                args.plan_path, manifest, os.path.dirname(os.path.abspath(args.out)),
-                os.path.dirname(os.path.abspath(manifest)))
-        elif template_approval_required(os.path.dirname(os.path.abspath(args.out))):
-            raise RuntimeError("produced/full assemble requires --manifest to verify template history")
+        plan, manifest = load_documents(args)
         audio_only = False
         if args.auto_base:
             with span_for_base(args.base, "base_check"):
                 plan, state = ensure_base(args.base, args.plan_path, plan,
-                                          args.fingerprint, args.manifest)
+                    args.fingerprint, BaseManifest(args.manifest, args.audio_clock_policy))
             audio_only = state == "audio_only"
         job = AssembleJob(base=args.base, plan=plan, out=args.out,
-                          cache_dir=args.cache_dir or default_cache,
+                          cache_dir=args.cache_dir or default_cache_directory(),
                           fingerprint_path=args.fingerprint,
-                          manifest=args.manifest, audio_only=audio_only)
+                          manifest=manifest, audio_only=audio_only, audio_clock_policy=args.audio_clock_policy,
+                          plan_path=args.plan_path, source_bus_receipt_hash=args.source_bus_receipt_hash)
         summary = assemble(job)
         emit(status="done", **summary)
     except (OSError, json.JSONDecodeError, KeyError, ValueError, RuntimeError) as exc:

@@ -2,6 +2,8 @@
 import unittest
 
 from _common import *  # noqa: F401,F403
+from _broll_pool_authority_fixture import build_pool_authority
+from broll.pool_admission import PoolAuthority, open_pool
 
 
 class BrollInsertTests(unittest.TestCase):
@@ -92,6 +94,7 @@ class BrollPoolTests(unittest.TestCase):
             raise unittest.SkipTest("ffmpeg not on PATH")
         cls.root = tempfile.mkdtemp(prefix="selftest-pool-")
         cls.src = os.path.join(cls.root, "src.mp4")
+        cls.manifests = {}
         bp.run_command(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
                         "-f", "lavfi", "-i", "color=c=blue:s=320x180:d=2:r=30",
                         "-c:v", "libx264", "-preset", "veryfast",
@@ -108,14 +111,24 @@ class BrollPoolTests(unittest.TestCase):
             dst = pool / rel
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(self.src, dst)
+        self._admit(pool)
         return pool
+
+    def _admit(self, pool: Path) -> PoolAuthority:
+        manifest_path, authority = build_pool_authority(pool)
+        self.manifests[str(pool)] = manifest_path
+        return authority
+
+    def _authority(self, pool: Path) -> PoolAuthority:
+        return open_pool(pool, self.manifests[str(pool)])
 
     def _scan(self, pool: Path) -> list[dict]:
         with contextlib.redirect_stdout(io.StringIO()):
-            return bp.scan_pool(pool)
+            return bp.scan_pool(self._authority(pool))
 
     def _annotate(self, pool: Path, rid: str, tags: list[str]) -> dict:
-        return bp.annotate(pool, rid, tags, "seen: fixture clip")
+        return bp.annotate(
+            self._authority(pool), rid, tags, "seen: fixture clip")
 
     def test_scan_idempotency_and_mtime_reset(self) -> None:
         pool = self._mk_pool("screen-recordings/youtube.mp4")
@@ -129,32 +142,48 @@ class BrollPoolTests(unittest.TestCase):
         self.assertTrue(again["cataloged"])              # vision fields preserved
         self.assertEqual(again["tags"], ["animation", "cartoons"])
         self.assertEqual(again["id"], rec["id"])
+        late = pool / "screen-recordings" / "late.mp4"
+        shutil.copy(self.src, late)
+        with self.assertRaisesRegex(RuntimeError, "re-run canonical ingest"):
+            self._authority(pool)
+        self._admit(pool)
+        rescanned = self._scan(pool)
+        self.assertEqual(len(rescanned), 2)
+        self.assertEqual(
+            sum(not row["cataloged"] for row in rescanned), 1)
         path = pool / "screen-recordings/youtube.mp4"
-        os.utime(path, (path.stat().st_atime, path.stat().st_mtime + 5))
-        (touched,) = self._scan(pool)                    # mtime change: re-review
-        self.assertFalse(touched["cataloged"])
-        self.assertEqual(len(touched["frames"]), 3)      # re-extracted
+        path.write_bytes(b"untrusted replacement after admission")
+        stable = self._scan(pool)
+        reviewed = next(row for row in stable if row["id"] == rec["id"])
+        self.assertTrue(reviewed["cataloged"])
+        self.assertEqual(len(reviewed["frames"]), 3)
 
     def test_annotate_round_trip(self) -> None:
         pool = self._mk_pool("screen-recordings/clip.mp4")
         (rec,) = self._scan(pool)
-        bp.annotate(pool, rec["id"], [" YouTube", "Channel ", "screen-recording"],
+        authority = self._authority(pool)
+        bp.annotate(authority, rec["id"],
+                    [" YouTube", "Channel ", "screen-recording"],
                     "his channel page, subscriber count visible")
-        (stored,) = bp.load_catalog(pool)
+        (stored,) = bp.load_catalog(authority)
         self.assertTrue(stored["cataloged"])
         self.assertEqual(stored["tags"],                 # lowercased, sorted tokens
                          ["channel", "screen-recording", "youtube"])
         self.assertEqual(stored["descriptionSource"], "vision")
-        self.assertRaises(ValueError, bp.annotate, pool, "ghost-id", ["x"], "d")
-        self.assertRaises(ValueError, bp.annotate, pool, rec["id"], ["  "], "d")
-        self.assertRaises(ValueError, bp.annotate, pool, rec["id"], ["x"], " ")
+        self.assertRaises(
+            ValueError, bp.annotate, authority, "ghost-id", ["x"], "d")
+        self.assertRaises(
+            ValueError, bp.annotate, authority, rec["id"], ["  "], "d")
+        self.assertRaises(
+            ValueError, bp.annotate, authority, rec["id"], ["x"], " ")
 
     def test_manifest_contract_feeds_broll_insert(self) -> None:
         pool = self._mk_pool("screen-recordings/clip.mp4")
         (rec,) = self._scan(pool)
-        self.assertEqual(bp.manifest_entries(bp.load_catalog(pool)), [])
+        authority = self._authority(pool)
+        self.assertEqual(bp.manifest_entries(bp.load_catalog(authority)), [])
         self._annotate(pool, rec["id"], ["youtube", "channel"])
-        entries = bp.manifest_entries(bp.load_catalog(pool))
+        entries = bp.manifest_entries(bp.load_catalog(authority))
         self.assertEqual([e["id"] for e in entries], [rec["id"]])
         self.assertEqual(entries[0]["kind"], "video")
         self.assertAlmostEqual(entries[0]["duration"], 2.0, delta=0.2)
@@ -162,8 +191,8 @@ class BrollPoolTests(unittest.TestCase):
         inserts = bi.resolve_assets(                     # the real consumer
             bi.parse_inserts([{"assetId": rec["id"], "outStart": 2.0,
                                "outEnd": 3.5}], 8.0, 5.0), manifest)
-        self.assertEqual(inserts[0].path,
-                         str(pool / "screen-recordings/clip.mp4"))
+        self.assertEqual(inserts[0].path, entries[0]["path"])
+        self.assertIn(".sniper-external-media", inserts[0].path)
         with self.assertRaises(ValueError):              # unknown id still hard-fails
             bi.resolve_assets(bi.parse_inserts(
                 [{"assetId": "ghost", "outStart": 2.0, "outEnd": 3.5}],
@@ -172,7 +201,9 @@ class BrollPoolTests(unittest.TestCase):
     def test_resolver_exact_multi_zero(self) -> None:
         pool = self._mk_pool("a/a.mp4", "a/b.mp4", "a/c.mp4")
         recs = self._scan(pool)
-        by_path = {r["path"].rsplit("/", 1)[-1]: r["id"] for r in recs}
+        by_path = {
+            r["originalPath"].rsplit("/", 1)[-1]: r["id"] for r in recs
+        }
         self._annotate(pool, by_path["a.mp4"], ["youtube", "channel"])
         self._annotate(pool, by_path["b.mp4"], ["website", "laptop"])
         self._annotate(pool, by_path["c.mp4"], ["youtube", "cartoons"])
@@ -184,7 +215,8 @@ class BrollPoolTests(unittest.TestCase):
         concepts = [{"assetId": None, "needsOperator": True,
                      "note": "concept-stock: youtube"}]
         proposal = {"brollReceipts": rows, "brollConcept": concepts}
-        out = bp.resolve_receipts(proposal, bp.load_catalog(pool))
+        out = bp.resolve_receipts(
+            proposal, bp.load_catalog(self._authority(pool)))
         exact, multi, zero, alltok = out["brollReceipts"]
         self.assertEqual(exact["assetId"], by_path["b.mp4"])   # exactly one hit
         self.assertFalse(exact["needsOperator"])
@@ -204,26 +236,27 @@ class BrollPoolTests(unittest.TestCase):
         proposal = {"brollReceipts": [
             {"assetId": None, "needsOperator": True, "note": "receipt: YouTube"},
             {"assetId": None, "needsOperator": True, "note": "receipt: cartoons"}]}
-        out = bp.resolve_receipts(proposal, bp.load_catalog(pool))
+        out = bp.resolve_receipts(
+            proposal, bp.load_catalog(self._authority(pool)))
         named, tagged = out["brollReceipts"]
         self.assertIsNone(named["assetId"])              # filename resolves NOTHING
         self.assertTrue(named["needsOperator"])
         self.assertEqual(tagged["assetId"], rec["id"])   # tags are the only currency
 
-    def test_uncataloged_assets_never_resolve(self) -> None:
-        # Tags exist but cataloged=false (e.g. after an mtime reset): stale tags
-        # must not feed renders until the brain re-confirms them.
+    def test_mutable_original_never_changes_admitted_catalog(self) -> None:
+        # After admission, touching the mutable original cannot replace the
+        # reviewed snapshot or invalidate its vision verdict.
         pool = self._mk_pool("a/clip.mp4")
         (rec,) = self._scan(pool)
         self._annotate(pool, rec["id"], ["youtube"])
         path = pool / "a/clip.mp4"
         os.utime(path, (path.stat().st_atime, path.stat().st_mtime + 5))
-        self._scan(pool)                                 # resets cataloged=false
+        self._scan(pool)  # admitted snapshot is unchanged; annotations remain
         out = bp.resolve_receipts(
             {"brollReceipts": [{"assetId": None, "needsOperator": True,
                                 "note": "receipt: YouTube"}]},
-            bp.load_catalog(pool))
-        self.assertIsNone(out["brollReceipts"][0]["assetId"])
+            bp.load_catalog(self._authority(pool)))
+        self.assertEqual(out["brollReceipts"][0]["assetId"], rec["id"])
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

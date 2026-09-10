@@ -6,8 +6,10 @@
     {"id":"line1","type":"string","label":"Title — serif-accent, wipes in (<= 2 words)","default":"Familiarity"},
     {"id":"line2","type":"string","label":"Qualifier — white sans, optional (<= 2 words)","default":"Rule"},
     {"id":"side","type":"enum","label":"Anchor side (the emptier side, opposite the subject)","default":"left","options":[{"value":"left","label":"Top-left"},{"value":"right","label":"Top-right"}]},
-    {"id":"accent","type":"color","label":"Accent color (serif title)","default":"#054BC9"}
+    {"id":"accent","type":"color","label":"Accent color (serif title)","default":"#054BC9"},
+    {"id":"readability","type":"enum","label":"Text backing (new recipes use local plates)","default":"scrim","options":[{"value":"scrim","label":"Legacy translucent scrim"},{"value":"plates","label":"Opaque local text plates"}]}
   ]'
+  data-contrast-roles='{"schemaVersion":1,"treatment":"plates","roles":[{"id":"eyebrow","selector":"#marker-eyebrow","copyVariable":"num","foreground":"#FFFFFF","background":"#0a1123","fullOpacityAt":0.34},{"id":"title","selector":"#marker-title","copyVariable":"line1","foregroundVariable":"accent","background":"#f6eac6","fullOpacityAt":0.58},{"id":"qualifier","selector":"#marker-qualifier","copyVariable":"line2","foreground":"#FFFFFF","background":"#0a1123","fullOpacityAt":0.66}],"exit":{"maximumSeconds":0.42,"durationFraction":0.18,"frameReserveSeconds":0.05}}'
 >
   <!--
     PROJECT SNIPER · Motion template: SECTION-MARKER (REBUILT for R9/R10 — deep-pass
@@ -63,10 +65,9 @@
         flex-direction: column;
         gap: 14px;
       }
-      /* CONTRAST GUARANTEE: a soft feathered scrim behind the headroom text so it
-         reads on ANY footage (the blue-serif-on-blue-wall failure). Darkens the
-         backing → light title/eyebrow always separate; feathers to 0 so it never
-         reads as a hard panel. Kept subtle (R10 clean-overlay doctrine). */
+      /* Legacy, context-dependent scrim: this does NOT guarantee contrast.
+         Omitted readability keeps saved plans visually unchanged. New recipes
+         explicitly select plates; their exact source-bound roles are above. */
       .stage::before {
         content: "";
         position: absolute;
@@ -112,6 +113,28 @@
         text-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
         will-change: transform, opacity;
       }
+      /* Local, opaque backing only: the rest of this canvas remains alpha.
+         Never replace an operator's accent. Lint checks it against the cream
+         title plate; Audit B checks decoded foreground/backing pairs. */
+      .stage[data-readability="plates"]::before { display: none; }
+      .stage[data-readability="plates"] .eyebrow,
+      .stage[data-readability="plates"] .qualifier {
+        width: fit-content;
+        max-width: 100%;
+        padding: 6px 12px;
+        background: #0a1123;
+        text-shadow: none;
+        overflow-wrap: anywhere;
+      }
+      .stage[data-readability="plates"] .qualifier { white-space: normal; }
+      .stage[data-readability="plates"] .title {
+        padding: 6px 12px;
+        max-width: 100%;
+        background: #f6eac6;
+        text-shadow: none;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
     </style>
   </head>
   <body>
@@ -120,6 +143,7 @@
       data-composition-id="section-marker"
       data-width="1080"
       data-height="1920"
+      data-start="0"
       data-duration="2.5"
     >
       <div id="marker-stage" class="stage">
@@ -145,7 +169,7 @@
         // Single source of truth for render length: the root data-duration attr.
         const D = parseFloat(root.dataset.duration) || 2.5;
 
-        const defaults = { num: "System No.1", line1: "Familiarity", line2: "Rule", side: "left", accent: "#054BC9" };
+        const defaults = { num: "System No.1", line1: "Familiarity", line2: "Rule", side: "left", accent: "#054BC9", readability: "scrim" };
         const HF = window.__hyperframes;
         const vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
         document.documentElement.style.setProperty("--accent", vars.accent);
@@ -172,6 +196,7 @@
         // Side anchor (R10): left/right + text alignment; wipe direction follows.
         const right = String(vars.side) === "right";
         const stage = document.getElementById("marker-stage");
+        stage.dataset.readability = String(vars.readability);
         if (right) {
           stage.style.right = "64px";
           stage.style.alignItems = "flex-end";

@@ -16,7 +16,10 @@ from dataclasses import dataclass
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from audio.music_stage import resolve_music_track                 # noqa: E402
 from fingerprints import plan_content_hash                        # noqa: E402
-from graphics.graphics_render import render_entry                 # noqa: E402
+from graphics.graphics_render import (                           # noqa: E402
+    render_entry_at_rate as render_entry,
+)
+from ingest_execution_authority import verify_execution_media_authority  # noqa: E402
 from palmier.components import component_assets                   # noqa: E402
 from palmier.export import FINAL_NAME                             # noqa: E402
 from palmier.mcp_client import (PalmierClient, PalmierError,      # noqa: E402
@@ -45,6 +48,8 @@ class CliArgs:
     dry_run: bool
     preflight: bool
     plan_stdin: bool
+    require_source_set_admission: bool
+    allow_legacy_unadmitted: bool
 
 @dataclass(frozen=True)
 class LoadedInputs:
@@ -78,12 +83,13 @@ def resolve_plan_assets(plan: dict, manifest_path: str) -> dict:
     return {**plan, "music": {**music, "path": path}}
 
 
-def render_graphics(plan: dict, cache_dir: str | None) -> dict[int, str]:
+def render_graphics(plan: dict, cache_dir: str | None,
+                    fps: float = 30.0) -> dict[int, str]:
     """Render every selected component or fail the handoff as incomplete."""
     paths: dict[int, str] = {}
     for index, entry in enumerate(plan.get("graphicsTrack") or []):
         try:
-            result = render_entry(entry, cache_dir)
+            result = render_entry(entry, cache_dir, fps)
         except Exception as exc:
             raise PalmierError(
                 f"required component graphicsTrack[{index}] could not be "
@@ -114,8 +120,13 @@ def _json_file(path: str, label: str) -> dict:
 def _inputs(args: CliArgs) -> LoadedInputs:
     disk_plan = read_plan(args.plan_path, args.plan_stdin)
     manifest = _json_file(args.manifest_path, "asset manifest")
+    verify_execution_media_authority(
+        disk_plan, manifest, args.manifest_path)
     source = primary_source(manifest)
-    plan = resolve_plan_assets(disk_plan, args.manifest_path)
+    plan = {
+        **resolve_plan_assets(disk_plan, args.manifest_path),
+        "_path": os.path.abspath(args.plan_path),
+    }
     return LoadedInputs(plan, manifest, source, plan_content_hash(disk_plan))
 
 
@@ -129,7 +140,7 @@ def _project_name(args: CliArgs) -> str:
 def _translate(args: CliArgs, plan: dict, master: MasterFacts,
                manifest: dict | None = None,
                preserve_components: bool = True) -> list[dict]:
-    graphics = (render_graphics(plan, args.cache_dir)
+    graphics = (render_graphics(plan, args.cache_dir, master.fps)
                 if preserve_components else {})
     components = (component_assets(plan, manifest or {}, args.manifest_path,
                                    graphics) if preserve_components else {})
@@ -248,6 +259,13 @@ def _parse(argv: list[str] | None) -> CliArgs:
     parser.add_argument("--cache-dir", default=None)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--preflight", action="store_true")
+    policy = parser.add_mutually_exclusive_group()
+    policy.add_argument(
+        "--require-source-set-admission", action="store_true",
+        help="explicitly require source-set admission (the default)")
+    policy.add_argument(
+        "--allow-legacy-unadmitted", action="store_true",
+        help="non-production migration only: accept a legacy manifest")
     parser.add_argument("--plan-stdin", action="store_true",
                         help="read an unsaved plan snapshot from stdin; preflight only")
     parsed = parser.parse_args(argv)
@@ -256,6 +274,8 @@ def _parse(argv: list[str] | None) -> CliArgs:
 
 def _run(argv: list[str] | None = None) -> int:
     args = _parse(argv)
+    if not args.allow_legacy_unadmitted:
+        os.environ["SNIPER_REQUIRE_SOURCE_SET_ADMISSION"] = "1"
     if args.plan_stdin and not args.preflight:
         raise PalmierError("--plan-stdin is allowed only with --preflight")
     if args.preflight:

@@ -11,6 +11,7 @@ from pathlib import Path
 from unittest import mock
 
 from _common import pl  # noqa: F401
+from _current_render_build_fixture import current_manifest
 from headless import render_admission as admission_module
 from headless import render_admission_artifact as artifact_module
 from headless.admission_registry import (
@@ -39,7 +40,7 @@ REPO_ROOT = PRODUCER_DIR.parents[1]
 KEY = "11111111-1111-4111-8111-111111111111"
 ATTEMPT = "22222222-2222-4222-8222-222222222222"
 UNIT = "33333333-3333-4333-8333-333333333333"
-BUILD = {"schemaVersion": 1, "policy": "admission-test", "implementation": []}
+BUILD = current_manifest("admission-test")
 
 
 def _request(label: str = "A") -> dict:

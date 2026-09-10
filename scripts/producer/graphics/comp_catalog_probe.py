@@ -9,15 +9,17 @@ Two passes over ``templates/motion/compositions/*.html``:
   whether the template exposes a position knob (slotX/x/align family) or is a
   fixed layout.
 * RENDER (real path, content-hash cached): render each comp ONCE with its
-  declared defaults through ``graphics_render.render_entry``, then measure the
-  terminal-frame alpha (``frame_oracles.terminal_alpha``) into a fade class —
+  declared defaults through ``render_entry_for_capability_probe``, then measure
+  the terminal-frame alpha (``frame_oracles.terminal_alpha``) into a fade class —
   ``fades-clean`` (passes the render-proof bounds) / ``hold-to-cut``
   (mean > 64) / ``partial-fade`` (between) — and the settled content bbox
   (``planner.graphics_anchors._content_bbox``). Comps that fail to render
   record ``{"renderError": msg}`` honestly.
 
 Emits ``templates/motion/comp_capabilities.json``: a deterministic core (no
-timestamps) plus a stable digest of the per-comp entries.
+timestamps), a stable digest of the per-comp entries, and a digest of the exact
+local composition/runtime source closure. Any source change makes the old
+artifact stale until this probe is run again.
 
 CLI: comp_catalog_probe.py [--out F] [--cache-dir D] [--workers N] [--static-only]
 """
@@ -25,8 +27,8 @@ from __future__ import annotations
 
 import argparse
 import glob
-import hashlib
 import json
+import math
 import os
 import re
 import sys
@@ -34,13 +36,18 @@ from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # run-by-path: producer pkg root on sys.path
 from graphics import frame_oracles
+from graphics.comp_capability_artifact import (
+    build_artifact,
+    composition_source_closure,
+)
 from graphics.graphics_render import (COMPOSITIONS_DIR, DEFAULT_CACHE_DIR,
                                       TOKENS_CSS, content_hash, format_for,
-                                      render_entry)
+                                      render_entry_for_capability_probe)
+from graphics.frame_quantization import rounded_frame_index
 from graphics.render_tools import resolve_tools
 from graphics.template_contract import (composition_dimensions,
                                         declared_variables)
-from graphics.template_visual_contract import _TIMING_POLICY, _latest_reveal
+from graphics.template_visual_contract import _latest_reveal, visible_timing
 from planner.graphics_anchors import _content_bbox
 
 _DEFAULT_CANVAS = (1080, 1920)
@@ -60,6 +67,16 @@ _PROBE_OVERRIDES: dict[str, dict] = {
     "icon-badge-wide": {"icon1": "openai-color.svg",
                         "icon2": "claude-color.svg",
                         "icon3": "gemini-color.svg"},
+    "ui-focus-zoom": {"image": "assets/sample-screen.png"},
+    # The HTML's preview-only SAMPLE is not a declared asset default. Bind its
+    # exact mark as probe input so sealed renders include the local SVG.
+    "stroke-draw-badge": {"icon": "youtube", "label": "Subscribe"},
+    "nateherk-scoreboard": {"heroValue": "97%", "heroLabel": "PROBE VALUE"},
+    # Explicit TEST content for every present module; never the preview sample.
+    "nateherk-pipeline": {"eyebrow": "TEST CAPABILITY", "headlineLines": "The TEST sequence|has six stages",
+        "explainer": "Synthetic nodes for a physical capability probe.",
+        "nodes": "01~INPUT|02~CHECK|03~MAP|04~BUILD|05~REVIEW|06~OUTPUT", "activeIndex": 3,
+        "footChip": "TEST FIXTURE", "moduleLands": "0.2|1.1|2.0"},
 }
 
 
@@ -118,13 +135,15 @@ def probe_spec(kind: str, declared: dict[str, dict]) -> dict:
 
 def probe_duration(kind: str, spec: dict) -> float:
     """Shortest honest probe window: 2.5s or the comp's completion floor."""
+    if kind == "glitch-hit":
+        hit_s = float(spec.get("durMs", 400)) / 1000.0
+        return round(max(0.2, min(hit_s, 0.8)), 3)
     reveal = _latest_reveal(spec)
     duration = max(_MIN_PROBE_S, reveal + 0.75)
-    policy = _TIMING_POLICY.get(kind)
-    if policy is not None:
-        floor, settle, dwell, runway = policy
-        duration = max(duration, floor, reveal + settle + dwell + runway)
-    return round(duration, 2)
+    timing = visible_timing(kind, spec)
+    if timing is not None:
+        duration = max(duration, timing[0])
+    return math.ceil(duration * 100) / 100
 
 
 def static_probe(kind: str, comp_html: str) -> dict:
@@ -204,7 +223,7 @@ def render_probe(kind: str, declared: dict[str, dict], cache_dir: str) -> dict:
              "outStart": 0.0, "outEnd": duration}
     result: dict = {"probeDurationS": duration}
     try:
-        rendered = render_entry(entry, cache_dir)
+        rendered = render_entry_for_capability_probe(entry, cache_dir)
         _measure_artifact(result, rendered["path"],
                           rendered["proof"]["asset"]["frameCount"],
                           rendered["proof"].get("terminalFrame"))
@@ -215,7 +234,8 @@ def render_probe(kind: str, declared: dict[str, dict], cache_dir: str) -> dict:
         artifact = _quarantined_artifact(entry, cache_dir)
         if artifact is not None:
             try:
-                _measure_artifact(result, artifact, round(duration * 30), None)
+                _measure_artifact(
+                    result, artifact, rounded_frame_index(duration, 30), None)
                 result["renderNote"] = ("render proof rejected the terminal "
                                        "frame (unregistered hold-to-cut); "
                                        "measured from the quarantined artifact")
@@ -235,6 +255,8 @@ def build_catalog(cache_dir: str, workers: int, static_only: bool) -> dict:
     for path in paths:
         with open(path, encoding="utf-8") as handle:
             sources[os.path.splitext(os.path.basename(path))[0]] = handle.read()
+    for html in sources.values():
+        composition_source_closure(html)
     comps = {kind: static_probe(kind, html) for kind, html in sources.items()}
     if not static_only:
         kinds = sorted(sources)
@@ -244,9 +266,7 @@ def build_catalog(cache_dir: str, workers: int, static_only: bool) -> dict:
                     kind, declared_variables(sources[kind]), cache_dir), kinds)
             for kind, measured in zip(kinds, rendered):
                 comps[kind].update(measured)
-    digest = hashlib.sha1(json.dumps(
-        comps, sort_keys=True, ensure_ascii=True).encode("utf-8")).hexdigest()
-    return {"schemaVersion": 1, "comps": comps, "digest": digest}
+    return build_artifact(comps)
 
 
 def main() -> int:

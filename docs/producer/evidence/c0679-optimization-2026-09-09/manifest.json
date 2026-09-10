@@ -1,0 +1,541 @@
+{
+  "capturedAt": "2026-09-09T15:54:23.680257+00:00",
+  "scope": "Preserved failures, full native memory success, corrected output objective and complete playback qualification, failed Studio observation, and finalized immutable Attempt A handoff. No human listening or user creative approval is inferred.",
+  "files": [
+    {
+      "file": "full-native-high-v1.render.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v1.render.json",
+      "bytes": 13695,
+      "sha256": "d04201bc231e44f71796591b2a0dc59aed59effd3a3da52945b035fb428b1eca"
+    },
+    {
+      "file": "full-native-high-v1.render.log",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v1.render.log",
+      "bytes": 13678,
+      "sha256": "145f3f84fc6e869c2a90ebaec5bec49c7c0cbdca3f79cf5c090ef6170917137a"
+    },
+    {
+      "file": "full-native-high-v2-stream.render.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v2-stream.render.json",
+      "bytes": 17916,
+      "sha256": "fdba9c9898b14edc3552cab05abfd422e960574227329747e83aa0dadec932b7"
+    },
+    {
+      "file": "full-native-high-v2-stream.render.log",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v2-stream.render.log",
+      "bytes": 82065,
+      "sha256": "5321fb2497a0221dee47276934195c0dec4b08686c785ef433ec4e91b58b01f3"
+    },
+    {
+      "file": "native-full-media-preparation.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-full-media-preparation.json",
+      "bytes": 2085,
+      "sha256": "a68be98f725be2e98df5085e4f86dccb790118a5af0580d544f5388d228bf3fc"
+    },
+    {
+      "file": "audio-consistency-35-65-readonly.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/audio-consistency-35-65-readonly.json",
+      "bytes": 3521,
+      "sha256": "cd165568234b605fb37e047f581cd6b95e32e4efc501dee8cc888f751453d92e"
+    },
+    {
+      "file": "audio-cut-joins-readonly.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/audio-cut-joins-readonly.json",
+      "bytes": 5007,
+      "sha256": "0e1f435b5a066dbc0d917f631d84313a176f8f879cbbb25516c6278715897e72"
+    },
+    {
+      "file": "native-tail-independent-visual-review.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-independent-visual-review.json",
+      "bytes": 5922,
+      "sha256": "fadc5703c248410eaf54bb15dc08f31559c867e420def5621e9ac6f37c1c7c38"
+    },
+    {
+      "file": "full-native-high-v3-bounded.render.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v3-bounded.render.json",
+      "bytes": 11279,
+      "sha256": "9dabc7310b77d0c74f3b3d70ee2844bf4367d3f9c062ddb7e1dc6bcf30b9a73b"
+    },
+    {
+      "file": "full-native-high-v3-bounded.resources.jsonl",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v3-bounded.resources.jsonl",
+      "bytes": 40649,
+      "sha256": "2854a00ce9e636459662e470f9b7800869802415b31e0a050974fb18083e6918"
+    },
+    {
+      "file": "full-native-high-v4-browser-budget.render.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v4-browser-budget.render.json",
+      "bytes": 9825,
+      "sha256": "d7bb62fc3dd05d729e9db75d32f956a2b24e9cbd6373165d94cf1780b1dbac14"
+    },
+    {
+      "file": "full-native-high-v4-browser-budget.render.log",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v4-browser-budget.render.log",
+      "bytes": 453114,
+      "sha256": "3bd7598388609ffd7c9a658d13441672ed44d421cf12dc3d9f445f35b93ad971"
+    },
+    {
+      "file": "full-native-high-v4-browser-budget.resources.jsonl",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v4-browser-budget.resources.jsonl",
+      "bytes": 158180,
+      "sha256": "2efa4fe9a5ec1828d51e5b82963b9a219fe1c6e4b8e8369ac4d507150086c9f5"
+    },
+    {
+      "file": "obsolete-preview-cleanup-20260909.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/obsolete-preview-cleanup-20260909.json",
+      "bytes": 3829,
+      "sha256": "b349a0e25778f2c7e57f48381184d0f2c1b4c7f70ec1e75cbc40af91e8d628cd"
+    },
+    {
+      "file": "obsolete-preview-tree-inventory-20260909.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/obsolete-preview-tree-inventory-20260909.json",
+      "bytes": 9062,
+      "sha256": "a4e0d5f874213e292ba6bc2d304237e9607dd23f2b76dcb27cb18f0437597038"
+    },
+    {
+      "file": "obsolete-preview-tree-cleanup-20260909.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/obsolete-preview-tree-cleanup-20260909.json",
+      "bytes": 5829,
+      "sha256": "2acdd693bf8a7d6395f322d5d128af8f0fd6ca2b2ec3256b8598fa80038f0654"
+    },
+    {
+      "file": "post-preview-cleanup-resources-20260909.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/post-preview-cleanup-resources-20260909.json",
+      "bytes": 2011,
+      "sha256": "afdcac25da13e65218a3337f1dee647fdcb33163b24bc141a70fbb75e548a746"
+    },
+    {
+      "file": "native-lifecycle-validation.json",
+      "source": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/docs/producer/evidence/c0679-optimization-2026-09-09/native-lifecycle-validation.json",
+      "bytes": 2109,
+      "sha256": "d805da70c7bbc4d8a499f656d88575eec9726261267ecb07f2981d0ec5c33bbd"
+    },
+    {
+      "file": "heavy.recovery-546ae6d001d4450292a4eff0c4c4d862.json",
+      "source": "/private/tmp/sniper-native-work-501/heavy.recovery-546ae6d001d4450292a4eff0c4c4d862.json",
+      "bytes": 1832,
+      "sha256": "4fab873af2f23ccc768b0e7d370aa179a30aeabaf3f654eed0b5d84bf8a12a24"
+    },
+    {
+      "file": "post-cleanup-playback.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/post-cleanup-playback-v1/playback.json",
+      "bytes": 621966,
+      "sha256": "49125084b4810c317f8bb2b7f97d749c49a9fde6c4eb50a7b4c4a96d86ac3ced"
+    },
+    {
+      "file": "post-cleanup-playback-supervisor.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/post-cleanup-playback-v1/supervisor.json",
+      "bytes": 11179,
+      "sha256": "ff6038c4b302a631d693633c6711ff4c597892d511685a544e0b4dcd48d8a447"
+    },
+    {
+      "file": "post-cleanup-playback-interpretation.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/post-cleanup-playback-interpretation.json",
+      "bytes": 3514,
+      "sha256": "cebbfab11793415b01101314b0edb5562797c743bee3653117c9c54d49a7ea4e"
+    },
+    {
+      "file": "post-cleanup-playback-probe.cjs",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/post-cleanup-playback-v1/used-observe-playback.cjs",
+      "bytes": 7592,
+      "sha256": "908b1b817297ba14a0f54d01bf2e25e722c577ae63dc20a382ec65c9d015294f"
+    },
+    {
+      "file": "post-cleanup-playback-runner.py",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/post-cleanup-playback-v1/used-run-playback.py",
+      "bytes": 3608,
+      "sha256": "69e7ffa13c2ed4893c7d75bac1ad5018ade6e2932b6834fb2054d4d37637600c"
+    },
+    {
+      "file": "startup-error-playback.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/startup-error-v1/playback.json",
+      "bytes": 2054,
+      "sha256": "b156185e99a1c019038a6c3be38bd1527b8926e09fece397ca5cf22352a81e6b"
+    },
+    {
+      "file": "startup-error-supervisor.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/startup-error-v1/supervisor.json",
+      "bytes": 9312,
+      "sha256": "3320412100a91cfef95cc538798690d943f71e324f45ecb45f0849a82089f406"
+    },
+    {
+      "file": "startup-error-probe.cjs",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/startup-error-v1/used-observe-playback.cjs",
+      "bytes": 9335,
+      "sha256": "50768c2786b8d06f3a09147220fc6bc53fbd59a9ce33da21d6ef3ab5b36c3ebf"
+    },
+    {
+      "file": "startup-error-runner.py",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/startup-error-v1/used-run-playback.py",
+      "bytes": 3868,
+      "sha256": "44c82ab8fbdca76414323fb142a513c67848f42d4dce035d35df4b5fd30a41ed"
+    },
+    {
+      "file": "studio-startup-error-classification.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/studio-startup-error-classification.json",
+      "bytes": 2379,
+      "sha256": "b1ebfaa5458641ebcc470df7e7d8c5ca2c67df767364910cf953ae15b2cbbfff"
+    },
+    {
+      "file": "transport-baseline-reference-parent-v1.render.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/transport-baseline-reference-parent-v1.render.json",
+      "bytes": 12690,
+      "sha256": "a0c3c6742f6d950b80f7428c85560b91f1bb5b1ddfccdc384ae36f29d97831e3"
+    },
+    {
+      "file": "transport-baseline-reference-parent-v1.render.log",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/transport-baseline-reference-parent-v1.render.log",
+      "bytes": 3129,
+      "sha256": "1e2fd8ee26247fb21c2f8b78fe48a5472b0f82aeb8ac35c02d4743136621d46d"
+    },
+    {
+      "file": "transport-baseline-reference-parent-v1.resources.jsonl",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/transport-baseline-reference-parent-v1.resources.jsonl",
+      "bytes": 613,
+      "sha256": "2b358f870ce0580115dc248929c03c6797b6d1dfd7f47cb4487ee693ca57a02b"
+    },
+    {
+      "file": "transport-baseline-reference-parent-v1.capture.partial.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/transport-baseline-reference-parent-v1.capture.partial.json",
+      "bytes": 35889,
+      "sha256": "7e9839c303038ff335df7d365d4d82ccaa7c8d39a7c6417f66b856dbd72e822a"
+    },
+    {
+      "file": "native-sampler-reconciliation-validation.json",
+      "source": "/private/tmp/sniper-native-sampler-reconciliation-20260909-jmjh55_s/proposal.json",
+      "bytes": 2886,
+      "sha256": "bd36f06c87256523cf53bf8774de198ab15cf73dad39cf1e394ca688d547642e"
+    },
+    {
+      "file": "heavy.recovery-81d8e97503c64012ac619ec0594fed74.json",
+      "source": "/private/tmp/sniper-native-work-501/heavy.recovery-81d8e97503c64012ac619ec0594fed74.json",
+      "bytes": 3345,
+      "sha256": "1a0c856e3e7241772894211a8140689740370c1198fabf105e0d6a1224089a24"
+    },
+    {
+      "file": "native-reference-baseline-v3-barrier.render.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-baseline-v3-barrier.render.json",
+      "bytes": 18702,
+      "sha256": "434df528ff802632f28ee8f769421c8176b4c8d2bdd8c03b21e56138f9c550fd"
+    },
+    {
+      "file": "native-reference-baseline-v3-barrier.capture.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-baseline-v3-barrier.capture.json",
+      "bytes": 49196,
+      "sha256": "12fb1e92adf31fb3b0025ecfde986b14011f12c830c0b92b5017573ccb4ac6d3"
+    },
+    {
+      "file": "native-reference-baseline-v3-barrier.resources.jsonl",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-baseline-v3-barrier.resources.jsonl",
+      "bytes": 13814,
+      "sha256": "b63d389e56cc2cc0c2d8a2f2453c1f80cf7ad04dcfb0b01b7b6f8b9dd5ae327a"
+    },
+    {
+      "file": "native-reference-candidate-v1-barrier.render.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-candidate-v1-barrier.render.json",
+      "bytes": 18759,
+      "sha256": "cb536c68d0d3a9ae40b8bb86e62936ac04d42cdfcae96edddb1bc64f6ad3bc83"
+    },
+    {
+      "file": "native-reference-candidate-v1-barrier.capture.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-candidate-v1-barrier.capture.json",
+      "bytes": 51036,
+      "sha256": "985dafec504118e51947bc2e014553a8bcccffe6bbba8a2c461b1cb3884a41de"
+    },
+    {
+      "file": "native-reference-candidate-v1-barrier.resources.jsonl",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-candidate-v1-barrier.resources.jsonl",
+      "bytes": 13813,
+      "sha256": "c6f9ce04d694fb21642b133eb1b40f6f79b2a0f01ccd47f8023c1da5a75d0cb1"
+    },
+    {
+      "file": "native-reference-paired-v1.parity.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-paired-v1.parity.json",
+      "bytes": 29942,
+      "sha256": "9dd1b2147911d61c912a30ed73c16737e5d94768d6d340532bff77b188b30afc"
+    },
+    {
+      "file": "native-reference-selected-pair-visual-review.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-selected-pair-visual-review.json",
+      "bytes": 4215,
+      "sha256": "a1c6b690e211de27bf2ed0703c26660f7758e59c44255c2405f85f1bd511956c"
+    },
+    {
+      "file": "transport-candidate-4320-v1.render.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/transport-candidate-4320-v1.render.json",
+      "bytes": 16205,
+      "sha256": "95f1848b63075c39774b077b423758a82184d11ca3984bae261b1f159b450b07"
+    },
+    {
+      "file": "transport-candidate-4320-v1.render.log",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/transport-candidate-4320-v1.render.log",
+      "bytes": 492098,
+      "sha256": "2a9635c6443a3ada4c88543684cd600274481aac00c9566a6cfb88b0c1356eee"
+    },
+    {
+      "file": "transport-candidate-4320-v1.resources.jsonl",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/transport-candidate-4320-v1.resources.jsonl",
+      "bytes": 165692,
+      "sha256": "7a48d5c6693772f2d10c11c643e6b97f619147ccdbb2293ba7449d7ea9fb6fca"
+    },
+    {
+      "file": "transport-candidate-4320-v1.memory-classification.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/transport-candidate-4320-v1.memory-classification.json",
+      "bytes": 7229,
+      "sha256": "28aae5823c509641190a3b486b5b060244ba93dc2446eaf0f356453dd37de6a0"
+    },
+    {
+      "file": "baseline-reference-selected-visual-review.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/baseline-reference-selected-visual-review.json",
+      "bytes": 2817,
+      "sha256": "0e39a9671ed51e93d0cd43e0aece055a590224407e39c8df2366fc9375f35455"
+    },
+    {
+      "file": "full-native-high-v5-url.render.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v5-url.render.json",
+      "bytes": 16151,
+      "sha256": "a80518ac6205f1a14ffe2c93006d7bf6e89c5505ad1d357df87e2a4426c513a9"
+    },
+    {
+      "file": "full-native-high-v6-url.render.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v6-url.render.json",
+      "bytes": 16151,
+      "sha256": "7999919e46eea60f9bab366054c6439dec5acda16929861c10204fd10d931303"
+    },
+    {
+      "file": "full-native-high-v7-url.render.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v7-url.render.json",
+      "bytes": 23986,
+      "sha256": "a32acd3fdedeed0116f4a5e057f9c3d77e174c9d24635de3d0776334a2cfa798"
+    },
+    {
+      "file": "full-native-high-v7-url.render.log",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v7-url.render.log",
+      "bytes": 691,
+      "sha256": "e26a2cd88fe2186ebeb8d87a2a0a3bac78bf292701a7804fc625450140d194f8"
+    },
+    {
+      "file": "full-native-high-v7-url.resources.jsonl",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v7-url.resources.jsonl",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "full-native-high-v8-url.render.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v8-url.render.json",
+      "bytes": 29571,
+      "sha256": "bb21bdc7a1a0a2050d7b8073474c23a79951e8715013a3bd31f0605d3a73697f"
+    },
+    {
+      "file": "full-native-high-v8-url.render.log",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v8-url.render.log",
+      "bytes": 1864309,
+      "sha256": "961deb845324b888b20b2c12ad0d5ff8d6c28031605eed49d538924d61dadade"
+    },
+    {
+      "file": "full-native-high-v8-url.resources.jsonl",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v8-url.resources.jsonl",
+      "bytes": 620645,
+      "sha256": "0acd02e60a08748ca71a8702ead68c4612fdba746c9a50abbec3f4cfc6898594"
+    },
+    {
+      "file": "full-native-high-v8-url.output-qc.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v8-url.output-qc.json",
+      "bytes": 31639,
+      "sha256": "bdad547c213cbc7a3f125be9384b45840adafc1d8c2eb89e0df1e66c78c4707f"
+    },
+    {
+      "file": "full-native-high-v8-url-output-qc.render.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v8-url-output-qc.render.json",
+      "bytes": 95541,
+      "sha256": "1cc6d10fb145f4e78ad8e0c375166f99b31ffec1927cf522f35dafa4d7862e9b"
+    },
+    {
+      "file": "full-native-high-v8-url-output-qc.resources.jsonl",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v8-url-output-qc.resources.jsonl",
+      "bytes": 3963,
+      "sha256": "665a2f8282c36056aafccf947594af16f73d24319188b4ec9db2691105a6de40"
+    },
+    {
+      "file": "full-native-high-v8-url-visual-frames.render.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v8-url-visual-frames.render.json",
+      "bytes": 121527,
+      "sha256": "0cc2891b019a614ce364cb128cdc5823114c5823602d3981b277732d35949288"
+    },
+    {
+      "file": "full-native-high-v8-url-source-comparison.render.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v8-url-source-comparison.render.json",
+      "bytes": 124496,
+      "sha256": "ef9120cfde478bef9bf3db8dadbf91e64ee5862a670334d8af2ed83c3a7123d5"
+    },
+    {
+      "file": "full-native-high-v8-url.root-checkpoint-review.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v8-url.root-checkpoint-review.json",
+      "bytes": 1880,
+      "sha256": "c3ebccbdf64486c658114f6d95eb967645b5b6975cc5783e1fa46be6bf10a4b3"
+    },
+    {
+      "file": "full-native-high-v8-url.independent-selected-picture-review.json",
+      "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v8-url.independent-selected-picture-review.json",
+      "bytes": 6039,
+      "sha256": "ac9b768adcf5d1dfaf796d15e42ab9a2cdae43a51bc0bb21c8ef7e1adca803dc"
+    },
+    {
+      "file": "full-native-high-v10-authority-v1.authority.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/full-native-high-v10-authority-v1.authority.json",
+      "bytes": 2014,
+      "sha256": "8a63c34cff20a6d450bb8d367d9f660dccb4c062f6963cbb9c00875601cedb2c"
+    },
+    {
+      "file": "full-native-high-v10-authority-v1.render.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/full-native-high-v10-authority-v1.render.json",
+      "bytes": 99065,
+      "sha256": "7e65d103f431757eefa463eba2eca7efc89886f84928b9d13ab99dbf58f5449a"
+    },
+    {
+      "file": "full-native-high-v10-authority-v1.render.log",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/full-native-high-v10-authority-v1.render.log",
+      "bytes": 279,
+      "sha256": "3ecd6cbf7b117b9c359b5df39f9e6c0d58ff2337b8ccca8e83817f9418dbf966"
+    },
+    {
+      "file": "full-native-high-v10-authority-v1.resources.jsonl",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/full-native-high-v10-authority-v1.resources.jsonl",
+      "bytes": 1343,
+      "sha256": "50636f796bb42197919880e53c01fdd85c9d8f9c592e96222e23e0df0ca2c73c"
+    },
+    {
+      "file": "full-native-high-v10-lossless-av-color.assembly-qc.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/full-native-high-v10-lossless-av-color.assembly-qc.json",
+      "bytes": 45726,
+      "sha256": "1ccb62f4729286552d6d279f612f4a7f02c32cdff981ac2094c125ff8ea629d6"
+    },
+    {
+      "file": "full-native-high-v10-lossless-av-color.render.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/full-native-high-v10-lossless-av-color.render.json",
+      "bytes": 98373,
+      "sha256": "c289f45ffa6b9994e72c6265be7ff4a3f45363c34cdbc3a52f68902553408c0b"
+    },
+    {
+      "file": "full-native-high-v10-lossless-av-color.render.log",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/full-native-high-v10-lossless-av-color.render.log",
+      "bytes": 946,
+      "sha256": "f31ec7fde46afd7b4592adee9699a410789f5a2210d9ffa9b0298ec3aa6c0549"
+    },
+    {
+      "file": "full-native-high-v10-lossless-av-color.resources.jsonl",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/full-native-high-v10-lossless-av-color.resources.jsonl",
+      "bytes": 22608,
+      "sha256": "a818abe73d0de286ee740e8b2fb47bb5de75617127378e8ac59b156f88359317"
+    },
+    {
+      "file": "full-native-high-v9-lossless-av-color.render.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/full-native-high-v9-lossless-av-color.render.json",
+      "bytes": 95422,
+      "sha256": "735a655b7fc7450bee79572d4822fb5ac170ae1ce099925713988bd97fb19a11"
+    },
+    {
+      "file": "full-native-high-v9-lossless-av-color.render.log",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/full-native-high-v9-lossless-av-color.render.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "full-native-high-v9-lossless-av-color.resources.jsonl",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/full-native-high-v9-lossless-av-color.resources.jsonl",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "attempt-a-baseline.json",
+      "source": "current saved package integrity and completed production evidence",
+      "bytes": 3112,
+      "sha256": "0ab610ee8e44767ab3b30a6ed6244fca41bc1c475a0c0267407a976f539e097a"
+    },
+    {
+      "file": "corrected-browser-whole-v2.browser-config.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/corrected-browser-whole-v2.browser-config.json",
+      "bytes": 572,
+      "sha256": "0ac55a27712897350d25184bbf130d1e56b7d0cc86bcee5a31255640e9a20f4f"
+    },
+    {
+      "file": "corrected-browser-whole-v2.browser-review.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/corrected-browser-whole-v2.browser-review.json",
+      "bytes": 5949,
+      "sha256": "43110fb7f95eecd1d5122a1b5c1eefac8add67f5446b097b6b7b291bb09dc74e"
+    },
+    {
+      "file": "corrected-browser-whole-v2.browser.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/corrected-browser-whole-v2.browser.json",
+      "bytes": 299852,
+      "sha256": "e886d87b8e84cdbaf001f99ddb0a4b2f9a778197a6b1cf003c04744d162b087a"
+    },
+    {
+      "file": "corrected-browser-whole-v2.render.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/corrected-browser-whole-v2.render.json",
+      "bytes": 2518752,
+      "sha256": "21f4cad6deba017836f600e2cdb914d5a9b97921b86fc1aca6f6835e51b058c9"
+    },
+    {
+      "file": "corrected-browser-whole-v2.render.log",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/corrected-browser-whole-v2.render.log",
+      "bytes": 24979,
+      "sha256": "f5271eb854dfcc98a62e4d1a2851473a5e2c1cbf6435b93883390933cbc03fac"
+    },
+    {
+      "file": "corrected-browser-whole-v2.resources.jsonl",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/corrected-browser-whole-v2.resources.jsonl",
+      "bytes": 149025,
+      "sha256": "26650579e23c6b0226c71ffd41feeedc13fa5639e30813aa7c4a742a63d54b32"
+    },
+    {
+      "file": "current-studio-full-source-v1.browser-config.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/current-studio-full-source-v1.browser-config.json",
+      "bytes": 576,
+      "sha256": "5130e843ee3423e077ca1fc008884042275573e4ade44f4b95809a6b84613c34"
+    },
+    {
+      "file": "current-studio-full-source-v1.browser.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/current-studio-full-source-v1.browser.json",
+      "bytes": 987215,
+      "sha256": "99e52ea28d5d1eaab6b42c8862efc3f1225bc35024e1aaf30c5fdecbbe35d643"
+    },
+    {
+      "file": "current-studio-full-source-v1.browser.json.partial.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/current-studio-full-source-v1.browser.json.partial.json",
+      "bytes": 565011,
+      "sha256": "24206400ce43afe8cc7d4013ce69761123e38fd9f78a0611fe0a04005f3e7688"
+    },
+    {
+      "file": "current-studio-full-source-v1.render.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/current-studio-full-source-v1.render.json",
+      "bytes": 2519164,
+      "sha256": "3e3ddc521f6a418e609c8087bce229671ec4ea137e01f2865a23c86ea70e2f71"
+    },
+    {
+      "file": "current-studio-full-source-v1.render.log",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/current-studio-full-source-v1.render.log",
+      "bytes": 6093,
+      "sha256": "799ac37f9d8b28bdf2696905a45b96a2078ae82c24b0e53de038b3a7383a8788"
+    },
+    {
+      "file": "current-studio-full-source-v1.resources.jsonl",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/current-studio-full-source-v1.resources.jsonl",
+      "bytes": 14104,
+      "sha256": "39ed2d0b49540e360c1696724c4695dca3e21ecde4870e345f34839bfbce2b3c"
+    },
+    {
+      "file": "current-studio-full-source-v1.studio-config.json",
+      "source": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/current-studio-full-source-v1.studio-config.json",
+      "bytes": 504,
+      "sha256": "552e92d0eef78951bf807723bcfad6a5946ab47e3ecf6aed7d99dfd201200e24"
+    },
+    {
+      "file": "attempt-a-final-handoff.json",
+      "source": "External baseline handoff authored after terminal output and Studio checks; archive unchanged",
+      "bytes": 6829,
+      "sha256": "6499692cfe3418fd45434ab32ad0181381ea89a897fa04e4df627b9c2956cf1d"
+    }
+  ],
+  "updatedAt": "2026-09-09T21:36:18.432874+00:00"
+}

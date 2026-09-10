@@ -13,8 +13,8 @@ Pipeline for one run:
    → opaque ``.mp4`` takeover.
 2. COMPOSITE every clip onto the base in ONE ffmpeg pass — each clip's PTS is
    shifted to its ``outStart`` and it is ``enable``-gated to its window (§5.5.3).
-   More than ``_CHUNK`` overlays split into extra passes to keep the filter graph
-   robust; the frame count is asserted unchanged (±1) so the timeline can't drift.
+   Overlay count does not add full-duration picture generations; the frame count
+   is asserted unchanged (±1) so the timeline cannot drift.
 3. SUPPRESS captions under own-screen takeovers: any burned-caption ASS event that
    overlaps a takeover window is dropped from ``--ass`` into ``--ass-out`` (§2.1 —
    the screen IS the visual; stacking captions on the takeover is double load).
@@ -30,7 +30,6 @@ CLI: graphics_stage.py <video_in> <graphics_track.json> <video_out>
 
 from __future__ import annotations
 
-import argparse
 import json
 import os
 import sys
@@ -50,57 +49,20 @@ from graphics.composite_core import (
     probe_frames as _probe_frames,
     run_command as _run,
 )
+from graphics.caption_suppression import _overlaps, suppress_captions
+from graphics.frame_quantization import bind_graphic_frame_windows, require_graphic_frame_clock
 from graphics.exit_on_cut import TAKEOVER_BASES
-from graphics.graphics_render import render_entry
+from graphics.graphics_render import render_entry_at_rate as render_entry
 from graphics.pip_hole import entry_has_hole, hole_clip_fields
 from graphics.placement_verify import (VerifyContext, resolve_severity,
                                        run_verify)
 from graphics.stage_placement import emit, resolve_placement
+from graphics.owned_execution import (
+    GraphicsComposition, OwnedGraphicsExecution, compose_owned, current, render_owned,
+)
 from planner import geometry_calibration
 
 
-# --------------------------------------------------------------------------- #
-# Caption suppression under own-screen takeovers (§2.1)
-# --------------------------------------------------------------------------- #
-def _ass_time_to_s(stamp: str) -> float:
-    """ASS ``H:MM:SS.cc`` timestamp → seconds."""
-    hours, minutes, seconds = stamp.split(":")
-    return int(hours) * 3600 + int(minutes) * 60 + float(seconds)
-
-
-def _overlaps(start: float, end: float, windows: list[tuple[float, float]]) -> bool:
-    """True if ``[start, end)`` intersects any ``[w0, w1)`` takeover window."""
-    return any(start < w1 and end > w0 for w0, w1 in windows)
-
-
-def suppress_captions(ass_in: str, ass_out: str,
-                      windows: list[tuple[float, float]]) -> int:
-    """Copy ``ass_in`` → ``ass_out``, dropping Dialogue events under takeovers.
-
-    A ``Dialogue:`` line whose start/end (fields 2 and 3) overlaps any window is
-    omitted; every other line — headers, styles, format rows, non-overlapping
-    events — is passed through verbatim. Returns the dropped-event count.
-    """
-    with open(ass_in, encoding="utf-8") as f:
-        lines = f.readlines()
-    kept: list[str] = []
-    dropped = 0
-    for line in lines:
-        if line.startswith("Dialogue:") and windows:
-            fields = line.split(":", 1)[1].split(",")
-            start, end = _ass_time_to_s(fields[1]), _ass_time_to_s(fields[2])
-            if _overlaps(start, end, windows):
-                dropped += 1
-                continue
-        kept.append(line)
-    with open(ass_out, "w", encoding="utf-8") as f:
-        f.writelines(kept)
-    return dropped
-
-
-# --------------------------------------------------------------------------- #
-# Orchestration
-# --------------------------------------------------------------------------- #
 @dataclass
 class GraphicsJob:
     """One graphics-stage run (keeps the entry point ≤4 params)."""
@@ -120,6 +82,8 @@ class GraphicsJob:
     #                                  the A3 residual ledger (calibration)
     band_y_offset_px: float = 0.0    # plan captions.bandYOffsetPx — occupancy
     #                                  models the band where captions render
+    graphic_frame_clock: tuple[str, int] | None = None  # Internal exact-frame opt-in.
+    owned_graphics: OwnedGraphicsExecution | None = None  # Internal live owner only.
 
 
 def _clip_record(entry: dict, rendered: dict, video_in: str,
@@ -139,9 +103,12 @@ def _clip_record(entry: dict, rendered: dict, video_in: str,
     if entry.get("placement") is not None:
         clip["placed"] = True
     for source, target in (("scaledDims", "scaleDims"),
-                           ("placedBBox", "placedBBox")):
+                           ("placedBBox", "placedBBox"),
+                           ("expandedFace", "expandedFace")):
         if meta.get(source):
             clip[target] = meta[source]
+    if meta.get("faceAware"):
+        clip["faceAware"] = True
     if entry_has_hole(entry):
         clip["pipHole"] = hole_clip_fields(entry, video_in)
         emit(stage="graphics", status="pip_hole", kind=rendered["kind"],
@@ -150,26 +117,27 @@ def _clip_record(entry: dict, rendered: dict, video_in: str,
     return clip
 
 
-def _render_all(track: list[dict], cache_dir: str | None, video_in: str,
-                band_y_offset_px: float = 0.0) -> tuple[list[dict], list[dict]]:
-    """Render/reuse every entry; return ``(overlay clips, eye-trace rows)``.
+def _clip_fps(video_in: str) -> object:
+    """Exact-stream rate projected to HyperFrames' positive numeric CLI."""
+    from media_probe import _fps_fraction, probe_video
+    fps = _fps_fraction(probe_video(video_in)["r_frame_rate"])
+    if fps <= 0:
+        raise RuntimeError("graphics base video has no positive frame rate")
+    return fps
 
-    The anchor (for focus-shift blur) and the resolved face-relative ``(x, y)``
-    offset are attached here so ``_build_graph`` stays a pure string-builder. The
-    offset comes from Placement v2 (absolute free-space placement) using the
-    just-rendered clip + the base ``video_in``; the status line carries the chosen
-    region so a mis-place is visible in the log. The second list is one
-    ``eye_trace.placement_row`` per entry (gaze read + landed bbox distance) —
-    ``run_graphics_stage`` persists it for the Audit B advisory (LIAM move 4).
-    """
+
+def _render_all(job: GraphicsJob) -> tuple[list[dict], list[dict]]:
+    """Render/reuse entries with Placement v2 and emit Audit B eye-trace rows."""
     clips: list[dict] = []
     rows: list[dict] = []
-    canvas = _clip_dims(video_in)
-    for entry in track:
-        res = render_entry(entry, cache_dir)
+    video_in, canvas = job.video_in, _clip_dims(job.video_in)
+    fps, owned = _clip_fps(video_in), current(job)
+    for order, entry in enumerate(job.track):
+        res = (render_owned(owned, entry, order) if owned
+               else render_entry(entry, job.cache_dir, fps))
         anchor = entry.get("anchor", "free-band")
         x, y, meta = resolve_placement(entry, res["path"], video_in,
-                                       band_y_offset_px)
+                                       job.band_y_offset_px)
         x, y, meta = _delivery_geometry(res["path"], (x, y), meta, canvas)
         meta = _fallback_placement_evidence(res["path"], (x, y), meta, canvas)
         row = placement_row(entry, meta, canvas)
@@ -183,6 +151,20 @@ def _render_all(track: list[dict], cache_dir: str | None, video_in: str,
              outStart=float(entry["outStart"]), outEnd=float(entry["outEnd"]))
         clips.append(_clip_record(entry, res, video_in, (x, y, meta)))
     return clips, rows
+
+
+def _compose_actual(job: GraphicsJob, clips: list[dict]) -> tuple[int, dict]:
+    """Keep one ordinary graph; an owned encode returns its exact prefix proof."""
+    clock, owned = job.graphic_frame_clock, current(job)
+    options = _PassOpts(eof_pass=job.eof_pass, ydif_file=job.ydif_file,
+                       frame_rate=clock[0] if clock else None, video_only=clock is not None)
+    if owned is None:
+        return composite(job.video_in, clips, job.video_out, options), {}
+    if clock is None or not job.eof_pass:
+        raise RuntimeError("owned graphics requires an exact-frame EOF-pass composition")
+    value = GraphicsComposition(job.video_in, job.video_out, tuple(clips), options,
+                                tuple(_clip_dims(job.video_in)), clock)
+    return 1, {"ownedCompositionEvidence": compose_owned(owned, value)}
 
 
 def _passthrough(job: GraphicsJob) -> None:
@@ -210,47 +192,58 @@ def _clear_stale_placements(placements_out: str | None) -> None:
          reason="empty graphicsTrack owes no placements evidence")
 
 
+def _write_placements(path: str | None, rows: list[dict]) -> None:
+    """Persist placement evidence when the caller requested a sidecar."""
+    if not path:
+        return
+    with open(path, "w") as handle:
+        json.dump(rows, handle, indent=1)
+    emit(stage="graphics", status="placements_written",
+         out=path, entries=len(rows))
+
+
 def run_graphics_stage(job: GraphicsJob) -> dict:
     """Render → composite → assert frames → suppress takeover captions."""
-    if not job.track:
+    clock = job.graphic_frame_clock
+    owned = current(job)
+    if owned is not None and (clock is None or not job.eof_pass):
+        raise RuntimeError("owned graphics requires an exact-frame EOF-pass composition")
+    if clock is not None:
+        clock = require_graphic_frame_clock(clock, (_clip_fps(job.video_in), _probe_frames(job.video_in)))
+        bind_graphic_frame_windows(job.track, clock)  # Fail before any catalog execution.
+    if not job.track and owned is None:
         _clear_stale_placements(job.placements_out)
         _passthrough(job)
         emit(stage="graphics", status="passthrough", reason="no graphics")
         return {"graphics": 0, "passes": 0, "out": job.video_out}
 
-    clips, rows = _render_all(job.track, job.cache_dir, job.video_in,
-                              job.band_y_offset_px)
-    if job.placements_out:
-        # Eye-trace placements sidecar (LIAM move 4): the gaze read + landed
-        # bbox per entry, persisted where Audit B can find it (advisory WARN).
-        with open(job.placements_out, "w") as f:
-            json.dump(rows, f, indent=1)
-        emit(stage="graphics", status="placements_written",
-             out=job.placements_out, entries=len(rows))
-    frames_in = _probe_frames(job.video_in)
-    passes = composite(job.video_in, clips, job.video_out,
-                       _PassOpts(eof_pass=job.eof_pass, ydif_file=job.ydif_file))
-    frames_out = _probe_frames(job.video_out)
-    if abs(frames_out - frames_in) > 1:
-        raise RuntimeError(
-            f"graphics compositing changed the timeline: {frames_in} -> "
-            f"{frames_out} frames (tolerance 1)")
+    clips, rows = _render_all(job)
+    clips = bind_graphic_frame_windows(clips, clock) if clock is not None else clips
+    _write_placements(job.placements_out, rows)
+    frames_in = clock[1] if clock is not None else _probe_frames(job.video_in)
+    passes, owned_evidence = _compose_actual(job, clips)
+    frames_out = _verified_frame_count(job, frames_in)
     emit(stage="graphics", status="composited", passes=passes,
          clips=len(clips), frames_in=frames_in, frames_out=frames_out)
     if job.producer_dir:
         # Journal BEFORE verify: even a verify-blocked run yields honest
         # residual samples (the measurement succeeded; the placement didn't).
         geometry_calibration.journal_actuals(job.producer_dir, rows, emit)
-    # Default-on post-composite verify (v3 item #5): WARN-with-evidence until
-    # the A3 margin ledger calibrates, then FAIL; allow-vocabulary SKIPs and
-    # operator-pin WARNs inside — a WARN-mode hit NEVER raises.
+    # Existing post-composite verification keeps its A3-calibrated severity.
     severity, note = resolve_severity(job.producer_dir)
     run_verify(clips, job.video_out,
                VerifyContext(severity=severity, occlusions=job.occlusions,
                              emit=emit, note=note))
 
     summary = {"graphics": len(clips), "passes": passes, "out": job.video_out,
-               "frames_in": frames_in, "frames_out": frames_out}
+               "frames_in": frames_in, "frames_out": frames_out, **owned_evidence}
+    _suppress_authored_captions(job, summary)
+    current(job)
+    return summary
+
+
+def _suppress_authored_captions(job: GraphicsJob, summary: dict) -> None:
+    """Retain the ordinary takeover/text-caption rule for both execution paths."""
     if job.ass_in and job.ass_out:
         # Own-screen takeovers always suppress; a free-band TEXT card whose
         # copy verbatim-matches the spoken words may declare suppressCaptions
@@ -263,53 +256,22 @@ def run_graphics_stage(job: GraphicsJob) -> dict:
         emit(stage="graphics", status="captions_suppressed",
              takeovers=len(windows), dropped=dropped, out=job.ass_out)
         summary["captions_dropped"] = dropped
-    return summary
+
+
+def _verified_frame_count(job: GraphicsJob, frames_in: int) -> int:
+    """Retain legacy tolerance; exact-frame callers cannot lose or gain a frame."""
+    frames_out = _probe_frames(job.video_out)
+    tolerance = 0 if job.graphic_frame_clock is not None else 1
+    if abs(frames_out - frames_in) > tolerance:
+        raise RuntimeError(f"graphics compositing changed the timeline: {frames_in} -> "
+                           f"{frames_out} frames (tolerance {tolerance})")
+    return frames_out
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="PRODUCER MG stage: graphics compositing")
-    ap.add_argument("video_in")
-    ap.add_argument("track_path", help="the plan's graphicsTrack array (JSON)")
-    ap.add_argument("video_out")
-    ap.add_argument("--cache-dir", default=None,
-                    help="content-hash render cache (default: templates/motion/renders/cache)")
-    ap.add_argument("--ass", dest="ass_in", default=None,
-                    help="burned-caption ASS to filter under own-screen takeovers")
-    ap.add_argument("--ass-out", dest="ass_out", default=None,
-                    help="where the filtered ASS is written (required with --ass)")
-    ap.add_argument("--placements-out", default=None,
-                    help="write the eye-trace placements sidecar here (Audit B)")
-    ap.add_argument("--occlusions", default=None,
-                    help="JSON file {broll:[[s,e]..], cards:[[s,e]..]} — plan "
-                         "windows the verify allow-vocabulary excuses")
-    ap.add_argument("--producer-dir", default=None,
-                    help="producer dir owning geometry_predictions.json + the "
-                         "A3 residual ledger (flips verify WARN→FAIL)")
-    ap.add_argument("--band-y-offset", type=float, default=0.0,
-                    help="plan captions.bandYOffsetPx — model the caption "
-                         "band where the captions actually render")
-    args = ap.parse_args()
-    if bool(args.ass_in) != bool(args.ass_out):
-        ap.error("--ass and --ass-out must be given together")
-    try:
-        with open(args.track_path) as f:
-            track = json.load(f)
-        occlusions = None
-        if args.occlusions:
-            with open(args.occlusions) as f:
-                occlusions = json.load(f)
-        job = GraphicsJob(video_in=args.video_in, video_out=args.video_out,
-                          track=track, cache_dir=args.cache_dir,
-                          ass_in=args.ass_in, ass_out=args.ass_out,
-                          placements_out=args.placements_out,
-                          occlusions=occlusions,
-                          producer_dir=args.producer_dir,
-                          band_y_offset_px=args.band_y_offset)
-        summary = run_graphics_stage(job)
-        emit(status="done", **summary)
-    except (OSError, json.JSONDecodeError, KeyError, ValueError, RuntimeError) as exc:
-        emit(error=str(exc))
-        sys.exit(1)
+    """Keep the existing ordinary CLI; owned execution is not a command flag."""
+    from graphics.graphics_stage_cli import main as cli_main
+    cli_main()
 
 
 if __name__ == "__main__":

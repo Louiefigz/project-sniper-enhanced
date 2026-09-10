@@ -20,7 +20,7 @@ import {
 import { streamProgressMessage } from "@/lib/producer/project-state";
 import {
   editorBrainLabel,
-  launchAutoEditFromPalmier,
+  launchAutoEditFromHyperframes,
   useEditorRuntime,
 } from "../use-editor-runtime";
 
@@ -45,7 +45,7 @@ function foldRenderReviewEvent(
     return;
   }
   if (ev.status === "base_rebuild_start") {
-    setReMsg("Rebuilding base (~3 min)…");
+    setReMsg("Rebuilding the base; elapsed time is tracked with this run…");
     return;
   }
   if (ev.status === "refit") {
@@ -207,12 +207,12 @@ export function usePlanActions(a: Args) {
   const reRender = useCallback(async () => {
     if (argsRef.current.dirty && !(await save())) return;
     setReState("running");
-    setReMsg(`Opening Palmier before ${brain} starts review…`);
+    setReMsg(`${brain} is starting the reviewed MP4 pipeline…`);
     invalidatePreviewAuthority();
     const prog: ReProgress = { refits: 0, baseRebuilt: false };
     let approved = false;
     try {
-      const res = await launchAutoEditFromPalmier({
+      const res = await launchAutoEditFromHyperframes({
         dir: argsRef.current.base,
         request: { dir: argsRef.current.base, reviewSavedPlan: true },
       });

@@ -26,8 +26,10 @@ from graphics.intro_semantic_binding import (
 from graphics.style_profiles import (compatible_kinds, forms_for_shape,
                                      profile as visual_profile,
                                      profile_name)
+from graphics.template_catalog_contract import SPOKEN_NUMBER_KINDS
 from graphics.template_contract import template_catalog
 from planner import motion_triggers as mt
+from claims_contract import window_values
 from planner.graphics_planner_rules import UNIT_NOUNS, is_generic_entity
 from producer_config import MOTION
 
@@ -182,6 +184,25 @@ def _wide_forms(row: dict, catalog: dict[str, dict]) -> list[str]:
             and is_aspect_legal_kind(kind, "16:9")]
 
 
+def _speakable_forms(forms: list[str], words: list[dict], row: dict) -> list[str]:
+    """Drop number-painting kinds when the beat's card window speaks no number.
+
+    chart-story/count-up need numeric spec values and claims_contract owes each
+    painted number to the spoken window, so for a number-free beat they are
+    unauthorable — and a feasibility gate must never demand them. The window
+    is the beat's evidence span extended to the minimum long-form hold.
+    """
+    if not any(kind in SPOKEN_NUMBER_KINDS for kind in forms):
+        return forms
+    start = float(row["outStart"])
+    end = max(float(row.get("outEnd", start)), start + float(MOTION["hold_min_s"]["longform"]))
+    inside = [w for w in words if start <= float(w.get("start", 0.0)) <= end]
+    values, _raws = window_values(inside)
+    if values:
+        return forms
+    return [kind for kind in forms if kind not in SPOKEN_NUMBER_KINDS]
+
+
 def _beat_id(row: dict) -> str:
     raw = f"{row['shape']}|{round(row['outStart'] * 1000)}|{row['evidence']}"
     return "intro-" + hashlib.sha256(raw.encode("utf-8")).hexdigest()[:12]
@@ -226,8 +247,8 @@ def semantic_beats(words: list[dict], out_dur: float,
         if shape != row["shape"]:
             shaped["sourceShape"] = row["shape"]
         info_forms = forms_for_shape(selected_profile, shape) if profile_cfg else []
-        forms = compatible_kinds(selected_profile, info_forms) if profile_cfg \
-            else _wide_forms(row, catalog)
+        forms = _speakable_forms(compatible_kinds(selected_profile, info_forms) if profile_cfg
+                                 else _wide_forms(row, catalog), words, row)
         fields = {"compatibleForms": info_forms,
                   "preferredForm": info_forms[0] if info_forms else None,
                   "visualProfile": selected_profile} if profile_cfg else {}

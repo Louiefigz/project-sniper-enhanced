@@ -77,17 +77,34 @@ from planner import icon_library as ilib
 from planner import icon_lucide as ilu
 import plan_lint_smooth as pls
 import plan_lint_comps as plcaps
+from graphics import comp_catalog_probe as _cap_probe
+from graphics import comp_capabilities as _caps
+from graphics.comp_capability_artifact import build_artifact as _build_cap_artifact
 from cut_speed import display_dims as ct_display_dims
 from audit import audit_motion as amot
 
 # HERMETIC MATRIX: templates/motion/comp_capabilities.json is repo STATE (the
 # probe may be absent, partial, or complete on any machine) — fixture-based
 # lint tests must never read it, or the suite's verdicts drift with the file.
-# Point the default at a guaranteed-missing path (fresh temp dir, no file);
-# plan_lint_comps resolves this as the documented SKIP-with-evidence path.
-# test_plan_lint_comps passes explicit synthetic fixture paths instead.
-plcaps.DEFAULT_MATRIX_PATH = os.path.join(
-    tempfile.mkdtemp(prefix="sniper-no-matrix-"), "comp_capabilities.json")
+# Build a static, release-ready synthetic inventory instead. This keeps normal
+# plan fixtures capability-clean while test_plan_lint_comps supplies targeted
+# missing/stale/error artifacts explicitly.
+_cap_dir = tempfile.mkdtemp(prefix="sniper-test-matrix-")
+_cap_path = os.path.join(_cap_dir, "comp_capabilities.json")
+_cap_rows = _cap_probe.build_catalog("", 1, True)["comps"]
+for _cap_row in _cap_rows.values():
+    _cap_w, _cap_h = _cap_row["canvas"]
+    _cap_row.update({
+        "fadeClass": "fades-clean",
+        "terminalAlpha": {"maxAlpha8": 0, "meanAlpha8": 0.0},
+        "contentBBox": [0, 0, _cap_w - 1, _cap_h - 1],
+    })
+with open(_cap_path, "w", encoding="utf-8") as _cap_handle:
+    json.dump(_build_cap_artifact(_cap_rows), _cap_handle)
+plcaps.DEFAULT_MATRIX_PATH = _cap_path
+_caps._MATRIX_PATH = _cap_path
+_caps._matrix_cache = None
+_caps._matrix_error = None
 
 # The longform edit-brain tools (retake_scan / pause_scan) reuse study_edit_diff,
 # which needs rapidfuzz. Keep selftest stdlib-runnable: skip their cases if it's

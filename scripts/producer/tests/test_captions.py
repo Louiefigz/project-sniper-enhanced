@@ -131,6 +131,42 @@ class AspectGeometryTests(unittest.TestCase):
     def test_unknown_aspect_falls_back_to_portrait(self) -> None:
         self.assertEqual(cap.caption_cfg_for_aspect("21:9")["canvas"]["height"], 1920)
 
+    def test_lint_accepts_v1_track_and_rejects_ghost_timed_text(self) -> None:
+        plan = good_plan()
+        plan["captionsTrack"] = {
+            "schemaVersion": 1, "source": "kept-transcript",
+            "defaultPolicy": "karaoke", "groups": [],
+        }
+        self.assertFalse(any(
+            "CaptionTrackV1" in error
+            for error in pl.lint(plan, MANIFEST).errors))
+        plan["captionsTrack"] = [{
+            "outStart": 0, "outEnd": 1, "text": "ghost",
+        }]
+        self.assertTrue(any(
+            "CaptionTrackV1" in error
+            for error in pl.lint(plan, MANIFEST).errors))
+
+    def test_semantic_chapters_require_longform_caption_authority(self) -> None:
+        plan = good_plan()
+        plan["target"]["mode"] = "longform"
+        plan["captions"]["burn"] = False
+        plan["captionsTrack"] = {
+            "schemaVersion": 1, "source": "kept-transcript",
+            "defaultPolicy": "line", "groups": [],
+        }
+        plan["captionChapters"] = [{
+            "chapterId": "chapter-intro", "title": "Intro",
+            "wordId": "w-1111111111111111",
+        }]
+        errors = pl.lint(plan, MANIFEST).errors
+        self.assertFalse(any("captionChapters" in error for error in errors),
+                         errors)
+        plan["target"]["mode"] = "short"
+        self.assertTrue(any(
+            "captionChapters are longform-only" in error
+            for error in pl.lint(plan, MANIFEST).errors))
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
 

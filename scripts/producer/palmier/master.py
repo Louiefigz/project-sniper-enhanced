@@ -7,6 +7,7 @@ import re
 from dataclasses import dataclass
 from datetime import datetime
 
+from cut_delivery_authority import DELIVERY_NAME, verify_delivered_cuts
 from fingerprints import file_sha256
 from ingest_probe import probe_media
 from palmier.mcp_client import PalmierError
@@ -32,6 +33,7 @@ class MasterFacts:
     width: int
     height: int
     end_frame: int
+    frame_rate: str | None = None
 
 
 def _json(path: str, label: str) -> dict:
@@ -137,6 +139,24 @@ def _managed_approval(out_dir: str, ctx: dict, final_path: str) -> None:
     _job(out_dir, ctx, approval, authority)
 
 
+def _exact_end_frame(out_dir: str, final: str,
+                     plan_path: str, fallback: int) -> int:
+    """Prefer sealed cut lineage over duration math susceptible to AAC padding."""
+    delivery = os.path.join(out_dir, DELIVERY_NAME)
+    if not os.path.isfile(delivery):
+        return fallback
+    plan = _json(plan_path, "edit plan")
+    try:
+        proof = verify_delivered_cuts(out_dir, final, plan)
+    except (OSError, RuntimeError, TypeError, ValueError) as exc:
+        raise PalmierError(
+            f"approved visual master cut delivery is stale: {exc}") from exc
+    if proof.frames <= 0:
+        raise PalmierError(
+            "approved visual master cut delivery resolves to no frames")
+    return proof.frames
+
+
 def authority_hash(out_dir: str, plan_hash: str) -> str:
     """Prove final.mp4 was assembled from this plan and remains unchanged."""
     final = os.path.join(out_dir, "final.mp4")
@@ -150,7 +170,34 @@ def authority_hash(out_dir: str, plan_hash: str) -> str:
     if proof.get("authorityHash") != actual:
         raise PalmierError(
             "Sniper final changed after its provenance checkpoint")
+    _caption_authority(out_dir, proof)
     return actual
+
+
+def _caption_authority(out_dir: str, proof: dict) -> None:
+    """Verify the caption generation cross-bound by final provenance."""
+    if "captionFingerprint" not in proof:
+        return
+    expected = proof.get("captionAuthorityHash")
+    if not isinstance(expected, str) or not _SHA.fullmatch(expected):
+        raise PalmierError(
+            "first-class caption final has no bound caption authority")
+    authority = _json(
+        os.path.join(out_dir, "caption_authority.json"), "caption authority")
+    if authority.get("authorityHash") != expected:
+        raise PalmierError("caption authority does not match final provenance")
+    files = authority.get("files")
+    if not isinstance(files, dict):
+        raise PalmierError("caption authority has no file closure")
+    for record in files.values():
+        if not isinstance(record, dict) or set(record) != {"name", "sha256"}:
+            raise PalmierError("caption authority file record is malformed")
+        name = record["name"]
+        if not isinstance(name, str) or os.path.basename(name) != name:
+            raise PalmierError("caption authority file name is unsafe")
+        path = os.path.join(out_dir, name)
+        if not os.path.isfile(path) or file_sha256(path) != record["sha256"]:
+            raise PalmierError(f"caption authority file is stale: {name}")
 
 
 def approved_master(out_dir: str, plan_path: str, manifest_path: str,
@@ -173,13 +220,17 @@ def approved_master(out_dir: str, plan_path: str, manifest_path: str,
         probe = probe_media(final)
     except (OSError, RuntimeError, ValueError) as exc:
         raise PalmierError(f"cannot probe approved visual master: {exc}") from exc
-    facts = (probe.duration, probe.fps, probe.width, probe.height)
+    facts = (probe.duration, probe.fps, probe.width, probe.height,
+             getattr(probe, "frame_rate", None))
     if any(value is None for value in facts) or probe.vfr:
         raise PalmierError(
             "approved visual master requires CFR video with duration, fps, and canvas")
     project_fps = round(float(probe.fps))
-    end_frame = round(float(probe.duration) * project_fps)
+    duration_frames = round(float(probe.duration) * project_fps)
+    end_frame = _exact_end_frame(
+        out_dir, final, plan_path, duration_frames)
     if project_fps <= 0 or end_frame <= 0:
         raise PalmierError("approved visual master resolves to no timeline frames")
-    return MasterFacts(final, actual, float(probe.duration), float(probe.fps),
-                       int(probe.width), int(probe.height), end_frame)
+    return MasterFacts(
+        final, actual, float(probe.duration), float(probe.fps),
+        int(probe.width), int(probe.height), end_frame, probe.frame_rate)

@@ -1,0 +1,637 @@
+{
+  "schemaVersion": 1,
+  "kind": "program-audio-mix-registry",
+  "scanRoot": "scripts/producer",
+  "discoveryTokens": [
+    "amix=inputs=",
+    "amerge=inputs=",
+    "join=inputs=",
+    "acrossfade=",
+    "sidechaincompress=",
+    "v=0:a=1"
+  ],
+  "consumers": [
+    {
+      "id": "music-final-program-mix",
+      "path": "scripts/producer/audio/audio_mix.py",
+      "sourceToken": "[d][b]amix=inputs=2",
+      "expectedOccurrences": 1,
+      "consumerKind": "program-mix",
+      "normalizationAuthority": "run_audio_mix materializes the content-bound first-audio receipt to stereo PCM before every pass",
+      "authorityPaths": [
+        "scripts/producer/audio/channel_normalization.py",
+        "scripts/producer/audio/channel_normalization_media.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_channel_normalization_mix_paths.py"
+      ],
+      "exemption": null
+    },
+    {
+      "id": "music-sidechain-program-control",
+      "path": "scripts/producer/audio/audio_mix.py",
+      "sourceToken": "[bed][key]sidechaincompress=",
+      "expectedOccurrences": 1,
+      "consumerKind": "program-control",
+      "normalizationAuthority": "the sidechain key reads the same materialized normalized program used by the final amix",
+      "authorityPaths": [
+        "scripts/producer/audio/channel_normalization.py",
+        "scripts/producer/audio/channel_normalization_media.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_channel_normalization_mix_paths.py"
+      ],
+      "exemption": null
+    },
+    {
+      "id": "music-loop-bed-asset-mix",
+      "path": "scripts/producer/audio/audio_mix_bed.py",
+      "sourceToken": "[tail][head]amix=inputs=2",
+      "expectedOccurrences": 1,
+      "consumerKind": "asset-only-mix",
+      "normalizationAuthority": "not applicable because both legs are overlapping windows of one music asset and no program or dialogue leg enters",
+      "authorityPaths": [
+        "scripts/producer/audio/audio_mix_bed.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_audio_mix_render.py"
+      ],
+      "exemption": "asset-only seam smoothing; neither input is program dialogue"
+    },
+    {
+      "id": "music-loop-bed-asset-concat",
+      "path": "scripts/producer/audio/audio_mix_bed.py",
+      "sourceToken": "[x][body]concat=n=2:v=0:a=1",
+      "expectedOccurrences": 1,
+      "consumerKind": "asset-only-mix",
+      "normalizationAuthority": "not applicable because both concat legs are windows of the same normalized music-bed asset",
+      "authorityPaths": [
+        "scripts/producer/audio/audio_mix_bed.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_audio_mix_render.py"
+      ],
+      "exemption": "asset-only music length fitting; no program or dialogue input exists"
+    },
+    {
+      "id": "demucs-derived-stem-remix",
+      "path": "scripts/producer/audio/audio_separate.py",
+      "sourceToken": "[1:a][res]amix=inputs=2",
+      "expectedOccurrences": 1,
+      "consumerKind": "derived-program-mix",
+      "normalizationAuthority": "run_separate observes the source and extract_wav repairs it before Demucs derives both remix stems",
+      "authorityPaths": [
+        "scripts/producer/audio/audio_separate.py",
+        "scripts/producer/audio/channel_normalization.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_channel_normalization_mix_paths.py"
+      ],
+      "exemption": null
+    },
+    {
+      "id": "exact-dialogue-program-mix",
+      "path": "scripts/producer/audio/dialogue_program_media.py",
+      "sourceToken": "amix=inputs={count}:duration=first",
+      "expectedOccurrences": 1,
+      "consumerKind": "program-mix",
+      "normalizationAuthority": "the dialogue input is exact mono PCM whose source proofs each contain a verified channel-normalization receipt; auxiliary roles are separately pinned",
+      "authorityPaths": [
+        "scripts/producer/audio/dialogue_stem_probe.py",
+        "scripts/producer/audio/dialogue_stem_receipt.py",
+        "scripts/producer/audio/dialogue_program_render.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_p2_dialogue_stem_render.py",
+        "scripts/producer/tests/test_p2_dialogue_program_render.py"
+      ],
+      "exemption": null
+    },
+    {
+      "id": "exact-dialogue-entry-mix",
+      "path": "scripts/producer/audio/dialogue_stem_mix.py",
+      "sourceToken": "amix=inputs={len(placements) + 1}",
+      "expectedOccurrences": 1,
+      "consumerKind": "derived-program-mix",
+      "normalizationAuthority": "every placement is cut from a mono PCM source decoded only after its pinned channel-normalization receipt is proved",
+      "authorityPaths": [
+        "scripts/producer/audio/dialogue_stem_probe.py",
+        "scripts/producer/audio/dialogue_stem_render.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_p2_dialogue_stem_render.py"
+      ],
+      "exemption": null
+    },
+    {
+      "id": "sfx-library-synthesis-mix",
+      "path": "scripts/producer/audio/sfx_library.py",
+      "sourceToken": "[hb][mb][lb]amix=inputs=3",
+      "expectedOccurrences": 1,
+      "consumerKind": "asset-only-mix",
+      "normalizationAuthority": "not applicable because all three legs are generated frequency bands of one seeded SFX asset",
+      "authorityPaths": [
+        "scripts/producer/audio/sfx_library.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_sfx_icons.py"
+      ],
+      "exemption": "asset-only SFX synthesis; no program or dialogue input exists"
+    },
+    {
+      "id": "transition-whoosh-synthesis-mix",
+      "path": "scripts/producer/motion/transitions.py",
+      "sourceToken": "[hb][mb][lb]amix=inputs=3",
+      "expectedOccurrences": 1,
+      "consumerKind": "asset-only-mix",
+      "normalizationAuthority": "not applicable because all three legs synthesize one deterministic whoosh asset before it reaches the program mix",
+      "authorityPaths": [
+        "scripts/producer/motion/transitions.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_motion.py"
+      ],
+      "exemption": "asset-only whoosh synthesis; no program or dialogue input exists"
+    },
+    {
+      "id": "transition-program-sfx-mix",
+      "path": "scripts/producer/motion/transitions.py",
+      "sourceToken": "amix=inputs={len(delayed) + 1}",
+      "expectedOccurrences": 1,
+      "consumerKind": "program-mix",
+      "normalizationAuthority": "apply_transitions observes a content-bound source receipt and injects its exact stereo filter on the program leg before amix",
+      "authorityPaths": [
+        "scripts/producer/audio/channel_normalization.py",
+        "scripts/producer/motion/transitions.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_channel_normalization_mix_paths.py"
+      ],
+      "exemption": null
+    },
+    {
+      "id": "cut-jcut-program-concat",
+      "path": "scripts/producer/cut_speed.py",
+      "sourceToken": "[own][tail]concat=n=2:v=0:a=1",
+      "expectedOccurrences": 1,
+      "consumerKind": "derived-program-mix",
+      "normalizationAuthority": "render_cut_speed observes every unique source once and applies its exact stereo filter before own and J-cut tail extraction",
+      "authorityPaths": [
+        "scripts/producer/audio/cut_channel_normalization.py",
+        "scripts/producer/audio/cut_audio_filters.py",
+        "scripts/producer/cut_speed.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_channel_normalization_mix_paths.py"
+      ],
+      "exemption": null
+    },
+    {
+      "id": "ordinary-source-float-jcut-concat",
+      "path": "scripts/producer/audio/render_audio_bus.py",
+      "sourceToken": "[own][tail]concat=n=2:v=0:a=1",
+      "expectedOccurrences": 1,
+      "consumerKind": "derived-program-mix",
+      "normalizationAuthority": "the explicit fresh unity-speed adapter verifies same-cut source/channel receipts for own and incoming J-cut legs before the shared stereo float filter; silent input requires observed audio absence",
+      "authorityPaths": [
+        "scripts/producer/audio/render_audio_authority.py",
+        "scripts/producer/audio/render_audio_bus.py",
+        "scripts/producer/audio/cut_audio_filters.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_render_source_audio_media.py",
+        "scripts/producer/tests/test_channel_normalization_mix_paths.py"
+      ],
+      "exemption": null
+    },
+    {
+      "id": "ordinary-source-float-byte-concat",
+      "path": "scripts/producer/audio/render_audio_bus.py",
+      "sourceToken": "def _concat(",
+      "expectedOccurrences": 1,
+      "consumerKind": "derived-program-mix",
+      "normalizationAuthority": "each normalized float part is bound to executed cut frames and source/channel authority; byte concatenation checks each part hash and total samples before wrapping the retained unmastered WAV",
+      "authorityPaths": [
+        "scripts/producer/audio/render_audio_authority.py",
+        "scripts/producer/audio/render_audio_bus.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_render_source_audio_media.py"
+      ],
+      "exemption": null
+    },
+    {
+      "id": "private-cut-preview-float-jcut-concat",
+      "path": "scripts/producer/cut_preview_audio.py",
+      "sourceToken": "[own][tail]concat=n=2:v=0:a=1",
+      "expectedOccurrences": 1,
+      "consumerKind": "derived-program-mix",
+      "normalizationAuthority": "the private cut preview binds actual source/channel receipts to the cut proof and applies shared stereo filters to both own and incoming J-cut legs; this is cut playback, not mastered delivery",
+      "authorityPaths": [
+        "scripts/producer/cut_preview_audio.py",
+        "scripts/producer/cut_speed.py",
+        "scripts/producer/audio/cut_audio_filters.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_cut_preview.py"
+      ],
+      "exemption": null
+    },
+    {
+      "id": "private-cut-preview-float-byte-concat",
+      "path": "scripts/producer/cut_preview_audio.py",
+      "sourceToken": "def _concatenate(",
+      "expectedOccurrences": 1,
+      "consumerKind": "derived-program-mix",
+      "normalizationAuthority": "the private preview concatenates hash-bound normalized float parts on the executed cumulative frame/sample clock and checks total byte count before one preview AAC encode; no delivery approval is granted",
+      "authorityPaths": [
+        "scripts/producer/cut_preview_audio.py",
+        "scripts/producer/audio/channel_normalization_receipt.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_cut_preview.py"
+      ],
+      "exemption": null
+    },
+    {
+      "id": "cut-part-program-demux-concat",
+      "path": "scripts/producer/cut_speed.py",
+      "sourceToken": "def concat_parts(",
+      "expectedOccurrences": 1,
+      "consumerKind": "derived-program-mix",
+      "normalizationAuthority": "every encoded part consumes the per-source receipt before the concat demuxer joins the closed part set (video stream-copied on an index-rebuilt CFR clock; float PCM part audio re-timed contiguously and encoded to AAC exactly once)",
+      "authorityPaths": [
+        "scripts/producer/audio/cut_channel_normalization.py",
+        "scripts/producer/cut_speed.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_channel_normalization_mix_paths.py",
+        "scripts/producer/tests/test_audio_mix_render.py"
+      ],
+      "exemption": null
+    },
+    {
+      "id": "repair-fragment-program-concat",
+      "path": "scripts/producer/edit/repair_fragment_media.py",
+      "sourceToken": "concat=n={len(labels)}:v=0:a=1",
+      "expectedOccurrences": 1,
+      "consumerKind": "derived-program-mix",
+      "normalizationAuthority": "the parent must already be stereo-verified and the raw source exact filter is injected before the fragment splice",
+      "authorityPaths": [
+        "scripts/producer/edit/repair_channel_authority.py",
+        "scripts/producer/edit/repair_fragment.py",
+        "scripts/producer/edit/repair_fragment_media.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_channel_normalization_mix_paths.py",
+        "scripts/producer/tests/test_p2_repair_fragment_render.py"
+      ],
+      "exemption": null
+    },
+    {
+      "id": "repair-composite-program-concat",
+      "path": "scripts/producer/edit/repair_composite_media.py",
+      "sourceToken": "concat=n={len(labels)}:v=0:a=1",
+      "expectedOccurrences": 1,
+      "consumerKind": "derived-program-mix",
+      "normalizationAuthority": "both parent and fragment must be stereo-verified receipts and both exact filters are injected before the terminal splice",
+      "authorityPaths": [
+        "scripts/producer/edit/repair_channel_authority.py",
+        "scripts/producer/edit/repair_composite.py",
+        "scripts/producer/edit/repair_composite_media.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_channel_normalization_mix_paths.py",
+        "scripts/producer/tests/test_p2_repair_fragment_render.py"
+      ],
+      "exemption": null
+    },
+    {
+      "id": "repair-outside-dirty-oracle-concat",
+      "path": "scripts/producer/edit/repair_composite_media.py",
+      "sourceToken": "[before][after]concat=n=2:v=0:a=1",
+      "expectedOccurrences": 1,
+      "consumerKind": "program-control",
+      "normalizationAuthority": "the non-publishing oracle is reachable only after the composite controller verifies the parent and fragment channel pair",
+      "authorityPaths": [
+        "scripts/producer/edit/repair_channel_authority.py",
+        "scripts/producer/edit/repair_composite.py",
+        "scripts/producer/edit/repair_composite_media.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_p2_repair_fragment_render.py"
+      ],
+      "exemption": null
+    },
+    {
+      "id": "palmier-editable-parity-difference-control",
+      "path": "scripts/producer/palmier/editable_parity_measure.py",
+      "sourceToken": "[a][b]amerge=inputs=2",
+      "expectedOccurrences": 1,
+      "consumerKind": "program-control",
+      "normalizationAuthority": "the non-publishing parity oracle independently canonicalizes both first-audio streams to 48 kHz stereo float PCM before measuring their difference",
+      "authorityPaths": [
+        "scripts/producer/palmier/editable_parity_measure.py",
+        "scripts/producer/palmier/editable_parity_contract.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_palmier_editable_parity.py"
+      ],
+      "exemption": null
+    },
+    {
+      "id": "source-float-finishing-sfx-program-sum",
+      "path": "scripts/producer/audio/program_finish_bus.py",
+      "sourceToken": "amix=inputs={len(delayed) + 1}:duration=first",
+      "expectedOccurrences": 1,
+      "consumerKind": "program-mix",
+      "normalizationAuthority": "the program leg is the finished dialogue rendered from the retained source-float bus, whose every audible cut part carries a verified channel-normalization receipt (render_audio_bus); SFX legs are aformat-pinned stereo float one-shots delayed sample-exactly onto their seams; the unity float sum is pinned to the exact bus clock by float_audio_clock and never mastered here",
+      "authorityPaths": [
+        "scripts/producer/audio/render_audio_bus.py",
+        "scripts/producer/audio/program_finish_bus.py",
+        "scripts/producer/audio/program_audio_clock.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_program_finish_media.py"
+      ],
+      "exemption": null
+    }
+  ],
+  "dependencies": [
+    {
+      "consumerId": "music-final-program-mix",
+      "enforcementTokens": [
+        {
+          "path": "scripts/producer/audio/audio_mix.py",
+          "token": "materialize_normalized_program("
+        },
+        {
+          "path": "scripts/producer/audio/channel_normalization_media.py",
+          "token": "authority.filter_for(\"stereo\")"
+        }
+      ]
+    },
+    {
+      "consumerId": "music-sidechain-program-control",
+      "enforcementTokens": [
+        {
+          "path": "scripts/producer/audio/audio_mix.py",
+          "token": "ctx.spec = replace(ctx.spec, video_in=normalized)"
+        }
+      ]
+    },
+    {
+      "consumerId": "demucs-derived-stem-remix",
+      "enforcementTokens": [
+        {
+          "path": "scripts/producer/audio/audio_separate.py",
+          "token": "job.authority.filter_for(\"stereo\")"
+        },
+        {
+          "path": "scripts/producer/audio/audio_separate.py",
+          "token": "job.authority.assert_stable()"
+        }
+      ]
+    },
+    {
+      "consumerId": "exact-dialogue-program-mix",
+      "enforcementTokens": [
+        {
+          "path": "scripts/producer/audio/dialogue_stem_probe.py",
+          "token": "\"channelNormalization\": channel_authority.receipt"
+        },
+        {
+          "path": "scripts/producer/audio/dialogue_program_media.py",
+          "token": "probe_pcm("
+        }
+      ]
+    },
+    {
+      "consumerId": "exact-dialogue-entry-mix",
+      "enforcementTokens": [
+        {
+          "path": "scripts/producer/audio/dialogue_stem_probe.py",
+          "token": "channel_authority.filter_for('mono')"
+        },
+        {
+          "path": "scripts/producer/audio/dialogue_stem_probe.py",
+          "token": "channel_authority.assert_stable()"
+        }
+      ]
+    },
+    {
+      "consumerId": "transition-program-sfx-mix",
+      "enforcementTokens": [
+        {
+          "path": "scripts/producer/motion/transitions.py",
+          "token": "authority.filter_for(\"stereo\")"
+        },
+        {
+          "path": "scripts/producer/motion/transitions.py",
+          "token": "authority.assert_stable()"
+        }
+      ]
+    },
+    {
+      "consumerId": "cut-jcut-program-concat",
+      "enforcementTokens": [
+        {
+          "path": "scripts/producer/cut_speed.py",
+          "token": "_tail_chain(shifted, next_idx, job.tail_channels)"
+        },
+        {
+          "path": "scripts/producer/audio/cut_audio_filters.py",
+          "token": "spec.authority.filter_for(\"stereo\")"
+        }
+      ]
+    },
+    {
+      "consumerId": "ordinary-source-float-jcut-concat",
+      "enforcementTokens": [
+        {
+          "path": "scripts/producer/audio/render_audio_bus.py",
+          "token": "channels = channel_authorities(job.admission, job.cut_proof[\"channelNormalizationReceipts\"])"
+        },
+        {
+          "path": "scripts/producer/audio/render_audio_bus.py",
+          "token": "lead = _authority(tail.src_path, channels, sources)"
+        },
+        {
+          "path": "scripts/producer/audio/cut_audio_filters.py",
+          "token": "spec.authority.filter_for(\"stereo\")"
+        }
+      ]
+    },
+    {
+      "consumerId": "ordinary-source-float-byte-concat",
+      "enforcementTokens": [
+        {
+          "path": "scripts/producer/audio/render_audio_bus.py",
+          "token": "file_sha256(row[\"path\"]) != row[\"sha256\"]"
+        },
+        {
+          "path": "scripts/producer/audio/render_audio_bus.py",
+          "token": "joined.stat().st_size != rows[-1][\"endSample\"] * 8"
+        },
+        {
+          "path": "scripts/producer/audio/render_audio_bus.py",
+          "token": "assert_admission(job.admission, job.plan)"
+        }
+      ]
+    },
+    {
+      "consumerId": "private-cut-preview-float-jcut-concat",
+      "enforcementTokens": [
+        {
+          "path": "scripts/producer/cut_preview_audio.py",
+          "token": "receipt = verify_channel_receipt(item[\"receipt\"])"
+        },
+        {
+          "path": "scripts/producer/cut_preview_audio.py",
+          "token": "tail_filter = _tail_chain(shifted, 1 if authority else 2, lead_authority)"
+        },
+        {
+          "path": "scripts/producer/audio/cut_audio_filters.py",
+          "token": "spec.authority.filter_for(\"stereo\")"
+        }
+      ]
+    },
+    {
+      "consumerId": "private-cut-preview-float-byte-concat",
+      "enforcementTokens": [
+        {
+          "path": "scripts/producer/cut_preview_audio.py",
+          "token": "file_hash(source) != row[\"floatSha256\"]"
+        },
+        {
+          "path": "scripts/producer/cut_preview_audio.py",
+          "token": "destination.stat().st_size != rows[-1][\"endSample\"] * 8"
+        },
+        {
+          "path": "scripts/producer/cut_preview_audio.py",
+          "token": "authority.assert_stable()"
+        }
+      ]
+    },
+    {
+      "consumerId": "cut-part-program-demux-concat",
+      "enforcementTokens": [
+        {
+          "path": "scripts/producer/cut_speed.py",
+          "token": "assert_cut_sources_stable(channels)"
+        },
+        {
+          "path": "scripts/producer/cut_speed.py",
+          "token": "cut_source_receipts(channels)"
+        }
+      ]
+    },
+    {
+      "consumerId": "repair-fragment-program-concat",
+      "enforcementTokens": [
+        {
+          "path": "scripts/producer/edit/repair_fragment.py",
+          "token": "channels.second.filter_for(\"stereo\")"
+        },
+        {
+          "path": "scripts/producer/edit/repair_fragment_media.py",
+          "token": "f\"[1:a]{audio_filter},\""
+        }
+      ]
+    },
+    {
+      "consumerId": "repair-composite-program-concat",
+      "enforcementTokens": [
+        {
+          "path": "scripts/producer/edit/repair_composite.py",
+          "token": "value.channels.second.filter_for(\"stereo\")"
+        },
+        {
+          "path": "scripts/producer/edit/repair_composite_media.py",
+          "token": "f\"[{input_index}:a]{audio_filter},\""
+        }
+      ]
+    },
+    {
+      "consumerId": "repair-outside-dirty-oracle-concat",
+      "enforcementTokens": [
+        {
+          "path": "scripts/producer/edit/repair_composite.py",
+          "token": "channels = _composite_channels("
+        },
+        {
+          "path": "scripts/producer/edit/repair_composite.py",
+          "token": "value.channels.assert_stable()"
+        }
+      ]
+    },
+    {
+      "consumerId": "palmier-editable-parity-difference-control",
+      "enforcementTokens": [
+        {
+          "path": "scripts/producer/palmier/editable_parity_measure.py",
+          "token": "[0:a:0]aformat=sample_fmts=fltp:sample_rates=48000:"
+        },
+        {
+          "path": "scripts/producer/palmier/editable_parity_measure.py",
+          "token": "[1:a:0]aformat=sample_fmts=fltp:sample_rates=48000:"
+        }
+      ]
+    },
+    {
+      "consumerId": "source-float-finishing-sfx-program-sum",
+      "enforcementTokens": [
+        {
+          "path": "scripts/producer/audio/program_finish_bus.py",
+          "token": "float_audio_clock(str(target), bus)"
+        },
+        {
+          "path": "scripts/producer/audio/render_audio_bus.py",
+          "token": "channel_authorities(job.admission, job.cut_proof[\"channelNormalizationReceipts\"])"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "id": "renderer-program-order",
+      "path": "scripts/producer/render.py",
+      "boundaryKind": "renderer-orchestration",
+      "guarantee": "cut sources normalize per source before part concatenation; the retained channels stage remains before enhance, transition SFX, gain, and master",
+      "authorityPaths": [
+        "scripts/producer/audio/cut_channel_normalization.py",
+        "scripts/producer/render.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_channel_normalization_mix_paths.py",
+        "scripts/producer/tests/test_final_provenance.py"
+      ]
+    },
+    {
+      "id": "audio-fast-path-program-order",
+      "path": "scripts/producer/audio/base_audio.py",
+      "boundaryKind": "audio-fast-path",
+      "guarantee": "the fast path adds no sum mix and its terminal remaster reobserves dead-channel state before loudness processing",
+      "authorityPaths": [
+        "scripts/producer/audio/base_audio.py",
+        "scripts/producer/audio/master.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_audio_fast_path.py"
+      ]
+    },
+    {
+      "id": "palmier-authoritative-audio-handoff",
+      "path": "scripts/producer/palmier/audio_finish.py",
+      "boundaryKind": "palmier-handoff",
+      "guarantee": "Palmier picture is never audio-mixed here; one in-house master stream is mapped and the finished stereo RMS balance gate rejects a dead side",
+      "authorityPaths": [
+        "scripts/producer/palmier/audio_finish.py",
+        "scripts/producer/audit/audio_quality.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_palmier_audio_finish.py"
+      ]
+    }
+  ]
+}

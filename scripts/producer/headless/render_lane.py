@@ -41,7 +41,6 @@ from .request_artifact import (
 )
 
 RENDERER_MODE = "sealed-oci-v2"
-_DIGEST = re.compile(r"[0-9a-f]{64}")
 _RESULT_KEY = re.compile(r"[0-9a-f]{64}")
 
 @dataclass(frozen=True)
@@ -205,13 +204,14 @@ def _validated_result(stdout: str, binding: CacheBinding,
         value = json.loads(stdout)
     except json.JSONDecodeError as exc:
         raise RuntimeError("headless render worker returned invalid JSON") from exc
-    required = {"cached", "fmt", "key", "kind", "path", "proof"}
+    required = {"cached", "fmt", "fps", "key", "kind", "path", "proof"}
     if not isinstance(value, dict) or set(value) != required:
         raise RuntimeError("headless render worker returned an invalid result schema")
     path = value["path"]
     expected_kind = seal.entry["kind"]
     valid = (
         type(value["cached"]) is bool and isinstance(value["proof"], dict)
+        and value["fps"] == "30"  # Exact current render_presealed clock; not a catalog-wide rate.
         and isinstance(value["kind"], str) and isinstance(value["fmt"], str)
         and isinstance(value["key"], str) and _RESULT_KEY.fullmatch(value["key"])
         and value["key"] == seal.key

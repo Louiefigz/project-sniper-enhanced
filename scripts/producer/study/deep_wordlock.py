@@ -11,8 +11,8 @@ Words come from (in order): an explicit ``--transcript`` (word-timing JSON
 or a YouTube-style ``.vtt`` with ``<c>`` word tags), an existing
 ``<out_dir>/transcript.json``, a SIBLING ``.vtt`` auto-discovered next to
 the video (``<stem>*.vtt`` — no API needed; LL-013), or a fresh run of
-``scripts/transcribe.py`` (Deepgram — the ONLY off-machine step, taken only
-when DEEPGRAM_API_KEY is set, mirroring study_transcribe). With no source
+``scripts/transcribe.py`` (local Whisper by default; a key never authorizes a
+paid call, mirroring study_transcribe). With no source
 available the stats carry a loud ``skipped`` reason instead of failing the
 deterministic passes.
 """
@@ -23,7 +23,6 @@ import json
 import os
 import re
 import statistics
-import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -31,7 +30,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from planner.word_lock import off_boundary_s, word_boundaries  # noqa: E402
 from study.deep_config import DEEP  # noqa: E402
 from study.study_transcribe import (  # noqa: E402
-    _flatten_words, _parse_done_line, _transcribe_script)
+    _flatten_words, run_transcribe_worker)
 
 
 _VTT_TAG = re.compile(r"(<[^>]*>)")   # format tokenizer, not semantics
@@ -124,15 +123,10 @@ def _words_from_payload(payload) -> list[dict]:
 
 
 def _transcribe(video: str, cache_path: str) -> "dict | None":
-    """Run the Deepgram worker and cache its payload next to the study."""
-    script = _transcribe_script()
-    if not os.path.exists(script):
-        return None
-    proc = subprocess.run([sys.executable, script, video],
-                          capture_output=True, text=True, timeout=1800)
-    payload = _parse_done_line(proc.stdout)
-    if payload is None:
-        return None
+    """Cache only a successful local/default or explicitly authorized result."""
+    payload = run_transcribe_worker(video)
+    if "skipped" in payload:
+        return payload
     with open(cache_path, "w") as handle:
         json.dump(payload, handle)
     return payload
@@ -161,12 +155,11 @@ def load_words(video: str, out_dir: str,
     if vtt is not None:
         return parse_vtt_words(vtt), \
             {"transcriptPath": os.path.abspath(vtt), "source": "vtt-sibling"}
-    if not os.environ.get("DEEPGRAM_API_KEY"):
-        return [], {"skipped": "no transcript, no sibling .vtt and "
-                               "DEEPGRAM_API_KEY not set"}
     payload = _transcribe(video, cache)
     if payload is None:
         return [], {"skipped": "transcribe worker returned no transcript"}
+    if "skipped" in payload:
+        return [], payload
     return _words_from_payload(payload), {"transcriptPath": cache}
 
 

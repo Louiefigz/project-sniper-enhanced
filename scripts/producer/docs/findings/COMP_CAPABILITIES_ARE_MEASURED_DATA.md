@@ -40,15 +40,51 @@ an unchanged catalog are nearly free) and emits
   bbox. Comps that fail record `renderError` honestly.
 
 One hour of discovery-by-render-failure per session becomes a 15-minute
-one-time measurement whose answers are readable at plan time, forever.
+measurement whose answers stay readable until any bound composition/runtime
+source changes. Schema v2 binds the rows to both a row digest and a local
+source-closure digest, so edited sources make the old artifact stale.
+
+The first 2026-07-29 offline reprobe of the migrated catalog attempted all
+**46** comps but produced only **15** complete rows and **31** `renderError`
+rows. That result exposed two gate defects rather than 31 unrelated comp
+failures:
+
+- capability discovery was enforcing terminal-clear before it had measured
+  whether a comp cleanly fades, intentionally holds, or partially fades;
+- Python's ties-to-even `round()` disagreed with HyperFrames/JavaScript at
+  positive half-frame boundaries, producing six false one-frame mismatches.
+
+After separating measurement from release enforcement and using shared
+positive half-up frame quantization, a second real offline probe completed
+**46 of 46** rows: **9** `fades-clean`, **18** `hold-to-cut`, and **19**
+`partial-fade`. Normal renders still fail closed: only a fresh complete matrix
+can waive terminal-clear for a measured hold/partial fade, and plan lint
+enforces hold exits and warns on partial fades.
+
+Canvas/fade capability and output-rate capability are deliberately separate
+receipts. On 2026-07-29, the real HyperFrames/browser lane also rendered all
+46 comps at all eight released exact rates
+(`24000/1001`, `24`, `25`, `30000/1001`, `30`, `50`, `60000/1001`, `60`)
+and fully decoded all **368** four-frame ProRes 4444 outputs. The retained
+`hyperframes-rate-matrix-v1.json` is bound to source digest
+`21238087cb191e08b891c4c04a4b8dd401f10ab602e55f139d82555ee89fc50f`,
+capability digest `a2a72bf8f5790521093c0b7c2d7f16c13ab31c41`, and reviewed receipt
+`8d2143163c3c2c45666e72a73af61f56f6ccb21b94fc297b57d2e5cdadf8f77b`.
+Its validator rejects stale source/tool identities, an incomplete/repeated
+cross-product, noncanonical exact rates, wrong canvas/codec/alpha/frame count,
+and any row change that no longer matches that reviewed receipt.
+
+That matrix proves catalog render/decode compatibility at those rates. Four
+frames per comp do **not** prove a full short/long pipeline, full-duration
+animation behavior, Palmier conformance, or a performance target.
 
 ## Where the matrix is consumed
 
 - `graphics/comp_capabilities.py` — the reader:
   `is_aspect_legal_kind(kind, aspect)` (sibling of
   `form_allocation.is_gate_executable_kind`, the canvas-pip-list precedent).
-  Measured aspect is **authoritative**; an unmeasured kind stays permissive so
-  the derived MG-4.3 filter and render proofs still stand behind it.
+  Measured aspect is **authoritative**; missing/stale/unmeasured/`renderError`
+  kinds are unavailable and never fall back to declared dimensions.
 - `planner/graphics_planner_longform.canvas_ok` — the funnel every proposal
   lane runs through (both modes, all three styles, plus the gauge/reference/
   whiteboard lanes) now consults the matrix before the declared-dims
@@ -80,9 +116,10 @@ entries keep broken comps visible instead of silently unmeasured.
 - **It does not replace render proofs.** The matrix is plan-time capability
   data; per-render terminal-alpha/occupancy proofs still gate every real
   artifact (a spec can change a comp's behavior vs its defaults probe).
-- **An absent matrix is not an error.** Predicates degrade to permissive and
-  the declared-dims filter still applies — fail-closed here would brick every
-  fresh checkout on data only the probe can create.
+- **An absent matrix is an unreleased graphics catalog.** A trim/no-graphics
+  job remains usable, but a plan that references a comp blocks until the
+  measured artifact is present, fresh, inventory-complete, and that comp's
+  render probe succeeds. Declared metadata cannot substitute for proof.
 - **Don't stretch it to per-spec questions.** The probe renders each comp once
   with defaults; content-dependent geometry (long copy, extra rows) stays the
   job of `comp_measure.py`, which renders the *actual* plan entry.

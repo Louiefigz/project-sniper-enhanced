@@ -92,8 +92,10 @@ class FormAllocationTests(unittest.TestCase):
                  _beat("beat-c", ["form-c", "form-b"], 3.0)]
         permuted = [{**row, "compatibleKinds": list(reversed(
             row["compatibleKinds"]))} for row in reversed(beats)]
-        self.assertEqual(build_form_allocation(beats),
-                         build_form_allocation(permuted))
+        with mock.patch("graphics.form_allocation.is_aspect_legal_kind",
+                        return_value=True):
+            self.assertEqual(build_form_allocation(beats),
+                             build_form_allocation(permuted))
 
     def test_unavoidable_reuse_passes_without_a_fake_witness(self) -> None:
         beats = [_beat("one", ["form-a"]), _beat("two", ["form-a"]),
@@ -101,7 +103,9 @@ class FormAllocationTests(unittest.TestCase):
         decisions = [{"beatId": "one", "decision": "graphic", "kind": "form-a"},
                      {"beatId": "two", "decision": "graphic", "kind": "form-a"},
                      {"beatId": "three", "decision": "graphic", "kind": "form-b"}]
-        result = assess_kind_reuse(beats, decisions)
+        with mock.patch("graphics.form_allocation.is_aspect_legal_kind",
+                        return_value=True):
+            result = assess_kind_reuse(beats, decisions)
         self.assertFalse(result["avoidableReuse"], result)
         self.assertEqual(result["maximumFeasibleDistinctKinds"], 2)
         self.assertEqual(result["replacementWitnesses"], [])
@@ -111,7 +115,9 @@ class FormAllocationTests(unittest.TestCase):
                  _beat("two", ["form-b", "form-a"])]
         decisions = [{"beatId": row["beatId"], "decision": "graphic",
                       "kind": "form-a"} for row in beats]
-        result = assess_kind_reuse(beats, decisions)
+        with mock.patch("graphics.form_allocation.is_aspect_legal_kind",
+                        return_value=True):
+            result = assess_kind_reuse(beats, decisions)
         compatible = {row["beatId"]: set(row["compatibleKinds"])
                       for row in beats}
         self.assertTrue(result["avoidableReuse"], result)

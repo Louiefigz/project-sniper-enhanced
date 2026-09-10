@@ -32,8 +32,12 @@ assert.match(
 );
 
 const semantics = source("scripts/producer/study/deep_semantics.py");
-assert.match(semantics, /"--model", claude_model\(\)/,
-  "the optional Python Claude micro-layer must use the same explicit model contract");
+assert.match(semantics, /def _default_spawn\(prompt: str\)[\s\S]*?raise RuntimeError\([\s\S]*?Subscription admission not qualified/,
+  "unqualified legacy semantic analysis must reject before provider execution");
+assert.match(semantics, /if spawn is None:\s+_default_spawn\(""\)/,
+  "the default semantic pass must enter the subscription admission guard");
+assert.doesNotMatch(semantics, /subprocess\.(?:run|Popen)\(/,
+  "the blocked legacy semantic path must not regain an ambient provider spawn");
 
 const runtime = source("src/app/api/runtime/route.ts");
 assert.match(runtime, /model: brainModel\(provider\)/,

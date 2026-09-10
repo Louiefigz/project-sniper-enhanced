@@ -21,6 +21,7 @@ interface GuardDependencies {
 const GUARD_SCRIPT = path.join(
   SCRIPTS_DIR, "producer", "palmier", "timeline_authority_cli.py",
 );
+export const PALMIER_AUTHORITY_GUARD_TIMEOUT_MS = 10_000;
 
 const DEFAULT_DEPENDENCIES: GuardDependencies = {
   stateExists: (dir) => existsSync(palmierStatePath(dir)),
@@ -53,6 +54,8 @@ export function runPalmierAuthorityGuard(
   return new Promise((resolve) => {
     const child = spawn(pythonInterpreter(), [GUARD_SCRIPT, dir], {
       env: { ...process.env },
+      timeout: PALMIER_AUTHORITY_GUARD_TIMEOUT_MS,
+      killSignal: "SIGKILL",
     });
     let stdout = "";
     let stderr = "";
@@ -60,7 +63,13 @@ export function runPalmierAuthorityGuard(
     child.stderr.on("data", (data: Buffer) => {
       stderr = (stderr + data.toString()).slice(-800);
     });
-    child.on("close", (code) => {
+    child.on("close", (code, signal) => {
+      if (signal) {
+        resolve({ code: 1, verdict: {
+          error: `Palmier authority readback did not complete (${signal}; deadline ${PALMIER_AUTHORITY_GUARD_TIMEOUT_MS}ms).`,
+        } });
+        return;
+      }
       const line = stdout.trim().split("\n").filter(Boolean).pop() ?? "";
       try {
         resolve({ code: code ?? 1, verdict: JSON.parse(line) as PalmierAuthorityVerdict });

@@ -7,9 +7,9 @@
   `.../dist/DrawSVGPlugin.min.js`, vendored 2026-07-11; SplitText 7,779 bytes,
   DrawSVGPlugin 4,351 bytes). Since GSAP 3.13 the formerly members-only bonus
   plugins ship in the public npm package — these ARE the official free builds.
-- Version: 3.14.2 (matches the `gsap.min.js` core every comp already loads from
-  `https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js` — plugin and core
-  versions MUST stay in lockstep when either is bumped).
+- Version: 3.14.2 (matches the pinned local `vendor/gsap/gsap.min.js` core every
+  registered comp loads — plugin and core versions MUST stay in lockstep when
+  either is bumped).
 - Licensing: GSAP standard "no charge" license —
   https://gsap.com/standard-license (per each file's `@license` header:
   "Copyright 2025, GreenSock. All rights reserved. Subject to the terms at

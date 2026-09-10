@@ -7,6 +7,10 @@ import { runLegacyNative } from "../../ai-edit/palmier-native-process";
 import type { PalmierNativeQcAuthority } from "../../ai-edit/palmier-native-authority";
 import type { PalmierLiveBuildQcAuthority } from "../../live-build/authority";
 import {
+  isLiveBuildQcAuthority,
+  liveReviewAuthority,
+} from "./live-authority";
+import {
   parseProducerReview,
   type ProducerReview,
 } from "../../auto-edit/review-contract";
@@ -104,49 +108,8 @@ export function nativeRepairAuthority(authority: PalmierNativeQcAuthority): {
     paths: [expected.path] };
 }
 
-function isLive(authority: CandidateQcAuthority): authority is PalmierLiveBuildQcAuthority {
-  return "kind" in authority && authority.kind === "palmier-live-build-qc-authority";
-}
-
-function liveReviewAuthority(authority: PalmierLiveBuildQcAuthority): {
-  request: string;
-  lanes: string[];
-  plan: Record<string, unknown>;
-  paths: string[];
-} {
-  const expected = authority.liveInput;
-  if (!expected || hashBytes(expected.path) !== expected.hash) {
-    throw new Error("Candidate QC live-build input bytes changed after capture.");
-  }
-  const artifact = object(JSON.parse(readFileSync(expected.path, "utf8")), "live input");
-  const request = object(artifact.request, "live input request");
-  const controller = object(artifact.controller, "live input controller");
-  const planRef = object(artifact.plan, "live input plan");
-  const journal = object(artifact.journal, "live input journal");
-  const parent = object(artifact.parent, "live input parent");
-  const lanes = controller.lanes;
-  const plan = typeof planRef.path === "string"
-    ? object(JSON.parse(readFileSync(planRef.path, "utf8")), "approved edit plan") : {};
-  const exact = artifact.schemaVersion === 1
-    && artifact.kind === "palmier-live-build-input"
-    && artifact.captureId === authority.captureId
-    && typeof request.text === "string"
-    && request.hash === hashText(request.text)
-    && request.hash === authority.requestHash
-    && Array.isArray(lanes) && lanes.every((item) => typeof item === "string")
-    && JSON.stringify(lanes) === JSON.stringify(expected.lanes)
-    && typeof planRef.path === "string" && hashBytes(planRef.path) === expected.planHash
-    && typeof journal.path === "string" && hashBytes(journal.path) === expected.journalHash
-    && journal.operationCount === expected.operationCount
-    && parent.timelineId === expected.parent.timelineId
-    && parent.fingerprint === expected.parent.fingerprint;
-  if (!exact) throw new Error("Candidate QC approved plan, journal, scope, or parent is stale.");
-  return { request: request.text as string, lanes: [...lanes] as string[], plan,
-    paths: [expected.path, planRef.path as string, journal.path as string] };
-}
-
 function governedAuthority(authority: CandidateQcAuthority) {
-  return isLive(authority)
+  return isLiveBuildQcAuthority(authority)
     ? liveReviewAuthority(authority)
     : nativeRepairAuthority(authority);
 }
@@ -171,6 +134,11 @@ export function candidateReviewEvidence(
     throw new Error("Deterministic candidate evidence is incomplete; no critic may approve it.");
   }
   const governed = governedAuthority(authority);
+  if (isLiveBuildQcAuthority(authority)
+      && candidate.fingerprint !== authority.liveInput.headFingerprint) {
+    throw new Error(
+      "Deterministic candidate differs from the closed live-build head.");
+  }
   return {
     binding: {
       candidateFingerprint: values[0] as string,

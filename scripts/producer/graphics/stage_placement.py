@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) 
 from planner.occupancy import NoLegalRegion
 from planner.graphics_anchors import (_clip_dims, _content_bbox,
                                       resolve_offset, resolve_offset_v2,
-                                      scale_geometry)
+                                      scale_geometry, valid_face_bbox)
 from graphics.delivery_geometry import own_screen_meta as _own_screen_meta
 from graphics.placement_verify import declare_env_fallback
 from motion.recompose import requires_recompose
@@ -112,6 +112,14 @@ def _fixed_overlay_offset(entry: dict, mov_path: str) -> tuple[int, int, dict]:
     return 0, 0, meta
 
 
+def _fallback_offset(entry: dict, video_in: str) -> tuple[int, int]:
+    """Use delivery-aware v1 geometry when the delivery probe still works."""
+    try:
+        return resolve_offset(entry, _clip_dims(video_in))
+    except (RuntimeError, OSError, ValueError):
+        return resolve_offset(entry)
+
+
 def resolve_placement(entry: dict, mov_path: str, video_in: str,
                       band_y_offset_px: float = 0.0) -> tuple[int, int, dict]:
     """Resolve one entry's overlay offset — explicit placement, else anchors.
@@ -140,9 +148,15 @@ def resolve_placement(entry: dict, mov_path: str, video_in: str,
         # evidence routes back into planning via the NDJSON error stream.
         raise
     except (RuntimeError, ValueError, OSError, ImportError, KeyError) as exc:
+        if anchor == "free-band" and valid_face_bbox(
+                entry.get("faceBBoxNorm")):
+            raise RuntimeError(
+                "face-aware free-band placement could not be measured; "
+                "refusing the authored origin because it may cover the face: "
+                f"{type(exc).__name__}: {exc}") from exc
         # ENVIRONMENT failure (no cv2, probe fail, no face + no hint): keep
         # the v1 deviation nudge, declared LOUDLY through gate policy.
-        x, y = resolve_offset(entry)
+        x, y = _fallback_offset(entry, video_in)
         declare_env_fallback(emit, entry, exc)
         return x, y, {"anchor": entry.get("anchor", "free-band"),
                       "region": "v1-fallback", "fallback": True,

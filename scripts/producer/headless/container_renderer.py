@@ -1,36 +1,47 @@
 """Exact, networkless OCI adapter for one sealed HyperFrames render."""
 from __future__ import annotations
 
-import json
 import os
 import re
 import subprocess
 import tempfile
+from contextlib import nullcontext
 from dataclasses import dataclass
+from types import ModuleType
 
+from graphics.render_rate import normalize_render_rate
 from headless.container_io import SealedInput, promote_regular
-from headless.container_live_policy import ContainerExpectation, attest_container
+from headless.container_live_policy import (
+    ContainerExpectation, attest_container, output_tmpfs_size, HYPERFRAMES_VERSION_LABEL)
 from headless.docker_identity import daemon_identity, file_sha256
 from headless.network_probe import probe_container
-from headless.runtime_receipt import write_runtime_receipt
+from headless.runtime_receipt import (
+    write_runtime_receipt, render_cache_identity as cache_identity,
+    parse_container_id as _container_id,
+)
 from headless.container_policy import (
-    DockerRuntime,
-    attest_image,
-    command as docker_command,
-    docker_env,
-    reconcile_launch_abort,
-    remove_container,
-    required_runtime,
-    wait_and_copy,
+    DockerRuntime, attest_image, command as docker_command, docker_env,
+    reconcile_launch_abort, remove_container, required_runtime, wait_and_copy,
 )
 
 _COMPOSITION = re.compile(r"compositions/[A-Za-z0-9._-]+\.html")
-_CONTAINER_ID = re.compile(r"[0-9a-f]{64}")
 _CONTAINER_NAME = re.compile(r"sniper-render-[0-9a-f]{32}")
-_BROWSER = ("/ms-playwright/chromium_headless_shell-1194/"
-            "chrome-linux/headless_shell")
+_BROWSER = "/ms-playwright/chromium_headless_shell-1194/chrome-linux/headless_shell"
 _PRELOAD = "/opt/sniper-motion/container/node_isolated_user.cjs"
 RENDER_POLICY_VERSION = "sniper-oci-render-v2"
+
+
+def _layout_transport() -> ModuleType:
+    """Load the new observation closure only for an explicit private request."""
+    from headless import render_layout_transport
+    return render_layout_transport
+
+
+def _layout_environment(request: object) -> dict[str, str]:
+    """Historical render requests never import or invoke observer modules."""
+    if request.layout is None:
+        return {}
+    return _layout_transport().environment(request)
 
 
 @dataclass(frozen=True)
@@ -42,6 +53,9 @@ class RenderRequest:
     output: str
     snapshot: SealedInput
     container_name: str
+    fps: object = 30
+    layout: dict | None = None
+    layout_deadline: float | None = None
 
 
 @dataclass(frozen=True)
@@ -85,6 +99,8 @@ def _tmpfs(path: str, size: str, user_id: str) -> str:
 
 def _command(paths: RenderPaths, request: RenderRequest, name: str) -> list[str]:
     runtime = paths.runtime
+    quota = output_tmpfs_size((runtime.approval.get("labels") or {}).get(HYPERFRAMES_VERSION_LABEL))
+    rate = normalize_render_rate(request.fps)
     archive = (f"type=bind,src={paths.snapshot.path},"
                "dst=/request/render-input.tar,readonly")
     result = docker_command(
@@ -97,15 +113,17 @@ def _command(paths: RenderPaths, request: RenderRequest, name: str) -> list[str]
         "--ulimit", "nofile=4096:4096", "--hostname", "sniper-render",
         "--label", f"io.project-sniper.render-name={name}",
         "--tmpfs", _tmpfs("/scratch", "2g", runtime.user_id),
-        "--tmpfs", _tmpfs("/output", "512m", runtime.user_id),
+        "--tmpfs", _tmpfs("/output", quota, runtime.user_id),
         "--mount", archive, "--workdir", "/scratch")
-    for key, value in sorted(_container_env(paths.snapshot).items()):
+    environment = {**_container_env(paths.snapshot), **_layout_environment(request)}
+    for key, value in sorted(environment.items()):
         result.extend(("--env", f"{key}={value}"))
     result.extend((
         runtime.image_id, "render", "/scratch/project/motion", "-c",
         request.composition, "--format", request.fmt, "--variables-file",
         "/scratch/project/request/variables.json", "-o",
-        f"/output/render.{request.fmt}", "--fps", "30", "--quality", "high",
+        f"/output/render.{request.fmt}", "--fps",
+        rate.token, "--quality", "high",
         "--workers", "1", "--no-browser-gpu", "--strict",
         "--strict-variables", "--json"))
     return result
@@ -163,8 +181,15 @@ def _run(command: list[str], paths: RenderPaths,
 
 
 def _validate_request(request: RenderRequest) -> None:
+    if request.layout is None and request.layout_deadline is not None:
+        raise RuntimeError("layout deadline requires an explicit layout observation")
     if any("," in path for path in (request.snapshot.path, request.output)):
         raise RuntimeError("container render paths must not contain commas")
+    try:
+        normalize_render_rate(request.fps)
+    except ValueError as exc:
+        raise RuntimeError(
+            "container render format or composition path is invalid") from exc
     if (request.fmt not in {"mov", "mp4"}
             or not _COMPOSITION.fullmatch(request.composition)
             or not _CONTAINER_NAME.fullmatch(request.container_name)):
@@ -173,13 +198,6 @@ def _validate_request(request: RenderRequest) -> None:
             or not os.path.isdir(os.path.dirname(request.output))
             or os.path.lexists(request.output)):
         raise RuntimeError("container render output must be a new path in an existing dir")
-
-
-def _container_id(stdout: str) -> str:
-    value = stdout.strip()
-    if not _CONTAINER_ID.fullmatch(value):
-        raise RuntimeError("detached Docker launch returned an invalid container ID")
-    return value
 
 
 def _receipt(runtime: DockerRuntime, request: RenderRequest,
@@ -200,11 +218,15 @@ def _receipt(runtime: DockerRuntime, request: RenderRequest,
 
 
 def _promote_outputs(request: RenderRequest, copied: str) -> None:
+    if request.layout is not None:
+        _layout_transport().guard(request)
     promote_regular(copied, request.output)
     try:
         promote_regular(copied + ".runtime.json", request.output + ".runtime.json")
         promote_regular(request.snapshot.path, request.output + ".input.tar",
                         request.snapshot.sha256, request.snapshot.size_bytes)
+        if request.layout is not None:
+            _layout_transport().promote(request, copied)
     except Exception:
         os.unlink(request.output)
         try:
@@ -223,7 +245,8 @@ def _execute_container(paths: RenderPaths, request: RenderRequest,
         raise RuntimeError(f"networkless HyperFrames render failed:\n{tail}")
     container_ref = _container_id(result.stdout)
     expected = ContainerExpectation(
-        container_ref, name, request.snapshot.path, _container_env(request.snapshot),
+        container_ref, name, request.snapshot.path,
+        {**_container_env(request.snapshot), **_layout_environment(request)},
         tuple(launch[launch.index(paths.runtime.image_id) + 1:]))
     evidence["before"] = attest_container(
         paths.runtime, paths.docker_config, expected)
@@ -231,18 +254,26 @@ def _execute_container(paths: RenderPaths, request: RenderRequest,
         paths.runtime, paths.docker_config, container_ref)
     wait_and_copy(paths.runtime, paths.docker_config,
                   container_ref, paths.copied_output)
+    observed_layout = (None if request.layout is None else
+                       _layout_transport().copy_observation(paths, request, container_ref))
     evidence["after"] = attest_container(
         paths.runtime, paths.docker_config, expected)
-    return _receipt(paths.runtime, request, paths.copied_output, evidence), container_ref
+    receipt = _receipt(paths.runtime, request, paths.copied_output, evidence)
+    if observed_layout is not None:
+        receipt["layoutObservation"] = observed_layout
+    return receipt, container_ref
 
 
 def render_to(request: RenderRequest) -> dict:
     """Render through the approved image and promote only a regular output."""
     runtime = required_runtime()
-    request = RenderRequest(request.composition, request.fmt,
-                            os.path.abspath(request.output), request.snapshot,
-                            request.container_name)
+    request = RenderRequest(
+        request.composition, request.fmt, os.path.abspath(request.output),
+        request.snapshot, request.container_name, request.fps,
+        request.layout, request.layout_deadline)
     _validate_request(request)
+    if request.layout is not None:
+        _layout_transport().preflight(runtime, request)
     out_dir = os.path.dirname(request.output)
     with tempfile.TemporaryDirectory(prefix=".container-render-", dir=out_dir) as stage:
         docker_config = os.path.join(stage, "docker-config")
@@ -251,48 +282,19 @@ def render_to(request: RenderRequest) -> dict:
         paths = RenderPaths(runtime, docker_config, request.snapshot, copied)
         image_attestation = attest_image(runtime, docker_config)
         docker_runtime = daemon_identity(runtime, docker_config)
-        name = request.container_name
-        container_ref = name
+        name = container_ref = request.container_name
         try:
             evidence = {"image": image_attestation, "daemon": docker_runtime}
-            receipt, container_ref = _execute_container(
-                paths, request, name, evidence)
+            budget = nullcontext() if request.layout is None else _layout_transport().work_budget(request)
+            with budget:
+                receipt, container_ref = _execute_container(paths, request, name, evidence)
         finally:
             removal = remove_container(runtime, docker_config, container_ref)
         receipt["containerRemoval"] = removal
+        if request.layout is not None:
+            _layout_transport().guard(request)
         write_runtime_receipt(copied, receipt)
         _promote_outputs(request, copied)
+        if request.layout is not None:
+            _layout_transport().guard(request)
         return receipt
-
-
-def cache_identity(pipeline_root: str) -> bytes:
-    """Bind cache authority to every host policy and proof executable."""
-    runtime = required_runtime()
-    policy_dir = os.path.dirname(__file__)
-    files = {
-        "adapter": __file__,
-        "ioPolicy": os.path.join(policy_dir, "container_io.py"),
-        "livePolicy": os.path.join(policy_dir, "container_live_policy.py"),
-        "dockerIdentityPolicy": os.path.join(policy_dir, "docker_identity.py"),
-        "networkProbePolicy": os.path.join(policy_dir, "network_probe.py"),
-        "imageApproval": os.path.join(policy_dir, "render_image_approval.json"),
-        "imagePolicy": os.path.join(policy_dir, "container_policy.py"),
-        "docker": runtime.docker,
-    }
-    proof_tools = {}
-    for label, env_key in (("ffmpeg", "SNIPER_PROOF_FFMPEG_PATH"),
-                           ("ffprobe", "SNIPER_PROOF_FFPROBE_PATH")):
-        path = os.path.realpath(os.environ.get(env_key, ""))
-        if not path or not os.path.isfile(path) or not os.access(path, os.X_OK):
-            raise RuntimeError(f"{env_key} is required for container cache identity")
-        proof_tools[label] = {"path": path, "sha256": file_sha256(path)}
-    with tempfile.TemporaryDirectory(prefix=".docker-identity-") as config_dir:
-        os.chmod(config_dir, 0o700)
-        daemon = daemon_identity(runtime, config_dir)
-    value = {"digests": {key: file_sha256(path) for key, path in files.items()},
-             "dockerRuntime": daemon,
-             "environment": _container_env(SealedInput("", "0" * 64, ())),
-             "imageId": runtime.image_id, "policy": RENDER_POLICY_VERSION,
-             "proofTools": proof_tools, "userId": runtime.user_id}
-    return json.dumps(value, ensure_ascii=True, separators=(",", ":"),
-                      sort_keys=True).encode("utf-8")

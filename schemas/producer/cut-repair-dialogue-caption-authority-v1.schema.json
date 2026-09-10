@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/cut-repair-dialogue-caption-authority-v1.schema.json",
+  "title": "CutRepairDialogueCaptionAuthorityV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "operation",
+    "operationHash",
+    "sourceSnapshotSetHash",
+    "parentDialogueTrack",
+    "parentDialogueTrackHash",
+    "parentDialogueMap",
+    "parentDialogueMapHash",
+    "parentSourceWords",
+    "childDialogueTrack",
+    "childDialogueTrackHash",
+    "childDialogueMap",
+    "childDialogueMapHash",
+    "childSourceWords",
+    "captionRevalidation",
+    "authorityHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "cut-repair-dialogue-caption-authority" },
+    "operation": { "$ref": "cut-restore-speech-v1.schema.json" },
+    "operationHash": { "$ref": "#/$defs/sha256" },
+    "sourceSnapshotSetHash": { "$ref": "#/$defs/sha256" },
+    "parentDialogueTrack": { "$ref": "dialogue-track-v1.schema.json" },
+    "parentDialogueTrackHash": { "$ref": "#/$defs/sha256" },
+    "parentDialogueMap": { "$ref": "dialogue-map-v1.schema.json" },
+    "parentDialogueMapHash": { "$ref": "#/$defs/sha256" },
+    "parentSourceWords": { "$ref": "#/$defs/sourceWords" },
+    "childDialogueTrack": { "$ref": "dialogue-track-v1.schema.json" },
+    "childDialogueTrackHash": { "$ref": "#/$defs/sha256" },
+    "childDialogueMap": { "$ref": "dialogue-map-v1.schema.json" },
+    "childDialogueMapHash": { "$ref": "#/$defs/sha256" },
+    "childSourceWords": { "$ref": "#/$defs/sourceWords" },
+    "captionRevalidation": {
+      "$ref": "caption-repair-revalidation-v1.schema.json"
+    },
+    "authorityHash": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "wordId": {
+      "type": "string",
+      "pattern": "^w-[0-9a-f]{16}$"
+    },
+    "stableId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"
+    },
+    "positiveSafeInteger": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "safeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "sampleRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startSample", "endSampleExclusive"],
+      "properties": {
+        "startSample": { "$ref": "#/$defs/safeInteger" },
+        "endSampleExclusive": { "$ref": "#/$defs/positiveSafeInteger" }
+      }
+    },
+    "sourceWord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceWordId",
+        "captionWordId",
+        "occurrence",
+        "text",
+        "sourceId",
+        "ownerCutSegmentId",
+        "sourceSampleRate",
+        "sourceSampleRange",
+        "transcriptTimingHash"
+      ],
+      "properties": {
+        "sourceWordId": { "$ref": "#/$defs/wordId" },
+        "captionWordId": { "$ref": "#/$defs/wordId" },
+        "occurrence": { "$ref": "#/$defs/positiveSafeInteger" },
+        "text": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "sourceId": { "$ref": "#/$defs/stableId" },
+        "ownerCutSegmentId": { "$ref": "#/$defs/stableId" },
+        "sourceSampleRate": { "$ref": "#/$defs/positiveSafeInteger" },
+        "sourceSampleRange": { "$ref": "#/$defs/sampleRange" },
+        "transcriptTimingHash": { "$ref": "#/$defs/sha256" },
+        "speaker": {
+          "oneOf": [
+            { "type": "string", "minLength": 1, "maxLength": 128 },
+            {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          ]
+        }
+      }
+    },
+    "sourceWords": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/sourceWord" }
+    }
+  }
+}

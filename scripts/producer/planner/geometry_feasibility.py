@@ -1,35 +1,9 @@
 #!/usr/bin/env python3
-"""geometry_feasibility — plan-time placement feasibility LINT (v3 item #3).
+"""Plan-time feasibility for delivery-aware automatic face placement.
 
-For each of a short's face-anchored, non-recompose ``graphicsTrack`` entries
-this gate composes the DELIVERY geometry the renderer will actually face —
-proxy-mezzanine face sampling (:mod:`planner.geometry_proxy`, the REAL
-cut_speed/face_track path) × reframe crop × max punch scale — then runs the
-REAL ``_choose_region`` against the SHARED occupancy predicate
-(:mod:`planner.occupancy`: face+hair, body, caption band honoring
-``bandYOffsetPx``) with the comp's MEASURED content bbox (the same
-content-hash-cached render ``comp_measure`` warms). No legal region =
-WARN-WITH-EVIDENCE while UNCALIBRATED (A3: the margin is an empirical
-residual — no FAIL until the calibration ledger exists), carrying the
-anatomy evidence so the brain swaps forms PRE-review at zero loop cost.
-FLIP CONDITION (v3 item #4): once ``planner.geometry_calibration``'s
-residual ledger (``<producer_dir>/.sniper-learning/geometry_residuals.jsonl``)
-clears its floors — ``margin_from_residuals`` returns a per-axis p95 —
-verdicts are declared at ``severity_for(GATE, "FAIL", calibrated=True)``
-and the lint flips WARN→FAIL. It writes NO placement into the plan —
-render-time ``resolve_offset_v2`` (now fail-closed) stays the placement
-authority on ground-truth pixels.
-
-Out-of-depth compositions REFUSE LOUDLY (SKIP-with-evidence): baselineLook
-(recrops before reframe), brollTrack or titleCards overlapping the checked
-window (they replace/occupy frames the proxy face model can't see).
-
-Side artifact: ``<producer_dir>/geometry_predictions.json`` — the predicted
-expanded-face boxes per window, consumed by the A3 calibration loop (#4).
-
-CLI: geometry_feasibility.py <plan.json> <manifest.json> <producer_dir>
-       [--cache-dir DIR] [--proxy-scale S] [--workdir DIR]
-prints the gate contract ``{ok, errors, warnings, metrics}``; exit 0 iff ok.
+The gate composes proxy/crop/punch geometry, scales the measured comp footprint
+to the real delivery canvas, and invokes the same solver as render time. It
+stays WARN-with-evidence until calibrated and never writes placement to a plan.
 """
 
 from __future__ import annotations
@@ -50,15 +24,19 @@ from gate_policy import Verdict, to_gate_json  # noqa: E402
 from compile_timeline import compile_plan  # noqa: E402
 from graphics.comp_measure import effective_entries, environment_issue  # noqa: E402
 from graphics.graphics_render import DEFAULT_CACHE_DIR, render_entry  # noqa: E402
+from graphics.placement_context import (bind_plan_face_bbox,  # noqa: E402
+                                        is_face_aware)
 from graphics.pip_hole import entry_has_hole  # noqa: E402
 from motion.recompose import requires_recompose  # noqa: E402
 from planner import geometry_calibration  # noqa: E402
 from planner import geometry_proxy as gproxy  # noqa: E402
-from planner.graphics_anchors import (FACE_ANCHORS, _choose_region,  # noqa: E402
-                                      _content_bbox)
+from planner.delivery_canvas import (delivery_strategy,  # noqa: E402
+                                     resolve_delivery_canvas)
+from planner.graphics_anchors import _clip_dims, _content_bbox  # noqa: E402
 from planner.occupancy import (OccupancyExtras, build_map,  # noqa: E402
                                no_legal_evidence, plan_band_offset)
-from producer_config import CANVAS_BY_ASPECT, MODES  # noqa: E402
+from planner.placement_solver import scale_footprint, solve_placement  # noqa: E402
+from producer_config import MODES  # noqa: E402
 
 GATE = "geometry_feasibility"
 gate_policy.register_gate(GATE, "FAIL")
@@ -110,8 +88,9 @@ def checked_entries(plan: dict) -> list:
     Windows come exit-on-cut clamped via the shared ``effective_entries``.
     """
     out: list = []
-    for i, entry in enumerate(effective_entries(plan)):
-        if entry.get("anchor", "free-band") not in FACE_ANCHORS:
+    entries = bind_plan_face_bbox(effective_entries(plan), plan)
+    for i, entry in enumerate(entries):
+        if not is_face_aware(entry):
             continue
         if entry.get("placement") is not None or requires_recompose(entry) \
                 or entry_has_hole(entry):
@@ -133,10 +112,8 @@ def applicability_skip(plan: dict) -> str | None:
     reframe = plan.get("reframe") or {}
     if reframe.get("layout", "fill") == "split" or reframe.get("crop") is not None:
         return "manual reframe geometry (split/crop) — face_track does not run"
-    mode = (plan.get("target") or {}).get("mode")
-    strategy = reframe.get("strategy",
-                           MODES.get(mode, {}).get("reframe_default", "none"))
-    if strategy != "face":
+    strategy = delivery_strategy(plan)
+    if strategy not in ("face", "none"):
         return f"reframe strategy {strategy!r} — no face-relative crop to compose"
     return None
 
@@ -157,13 +134,15 @@ def check_window(run: LintRun, tag: str, entry: dict,
     free_map = build_map(geom.face_px, set(), run.canvas,
                          OccupancyExtras(hair_top=geom.hair_top,
                                          band_y_offset_px=band))
-    bbox = run.metrics.setdefault("_compBBox", {}).get(tag)
+    bbox = run.metrics.setdefault("_compGeometry", {}).get(tag)
     if bbox is None:
         rendered = render_entry(entry, run.cache_dir)
-        bbox = _content_bbox(rendered["path"])
-        run.metrics["_compBBox"][tag] = bbox
+        authored = _clip_dims(rendered["path"])
+        bbox = scale_footprint(
+            _content_bbox(rendered["path"]), authored, run.canvas)
+        run.metrics["_compGeometry"][tag] = bbox
     anchor = entry.get("anchor", "free-band")
-    region, _fallback = _choose_region(free_map, anchor, bbox, None)
+    solved = solve_placement(free_map, anchor, bbox, (run.canvas, None))
     window = (float(entry["outStart"]), float(entry["outEnd"]))
     prediction = {
         "tag": tag, "kind": entry.get("kind"), "anchor": anchor,
@@ -175,10 +154,12 @@ def check_window(run: LintRun, tag: str, entry: dict,
         "punchScale": round(geom.punch_scale, 4),
         "cropStrategy": geom.crop_strategy,
         "contentBBox": [int(v) for v in bbox],
-        "region": region.name if region is not None else None,
+        "region": solved.region if solved is not None else None,
     }
+    if solved is not None and solved.scale != 1.0:
+        prediction["scale"] = round(solved.scale, 4)
     run.predictions.append(prediction)
-    if region is not None:
+    if solved is not None:
         return
     evidence = no_legal_evidence(anchor, bbox, free_map, window)
     evidence["punchScale"] = round(geom.punch_scale, 4)
@@ -198,7 +179,7 @@ def check_entry(run: LintRun, item: tuple, proxy: dict, crops: list) -> None:
                                     lane="graphics", mode=run.mode))
         return
     s, e = float(entry["outStart"]), float(entry["outEnd"])
-    face_px, hair = gproxy.observe_window(proxy["path"], s, e)
+    face_px, hair, proxy_canvas = gproxy.observe_window(proxy["path"], s, e)
     if face_px is None:
         run.verdicts.append(Verdict(GATE, "SKIP", (
             f"{tag}: no face detected on the proxy in [{s:.2f}, {e:.2f}] — "
@@ -206,7 +187,11 @@ def check_entry(run: LintRun, item: tuple, proxy: dict, crops: list) -> None:
             lane="graphics", mode=run.mode))
         return
     punch = gproxy.max_punch(run.metrics["_punch"], s, e)
-    for crop in gproxy.crops_for_window(crops, s, e):
+    windows = gproxy.crops_for_window(crops, s, e)
+    if delivery_strategy(run.plan) == "none":
+        windows = [{"cropX": 0, "cropWidth": proxy_canvas[0],
+                    "frameHeight": proxy_canvas[1], "strategy": "none"}]
+    for crop in windows:
         geom = gproxy.compose_delivery_geometry((face_px, hair), crop, punch,
                                                 run.canvas)
         check_window(run, tag, entry, geom)
@@ -214,14 +199,7 @@ def check_entry(run: LintRun, item: tuple, proxy: dict, crops: list) -> None:
 
 def lint_plan(run: LintRun, producer_dir: str, work_dir: str,
               proxy_scale: float | None = None) -> None:
-    """Run the full lint into ``run`` (verdicts + metrics + predictions file).
-
-    Args:
-        run: The shared lint state (plan/manifest/cache/canvas).
-        producer_dir: Where ``geometry_predictions.json`` is written.
-        work_dir: Scratch dir for the proxy mezzanine.
-        proxy_scale: Optional proxy downscale override.
-    """
+    """Run the full lint and write its geometry-prediction artifact."""
     started = time.monotonic()
     entries = checked_entries(run.plan)
     run.metrics.update(checked=len(entries), warned=0, skipped=0)
@@ -246,14 +224,18 @@ def lint_plan(run: LintRun, producer_dir: str, work_dir: str,
     proxy = gproxy.render_proxy(run.plan, run.manifest, work_dir, proxy_scale)
     run.metrics.update(proxyRenderS=proxy["elapsedS"],
                        proxyScale=proxy["scale"])
-    t_faces = time.monotonic()
-    crops = gproxy.reframe_crop_windows(proxy["path"], compile_plan(run.plan))
-    run.metrics["faceTrackS"] = round(time.monotonic() - t_faces, 2)
+    crops: list = []
+    if delivery_strategy(run.plan) == "face":
+        t_faces = time.monotonic()
+        crops = gproxy.reframe_crop_windows(proxy["path"], compile_plan(run.plan))
+        run.metrics["faceTrackS"] = round(time.monotonic() - t_faces, 2)
+    else:
+        run.metrics["faceTrackS"] = 0.0
     for item in entries:
         check_entry(run, item, proxy, crops)
     run.metrics["warned"] = sum(1 for v in run.verdicts if v.severity != "SKIP")
     run.metrics["skipped"] = sum(1 for v in run.verdicts if v.severity == "SKIP")
-    run.metrics.pop("_compBBox", None)
+    run.metrics.pop("_compGeometry", None)
     run.metrics.pop("_punch", None)
     run.metrics["elapsedS"] = round(time.monotonic() - started, 2)
     with open(os.path.join(producer_dir, PREDICTIONS_FILENAME), "w") as f:
@@ -282,10 +264,10 @@ def main() -> int:
             plan = json.load(f)
         with open(args.manifest_path) as f:
             manifest = json.load(f)
-        canvas = CANVAS_BY_ASPECT["9:16"]
+        canvas = resolve_delivery_canvas(plan, manifest)
         mode_raw = (plan.get("target") or {}).get("mode")
         run = LintRun(plan, manifest, args.cache_dir or DEFAULT_CACHE_DIR,
-                      (canvas["width"], canvas["height"]),
+                      canvas,
                       mode=mode_raw if mode_raw in MODES else None,
                       severity=run_severity(args.producer_dir))
         os.makedirs(work_dir, exist_ok=True)

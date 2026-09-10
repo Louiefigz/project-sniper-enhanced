@@ -1,3 +1,4 @@
+import path from "node:path";
 import { catalogPromptLines, planCanvas } from "@/lib/producer/comps-catalog";
 import {
   inferSurgicalEditScope,
@@ -19,6 +20,8 @@ export function buildAiEditPrompt(
   if (!scope) throw new Error("the request does not identify an editable lane");
   const requestData = JSON.stringify({ request, scope });
   const allowedFields = surgicalScopeFields(scope);
+  const captionIndex = path.join(
+    path.dirname(planPath), "caption-word-index.json");
   return [
     `You are the SURGICAL EDIT WRITER for ${planPath}.`,
     `Apply only the delimited operator request within its controller-owned lane scope.`,
@@ -43,7 +46,12 @@ export function buildAiEditPrompt(
     ``,
     `Time domains:`,
     `- cutTrack is in SOURCE seconds for its sourceId.`,
-    `- graphicsTrack, punchIns, transitions, treatmentMap, captionsTrack, brollTrack, and audioGain use OUTPUT seconds.`,
+    `- graphicsTrack, punchIns, transitions, treatmentMap, brollTrack, and audioGain use OUTPUT seconds.`,
+    `- CaptionTrackV1 is renderable. Caption ranges use kept-transcript word IDs, half-open compiler timing, and captionsTrack groups. Omit new groupId/correctionId values: controller code stamps them from the exact word range. Never replace caption prose globally to target one occurrence.`,
+    ...(scope.lanes.includes("captions") ? [
+      `- Read controller-owned ${captionIndex}. It contains every kept word with its stable wordId and output time plus requestAnchors for quoted phrases. Use only those exact IDs. Never invent or hash a word ID, and never guess an ambiguous occurrence.`,
+    ] : []),
+    `- First-class longform chapters use captionChapters [{chapterId,title,wordId}] so they follow the same kept-word timeline; never add output-time chapters beside CaptionTrackV1.`,
     `- After a cutTrack change, the controller runs plan_refit before lint and review; do not hand-adjust another lane unless it is explicitly in scope.`,
     ``,
     `Graphics envelope:`,
@@ -53,6 +61,7 @@ export function buildAiEditPrompt(
     ...catalogPromptLines(canvas),
     ``,
     `Audio fields:`,
+    `- Preserve audioAuthorityMode during this scoped edit. New governed plans are controller-initialized to "mastered-stereo"; "editable-stems" is reserved and currently export-blocked.`,
     `- audioEnhance = {"preset":"voice"|"voice-rnn"|"voice-strong"|"separate"}.`,
     `- audioGain = [{outStart,outEnd,dB}].`,
     `- music = {enabled,path OR assetId,duck,gapDb}; music is post-master and does not rebuild video.`,

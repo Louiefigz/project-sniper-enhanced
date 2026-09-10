@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from fingerprints import file_sha256
+from palmier.desktop_audio_declaration import manifest_audio_authority
 from palmier.desktop_quality import quality_contract
 from palmier.desktop_state import DesktopStageInput
 
@@ -27,7 +28,11 @@ def manifest_content(inputs: DesktopStageInput,
         "stage": inputs.stage, "planHash": file_sha256(inputs.plan_path),
         "manifestHash": file_sha256(inputs.manifest_path),
         "checkpointKey": prepared.authority.checkpoint_key,
-        "capability": prepared.capability,
+        "capability": {**prepared.capability,
+                       "audioAuthority": manifest_audio_authority(
+                           inputs.plan_path, prepared.steps,
+                           prepared.capability.get(
+                               "preservedMasteredStereoAuthority"))},
         "qualityContract": quality_contract(), "steps": prepared.steps,
     }
     if prepared.revision is None:

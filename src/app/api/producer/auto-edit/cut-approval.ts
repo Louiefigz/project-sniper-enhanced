@@ -51,7 +51,10 @@ export function cutApprovalPath(ctx: AutoEditCtx): string {
   return path.join(ctx.dir, CUT_APPROVAL_FILE);
 }
 
-function receiptFrom(verdict: PlanningGateVerdict): CutApprovalReceipt {
+function receiptFrom(
+  verdict: PlanningGateVerdict,
+  sourceStage: "previsual" | "planning_gate" = "previsual",
+): CutApprovalReceipt {
   const receipt = verdict.metrics?.receipt;
   if (!receipt || typeof receipt !== "object" || Array.isArray(receipt)) {
     throw new AutoEditError("transcript/cut gate returned no hash-bound receipt");
@@ -61,13 +64,13 @@ function receiptFrom(verdict: PlanningGateVerdict): CutApprovalReceipt {
     "planHash", "manifestHash", "transcriptDigest",
     "cutTrackDigest", "cutDecisionsDigest",
   ];
-  if (value.schemaVersion !== 1 || value.stage !== "previsual"
+  if (value.schemaVersion !== 1 || value.stage !== sourceStage
       || hashes.some((key) => typeof value[key] !== "string" || !SHA256.test(value[key] as string))
       || !Number.isInteger(value.cuts) || !Array.isArray(value.seams)
       || !Array.isArray(value.removals)) {
-    throw new AutoEditError("transcript/cut gate returned a malformed previsual receipt");
+    throw new AutoEditError("transcript/cut gate returned a malformed cut receipt");
   }
-  return value as unknown as CutApprovalReceipt;
+  return { ...value, stage: "previsual" } as unknown as CutApprovalReceipt;
 }
 
 /** Extract the freshly computed immutable cut identity from an approved gate. */
@@ -140,6 +143,21 @@ export async function approvePrevisualCut(
   return receipt;
 }
 
+/** Approve only the cut authority of a complete saved plan, without rewriting it. */
+export async function approveSavedPlanCut(
+  ctx: AutoEditCtx,
+  send?: Send,
+): Promise<CutApprovalReceipt> {
+  const receipt = await validateSavedPlanCut(ctx, send);
+  persistReceipt(ctx, receipt);
+  send?.({
+    event: "cut_approved", savedPlan: true,
+    cutTrackDigest: receipt.cutTrackDigest,
+    planHash: receipt.planHash, cuts: receipt.cuts,
+  });
+  return receipt;
+}
+
 /** Run the deterministic previsual wall without minting cut authority. */
 export async function validatePrevisualCut(
   ctx: AutoEditCtx,
@@ -150,6 +168,24 @@ export async function validatePrevisualCut(
   send?.({ event: "cut_validation_gate", stage: "previsual", ...verdict });
   if (!verdict.ok) throw gateError("previsual", verdict);
   const receipt = receiptFrom(verdict);
+  assertCurrentAuthority(ctx, receipt);
+  return receipt;
+}
+
+/**
+ * Validate a complete saved plan's exact bytes and cut fields. The underlying
+ * planning-stage gate checks the same transcript boundaries/removal evidence
+ * without the cut-writer-only prohibition on populated downstream lanes.
+ */
+export async function validateSavedPlanCut(
+  ctx: AutoEditCtx,
+  send?: Send,
+): Promise<CutApprovalReceipt> {
+  const command = transcriptCutCommand(gateInput(ctx), "saved-plan");
+  const verdict = parsePlanningGateVerdict(command.gate, await spawnPlanningGate(command));
+  send?.({ event: "cut_validation_gate", stage: "saved-plan", ...verdict });
+  if (!verdict.ok) throw gateError("saved-plan", verdict);
+  const receipt = receiptFrom(verdict, "planning_gate");
   assertCurrentAuthority(ctx, receipt);
   return receipt;
 }

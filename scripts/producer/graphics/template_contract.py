@@ -23,9 +23,15 @@ from graphics.template_content import (
 )
 from graphics.template_assets import (
     asset_contract,
+    effective_asset_spec,
     resolved_selectors,
     selector_errors,
 )
+from graphics.template_catalog_contract import (
+    catalog_entry_errors,
+    image_asset_rows,
+)
+from graphics.template_hw_contract import hw_entry_errors
 from graphics.template_visual_contract import visual_entry_errors
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -42,10 +48,21 @@ _ROOT_RE = re.compile(r'<[^>]*data-composition-id="[^"]*"[^>]*>')
 _DIM_RE = re.compile(r'data-(width|height)="(\d+)"')
 _STATEMENT_KIND = "statement-card"
 _VARIANTS = ("classic", "nateherk")
+# Nateherk-only statement variables.  The MEASURED catalog declares all three
+# with empty-string defaults, and an authoring surface that must round-trip
+# every declared default key (guided candidate compilation) therefore has to
+# emit them.  An exact empty string carries no content and drops nothing, so
+# only a populated value is a real classic/nateherk grammar collision.
+_CLASSIC_UNREAD_KEYS = ("headlineLines", "statements", "statementLands")
 
 
 def _nonempty(value: Any) -> bool:
     return isinstance(value, str) and bool(value.strip())
+
+
+def _carries_content(value: Any) -> bool:
+    """True unless the value is an explicit blank equal to the measured default."""
+    return str(value).strip() != ""
 
 
 def declared_variables(comp_html: str) -> dict[str, dict]:
@@ -88,8 +105,8 @@ def _classic_errors(spec: dict) -> list[str]:
     if not _nonempty(spec.get("text")):
         errors.append("classic requires explicit non-empty spec.text; the "
                       "template's demo default is not planned content")
-    incompatible = [key for key in ("headlineLines", "statements", "statementLands")
-                    if key in spec]
+    incompatible = [key for key in _CLASSIC_UNREAD_KEYS
+                    if key in spec and _carries_content(spec[key])]
     if incompatible:
         errors.append("classic does not read " + ", ".join(
             f"spec.{key}" for key in incompatible))
@@ -207,7 +224,8 @@ def _value_errors(spec: dict, declared: dict[str, dict]) -> list[str]:
 def entry_errors(entry: dict, comp_html: str | None = None) -> list[str]:
     """Return every template/spec incompatibility for one planned graphic."""
     kind = str(entry.get("kind", ""))
-    errors = statement_card_errors(entry) if kind == _STATEMENT_KIND else []
+    errors = statement_card_errors(entry) if kind == _STATEMENT_KIND else \
+        hw_entry_errors(entry) + catalog_entry_errors(entry)
     if comp_html is None:
         path = os.path.join(COMPOSITIONS_DIR, f"{kind}.html")
         if not kind or not os.path.isfile(path):
@@ -274,4 +292,5 @@ def resolved_assets(entry: dict, comp_html: str | None = None) -> list[dict]:
         with open(path, encoding="utf-8") as handle:
             comp_html = handle.read()
     declared = declared_variables(comp_html)
-    return resolved_selectors(entry.get("spec") or {}, declared)
+    spec = effective_asset_spec(entry.get("spec") or {}, declared)
+    return resolved_selectors(spec, declared) + image_asset_rows(spec, declared)

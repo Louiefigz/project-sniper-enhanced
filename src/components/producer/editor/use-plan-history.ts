@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   emptyHistory,
   recordEdit,
+  restorePlanContent,
   redoStep,
   undoStep,
   type History,
@@ -63,10 +64,11 @@ export function usePlanHistory(initialPlan: EditPlan, onAfterChange?: () => void
   /** Apply an undo/redo step; true when a step existed (caller resets selection). */
   const restore = useCallback((step: { history: History<EditPlan>; plan: EditPlan } | null): boolean => {
     if (!step) return false;
+    const restored = restorePlanContent(step.plan, planRef.current);
     histRef.current = step.history;
-    planRef.current = step.plan;
+    planRef.current = restored;
     setHist(step.history);
-    setPlan(step.plan);
+    setPlan(restored);
     setDirty(true);
     onAfterChangeRef.current?.();
     return true;

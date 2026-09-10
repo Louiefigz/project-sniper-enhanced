@@ -135,6 +135,8 @@ class ReferenceReviewTests(unittest.TestCase):
         inputs = PackInputs(worklist_path, mechanics, editorial, templates, self.deep_path)
         pack = compile_style_pack(inputs)
         self.assertTrue(pack["releaseReady"])
+        self.assertEqual(pack["releaseClass"], "reference-inspired")
+        self.assertFalse(pack["verifiedMimicQualified"])
         self.assertEqual(pack["grammar"]["informationForms"], ["comparison"])
         plan = {"target": {"referenceId": worklist["referenceId"],
                            "referenceStrategy": "mimic"},
@@ -142,7 +144,16 @@ class ReferenceReviewTests(unittest.TestCase):
                                    "informationForm": "comparison",
                                    "kind": "comparison-bars"}],
                 "transitions": [], "punchIns": []}
-        self.assertTrue(lint(plan, pack, worklist["referenceId"])["ok"])
+        verdict = lint(plan, pack, worklist["referenceId"])
+        self.assertTrue(verdict["ok"])
+        self.assertEqual(
+            verdict["metrics"]["releaseClass"], "reference-inspired")
+        claimed = {**pack, "releaseClass": "verified-mimic",
+                   "verifiedMimicQualified": True}
+        self.assertIn(
+            "schema v1 style packs cannot claim verified mimic",
+            lint(plan, claimed, worklist["referenceId"])["errors"],
+        )
 
     def test_compile_rejects_review_disagreement_without_adjudication(self) -> None:
         worklist = self._prepared()

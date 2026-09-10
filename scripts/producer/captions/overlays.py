@@ -36,19 +36,12 @@ import tempfile
 from PIL import Image, ImageDraw, ImageFont
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # run-by-path: producer pkg root on sys.path
-from producer_config import CANVAS, ENCODE, HOOK_CARD, SAFE_BOX, VISUAL_CENTER_X
+from media_probe import _fps_fraction, display_dims, probe_video
+from producer_config import CANVAS, ENCODE, HOOK_CARD
+from captions.title_card_layout import CardLayout, layout_for_canvas
 
 _STYLE = HOOK_CARD["style"]
-_PADDING = _STYLE["padding"]
-_RADIUS = _STYLE["corner_radius"]
 _ALPHA = int(round(_STYLE["container_alpha"] * 255))
-_FONT_MIN, _FONT_MAX = _STYLE["font_size_range"]
-# Usable safe-box width (870) minus the card's own padding on both sides: the
-# widest text line must fit inside this.
-_USABLE_W = CANVAS["width"] - SAFE_BOX["left"] - SAFE_BOX["right"]
-_TEXT_MAX_W = _USABLE_W - 2 * _PADDING
-_Y_LO, _Y_HI = HOOK_CARD["y_range"]
-_BAND_H = _Y_HI - _Y_LO             # 310px upper-third band the card must fit in
 _FADE_S = 0.25                      # alpha fade-out at the tail of each window
 
 # Operator brand font is Inter Bold; degrade only to a real bold sans, never to
@@ -75,6 +68,8 @@ _FONT_CANDIDATES = [
 
 _resolved: tuple[str, dict, str] | None = None
 _SCRATCH = ImageDraw.Draw(Image.new("RGBA", (1, 1)))
+
+_DEFAULT_LAYOUT = layout_for_canvas(CANVAS["width"], CANVAS["height"])
 
 
 def emit(**fields) -> None:
@@ -127,7 +122,9 @@ def _text_bbox(text: str, font: ImageFont.FreeTypeFont) -> tuple[int, int, int, 
         (0, 0), text, font=font, align="center", spacing=_line_spacing(font.size))
 
 
-def _fit(text: str) -> tuple[ImageFont.FreeTypeFont, tuple[int, int, int, int]]:
+def _fit(
+        text: str, layout: CardLayout,
+) -> tuple[ImageFont.FreeTypeFont, tuple[int, int, int, int]]:
     """Largest font whose text fits BOTH the safe-box width and the hook band.
 
     Shrinks from ``font_size_range`` max toward min; the width rule (§4.3) plus a
@@ -135,38 +132,47 @@ def _fit(text: str) -> tuple[ImageFont.FreeTypeFont, tuple[int, int, int, int]]:
     the upper-third band. If even the floor size overflows, the floor is used
     (the overlay-side clamp keeps it on canvas) — never smaller than min.
     """
-    for size in range(_FONT_MAX, _FONT_MIN - 1, -1):
+    text_max = (
+        layout.width - layout.safe["left"] - layout.safe["right"]
+        - 2 * layout.padding)
+    band_height = layout.y_range[1] - layout.y_range[0]
+    for size in range(layout.font_range[1], layout.font_range[0] - 1, -1):
         font = _font_at(size)
         l, t, r, b = _text_bbox(text, font)
-        if (r - l) <= _TEXT_MAX_W and (b - t) + 2 * _PADDING <= _BAND_H:
+        if (r - l) <= text_max \
+                and (b - t) + 2 * layout.padding <= band_height:
             return font, (l, t, r, b)
-    font = _font_at(_FONT_MIN)
+    font = _font_at(layout.font_range[0])
     return font, _text_bbox(text, font)
 
 
 # --------------------------------------------------------------------------- #
 # Card rendering
 # --------------------------------------------------------------------------- #
-def build_card_png(text: str, out_path: str) -> tuple[int, int]:
+def build_card_png(
+        text: str, out_path: str,
+        layout: CardLayout | None = None) -> tuple[int, int]:
     """Render one hook card (white rounded box, black bold text) to an RGBA PNG.
 
     The card hugs its text: card size = ink box + padding on every side. Returns
     the ``(width, height)`` in pixels.
     """
     text = text.replace("\r\n", "\n").replace("\r", "\n").strip("\n")
-    font, (l, t, r, b) = _fit(text)
+    layout = layout or _DEFAULT_LAYOUT
+    font, (l, t, r, b) = _fit(text, layout)
     # Pillow may return fractional ink bounds; ceil so nothing clips.
-    card_w = math.ceil(r - l) + 2 * _PADDING
-    card_h = math.ceil(b - t) + 2 * _PADDING
+    card_w = math.ceil(r - l) + 2 * layout.padding
+    card_h = math.ceil(b - t) + 2 * layout.padding
     img = Image.new("RGBA", (card_w, card_h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     draw.rounded_rectangle(
-        [0, 0, card_w - 1, card_h - 1], radius=_RADIUS,
+        [0, 0, card_w - 1, card_h - 1], radius=layout.radius,
         fill=(255, 255, 255, _ALPHA))
     # Offset by (padding - l, padding - t) so the ink box's top-left sits exactly
     # at the padding inset — pixel-accurate centering inside the hugging card.
     draw.multiline_text(
-        (_PADDING - l, _PADDING - t), text, font=font, fill=(0, 0, 0, 255),
+        (layout.padding - l, layout.padding - t),
+        text, font=font, fill=(0, 0, 0, 255),
         align="center", spacing=_line_spacing(font.size))
     img.save(out_path)
     return card_w, card_h
@@ -175,14 +181,18 @@ def build_card_png(text: str, out_path: str) -> tuple[int, int]:
 # --------------------------------------------------------------------------- #
 # Overlay compositing
 # --------------------------------------------------------------------------- #
-def _overlay_xy(card_w: int, card_h: int) -> tuple[int, int]:
+def _overlay_xy(
+        card_w: int, card_h: int,
+        layout: CardLayout | None = None) -> tuple[int, int]:
     """Overlay top-left: centered on VISUAL_CENTER_X and in the hook band,
     clamped so the card stays inside the safe box / band even if oversized."""
-    x = int(round(VISUAL_CENTER_X - card_w / 2.0))
-    x = max(SAFE_BOX["left"],
-            min(x, CANVAS["width"] - SAFE_BOX["right"] - card_w))
-    y = int(round((_Y_LO + _Y_HI) / 2.0 - card_h / 2.0))
-    y = max(_Y_LO, min(y, _Y_HI - card_h))
+    layout = layout or _DEFAULT_LAYOUT
+    x = int(round(layout.visual_center_x - card_w / 2.0))
+    x = max(layout.safe["left"],
+            min(x, layout.width - layout.safe["right"] - card_w))
+    low, high = layout.y_range
+    y = int(round((low + high) / 2.0 - card_h / 2.0))
+    y = max(low, min(y, high - card_h))
     return x, y
 
 
@@ -208,7 +218,9 @@ def _build_filter(cards: list[dict]) -> tuple[str, str]:
     return ";".join(parts), prev
 
 
-def apply_cards(video_in: str, cards: list[dict], video_out: str) -> None:
+def apply_cards(
+        video_in: str, cards: list[dict], video_out: str,
+        layout: CardLayout | None = None) -> None:
     """Overlay every card PNG onto ``video_in`` in one ffmpeg pass.
 
     ``cards`` = ``[{"png", "outStart", "outEnd"}, ...]``. Video re-encodes to the
@@ -217,13 +229,16 @@ def apply_cards(video_in: str, cards: list[dict], video_out: str) -> None:
     """
     if not cards:
         raise ValueError("apply_cards: no cards to apply")
+    layout = layout or _DEFAULT_LAYOUT
     ordered = sorted(cards, key=lambda c: float(c["outStart"]))
     for c in ordered:
         with Image.open(c["png"]) as im:
-            c["_x"], c["_y"] = _overlay_xy(*im.size)
+            c["_x"], c["_y"] = _overlay_xy(*im.size, layout)
+    rate = _fps_fraction(probe_video(video_in)["r_frame_rate"])
+    rate_token = f"{rate.numerator}/{rate.denominator}"
     cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i", video_in]
     for c in ordered:
-        cmd += ["-loop", "1", "-framerate", str(CANVAS["fps_default"]),
+        cmd += ["-loop", "1", "-framerate", rate_token,
                 "-t", f"{float(c['outEnd']):.4f}", "-i", c["png"]]
     graph, final = _build_filter(ordered)
     cmd += ["-filter_complex", graph, "-map", final, "-map", "0:a?",
@@ -236,15 +251,19 @@ def apply_cards(video_in: str, cards: list[dict], video_out: str) -> None:
 def build_and_apply(video_in: str, title_cards: list[dict],
                     video_out: str, png_dir: str) -> dict:
     """Build a PNG per title card into ``png_dir``, then overlay them all."""
+    stream = probe_video(video_in)
+    layout = layout_for_canvas(*display_dims(stream))
     built: list[dict] = []
     for i, tc in enumerate(title_cards):
         png = os.path.join(png_dir, f"card_{i:02d}.png")
-        w, h = build_card_png(str(tc.get("text", "")), png)
+        w, h = build_card_png(str(tc.get("text", "")), png, layout)
         built.append({"png": png, "outStart": float(tc["outStart"]),
-                      "outEnd": float(tc["outEnd"]), "dims": [w, h]})
-    apply_cards(video_in, built, video_out)
+                      "outEnd": float(tc["outEnd"]), "dims": [w, h],
+                      "canvas": [layout.width, layout.height]})
+    apply_cards(video_in, built, video_out, layout)
     return {"cards": len(built), "out": video_out,
-            "dims": [b["dims"] for b in built]}
+            "dims": [b["dims"] for b in built],
+            "canvas": [layout.width, layout.height]}
 
 
 def _passthrough(video_in: str, video_out: str) -> None:

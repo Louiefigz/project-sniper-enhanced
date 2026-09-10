@@ -47,7 +47,10 @@ export async function qualityRoundWithRenderCheckpoint(
     const failure = await checkpointFailure;
     if (failure) throw failure.error;
   };
-  const round = await deps.quality(run, { renderCheckpointSettled }).then(
+  const round = await deps.quality(run, {
+    renderCheckpointSettled,
+    checkpoint: deps.checkpoint,
+  }).then(
     (result) => ({ result }),
     (error: unknown) => ({ error }),
   );

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from edit_scope import lane_required, resolve_scope
 from producer_config import HOOK_CARD, LINT
 
 
@@ -33,6 +34,21 @@ def _overlaps(span: tuple[float, float], spans: list[tuple[float, float]]) -> bo
     """True when ``span`` intersects any already-collected title-card span."""
     s, e = span
     return any(s < pe and ps < e for ps, pe in spans)
+
+
+def _short_hook_required(target: dict, rep: Any) -> bool:
+    """Respect graphics ownership while preserving an explicit Caleb base kit."""
+    if target.get("mode") != "short":
+        return False
+    owned = lane_required(target, "graphics")
+    named_thesis = target.get("style") == "caleb"
+    directive = (target.get("lanes") or {}).get("graphics")
+    if named_thesis and (directive == "off" or resolve_scope(target) == "trim"):
+        rep.error("target.style='caleb' requires a frame-one thesis hook, "
+                  "but explicit graphics-off or trim scope forbids that request; "
+                  "resolve the operator intent conflict")
+        return False
+    return owned or named_thesis
 
 
 def check_title_cards(plan: dict, preset: dict, out_dur: float, rep: Any) -> None:
@@ -57,8 +73,8 @@ def check_title_cards(plan: dict, preset: dict, out_dur: float, rep: Any) -> Non
         if _overlaps((s, e), spans):
             rep.error(f"{tag}: overlaps another title card")
         spans.append((s, e))
-    mode = (plan.get("target") or {}).get("mode")
-    if mode == "short" and HOOK_CARD["from_frame_one"] and not hook_at_zero:
+    needs_hook = _short_hook_required(plan.get("target") or {}, rep)
+    if needs_hook and HOOK_CARD["from_frame_one"] and not hook_at_zero:
         rep.error("short mode requires a style='hook' title card starting at 0.0 "
                   "(frame 1 doubles as cover + loop start)")
 

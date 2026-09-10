@@ -55,6 +55,7 @@ export function freshJob(args: NewAutoEditJobArgs, now: string): AutoEditJob {
       : "Auto Edit is queued in the detached worker.",
     snapshots: args.snapshots,
     attempts: 1,
+    ...(args.reviewSavedPlan ? { reviewSavedPlan: true as const } : {}),
     planningRound: 0,
     planningCycles: 0,
     planningCleanRounds: 0,

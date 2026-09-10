@@ -5,6 +5,7 @@ decides base reuse vs re-render, the staleness check, and the eof_action=pass
 graph injection that guards the duplicate-frame stutter. The ffmpeg composite +
 YDIF ratio are exercised by the e2e render, not here.
 """
+import ast
 import contextlib
 import io
 import json
@@ -36,6 +37,32 @@ class BaseFingerprintTests(unittest.TestCase):
         f0 = asm.base_fingerprint(p)
         p["graphicsTrack"].append({"kind": "chip-row", "outStart": 3.0, "outEnd": 4.0})
         p["planVersion"] = 9                      # a re-plan bump must NOT invalidate the base
+        self.assertEqual(asm.base_fingerprint(p), f0)
+
+    def test_longform_rail_edit_invalidates_cross_lane_base(self) -> None:
+        p = self._plan()
+        p["graphicsTrack"] = [{
+            "kind": "glass-rail", "anchor": "free-band",
+            "outStart": 1.0, "outEnd": 4.0, "spec": {"side": "left"},
+        }]
+        f0 = asm.base_fingerprint(p)
+        p["graphicsTrack"][0]["spec"]["side"] = "right"
+        self.assertNotEqual(asm.base_fingerprint(p), f0)
+
+    def test_caption_suppression_window_invalidates_base(self) -> None:
+        p = self._plan()
+        p["graphicsTrack"][0].update({
+            "anchor": "own-screen", "outStart": 1.0, "outEnd": 2.0,
+        })
+        f0 = asm.base_fingerprint(p)
+        p["graphicsTrack"][0]["outEnd"] = 2.5
+        self.assertNotEqual(asm.base_fingerprint(p), f0)
+
+    def test_regular_scene_payload_still_reuses_base(self) -> None:
+        p = self._plan()
+        p["graphicsTrack"][0]["spec"] = {"text": "Before"}
+        f0 = asm.base_fingerprint(p)
+        p["graphicsTrack"][0]["spec"]["text"] = "After"
         self.assertEqual(asm.base_fingerprint(p), f0)
 
     def test_cut_change_flips_fingerprint(self) -> None:
@@ -220,7 +247,9 @@ class AutoBaseDispatchTests(unittest.TestCase):
                 f.write(b"x")
         if fingerprint is not None:
             with open(self.fp, "w") as f:
-                json.dump({"fingerprint": fingerprint}, f)
+                from audio.master import MASTERING_POLICY_VERSION
+                json.dump({"fingerprint": fingerprint,
+                           "masteringPolicyVersion": MASTERING_POLICY_VERSION}, f)
 
     def test_current_base_is_reused(self) -> None:
         self._write(base=True, fingerprint=asm.base_fingerprint(self.plan))
@@ -247,12 +276,13 @@ class AutoBaseDispatchTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "no manifest"):
             asm.ensure_base(self.base, plan_path, self.plan, self.fp, manifest=None)
 
-    def test_unverifiable_base_does_not_block(self) -> None:
+    def test_unverifiable_base_without_rebuild_manifest_fails_closed(self) -> None:
         self._write(base=True, fingerprint=None)
         plan_path = os.path.join(self.tmp.name, "edit_plan.json")
         with open(plan_path, "w") as f:
             json.dump(self.plan, f)
-        asm.ensure_base(self.base, plan_path, self.plan, self.fp, manifest=None)
+        with self.assertRaisesRegex(RuntimeError, "no manifest"):
+            asm.ensure_base(self.base, plan_path, self.plan, self.fp, manifest=None)
 
 
 class _StubProc:
@@ -454,11 +484,20 @@ class RenderStageOrderTests(unittest.TestCase):
         # F3: enhance must clean the PURE dialogue bus. After transitions,
         # 'separate' (Demucs residual -60dB) / voice-rnn would delete the
         # authored whoosh SFX amixed into the program.
-        body = self._render_body()
-        self.assertIn("enhance_stage(", body)
-        self.assertIn("transitions_stage(", body)
-        self.assertLess(body.index("enhance_stage("),
-                        body.index("transitions_stage("))
+        body = ast.parse("def render(" + self._render_body())
+        calls = [node for node in ast.walk(body) if isinstance(node, ast.Call)]
+        stages = {}
+        for call in calls:
+            name = call.func.id if isinstance(call.func, ast.Name) else None
+            if name == "source_color_stage" and len(call.args) > 1:
+                stage = call.args[1]
+                name = stage.id if isinstance(stage, ast.Name) else None
+            if name in {"enhance_stage", "transitions_stage"}:
+                stages.setdefault(name, []).append(call.lineno)
+        self.assertEqual(set(stages), {"enhance_stage", "transitions_stage"})
+        self.assertEqual(len(stages["enhance_stage"]), 1)
+        self.assertEqual(len(stages["transitions_stage"]), 1)
+        self.assertLess(stages["enhance_stage"][0], stages["transitions_stage"][0])
 
     def test_monolithic_render_warns_music_not_applied(self) -> None:
         # F5: plan.music is assemble-time; the monolithic path must warn

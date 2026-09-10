@@ -67,6 +67,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from audio.sfx_library import probe_peak_dbfs  # noqa: E402
 from audio.sfx_library import resolve as resolve_sfx  # noqa: E402
+from audio.channel_normalization import (  # noqa: E402
+    ChannelAuthority,
+    observe_channel_authority,
+    system_program_request,
+)
 from cut_speed import (has_audio, probe_duration, probe_video,  # noqa: E402
                        probe_video_frames, run_ff)
 from motion import zoom_pull as zp  # noqa: E402
@@ -106,6 +111,15 @@ class TransitionEvent:
     kind: str
     sfx: bool | str = False
     zoom: "zp.ZoomPullSpec | None" = None
+
+
+@dataclass(frozen=True)
+class _TransitionAudio:
+    inputs: tuple[str, ...]
+    filter_suffix: str
+    map_args: tuple[str, ...]
+    whoosh_peak_dbfs: float | None
+    authority: ChannelAuthority | None
 
 
 def emit(**fields) -> None:
@@ -286,7 +300,8 @@ def _sfx_key(e: TransitionEvent) -> object:
 
 
 def build_audio_graph(sfx_events: list[TransitionEvent],
-                      sources: dict[object, tuple[int, float]]) -> str:
+                      sources: dict[object, tuple[int, float]],
+                      normalization_filter: str = "anull") -> str:
     """Delay each event's SFX copy so its HIT lands on the seam; mix onto the
     dialogue untouched.
 
@@ -308,7 +323,8 @@ def build_audio_graph(sfx_events: list[TransitionEvent],
             lbl = f"[d{len(delayed)}]"
             parts.append(f"{tap}adelay={ms}|{ms}{lbl}")
             delayed.append(lbl)
-    parts.append("[0:a]" + "".join(delayed) +
+    parts.append(f"[0:a]{normalization_filter}[program]")
+    parts.append("[program]" + "".join(delayed) +
                  f"amix=inputs={len(delayed) + 1}:duration=first:normalize=0[aout]")
     return ";".join(parts)
 
@@ -328,6 +344,43 @@ def _assert_preserved(src_path: str, out_path: str, in_frames: int,
             raise RuntimeError(f"transitions changed audio duration: "
                                f"{a_in:.3f}s -> {a_out:.3f}s")
     return fields
+
+
+def _transition_audio(
+    src_path: str,
+    work: str,
+    sfx_events: list[TransitionEvent],
+) -> _TransitionAudio:
+    """Prepare SFX inputs and the normalized program-audio graph."""
+    if not sfx_events:
+        return _TransitionAudio(
+            (), "", ("-map", "0:a?", "-c:a", "copy"), None, None)
+    authority = observe_channel_authority(system_program_request(src_path))
+    inputs: list[str] = []
+    sources: dict[object, tuple[int, float]] = {}
+    whoosh_peak = None
+    if any(event.sfx is True for event in sfx_events):
+        wav = os.path.join(work, "whoosh.wav")
+        whoosh_peak = synth_whoosh(wav)
+        inputs.extend(["-i", wav])
+        sources[True] = (len(sources) + 1, WHOOSH_LEAD_S)
+    names = sorted({
+        event.sfx for event in sfx_events
+        if isinstance(event.sfx, str)
+    })
+    for name in names:
+        path, lead = resolve_sfx(name)
+        inputs.extend(["-i", path])
+        sources[name] = (len(sources) + 1, lead)
+    graph = ";" + build_audio_graph(
+        sfx_events, sources, authority.filter_for("stereo"))
+    mapping = (
+        "-map", "[aout]", "-c:a", ENCODE["acodec"],
+        "-b:a", SFX_AUDIO_BITRATE, "-ar", str(ENCODE["audio_rate"]),
+        "-ac", str(ENCODE["audio_channels"]),
+    )
+    return _TransitionAudio(
+        tuple(inputs), graph, mapping, whoosh_peak, authority)
 
 
 def apply_transitions(src_path: str, raw_events: object, out_path: str) -> dict:
@@ -350,41 +403,28 @@ def apply_transitions(src_path: str, raw_events: object, out_path: str) -> dict:
              reason="input has no audio stream; sfx skipped")
     work = tempfile.mkdtemp(prefix="producer-transitions-")
     try:
-        whoosh_peak = None
+        audio = _transition_audio(src_path, work, sfx_events)
         cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-               "-i", src_path]
-        fc = build_video_filter(events, fps, dims)
-        if sfx_events:
-            sources: dict[object, tuple[int, float]] = {}
-            if any(e.sfx is True for e in sfx_events):
-                wav = os.path.join(work, "whoosh.wav")
-                whoosh_peak = synth_whoosh(wav)
-                cmd += ["-i", wav]
-                sources[True] = (len(sources) + 1, WHOOSH_LEAD_S)
-            for name in sorted({e.sfx for e in sfx_events
-                                if isinstance(e.sfx, str)}):
-                path, lead = resolve_sfx(name)
-                cmd += ["-i", path]
-                sources[name] = (len(sources) + 1, lead)
-            fc += ";" + build_audio_graph(sfx_events, sources)
-            amap = ["-map", "[aout]", "-c:a", ENCODE["acodec"],
-                    "-b:a", SFX_AUDIO_BITRATE, "-ar", str(ENCODE["audio_rate"]),
-                    "-ac", str(ENCODE["audio_channels"])]
-        else:
-            amap = ["-map", "0:a?", "-c:a", "copy"]
-        cmd += ["-filter_complex", fc, "-map", "[vout]", *amap,
+               "-i", src_path, *audio.inputs]
+        fc = build_video_filter(events, fps, dims) + audio.filter_suffix
+        cmd += ["-filter_complex", fc, "-map", "[vout]", *audio.map_args,
                 "-c:v", "libx264", "-crf", str(ENCODE["mezzanine_crf"]),
                 "-preset", ENCODE["mezzanine_preset"],
                 "-pix_fmt", ENCODE["pix_fmt"], "-fps_mode", "passthrough",
                 "-movflags", "+faststart", out_path]
         run_ff(cmd)
+        if audio.authority is not None:
+            audio.authority.assert_stable()
     finally:
         shutil.rmtree(work, ignore_errors=True)
     result = {"fps": round(fps, 3), "events": len(events),
               "flashes": sum(1 for e in events if e.kind == "white-flash"),
               "leaks": sum(1 for e in events if e.kind == "light-leak"),
               "zoomPulls": sum(1 for e in events if e.kind == "zoom-pull"),
-              "sfx": len(sfx_events), "whooshPeakDbfs": whoosh_peak}
+              "sfx": len(sfx_events),
+              "whooshPeakDbfs": audio.whoosh_peak_dbfs}
+    if audio.authority is not None:
+        result["channelNormalization"] = audio.authority.receipt
     result.update(_assert_preserved(src_path, out_path, in_frames,
                                     check_audio=src_audio))
     return result

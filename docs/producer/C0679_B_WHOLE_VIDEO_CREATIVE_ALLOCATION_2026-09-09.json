@@ -1,0 +1,1259 @@
+{
+  "createdAt": "2026-09-10T00:54:01.777546+00:00",
+  "status": "source-only-allocation-not-rendered",
+  "benchmarkClockReset": false,
+  "sceneCount": 53,
+  "planningDocument": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/docs/producer/C0679_B_WHOLE_VIDEO_CREATIVE_ALLOCATION_2026-09-09.md",
+  "planningDocumentSha256": "443f156107fcc2db9fd8e021bc685d0b0c1a0dc859c440140d87109d02d1735a",
+  "inputs": {
+    "scene-map.json": {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-fresh-native-b-2026-09-09/scene-map.json",
+      "sha256": "7755256028c4cd4ae42072329c1b521605e6ae48897835c98f29d64dc1bb414b"
+    },
+    "scene-spec.json": {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-fresh-native-b-2026-09-09/scene-spec.json",
+      "sha256": "2f96dc4580df98f426febc411e6442359069dd95ccec1cd0a83f1fb113919746"
+    },
+    "transcript.json": {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-fresh-native-b-2026-09-09/transcript.json",
+      "sha256": "c1fc71d4d3211e8ec72c690990e0d9aa789f949729150ff50308adaee11b8600"
+    }
+  },
+  "aManifest": {
+    "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-native-hyperframes-2026-09-09/PACKAGE_MANIFEST.json",
+    "sha256": "1cc0c92dfc15530afb57c2f6d33caf62061a6034d648e43b69d2d64069c5f7c5"
+  },
+  "catalogSources": {
+    "C1": {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/yt-camera-move.html",
+      "sha256": "f58d4c2fc7165cf49a701f55f80fcd88eccab5c582cf8c2ae00259523810d58a"
+    },
+    "C2": {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/shared-axis-y.html",
+      "sha256": "ae9d2f096308f18deeb5bc365219ac3fd41793dcd5a5a1675e0735a62b11c24f"
+    },
+    "C3": {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/lt-accent-underline.html",
+      "sha256": "0bd8bd7c6c99f4fd30b0ab3650ba352f973a40080d9d372fe9b714f2bb5c135b"
+    },
+    "C4": {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/flowchart.html",
+      "sha256": "4d7b486e72f03d1809e57ff0214f2e889882387fbe7783756cfa6d871e904d35"
+    },
+    "C5": {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/number-pop-in.html",
+      "sha256": "25bb2a0a3e2dc9a067cfb016d7d8a971b70774652a0a4dca200c9173a1fc4e48"
+    },
+    "C6": {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/comparison-split.html",
+      "sha256": "2637b4dd260eb9ef272fad2f3b3921fe8f282cb498b8de112ec6faa76d5ef3b8"
+    },
+    "C7": {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/panel-reveal.html",
+      "sha256": "0fbb1c9685a80e10e577d405544bf8db35ec1a27cb0c8bed55a4a1f5fd88d376"
+    },
+    "C8": {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/constellation-hub.html",
+      "sha256": "6ebed16e6f7d2aff53507fc719639e4b9332b1882c4c4b8e3e8ff0b53011805e"
+    },
+    "C9": {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/morph-swap.html",
+      "sha256": "01b9248e4cbfddaafa0bb026c7e970f202196acf83082c8699efa7e8716b7f83"
+    },
+    "C10": {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/mk-specs-list.html",
+      "sha256": "a6c68fd7cdec5b30d043ffe89562149d3e54806bf045cc867bd068059d979fe8"
+    },
+    "C11": {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/inline-highlight.html",
+      "sha256": "5063977e75ef2c36ed9ce71e0f95b244504a7c489dd540b47defabbe39c09100"
+    },
+    "C12": {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/text-state-swap.html",
+      "sha256": "53eeedf34c11ee2f051e4efaafc0ae32e15f3f89bbcba2160ae026e4a36240fb"
+    },
+    "C13": {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/grid-card-assemble.html",
+      "sha256": "8713fc92043a353732f4d9bd8832e0023a2019472d3a9cfffc566ff6fd194042"
+    },
+    "C14": {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/marker-checklist-card.html",
+      "sha256": "c99d951e0f361447109f50b5301cbbd8bcfed621cd7a66d92d9c5a65ec1614f0"
+    },
+    "C15": {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/outline-draw.html",
+      "sha256": "30674e59672253a2b1596addbc3200a012a8a88c0382158d3db2612c44efa76f"
+    },
+    "C16": {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/fade-through.html",
+      "sha256": "f3355c517ee2eb808036cc8978ca7489f9569eaceef83f87eeb639b23b66147f"
+    }
+  },
+  "scenes": [
+    {
+      "anchor": 13.26,
+      "until": 16.5,
+      "layout": "full",
+      "type": "impact",
+      "kicker": "FOR THE PEOPLE MAKING IT",
+      "title": "CONTENT FOR CLIENTS",
+      "items": [],
+      "id": "panel-00",
+      "start": 0.0,
+      "end": 3.25325,
+      "duration": 3.25325,
+      "proposedPresenter": "S",
+      "treatment": "Human opening. One small client-content label after the face registers; no title card.",
+      "sources": "A0, C1, C2",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 16.5,
+      "until": 20.75,
+      "layout": "split",
+      "type": "stack",
+      "kicker": "YOUR WORKDAY",
+      "title": "SMALL TEAM. BIG LOAD.",
+      "items": [
+        "Media team",
+        "One-person shop"
+      ],
+      "id": "panel-01",
+      "start": 3.25325,
+      "end": 7.5075,
+      "duration": 4.254250000000001,
+      "proposedPresenter": "S",
+      "treatment": "Audience annotation. Replace the label with small team / one-person shop on speech; let the delivery carry the workload.",
+      "sources": "A0, C12",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 20.76,
+      "until": 24.9,
+      "layout": "split",
+      "type": "tools",
+      "kicker": "SAME TOOLS",
+      "title": "YOU HAVE THE AI.",
+      "items": [
+        "ChatGPT",
+        "Claude",
+        "Gemini"
+      ],
+      "delays": [
+        1.29,
+        1.89,
+        2.43
+      ],
+      "id": "panel-02",
+      "start": 7.5075,
+      "end": 11.636625,
+      "duration": 4.129125,
+      "proposedPresenter": "S",
+      "treatment": "Tool logos. Three real local SVG marks and short names reveal on the named-tool cues in peripheral clear space.",
+      "sources": "A0, A1, C2",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 25.08,
+      "until": 28.7,
+      "layout": "full",
+      "type": "impact",
+      "kicker": "THE REAL QUESTION",
+      "title": "WHAT GOES IN?",
+      "items": [],
+      "id": "panel-03",
+      "start": 11.803458333333333,
+      "end": 15.432083333333333,
+      "duration": 3.6286249999999995,
+      "proposedPresenter": "S",
+      "treatment": "Direct-address question. Clear logos; small camera push, with WHAT GOES IN? only if the shot needs text emphasis.",
+      "sources": "C1",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 28.74,
+      "until": 33.65,
+      "layout": "split",
+      "type": "flow",
+      "kicker": "THE STARTING POINT",
+      "title": "TOPIC → PROMPT",
+      "items": [
+        "A topic",
+        "A request",
+        "A generic list"
+      ],
+      "id": "panel-04",
+      "start": 15.473791666666667,
+      "end": 20.395375,
+      "duration": 4.921583333333334,
+      "proposedPresenter": "PL",
+      "treatment": "Mechanism. A topic enters a prompt; a connector carries it toward a generic-list output. Change the state, not three unrelated cards.",
+      "sources": "A0 #mechanism, C4",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 33.68,
+      "until": 37.0,
+      "layout": "split",
+      "type": "quote",
+      "kicker": "STAGE ONE",
+      "title": "JUST PROMPTS",
+      "items": [
+        "“Give me content ideas.”"
+      ],
+      "id": "panel-05",
+      "start": 20.437083333333334,
+      "end": 23.732041666666667,
+      "duration": 3.2949583333333337,
+      "proposedPresenter": "PL",
+      "treatment": "Prompt annotation. Keep that relationship in place; isolate PROMPTS ONLY beside its input and dim the generic result.",
+      "sources": "A0 #only-label, C11, C12",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 37.0,
+      "until": 39.38,
+      "layout": "full",
+      "type": "impact",
+      "kicker": "THE OPPORTUNITY",
+      "title": "BETTER INPUTS.",
+      "items": [],
+      "id": "panel-06",
+      "start": 23.732041666666667,
+      "end": 26.109416666666668,
+      "duration": 2.3773750000000007,
+      "proposedPresenter": "S",
+      "treatment": "Rehook. Return to Aaron as BETTER INPUTS lands; one underline and a readable hold.",
+      "sources": "C1, C11",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 39.4,
+      "until": 43.25,
+      "layout": "full",
+      "type": "credential",
+      "kicker": "AARON FIGUEROA",
+      "title": "10 YEARS",
+      "items": [
+        "Software engineering"
+      ],
+      "id": "panel-07",
+      "start": 26.151125,
+      "end": 29.988291666666665,
+      "duration": 3.837166666666665,
+      "proposedPresenter": "S",
+      "treatment": "Credibility lower third. Aaron's name/role and animated 10 YEARS on “decade”; preserve his face throughout his introduction.",
+      "sources": "A0 #identity/#credential, C3, C5",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 43.25,
+      "until": 47.45,
+      "layout": "split",
+      "type": "flow",
+      "kicker": "WHAT I BUILD",
+      "title": "AI × CONTENT",
+      "items": [
+        "Video-first brands",
+        "Content systems"
+      ],
+      "id": "panel-08",
+      "start": 29.988291666666665,
+      "end": 34.200833333333335,
+      "duration": 4.21254166666667,
+      "proposedPresenter": "S",
+      "treatment": "Builder annotation. Compact AI → content systems relationship beside Aaron; video-first brands is the destination label.",
+      "sources": "A0 #xt-video-brands, C4",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 47.48,
+      "until": 52.2,
+      "layout": "split",
+      "type": "impact",
+      "kicker": "CURRENT BUILD",
+      "title": "DROP-IN",
+      "items": [
+        "AI content workflow"
+      ],
+      "id": "panel-09",
+      "start": 34.200833333333335,
+      "end": 38.95558333333334,
+      "duration": 4.754750000000001,
+      "proposedPresenter": "S",
+      "treatment": "Product mention. A small DROP-IN / AI content workflow identifier; no invented app screenshot or feature tour.",
+      "sources": "A0 #xt-product, C3",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 52.24,
+      "until": 56.3,
+      "layout": "split",
+      "type": "worksheet",
+      "kicker": "THE WORKBOOK",
+      "title": "ANGLE GENERATOR",
+      "items": [
+        "01  Client pain",
+        "02  Beliefs + proof",
+        "03  Angle engine"
+      ],
+      "id": "panel-10",
+      "start": 38.99729166666667,
+      "end": 43.043,
+      "duration": 4.04570833333333,
+      "proposedPresenter": "PR",
+      "treatment": "Resource object. Angle-generator document silhouette opens to its three stage labels; this is an illustration of the workbook.",
+      "sources": "A2 #xt-workbook, C7",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 56.3,
+      "until": 59.15,
+      "layout": "full",
+      "type": "impact",
+      "kicker": "USED IN MY WORK",
+      "title": "BRAND + CLIENTS",
+      "items": [],
+      "id": "panel-11",
+      "start": 43.043,
+      "end": 45.87916666666667,
+      "duration": 2.8361666666666707,
+      "proposedPresenter": "S",
+      "treatment": "Two-use annotation. MY BRAND and CLIENTS appear on opposite clear sides as two destinations of the same engine.",
+      "sources": "A2 #xt-own-brand/#xt-client-accounts, C2",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 59.15,
+      "until": 62.64,
+      "layout": "split",
+      "type": "quote",
+      "kicker": "THE BOTTLENECK",
+      "title": "STUCK PROMPTING?",
+      "items": [
+        "Change the material you give AI."
+      ],
+      "id": "panel-12",
+      "start": 45.87916666666667,
+      "end": 49.382666666666665,
+      "duration": 3.5034999999999954,
+      "proposedPresenter": "S",
+      "treatment": "Direct challenge. PROMPTING changes to BETTER INPUTS with Aaron visible; clear it before the roadmap.",
+      "sources": "A2 #xt-prompting, C12",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 195.57,
+      "until": 205.44,
+      "layout": "bubble",
+      "type": "roadmap",
+      "kicker": "THE PLAN",
+      "title": "BUILD THE ENGINE",
+      "items": [
+        "01  Sharpen the pain",
+        "02  Add beliefs + proof",
+        "03  Generate better angles"
+      ],
+      "delays": [
+        0.5,
+        3.2,
+        6.1
+      ],
+      "id": "panel-13",
+      "start": 49.382666666666665,
+      "end": 59.267541666666666,
+      "duration": 9.884875000000001,
+      "proposedPresenter": "PR",
+      "treatment": "Roadmap rail. Pain → beliefs/proof → angles becomes one connected three-stage path, highlighted in spoken order.",
+      "sources": "A3 #b1-outcomes, C4",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 73.17,
+      "until": 80.7,
+      "layout": "full",
+      "type": "impact",
+      "kicker": "LET'S MAKE IT CONCRETE",
+      "title": "WATCH THE INPUT.",
+      "items": [],
+      "id": "panel-14",
+      "start": 59.267541666666666,
+      "end": 66.81675,
+      "duration": 7.549208333333333,
+      "proposedPresenter": "S",
+      "treatment": "Demonstration handoff. Pull back to the person and a small WATCH THE INPUT cue; hold eye contact before showing the example.",
+      "sources": "C1, C2",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 80.76,
+      "until": 91.55,
+      "layout": "split",
+      "type": "quote",
+      "kicker": "ILLUSTRATIVE PROMPT",
+      "title": "THE GENERIC ASK",
+      "items": [
+        "Give me 20 content ideas about content marketing for creators."
+      ],
+      "id": "panel-15",
+      "start": 66.85845833333333,
+      "end": 77.66091666666667,
+      "duration": 10.802458333333334,
+      "proposedPresenter": "PL",
+      "treatment": "Prompt specimen. Build the exact generic-request example as readable text; pop 20 where spoken. Label it EXAMPLE INPUT.",
+      "sources": "A2 #xt-demonstration, C2, C5",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 91.6,
+      "until": 107.45,
+      "layout": "bubble",
+      "type": "stack",
+      "kicker": "EXAMPLE OUTPUTS",
+      "title": "FAMILIAR IDEAS",
+      "items": [
+        "5 tips to stay consistent",
+        "Use AI to create content faster",
+        "Top tools for creators"
+      ],
+      "delays": [
+        0.4,
+        5.2,
+        10.1
+      ],
+      "id": "panel-16",
+      "start": 77.702625,
+      "end": 93.55179166666667,
+      "duration": 15.849166666666676,
+      "proposedPresenter": "G → B",
+      "treatment": "Editorial output list. Three familiar ideas build as open typographic rows, then a live bubble returns in reserved space for the commentary.",
+      "sources": "A3 #b1-examples, C10",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 107.48,
+      "until": 114.39,
+      "layout": "full",
+      "type": "impact",
+      "kicker": "FINE IS NOT DISTINCTIVE",
+      "title": "ANYONE COULD SAY IT.",
+      "items": [],
+      "id": "panel-17",
+      "start": 93.5935,
+      "end": 100.51708333333333,
+      "duration": 6.923583333333326,
+      "proposedPresenter": "S",
+      "treatment": "Rehook. Return to Aaron for “anyone could say it”; short punch-in, no repeated impact card.",
+      "sources": "C1",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 124.53,
+      "until": 132.25,
+      "layout": "split",
+      "type": "impact",
+      "kicker": "CHANGE ONE THING",
+      "title": "GIVE IT REAL DATA.",
+      "items": [],
+      "id": "panel-18",
+      "start": 100.55879166666666,
+      "end": 108.27483333333333,
+      "duration": 7.716041666666669,
+      "proposedPresenter": "S",
+      "treatment": "Input correction. REAL DATA / REAL PAIN beside Aaron; a single underline points attention to the change of input.",
+      "sources": "A3 #b1-real-input, C11",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 132.28,
+      "until": 143.65,
+      "layout": "split",
+      "type": "quote",
+      "kicker": "ONE CLIENT PAIN",
+      "title": "FIVE TOOLS. WRONG CUT.",
+      "items": [
+        "We spend more time moving the video than editing it.",
+        "And we still send the wrong cut."
+      ],
+      "delays": [
+        0.5,
+        7.8
+      ],
+      "id": "panel-19",
+      "start": 108.31654166666667,
+      "end": 119.66120833333333,
+      "duration": 11.344666666666669,
+      "proposedPresenter": "PR",
+      "treatment": "File journey. A video-file symbol travels through five tool nodes and ends at WRONG CUT; animate the actual relationship.",
+      "sources": "A3 #b1-five-tools, C4, C5",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 143.7,
+      "until": 156.5,
+      "layout": "full",
+      "type": "impact",
+      "kicker": "THE DIFFERENCE",
+      "title": "A RELATABLE PROBLEM",
+      "items": [
+        "Specific situation. Real cost."
+      ],
+      "id": "panel-20",
+      "start": 119.70291666666667,
+      "end": 132.507375,
+      "duration": 12.80445833333333,
+      "proposedPresenter": "S",
+      "treatment": "Recognition/payoff. MOVING ≠ EDITING becomes a brief peripheral annotation; Aaron explains why the situation is relatable.",
+      "sources": "A3 #b1-moving-badge, C2",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 156.56,
+      "until": 169.65,
+      "layout": "split",
+      "type": "quote",
+      "kicker": "ANGLE 01 / MISTAKE STORY",
+      "title": "WE BURNED A MONDAY.",
+      "items": [
+        "One video. Tool after tool.",
+        "Still the wrong cut.",
+        "Here's what broke."
+      ],
+      "delays": [
+        0.4,
+        7.2,
+        10.7
+      ],
+      "id": "panel-21",
+      "start": 132.59079166666666,
+      "end": 145.68720833333333,
+      "duration": 13.09641666666667,
+      "proposedPresenter": "PL",
+      "treatment": "Calendar story. One Monday calendar is occupied by one video; reveal the app journey, then the wrong-cut outcome. No invented hours.",
+      "sources": "A3 #b1-monday, C7, C4",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 169.7,
+      "until": 181.85,
+      "layout": "split",
+      "type": "quote",
+      "kicker": "ANGLE02 / DIAGNOSTIC",
+      "title": "WHY YOU'RE ALWAYS LATE",
+      "items": [
+        "How many tools does one clip touch before it goes live?"
+      ],
+      "id": "panel-22",
+      "start": 145.72891666666666,
+      "end": 157.86604166666666,
+      "duration": 12.137124999999997,
+      "proposedPresenter": "PL",
+      "treatment": "Threshold annotation. “MORE THAN 3 TOOLS?” appears on the actual hypothetical question; a compact handoff route connects it to lateness.",
+      "sources": "A3 #b1-three-tools, C5, C4",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 181.88,
+      "until": 190.65,
+      "layout": "split",
+      "type": "quote",
+      "kicker": "ANGLE03 / REFRAME",
+      "title": "NOT AN IDEAS PROBLEM.",
+      "items": [
+        "A versioning problem.",
+        "“Wait—which file?”"
+      ],
+      "id": "panel-23",
+      "start": 157.90775,
+      "end": 166.6665,
+      "duration": 8.75875000000002,
+      "proposedPresenter": "S",
+      "treatment": "Versioning reframe. IDEAS? swaps to VERSIONING beside Aaron; a small pair of file outlines makes “which file?” concrete.",
+      "sources": "A3 #b1-versioning/#b1-which-file, C12",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 190.68,
+      "until": 195.55,
+      "layout": "full",
+      "type": "impact",
+      "kicker": "SAME MODEL",
+      "title": "DIFFERENT INPUT. DIFFERENT OUTPUT.",
+      "items": [],
+      "id": "panel-24",
+      "start": 166.70820833333335,
+      "end": 171.58808333333334,
+      "duration": 4.879874999999998,
+      "proposedPresenter": "G → S",
+      "treatment": "Controlled comparison. Hold the same model in the center while the input changes and output changes; return to Aaron at the result.",
+      "sources": "A3 #b1-same-model, C6",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 212.93,
+      "until": 234.35,
+      "layout": "bubble",
+      "type": "roadmap",
+      "kicker": "WHAT YOU LEAVE WITH",
+      "title": "ONE REUSABLE ENGINE",
+      "items": [
+        "A sharply written client pain",
+        "Beliefs + proof rails",
+        "A repeatable angle prompt"
+      ],
+      "delays": [
+        0.4,
+        8.3,
+        15.0
+      ],
+      "id": "panel-25",
+      "start": 171.58808333333334,
+      "end": 193.02616666666665,
+      "duration": 21.43808333333331,
+      "proposedPresenter": "PR → S",
+      "treatment": "Reusable-engine recap. Three deliverables join the same path from 13; highlight each on speech, then return to Aaron for the promise.",
+      "sources": "A3 #b1-outcomes, C4",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 235.55,
+      "until": 251.4,
+      "layout": "split",
+      "type": "worksheet",
+      "kicker": "FOLLOW ALONG",
+      "title": "OPEN THE WORKBOOK",
+      "items": [
+        "Free angle generator",
+        "Fill it in as we go",
+        "Look for the worksheet marker"
+      ],
+      "delays": [
+        1.0,
+        5.1,
+        9.8
+      ],
+      "id": "panel-26",
+      "start": 193.067875,
+      "end": 208.91704166666668,
+      "duration": 15.84916666666669,
+      "proposedPresenter": "S",
+      "treatment": "Resource badge. Small workbook/free marker beside the presenter; clear the main field instead of holding a worksheet card for 16 seconds.",
+      "sources": "A4 #b2-resource, C3",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 251.42,
+      "until": 264.48,
+      "layout": "split",
+      "type": "quote",
+      "kicker": "01 / THE INPUT",
+      "title": "TOPIC ISN'T ENOUGH.",
+      "items": [
+        "“Give me 50 ideas about…”",
+        "Upgrade how you use AI."
+      ],
+      "id": "panel-27",
+      "start": 208.91704166666668,
+      "end": 221.97175,
+      "duration": 13.05470833333331,
+      "proposedPresenter": "S",
+      "treatment": "Prompt misconception. A compact “50 ideas about a topic” example appears beside Aaron, then clears for the upgrade explanation.",
+      "sources": "A4 #b2-prompt50, C5, C12",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 276.73,
+      "until": 291.08,
+      "layout": "split",
+      "type": "flow",
+      "kicker": "01 / SHARPEN THE PAIN",
+      "title": "TOPIC → FIRST-PERSON PAIN",
+      "items": [
+        "Content",
+        "Client communication",
+        "What actually happened this week"
+      ],
+      "delays": [
+        0.3,
+        3.0,
+        7.6
+      ],
+      "id": "panel-28",
+      "start": 221.97175,
+      "end": 236.31941666666665,
+      "duration": 14.347666666666669,
+      "proposedPresenter": "PL",
+      "treatment": "Topic-to-sentence transformation. AI / content / client communication are replaced by a specific first-person sentence structure.",
+      "sources": "A4 #b2-topics/#b2-sentence, C12, C7",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 291.1,
+      "until": 301.94,
+      "layout": "bubble",
+      "type": "worksheet",
+      "kicker": "WORKSHEET01",
+      "title": "WRITE ONE SENTENCE",
+      "items": [
+        "I / we…",
+        "This week…",
+        "The cost was…"
+      ],
+      "delays": [
+        0.4,
+        2.5,
+        5.5
+      ],
+      "id": "panel-29",
+      "start": 236.31941666666665,
+      "end": 247.16358333333332,
+      "duration": 10.844166666666666,
+      "proposedPresenter": "S",
+      "treatment": "Fill-in annotation. I/WE → THIS WEEK → COST builds as a short lower/peripheral sentence scaffold while Aaron teaches.",
+      "sources": "A4 #b2-sentence, C2",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 301.96,
+      "until": 321.69,
+      "layout": "split",
+      "type": "compare",
+      "kicker": "MAKE IT SPECIFIC",
+      "title": "TOPIC → PAIN",
+      "items": [
+        "TOPIC|Our workflow is scattered.",
+        "PAIN|We move one video through five tools—and still send the wrong cut."
+      ],
+      "delays": [
+        0.6,
+        9.8
+      ],
+      "id": "panel-30",
+      "start": 247.20529166666665,
+      "end": 266.93333333333334,
+      "duration": 19.728041666666684,
+      "proposedPresenter": "PL",
+      "treatment": "Before/after comparison. Retain the frozen working comparison: vague topic gives way to the specific five-tool/wrong-cut pain.",
+      "sources": "A4 #b2-pain-example, C6; frozen panel-30",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 321.72,
+      "until": 336.1,
+      "layout": "full",
+      "type": "impact",
+      "kicker": "THE STAGE-ONE TEST",
+      "title": "REAL PAIN. NOT MORE IDEAS.",
+      "items": [],
+      "id": "panel-31",
+      "start": 266.97504166666664,
+      "end": 281.3227083333333,
+      "duration": 14.347666666666669,
+      "proposedPresenter": "S",
+      "treatment": "Teaching payoff. Clear the comparison and let Aaron explain REAL PAIN; one camera emphasis and then a stable human hold.",
+      "sources": "A4 #b2-real-pain, C1, C11",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 336.12,
+      "until": 345.92,
+      "layout": "split",
+      "type": "impact",
+      "kicker": "02 / YOUR POINT OF VIEW",
+      "title": "GIVE IT YOUR BRAIN.",
+      "items": [
+        "Voice is more than a tone prompt."
+      ],
+      "id": "panel-32",
+      "start": 281.36441666666667,
+      "end": 291.165875,
+      "duration": 9.801458333333358,
+      "proposedPresenter": "S",
+      "treatment": "Stage turn. Small “02 · YOUR POINT OF VIEW” identifier, followed by Aaron explaining voice; avoid another full card.",
+      "sources": "A4 #b2-stage-two, C3",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 351.24,
+      "until": 376.9,
+      "layout": "bubble",
+      "type": "worksheet",
+      "kicker": "BRAND BRAIN",
+      "title": "YOUR FOUNDATION",
+      "items": [
+        "Who you're for",
+        "What you believe",
+        "What proof you have",
+        "What you refuse to fake"
+      ],
+      "delays": [
+        7.8,
+        10.8,
+        14.0,
+        18.5
+      ],
+      "id": "panel-33",
+      "start": 296.4628333333333,
+      "end": 322.1551666666667,
+      "duration": 25.69233333333335,
+      "proposedPresenter": "PR → S",
+      "treatment": "Brand-context hub. Five narrated inputs connect to a fixed foundation: who for, belief, proof, known for, refuse to fake. Return to Aaron for “foundation.”",
+      "sources": "A4 #b2-brand-hub, C8",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 377.0,
+      "until": 388.55,
+      "layout": "full",
+      "type": "impact",
+      "kicker": "02 / MAKE IT YOURS",
+      "title": "SOMETHING YOU'D ACTUALLY SAY.",
+      "items": [],
+      "id": "panel-34",
+      "start": 322.23858333333334,
+      "end": 333.79179166666665,
+      "duration": 11.553208333333316,
+      "proposedPresenter": "S",
+      "treatment": "Personal-voice payoff. Direct delivery; a small “something you would actually say” emphasis only on its meaningful phrase.",
+      "sources": "C1, C2",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 388.6,
+      "until": 420.45,
+      "layout": "split",
+      "type": "compare",
+      "kicker": "LOOK BENEATH THE ASK",
+      "title": "WHAT THEY HAVEN'T SEEN",
+      "items": [
+        "SURFACE|I want to buy a house.",
+        "HIDDEN COST|Mortgage, taxes and the fees they haven't calculated."
+      ],
+      "delays": [
+        5.2,
+        17.0
+      ],
+      "id": "panel-35",
+      "start": 333.8335,
+      "end": 365.69866666666667,
+      "duration": 31.865166666666653,
+      "proposedPresenter": "PL → G → PL",
+      "treatment": "House illustration. Brief X/Y reframe, then a line-drawn house reveals mortgage, taxes and other fees on a receipt. Use full teaching space only while the costs need it.",
+      "sources": "A4 #b2-reframe/#b2-house, C7, C4",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 420.48,
+      "until": 450.54,
+      "layout": "split",
+      "type": "flow",
+      "kicker": "THE PRECEDING PROBLEM",
+      "title": "BEFORE YOUR OFFER…",
+      "items": [
+        "What blocks them now?",
+        "Your real beliefs",
+        "A principle—not a pitch"
+      ],
+      "delays": [
+        0.5,
+        14.0,
+        24.0
+      ],
+      "id": "panel-36",
+      "start": 365.69866666666667,
+      "end": 395.770375,
+      "duration": 30.071708333333333,
+      "proposedPresenter": "PR → S",
+      "treatment": "Preceding-problem map. Content strategy precedes workflow, which reaches publishing. Editors/VAs attach to workflow on speech; return to Aaron for “principle, not a pitch.”",
+      "sources": "A5 #b3-upstream/#b3-principle, C4, C11",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 450.58,
+      "until": 475.1,
+      "layout": "bubble",
+      "type": "compare",
+      "kicker": "WORKED EXAMPLE",
+      "title": "WHAT'S REALLY BROKEN?",
+      "items": [
+        "SURFACE|We need to post more.",
+        "HIDDEN|We lose Mondays moving files.",
+        "BEFORE THE OFFER|Five tools just to publish one clip."
+      ],
+      "delays": [
+        3.2,
+        7.8,
+        14.1
+      ],
+      "id": "panel-37",
+      "start": 395.8120833333333,
+      "end": 420.33658333333335,
+      "duration": 24.524500000000046,
+      "proposedPresenter": "PL",
+      "treatment": "Hidden-cause reveal. Surface “post more” opens to the Monday/file-handoff cause below it; clarify the causal relationship before the next solution.",
+      "sources": "A5 #b3-surface/#b3-diagnosis, C7",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 475.14,
+      "until": 490.53,
+      "layout": "split",
+      "type": "flow",
+      "kicker": "BELIEF ANCHOR",
+      "title": "CONSOLIDATE FIRST.",
+      "items": [
+        "One workflow",
+        "AI inside it",
+        "Not another tab"
+      ],
+      "delays": [
+        0.5,
+        9.0,
+        12.7
+      ],
+      "id": "panel-38",
+      "start": 420.37829166666666,
+      "end": 435.76866666666666,
+      "duration": 15.390375000000006,
+      "proposedPresenter": "PR",
+      "treatment": "Consolidation morph. Five tool nodes condense to ONE WORKFLOW; AI settles inside it and “another tab” exits.",
+      "sources": "A5 #b3-merge, C9",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 490.56,
+      "until": 509.82,
+      "layout": "bubble",
+      "type": "quote",
+      "kicker": "THE BETTER PROMPT",
+      "title": "PAIN + BELIEF + PROOF",
+      "items": [
+        "Give me 10 angles on this hidden pain, from this belief, using this kind of proof."
+      ],
+      "delays": [
+        4.6
+      ],
+      "id": "panel-39",
+      "start": 435.810375,
+      "end": 455.03791666666666,
+      "duration": 19.22754166666664,
+      "proposedPresenter": "PL",
+      "treatment": "Prompt construction. Old generic request is struck; the new 10-angle example builds from pain, belief and proof in three readable clauses.",
+      "sources": "A5 #b3-prompt, C11, C2, C5",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 516.61,
+      "until": 531.78,
+      "layout": "full",
+      "type": "impact",
+      "kicker": "THE DISTINCTIVENESS TEST",
+      "title": "COULD ANYONE ELSE POST IT?",
+      "items": [
+        "If yes, revisit the inputs."
+      ],
+      "id": "panel-40",
+      "start": 455.079625,
+      "end": 470.26145833333334,
+      "duration": 15.181833333333316,
+      "proposedPresenter": "S",
+      "treatment": "Viewer test. Aaron asks whether anybody could post it; short camera push and generous quiet space for the question.",
+      "sources": "A5 #b3-challenge, C1",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 543.23,
+      "until": 556.02,
+      "layout": "split",
+      "type": "flow",
+      "kicker": "03 / MULTIPLY THE ANGLES",
+      "title": "NOW BUILD THE ENGINE.",
+      "items": [
+        "Sharp pain",
+        "Voice + beliefs",
+        "A preceding problem"
+      ],
+      "id": "panel-41",
+      "start": 470.26145833333334,
+      "end": 483.0659166666667,
+      "duration": 12.804458333333343,
+      "proposedPresenter": "S → PR",
+      "treatment": "Engine assembly. Pain, voice, beliefs and preceding problem join into one compact input bundle; lead spatially into the doors.",
+      "sources": "A5 #b3-inputs, C4",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 556.06,
+      "until": 575.68,
+      "layout": "bubble",
+      "type": "doors",
+      "kicker": "EIGHT DIFFERENT DOORS",
+      "title": "ONE PAIN. MANY WAYS IN.",
+      "items": [
+        "How-to",
+        "Why",
+        "Diagnostic",
+        "Framework",
+        "Mistake",
+        "Breakdown",
+        "Reframe",
+        "Consequence"
+      ],
+      "delays": [
+        0.0,
+        0.9,
+        1.5,
+        2.5,
+        3.6,
+        4.5,
+        5.4,
+        6.1
+      ],
+      "id": "panel-42",
+      "start": 483.107625,
+      "end": 502.75225,
+      "duration": 19.64462500000002,
+      "proposedPresenter": "B",
+      "treatment": "Eight doors. Eight distinct labels enter a balanced open grid around reserved live-presenter space. Use small door/angle glyphs, not eight thumbnail-like cards.",
+      "sources": "A5 #b3-doors, C13",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 575.72,
+      "until": 593.85,
+      "layout": "split",
+      "type": "stack",
+      "kicker": "ASK FOR A DOOR",
+      "title": "VARY THE ANGLE.",
+      "items": [
+        "Mistake-story angle",
+        "Diagnostic angle",
+        "Framework angle"
+      ],
+      "delays": [
+        6.2,
+        13.5,
+        14.9
+      ],
+      "id": "panel-43",
+      "start": 502.75225,
+      "end": 520.895375,
+      "duration": 18.14312499999994,
+      "proposedPresenter": "PL",
+      "treatment": "Three branches. One concrete pain branches into mistake story, diagnostic and framework. Retain the same central pain to show the changed lens.",
+      "sources": "A5 #b3-branches, C4",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 593.88,
+      "until": 615.85,
+      "layout": "bubble",
+      "type": "stack",
+      "kicker": "FOLLOW THE COST",
+      "title": "WHAT DID IT COST?",
+      "items": [
+        "Time you couldn't bill",
+        "Three delayed deliverables",
+        "One annoyed client",
+        "One stressed editor"
+      ],
+      "delays": [
+        3.8,
+        5.2,
+        7.1,
+        8.8
+      ],
+      "id": "panel-44",
+      "start": 520.9370833333334,
+      "end": 542.917375,
+      "duration": 21.98029166666663,
+      "proposedPresenter": "PR",
+      "treatment": "Consequence illustration. Unbilled-time clock, three delayed-deliverable outlines, client and editor labels build into a consequence map. Animate 3; no fabricated bars, hours or money.",
+      "sources": "A5 #b3-costs, C4, C5",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 615.88,
+      "until": 630.65,
+      "layout": "full",
+      "type": "impact",
+      "kicker": "THE MULTIPLIER",
+      "title": "EACH COST IS ANOTHER ANGLE.",
+      "items": [],
+      "id": "panel-45",
+      "start": 542.917375,
+      "end": 557.682125,
+      "duration": 14.76475000000005,
+      "proposedPresenter": "S",
+      "treatment": "Payoff. Brief cost → angle label transfer, then clear it for Aaron. Do not turn the rhetorical “a thousand angles” into a measured output count.",
+      "sources": "A5 #b3-costs, C12",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 630.68,
+      "until": 655.85,
+      "layout": "bubble",
+      "type": "gate",
+      "kicker": "WORKSHEET / QUALITY GATE",
+      "title": "WHICH ONES SURVIVE?",
+      "items": [
+        "Serves the right client?",
+        "Plants the right flag?",
+        "Matches the current goal?",
+        "Executable this month?"
+      ],
+      "delays": [
+        10.8,
+        15.1,
+        16.9,
+        20.0
+      ],
+      "id": "panel-46",
+      "start": 557.7238333333333,
+      "end": 582.9156666666667,
+      "duration": 25.191833333333307,
+      "proposedPresenter": "PR",
+      "treatment": "Four-question gate. Retain the frozen transparent ordinal/ring annotations on the left; each actual criterion appears on speech. No scored or passed result is invented.",
+      "sources": "C14; frozen panel-46",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 655.88,
+      "until": 662.93,
+      "layout": "full",
+      "type": "impact",
+      "kicker": "THE FILTER",
+      "title": "FAIL THE GATE? CUT IT.",
+      "items": [],
+      "id": "panel-47",
+      "start": 582.9156666666667,
+      "end": 589.964375,
+      "duration": 7.048708333333366,
+      "proposedPresenter": "S",
+      "treatment": "Selection rehook. Clear the criteria; Aaron delivers “cut it” with a short camera emphasis and a small departing DOESN'T FIT label.",
+      "sources": "A5 #b3-reject, C1, C12",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 662.96,
+      "until": 683.59,
+      "layout": "split",
+      "type": "stack",
+      "kicker": "ASSEMBLE THE MONTH",
+      "title": "ONE PAIN. ONE PACKAGE.",
+      "items": [
+        "1 flagship longform",
+        "3–5 shorts + clips",
+        "2–3 written posts"
+      ],
+      "delays": [
+        2.0,
+        5.0,
+        8.0
+      ],
+      "id": "panel-48",
+      "start": 590.0060833333333,
+      "end": 610.6517083333333,
+      "duration": 20.645624999999995,
+      "proposedPresenter": "PR",
+      "treatment": "Repurposing tree. Retain the frozen ONE PAIN branches with 1 longform, 3–5 shorts/clips, MAYBE 2–3 posts; resource is their common destination.",
+      "sources": "A5 #b3-formats, C4, C5; frozen panel-48",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 760.81,
+      "until": 773.8,
+      "layout": "split",
+      "type": "worksheet",
+      "kicker": "MAKE IT REUSABLE",
+      "title": "ANGLE-ENGINE.MD",
+      "items": [
+        "Fill the workbook once",
+        "Drop the answers in",
+        "Paste into Claude or ChatGPT"
+      ],
+      "delays": [
+        4.4,
+        7.0,
+        9.6
+      ],
+      "id": "panel-49",
+      "start": 610.6517083333333,
+      "end": 623.6647083333334,
+      "duration": 13.013000000000034,
+      "proposedPresenter": "PL",
+      "treatment": "File relationship. Workbook answers move into angle engine.md, then toward Claude Desktop / ChatGPT labels or existing logos. Conceptual file diagram, not fake software footage.",
+      "sources": "A5 #b3-file, A1, C4",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 773.86,
+      "until": 786.28,
+      "layout": "bubble",
+      "type": "quote",
+      "kicker": "NEXT TIME",
+      "title": "START WITH THE ENGINE.",
+      "items": [
+        "Take this pain point.",
+        "Create 15 angles.",
+        "Choose this month's set."
+      ],
+      "delays": [
+        0.4,
+        4.8,
+        9.3
+      ],
+      "id": "panel-50",
+      "start": 623.7064166666667,
+      "end": 636.1355,
+      "duration": 12.429083333333324,
+      "proposedPresenter": "S",
+      "treatment": "Example request. Compact pain → 15 angles annotation on speech; the choosing-for-this-month phrase remains beside Aaron.",
+      "sources": "A5 #b3-command, C5, C2",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 786.32,
+      "until": 792.6,
+      "layout": "full",
+      "type": "impact",
+      "kicker": "BUILDING TOWARD",
+      "title": "FROM ANGLES TO SCRIPTS",
+      "items": [
+        "The next layer—not a result shown here."
+      ],
+      "id": "panel-51",
+      "start": 636.1772083333333,
+      "end": 642.4334583333333,
+      "duration": 6.256250000000023,
+      "proposedPresenter": "S",
+      "treatment": "Future-layer note. Small COMING LATER · POSTS + SCRIPTS marker; preserve that these outputs are future work.",
+      "sources": "A5 #b3-future, C3",
+      "status": "source-only-planning"
+    },
+    {
+      "anchor": 818.21,
+      "until": 833.08,
+      "layout": "split",
+      "type": "closing",
+      "kicker": "YOUR NEXT STEP",
+      "title": "CONTENT STRATEGY",
+      "items": [
+        "Start with one real client pain.",
+        "Then give the AI a system."
+      ],
+      "delays": [
+        0.5,
+        4.0
+      ],
+      "id": "panel-52",
+      "start": 642.4751666666667,
+      "end": 657.3650416666667,
+      "duration": 14.889874999999961,
+      "proposedPresenter": "S → PL",
+      "treatment": "Human close. Start with Aaron; then create an uncluttered content-strategy end-screen region, keeping his gesture/head safe. No invented thumbnail or working link.",
+      "sources": "A5 #b3-close/#b3-end, C1, C15",
+      "status": "source-only-planning"
+    }
+  ]
+}

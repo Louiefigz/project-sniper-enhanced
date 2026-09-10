@@ -1,9 +1,11 @@
 "use client";
 
 import type { PreviewAuthority } from "@/lib/producer/editor-preview-authority";
+import HyperframesStudio from "./hyperframes-studio";
 
 interface Props {
   title?: string;
+  producerDir?: string;
   onBack?: () => void;
   reState: "idle" | "running" | "error";
   reMsg: string;
@@ -22,6 +24,8 @@ interface Props {
   onSave: () => void;
   onReRender: () => void;
   onReveal: () => void;
+  onStudioDraftInvalidated?: () => void;
+  onStudioDraftChanged?: () => Promise<boolean>;
 }
 
 const SHORTCUTS =
@@ -101,6 +105,9 @@ export default function EditorHeader(p: Props) {
         >
           {p.saveState === "saving" ? "Saving…" : "Save timeline"}
         </button>
+        {p.producerDir && <HyperframesStudio key={p.producerDir} dir={p.producerDir} dirty={p.dirty}
+          onDraftInvalidated={p.onStudioDraftInvalidated} onDraftChanged={p.onStudioDraftChanged}
+          blocked={p.saveBlocked ?? p.reBlocked ?? (p.reState === "running" ? "Wait for the active render." : null)} />}
         <button
           type="button"
           onClick={p.onReRender}

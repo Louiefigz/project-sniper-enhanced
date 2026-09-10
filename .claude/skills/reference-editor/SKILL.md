@@ -1,6 +1,6 @@
 ---
 name: reference-editor
-description: Study a finished reference video or raw+edited pair meticulously, frame by frame; classify its cuts, graphics, transitions, animation, layout, typography, captions, color, audio, and editorial intent; save verified reusable templates and a release-ready style pack; then apply that editing grammar to new footage through the producer skill and editable Palmier. Use when the operator shares a YouTube, Instagram, TikTok, or local video and asks to study it, save its edit style, mimic/copy its cut, build templates from it, or edit new content like the reference.
+description: Study a finished reference video or raw+edited pair meticulously, frame by frame; classify its cuts, graphics, transitions, animation, layout, typography, captions, color, audio, and editorial intent; save evidence-bound templates and reference-inspired profile guidance for the producer skill. Use when the operator shares a YouTube, Instagram, TikTok, or local video and asks to study its edit style or build templates from it. Verified mimic/replication is not a released capability.
 ---
 
 # Reference Editor
@@ -9,10 +9,18 @@ Turn reference evidence into a reusable editing grammar, then use that grammar
 to produce new content. Copy structure and mechanics only—never copy creator
 identity, words, claims, logos, footage, screenshots, music, or branding.
 
+**Qualification boundary:** this workflow produces a study/profile and planning
+guidance. Verified mimic is not released (P6 is 0/7). The safe output is an
+audited exact MP4 or its approved flat mirror; editable Palmier application is
+an isolated, production-shaped experiment whose connected hybrid path remains
+P5-blocked.
+
 ## Choose the workflow
 
-- **Learn only:** reference → meticulous study → verified templates → style pack.
-- **Apply existing:** release-ready style pack + new source → Producer → Palmier.
+- **Learn only:** reference → meticulous study → evidence-bound templates →
+  study pack.
+- **Apply existing:** study pack + new source → reference-inspired Producer
+  plan → exact MP4.
 - **Learn and apply:** complete Learn first; never plan the new edit while the
   reference review is incomplete.
 - **Raw + edited pair:** run the same visual study on the edited video and also
@@ -124,7 +132,7 @@ For each reviewed graphic window:
 
 Do not create cosmetic aliases to fake variety. One renderer earns one name.
 
-## 5. Compile the immutable style pack
+## 5. Compile the immutable study pack
 
 Fill every generated registry row with its verified binding, then run:
 
@@ -140,10 +148,10 @@ classification agreement, zero unclassified motion runs, source/worklist hash
 binding, and proof for every reusable graphic template. Never hand-author or
 edit a compiled pack.
 
-## 6. Apply the grammar to new content
+## 6. Use the grammar as guidance for new content
 
-Invoke the `producer` skill and its Claude Code Desktop → Palmier branch. Read
-the complete style pack before visual planning. Map new transcript beats to the
+Invoke the `producer` skill and default to its exact rendered-file branch. Read
+the complete study pack before visual planning. Map new transcript beats to the
 reference's **information forms**, then use compatible bound templates; never
 paste reference copy or force a reference device onto an incompatible beat.
 
@@ -162,9 +170,10 @@ Run both reference gates before unlocking Palmier:
   <PLAN> <STYLE_PACK> --reference-id <ID>
 ```
 
-Land the cut first, then graphics/motion/audio incrementally in the retained
-Palmier session. Finish with exact-candidate export, deterministic Audit B, and
-the two rendered composition/editorial reviews required by the producer skill.
+Render and audit the exact MP4 through the producer contract. If the operator
+explicitly requests the editable Palmier experiment, use only an isolated
+candidate and still finish with exact-candidate export, deterministic Audit B,
+and both rendered reviews. That experiment is not connected P5 qualification.
 
 ## Completion standard
 
@@ -174,7 +183,9 @@ Report separately:
 - What was judged twice and adjudicated.
 - Which templates were reused versus newly built.
 - What mechanics transferred and what could not transfer to the new content.
-- Exact Palmier export/QC evidence.
+- Exact MP4 export/QC evidence; if separately exercised, label Palmier evidence
+  experimental.
 
-One reference may produce a reference-bound mimic pack. Promote a durable house
-style only after multiple references, variance analysis, and operator approval.
+One reference may produce a reference-bound study pack, not a verified mimic.
+Promote a durable house style only after multiple references, variance analysis,
+operator approval, and the currently missing P6 qualification.

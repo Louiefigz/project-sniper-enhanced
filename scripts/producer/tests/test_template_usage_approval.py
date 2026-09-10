@@ -1,10 +1,15 @@
 """Delivery-bound template-history approval tests."""
 import json
+import contextlib
+import io
 import os
 import tempfile
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from _common import *  # noqa: F401,F403
+from assemble import delivery_authority_dir
 from fingerprints import file_sha256
 from palmier.quality_hash import stable_hash
 from template_usage_approval import APPROVAL_FILE, require_current
@@ -94,13 +99,53 @@ class TemplateUsageApprovalTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "review the saved plan first"):
             require_current(self.plan, self.manifest, self.producer, self.source)
 
-    def test_delivery_entrypoints_call_shared_verifier(self):
+    def test_other_delivery_entrypoints_call_shared_verifier(self):
         paths = [os.path.join(PRODUCER_DIR, "render.py"),
-                 os.path.join(PRODUCER_DIR, "assemble.py"),
                  os.path.join(PRODUCER_DIR, "palmier", "push.py")]
         for path in paths:
             with open(path, encoding="utf-8") as handle:
                 self.assertIn("require_template_usage_approval(", handle.read(), path)
+
+    def _assemble_args(self) -> SimpleNamespace:
+        """Keep the ordinary CLI form while isolating actual media work."""
+        return SimpleNamespace(plan_path=self.plan, manifest=self.manifest,
+            base=os.path.join(self.producer, "TEST-base.mp4"),
+            out=os.path.join(self.producer, "TEST-out.mp4"), fingerprint=None,
+            allow_legacy_unadmitted=False, auto_base=False, cache_dir=None,
+            audio_clock_policy="legacy-v1", source_bus_receipt_hash=None)
+
+    def test_assembler_calls_real_shared_verifier_through_document_loader(self) -> None:
+        """A delegated call must still use the canonical project, not output dir."""
+        from assemble import main
+        with patch("assemble_arguments.parse_arguments", return_value=self._assemble_args()), \
+                patch("assemble.acquire_lock", return_value=True), patch("assemble.emit"), \
+                patch("assemble.validate_render_documents"), patch("assemble.verify_execution_media_authority"), \
+                patch("assemble.require_template_usage_approval", wraps=require_current) as approval, \
+                patch("assemble.assemble", return_value={"TEST": True}) as media:
+            main()
+        approval.assert_called_once_with(self.plan, self.manifest, self.producer, self.source)
+        media.assert_called_once()
+
+    def test_missing_template_approval_stops_actual_assembler_entry_before_media(self) -> None:
+        """Guard behavior, not a literal spelling in an old source location."""
+        from assemble import main
+        os.remove(os.path.join(self.producer, APPROVAL_FILE))
+        with patch("assemble_arguments.parse_arguments", return_value=self._assemble_args()), \
+                patch("assemble.acquire_lock", return_value=True), patch("assemble.emit"), \
+                patch("assemble.validate_render_documents"), patch("assemble.verify_execution_media_authority"), \
+                patch("assemble.assemble") as media, contextlib.redirect_stderr(io.StringIO()), \
+                self.assertRaises(SystemExit) as stopped:
+            main()
+        self.assertEqual(stopped.exception.code, 1)
+        media.assert_not_called()
+
+    def test_private_output_directory_cannot_rebind_delivery_authority(self):
+        candidate = os.path.join(
+            self.producer, ".sniper-qc", "run", "round-1", "final.mp4")
+        self.assertEqual(
+            delivery_authority_dir(self.plan), self.producer)
+        self.assertNotEqual(
+            delivery_authority_dir(self.plan), os.path.dirname(candidate))
 
 
 if __name__ == "__main__":

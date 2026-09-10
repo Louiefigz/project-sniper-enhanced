@@ -8,6 +8,7 @@ import unittest
 from pathlib import Path
 
 from _common import pl  # noqa: F401
+from _current_render_build_fixture import current_manifest
 from headless.render_build_receipt import (
     RenderBuildLocator,
     load_render_build,
@@ -22,8 +23,7 @@ class RenderBuildReceiptTests(unittest.TestCase):
         self.attempt = Path(self.temp.name).resolve() / "attempt-a"
         self.attempt.mkdir(mode=0o700)
         os.chmod(self.attempt, 0o700)
-        self.manifest = {"implementation": [], "policy": "test",
-                         "schemaVersion": 1, "tools": []}
+        self.manifest = current_manifest()
 
     def test_round_trip_is_idempotent_and_private(self) -> None:
         first = store_render_build(str(self.attempt), self.manifest)

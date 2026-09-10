@@ -1,5 +1,3 @@
-import { existsSync, readFileSync } from "node:fs";
-import { palmierStatePath } from "../palmier/_lib";
 import {
   guardProjectMutation,
   mutationProjectRoot,
@@ -13,6 +11,14 @@ import {
 import type { PalmierNativePromptInput } from "./palmier-native-prompt";
 import type { PalmierNativeResult } from "./palmier-native-contract";
 import { palmierNativeCapabilityFailure } from "./palmier-native-capabilities";
+import {
+  classifyPalmierWorkspace,
+  type PalmierWorkspaceClassification,
+} from "./palmier-workspace-classification";
+export {
+  classifyPalmierWorkspace,
+  type PalmierWorkspaceClassification,
+} from "./palmier-workspace-classification";
 
 const UNSUPPORTED = new Set(["broll", "music"]);
 
@@ -29,54 +35,6 @@ export interface PalmierNativeStreamDependencies {
     operation: string;
   }) => ProjectMutationGuard;
   run?: NativeRun;
-}
-
-export type PalmierWorkspaceClassification =
-  | { state: "absent" }
-  | {
-    state: "managed";
-    workspaceMode?: "managed-draft" | "verified-mirror";
-    assetKind?: "source" | "saved-cut";
-  }
-  | { state: "invalid"; error: string };
-
-function nonEmpty(value: unknown): value is string {
-  return typeof value === "string" && value.trim().length > 0;
-}
-
-/** Classify product authority without consulting the legacy writer-lease owner. */
-export function classifyPalmierWorkspace(dir: string): PalmierWorkspaceClassification {
-  const statePath = palmierStatePath(dir);
-  if (!existsSync(statePath)) return { state: "absent" };
-  let value: unknown;
-  try {
-    value = JSON.parse(readFileSync(statePath, "utf8")) as unknown;
-  } catch (error) {
-    return { state: "invalid", error: `Palmier workspace state is unreadable: ${(error as Error).message}` };
-  }
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return { state: "invalid", error: "Palmier workspace state is not a JSON object." };
-  }
-  const row = value as Record<string, unknown>;
-  const managedMode = row.workspaceMode === "managed-draft"
-    || row.workspaceMode === "verified-mirror" || row.mirrorMode === "visual-master";
-  const ownerValid = row.ownership === undefined
-    || row.ownership === "sniper" || row.ownership === "palmier";
-  if (row.schemaVersion !== 4 || !managedMode || !ownerValid
-      || !nonEmpty(row.projectId) || !nonEmpty(row.projectPath)
-      || !existsSync(row.projectPath) || !nonEmpty(row.latestTimelineId)) {
-    return { state: "invalid", error: "Palmier workspace state is incomplete or uses an unknown schema." };
-  }
-  const draft = row.draft && typeof row.draft === "object" && !Array.isArray(row.draft)
-    ? row.draft as Record<string, unknown> : null;
-  const assetKind = draft?.assetKind === "source" || draft?.assetKind === "saved-cut"
-    ? draft.assetKind : undefined;
-  return {
-    state: "managed",
-    workspaceMode: row.workspaceMode === "managed-draft"
-      ? "managed-draft" : "verified-mirror",
-    ...(assetKind ? { assetKind } : {}),
-  };
 }
 
 function json(value: unknown, status: number): Response {

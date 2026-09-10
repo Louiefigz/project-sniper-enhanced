@@ -6,7 +6,8 @@ import json
 import os
 from typing import Any
 
-from fingerprints import file_sha256, json_canon, plan_content_hash
+from cross_runtime_canonical_json import canonical_compact_json
+from fingerprints import file_sha256, plan_content_hash
 
 SCHEMA_VERSION = 1
 QUALITY_VERSION = 1
@@ -19,17 +20,19 @@ _EXCLUDED_MEDIA = (".mov", ".mp4", ".wav", ".mp3", ".pyc")
 
 def stable_hash(value: object) -> str:
     """Match stableAuthorityHash: sorted objects and compact JSON.stringify."""
-    blob = json.dumps(json_canon(value), sort_keys=True, separators=(",", ":"),
-                      ensure_ascii=False)
+    blob = canonical_compact_json(value)
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
 
 def request_key(ctx: dict) -> str:
     """Match autoEditRequestKey for the persisted managed context."""
-    return stable_hash({key: value for key, value in ctx.items()
-                        if key not in ("doctrine", "pipeline", "templateUsage",
-                                       "brainSessionId",
-                                       "brainSessionEstablished")})
+    request = {key: value for key, value in ctx.items()
+               if key not in ("doctrine", "pipeline", "templateUsage",
+                              "brainSessionId",
+                              "brainSessionEstablished")}
+    if request.get("deliveryPolicy") == "palmier-hybrid":
+        request.pop("deliveryPolicy")
+    return stable_hash(request)
 
 
 def _hash_or_none(path: str) -> str | None:

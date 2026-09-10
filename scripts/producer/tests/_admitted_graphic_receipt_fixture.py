@@ -12,7 +12,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
 
-from _build_receipt_semantics_fixture import render_manifest_document
+from _current_render_build_fixture import current_manifest
 from _render_lane_proof import ProofInputs, build_full_proof
 from headless import admitted_render_lane as lane_module
 from headless import render_admission_artifact as artifact_module
@@ -84,7 +84,7 @@ class AdmittedGraphicReceiptFixture:
         self.authority_root = self.root / "authority"
         self.authority_root.mkdir(mode=0o700)
         os.chmod(self.authority_root, 0o700)
-        self.manifest = render_manifest_document("e" * 64, "f" * 64)
+        self.manifest = current_manifest("admitted-graphic-receipt")
         self.runtime = self._runtime()
         self._boot_patches = self._start_boot_patches()
         self.artifact = self._store_artifact()
@@ -164,8 +164,20 @@ class AdmittedGraphicReceiptFixture:
             self.runtime.image_id,
             ProofInputs(seal.expected_copy, seal.snapshot),
         )
+        # This current-lane fixture names the current image/quota contract;
+        # the shared historical proof factory remains unchanged.
+        runtime = proof["runtimeAttestation"]
+        version_label = "io.project-sniper.hyperframes-version"
+        runtime["imageAttestation"]["Config"]["Labels"] = {version_label: "0.8.31"}
+        for key in ("containerBeforeOutput", "containerAfterOutput"):
+            runtime[key]["Config"]["Labels"][version_label] = "0.8.31"
+            runtime[key]["HostConfig"]["Tmpfs"]["/output"] = (
+                "rw,nosuid,nodev,noexec,size=2g,uid=501,gid=20,mode=0700")
+        disk = {key: value for key, value in proof.items() if key != "sidecar"}
+        Path(proof["sidecar"]).write_text(json.dumps(disk), encoding="utf-8")
         result = {
             "cached": False,
+            "fps": "30",
             "fmt": seal.fmt,
             "key": seal.key,
             "kind": seal.entry["kind"],

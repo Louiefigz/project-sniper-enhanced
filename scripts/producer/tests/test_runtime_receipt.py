@@ -23,7 +23,8 @@ def _receipt(media: bytes) -> dict:
         "Config": {"Image": _IMAGE, "Entrypoint": ["/entrypoint"],
                    "WorkingDir": "/scratch", "User": "501:20",
                    "Cmd": ["render"], "Env": ["TZ=UTC",
-                   "SNIPER_INPUT_SHA256=" + "c" * 64], "Labels": {}},
+                   "SNIPER_INPUT_SHA256=" + "c" * 64], "Labels": {
+                       "io.project-sniper.hyperframes-version": "0.7.33"}},
         "Args": ["render"],
         "HostConfig": {"NetworkMode": "none", "ReadonlyRootfs": True,
                        "Privileged": False, "CapDrop": ["ALL"], "CapAdd": None,
@@ -41,7 +42,7 @@ def _receipt(media: bytes) -> dict:
                        "Tmpfs": {
                            "/scratch": ("rw,nosuid,nodev,noexec,size=2g,uid=501,"
                                         "gid=20,mode=0700"),
-                           "/output": ("rw,nosuid,nodev,noexec,size=512m,uid=501,"
+                           "/output": ("rw,nosuid,nodev,noexec,size=1g,uid=501,"
                                        "gid=20,mode=0700")},
                        "Mounts": [{"Type": "bind", "Source": "/sealed.tar",
                                    "Target": "/request/render-input.tar",
@@ -61,7 +62,8 @@ def _receipt(media: bytes) -> dict:
                                   "sha256": "d" * 64}],
             "outputSha256": hashlib.sha256(media).hexdigest(),
             "imageAttestation": {"Id": _IMAGE,
-                                 "Config": {"Entrypoint": ["/entrypoint"]}},
+                                 "Config": {"Entrypoint": ["/entrypoint"], "Labels": {
+                                     "io.project-sniper.hyperframes-version": "0.7.33"}}},
             "containerBeforeOutput": container,
             "containerAfterOutput": container,
             "containerRemoval": {"canonicalAbsenceProved": True},
@@ -107,6 +109,24 @@ class RuntimeReceiptTests(unittest.TestCase):
             self.assertEqual(persisted["runtimeAttestation"]["outputSha256"],
                              hashlib.sha256(media).hexdigest())
             self.assertNotIn("sidecar", persisted)
+
+    def test_bound_proof_validates_in_memory_before_any_json_round_trip(self) -> None:
+        """The opening worker validates the bound proof directly; a tuple of archive
+        members must not read as a different archive than the sidecar's list."""
+        from headless.runtime_receipt import validate_runtime_attestation
+        with tempfile.TemporaryDirectory() as root:
+            media = b"exact-media"
+            path = os.path.join(root, "render.mov")
+            Path(path).write_bytes(media)
+            write_runtime_receipt(path, _receipt(media))
+            bound = bind_runtime_receipt(path, _proof(path, media))
+            retained = bound["runtimeAttestation"]["retainedInputArchive"]
+            self.assertEqual(retained["members"], ["motion/index.html"])
+            validate_runtime_attestation(bound["runtimeAttestation"], path,
+                                         hashlib.sha256(media).hexdigest(), _IMAGE)
+            persisted = json.loads(Path(path + ".proof.json").read_text())
+            validate_runtime_attestation(persisted["runtimeAttestation"], path,
+                                         hashlib.sha256(media).hexdigest(), _IMAGE)
 
     def test_receipt_for_different_media_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as root:

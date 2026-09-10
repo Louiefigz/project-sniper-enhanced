@@ -1,0 +1,14 @@
+{
+  "header": "x-sniper-studio-policy",
+  "identity": "review-only-v4",
+  "cliVersion": "0.7.33",
+  "cliSha256": "88cd104e1435ae7a7322469994c72f80f6fde0587d67c2f34b99daa482c597ac",
+  "localFontTokensSha256": "545fa041ac243144c29952ede77632dfcf637d48330867f18309b1ec8822f4f6",
+  "uiSha256": {
+    "index.html": "e95e24d28812dd9bb7fd162e214ba3dbeab565875f1b8b2c09a2b41499dd26ec",
+    "assets/index-BZBjzYc8.js": "c24efb15f4f2c8bcf8fb66568b56123b60d63041eeea5fe1506820caaa91d990",
+    "assets/index-z7MmyGzS.js": "e7f01e5a84f20e00b2c1f6a7cb8ebb8f63f55e30a9676a9f661e9de5b831b49f",
+    "assets/index-CFm5HEIz.js": "7dfd1318c3ab29bc4e123c6a86b36ef849777303529fdb2efe0215b7543cc56e",
+    "assets/index-DmkOvZns.css": "23745244375d72396ce202dcf4fb52bc615c917f8d915c8e33ed8e519ba6e749"
+  }
+}

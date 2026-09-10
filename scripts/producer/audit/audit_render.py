@@ -33,6 +33,7 @@ from audit.audit_frames import (  # noqa: E402
 )
 from audit.audit_glitch import check_glitch_screens  # noqa: E402
 from audit.audit_composite_visual import check_composite_visuals  # noqa: E402
+from audit.audit_captions import check_caption_authority  # noqa: E402
 from audit.audio_quality import check_audio_quality  # noqa: E402
 from audit.audit_motion import (  # noqa: E402
     check_pacing_rendered, check_presence, check_smoothness,
@@ -42,6 +43,10 @@ from audit.audit_probe import (  # noqa: E402
     ffprobe_json, first_stream, fps_from_stream, video_frame_count,
 )
 from compile_timeline import TimelineMap  # noqa: E402
+from fingerprints import file_sha256  # noqa: E402
+from audio.audio_mix_delivery import (  # noqa: E402
+    AUDIO_DELIVERY_POLICY_VERSION, measure_delivery,
+)
 
 
 @dataclass
@@ -53,6 +58,8 @@ class Probed:
     mode: str
     video: dict
     audio: dict | None
+    audio_delivery: dict | None = None
+    final_sha256: str | None = None
 
 
 @dataclass
@@ -66,6 +73,8 @@ class AuditReport:
     exit_code: int
     checks: list[CheckResult]
     frames: list[FrameRef]
+    audio_delivery: dict | None = None
+    final_sha256: str | None = None
 
 
 def _load_json(path: str) -> dict | None:
@@ -89,8 +98,8 @@ def _emit(status: str, **fields) -> None:
     print(json.dumps({"status": status, **fields}), flush=True)
 
 
-def run_audit(out_dir: str) -> AuditReport:
-    """Run every Audit B check over ``out_dir`` and assemble the report."""
+def run_audit(out_dir: str, graphics_reference: str | None = None) -> AuditReport:
+    """Run all checks; a trusted caller may supply its exact graphics-free base."""
     final = os.path.join(out_dir, "final.mp4")
     plan = _load_json(os.path.join(out_dir, "edit_plan.json")) or {}
     mode = (plan.get("target") or {}).get("mode", "short")
@@ -105,7 +114,8 @@ def run_audit(out_dir: str) -> AuditReport:
         probed = Probed(out_dir, final, mode, {}, None)
         return _assemble(probed, [CheckResult(
             "format_video", FAIL, "no video stream", "no decodable video")], [])
-    probed = Probed(out_dir, final, mode, video, audio)
+    probed = Probed(out_dir, final, mode, video, audio,
+                    final_sha256=file_sha256(final))
     checks, duration = _deterministic_checks(probed)
     # Frame planning must aim inside the DELIVERED stream: predicted duration
     # runs a few sub-frame roundings long on multi-segment mining cuts, and a
@@ -116,10 +126,11 @@ def run_audit(out_dir: str) -> AuditReport:
     except (TypeError, ValueError):
         stream_duration = 0.0
     frame_horizon = min(duration, stream_duration) if stream_duration > 0 else duration
-    frames = extract_review_frames(final, out_dir, plan_frames(plan, frame_horizon))
+    frames = extract_review_frames(final, out_dir, plan_frames(plan, frame_horizon), probe)
     checks.append(check_frame_extraction(frames))
-    checks.extend(scan_safe_zone(frames))
-    checks.extend(check_composite_visuals(out_dir, plan, frames))
+    checks.extend(scan_safe_zone(frames, plan, video))
+    checks.extend(check_composite_visuals(out_dir, plan, frames, graphics_reference))
+    checks.extend(check_caption_authority(out_dir, plan))
     return _assemble(probed, checks, frames)
 
 
@@ -137,7 +148,8 @@ def _deterministic_checks(p: Probed) -> tuple[list[CheckResult], float]:
         checks.append(check_duration(p.final, p.video, tmap))
         duration = tmap.output_duration
     audio_present = has_audio_stream(p.audio)
-    checks.extend(check_loudness(p.final, audio_present))
+    p.audio_delivery = measure_delivery(p.final)
+    checks.extend(check_loudness(p.final, audio_present, p.audio_delivery))
     checks.extend(check_format(p.final, p.video, p.audio, p.mode))
     if audio_present:
         checks.extend(check_audio_quality(p.final, plan))
@@ -166,11 +178,20 @@ def _deterministic_checks(p: Probed) -> tuple[list[CheckResult], float]:
 def _assemble(p: Probed, checks: list[CheckResult],
               frames: list[FrameRef]) -> AuditReport:
     """Roll up verdict + exit code and build the report object."""
+    if p.final_sha256 is not None:
+        try:
+            stable = file_sha256(p.final) == p.final_sha256
+        except OSError:
+            stable = False
+        checks.append(CheckResult(
+            "final_identity", PASS if stable else FAIL,
+            p.final_sha256, "exact candidate SHA-256 before/after audit"))
     overall = worst_status(checks) if checks else FAIL
     exit_code = 1 if overall == FAIL else 0
     return AuditReport(out_dir=p.out_dir, final_path=p.final, mode=p.mode,
                        overall=overall, exit_code=exit_code,
-                       checks=checks, frames=frames)
+                       checks=checks, frames=frames, audio_delivery=p.audio_delivery,
+                       final_sha256=p.final_sha256)
 
 
 def report_to_dict(report: AuditReport) -> dict:
@@ -184,6 +205,9 @@ def report_to_dict(report: AuditReport) -> dict:
         "counts": _status_counts(report.checks),
         "checks": [asdict(c) for c in report.checks],
         "frames": [asdict(f) for f in report.frames],
+        "audioDeliveryPolicyVersion": AUDIO_DELIVERY_POLICY_VERSION,
+        "audioDelivery": report.audio_delivery,
+        "finalSha256": report.final_sha256,
     }
 
 

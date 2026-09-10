@@ -1,0 +1,55 @@
+{
+  "status": "prepared-not-final-delivery-qualified",
+  "startedAt": "2026-09-09T14:16:30.400Z",
+  "sourcePicture": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/mastered-audio-headroom-v1/base-mastered.DRAFT.mp4",
+  "sourcePcm": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/mastered-audio-headroom-v1/headroom-master.wav",
+  "pictureReencoded": false,
+  "audioLossyGenerationAdded": false,
+  "steps": [
+    {
+      "operation": "verify-source",
+      "filename": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/mastered-audio-headroom-v1/base-mastered.DRAFT.mp4",
+      "sha256": "374fcd0e8d276a954c04a4c4bb5a49c82753508c2dd914f2920995b59972ebe2"
+    },
+    {
+      "operation": "verify-source",
+      "filename": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/mastered-audio-headroom-v1/headroom-master.wav",
+      "sha256": "790f38dd97e4a4a821ee7ebc09f9ce31b839f15ac133c58393c94d957c80a606"
+    },
+    {
+      "operation": "clone-picture",
+      "seconds": 2.921
+    },
+    {
+      "operation": "float-to-browser-pcm24",
+      "seconds": 0.509,
+      "args": [
+        "-hide_banner",
+        "-nostdin",
+        "-loglevel",
+        "error",
+        "-i",
+        "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/mastered-audio-headroom-v1/headroom-master.wav",
+        "-map",
+        "0:a:0",
+        "-c:a",
+        "pcm_s24le",
+        "-n",
+        "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/assets/narration-full.wav"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "filename": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/assets/presenter-full.mp4",
+      "bytes": 2246722934,
+      "sha256": "374fcd0e8d276a954c04a4c4bb5a49c82753508c2dd914f2920995b59972ebe2"
+    },
+    {
+      "filename": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/assets/narration-full.wav",
+      "bytes": 196924830,
+      "sha256": "d19179ae602b27249f99a577a79c9797909a83fb2ac3853429a0e5ea4eae3444"
+    }
+  ],
+  "elapsedSeconds": 7.172
+}

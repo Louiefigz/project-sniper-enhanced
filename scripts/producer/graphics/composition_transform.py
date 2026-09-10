@@ -15,7 +15,7 @@ def set_root_duration(html: str, duration: float) -> str:
 
     def rewrite(match: re.Match) -> str:
         tag, count = _DURATION.subn(
-            f'data-duration="{duration:g}"', match.group(0), count=1)
+            f'data-duration="{duration:.17g}"', match.group(0), count=1)
         if count != 1:
             raise ValueError("composition root tag has no data-duration attribute")
         return tag

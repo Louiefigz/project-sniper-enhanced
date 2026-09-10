@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/palmier-commit-saga-v1.schema.json",
+  "title": "PalmierCommitSagaV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "sagaId",
+    "idempotencyKey",
+    "state",
+    "expectedLocalParentHash",
+    "reservedLocalChildHash",
+    "expectedPalmierParentId",
+    "reservedPalmierCandidateId",
+    "reservedPalmierCandidateHash",
+    "reservedPalmierTimelineHash",
+    "activationReadback",
+    "updatedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "sagaId": { "type": "string", "format": "uuid" },
+    "idempotencyKey": { "type": "string", "format": "uuid" },
+    "state": {
+      "enum": [
+        "PREPARING",
+        "CANDIDATES_PROVED",
+        "PALMIER_ACTIVATING",
+        "PALMIER_ACTIVE",
+        "LOCAL_COMMITTING",
+        "COMMITTED",
+        "ABORTED",
+        "RECONCILIATION_REQUIRED"
+      ]
+    },
+    "expectedLocalParentHash": { "$ref": "#/$defs/sha256" },
+    "reservedLocalChildHash": { "$ref": "#/$defs/sha256" },
+    "expectedPalmierParentId": { "$ref": "#/$defs/stableId" },
+    "reservedPalmierCandidateId": { "$ref": "#/$defs/stableId" },
+    "reservedPalmierCandidateHash": { "$ref": "#/$defs/sha256" },
+    "reservedPalmierTimelineHash": { "$ref": "#/$defs/sha256" },
+    "activationReadback": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["headId", "candidateHash", "timelineHash", "observedAt"],
+          "properties": {
+            "headId": { "$ref": "#/$defs/stableId" },
+            "candidateHash": { "$ref": "#/$defs/sha256" },
+            "timelineHash": { "$ref": "#/$defs/sha256" },
+            "observedAt": { "type": "string", "format": "date-time" }
+          }
+        }
+      ]
+    },
+    "failureReason": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "stableId": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]+$"
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "status": "applied-to-owned-live-sampler-awaiting-production-review",
+  "sourceFiles": [
+    {
+      "source": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/native_render_resources.py",
+      "file": "native_render_resources.py",
+      "beforeSha256": "683f52f9c734baa55238c7ee8eb752b0761e92e75d1f91ef085013ba144f5bd2"
+    },
+    {
+      "source": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/native_render_processes.py",
+      "file": "native_render_processes.py",
+      "beforeSha256": "8db0f32e6db8db7e885a3ac3308f1549d0d18670be7a4a1bfd7777148f0b79c6"
+    }
+  ],
+  "updatedAt": "2026-09-09T17:39:36.425317+00:00",
+  "filesAfter": [
+    {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/native_render_processes.py",
+      "sha256": "0132813c6b70399248fe3035b05efce333bccaa4845ee2721a442c85188e9220",
+      "lines": 181,
+      "maximumFunctionLines": 20,
+      "maximumParameters": 3
+    },
+    {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/native_render_resources.py",
+      "sha256": "9501a54ee94bbb25e2f504c966c941c2782fd588ee031bf4af904f0c0e668cc4",
+      "lines": 245,
+      "maximumFunctionLines": 24,
+      "maximumParameters": 4
+    },
+    {
+      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/test_native_measurement_reconciliation.py",
+      "sha256": "9b8731500565a6e6e59434a7ad362f4dcfeb1534209997a6879202ec5977a168",
+      "lines": 128,
+      "maximumFunctionLines": 10,
+      "maximumParameters": 4
+    }
+  ],
+  "validation": {
+    "focusedTests": 31,
+    "elapsedSeconds": 0.004,
+    "mediaLaunchedForValidation": false,
+    "liveReadOnlySampleSeconds": 1.352037167,
+    "liveMeasuredAt": 1788975527.721299,
+    "liveIdentityVerified": true,
+    "liveOwnedPids": [
+      53236,
+      53721,
+      53868,
+      53870,
+      53871,
+      53872
+    ],
+    "liveOwnedBytes": 1684128768,
+    "kernelPressureLevel": 1
+  },
+  "failure": {
+    "attempt": "transport-baseline-reference-parent-v1",
+    "elapsedSeconds": 11.451282790862024,
+    "capturedFramesBeforeStop": 48,
+    "supervisorMeasurementRetries": 1,
+    "cleanupVerified": true,
+    "leaseCleanupVerified": true,
+    "exactMissingIdentities": "Not recoverable: original exception and failed samples did not record them."
+  },
+  "limitations": [
+    "No media rerun has qualified this change yet.",
+    "The owner must persist exception.evidence to retain missing identities in its supervisor receipt.",
+    "Snapshot sampling cannot discover a child born and orphaned between both observations.",
+    "Successful snapshots expose all measured process identities, including newly discovered orphans; supervisor cleanup ownership should retain those identities."
+  ]
+}

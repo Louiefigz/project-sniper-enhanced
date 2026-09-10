@@ -1,6 +1,5 @@
 import { spawn } from "node:child_process";
 import path from "node:path";
-import { claudeProcessEnv } from "../../_lib/ai-provider";
 import {
   PROCESS_TERM_GRACE_MS,
   shouldDetachProcessGroup,
@@ -9,7 +8,7 @@ import {
 } from "../../_lib/child-process-lifecycle";
 import { pythonInterpreter, SCRIPTS_DIR } from "../../_lib/spawn-python";
 import {
-  parseClaudeResultStream,
+  runLegacyBrainProcess,
   type BrainProcessResult,
   type LegacyBrainInvocation,
 } from "../auto-edit/brain-review-runner";
@@ -18,7 +17,6 @@ const DEFAULT_CLI = path.join(
   SCRIPTS_DIR, "producer", "palmier", "native_delta_cli.py",
 );
 const CLI_TIMEOUT_MS = 30 * 60 * 1000;
-const CLAUDE_BIN = process.env.CLAUDE_BIN || "claude";
 
 interface CommandResult {
   code: number | null;
@@ -140,19 +138,5 @@ export async function runLegacyNative(
   invocation: LegacyBrainInvocation,
   signal?: AbortSignal,
 ): Promise<BrainProcessResult> {
-  const result = await runCommand(CLAUDE_BIN, invocation.args, {
-    cwd: invocation.cwd,
-    env: claudeProcessEnv(),
-    timeoutMs: invocation.timeoutMs,
-    signal,
-  });
-  if (result.code !== 0) {
-    const detail = result.stderr.trim() ? `: ${result.stderr.trim().slice(-1_200)}` : "";
-    throw new Error(`Claude exited ${result.code}${detail}`);
-  }
-  return {
-    message: parseClaudeResultStream(result.stdout),
-    stderr: result.stderr,
-    ms: result.ms,
-  };
+  return runLegacyBrainProcess({ ...invocation, signal });
 }

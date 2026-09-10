@@ -26,7 +26,11 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import os
 import sys
+
+sys.path.insert(
+    0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from compile_timeline import Segment, TimelineMap, compile_plan
 

@@ -5,7 +5,7 @@ import path from "node:path";
 import {
   activePalmierHandoffBlock,
   loadHandoff,
-} from "../../../app/api/producer/palmier/open/route";
+} from "../../../app/api/producer/palmier/_lib";
 import { beginProducerRun, clearProducerRun } from "../../server/producer-run-registry";
 
 const root = mkdtempSync(path.join(os.tmpdir(), "sniper-open-handoff-"));

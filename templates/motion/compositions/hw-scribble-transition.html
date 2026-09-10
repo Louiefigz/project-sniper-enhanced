@@ -1,0 +1,202 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"accent","type":"color","label":"Scribble / backstop color","default":"#054BC9"},
+    {"id":"bands","type":"number","label":"Horizontal scribble bands","default":12,"min":3,"max":18,"step":1},
+    {"id":"strokeScale","type":"number","label":"Stroke weight scale","default":1,"min":0.5,"max":2,"step":0.05},
+    {"id":"seed","type":"number","label":"Zigzag jitter seed","default":17,"min":1,"max":99,"step":1}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · Motion template: HW-SCRIBBLE-TRANSITION (catalog port
+    wave A — hand-drawn family; upstream: vendor/hyperframes-catalog/
+    compositions/hw-scribble-transition.html, CONFIG object promoted to typed
+    variables, colors retargeted to tokens.css, canvas retargeted 9:16).
+    Trigger it serves: a seam cover for a hard subject switch — fat hand-drawn
+    zigzag bands stagger-scribble across the frame, a solid backstop snaps in
+    to GUARANTEE full coverage through the cut window (the compositor
+    hard-cuts the base underneath), then the bands scribble off the other
+    way. The scribble-marker sibling of stinger-wipe — but ALPHA, not opaque:
+    outside the cover window the live footage shows through the gaps.
+    Transparent 1080x1920 overlay -> render with `--format mov` (ProRes 4444)
+    for alpha; place full-frame via an explicit placement {x:0, y:0} pin.
+
+    CONTRACT for the PRODUCER compositing stage:
+      - accent / bands / strokeScale / seed are `data-composition-variables`.
+        A spec of {} is legitimate — a transition's defaults ARE the product
+        (no content copy to leak). seed selects the deterministic zigzag
+        jitter; same seed -> byte-identical frames.
+      - COVER WINDOW (the host's cut belongs inside it): with D the root
+        duration and s = min(1, D / 1.87), full coverage is guaranteed from
+        0.92*s to D - 0.75*s. At the default D = 2.2 that is [0.92, 1.45] —
+        the compositor hard-cuts the base anywhere inside it. ENVELOPE (house
+        law #7): fixed IN (0.92s bands-on + backstop snap) and OUT (0.75s
+        lift + bands-off), compressed together when D is short; only the
+        cover HOLD is elastic.
+      - MECHANISM (kept from upstream): per-band fat zigzag paths built from
+        the seeded hash, alternating draw direction, stroke-dashoffset
+        ATTRIBUTE dash tweens (house scrub law #6), backstop opacity snap,
+        and the kill-on-clear (root visibility flips hidden via tl.set the
+        moment the last band clears — seek-safe, GSAP restores it backward).
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (see stat-card
+        note); default 2.2s, the upstream-documented envelope.
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>SNIPER · hw-scribble-transition</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="/vendor/gsap/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: var(--canvas-w);
+        height: var(--canvas-h);
+        overflow: hidden;
+        background: transparent;          /* alpha overlay — bands + backstop only */
+        font-family: var(--font);
+      }
+      #hwst-root {
+        position: relative;
+        width: var(--canvas-w);
+        height: var(--canvas-h);
+        overflow: hidden;
+      }
+      #hwst-svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+      #hwst-svg path {
+        fill: none;
+        stroke: var(--hw-accent);
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      /* Solid backstop that guarantees full coverage through the cut window. */
+      #hwst-solid {
+        position: absolute;
+        inset: 0;
+        background: var(--hw-accent);
+        opacity: 0;
+        will-change: opacity;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="hwst-root"
+      data-composition-id="hw-scribble-transition"
+      data-width="1080"
+      data-height="1920"
+      data-start="0"
+      data-duration="2.2"
+    >
+      <svg id="hwst-svg" class="clip" viewBox="0 0 1080 1920" data-start="0" data-duration="60" data-track-index="1"></svg>
+      <div id="hwst-solid" class="clip" data-start="0" data-duration="60" data-track-index="2"></div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("hwst-root");
+        // Single source of truth for render length: the root data-duration attr.
+        const D = parseFloat(root.dataset.duration) || 2.2;
+
+        const defaults = { accent: "#054BC9", bands: 12, strokeScale: 1, seed: 17 };
+        const HF = window.__hyperframes;
+        const vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
+        document.documentElement.style.setProperty("--hw-accent", vars.accent);
+
+        const n = Math.floor(Number(vars.bands));
+        if (!isFinite(n) || n < 2 || n > 24) {
+          throw new Error("hw-scribble-transition: bands must be 2..24; got " + vars.bands);
+        }
+        const strokeScale = Number(vars.strokeScale);
+        if (!isFinite(strokeScale) || strokeScale <= 0) {
+          throw new Error("hw-scribble-transition: strokeScale must be > 0; got " +
+            vars.strokeScale);
+        }
+        const seed = isFinite(Number(vars.seed)) ? Number(vars.seed) : 17;
+
+        // Seeded hash -> [-1, 1]. Pure function of its inputs (hw family runtime).
+        function hwHash(k, s) {
+          const v = Math.sin(k * 127.1 + (s || 1) * 311.7) * 43758.5453;
+          return (v - Math.floor(v)) * 2 - 1;
+        }
+
+        // Fat zigzag bands, each covering a horizontal slice edge-to-edge.
+        const W = 1080, H = 1920;
+        const NS = "http://www.w3.org/2000/svg";
+        const svg = document.getElementById("hwst-svg");
+        const bandH = H / n;
+        const paths = [];
+        for (let b = 0; b < n; b++) {
+          const y0 = b * bandH + bandH / 2;
+          let d = "M -80 " + (y0 + hwHash(b * 17, seed) * 20).toFixed(1);
+          const zigs = 7;
+          for (let i = 1; i <= zigs; i++) {
+            const px = (W + 160) * (i / zigs) - 80;
+            const py = y0 + (i % 2 ? -1 : 1) * bandH * 0.32 + hwHash(b * 17 + i, seed) * 16;
+            d += " L " + px.toFixed(1) + " " + py.toFixed(1);
+          }
+          const p = document.createElementNS(NS, "path");
+          p.setAttribute("d", d);
+          p.setAttribute("stroke-width", String(Math.ceil(bandH * 0.85 * strokeScale)));
+          p.setAttribute("id", "hwst-band-" + b);
+          svg.appendChild(p);
+          paths.push(p);
+        }
+
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // ENVELOPE: fixed IN 0.92s + OUT 0.75s (compressed together when D is
+        // short); the cover HOLD between them is the only elastic span.
+        const s = Math.min(1, D / 1.87);
+        const IN = 0.92 * s, OUT = 0.75 * s;
+        const outStart = D - OUT;
+        const st1 = (0.24 * s) / Math.max(1, n - 1);   // upstream 0.04 x 6 span, rescaled
+        const st2 = (0.21 * s) / Math.max(1, n - 1);   // upstream 0.035 x 6 span, rescaled
+
+        // IN: bands scribble on (staggered, alternating direction) — dash
+        // tweens on the stroke-dashoffset ATTRIBUTE, both endpoints explicit.
+        paths.forEach(function (p, i) {
+          const len = p.getTotalLength();
+          const from = i % 2 ? -len : len;
+          p.setAttribute("stroke-dasharray", String(len));
+          p.setAttribute("stroke-dashoffset", String(from));
+          tl.fromTo(p, { attr: { "stroke-dashoffset": from } },
+            { attr: { "stroke-dashoffset": 0 }, duration: 0.55 * s,
+              ease: "power2.in", immediateRender: false },
+            i * st1);
+        });
+        // Backstop snaps in beneath the finished scribble — full coverage
+        // guaranteed from IN until outStart (the host's cut window).
+        tl.fromTo("#hwst-solid", { opacity: 0 },
+          { opacity: 1, duration: 0.12 * s, ease: "none", immediateRender: false },
+          IN - 0.12 * s);
+
+        // OUT: backstop lifts, bands scribble off the other way. Both
+        // endpoints explicit + immediateRender:false (house scrub law #1) —
+        // a plain .to() would capture its start on first render, which an
+        // arbitrary seek order corrupts.
+        tl.fromTo("#hwst-solid", { opacity: 1 },
+          { opacity: 0, duration: 0.15 * s, ease: "none", immediateRender: false },
+          outStart);
+        paths.forEach(function (p, i) {
+          const len = p.getTotalLength();
+          tl.fromTo(p, { attr: { "stroke-dashoffset": 0 } }, {
+            attr: { "stroke-dashoffset": i % 2 ? len : -len },
+            duration: 0.5 * s, ease: "power2.out", immediateRender: false,
+          }, outStart + i * st2);
+        });
+
+        // Hard kill the moment the last band clears (upstream learning: kill
+        // roots when the final clear completes, not at D). tl.set records the
+        // prior value, so backward seeks restore visibility exactly.
+        tl.set(root, { visibility: "hidden" }, Math.min(D - 0.01, outStart + 0.73 * s));
+
+        tl.seek(0);
+        window.__timelines["hw-scribble-transition"] = tl;
+      })();
+    </script>
+  </body>
+</html>

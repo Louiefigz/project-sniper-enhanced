@@ -1,45 +1,29 @@
-import { randomUUID } from "node:crypto";
 import {
   existsSync, lstatSync, readFileSync, realpathSync,
-  renameSync, rmSync, writeFileSync,
 } from "node:fs";
 import path from "node:path";
-import {
-  autoEditAuthoritySnapshot,
-  stableAuthorityHash,
-} from "@/lib/server/auto-edit-authority-snapshot";
+import { autoEditAuthoritySnapshot, stableAuthorityHash } from
+  "@/lib/server/auto-edit-authority-snapshot";
 import { fileSha256 } from "@/lib/server/auto-edit-hash";
-import type {
-  CutApprovalReceipt,
-  CutAuthorityEvidence,
-} from "./cut-approval";
+import type { CutApprovalReceipt, CutAuthorityEvidence } from "./cut-approval";
 import type { ProducerReview } from "./review-contract";
 import { AutoEditError, type AutoEditCtx } from "./stream";
+import {
+  REQUIRED_CLEAN_CUT_REVIEWS,
+  validateCutReviewReceipt,
+  validateLegacyCutReviewReceipt,
+  writeCutReviewReceipt,
+  type CleanCutReviewArtifact,
+  type CutReviewApprovalReceipt,
+} from "./cut-review-receipt";
+export {
+  REQUIRED_CLEAN_CUT_REVIEWS,
+  type CleanCutReviewArtifact,
+  type CutReviewApprovalReceipt,
+} from "./cut-review-receipt";
 
 const CUT_REVIEW_APPROVAL_FILE = ".sniper-cut-review-approved.json";
-export const REQUIRED_CLEAN_CUT_REVIEWS = 2;
-
-export interface CleanCutReviewArtifact {
-  round: number;
-  path: string;
-  hash: string;
-}
-
-export interface CutReviewApprovalReceipt {
-  schemaVersion: 1;
-  stage: "cut-review";
-  requiredCleanReviews: 2;
-  qualityPolicyVersion: 1;
-  planHash: string;
-  manifestHash: string;
-  transcriptDigest: string;
-  authorityDigest: string;
-  cutTrackDigest: string;
-  cutDecisionsDigest: string;
-  doctrineHash: string | null;
-  cutAuthorityDigest: string;
-  reviews: CleanCutReviewArtifact[];
-}
+const SHA256 = /^[a-f0-9]{64}$/;
 
 export interface StoredCutReviewArtifact {
   schemaVersion: 1;
@@ -61,6 +45,7 @@ interface CurrentCutAuthority {
   cutTrackDigest: string;
   cutDecisionsDigest: string;
   doctrineHash: string | null;
+  cutIntentDigest: string;
   digest: string;
 }
 
@@ -82,6 +67,11 @@ function currentCutAuthority(
     cutTrackDigest: evidence.cutTrackDigest,
     cutDecisionsDigest: evidence.cutDecisionsDigest,
     doctrineHash: ctx.doctrine?.doctrineHash ?? null,
+    cutIntentDigest: stableAuthorityHash({
+      scope: ctx.scope,
+      operatorIntentDigest: authority.operatorIntentDigest,
+      referenceDigest: authority.referenceDigest,
+    }),
   };
   return { ...core, digest: stableAuthorityHash(core) };
 }
@@ -121,11 +111,12 @@ function validateArtifact(
   ctx: AutoEditCtx,
   item: CleanCutReviewArtifact,
   receipt: CutReviewApprovalReceipt,
+  read: typeof boundJson = boundJson,
 ): void {
   if (!Number.isInteger(item.round) || item.round < 1 || !item.hash) {
     throw new AutoEditError("clean cut review artifact reference is malformed");
   }
-  const value = boundJson(
+  const value = read(
     ctx, item.path, item.hash, "clean cut review artifact",
   ) as unknown as StoredCutReviewArtifact;
   const valid = value.schemaVersion === 1 && value.stage === "cut"
@@ -147,57 +138,39 @@ function legacyDoctrineHash(
   }
   const packet = boundJson(ctx, ref.path, ref.hash, "cut review critic packet");
   const doctrine = packet.doctrineHash;
-  if (doctrine !== null && (typeof doctrine !== "string" || !/^[a-f0-9]{64}$/.test(doctrine))) {
+  if (doctrine !== null && (typeof doctrine !== "string" || !SHA256.test(doctrine))) {
     throw new AutoEditError("legacy cut review critic packet has malformed doctrine authority");
   }
   return doctrine as string | null;
 }
 
-function validateReceiptShape(value: unknown): CutReviewApprovalReceipt {
-  const receipt = value as CutReviewApprovalReceipt;
-  const hashes = [
-    receipt?.planHash, receipt?.manifestHash, receipt?.transcriptDigest,
-    receipt?.authorityDigest, receipt?.cutTrackDigest, receipt?.cutDecisionsDigest,
-    receipt?.cutAuthorityDigest,
-  ];
-  const valid = receipt?.schemaVersion === 1 && receipt.stage === "cut-review"
-    && receipt.requiredCleanReviews === REQUIRED_CLEAN_CUT_REVIEWS
-    && receipt.qualityPolicyVersion === 1
-    && hashes.every((hash) => typeof hash === "string" && /^[a-f0-9]{64}$/.test(hash))
-    && (receipt.doctrineHash === null
-      || (typeof receipt.doctrineHash === "string" && /^[a-f0-9]{64}$/.test(receipt.doctrineHash)))
-    && Array.isArray(receipt.reviews)
-    && receipt.reviews.length === REQUIRED_CLEAN_CUT_REVIEWS;
-  if (!valid) throw new AutoEditError("cut review approval receipt is malformed");
-  return receipt;
-}
-
-function legacyReceipt(value: unknown): CutReviewApprovalReceipt {
-  const receipt = value as CutReviewApprovalReceipt;
-  const hashes = [
-    receipt?.planHash, receipt?.manifestHash, receipt?.transcriptDigest,
-    receipt?.authorityDigest, receipt?.cutTrackDigest, receipt?.cutDecisionsDigest,
-  ];
-  const valid = receipt?.schemaVersion === 1 && receipt.stage === "cut-review"
-    && receipt.requiredCleanReviews === REQUIRED_CLEAN_CUT_REVIEWS
-    && hashes.every((hash) => typeof hash === "string" && /^[a-f0-9]{64}$/.test(hash))
-    && Array.isArray(receipt.reviews)
-    && receipt.reviews.length === REQUIRED_CLEAN_CUT_REVIEWS;
-  if (!valid) throw new AutoEditError("cut review approval receipt is malformed");
-  return receipt;
-}
-
-function writeReceipt(ctx: AutoEditCtx, receipt: CutReviewApprovalReceipt): void {
-  const destination = cutReviewApprovalPath(ctx);
-  const temporary = `${destination}.${randomUUID()}.tmp`;
-  try {
-    writeFileSync(temporary, `${JSON.stringify(receipt, null, 2)}\n`, {
-      flag: "wx", mode: 0o600,
-    });
-    renameSync(temporary, destination);
-  } finally {
-    rmSync(temporary, { force: true });
+function legacyCutIntentDigest(
+  ctx: AutoEditCtx,
+  item: CleanCutReviewArtifact,
+): string {
+  const review = boundJson(ctx, item.path, item.hash, "clean cut review artifact");
+  const ref = review.inputPacket as { path?: unknown; hash?: unknown } | undefined;
+  if (typeof ref?.path !== "string" || typeof ref.hash !== "string") {
+    throw new AutoEditError("legacy cut review has no bound critic packet");
   }
+  const packet = boundJson(ctx, ref.path, ref.hash, "cut review critic packet");
+  const request = packet.request as { scope?: unknown } | undefined;
+  const authority = review.inputAuthority as {
+    operatorIntentDigest?: unknown;
+    referenceDigest?: unknown;
+  } | undefined;
+  if (typeof request?.scope !== "string"
+      || typeof authority?.operatorIntentDigest !== "string"
+      || !SHA256.test(authority.operatorIntentDigest)
+      || typeof authority.referenceDigest !== "string"
+      || !SHA256.test(authority.referenceDigest)) {
+    throw new AutoEditError("legacy cut review has no bound cut-intent authority");
+  }
+  return stableAuthorityHash({
+    scope: request.scope,
+    operatorIntentDigest: authority.operatorIntentDigest,
+    referenceDigest: authority.referenceDigest,
+  });
 }
 
 function upgradeLegacyReceipt(
@@ -205,7 +178,7 @@ function upgradeLegacyReceipt(
   value: unknown,
   current: CurrentCutAuthority,
 ): CutReviewApprovalReceipt {
-  const legacy = legacyReceipt(value);
+  const legacy = validateLegacyCutReviewReceipt(value);
   const unchanged = legacy.manifestHash === current.manifestHash
     && legacy.transcriptDigest === current.transcriptDigest
     && legacy.cutTrackDigest === current.cutTrackDigest
@@ -215,12 +188,18 @@ function upgradeLegacyReceipt(
   if (doctrines.some((item) => item !== current.doctrineHash)) {
     throw new AutoEditError("legacy cut review doctrine authority changed");
   }
-  const receipt = validateReceiptShape({
+  const intents = legacy.reviews.map((item) => legacyCutIntentDigest(ctx, item));
+  if (intents.some((item) => item !== current.cutIntentDigest)) {
+    throw new AutoEditError("legacy cut review intent authority changed");
+  }
+  const receipt = validateCutReviewReceipt({
     ...legacy, qualityPolicyVersion: current.qualityPolicyVersion,
-    doctrineHash: current.doctrineHash, cutAuthorityDigest: current.digest,
+    doctrineHash: current.doctrineHash,
+    cutIntentDigest: current.cutIntentDigest,
+    cutAuthorityDigest: current.digest,
   });
   for (const review of receipt.reviews) validateArtifact(ctx, review, receipt);
-  writeReceipt(ctx, receipt);
+  writeCutReviewReceipt(cutReviewApprovalPath(ctx), receipt);
   return receipt;
 }
 
@@ -231,7 +210,7 @@ export function persistCutReviewApproval(
   reviews: CleanCutReviewArtifact[],
 ): CutReviewApprovalReceipt {
   const current = currentCutAuthority(ctx, gate);
-  const receipt = validateReceiptShape({
+  const receipt = validateCutReviewReceipt({
     schemaVersion: 1,
     stage: "cut-review",
     requiredCleanReviews: REQUIRED_CLEAN_CUT_REVIEWS,
@@ -243,28 +222,36 @@ export function persistCutReviewApproval(
     cutTrackDigest: gate.cutTrackDigest,
     cutDecisionsDigest: gate.cutDecisionsDigest,
     doctrineHash: current.doctrineHash,
+    cutIntentDigest: current.cutIntentDigest,
     cutAuthorityDigest: current.digest,
     reviews,
   });
   for (const review of reviews) validateArtifact(ctx, review, receipt);
-  writeReceipt(ctx, receipt);
+  writeCutReviewReceipt(cutReviewApprovalPath(ctx), receipt);
   return receipt;
 }
 
 export function verifyCutReviewApproval(
   ctx: AutoEditCtx,
   evidence: CutAuthorityEvidence,
+  options?: {
+    /** Current schema only; supplied immutable bytes must never be upgraded. */
+    boundReceipt: CutReviewApprovalReceipt;
+    readBoundArtifact?: typeof boundJson;
+  },
 ): CutReviewApprovalReceipt {
-  let value: unknown;
-  try {
-    value = JSON.parse(readFileSync(cutReviewApprovalPath(ctx), "utf8")) as unknown;
-  } catch {
-    throw new AutoEditError("controller-owned cut review approval is missing or unreadable");
+  let value: unknown = options?.boundReceipt;
+  if (value === undefined) {
+    try {
+      value = JSON.parse(readFileSync(cutReviewApprovalPath(ctx), "utf8")) as unknown;
+    } catch {
+      throw new AutoEditError("controller-owned cut review approval is missing or unreadable");
+    }
   }
   const current = currentCutAuthority(ctx, evidence);
   const candidate = value as Partial<CutReviewApprovalReceipt>;
-  const receipt = candidate.cutAuthorityDigest
-    ? validateReceiptShape(value) : upgradeLegacyReceipt(ctx, value, current);
+  const receipt = options || (candidate.cutAuthorityDigest && candidate.cutIntentDigest)
+    ? validateCutReviewReceipt(value) : upgradeLegacyReceipt(ctx, value, current);
   const storedCore = {
     qualityPolicyVersion: receipt.qualityPolicyVersion,
     manifestHash: receipt.manifestHash,
@@ -272,11 +259,12 @@ export function verifyCutReviewApproval(
     cutTrackDigest: receipt.cutTrackDigest,
     cutDecisionsDigest: receipt.cutDecisionsDigest,
     doctrineHash: receipt.doctrineHash,
+    cutIntentDigest: receipt.cutIntentDigest,
   };
   if (receipt.cutAuthorityDigest !== stableAuthorityHash(storedCore)
       || receipt.cutAuthorityDigest !== current.digest) {
     throw new AutoEditError("cut review approval no longer matches current cut authority");
   }
-  for (const review of receipt.reviews) validateArtifact(ctx, review, receipt);
+  for (const review of receipt.reviews) validateArtifact(ctx, review, receipt, options?.readBoundArtifact);
   return receipt;
 }

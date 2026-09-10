@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { projectedIntentStatus } from "../../../app/api/producer/project-status/route";
+import { projectedIntentStatus } from "../../server/project-status-projection";
 import type { ProjectJson } from "../../../app/api/_lib/workspace";
 
 const dir = mkdtempSync(path.join(os.tmpdir(), "sniper-intent-status-"));

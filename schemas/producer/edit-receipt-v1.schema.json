@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/edit-receipt-v1.schema.json",
+  "title": "EditReceiptV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "receiptId",
+    "requestId",
+    "batchId",
+    "idempotencyKey",
+    "parentRevisionHash",
+    "childRevisionHash",
+    "status",
+    "recordedAt",
+    "operations",
+    "dirtyWindows",
+    "invariantProofHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "receiptId": { "$ref": "#/$defs/uuid" },
+    "requestId": { "$ref": "#/$defs/uuid" },
+    "batchId": { "$ref": "#/$defs/uuid" },
+    "idempotencyKey": { "$ref": "#/$defs/uuid" },
+    "parentRevisionHash": { "$ref": "#/$defs/sha256" },
+    "childRevisionHash": { "$ref": "#/$defs/sha256" },
+    "status": {
+      "enum": [
+        "candidate-proved",
+        "committed",
+        "not-promoted",
+        "reconciliation-required"
+      ]
+    },
+    "recordedAt": { "type": "string", "format": "date-time" },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "operationId",
+          "clauseId",
+          "operation",
+          "executionState",
+          "beforeHash",
+          "afterHash",
+          "dirtyNodeIds",
+          "explanation"
+        ],
+        "properties": {
+          "operationId": { "$ref": "#/$defs/uuid" },
+          "clauseId": { "$ref": "#/$defs/uuid" },
+          "operation": {
+            "enum": [
+              "SetGraphicTextV1",
+              "cut.restoreSpeech",
+              "scene.add",
+              "scene.setVariable",
+              "scene.move",
+              "scene.remove",
+              "title.setText",
+              "transition.set",
+              "sfx.set",
+              "grade.set"
+            ]
+          },
+          "executionState": {
+            "enum": ["candidate-executed", "committed"]
+          },
+          "beforeHash": { "$ref": "#/$defs/sha256" },
+          "afterHash": { "$ref": "#/$defs/sha256" },
+          "dirtyNodeIds": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "$ref": "#/$defs/stableId" }
+          },
+          "explanation": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        }
+      }
+    },
+    "dirtyWindows": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/frameRange" }
+    },
+    "invariantProofHash": { "$ref": "#/$defs/sha256" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "status": { "const": "committed" } },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "operations": {
+            "items": {
+              "properties": {
+                "executionState": { "const": "committed" }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "status": { "const": "candidate-proved" } },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "operations": {
+            "items": {
+              "properties": {
+                "executionState": { "const": "candidate-executed" }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "stableId": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]+$"
+    },
+    "uuid": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "frameRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startFrame", "endFrameExclusive"],
+      "properties": {
+        "startFrame": { "type": "integer", "minimum": 0 },
+        "endFrameExclusive": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

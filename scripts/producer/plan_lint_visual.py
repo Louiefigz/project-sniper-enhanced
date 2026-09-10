@@ -52,6 +52,7 @@ import claims_contract as cc
 from graphics.variety_contract import check_variety, strict_scope
 from planner import motion_triggers as mt
 from producer_config import MOTION
+from plan_lint_contrast import check_contrast, contrast_ratio, luminance
 
 def _declared_first_land(spec: dict) -> float | None:
     """Earliest DECLARED comp-relative land: moduleLands[0] / min atN.
@@ -89,69 +90,6 @@ def check_first_land(plan: dict, rep: Any) -> None:
                "(LL-002: enter the card later, still word-locked, or land "
                "the first module on the cut)")
         rep.error(msg) if own_screen else rep.warn(msg)
-
-
-def _srgb_channel(v: int) -> float:
-    """Linearized sRGB channel (WCAG relative-luminance definition)."""
-    c = v / 255.0
-    return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
-
-
-def _hex_rgb(color: str) -> tuple[int, int, int] | None:
-    """#RRGGBB / #RGB → (r, g, b); None for anything else (not this rule's
-    job to validate color syntax — named colors are skipped, not guessed)."""
-    s = str(color).strip().lstrip("#")
-    if len(s) == 3:
-        s = "".join(ch * 2 for ch in s)
-    if len(s) != 6 or any(ch not in "0123456789abcdefABCDEF" for ch in s):
-        return None
-    return int(s[0:2], 16), int(s[2:4], 16), int(s[4:6], 16)
-
-
-def luminance(color: str) -> float | None:
-    """WCAG relative luminance of a #RRGGBB color (None if unparseable)."""
-    rgb = _hex_rgb(color)
-    if rgb is None:
-        return None
-    r, g, b = (_srgb_channel(v) for v in rgb)
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b
-
-
-def contrast_ratio(fg: str, bg: str) -> float | None:
-    """WCAG contrast ratio between two hex colors (None if unparseable)."""
-    lf, lb = luminance(fg), luminance(bg)
-    if lf is None or lb is None:
-        return None
-    hi, lo = max(lf, lb), min(lf, lb)
-    return (hi + 0.05) / (lo + 0.05)
-
-
-# Spec keys that paint accent color onto large text in the cataloged kinds.
-_ACCENT_KEYS = ("accent", "accentColor")
-
-
-def check_contrast(plan: dict, rep: Any) -> None:
-    """LL-004 — accent-on-bg contrast floor for known comp kinds."""
-    cfg = MOTION["contrast"]
-    floor = float(cfg["min_ratio"])
-    for i, g in enumerate(plan.get("graphicsTrack") or []):
-        bg_by_variant = cfg["kind_bg"].get(str(g.get("kind", "")))
-        if bg_by_variant is None:
-            continue                       # unknown comp — never guess a bg
-        spec = g.get("spec") or {}
-        bg = bg_by_variant.get(str(spec.get("bg", "")))
-        if bg is None:
-            continue                       # unknown variant — skip, no fallback
-        for key in _ACCENT_KEYS:
-            if key not in spec:
-                continue
-            ratio = contrast_ratio(str(spec[key]), bg)
-            if ratio is not None and ratio < floor:
-                rep.error(
-                    f"graphicsTrack[{i}]: spec.{key} {spec[key]!r} on the "
-                    f"{g.get('kind')} bg {bg} is {ratio:.1f}:1 — below the "
-                    f"{floor:g}:1 large-text floor (LL-004: pick a brighter "
-                    "accent for dark cards / darker for light cards)")
 
 
 def check_left_balance(plan: dict, rep: Any) -> None:

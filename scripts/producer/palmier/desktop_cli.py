@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from palmier.desktop_authority import (advance, approve, begin, load_pointer,
                                        reconcile, run_qc)  # noqa: E402
 from palmier.desktop_lease import renew  # noqa: E402
+from palmier.desktop_gates import verify_desktop_media_authority  # noqa: E402
 from palmier.desktop_state import DesktopStageInput  # noqa: E402
 from palmier.mcp_client import PalmierClient  # noqa: E402
 
@@ -24,6 +25,13 @@ def _client() -> PalmierClient:
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", default=os.getcwd())
+    policy = parser.add_mutually_exclusive_group()
+    policy.add_argument(
+        "--require-source-set-admission", action="store_true",
+        help="explicitly require source-set admission (the default)")
+    policy.add_argument(
+        "--allow-legacy-unadmitted", action="store_true",
+        help="non-production migration only: accept a legacy manifest")
     sub = parser.add_subparsers(dest="command", required=True)
     start = sub.add_parser("begin")
     start.add_argument("out_dir"); start.add_argument("plan")
@@ -47,6 +55,8 @@ def _parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = _parser().parse_args()
+    if not args.allow_legacy_unadmitted:
+        os.environ["SNIPER_REQUIRE_SOURCE_SET_ADMISSION"] = "1"
     repo = os.path.abspath(args.repo)
     if args.command == "status":
         _path, result = load_pointer(repo)
@@ -54,11 +64,13 @@ def main() -> int:
         inputs = DesktopStageInput(
             repo, args.out_dir, args.plan, args.manifest, args.stage,
             args.transcripts_dir)
+        verify_desktop_media_authority(inputs)
         result = begin(_client(), inputs, args.hours)
     elif args.command == "advance":
         inputs = DesktopStageInput(
             repo, "", args.plan, args.manifest, args.stage,
             args.transcripts_dir, args.revision_set)
+        verify_desktop_media_authority(inputs)
         result = advance(_client(), inputs)
     elif args.command == "renew":
         result = renew(_client(), repo, args.hours)

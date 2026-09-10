@@ -4,7 +4,8 @@
 
 `gsap.min.js` is the exact GSAP core 3.14.2 file fetched from
 `https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js` on 2026-07-18 for
-offline `section-marker` rendering. Its SHA-256 is
+offline rendering. Every registered production comp now loads this vendored
+copy. Its SHA-256 is
 `c174bfce53a729418d57a8ad8625e7247c793a22fef8e2851e3cfa3de9cd8280`.
 Do not replace it through an unpinned package or CDN alias.
 

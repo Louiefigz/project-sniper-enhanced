@@ -25,9 +25,10 @@ The SEGMENTER/CLIPPER/FRAME.IO flows are independent (no automated handoff). The
 ## New here? Read in order
 
 1. `docs/PIPELINE.md` — canonical doctrine (footage in → in-house render → **optional** Palmier mirror out). Wins every contradiction.
-2. `docs/HANDOFF.md` — current `/producer` state + how to test.
+2. `docs/producer/command-driven-editing/12_SHORT_LONG_EXECUTABLE_MATRIX.md` — current route/workflow behavior and explicit blockers.
 3. `.claude/skills/producer/SKILL.md` — the editor brain's doctrine (how a plan is authored + gated).
 4. `scripts/producer/CLAUDE.md` — the Python engine module map.
+5. `docs/HANDOFF.md` — historical 2026-07-10 snapshot, not current release evidence.
 
 User-facing setup + the easiest way to run it: `README.md`. More references/docs: `docs/README.md`.
 
@@ -38,21 +39,29 @@ User-facing setup + the easiest way to run it: `README.md`. More references/docs
 canonical file instead of duplicating it. Commands in `.claude/commands/` make
 routing explicit, but natural-language trigger descriptions remain supported.
 
-**SNIPER ↔ HyperFrames — two different worlds.** Raw footage → edit =
+**SNIPER ↔ HyperFrames — one explicit boundary.** Raw footage → edit =
 **PRODUCER** (`/producer`, `scripts/producer/`, `edit_plan.json`, optional
 Palmier). The upstream HyperFrames recipe documents for videos from
 text/URL/PR/song/deck are archived under `vendor/hyperframes-skills/` for
-provenance only. They are outside `.claude/skills` and `.agents/skills`, are not
+provenance only, and the upstream graphics catalog is mirrored read-only at
+`vendor/hyperframes-catalog/` (selection/porting reference — see its README and
+`docs/producer/catalog-study/`; items enter the vocabulary only via the porting
+contract). They are outside `.claude/skills` and `.agents/skills`, are not
 agent-discoverable, and are not Project Sniper capabilities. This repo uses
-HyperFrames only as the pinned `hyperframes@0.7.33 render` graphics subprocess
-(`scripts/producer/graphics/graphics_render.py`). Do not route footage-edit jobs
-into the archived recipes or advertise their workflows.
+HyperFrames two ways: the pinned `hyperframes@0.8.31 render` graphics subprocess
+(`scripts/producer/graphics/graphics_render.py`) — still the ONLY render use —
+and **HyperFrames Studio as the review/manual-control surface for the graphics
+layer** (`scripts/producer/studio/`, `/produce-studio`,
+`docs/producer/STUDIO_REVIEW_LANE.md`; preview only — the render boundary is
+unchanged and footage never re-encodes in a browser). Do not route footage-edit
+jobs into the archived recipes or advertise their workflows.
 
 ## THE PIPELINE (canonical: `docs/PIPELINE.md` — read it before touching PRODUCER)
 
 **Footage is uploaded into PRODUCER → the operator picks intent → Sniper produces
-an approved final; that exact visual/audio master may then be mirrored explicitly
-to Palmier Pro for additional manual control.**
+an approved final; manual control/review happens in the Studio review lane
+(`/produce-studio`), and that exact visual/audio master may still be mirrored
+explicitly to Palmier Pro as an optional legacy export.**
 The intent card offers: **Short (9:16)** with a style
 (**Caleb light · Jaden produced · Angela involved** + generics), or **Long (16:9)**
 with a **checklist of items** — full workflow or just certain lanes (motion,
@@ -71,24 +80,25 @@ approved-master clip; approximate/baked/known-unsupported findings describe
 native editability and do not block that exact mirror. Malformed or unknown plan
 state does block. Opening the mirror pauses Sniper sync — the code enforces a
 compatibility lease (`palmier/sync.py` refuses to sync when ownership is
-Palmier's; `palmier/ownership.py` ships `--handoff`/`--reclaim`) — but the
-current UI exposes **no** take-control/reclaim ceremony, and the native-promotion
-path this lease guards is **not wired yet**
-(`docs/palmier/PALMIER_CANONICAL_IMPLEMENTATION_STATE.md`). Never read Palmier edits back
-into `edit_plan.json`. Keep
+Palmier's; `palmier/ownership.py` ships `--handoff`/`--reclaim`) — but there is
+still no released product-level reclaim workflow. A production-callable native
+candidate protocol now exists locally, but connected editable/hybrid delivery
+remains isolated and P5-blocked pending representative short/long evidence
+(`docs/palmier/PALMIER_CANONICAL_IMPLEMENTATION_STATE.md`). Never read Palmier
+edits back into `edit_plan.json`. Keep
 `docs/PIPELINE.md` and `docs/palmier/PALMIER_PARITY_CONTRACT.md` aligned with this model.
 
 **Interactive live-drive (a DIFFERENT path from the one-way mirror above).** The
 repo ships a project-scoped `.mcp.json` declaring the `palmier-pro` MCP server
 (`http://127.0.0.1:19789/mcp`); when Palmier Pro is open, a Claude client can drive
 it **directly** (`add_clips`/`add_texts`/`set_keyframes`/`apply_color`/
-`import_media` → `export_project`) — a fast, hands-on editing loop the operator
-watches populate live, and the fastest way to build/adjust a timeline by hand. Give
-Claude the footage as an **absolute path** (Palmier's `import_media` reads it
-locally — bytes never leave the machine); pull words with `get_transcript`. Load the
-`producer` skill for the editing doctrine. This is a **manual workflow, NOT an
-automated pipeline stage** — do not conflate it with the gated GUI mirror, and do
-not claim the app drives Palmier by agent on its own (it does not; see
+`import_media` → `export_project`) inside an isolated disposable candidate so
+the operator can observe the mechanics. Give Claude the footage as an
+**absolute path** (Palmier's `import_media` reads it locally); pull words with
+`get_transcript`. Load the `producer` skill for the editing doctrine. This is
+an **experimental manual workflow, not a released delivery path or automated
+pipeline stage** — do not conflate it with the gated GUI mirror, and do not
+claim the app drives Palmier by agent on its own (it does not; see
 `docs/palmier/PALMIER_LIVE_BUILD_SPEC.md`). Setup + Claude Desktop bridge:
 `docs/palmier/PALMIER_MCP_SETUP.md`.
 

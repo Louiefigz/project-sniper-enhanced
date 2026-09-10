@@ -6,57 +6,15 @@ import { autoEditJobStream } from "./job-stream";
 import {
   SSE_HEADERS,
 } from "./stream";
-import {
-  guardPalmierCanonicalForAiEdit,
-  PalmierCanonicalError,
-} from "../ai-edit/palmier-canonical";
-import {
-  classifyPalmierWorkspace,
-  type PalmierWorkspaceClassification,
-} from "../ai-edit/palmier-native-stream";
+import { PalmierCanonicalError } from "../ai-edit/palmier-canonical";
 import { guardProjectMutation } from "../../_lib/project-mutation";
 import { prepareRequest, type PreparedRequest } from "./request";
 import { RequestFailure } from "./request-failure";
-import { startDetachedRun } from "./launch";
-
-export { validateReferenceSelection } from "./saved-plan-request";
-export { legacyPlanHash } from "./launch";
+import { guardAutoEditDeliveryForLaunch, startDetachedRun } from "./launch";
+import type { AutoEditCtx } from "./stream";
 
 export const maxDuration = 2400;
 export const dynamic = "force-dynamic";
-
-interface PalmierLaunchDependencies {
-  classify: (dir: string) => PalmierWorkspaceClassification;
-  legacyGuard: (dir: string) => Promise<void>;
-}
-
-const PALMIER_LAUNCH_DEPENDENCIES: PalmierLaunchDependencies = {
-  classify: classifyPalmierWorkspace,
-  legacyGuard: guardPalmierCanonicalForAiEdit,
-};
-
-/** Let a managed Palmier run reconcile its own working head inside the worker.
- *
- * The plan-only guard intentionally rejects manual/promoted Palmier origins.
- * Calling it before a Palmier-primary worker starts would prevent the native
- * reconciler from adopting precisely the manual readback it is designed to
- * edit. Invalid managed metadata still fails closed; projects without a
- * managed workspace retain the legacy plan-first guard.
- */
-export async function guardPalmierForAutoEditLaunch(
-  dir: string,
-  dependencies: PalmierLaunchDependencies = PALMIER_LAUNCH_DEPENDENCIES,
-): Promise<void> {
-  const workspace = dependencies.classify(dir);
-  if (workspace.state === "invalid") {
-    throw new PalmierCanonicalError(
-      `${workspace.error} Refusing to launch against an unprovable Palmier working head.`,
-      409,
-    );
-  }
-  if (workspace.state === "managed") return;
-  await dependencies.legacyGuard(dir);
-}
 
 function localRejection(req: NextRequest): Response | null {
   const rejected = localApiRejection({
@@ -99,7 +57,7 @@ async function runPreparedRequest(prepared: PreparedRequest): Promise<Response> 
     return mutation.response;
   }
   try {
-    await guardedPalmierLaunch(prepared.ctx.dir);
+    await guardedPalmierLaunch(prepared.ctx);
     const started = await startDetachedRun(prepared);
     return new Response(autoEditJobStream(started.jobPath, started.token), { headers: SSE_HEADERS });
   } finally {
@@ -108,9 +66,9 @@ async function runPreparedRequest(prepared: PreparedRequest): Promise<Response> 
   }
 }
 
-async function guardedPalmierLaunch(dir: string): Promise<void> {
+async function guardedPalmierLaunch(ctx: AutoEditCtx): Promise<void> {
   try {
-    await guardPalmierForAutoEditLaunch(dir);
+    await guardAutoEditDeliveryForLaunch(ctx);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     const status = error instanceof PalmierCanonicalError ? error.statusCode : 503;

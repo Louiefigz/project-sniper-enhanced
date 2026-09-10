@@ -16,6 +16,7 @@ import {
 } from "./cut-authoring-prompt";
 import { AutoEditCtx, Send } from "./stream";
 import { authoringReasoning } from "./authoring-reasoning";
+import { AUTHORING_OUTPUT_MAX_BYTES, authoringTextState, observeCodexAuthoringError, observeAuthoringEvent, observeAuthoringText } from "./authoring-stream-contract";
 import {
   AUTHORING_TIMEOUT_MS,
   runClaudeAuthoringProcess,
@@ -100,11 +101,6 @@ export function claudeArgs(
   ];
 }
 
-function parsedAuthored(message: string): AuthoringResult["authored"] {
-  const match = message.match(/AUTHORED ok segments=(\d+) graphics=(\d+)/);
-  return match ? { segments: Number(match[1]), graphics: Number(match[2]) } : null;
-}
-
 /** Forward one Codex JSONL event using the same authoring_* SSE namespace. */
 function forwardCodexEvent(event: Record<string, unknown>, send: Send): void {
   const type = typeof event.type === "string" ? event.type : "raw";
@@ -118,14 +114,12 @@ export interface AuthoringDependencies {
   codex?: CodexRunner;
 }
 
-async function runCodexAuthoring(
-  ctx: AutoEditCtx,
-  send: Send,
-  codex: CodexRunner,
-  stage: AuthoringStage,
-): Promise<AuthoringResult> {
+/** Preserve explicit editor stops across final output, cancellation and timeout. */
+async function runCodexAuthoring(ctx: AutoEditCtx, send: Send,
+  codex: CodexRunner, stage: AuthoringStage): Promise<AuthoringResult> {
   const started = Date.now();
   const effort = authoringReasoning(ctx);
+  const state = authoringTextState(), stop = new AbortController();
   dlog("producer:auto-edit", "spawn codex (authoring)", {
     dir: ctx.dir, scope: ctx.scope, ...effort,
   });
@@ -137,18 +131,27 @@ async function runCodexAuthoring(
       timeoutMs: AUTHORING_TIMEOUT_MS,
       reasoning: effort.reasoning,
       cwd: ctx.dir,
-      onEvent: (event) => forwardCodexEvent(event, send),
+      maxOutputBytes: AUTHORING_OUTPUT_MAX_BYTES,
+      signal: stop.signal,
+      onEvent: (event) => {
+        observeAuthoringEvent(state, "codex", event);
+        forwardCodexEvent(event, send);
+        if (state.blocked || state.protocolFailure || state.providerFailure) stop.abort();
+      },
     });
+    observeAuthoringText(state, result.message);
     return {
-      code: 0,
+      code: state.protocolFailure || state.providerFailure ? 1 : 0,
       timedOut: false,
       errTail: result.stderr,
       ms: result.ms,
       provider: "codex",
-      authored: parsedAuthored(result.message),
+      authored: state.authored,
+      blocked: state.blocked, protocolFailure: state.protocolFailure, providerFailure: state.providerFailure,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    observeCodexAuthoringError(state, message);
     const timedOut = /timed out/i.test(message);
     derror("producer:auto-edit", "codex authoring failed", error);
     return {
@@ -158,6 +161,7 @@ async function runCodexAuthoring(
       ms: Date.now() - started,
       provider: "codex",
       authored: null,
+      blocked: state.blocked, protocolFailure: state.protocolFailure, providerFailure: state.providerFailure,
     };
   }
 }

@@ -71,10 +71,35 @@ def _candidate_and_parent(client: Any, parent: dict,
     return parent_now, active
 
 
-def resume_live_candidate(client: Any, out_dir: str) -> dict:
+def _observed_candidate(candidate: dict, found: Any) -> dict:
+    observed = dict(candidate)
+    observed.update({
+        "projectId": found.project_id,
+        "timelineId": found.timeline_id,
+        "fingerprint": found.fingerprint,
+        "semanticFingerprint": found.semantic_fingerprint,
+        "timeline": found.timeline,
+        "readbackCoverage": found.coverage,
+    })
+    return observed
+
+
+def observe_live_candidate(client: Any, out_dir: str) -> dict:
+    """Read the exact candidate without refreshing its retained receipt."""
+    parent, candidate = _records(out_dir)
+    _parent_now, found = _candidate_and_parent(client, parent, candidate)
+    return _observed_candidate(candidate, found)
+
+
+def resume_live_candidate(client: Any, out_dir: str,
+                          expected_fingerprint: str | None = None) -> dict:
     """Adopt the visible partial candidate while preserving the parent authority."""
     parent, candidate = _records(out_dir)
     _parent_now, found = _candidate_and_parent(client, parent, candidate)
+    if expected_fingerprint is not None \
+            and found.fingerprint != expected_fingerprint:
+        raise TimelineConflict(
+            "Palmier candidate changed after resume reconciliation")
     refreshed = record_candidate(out_dir, found, parent)
     refreshed.update({key: value for key, value in candidate.items()
                       if key not in refreshed})
@@ -125,12 +150,20 @@ def _archive_prior_qc(out_dir: str, candidate: dict,
     return [*list(candidate.get("qcHistory") or []), archive]
 
 
-def checkpoint_live_candidate(client: Any, out_dir: str,
-                              authority_path: str) -> dict:
+def checkpoint_live_candidate(
+    client: Any,
+    out_dir: str,
+    authority_path: str,
+    expected_fingerprint: str | None = None,
+) -> dict:
     """Bind fresh candidate readback to immutable plan/journal QC authority."""
     parent, candidate = _records(out_dir)
     authority = _authority(authority_path, out_dir)
     _parent_now, found = _candidate_and_parent(client, parent, candidate)
+    if expected_fingerprint is not None \
+            and found.fingerprint != expected_fingerprint:
+        raise TimelineConflict(
+            "Palmier candidate changed after journal closure")
     parent_semantic = parent.get("semanticFingerprint")
     if not isinstance(parent_semantic, str) \
             or not isinstance(found.semantic_fingerprint, str):
@@ -146,7 +179,10 @@ def checkpoint_live_candidate(client: Any, out_dir: str,
         "status": "edited", "requestHash": authority.get("requestHash"),
         "lanes": live_input.get("lanes"),
         "operations": {"count": live_input.get("operationCount"),
-                       "journalHash": live_input.get("journalHash")},
+                       "journalHash": live_input.get("journalHash"),
+                       "lifecycleDigest":
+                       live_input.get("journalLifecycleDigest"),
+                       "headFingerprint": live_input.get("headFingerprint")},
         "liveBuildAuthority": authority,
         "builder": {"kind": "skilled-live-build", "status": "built",
                     "sessionId": live_input.get("sessionId"),

@@ -58,7 +58,7 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
       variant: "classic",
       text: "Make the *key point* land",
       bg: "dark",
-      accent: "#054BC9",
+      accent: "#7FB4FF",
     },
   },
   {
@@ -161,8 +161,8 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
   {
     kind: "section-marker",
     label: "Section marker",
-    description: "Chapter break — an eyebrow number, a serif accent title, and a qualifier settle in.",
-    ownScreen: true,
+    description: "Headroom overlay — an eyebrow number, a serif accent title, and a qualifier over the live footage.",
+    ownScreen: false,
     canvas: "9:16",
     defaultSpec: {
       num: "No.1",
@@ -170,6 +170,7 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
       line2: "Title",
       side: "left",
       accent: "#054BC9",
+      readability: "plates",
     },
   },
   {
@@ -509,7 +510,7 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     ownScreen: false,
     canvas: "16:9",
     defaultSpec: {
-      fragment: "", payoff: "", accentColor: "#054BC9",
+      fragment: "", payoff: "", accentColor: "#7FB4FF",
       payoffAt: 0.8, wordGapMs: 130, align: "center",
     },
   },
@@ -676,6 +677,155 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
       l4: "", r4: "", at4: 4.2,
       arrowInAt: 0, rightInAt: 0, accent: "#054BC9",
     },
+  },
+
+  // ---- CATALOG PORT PACK (2026-08-28) — comps ported from the HyperFrames
+  // catalog study (docs/producer/catalog-study/CATALOG_STUDY.md): the
+  // hand-drawn annotation family plus the data/hook/screen wave. Templates
+  // at compositions/<kind>.html; slot contracts in template_hw_contract /
+  // template_catalog_contract.
+  {
+    kind: "marker-highlight",
+    label: "Marker highlight",
+    description:
+      "Cream paper panel with one spoken line — a hand-drawn marker stroke (highlight/circle/underline/scribble) draws over the emphasis word on cue (whole-word match).",
+    ownScreen: false,
+    canvas: "9:16",
+    defaultSpec: {
+      text: "The hook does the heavy lifting",
+      emphasisWord: "hook",
+      style: "highlight",
+      drawAt: 0.9,
+      accent: "#054BC9",
+    },
+    specFields: [
+      { key: "drawAt", label: "draw at s", type: "number", min: 0, max: 30, step: 0.05 },
+      { key: "accent", label: "ink", type: "color" },
+    ],
+  },
+  {
+    kind: "hw-callout-circle",
+    label: "Callout circle",
+    description:
+      "Hand-wobbled ellipse draws around an x/y/w/h region of the frame with an optional scribble hatch and a connected handwritten label; the whole callout boils like marker ink.",
+    ownScreen: false,
+    canvas: "9:16",
+    defaultSpec: {
+      x: 240, y: 780, w: 600, h: 300,
+      label: "look here",
+      labelAt: "below",
+      scribble: false,
+      seed: 4,
+      drawAt: 0.2,
+      accent: "#054BC9",
+    },
+    specFields: [
+      { key: "x", label: "region x", type: "number", min: 0, max: 1080, step: 1 },
+      { key: "y", label: "region y", type: "number", min: 0, max: 1920, step: 1 },
+      { key: "w", label: "region w", type: "number", min: 20, max: 1080, step: 1 },
+      { key: "h", label: "region h", type: "number", min: 20, max: 1920, step: 1 },
+      { key: "drawAt", label: "draw at s", type: "number", min: 0, max: 30, step: 0.05 },
+    ],
+  },
+  {
+    kind: "hw-scribble-transition",
+    label: "Scribble transition",
+    description:
+      "Seam cover for a hard subject switch — fat hand-drawn zigzag bands scribble across the frame over a solid backstop, then clear the other way ({} spec is legitimate).",
+    ownScreen: false,
+    canvas: "9:16",
+    defaultSpec: {
+      bands: 12,
+      strokeScale: 1,
+      seed: 17,
+      accent: "#054BC9",
+    },
+    specFields: [
+      { key: "bands", label: "bands", type: "number", min: 3, max: 18, step: 1 },
+      { key: "strokeScale", label: "stroke scale", type: "number", min: 0.5, max: 2, step: 0.05 },
+      { key: "accent", label: "ink", type: "color" },
+    ],
+  },
+  {
+    kind: "chart-story",
+    label: "Chart story",
+    description:
+      "Evidence card with four chart forms (bars/line/donut/progress) that builds in reading order and lands the exact supplied values; the emphasized datum takes the accent callout. Plan it as a panel, not a takeover.",
+    ownScreen: false,
+    canvas: "16:9",
+    defaultSpec: {
+      type: "bars",
+      data: "12, 28, 45, 64",
+      labels: "Q1, Q2, Q3, Q4",
+      emphasize: 3,
+      unit: "%",
+      accent: "#054BC9",
+    },
+    specFields: [
+      { key: "emphasize", label: "emphasize idx", type: "number", min: 0, max: 7, step: 1 },
+      { key: "accent", label: "accent", type: "color" },
+    ],
+  },
+  {
+    kind: "count-up",
+    label: "Count up",
+    description:
+      "One hero number on the house card accelerates from start and lands exactly on the integer end value with a restrained pulse; prefix/suffix state the unit.",
+    ownScreen: false,
+    canvas: "9:16",
+    defaultSpec: {
+      start: 0,
+      end: 100,
+      prefix: "",
+      suffix: "%",
+      accent: "#054BC9",
+    },
+    specFields: [
+      { key: "start", label: "start", type: "number", step: 1 },
+      { key: "end", label: "end", type: "number", step: 1 },
+      { key: "accent", label: "accent", type: "color" },
+    ],
+  },
+  {
+    kind: "line-swap",
+    label: "Line swap",
+    description:
+      "Setup-then-subvert hook card — line A holds center in a masked slot, exits up on the swap beat as line B slams in, and an accent underline draws under the matched word.",
+    ownScreen: false,
+    canvas: "9:16",
+    defaultSpec: {
+      lineA: "You do not need more footage",
+      lineB: "You need a sharper first line",
+      swapAt: 1.5,
+      underlineWord: "sharper",
+      accent: "#054BC9",
+    },
+    specFields: [
+      { key: "swapAt", label: "swap at s", type: "number", min: 0, max: 30, step: 0.1 },
+      { key: "accent", label: "accent", type: "color" },
+    ],
+  },
+  {
+    kind: "ui-focus-zoom",
+    label: "UI focus zoom",
+    description:
+      "Screen/tutorial cutaway that points — the framed screenshot establishes, then the camera zooms and pans to the anchored region on cue and holds (screenshot must live under templates/motion/assets).",
+    ownScreen: true,
+    canvas: "16:9",
+    defaultSpec: {
+      image: "assets/sample-screen.png",
+      anchorX: 64,
+      anchorY: 36,
+      zoom: 1.6,
+      zoomAt: 1.4,
+      accent: "#054BC9",
+    },
+    specFields: [
+      { key: "anchorX", label: "anchor x %", type: "number", min: 0, max: 100, step: 1 },
+      { key: "anchorY", label: "anchor y %", type: "number", min: 0, max: 100, step: 1 },
+      { key: "zoom", label: "zoom", type: "number", min: 1.05, max: 3, step: 0.05 },
+      { key: "zoomAt", label: "zoom at s", type: "number", min: 0, max: 30, step: 0.1 },
+    ],
   },
 
   // ---- PRIMITIVES — raw building blocks (drag/scale them into a layout).

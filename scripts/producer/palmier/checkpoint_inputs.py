@@ -8,6 +8,12 @@ from dataclasses import dataclass
 
 from fingerprints import file_sha256, plan_content_hash
 from ingest_probe import probe_media
+from palmier.checkpoint_asset_authority import \
+    bind_checkpoint_asset_authority
+from palmier.checkpoint_graphics import (
+    bake_checkpoint_graphics,
+    placement_context,
+)
 from palmier.checkpoint_plan import prepare_checkpoint_plan
 from palmier.mcp_client import PalmierError
 from palmier.presenter_asset import fill_presenter_assets
@@ -126,6 +132,12 @@ def _plan_steps(spec: CheckpointInput, plan: dict, source: dict,
         next(iter(prepared.graphics.values()), source["path"]))
     graphics = fill_presenter_assets(
         prepared.plan, source, prepared.graphics, graphics_cache)
+    receipts: list[dict] = []
+    if graphics:
+        context = placement_context(
+            spec.out_dir, prepared.plan, graphics_cache, project)
+        graphics, receipts = bake_checkpoint_graphics(
+            prepared.plan, graphics, context)
     request = TranslateRequest(
         fps=float(source["fps"]), source_path=os.path.abspath(source["path"]),
         graphics_paths=graphics, project_name=project["name"],
@@ -136,7 +148,8 @@ def _plan_steps(spec: CheckpointInput, plan: dict, source: dict,
                   "limitations": prepared.limitations,
                   "paritySummary": prepared.parity.get("summary"),
                   "fidelityFindings": prepared.parity.get("blockers", [])}
-    return translate(prepared.plan, request), capability
+    return translate(prepared.plan, request), \
+        bind_checkpoint_asset_authority(capability, receipts)
 
 
 def _render_steps(spec: CheckpointInput, project: dict,

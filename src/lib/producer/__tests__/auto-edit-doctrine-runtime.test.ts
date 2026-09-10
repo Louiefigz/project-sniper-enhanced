@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import {
   mkdirSync,
   mkdtempSync,
@@ -106,6 +107,21 @@ function materialReview(): ProducerReview {
     }],
     findings: [],
   };
+}
+
+function pythonCanonicalHash(value: unknown): string {
+  const script = [
+    "import hashlib, json, sys",
+    "from cross_runtime_canonical_json import canonical_compact_json",
+    "value = json.load(sys.stdin)",
+    "print(hashlib.sha256(canonical_compact_json(value).encode('utf-8')).hexdigest())",
+  ].join("; ");
+  const result = spawnSync(path.join(process.cwd(), ".venv", "bin", "python3"), ["-c", script], {
+    input: JSON.stringify(value), encoding: "utf8",
+    env: { ...process.env, PYTHONPATH: path.join(process.cwd(), "scripts", "producer") },
+  });
+  if (result.status !== 0) throw new Error(result.stderr || result.stdout);
+  return result.stdout.trim();
 }
 
 function testLiveDriftKeepsPinnedPromptAuthority(root: string): void {
@@ -220,7 +236,9 @@ function testObservationPersistence(root: string): void {
   mkdirSync(candidateDir, { recursive: true });
   const machine = path.join(candidateDir, "audit_report.json");
   writeFileSync(machine, JSON.stringify({ checks: [
-    { name: "motion_pacing", status: "warn", measured: "gap 18s", detail: "too static" },
+    { name: "motion_pacing", status: "warn",
+      measured: { "10": 0.000001, "2": 0.0000001, "\u{10000}": "café" },
+      detail: "too static" },
     { name: "true_peak", status: "fail", measured: "+0.3 dBTP", detail: "clipping" },
     { name: "black_frames", status: "pass" },
   ] }));
@@ -243,6 +261,10 @@ function testObservationPersistence(root: string): void {
     assert.equal(value.doctrineHash, doctrine.doctrineHash);
     assert.equal(value.status, "observed");
     assert.ok(!JSON.stringify(value).includes("lessonText"));
+    const core = { ...value };
+    delete core.observationHash;
+    delete core.status;
+    assert.equal(value.observationHash, pythonCanonicalHash(core));
   }
   assert.equal(persistCriticObservations({
     ctx: pinned, artifactPath: reviewPath, review: materialReview(), namespace: "planning-a1-r1",

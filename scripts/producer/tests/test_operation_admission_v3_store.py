@@ -7,6 +7,7 @@ import multiprocessing
 import os
 import tempfile
 import unittest
+from pathlib import Path
 
 from _common import pl  # noqa: F401
 from _operation_admission_fixture import proposal, quality_operation
@@ -97,10 +98,12 @@ class OperationAdmissionV3StoreTests(unittest.TestCase):
             request.admission.operation.artifact.relative_path,
         )
         self.assertEqual(
-            open(admission_path, "rb").read(), request.admission.document_json
+            Path(admission_path).read_bytes(),
+            request.admission.document_json,
         )
         self.assertEqual(
-            open(operation_path, "rb").read(), request.operation.document_json
+            Path(operation_path).read_bytes(),
+            request.operation.document_json,
         )
         self.assertEqual(os.stat(directory).st_mode & 0o777, 0o700)
         self.assertEqual(os.stat(admission_path).st_mode & 0o777, 0o600)

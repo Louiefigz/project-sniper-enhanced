@@ -117,6 +117,44 @@ export interface ReframeSpec {
   track?: boolean;
 }
 
+export interface CaptionGroupV1 {
+  groupId: string;
+  anchor: { kind: "word-range"; wordIds: string[] };
+  styleId: string;
+  mode: "line" | "karaoke-word" | "karaoke-phrase";
+  placement: "bottom-center" | "lower-third" | "center" | "top-center";
+  language?: string;
+  suppressUnderSceneIds?: string[];
+}
+
+export interface CaptionTrackV1 {
+  schemaVersion: 1;
+  source: "kept-transcript";
+  defaultPolicy: "off" | "line" | "karaoke";
+  groups: CaptionGroupV1[];
+  transcriptCorrectionHash?: string;
+}
+
+export interface CaptionCorrectionV1 {
+  correctionId: string;
+  sourceWordIds: string[];
+  displayTokens: string[];
+  timingPolicy: "proportional-codepoints";
+  reason?: string;
+}
+
+export interface CaptionCorrectionLedgerV1 {
+  schemaVersion: 1;
+  kind: "caption-correction-ledger";
+  corrections: CaptionCorrectionV1[];
+}
+
+export interface CaptionChapterV1 {
+  chapterId: string;
+  title: string;
+  wordId: string;
+}
+
 export type GraphicsDecisionAction = "graphic" | "broll" | "omit";
 
 /** Transcript-bound disposition for one deterministic introSemanticBeats row. */
@@ -152,8 +190,18 @@ export interface EditPlan {
   transitions?: Transition[];
   audioGain?: AudioGainEntry[];
   audioEnhance?: AudioEnhance;
+  /** Governed Palmier handoff; editable stems remain blocked until bus readback exists. */
+  audioAuthorityMode?: "editable-stems" | "mastered-stereo";
   music?: MusicSpec;
   reframe?: ReframeSpec;
+  captions?: Record<string, unknown>;
+  captionsTrack?: CaptionTrackV1;
+  /** Exact child dialogue/caption proof carried by a prepared cut repair. */
+  dialogueCaptionAuthority?: Record<string, unknown>;
+  captionCorrectionLedger?: CaptionCorrectionLedgerV1;
+  captionStyles?: Record<string, Record<string, unknown>>;
+  captionChapters?: CaptionChapterV1[];
+  chapters?: Array<{ outStart: number; title: string }>;
   target?: {
     mode?: string;
     durationTargetS?: number;

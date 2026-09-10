@@ -16,6 +16,10 @@ export type Lane = (typeof LANES)[number];
 export const SCOPES = ["trim", "light", "produced", "full"] as const;
 export type Scope = (typeof SCOPES)[number];
 
+/** Canonical plan delivery formats used by requests, prompts, and validation. */
+export const MODES = ["short", "longform"] as const;
+export type Mode = (typeof MODES)[number];
+
 // edit_scope.py: _DIRECTIVE_WORDS. Asset-id LISTS (broll/graphics) exist in the
 // python vocabulary but are skill-flow territory — the intent card never emits
 // them, and `validateLaneOverrides` rejects them loudly.
@@ -49,8 +53,6 @@ export type ReferenceStrategy = (typeof REFERENCE_STRATEGIES)[number];
 
 // producer_config.AUDIO_ENHANCE catalog keys (mirrored by edit-plan.AudioEnhance).
 export const AUDIO_ENHANCE_PRESETS = ["voice", "voice-rnn", "voice-strong", "separate"] as const;
-
-export type Mode = "short" | "longform";
 
 /** Operator intent for a studied reference selected from the reference library. */
 export interface ReferenceIntent {

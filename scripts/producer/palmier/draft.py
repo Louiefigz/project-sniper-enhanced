@@ -17,6 +17,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from fingerprints import file_sha256                              # noqa: E402
+from ingest_execution_authority import execution_media_authority_entries  # noqa: E402
 from ingest_probe import probe_media                              # noqa: E402
 from palmier.executor import Executor                             # noqa: E402
 from palmier.mcp_client import (PalmierClient, PalmierError,      # noqa: E402
@@ -66,10 +67,26 @@ def _json(path: str) -> dict:
     return value
 
 
-def _draft_input(manifest_path: str, mode: str,
-                 working_path: str | None = None) -> DraftInput:
-    manifest = _json(manifest_path)
+def _working_path(ctx: DraftContext) -> str | None:
+    if ctx.working_path is None:
+        return None
+    path = os.path.abspath(ctx.working_path)
+    allowed = {
+        os.path.join(ctx.out_dir, "base_final.mp4"),
+        os.path.join(ctx.out_dir, "final.mp4"),
+    }
+    if path not in allowed or os.path.realpath(path) != path \
+            or os.path.islink(path) or not os.path.isfile(path):
+        raise PalmierError(
+            "Palmier working media must be this project's governed base or final")
+    return path
+
+
+def _draft_input(ctx: DraftContext) -> DraftInput:
+    manifest = _json(ctx.manifest_path)
+    execution_media_authority_entries({}, manifest, ctx.manifest_path)
     source = _manifest_source(manifest)
+    working_path = _working_path(ctx)
     source_path = os.path.abspath(working_path or source["path"])
     asset_kind = "saved-cut" if working_path else "source"
     try:
@@ -79,7 +96,7 @@ def _draft_input(manifest_path: str, mode: str,
     facts = (probe.duration, probe.fps, probe.width, probe.height)
     if any(value is None for value in facts) or probe.vfr:
         raise PalmierError("Palmier draft requires CFR source video facts")
-    width, height = _canvas(mode, int(probe.width), int(probe.height))
+    width, height = _canvas(ctx.mode, int(probe.width), int(probe.height))
     content_hash = source.get("contentHash") if not working_path else None
     if not isinstance(content_hash, str) or len(content_hash) != 64:
         content_hash = file_sha256(source_path)
@@ -177,9 +194,13 @@ def _activate_existing(client: PalmierClient, out_dir: str,
     return True
 
 
-def create_draft(client: PalmierClient, ctx: DraftContext) -> None:
+def create_draft(
+    client: PalmierClient,
+    ctx: DraftContext,
+    draft: DraftInput | None = None,
+) -> None:
     """Create or activate one stable-media managed working timeline."""
-    draft = _draft_input(ctx.manifest_path, ctx.mode, ctx.working_path)
+    draft = draft or _draft_input(ctx)
     if _activate_existing(client, ctx.out_dir, draft, ctx.name):
         return
     state = load_sidecar(ctx.out_dir)
@@ -224,7 +245,7 @@ def create_draft(client: PalmierClient, ctx: DraftContext) -> None:
 def _run_locked(args) -> int:
     ctx = DraftContext(args.out_dir, args.manifest_path, args.name, args.mode,
                        args.working_path)
-    draft = _draft_input(ctx.manifest_path, ctx.mode, ctx.working_path)
+    draft = _draft_input(ctx)
     result = SyncLock.acquire(
         args.out_dir, f"draft-{draft.source_hash}", queue_if_busy=False)
     if result.state != SyncLockState.ACQUIRED or result.lease is None:
@@ -235,7 +256,7 @@ def _run_locked(args) -> int:
     try:
         client = PalmierClient()
         client.handshake()
-        create_draft(client, ctx)
+        create_draft(client, ctx, draft)
         return 0
     finally:
         result.lease.release()
@@ -248,7 +269,16 @@ def _run(argv: list[str] | None = None) -> int:
     parser.add_argument("--name", required=True)
     parser.add_argument("--mode", choices=("short", "longform"), required=True)
     parser.add_argument("--working-media")
+    policy = parser.add_mutually_exclusive_group()
+    policy.add_argument(
+        "--require-source-set-admission", action="store_true",
+        help="explicitly require source-set admission (the default)")
+    policy.add_argument(
+        "--allow-legacy-unadmitted", action="store_true",
+        help="non-production migration only: accept a legacy manifest")
     args = parser.parse_args(argv)
+    if not args.allow_legacy_unadmitted:
+        os.environ["SNIPER_REQUIRE_SOURCE_SET_ADMISSION"] = "1"
     os.makedirs(args.out_dir, exist_ok=True)
     args.working_path = args.working_media
     return _run_locked(args)

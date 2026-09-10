@@ -17,6 +17,10 @@ import {
 } from "@/lib/producer/intent-presets";
 import type { AudioEnhance } from "@/lib/producer/edit-plan";
 import type { TemplateUsageAuthority } from "@/lib/server/template-usage-history";
+import type { GuidedWorkflowV2 } from "@/lib/producer/contracts/guided-workflow-v2";
+import type { AuthoredCutPolicy, ExistingCutCandidatePolicy } from "@/lib/server/guided-project-bootstrap-contract";
+import type { AutoEditDeliveryPolicy } from
+  "@/lib/producer/auto-edit-delivery-policy";
 
 export const AUTO_EDIT_SCOPES = ["trim", "light", "produced", "full"] as const;
 export type AutoEditScope = (typeof AUTO_EDIT_SCOPES)[number];
@@ -144,6 +148,17 @@ export function parseAutoEditIntent(body: Record<string, unknown>): AutoEditInte
 export interface AutoEditCtx {
   dir: string; // the producer dir (holds edit_plan.json / base_final.mp4)
   scope: AutoEditScope;
+  /** Closed delivery authority. New runs persist this explicitly; omission is
+   * accepted only for legacy journals and resolves to Palmier-hybrid. */
+  deliveryPolicy?: AutoEditDeliveryPolicy;
+  /** Explicit guided cut gate. Omission retains the historical workflow. */
+  workflowPolicy?: "cut-first";
+  /** Closed internal-only opt-in. Existing v1 launch/accept routes cannot activate it. */
+  workflowV2?: GuidedWorkflowV2;
+  /** New-only explicit previsual review; never writer completion or human acceptance. */
+  existingCutCandidate?: ExistingCutCandidatePolicy;
+  /** Distinct new-only source+brief authoring; never a supplied-candidate write waiver. */
+  authoredCut?: AuthoredCutPolicy;
   intent?: AutoEditIntent;
   referenceStudy?: ResolvedReferenceStudy;
   planPath: string;

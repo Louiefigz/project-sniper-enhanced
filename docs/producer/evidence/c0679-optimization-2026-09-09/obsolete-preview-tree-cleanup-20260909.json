@@ -1,0 +1,307 @@
+{
+  "completedAt": "2026-09-09T16:40:53.198006+00:00",
+  "cleanup": [
+    {
+      "root": 29265,
+      "registeredPids": [
+        29265,
+        29425,
+        29427,
+        29428,
+        29429,
+        29416
+      ],
+      "verified": true,
+      "survivors": [],
+      "signals": [
+        {
+          "pid": 29265,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 29416,
+          "signal": "SIGTERM"
+        }
+      ]
+    },
+    {
+      "root": 32518,
+      "registeredPids": [
+        32518,
+        32674,
+        32658,
+        32675,
+        32676,
+        32677
+      ],
+      "verified": true,
+      "survivors": [],
+      "signals": [
+        {
+          "pid": 32518,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 32674,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 32658,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 32675,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 32676,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 32677,
+          "signal": "SIGTERM"
+        }
+      ]
+    },
+    {
+      "root": 32888,
+      "registeredPids": [
+        32888
+      ],
+      "verified": true,
+      "survivors": [],
+      "signals": [
+        {
+          "pid": 32888,
+          "signal": "SIGTERM"
+        }
+      ]
+    },
+    {
+      "root": 37059,
+      "registeredPids": [
+        37059,
+        37157,
+        37158,
+        37159,
+        37160,
+        37147
+      ],
+      "verified": true,
+      "survivors": [],
+      "signals": [
+        {
+          "pid": 37059,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 37157,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 37158,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 37159,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 37160,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 37147,
+          "signal": "SIGTERM"
+        }
+      ]
+    },
+    {
+      "root": 40310,
+      "registeredPids": [
+        40310,
+        40370,
+        40379,
+        40380,
+        40381,
+        40382
+      ],
+      "verified": true,
+      "survivors": [],
+      "signals": [
+        {
+          "pid": 40310,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 40370,
+          "signal": "SIGTERM"
+        }
+      ]
+    },
+    {
+      "root": 40321,
+      "registeredPids": [
+        40321,
+        40593,
+        40603,
+        40604,
+        40605,
+        40606
+      ],
+      "verified": true,
+      "survivors": [],
+      "signals": [
+        {
+          "pid": 40321,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 40593,
+          "signal": "SIGTERM"
+        }
+      ]
+    },
+    {
+      "root": 43661,
+      "registeredPids": [
+        43661,
+        43808,
+        43821,
+        43818,
+        43819,
+        43820
+      ],
+      "verified": true,
+      "survivors": [],
+      "signals": [
+        {
+          "pid": 43661,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 43808,
+          "signal": "SIGTERM"
+        }
+      ]
+    },
+    {
+      "root": 45386,
+      "registeredPids": [
+        45386,
+        45536,
+        45537,
+        45524,
+        45534,
+        45535
+      ],
+      "verified": true,
+      "survivors": [],
+      "signals": [
+        {
+          "pid": 45386,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 45536,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 45524,
+          "signal": "SIGTERM"
+        }
+      ]
+    },
+    {
+      "root": 46368,
+      "registeredPids": [
+        46368,
+        46584,
+        46585,
+        46586,
+        46587,
+        46574
+      ],
+      "verified": true,
+      "survivors": [],
+      "signals": [
+        {
+          "pid": 46368,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 46584,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 46585,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 46586,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 46587,
+          "signal": "SIGTERM"
+        },
+        {
+          "pid": 46574,
+          "signal": "SIGTERM"
+        }
+      ]
+    }
+  ],
+  "currentPreview": {
+    "preview": {
+      "identity": {
+        "command": "/opt/homebrew/Cellar/node/23.10.0_1/bin/node /Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js preview . --port 41058 --foreground --no-open",
+        "pgid": 53236,
+        "pid": 53236,
+        "started": "Wed Sep  9 08:55:58 2026"
+      },
+      "project": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1",
+      "record": {
+        "pid": 53236,
+        "port": 41058,
+        "startedAt": "2026-09-09T13:55:58+00:00",
+        "url": "http://127.0.0.1:41058/#project/native-presenter-v1"
+      },
+      "schemaVersion": 1,
+      "state": "running",
+      "processes": [
+        {
+          "pid": 53236,
+          "pgid": 53236,
+          "started": "Wed Sep  9 08:55:58 2026"
+        },
+        {
+          "pid": 53872,
+          "pgid": 53868,
+          "started": "Wed Sep  9 09:00:01 2026"
+        },
+        {
+          "pid": 53721,
+          "pgid": 53236,
+          "started": "Wed Sep  9 08:58:47 2026"
+        },
+        {
+          "pid": 53868,
+          "pgid": 53868,
+          "started": "Wed Sep  9 09:00:01 2026"
+        },
+        {
+          "pid": 53870,
+          "pgid": 53868,
+          "started": "Wed Sep  9 09:00:01 2026"
+        },
+        {
+          "pid": 53871,
+          "pgid": 53868,
+          "started": "Wed Sep  9 09:00:01 2026"
+        }
+      ]
+    },
+    "live": true
+  }
+}

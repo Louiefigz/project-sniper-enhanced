@@ -14,27 +14,23 @@ def _asset_path(value: object, manifest_path: str) -> str | None:
     return os.path.abspath(path)
 
 
-def _declared_artifacts(plan: dict, manifest_path: str) -> dict[str, str]:
-    """Collect explicit caption, text, animation, and SFX artifact paths."""
-    artifacts: dict[str, str] = {}
-    lanes = (("captions", [plan.get("captions")]),
-             ("title", plan.get("titleCards") or []),
-             ("transition", plan.get("transitions") or []))
-    path_keys = ("path", "artifactPath", "renderPath", "srtPath", "vttPath")
-    for lane, rows in lanes:
-        for index, row in enumerate(rows):
-            if not isinstance(row, dict):
-                continue
-            for field in path_keys:
-                path = _asset_path(row.get(field), manifest_path)
-                if path:
-                    artifacts[f"{lane}:{index}:{field}"] = path
-            sfx = row.get("sfx")
-            value = sfx.get("path") if isinstance(sfx, dict) else sfx
-            path = _asset_path(value, manifest_path)
-            if path:
-                artifacts[f"{lane}:{index}:sfx"] = path
-    return artifacts
+def _caption_artifacts(plan: dict, manifest_path: str) -> dict[str, str]:
+    """Preserve proved first-class caption projections as regenerable assets."""
+    if not isinstance(plan.get("captionsTrack"), dict):
+        return {}
+    directory = os.path.dirname(os.path.abspath(manifest_path))
+    plan_path = plan.get("_path")
+    if isinstance(plan_path, str):
+        directory = os.path.dirname(os.path.abspath(plan_path))
+    names = (
+        "caption_authority.json", "caption_compilation.json",
+        "caption_palmier.json", "captions.ass", "captions.srt",
+        "caption_chapters.json", "chapters.txt",
+    )
+    return {
+        f"captions:v1:{name}": os.path.join(directory, name)
+        for name in names if os.path.isfile(os.path.join(directory, name))
+    }
 
 
 def component_assets(plan: dict, manifest: dict, manifest_path: str,
@@ -61,5 +57,5 @@ def component_assets(plan: dict, manifest: dict, manifest_path: str,
     music_path = _asset_path(music.get("path"), manifest_path)
     if music.get("enabled") and music_path:
         result["music:selected"] = music_path
-    result.update(_declared_artifacts(plan, manifest_path))
+    result.update(_caption_artifacts(plan, manifest_path))
     return result

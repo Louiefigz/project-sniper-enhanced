@@ -7,6 +7,7 @@ import re
 from dataclasses import dataclass
 from typing import Mapping
 
+from cross_runtime_canonical_json import canonical_compact_json
 from learning.doctrine_lifecycle import DoctrineLifecycleError, DoctrineLock
 
 _SHA = re.compile(r"^[0-9a-f]{64}$")
@@ -14,8 +15,7 @@ _RUNTIME_ROOT_KEYS = {"canGenerate", "currentFrame", "timelines"}
 
 
 def _canonical(value: object) -> str:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"),
-                      ensure_ascii=False, allow_nan=False)
+    return canonical_compact_json(value)
 
 
 def _hash(value: object) -> str:

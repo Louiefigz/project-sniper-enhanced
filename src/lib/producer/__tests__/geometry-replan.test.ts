@@ -105,6 +105,10 @@ function dependencies(counts: Counts): Partial<PipelineDependencies> {
     approveCut: async () => ({} as never),
     reviewCut: async () => ({} as never),
     verifyReviewCut: () => ({} as never),
+    lockCut: async () => ({
+      hash: "f".repeat(64), projectionHash: "e".repeat(64), reused: true,
+      lock: { timelineMapHash: "d".repeat(64) },
+    } as never),
     verifyCut: async () => ({
       gate: "transcript_cut", ok: true, errors: [], warnings: [], exit: 0,
       metrics: { receipt: {
@@ -133,6 +137,8 @@ function dependencies(counts: Counts): Partial<PipelineDependencies> {
     checkpoint: async () => ({ status: "committed" as const }),
     approvedMirror: async () => {},
     palmierPrimary: async () => false,
+    renderGraphReady: () => true,
+    approvedRevisionReady: () => true,
     assemble: async () => {
       counts.assemble += 1;
       return { code: 1, errTail: GEOMETRY_TAIL };

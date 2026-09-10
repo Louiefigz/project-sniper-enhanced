@@ -16,6 +16,7 @@ import {
 import { fileSha256 } from "../../server/auto-edit-job-store";
 import { planContentHash } from "../../server/auto-edit-authority";
 import { writeApprovalFixture } from "./auto-edit-approval-fixture";
+import { audioAuditFixture } from "./audit-audio-fixture";
 
 const root = mkdtempSync(path.join(os.tmpdir(), "sniper-qc-artifacts-"));
 try {
@@ -76,6 +77,29 @@ try {
   prepareQcRound(producer, "unproven", 3);
   writeFileSync(unproven, "unproven-video");
   assert.throws(() => promoteApprovedCandidate(unproven, producer, record), /authority proof is missing/);
+  for (const version of ["old-policy", "false-peak-pass", "wrong-hash"]) {
+    const token = `audio-${version}`;
+    prepareQcRound(producer, token, 1);
+    const staged = candidateFinalPath(producer, token, 1);
+    writeFileSync(staged, token);
+    writeFileSync(`${staged}.assembled.json`, JSON.stringify({
+      planHash: planContentHash(path.join(producer, "edit_plan.json")),
+      authorityHash: fileSha256(staged),
+    }));
+    const evidence = audioAuditFixture(fileSha256(staged)!);
+    if (version === "old-policy") evidence.audioDeliveryPolicyVersion = 1;
+    if (version === "false-peak-pass") evidence.audioDelivery.truePeakDbtp = -0.6;
+    if (version === "wrong-hash") evidence.finalSha256 = "0".repeat(64);
+    const rejected = writeApprovalFixture({
+      ctx: { dir: producer, scope: "light", planPath: path.join(producer, "edit_plan.json"),
+        manifestPath: path.join(producer, "manifest.json"), transcriptsDir: producer },
+      token, candidate: staged, audioAudit: evidence,
+    });
+    const before = fileSha256(path.join(producer, "final.mp4"));
+    assert.throws(() => promoteApprovedCandidate(staged, producer, rejected));
+    assert.equal(fileSha256(path.join(producer, "final.mp4")), before);
+    assert.ok(existsSync(staged));
+  }
 } finally {
   rmSync(root, { recursive: true, force: true });
 }

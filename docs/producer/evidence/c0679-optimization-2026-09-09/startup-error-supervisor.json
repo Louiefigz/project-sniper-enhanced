@@ -1,0 +1,182 @@
+{
+  "status": "probe-completed-awaiting-review",
+  "startedAt": "2026-09-09T17:24:04.394657+00:00",
+  "admission": {
+    "output": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/startup-error-v1/playback.json",
+    "sdkSha256": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "sandboxSha256": "44309d0cf11391ec665221c43d73a40d81ad05009d517c4986aaff302dfee0ea",
+    "sourceProgramDuration": 683.7664166666667,
+    "observationStart": 0,
+    "observationEnd": 0,
+    "browserSha256": "3985a87c5905cf9ecd25d49638822cf071a517f5d976ef8c5e8fe2c6d5496cae",
+    "jobKind": "studio-playback-observation"
+  },
+  "project": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1",
+  "output": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/startup-error-v1/playback.json",
+  "sdkVersion": "0.8.31",
+  "sourceHashesBefore": {
+    "extension-194-367.css": "a9d32e3015cbe7a31c610ed293ff21ed95c6aadaf4410a21384ce2d84fce31ae",
+    "extension-194-367.js": "8a96c69f01a5b08e87d707986209677255374455f9b85daeab9e73b2fdfb9353",
+    "extension-32-75.css": "6856455522448b2e3d5186522982379e58c7a7e663d9ba6c830b7dd8cf36e4d4",
+    "extension-32-75.js": "f2e1b9737c98bc734c8beba94d14365977862f36c625ae6f27a3862853b07f2b",
+    "extension-367-end.css": "6877c5d777f4e606ac89c3854eef9d04f0030f7718d2e74a29a01c95ead093aa",
+    "extension-367-end.js": "694ece67b6b23f30abb70f7e5104d67ac6c1f8ff7c4682534f9216645ff83c99",
+    "extension-75-194.css": "20619092f95c4dcb9b7afa88b510143789c60f12a19aa3557cee143da4752505",
+    "extension-75-194.js": "31a29d27e632eca5d91b52bd5bfcd908c9b4197a05857d9dde9cfee0e28da068",
+    "hyperframes.json": "f311a7b6cdca37251313743f24c44a5b2d7f80311af0758508fcf447443e18f2",
+    "index.html": "bc95f3ccdeaa2953d2cf1aa178d9e4ad0ba4b62a022b1a340cdb63df8c493577",
+    "motion.js": "3536dd792fc44f5efcb30366041d93b3489b38f435c5f79c084600d77cf07bb2",
+    "scene.css": "4e3b8aec22335e82cee1764dd5e9b4f1c6b47aa770161f60d879894422f6471a"
+  },
+  "fullEditTwoHourTargetAlreadyMissed": true,
+  "renderOnlyTiming": false,
+  "policy": {
+    "admission_free_percent": 25,
+    "stop_free_percent": 10,
+    "maximum_compressor_fraction": 0.25,
+    "maximum_owned_gib": 4,
+    "maximum_process_gib": 3,
+    "maximum_swap_growth_gib": 1,
+    "minimum_disk_free_gib": 10,
+    "minimum_unused_physical_gib": 6,
+    "maximum_snapshot_age_seconds": 30
+  },
+  "args": [
+    "/usr/bin/sandbox-exec",
+    "-f",
+    "/private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/localhost-only.sb",
+    "/opt/homebrew/Cellar/node/23.10.0_1/bin/node",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/observe-playback.cjs",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/startup-error-v1/config.json"
+  ],
+  "nativeOverrides": {
+    "PATH": "/opt/homebrew/Cellar/node/23.10.0_1/bin:/opt/homebrew/Cellar/ffmpeg/8.0_1/bin:/usr/bin:/bin",
+    "TMPDIR": "/private/tmp",
+    "LC_ALL": "C",
+    "HYPERFRAMES_BROWSER_PATH": "/Users/aaronfigueroa/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-152.0.7928.2/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+    "HYPERFRAMES_FFMPEG_PATH": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffmpeg",
+    "HYPERFRAMES_FFPROBE_PATH": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffprobe",
+    "PRODUCER_LOW_MEMORY_MODE": "true",
+    "PRODUCER_FRAME_DATA_URI_CACHE_LIMIT": "32",
+    "PRODUCER_FRAME_DATA_URI_CACHE_BYTES_MB": "64",
+    "PRODUCER_EXPERIMENTAL_FAST_CAPTURE": "false",
+    "PRODUCER_STREAMING_ENCODE_MAX_DURATION_SECONDS": "900",
+    "FFMPEG_STREAMING_TIMEOUT_MS": "5400000",
+    "HYPERFRAMES_EXTRACT_CACHE_MAX_MB": "65536"
+  },
+  "runDeadlineSeconds": 50,
+  "supervisorSigkillProtection": false,
+  "additionalFilePinsBefore": {
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/observe-playback.cjs": "50768c2786b8d06f3a09147220fc6bc53fbd59a9ce33da21d6ef3ab5b36c3ebf",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/run-playback.py": "44c82ab8fbdca76414323fb142a513c67848f42d4dce035d35df4b5fd30a41ed",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/startup-error-v1/config.json": "73a371fbb7fa6aaac5c393345546a49ffcb66a6aef36b4ed62e080474838853a",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/render_native_bounded.py": "1897b79e5d5d35066f5da535d98653aa37f6a97221bb530b8e40090f362d6905",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/native_work_lease.py": "bcea94536ba8d1aaf37288066042fad11e819a6e0a6d10d33376e4194ea5cbee"
+  },
+  "jobKind": "studio-playback-observation",
+  "probeOnlyTiming": true,
+  "baseline": {
+    "measured_at": 1788974644.396357,
+    "physical_bytes": 68719476736,
+    "free_percent": 85.0,
+    "swap_used_bytes": 9471199805,
+    "compressor_bytes": 1930428416,
+    "disk_free_bytes": 75140943872,
+    "owned_footprint_bytes": 0,
+    "largest_owned_process_bytes": 0,
+    "owned_pids": [],
+    "processes": [],
+    "identity_verified": false,
+    "unused_physical_bytes": 7960788992,
+    "missing_registered_pids": [],
+    "reused_registered_pids": [],
+    "kernel_pressure_level": 1
+  },
+  "logPath": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/startup-error-v1/startup-error-v1.render.log",
+  "pid": 76916,
+  "nativeLaunchedAt": "2026-09-09T17:24:05.921774+00:00",
+  "ownerIdentities": [
+    {
+      "pid": 76916,
+      "parent_pid": 76903,
+      "pgid": 76916,
+      "started": "Wed Sep  9 12:24:05 2026"
+    }
+  ],
+  "latestResourceSnapshot": {
+    "measured_at": 1788974645.996072,
+    "physical_bytes": 68719476736,
+    "free_percent": 85.0,
+    "swap_used_bytes": 9471199805,
+    "compressor_bytes": 1930428416,
+    "disk_free_bytes": 75056771072,
+    "owned_footprint_bytes": 83886080,
+    "largest_owned_process_bytes": 65011712,
+    "owned_pids": [
+      76916,
+      76923
+    ],
+    "processes": [
+      {
+        "pid": 76916,
+        "parent_pid": 76903,
+        "pgid": 76916,
+        "started": "Wed Sep  9 12:24:05 2026",
+        "footprint_bytes": 65011712,
+        "compressed_bytes": 0
+      },
+      {
+        "pid": 76923,
+        "parent_pid": 76916,
+        "pgid": 76923,
+        "started": "Wed Sep  9 12:24:06 2026",
+        "footprint_bytes": 18874368,
+        "compressed_bytes": 0
+      }
+    ],
+    "identity_verified": true,
+    "unused_physical_bytes": 6522142720,
+    "missing_registered_pids": [],
+    "reused_registered_pids": [],
+    "kernel_pressure_level": 1,
+    "warnings": []
+  },
+  "cleanup": {
+    "verified": true,
+    "survivors": [],
+    "signals": [],
+    "scope": "Recorded owned identities; not an unobserved-child guarantee"
+  },
+  "exitCode": 0,
+  "leaseCleanupVerified": true,
+  "elapsedSeconds": 4.846931624924764,
+  "completedAt": "2026-09-09T17:24:09.241636+00:00",
+  "abortReason": null,
+  "sourceHashesAfter": {
+    "extension-194-367.css": "a9d32e3015cbe7a31c610ed293ff21ed95c6aadaf4410a21384ce2d84fce31ae",
+    "extension-194-367.js": "8a96c69f01a5b08e87d707986209677255374455f9b85daeab9e73b2fdfb9353",
+    "extension-32-75.css": "6856455522448b2e3d5186522982379e58c7a7e663d9ba6c830b7dd8cf36e4d4",
+    "extension-32-75.js": "f2e1b9737c98bc734c8beba94d14365977862f36c625ae6f27a3862853b07f2b",
+    "extension-367-end.css": "6877c5d777f4e606ac89c3854eef9d04f0030f7718d2e74a29a01c95ead093aa",
+    "extension-367-end.js": "694ece67b6b23f30abb70f7e5104d67ac6c1f8ff7c4682534f9216645ff83c99",
+    "extension-75-194.css": "20619092f95c4dcb9b7afa88b510143789c60f12a19aa3557cee143da4752505",
+    "extension-75-194.js": "31a29d27e632eca5d91b52bd5bfcd908c9b4197a05857d9dde9cfee0e28da068",
+    "hyperframes.json": "f311a7b6cdca37251313743f24c44a5b2d7f80311af0758508fcf447443e18f2",
+    "index.html": "bc95f3ccdeaa2953d2cf1aa178d9e4ad0ba4b62a022b1a340cdb63df8c493577",
+    "motion.js": "3536dd792fc44f5efcb30366041d93b3489b38f435c5f79c084600d77cf07bb2",
+    "scene.css": "4e3b8aec22335e82cee1764dd5e9b4f1c6b47aa770161f60d879894422f6471a"
+  },
+  "sourceStable": true,
+  "sdkStable": true,
+  "sandboxStable": true,
+  "additionalFilePinsAfter": {
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/observe-playback.cjs": "50768c2786b8d06f3a09147220fc6bc53fbd59a9ce33da21d6ef3ab5b36c3ebf",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/run-playback.py": "44c82ab8fbdca76414323fb142a513c67848f42d4dce035d35df4b5fd30a41ed",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/startup-error-v1/config.json": "73a371fbb7fa6aaac5c393345546a49ffcb66a6aef36b4ed62e080474838853a",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/render_native_bounded.py": "1897b79e5d5d35066f5da535d98653aa37f6a97221bb530b8e40090f362d6905",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/native_work_lease.py": "bcea94536ba8d1aaf37288066042fad11e819a6e0a6d10d33376e4194ea5cbee"
+  },
+  "additionalFilesStable": true,
+  "outputBytes": 2054,
+  "executionStatusBeforeProbeClassification": "rendered-awaiting-output-qc"
+}

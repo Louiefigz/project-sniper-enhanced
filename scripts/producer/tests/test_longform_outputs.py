@@ -3,6 +3,7 @@ actually ships captions) + chapters."""
 import os
 import tempfile
 import unittest
+from types import SimpleNamespace
 from unittest import mock
 
 from _common import *  # noqa: F401,F403
@@ -60,6 +61,26 @@ class SrtSidecarTests(unittest.TestCase):
                 result = renderer.longform_sidecar_stage(ctx, mock.Mock())
             self.assertIsNone(result)
             self.assertFalse(os.path.exists(os.path.join(d, "captions.srt")))
+
+    def test_strict_short_keeps_shared_srt_when_burn_is_off(self) -> None:
+        plan = {
+            "target": {"mode": "short"},
+            "captions": {"burn": False},
+            "captionsTrack": {
+                "schemaVersion": 1, "source": "kept-transcript",
+                "defaultPolicy": "line", "groups": [],
+            },
+        }
+        projection = SimpleNamespace(
+            compilation={"cues": [{"cueId": "cue-1"}]},
+            artifacts=SimpleNamespace(srt="/tmp/proved-captions.srt"))
+        with tempfile.TemporaryDirectory() as directory:
+            ctx = renderer.RenderCtx(plan, {}, directory, directory)
+            with mock.patch(
+                    "captions.caption_render.project_render_captions",
+                    return_value=projection), mock.patch.object(renderer, "emit"):
+                result = renderer.longform_sidecar_stage(ctx, mock.Mock())
+        self.assertEqual(result, "/tmp/proved-captions.srt")
 
 
 if __name__ == "__main__":

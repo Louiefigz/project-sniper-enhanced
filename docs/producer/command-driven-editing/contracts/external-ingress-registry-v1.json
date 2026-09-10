@@ -1,0 +1,615 @@
+{
+  "schemaVersion": 1,
+  "kind": "external-ingress-registry",
+  "scanRules": [
+    {
+      "ruleId": "external-media-sandbox",
+      "roots": ["scripts/producer"],
+      "suffixes": [".py"],
+      "token": "admit_external_media(",
+      "expectedOccurrenceCount": 3
+    },
+    {
+      "ruleId": "external-media-sandbox-alias",
+      "roots": ["scripts/producer"],
+      "suffixes": [".py"],
+      "token": "runner or admit_external_media",
+      "expectedOccurrenceCount": 1
+    },
+    {
+      "ruleId": "reference-media-admission",
+      "roots": ["src/app/api"],
+      "suffixes": [".ts"],
+      "token": "admitReferenceMedia(",
+      "expectedOccurrenceCount": 3
+    },
+    {
+      "ruleId": "reference-text-admission",
+      "roots": ["src/app/api"],
+      "suffixes": [".ts"],
+      "token": "admitReferenceVtt(",
+      "expectedOccurrenceCount": 4
+    },
+    {
+      "ruleId": "managed-source-copy",
+      "roots": ["src/app/api/producer/ingest"],
+      "suffixes": [".ts"],
+      "token": "copyStableSource(",
+      "expectedOccurrenceCount": 2
+    },
+    {
+      "ruleId": "palmier-media-import",
+      "roots": ["scripts/producer"],
+      "suffixes": [".py"],
+      "token": "call_json(\"import_media\"",
+      "expectedOccurrenceCount": 2
+    },
+    {
+      "ruleId": "sealed-archive-verification",
+      "roots": ["scripts/producer"],
+      "suffixes": [".py"],
+      "token": "verify_archive_file(",
+      "expectedOccurrenceCount": 4
+    },
+    {
+      "ruleId": "legacy-admission-escape",
+      "roots": ["scripts/producer"],
+      "suffixes": [".py"],
+      "token": "--allow-legacy-unadmitted",
+      "expectedOccurrenceCount": 6
+    },
+    {
+      "ruleId": "product-legacy-admission-escape",
+      "roots": ["src/app/api/producer"],
+      "suffixes": [".ts"],
+      "token": "--allow-legacy-unadmitted",
+      "expectedOccurrenceCount": 0
+    }
+  ],
+  "families": [
+    {
+      "id": "canonical-project-media",
+      "classification": "sandbox-admitted-media",
+      "released": true,
+      "entryPoints": [
+        "src/app/api/producer/ingest/route.ts",
+        "scripts/producer/ingest.py"
+      ],
+      "authorityPaths": [
+        "src/app/api/producer/ingest/source-copy.ts",
+        "scripts/producer/ingest_admission.py",
+        "scripts/producer/ingest_admission_contract.py",
+        "scripts/producer/ingest_execution_authority.py"
+      ],
+      "promotionPaths": [
+        "scripts/producer/source_set_receipt_authority.py",
+        "scripts/producer/current_render_graph_source_gate.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_ingest_admission.py",
+        "scripts/producer/tests/test_ingest_execution_authority.py",
+        "scripts/producer/tests/live_ingest_admission_acceptance.py"
+      ],
+      "ownership": [
+        {
+          "ruleId": "external-media-sandbox-alias",
+          "path": "scripts/producer/ingest_admission.py",
+          "sourceToken": "runner or admit_external_media",
+          "expectedOccurrences": 1
+        },
+        {
+          "ruleId": "managed-source-copy",
+          "path": "src/app/api/producer/ingest/source-copy.ts",
+          "sourceToken": "function copyStableSource(",
+          "expectedOccurrences": 1
+        },
+        {
+          "ruleId": "managed-source-copy",
+          "path": "src/app/api/producer/ingest/target.ts",
+          "sourceToken": "await copyStableSource(",
+          "expectedOccurrences": 1
+        }
+      ],
+      "notes": "Source, b-roll, and project music converge on immutable full-decode snapshots; the TypeScript copy is stable staging, not a substitute for sandbox admission."
+    },
+    {
+      "id": "external-media-probe-primitive",
+      "classification": "sandbox-admitted-media",
+      "released": true,
+      "entryPoints": [
+        "scripts/producer/headless/external_media_probe.py"
+      ],
+      "authorityPaths": [
+        "scripts/producer/headless/external_media_snapshot.py",
+        "scripts/producer/headless/external_media_probe_policy.py",
+        "scripts/producer/headless/container_policy.py"
+      ],
+      "promotionPaths": [],
+      "testPaths": [
+        "scripts/producer/tests/test_external_media_probe.py",
+        "scripts/producer/tests/live_external_media_probe_acceptance.py",
+        "scripts/producer/tests/live_p0_adversarial_ingress_acceptance.py",
+        "scripts/producer/tests/test_p0_adversarial_ingress_artifact.py"
+      ],
+      "ownership": [
+        {
+          "ruleId": "external-media-sandbox",
+          "path": "scripts/producer/headless/external_media_probe.py",
+          "sourceToken": "def admit_external_media(",
+          "expectedOccurrences": 1
+        }
+      ],
+      "notes": "The shared primitive owns immutable copy, approved-image attestation, non-root networkless full decode, bounded cleanup, and reobservation."
+    },
+    {
+      "id": "reference-video",
+      "classification": "sandbox-admitted-media",
+      "released": true,
+      "entryPoints": [
+        "src/app/api/producer/references/route.ts",
+        "src/app/api/producer/references/fetch/route.ts"
+      ],
+      "authorityPaths": [
+        "src/app/api/_lib/reference-media-admission.ts",
+        "scripts/producer/headless/admit_external_media_cli.py",
+        "src/app/api/_lib/reference-admission-verifier.ts"
+      ],
+      "promotionPaths": [
+        "src/app/api/_lib/reference-library.ts"
+      ],
+      "testPaths": [
+        "src/lib/producer/__tests__/reference-admission-verifier.test.ts",
+        "src/lib/producer/__tests__/reference-library.test.ts",
+        "scripts/producer/tests/test_reference_intake.py"
+      ],
+      "ownership": [
+        {
+          "ruleId": "external-media-sandbox",
+          "path": "scripts/producer/headless/admit_external_media_cli.py",
+          "sourceToken": "admit_external_media(source, str(root), REFERENCE_LIMITS)",
+          "expectedOccurrences": 1
+        },
+        {
+          "ruleId": "reference-media-admission",
+          "path": "src/app/api/_lib/reference-media-admission.ts",
+          "sourceToken": "function admitReferenceMedia(",
+          "expectedOccurrences": 1
+        },
+        {
+          "ruleId": "reference-media-admission",
+          "path": "src/app/api/producer/references/route.ts",
+          "sourceToken": "await admitReferenceMedia(",
+          "expectedOccurrences": 1
+        },
+        {
+          "ruleId": "reference-media-admission",
+          "path": "src/app/api/producer/references/fetch/route.ts",
+          "sourceToken": "await admitReferenceMedia(",
+          "expectedOccurrences": 1
+        }
+      ],
+      "notes": "Local and downloaded reference videos use the same full-decode primitive and a separate content-addressed reference authority."
+    },
+    {
+      "id": "reference-vtt",
+      "classification": "descriptor-admitted-text",
+      "released": true,
+      "entryPoints": [
+        "src/app/api/producer/references/route.ts",
+        "src/app/api/producer/references/fetch/route.ts"
+      ],
+      "authorityPaths": [
+        "src/app/api/_lib/reference-sidecar.ts",
+        "src/app/api/_lib/reference-admission-verifier.ts"
+      ],
+      "promotionPaths": [
+        "src/app/api/_lib/reference-library.ts"
+      ],
+      "testPaths": [
+        "src/lib/producer/__tests__/reference-sidecar.test.ts",
+        "src/lib/producer/__tests__/reference-admission-verifier.test.ts"
+      ],
+      "ownership": [
+        {
+          "ruleId": "reference-text-admission",
+          "path": "src/app/api/_lib/reference-sidecar.ts",
+          "sourceToken": "function admitReferenceVtt(",
+          "expectedOccurrences": 1
+        },
+        {
+          "ruleId": "reference-text-admission",
+          "path": "src/app/api/_lib/reference-sidecar.ts",
+          "sourceToken": "return admitReferenceVtt(",
+          "expectedOccurrences": 1
+        },
+        {
+          "ruleId": "reference-text-admission",
+          "path": "src/app/api/producer/references/route.ts",
+          "sourceToken": "return admitReferenceVtt(",
+          "expectedOccurrences": 1
+        },
+        {
+          "ruleId": "reference-text-admission",
+          "path": "src/app/api/producer/references/fetch/route.ts",
+          "sourceToken": "return admitReferenceVtt(",
+          "expectedOccurrences": 1
+        }
+      ],
+      "notes": "VTT is bounded text, not decoder media; it uses no-follow held-descriptor copy plus a content-addressed receipt and downstream byte rehash."
+    },
+    {
+      "id": "scene-package-assets",
+      "classification": "sandbox-admitted-media",
+      "released": true,
+      "entryPoints": [
+        "scripts/producer/graphics/scene_package_cli.py"
+      ],
+      "authorityPaths": [
+        "scripts/producer/graphics/asset_governance.py",
+        "scripts/producer/graphics/scene_package_assets.py",
+        "scripts/producer/graphics/scene_package_render.py"
+      ],
+      "promotionPaths": [
+        "scripts/producer/graphics/scene_package_contract.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_scene_package_assets.py",
+        "scripts/producer/tests/live_scene_package_cli_acceptance.py"
+      ],
+      "ownership": [
+        {
+          "ruleId": "external-media-sandbox",
+          "path": "scripts/producer/graphics/scene_package_assets.py",
+          "sourceToken": "admit_external_media(package_asset[\"blobPath\"], store)",
+          "expectedOccurrences": 1
+        }
+      ],
+      "notes": "Generated or acquired scene assets must pass byte, rights, attribution, and sandbox decode authority before package publication."
+    },
+    {
+      "id": "sealed-render-archives",
+      "classification": "sealed-archive",
+      "released": true,
+      "entryPoints": [
+        "scripts/producer/headless/container_io.py",
+        "scripts/producer/headless/overlay_source_seal.py"
+      ],
+      "authorityPaths": [
+        "scripts/producer/headless/sealed_archive.py",
+        "scripts/producer/headless/sealed_tar_format.py"
+      ],
+      "promotionPaths": [
+        "scripts/producer/headless/container_renderer.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_sealed_archive_adversarial.py",
+        "scripts/producer/tests/live_p0_adversarial_ingress_acceptance.py"
+      ],
+      "ownership": [
+        {
+          "ruleId": "sealed-archive-verification",
+          "path": "scripts/producer/headless/sealed_archive.py",
+          "sourceToken": "def verify_archive_file(",
+          "expectedOccurrences": 1
+        },
+        {
+          "ruleId": "sealed-archive-verification",
+          "path": "scripts/producer/headless/container_io.py",
+          "sourceToken": "proof = verify_archive_file(",
+          "expectedOccurrences": 1
+        },
+        {
+          "ruleId": "sealed-archive-verification",
+          "path": "scripts/producer/headless/container_io.py",
+          "sourceToken": "return verify_archive_file(",
+          "expectedOccurrences": 1
+        },
+        {
+          "ruleId": "sealed-archive-verification",
+          "path": "scripts/producer/headless/overlay_source_seal.py",
+          "sourceToken": "archive = verify_archive_file(",
+          "expectedOccurrences": 1
+        }
+      ],
+      "notes": "Render bundles enter through canonical USTAR closure with file-count, path, member, byte, and 128 MiB expansion limits."
+    },
+    {
+      "id": "palmier-media-delivery",
+      "classification": "governed-derivative",
+      "released": true,
+      "entryPoints": [
+        "scripts/producer/palmier/push.py",
+        "scripts/producer/palmier/checkpoint_cli.py",
+        "scripts/producer/palmier/draft.py",
+        "scripts/producer/palmier/desktop_cli.py",
+        "scripts/producer/tests/live_p5_connected_palmier_acceptance.py"
+      ],
+      "authorityPaths": [
+        "scripts/producer/palmier/media.py",
+        "scripts/producer/palmier/components.py",
+        "scripts/producer/palmier/desktop_gates.py",
+        "scripts/producer/palmier/desktop_manifest.py",
+        "scripts/producer/palmier/live_acceptance_cohort.py",
+        "scripts/producer/palmier/live_acceptance_media.py",
+        "scripts/producer/ingest_execution_authority.py"
+      ],
+      "promotionPaths": [
+        "scripts/producer/palmier/master.py",
+        "scripts/producer/palmier/mirror.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_palmier_push.py",
+        "scripts/producer/tests/test_palmier_draft.py",
+        "scripts/producer/tests/test_palmier_components.py",
+        "scripts/producer/tests/test_palmier_desktop_authority.py",
+        "scripts/producer/tests/test_ingest_execution_authority.py",
+        "scripts/producer/tests/test_palmier_live_acceptance_harness.py"
+      ],
+      "ownership": [
+        {
+          "ruleId": "palmier-media-import",
+          "path": "scripts/producer/palmier/media.py",
+          "sourceToken": "call_json(\"import_media\"",
+          "expectedOccurrences": 1
+        },
+        {
+          "ruleId": "palmier-media-import",
+          "path": "scripts/producer/palmier/live_acceptance_cohort.py",
+          "sourceToken": "call_json(\"import_media\"",
+          "expectedOccurrences": 1
+        }
+      ],
+      "notes": "Palmier import is a delivery consumer, not a new open ingress: released callers provide admitted manifest snapshots or hash-bound Sniper derivatives. Connected acceptance reobserves the exact managed bootstrap immediately before and after import; arbitrary live-build import remains disabled."
+    },
+    {
+      "id": "palmier-live-build-direct-import",
+      "classification": "disabled",
+      "released": false,
+      "entryPoints": [
+        "src/app/api/producer/live-build/args.ts"
+      ],
+      "authorityPaths": [
+        "src/app/api/producer/live-build/prompt.ts"
+      ],
+      "promotionPaths": [],
+      "testPaths": [
+        "src/lib/producer/__tests__/palmier-live-build-contract.test.ts"
+      ],
+      "ownership": [],
+      "notes": "The interactive coding-agent tool list intentionally excludes import_media; new bytes must return to a governed controller ingress."
+    },
+    {
+      "id": "legacy-unadmitted-cli-migration",
+      "classification": "non-production-migration",
+      "released": false,
+      "entryPoints": [
+        "scripts/producer/render.py",
+        "scripts/producer/assemble.py",
+        "scripts/producer/palmier/push.py",
+        "scripts/producer/palmier/checkpoint_cli.py",
+        "scripts/producer/palmier/draft.py",
+        "scripts/producer/palmier/desktop_cli.py"
+      ],
+      "authorityPaths": [
+        "scripts/producer/ingest_admission_contract.py"
+      ],
+      "promotionPaths": [],
+      "testPaths": [
+        "scripts/producer/tests/test_ingest_execution_authority.py"
+      ],
+      "ownership": [
+        {
+          "ruleId": "legacy-admission-escape",
+          "path": "scripts/producer/render.py",
+          "sourceToken": "--allow-legacy-unadmitted",
+          "expectedOccurrences": 1
+        },
+        {
+          "ruleId": "legacy-admission-escape",
+          "path": "scripts/producer/assemble.py",
+          "sourceToken": "--allow-legacy-unadmitted",
+          "expectedOccurrences": 1
+        },
+        {
+          "ruleId": "legacy-admission-escape",
+          "path": "scripts/producer/palmier/push.py",
+          "sourceToken": "--allow-legacy-unadmitted",
+          "expectedOccurrences": 1
+        },
+        {
+          "ruleId": "legacy-admission-escape",
+          "path": "scripts/producer/palmier/checkpoint_cli.py",
+          "sourceToken": "--allow-legacy-unadmitted",
+          "expectedOccurrences": 1
+        },
+        {
+          "ruleId": "legacy-admission-escape",
+          "path": "scripts/producer/palmier/draft.py",
+          "sourceToken": "--allow-legacy-unadmitted",
+          "expectedOccurrences": 1
+        },
+        {
+          "ruleId": "legacy-admission-escape",
+          "path": "scripts/producer/palmier/desktop_cli.py",
+          "sourceToken": "--allow-legacy-unadmitted",
+          "expectedOccurrences": 1
+        }
+      ],
+      "notes": "The escape is explicit, defaults off, and is classified non-production migration; no product route passes it."
+    },
+    {
+      "id": "repository-build-assets",
+      "classification": "trusted-build-input",
+      "released": true,
+      "entryPoints": [
+        "assets/music",
+        "templates/motion/vendor"
+      ],
+      "authorityPaths": [
+        "scripts/producer/current_render_toolchain.py",
+        "scripts/producer/headless/source_closure.py"
+      ],
+      "promotionPaths": [],
+      "testPaths": [
+        "scripts/producer/tests/test_graphics_runtime_closure.py",
+        "scripts/producer/tests/test_current_render_graph.py"
+      ],
+      "ownership": [],
+      "notes": "Vendored source/runtime assets are trusted build closure, not operator external ingress; their bytes remain toolchain/source-closure authority."
+    }
+  ],
+  "invariants": [
+    {
+      "id": "final-promotion-rehashes-source-set",
+      "requiredTokens": [
+        {
+          "path": "scripts/producer/source_set_receipt_authority.py",
+          "token": "_verify_entry(entry, manifest_dir)",
+          "expectedOccurrences": 1
+        },
+        {
+          "path": "scripts/producer/current_render_graph_source_gate.py",
+          "token": "verify_source_set_receipt_artifact(path)",
+          "expectedOccurrences": 1
+        },
+        {
+          "path": "scripts/producer/current_render_graph_store.py",
+          "token": "verify_graph_source_authority(graph, receipt)",
+          "expectedOccurrences": 1
+        },
+        {
+          "path": "scripts/producer/current_render_graph_candidate.py",
+          "token": "verify_graph_source_authority(graph, receipt)",
+          "expectedOccurrences": 4
+        }
+      ],
+      "forbiddenTokens": [],
+      "testPaths": [
+        "scripts/producer/tests/test_current_render_graph_candidate.py",
+        "scripts/producer/tests/test_current_render_graph_store.py",
+        "src/lib/server/__tests__/p2-cut-repair-v2-promotion.test.ts"
+      ]
+    },
+    {
+      "id": "production-clis-default-strict",
+      "requiredTokens": [
+        {
+          "path": "scripts/producer/render.py",
+          "token": "if not args.allow_legacy_unadmitted:",
+          "expectedOccurrences": 1
+        },
+        {
+          "path": "scripts/producer/assemble.py",
+          "token": "if not args.allow_legacy_unadmitted:",
+          "expectedOccurrences": 1
+        },
+        {
+          "path": "scripts/producer/palmier/push.py",
+          "token": "if not args.allow_legacy_unadmitted:",
+          "expectedOccurrences": 1
+        },
+        {
+          "path": "scripts/producer/palmier/checkpoint_cli.py",
+          "token": "if not args.allow_legacy_unadmitted:",
+          "expectedOccurrences": 1
+        },
+        {
+          "path": "scripts/producer/palmier/draft.py",
+          "token": "if not args.allow_legacy_unadmitted:",
+          "expectedOccurrences": 1
+        },
+        {
+          "path": "scripts/producer/palmier/desktop_cli.py",
+          "token": "if not args.allow_legacy_unadmitted:",
+          "expectedOccurrences": 1
+        }
+      ],
+      "forbiddenTokens": [],
+      "testPaths": [
+        "scripts/producer/tests/test_ingest_execution_authority.py"
+      ]
+    },
+    {
+      "id": "live-build-cannot-import-new-media",
+      "requiredTokens": [
+        {
+          "path": "src/app/api/producer/live-build/args.ts",
+          "token": "LIVE_BUILD_ALLOWED_TOOLS",
+          "expectedOccurrences": 2
+        }
+      ],
+      "forbiddenTokens": [
+        {
+          "path": "src/app/api/producer/live-build/args.ts",
+          "token": "import_media",
+          "expectedOccurrences": 0
+        }
+      ],
+      "testPaths": [
+        "src/lib/producer/__tests__/palmier-live-build-contract.test.ts"
+      ]
+    },
+    {
+      "id": "palmier-imports-only-governed-media",
+      "requiredTokens": [
+        {
+          "path": "scripts/producer/palmier/push.py",
+          "token": "verify_execution_media_authority(",
+          "expectedOccurrences": 1
+        },
+        {
+          "path": "scripts/producer/palmier/checkpoint_cli.py",
+          "token": "verify_execution_media_authority(",
+          "expectedOccurrences": 1
+        },
+        {
+          "path": "scripts/producer/palmier/draft.py",
+          "token": "execution_media_authority_entries(",
+          "expectedOccurrences": 1
+        },
+        {
+          "path": "scripts/producer/palmier/desktop_gates.py",
+          "token": "verify_execution_media_authority(",
+          "expectedOccurrences": 1
+        },
+        {
+          "path": "scripts/producer/palmier/desktop_manifest.py",
+          "token": "verify_execution_media_authority(",
+          "expectedOccurrences": 1
+        },
+        {
+          "path": "scripts/producer/palmier/desktop_manifest_native.py",
+          "token": "has no released external-media authority",
+          "expectedOccurrences": 2
+        }
+      ],
+      "forbiddenTokens": [
+        {
+          "path": "scripts/producer/palmier/components.py",
+          "token": "_declared_artifacts",
+          "expectedOccurrences": 0
+        }
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_ingest_execution_authority.py",
+        "scripts/producer/tests/test_palmier_components.py",
+        "scripts/producer/tests/test_palmier_desktop_authority.py"
+      ]
+    },
+    {
+      "id": "reference-text-rehashes-before-use",
+      "requiredTokens": [
+        {
+          "path": "src/app/api/_lib/reference-admission-verifier.ts",
+          "token": "verifyReferenceVttAdmission",
+          "expectedOccurrences": 2
+        }
+      ],
+      "forbiddenTokens": [],
+      "testPaths": [
+        "src/lib/producer/__tests__/reference-sidecar.test.ts",
+        "src/lib/producer/__tests__/reference-admission-verifier.test.ts"
+      ]
+    }
+  ]
+}

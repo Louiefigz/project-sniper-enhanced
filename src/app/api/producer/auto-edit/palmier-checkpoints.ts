@@ -117,6 +117,7 @@ function savedTimelineId(dir: string): string | undefined {
 
 export function checkpointCommand(ctx: AutoEditCtx, spec: PalmierCheckpointSpec): string[] {
   const args = [CHECKPOINT, ctx.planPath, ctx.manifestPath, ctx.dir,
+    "--require-source-set-admission",
     "--stage", spec.stage, "--round", String(spec.round)];
   if (spec.mediaPath) args.push("--media", spec.mediaPath);
   return args;
@@ -124,7 +125,8 @@ export function checkpointCommand(ctx: AutoEditCtx, spec: PalmierCheckpointSpec)
 
 export function approvedMirrorCommand(ctx: AutoEditCtx): string[] {
   const name = path.basename(path.dirname(ctx.dir)) || "sniper-push";
-  return [PUSH, ctx.planPath, ctx.manifestPath, "--name", name,
+  return [PUSH, ctx.planPath, ctx.manifestPath,
+    "--require-source-set-admission", "--name", name,
     "--export", path.join(ctx.dir, "final.palmier.mp4")];
 }
 

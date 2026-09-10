@@ -1,0 +1,62 @@
+{
+  "recordedAt": "2026-09-09T17:51:22.909778+00:00",
+  "status": "selected-pair-visual-review-passed",
+  "pairs": [
+    {
+      "frameIndex": 92,
+      "time": 3.8371666666666666,
+      "baselinePath": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-baseline-v3-barrier.frames/batch-0/frame_000092.jpg",
+      "candidatePath": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-candidate-v1-barrier.frames/batch-0/frame_000092.jpg",
+      "baselineSha256": "63244688ce2a107ff41406e6825c830e3ec06ddae209ee6e358dccf276fae756",
+      "candidateSha256": "63244688ce2a107ff41406e6825c830e3ec06ddae209ee6e358dccf276fae756",
+      "bytesEqual": true,
+      "visualObservation": "Both images show the same circular lower-right presenter cutout, unobstructed face and person-shop headline; the circle stays inside the frame."
+    },
+    {
+      "frameIndex": 383,
+      "time": 15.974291666666666,
+      "baselinePath": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-baseline-v3-barrier.frames/batch-1/frame_000383.jpg",
+      "candidatePath": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-candidate-v1-barrier.frames/batch-1/frame_000383.jpg",
+      "baselineSha256": "aa1d0e52895afd70d20c4cfcf4b603eb20e162fca36a11abb3999aefcf87a923",
+      "candidateSha256": "aa1d0e52895afd70d20c4cfcf4b603eb20e162fca36a11abb3999aefcf87a923",
+      "bytesEqual": true,
+      "visualObservation": "Both images show the same padded, rounded presenter inset on the left and legible prompt headline on the right; no face/text overlap or apparent font change."
+    },
+    {
+      "frameIndex": 625,
+      "time": 26.067708333333332,
+      "baselinePath": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-baseline-v3-barrier.frames/batch-2/frame_000625.jpg",
+      "candidatePath": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-candidate-v1-barrier.frames/batch-2/frame_000625.jpg",
+      "baselineSha256": "db278b1f4718ac45c04d49d2562844b2a4d9a6c104e19412080d6c4c84c0fcfd",
+      "candidateSha256": "db278b1f4718ac45c04d49d2562844b2a4d9a6c104e19412080d6c4c84c0fcfd",
+      "bytesEqual": true,
+      "visualObservation": "Both images show the same full-screen presenter with the same lower-left name entrance, preserving face visibility."
+    },
+    {
+      "frameIndex": 653,
+      "time": 27.235541666666666,
+      "baselinePath": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-baseline-v3-barrier.frames/batch-3/frame_000653.jpg",
+      "candidatePath": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-candidate-v1-barrier.frames/batch-3/frame_000653.jpg",
+      "baselineSha256": "a8778c4356b8116b0f9119796975089a977f46e4cba030ec81ebc2902505cb08",
+      "candidateSha256": "a8778c4356b8116b0f9119796975089a977f46e4cba030ec81ebc2902505cb08",
+      "bytesEqual": true,
+      "visualObservation": "Both images show the same 10 YEARS card above the right side and name/role overlay at lower left; the number and labels are legible and the presenter remains visible."
+    }
+  ],
+  "captureReceipts": [
+    {
+      "path": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-baseline-v3-barrier.capture.json",
+      "sha256": "12fb1e92adf31fb3b0025ecfde986b14011f12c830c0b92b5017573ccb4ac6d3"
+    },
+    {
+      "path": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-candidate-v1-barrier.capture.json",
+      "sha256": "985dafec504118e51947bc2e014553a8bcccffe6bbba8a2c461b1cb3884a41de"
+    }
+  ],
+  "method": "Direct view_image inspection of both actual native JPEG95 images at each of four indices, with fresh byte equality and receipt hash checks. Baseline 625 was inspected earlier in the same turn and candidate 625 afterward.",
+  "limitations": [
+    "Only four frame pairs were manually compared, not all 55.",
+    "This is static pre-encode picture preservation; it does not qualify motion continuity, memory stability, final encoding, audio, or the full programme.",
+    "The two-hour goal remains missed and no complete export is implied."
+  ]
+}

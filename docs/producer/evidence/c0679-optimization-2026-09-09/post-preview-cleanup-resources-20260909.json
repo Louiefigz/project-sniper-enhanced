@@ -1,0 +1,71 @@
+{
+  "snapshot": {
+    "measured_at": 1788972118.377766,
+    "physical_bytes": 68719476736,
+    "free_percent": 87.0,
+    "swap_used_bytes": 11355155333,
+    "compressor_bytes": 1648361472,
+    "disk_free_bytes": 75245404160,
+    "owned_footprint_bytes": 0,
+    "largest_owned_process_bytes": 0,
+    "owned_pids": [],
+    "processes": [],
+    "identity_verified": false,
+    "unused_physical_bytes": 24696061952,
+    "missing_registered_pids": [],
+    "reused_registered_pids": [],
+    "kernel_pressure_level": 1
+  },
+  "preview": {
+    "preview": {
+      "identity": {
+        "command": "/opt/homebrew/Cellar/node/23.10.0_1/bin/node /Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js preview . --port 41058 --foreground --no-open",
+        "pgid": 53236,
+        "pid": 53236,
+        "started": "Wed Sep  9 08:55:58 2026"
+      },
+      "processes": [
+        {
+          "pid": 53236,
+          "pgid": 53236,
+          "started": "Wed Sep  9 08:55:58 2026"
+        },
+        {
+          "pid": 53872,
+          "pgid": 53868,
+          "started": "Wed Sep  9 09:00:01 2026"
+        },
+        {
+          "pid": 53721,
+          "pgid": 53236,
+          "started": "Wed Sep  9 08:58:47 2026"
+        },
+        {
+          "pid": 53868,
+          "pgid": 53868,
+          "started": "Wed Sep  9 09:00:01 2026"
+        },
+        {
+          "pid": 53870,
+          "pgid": 53868,
+          "started": "Wed Sep  9 09:00:01 2026"
+        },
+        {
+          "pid": 53871,
+          "pgid": 53868,
+          "started": "Wed Sep  9 09:00:01 2026"
+        }
+      ],
+      "project": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1",
+      "record": {
+        "pid": 53236,
+        "port": 41058,
+        "startedAt": "2026-09-09T13:55:58+00:00",
+        "url": "http://127.0.0.1:41058/#project/native-presenter-v1"
+      },
+      "schemaVersion": 1,
+      "state": "running"
+    },
+    "live": true
+  }
+}

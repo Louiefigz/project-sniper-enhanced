@@ -1,0 +1,378 @@
+{
+  "schemaVersion": 1,
+  "officialVersion": "0.8.31",
+  "scope": "Frozen private evidence; not portable installed integration",
+  "offsetUnits": "JavaScript UTF-16 code units",
+  "runtime": {
+    "baseSha256": "c6f9f9b8e15360a20409842f97d8630ce7b433adc9714c55ef190036475bd740",
+    "targetSha256": "a8b8b70b7fa92555691fd094265c5dbce6c3780257c1ec29b63955956d1e7595",
+    "edits": [
+      {
+        "at": 19,
+        "remove": "",
+        "insert": "function __hfSameDocumentHtml(n){return n!=null&&n.nodeType===1&&n.ownerDocument===document&&n.namespaceURI===\"http://www.w3.org/1999/xhtml\"&&typeof n.style?.setProperty===\"function\"}function __hfSameDocumentMedia(n){return __hfSameDocumentHtml(n)&&(n.localName===\"audio\"||n.localName===\""
+      },
+      {
+        "at": 20,
+        "remove": "",
+        "insert": "ideo\")&&typeof n.pl"
+      },
+      {
+        "at": 21,
+        "remove": "",
+        "insert": "y===\"function\"&&typeof n.pause===\"function\"}va"
+      },
+      {
+        "at": 335833,
+        "remove": "y inst",
+        "insert": "__hfS"
+      },
+      {
+        "at": 335840,
+        "remove": "nc",
+        "insert": "m"
+      },
+      {
+        "at": 335843,
+        "remove": "",
+        "insert": "D"
+      },
+      {
+        "at": 335844,
+        "remove": "f HTMLEle",
+        "insert": "cu"
+      },
+      {
+        "at": 335857,
+        "remove": "",
+        "insert": "Html(y"
+      },
+      {
+        "at": 335859,
+        "remove": "",
+        "insert": ")"
+      },
+      {
+        "at": 336309,
+        "remove": "N inst",
+        "insert": "__hfS"
+      },
+      {
+        "at": 336316,
+        "remove": "nc",
+        "insert": "m"
+      },
+      {
+        "at": 336319,
+        "remove": "",
+        "insert": "D"
+      },
+      {
+        "at": 336320,
+        "remove": "f HTMLEle",
+        "insert": "cu"
+      },
+      {
+        "at": 336333,
+        "remove": "",
+        "insert": "Html(N)"
+      },
+      {
+        "at": 340863,
+        "remove": "y inst",
+        "insert": "__hfS"
+      },
+      {
+        "at": 340870,
+        "remove": "nc",
+        "insert": "m"
+      },
+      {
+        "at": 340873,
+        "remove": "",
+        "insert": "D"
+      },
+      {
+        "at": 340874,
+        "remove": "f HT",
+        "insert": "cument"
+      },
+      {
+        "at": 340879,
+        "remove": "LM",
+        "insert": ""
+      },
+      {
+        "at": 340885,
+        "remove": "Element",
+        "insert": "(y"
+      },
+      {
+        "at": 340893,
+        "remove": "",
+        "insert": ")"
+      },
+      {
+        "at": 348637,
+        "remove": "N inst",
+        "insert": "__hfS"
+      },
+      {
+        "at": 348644,
+        "remove": "nc",
+        "insert": "m"
+      },
+      {
+        "at": 348647,
+        "remove": "",
+        "insert": "D"
+      },
+      {
+        "at": 348648,
+        "remove": "f HT",
+        "insert": "cument"
+      },
+      {
+        "at": 348653,
+        "remove": "LM",
+        "insert": ""
+      },
+      {
+        "at": 348659,
+        "remove": "Element",
+        "insert": "(N"
+      },
+      {
+        "at": 348667,
+        "remove": "",
+        "insert": ")"
+      },
+      {
+        "at": 349657,
+        "remove": "",
+        "insert": "__"
+      },
+      {
+        "at": 349658,
+        "remove": " inst",
+        "insert": "fS"
+      },
+      {
+        "at": 349664,
+        "remove": "nc",
+        "insert": "m"
+      },
+      {
+        "at": 349667,
+        "remove": "",
+        "insert": "D"
+      },
+      {
+        "at": 349668,
+        "remove": "f HT",
+        "insert": "cument"
+      },
+      {
+        "at": 349673,
+        "remove": "LM",
+        "insert": ""
+      },
+      {
+        "at": 349679,
+        "remove": "Element",
+        "insert": "(h"
+      },
+      {
+        "at": 349687,
+        "remove": "",
+        "insert": ")"
+      },
+      {
+        "at": 350090,
+        "remove": "",
+        "insert": "__"
+      },
+      {
+        "at": 350091,
+        "remove": " inst",
+        "insert": "fS"
+      },
+      {
+        "at": 350097,
+        "remove": "nc",
+        "insert": "m"
+      },
+      {
+        "at": 350100,
+        "remove": "",
+        "insert": "D"
+      },
+      {
+        "at": 350101,
+        "remove": "f HT",
+        "insert": "cument"
+      },
+      {
+        "at": 350106,
+        "remove": "LM",
+        "insert": ""
+      },
+      {
+        "at": 350112,
+        "remove": "Element",
+        "insert": "(h"
+      },
+      {
+        "at": 350120,
+        "remove": "",
+        "insert": ")"
+      },
+      {
+        "at": 351572,
+        "remove": "g inst",
+        "insert": "__hfS"
+      },
+      {
+        "at": 351579,
+        "remove": "nc",
+        "insert": "m"
+      },
+      {
+        "at": 351582,
+        "remove": "",
+        "insert": "D"
+      },
+      {
+        "at": 351583,
+        "remove": "f HT",
+        "insert": "cument"
+      },
+      {
+        "at": 351588,
+        "remove": "LM",
+        "insert": ""
+      },
+      {
+        "at": 351594,
+        "remove": "Element",
+        "insert": "(g)"
+      },
+      {
+        "at": 351822,
+        "remove": "y inst",
+        "insert": "__hfS"
+      },
+      {
+        "at": 351829,
+        "remove": "nc",
+        "insert": "m"
+      },
+      {
+        "at": 351832,
+        "remove": "",
+        "insert": "D"
+      },
+      {
+        "at": 351833,
+        "remove": "f HT",
+        "insert": "cument"
+      },
+      {
+        "at": 351838,
+        "remove": "LM",
+        "insert": ""
+      },
+      {
+        "at": 351844,
+        "remove": "Element",
+        "insert": "(y)"
+      },
+      {
+        "at": 351999,
+        "remove": "",
+        "insert": "__"
+      },
+      {
+        "at": 352000,
+        "remove": " inst",
+        "insert": "fS"
+      },
+      {
+        "at": 352006,
+        "remove": "nc",
+        "insert": "m"
+      },
+      {
+        "at": 352009,
+        "remove": "",
+        "insert": "D"
+      },
+      {
+        "at": 352010,
+        "remove": "f HT",
+        "insert": "cument"
+      },
+      {
+        "at": 352015,
+        "remove": "LM",
+        "insert": ""
+      },
+      {
+        "at": 352021,
+        "remove": "Element",
+        "insert": "(h"
+      },
+      {
+        "at": 352030,
+        "remove": "",
+        "insert": ")"
+      },
+      {
+        "at": 352269,
+        "remove": "y inst",
+        "insert": "__hfS"
+      },
+      {
+        "at": 352276,
+        "remove": "nc",
+        "insert": "m"
+      },
+      {
+        "at": 352279,
+        "remove": "",
+        "insert": "D"
+      },
+      {
+        "at": 352280,
+        "remove": "f HT",
+        "insert": "cument"
+      },
+      {
+        "at": 352285,
+        "remove": "LM",
+        "insert": ""
+      },
+      {
+        "at": 352291,
+        "remove": "Element",
+        "insert": "(y)"
+      }
+    ]
+  },
+  "cli": {
+    "baseSha256": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "realmTargetSha256": "cb94eadc66195c45a462aa25a2a1695fe993bdd5c60044d2d4c68f60eb222d86",
+    "replaceUniqueLineStarting": "    RUNTIME_IIFE = ",
+    "newLineExpression": "    RUNTIME_IIFE = JSON.stringify(reconstructed runtime text with exactly one terminal LF removed);",
+    "inMemoryReconstructionMatches": true,
+    "replacementMechanism": "Use a callback returning the new line (or slicing), never String.replace with a string containing runtime $& tokens."
+  },
+  "runtimeAliasTargetSha256": "a8b8b70b7fa92555691fd094265c5dbce6c3780257c1ec29b63955956d1e7595",
+  "frameTransport": {
+    "baseSha256": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "targetSha256": "6d359af9c049a43402101da1b707663c285b89499109dfa687948777614b7985",
+    "patch": "transport/official-0.8.31-frame-transport.patch.source",
+    "additionalFile": "transport/frame-source-transport.mjs.source"
+  },
+  "variantsAreSeparate": true
+}

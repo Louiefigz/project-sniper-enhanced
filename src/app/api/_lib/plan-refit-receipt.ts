@@ -7,6 +7,10 @@ import {
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
+import {
+  canonicalJson,
+  canonicalJsonSha256,
+} from "@/lib/server/auto-edit-hash";
 
 export const PLAN_REFIT_RECEIPT_FILE = ".sniper-plan-refit.json";
 export const PLAN_REFIT_PENDING_FILE = ".sniper-plan-refit.pending.json";
@@ -43,6 +47,10 @@ export type PlanRefitDecision =
   | { kind: "already-applied"; receipt: PlanRefitReceipt }
   | { kind: "refit"; oldPlanText: string };
 
+export function planRefitReceiptPath(dir: string): string {
+  return path.join(dir, PLAN_REFIT_RECEIPT_FILE);
+}
+
 /**
  * A cut mismatch is not evidence that output-time lanes are stale. The caller
  * must identify how the current plan was produced before a refit is allowed.
@@ -52,18 +60,9 @@ export type PlanRefitProvenance =
   | { kind: "cut-only"; oldPlanText: string }
   | { kind: "unknown" };
 
-function stable(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(stable);
-  if (!value || typeof value !== "object") return value;
-  return Object.fromEntries(
-    Object.entries(value as Record<string, unknown>)
-      .sort(([left], [right]) => left.localeCompare(right))
-      .map(([key, item]) => [key, stable(item)]),
-  );
-}
-
 export function sameRefitJson(left: unknown, right: unknown): boolean {
-  return JSON.stringify(stable(left)) === JSON.stringify(stable(right));
+  if (left === undefined || right === undefined) return left === right;
+  return canonicalJson(left) === canonicalJson(right);
 }
 
 export function refitSha256(text: string): string {
@@ -71,7 +70,7 @@ export function refitSha256(text: string): string {
 }
 
 export function cutTrackHash(cutTrack: unknown): string {
-  return refitSha256(JSON.stringify(stable(cutTrack)));
+  return canonicalJsonSha256(cutTrack);
 }
 
 function parsedPlan(text: string, label: string): Record<string, unknown> {
@@ -133,7 +132,7 @@ export function commitPlanRefitReceipt(
     throw new Error("refit receipt does not match the promoted plan; refusing timebase authority");
   }
   const committed: PlanRefitReceipt = { ...receipt, transactionState: "committed" };
-  atomicReceipt(path.join(dir, PLAN_REFIT_RECEIPT_FILE), committed);
+  atomicReceipt(planRefitReceiptPath(dir), committed);
   rmSync(path.join(dir, PLAN_REFIT_PENDING_FILE), { force: true });
   return committed;
 }
@@ -174,7 +173,7 @@ export function resolvePlanRefitDecision(
   const currentText = readFileSync(planPath, "utf8");
   const current = parsedPlan(currentText, "current plan");
   const receipt = readReceipt(
-    path.join(dir, PLAN_REFIT_RECEIPT_FILE), "plan refit receipt",
+    planRefitReceiptPath(dir), "plan refit receipt",
   );
   if (receipt?.planHash === refitSha256(currentText)
       && sameRefitJson(receipt.targetCutTrack, current.cutTrack)) {
@@ -207,7 +206,7 @@ export function writePlanRefitReceipt(
 
 export function currentPlanRefitReceipt(dir: string, planPath: string): PlanRefitReceipt | null {
   try {
-    const receipt = readReceipt(path.join(dir, PLAN_REFIT_RECEIPT_FILE), "plan refit receipt");
+    const receipt = readReceipt(planRefitReceiptPath(dir), "plan refit receipt");
     if (!receipt || receipt.transactionState !== "committed") return null;
     const text = readFileSync(planPath, "utf8");
     const plan = parsedPlan(text, "current plan");

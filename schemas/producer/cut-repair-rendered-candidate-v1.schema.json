@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/cut-repair-rendered-candidate-v1.schema.json",
+  "title": "CutRepairRenderedCandidateV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "status",
+    "operationHash",
+    "reviewPlanObjectHash",
+    "reviewPlanContentHash",
+    "reviewTimelineMapHash",
+    "reviewRenderGraphHash",
+    "reviewRenderGraphReceiptHash",
+    "reviewRenderGraphCandidatePointerHash",
+    "candidatePath",
+    "candidateSha256"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "cut-repair-rendered-plan-candidate" },
+    "status": { "const": "candidate-proved" },
+    "operationHash": { "$ref": "#/$defs/sha256" },
+    "reviewPlanObjectHash": { "$ref": "#/$defs/sha256" },
+    "reviewPlanContentHash": { "$ref": "#/$defs/sha256" },
+    "reviewTimelineMapHash": { "$ref": "#/$defs/sha256" },
+    "reviewRenderGraphHash": { "$ref": "#/$defs/sha256" },
+    "reviewRenderGraphReceiptHash": { "$ref": "#/$defs/sha256" },
+    "reviewRenderGraphCandidatePointerHash": { "$ref": "#/$defs/sha256" },
+    "candidatePath": { "type": "string", "minLength": 1 },
+    "candidateSha256": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

@@ -13,7 +13,7 @@ import os from "node:os";
 import path from "node:path";
 import type { AutoEditCtx } from "../../../app/api/producer/auto-edit/stream";
 import { autoEditJobStream } from "../../../app/api/producer/auto-edit/job-stream";
-import { legacyPlanHash } from "../../../app/api/producer/auto-edit/route";
+import { legacyPlanHash } from "../../../app/api/producer/auto-edit/launch";
 import {
   appendAutoEditJobEvent,
   autoEditJobPath,

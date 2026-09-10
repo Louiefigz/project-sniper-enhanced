@@ -88,10 +88,15 @@ function review(verdict: "pass" | "revise" | "block"): ProducerReview {
   };
 }
 
-function runtime(ctx: AutoEditCtx): { run: CutReviewLoopRuntime; events: Record<string, unknown>[] } {
+function runtime(
+  ctx: AutoEditCtx,
+  reviewSavedPlan = false,
+): { run: CutReviewLoopRuntime; events: Record<string, unknown>[] } {
   const events: Record<string, unknown>[] = [];
   const run = {} as CutReviewLoopRuntime;
-  run.job = freshJob({ ctx, token: "cut-loop", snapshots: 0 }, new Date().toISOString());
+  run.job = freshJob({
+    ctx, token: "cut-loop", snapshots: 0, reviewSavedPlan,
+  }, new Date().toISOString());
   run.io = {
     send: (event) => events.push(event),
     advance: (update: CheckpointUpdate) => {
@@ -220,6 +225,25 @@ async function repeatedConflictFailsExplicitly(root: string): Promise<void> {
   assert.deepEqual(counts, { gates: 2, reviews: 4, revisions: 1 });
 }
 
+async function savedPlanIssueFailsWithoutRevision(root: string): Promise<void> {
+  const ctx = fixture(path.join(root, "saved-plan-issue"));
+  const plan = JSON.parse(readFileSync(ctx.planPath, "utf8"));
+  plan.graphicsTrack = [{ id: "g1", kind: "text-element", outStart: 0, outEnd: 2 }];
+  plan.captions = { burn: true, style: "karaoke" };
+  writeFileSync(ctx.planPath, `${JSON.stringify(plan, null, 2)}\n`);
+  const before = readFileSync(ctx.planPath);
+  const beforeHash = fileSha256(ctx.planPath);
+  const { run } = runtime(ctx, true);
+  const counts = { gates: 0, reviews: 0, revisions: 0 };
+  await assert.rejects(
+    runCutReviewLoop(run, dependencies(["revise"], counts)),
+    /saved-plan cut review found material issues; complete plan was not modified/,
+  );
+  assert.deepEqual(counts, { gates: 1, reviews: 2, revisions: 0 });
+  assert.deepEqual(readFileSync(ctx.planPath), before);
+  assert.equal(fileSha256(ctx.planPath), beforeHash);
+}
+
 async function main(): Promise<void> {
   const root = mkdtempSync(path.join(os.tmpdir(), "sniper-cut-review-loop-"));
   try {
@@ -229,6 +253,7 @@ async function main(): Promise<void> {
     await noChangeGetsOneFreshReview(root);
     await deferredGetsOneFreshReview(root);
     await repeatedConflictFailsExplicitly(root);
+    await savedPlanIssueFailsWithoutRevision(root);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

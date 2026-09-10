@@ -9,11 +9,16 @@ study, and a single ``claude -p`` call per event must answer as strict JSON:
 
     {"kindGuess": str, "stylingTokens": [str, ...], "layout": str}
 
-House rules: skills-only ($0 subscription CLI, never a paid API), per-event,
+House rules: skills-only (subscription admission, never an implicit paid API), per-event,
 capped at ``semantics_max_events``, and SKIPPABLE — the core pipeline runs
 with zero AI; a malformed reply is recorded as that event's error, loudly,
 without sinking the deterministic study. ``spawn`` is injectable so tests
 exercise the whole harness without any agent.
+
+The legacy automatic CLI invocation is currently blocked pending shared
+subscription admission. Request a Codex subscription-agent review of the local
+evidence explicitly; this module never switches providers automatically and
+does not establish account-level overage policy.
 """
 
 from __future__ import annotations
@@ -87,15 +92,11 @@ def claude_model() -> str:
 
 
 def _default_spawn(prompt: str) -> str:
-    """One bounded ``claude -p`` call (subscription CLI — never a paid API)."""
-    proc = subprocess.run(
-        ["claude", "-p", prompt, "--model", claude_model(),
-         "--output-format", "text"],
-        capture_output=True, text=True, timeout=DEEP["semantics_timeout_s"])
-    if proc.returncode != 0:
-        raise RuntimeError(f"claude -p exited {proc.returncode}: "
-                           f"{proc.stderr.strip()[-200:]}")
-    return proc.stdout
+    """Block the unqualified legacy invocation before any provider process."""
+    raise RuntimeError(
+        "Subscription admission not qualified for automatic study semantics; "
+        "request a Codex subscription-agent review of local evidence explicitly. "
+        "No semantic analysis ran and no provider fallback was attempted.")
 
 
 def parse_reply(raw: str) -> dict:
@@ -113,7 +114,8 @@ def parse_reply(raw: str) -> dict:
 def run_semantics(video: str, info: VideoInfo, events: list[dict],
                   out_dir: str, spawn=None) -> dict:
     """The whole opt-in pass: per-event frames → micro-call → validated rows."""
-    spawn = spawn or _default_spawn
+    if spawn is None:
+        _default_spawn("")
     targets = [e for e in events if e["type"] in SEMANTIC_TYPES]
     targets = targets[:DEEP["semantics_max_events"]]
     rows = []

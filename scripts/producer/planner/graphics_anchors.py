@@ -29,12 +29,18 @@ Two models live here:
 
 from __future__ import annotations
 
+import math
 import os
 import subprocess
 import tempfile
 
 from planner.occupancy import NoLegalRegion, no_legal_evidence
-from producer_config import CANVAS, FREE_SPACE, MOTION, SAFE_BOX
+from planner.placement_solver import (
+    choose_region as _choose_region,
+    scale_footprint,
+    solve_placement,
+)
+from producer_config import CANVAS, MOTION, SAFE_BOX
 
 # The face-relative anchors this module handles (others → no offset).
 FACE_ANCHORS = MOTION.get("face_anchors", ("headroom", "chest", "beside-face"))
@@ -51,37 +57,55 @@ _OFFSET_CAP_X = SAFE_BOX["left"] + 160          # ~220px
 _OFFSET_CAP_Y = SAFE_BOX["top"] + 70            # ~320px
 
 
-def _face_px(bbox: list) -> dict:
-    """faceBBoxNorm ``[x, y, w, h]`` (0..1) → pixel geometry on the 9:16 canvas."""
-    w_px, h_px = CANVAS["width"], CANVAS["height"]
+def _face_px(bbox: list, canvas: tuple | None = None) -> dict:
+    """faceBBoxNorm ``[x, y, w, h]`` → geometry on the requested canvas."""
+    w_px, h_px = canvas or (CANVAS["width"], CANVAS["height"])
     x, y, w, h = (float(v) for v in bbox)
     return {"cx": (x + w / 2) * w_px, "cy": (y + h / 2) * h_px,
             "top": y * h_px, "bottom": (y + h) * h_px,
             "left": x * w_px, "right": (x + w) * w_px, "w": w * w_px}
 
 
-def anchor_offset(anchor: str, bbox: list) -> tuple[int, int]:
+def anchor_offset(anchor: str, bbox: list,
+                  canvas: tuple | None = None) -> tuple[int, int]:
     """Overlay ``(dx, dy)`` px to place a full-canvas comp face-relative (R3/R4).
 
     The offset is the actual face's deviation from ``_NOMINAL_FACE`` at the
     anchor's reference point, so a comp authored for the nominal head follows the
     real one. Capped to keep the overlay on-canvas for a pathological bbox.
     """
-    f, n = _face_px(bbox), _face_px(_NOMINAL_FACE)
+    dims = canvas or (CANVAS["width"], CANVAS["height"])
+    f, n = _face_px(bbox, dims), _face_px(_NOMINAL_FACE, dims)
+    sx, sy = dims[0] / CANVAS["width"], dims[1] / CANVAS["height"]
     if anchor == "headroom":           # content lives above the face top
         dx, dy = f["cx"] - n["cx"], f["top"] - n["top"]
     elif anchor == "chest":            # content lives below the face bottom
         dx, dy = f["cx"] - n["cx"], f["bottom"] - n["bottom"]
     else:                              # beside-face: push to the emptier side
-        side = 1 if (CANVAS["width"] - f["right"]) >= f["left"] else -1
-        dx = (f["cx"] - n["cx"]) + side * (f["w"] / 2 + _BESIDE_MARGIN_PX)
+        side = 1 if (dims[0] - f["right"]) >= f["left"] else -1
+        dx = (f["cx"] - n["cx"]) + side * (
+            f["w"] / 2 + _BESIDE_MARGIN_PX * sx)
         dy = f["cy"] - n["cy"]
-    dx = max(-_OFFSET_CAP_X, min(_OFFSET_CAP_X, dx))
-    dy = max(-_OFFSET_CAP_Y, min(_OFFSET_CAP_Y, dy))
+    dx = max(-_OFFSET_CAP_X * sx, min(_OFFSET_CAP_X * sx, dx))
+    dy = max(-_OFFSET_CAP_Y * sy, min(_OFFSET_CAP_Y * sy, dy))
     return int(round(dx)), int(round(dy))
 
 
-def resolve_offset(entry: dict) -> tuple[int, int]:
+def valid_face_bbox(value: object) -> bool:
+    """Whether ``value`` is a positive, in-bounds normalized xywh box."""
+    if not isinstance(value, (list, tuple)) or len(value) != 4:
+        return False
+    if not all(isinstance(item, (int, float))
+               and not isinstance(item, bool)
+               and math.isfinite(float(item)) for item in value):
+        return False
+    x, y, width, height = (float(item) for item in value)
+    return (x >= 0.0 and y >= 0.0 and width > 0.0 and height > 0.0
+            and x + width <= 1.0 and y + height <= 1.0)
+
+
+def resolve_offset(entry: dict,
+                   canvas: tuple | None = None) -> tuple[int, int]:
     """``(dx, dy)`` for one graphicsTrack entry — 0 unless a face-relative anchor.
 
     Face-relative anchors REQUIRE a valid 4-number faceBBoxNorm ON THE ENTRY
@@ -93,13 +117,11 @@ def resolve_offset(entry: dict) -> tuple[int, int]:
     if anchor not in FACE_ANCHORS:
         return 0, 0
     bbox = entry.get("faceBBoxNorm")
-    if not (isinstance(bbox, (list, tuple)) and len(bbox) == 4
-            and all(isinstance(v, (int, float)) and 0.0 <= float(v) <= 1.0
-                    for v in bbox)):
+    if not valid_face_bbox(bbox):
         raise ValueError(
             f"anchor '{anchor}' requires a 4-number faceBBoxNorm (0..1) on the "
             f"entry; got {bbox!r}")
-    return anchor_offset(anchor, bbox)
+    return anchor_offset(anchor, bbox, canvas)
 
 
 # --------------------------------------------------------------------------- #
@@ -194,42 +216,28 @@ def _content_bbox(mov_path: str, alpha_thresh: int = 8) -> tuple[int, int, int, 
     return box
 
 
-def _choose_region(free_map, anchor: str, content_bbox: tuple,
-                   gaze: tuple | None = None):
-    """Pick the target region for ``anchor`` given the content footprint.
-
-    The anchor's PREFERRED region wins if it can hold the content and is at least
-    ``prefer_emptiness`` empty; otherwise the highest-scored feasible region of any
-    kind is used (a logged fallback). Returns ``(region | None, fallback: bool)``.
-
-    ``gaze`` (normalized previous-shot focal xy, LIAM move 4) adds an ADDITIVE
-    near-tie-breaker term (``eye_trace.region_bias``, weight ~0.05 vs scores
-    ~0.1-0.5) to the ranking among LEGAL candidates only — fit + emptiness
-    legality is unchanged, so the bias can never override free space (the
-    measured pro behaviour: designed anchors dominate, gaze breaks ties).
-    ``gaze=None`` (or weight 0) reproduces today's ordering exactly.
-    """
-    from planner.eye_trace import region_bias
-
-    cw = content_bbox[2] - content_bbox[0]
-    ch = content_bbox[3] - content_bbox[1]
-    canvas = (free_map.canvas_w, free_map.canvas_h)
-
-    def _biased(region) -> float:                   # additive, ties keep order
-        return region.score + region_bias(region.center, gaze, canvas)
-
-    pref = FREE_SPACE["anchor_region"].get(anchor)
-    pref_names = (("left-of-face", "right-of-face") if pref == "beside-face"
-                  else (pref,))
-    legal = [r for r in free_map.regions            # already score-sorted desc
-             if r.name in pref_names and r.fits(cw, ch)
-             and r.emptiness >= FREE_SPACE["prefer_emptiness"]]
-    if legal:
-        return max(legal, key=_biased), False
-    feasible = [r for r in free_map.regions if r.fits(cw, ch)]
-    if feasible:
-        return max(feasible, key=_biased), True
-    return None, True
+def _solution_meta(anchor: str, content: tuple, free_map,
+                   result: tuple) -> dict:
+    """Placement evidence for one solved geometry result."""
+    solved, gaze = result
+    region = free_map.region(solved.region)
+    meta = {
+        "anchor": anchor,
+        "region": solved.region,
+        "fallback": solved.fallback,
+        "emptiness": round(region.emptiness, 3) if region else 1.0,
+        "hairMeasured": free_map.hair_measured,
+        "contentBBox": list(content),
+        "placedBBox": list(solved.placed_bbox),
+        "expandedFace": [int(v) for v in free_map.expanded_face],
+        "faceAware": True,
+    }
+    if gaze:
+        meta["gaze"] = [round(value, 4) for value in gaze]
+    if solved.scaled_dims is not None:
+        meta.update(scale=round(solved.scale, 4),
+                    scaledDims=list(solved.scaled_dims))
+    return meta
 
 
 def resolve_offset_v2(entry: dict, mov_path: str, video_in: str,
@@ -248,29 +256,32 @@ def resolve_offset_v2(entry: dict, mov_path: str, video_in: str,
     never mis-place silently.
     """
     from planner.eye_trace import gaze_xy
-    from planner.free_space import build_free_map, place_content
+    from planner.free_space import build_free_map
 
     anchor = entry.get("anchor", "free-band")
-    if anchor not in FACE_ANCHORS:
+    bbox = entry.get("faceBBoxNorm")
+    free_band_face_aware = anchor == "free-band" and valid_face_bbox(bbox)
+    if anchor not in FACE_ANCHORS and not free_band_face_aware:
         return 0, 0, {"anchor": anchor, "region": None}
     out_start, out_end = float(entry["outStart"]), float(entry["outEnd"])
     free_map = build_free_map(video_in, (out_start, out_end),
-                              entry.get("faceBBoxNorm"), band_y_offset_px)
-    content = _content_bbox(mov_path)
+                              bbox, band_y_offset_px)
+    authored = _clip_dims(mov_path)
+    delivery = (free_map.canvas_w, free_map.canvas_h)
+    authored_content = _content_bbox(mov_path)
+    content = scale_footprint(authored_content, authored, delivery)
     gaze = gaze_xy(entry)
-    region, fallback = _choose_region(free_map, anchor, content, gaze)
-    gaze_meta = {"gaze": [round(g, 4) for g in gaze]} if gaze else {}
-    if region is None:
+    solved = solve_placement(
+        free_map, anchor, content, (delivery, gaze))
+    if solved is None:
         # Fail-closed core (geometry contract v3 #1): the v1 seed nudge here
         # was the silent mis-place path — a typed error now routes the anatomy
         # evidence to the brain for a re-plan instead.
         raise NoLegalRegion(no_legal_evidence(anchor, content, free_map,
                                               (out_start, out_end)))
-    dx, dy = place_content(content, region)
-    placed = (content[0] + dx, content[1] + dy, content[2] + dx, content[3] + dy)
-    return dx, dy, {"anchor": anchor, "region": region.name, "fallback": fallback,
-                    "emptiness": round(region.emptiness, 3),
-                    "hairMeasured": free_map.hair_measured,
-                    "contentBBox": list(content), "placedBBox": list(placed),
-                    "expandedFace": [int(v) for v in free_map.expanded_face],
-                    **gaze_meta}
+    meta = _solution_meta(anchor, content, free_map, (solved, gaze))
+    meta.update(canvas=list(delivery), authoredCanvas=list(authored))
+    if authored != delivery:
+        meta["authoredContentBBox"] = list(authored_content)
+        meta.setdefault("scaledDims", list(delivery))
+    return solved.dx, solved.dy, meta

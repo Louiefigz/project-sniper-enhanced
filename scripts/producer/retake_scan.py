@@ -421,6 +421,8 @@ def main() -> int:
              "needsOperator": r["needsOperator"], "line": r["line"]}
             for r in report["retakes"]],
     }
+    if args.pauses:
+        summary["pauseTimingDiagnostics"] = report["pauses"]["timingDiagnostics"]
     json.dump(summary, sys.stdout, indent=2)
     sys.stdout.write("\n")
     return 0

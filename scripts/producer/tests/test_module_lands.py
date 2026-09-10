@@ -87,7 +87,7 @@ class ModuleLandsLintTests(unittest.TestCase):
     def test_absent_key_is_additive_no_checks(self) -> None:
         plan = self._plan([0.0])
         del plan["graphicsTrack"][0]["spec"]["moduleLands"]
-        self.assertEqual(pl.lint(plan, MANIFEST).errors, [])
+        self.assertEqual(self._errors(plan), [])
 
     def test_land_outside_hold_fires(self) -> None:
         errs = self._errors(self._plan([0.0, 5.0]))       # hold is 4.0s

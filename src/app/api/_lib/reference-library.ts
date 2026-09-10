@@ -7,6 +7,8 @@ import { buildReferenceStyleProfile } from "./reference-profile";
 import { sanitizeRepresentativeFrames } from "./reference-frame-policy";
 import { validStoredReferenceDecision } from "./reference-decision";
 import { assertStudyFresh } from "./reference-provenance";
+import { validAdmittedReference } from "./reference-admission-verifier";
+import { verifyReferenceVttAdmission } from "./reference-sidecar";
 import { addIgnoredIds, atomicWriteJson, readIgnoredIds } from "./reference-storage";
 import {
   evictReferenceJsonUnder,
@@ -19,13 +21,15 @@ import type {
   ReferenceMetadata,
   ReferenceStyleProfile,
 } from "./reference-types";
-const VIDEO_EXTS = new Set([".mp4", ".mov", ".m4v", ".webm", ".mkv"]);
+const VIDEO_EXTS = new Set([".mp4", ".mov", ".m4v", ".webm", ".mkv", ".media"]);
+const ADMISSION_PENDING = ".sniper-admission-pending";
 const TRANSCRIPT_SOURCE_WINDOW_MS = 10 * 60 * 1000;
 const hashCache = new Map<string, { key: string; value: string }>();
 function walkVideos(root: string): string[] {
   if (!fs.existsSync(root)) return [];
   const out: string[] = [];
   const visit = (dir: string) => {
+    if (fs.existsSync(path.join(dir, ADMISSION_PENDING))) return;
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
       const hit = path.join(dir, entry.name);
       if (entry.isDirectory() && !entry.isSymbolicLink() && !entry.name.startsWith(".")) visit(hit);
@@ -110,9 +114,23 @@ export function findWordTranscript(video: string): string | null {
   const dir = path.dirname(video);
   const stem = path.parse(video).name;
   const videoMtime = fs.statSync(video).mtimeMs;
+  const source = readJson<Record<string, unknown>>(
+    path.join(dir, "reference-source.json"),
+  );
+  const textRows = Array.isArray(source?.transcripts)
+    ? source.transcripts
+    : source?.transcript === null || source?.transcript === undefined
+      ? []
+      : [source.transcript];
+  const admitted = new Set(
+    textRows.map((row) => verifyReferenceVttAdmission(row, dir))
+      .filter((file): file is string => file !== null),
+  );
+  const governed = source !== null;
   const siblings = fs.readdirSync(dir)
     .filter((name) => name.startsWith(stem) && name.toLowerCase().endsWith(".vtt"))
     .map((name) => path.join(dir, name))
+    .filter((file) => !governed || admitted.has(path.resolve(file)))
     .filter((file) => fs.statSync(file).mtimeMs >= videoMtime - TRANSCRIPT_SOURCE_WINDOW_MS)
     .sort();
   const cached = [path.join(canonicalStudyDir(video), "transcript.json")]
@@ -127,10 +145,10 @@ function sha256(video: string, stat: fs.Stats): string {
   const fd = fs.openSync(video, "r");
   const buffer = Buffer.allocUnsafe(1024 * 1024);
   try {
-    for (;;) {
-      const size = fs.readSync(fd, buffer, 0, buffer.length, null);
-      if (!size) break;
+    let size = fs.readSync(fd, buffer, 0, buffer.length, null);
+    while (size) {
       hash.update(buffer.subarray(0, size));
+      size = fs.readSync(fd, buffer, 0, buffer.length, null);
     }
   } finally {
     fs.closeSync(fd);
@@ -149,14 +167,14 @@ function validProfile(value: ReferenceStyleProfile | null, id: string): value is
     Boolean(value.mechanics) && Boolean(value.quality) && Array.isArray(value.representativeFrames);
 }
 function profileFrom(deepPath: string | null, fingerprintPath: string | null,
-                     id: string, title: string, video: string,
-                     sourceHash = ""): ReferenceStyleProfile | null {
+                     title: string, video: string): ReferenceStyleProfile | null {
   if (!deepPath) return null;
+  const id = stableReferenceId(video);
   const stored = readJson<ReferenceStyleProfile>(path.join(path.dirname(deepPath), "style_profile.json"));
   if (validProfile(stored, id)) return sanitizeRepresentativeFrames(stored, path.dirname(deepPath));
   const deep = readJson<Record<string, unknown>>(deepPath);
   if (!deep) return null;
-  const profile = buildReferenceStyleProfile({ id, title, video, sha256: sourceHash, deep,
+  const profile = buildReferenceStyleProfile({ id, title, video, sha256: "", deep,
     fingerprint: fingerprintPath ? readJson<Record<string, unknown>>(fingerprintPath) : null });
   return sanitizeRepresentativeFrames(profile, path.dirname(deepPath));
 }
@@ -180,7 +198,7 @@ function entryFor(video: string, registryTitles: Map<string, string>): Reference
   const recordedVideo = deepStudyPath ? readDeepStudyVideo(deepStudyPath) : null;
   const sourceMatches = recordedVideo !== null && path.resolve(recordedVideo) === path.resolve(video);
   const profile = sourceMatches
-    ? profileFrom(deepStudyPath, fingerprintPath, id, title, video) : null;
+    ? profileFrom(deepStudyPath, fingerprintPath, title, video) : null;
   const decision = decisionFor(video, studyDir);
   const transcriptPath = findWordTranscript(video);
   const width = profile?.source.width ?? null;
@@ -214,7 +232,8 @@ export function listReferenceLibrary(): ReferenceEntry[] {
   const titles = new Map(registered.map((entry) => [path.resolve(entry.dir), entry.title]));
   const roots = [path.join(workspaceRoot(), "_references"),
     ...registered.filter((entry) => entry.exists).map((entry) => entry.dir)];
-  const videos = [...new Set(roots.flatMap(walkVideos).map((video) => path.resolve(video)))];
+  const videos = [...new Set(roots.flatMap(walkVideos).map((video) => path.resolve(video)))]
+    .filter(validAdmittedReference);
   const ignored = readIgnoredIds(path.join(workspaceRoot(), "_references"));
   const visible = videos.filter((video) => {
     if (!ignored.has(stableReferenceId(video))) return true;
@@ -278,5 +297,4 @@ export function ignoreReferenceIds(ids: string[]): void {
   }
   addIgnoredIds(path.join(workspaceRoot(), "_references"), ids);
 }
-export function videoExtensions(): ReadonlySet<string> {
-  return VIDEO_EXTS; }
+export function videoExtensions(): ReadonlySet<string> { return VIDEO_EXTS; }

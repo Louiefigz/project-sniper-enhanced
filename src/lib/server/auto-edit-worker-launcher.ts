@@ -7,6 +7,7 @@ import {
   readAutoEditJob,
 } from "./auto-edit-job-store";
 import { setProducerRunOwner } from "./producer-run-registry";
+import { markHumanCutWorker } from "./human-cut-continuation";
 
 type SpawnWorker = (command: string, args: readonly string[], options: SpawnOptions) => ChildProcess;
 
@@ -37,7 +38,7 @@ export async function launchDetachedAutoEditWorker(
   dependencies: LauncherDependencies = {},
 ): Promise<number> {
   const job = readAutoEditJob(jobPath);
-  if (!job || job.status !== "running") throw new Error(`No runnable Auto Edit job at ${jobPath}`);
+  if (!job || !["running", "cut_accepted"].includes(job.status)) throw new Error(`No runnable Auto Edit job at ${jobPath}`);
   if (job.orphanedWorkerGroup) throw new Error("Previous Auto Edit worker processes are still stopping");
   const invocation = detachedWorkerInvocation(
     jobPath,
@@ -65,9 +66,12 @@ export async function launchDetachedAutoEditWorker(
   } finally {
     closeSync(logFd);
   }
+  if (job.cutAcceptance) child.once("error", () => { /* The durable PID/identity owns failure recovery after handoff. */ });
   if (!child.pid) throw new Error("Detached Auto Edit worker started without a PID");
-  markAutoEditWorker(jobPath, job.token, child.pid);
-  setProducerRunOwner(job.ctx.dir, job.token, child.pid, true);
+  if (job.status === "cut_accepted") markHumanCutWorker(jobPath, job.token, child.pid);
+  else markAutoEditWorker(jobPath, job.token, child.pid);
+  try { setProducerRunOwner(job.ctx.dir, job.token, child.pid, true); }
+  catch { /* The durable job is authoritative; a status-mirror write cannot undo its handoff. */ }
   child.unref();
   return child.pid;
 }

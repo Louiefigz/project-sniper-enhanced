@@ -1,6 +1,9 @@
 import path from "node:path";
 import type { LiveBuildPreflight } from "./preflight";
-import { liveBuildJournalPath } from "./state";
+import {
+  liveBuildJournalPath,
+  type LiveBuildResumeAuthority,
+} from "./state";
 
 function doctrineLines(input: LiveBuildPreflight): string[] {
   return Object.entries(input.doctrineFiles).map(
@@ -22,9 +25,30 @@ function repairLines(input: LiveBuildPreflight, resume: boolean): string[] {
   ];
 }
 
+function resumeLines(
+  journal: string,
+  authority?: LiveBuildResumeAuthority,
+): string[] {
+  if (!authority) {
+    return [
+      `This is a resumed turn. Read ${journal}. The controller did not provide a closed reconciliation authority, so stop without mutation.`,
+    ];
+  }
+  return [
+    "This is a controller-reconciled resumed turn.",
+    `- Closed journal SHA-256: ${authority.journalHash}`,
+    `- Reconciled head fingerprint: ${authority.headFingerprint}`,
+    `- Verified applied operations JSON: ${JSON.stringify(authority.verifiedOperations)}`,
+    `- Reconciled not-applied operation ids JSON: ${JSON.stringify(authority.resolvedNotAppliedIds)}`,
+    "- Never replay a verified operation id or repeat the same unresolved/applied tool plus canonical-input payload under a new id. That fence prevents replay; it is not an equivalence claim.",
+    "- A genuinely different target, time window, or payload is allowed. Only an explicitly reconciled not-applied payload may be reissued when the approved plan still requires it.",
+  ];
+}
+
 export function buildLiveBuildPrompt(
   input: LiveBuildPreflight,
   resume: boolean,
+  resumeAuthority?: LiveBuildResumeAuthority,
 ): string {
   const journal = liveBuildJournalPath(input.dir);
   return [
@@ -53,18 +77,19 @@ export function buildLiveBuildPrompt(
     "- After each mutation result, update your local timeline model. Re-read get_transcript after remove_words because word indexes shift.",
     "- Do not silently omit or approximate a requested lane. If Palmier cannot represent it, report the exact unsupported operation and continue only with independent approved lanes.",
     "- Automatic transitions have no proved native primitive. Do not disguise keyframes or a baked visual as an exact transition.",
+    "- Media ingress is controller-owned. import_media is intentionally unavailable in this lane. Use only mediaRefs already present in the governed candidate; report any plan row requiring a new import as unsupported so the controller can use the admitted Desktop or baked-master path.",
     "",
     "Connected editable vocabulary:",
-    "- Imports/cuts: import_media, add_clips, insert_clips, split_clips, move_clips, remove_clips, ripple_delete_ranges, remove_words, remove_silence.",
-    "- Graphics: add_texts/update_text for native text; import_media + add_clips for already-rendered alpha assets; apply_layout and transform properties for editable placement.",
+    "- Existing media/cuts: add_clips, insert_clips, split_clips, move_clips, remove_clips, ripple_delete_ranges, remove_words, remove_silence.",
+    "- Graphics: add_texts/update_text for native text; add_clips only for already-present governed mediaRefs; apply_layout and transform properties for editable placement.",
     "- Motion/framing: set_clip_properties and clip-relative set_keyframes.",
     "- Captions/color/audio: add_captions, apply_color, denoise_audio, volume keyframes, and imported music where the approved plan names real media.",
     "- QC/readback: get_timeline, get_transcript, inspect_timeline. The controller—not this session—exports the exact candidate for QC.",
     "",
     ...repairLines(input, resume),
-    resume
-      ? `This is a resumed turn. Read ${journal}, then reconcile it with current Palmier readback. Never replay an operation already verified in the current timeline ancestry.`
-      : "This is the first live-build turn. Begin from the exact parent readback above.",
+    ...(resume
+      ? resumeLines(journal, resumeAuthority)
+      : ["This is the first live-build turn. Begin from the exact parent readback above."]),
     "Execute cuts first, then downstream graphics/assets, motion/framing, captions/color/audio, respecting plan dependencies. Do not spend a second turn explaining what you could execute: execute it.",
     "Finish with get_timeline readback and a concise result listing applied lanes, unsupported operations, and the next safe operation if work remains.",
     `Do not read outside ${path.dirname(input.planPath)}, the pinned doctrine, manifest evidence, and repository Producer guidance needed to execute this plan.`,

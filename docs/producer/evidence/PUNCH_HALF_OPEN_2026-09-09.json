@@ -1,0 +1,62 @@
+{
+  "kind": "live-ordinary-punch-half-open-integration",
+  "date": "2026-09-09",
+  "status": "integrated-live",
+  "report": "/private/tmp/sniper-punch-half-open-20260909.zMLvmN/README.md",
+  "patchSha256": "0ab883b0577571308231cbe9e17443cde2a74fd77fbe42c48f53ebee2117bbf7",
+  "files": [
+    {
+      "path": "scripts/producer/motion/punch_in.py",
+      "beforeSha256": "97e5135628c270809496132bdd32996b22e3e17c8d5ecdc73fb71e51ea7b4fe4",
+      "afterSha256": "332b38f9fa0da3a885caf48126a2b98e96705ecd4fd7c38361e2592c4ee472ac"
+    },
+    {
+      "path": "scripts/producer/tests/test_punch_endpoints.py",
+      "beforeSha256": null,
+      "afterSha256": "971d9134baed3fdf7bbcde375beb6e42b0d3f4705bf66e23f99668ce1e85e0c2"
+    },
+    {
+      "path": "scripts/producer/tests/_punch_endpoint_fixture.py",
+      "beforeSha256": null,
+      "afterSha256": "01fb2757b6fbb30d374b9a83eedee51b55811f27073150edcf1a4dc467b575aa"
+    }
+  ],
+  "rootNative": {
+    "passed": 63,
+    "skipped": 0,
+    "suiteSeconds": 4.504,
+    "wallSeconds": 7.45,
+    "terminalChunk": "058aae",
+    "workspace": "/private/tmp/sniper-punch-endpoints-native-yfkbg3hr",
+    "pid": 89825,
+    "nativeSeconds": 4.496165875112638,
+    "resultSha256": "548a1150e7f4893bbb59371f6bca4fe7f693166324c4e48ead5ae261433e354b"
+  },
+  "livePure": {
+    "passed": 62,
+    "failed": 0,
+    "skipped": 0,
+    "wallSeconds": 3.01,
+    "terminalChunk": "aa4dd9"
+  },
+  "cleanup": {
+    "remainingPidOrNativeNamespaceMatches": 0,
+    "terminalChunk": "0db28f"
+  },
+  "whitespaceCheck": {
+    "passed": true,
+    "terminalChunk": "5b4824"
+  },
+  "visualReview": [
+    "original control60/punch60/punch61",
+    "repaired30fps E-1/E",
+    "repaired24fps E",
+    "repaired NTSC animatedE"
+  ],
+  "retainedToolFailure": "Initial oversized full-file JSON read was truncated; no apply occurred. Reduced exact-hash read and minimal patch then succeeded.",
+  "limits": [
+    "Six-decimal seconds projections retained; arbitrary fractional-frame quantization unqualified.",
+    "Ordinary static/eased-attack cases only; not guided, creator framing/listening or whole-video/SLA qualification.",
+    "Preexisting over-300-line primitive remains; only two predicates and endpoint prose changed. New TEST files meet stated mechanics."
+  ]
+}

@@ -1,0 +1,129 @@
+/** Source-bound native compilation and sparse capture for the current revision. */
+import * as sdk from '/private/tmp/sniper-native-frame-transport-20260909.wsUupP/hyperframes/dist/native-candidate-test-library.mjs';
+import fs from 'node:fs';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
+import assert from 'node:assert/strict';
+
+const config=JSON.parse(fs.readFileSync(process.argv[2]));
+const fps={num:24000,den:1001};
+const receipt={status:'failed',scope:'Post-seal creative revision; not a fresh edit',
+  humanListening:false,wholeExportQualified:false,frames:[],startedUtc:new Date().toISOString()};
+const hash=file=>createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+const log=Object.fromEntries(['info','warn','error','debug'].map(k=>[k,(...v)=>console.log(k,...v)]));
+
+async function digest(file) {
+  const value=createHash('sha256');
+  for await(const chunk of fs.createReadStream(file))value.update(chunk);
+  return value.digest('hex');
+}
+
+async function stage() {
+  assert.equal(await digest(config.presenter),config.presenterSha256);
+  assert.equal(await digest(path.join(config.project,'assets/presenter.mp4')),config.presenterSha256);
+  assert.ok(!fs.existsSync(config.staging),'Staging must be new');
+  const skip=new Set(['presenter.mp4','narration-unmastered.wav','narration.wav']);
+  fs.cpSync(config.project,config.staging,{recursive:true,errorOnExist:true,force:false,
+    filter:file=>!path.relative(config.project,file).split(path.sep).some(p=>p.startsWith('.')||skip.has(p))});
+  const entry=path.join(config.staging,'index.html');
+  const original=fs.readFileSync(entry,'utf8'),needle='src="assets/presenter.mp4"';
+  assert.equal(original.split(needle).length,2,'Exactly one persistent presenter source');
+  fs.writeFileSync(entry,original.replace(needle,'src="'+config.presenter+'"'));
+  // The authored root-relative URL and native absolute extraction path must serve identical bytes.
+  const servedCopy=path.join(config.staging,config.presenter.slice(1));
+  assert.ok(servedCopy.startsWith(config.staging+path.sep));
+  fs.mkdirSync(path.dirname(servedCopy),{recursive:true});
+  fs.copyFileSync(config.presenter,servedCopy,fs.constants.COPYFILE_FICLONE);
+  assert.equal(await digest(servedCopy),config.presenterSha256);
+  assert.notEqual(fs.statSync(servedCopy).ino,fs.statSync(config.presenter).ino);
+  receipt.servedPresenter={path:servedCopy,sha256:config.presenterSha256,
+    independentFile:true,sourceModified:false,reason:'Make the same root-relative media URL valid inside the render project'};
+  const stat=fs.statSync(config.presenter);
+  const keyBlob={p:config.presenter,m:Math.floor(stat.mtimeMs),s:stat.size,ms:0,
+    d:657.365041666667,f:'24000/1001',fmt:'png'};
+  const key=createHash('sha256').update(JSON.stringify(keyBlob)).digest('hex');
+  assert.equal(path.basename(config.cache),'hfcache-v4-'+key.slice(0,16));
+  assert.ok(fs.existsSync(path.join(config.cache,'.hf-complete')));
+  receipt.staging={path:config.staging,sourceRootSha256:hash(path.join(config.project,'index.html')),
+    entrySha256:hash(entry),substitution:'Same verified prepared picture, absolute path only',
+    presenterSha256:config.presenterSha256,cacheKey:key,keyBlob};
+}
+
+async function compile() {
+  const cfg=sdk.resolveConfig({chromePath:process.env.HYPERFRAMES_BROWSER_PATH,
+    browserGpuMode:'software',forceScreenshot:true,useDrawElement:false,lowMemoryMode:true,
+    enableBrowserPool:false,staticFrameDedup:false,frameDataUriCacheLimit:32,
+    frameDataUriCacheBytesLimitMb:64});
+  fs.mkdirSync(config.work);
+  const result=await sdk.runCompileStage({projectDir:config.staging,workDir:config.work,
+    htmlPath:path.join(config.staging,'index.html'),entryFile:'index.html',
+    job:{config:{fps,quality:'high',format:'mp4',workers:1}},cfg,
+    needsAlpha:false,log,assertNotAborted:()=>{},failClosedFontFetch:true});
+  assert.equal(result.composition.videos.length,1);
+  assert.equal(result.composition.videos[0].src,config.presenter);
+  assert.equal(result.composition.width,1920);assert.equal(result.composition.height,1080);
+  assert.ok(Math.abs(result.composition.duration-657.365041666667)<1e-9);
+  const names=fs.readdirSync(config.cache).filter(n=>/^frame_\d{5}\.png$/.test(n)).sort();
+  assert.equal(names.length,15761);
+  const framePaths=new Map(names.map((name,i)=>{
+    assert.equal(name,'frame_'+String(i+1).padStart(5,'0')+'.png');
+    return [i,path.join(config.cache,name)];
+  }));
+  const metadata=await sdk.extractMediaMetadata(config.presenter);
+  const extracted={videoId:'presenter',srcPath:config.presenter,outputDir:config.cache,
+    framePattern:'frame_%05d.png',fps:24000/1001,totalFrames:15761,metadata,framePaths};
+  receipt.compiled={path:path.join(config.work,'compiled/index.html'),
+    sha256:hash(path.join(config.work,'compiled/index.html')),video:result.composition.videos[0],
+    duration:result.composition.duration};
+  return {cfg,result,lookup:sdk.createFrameLookupTable(result.composition.videos,[extracted])};
+}
+
+async function inspectFrame(prepared,session,server,point) {
+  const at=point.frame*1001/24000,payload=prepared.lookup.getActiveFramePayloads(at);
+  if(point.scene)assert.ok(at>=point.sceneStart && at<point.sceneEnd,'Reference escaped its named scene');
+  assert.equal(payload.size,1);assert.equal(payload.get('presenter').frameIndex,point.frame);
+  const source=payload.get('presenter').framePath,before=hash(source);
+  const result=await sdk.captureFrame(session,point.frame,at);
+  const actual=await session.page.evaluate(()=>{
+    const presenter=document.querySelector('#presenter-frame'),video=document.querySelector('#presenter');
+    const injected=video.nextElementSibling,css=getComputedStyle(presenter);
+    return {presenterOpacity:Number(css.opacity),presenterBox:(()=>{const r=presenter.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};})(),
+      active:[...document.querySelectorAll('.panel-host')].filter(n=>getComputedStyle(n).visibility==='visible'&&getComputedStyle(n).display!=='none').map(n=>n.dataset.compositionId),injectedUrl:injected?.getAttribute('src'),
+      decoded:injected?.complete&&injected?.naturalWidth===1920,
+      fonts:[...document.fonts].map(f=>({family:f.family,status:f.status}))};
+  });
+  if(point.scene)assert.deepEqual(actual.active,[point.scene]);
+  assert.ok(actual.decoded);assert.equal(actual.injectedUrl,server.frameTransport.resolve(source));
+  assert.ok(actual.fonts.every(f=>f.status==='loaded'));assert.equal(hash(source),before);
+  if(point.presenterOpacity!==undefined)assert.ok(Math.abs(actual.presenterOpacity-point.presenterOpacity)<.001);
+  receipt.frames.push({...point,at,...result,sha256:hash(result.path),sourceFrameSha256:before,actual});
+}
+
+async function capture(prepared) {
+  const server=await sdk.createFileServer2({projectDir:config.staging,
+    compiledDir:path.join(config.work,'compiled'),port:0,preHeadScripts:[sdk.VIRTUAL_TIME_SHIM],fps});
+  let session;
+  try {
+    assert.ok(server.frameTransport);server.frameTransport.configure([config.cache]);
+    const inject=sdk.createVideoFrameInjector(prepared.lookup,{frameDataUriCacheLimit:32,
+      frameDataUriCacheBytesLimitMb:64,frameSrcResolver:p=>server.frameTransport.resolve(p),strictFrameDecode:true});
+    session=await sdk.createCaptureSession(server.url,path.join(config.work,'frames'),
+      {width:1920,height:1080,fps,format:'jpeg',quality:95,deviceScaleFactor:1,
+        captureBeyondViewport:true,skipReadinessVideoIds:['presenter'],
+        videoMetadataHints:[{id:'presenter',width:1920,height:1080}],
+        compositionDurationSeconds:657.365041666667},inject,prepared.cfg);
+    await sdk.initializeSession(session);assert.equal(session.captureMode,'screenshot');
+    for(const point of config.points)await inspectFrame(prepared,session,server,point);
+    receipt.transport=server.frameTransport.stats();
+    assert.equal(receipt.transport.errors,0);assert.equal(receipt.transport.base64Fallbacks,0);
+    receipt.status='native-captured-awaiting-visual-and-export-qc';
+  } finally {
+    try{if(session)await sdk.closeCaptureSession(session);}
+    finally{await sdk.drainBrowserPool();await server.close();}
+  }
+}
+
+try{await stage();await capture(await compile());}
+catch(error){receipt.error=String(error.stack||error);process.exitCode=1;}
+finally{receipt.finishedUtc=new Date().toISOString();
+  fs.writeFileSync(config.receipt,JSON.stringify(receipt,null,2),{flag:'wx'});}

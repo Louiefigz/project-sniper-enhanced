@@ -1,0 +1,454 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"image","type":"string","label":"Screenshot under templates/motion/assets — motion-web-root-relative selector, e.g. assets/sample-screen.png (empty = token skeleton preview)","default":""},
+    {"id":"anchorX","type":"number","label":"Focus anchor, % from the left edge of the screen","default":64,"min":0,"max":100,"step":1,"unit":"%"},
+    {"id":"anchorY","type":"number","label":"Focus anchor, % from the top edge of the screen","default":36,"min":0,"max":100,"step":1,"unit":"%"},
+    {"id":"zoom","type":"number","label":"Camera scale at the focused state","default":1.6,"min":1.05,"max":3,"step":0.05},
+    {"id":"zoomAt","type":"number","label":"Camera departure cue (s, comp-relative — the transcript time of the pointed-at detail)","default":1.4,"min":0,"max":30,"step":0.1,"unit":"s"},
+    {"id":"halo","type":"boolean","label":"Soft accent bloom at the anchor as the camera arrives","default":true},
+    {"id":"accent","type":"color","label":"Halo / skeleton accent color","default":"#054BC9"},
+    {"id":"exit","type":"enum","label":"Exit","default":"hold","options":[{"value":"hold","label":"Hold to end (compositor owns the seam)"},{"value":"fade","label":"Fade 0.5s"},{"value":"up","label":"Rise + fade 0.5s"}]}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · LONG-FORM template: UI-FOCUS-ZOOM (catalog port wave B —
+    screen/tutorial family; upstream: vendor/hyperframes-catalog/compositions/
+    components/ui-focus-zoom.html, host-document slot mechanism replaced by
+    the `image` asset variable, contract tokens retargeted to tokens.css).
+    Trigger it serves: a tutorial/screen cutaway that must POINT — the full
+    screenshot establishes with one settle, then the camera zooms and pans
+    to the anchored region on its cue and holds the zoomed state; an
+    optional accent halo blooms at the anchor as the camera arrives.
+
+    CANVAS CHOICE (wave-B doctrine): 16:9 1920x1080 OPAQUE own-screen
+    cutaway (`--format mp4`) — screen/tutorial cutaways are long-form
+    grammar (screenshare x3 in the reference study); shorts do not hold a
+    slow camera move. Near-black house canvas (--nateherk-canvas) with the
+    framed screen inset.
+
+    CONTRACT for the PRODUCER compositing stage:
+      - image / anchorX / anchorY / zoom / zoomAt / halo / accent / exit are
+        `data-composition-variables`. The screenshot is a VARIABLE-REFERENCED
+        ASSET: spec.image is a motion-web-root-relative selector under
+        templates/motion/assets/ ("assets/<file>", png/jpg/jpeg/webp — copy
+        the brain-supplied screenshot there at plan time).
+        template_catalog_contract REJECTS a plan whose image is missing or
+        does not resolve (the screenshot IS the cutaway; a skeleton punch-in
+        is not planned content), whose anchor is off the screen, whose zoom
+        is a no-op (< 1.05), or whose zoomAt is negative.
+        template_contract.resolved_assets returns the resolved file so the
+        render cache hashes the image bytes (a changed screenshot re-renders
+        the cached asset) and the sealed snapshot carries it. UNSET image
+        renders a token-styled skeleton app (preview sample only — the G21
+        pattern; a broken load also falls back to the skeleton underneath,
+        the avatar-bio-card degradation law).
+      - MECHANISM (upstream servo math kept; drive converted): the camera
+        lives on ONE world-wrapper transform, translate(x,y) scale(S) — a
+        world point at offset o% from center lands at S*o + T, so
+        T = -(anchor-50)*S with no pixel measurement (camera-servo law).
+        The move tweens a SETTER-DRIVEN camera proxy (defineProperty get/set
+        repainting through one applyCamera writer — house scrub law #2's
+        setter-driver form, hw-callout's boil precedent). Upstream's
+        tween-level onUpdate only fired on event-firing seeks: the renderer
+        seeks with suppressEvents=false, but Studio and the editor preview
+        shim seek suppressed, which froze the camera there (review F4);
+        setters fire under every seek order and land the same transform.
+        The pan is clamped so the scaled world always covers the frame
+        (|T| <= 50*(S-1) minus drift amplitude). Micro-drift is 2 and 3
+        INTEGER sine cycles ending at exactly zero before the authored
+        stillness (house law #7 phase-exact rule).
+      - ENVELOPE: fixed IN 0.9s (one settle) + ZOOM 1.1s (servo move) +
+        optional OUT 0.5s; only HOLD is elastic. zoomAt is clamped inside
+        [IN, D - OUT - move]. Default exit "hold" — THE EXIT LAW.
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (stat-card
+        note); graphics_render rewrites it per window.
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>SNIPER · ui-focus-zoom</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="/vendor/gsap/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--nateherk-canvas); /* opaque own-screen cutaway */
+        font-family: var(--font);
+      }
+      #ufz-root { position: relative; width: 1920px; height: 1080px; }
+
+      .stage {
+        position: absolute;
+        inset: 0;
+        will-change: transform, opacity;
+      }
+      /* The fixed frame: the camera moves the world inside this window. */
+      #ufz-frame {
+        position: absolute;
+        left: 128px;
+        top: 72px;
+        width: 1664px;
+        height: 936px;
+        overflow: hidden;
+        border: 2px solid rgba(255, 255, 255, 0.14);
+        border-radius: 24px;
+        background: #10141A;
+        box-shadow: var(--card-shadow);
+      }
+      /* ONE world wrapper: all camera motion is this element's transform. */
+      #ufz-world { position: absolute; inset: 0; will-change: transform; }
+      #ufz-surface {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        background: #171C24;
+      }
+      #ufz-surface > img {
+        position: relative;
+        z-index: 1;
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      #ufz-halo {
+        position: absolute;
+        z-index: 2;
+        width: 324px;
+        height: 324px;
+        border-radius: 50%;
+        will-change: transform, opacity;
+      }
+
+      /* Preview skeleton (UNSET image only): token furniture, no branding.
+         Sits UNDER the img so a broken load degrades to it. */
+      .ufz-skel {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+        background: #F4F4F1;
+      }
+      .ufz-skel-top {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 20px 28px;
+        background: #FFFFFF;
+        border-bottom: 2px solid #E3E4E8;
+      }
+      .ufz-skel-mark { width: 28px; height: 28px; border-radius: 8px; }
+      .ufz-skel-line {
+        height: 14px;
+        border-radius: 999px;
+        background: #C9CCD4;
+      }
+      .ufz-skel-top .ufz-skel-line:nth-of-type(1) { width: 96px; }
+      .ufz-skel-top .ufz-skel-line:nth-of-type(2) { width: 70px; background: #E3E4E8; }
+      .ufz-skel-spring { flex: 1; }
+      .ufz-skel-chip { width: 92px; height: 30px; border-radius: 999px; }
+      .ufz-skel-avatar { width: 30px; height: 30px; border-radius: 50%; background: #C9CCD4; }
+      .ufz-skel-body {
+        display: grid;
+        grid-template-columns: 22% minmax(0, 1fr);
+        min-height: 0;
+      }
+      .ufz-skel-side {
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+        padding: 28px;
+        background: #FFFFFF;
+        border-right: 2px solid #E3E4E8;
+      }
+      .ufz-skel-side .ufz-skel-line:nth-child(1) { width: 78%; background: #2A2A2E; }
+      .ufz-skel-side .ufz-skel-line:nth-child(2) { width: 56%; }
+      .ufz-skel-side .ufz-skel-line:nth-child(3) { width: 66%; }
+      .ufz-skel-side .ufz-skel-line:nth-child(4) { width: 44%; }
+      .ufz-skel-side .ufz-skel-line:nth-child(5) { width: 60%; }
+      .ufz-skel-main {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        min-height: 0;
+        padding: 30px;
+      }
+      .ufz-skel-heading { width: 34%; height: 26px; border-radius: 999px; background: #2A2A2E; }
+      .ufz-skel-sub { width: 52%; height: 14px; border-radius: 999px; background: #C9CCD4; }
+      .ufz-skel-cards {
+        display: grid;
+        flex: 1;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 22px;
+        min-height: 0;
+        margin-top: 8px;
+      }
+      .ufz-skel-card {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-height: 0;
+        padding: 22px;
+        border: 2px solid #E3E4E8;
+        border-radius: 16px;
+        background: #FFFFFF;
+      }
+      .ufz-skel-card .ufz-skel-line { width: 55%; }
+      .ufz-skel-block {
+        flex: 1;
+        min-height: 32px;
+        border-radius: 10px;
+        background: #E9EAED;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="ufz-root"
+      data-composition-id="ui-focus-zoom"
+      data-width="1920"
+      data-height="1080"
+      data-start="0"
+      data-duration="4.5"
+    >
+      <div id="ufz-stage" class="stage clip" data-start="0" data-duration="60" data-track-index="1">
+        <div id="ufz-frame" role="img" aria-label="Screen with a camera focus zoom">
+          <div id="ufz-world">
+            <div id="ufz-surface">
+              <div class="ufz-skel" aria-hidden="true">
+                <div class="ufz-skel-top">
+                  <span class="ufz-skel-mark"></span>
+                  <span class="ufz-skel-line"></span>
+                  <span class="ufz-skel-line"></span>
+                  <span class="ufz-skel-spring"></span>
+                  <span class="ufz-skel-chip"></span>
+                  <span class="ufz-skel-avatar"></span>
+                </div>
+                <div class="ufz-skel-body">
+                  <div class="ufz-skel-side">
+                    <span class="ufz-skel-line"></span>
+                    <span class="ufz-skel-line"></span>
+                    <span class="ufz-skel-line"></span>
+                    <span class="ufz-skel-line"></span>
+                    <span class="ufz-skel-line"></span>
+                  </div>
+                  <div class="ufz-skel-main">
+                    <span class="ufz-skel-heading"></span>
+                    <span class="ufz-skel-sub"></span>
+                    <div class="ufz-skel-cards">
+                      <div class="ufz-skel-card">
+                        <span class="ufz-skel-line"></span>
+                        <span class="ufz-skel-block"></span>
+                      </div>
+                      <div class="ufz-skel-card">
+                        <span class="ufz-skel-line"></span>
+                        <span class="ufz-skel-block"></span>
+                      </div>
+                      <div class="ufz-skel-card">
+                        <span class="ufz-skel-line"></span>
+                        <span class="ufz-skel-block"></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="ufz-halo" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        var root = document.getElementById("ufz-root");
+        var stage = root.querySelector(".stage");
+        var world = document.getElementById("ufz-world");
+        var surface = document.getElementById("ufz-surface");
+        var halo = document.getElementById("ufz-halo");
+        var D = Math.max(0.001, parseFloat(root.dataset.duration) || 4.5);
+
+        var defaults = {
+          image: "", anchorX: 64, anchorY: 36, zoom: 1.6, zoomAt: 1.4,
+          halo: true, accent: "#054BC9", exit: "hold",
+        };
+        var HF = window.__hyperframes;
+        var vars = Object.assign({}, defaults,
+          HF && HF.getVariables ? HF.getVariables() : {});
+
+        function num(value, fallback, min, max) {
+          var parsed = parseFloat(value);
+          if (!isFinite(parsed)) parsed = fallback;
+          return Math.min(max, Math.max(min, parsed));
+        }
+
+        var anchorX = num(vars.anchorX, 64, 0, 100);
+        var anchorY = num(vars.anchorY, 36, 0, 100);
+        var zoom = num(vars.zoom, 1.6, 1, 3);
+        var zoomAt = num(vars.zoomAt, 1.4, 0, 30);
+        var haloOn = vars.halo !== false && vars.halo !== "false";
+        var accent = String(vars.accent || "#054BC9");
+        var exit = vars.exit === "fade" || vars.exit === "up" ? vars.exit : "hold";
+
+        // The screenshot: a motion-web-root-relative asset selector
+        // ("assets/<file>"). template_catalog_contract requires + resolves
+        // it plan-side; an empty selector is the skeleton preview sample.
+        var image = String(vars.image == null ? "" : vars.image).trim();
+        if (image) {
+          if (image.charAt(0) === "/") image = image.slice(1);
+          var shot = document.createElement("img");
+          shot.alt = "";
+          shot.src = "/" + image;
+          surface.appendChild(shot);
+        }
+
+        // Halo color rides the accent variable (radial bloom, no color-mix:
+        // literal rgba stops derived once, synchronously).
+        function rgba(hex, alpha) {
+          var m = /^#([0-9a-fA-F]{6})$/.exec(hex) || ["", "054BC9"];
+          var v = parseInt(m[1], 16);
+          return "rgba(" + ((v >> 16) & 255) + ", " + ((v >> 8) & 255) +
+            ", " + (v & 255) + ", " + alpha + ")";
+        }
+        halo.style.background = "radial-gradient(circle, " +
+          rgba(accent, 0.30) + " 0%, " + rgba(accent, 0.14) +
+          " 42%, transparent 70%)";
+        var marks = root.querySelectorAll(".ufz-skel-mark, .ufz-skel-chip");
+        for (var i = 0; i < marks.length; i += 1) {
+          marks[i].style.background = rgba(accent, marks[i].className
+            .indexOf("chip") >= 0 ? 0.28 : 0.85);
+        }
+
+        /* ===== Camera (camera-servo law, kept verbatim): translate(x, y)
+           scale(S) on the ONE world wrapper. Translate percentages resolve
+           against the world's own box (it fills the frame), so a world point
+           at offset o% from center lands at S*o + T and the target is
+           T = -(anchor - 50) * S, no measurement needed. The pan is clamped
+           so the scaled world always covers the frame. ===== */
+        var DRIFT_X = 0.16;
+        var DRIFT_Y = 0.11;
+        var panMax = Math.max(0, 50 * (zoom - 1) - Math.max(DRIFT_X, DRIFT_Y) - 0.2);
+        var targetX = Math.min(panMax, Math.max(-panMax, -(anchorX - 50) * zoom));
+        var targetY = Math.min(panMax, Math.max(-panMax, -(anchorY - 50) * zoom));
+
+        /* Camera state painted by property SETTERS (house scrub law #2's
+           setter-driver form — hw-callout's boil is the in-repo precedent):
+           GSAP's writes land on defineProperty setters that repaint through
+           the one applyCamera writer. A tween-level onUpdate only fires on
+           event-firing seeks — the renderer's tl.seek(t) — while Studio and
+           the editor preview shim seek with suppressEvents, which froze the
+           camera there (review F4). Setters fire on EVERY seek. */
+        var camState = { s: 1, x: 0, y: 0 };
+        var driftState = { p: 0, dx: 0, dy: 0 };
+        function applyCamera() {
+          world.style.transform = "translate(" +
+            (camState.x + driftState.dx) + "%, " +
+            (camState.y + driftState.dy) + "%) scale(" + camState.s + ")";
+        }
+        function drivenBy(state, apply) {
+          var proxy = {};
+          Object.keys(state).forEach(function (key) {
+            Object.defineProperty(proxy, key, {
+              get: function () { return state[key]; },
+              set: function (value) { state[key] = value; apply(value, key); },
+            });
+          });
+          return proxy;
+        }
+        var cam = drivenBy(camState, applyCamera);
+        var drift = drivenBy(driftState, function (value, key) {
+          if (key === "p") {
+            driftState.dx = Math.sin(value) * DRIFT_X;
+            driftState.dy = Math.sin(value * 1.5) * DRIFT_Y;
+          }
+          applyCamera();
+        });
+        applyCamera();
+
+        // Halo pinned to the anchor in world space; it rides the camera.
+        // Explicit state BEFORE the timeline exists: the bloom fromTo sits
+        // mid-timeline, so without this set a seek landing before the cue
+        // would show the halo unstyled.
+        halo.style.left = anchorX + "%";
+        halo.style.top = anchorY + "%";
+        if (!haloOn) halo.remove();
+        else gsap.set(halo, { opacity: 0, scale: 0.55, xPercent: -50,
+                              yPercent: -50, transformOrigin: "50% 50%" });
+
+        // ENVELOPE (house law #7): fixed IN/ZOOM/OUT, elastic HOLD, never
+        // timeScaled; phases compress together when D is short.
+        var IN_BASE = 0.9;
+        var ZOOM_BASE = 1.1;
+        var OUT_BASE = exit === "hold" ? 0 : 0.5;
+        var STILLNESS = 0.35;
+        var totalBase = IN_BASE + ZOOM_BASE + OUT_BASE;
+        var scale = D < totalBase ? D / totalBase : 1;
+        var IN = IN_BASE * scale;
+        var ZOOM = ZOOM_BASE * scale;
+        var OUT = OUT_BASE * scale;
+        var OUT_START = D - OUT;
+
+        // The camera departs on its cue, clamped so the move never fights
+        // the entrance or the exit.
+        var zoomStart = Math.min(Math.max(zoomAt, IN),
+          Math.max(IN, OUT_START - ZOOM - 0.05));
+
+        window.__timelines = window.__timelines || {};
+        var tl = gsap.timeline({ paused: true });
+
+        // IN: one settle. Rise + soft scale + fade, smooth ease-out.
+        tl.fromTo(stage,
+          { opacity: 0, y: 48, scale: 0.965, transformOrigin: "50% 60%" },
+          { opacity: 1, y: 0, scale: 1, duration: IN, ease: "power3.out" }, 0);
+
+        // Camera servo: one move to the anchored region, then hold zoomed.
+        // The tween writes through the setter driver above — no onUpdate,
+        // so the camera lands on suppressed-event seeks too.
+        tl.fromTo(cam, { s: 1, x: 0, y: 0 }, {
+          s: zoom, x: targetX, y: targetY, duration: ZOOM,
+          ease: "power2.inOut", immediateRender: false,
+        }, zoomStart);
+
+        // Micro-drift: 2 and 3 INTEGER sine cycles that end at exactly zero
+        // before the authored stillness, so the final hold is dead still and
+        // every seek reproduces the same frame. dx/dy are a pure function of
+        // the driven p (the setter computes them).
+        var driftDuration = Math.max(0, OUT_START - STILLNESS);
+        if (driftDuration >= 1.2) {
+          tl.fromTo(drift, { p: 0 }, {
+            p: Math.PI * 2 * 2, duration: driftDuration, ease: "none",
+            immediateRender: false,
+          }, 0);
+        }
+
+        // Halo: soft bloom at the anchor as the camera arrives, then hold.
+        if (haloOn) {
+          tl.fromTo(halo,
+            { opacity: 0, scale: 0.55, xPercent: -50, yPercent: -50 },
+            { opacity: 0.85, scale: 1, xPercent: -50, yPercent: -50,
+              duration: 0.75 * scale, ease: "power2.out" },
+            zoomStart + ZOOM * 0.5);
+        }
+
+        // OUT: optional departure; "hold" (default) leaves the seam to the
+        // compositor / exitOnCut (THE EXIT LAW). The stage moves; the
+        // near-black canvas stays opaque (no base flash at the seam).
+        if (exit !== "hold") {
+          tl.to(stage, { opacity: 0, duration: OUT, ease: "power2.in" }, OUT_START);
+          if (exit === "up") {
+            tl.to(stage, { y: -44, duration: OUT, ease: "power2.in" }, OUT_START);
+          }
+        }
+
+        tl.seek(0);
+        window.__timelines["ui-focus-zoom"] = tl;
+      })();
+    </script>
+  </body>
+</html>

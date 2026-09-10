@@ -2,36 +2,48 @@ import { spawn } from "child_process";
 import { existsSync } from "fs";
 import path from "path";
 import { NextRequest, NextResponse } from "next/server";
-import { palmierStatePath, readJsonObject } from "../_lib";
+import { activePalmierHandoffBlock, loadHandoff } from "../_lib";
 import { activateGeneratedTimeline } from "./activate";
 import { currentPreflight } from "./current";
 import { runPalmierOwnership } from "../ownership/runner";
-import { producerRunActive } from "@/lib/server/producer-run-registry";
+import { canonicalPalmierDir, localPalmierRejection } from "../request";
+import {
+  guardProjectMutation,
+  mutationProjectRoot,
+} from "../../../_lib/project-mutation";
 
 export const dynamic = "force-dynamic";
-
-export interface Handoff {
-  projectPath: string;
-  timelineId: string;
-  planHash: string;
-  ownership: "sniper" | "palmier";
-}
-
-interface HandoffError {
-  error: string;
-  status: number;
-}
 
 /** Open the verified project and reveal its exact generated Sniper timeline. */
 export async function POST(req: NextRequest) {
   if (process.platform !== "darwin") {
     return NextResponse.json({ error: "Palmier launching is only supported on macOS." }, { status: 400 });
   }
-  const body = (await req.json().catch(() => null)) as { dir?: unknown } | null;
-  const dir = typeof body?.dir === "string" ? body.dir.replace(/\/$/, "") : "";
-  if (!dir || !path.isAbsolute(dir) || dir.split("/").includes("..")) {
-    return NextResponse.json({ error: "dir must be an absolute Producer directory" }, { status: 400 });
+  const rejection = localPalmierRejection(req);
+  if (rejection) {
+    return NextResponse.json({ error: rejection.error }, { status: rejection.status });
   }
+  const body = (await req.json().catch(() => null)) as { dir?: unknown } | null;
+  let dir: string;
+  try {
+    dir = canonicalPalmierDir(body?.dir);
+  } catch (error) {
+    return NextResponse.json({ error: (error as Error).message }, { status: 400 });
+  }
+  const guarded = guardProjectMutation({
+    projectRoot: mutationProjectRoot(dir),
+    producerDir: dir,
+    operation: "opening and handing off a Palmier revision",
+  });
+  if (guarded.response) return guarded.response;
+  try {
+    return await openPalmierHandoff(dir);
+  } finally {
+    guarded.lease.release();
+  }
+}
+
+async function openPalmierHandoff(dir: string): Promise<Response> {
   const activeBlock = activePalmierHandoffBlock(dir);
   if (activeBlock) return NextResponse.json({ error: activeBlock }, { status: 409 });
   if (!existsSync(path.join(dir, "edit_plan.json")) || !existsSync(path.join(dir, "final.mp4"))) {
@@ -76,13 +88,6 @@ export async function POST(req: NextRequest) {
   });
 }
 
-/** Ownership may not move while Sniper is still changing the managed project. */
-export function activePalmierHandoffBlock(dir: string): string | null {
-  return producerRunActive(dir)
-    ? "Sniper is still working on this project. Stop and keep its checkpoint before taking control in Palmier."
-    : null;
-}
-
 async function currentGate(dir: string, expectedHash: string): Promise<Response | null> {
   try {
     const current = await currentPreflight(dir);
@@ -95,37 +100,6 @@ async function currentGate(dir: string, expectedHash: string): Promise<Response 
     const message = error instanceof Error ? error.message : "Could not verify the current plan.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
-}
-
-export function loadHandoff(dir: string): Handoff | HandoffError {
-  const state = readJsonObject(palmierStatePath(dir));
-  const projectPath = typeof state?.projectPath === "string" && existsSync(state.projectPath)
-    ? state.projectPath
-    : null;
-  const timelineId = typeof state?.latestTimelineId === "string" ? state.latestTimelineId : null;
-  const planHash = typeof state?.lastPushPlanHash === "string" ? state.lastPushPlanHash : null;
-  const ownership = state?.ownership === "palmier" ? "palmier" : "sniper";
-  if (!projectPath || !timelineId || !planHash) {
-    return { error: "No verified Palmier handoff exists for this project yet.", status: 409 };
-  }
-  const parity = asObject(state?.parity);
-  const verification = asObject(state?.verification);
-  const proofMatches = verification?.planHash === planHash
-    && verification?.timelineId === timelineId;
-  if (state?.schemaVersion !== 4 || state?.mirrorMode !== "visual-master"
-      || parity?.mirrorReady !== true || verification?.ok !== true || !proofMatches) {
-    return {
-      error: "Palmier mirror proof is incomplete. Update the mirror before opening it.",
-      status: 409,
-    };
-  }
-  return { projectPath, timelineId, planHash, ownership };
-}
-
-function asObject(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
 }
 
 function runOpen(args: string[]): Promise<{ code: number; error: string }> {

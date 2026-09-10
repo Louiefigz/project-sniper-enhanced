@@ -9,7 +9,7 @@ workflow here. Ignore any of that — the code below is the whole contract.
   `scripts/producer/CLAUDE.md` → Graphics before authoring). Each `graphicsTrack`
   entry (`docs/producer/PRODUCER_MOTION_GRAPHICS_PLAN.md` §3.1) selects a comp by `kind` →
   `compositions/<kind>.html`.
-- **Layout:** `compositions/*.html` (the comps, ~46), `tokens.css`,
+- **Layout:** `compositions/*.html` (the comps, ~53 — incl. 7 catalog-ported 2026-08-28, see docs/producer/catalog-study/), `tokens.css`,
   `motion-tokens.js`, `icons/`, `renders/cache/` (content-hash render cache).
 
 ## The one render invocation (pinned)
@@ -24,7 +24,7 @@ with explicitly configured Node, browser, ffmpeg, and ffprobe executables:
     --workers 1 --no-browser-gpu --strict --strict-variables --json
 ```
 
-`hyperframes@0.7.33` and its transitive closure are pinned in
+`hyperframes@0.8.31` and its transitive closure are pinned in
 `package-lock.json`; install them with `npm ci`. `SNIPER_NODE_PATH`,
 `HYPERFRAMES_BROWSER_PATH`, `HYPERFRAMES_FFMPEG_PATH`, and
 `HYPERFRAMES_FFPROBE_PATH` must be absolute executable paths. The pipeline
@@ -54,10 +54,9 @@ renders a throwaway `_gs-<hash>.html` copy of the target comp.
    `graphics_render._set_root_duration`. (Child `.clip` elements keep their own.)
 4. **Determinism only** — no `Date.now()`, no `Math.random()`, no `repeat: -1`,
    no network fetches in comp logic. Renders must be byte-reproducible for the cache.
-5. **GSAP provenance is explicit.** `section-marker` loads pinned local
-   `vendor/gsap/gsap.min.js` for the G2 offline proof. The remaining comps still
-   load `cdn.jsdelivr.net/npm/gsap@…`, so they still require network until each
-   template is migrated and proven separately.
+5. **GSAP provenance is explicit.** Every registered comp loads the pinned local
+   `vendor/gsap/gsap.min.js`; remote render dependencies are forbidden. The
+   source-closure and capability-artifact tests block CDN reintroduction.
 
 ## Verification (NOT `npm run check`)
 

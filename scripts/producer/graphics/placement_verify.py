@@ -3,15 +3,18 @@
 
 ``free_space.verify_placement`` re-measures the COMPOSITE render (face +
 hair in the final frames) and asserts each graphic's placed bbox clears the
-face. It now runs for every anchor-resolved (non-explicit) face-anchored
-clip BY DEFAULT — the old ``SNIPER_VERIFY_PLACEMENT`` env gate is gone.
+face. It runs for every anchor-resolved face placement, including a
+``free-band`` clip marked face-aware by the shared placement authority.
 
 A2's deterministic false-FAIL classes on legal compositions are excused
 through the allow-vocabulary as SKIP-with-evidence, never silently:
 
 * pip_hole comps — the footage face lives INSIDE the transparent hole;
-* windows overlapping ``brollTrack`` — b-roll replaced the frames (no face);
-* windows overlapping hook-card overlays (``titleCards`` occupancy).
+* only the intervals covered by ``brollTrack`` (b-roll replaces those frames);
+* only the intervals covered by hook-card overlays (``titleCards`` occupancy).
+
+Partial coverage never exempts the remaining graphic. Every uncovered span
+gets its own measurement and evidence, including after an earlier probe fails.
 
 Operator-explicit placements ARE verified, but a hit is WARN-with-evidence,
 NEVER FAIL — the pin is the operator's call. Verdict severity honors the A3
@@ -27,8 +30,9 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field, replace
 from typing import Callable, Optional
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -37,6 +41,9 @@ import gate_policy  # noqa: E402
 from planner import geometry_calibration  # noqa: E402
 from planner.free_space import verify_placement  # noqa: E402
 from planner.graphics_anchors import FACE_ANCHORS, _content_bbox  # noqa: E402
+from graphics.placement_coverage import placement_spans  # noqa: E402
+from planner.verified_frame_sampling import FrameIndex, selected_frame_samples  # noqa: E402
+from producer_config import FREE_SPACE  # noqa: E402
 
 VERIFY_GATE = "placement_verify"
 gate_policy.register_gate(VERIFY_GATE, "FAIL")
@@ -45,14 +52,6 @@ gate_policy.register_gate(VERIFY_GATE, "FAIL")
 # never silent (geometry contract v3 #1).
 ENV_FALLBACK_GATE = "placement_environment"
 gate_policy.register_gate(ENV_FALLBACK_GATE, "WARN")
-
-#: (occlusions key, SKIP evidence) — the brollTrack / hook-card vocabulary.
-_OCCLUSION_VOCAB = (
-    ("broll", "brollTrack replaces the frames in the window — no face to clear"),
-    ("cards", "hook-card overlay occupies the window — card occupancy is "
-              "unmodeled"),
-)
-
 
 @dataclass
 class VerifyContext:
@@ -72,6 +71,7 @@ class VerifyContext:
     occlusions: Optional[dict] = None
     emit: Optional[Callable] = None
     note: Optional[str] = None
+    frame_index: FrameIndex | None = field(default=None, init=False)
 
     def say(self, **fields) -> None:
         """Forward one status row to the emitter when one is wired."""
@@ -153,19 +153,6 @@ def resolve_severity(producer_dir: str | None) -> tuple[str, str | None]:
                                     calibrated=margin is not None), None
 
 
-def _skip_reason(clip: dict, occlusions: dict | None) -> str | None:
-    """The allow-vocabulary SKIP reason for one clip, or None (verify it)."""
-    if clip.get("pipHole"):
-        return ("pip_hole comp — the footage face lives inside the "
-                "transparent hole; face clearance is inapplicable")
-    s, e = float(clip["outStart"]), float(clip["outEnd"])
-    for key, why in _OCCLUSION_VOCAB:
-        wins = (occlusions or {}).get(key) or []
-        if any(s < float(w[1]) and e > float(w[0]) for w in wins):
-            return why
-    return None
-
-
 def _placed_bbox(clip: dict) -> tuple:
     """The clip's landed content bbox (recorded, else re-probed + offset)."""
     placed = clip.get("placedBBox")
@@ -184,32 +171,40 @@ def _declare(ctx: VerifyContext, clip: dict, verdict: gate_policy.Verdict,
             **verdict.to_dict())
 
 
-def _verify_one(clip: dict, video_out: str, ctx: VerifyContext) -> dict | None:
-    """Check one face-anchored clip; return a detail dict only when blocking.
-
-    WARN-severity hits and every SKIP/environment path return ``None`` (log
-    + continue — never a raise); a FAIL-severity hit on an anchor-resolved
-    placement returns its detail for the caller to fail loudly.
-    """
-    skip = _skip_reason(clip, ctx.occlusions)
-    if skip:
-        _declare(ctx, clip, gate_policy.Verdict(VERIFY_GATE, "SKIP", skip,
-                                                lane="graphics"),
-                 "placement_verify_skip")
+def _probe_span(clip: dict, video_out: str, ctx: VerifyContext) -> tuple | None:
+    """Choose actual uncovered displayed frames before invoking geometry."""
+    bounds = (float(clip["outStart"]), float(clip["outEnd"]))
+    if not ctx.occlusions or not any(ctx.occlusions.values()):
+        return verify_placement(video_out, *bounds, clip["placedBBox"])
+    samples = ctx.frame_index.samples(bounds, ctx.occlusions,
+                                       FREE_SPACE["samples_per_window"])
+    if not samples:
+        _declare(ctx, clip, gate_policy.Verdict(
+            VERIFY_GATE, "SKIP", "no unoccluded displayed frame in this interval",
+            lane="graphics"), "placement_verify_skip")
         return None
+    with selected_frame_samples(video_out, samples):
+        ok, detail = verify_placement(video_out, *bounds, clip["placedBBox"])
+    return ok, {**detail, "sampledPts": list(samples)}
+
+
+def _verify_span(clip: dict, video_out: str, ctx: VerifyContext) -> dict | None:
+    """Check one uncovered span without suppressing subsequent measurements."""
     try:
-        placed = _placed_bbox(clip)
-        ok, detail = verify_placement(video_out, float(clip["outStart"]),
-                                      float(clip["outEnd"]), placed)
-    except (ImportError, OSError, RuntimeError, ValueError) as exc:
+        result = _probe_span(clip, video_out, ctx)
+    except (ImportError, OSError, RuntimeError, ValueError, subprocess.SubprocessError) as exc:
         _declare(ctx, clip, gate_policy.Verdict(
             VERIFY_GATE, "SKIP", "verify unavailable — "
             f"{type(exc).__name__}: {str(exc)[:160]}", lane="graphics"),
             "placement_verify_skip")
         return None
+    if result is None:
+        return None
+    ok, detail = result
     if ok:
         ctx.say(status="placement_verified", anchor=clip.get("anchor"),
-                **detail)
+                **{**detail, "outStart": float(clip["outStart"]),
+                   "outEnd": float(clip["outEnd"])})
         return None
     evidence = json.dumps(detail, sort_keys=True)
     if clip.get("placed"):
@@ -223,6 +218,30 @@ def _verify_one(clip: dict, video_out: str, ctx: VerifyContext) -> dict | None:
         f"graphic intersects the measured face+hair — {evidence}",
         lane="graphics"), "placement_verify_hit")
     return detail if ctx.severity == "FAIL" else None
+
+
+def _verify_one(clip: dict, video_out: str, ctx: VerifyContext) -> dict | None:
+    """Partition coverage, resolve geometry once, and check every visible span."""
+    spans = placement_spans(clip, ctx.occlusions, rendered=bool(ctx.occlusions))
+    unavailable, placed = None, None
+    try:
+        if any(span.reason is None for span in spans):
+            placed = _placed_bbox(clip)
+    except (ImportError, OSError, RuntimeError, ValueError) as exc:
+        unavailable = f"verify unavailable — {type(exc).__name__}: {str(exc)[:160]}"
+    failures = []
+    for span in spans:
+        scoped = {**clip, "outStart": span.start, "outEnd": span.end,
+                  "placedBBox": placed}
+        reason = span.reason or unavailable
+        if reason:
+            _declare(ctx, scoped, gate_policy.Verdict(
+                VERIFY_GATE, "SKIP", reason, lane="graphics"), "placement_verify_skip")
+            continue
+        failure = _verify_span(scoped, video_out, ctx)
+        if failure is not None:
+            failures.append({**failure, "outStart": span.start, "outEnd": span.end})
+    return {"intervalFailures": failures} if failures else None
 
 
 def run_verify(clips: list, video_out: str, ctx: VerifyContext) -> int:
@@ -240,13 +259,16 @@ def run_verify(clips: list, video_out: str, ctx: VerifyContext) -> int:
         RuntimeError: Only in calibrated FAIL mode, when an anchor-resolved
             placement intersects the measured face+hair.
     """
+    ctx = replace(ctx)
+    ctx.frame_index = FrameIndex(video_out)
     if ctx.note:
         ctx.say(status="placement_verify_note",
                 **gate_policy.Verdict(VERIFY_GATE, "WARN", ctx.note,
                                       lane="graphics").to_dict())
     checked, failures = 0, []
     for clip in clips:
-        if clip.get("anchor") not in FACE_ANCHORS:
+        if (clip.get("anchor") not in FACE_ANCHORS
+                and not clip.get("faceAware")):
             continue
         checked += 1
         failure = _verify_one(clip, video_out, ctx)

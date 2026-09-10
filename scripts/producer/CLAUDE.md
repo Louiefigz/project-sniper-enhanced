@@ -1,5 +1,24 @@
 # CLAUDE.md — PRODUCER (`scripts/producer/`)
 
+September 9 native-work resource rule: use `studio/managed_preview.py open`
+for authored HyperFrames projects, or the existing Studio open command which
+now delegates to it. It reuses one current preview across draft folders and
+verifies retained descendant cleanup before replacement. Do not start raw SDK
+preview daemons. Native rendering and browser/media QC must acquire the shared
+`native_work_lease.NativeWorkLease` heavy lane and use resource admission plus
+continuous owned-tree monitoring; release only after verified cleanup. These
+controls are independent of the legacy renderer described below. See
+`docs/producer/C0679_END_TO_END_OPTIMIZATION_AUDIT_2026-09-09.md` for the failed
+attempts, tested controls, current native direction and remaining limitations.
+
+For explicitly selected native-project work, the conservative static preflight
+is `studio/native_preflight.py <canonical-staged-project> --output-dir <new-evidence-dir>`.
+Use the installed `SNIPER_NODE_PATH`. It reuses official SDK project lint and
+path resolution without network, probes, rendering or project edits. Run it
+after asset staging and before guarded sample/master work; its pass is never
+render/quality admission. Animated sample and full-output QC remain required.
+See `docs/producer/NATIVE_PREFLIGHT.md` for scope, bounds and failure semantics.
+
 The AI video editor: raw footage + a brain-authored `edit_plan.json` → a finished
 short/long via a deterministic Python + ffmpeg/hyperframes renderer, then Audit B.
 
@@ -107,6 +126,21 @@ happens HERE, upstream — not in the renderer.
   nothing here.
 - `edit/render_cut.py` — standalone CLIPPER-ranges → finished master (quick win; no
   reframe/captions). Consumes ALREADY-decided keep ranges.
+- `edit/cut_repair.py` + `target_resolver.py` + `non_ripple.py` — P2
+  occurrence-aware `cut.restoreSpeech` analysis. They enumerate bounded
+  duration-neutral candidates or return `NON_RIPPLE_IMPOSSIBLE`; they never
+  mutate the current picture lock.
+- `edit/repair_fragment.py` + `repair_composite.py` — P2 media executor. The
+  first renders one exact dirty frame/sample unit; the second must rebuild and
+  fully decode the complete candidate, enforce terminal pre-AAC `B(F)`, and
+  prove decoded picture/PCM outside the authorized closure before the
+  controller can call the candidate proved.
+  Ask Editor promotion uses a separate durable
+  `PICTURE_LOCKED → CUT_REVIEW → PICTURE_LOCKED` TypeScript transition. It
+  accepts only a content-addressed execution package containing the exact
+  Python candidate plus real QC/operator receipts. The Python repair action
+  stays bound to its original parent; never rebase it onto the review child or
+  manufacture the missing acoustic/audition package.
 - `edit/study_edit_diff.py` — learns the editor's cut policy by diffing RAW vs EDITED.
 - `edit/cover_select.py` — LL-008 slip-cover window scoring (operator review
   2026-07-10: the v2 45.3-47.8s wide cover read as an OUTTAKE — silent,
@@ -137,6 +171,21 @@ should slot into the same gate (graphics / broll / motion family).
 - `graphics_copy.py` — deterministic converge points: brain-written copy + code
   timing → a placed candidate (`fill_list_spec`, `fill_illustration_spec`). The
   `fill_*_spec` seam is where brain copy meets code timing. No LLM calls here.
+- `graphics/catalog_discovery.py` (+ `_sources`, `_records`, `_cli`) — READ-ONLY
+  discovery over the WHOLE recorded catalog: the vendored mirror index/lock/
+  sources (`vendor/hyperframes-catalog/`), the mechanism study
+  (`docs/producer/catalog-study/`) and the integrated registry, joined to the
+  MEASURED matrix through the existing `comp_capability_artifact` reader (never
+  a second validator, never the probe). `catalog_discovery_cli.py search
+  "<need>" [--type --declared-aspect --status --tag --limit]` / `lookup <name>`
+  → JSON or text with per-item status (`reference` / `reference-missing-source`
+  / `integrated-measured` / `integrated-unmeasured`), source path + existence,
+  declared vs measured canvas kept separate, evidence-backed adaptation notes,
+  loaded provenance + lock/study/disk disagreements. The explicit
+  `PORTED_KINDS` mapping joins a local kind to its upstream item only when the
+  template declares its provenance; same-named items never share capability.
+  Evidence, not admission — the plan/scene adapters and gates still decide.
+  Tests: `test_catalog_discovery.py`, `test_catalog_discovery_fixtures.py`.
 - Placement: `planner/free_space.py` (absolute free-space map, SAFE_BOX-clamped) +
   `planner/graphics_anchors.py` (`resolve_offset_v2` measures + places into the
   emptiest legal region; v1 fallback). Reuse for any placement — it already clamps
@@ -167,11 +216,13 @@ graphics, our graphics are output-space overlays → the base cleanly separates:
 
 1. **BASE** — `render.py --skip-graphics <plan> <manifest> <base_dir>` masters the
    whole pipeline EXCEPT the graphics composite → `base_dir/final.mp4` +
-   `base.fingerprint.json` (a hash of every non-graphics plan field). Rendered once.
+   `base.fingerprint.json` (a hash of every base-shaping plan field). Rendered once.
 2. **ASSEMBLE** — `assemble.py <base.mp4> <plan> <out.mp4> [--fingerprint …]`
    renders each `graphicsTrack` entry (content-hash cached) and overlays them onto
-   the base in ONE ffmpeg pass (audio stream-copied from the mastered base). Edit a
-   graphic → only that clip re-renders → re-assemble in seconds; the base is reused.
+   the base in ONE ffmpeg pass (audio stream-copied from the mastered base). An
+   ordinary graphic edit rerenders only that clip and the composite; graphics that
+   change long-form recomposition or legacy-caption suppression correctly rebuild
+   the base.
 
 **Fingerprints are SPLIT** (`fingerprints.py`, shared by render + assemble):
 `base_fingerprint` (legacy full print — graphics/planVersion/music excluded via
@@ -195,9 +246,24 @@ split of the final label; PRE-encode frames, same 0.08 threshold;
 (identical 2598 on our H.264 MP4s, 0.085s vs 16.5s), and the composite encodes
 with `ENCODE["composite_preset"]` = veryfast (16.9s→9.4s; CRF 12 still governs
 quality — VideoToolbox rejected: slower AND loses CRF).
-**Longform-first**: graphics composite after master, so burned-caption suppression
-under an own-screen takeover (shorts) isn't available here yet — shorts keep the
-monolithic path.
+
+**The graphics/base boundary is explicit, not mode-wide.**
+`graphics_base_effects.py` projects only long-form rail/recompose geometry and
+legacy-caption suppression windows into the base/video fingerprints. In a
+`--skip-graphics` render, those windows remove legacy ASS cues before the base
+encode; explicit `CaptionTrackV1` captions remain post-base shards. Ordinary
+scene copy and `presenterFrame` alpha/format changes retain the base in both
+short and long-form workflows.
+
+**The render-effect vocabulary is closed.**
+`render-effect-registry-v1.json` owns every released public plan/manifest root;
+`render_effect_registry.py` rejects unknown or unreleased roots and
+`render_effect_discovery.py` scans the current renderer import closure for
+unregistered literal readers. `render_stage_roots.py` compiles domain-separated
+timeline, base, per-scene, composite, final, and manifest roots into the current
+`RenderGraphV1` bridge. Generated registry mutations are the authority for which
+roots move and whether base reuse is legal; add a registry row and mutation
+before teaching the renderer a new public field.
 
 **`--auto-base` is the smart re-render dispatch** (the editor's one button):
 `assemble.py <base> <plan> <out> --fingerprint base.fingerprint.json --auto-base`
@@ -291,6 +357,31 @@ At Palmier handoff this mastered bus replaces the NLE's raw linked audio; see
   coordinate transform yet, fail loud.
   `reframe.track` is reserved (only `false` accepted — tracker not yet wired).
   reframe is BASE-side: any layout/crop edit flips the base fingerprint.
+- `audio/program_finish_contract.py` + `audio/program_finish_bus.py` — **source-float-v2
+  audio finishing** (2026-09-08). On the v2 path `audioEnhance`, `audioGain` and
+  `transitions[].sfx` are NOT base stages: `render.py` skips the legacy enhance/gain
+  stages and strips seam SFX from the transitions stage once the source-float
+  admission holds, and assemble applies them on the retained float dialogue bus at
+  program-master time (`program_mix_bus.build_program_mix` → `render_finishing`):
+  cleanup (catalog ffmpeg chain; `separate` is refused, it needs a downloaded
+  Demucs runtime) → measured-latency removal (afftdn/arnndn are not latency-free
+  and do not flush their tail; the chain input is padded by the measured delay +
+  100 ms guard, then the delay is trimmed) → the existing trapezoid gain windows
+  (`audio_gain.build_filter`, evaluated every 256 samples) → authored SFX summed
+  sample-exactly (engine whoosh via `motion.transitions.synth_whoosh`, pack items
+  via `sfx_library.resolve`; hit lands on the seam) → music bed ducked by the
+  finished dialogue WITHOUT SFX → the single whole-program master. Everything stays
+  pcm_f32le at the bus clock. `audio_policy_reason(plan, "source-float-v2")` now
+  validates finishing (`finishing_reason`) instead of refusing it; v1 still refuses.
+  The program-master receipt carries `finishing` (settings, filters, measured delay,
+  model/SFX sha256s, finished stem identities) and `audioProgramInputHash` digests
+  it, so a finishing revision invalidates excerpts/pointers/graph node-final while
+  the raw bus (cutTrack+target domain) and the base stay current
+  (`assemble._finishing_invariant_current`, `cut_delivery_authority.base_plan_lineage_digest`,
+  `assemble_picture_reuse` use `finishing_free_plan`). `assemble_source_audio` reuses
+  the retained program master for non-audio revisions after `load_program_master`
+  re-proves it (`programMasterReused`). Tests: `test_program_finish_contract.py`,
+  `test_program_finish_media.py`, `test_assemble_finishing_media.py`.
 - `audio/` — `master` (encode + loudnorm + cover), `audio_enhance` (plan.audioEnhance
   dialogue cleanup — the SINGLE entry point the renderer calls; presets in
   `producer_config.AUDIO_ENHANCE`: `voice`/`voice-strong` (afftdn — steady noise
@@ -316,7 +407,12 @@ At Palmier handoff this mastered bus replaces the NLE's raw linked audio; see
   `overlays` (hook cards),
   `caption_corrections`, `bake_emoji`, `longform_outputs` (SRT + chapters — WIRED
   into `render.py` `longform_sidecar_stage`; longform ships the SRT even when not
-  burning, so a longform is never caption-less).
+  burning, so a longform is never caption-less). Explicit `CaptionTrackV1`
+  authority uses `caption_plan_pipeline` → `caption_shards` (cue-local,
+  font-byte-bound RGBA clips) → `caption_shard_composite`; the same compilation
+  writes SRT, semantic chapters, regenerable Palmier bindings, authority, and
+  Audit B evidence. Caption-only changes restore the proved caption-free
+  composite and rebuild only dirty shard keys.
 - **`graphics/pip_takeover.py` is UNWIRED** (the ANIMATED shrink-to-PIP,
   NATEHERK §5 item 10) — `render.py` never calls it; `plan_lint_motion` still
   HARD-REJECTS `needsPip`/`canvas-pip-list` entries. BUT the STATIC
@@ -466,6 +562,17 @@ At Palmier handoff this mastered bus replaces the NLE's raw linked audio; see
 ## Ingest & test
 
 - `ingest.py` / `ingest_probe.py` / `ingest_scan.py` — build `asset_manifest.json`.
+  Canonical Producer ingest first routes raw sources, input-project b-roll, and
+  input-project music through `ingest_admission.py`; manifest executable paths
+  name immutable snapshots and bind a content-addressed source-set receipt.
+  `render.py`/`assemble.py` reverify that receipt when present. Every
+  `broll_pool.py` command requires the manifest, rejects late additions until
+  canonical re-ingest, and probes/extracts only admitted snapshots. Reference
+  video intake has a separate retained admission authority, and canonical
+  `music.path` is restricted to admitted manifest rows. Reference text
+  sidecars, legacy no-flag CLI calls, and Palmier live-build imports remain
+  separate boundaries; see
+  `docs/findings/INGEST_ADMISSION_IS_NOT_ALL_INGRESS_ADMISSION.md`.
   Repo-bundled starter beds (`PROJECT_SNIPER/assets/music/*`) auto-register into
   `manifest.music` AFTER the project's own `music/` (ids continue `music-N`,
   `source: "builtin"`), so `plan.music.assetId` resolves out of the box.

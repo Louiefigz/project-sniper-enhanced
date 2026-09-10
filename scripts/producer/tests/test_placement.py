@@ -9,6 +9,7 @@ Covers the three legs of the contract:
     (error), shorts SAFE_BOX edges (warning naming the edge), own-screen ban.
 """
 import math
+import copy
 import unittest
 from unittest import mock
 
@@ -16,7 +17,11 @@ from _common import *  # noqa: F401,F403
 
 from graphics import delivery_geometry as dg
 from graphics import graphics_stage as gs
+from graphics import placement_context as pc
 from graphics import stage_placement as sp
+from planner import occupancy as occ
+from planner import free_space_sample as fss
+from producer_config import PLACEMENT_SCALE
 
 # A synthetic rendered-content footprint (x0, y0, x1, y1) on the comp canvas.
 _CONTENT = (200, 855, 880, 1055)
@@ -162,6 +167,7 @@ class AbsentPlacementPathTests(unittest.TestCase):
                     "kind": "stat-card", "fmt": "mov"}
         dims = {"base.mp4": (3840, 2160), "comp.mov": (1920, 1080)}
         with mock.patch.object(gs, "render_entry", return_value=rendered), \
+             mock.patch.object(gs, "_clip_fps", return_value=30.0), \
              mock.patch.object(gs, "resolve_placement", return_value=(0, 0, {
                  "anchor": "free-band", "region": None,
              })), mock.patch.object(gs, "_clip_dims",
@@ -196,6 +202,20 @@ class AbsentPlacementPathTests(unittest.TestCase):
                 gs._delivery_geometry("comp.mov", (-240, -120), meta,
                                       (3840, 2160))
 
+    def test_delivery_resolved_4k_face_anchor_is_not_double_scaled(self) -> None:
+        meta = {"anchor": "headroom", "region": "headroom",
+                "faceAware": True, "authoredCanvas": [1920, 1080],
+                "canvas": [3840, 2160], "scaledDims": [3840, 2160],
+                "contentBBox": [600, 400, 1800, 1000],
+                "placedBBox": [120, 160, 1320, 760]}
+        with mock.patch.object(dg, "_clip_dims", return_value=(1920, 1080)):
+            x, y, fitted = gs._delivery_geometry(
+                "comp.mov", (-480, -240), meta, (3840, 2160))
+        self.assertEqual((x, y), (-480, -240))
+        self.assertEqual(fitted["placedBBox"], meta["placedBBox"])
+        self.assertEqual(fitted["scaledDims"], [3840, 2160])
+        self.assertEqual(fitted["canvasScale"], [2.0, 2.0])
+
     def test_zero_offset_filter_graph_is_byte_stable(self) -> None:
         clips = [{"path": "c.mov", "outStart": 2.0, "outEnd": 4.0,
                   "anchor": "free-band", "x": 0, "y": 0}]
@@ -211,6 +231,165 @@ class AbsentPlacementPathTests(unittest.TestCase):
                   "anchor": "free-band", "x": -140, "y": -555}]
         graph, _ = gs._build_graph(clips)
         self.assertIn("overlay=x=-140:y=-555:", graph)
+
+
+class FaceAwareFreeBandTests(unittest.TestCase):
+    """Portrait free-band clips inherit face authority and avoid occlusion."""
+
+    @staticmethod
+    def _map():
+        return occ.build_map(
+            (240.0, 724.0, 444.0, 444.0), set(), (1080, 1920),
+            occ.OccupancyExtras(),
+        )
+
+    def test_global_face_box_is_bound_without_mutating_plan(self) -> None:
+        plan = {
+            "faceBBoxNorm": [0.2, 0.3, 0.4, 0.2],
+            "graphicsTrack": [
+                _entry(),
+                _entry(anchor="headroom"),
+                _entry(anchor="own-screen"),
+                _entry(placement={"x": 60, "y": 300}),
+            ],
+        }
+        before = copy.deepcopy(plan)
+        track = pc.bind_plan_face_bbox(plan["graphicsTrack"], plan)
+        self.assertEqual(track[0]["faceBBoxNorm"], plan["faceBBoxNorm"])
+        self.assertEqual(track[1]["faceBBoxNorm"], plan["faceBBoxNorm"])
+        self.assertNotIn("faceBBoxNorm", track[2])
+        self.assertNotIn("faceBBoxNorm", track[3])
+        self.assertEqual(plan, before)
+
+    def test_malformed_global_face_box_fails_closed(self) -> None:
+        plan = {"faceBBoxNorm": [0.2, 0.3, float("nan"), 0.2],
+                "graphicsTrack": [_entry()]}
+        with self.assertRaisesRegex(ValueError, "faceBBoxNorm"):
+            pc.bind_plan_face_bbox(plan["graphicsTrack"], plan)
+
+    def test_malformed_entry_box_uses_valid_global_without_mutation(self) -> None:
+        plan = {"faceBBoxNorm": [0.2, 0.3, 0.4, 0.2],
+                "graphicsTrack": [
+                    _entry(faceBBoxNorm=[0.8, 0.3, 0.4, 0.2])]}
+        before = copy.deepcopy(plan)
+        track = pc.bind_plan_face_bbox(plan["graphicsTrack"], plan)
+        self.assertEqual(track[0]["faceBBoxNorm"], plan["faceBBoxNorm"])
+        self.assertEqual(plan, before)
+
+    def test_malformed_entry_box_without_global_fails_closed(self) -> None:
+        plan = {"graphicsTrack": [_entry(faceBBoxNorm=[0.2, 0.3, 0.0, 0.2])]}
+        with self.assertRaisesRegex(ValueError, "graphicsTrack faceBBoxNorm"):
+            pc.bind_plan_face_bbox(plan["graphicsTrack"], plan)
+
+    def test_normalized_face_box_requires_positive_in_bounds_area(self) -> None:
+        self.assertTrue(ga.valid_face_bbox([0.2, 0.3, 0.4, 0.2]))
+        bad = (
+            [0.2, 0.3, 0.0, 0.2], [0.2, 0.3, 0.4, 0.0],
+            [-0.1, 0.3, 0.4, 0.2], [0.8, 0.3, 0.4, 0.2],
+            [0.2, 0.9, 0.4, 0.2], [0.2, 0.3, float("nan"), 0.2],
+        )
+        for bbox in bad:
+            self.assertFalse(ga.valid_face_bbox(bbox), bbox)
+            self.assertFalse(plm._valid_bbox(bbox), bbox)
+
+    def test_plan_lint_resolution_skips_bad_entry_for_valid_global(self) -> None:
+        bad_entry = {"faceBBoxNorm": [0.8, 0.3, 0.4, 0.2]}
+        global_bbox = [0.2, 0.3, 0.4, 0.2]
+        self.assertEqual(
+            plm._resolve_face_bbox(bad_entry, None, global_bbox),
+            global_bbox,
+        )
+
+    def _resolve(self, content: tuple, free_map=None) -> tuple:
+        entry = _entry(faceBBoxNorm=[0.2, 0.3, 0.4, 0.2])
+        with mock.patch.object(
+                fs, "build_free_map", return_value=free_map or self._map()), \
+             mock.patch.object(ga, "_content_bbox", return_value=content), \
+             mock.patch.object(ga, "_clip_dims", return_value=(1080, 1920)):
+            return ga.resolve_offset_v2(entry, "comp.mov", "base.mp4")
+
+    def test_clear_authored_section_marker_is_preserved_and_measured(self) -> None:
+        x, y, meta = self._resolve((0, 206, 537, 511))
+        self.assertEqual((x, y), (0, 0))
+        self.assertEqual(meta["region"], "authored-clear")
+        self.assertTrue(meta["faceAware"])
+        self.assertEqual(meta["placedBBox"], [0, 206, 537, 511])
+        self.assertEqual(len(meta["expandedFace"]), 4)
+
+    def test_face_occluding_chip_row_moves_above_the_hair(self) -> None:
+        _x, _y, meta = self._resolve((234, 731, 754, 1016))
+        self.assertEqual(meta["region"], "headroom")
+        self.assertLessEqual(meta["placedBBox"][3], meta["expandedFace"][1])
+        self.assertNotEqual(meta["placedBBox"], [234, 731, 754, 1016])
+
+    def test_tall_chip_stack_downscales_to_a_legal_headroom_region(self) -> None:
+        _x, _y, meta = self._resolve((153, 400, 835, 1100))
+        self.assertEqual(meta["region"], "headroom")
+        self.assertLess(meta["scale"], 1.0)
+        self.assertGreaterEqual(meta["scale"], PLACEMENT_SCALE["min"])
+        self.assertIn("scaledDims", meta)
+        self.assertLessEqual(meta["placedBBox"][3], meta["expandedFace"][1])
+
+    def test_unplaceable_portrait_footprint_raises_typed_failure(self) -> None:
+        tight = occ.build_map(
+            (240.0, 400.0, 444.0, 444.0), set(), (1080, 1920),
+            occ.OccupancyExtras(),
+        )
+        with self.assertRaises(occ.NoLegalRegion):
+            self._resolve((0, 0, 1080, 1920), tight)
+
+    def test_4k_landscape_solver_uses_delivery_space_end_to_end(self) -> None:
+        fmap = occ.build_map(
+            (1500.0, 600.0, 500.0, 500.0), set(), (3840, 2160),
+            occ.OccupancyExtras(hair_top=520.0),
+        )
+        entry = _entry(anchor="headroom",
+                       faceBBoxNorm=[0.39, 0.28, 0.13, 0.23])
+        with mock.patch.object(fs, "build_free_map", return_value=fmap), \
+             mock.patch.object(ga, "_content_bbox",
+                               return_value=(300, 200, 900, 400)), \
+             mock.patch.object(ga, "_clip_dims", return_value=(1920, 1080)):
+            x, y, meta = ga.resolve_offset_v2(
+                entry, "comp.mov", "base.mp4")
+        self.assertEqual(meta["canvas"], [3840, 2160])
+        self.assertEqual(meta["authoredCanvas"], [1920, 1080])
+        self.assertEqual(meta["contentBBox"], [600.0, 400.0, 1800.0, 800.0])
+        self.assertEqual(meta["scaledDims"], [3840, 2160])
+        self.assertLessEqual(meta["placedBBox"][3], meta["expandedFace"][1])
+        with mock.patch.object(dg, "_clip_dims", return_value=(1920, 1080)):
+            fitted = dg.fit_delivery_geometry(
+                "comp.mov", (x, y), meta, (3840, 2160))
+        self.assertEqual(fitted[:2], (x, y))
+
+    def test_sampler_grid_uses_decoded_landscape_dimensions(self) -> None:
+        import numpy as np
+        import cv2
+
+        cap = mock.Mock()
+        cap.isOpened.return_value = True
+        cap.get.side_effect = lambda field: (
+            384 if field == cv2.CAP_PROP_FRAME_WIDTH else 216)
+        frame = np.zeros((216, 384, 3), dtype=np.uint8)
+        with mock.patch.object(cv2, "VideoCapture", return_value=cap), \
+             mock.patch("motion.face_track._load_cascade", return_value=object()), \
+             mock.patch("motion.face_track._sample_times", return_value=[1.0]), \
+             mock.patch("motion.face_track._read_at", return_value=frame), \
+             mock.patch("motion.visual_state._largest_face", return_value=None), \
+             mock.patch.object(fss, "busy_cells", return_value=set()) as busy:
+            _frames, _face, _cells, canvas = fss.sample_window(
+                "landscape.mp4", 0.0, 2.0)
+        self.assertEqual(canvas, (384, 216))
+        self.assertEqual(busy.call_args.args[1].canvas, (384, 216))
+
+    def test_search_boundary_motion_is_not_claimed_as_measured_hair(self) -> None:
+        import numpy as np
+
+        frames = []
+        for x in (12, 32, 52, 22, 42):
+            frame = np.zeros((100, 100, 3), dtype=np.uint8)
+            frame[1:30, x:x + 12] = 255
+            frames.append(frame)
+        self.assertIsNone(fss.measure_hair_top(frames, 50.0, 80.0))
 
 
 class PlacementLintTests(unittest.TestCase):

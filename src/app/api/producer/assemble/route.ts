@@ -18,6 +18,7 @@ import {
 } from "@/lib/server/producer-run-registry";
 import { guardProjectMutation, mutationProjectRoot } from "../../_lib/project-mutation";
 import { assertTemplateUsageApprovalCurrent } from "@/lib/server/template-usage-approval";
+import { currentRenderGraphArgs } from "@/lib/server/current-render-graph-command";
 
 export const maxDuration = 600;
 export const dynamic = "force-dynamic";
@@ -77,8 +78,15 @@ export async function POST(req: NextRequest) {
     throw e;
   }
 
-  const args = [ASSEMBLE, baseVideo, planPath, outPath, "--auto-base", "--manifest", manifestPath];
-  if (existsSync(fingerprint)) args.push("--fingerprint", fingerprint);
+  const rendererArgs = [
+    ASSEMBLE, baseVideo, planPath, outPath, "--auto-base",
+    "--manifest", manifestPath, "--require-source-set-admission",
+  ];
+  if (existsSync(fingerprint)) rendererArgs.push("--fingerprint", fingerprint);
+  const args = currentRenderGraphArgs({
+    phase: "assemble", producerDir: dir, planPath, manifestPath,
+    basePath: baseVideo, outputPath: outPath, rendererArgs,
+  });
   dlog("producer:assemble", "spawn assemble.py", { dir, args: args.slice(1) });
   const guarded = guardProjectMutation({
     projectRoot: mutationProjectRoot(dir),

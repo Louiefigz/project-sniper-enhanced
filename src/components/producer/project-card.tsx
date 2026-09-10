@@ -5,6 +5,7 @@ import { Check, ChevronDown, ExternalLink, Loader2, Pencil, Trash2, X } from "lu
 import { Button } from "@/components/ui/button";
 import { canOpenProject } from "@/lib/producer/project-state";
 import { projectCardPresentation } from "@/lib/producer/project-card-state";
+import { guidedCheckpointOpenLabel, isGuidedCheckpoint } from "@/lib/producer/guided-checkpoint-state";
 import { StageActionButton, type IngestedPayload } from "./stage-actions";
 import { CutawayDecision, ProjectDetails, SegmentRows } from "./project-card-details";
 import ProjectPalmierButton, { ProjectCandidateQcButton } from "./project-palmier-button";
@@ -132,6 +133,7 @@ function ActionBlock(props: ActionBlockProps) {
     </div>
   ) : null;
   const running = status.run?.status === "running";
+  const cutCheckpoint = isGuidedCheckpoint(status.run);
   const presentation = projectCardPresentation({
     origin: status.origin, intent: status.intent, stages: status.stages,
     run: status.run, palmier: status.palmier, finalArtifact: status.finalArtifact,
@@ -143,21 +145,22 @@ function ActionBlock(props: ActionBlockProps) {
       size="xs"
       onClick={() => props.onOpen(status.producerDir, p.title)}
     >
-      {running ? "Open Sniper progress" : status.stages.final
+      {cutCheckpoint ? guidedCheckpointOpenLabel(status.run)
+        : running ? "Open Sniper progress" : status.stages.final
         ? "Open approved Sniper video" : status.finalArtifact.state === "unapproved"
           ? "Inspect unapproved render" : "Inspect Sniper draft"}
     </Button>
   ) : null;
   return (
     <div className="flex flex-wrap items-start justify-end gap-1.5">
-      <ProjectPalmierButton status={status} title={p.title} onMessage={props.onPalmierMessage}
+      {!cutCheckpoint && <ProjectPalmierButton status={status} title={p.title} onMessage={props.onPalmierMessage}
         onChanged={props.onRefresh}
-        primary={presentation.primary === "open_palmier"} />
-      <ProjectCandidateQcButton status={status} onMessage={props.onPalmierMessage}
-        onChanged={props.onRefresh} />
+        primary={presentation.primary === "open_palmier"} />}
+      {!cutCheckpoint && <ProjectCandidateQcButton status={status} onMessage={props.onPalmierMessage}
+        onChanged={props.onRefresh} />}
       {running && openButton}
       {presentation.primary !== "choose_segment" && presentation.primary !== "reveal_clipper"
-        && status.palmier.state !== "approved_working_head" && (
+        && (cutCheckpoint || status.palmier.state !== "approved_working_head") && (
         <StageActionButton status={status} onIngested={props.onIngested} onRefresh={props.onRefresh}
           primary={presentation.primary === "stage"} />
       )}
@@ -188,6 +191,7 @@ function CardBody(props: BodyProps) {
     segmentCount: status.segments.length, clipperFileCount: status.clipperFiles.length,
   });
   const running = status.run?.status === "running";
+  const cutCheckpoint = isGuidedCheckpoint(status.run);
   return (
     <div className="mt-2 space-y-1.5">
       <p className="text-sm font-medium text-foreground">{summary.label}</p>
@@ -197,7 +201,7 @@ function CardBody(props: BodyProps) {
         <span className="font-medium text-foreground">What&apos;s next</span><span>{summary.next}</span>
         <span className="font-medium text-foreground">Safe actions</span><span>{summary.safe}</span>
       </div>
-      {status.intentDecisions
+      {!cutCheckpoint && status.intentDecisions
         .filter((decision) => decision.lane === "broll" && decision.status === "resolved")
         .map((decision) => (
           <CutawayDecision
@@ -227,16 +231,7 @@ function CardBody(props: BodyProps) {
   );
 }
 
-export default function ProjectCard({
-  p,
-  status,
-  statusError,
-  onOpen,
-  onRemove,
-  onRename,
-  onRefresh,
-  onIngested,
-}: {
+interface ProjectCardProps {
   p: Listing;
   status: ProjectStatus | null;
   statusError: string | null;
@@ -245,7 +240,21 @@ export default function ProjectCard({
   onRename: (dir: string, title: string) => Promise<void>;
   onRefresh: () => void;
   onIngested?: (payload: IngestedPayload) => void;
-}) {
+}
+
+async function revealPath(input: { path?: string; pending: string; complete: string; onMessage: (value: string) => void }) {
+  if (!input.path) return;
+  input.onMessage(input.pending);
+  try {
+    const response = await fetch("/api/producer/reveal", { method: "POST",
+      headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: input.path }) });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(typeof result.error === "string" ? result.error : `Reveal failed (${response.status})`);
+    input.onMessage(input.complete);
+  } catch (error) { input.onMessage(error instanceof Error ? error.message : "Reveal failed"); }
+}
+
+export default function ProjectCard({ p, status, statusError, onOpen, onRemove, onRename, onRefresh, onIngested }: ProjectCardProps) {
   const [renaming, setRenaming] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [palmierMessage, setPalmierMessage] = useState("");
@@ -254,28 +263,10 @@ export default function ProjectCard({
     if (status && openable) onOpen(status.producerDir, p.title);
     else setExpanded((value) => !value);
   };
-  const revealClipper = async () => {
-    if (!status?.clipperFiles?.[0]) return;
-    setPalmierMessage("Showing the Final Cut Pro timeline in Finder…");
-    const response = await fetch("/api/producer/reveal", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path: status.clipperFiles[0].path }),
-    });
-    const result = await response.json().catch(() => ({}));
-    setPalmierMessage(response.ok ? "Final Cut Pro timeline shown in Finder." : result.error ?? `Reveal failed (${response.status})`);
-  };
-  const revealSource = async () => {
-    if (!status?.sourceDir) return;
-    setPalmierMessage("Showing the source folder in Finder…");
-    const response = await fetch("/api/producer/reveal", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path: status.sourceDir }),
-    });
-    const result = await response.json().catch(() => ({}));
-    setPalmierMessage(response.ok ? "Source folder shown in Finder." : result.error ?? `Reveal failed (${response.status})`);
-  };
+  const revealClipper = () => revealPath({ path: status?.clipperFiles?.[0]?.path, onMessage: setPalmierMessage,
+    pending: "Showing the Final Cut Pro timeline in Finder…", complete: "Final Cut Pro timeline shown in Finder." });
+  const revealSource = () => revealPath({ path: status?.sourceDir ?? undefined, onMessage: setPalmierMessage,
+    pending: "Showing the source folder in Finder…", complete: "Source folder shown in Finder." });
 
   return (
     <li className="rounded-md border border-border/60 bg-background/20 p-3">

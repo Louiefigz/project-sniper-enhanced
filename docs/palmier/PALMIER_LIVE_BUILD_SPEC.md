@@ -1,13 +1,26 @@
-> Authored 2026-07-13. Implementation spec for the "Build live in Palmier" GUI mode
-> (agent drives Palmier MCP element-by-element into one live, authoritative timeline —
-> reproducing the interactive CLI experience). Grounded in the live WIP; every claim
-> carries a file:line. Build against THIS as the shared blueprint.
+> Authored 2026-07-13; implementation status updated 2026-07-30. Implementation
+> spec for the experimental "Build live in Palmier" GUI mode and its target
+> connected behavior. Grounded in the live WIP; every claim carries a file:line.
+> Sections that retain `NEW`, `create`, or `modify` labels are the original
+> build blueprint, not a current-file inventory.
 
 # Build Live in Palmier — Implementation Spec
 
-> **STATUS: PROPOSED / FORWARD-LOOKING SPEC.** Offline-verified; a full agent-driven live build is **not proved / not delivered** in the app today. Not current shipped state.
+> **STATUS: LOCAL/OFFLINE PREREQUISITES IMPLEMENTED; CONNECTED PRODUCT
+> UNQUALIFIED.** The route, controller, strict operation journal, fail-closed
+> resume, candidate export/QC, explicit promotion, and GUI control exist and are
+> production-callable. `BUILD VERIFIED` in this document means local UI/build
+> verification only. Editable/hybrid Palmier delivery remains isolated and
+> P5-blocked; a representative connected short/long cohort has not qualified
+> it. The approved exact `final.mp4` plus its flat mirror remains the safe
+> delivery path.
 
-**Feature:** A GUI "Build live in Palmier" mode where a spawned local `claude` agent (headless, subscription-auth, $0) reads the producer doctrine and drives the Palmier Pro MCP **directly and incrementally**, applying each trim/cut, text element, graphic, transition, and keyframe into **one live, operator-visible, authoritative Palmier timeline** while the operator watches it populate — reproducing the CLI experience the operator already had interactively.
+**Experimental feature contract:** A GUI "Build live in Palmier" mode where a
+spawned local `claude` agent reads the producer doctrine and drives the Palmier
+Pro MCP directly and incrementally into a visible candidate. The controller,
+not the model, owns authority, QC, and promotion. This describes the implemented
+local protocol and its target connected behavior; it is not a release claim
+that every planned lane already lands in a qualified editable timeline.
 
 ---
 
@@ -17,7 +30,49 @@
 
 **2026-07-13 Phase-0 update.** The disposable `live_headless_claude_mcp_smoke.py` test proved noninteractive skill invocation, explicit HTTP MCP connection, auto-approved enumerated MCP tools, streamed `tool_use` events, direct `add_texts`, same-session `--resume`, direct `set_keyframes`, exact Palmier readback, prior-project restoration, and disposable cleanup. First turn took 25.522s; resumed mutation took 16.592s. The wildcard allowlist, direct media import/cut construction, full Produced-plan scale, and GUI wrapper remain unproved.
 
-**2026-07-13 Phase-1 implementation update (offline verified; full live build not yet proved).** The GUI now has an additive `Build live in Palmier` route/control, a stable UUID Claude session resumed from planning only when stream output proved that conversation exists (otherwise a fresh skilled session), strict enumerated Palmier tools, a controller-created visible candidate, streamed operation evidence, durable stop/resume state, and hash-bound plan/journal/readback authority. Project creation/navigation and export are deliberately unavailable to the model. The controller exports the exact retained candidate and requires deterministic checks plus parallel composition/editorial critics before explicit promotion. A failed live QC attempt preserves the candidate and feeds the exact issues/evidence back to the retained session for scoped repair; it never creates a wholesale replacement. TypeScript/build checks and the 1,454-test Python producer suite pass. Direct import/cut/graphics/audio construction and the complete first-60-seconds live run remain unproved.
+**2026-07-13 Phase-1 historical update (offline verified; full live build was
+then unproved).** The GUI gained an additive `Build live in Palmier`
+route/control, a stable UUID Claude session, strict enumerated Palmier tools, a
+controller-created visible candidate, streamed operation evidence, durable
+stop/resume state, and hash-bound plan/journal/readback authority. The
+controller, rather than the model, owned exact-candidate export, deterministic
+checks, independent critics, repair, and promotion. The test counts and missing
+lane statements recorded at that date are historical. A later first-60 attempt
+did exercise transport and mutation mechanics, but failed product-quality
+review after 56m48s: QC remained pending, seven captions lost karaoke timing,
+and the wrong 3840×2160 canvas was accepted. It is not connected P5
+qualification.
+
+**2026-07-30 authority update (local/offline verified).** The journal now parses
+every bounded JSONL row strictly, fsyncs appended transitions, binds each
+operation ID to one canonical tool/input hash, distinguishes mutations through
+an explicit allowlist, and records `applying`, `applied`, `failed`, or
+reconciled `not-applied` lifecycle. Controller heads bind the fresh candidate
+fingerprint to every verified applied mutation. Resume observes Palmier
+read-only first: torn/corrupt history, foreign identity, ambiguous visible
+effect, manual drift, a reported apply with no candidate delta, or unsafe
+same-payload replay changes state to `reconciliation_required` instead of
+replaying. Desktop mutations separately retain immutable, content-addressed
+pre-operation timeline snapshots.
+
+Adjacent hybrid-delivery prerequisites are also implemented locally: Exact
+Master can prepare one dedicated linked A/V pair and require complete
+hidden/muted/sync-locked readback for admitted integer-rate projects; native and
+Desktop Audit B enforce full-stream frame/timing/SSIM/audio parity with exact
+hash-bound approximation approvals; and one standard scene-binding revision can
+replace one clip while preserving every unrelated clip. These are not connected
+qualification. Production authority readback now recursively partitions
+`[0,totalFrames)` through `get_timeline(startFrame,endFrame,captionDetail:true)`,
+deduplicates boundary-spanning captions by ID, and fails closed on missing
+coverage, inconsistent overlaps, identity drift, or incomplete group counts.
+Connected cohort evidence for that reader and Exact Master at fractional
+project rates remain blocked. The local Desktop compiler now issues a ready
+`mastered-stereo` declaration only with its complete hash-bound PCM derivation,
+dedicated full-length placement, and dynamic routing steps. It persists route
+authority only after complete placement and routing readback proves the exact
+delta and keeps the separate Exact Master hidden/muted/locked. This production
+path remains unqualified against connected representative short/long projects,
+and editable stems still lack stable role/output-bus readback.
 
 **What the GUI already does (the three governed touch-points the other agent added).** All three are orchestrated from `runAutoEditPipeline` in `src/app/api/producer/auto-edit/pipeline.ts` and gated by the `palmier.sync.json` sidecar via `managedWorkspace` (`palmier-checkpoints.ts:51-69`):
 
@@ -27,7 +82,17 @@
 
 - **(3) QC-APPROVED final mirror** — `pipeline.ts:255` & `:265` (`deps.approvedMirror`) → `publishApprovedPalmierMirror` (`palmier-checkpoints.ts:178`) → `push.py … --export DIR/final.palmier.mp4` → `run_sync` (`sync.py:230`), which **requires a mirror lane and rejects a cuts lane** (`sync.py:238-239`); `publish_master` (`mirror.py:178`) **byte-copies** the approved `final.mp4` as one flat clip.
 
-**The one architectural gap.** (2) and (3) are flat-mp4 mirror publishes. (1) does native element placement but into a **fresh, disposable, `authoritative:False`** timeline built off-screen per checkpoint, from a **lossy** plan, **by Python, not an agent**. **No path builds ONE persistent, operator-visible, authoritative timeline incrementally, element-by-element, with an agent driving the MCP.** Concretely missing: (a) a live applicator targeting one persistent authoritative timeline; (b) a spawned `claude` agent that calls the MCP itself (no spawn site today passes `--mcp-config` or allows any `mcp__` tool — grep returns zero); (c) full-fidelity lane coverage (transitions/broll/reframe/captions/music/grade currently stripped or "no native primitive"); (d) a co-edit concurrency model (today ownership is a one-way `managed-draft`→`palmier` gate that **pauses/skips** the moment a human holds Palmier — `palmier-checkpoints.ts:59-64`, `checkpoint.py:81-89`); (e) removal of the flat-mp4 mirror as the delivery mechanism for this path.
+**The remaining architectural gap.** The original gap was the absence of a
+persistent agent-driven path. The current tree now has the additive live-build
+route, strict enumerated MCP spawn, retained session, visible candidate,
+operation stream, journal, resume controller, exact-candidate QC, and explicit
+promotion control. What remains is release proof: full-fidelity connected lane
+coverage, connected proof of complete paged readback, released-rate Exact Master
+and audio-route
+authority, a representative short/long cohort, disconnect-at-every-boundary
+recovery, and a resolved human co-edit/manual-advance model. Flat-mp4 mirror
+delivery remains a separate compatibility path rather than proof of the hybrid
+editable product.
 
 ---
 
@@ -97,7 +162,12 @@ Two options exist (from reader 6's analysis):
 
 ## 3. The MCP wiring
 
-**Current state:** four `claude` spawn sites in PRODUCER, none pass `--mcp-config`, none allow any `mcp__` tool, and there is **no `.mcp.json` anywhere** in the repo. All Palmier mutations happen from Python (`mcp_client.py` `PalmierClient`) or TS `palmierRpc` (`palmier/_lib.ts:98`) — never from the model.
+**Current state:** the live-build spawn now passes a strict inline Palmier MCP
+configuration and an enumerated auto-approved tool surface. The controller, not
+the model, binds the managed project, forks the exact parent, owns lifecycle
+state, and performs readback/reconciliation. The remaining uncertainty is
+connected full-plan behavior and release evidence, not absence of MCP spawn
+wiring.
 
 **The mcp-config value** (exactly the entry already working in the operator's `~/.claude.json`, but passed explicitly because Claude Code keys project-scoped MCP by exact `cwd` and the spawned agent's `cwd = REPO_ROOT = …/PROJECT_SNIPER`, which does **not** inherit the parent-dir server):
 
@@ -165,7 +235,7 @@ This is the heart of what the live build actually does. Every arg shape is prove
 | **Denoise** | `denoise_audio {clipIds,strength(0-1)}` (DeepFilterNet3) | Native (equiv of in-house noise pass) | catalog |
 | **Loudness / voice-priority ducking / EBU** | `set_clip_properties {volume}` or volume keyframes (approximate) | **Baked** — no exact native equivalent | parity "baked" L217-225; `translate.py:176-180` warns export replaces Palmier mix |
 | **Reframe — static** | `set_project_settings {aspectRatio:'9:16'}` (re-fits) · `apply_layout {layout,slots:[{slot,mediaRef|clipIds,anchorX,anchorY}]}` · crop via `set_keyframes {property:'crop'}` | Native (static) | catalog; note `native_plan:113-116` restricts `apply_layout` to `clipIds`-only today |
-| **Reframe — face-tracked dynamic** | — | **Baked** (no follow-crop primitive) | parity L156-157 |
+| **Reframe — bounded face/center/blur-pad** | — | **Baked**; bounded face selection with center-crop or blur-pad fallback, not continuous subject tracking | parity contract |
 | **Export** | `export_project {mode:'video'|'fcpxml'|'xml'|'palmier',codec,resolution,outputPath,timelineId}` | Native (NOT a byte-copy) | `export.py:257` |
 | **Verify / read-back** | `get_timeline {}` (`totalFrames`/`tracks`/`canGenerate`) · `inspect_timeline` (composited preview) · `get_transcript` | — | `executor` verifies via `get_timeline`; `canGenerate=false` ⇒ generate/upscale fail |
 
@@ -173,7 +243,12 @@ This is the heart of what the live build actually does. Every arg shape is prove
 
 ---
 
-## 5. Every file to create or modify
+## 5. Original file-by-file build checklist
+
+The action labels below are preserved as the design history from 2026-07-13.
+Several listed files and behaviors now exist. Current implementation status is
+the authority update above and the build-order ledger in section 9; do not use a
+`create` label here as evidence that the current file is absent.
 
 ### (a) MCP + spawn wiring
 
@@ -278,14 +353,29 @@ Keep `shadow.py` identity guards (`assert_project`/`assert_build`/`assert_human`
 
 ## 8. Coexistence & migration
 
-**Recommendation: two modes side-by-side, not a replacement.** The render-in-house-then-mirror pipeline and the live build serve different operator intents and should both ship:
+**Recommendation after qualification: two modes side-by-side, not a
+replacement.** Today only the render-in-house-then-mirror path is the dependable
+delivery. The live build stays isolated until the P5 connected cohort passes:
 
 - **"Autonomous finished video"** (existing) — one click, the pipeline authors + gates + renders in-house with `assemble.py`/ffmpeg and publishes a flat visual-master mirror to Palmier. Best when the operator wants a hands-off deliverable. **Do not remove it** — it is the working render path (per CLAUDE.md: "do not simplify the in-house renderer away while it is still the working path").
-- **"Build live I watch/steer"** (new) — the same gated plan, but executed element-by-element into one live Palmier timeline the operator watches and then keeps/steers. Best when the operator wants to intervene, co-edit, or trust-but-verify each move.
+- **"Build live I watch/steer"** (experimental) — the same gated plan, executed
+  element-by-element into a visible Palmier candidate. It may be exercised in
+  an isolated target, but must not be marketed as a released editable/hybrid
+  handoff before connected short/long qualification.
 
-Both consume the **same gated `edit_plan.json`** — the determinism boundary is shared; only the delivery differs (flat mirror vs. native incremental build). This keeps the plan-first governance identical and lets the live build reuse every Stage-1 gate.
+Both consume the **same gated `edit_plan.json`** — the determinism boundary is
+shared; only the delivery differs (flat mirror vs. native incremental build).
+Shared governance does not make their evidence equivalent: exact-master mirror
+publication is qualified, while the native incremental path is P5-blocked.
 
-**UI presentation.** In the intent card / editor, offer a delivery toggle after Auto-edit authors the plan: **"Render finished video"** (default, existing) vs **"Build live in Palmier"** (new). The live-build choice: (1) calls `openPalmierWorkbench(dir,mode)` to bring Palmier to front (precondition: Palmier open with the target project, same as `get_timeline canGenerate`), (2) opens `<LiveBuildSection>` with the streaming applied-ops list, (3) on `build_done` offers **Accept** (`ownership.py --handoff`) or **Abandon** (`discard_candidate`). `RunProgress` already prints "Palmier updates at each governed checkpoint" (`stage-action-status.tsx:105-118`) — extend that copy to distinguish "watching live build — N elements applied."
+**UI presentation.** The local UI/build includes a delivery choice after
+Auto-edit authors the plan: **"Render finished video"** (default, safe) vs
+**"Build live in Palmier"** (experimental). The live-build choice: (1) calls
+`openPalmierWorkbench(dir,mode)` to bring Palmier to front, (2) opens
+`<LiveBuildSection>` with the streaming applied-ops list, and (3) on
+`build_done` offers **Accept** (`ownership.py --handoff`) or **Abandon**
+(`discard_candidate`). Presence in a successful local production build does
+not mean the connected workflow is release-qualified.
 
 **Migration:** none of the existing checkpoint/mirror code is deleted. The live-build path is additive; the `pipeline.ts` call-sites (`:249`/`:262`/`:255`/`:265`) are branched, not replaced.
 
@@ -299,15 +389,20 @@ Each phase is independently demoable.
 
 - **Phase 1 — IMPLEMENTED / OFFLINE VERIFIED.** `live-build/args.ts`, `process.ts`, and `route.ts` use strict enumerated MCP, the subscription-safe environment, process-tree cleanup, retained session IDs, and normalized SSE operation events. The route is present in a successful production build; it has not been invoked against the user's active project.
 
-- **Phase 2 — IMPLEMENTED / OFFLINE VERIFIED.** The controller validates the approved plan and active authority, forks the exact parent, retains the visible editable candidate, journals operations, preserves it on stop, and resumes from Palmier readback. The live writer is the proven A2 Claude session; the Python layer owns candidate lifecycle and checkpoint authority, not editorial mutation.
+- **Phase 2 — IMPLEMENTED / OFFLINE VERIFIED.** The controller validates the approved plan and active authority, forks the exact parent, retains the visible editable candidate, and preserves it on stop. Every operation lifecycle is written to strict fsynced JSONL with a stable ID and canonical payload hash; controller heads bind verified applied IDs to fresh readback. Resume performs a read-only observation first and fails closed to `reconciliation_required` on torn history, foreign identity, ambiguous effect, no-delta apply, unsafe replay, or manual drift. The live writer is the proven A2 Claude session; the controller owns candidate lifecycle and checkpoint authority, not editorial mutation.
 
 - **Phase 3 — NEXT LIVE MILESTONE.** Exercise the enumerated imports/cuts/graphics/motion/captions/color/audio tools on the complete approved first-60-seconds plan. Unsupported transition semantics must fail explicitly. **Demo:** every planned lane lands visibly in the retained candidate and survives exact readback.
 
 - **Phase 4 — IMPLEMENTED / OFFLINE VERIFIED.** Launch requires current deterministic gates and planning-review evidence. Plan, doctrine, pipeline, journal, parent, session, readback, and exact candidate export share one immutable QC authority. Deterministic audit precedes parallel composition/editorial critics. Failure preserves the candidate and creates a retained-session scoped-repair turn.
 
-- **Phase 5 — IMPLEMENTED / BUILD VERIFIED.** The Producer Palmier bar exposes build/resume/stop, live operation/result rows, first-mutation latency, exact-candidate QC progress, and explicit promotion through the existing candidate control.
+- **Phase 5 — IMPLEMENTED / BUILD VERIFIED LOCALLY.** The Producer Palmier bar
+  exposes build/resume/stop, live operation/result rows, first-mutation latency,
+  exact-candidate QC progress, and explicit promotion through the existing
+  candidate control. Here `BUILD VERIFIED` means the local UI compiles and its
+  build contracts pass; it does not mean a connected editable short or long was
+  delivered.
 
-- **Phase 6 — PARTIAL.** Candidate fork/resume, unchanged-parent checks, stop preservation, QC archival, explicit promotion, and A2 execution are implemented. Human co-edit reconciliation and a complete kill/resume live exercise remain unproved.
+- **Phase 6 — PARTIAL.** Candidate fork/resume, unchanged-parent checks, stop preservation, QC archival, explicit promotion, A2 execution, strict local journal reconciliation, and immutable Desktop pre-mutation snapshots are implemented. A connected kill/resume exercise, disconnects at every mutation boundary, external adoption/fork resolution, and real human co-edit/manual-advance preservation remain unproved.
 
 ---
 
@@ -321,10 +416,22 @@ Each phase is independently demoable.
 
 4. **Concurrent Codex / native-edit paths.** The concurrent Codex Palmier-canonical WIP guards on **sidecar existence, not ownership** (edge-case register). The live build's new `managed-draft`-during-build + fork model must not collide with that path; the shared lease + `SyncLock` + `managedWorkspace` gate are the coordination points, but the ownership state machine now has more transitions (build→fork→handoff→reclaim-fresh-fork) and needs explicit reconciliation with `reconcile_working_authority` (`timeline_guard.py:72`).
 
-5. **Batch scale and mid-build death.** The A2 path is not limited by the old 24-operation native-plan cap, but a full build still needs bounded same-tool batches and durable verified checkpoints. Stop preserves the editable candidate and session; a real kill/resume run must still prove that applied operations are reconciled without replay.
+5. **Batch scale and mid-build death.** The A2 path is not limited by the old 24-operation native-plan cap, but a full build still needs bounded same-tool batches and durable verified checkpoints. The local strict journal rejects blind replay and the Desktop path retains an immutable before-snapshot, but a connected kill/resume run must still prove that every landed operation is reconciled exactly once.
 
 6. **Co-edit while the agent builds.** The operator "watching" can become the operator "touching." Today any human touch flips ownership to `palmier` and pauses automation (`palmier-checkpoints.ts:59-64`). True simultaneous co-edit (agent and human writing the same timeline) is a **larger concurrency model** than this spec fully resolves — the recommended v1 is "operator watches, then accepts/steers after `build_done`," with mid-build human touches treated as an abort (preserve their timeline, do not stomp).
 
 ---
 
-**Bottom line for the next live test:** the A2 spawn/session, strict tool surface, candidate lifecycle, operation streaming, immutable authority, exact-export QC, parallel critics, and retained-session repair loop are implemented and offline-verified. Do not claim a Produced-video success yet. The next proof is the complete first 60 seconds in an isolated governed target, including direct imports/cuts/graphics/audio, exact readback/export, at least one intentional QC rejection and scoped repair, stop/resume, and explicit promotion only after the exact candidate passes.
+**Bottom line for the next live test:** the A2 spawn/session, strict tool surface,
+candidate lifecycle, operation streaming, fsynced lifecycle journal,
+fail-closed resume, immutable Desktop before-snapshots, exact-export QC, full-
+stream parity contract, local Exact Master and scene-replacement contracts,
+parallel critics, and retained-session repair loop are implemented or
+offline-verified prerequisites. Do not claim a Produced-video or hybrid-delivery
+success yet. The next proof is a complete isolated governed build, followed by
+representative connected short and long projects, including direct
+imports/cuts/graphics/audio, complete paged readback, exact export, a
+production-reachable one-audible-route receipt, Exact Master at every released
+rate, one-scene preservation, at least one intentional QC rejection and scoped
+repair, disconnect/kill-resume at every mutation boundary, manual-edit
+preservation, and explicit promotion only after the exact candidate passes.

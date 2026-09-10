@@ -49,7 +49,7 @@ UNIT_NOUNS = frozenset({
 # every candidate funnels through graphics_planner_longform.canvas_ok in the
 # retarget gauntlet, which consults the MEASURED matrix
 # (templates/motion/comp_capabilities.json via graphics.comp_capabilities.
-# is_aspect_legal_kind) before the declared-dims derivation — a comp whose
+# is_aspect_legal_kind) without a declared-dims fallback — a comp whose
 # real canvas drifts from this table's assumption is rejected at propose time
 # with the measured canvas named (LL-036/LL-037; a 16:9 comp composites raw +
 # clipped on a 9:16 delivery). A NEW lane that bypasses the retarget must
@@ -212,7 +212,8 @@ def seed_spec(kind: str, text: str, land_s: float) -> dict:
         # Headroom section header (shorts): the brain writes the eyebrow ("System
         # No.2") + a real title/qualifier at merge — the boundary words only seed
         # the title slot so an un-refined marker still reads.
-        return {"num": "", "line1": " ".join(text.split()[:4]), "line2": ""}
+        return {"num": "", "line1": " ".join(text.split()[:4]), "line2": "",
+                "readability": "plates"}
     if kind == "glass-takeover-bg":
         return {"eyebrow": "", "title": " ".join(text.split()[:5])}
     if kind == "glass-lower-third":

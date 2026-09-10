@@ -1,0 +1,52 @@
+{
+  "candidate": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/full-native-high-v10-lossless-av-color.mp4",
+  "candidateSha256": "eef61c5a2a410d869c79c13c6fb9ba69f52690377d0a99c3fbd53db3ffa50181",
+  "originalWholeProof": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/full-native-high-v10-lossless-av-color.assembly-qc.json",
+  "originalWholeProofSha256": "1ccb62f4729286552d6d279f612f4a7f02c32cdff981ac2094c125ff8ea629d6",
+  "originalGuardSha256": "c289f45ffa6b9994e72c6265be7ff4a3f45363c34cdbc3a52f68902553408c0b",
+  "humanListened": false,
+  "creativeApproved": false,
+  "deliveryApproved": false,
+  "phases": {
+    "sourceAuthority": {
+      "passed": true,
+      "sealedDeliveryReceiptRecomputed": "6612e69c3dafaf81289511b58bb218ac1e34d0ac1b603ac869051e6d057d4478",
+      "sealedFloatReceiptRecomputed": "3e2b777686e212cd0ad9f80f23c1141e8fe9043dd9128ab6dbbb63e2e822a503",
+      "floatSha256": "790f38dd97e4a4a821ee7ebc09f9ce31b839f15ac133c58393c94d957c80a606",
+      "narrationPcm24Sha256": "d19179ae602b27249f99a577a79c9797909a83fb2ac3853429a0e5ea4eae3444",
+      "sameSoundtrackPcm24ConversionVerified": true,
+      "elapsedSeconds": 2.3420900418423116
+    },
+    "observedPacketFacts": {
+      "passed": true,
+      "streams": {
+        "v:0": {
+          "packets": 16394,
+          "validPayloadHashesObserved": 16394,
+          "priming": []
+        },
+        "a:0": {
+          "packets": 32053,
+          "validPayloadHashesObserved": 32053,
+          "priming": [
+            {
+              "side_data_type": "Skip Samples",
+              "skip_samples": 1024,
+              "discard_padding": 0,
+              "skip_reason": 0,
+              "discard_reason": 0
+            }
+          ]
+        }
+      },
+      "elapsedSeconds": 6.427529416047037
+    },
+    "colorCriteria": {
+      "passed": true
+    }
+  },
+  "bytesStable": true,
+  "status": "supplemental-authority-pass",
+  "elapsedSeconds": 11.910188667010516,
+  "mediaModified": false
+}

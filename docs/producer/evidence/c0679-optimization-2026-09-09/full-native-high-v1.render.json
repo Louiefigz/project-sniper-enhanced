@@ -1,0 +1,410 @@
+{
+  "status": "failed",
+  "startedAt": "2026-09-09T14:52:15.802Z",
+  "admission": {
+    "duration": 683.7664166666667,
+    "freeBytes": 75473195008
+  },
+  "project": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1",
+  "output": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/full-native-high-v1.mp4",
+  "logPath": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v1.render.log",
+  "args": [
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js",
+    "render",
+    ".",
+    "--fps",
+    "24000/1001",
+    "--quality",
+    "high",
+    "--workers",
+    "4",
+    "--video-frame-format",
+    "png",
+    "--strict",
+    "--output",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/full-native-high-v1.mp4"
+  ],
+  "sdkVersion": "0.8.31",
+  "sourceHashesBefore": {
+    "extension-194-367.css": "a9d32e3015cbe7a31c610ed293ff21ed95c6aadaf4410a21384ce2d84fce31ae",
+    "extension-194-367.js": "8a96c69f01a5b08e87d707986209677255374455f9b85daeab9e73b2fdfb9353",
+    "extension-32-75.css": "6856455522448b2e3d5186522982379e58c7a7e663d9ba6c830b7dd8cf36e4d4",
+    "extension-32-75.js": "f2e1b9737c98bc734c8beba94d14365977862f36c625ae6f27a3862853b07f2b",
+    "extension-367-end.css": "6877c5d777f4e606ac89c3854eef9d04f0030f7718d2e74a29a01c95ead093aa",
+    "extension-367-end.js": "694ece67b6b23f30abb70f7e5104d67ac6c1f8ff7c4682534f9216645ff83c99",
+    "extension-75-194.css": "20619092f95c4dcb9b7afa88b510143789c60f12a19aa3557cee143da4752505",
+    "extension-75-194.js": "31a29d27e632eca5d91b52bd5bfcd908c9b4197a05857d9dde9cfee0e28da068",
+    "hyperframes.json": "f311a7b6cdca37251313743f24c44a5b2d7f80311af0758508fcf447443e18f2",
+    "index.html": "bc95f3ccdeaa2953d2cf1aa178d9e4ad0ba4b62a022b1a340cdb63df8c493577",
+    "motion.js": "3536dd792fc44f5efcb30366041d93b3489b38f435c5f79c084600d77cf07bb2",
+    "scene.css": "4e3b8aec22335e82cee1764dd5e9b4f1c6b47aa770161f60d879894422f6471a"
+  },
+  "fullEditTwoHourTargetAlreadyMissed": true,
+  "renderOnlyTiming": true,
+  "trace": [
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "platform": "darwin",
+      "arch": "arm64",
+      "nodeVersion": "v23.10.0",
+      "fps": {
+        "num": 24000,
+        "den": 1001
+      },
+      "format": "mp4",
+      "quality": "high",
+      "browserGpuMode": "auto",
+      "forceScreenshot": false,
+      "protocolTimeout": 300000,
+      "browserTimeout": 120000,
+      "pageNavigationTimeout": 60000,
+      "playerReadyTimeout": 45000
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "pipeline",
+      "status": "checkpoint",
+      "elapsedMs": 2,
+      "message": "started",
+      "format": "mp4",
+      "quality": "high",
+      "browserGpuMode": "auto",
+      "forceScreenshot": false,
+      "protocolTimeoutMs": 300000,
+      "pageNavigationTimeoutMs": 60000,
+      "playerReadyTimeoutMs": 45000,
+      "requestedWorkers": 4
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "compile",
+      "status": "start",
+      "elapsedMs": 3,
+      "needsAlpha": false
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "entryFile": "index.html",
+      "staticDuration": 683.7664166666667,
+      "width": 1920,
+      "height": 1080,
+      "videoCount": 1,
+      "audioCount": 1,
+      "renderModeHints": {
+        "recommendScreenshot": false,
+        "reasons": []
+      }
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "compile",
+      "status": "end",
+      "elapsedMs": 214,
+      "durationMs": 211,
+      "needsAlpha": false
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "compile",
+      "status": "checkpoint",
+      "elapsedMs": 214,
+      "message": "composition metadata resolved",
+      "width": 1920,
+      "height": 1080,
+      "videoCount": 1,
+      "audioCount": 1,
+      "imageCount": 3,
+      "deviceScaleFactor": 1,
+      "forceScreenshot": false,
+      "compositionHash": "b49e016c762e2150"
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "browser_probe",
+      "status": "start",
+      "elapsedMs": 214,
+      "forceScreenshot": false,
+      "stagePhase": "calibrating"
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "browser_probe",
+      "status": "end",
+      "elapsedMs": 227,
+      "durationMs": 13,
+      "forceScreenshot": false,
+      "stagePhase": "calibrating"
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "browser_probe",
+      "status": "checkpoint",
+      "elapsedMs": 228,
+      "message": "duration resolved",
+      "durationSeconds": 683.7664166666667,
+      "totalFrames": 16394,
+      "compositionHash": "b49e016c762e2150",
+      "beginFrameStalled": false
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "video_extract",
+      "status": "start",
+      "elapsedMs": 228,
+      "videoCount": 1
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "videoCount": 1
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "sourceType": "local"
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "video_extract",
+      "status": "checkpoint",
+      "elapsedMs": 30230,
+      "message": "stage still running",
+      "videoCount": 1,
+      "heartbeatIndex": 1,
+      "stageElapsedMs": 30002
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "video_extract",
+      "status": "checkpoint",
+      "elapsedMs": 60232,
+      "message": "stage still running",
+      "videoCount": 1,
+      "heartbeatIndex": 2,
+      "stageElapsedMs": 60004
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "video_extract",
+      "status": "checkpoint",
+      "elapsedMs": 120234,
+      "message": "stage still running",
+      "videoCount": 1,
+      "heartbeatIndex": 3,
+      "stageElapsedMs": 120006
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "video_extract",
+      "status": "end",
+      "elapsedMs": 218399,
+      "durationMs": 218171,
+      "videoCount": 1
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "video_extract",
+      "status": "checkpoint",
+      "elapsedMs": 218410,
+      "message": "frames resolved",
+      "videoCount": 1,
+      "extractedVideoCount": 1,
+      "totalFramesExtracted": 16394,
+      "maxFramesPerVideo": 16394,
+      "avgFramesPerExtractedVideo": 16394,
+      "vfrPreflightCount": 0,
+      "vfrPreflightMs": 0,
+      "cacheHits": 0,
+      "cacheMisses": 1,
+      "transientRetries": 0,
+      "minVideoFrameCoverageRatio": 1,
+      "authoredTimedClipCount": 3
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3"
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "hdr_detection",
+      "status": "checkpoint",
+      "elapsedMs": 218410,
+      "message": "resolved",
+      "requestedHdrMode": "auto",
+      "effectiveHdr": "sdr",
+      "nativeHdrVideoCount": 0,
+      "nativeHdrImageCount": 0
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "audio_process",
+      "status": "start",
+      "elapsedMs": 218410,
+      "audioCount": 1
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "audio_process",
+      "status": "end",
+      "elapsedMs": 236439,
+      "durationMs": 18029,
+      "audioCount": 1
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "file_server",
+      "status": "start",
+      "elapsedMs": 236439,
+      "reused": false
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "file_server",
+      "status": "end",
+      "elapsedMs": 236444,
+      "durationMs": 5
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "capture_calibration",
+      "status": "checkpoint",
+      "elapsedMs": 236841,
+      "message": "skipped",
+      "requestedWorkers": 4,
+      "totalFrames": 16394,
+      "htmlInCanvasDetected": false,
+      "lowMemoryMode": false,
+      "deInversionEligible": false,
+      "deParallelRouterEligible": false
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "worker_resolution",
+      "status": "checkpoint",
+      "elapsedMs": 236842,
+      "message": "resolved",
+      "workerCount": 4
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "enabled": false,
+      "configFlag": true,
+      "outputFormat": "mp4",
+      "workerCount": 4,
+      "durationSeconds": 683.7664166666667,
+      "maxDurationSeconds": 240
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3"
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "capture_strategy",
+      "status": "checkpoint",
+      "elapsedMs": 236842,
+      "message": "resolved",
+      "workerCount": 4,
+      "forceScreenshot": false,
+      "captureBeyondViewport": true,
+      "useStreamingEncode": false,
+      "useLayeredComposite": false,
+      "usePageSideCompositing": false,
+      "hasHdrContent": false,
+      "hasShaderTransitions": false,
+      "isPngSequence": false
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "capture_disk",
+      "status": "start",
+      "elapsedMs": 236843,
+      "stagePhase": "capturing",
+      "needsAlpha": false,
+      "workerCount": 4,
+      "forceScreenshot": false,
+      "totalFrames": 16394,
+      "framesCompleted": 0,
+      "captureMode": "beginframe",
+      "captureOperation": "beginFrame"
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "phase": "capture_disk",
+      "status": "error",
+      "elapsedMs": 236843,
+      "durationMs": 0,
+      "message": "Disk capture may need ~135978.4 MB of temporary frame storage, but only 35031.4 MB is free at [path] Re-run with --low-memory-mode to stream frames, raise PRODUCER_STREAMING_ENCODE_MAX_DURATION_SECONDS if streaming is supported, or free up…",
+      "stagePhase": "capturing",
+      "needsAlpha": false,
+      "workerCount": 4,
+      "forceScreenshot": false,
+      "totalFrames": 16394,
+      "framesCompleted": 0,
+      "captureMode": "beginframe",
+      "captureOperation": "beginFrame"
+    },
+    {
+      "renderJobId": "0b1f8fdb-c590-418e-81d6-8ae7234c82d3",
+      "failedStage": "Starting frame capture",
+      "error": "Disk capture may need ~135978.4 MB of temporary frame storage, but only 35031.4 MB is free at /private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/work-0b1f8fdb-c590-418e-81d6-8ae7234c82d3-xEW1sx/captured-frames. Re-run with --low-memory-mode to stream frames, raise PRODUCER_STREAMING_ENCODE_MAX_DURATION_SECONDS if streaming is supported, or free up disk space.",
+      "elapsedMs": 236845,
+      "stageTimings": {
+        "compileOnlyMs": 160,
+        "browserProbeMs": 12,
+        "compileMs": 225,
+        "videoExtractMs": 218171,
+        "audioProcessMs": 18028
+      },
+      "isTimeout": false,
+      "workers": 4,
+      "protocolTimeout": 300000,
+      "observedFailedPhase": "capture_disk",
+      "observedLastPhase": "capture_disk",
+      "observedLastStatus": "error",
+      "browserDiagnostics": {
+        "total": 0,
+        "errors": 0,
+        "pageErrors": 0,
+        "requestFailed": 0,
+        "httpErrors": 0,
+        "navigationStarts": 0,
+        "navigationFailures": 0,
+        "consoleErrors": 0,
+        "consoleWarnings": 0
+      },
+      "extraction": {
+        "videoCount": 1,
+        "extractedVideoCount": 1,
+        "totalFramesExtracted": 16394,
+        "maxFramesPerVideo": 16394,
+        "avgFramesPerExtractedVideo": 16394,
+        "vfrProbeMs": 0,
+        "vfrPreflightMs": 0,
+        "vfrPreflightCount": 0,
+        "cacheHits": 0,
+        "cacheMisses": 1,
+        "transientRetries": 0,
+        "minVideoFrameCoverageRatio": 1,
+        "authoredTimedClipCount": 3
+      },
+      "browserConsoleErrors": []
+    }
+  ],
+  "pid": 60568,
+  "elapsedSeconds": 238.317,
+  "completedAt": "2026-09-09T14:56:14.119Z",
+  "exitCode": 1,
+  "signal": null,
+  "sourceHashesAfter": {
+    "extension-194-367.css": "a9d32e3015cbe7a31c610ed293ff21ed95c6aadaf4410a21384ce2d84fce31ae",
+    "extension-194-367.js": "8a96c69f01a5b08e87d707986209677255374455f9b85daeab9e73b2fdfb9353",
+    "extension-32-75.css": "6856455522448b2e3d5186522982379e58c7a7e663d9ba6c830b7dd8cf36e4d4",
+    "extension-32-75.js": "f2e1b9737c98bc734c8beba94d14365977862f36c625ae6f27a3862853b07f2b",
+    "extension-367-end.css": "6877c5d777f4e606ac89c3854eef9d04f0030f7718d2e74a29a01c95ead093aa",
+    "extension-367-end.js": "694ece67b6b23f30abb70f7e5104d67ac6c1f8ff7c4682534f9216645ff83c99",
+    "extension-75-194.css": "20619092f95c4dcb9b7afa88b510143789c60f12a19aa3557cee143da4752505",
+    "extension-75-194.js": "31a29d27e632eca5d91b52bd5bfcd908c9b4197a05857d9dde9cfee0e28da068",
+    "hyperframes.json": "f311a7b6cdca37251313743f24c44a5b2d7f80311af0758508fcf447443e18f2",
+    "index.html": "bc95f3ccdeaa2953d2cf1aa178d9e4ad0ba4b62a022b1a340cdb63df8c493577",
+    "motion.js": "3536dd792fc44f5efcb30366041d93b3489b38f435c5f79c084600d77cf07bb2",
+    "scene.css": "4e3b8aec22335e82cee1764dd5e9b4f1c6b47aa770161f60d879894422f6471a"
+  },
+  "sourceStable": true
+}

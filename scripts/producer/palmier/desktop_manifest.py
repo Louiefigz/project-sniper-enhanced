@@ -3,131 +3,28 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-from dataclasses import dataclass
-from typing import Any
 
 from fingerprints import file_sha256
+from ingest_execution_authority import verify_execution_media_authority
+from palmier.desktop_audio_master_plan import (
+    MasteredStereoPlanRequest, extend_mastered_stereo_worklist,
+    preserved_mastered_stereo_authority)
 from palmier.checkpoint_inputs import (CheckpointInput, checkpoint_inputs,
                                        input_authority, read_json)
 from palmier.mcp_client import PalmierError
+from palmier.desktop_manifest_native import (
+    NativeContext, _broll_steps, native_steps)
 from palmier.desktop_manifest_record import (PreparedDesktopStage,
                                              manifest_content)
+from palmier.desktop_manifest_media import bind_media_hashes
 from palmier.desktop_state import DesktopStageInput
 from palmier.timeline_authority import atomic_write_record
 MANIFEST_NAME = ".palmier-desktop-operations"
-@dataclass(frozen=True)
-class NativeContext:
-    """Inputs shared by native media-lane planners."""
-
-    plan: dict
-    manifest: dict
-    fps: float
-    duration_s: float
-    base: str
 
 
 def _hash(value: object) -> str:
     blob = json.dumps(value, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()
-
-
-def _asset_path(row: dict, base: str, label: str) -> str:
-    value = row.get("path")
-    if not isinstance(value, str) or not value:
-        raise PalmierError(f"{label} has no media path")
-    path = value if os.path.isabs(value) else os.path.join(base, value)
-    path = os.path.abspath(path)
-    if not os.path.isfile(path):
-        raise PalmierError(f"{label} media is missing: {path}")
-    return path
-
-
-def _catalog(manifest: dict, lane: str) -> dict[str, dict]:
-    rows = manifest.get(lane) or []
-    if not isinstance(rows, list):
-        raise PalmierError(f"asset manifest {lane} catalog is malformed")
-    return {str(row.get("id")): row for row in rows
-            if isinstance(row, dict) and row.get("id")}
-
-
-def _broll_steps(plan: dict, manifest: dict, fps: float,
-                 base: str) -> list[dict]:
-    catalog = _catalog(manifest, "broll")
-    steps = []
-    for index, row in enumerate(plan.get("brollTrack") or []):
-        if not isinstance(row, dict):
-            raise PalmierError(f"brollTrack[{index}] is malformed")
-        ident = str(row.get("assetId") or "")
-        asset = catalog.get(ident)
-        if asset is None:
-            raise PalmierError(f"brollTrack[{index}] asset {ident!r} is missing")
-        steps.append({
-            "op": "native-broll", "lane": "broll", "key": f"broll:{index}",
-            "elementId": row.get("id") or f"broll:{ident}:{index}",
-            "path": _asset_path(asset, base, f"brollTrack[{index}]"),
-            "startFrame": round(float(row["outStart"]) * fps),
-            "endFrame": round(float(row["outEnd"]) * fps),
-            "source": [float(row.get("assetStart", 0.0)),
-                       float(row.get("assetStart", 0.0))
-                       + float(row["outEnd"]) - float(row["outStart"])],
-            "focusOps": row.get("focusOps") or [],
-        })
-    return steps
-
-
-def _music_steps(context: NativeContext) -> list[dict]:
-    music = context.plan.get("music") or {}
-    if not isinstance(music, dict) or not music.get("enabled"):
-        return []
-    row: dict[str, Any] = music
-    if not music.get("path"):
-        row = _catalog(context.manifest, "music").get(
-            str(music.get("assetId"))) or {}
-    path = _asset_path(row, context.base, "music")
-    return [{"op": "native-music", "lane": "music", "key": "music",
-             "elementId": "music",
-             "path": path, "startFrame": 0,
-             "endFrame": round(context.duration_s * context.fps),
-             "gapDb": music.get("gapDb"), "duck": music.get("duck", True)}]
-
-
-def _native_steps(context: NativeContext) -> list[dict]:
-    steps = _broll_steps(
-        context.plan, context.manifest, context.fps, context.base)
-    steps.extend(_music_steps(context))
-    captions = context.plan.get("captions")
-    if isinstance(captions, dict) and captions:
-        steps.append({"op": "native-captions", "lane": "captions",
-                      "settings": captions,
-                      "limitation": "Palmier re-transcribes editable captions"})
-    enhance = context.plan.get("audioEnhance")
-    audio_master = enhance.get("palmierAudioMaster") \
-        if isinstance(enhance, dict) else None
-    if isinstance(audio_master, dict):
-        steps.append({
-            "op": "native-audio-master", "lane": "audio-master",
-            "elementId": "audio-master",
-            "path": _asset_path(audio_master, context.base, "audio master"),
-            "startFrame": 0, "endFrame": round(context.duration_s * context.fps),
-            "muteExisting": True, "targetLUFS": audio_master.get("targetLUFS"),
-            "targetTruePeak": audio_master.get("targetTruePeak"),
-            "sourceExportHash": audio_master.get("sourceExportHash"),
-        })
-    native_denoise = enhance.get("palmierDenoise") \
-        if isinstance(enhance, dict) else None
-    if isinstance(native_denoise, dict):
-        steps.append({"op": "native-denoise", "lane": "audio",
-                      "settings": native_denoise})
-    elif enhance:
-        steps.append({"op": "native-audio-review", "lane": "audio-review",
-                      "settings": enhance,
-                      "limitation": "named enhance preset has no measured Palmier strength mapping"})
-    look = context.plan.get("baselineLook") or {}
-    if isinstance(look, dict) and (look.get("palmierColor") or look.get("lut")):
-        steps.append({"op": "native-color", "lane": "color",
-                      "settings": look.get("palmierColor") or
-                      {"lut": look["lut"]}})
-    return steps
 
 
 def _duration(plan: dict) -> float:
@@ -139,32 +36,32 @@ def _duration(plan: dict) -> float:
 def _visual_steps(steps: list[dict]) -> list[dict]:
     """Cut stage already landed; retain only downstream translated steps."""
     kept = [row for row in steps if row.get("op") not in
-            {"project", "cuts", "mirror"}
+            {"project", "cuts", "mirror", "baseline", "text"}
             and not (row.get("op") == "import" and row.get("key") == "src")]
     layered: list[dict] = []
     for row in kept:
-        layered.extend(_layer_overlays(row) if row.get("op") == "overlays"
+        layered.extend(_exact_graphics(row) if row.get("op") == "overlays"
                        else [row])
     return layered
 
 
-def _layer_overlays(step: dict) -> list[dict]:
-    """Allocate overlapping overlays to distinct non-destructive tracks."""
-    entries = step.get("entries") or []
-    ordered = sorted(enumerate(entries),
-                     key=lambda item: (item[1]["startFrame"], item[0]))
-    layers: list[list[dict]] = []
-    layer_ends: list[int] = []
-    for _index, entry in ordered:
-        layer = next((index for index, end in enumerate(layer_ends)
-                      if entry["startFrame"] >= end), len(layers))
-        if layer == len(layers):
-            layers.append([]); layer_ends.append(0)
-        layers[layer].append(entry)
-        layer_ends[layer] = int(entry["endFrame"])
-    return [{**step, "entries": rows, "layer": index,
-             "stacking": "higher layer renders above lower layer"}
-            for index, rows in enumerate(layers)]
+def _exact_graphics(step: dict) -> list[dict]:
+    """Preserve plan order with one governed top track per full-canvas asset."""
+    from palmier.desktop_caption_shard_plan import (
+        FULL_CANVAS_TRANSFORM, GRAPHICS_OP,
+    )
+    rows = []
+    for entry in step.get("entries") or []:
+        if entry.get("transform") != FULL_CANVAS_TRANSFORM:
+            raise PalmierError(
+                "Desktop graphic is not a normalized full-canvas asset")
+        rows.append({
+            **entry, "op": GRAPHICS_OP, "lane": "graphics",
+            "alphaMode": "proved-by-rendered-asset",
+            "trackPolicy": "new-top-video-track-per-graphic",
+            "transform": FULL_CANVAS_TRANSFORM,
+        })
+    return rows
 
 
 def _cut_worklist(plan: dict, fps: float) -> list[dict]:
@@ -194,28 +91,22 @@ def _desktop_capability(capability: dict, steps: list[dict]) -> dict:
             "desktopNativeLanes": sorted(lane for lane in mapped if lane)}
 
 
-def _bind_media_hashes(steps: list[dict]) -> list[dict]:
-    """Bind every path-bearing operation to the exact imported file bytes."""
-    bound = [{**row, "fileHash": file_sha256(row["path"])}
-             if isinstance(row.get("path"), str) else row for row in steps]
-    resources = {str(row["key"]): row for row in bound
-                 if row.get("op") == "import"
-                 and isinstance(row.get("key"), str)}
-    result = []
-    for row in bound:
-        if row.get("op") != "overlays":
-            result.append(row)
-            continue
-        entries = []
-        for entry in row.get("entries") or []:
-            asset = resources.get(str(entry.get("mediaKey")))
-            if not asset or not asset.get("fileHash"):
-                raise PalmierError(
-                    f"overlay {entry.get('elementId')!r} has no bound asset")
-            entries.append({**entry, "assetPath": asset["path"],
-                            "assetHash": asset["fileHash"]})
-        result.append({**row, "entries": entries})
-    return result
+def _ordered_visual_layers(groups: list[list[dict]]) -> list[dict]:
+    """Emit mutations in production bottom-to-top visual layer order."""
+    rows = [row for group in groups for row in group]
+    layer_ops = {
+        "native-broll", "title-alpha-shard",
+        "graphics-alpha-shard", "caption-alpha-pages",
+    }
+    imports = [row for row in rows if row.get("op") == "import"]
+    base = [row for row in rows
+            if row.get("op") != "import" and row.get("op") not in layer_ops]
+    layers = [[row for row in rows if row.get("op") == op] for op in (
+        "native-broll", "title-alpha-shard",
+        "graphics-alpha-shard", "caption-alpha-pages",
+    )]
+    return [*imports, *base, *(row for layer in layers for row in layer)]
+
 
 def _repair_steps(context: NativeContext, project: dict,
                   cache: str) -> tuple[list[dict], dict]:
@@ -226,14 +117,62 @@ def _repair_steps(context: NativeContext, project: dict,
         raise PalmierError("scoped repair has no prior plan authority")
     from palmier.desktop_repair import RepairRenderContext, build_scoped_repair
     from palmier.presenter_asset import primary_source
+    from palmier.checkpoint_graphics import placement_context
     old_plan = read_json(prior_path, "prior edit plan")
+    settings = project.get("projectSettings") or {}
+    canvas = (settings.get("width"), settings.get("height"))
+    if any(isinstance(value, bool) or not isinstance(value, (int, float))
+           or value <= 0 for value in canvas):
+        raise PalmierError("scoped repair has no positive project canvas")
+    placed = placement_context(
+        context.out_dir, plan, cache,
+        {"fps": context.fps, "width": int(canvas[0]),
+         "height": int(canvas[1])})
     render_context = RepairRenderContext(
-        context.fps, cache, primary_source(context.manifest))
+        context.fps, cache, primary_source(context.manifest), placed)
     steps, scope = build_scoped_repair(
         old_plan, plan, render_context, project.get("elementLedger"))
     capability = {"mode": "scoped-card-repair", "approved": False,
                   "scope": scope, "omissions": [],
                   "limitations": []}
+    return steps, capability
+
+
+def _prepare_visual(
+        request: dict, steps: list[dict],
+        capability: dict) -> tuple[list[dict], dict]:
+    inputs = request["inputs"]
+    context = request["context"]
+    project = request["project"]
+    authority = request["authority"]
+    from palmier.desktop_frame_authority import \
+        resolve_desktop_frame_authority
+    frame_authority = resolve_desktop_frame_authority(
+        inputs, authority, project)
+    native_rows = native_steps(context)
+    from palmier.desktop_title_card_plan import plan_title_card_shards
+    title_steps, title_capability = plan_title_card_shards(
+        context.plan, context.out_dir, project, frame_authority.frames)
+    from palmier.desktop_caption_page_plan import plan_caption_pages
+    caption_steps, caption_capability = plan_caption_pages(
+        context.plan, context.out_dir, project, frame_authority.frames)
+    steps = _ordered_visual_layers([
+        steps, native_rows, title_steps, caption_steps])
+    from palmier.desktop_exact_master_plan import \
+        prepare_exact_master_reference
+    exact, reference = prepare_exact_master_reference(
+        inputs, authority, project, frame_authority)
+    steps.extend(exact)
+    steps = extend_mastered_stereo_worklist(
+        steps, MasteredStereoPlanRequest(
+            context.plan, inputs, authority, project,
+            frame_authority.frames, request["cache"]))
+    capability = _desktop_capability(capability, steps)
+    capability["exactMasterReference"] = reference
+    if caption_capability:
+        capability["captionAuthority"] = caption_capability
+    if title_capability:
+        capability["titleCardAuthority"] = title_capability
     return steps, capability
 
 
@@ -243,21 +182,40 @@ def _prepare_stage(inputs: DesktopStageInput, project: dict,
     cache = str(spec.cache_dir)
     if inputs.stage in {"repair", "revision"}:
         authority = input_authority(spec, context.plan)
+        from palmier.desktop_frame_authority import \
+            resolve_desktop_frame_authority
+        frame_authority = resolve_desktop_frame_authority(
+            inputs, authority, project)
+        audio_request = MasteredStereoPlanRequest(
+            context.plan, inputs, authority, project,
+            frame_authority.frames, cache)
+        preserved_audio = preserved_mastered_stereo_authority(audio_request)
         if inputs.stage == "repair":
             steps, capability = _repair_steps(context, project, cache)
+            if preserved_audio is None:
+                steps = extend_mastered_stereo_worklist(steps, audio_request)
+            else:
+                capability[
+                    "preservedMasteredStereoAuthority"] = preserved_audio
             return PreparedDesktopStage(authority, steps, capability)
         from palmier.desktop_revision import prepare_manifest_revision
         steps, capability, revision = prepare_manifest_revision(
             inputs, context, project, cache)
+        if preserved_audio is None:
+            steps = extend_mastered_stereo_worklist(steps, audio_request)
+        else:
+            capability["preservedMasteredStereoAuthority"] = preserved_audio
         return PreparedDesktopStage(authority, steps, capability, revision)
     authority, translated, capability = checkpoint_inputs(spec, project)
     steps = _cut_worklist(context.plan, context.fps) \
         if inputs.stage == "cut" else _visual_steps(translated)
     if inputs.stage == "visual":
-        steps.extend(_native_steps(context))
-        capability = _desktop_capability(capability, steps)
+        steps, capability = _prepare_visual({
+            "inputs": inputs, "context": context, "project": project,
+            "authority": authority, "cache": cache,
+        }, steps, capability)
     return PreparedDesktopStage(
-        authority, _bind_media_hashes(steps), capability)
+        authority, bind_media_hashes(steps), capability)
 
 
 def prepare_desktop_manifest(inputs: DesktopStageInput,
@@ -274,12 +232,15 @@ def prepare_desktop_manifest(inputs: DesktopStageInput,
                            cache_dir=cache)
     plan = read_json(inputs.plan_path, "edit plan")
     manifest = read_json(inputs.manifest_path, "asset manifest")
+    verify_execution_media_authority(
+        plan, manifest, inputs.manifest_path)
     fps = float((project.get("projectSettings") or {}).get("fps") or 0)
     if fps <= 0:
         raise PalmierError("Desktop Palmier project has no positive fps")
     context = NativeContext(
         plan, manifest, fps, _duration(plan),
-        os.path.dirname(os.path.abspath(inputs.manifest_path)))
+        os.path.dirname(os.path.abspath(inputs.manifest_path)),
+        inputs.out_dir)
     prepared = _prepare_stage(inputs, project, spec, context)
     content = manifest_content(inputs, prepared)
     content["digest"] = _hash(content)

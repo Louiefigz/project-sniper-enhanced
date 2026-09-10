@@ -22,12 +22,17 @@ interface PythonCanonical {
 function pythonCanonical(value: unknown): PythonCanonical {
   const script = [
     "import hashlib, json, sys",
+    "from cross_runtime_canonical_json import canonical_compact_json",
     "value = json.load(sys.stdin)",
-    "raw = json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False)",
+    "raw = canonical_compact_json(value)",
     "print(json.dumps({'raw': raw, 'digest': hashlib.sha256(raw.encode('utf-8')).hexdigest()}, ensure_ascii=False))",
   ].join("; ");
   const result = spawnSync(path.join(process.cwd(), ".venv", "bin", "python3"), ["-c", script], {
     input: JSON.stringify(value), encoding: "utf8",
+    env: {
+      ...process.env,
+      PYTHONPATH: path.join(process.cwd(), "scripts", "producer"),
+    },
   });
   if (result.status !== 0) throw new Error(result.stderr || result.stdout);
   return JSON.parse(result.stdout) as PythonCanonical;
@@ -42,6 +47,13 @@ function crossLanguageDigestContract(): void {
   assert.equal(canonicalJsonSha256(fixture), python.digest);
   assert.match(python.raw, /"policy":\{"minProjectShare":0\.5,"minProjects":3\}/,
     "case-sensitive code-point order prevents localeCompare policy drift");
+  const edge = {
+    policy: { minProjectShare: 1e-7, minProjects: 3 },
+    numericKeys: { "10": "ten", "2": "two" },
+  };
+  const edgePython = pythonCanonical(edge);
+  assert.equal(canonicalJson(edge), edgePython.raw);
+  assert.equal(canonicalJsonSha256(edge), edgePython.digest);
 }
 
 function project(root: string, id: string, mode: string, kinds: string[]): string {

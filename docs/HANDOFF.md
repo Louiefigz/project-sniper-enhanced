@@ -1,20 +1,21 @@
-# PRODUCER Editor — Handoff (2026-07-10)
+# PRODUCER Editor — historical handoff (2026-07-10)
 
-> **Updated since this 2026-07-10 handoff — read this first.** The GUI now runs a
-> **detached auto-edit worker + bounded plan-review/QC controller.** Three things
-> below are stale: (1) the brain is the local **`claude`/`codex` CLI** (local mode
-> defaults to Codex `gpt-5.6-sol`), not claude-only; (2) each plan-review round adds
-> a **fresh independent critic** + the full gate bundle + Audit B + two visual
-> critics — not single-pass "gates validate then render"; (3) the in-house
-> `assemble.py` render is the **primary** output and **Palmier is an optional one-way
-> exact-master mirror**, not where everything "pushes for final export." Canonical:
-> [`AUTO_EDIT_LANE.md`](producer/AUTO_EDIT_LANE.md) + [`PIPELINE.md`](PIPELINE.md).
+> **Historical snapshot, not current release evidence.** Several counts,
+> timings, capability claims, and gap lists below describe the 2026-07-10 tree.
+> Use [`AUTO_EDIT_LANE.md`](producer/AUTO_EDIT_LANE.md),
+> [`PIPELINE.md`](PIPELINE.md), and the
+> [short/long executable matrix](producer/command-driven-editing/12_SHORT_LONG_EXECUTABLE_MATRIX.md)
+> for current behavior. In particular, the current controller uses detached
+> `claude`/`codex` workers plus bounded plan/render review, the in-house approved
+> MP4 is canonical, and connected editable Palmier delivery remains
+> qualification-gated.
 
 The "poor-man's NLE": a skills-only AI video editor at `localhost:3000/producer`.
 Raw footage → brain-authored edit → human polish in the editor → `final.mp4`.
-**No paid API anywhere** — all AI runs through the local `claude`/`codex` CLI
-(subscription; local mode defaults to Codex `gpt-5.6-sol`; `ANTHROPIC_API_KEY` is
-stripped before every spawn; verified `apiKeySource: none`).
+The historical local-mode path used the subscription-authenticated
+`claude`/`codex` CLI rather than a usage-metered API key. That is not an offline
+claim: transcript/plan context still leaves the machine for the selected model
+service.
 
 **Destination (canonical: `PIPELINE.md`):** upload into PRODUCER → intent card
 (Short w/ style: Caleb/Jaden/Angela · Long w/ item checklist, full workflow or
@@ -22,8 +23,9 @@ stripped before every spawn; verified `apiKeySource: none`).
 **`final.mp4`** (the primary, canonical output). **Palmier Pro is an OPTIONAL,
 post-approval, one-way exact-master mirror:** `scripts/producer/palmier/push.py
 <plan> <manifest> [--export]` (`--export` → `<project>/final.palmier.mp4`) mirrors
-that approved master as ONE byte-identical clip (verified on the real C0679 plan,
-frame-checked 81.3s export) — it is not where the plan is "pushed for final export."
+that approved master as one flat clip. The C0679 frame check cited by the
+original handoff is historical evidence for that earlier tree, not current
+connected P5 qualification.
 
 Start: open the project in **Claude Code desktop** (the easy path — see the repo
 `README.md`). The web GUI is optional: `npm run dev:local` (server may already be
@@ -31,7 +33,7 @@ running, detached).
 Full session-by-session state lives in Claude's memory file
 `project_producer_editor_ui.md`; module map in `scripts/producer/CLAUDE.md`.
 
-## The loop (all verified end-to-end)
+## Historical loop snapshot
 
 1. **Ingest** — producer tab → pick footage → **intent card** (Short|Long, preset
    chips incl. style presets, lane checkboxes) → lands in `~/ProjectSniper/<slug>/`
@@ -51,15 +53,17 @@ Full session-by-session state lives in Claude's memory file
    (text/container), Audio panel (volume, voice/voice-rnn/Demucs-separate, music
    with auto-duck), Ask-Claude bar (timestamps prefill from ruler range-select),
    speech-cleanup button, undo/redo, ⌘Z/space/arrows, Reveal final.mp4.
-4. **Re-render** — ONE button, smart dispatch by split fingerprints:
-   graphics-only ≈ 18s · audio-only ≈ 12s · cut/zoom edits ≈ 3min full rebuild with
-   automatic window refit (deterministic remap of every graphic/zoom/caption window).
+4. **Re-render** — ONE button, dispatched by change class. The original
+   handoff measured roughly 18s graphics-only, 12s audio-only, and 3min
+   cut/zoom rebuilds on its fixtures; those are historical observations, not
+   current SLAs or proof that every repair stays local.
 
 ## Architecture invariants
 
 - **Brain owns WHAT, code owns WHERE/timing.** LLMs never do timeline math.
-  The plan is the determinism boundary: same `edit_plan.json` → byte-identical
-  video (proved by double-render MD5).
+  The plan is the determinism boundary. Current equivalence claims use the
+  retained byte, FrameMD5, PCM, or codec-floor oracle named by each gate; a
+  general same-plan → byte-identical-video claim is not made.
 - Plan contracts: `cutTrack` = SOURCE seconds; graphics/motion = OUTPUT seconds;
   `plan_refit.py` auto-remaps on cut edits (idempotent, tested). Fingerprints:
   video/audio/legacy in `base.fingerprint.json` (JSON canonicalized — JS/py number
@@ -102,14 +106,17 @@ receipts → executable pacing profile → style preset.
 - Presets in the intent card: **Caleb light · Jaden produced · Angela involved**
   (+ 4 generics). `target.style` tells Auto-edit to read the grammar doc first.
 
-## Test state
+## Historical test state (2026-07-11)
 
 816 python tests green as of 2026-07-11 (stdlib unittest: `cd scripts/producer &&
 PYTHONPATH=.:tests ../../.venv/bin/python3 selftest.py`), tsc/build clean,
 tsx harnesses for all pure UI geometry. Three adversarial review rounds ran on the
 editor (33 findings found → 33 fixed + independently closed).
 
-## Known gaps / next work (priority order)
+## Historical gap list
+
+Do not use this list as current status; see `PIPELINE.md` and the stop-gated
+roadmap/audits linked there.
 
 1. ~~`edit_plan.json` → Palmier Pro MCP translator.~~ DONE (2026-07-11) —
    `scripts/producer/palmier/` (client + pure translate + push CLI), verified

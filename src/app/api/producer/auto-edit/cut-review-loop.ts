@@ -18,7 +18,10 @@ import {
   type CleanCutReviewArtifact,
   type CutReviewApprovalReceipt,
 } from "./cut-review-approval";
-import { validatePrevisualCut } from "./cut-approval";
+import {
+  validatePrevisualCut,
+  validateSavedPlanCut,
+} from "./cut-approval";
 import {
   cutRoundDir,
   MAX_CUT_REVIEW_ROUNDS,
@@ -28,6 +31,10 @@ import {
 import { mergeProducerReviewBatch } from "./review-batch";
 import { RevisionNoChangeError } from "./revision-staging";
 import { AutoEditError, type Send } from "./stream";
+import { assertExistingCutContext, hasGuidedBootstrap } from "@/lib/server/guided-project-bootstrap-contract";
+import { assertBootstrapCurrent } from "@/lib/server/guided-project-bootstrap-guard";
+
+export const cutReviewBootstrapGuards = { current: assertBootstrapCurrent };
 
 export { MAX_CUT_REVIEW_ROUNDS } from "./cut-review-batch";
 
@@ -150,16 +157,64 @@ function mergeCutResults(results: CutRoundResult[]): CutRoundResult {
   };
 }
 
-export async function runCutReviewLoop(
+function cutReviewDependencies(
   run: CutReviewLoopRuntime,
-  dependencies: Partial<CutReviewLoopDependencies> = {},
-): Promise<CutReviewApprovalReceipt> {
-  const deps = { ...DEFAULT_DEPS, ...dependencies };
+  overrides: Partial<CutReviewLoopDependencies>,
+): CutReviewLoopDependencies {
+  const deps = { ...DEFAULT_DEPS, ...overrides };
+  if (run.job.reviewSavedPlan && !overrides.gate) deps.gate = validateSavedPlanCut;
+  return deps;
+}
+
+function approveCleanCut(
+  run: CutReviewLoopRuntime,
+  result: CutRoundResult,
+  cleanReviews: CleanCutReviewArtifact[],
+  deps: CutReviewLoopDependencies,
+): CutReviewApprovalReceipt {
+  if (!sameAutoEditAuthority(result.authority, deps.authority(run.job.ctx))) {
+    throw new AutoEditError("cut authority changed before review approval was committed");
+  }
+  return deps.approve(
+    run.job.ctx, result.gate, result.authority.digest,
+    cleanReviews.slice(-REQUIRED_CLEAN_CUT_REVIEWS),
+  );
+}
+
+async function resolveMaterialCutIssues(run: CutReviewLoopRuntime, result: CutRoundResult,
+  state: { round: number; reReviewedConflicts: Set<string> }, deps: CutReviewLoopDependencies): Promise<void> {
+  const { round, reReviewedConflicts } = state;
+  if (round >= MAX_CUT_REVIEW_ROUNDS) {
+    throw new AutoEditError(`cut review exhausted ${round} rounds: ${result.review.materialIssues.map((x) => x.code).join(", ")}`);
+  }
+  if (run.job.reviewSavedPlan || run.job.ctx.existingCutCandidate) {
+    const codes = result.review.materialIssues.map((issue) => issue.code).join(", ");
+    throw new AutoEditError(`saved-plan cut review found material issues; complete plan was not modified: ${codes}`);
+  }
+  const key = conflictKey(result);
+  if (reReviewedConflicts.has(key)) {
+    const codes = result.review.materialIssues.map((issue) => issue.code).join(", ");
+    throw new AutoEditError(`cut critic/revision conflict repeated for unchanged deterministic cut: ${codes}`);
+  }
+  const revision = await reviseCut(run, result, round, deps);
+  if (run.job.ctx.authoredCut) cutReviewBootstrapGuards.current(run.job);
+  if (revision.kind === "conflict") {
+    reReviewedConflicts.add(key);
+    persistConflict(run, round, revision, deps);
+  }
+}
+
+export async function runCutReviewLoop(run: CutReviewLoopRuntime,
+  dependencies: Partial<CutReviewLoopDependencies> = {}): Promise<CutReviewApprovalReceipt> {
+  assertExistingCutContext(run.job.ctx);
+  if (hasGuidedBootstrap(run.job.ctx) && run.job.reviewSavedPlan) throw new AutoEditError("Guided cut bootstrap cannot select the saved-plan gate");
+  const deps = cutReviewDependencies(run, dependencies);
   let cleanIdentity: string | undefined;
   let cleanReviews: CleanCutReviewArtifact[] = [];
   const reReviewedConflicts = new Set<string>();
   let round = 0;
   while (round < MAX_CUT_REVIEW_ROUNDS) {
+    if (run.job.ctx.authoredCut) cutReviewBootstrapGuards.current(run.job);
     const firstRound = round + 1;
     const remainingClean = REQUIRED_CLEAN_CUT_REVIEWS - cleanReviews.length;
     const batchSize = Math.min(remainingClean, MAX_CUT_REVIEW_ROUNDS - round);
@@ -168,24 +223,13 @@ export async function runCutReviewLoop(
       message: `Transcript cut review ${firstRound}/${MAX_CUT_REVIEW_ROUNDS}; launching ${batchSize} independent critic(s) against the same deterministic cut.`,
     });
     const results = await runCutReviewBatch(run, firstRound, batchSize, deps);
+    if (run.job.ctx.authoredCut) cutReviewBootstrapGuards.current(run.job);
     round += results.length;
     const result = mergeCutResults(results);
     if (result.review.materialIssues.length) {
       cleanIdentity = undefined;
       cleanReviews = [];
-      if (round >= MAX_CUT_REVIEW_ROUNDS) {
-        throw new AutoEditError(`cut review exhausted ${round} rounds: ${result.review.materialIssues.map((x) => x.code).join(", ")}`);
-      }
-      const key = conflictKey(result);
-      if (reReviewedConflicts.has(key)) {
-        const codes = result.review.materialIssues.map((issue) => issue.code).join(", ");
-        throw new AutoEditError(`cut critic/revision conflict repeated for unchanged deterministic cut: ${codes}`);
-      }
-      const revision = await reviseCut(run, result, round, deps);
-      if (revision.kind === "conflict") {
-        reReviewedConflicts.add(key);
-        persistConflict(run, round, revision, deps);
-      }
+      await resolveMaterialCutIssues(run, result, { round, reReviewedConflicts }, deps);
       continue;
     }
     const identity = cutIdentity(result);
@@ -197,13 +241,7 @@ export async function runCutReviewLoop(
       message: `Current transcript cut has ${cleanReviews.length}/${REQUIRED_CLEAN_CUT_REVIEWS} clean independent reviews.`,
     });
     if (cleanReviews.length < REQUIRED_CLEAN_CUT_REVIEWS) continue;
-    if (!sameAutoEditAuthority(result.authority, deps.authority(run.job.ctx))) {
-      throw new AutoEditError("cut authority changed before review approval was committed");
-    }
-    return deps.approve(
-      run.job.ctx, result.gate, result.authority.digest,
-      cleanReviews.slice(-REQUIRED_CLEAN_CUT_REVIEWS),
-    );
+    return approveCleanCut(run, result, cleanReviews, deps);
   }
   throw new AutoEditError("cut review ended without an approved transcript spine");
 }

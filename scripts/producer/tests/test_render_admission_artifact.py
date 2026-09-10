@@ -13,6 +13,7 @@ from pathlib import Path
 from unittest import mock
 
 from _common import pl  # noqa: F401
+from _current_render_build_fixture import current_manifest
 from headless import render_admission_artifact as artifact_module
 from headless import render_admission_artifact_reader as artifact_reader
 from headless.render_admission_artifact import (
@@ -33,8 +34,8 @@ from headless.request_artifact import canonical_request_document
 
 PRODUCER_DIR = Path(__file__).resolve().parents[1]
 REPO_ROOT = PRODUCER_DIR.parents[1]
-BUILD_A = {"schemaVersion": 1, "policy": "test-a", "implementation": []}
-BUILD_B = {"schemaVersion": 1, "policy": "test-b", "implementation": []}
+BUILD_A = current_manifest("test-a")
+BUILD_B = current_manifest("test-b")
 
 
 def _entry(label: str = "A", duration: float = 2.5) -> dict:

@@ -1,0 +1,414 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-07-29",
+  "completeness": "complete",
+  "gates": [
+    {
+      "gateId": "exact-delivery-geometry",
+      "lessonIds": ["LL-019"],
+      "sourceDocuments": [
+        "scripts/producer/docs/findings/FAILURE_LEDGER.md",
+        "docs/producer/PRODUCER_EDGE_CASES.md"
+      ],
+      "ownerPhases": ["P0", "P4"],
+      "classification": "blocking",
+      "implementationStatus": "enforced",
+      "enforcingCode": [
+        "scripts/producer/graphics/delivery_geometry.py",
+        "scripts/producer/graphics/graphics_stage.py"
+      ],
+      "fixtures": [
+        {
+          "path": "scripts/producer/tests/test_placement.py",
+          "expected": "A 1920x1080 own-screen comp on 3840x2160 delivery scales to and records the exact 3840x2160 delivery bounds."
+        }
+      ],
+      "evidenceArtifacts": [
+        "docs/producer/command-driven-editing/contracts/p4-scene-brief-matrix-v1.json"
+      ],
+      "receiptBindings": [
+        "placementEvidence.placedBBox",
+        "SceneSpecV1.deliveryGeometry"
+      ],
+      "knownGap": "none"
+    },
+    {
+      "gateId": "footage-readability",
+      "lessonIds": ["LL-033"],
+      "sourceDocuments": [
+        "scripts/producer/docs/findings/FAILURE_LEDGER.md",
+        "docs/producer/PRODUCER_EDGE_CASES.md"
+      ],
+      "ownerPhases": ["P0", "P4"],
+      "classification": "blocking",
+      "implementationStatus": "enforced",
+      "enforcingCode": [
+        "scripts/producer/graphics/readability_gate.py",
+        "scripts/producer/graphics/scene_package_contract.py"
+      ],
+      "fixtures": [
+        {
+          "path": "scripts/producer/tests/test_readability_gate.py",
+          "expected": "Actual decoded background frames must meet the configured contrast floor or bind a proved backing treatment; no-verdict evidence fails."
+        }
+      ],
+      "evidenceArtifacts": [
+        "schemas/producer/scene-readability-receipt-v1.schema.json"
+      ],
+      "receiptBindings": [
+        "SceneReadabilityReceiptV1.receiptHash",
+        "ScenePackageV1.readability.receiptHash"
+      ],
+      "knownGap": "none"
+    },
+    {
+      "gateId": "measured-comp-capability",
+      "lessonIds": ["LL-036", "LL-037"],
+      "sourceDocuments": [
+        "scripts/producer/docs/findings/FAILURE_LEDGER.md",
+        "docs/producer/PRODUCER_EDGE_CASES.md"
+      ],
+      "ownerPhases": ["P0", "P4"],
+      "classification": "blocking",
+      "implementationStatus": "enforced",
+      "enforcingCode": [
+        "scripts/producer/graphics/comp_capability_artifact.py",
+        "scripts/producer/graphics/comp_rate_artifact.py"
+      ],
+      "fixtures": [
+        {
+          "path": "scripts/producer/tests/test_comp_capability_artifact.py",
+          "expected": "Missing, stale, unmeasured, unknown, or render-error capability rows fail closed."
+        },
+        {
+          "path": "scripts/producer/tests/test_comp_rate_matrix.py",
+          "expected": "Every released catalog composition fully decodes at every measured rational frame rate."
+        }
+      ],
+      "evidenceArtifacts": [
+        "docs/producer/command-driven-editing/contracts/hyperframes-rate-matrix-v1.json"
+      ],
+      "receiptBindings": [
+        "HyperframesRateMatrixV1.artifactHash",
+        "compCapabilityArtifact.sourceClosureHash"
+      ],
+      "knownGap": "none"
+    },
+    {
+      "gateId": "channel-normalization-order",
+      "lessonIds": ["X21"],
+      "sourceDocuments": [
+        "docs/producer/PRODUCER_EDGE_CASES.md"
+      ],
+      "ownerPhases": ["P0", "P5"],
+      "classification": "blocking",
+      "implementationStatus": "enforced",
+      "enforcingCode": [
+        "scripts/producer/audio/channel_normalization.py",
+        "scripts/producer/audio/cut_channel_normalization.py",
+        "scripts/producer/audio/dialogue_stem_probe.py",
+        "scripts/producer/audio/program_mix_registry.py",
+        "scripts/producer/edit/repair_channel_authority.py"
+      ],
+      "fixtures": [
+        {
+          "path": "scripts/producer/tests/test_channel_normalization.py",
+          "expected": "Real dead-left and dead-right media are repaired before mono dialogue decode, and a rehashed filter substitution is rejected by the content-bound receipt."
+        },
+        {
+          "path": "scripts/producer/tests/test_channel_normalization_mix_paths.py",
+          "expected": "Real media exercises cut and J-cut, music, transition, separation, and repair boundaries; each program source consumes its pinned channel authority before a mix or downmix."
+        },
+        {
+          "path": "scripts/producer/tests/test_program_mix_registry.py",
+          "expected": "The exact program-mix inventory rejects an unowned mix literal and fails when any registered normalization dependency token is removed."
+        },
+        {
+          "path": "scripts/producer/tests/test_audio_mix_render.py",
+          "expected": "A four-segment 24000/1001 fixture proves AAC padding cannot extend picture or alter the compiled program clock."
+        }
+      ],
+      "evidenceArtifacts": [
+        "docs/producer/command-driven-editing/contracts/program-audio-mix-registry-v1.json",
+        "docs/producer/command-driven-editing/11_P0_EXIT_AUDIT.md"
+      ],
+      "receiptBindings": [
+        "ChannelNormalizationReceiptV1.receiptHash",
+        "ProgramAudioMixRegistryV1.dependencies",
+        "CutRepairFragmentReceiptV1.inputs.*.channelNormalization"
+      ],
+      "knownGap": "none"
+    },
+    {
+      "gateId": "frame-sample-duration-authority",
+      "lessonIds": ["X8", "X19"],
+      "sourceDocuments": [
+        "docs/producer/PRODUCER_EDGE_CASES.md"
+      ],
+      "ownerPhases": ["P0", "P5"],
+      "classification": "blocking",
+      "implementationStatus": "enforced",
+      "enforcingCode": [
+        "scripts/producer/audio/master.py",
+        "scripts/producer/render.py"
+      ],
+      "fixtures": [
+        {
+          "path": "scripts/producer/tests/test_audio_mix_render.py",
+          "expected": "A four-segment 24000/1001 fixture clamps picture to compiled frame count and audio to pre-AAC PCM count without accumulating AAC padding."
+        },
+        {
+          "path": "scripts/producer/tests/test_final_provenance.py",
+          "expected": "Final publication binds compiled editorial clocks rather than container duration observations."
+        }
+      ],
+      "evidenceArtifacts": [
+        "docs/producer/command-driven-editing/contracts/p0-current-lf14-baseline-v1.json"
+      ],
+      "receiptBindings": [
+        "finalProvenance.compiledVideoFrames",
+        "finalProvenance.preAacPcmSamples"
+      ],
+      "knownGap": "none"
+    },
+    {
+      "gateId": "exact-rational-fps",
+      "lessonIds": ["X20"],
+      "sourceDocuments": [
+        "docs/producer/PRODUCER_EDGE_CASES.md"
+      ],
+      "ownerPhases": ["P0", "P2", "P5"],
+      "classification": "blocking",
+      "implementationStatus": "enforced",
+      "enforcingCode": [
+        "scripts/producer/graphics/render_rate.py",
+        "src/lib/producer/contracts/positive-rational.ts"
+      ],
+      "fixtures": [
+        {
+          "path": "scripts/producer/tests/test_render_rate.py",
+          "expected": "Rational numerator and denominator survive render invocation and receipt validation without float substitution."
+        },
+        {
+          "path": "src/lib/producer/__tests__/producer-contracts-v1.test.ts",
+          "expected": "Non-reduced and non-canonical rational frame rates are rejected."
+        }
+      ],
+      "evidenceArtifacts": [
+        "docs/producer/command-driven-editing/contracts/fps-support-matrix-v1.json"
+      ],
+      "receiptBindings": [
+        "PositiveRationalV1.numerator",
+        "PositiveRationalV1.denominator"
+      ],
+      "knownGap": "none"
+    },
+    {
+      "gateId": "caption-end-to-end-authority",
+      "lessonIds": ["captionsTrack-ghost-coverage"],
+      "sourceDocuments": [
+        "docs/producer/PRODUCER_EDGE_CASES.md"
+      ],
+      "ownerPhases": ["P0", "P3"],
+      "classification": "blocking",
+      "implementationStatus": "enforced",
+      "enforcingCode": [
+        "scripts/producer/captions/caption_plan_pipeline.py",
+        "scripts/producer/captions/caption_compile.py"
+      ],
+      "fixtures": [
+        {
+          "path": "scripts/producer/tests/test_caption_legacy_integration.py",
+          "expected": "One strict compilation drives SRT, burned alpha media, Palmier disposition, authority coverage, and Audit B."
+        },
+        {
+          "path": "scripts/producer/tests/test_caption_shards.py",
+          "expected": "Caption-only edits rebuild only affected alpha shards while forced-full decoded frames remain identical."
+        }
+      ],
+      "evidenceArtifacts": [
+        "scripts/producer/tests/fixtures/p3-caption-shard-traces.json"
+      ],
+      "receiptBindings": [
+        "CaptionCompilationV1.captionTrackHash",
+        "CaptionShardTraceV1.fullOracleSha256"
+      ],
+      "knownGap": "none"
+    },
+    {
+      "gateId": "cut-prompt-vocabulary",
+      "lessonIds": ["cut-authoring-enum-drift"],
+      "sourceDocuments": [
+        "docs/producer/PRODUCER_EDGE_CASES.md"
+      ],
+      "ownerPhases": ["P0"],
+      "classification": "blocking",
+      "implementationStatus": "enforced",
+      "enforcingCode": [
+        "src/app/api/producer/auto-edit/cut-authoring-prompt.ts",
+        "scripts/producer/producer_config.py"
+      ],
+      "fixtures": [
+        {
+          "path": "src/lib/producer/__tests__/producer-ai-provider.test.ts",
+          "expected": "The prompt accepts short|longform and trim|light|produced|full while rejecting the former contradictory vocabulary."
+        }
+      ],
+      "evidenceArtifacts": [
+        "schemas/producer/product-capability-matrix-v1.schema.json"
+      ],
+      "receiptBindings": [
+        "canonical MODES enum",
+        "canonical SCOPES enum"
+      ],
+      "knownGap": "none"
+    },
+    {
+      "gateId": "graphics-over-broll-layering",
+      "lessonIds": ["graphics-over-broll-unproved"],
+      "sourceDocuments": [
+        "docs/producer/PRODUCER_EDGE_CASES.md"
+      ],
+      "ownerPhases": ["P4", "P5"],
+      "classification": "blocking",
+      "implementationStatus": "enforced",
+      "enforcingCode": [
+        "scripts/producer/broll/broll_insert.py",
+        "scripts/producer/captions/caption_authority.py",
+        "scripts/producer/graphics/composite_core.py",
+        "scripts/producer/render.py",
+        "scripts/producer/graphics/graphics_stage.py"
+      ],
+      "fixtures": [
+        {
+          "path": "scripts/producer/tests/test_graphics_broll_layering.py",
+          "expected": "A decoded real-media b-roll insert is alpha-composited with two independently rendered graphics and then caption-burned through the production primitives; graphics must appear above b-roll, the same oracle must reject missing and reversed overlays, captions must appear above graphics, encoded audio must remain stream-identical, and the second graphic edit must leave b-roll and caption authorities exact."
+        }
+      ],
+      "evidenceArtifacts": [
+        "docs/producer/command-driven-editing/17_P5_EXIT_AUDIT.md"
+      ],
+      "receiptBindings": [
+        "broll_insert.apply_broll_inserts.inFrames/outFrames/audioCopied",
+        "graphics.composite_core.composite.passCount",
+        "caption_authority.burn_caption_artifact audio-stream-copy contract"
+      ],
+      "knownGap": "none"
+    },
+    {
+      "gateId": "dual-cut-approval-binding",
+      "lessonIds": ["dual-review-picture-lock"],
+      "sourceDocuments": [
+        "docs/producer/PRODUCER_EDGE_CASES.md"
+      ],
+      "ownerPhases": ["P1"],
+      "classification": "blocking",
+      "implementationStatus": "enforced",
+      "enforcingCode": [
+        "src/app/api/producer/auto-edit/compatibility-picture-lock.ts",
+        "src/lib/server/producer-revision-shadow-lock.ts"
+      ],
+      "fixtures": [
+        {
+          "path": "src/lib/producer/__tests__/compatibility-picture-lock.test.ts",
+          "expected": "Deleting or mutating either deterministic cut approval or two-clean-review authority invalidates the compatibility picture lock."
+        }
+      ],
+      "evidenceArtifacts": [
+        "schemas/producer/picture-lock-v1.schema.json"
+      ],
+      "receiptBindings": [
+        "CompatibilityPictureLockV1.cutApprovalReceiptHash",
+        "CompatibilityPictureLockV1.twoCleanReviewReceiptHash"
+      ],
+      "knownGap": "none"
+    },
+    {
+      "gateId": "refit-old-output-order",
+      "lessonIds": ["old-output-refit-order"],
+      "sourceDocuments": [
+        "docs/producer/PRODUCER_EDGE_CASES.md"
+      ],
+      "ownerPhases": ["P1"],
+      "classification": "blocking",
+      "implementationStatus": "enforced",
+      "enforcingCode": [
+        "scripts/producer/edit/plan_refit.py"
+      ],
+      "fixtures": [
+        {
+          "path": "scripts/producer/tests/test_plan_refit.py",
+          "expected": "Early, middle, late, reordered-source, and repeated-source removals map old output to source and search removed spans in old-output order."
+        }
+      ],
+      "evidenceArtifacts": [
+        "scripts/producer/tests/test_plan_refit.py"
+      ],
+      "receiptBindings": [
+        "PlanRefitReceiptV1.oldOutputOrder",
+        "PlanRefitReceiptV1.sourceMapping"
+      ],
+      "knownGap": "none"
+    },
+    {
+      "gateId": "observed-state-recovery",
+      "lessonIds": ["durable-receipt-recovery"],
+      "sourceDocuments": [
+        "docs/producer/PRODUCER_EDGE_CASES.md"
+      ],
+      "ownerPhases": ["P1"],
+      "classification": "blocking",
+      "implementationStatus": "enforced",
+      "enforcingCode": [
+        "src/lib/server/producer-qc-promotion.ts",
+        "src/lib/server/producer-qc-promotion-intent.ts"
+      ],
+      "fixtures": [
+        {
+          "path": "src/lib/server/__tests__/producer-qc-promotion-intent.test.ts",
+          "expected": "Power loss at each promotion boundary recovers old head, exact child, or explicit reconciliation and never blindly repeats uncertain mutation."
+        }
+      ],
+      "evidenceArtifacts": [
+        "src/lib/server/__tests__/producer-qc-promotion-intent.test.ts"
+      ],
+      "receiptBindings": [
+        "ProducerQcPromotionIntentV1.intentHash",
+        "ProducerQcPromotionReceiptV1.receiptHash"
+      ],
+      "knownGap": "none"
+    },
+    {
+      "gateId": "headless-non-authorizing-boundary",
+      "lessonIds": ["headless-primitives-non-authorizing"],
+      "sourceDocuments": [
+        "docs/producer/PRODUCER_EDGE_CASES.md"
+      ],
+      "ownerPhases": ["P1"],
+      "classification": "blocking",
+      "implementationStatus": "enforced",
+      "enforcingCode": [
+        "scripts/producer/headless/generation_policy_documents.py",
+        "scripts/producer/headless/graphic_render_receipt_semantics.py"
+      ],
+      "fixtures": [
+        {
+          "path": "scripts/producer/tests/test_headless_import_boundary.py",
+          "expected": "Experimental headless workers and CURRENT pointers cannot become selected project authority through an import."
+        },
+        {
+          "path": "scripts/producer/tests/test_generation_policy_documents.py",
+          "expected": "MP4-only headless generation policy denies Palmier authority and publication."
+        }
+      ],
+      "evidenceArtifacts": [
+        "scripts/producer/tests/test_headless_import_boundary.py"
+      ],
+      "receiptBindings": [
+        "GenerationPolicyV1.palmierAllowed",
+        "GraphicRenderReceiptV1.authorityDisposition"
+      ],
+      "knownGap": "none"
+    }
+  ]
+}

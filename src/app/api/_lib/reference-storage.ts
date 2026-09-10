@@ -1,15 +1,10 @@
 import fs from "fs";
 import path from "path";
+import { atomicWriteJsonSync } from "@/lib/server/atomic-file";
 
 export function atomicWriteJson(file: string, value: unknown): void {
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  const temp = `${file}.${process.pid}.${Date.now().toString(36)}.tmp`;
-  try {
-    fs.writeFileSync(temp, JSON.stringify(value, null, 2) + "\n", { flag: "wx" });
-    fs.renameSync(temp, file);
-  } finally {
-    try { if (fs.existsSync(temp)) fs.unlinkSync(temp); } catch {}
-  }
+  atomicWriteJsonSync(file, value);
 }
 
 export function readIgnoredIds(referenceRoot: string): Set<string> {

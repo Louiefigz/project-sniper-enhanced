@@ -1,0 +1,2585 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-07-30",
+  "completeness": "complete",
+  "phaseExit": "passed",
+  "inventoryGaps": [],
+  "baseline": {
+    "status": "measured",
+    "requiredFixtures": [
+      "frozen-short-current-full-path-cold-and-warm",
+      "frozen-lf-14-a-current-full-path-cold-and-warm"
+    ],
+    "evidencePaths": [
+      "docs/producer/command-driven-editing/contracts/p0-current-short-baseline-v1.json",
+      "docs/producer/command-driven-editing/contracts/p0-current-lf14-baseline-v1.json"
+    ]
+  },
+  "callSiteAudit": {
+    "roots": [
+      "scripts/producer",
+      "src/app/api",
+      "src/lib/producer",
+      "src/lib/server"
+    ],
+    "extensions": [
+      ".py",
+      ".ts",
+      ".tsx"
+    ],
+    "excludedPathSegments": [
+      "__pycache__",
+      "__tests__",
+      "docs",
+      "tests"
+    ]
+  },
+  "authorityDiscovery": {
+    "literalPrefixes": [
+      ".sniper",
+      ".palmier",
+      ".render-graph-v1"
+    ],
+    "artifactBindings": {
+      ".palmier-desktop-assets": "palmier-desktop-authority",
+      ".palmier-desktop-authority.json": "palmier-desktop-authority",
+      ".palmier-desktop-gates": "palmier-desktop-authority",
+      ".palmier-desktop-inputs": "palmier-desktop-authority",
+      ".palmier-desktop-operation-snapshots": "palmier-desktop-authority",
+      ".palmier-desktop-operations": "palmier-desktop-authority",
+      ".palmier-desktop-operations.jsonl": "palmier-desktop-authority",
+      ".palmier-live-build.jsonl": "palmier-live-build-state",
+      ".palmier-live-build.state.json": "palmier-live-build-state",
+      ".palmier.sync.lock": "palmier-sync-transaction",
+      ".palmier.sync.mutex": "palmier-sync-transaction",
+      ".palmier.sync.pending.json": "palmier-sync-transaction",
+      ".render-graph-v1": "current-render-graph-v1",
+      ".sniper-authority-v1": "revision-store-v1",
+      ".sniper-cut-approval.json": "cut-approval",
+      ".sniper-cut-review-approved.json": "cut-review-approval",
+      ".sniper-external-media": "external-media-snapshot-shadow",
+      ".sniper-palmier-desktop-authority.json": "palmier-desktop-authority",
+      ".sniper-plan-refit.json": "plan-refit-receipt",
+      ".sniper-plan-refit.pending.json": "plan-refit-receipt",
+      ".sniper-preview-stale.json": "auto-edit-preview-invalidation",
+      ".sniper-project-mutation.lock": "project-mutation-lease",
+      ".sniper-project-mutation.owner-${nonce}.json": "project-mutation-lease",
+      ".sniper-project-mutation.recovery": "project-mutation-lease",
+      ".sniper-qc": "auto-edit-qc-rounds",
+      ".sniper-qc-approved.json": "approved-final",
+      ".sniper-qc-promotion-reconciliation.json": "promotion-reconciliation",
+      ".sniper-source-sets": "producer-ingest-source-set-v1",
+      ".sniper-surgical-reconciliation-candidate.json": "promotion-reconciliation",
+      ".sniper-surgical-reconciliation.json": "promotion-reconciliation",
+      ".sniper-surgical-review.json": "surgical-review-marker",
+      ".sniper-template-usage-approved.json": "template-usage-approval",
+      ".palmier.candidate.tmp.mp4": "palmier-candidate-export-temp",
+      ".sniper-admission-pending": "reference-admission-transaction",
+      ".sniper-auto-edit-delivery-receipts": "auto-edit-delivery-receipts",
+      ".sniper-auto-edit-job.json": "auto-edit-job-journal",
+      ".sniper-auto-edit-launch.lock": "auto-edit-launch-lease",
+      ".sniper-auto-edit.log": "auto-edit-diagnostic-log",
+      ".sniper-cut-repair-staging": "cut-repair-staging-cache",
+      ".sniper-dialogue-program-stage-": "dialogue-stem-ephemeral-workspaces",
+      ".sniper-dialogue-stage-": "dialogue-stem-ephemeral-workspaces",
+      ".sniper-dialogue-work-": "dialogue-stem-ephemeral-workspaces",
+      ".sniper-learning": "producer-learning-root",
+      ".sniper-media-probe-": "external-media-probe-workspace",
+    ".sniper-quality-policy.json": "auto-edit-quality-policy",
+    ".sniper-reference-admission": "reference-media-admission",
+    ".sniper-reference-text-admission": "reference-text-admission",
+    ".sniper-repair-": "cut-repair-ephemeral-workspaces",
+      ".sniper-repair-composite-": "cut-repair-ephemeral-workspaces",
+      ".sniper-run-state.json": "producer-run-state"
+    },
+    "backlog": {},
+    "pathBoundaryEvidence": "docs/producer/command-driven-editing/contracts/p0-authority-path-boundary-evidence-v1.json",
+    "persistenceDispositionEvidence": "docs/producer/command-driven-editing/contracts/p0-persistence-call-dispositions-v1.json"
+  },
+  "artifacts": [
+    {
+      "artifactId": "project-intent",
+      "pathPattern": "<project>/project.json",
+      "owner": "src/app/api/_lib/workspace.ts",
+      "authority": "canonical",
+      "readers": [
+        "src/app/api/producer/auto-edit/operator-intent-authority.ts",
+        "src/app/api/producer/ingest/target.ts"
+      ],
+      "writers": [
+        "src/app/api/_lib/workspace.ts",
+        "src/app/api/producer/ingest/target.ts"
+      ],
+      "promotionPoint": "atomic project metadata replacement",
+      "fingerprintInputs": [
+        "requestedIntent",
+        "resolvedIntent",
+        "intentDecisions"
+      ],
+      "durability": "atomic file replacement; not an immutable revision",
+      "disposition": "adapter",
+      "parityFixture": "intent-flow.test.ts",
+      "removalCondition": "all intent readers resolve a committed ProjectRevisionV1",
+      "authorityPathTokens": [
+        "project.json"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/palmier/quality_hash.py": "reader",
+        "scripts/producer/prepare_current_baseline.py": "writer",
+        "scripts/producer/template_usage_approval.py": "reader",
+        "src/app/api/_lib/project-mutation.ts": "reader",
+        "src/app/api/_lib/workspace.ts": "reader-writer",
+        "src/app/api/clipper/save-to-workspace/route.ts": "writer",
+        "src/app/api/producer/auto-edit/operator-intent-authority.ts": "reader-writer",
+        "src/app/api/producer/auto-edit/planning-gate-contract.ts": "non-authority",
+        "src/app/api/producer/auto-edit/saved-plan-request.ts": "reader",
+        "src/app/api/producer/ingest/target.ts": "reader-writer",
+        "src/app/api/producer/intent/route.ts": "launcher",
+        "src/app/api/producer/project-status/route.ts": "reader",
+        "src/lib/producer/intent-presets.ts": "non-authority",
+        "src/lib/server/auto-edit-authority-snapshot.ts": "reader",
+        "src/lib/server/template-usage-approval.ts": "reader"
+      }
+    },
+    {
+      "artifactId": "asset-manifest",
+      "pathPattern": "<project>/source/asset_manifest.json",
+      "owner": "scripts/producer/ingest.py",
+      "authority": "canonical",
+      "readers": [
+        "scripts/producer/render.py",
+        "src/app/api/producer/auto-edit/stream.ts"
+      ],
+      "writers": [
+        "scripts/producer/ingest.py"
+      ],
+      "promotionPoint": "ingest worker completion",
+      "fingerprintInputs": [
+        "immutable snapshot paths and full SHA-256 identities",
+        "source-set digest and exact admission receipt hashes",
+        "legacy partial content hash",
+        "probe metadata"
+      ],
+      "durability": "mutable root JSON atomically replaced; new Producer ingests execute content-addressed snapshots while legacy manifests may still name mutable files",
+      "disposition": "extend",
+      "parityFixture": "test_ingest_admission.py",
+      "removalCondition": "legacy manifests are migrated or rejected and every external ingress participates in source-set authority",
+      "authorityPathTokens": [
+        "asset_manifest.json"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/broll/broll_insert.py": "reader",
+        "scripts/producer/broll/broll_pool.py": "reader",
+        "scripts/producer/broll/pool_views.py": "reader",
+        "scripts/producer/current_full_path_baseline.py": "reader",
+        "scripts/producer/cut_speed.py": "reader",
+        "scripts/producer/draft_render.py": "reader",
+        "scripts/producer/edit/cover_select.py": "reader",
+        "scripts/producer/ingest.py": "writer",
+        "scripts/producer/plan_lint.py": "reader",
+        "scripts/producer/prepare_current_baseline.py": "writer",
+        "scripts/producer/render.py": "reader",
+        "src/app/api/_lib/workspace.ts": "path-owner",
+        "src/app/api/producer/ingest/route.ts": "launcher",
+        "src/app/api/producer/ingest/target.ts": "reader",
+        "src/app/api/producer/intent/route.ts": "reader",
+        "src/app/api/producer/palmier/_lib.ts": "reader",
+        "src/app/api/producer/project-status/route.ts": "reader",
+        "src/lib/producer/types.ts": "non-authority",
+        "src/lib/server/producer-manifest.ts": "reader"
+      }
+    },
+    {
+      "artifactId": "edit-plan",
+      "pathPattern": "<project>/producer/edit_plan.json",
+      "owner": "src/app/api/producer/save-plan/route.ts",
+      "authority": "canonical",
+      "readers": [
+        "scripts/producer/render.py",
+        "scripts/producer/assemble.py",
+        "src/app/api/producer/auto-edit",
+        "src/app/api/producer/ai-edit",
+        "src/lib/server/cut-repair-media-activation.ts"
+      ],
+      "writers": [
+        "src/app/api/producer/save-plan/transaction.ts",
+        "src/app/api/producer/save-plan/route.ts",
+        "src/app/api/producer/auto-edit",
+        "src/app/api/producer/ai-edit",
+        "src/lib/server/cut-repair-media-activation.ts"
+      ],
+      "promotionPoint": "route-specific atomic replacement",
+      "fingerprintInputs": [
+        "canonical plan bytes"
+      ],
+      "durability": "mutable compatibility authority with guarded writers",
+      "disposition": "adapter",
+      "parityFixture": "typed-compatibility-finalize.test.ts",
+      "removalCondition": "all readers consume a receipt-bound revision projection",
+      "authorityPathTokens": [
+        "edit_plan.json"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/__init__.py": "non-authority",
+        "scripts/producer/audit/audit_render.py": "reader",
+        "scripts/producer/baseline_qc_observation.py": "reader",
+        "scripts/producer/brand_lint.py": "reader",
+        "scripts/producer/compile_timeline.py": "reader",
+        "scripts/producer/current_full_path_baseline.py": "reader",
+        "scripts/producer/cut_speed.py": "reader",
+        "scripts/producer/draft_render.py": "reader",
+        "scripts/producer/edit/auto_base_guard.py": "reader",
+        "scripts/producer/edit/compatibility_projection.py": "reader",
+        "scripts/producer/edit/cut_repair_context_materialize.py": "reader",
+        "scripts/producer/edit/cut_repair_review_plan.py": "reader",
+        "scripts/producer/graphics_planner.py": "non-authority",
+        "scripts/producer/motion/recompose.py": "reader",
+        "scripts/producer/palmier/__init__.py": "non-authority",
+        "scripts/producer/palmier/translate.py": "reader",
+        "scripts/producer/plan_lint.py": "reader",
+        "scripts/producer/prepare_current_baseline.py": "writer",
+        "scripts/producer/render.py": "reader-writer",
+        "src/app/api/_lib/plan-refit-transaction.ts": "reader-writer",
+        "src/app/api/_lib/plan-snapshots.ts": "non-authority",
+        "src/app/api/_lib/workspace.ts": "path-owner",
+        "src/app/api/producer/ai-edit/cut-repair-execute-runner.ts": "writer",
+        "src/app/api/producer/ai-edit/cut-repair-private-render-layout.ts": "writer",
+        "src/app/api/producer/ai-edit/execution.ts": "reader-writer",
+        "src/app/api/producer/ai-edit/prepare.ts": "reader",
+        "src/app/api/producer/ai-edit/promotion-recovery.ts": "reader-writer",
+        "src/app/api/producer/assemble/route.ts": "launcher",
+        "src/app/api/producer/auto-edit/chain.ts": "reader",
+        "src/app/api/producer/auto-edit/compatibility-timeline-projection.ts": "writer",
+        "src/app/api/producer/auto-edit/cut-review-loop.ts": "launcher",
+        "src/app/api/producer/auto-edit/cut-revision-prompt.ts": "non-authority",
+        "src/app/api/producer/auto-edit/gate-fix.ts": "non-authority",
+        "src/app/api/producer/auto-edit/geometry-replan-stage.ts": "launcher",
+        "src/app/api/producer/auto-edit/launch.ts": "non-authority",
+        "src/app/api/producer/auto-edit/pipeline-palmier-publish.ts": "non-authority",
+        "src/app/api/producer/auto-edit/planning-loop.ts": "launcher",
+        "src/app/api/producer/auto-edit/quality-loop.ts": "launcher",
+        "src/app/api/producer/auto-edit/revision-staging.ts": "reader-writer",
+        "src/app/api/producer/auto-edit/saved-plan-request.ts": "reader",
+        "src/app/api/producer/auto-edit/stream.ts": "non-authority",
+        "src/app/api/producer/lint/route.ts": "launcher",
+        "src/app/api/producer/live-build/preflight.ts": "reader",
+        "src/app/api/producer/palmier/open/current.ts": "reader",
+        "src/app/api/producer/palmier/open/route.ts": "reader",
+        "src/app/api/producer/palmier/preflight/route.ts": "reader",
+        "src/app/api/producer/palmier/push/route.ts": "reader",
+        "src/app/api/producer/plan/route.ts": "reader",
+        "src/app/api/producer/project-status/route.ts": "reader",
+        "src/app/api/producer/render/route.ts": "launcher",
+        "src/app/api/producer/save-plan/route.ts": "writer",
+        "src/app/api/producer/save-plan/transaction.ts": "reader-writer",
+        "src/lib/server/auto-edit-quality-artifacts.ts": "reader",
+        "src/lib/server/cut-repair-media-activation.ts": "reader-writer",
+        "src/lib/server/template-usage-history.ts": "reader"
+      }
+    },
+    {
+      "artifactId": "cut-approval",
+      "pathPattern": "<project>/producer/.sniper-cut-approval.json",
+      "owner": "src/app/api/producer/auto-edit/cut-approval.ts",
+      "authority": "receipt",
+      "readers": [
+        "src/app/api/producer/auto-edit/authoring-stage.ts",
+        "src/app/api/producer/auto-edit/compatibility-cut-authority.ts"
+      ],
+      "writers": [
+        "src/app/api/producer/auto-edit/cut-approval.ts"
+      ],
+      "promotionPoint": "deterministic cut-wall approval",
+      "fingerprintInputs": [
+        "plan",
+        "manifest",
+        "transcript",
+        "cut gate evidence"
+      ],
+      "durability": "atomic receipt replacement",
+      "disposition": "reuse",
+      "parityFixture": "compatibility-picture-lock-integration.test.ts",
+      "removalCondition": "P2 first-class picture-lock migration passes",
+      "authorityPathTokens": [
+        ".sniper-cut-approval.json"
+      ],
+      "callSiteDispositions": {
+        "src/app/api/producer/ai-edit/surgical-governance.ts": "reader",
+        "src/app/api/producer/auto-edit/cut-approval.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "cut-review-approval",
+      "pathPattern": "<project>/producer/.sniper-cut-review-approved.json",
+      "owner": "src/app/api/producer/auto-edit/cut-review-approval.ts",
+      "authority": "receipt",
+      "readers": [
+        "src/app/api/producer/auto-edit/authoring-stage.ts",
+        "src/app/api/producer/auto-edit/compatibility-cut-authority.ts"
+      ],
+      "writers": [
+        "src/app/api/producer/auto-edit/cut-review-receipt.ts"
+      ],
+      "promotionPoint": "two clean independent reviews",
+      "fingerprintInputs": [
+        "review artifacts",
+        "cut intent",
+        "cut authority"
+      ],
+      "durability": "atomic receipt replacement with exact review references",
+      "disposition": "reuse",
+      "parityFixture": "cut-review-contract.test.ts",
+      "removalCondition": "P2 selected-policy lock preserves both review authorities",
+      "authorityPathTokens": [
+        ".sniper-cut-review-approved.json"
+      ],
+      "callSiteDispositions": {
+        "src/app/api/producer/auto-edit/cut-review-approval.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "base-fingerprint",
+      "pathPattern": "<project>/producer/base.fingerprint.json",
+      "owner": "scripts/producer/fingerprints.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/assemble.py"
+      ],
+      "writers": [
+        "scripts/producer/render.py",
+        "scripts/producer/assemble.py"
+      ],
+      "promotionPoint": "base render or auto-base rebuild",
+      "fingerprintInputs": [
+        "base plan fields",
+        "video plan fields",
+        "audio plan fields"
+      ],
+      "durability": "co-located compatibility sidecar",
+      "disposition": "adapter",
+      "parityFixture": "test_fingerprints.py",
+      "removalCondition": "minimum render-node oracle and all-reader migration pass",
+      "authorityPathTokens": [
+        "base.fingerprint.json"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/assemble.py": "reader-writer",
+        "scripts/producer/audio/base_audio.py": "writer",
+        "scripts/producer/audio/music_stage.py": "reader",
+        "scripts/producer/current_full_path_baseline.py": "reader",
+        "scripts/producer/edit/auto_base_guard.py": "reader",
+        "scripts/producer/fingerprints.py": "path-owner",
+        "scripts/producer/render.py": "writer",
+        "src/app/api/producer/assemble/route.ts": "reader",
+        "src/app/api/producer/ai-edit/cut-repair-private-render-layout.ts": "writer",
+        "src/app/api/producer/auto-edit/chain.ts": "reader",
+        "src/app/api/producer/project-status/route.ts": "reader",
+        "src/app/api/producer/render/route.ts": "reader",
+        "src/app/api/producer/source-frame/route.ts": "reader",
+        "src/app/api/producer/speech-cleanup/route.ts": "reader",
+        "src/app/api/producer/words/route.ts": "reader",
+        "src/lib/server/producer-manifest.ts": "reader"
+      }
+    },
+    {
+      "artifactId": "plan-refit-receipt",
+      "pathPattern": "<project>/producer/*.refit*.json",
+      "owner": "scripts/producer/edit/refit_authority.py",
+      "authority": "receipt",
+      "readers": [
+        "scripts/producer/assemble.py",
+        "src/app/api/_lib/plan-refit-transaction.ts"
+      ],
+      "writers": [
+        "scripts/producer/edit/refit_authority.py",
+        "src/app/api/_lib/plan-refit-receipt.ts",
+        "src/app/api/_lib/plan-refit-transaction.ts"
+      ],
+      "promotionPoint": "successful base rebuild",
+      "fingerprintInputs": [
+        "old plan",
+        "new cut track",
+        "refit result"
+      ],
+      "durability": "pending exact bytes plus recovery",
+      "disposition": "extend",
+      "parityFixture": "test_plan_refit.py",
+      "removalCondition": "revision receipt preserves old-output-order parity",
+      "authorityPathTokens": [
+        ".sniper-plan-refit.json",
+        ".sniper-plan-refit.pending.json",
+        ".refit.json"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/assemble.py": "writer",
+        "scripts/producer/edit/refit_authority.py": "reader-writer",
+        "src/app/api/_lib/plan-refit-receipt.ts": "path-owner",
+        "src/app/api/_lib/plan-refit-transaction.ts": "writer"
+      }
+    },
+    {
+      "artifactId": "approved-final",
+      "pathPattern": "<project>/producer/final.mp4 + .sniper-qc-approved.json",
+      "owner": "src/lib/server/auto-edit-quality-artifacts.ts",
+      "authority": "canonical",
+      "readers": [
+        "src/app/api/producer/project-status",
+        "scripts/producer/palmier/master.py"
+      ],
+      "writers": [
+        "src/app/api/producer/auto-edit/quality-loop-outcomes.ts"
+      ],
+      "promotionPoint": "deterministic and visual QC approval",
+      "fingerprintInputs": [
+        "candidate bytes",
+        "plan",
+        "manifest",
+        "assembled proof",
+        "QC evidence"
+      ],
+      "durability": "isolated candidate promotion with compatibility sidecars",
+      "disposition": "extend",
+      "parityFixture": "auto-edit-authority.test.ts",
+      "removalCondition": "immutable revision generation publishes final and proof together",
+      "authorityPathTokens": [
+        ".sniper-qc-approved.json"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/draft_render.py": "reader",
+        "scripts/producer/palmier/master.py": "reader",
+        "src/lib/server/auto-edit-quality-artifacts.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "reference-study",
+      "pathPattern": "<reference>/study/{deep_study.json,style_profile.json,...}",
+      "owner": "src/app/api/producer/references/study/route.ts",
+      "authority": "derived",
+      "readers": [
+        "src/app/api/_lib/reference-library.ts",
+        "src/app/api/producer/auto-edit/reference-review-context.ts"
+      ],
+      "writers": [
+        "scripts/producer/study",
+        "scripts/producer/study/study_deep.py",
+        "src/app/api/producer/references/study/route.ts"
+      ],
+      "promotionPoint": "backup/restore completion",
+      "fingerprintInputs": [
+        "reference video hash",
+        "study outputs"
+      ],
+      "durability": "rename backup recovery; not immutable generation publication",
+      "disposition": "replace",
+      "parityFixture": "reference-study-files.test.ts",
+      "removalCondition": "generation-scoped study pointer and crash matrix pass",
+      "authorityPathTokens": [
+        "deep_study.json"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/study/study_deep.py": "writer",
+        "src/app/api/_lib/reference-library.ts": "reader",
+        "src/app/api/_lib/reference-study-files.ts": "reader-writer",
+        "src/app/api/producer/references/study/route.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "compatibility-projection",
+      "pathPattern": "<project>/producer/compatibility_projections/<hash>.json",
+      "owner": "src/app/api/producer/auto-edit/compatibility-timeline-projection.ts",
+      "authority": "compatibility-shadow",
+      "readers": [
+        "src/app/api/producer/auto-edit/compatibility-picture-lock.ts",
+        "src/lib/server/producer-auto-edit-genesis-facts.ts"
+      ],
+      "writers": [
+        "scripts/producer/edit/compatibility_projection.py",
+        "src/app/api/producer/auto-edit/compatibility-picture-lock.ts"
+      ],
+      "promotionPoint": "content-addressed shadow publication",
+      "fingerprintInputs": [
+        "approved cut plan",
+        "cut decisions",
+        "compiler source closure"
+      ],
+      "durability": "immutable content-addressed JSON",
+      "disposition": "retain-shadow",
+      "parityFixture": "compatibility-timeline-projection.test.ts",
+      "removalCondition": "ProjectionReceiptV1 reader migration and parity pass",
+      "authorityPathTokens": [
+        "compatibility_projections"
+      ],
+      "callSiteDispositions": {
+        "src/app/api/producer/auto-edit/compatibility-picture-lock.ts": "writer",
+        "src/lib/server/producer-auto-edit-projection-authority.ts": "path-owner",
+        "src/lib/server/producer-auto-edit-genesis-facts.ts": "reader"
+      }
+    },
+    {
+      "artifactId": "revision-store-v1",
+      "pathPattern": "<project>/producer/.sniper-authority-v1/**",
+      "owner": "src/lib/server/producer-revision-store.ts",
+      "authority": "compatibility-shadow",
+      "readers": [
+        "scripts/producer/edit/cut_repair_candidate_qc_contract.py",
+        "scripts/producer/edit/cut_repair_candidate_qc_bundle.py",
+        "src/app/api/producer/ai-edit/cut-repair-review-runner.ts",
+        "src/lib/server/ask-editor-reconciliation.ts",
+        "src/lib/server/cut-repair-audition-store.ts",
+        "src/lib/server/cut-repair-execution-package-store.ts",
+        "src/lib/server/producer-approved-revision-authority.ts",
+        "src/lib/server/producer-palmier-native-commit.ts",
+        "src/lib/server/producer-palmier-revision-candidate.ts",
+        "src/lib/server/producer-qc-promotion-intent.ts",
+        "src/lib/server/producer-revision-head.ts",
+        "src/lib/server/producer-revision-recovery.ts"
+      ],
+      "writers": [
+        "scripts/producer/edit/cut_repair_candidate_qc_bundle.py",
+        "src/lib/server/content-addressed-file.ts",
+        "src/lib/server/content-addressed-json.ts",
+        "src/lib/server/cut-repair-audition-store.ts",
+        "src/lib/server/cut-repair-execution-package-store.ts",
+        "src/lib/server/cut-repair-preparation-store.ts",
+        "src/lib/server/cut-repair-rendered-candidate-store.ts",
+        "src/lib/server/cut-repair-transition-store.ts",
+        "src/lib/server/producer-authority-files.ts",
+        "src/lib/server/producer-cut-repair-artifacts.ts",
+        "src/lib/server/producer-auto-edit-rendered-transition.ts",
+        "src/lib/server/producer-palmier-native-commit.ts",
+        "src/lib/server/producer-palmier-revision-candidate.ts",
+        "src/lib/server/producer-qc-promotion-objects.ts",
+        "src/lib/server/producer-qc-promotion-intent.ts",
+        "src/lib/server/producer-revision-head.ts",
+        "src/lib/server/producer-revision-materialize.ts",
+        "src/lib/server/producer-revision-recovery.ts"
+      ],
+      "promotionPoint": "immutable expected-parent advance marker",
+      "fingerprintInputs": [
+        "request",
+        "batch",
+        "revision",
+        "render graph",
+        "projection",
+        "invalidation",
+        "invariant proof"
+      ],
+      "durability": "content-addressed objects, immutable advances, recoverable head projection",
+      "disposition": "retain-shadow",
+      "parityFixture": "producer-revision-coverage.test.ts + producer-revision-shadow.test.ts + producer-shadow-fixtures.test.ts",
+      "removalCondition": "all current readers and writers migrate under shadow parity",
+      "authorityPathTokens": [
+        ".sniper-authority-v1"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/edit/cut_repair_candidate_qc_bundle.py": "reader-writer",
+        "scripts/producer/edit/cut_repair_candidate_qc_contract.py": "reader",
+        "scripts/producer/edit/cut_repair_context_materialize.py": "writer",
+        "scripts/producer/edit/cut_repair_route.py": "reader",
+        "src/lib/server/ask-editor-reconciliation.ts": "reader",
+        "src/lib/server/cut-repair-transition-reconciliation.ts": "reader",
+        "src/lib/server/producer-authority-files.ts": "path-owner",
+        "src/lib/server/producer-palmier-native-commit.ts": "reader-writer",
+        "src/lib/server/producer-qc-promotion-intent.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "cut-repair-qc-tool-manifest",
+      "pathPattern": "<project>/producer/<caller-selected cut-repair QC tool manifest>.json",
+      "owner": "scripts/producer/edit/cut_repair_candidate_qc_pin.py",
+      "authority": "receipt",
+      "readers": [
+        "scripts/producer/edit/cut_repair_candidate_qc_tools.py",
+        "src/app/api/producer/ai-edit/cut-repair-review-runner.ts"
+      ],
+      "writers": [
+        "scripts/producer/edit/cut_repair_candidate_qc_pin.py",
+        "src/app/api/producer/ai-edit/cut-repair-qc-toolchain.ts"
+      ],
+      "promotionPoint": "exclusive no-follow publication after exact FFmpeg, Whisper runtime/model, and optional independent aligner runtime/model/cache hashes are captured",
+      "fingerprintInputs": [
+        "FFmpeg executable hash",
+        "Whisper executable and model hashes",
+        "optional independent aligner executable, model, and cache hashes"
+      ],
+      "durability": "immutable canonical JSON with file and directory fsync; a different existing pin is a conflict and the consumer rehashes every tool byte",
+      "disposition": "extend",
+      "parityFixture": "test_p2_cut_repair_candidate_qc.py",
+      "removalCondition": "retain while candidate QC executes local tools; replace only with an equivalent content-addressed tool authority bound into every QC receipt",
+      "authorityPathTokens": [
+        "cut-repair-qc-tool-manifest"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/edit/cut_repair_candidate_qc_pin.py": "writer",
+        "scripts/producer/edit/cut_repair_candidate_qc_tools.py": "reader",
+        "src/app/api/producer/ai-edit/cut-repair-qc-toolchain.ts": "writer"
+      }
+    },
+    {
+      "artifactId": "compatibility-picture-lock",
+      "pathPattern": "<project>/producer/picture_locks/<sha256>.json",
+      "owner": "src/app/api/producer/auto-edit/compatibility-picture-lock.ts",
+      "authority": "receipt",
+      "readers": [
+        "src/app/api/producer/auto-edit/authoring-stage.ts",
+        "src/lib/server/producer-revision-shadow-lock.ts"
+      ],
+      "writers": [
+        "src/app/api/producer/auto-edit/compatibility-picture-lock.ts"
+      ],
+      "promotionPoint": "content-addressed publication after both current cut authorities validate",
+      "fingerprintInputs": [
+        "cut approval digest",
+        "two-clean-review approval digest",
+        "plan content hash",
+        "manifest hash",
+        "timeline map hash",
+        "transcript digest"
+      ],
+      "durability": "immutable no-follow content-addressed JSON reverified before shadow use",
+      "disposition": "adapter",
+      "parityFixture": "compatibility-picture-lock-integration.test.ts + producer-revision-shadow.test.ts",
+      "removalCondition": "P2 selected-policy PictureLockV1 migration and lineage fixtures pass",
+      "authorityPathTokens": [
+        "picture_locks"
+      ],
+      "callSiteDispositions": {
+        "src/app/api/producer/auto-edit/compatibility-picture-lock.ts": "writer",
+        "src/lib/server/producer-revision-shadow-lock.ts": "reader"
+      }
+    },
+    {
+      "artifactId": "minimum-render-graph-shadow",
+      "pathPattern": "<project>/producer/.sniper-authority-v1/objects/graphs/<sha256>.json",
+      "owner": "src/lib/producer/contracts/render-graph.ts",
+      "authority": "compatibility-shadow",
+      "readers": [
+        "src/lib/producer/contracts/render-graph-executor.ts",
+        "src/app/api/producer/ai-edit/cut-repair-preparation-package.ts",
+        "src/lib/server/cut-repair-prepared-render-authority.ts",
+        "src/lib/server/cut-repair-ripple-reopen-store.ts",
+        "src/lib/server/cut-repair-surgical-parent-authority.ts",
+        "src/lib/server/producer-approved-revision-authority.ts",
+        "src/lib/server/producer-auto-edit-rendered-transition.ts",
+        "src/lib/server/producer-qc-promotion-objects.ts",
+        "src/lib/server/producer-qc-promotion-exact-child.ts",
+        "src/lib/server/producer-revision-artifacts.ts"
+      ],
+      "writers": [
+        "src/lib/server/cut-repair-prepared-render-authority.ts",
+        "src/lib/server/producer-auto-edit-genesis.ts",
+        "src/lib/server/producer-auto-edit-rendered-transition.ts",
+        "src/lib/server/producer-palmier-revision-candidate.ts",
+        "src/lib/server/producer-revision-materialize.ts",
+        "src/lib/server/producer-revision-shadow.ts"
+      ],
+      "promotionPoint": "revision materialization followed by immutable expected-parent advance",
+      "fingerprintInputs": [
+        "toolchain hash",
+        "node dependency identities",
+        "full immutable input digests",
+        "output artifact hashes"
+      ],
+      "durability": "content-addressed graph object; executor rehashes declared inputs and cached outputs",
+      "disposition": "adapter",
+      "parityFixture": "render-graph-executor-v1.test.ts",
+      "removalCondition": "current renderer stages execute as nodes and retained-media dirty/full oracle passes",
+      "authorityPathTokens": [
+        "objects.graphs"
+      ],
+      "callSiteDispositions": {
+        "src/app/api/producer/ai-edit/cut-repair-preparation-package.ts": "reader",
+        "src/lib/server/cut-repair-prepared-render-authority.ts": "reader-writer",
+        "src/lib/server/cut-repair-preparation-store.ts": "reader",
+        "src/lib/server/cut-repair-review-store.ts": "reader",
+        "src/lib/server/cut-repair-ripple-reopen-store.ts": "reader",
+        "src/lib/server/cut-repair-surgical-parent-authority.ts": "reader",
+        "src/lib/server/producer-approved-revision-authority.ts": "reader",
+        "src/lib/server/producer-auto-edit-genesis.ts": "writer",
+        "src/lib/server/producer-auto-edit-rendered-transition.ts": "reader-writer",
+        "src/lib/server/producer-qc-promotion-objects.ts": "reader",
+        "src/lib/server/producer-qc-promotion-exact-child.ts": "reader",
+        "src/lib/server/producer-revision-artifacts.ts": "reader",
+        "src/lib/server/producer-palmier-revision-candidate.ts": "writer",
+        "src/lib/server/producer-revision-materialize.ts": "writer",
+        "src/lib/server/producer-revision-shadow.ts": "writer"
+      }
+    },
+    {
+      "artifactId": "palmier-commit-saga-shadow",
+      "pathPattern": "<project>/producer/.sniper-authority-v1/sagas/<sha256>.json",
+      "owner": "src/lib/server/producer-palmier-saga.ts",
+      "authority": "compatibility-shadow",
+      "readers": [
+        "src/app/api/producer/ai-edit/cut-repair-review-runner.ts",
+        "src/app/api/producer/palmier/candidate-qc/saga-bridge-runner.ts",
+        "src/lib/server/cut-repair-audition-store.ts",
+        "src/lib/server/cut-repair-execution-package-store.ts",
+        "src/lib/server/producer-palmier-native-commit.ts",
+        "src/lib/server/producer-palmier-saga.ts"
+      ],
+      "writers": [
+        "src/app/api/producer/palmier/candidate-qc/saga-bridge-runner.ts",
+        "src/lib/server/cut-repair-audition-store.ts",
+        "src/lib/server/cut-repair-execution-package-store.ts",
+        "src/lib/server/cut-repair-media-activation.ts",
+        "src/lib/server/producer-palmier-native-commit.ts",
+        "src/lib/server/producer-palmier-saga.ts"
+      ],
+      "promotionPoint": "state persisted before each external/local effect and exact readback persisted after it",
+      "fingerprintInputs": [
+        "expected local parent",
+        "reserved local child",
+        "expected Palmier parent",
+        "reserved Palmier candidate and timeline hashes"
+      ],
+      "durability": "atomically created authority-scoped saga; restart converges or records reconciliation",
+      "disposition": "retain-shadow",
+      "parityFixture": "producer-palmier-saga.test.ts seven-boundary crash matrix",
+      "removalCondition": "live Palmier adapter and startup reconciler use this saga on connected short and long fixtures",
+      "authorityPathTokens": [
+        "paths.sagas",
+        "producerAuthorityPaths(producerDir).sagas"
+      ],
+      "callSiteDispositions": {
+        "src/app/api/producer/ai-edit/cut-repair-qc-toolchain.ts": "non-authority",
+        "src/app/api/producer/ai-edit/cut-repair-review-runner.ts": "reader",
+        "src/lib/server/cut-repair-audition-store.ts": "reader-writer",
+        "src/lib/server/cut-repair-execution-package-store.ts": "reader-writer",
+        "src/lib/server/cut-repair-preparation-store.ts": "non-authority",
+        "src/lib/server/cut-repair-promotion-store.ts": "non-authority",
+        "src/lib/server/cut-repair-review-store.ts": "non-authority",
+        "src/lib/server/cut-repair-ripple-reopen-store.ts": "non-authority",
+        "src/lib/server/cut-repair-media-activation.ts": "writer",
+        "src/lib/server/cut-repair-transition-reconciliation.ts": "non-authority",
+        "src/lib/server/cut-repair-transition-store.ts": "non-authority",
+        "src/lib/server/producer-authority-files.ts": "path-owner",
+        "src/lib/server/producer-palmier-native-commit.ts": "reader-writer",
+        "src/lib/server/producer-palmier-saga.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "external-media-snapshot-shadow",
+      "pathPattern": "<snapshot-store>/<sha256>.media",
+      "owner": "scripts/producer/headless/external_media_snapshot.py",
+      "authority": "compatibility-shadow",
+      "readers": [
+        "scripts/producer/headless/external_media_probe.py",
+        "scripts/producer/ingest_admission_contract.py"
+      ],
+      "writers": [
+        "scripts/producer/headless/external_media_snapshot.py"
+      ],
+      "promotionPoint": "stable full-byte copy, content-addressed hard-link publication, and post-publication rehash",
+      "fingerprintInputs": [
+        "full source bytes",
+        "source device and inode stability",
+        "source size, mtime, and ctime stability"
+      ],
+      "durability": "one-link no-follow regular file, bounded to 8 GiB, rehashed around decode",
+      "disposition": "adapter",
+      "parityFixture": "test_external_media_probe.py + live_external_media_probe_acceptance.py",
+      "removalCondition": "all external media ingress binds a successful sandbox receipt into the canonical source snapshot set",
+      "authorityPathTokens": [
+        "f\"{digest}.media\"",
+        "f\"{sha256}.media\"",
+        "verify_external_media_snapshot",
+        ".sniper-external-media"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/current_render_calibration_source.py": "non-authority",
+        "scripts/producer/headless/external_media_probe.py": "reader",
+        "scripts/producer/headless/external_media_snapshot.py": "reader-writer",
+        "scripts/producer/ingest_admission_contract.py": "reader"
+      }
+    },
+    {
+      "artifactId": "producer-ingest-source-set-v1",
+      "pathPattern": "<manifest-dir>/.sniper-source-sets/<receipt-sha256>.json",
+      "owner": "scripts/producer/ingest_admission.py",
+      "authority": "compatibility-shadow",
+      "readers": [
+        "scripts/producer/ingest.py",
+        "scripts/producer/render.py",
+        "scripts/producer/assemble.py"
+      ],
+      "writers": [
+        "scripts/producer/ingest_admission.py",
+        "src/app/api/producer/ingest/route.ts"
+      ],
+      "promotionPoint": "all raw, project b-roll, and project music candidates pass sandbox full-decode; the atomically written asset manifest names the content-addressed source-set receipt",
+      "fingerprintInputs": [
+        "each immutable snapshot SHA-256 and byte length",
+        "each exact sandbox admission receipt SHA-256",
+        "ingress lane and original-path provenance"
+      ],
+      "durability": "content-addressed receipt generations prevent a failed re-ingest from overwriting the source set named by the last good manifest",
+      "disposition": "adapter",
+      "parityFixture": "test_ingest_admission.py",
+      "removalCondition": "remaining reference, late b-roll, direct music.path, generated-asset, and Palmier live-build ingresses use the same authority and legacy manifests fail closed",
+      "authorityPathTokens": [
+        ".sniper-source-sets"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/ingest_admission_contract.py": "reader-writer",
+        "src/lib/producer/types.ts": "non-authority"
+      }
+    },
+    {
+      "artifactId": "caption-track-alpha-shards-v1",
+      "pathPattern": "<render-output>/caption_shards.json + caption-shard-<media-key>.mov + caption-shard-<media-key>.mov.json",
+      "owner": "scripts/producer/captions/caption_shards.py",
+      "authority": "receipt",
+      "readers": [
+        "scripts/producer/captions/caption_shard_contract.py",
+        "scripts/producer/captions/caption_shard_composite.py",
+        "scripts/producer/captions/caption_shard_authority.py",
+        "scripts/producer/fingerprints.py",
+        "scripts/producer/audit/audit_captions.py"
+      ],
+      "writers": [
+        "scripts/producer/captions/caption_render.py",
+        "scripts/producer/captions/caption_assemble.py",
+        "scripts/producer/captions/caption_shard_composite.py",
+        "scripts/producer/captions/caption_shards.py"
+      ],
+      "promotionPoint": "every bounded RGBA shard fully decodes with exact frame/canvas/FPS/font closure, then the caption authority binds the manifest and media hashes before final provenance",
+      "fingerprintInputs": [
+        "stable kept-word IDs and correction ledger",
+        "cue content asset key",
+        "placed shard key",
+        "exact rational FPS and destination canvas",
+        "renderer executable hashes and font byte closure",
+        "alpha media SHA-256"
+      ],
+      "durability": "content-keyed shard media and authority sidecars are rehashed on reuse; the manifest binds the complete ordered shard closure",
+      "disposition": "reuse",
+      "parityFixture": "test_caption_shards.py + fixtures/p3-caption-shard-traces.json",
+      "removalCondition": "retain as the released baked-caption authority; replace only after a separately qualified native-caption path proves exact word timing, style, and complete readback",
+      "authorityPathTokens": [
+        "caption_shards.json"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/captions/caption_authority.py": "reader",
+        "scripts/producer/captions/caption_shard_authority.py": "reader",
+        "scripts/producer/captions/caption_shards.py": "path-owner",
+        "scripts/producer/current_render_graph_build.py": "reader"
+      }
+    },
+    {
+      "artifactId": "scene-package-cli-v1",
+      "pathPattern": "<explicit ScenePackageV1 path> + <bundle-store>/<bundle-id>/generations/<bundle-hash> + <explicit receipt-out>",
+      "owner": "scripts/producer/graphics/scene_package_cli.py",
+      "authority": "receipt",
+      "readers": [
+        "scripts/producer/graphics/scene_package_contract.py",
+        "scripts/producer/graphics/scene_package_render.py",
+        "scripts/producer/palmier/scene_bindings.py",
+        "scripts/producer/palmier/scene_binding_reader.py"
+      ],
+      "writers": [
+        "scripts/producer/graphics/scene_bundle.py",
+        "scripts/producer/graphics/scene_package_cli.py"
+      ],
+      "promotionPoint": "the exact package and bundle generation pass source, asset-rights, readability, render-media, provenance, Palmier projection, and Palmier readback checks before a create-once canonical receipt is fsynced",
+      "fingerprintInputs": [
+        "canonical package hash and SceneSpecV1 hash",
+        "exact bundle ID, bundle SHA-256, and bundle file-set hash",
+        "catalog source hash or project animation-map hash",
+        "motion contract hash",
+        "asset snapshot, rights, consent, attribution, and expiry receipts",
+        "actual rendered media SHA-256 and render key",
+        "Palmier binding-set hash"
+      ],
+      "durability": "project bundles are immutable content-addressed generations; receipt publication is create-once and directory-fsynced; render and Palmier consumers reobserve actual media bytes",
+      "disposition": "reuse",
+      "parityFixture": "test_scene_package.py + live_scene_package_cli_acceptance.py + live_p4_scene_acceptance.py",
+      "removalCondition": "retain for the direct Codex/Claude Code release; any Ask Editor, native keyframe, continuous-reframe, or animated-PIP surface requires a separately gated adapter",
+      "authorityPathTokens": [
+        "ScenePackageV1"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/graphics/scene_package_cli.py": "reader-writer",
+        "scripts/producer/graphics/scene_package_render.py": "reader",
+        "src/lib/producer/contracts/scene-package.ts": "non-authority"
+      }
+    },
+    {
+      "artifactId": "candidate-promotion-transaction-v1",
+      "pathPattern": "<project>/**/promotion-commits/committed-<transaction-id>.json + blocked in-flight recovery intent/backups",
+      "owner": "src/lib/server/candidate-promotion-recovery-intent.ts",
+      "authority": "receipt",
+      "readers": [
+        "src/lib/server/candidate-promotion-recovery-intent.ts",
+        "src/lib/server/candidate-promotion-recovery.ts",
+        "src/lib/server/candidate-promotion-transaction.ts"
+      ],
+      "writers": [
+        "src/lib/server/candidate-promotion-fs.ts",
+        "src/lib/server/candidate-promotion-recovery-intent.ts",
+        "src/lib/server/candidate-promotion-recovery.ts",
+        "src/lib/server/candidate-promotion-transaction.ts"
+      ],
+      "promotionPoint": "a durable old-state snapshot and blocking intent precede every payload mutation; an exact committed-state terminal is published before the blocking intent is removed",
+      "fingerprintInputs": [
+        "transaction and topology hashes",
+        "exact old, intended-transfer, and committed node fingerprints",
+        "caller-specific exact child or activation receipt"
+      ],
+      "durability": "fsynced snapshots and atomic phase records recover exact old, exact committed new, or retain a blocking reconciliation record",
+      "disposition": "reuse",
+      "parityFixture": "candidate-promotion-crash-recovery.test.ts + candidate-promotion-recovery-adversarial.test.ts + caller process-crash tests",
+      "removalCondition": "retain until media, plan, graph, approval, and revision selection share one filesystem or database transaction with durable acknowledgement",
+      "authorityPathTokens": [
+        "promotion-commits"
+      ],
+      "callSiteDispositions": {
+        "src/lib/server/candidate-promotion-recovery-intent.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "current-render-graph-v1",
+      "pathPattern": "<project>/producer/.render-graph-v1/{ACTIVE.json,PENDING_BASE.json,generations/**,candidates/**}",
+      "owner": "scripts/producer/current_render_graph_store.py",
+      "authority": "canonical",
+      "readers": [
+        "scripts/producer/current_render_graph_contract.py",
+        "scripts/producer/current_render_graph_candidate.py",
+        "src/app/api/producer/ai-edit/cut-repair-private-picture-render.ts",
+        "src/lib/server/cut-repair-prepared-render-authority.ts",
+        "src/lib/server/current-render-graph-authority.ts",
+        "src/lib/server/current-render-graph-candidate.ts",
+        "src/lib/server/current-render-graph-promotion-recovery.ts",
+        "src/lib/server/producer-auto-edit-genesis-facts.ts",
+        "src/lib/server/producer-qc-promotion-objects.ts",
+        "src/lib/server/producer-qc-promotion-intent.ts",
+        "src/lib/server/render-graph-generation-authority.ts",
+        "src/lib/server/staged-render-graph-authority.ts"
+      ],
+      "writers": [
+        "scripts/producer/current_render_graph_store.py",
+        "scripts/producer/current_render_graph_candidate.py",
+        "scripts/producer/current_render_graph_cli.py",
+        "src/lib/server/current-render-graph-candidate-command.ts",
+        "src/lib/server/current-render-graph-candidate.ts",
+        "src/lib/server/current-render-graph-promotion-recovery.ts"
+      ],
+      "promotionPoint": "a fully validated content-addressed generation and receipt are staged before the ACTIVE pointer is atomically advanced",
+      "fingerprintInputs": [
+        "canonical graph bytes and graph hash",
+        "closed node input and artifact hashes",
+        "render receipt hash",
+        "expected active parent"
+      ],
+      "durability": "immutable graph generations and receipts with atomic active/pending pointers and rollback-bound candidates",
+      "disposition": "extend",
+      "parityFixture": "test_current_render_graph_store.py + test_current_render_graph_candidate.py + live_current_render_graph_qc_acceptance.py",
+      "removalCondition": "replace only when the first-class revision render graph executes every released stage and preserves the same candidate/QC rollback contract",
+      "authorityPathTokens": [
+        ".render-graph-v1"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/current_render_graph_candidate.py": "reader-writer",
+        "scripts/producer/current_render_graph_contract.py": "path-owner",
+        "src/app/api/producer/ai-edit/cut-repair-private-picture-render.ts": "reader",
+        "src/app/api/producer/ai-edit/cut-repair-private-render.ts": "reader",
+        "src/lib/server/cut-repair-prepared-render-authority.ts": "reader",
+        "src/lib/server/current-render-graph-authority.ts": "reader",
+        "src/lib/server/current-render-graph-candidate.ts": "reader-writer",
+        "src/lib/server/current-render-graph-promotion-recovery.ts": "reader-writer",
+        "src/lib/server/producer-auto-edit-genesis-facts.ts": "reader",
+        "src/lib/server/producer-qc-promotion-objects.ts": "reader",
+        "src/lib/server/producer-qc-promotion-intent.ts": "reader",
+        "src/lib/server/render-graph-generation-authority.ts": "reader",
+        "src/lib/server/staged-render-graph-authority.ts": "reader"
+      }
+    },
+    {
+      "artifactId": "template-usage-approval",
+      "pathPattern": "<project>/producer/.sniper-template-usage-approved.json",
+      "owner": "src/lib/server/template-usage-approval.ts",
+      "authority": "receipt",
+      "readers": [
+        "scripts/producer/template_usage_approval.py",
+        "src/lib/server/template-usage-approval.ts"
+      ],
+      "writers": [
+        "src/lib/server/template-usage-approval.ts",
+        "scripts/producer/draft_render.py"
+      ],
+      "promotionPoint": "operator intent, plan, manifest, transcript, and template-history hashes all match before the delivery receipt is minted",
+      "fingerprintInputs": [
+        "operator intent authority",
+        "plan and manifest hashes",
+        "transcript digest",
+        "template usage history digest"
+      ],
+      "durability": "atomic mutable receipt consumed by draft rendering and revalidated at delivery",
+      "disposition": "reuse",
+      "parityFixture": "test_template_usage_approval.py",
+      "removalCondition": "retain until operator/template approval is a receipt-bound field of the committed revision and every delivery reader uses it",
+      "authorityPathTokens": [
+        ".sniper-template-usage-approved.json"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/draft_render.py": "writer",
+        "scripts/producer/template_usage_approval.py": "reader",
+        "src/lib/server/template-usage-approval.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "project-mutation-lease",
+      "pathPattern": "<project>/.sniper-project-mutation.{lock,recovery} + <project>/.sniper-project-mutation.owner-<nonce>.json",
+      "owner": "src/lib/server/project-mutation-lease.ts",
+      "authority": "receipt",
+      "readers": [
+        "src/lib/server/project-mutation-lease.ts"
+      ],
+      "writers": [
+        "src/lib/server/project-mutation-lease.ts"
+      ],
+      "promotionPoint": "a durable owner record is linked as the exact project lock before a guarded mutation begins",
+      "fingerprintInputs": [
+        "PID and durable process-start identity",
+        "nonce and operation",
+        "owner-record filesystem identity"
+      ],
+      "durability": "exclusive linked owner record with exact-dead-owner recovery and parent-directory sync",
+      "disposition": "reuse",
+      "parityFixture": "project-mutation-lease.test.ts + project-mutation-routes.test.ts",
+      "removalCondition": "retain as the project-wide serialization boundary; replace only with an equivalent cross-process lease and crash-recovery proof",
+      "authorityPathTokens": [
+        ".sniper-project-mutation.lock",
+        ".sniper-project-mutation.recovery",
+        ".sniper-project-mutation.owner-${nonce}.json"
+      ],
+      "callSiteDispositions": {
+        "src/lib/server/project-mutation-lease.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "promotion-reconciliation",
+      "pathPattern": "<project>/producer/{.sniper-surgical-reconciliation.json,.sniper-surgical-reconciliation-candidate.json,.sniper-qc-promotion-reconciliation.json}",
+      "owner": "src/lib/server/ask-editor-reconciliation.ts",
+      "authority": "receipt",
+      "readers": [
+        "src/lib/server/ask-editor-reconciliation.ts"
+      ],
+      "writers": [
+        "src/lib/server/candidate-promotion-transaction.ts",
+        "src/app/api/producer/ai-edit/promotion-recovery.ts",
+        "src/lib/server/auto-edit-quality-artifacts.ts"
+      ],
+      "promotionPoint": "a post-promotion conflict preserves exact candidate bytes and a hash-bound manual-reconciliation receipt before later mutations are refused",
+      "fingerprintInputs": [
+        "promoted child hash",
+        "retained candidate path and bytes",
+        "failed local or render-graph effect"
+      ],
+      "durability": "fail-closed reconciliation markers block every guarded project mutation until explicitly resolved",
+      "disposition": "reuse",
+      "parityFixture": "ask-editor-reconciliation.test.ts + auto-edit-graph-promotion-failure.test.ts",
+      "removalCondition": "retain until one transaction atomically commits or rolls back local revision, rendered media, and external Palmier effects",
+      "authorityPathTokens": [
+        ".sniper-surgical-reconciliation.json",
+        ".sniper-surgical-reconciliation-candidate.json",
+        ".sniper-qc-promotion-reconciliation.json"
+      ],
+      "callSiteDispositions": {
+        "src/lib/server/ask-editor-reconciliation.ts": "reader"
+      }
+    },
+    {
+      "artifactId": "assembled-media-authority",
+      "pathPattern": "<rendered-media>.assembled.json",
+      "owner": "scripts/producer/fingerprints.py",
+      "authority": "receipt",
+      "readers": [
+        "scripts/producer/assemble.py",
+        "scripts/producer/audit/audit_captions.py",
+        "scripts/producer/palmier/master.py",
+        "src/lib/server/auto-edit-authority.ts",
+        "src/lib/server/auto-edit-approval.ts",
+        "src/lib/server/producer-qc-promotion-intent.ts"
+      ],
+      "writers": [
+        "scripts/producer/assemble.py",
+        "scripts/producer/fingerprint_io.py",
+        "src/app/api/producer/assemble/route.ts",
+        "src/app/api/producer/render/route.ts",
+        "src/lib/server/auto-edit-candidate-promotion.ts",
+        "src/lib/server/auto-edit-authority.ts",
+        "src/lib/server/auto-edit-quality-artifacts.ts"
+      ],
+      "promotionPoint": "assembled media is fully written before an atomic sidecar binds its byte hash to plan, video, audio, graphics, and caption fingerprints",
+      "fingerprintInputs": [
+        "final media SHA-256",
+        "plan content hash",
+        "video, audio, graphics, and caption fingerprints",
+        "caption authority hash"
+      ],
+      "durability": "atomic sidecar replacement; every reuse and promotion path rehashes both media and authority inputs",
+      "disposition": "extend",
+      "parityFixture": "test_audio_mix_render.py + auto-edit-quality-loop.test.ts + test_caption_legacy_integration.py",
+      "removalCondition": "retain until every render-graph output has equivalent content-addressed provenance and all compatibility readers migrate",
+      "authorityPathTokens": [
+        ".assembled.json"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/assemble.py": "reader-writer",
+        "scripts/producer/audit/audit_captions.py": "reader",
+        "scripts/producer/baseline_qc_observation.py": "reader",
+        "scripts/producer/draft_render.py": "writer",
+        "scripts/producer/fingerprint_io.py": "reader-writer",
+        "scripts/producer/palmier/master.py": "reader",
+        "scripts/producer/palmier/quality_evidence.py": "reader",
+        "src/app/api/producer/auto-edit/pipeline.ts": "reader",
+        "src/app/api/producer/auto-edit/quality-loop-outcomes.ts": "reader",
+        "src/app/api/producer/auto-edit/review-evidence.ts": "reader",
+        "src/app/api/producer/palmier/_lib.ts": "path-owner",
+        "src/lib/server/auto-edit-approval.ts": "reader",
+        "src/lib/server/auto-edit-candidate-promotion.ts": "reader-writer",
+        "src/lib/server/auto-edit-authority.ts": "reader",
+        "src/lib/server/auto-edit-quality-artifacts.ts": "reader-writer",
+        "src/lib/server/producer-qc-promotion-intent.ts": "reader"
+      }
+    },
+    {
+      "artifactId": "auto-edit-qc-rounds",
+      "pathPattern": "<project>/producer/.sniper-qc/<job>/{planning,cut,round-*}/**",
+      "owner": "src/lib/server/auto-edit-quality-artifacts.ts",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/audit/audit_composite_visual.py",
+        "src/app/api/producer/auto-edit/cut-review-packet.ts",
+        "src/app/api/producer/auto-edit/plan-review-packet.ts"
+      ],
+      "writers": [
+        "src/app/api/producer/auto-edit/cut-review-batch.ts",
+        "src/lib/server/auto-edit-quality-artifacts.ts"
+      ],
+      "promotionPoint": "round-specific packets, candidate media, machine reports, and independent review evidence are closed before an approval can name that candidate",
+      "fingerprintInputs": [
+        "job token and round",
+        "candidate media and assembled authority",
+        "machine QC report",
+        "critic input and review packets"
+      ],
+      "durability": "job- and round-scoped evidence directories retained across retry; promoted media is separately hash-bound",
+      "disposition": "reuse",
+      "parityFixture": "auto-edit-quality-loop.test.ts + cut-review-contract.test.ts",
+      "removalCondition": "retain as review evidence even after candidate media is represented as immutable render-graph artifacts",
+      "authorityPathTokens": [
+        "\".sniper-qc\""
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/audit/audit_composite_visual.py": "reader",
+        "src/app/api/producer/auto-edit/cut-review-batch.ts": "writer",
+        "src/app/api/producer/auto-edit/cut-review-packet.ts": "reader",
+        "src/app/api/producer/auto-edit/plan-review-packet.ts": "reader",
+        "src/lib/server/auto-edit-quality-artifacts.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "auto-edit-preview-invalidation",
+      "pathPattern": "<project>/producer/.sniper-preview-stale.json",
+      "owner": "src/lib/server/auto-edit-quality-artifacts.ts",
+      "authority": "receipt",
+      "readers": [
+        "scripts/producer/palmier/master.py",
+        "src/lib/server/auto-edit-quality-artifacts.ts"
+      ],
+      "writers": [
+        "src/lib/server/auto-edit-quality-artifacts.ts"
+      ],
+      "promotionPoint": "an approved preview is atomically marked stale before any authority-changing mutation can reuse it",
+      "fingerprintInputs": [
+        "invalidation reason",
+        "invalidation timestamp",
+        "current project authority context"
+      ],
+      "durability": "atomic mutable invalidation marker checked by managed Palmier master publication",
+      "disposition": "adapter",
+      "parityFixture": "ask-edit-preview-invalidation.test.ts",
+      "removalCondition": "preview validity becomes an immutable property of the approved revision and no mutable final can survive authority advance",
+      "authorityPathTokens": [
+        ".sniper-preview-stale.json"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/palmier/master.py": "reader",
+        "src/lib/server/auto-edit-quality-artifacts.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "caption-render-authority-v1",
+      "pathPattern": "<render-output>/{caption_authority.json,caption_compilation.json,captions.ass,captions.srt,caption_palmier.json,caption_chapters.json,chapters.txt}",
+      "owner": "scripts/producer/captions/caption_authority.py",
+      "authority": "receipt",
+      "readers": [
+        "scripts/producer/assemble.py",
+        "scripts/producer/audit/audit_captions.py",
+        "scripts/producer/fingerprints.py",
+        "scripts/producer/palmier/master.py"
+      ],
+      "writers": [
+        "scripts/producer/captions/caption_authority.py"
+      ],
+      "promotionPoint": "compiled ASS/SRT/Palmier/chapter projections and optional alpha shards are written before one authority receipt binds every exact output hash",
+      "fingerprintInputs": [
+        "caption track and compilation hash",
+        "ASS, SRT, Palmier, and chapter output hashes",
+        "font closure and exact FPS",
+        "alpha shard manifest and media hashes"
+      ],
+      "durability": "atomically published receipt; assembly, audit, provenance, and Palmier readers revalidate its content hashes",
+      "disposition": "reuse",
+      "parityFixture": "test_caption_compile.py + test_caption_outputs.py + test_caption_edge_cases.py",
+      "removalCondition": "retain for baked captions; native editable captions require a separately qualified projection and complete readback receipt",
+      "authorityPathTokens": [
+        "caption_authority.json"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/assemble.py": "reader",
+        "scripts/producer/audit/audit_captions.py": "reader",
+        "scripts/producer/captions/caption_authority.py": "reader-writer",
+        "scripts/producer/fingerprints.py": "reader",
+        "scripts/producer/palmier/components.py": "reader",
+        "scripts/producer/palmier/master.py": "reader"
+      }
+    },
+    {
+      "artifactId": "palmier-timeline-authority",
+      "pathPattern": "<project>/producer/{palmier.timeline-authority.json,palmier.timeline-candidate.json}",
+      "owner": "scripts/producer/palmier/timeline_authority.py",
+      "authority": "canonical",
+      "readers": [
+        "src/lib/server/project-palmier-state.ts",
+        "src/lib/server/palmier-candidate-qc.ts",
+        "src/app/api/producer/palmier/view/target.ts"
+      ],
+      "writers": [
+        "scripts/producer/palmier/timeline_authority.py"
+      ],
+      "promotionPoint": "the complete active Palmier timeline is read back and hashed before working authority or a quarantined candidate is atomically recorded",
+      "fingerprintInputs": [
+        "Palmier project, timeline, track, and clip identities",
+        "semantic timeline fingerprint",
+        "complete timeline snapshot",
+        "expected parent and candidate proof"
+      ],
+      "durability": "atomic mutable working-head authority plus a separately quarantined candidate; promotion compares the exact expected parent",
+      "disposition": "extend",
+      "parityFixture": "palmier-working-checkpoints.test.ts + producer-palmier-saga.test.ts",
+      "removalCondition": "retain until Palmier exposes a transactional native revision API with complete timeline readback and the local revision store binds that external head",
+      "authorityPathTokens": [
+        "palmier.timeline-authority.json",
+        "palmier.timeline-candidate.json"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/palmier/timeline_authority.py": "reader-writer",
+        "src/app/api/producer/ai-edit/palmier-native-prompt.ts": "reader",
+        "src/app/api/producer/live-build/preflight.ts": "reader",
+        "src/app/api/producer/palmier/view/target.ts": "reader",
+        "src/lib/server/palmier-candidate-qc.ts": "reader",
+        "src/lib/server/project-palmier-state.ts": "reader"
+      }
+    },
+    {
+      "artifactId": "palmier-desktop-authority",
+      "pathPattern": "<workspace>/.palmier-desktop-{authority.json,operations.jsonl,operations,operation-snapshots,gates,inputs,assets} + <repo>/.sniper-palmier-desktop-authority.json",
+      "owner": "scripts/producer/palmier/desktop_state.py",
+      "authority": "canonical",
+      "readers": [
+        "scripts/producer/palmier/desktop_state.py",
+        "scripts/producer/palmier/desktop_authority.py",
+        "scripts/producer/palmier/desktop_manifest.py",
+        "scripts/producer/palmier/desktop_gates.py",
+        "scripts/producer/palmier/desktop_hook.py",
+        "scripts/producer/palmier/desktop_quality.py",
+        "scripts/producer/palmier/desktop_audio_authority.py",
+        "scripts/producer/palmier/desktop_audio_declaration.py",
+        "scripts/producer/palmier/desktop_bound_operations.py",
+        "scripts/producer/palmier/desktop_operation_snapshot.py",
+        "scripts/producer/palmier/desktop_exact_master_binding.py",
+        "scripts/producer/palmier/desktop_exact_master_contract.py",
+        "scripts/producer/palmier/desktop_exact_master_readback.py"
+      ],
+      "writers": [
+        "scripts/producer/palmier/desktop_state.py",
+        "scripts/producer/palmier/desktop_authority.py",
+        "scripts/producer/palmier/desktop_manifest.py",
+        "scripts/producer/palmier/desktop_gates.py",
+        "scripts/producer/palmier/desktop_operation_snapshot.py"
+      ],
+      "promotionPoint": "desktop input, manifest, gate, operation, and audio-mode evidence are persisted before the workspace authority and repo pointer advance; an exact-master add remains non-promotable until the dedicated linked pair is hidden, muted, sync-locked, and proved by complete readback; Desktop export/QC remains blocked until a separate current audioRouteAuthority receipt proves the selected audible route",
+      "fingerprintInputs": [
+        "desktop operation manifest and asset hashes",
+        "Palmier timeline readback",
+        "approved exact-master hash, plan hash, rational frame rate, clip/audio/media identities, and hidden/muted track flags",
+        "immutable audioAuthority mode declaration and fresh audioRouteAuthority readback receipt",
+        "Desktop QC export, audit, review-frame, and editable-parity evidence",
+        "gate results and revision state",
+        "workspace pointer"
+      ],
+      "durability": "atomic authority/pointer records with an append-only operation journal, content-addressed immutable pre-mutation timeline snapshots, and separately retained inputs, assets, and gates",
+      "disposition": "reuse",
+      "parityFixture": "desktop authority, immutable operation snapshot, audio-route authority, exact-master reference, QC closure, manifest, gate, and revision test suites",
+      "removalCondition": "retain for Computer Use workflows until Palmier exposes equivalent complete native operation and readback receipts",
+      "authorityPathTokens": [
+        ".palmier-desktop-authority.json",
+        ".sniper-palmier-desktop-authority.json",
+        ".palmier-desktop-operations.jsonl",
+        ".palmier-desktop-operations",
+        ".palmier-desktop-operation-snapshots",
+        ".palmier-desktop-gates",
+        ".palmier-desktop-inputs",
+        ".palmier-desktop-assets"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/palmier/desktop_authority.py": "reader-writer",
+        "scripts/producer/palmier/desktop_gates.py": "reader-writer",
+        "scripts/producer/palmier/desktop_manifest.py": "reader-writer",
+        "scripts/producer/palmier/desktop_operation_snapshot.py": "reader-writer",
+        "scripts/producer/palmier/desktop_state.py": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "palmier-live-build-state",
+      "pathPattern": "<project>/producer/{.palmier-live-build.state.json,.palmier-live-build.jsonl}",
+      "owner": "src/app/api/producer/live-build/state.ts",
+      "authority": "canonical",
+      "readers": [
+        "src/app/api/producer/live-build/state.ts",
+        "src/app/api/producer/live-build/journal.ts",
+        "src/app/api/producer/live-build/reconciliation.ts",
+        "src/app/api/producer/live-build/authority.ts",
+        "src/app/api/producer/palmier/candidate-qc/live-authority.ts"
+      ],
+      "writers": [
+        "src/app/api/producer/live-build/state.ts",
+        "src/app/api/producer/live-build/journal.ts",
+        "src/app/api/producer/live-build/reconciliation.ts",
+        "src/app/api/producer/live-build/candidate-runtime.ts",
+        "src/app/api/producer/live-build/runner.ts"
+      ],
+      "promotionPoint": "a hash-bound request, exact operation lifecycle, and fresh candidate readback are closed by a controller head before QC capture",
+      "fingerprintInputs": [
+        "request key and parent/candidate timeline identity",
+        "canonical tool plus input hash for every mutation identity",
+        "applied, failed, unresolved, and reconciled-not-applied lifecycle",
+        "fresh candidate head fingerprint and verified applied operation ids"
+      ],
+      "durability": "atomic mutable state plus fsynced strict JSONL; torn, corrupt, oversized, ambiguous, replayed, or no-delta mutation histories block automatic resume and require external operator adoption",
+      "disposition": "reuse",
+      "parityFixture": "palmier-live-build-reconciliation.test.ts + test_palmier_live_build.py",
+      "removalCondition": "retain until live build is represented as a revision transaction with equivalent resumable transition evidence",
+      "authorityPathTokens": [
+        ".palmier-live-build.state.json",
+        ".palmier-live-build.jsonl"
+      ],
+      "callSiteDispositions": {
+        "src/app/api/producer/live-build/state.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "palmier-sync-transaction",
+      "pathPattern": "<project>/producer/{.palmier.sync.lock,.palmier.sync.mutex,.palmier.sync.pending.json}",
+      "owner": "scripts/producer/palmier/sync_lock.py",
+      "authority": "receipt",
+      "readers": [
+        "scripts/producer/palmier/sync_lock.py"
+      ],
+      "writers": [
+        "scripts/producer/palmier/sync_lock.py",
+        "scripts/producer/palmier/sync_lock_storage.py"
+      ],
+      "promotionPoint": "an exclusive sync lock and durable pending record bracket every Palmier synchronization effect",
+      "fingerprintInputs": [
+        "operation ID and lock owner",
+        "pending synchronization request",
+        "expected local and Palmier authority"
+      ],
+      "durability": "directory lock, process mutex, and atomic pending record support conflict refusal and restart recovery",
+      "disposition": "reuse",
+      "parityFixture": "Palmier sync lock, push, ownership, and native delta tests",
+      "removalCondition": "retain until Palmier effects are committed through the revision saga with equivalent cross-process exclusion and recovery",
+      "authorityPathTokens": [
+        ".palmier.sync.lock",
+        ".palmier.sync.mutex",
+        ".palmier.sync.pending.json"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/palmier/sync_lock.py": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "scene-authoring-stage-receipt",
+      "pathPattern": "<attempt>/{authoring-packet.json,stage-receipt.json,bundle/**}",
+      "owner": "scripts/producer/graphics/scene_authoring_stage.py",
+      "authority": "receipt",
+      "readers": [
+        "scripts/producer/graphics/scene_authoring_stage.py"
+      ],
+      "writers": [
+        "scripts/producer/graphics/scene_authoring_stage.py"
+      ],
+      "promotionPoint": "a validated authoring packet and private bundle directory are written before the packet hash and boundary are sealed in the stage receipt",
+      "fingerprintInputs": [
+        "SceneAuthoringPacketV1 canonical bytes",
+        "attempt boundary",
+        "bundle path and packet hash"
+      ],
+      "durability": "private create-once attempt directory with read-only JSON records and parent-directory sync",
+      "disposition": "reuse",
+      "parityFixture": "test_scene_authoring_stage.py + scene-authoring-packet-v1.test.ts",
+      "removalCondition": "retain as the direct-agent authoring boundary; replace only with an equivalent sandboxed packet and bundle receipt",
+      "authorityPathTokens": [
+        "authoring-packet.json",
+        "stage-receipt.json"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/graphics/scene_authoring_stage.py": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "reference-admission-transaction",
+      "pathPattern": "<reference>/.sniper-admission-pending",
+      "owner": "src/app/api/_lib/reference-library.ts",
+      "authority": "derived",
+      "readers": [
+        "src/app/api/_lib/reference-library.ts"
+      ],
+      "writers": [
+        "src/app/api/_lib/reference-fetch-storage.ts",
+        "src/app/api/producer/references/route.ts",
+        "src/app/api/producer/references/fetch/route.ts"
+      ],
+      "promotionPoint": "the create-exclusive pending marker is removed only after sandbox media admission, source metadata publication, and reference registration succeed",
+      "fingerprintInputs": [
+        "provisional reference directory",
+        "admission receipt and snapshot path",
+        "reference-source metadata"
+      ],
+      "durability": "create-exclusive marker suppresses incomplete directories from library scans; route cleanup removes failed imports, while a crash can leave a safely hidden orphan",
+      "disposition": "adapter",
+      "parityFixture": "reference-intake-policy.test.ts + reference-admission-verifier.test.ts",
+      "removalCondition": "replace when reference intake is one recoverable transaction whose committed head alone makes the reference visible",
+      "authorityPathTokens": [
+        ".sniper-admission-pending"
+      ],
+      "callSiteDispositions": {
+        "src/app/api/_lib/reference-library.ts": "reader",
+        "src/app/api/producer/references/fetch/route.ts": "writer",
+        "src/app/api/producer/references/route.ts": "writer"
+      }
+    },
+    {
+      "artifactId": "auto-edit-delivery-receipts",
+      "pathPattern": "<project>/producer/.sniper-auto-edit-delivery-receipts/<receipt-sha256>.json",
+      "owner": "src/lib/server/auto-edit-delivery-receipt.ts",
+      "authority": "receipt",
+      "readers": [
+        "src/lib/server/auto-edit-delivery-receipt.ts"
+      ],
+      "writers": [
+        "src/lib/server/auto-edit-delivery-receipt.ts"
+      ],
+      "promotionPoint": "after an approved MP4-only final exists, the delivery controller proves that no Palmier adapter was forwarded and publishes a content-addressed receipt bound to the run, request, and final hash",
+      "fingerprintInputs": [
+        "run and artifact tokens",
+        "Auto Edit request key",
+        "closed MP4-only delivery policy",
+        "approved final hash",
+        "zero forwarded Palmier adapter calls"
+      ],
+      "durability": "canonical JSON is hard-link-published once at its SHA-256 path; an existing hash path must contain identical bytes",
+      "disposition": "reuse",
+      "parityFixture": "auto-edit-mp4-only-delivery.test.ts",
+      "removalCondition": "retain while MP4-only is a supported production delivery policy or replace with an equivalent canonical revision receipt that preserves the zero-Palmier proof",
+      "authorityPathTokens": [
+        ".sniper-auto-edit-delivery-receipts"
+      ],
+      "callSiteDispositions": {
+        "src/lib/server/auto-edit-delivery-receipt.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "auto-edit-job-journal",
+      "pathPattern": "<project>/producer/.sniper-auto-edit-job.json + archived .sniper-auto-edit-job.<timestamp>.json",
+      "owner": "src/lib/server/auto-edit-job-persistence.ts",
+      "authority": "canonical",
+      "readers": [
+        "src/lib/server/auto-edit-job-store.ts",
+        "src/lib/server/producer-run-registry.ts",
+        "src/app/api/producer/auto-edit/worker.ts",
+        "src/app/api/producer/auto-edit/job-stream.ts",
+        "scripts/producer/palmier/master.py"
+      ],
+      "writers": [
+        "src/lib/server/auto-edit-job-persistence.ts",
+        "src/lib/server/auto-edit-job-store.ts"
+      ],
+      "promotionPoint": "every checkpoint, event, worker identity, candidate hash, and terminal status replaces the mutable journal under the per-job lock with a matching worker token",
+      "fingerprintInputs": [
+        "request key and exact AutoEdit context",
+        "worker token and durable process identity",
+        "checkpoint and authority digests",
+        "candidate and final hashes"
+      ],
+      "durability": "atomic rename under a job lock; stale worker tokens are fenced, dead workers become interrupted, and superseded journals are timestamp-archived",
+      "disposition": "adapter",
+      "parityFixture": "auto-edit-pipeline-resume.test.ts + auto-edit-cut-candidate-resume.test.ts",
+      "removalCondition": "remove only after every resumable job transition is represented by the canonical revision/saga store with equivalent stale-worker fencing and archived evidence",
+      "authorityPathTokens": [
+        ".sniper-auto-edit-job.json"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/palmier/master.py": "reader",
+        "src/lib/server/auto-edit-job-persistence.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "auto-edit-launch-lease",
+      "pathPattern": "<project>/producer/.sniper-auto-edit-launch.lock/owner.json",
+      "owner": "src/lib/server/auto-edit-launch-lock.ts",
+      "authority": "derived",
+      "readers": [
+        "src/lib/server/auto-edit-launch-lock.ts"
+      ],
+      "writers": [
+        "src/lib/server/auto-edit-launch-lock.ts"
+      ],
+      "promotionPoint": "a mode-0700 directory and create-exclusive owner record must be acquired before a detached Auto Edit launch may create or resume a job",
+      "fingerprintInputs": [
+        "PID",
+        "nonce",
+        "creation timestamp",
+        "lease directory age"
+      ],
+      "durability": "directory lease with nonce-checked release and bounded dead-owner recovery; it has no directory fsync and is not a project revision authority",
+      "disposition": "replace",
+      "parityFixture": "auto-edit launch and job-store recovery tests",
+      "removalCondition": "replace with the project mutation lease or saga admission fence after launch and revision transitions share one proved cross-process owner",
+      "authorityPathTokens": [
+        ".sniper-auto-edit-launch.lock"
+      ],
+      "callSiteDispositions": {
+        "src/lib/server/auto-edit-launch-lock.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "auto-edit-diagnostic-log",
+      "pathPattern": "<project>/producer/.sniper-auto-edit.log",
+      "owner": "src/lib/server/auto-edit-log.ts",
+      "authority": "derived",
+      "readers": [
+        "src/lib/server/auto-edit-log.ts"
+      ],
+      "writers": [
+        "src/lib/server/auto-edit-log.ts",
+        "src/lib/server/auto-edit-worker-launcher.ts"
+      ],
+      "promotionPoint": "none; the append-only worker stdout/stderr trail is diagnostic and never grants review, render, or promotion authority",
+      "fingerprintInputs": [
+        "attempt boundary",
+        "worker stdout and stderr"
+      ],
+      "durability": "no-follow append with mode 0600 and a bounded one-megabyte tail; bounding truncates in place and the log is intentionally not hash-bound",
+      "disposition": "reuse",
+      "parityFixture": "auto-edit worker launcher and log bound tests",
+      "removalCondition": "retain as diagnostics or replace with a structured bounded log sink; never promote it into revision authority",
+      "authorityPathTokens": [
+        ".sniper-auto-edit.log"
+      ],
+      "callSiteDispositions": {
+        "src/lib/server/auto-edit-log.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "cut-repair-staging-cache",
+      "pathPattern": "<project>/producer/.sniper-cut-repair-staging/<operation>/{fragment,composite}.mov plus qc/<invocation>/**",
+      "owner": "src/lib/server/cut-repair-preparation-media.ts",
+      "authority": "compatibility-shadow",
+      "readers": [
+        "scripts/producer/edit/cut_repair_candidate_qc_contract.py",
+        "scripts/producer/edit/cut_repair_promotion_candidate.py",
+        "scripts/producer/edit/cut_repair_surgical_terminal.py",
+        "src/app/api/producer/ai-edit/cut-repair-private-render-layout.ts",
+        "src/app/api/producer/ai-edit/cut-repair-private-render.ts",
+        "src/lib/server/cut-repair-preparation-media.ts",
+        "src/lib/server/producer-cut-repair-artifacts.ts"
+      ],
+      "writers": [
+        "scripts/producer/edit/cut_repair_candidate_qc.py",
+        "scripts/producer/edit/cut_repair_candidate_qc_store.py",
+        "scripts/producer/edit/cut_repair_candidate_qc_waveform.py",
+        "scripts/producer/edit/cut_repair_prepare_media.py",
+        "scripts/producer/edit/cut_repair_surgical_terminal.py",
+        "scripts/producer/edit/source_waveform_alignment_adapter.py",
+        "src/app/api/producer/ai-edit/cut-repair-prepare-runner.ts",
+        "src/app/api/producer/ai-edit/cut-repair-private-render-layout.ts",
+        "src/app/api/producer/ai-edit/cut-repair-private-render.ts",
+        "src/lib/server/cut-repair-preparation-media.ts",
+        "src/lib/server/cut-repair-rendered-candidate-store.ts"
+      ],
+      "promotionPoint": "staged media is rehashed, copied into immutable authority objects, and bound to a cut-repair package/revision before any candidate can promote",
+      "fingerprintInputs": [
+        "operation hash",
+        "fragment and composite media SHA-256",
+        "preparation package and promotion evidence"
+      ],
+      "durability": "controller-owned regular files are restorable from content-addressed media objects; the staging tree itself is disposable and never a canonical head",
+      "disposition": "adapter",
+      "parityFixture": "p2-cut-repair-preparation-store.test.ts + p2-cut-repair-execute-admission.test.ts",
+      "removalCondition": "delete after all repair renderers write directly to private content-addressed graph generations and promotion no longer consumes staging paths",
+      "authorityPathTokens": [
+        ".sniper-cut-repair-staging"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/edit/cut_repair_candidate_qc_contract.py": "reader",
+        "scripts/producer/edit/cut_repair_prepare_media.py": "writer",
+        "scripts/producer/edit/cut_repair_promotion_candidate.py": "reader",
+        "scripts/producer/edit/cut_repair_surgical_terminal.py": "reader-writer",
+        "src/app/api/producer/ai-edit/cut-repair-prepare-runner.ts": "writer",
+        "src/app/api/producer/ai-edit/cut-repair-private-render-layout.ts": "reader-writer",
+        "src/lib/server/cut-repair-preparation-media.ts": "reader-writer",
+        "src/lib/server/producer-cut-repair-artifacts.ts": "reader"
+      }
+    },
+    {
+      "artifactId": "producer-learning-root",
+      "pathPattern": "<project>/producer/.sniper-learning/{runs/**,geometry_residuals.jsonl,native-qc-history/**}",
+      "owner": "src/lib/server/auto-edit-doctrine.ts",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/template_usage_approval.py",
+        "scripts/producer/planner/geometry_feasibility.py",
+        "scripts/producer/palmier/live_build_candidate.py",
+        "src/lib/server/template-usage-approval.ts"
+      ],
+      "writers": [
+        "src/lib/server/auto-edit-doctrine.ts",
+        "src/lib/server/auto-edit-pipeline-authority.ts",
+        "src/lib/server/auto-edit-observations.ts",
+        "src/lib/server/template-usage-history.ts",
+        "scripts/producer/planner/geometry_calibration.py",
+        "scripts/producer/palmier/native_qc_archive.py"
+      ],
+      "promotionPoint": "none at the root; each doctrine, pipeline, usage, observation, calibration, or QC-history subfamily has its own lifecycle and may not silently mutate another family",
+      "fingerprintInputs": [
+        "run or capture ID",
+        "subfamily-specific hash-bound receipt",
+        "project-local learning namespace"
+      ],
+      "durability": "mixed namespace with immutable run snapshots, create-once observations, append-only calibration, and archived QC evidence; the root itself is not one authority",
+      "disposition": "extend",
+      "parityFixture": "auto-edit doctrine, pipeline, observation, template-usage, geometry calibration, and Palmier candidate-QC tests",
+      "removalCondition": "split every subfamily behind one declared store API and migrate direct root constructors before treating learning data as revision input",
+      "authorityPathTokens": [
+        ".sniper-learning"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/palmier/live_build_candidate.py": "reader",
+        "scripts/producer/palmier/native_qc_archive.py": "writer",
+        "scripts/producer/planner/geometry_calibration.py": "reader-writer",
+        "scripts/producer/planner/geometry_feasibility.py": "reader",
+        "scripts/producer/template_usage_approval.py": "reader",
+        "src/app/api/producer/ai-edit/palmier-native-authority.ts": "writer",
+        "src/app/api/producer/live-build/authority.ts": "writer",
+        "src/app/api/producer/palmier/candidate-qc/repair.ts": "reader",
+        "src/app/api/producer/palmier/candidate-qc/reviewer.ts": "writer",
+        "src/lib/server/auto-edit-doctrine.ts": "reader-writer",
+        "src/lib/server/auto-edit-observations.ts": "reader-writer",
+        "src/lib/server/auto-edit-pipeline-authority.ts": "reader-writer",
+        "src/lib/server/template-usage-approval.ts": "reader",
+        "src/lib/server/template-usage-history.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "producer-learning-run-snapshots",
+      "pathPattern": "<project>/producer/.sniper-learning/runs/<run>/{doctrine,pipeline}/{doctrine-lock.json,pipeline-lock.json,files/**}",
+      "owner": "src/lib/server/auto-edit-doctrine.ts",
+      "authority": "receipt",
+      "readers": [
+        "src/lib/server/auto-edit-doctrine.ts",
+        "src/lib/server/auto-edit-pipeline-authority.ts"
+      ],
+      "writers": [
+        "src/lib/server/auto-edit-doctrine.ts",
+        "src/lib/server/auto-edit-pipeline-authority.ts"
+      ],
+      "promotionPoint": "complete copied source trees and their lock receipts are renamed from private staging before a job context records the pinned doctrine and pipeline authority",
+      "fingerprintInputs": [
+        "run ID",
+        "exact source bytes and per-file hashes",
+        "doctrine hash or pipeline digest",
+        "lock hash"
+      ],
+      "durability": "create-once run directories restored by rehashing every copied file and lock receipt; no live repository fallback is allowed on resume",
+      "disposition": "reuse",
+      "parityFixture": "auto-edit doctrine authority and pipeline resume tests",
+      "removalCondition": "retain until equivalent immutable environment snapshots are native revision sidecars and all worker launches restore only from them",
+      "authorityPathTokens": [
+        "doctrine-lock.json",
+        "pipeline-lock.json"
+      ],
+      "callSiteDispositions": {
+        "src/lib/server/auto-edit-doctrine.ts": "reader-writer",
+        "src/lib/server/auto-edit-pipeline-authority.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "producer-learning-template-usage",
+      "pathPattern": "<project>/producer/.sniper-learning/runs/<run>/template-usage.json",
+      "owner": "src/lib/server/template-usage-history.ts",
+      "authority": "receipt",
+      "readers": [
+        "scripts/producer/template_usage_approval.py",
+        "src/lib/server/template-usage-approval.ts"
+      ],
+      "writers": [
+        "src/lib/server/template-usage-history.ts"
+      ],
+      "promotionPoint": "the exact accumulated template-usage history is hash-bound into the separate operator approval before delivery can use those templates",
+      "fingerprintInputs": [
+        "run ID",
+        "plan and template identities",
+        "usage observations",
+        "history digest"
+      ],
+      "durability": "atomic run-scoped history record; delivery recomputes its digest through the approval receipt",
+      "disposition": "reuse",
+      "parityFixture": "template-usage-approval.test.ts + test_template_usage_approval.py",
+      "removalCondition": "retain while template usage is separately approved; migrate as a revision sidecar only with identical history-digest verification",
+      "authorityPathTokens": [
+        "template-usage.json"
+      ],
+      "callSiteDispositions": {
+        "src/lib/server/template-usage-history.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "producer-learning-observations",
+      "pathPattern": "<project>/producer/.sniper-learning/runs/<run>/observations/<observation>.json",
+      "owner": "src/lib/server/auto-edit-observations.ts",
+      "authority": "derived",
+      "readers": [
+        "src/lib/server/auto-edit-observations.ts"
+      ],
+      "writers": [
+        "src/lib/server/auto-edit-observations.ts"
+      ],
+      "promotionPoint": "none; material critic and QC facts are written create-once and explicitly do not mutate doctrine or approve a candidate",
+      "fingerprintInputs": [
+        "run and doctrine hashes",
+        "source artifact hash",
+        "critic or QC finding",
+        "observation hash"
+      ],
+      "durability": "create-exclusive per-observation JSON with collision comparison; it is retained evidence, not an active learning-policy head",
+      "disposition": "reuse",
+      "parityFixture": "auto-edit observation persistence tests",
+      "removalCondition": "retain as immutable evidence or migrate to content-addressed revision sidecars; never let observations self-promote into doctrine",
+      "authorityPathTokens": [
+        "observationHash"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/learning/observations.py": "non-authority",
+        "src/lib/server/auto-edit-observations.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "producer-learning-geometry-ledger",
+      "pathPattern": "<project>/producer/.sniper-learning/geometry_residuals.jsonl",
+      "owner": "scripts/producer/planner/geometry_calibration.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/planner/geometry_calibration.py",
+        "scripts/producer/planner/geometry_feasibility.py"
+      ],
+      "writers": [
+        "scripts/producer/planner/geometry_calibration.py"
+      ],
+      "promotionPoint": "only a minimum number of distinct runs and windows with all axes represented activates the empirical clearance margin; below that floor geometry remains uncalibrated",
+      "fingerprintInputs": [
+        "predicted and measured expanded-face boxes",
+        "run and window identity",
+        "configured minimum runs/windows and quantile"
+      ],
+      "durability": "append-only JSONL learning side channel; malformed rows fail loudly when read, while journaling failure remains a visible WARN after a successful composite",
+      "disposition": "extend",
+      "parityFixture": "geometry calibration and feasibility tests",
+      "removalCondition": "replace only with a versioned content-addressed calibration dataset and an explicit activation receipt",
+      "authorityPathTokens": [
+        "geometry_residuals.jsonl"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/planner/geometry_calibration.py": "reader-writer",
+        "scripts/producer/planner/geometry_feasibility.py": "reader"
+      }
+    },
+    {
+      "artifactId": "producer-learning-qc-history",
+      "pathPattern": "<project>/producer/.sniper-learning/{native-qc-history/**,runs/<capture>/candidate-qc/**}",
+      "owner": "scripts/producer/palmier/native_qc_archive.py",
+      "authority": "receipt",
+      "readers": [
+        "scripts/producer/palmier/live_build_candidate.py",
+        "src/app/api/producer/palmier/candidate-qc/repair.ts"
+      ],
+      "writers": [
+        "scripts/producer/palmier/native_qc_archive.py",
+        "src/app/api/producer/palmier/candidate-qc/reviewer.ts"
+      ],
+      "promotionPoint": "rejected/discarded candidates copy every governed input, review, frame, audit, and media artifact into a read-only archive before live candidate status changes",
+      "fingerprintInputs": [
+        "candidate and QC receipts",
+        "review artifacts",
+        "deterministic audit and frames",
+        "copied evidence hashes"
+      ],
+      "durability": "private archive staging is atomically renamed and chmod-read-only; run-scoped reviewer JSON is create-exclusive and later included in the archive",
+      "disposition": "reuse",
+      "parityFixture": "Palmier native QC archive, candidate review, repair, and retained-session tests",
+      "removalCondition": "retain as immutable rejection evidence even after candidate lifecycle moves into the revision saga",
+      "authorityPathTokens": [
+        "native-qc-history",
+        "\"candidate-qc\""
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/palmier/live_build_candidate.py": "reader",
+        "scripts/producer/palmier/native_qc_archive.py": "reader-writer",
+        "src/app/api/producer/palmier/candidate-qc/repair.ts": "reader",
+        "src/app/api/producer/palmier/candidate-qc/reviewer.ts": "writer"
+      }
+    },
+    {
+      "artifactId": "auto-edit-quality-policy",
+      "pathPattern": "<project>/producer/.sniper-quality-policy.json",
+      "owner": "src/lib/server/auto-edit-quality-policy.ts",
+      "authority": "canonical",
+      "readers": [
+        "src/lib/server/auto-edit-quality-policy.ts",
+        "scripts/producer/palmier/master.py"
+      ],
+      "writers": [
+        "src/lib/server/auto-edit-quality-policy.ts"
+      ],
+      "promotionPoint": "managed policy is activated with the exact request key and context before a new job journal is published; legacy mode requires an explicit one-time migration reason",
+      "fingerprintInputs": [
+        "quality-policy version",
+        "request key",
+        "AutoEdit context",
+        "managed activation or legacy migration"
+      ],
+      "durability": "atomic mutable marker; missing or corrupt state fails closed and never implies legacy",
+      "disposition": "adapter",
+      "parityFixture": "auto-edit quality policy and managed Palmier master tests",
+      "removalCondition": "remove when quality policy is an immutable property of every canonical revision and all delivery readers reject unqualified revisions directly",
+      "authorityPathTokens": [
+        ".sniper-quality-policy.json"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/palmier/master.py": "reader",
+        "src/lib/server/auto-edit-quality-policy.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "reference-text-admission",
+      "pathPattern": "<reference>/.sniper-reference-text-admission/<receipt-sha256>.json",
+      "owner": "src/app/api/_lib/reference-sidecar.ts",
+      "authority": "receipt",
+      "readers": [
+        "src/app/api/_lib/reference-sidecar.ts"
+      ],
+      "writers": [
+        "src/app/api/_lib/reference-sidecar.ts"
+      ],
+      "promotionPoint": "the source VTT remains one stable single-link file while a create-exclusive admitted copy is hashed and fsynced; the exact content-addressed receipt is atomically created before the admission object is returned",
+      "fingerprintInputs": [
+        "stable source VTT bytes and byte length",
+        "canonical admitted destination path",
+        "admitted-copy SHA-256",
+        "canonical receipt bytes and SHA-256"
+      ],
+      "durability": "the admitted VTT is create-exclusive and fsynced; its receipt is content-addressed and atomically create-once, and every downstream verification rehashes both stable regular files",
+      "disposition": "reuse",
+      "parityFixture": "reference-sidecar.test.ts + reference-admission-verifier.test.ts",
+      "removalCondition": "retain until the canonical source-set authority directly binds the same VTT snapshot and receipt and every reference consumer rejects unadmitted sidecars",
+      "authorityPathTokens": [
+        ".sniper-reference-text-admission"
+      ],
+      "callSiteDispositions": {
+        "src/app/api/_lib/reference-sidecar.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "reference-media-admission",
+      "pathPattern": "<reference-store>/{<snapshot-sha256>.media,.sniper-reference-admission/<receipt-sha256>.json}",
+      "owner": "scripts/producer/headless/admit_external_media_cli.py",
+      "authority": "receipt",
+      "readers": [
+        "src/app/api/_lib/reference-media-admission.ts",
+        "src/app/api/_lib/reference-admission-verifier.ts"
+      ],
+      "writers": [
+        "scripts/producer/headless/admit_external_media_cli.py",
+        "src/app/api/_lib/reference-media-admission.ts"
+      ],
+      "promotionPoint": "a full-decode networkless probe receipt and content-addressed media snapshot are durably written before TypeScript accepts and exposes the reference",
+      "fingerprintInputs": [
+        "source media bytes and decoded facts",
+        "container image and isolation evidence",
+        "snapshot SHA-256 and receipt SHA-256",
+        "admission limits"
+      ],
+      "durability": "content-addressed snapshot plus fsynced canonical receipt; every library exposure rehashes stable regular-file bytes and the complete receipt",
+      "disposition": "extend",
+      "parityFixture": "test_external_media_probe.py + reference-admission-verifier.test.ts",
+      "removalCondition": "retain until the canonical source set directly binds the same reference snapshot and admission receipt for every downstream consumer",
+      "authorityPathTokens": [
+        ".sniper-reference-admission"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/headless/admit_external_media_cli.py": "reader-writer",
+        "src/app/api/_lib/reference-admission-verifier.ts": "reader",
+        "src/app/api/_lib/reference-media-admission.ts": "reader"
+      }
+    },
+    {
+      "artifactId": "producer-run-state",
+      "pathPattern": "<project>/producer/.sniper-run-state.json",
+      "owner": "src/lib/server/producer-run-registry.ts",
+      "authority": "derived",
+      "readers": [
+        "src/lib/server/producer-run-registry.ts",
+        "src/app/api/_lib/project-mutation.ts",
+        "src/app/api/producer/project-status/route.ts"
+      ],
+      "writers": [
+        "src/lib/server/producer-run-registry.ts"
+      ],
+      "promotionPoint": "none; the mutable status projection mirrors render state or the canonical Auto Edit job and is removed on successful completion",
+      "fingerprintInputs": [
+        "run token",
+        "owner process identity",
+        "phase, status, and bounded events",
+        "Auto Edit job journal when present"
+      ],
+      "durability": "best-effort temporary-file rename with dead-owner recovery; write failures are swallowed, so this file cannot authorize edits or delivery",
+      "disposition": "replace",
+      "parityFixture": "producer run registry recovery and project-status tests",
+      "removalCondition": "replace with a read-only projection from durable job/revision saga events and remove the competing mutable disk registry",
+      "authorityPathTokens": [
+        ".sniper-run-state.json"
+      ],
+      "callSiteDispositions": {
+        "src/lib/server/producer-run-registry.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "palmier-candidate-export-temp",
+      "pathPattern": "<project>/producer/.palmier.candidate.tmp.mp4",
+      "owner": "scripts/producer/palmier/native_qc_contract.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/palmier/native_qc_export.py"
+      ],
+      "writers": [
+        "scripts/producer/palmier/native_qc_export.py"
+      ],
+      "promotionPoint": "the explicit-timeline temp export is probed for exactly one encoded video stream and one encoded audio stream, fully decoded with ffmpeg -xerror, stably hashed, and only then atomically replaced by palmier.candidate.mp4; any failure unlinks the temp path. Stream count is not audible-route authority; Desktop QC separately requires a fresh audioRouteAuthority receipt",
+      "fingerprintInputs": [
+        "explicit candidate timeline ID",
+        "frame duration and FPS",
+        "exactly one encoded video stream and one encoded audio stream",
+        "successful full mapped A/V decode",
+        "separate Desktop audioRouteAuthority receipt when the Desktop authority kind is used",
+        "candidate media SHA-256"
+      ],
+      "durability": "ephemeral fixed-name temp file removed before and after attempts; it is never accepted as a persistent authority",
+      "disposition": "reuse",
+      "parityFixture": "test_palmier_native_export_decode.py + Palmier native candidate export and QC tests",
+      "removalCondition": "retain as an atomic export staging path or replace with an equivalent create-exclusive temp publication",
+      "authorityPathTokens": [
+        ".palmier.candidate.tmp.mp4"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/palmier/native_qc_contract.py": "path-owner"
+      }
+    },
+    {
+      "artifactId": "palmier-editable-parity",
+      "pathPattern": "<project>/producer/palmier.editable-parity{,-approvals}.json",
+      "owner": "scripts/producer/palmier/editable_parity_contract.py",
+      "authority": "receipt",
+      "readers": [
+        "scripts/producer/palmier/editable_parity_contract.py",
+        "scripts/producer/palmier/native_qc.py",
+        "scripts/producer/palmier/desktop_quality.py"
+      ],
+      "writers": [
+        "scripts/producer/palmier/editable_parity_contract.py",
+        "scripts/producer/palmier/editable_parity_measure.py",
+        "scripts/producer/palmier/native_qc_audit.py"
+      ],
+      "promotionPoint": "native or Desktop deterministic QC fully decodes the approved master and exact Palmier candidate, persists all frozen picture/timing/audio metrics, and passes only when every metric is within policy or has one exact hash-bound operator approval",
+      "fingerprintInputs": [
+        "approved final.mp4 SHA-256",
+        "exact Palmier candidate export SHA-256",
+        "frozen editable parity policy hash",
+        "full-stream SSIM and decoded PCM-difference metrics",
+        "exact approver, timestamp, metric IDs, and reasons for any approximations"
+      ],
+      "durability": "the canonical parity receipt is atomically replaced per candidate audit and its digest is embedded in deterministic QC; native and Desktop approval paths reopen current master, candidate, parity, and approximation bytes before approval or promotion, while missing, extra, stale, or unresolved approximation entries fail closed",
+      "disposition": "reuse",
+      "parityFixture": "test_palmier_editable_parity.py + Palmier native QC lifecycle tests",
+      "removalCondition": "retain until the same frozen full-stream comparison and exact approximation approvals are native fields of immutable revision QC authority",
+      "authorityPathTokens": [
+        "palmier.editable-parity"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/palmier/editable_parity_contract.py": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "external-media-probe-workspace",
+      "pathPattern": "<system-temp>/.sniper-media-probe-*/",
+      "owner": "scripts/producer/headless/external_media_probe.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/headless/external_media_probe.py"
+      ],
+      "writers": [
+        "scripts/producer/headless/external_media_probe.py"
+      ],
+      "promotionPoint": "none; the temporary configuration directory is destroyed when the container probe exits and no path from it enters an admission receipt",
+      "fingerprintInputs": [],
+      "durability": "TemporaryDirectory-managed ephemeral sandbox configuration with no persistence or promotion role",
+      "disposition": "reuse",
+      "parityFixture": "test_external_media_probe.py",
+      "removalCondition": "retain as private probe scratch or replace with an equally isolated ephemeral directory",
+      "authorityPathTokens": [
+        ".sniper-media-probe-"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/headless/external_media_probe.py": "non-authority"
+      }
+    },
+    {
+      "artifactId": "cut-repair-ephemeral-workspaces",
+      "pathPattern": "<private-parent>/{.sniper-repair-*,.sniper-repair-composite-*}/",
+      "owner": "scripts/producer/edit/repair_fragment.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/edit/repair_fragment.py",
+        "scripts/producer/edit/repair_composite.py"
+      ],
+      "writers": [
+        "scripts/producer/edit/repair_fragment.py",
+        "scripts/producer/edit/repair_composite.py"
+      ],
+      "promotionPoint": "none; only separately proved fragment/composite media and receipts leave these private work directories",
+      "fingerprintInputs": [],
+      "durability": "mkdtemp-owned scratch trees removed in finally paths and excluded from all authority heads",
+      "disposition": "reuse",
+      "parityFixture": "test_p2_repair_fragment_render.py + test_p2_terminal_composite.py",
+      "removalCondition": "retain as private renderer scratch or replace with graph-worker scratch carrying the same no-promotion rule",
+      "authorityPathTokens": [
+        ".sniper-repair-",
+        ".sniper-repair-composite-"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/edit/repair_composite.py": "non-authority",
+        "scripts/producer/edit/repair_fragment.py": "non-authority"
+      }
+    },
+    {
+      "artifactId": "dialogue-stem-ephemeral-workspaces",
+      "pathPattern": "<dialogue-output-parent>/{.sniper-dialogue-work-*,.sniper-dialogue-stage-*,.sniper-dialogue-program-stage-*}/",
+      "owner": "scripts/producer/audio/dialogue_stem_render.py",
+      "authority": "derived",
+      "readers": [
+        "scripts/producer/audio/dialogue_program_render.py",
+        "scripts/producer/audio/dialogue_stem_render.py"
+      ],
+      "writers": [
+        "scripts/producer/audio/dialogue_program_render.py",
+        "scripts/producer/audio/dialogue_stem_render.py"
+      ],
+      "promotionPoint": "the rendered stem and receipt are validated in private work/stage directories before their separately governed output paths are published",
+      "fingerprintInputs": [
+        "dialogue track and map identities",
+        "rendered PCM and receipt hashes"
+      ],
+      "durability": "mkdtemp-owned sibling workspaces removed through prefix-checked cleanup; neither temporary directory is an authority head",
+      "disposition": "reuse",
+      "parityFixture": "test_p2_dialogue_stem_render.py + test_p2_dialogue_program_render.py",
+      "removalCondition": "retain as private renderer scratch or replace with equivalent graph-worker scratch whose outputs alone cross publication",
+      "authorityPathTokens": [
+        ".sniper-dialogue-program-stage-",
+        ".sniper-dialogue-stage-",
+        ".sniper-dialogue-work-"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/audio/dialogue_program_render.py": "non-authority",
+        "scripts/producer/audio/dialogue_stem_render.py": "non-authority"
+      }
+    },
+    {
+      "artifactId": "surgical-review-marker",
+      "pathPattern": "<project>/producer/.sniper-surgical-review.json",
+      "owner": "src/app/api/producer/ai-edit/surgical-review-marker.ts",
+      "authority": "receipt",
+      "readers": [
+        "src/app/api/producer/ai-edit/surgical-review-marker.ts"
+      ],
+      "writers": [
+        "src/app/api/producer/ai-edit/surgical-review-marker.ts"
+      ],
+      "promotionPoint": "the exact surgical edit and resulting plan authority are atomically marked for scoped review before completion",
+      "fingerprintInputs": [
+        "typed compatibility edit",
+        "before and after plan hashes",
+        "affected range and review state"
+      ],
+      "durability": "atomic mutable review marker invalidated or replaced on later surgical authority changes",
+      "disposition": "adapter",
+      "parityFixture": "surgical-edit.test.ts + typed-compatibility-finalize.test.ts",
+      "removalCondition": "review requirements become immutable revision metadata with range-scoped QC evidence",
+      "authorityPathTokens": [
+        ".sniper-surgical-review.json"
+      ],
+      "callSiteDispositions": {
+        "src/app/api/producer/ai-edit/surgical-review-marker.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "scene-unit-private-review",
+      "pathPattern": "<producer>/scene-reviews/<requestId>/{request.json,review.mov,receipt.json,complete.json}",
+      "owner": "src/app/api/producer/scene-review/runner.ts",
+      "authority": "receipt",
+      "readers": [
+        "scripts/producer/graphics/scene_review_project.py",
+        "scripts/producer/graphics/scene_review_repair.py",
+        "scripts/producer/graphics/scene_review_repair_cli.py",
+        "scripts/producer/palmier/scene_binding_revision_cli.py",
+        "src/app/api/producer/scene-review/runner.ts"
+      ],
+      "writers": [
+        "scripts/producer/graphics/scene_review_media.py",
+        "scripts/producer/graphics/scene_review_repair_cli.py",
+        "src/app/api/producer/scene-review/process.ts",
+        "src/app/api/producer/scene-review/runner.ts"
+      ],
+      "promotionPoint": "the governed application route holds the shared project writer lease; the dirty-scene media is fully decoded and hard-linked create-once from private sibling staging; the canonical hash-bound receipt is fsynced and hard-linked create-once; and complete.json publishes only after stdout agrees with that durable receipt",
+      "fingerprintInputs": [
+        "previous and current governed scene-package hashes",
+        "previous and current closed project-authority hashes, including project ID, approved-base identity, exact rational FPS, canvas, sample rate, duration, and all scene package/version/frame bindings",
+        "exact treatment-operation and previous-render receipt hashes",
+        "approved base media identity and channel-normalization receipt",
+        "changed render-unit binding delta and current render receipt",
+        "exact rational scene frame window, sample rate, toolchain closure, decoded review-media identity, and complete dirty/reused project fanout"
+      ],
+      "durability": "request ids are create-once and hash-bound to project-confined inputs; exact retries reuse the complete receipt; conflicting ids fail; incomplete or failed attempts are quarantined; cancellation terminates the process group before lease release; and promotion remains private-review with zero active or connected-Palmier mutations",
+      "disposition": "extend",
+      "parityFixture": "test_scene_review_repair.py + test_p5_review_repair_artifact.py + live_p5_review_repair_acceptance.py + scene-review-route.test.ts",
+      "removalCondition": "retain until a released render-graph review node owns the same exact scene-window media, receipt, recovery, retention, and no-project-promotion guarantees",
+      "authorityPathTokens": [
+        ".scene-review-",
+        "scene-reviews",
+        "scene review media output",
+        "scene-unit-review-repair"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/graphics/scene_review_media.py": "writer",
+        "scripts/producer/graphics/scene_review_repair.py": "reader",
+        "scripts/producer/graphics/scene_review_repair_cli.py": "reader-writer",
+        "scripts/producer/palmier/scene_binding_revision_cli.py": "reader",
+        "src/app/api/producer/scene-review/runner.ts": "reader-writer"
+      }
+    },
+    {
+      "artifactId": "legacy-governed-production-state-family",
+      "pathPattern": "<project|reference|attempt|runtime-root>/{plans,locks,receipts,ledgers,catalogs,QC evidence,telemetry,dynamic state paths}",
+      "owner": "scripts/producer",
+      "authority": "compatibility-shadow",
+      "readers": [
+        "scripts/producer",
+        "src/app/api",
+        "src/lib/server"
+      ],
+      "writers": [
+        "scripts/producer/assemble_lock.py",
+        "scripts/producer/audit/audit_frames.py",
+        "scripts/producer/audit/audit_render.py",
+        "scripts/producer/broll/pool_admission.py",
+        "scripts/producer/broll/pool_frames.py",
+        "scripts/producer/captions/caption_corrections.py",
+        "scripts/producer/compile_timeline.py",
+        "scripts/producer/edit/apply_pauses.py",
+        "scripts/producer/edit/auto_base_guard.py",
+        "scripts/producer/edit/cut_repair_candidate_qc_media.py",
+        "scripts/producer/edit/cover_select.py",
+        "scripts/producer/edit/cut_repair_context_materialize.py",
+        "scripts/producer/edit/pause_scan.py",
+        "scripts/producer/edit/plan_refit.py",
+        "scripts/producer/edit/speech_cleanup.py",
+        "scripts/producer/edit/study_edit_diff.py",
+        "scripts/producer/graphics/asset_governance.py",
+        "scripts/producer/graphics/asset_proof.py",
+        "scripts/producer/graphics/comp_catalog_probe.py",
+        "scripts/producer/graphics/comp_rate_matrix.py",
+        "scripts/producer/graphics/placement_verify.py",
+        "scripts/producer/graphics/readability_gate.py",
+        "scripts/producer/graphics/scene_oracle.py",
+        "scripts/producer/graphics/scene_package_contract.py",
+        "scripts/producer/graphics/scene_snapshot.py",
+        "scripts/producer/graphics_planner.py",
+        "scripts/producer/graphics_style_advisor.py",
+        "scripts/producer/headless/attempt_trace.py",
+        "scripts/producer/headless/boot_identity.py",
+        "scripts/producer/headless/composite_media_checks.py",
+        "scripts/producer/headless/container_io.py",
+        "scripts/producer/headless/container_live_policy.py",
+        "scripts/producer/headless/container_policy.py",
+        "scripts/producer/headless/container_renderer.py",
+        "scripts/producer/headless/cross_ledger_order_store_write.py",
+        "scripts/producer/headless/docker_identity.py",
+        "scripts/producer/headless/durable_files.py",
+        "scripts/producer/headless/external_media_probe_policy.py",
+        "scripts/producer/headless/fence_admission_reservation_pending.py",
+        "scripts/producer/headless/fence_order_start_pending.py",
+        "scripts/producer/headless/generation_artifact_store.py",
+        "scripts/producer/headless/generation_reader_fs.py",
+        "scripts/producer/headless/generation_sealer_cleanup.py",
+        "scripts/producer/headless/graphic_render_receipt_store_io.py",
+        "scripts/producer/headless/media_probe.py",
+        "scripts/producer/headless/network_probe.py",
+        "scripts/producer/headless/operation_admission_store_persistence.py",
+        "scripts/producer/headless/overlay_seal_store.py",
+        "scripts/producer/headless/pending_cleanup_fs.py",
+        "scripts/producer/headless/prebound_compositor_store.py",
+        "scripts/producer/headless/process_runner.py",
+        "scripts/producer/headless/render_admission_artifact.py",
+        "scripts/producer/headless/render_result.py",
+        "scripts/producer/headless/resource_ledger.py",
+        "scripts/producer/headless/runtime_executable_pins.py",
+        "scripts/producer/headless/runtime_receipt.py",
+        "scripts/producer/headless/safe_source_files.py",
+        "scripts/producer/headless/sealed_archive.py",
+        "scripts/producer/headless/unit_enrollment_store_persistence.py",
+        "scripts/producer/ingest_admission_contract.py",
+        "scripts/producer/ingest_scan.py",
+        "scripts/producer/ledger_lessons.py",
+        "scripts/producer/palmier/native_qc_audit.py",
+        "scripts/producer/palmier/ownership.py",
+        "scripts/producer/palmier/scene_media.py",
+        "scripts/producer/palmier/sync.py",
+        "scripts/producer/planner/geometry_feasibility.py",
+        "scripts/producer/planner/geometry_proxy.py",
+        "scripts/producer/planner/graphics_anchors.py",
+        "scripts/producer/planner/icon_library.py",
+        "scripts/producer/planner/icon_lucide.py",
+        "scripts/producer/retake_scan.py",
+        "scripts/producer/review_packet.py",
+        "scripts/producer/stage_timing.py",
+        "src/app/api/_lib/audit-gate.ts",
+        "src/app/api/_lib/plan-snapshots.ts",
+        "src/app/api/_lib/projects-registry.ts",
+        "src/app/api/_lib/reference-library.ts",
+        "src/app/api/_lib/reference-sidecar.ts",
+        "src/app/api/_lib/reference-storage.ts",
+        "src/app/api/_lib/reference-study-files.ts",
+        "src/app/api/producer/ingest/source-copy.ts",
+        "src/app/api/producer/live-build/authority.ts",
+        "src/app/api/producer/live-build/process.ts",
+        "src/app/api/producer/palmier/candidate-qc/attempt.ts",
+        "src/app/api/producer/palmier/candidate-qc/repair.ts",
+        "src/app/api/producer/palmier/candidate-qc/route.ts",
+        "src/app/api/producer/palmier/candidate-qc/runner.ts",
+        "src/app/api/producer/palmier/ownership/runner.ts",
+        "src/app/api/producer/palmier/preflight/route.ts",
+        "src/app/api/producer/palmier/push/route.ts",
+        "src/app/api/producer/palmier/view/recovery.ts",
+        "src/app/api/producer/palmier/workspace/runner.ts",
+        "src/app/api/producer/speech-cleanup/route.ts",
+        "src/lib/server/atomic-file.ts",
+        "src/lib/server/auto-edit-job-lock.ts",
+        "src/lib/server/stage-timing.ts"
+      ],
+      "promotionPoint": "distributed legacy owners promote at module-local atomic rename, append, receipt publication, or child-process completion points; this family row does not create a new authority head",
+      "fingerprintInputs": [
+        "module-declared source, plan, policy, and tool identities",
+        "module-local receipt, lock, ledger, and QC payloads",
+        "caller-supplied project, reference, attempt, and runtime roots"
+      ],
+      "durability": "mixed legacy state family: members range from best-effort telemetry through mutable locks to durable receipts; the exact writer set is the AST-discovered production snapshot and every member keeps its existing module-local lifecycle",
+      "disposition": "replace",
+      "parityFixture": "p0-persistence-call-dispositions-v1.json governed-production-authority snapshot",
+      "removalCondition": "remove each writer only after it binds to a first-class typed artifact with explicit readers, promotion, fingerprint, and durability, or is proved non-authoritative and moved to an exclusion",
+      "authorityPathTokens": [
+        "stage_timings.jsonl"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/current_full_path_baseline.py": "reader",
+        "scripts/producer/stage_timing.py": "writer",
+        "src/lib/server/stage-timing.ts": "writer"
+      }
+    },
+    {
+      "artifactId": "legacy-editor-delivery-output-family",
+      "pathPattern": "<project|workspace|render-root>/{media,caption,proxy,export,preview,stem,dynamic delivery paths}",
+      "owner": "scripts/producer/render.py",
+      "authority": "compatibility-shadow",
+      "readers": [
+        "scripts/producer",
+        "src/app/api",
+        "src/lib/server"
+      ],
+      "writers": [
+        "scripts/producer/audio/audio_enhance.py",
+        "scripts/producer/audio/audio_gain.py",
+        "scripts/producer/audio/audio_mix.py",
+        "scripts/producer/audio/audio_mix_bed.py",
+        "scripts/producer/audio/channel_normalization_media.py",
+        "scripts/producer/audio/audio_separate.py",
+        "scripts/producer/audio/base_audio.py",
+        "scripts/producer/audio/dialogue_program_media.py",
+        "scripts/producer/audio/dialogue_stem_media.py",
+        "scripts/producer/audio/dialogue_stem_publish.py",
+        "scripts/producer/audio/dialogue_stem_receipt.py",
+        "scripts/producer/audio/master.py",
+        "scripts/producer/audio/music_stage.py",
+        "scripts/producer/audio/sfx_library.py",
+        "scripts/producer/captions/captions_ass.py",
+        "scripts/producer/captions/longform_outputs.py",
+        "scripts/producer/captions/overlays.py",
+        "scripts/producer/cut_speed.py",
+        "scripts/producer/edit/render_cut.py",
+        "scripts/producer/edit/repair_composite_media.py",
+        "scripts/producer/edit/repair_fragment_media.py",
+        "scripts/producer/graphics/composite_core.py",
+        "scripts/producer/graphics/deliverables.py",
+        "scripts/producer/graphics/graphics_render.py",
+        "scripts/producer/graphics/graphics_stage.py",
+        "scripts/producer/graphics/hyperframes_invocation.py",
+        "scripts/producer/graphics/parametric_scene.py",
+        "scripts/producer/graphics/pip_takeover.py",
+        "scripts/producer/graphics/scene_executor.py",
+        "scripts/producer/graphics/scene_render.py",
+        "scripts/producer/motion/face_track.py",
+        "scripts/producer/motion/punch_in.py",
+        "scripts/producer/motion/recompose.py",
+        "scripts/producer/motion/reframe.py",
+        "scripts/producer/motion/transition_sfx_repair.py",
+        "scripts/producer/motion/transitions.py",
+        "scripts/producer/motion/visual_state.py",
+        "scripts/producer/palmier/audio_finish.py",
+        "scripts/producer/palmier/audit_export.py",
+        "scripts/producer/palmier/draft.py",
+        "scripts/producer/palmier/export.py",
+        "scripts/producer/palmier/mirror.py",
+        "scripts/producer/palmier/presenter_asset.py",
+        "scripts/producer/palmier/transition_preview.py",
+        "scripts/producer/preview_proxy.py",
+        "src/app/api/_lib/multicam-store.ts",
+        "src/app/api/clipper/save-to-workspace/route.ts",
+        "src/app/api/clipper/transcribe/route.ts",
+        "src/app/api/segmenter/export-mp4/route.ts",
+        "src/app/api/segmenter/multicam-download/[id]/route.ts",
+        "src/app/api/segmenter/multicam-export/route.ts",
+        "src/app/api/segmenter/save-to-workspace/route.ts",
+        "src/app/api/segmenter/transcribe/route.ts"
+      ],
+      "promotionPoint": "distributed legacy owners expose outputs after successful encoder/tool completion, optional probe/QC, rename, copy, or editor handoff; this family row inventories those boundaries without declaring them equivalent",
+      "fingerprintInputs": [
+        "input media and plan identities when the member supports them",
+        "encoder, Hyperframes, caption, audio, and editor command arguments",
+        "caller-supplied output root and format"
+      ],
+      "durability": "mixed delivery family: members include replaceable previews, intermediate stems, editor exports, and final media; the exact writer set is the AST/process-boundary production snapshot while each member retains its current local cleanup and promotion behavior",
+      "disposition": "replace",
+      "parityFixture": "p0-persistence-call-dispositions-v1.json delivery-output snapshot",
+      "removalCondition": "remove each writer only after its output is assigned a typed artifact class, immutable input/tool fingerprint, bounded promotion transaction, and incremental invalidation policy",
+      "authorityPathTokens": [
+        "dialogue-program.wav"
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/audio/dialogue_program_media.py": "writer"
+      }
+    },
+    {
+      "artifactId": "bounded-command-execution-adapters",
+      "pathPattern": "<caller-declared cwd or output path>/** plus bounded stdout/stderr",
+      "owner": "src/app/api/_lib/run-cmd.ts",
+      "authority": "compatibility-shadow",
+      "readers": [
+        "src/app/api/clipper/clip-preview/route.ts",
+        "src/app/api/producer/ai-edit/critic.ts",
+        "src/app/api/producer/ai-edit/edit-streams.ts",
+        "src/app/api/producer/ai-edit/palmier-native-runner.ts",
+        "src/app/api/producer/auto-edit/authoring.ts",
+        "src/app/api/producer/auto-edit/brain-review-runner.ts",
+        "src/app/api/producer/filmstrip/route.ts",
+        "src/app/api/producer/lint/route.ts",
+        "src/app/api/producer/palmier/candidate-qc/reviewer.ts",
+        "src/app/api/producer/source-frame/route.ts",
+        "src/app/api/producer/waveform/route.ts",
+        "src/app/api/segmenter/export-mp4/route.ts",
+        "src/app/api/segmenter/save-to-workspace/route.ts",
+        "src/app/api/segmenter/segment/route.ts"
+      ],
+      "writers": [
+        "src/app/api/_lib/codex-cli.ts",
+        "src/app/api/_lib/run-cmd.ts",
+        "src/app/api/_lib/spawn-python.ts"
+      ],
+      "promotionPoint": "none in the adapters; each caller must validate exit status and bind any declared output path to its own artifact promotion contract",
+      "fingerprintInputs": [
+        "Codex binary, model, sandbox, cwd, addDirs, prompt, and output schema",
+        "runCmd executable plus caller-supplied argument vector",
+        "spawnPython interpreter, fixed script path, argument vector, and inherited environment"
+      ],
+      "durability": "the adapters buffer stdout/stderr or return a final Codex message and own no durable file; runCmd is limited to ffprobe/ffmpeg stdout or cache paths and unzip into the declared segment workspace, spawnPython is limited to the two segmenter export scripts, read-only Codex calls return schema-bound JSON/reviews, and workspace-write Codex calls are confined to the governed surgical staging or Auto Edit project/attempt cwd before caller validation and promotion",
+      "disposition": "replace",
+      "parityFixture": "codex-cli, segmenter export, waveform, filmstrip, and source-frame route tests",
+      "removalCondition": "replace generic command acceptance with a typed executable registry whose declared inputs, output paths, timeout, environment, and owning artifact are validated at every call",
+      "authorityPathTokens": [
+        "runCmd(",
+        "spawnPython(",
+        "runCodex"
+      ],
+      "callSiteDispositions": {
+        "src/app/api/_lib/codex-cli.ts": "path-owner",
+        "src/app/api/_lib/run-cmd.ts": "path-owner",
+        "src/app/api/_lib/spawn-python.ts": "path-owner",
+        "src/app/api/clipper/clip-preview/route.ts": "launcher",
+        "src/app/api/producer/ai-edit/critic.ts": "launcher",
+        "src/app/api/producer/ai-edit/edit-streams.ts": "launcher",
+        "src/app/api/producer/ai-edit/palmier-native-runner.ts": "launcher",
+        "src/app/api/producer/auto-edit/authoring.ts": "launcher",
+        "src/app/api/producer/auto-edit/brain-review-runner.ts": "launcher",
+        "src/app/api/producer/filmstrip/route.ts": "launcher",
+        "src/app/api/producer/lint/route.ts": "non-authority",
+        "src/app/api/producer/palmier/candidate-qc/reviewer.ts": "launcher",
+        "src/app/api/producer/source-frame/route.ts": "launcher",
+        "src/app/api/producer/waveform/route.ts": "launcher",
+        "src/app/api/segmenter/export-mp4/route.ts": "launcher",
+        "src/app/api/segmenter/save-to-workspace/route.ts": "launcher",
+        "src/app/api/segmenter/segment/route.ts": "launcher"
+      }
+    },
+    {
+      "artifactId": "palmier-current-preflight-boundary",
+      "pathPattern": "<project>/producer/{edit_plan.json,asset_manifest.json} -> stdout-only Palmier preflight verdict",
+      "owner": "src/app/api/producer/palmier/open/current.ts",
+      "authority": "derived",
+      "readers": [
+        "src/app/api/producer/palmier/open/route.ts"
+      ],
+      "writers": [
+        "src/app/api/producer/palmier/open/current.ts"
+      ],
+      "promotionPoint": "none; push.py runs with --preflight and the launcher accepts only the final parsed stdout verdict",
+      "fingerprintInputs": [
+        "canonical edit plan and manifest paths",
+        "source-set admission requirement",
+        "push.py and Python interpreter identity"
+      ],
+      "durability": "process-local stdout only; the preflight launcher does not request Palmier mutation or publish repository state",
+      "disposition": "adapter",
+      "parityFixture": "Palmier open handoff and preflight route tests",
+      "removalCondition": "replace the subprocess wrapper with a typed preflight API returning a receipt-bound verdict or prove the same no-write contract in the central executable registry",
+      "authorityPathTokens": [
+        "\"--preflight\""
+      ],
+      "callSiteDispositions": {
+        "scripts/producer/palmier/push.py": "reader",
+        "src/app/api/producer/palmier/open/current.ts": "launcher",
+        "src/app/api/producer/palmier/preflight/route.ts": "launcher",
+        "src/app/api/producer/palmier/push/route.ts": "launcher"
+      }
+    },
+    {
+      "artifactId": "native-desktop-interaction-adapters",
+      "pathPattern": "<operator desktop>/{macOS picker selection,Finder reveal,Palmier application or project activation}",
+      "owner": "src/app/api/producer/pick-file/route.ts",
+      "authority": "derived",
+      "readers": [
+        "src/app/api/clipper/native-pick/route.ts",
+        "src/app/api/frameio-review/pick-file/route.ts",
+        "src/app/api/producer/palmier/open/route.ts",
+        "src/app/api/producer/palmier/view/activate.ts",
+        "src/app/api/producer/palmier/workspace/launch.ts",
+        "src/app/api/producer/pick-file/route.ts",
+        "src/app/api/producer/reveal/route.ts",
+        "src/app/api/segmenter/pick-file/route.ts"
+      ],
+      "writers": [
+        "src/app/api/clipper/native-pick/route.ts",
+        "src/app/api/frameio-review/pick-file/route.ts",
+        "src/app/api/producer/palmier/open/route.ts",
+        "src/app/api/producer/palmier/view/activate.ts",
+        "src/app/api/producer/palmier/workspace/launch.ts",
+        "src/app/api/producer/pick-file/route.ts",
+        "src/app/api/producer/reveal/route.ts",
+        "src/app/api/segmenter/pick-file/route.ts"
+      ],
+      "promotionPoint": "none; picker paths, process exit status, and Palmier loopback readiness are returned to the caller and cannot by themselves authorize source admission, an edit, or delivery",
+      "fingerprintInputs": [
+        "validated picker kind, multiplicity, and prompt",
+        "existing reveal, project, or application target",
+        "darwin platform and fixed osascript/open executable"
+      ],
+      "durability": "operator-session side effect only; these routes write no repository artifact and any returned path must pass the downstream admission or handoff contract",
+      "disposition": "adapter",
+      "parityFixture": "native picker policy, Palmier open/view/workspace, and reveal route tests",
+      "removalCondition": "consolidate the duplicate osascript/open launchers behind one typed desktop bridge with target allowlists and caller-specific admission",
+      "authorityPathTokens": [
+        "spawn(\"open\"",
+        "spawn(\"osascript\""
+      ],
+      "callSiteDispositions": {
+        "src/app/api/clipper/native-pick/route.ts": "launcher",
+        "src/app/api/frameio-review/pick-file/route.ts": "launcher",
+        "src/app/api/producer/palmier/open/route.ts": "launcher",
+        "src/app/api/producer/palmier/view/activate.ts": "launcher",
+        "src/app/api/producer/palmier/workspace/launch.ts": "launcher",
+        "src/app/api/producer/pick-file/route.ts": "launcher",
+        "src/app/api/producer/reveal/route.ts": "launcher",
+        "src/app/api/segmenter/pick-file/route.ts": "launcher"
+      }
+    },
+    {
+      "artifactId": "frameio-review-report",
+      "pathPattern": "<selected-media-parent>/{results.json,report.html} + <system-temp>/frameio-<source-fingerprint>/frames",
+      "owner": "scripts/frameio/review.py",
+      "authority": "derived",
+      "readers": [
+        "src/app/api/frameio-review/frame/route.ts",
+        "src/components/frameio-review"
+      ],
+      "writers": [
+        "scripts/frameio/review.py",
+        "src/app/api/frameio-review/review/route.ts"
+      ],
+      "promotionPoint": "review.py overwrites the JSON and standalone HTML only after extraction, representative selection, model analysis, and verdict aggregation complete",
+      "fingerprintInputs": [
+        "selected media absolute path, size, mtime, and extraction FPS",
+        "review mode, thresholds, limits, and model",
+        "extracted representative frames and model verdicts"
+      ],
+      "durability": "results.json and report.html are mutable sidecars beside caller-selected media; frame JPEGs are a deterministic system-temp cache swept after one hour",
+      "disposition": "replace",
+      "parityFixture": "FRAME.IO review route and report-generation tests",
+      "removalCondition": "move reports under a project/revision-scoped content-addressed review artifact with collision-safe naming, source SHA-256, explicit retention, and atomic publication",
+      "authorityPathTokens": [
+        "\"frameio\", \"review.py\""
+      ],
+      "callSiteDispositions": {
+        "src/app/api/frameio-review/review/route.ts": "launcher"
+      }
+    }
+  ]
+}

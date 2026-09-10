@@ -7,6 +7,7 @@ import { dlog, derror } from "@/lib/debug";
 import { autoEditQcApproval, findManifest, palmierRenderPath } from "../_lib";
 import { guardProjectMutation, mutationProjectRoot } from "../../../_lib/project-mutation";
 import { assertTemplateUsageApprovalCurrent } from "@/lib/server/template-usage-approval";
+import { canonicalPalmierDir, localPalmierRejection } from "../request";
 
 export const maxDuration = 900;
 export const dynamic = "force-dynamic";
@@ -34,9 +35,15 @@ function runPy(args: string[]): Promise<{ stdout: string; code: number }> {
 // locks, so repeated requests reach its latest-wins queue even across HMR or
 // multiple dev servers. Every accepted plan passes plan_lint before MCP access.
 export async function POST(req: NextRequest) {
-  const { dir: rawDir } = (await req.json()) as { dir?: string };
-  const dir = (rawDir || "").replace(/\/$/, "");
-  if (!dir) return json({ error: "No dir provided" }, 400);
+  const rejection = localPalmierRejection(req);
+  if (rejection) return json({ error: rejection.error }, rejection.status);
+  const body = await req.json().catch(() => null) as { dir?: unknown } | null;
+  let dir: string;
+  try {
+    dir = canonicalPalmierDir(body?.dir);
+  } catch (error) {
+    return json({ error: (error as Error).message }, 400);
+  }
   const guarded = guardProjectMutation({
     projectRoot: mutationProjectRoot(dir),
     producerDir: dir,
@@ -69,7 +76,8 @@ async function prepareSync(dir: string): Promise<SyncSpec | Response> {
   const parityBlocked = await parityGate(planPath, manifestPath);
   if (parityBlocked) return parityBlocked;
   const slug = path.basename(path.dirname(dir)) || "sniper-push";
-  const args = [PUSH, planPath, manifestPath, "--name", slug,
+  const args = [PUSH, planPath, manifestPath, "--require-source-set-admission",
+    "--name", slug,
     "--export", palmierRenderPath(dir)];
   dlog("producer:palmier", "spawn shadow sync", { dir, args: args.slice(1) });
   return { dir, args };
@@ -90,7 +98,10 @@ async function lintGate(planPath: string, manifestPath: string): Promise<Respons
 }
 
 async function parityGate(planPath: string, manifestPath: string): Promise<Response | null> {
-  const preflight = await runPy([PUSH, planPath, manifestPath, "--preflight"]);
+  const preflight = await runPy([
+    PUSH, planPath, manifestPath, "--preflight",
+    "--require-source-set-admission",
+  ]);
   try {
     const line = preflight.stdout.trim().split("\n").filter(Boolean).pop() ?? "";
     const verdict = JSON.parse(line) as {

@@ -32,6 +32,7 @@ import {
 import {
   runPlanningReviewBatch,
 } from "./planning-review-batch";
+import { protectSavedPlanPlanning, savedPlanPlanningHash } from "./planning-saved-plan";
 import {
   mergePlanningResults,
   recordCleanPlanningResult,
@@ -196,6 +197,7 @@ export async function runPlanningReviewLoop(
   dependencies: Partial<PlanningLoopDependencies> = {},
 ): Promise<PlanningLoopResult> {
   const deps = { ...DEFAULT_DEPS, ...dependencies };
+  const savedPlanHash = savedPlanPlanningHash(run.job, deps.hash);
   invalidateChangedReview(run, deps);
   if (planningReusable(run.job, deps)) {
     return {
@@ -234,12 +236,8 @@ export async function runPlanningReviewLoop(
     criticRound += results.length;
     reviewPaths.push(...results.map((result) => result.path));
     const review = mergePlanningResults(results);
-    // Gate-only failure — no critic ran (the batch returns before launching
-    // critics when the deterministic bundle fails). A bounded low-effort
-    // fixer handles the machine diagnostics without charging the cycle
-    // budget or zeroing clean credit; when its budget denies a spawn
-    // (per-cycle cap, run total, or no progress) the failure falls through
-    // to the full revision path below.
+    protectSavedPlanPlanning(run.job, review, savedPlanHash, deps.hash);
+    // Gate-only failure — a bounded low-effort fixer runs before the full writer.
     const gateOnly = results.length === 1 && !results[0].gates.ok;
     // For a gate-only failure the review's materialIssues ARE the gate errors,
     // so their count gates whether the mechanical fixer is even worth trying.

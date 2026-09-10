@@ -18,6 +18,25 @@
 
 const SHIM_BODY = String.raw`
 (function () {
+  var previewFailure = null;
+  var previewToken = null;
+  function reportHealth() {
+    if (!previewToken) return;
+    var count = Object.keys(window.__timelines || {}).length;
+    if (!previewFailure && !count && document.readyState === "loading") return;
+    parent.postMessage({ type: "hf-preview-health", token: previewToken, ready: !previewFailure && count > 0,
+      error: previewFailure || (count ? null : "No animation timeline registered.") }, "*");
+  }
+  window.addEventListener("error", function (event) {
+    var target = event.target;
+    var source = target && (target.src || target.href);
+    previewFailure = String(event.message || (source ? "Preview asset failed: " + source : "Preview script failed.")).slice(0, 400);
+    reportHealth();
+  }, true);
+  window.addEventListener("unhandledrejection", function (event) {
+    previewFailure = String(event.reason && event.reason.message || "Preview initialization failed.").slice(0, 400);
+    reportHealth();
+  });
   var SVG_SHAPES = { path: 1, rect: 1, circle: 1, ellipse: 1, line: 1, polyline: 1, polygon: 1, text: 1, tspan: 1, image: 1, use: 1 };
   function seekAll(t) {
     var tls = window.__timelines || {};
@@ -69,8 +88,14 @@ const SHIM_BODY = String.raw`
     return box;
   }
   window.addEventListener("message", function (e) {
+    if (e.source !== parent) return;
     var d = e && e.data;
     if (!d) return;
+    if (d.type === "hf-preview-status") {
+      if (typeof d.token !== "string" || !d.token || d.token.length > 128) return;
+      previewToken = d.token;
+      reportHealth(); return;
+    }
     if (d.type === "hf-seek") { seekAll(d.t); return; }
     if (d.type !== "hf-measure" || !Array.isArray(d.ts)) return;
     // SYNCHRONOUS probe loop: hyperframes comps run as PAUSED deterministic

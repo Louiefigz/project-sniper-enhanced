@@ -8,6 +8,11 @@ card as a separate Palmier clip, and persist a stable mapping from plan graphic
 id to Palmier clip id. A copy/style edit then changes one rendered asset and one
 timeline element; video duration is no longer part of the repair cost.
 
+This is proved as a local executor boundary, not as a released connected
+Palmier product. The hybrid editable path remains P5-blocked and must stay
+isolated/experimental. The safe publishing paths are the exact audited MP4 and
+its approved one-clip flat mirror.
+
 The wrong boundary is the final H.264 file. Replacing arbitrary encoded ranges
 must account for GOPs, audio timestamps, transitions, color metadata, and seam
 validation. The reliable boundary is the pre-rendered overlay clip.
@@ -59,12 +64,20 @@ creates exactly two renders, two imports, and two placements, while the
 move/removal remain native. Cut-track changes calculate a full dependency
 closure and fail into the broader rebuild path.
 
-## Live first-60 proof (2026-07-16)
+## Historical Palmier specimens (not product qualification)
 
-The clean Desktop → Palmier acceptance changed `g-2jajjqng` from “One person
+The retained first-60 run proved substantial transport and mutation mechanics,
+but failed later product-quality review. It took **56m48s**, remained
+Palmier-QC-pending, lost per-word timing for seven karaoke captions, and
+accepted a wrong 3840×2160 canvas for a requested 9:16 short. It is not
+connected Palmier/P5 qualification.
+
+The later warm recovery specimen changed `g-2jajjqng` from “One person
 shop” to the transcript-grounded “Doing every single thing.” The repair plan
 resolved from the content cache in **0.492s**; Claude imported, replaced, and
-read back the card in **40.413s**. The authority recorded exactly two mutations.
+read back the card in **40.413s**. The authority recorded exactly two mutations,
+but the candidate remained unapproved and QC-pending. This followed a
+destructive stale-track attempt and is not an independent cold success.
 
 ```text
 old clip CD0C6BFC → new clip C7E1AD28

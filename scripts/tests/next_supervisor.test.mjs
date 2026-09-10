@@ -16,10 +16,12 @@ import {
   parseSupervisorArgs,
   processGroupAlive,
   releaseSupervisorLock,
+  supervisorRoot,
   terminateResidualGroup,
 } from "../infra/next_supervisor.mjs";
 
 function testArguments() {
+  assert.equal(supervisorRoot(), path.resolve(process.cwd()));
   const parsed = parseSupervisorArgs(["dev", "--local", "--webpack", "--port", "3101"]);
   assert.deepEqual(parsed, {
     command: "dev",

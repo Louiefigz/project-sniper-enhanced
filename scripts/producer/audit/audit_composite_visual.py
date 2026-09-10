@@ -12,11 +12,14 @@ from __future__ import annotations
 import math
 import os
 from collections import defaultdict
+from dataclasses import replace
 
 from PIL import Image, ImageFilter, ImageStat
 
 from audit.audit_checks import CheckResult, FAIL, PASS
 from audit.audit_frames import FrameRef, extract_review_frames
+from audit.audit_text_plates import text_plate_results
+from audit.audit_text_placement import PlateContext, observe_placements, binding_error
 from brand import load_tokens
 from producer_config import MOTION
 
@@ -39,6 +42,7 @@ def _rgb_image(path: str) -> Image.Image | None:
     try:
         with Image.open(path) as source:
             image = source.convert("RGB")
+            image.info["sniperOriginalSize"] = source.size
     except (OSError, ValueError):
         return None
     if image.width <= _SAMPLE_WIDTH:
@@ -50,7 +54,8 @@ def _rgb_image(path: str) -> Image.Image | None:
 def _paired_images(final_path: str, base_path: str
                    ) -> tuple[Image.Image, Image.Image] | None:
     final, base = _rgb_image(final_path), _rgb_image(base_path)
-    if final is None or base is None or final.size != base.size:
+    if final is None or base is None or final.size != base.size or final.info.get(
+            "sniperOriginalSize") != base.info.get("sniperOriginalSize"):
         return None
     return final, base
 
@@ -139,35 +144,47 @@ def _source_contrast_ratios(images: tuple[Image.Image, Image.Image],
 
 
 def _graphic_results(plan: dict, final_frames: dict[str, FrameRef],
-                     base_frames: dict[str, FrameRef]) -> list[CheckResult]:
+                     base_frames: dict[str, FrameRef],
+                     placement: PlateContext | None = None) -> list[CheckResult]:
     results: list[CheckResult] = []
-    floor = float(MOTION["contrast"]["min_ratio"])
     for index, graphic in enumerate(plan.get("graphicsTrack") or []):
         prefix = f"graphic{index}_"
         labels = sorted(label for label in final_frames if label.startswith(prefix))
-        pairs = [_paired_images(final_frames[label].path, base_frames[label].path)
-                 for label in labels if label in base_frames]
-        valid = [pair for pair in pairs if pair is not None]
+        samples = [(label, final_frames[label].timestamp,
+                    _paired_images(final_frames[label].path, base_frames[label].path))
+                   for label in labels if label in base_frames]
+        samples = [sample for sample in samples if sample[2] is not None]
+        valid = [sample[2] for sample in samples]
         peak = max((_active_ratio(pair) for pair in valid), default=0.0)
         status = PASS if valid and peak >= _MIN_ACTIVE_RATIO else FAIL
         results.append(CheckResult(
             f"graphic_composite_{index}_presence", status,
             f"peak changed-pixel ratio {peak:.4f}",
             f"requires >= {_MIN_ACTIVE_RATIO:.4f} against graphics-free footage"))
-        accents = _accent_colors(graphic)
-        if graphic.get("anchor") == "own-screen" or not accents or not valid:
+        plate_results = text_plate_results(index, graphic,
+            replace(placement or PlateContext(), samples=samples), _contrast)
+        if plate_results is not None:
+            results.extend(plate_results)
             continue
-        ratios = [ratio for pair in valid
-                  for ratio in _source_contrast_ratios(pair, accents)]
-        if not ratios:
-            continue
-        lowest = min(ratios)
-        results.append(CheckResult(
-            f"graphic_composite_{index}_contrast",
-            PASS if lowest >= floor else FAIL,
-            f"lowest source-exposed accent tile {lowest:.2f}:1",
-            f"requires >= {floor:g}:1 against the actual footage"))
+        accent = _accent_result(index, graphic, valid)
+        if accent is not None:
+            results.append(accent)
     return results
+
+
+def _accent_result(index: int, graphic: dict, pairs: list) -> CheckResult | None:
+    """Preserve the existing source-exposed accent check for other kinds."""
+    accents = _accent_colors(graphic)
+    if graphic.get("anchor") == "own-screen" or not accents or not pairs:
+        return None
+    ratios = [ratio for pair in pairs for ratio in _source_contrast_ratios(pair, accents)]
+    if not ratios:
+        return None
+    lowest = min(ratios)
+    floor = float(MOTION["contrast"]["min_ratio"])
+    return CheckResult(f"graphic_composite_{index}_contrast", PASS if lowest >= floor else FAIL,
+        f"lowest source-exposed accent tile {lowest:.2f}:1",
+        f"requires >= {floor:g}:1 against the actual footage")
 
 
 def _mean_distance(left: Image.Image, right: Image.Image) -> float:
@@ -218,13 +235,14 @@ def _reference_path(out_dir: str) -> str | None:
 
 
 def check_composite_visuals(out_dir: str, plan: dict,
-                            frames: list[FrameRef]) -> list[CheckResult]:
-    """Measure rendered graphic/transition pixels using existing review stills."""
+                            frames: list[FrameRef],
+                            graphics_reference: str | None = None) -> list[CheckResult]:
+    """Compare real pixels; explicit references never fall back to discovery."""
     final = {frame.label: frame for frame in frames if frame.path}
     graphics = plan.get("graphicsTrack") or []
     results: list[CheckResult] = []
     if graphics:
-        reference = _reference_path(out_dir)
+        reference = _reference_path(out_dir) if graphics_reference is None else graphics_reference
         if reference is None:
             results.append(CheckResult(
                 "graphic_composite_reference", FAIL, "missing base_final.mp4",
@@ -239,7 +257,15 @@ def check_composite_visuals(out_dir: str, plan: dict,
                 PASS if len(base_map) == len(refs) else FAIL,
                 f"{len(base_map)}/{len(refs)} reference frame(s)",
                 "graphics-free footage extracted at every graphic QC timestamp"))
-            results.extend(_graphic_results(plan, final, base_map))
+            placement = observe_placements(out_dir, plan, reference) if any(
+                graphic.get("kind") == "section-marker" and
+                (graphic.get("spec") or {}).get("readability") == "plates"
+                for graphic in graphics) else None
+            results.extend(_graphic_results(plan, final, base_map, placement))
+            error = binding_error(placement) if placement is not None else ""
+            if error:
+                results.append(CheckResult("graphic_text_placement_binding", FAIL,
+                    "text placement evidence unavailable or changed", error))
     results.extend(_transition_result(index, transition, final)
                    for index, transition in enumerate(plan.get("transitions") or []))
     return results

@@ -480,7 +480,9 @@ patch/composite re-run.
 ## 7.5 B-roll doctrine — selection order, density, Higgsfield prompting, folders
 
 ### Selection ORDER (fixed — assess before you promise)
-1. Catalog the pool (folder scan + vision descriptions, cached).
+1. Canonically ingest the pool, then catalog its admitted snapshots (vision
+   descriptions cached). A file added later is unavailable until re-ingest;
+   pool filenames remain provenance, never executable media paths.
 2. Brain identifies *candidate* b-roll needs from the cut plan — each need cites its
    reason: (a) cover a jump cut, (b) illustrate a concrete named noun, (c) reset a
    pacing lull. "Looks nice" is not a reason (research: purposeful, never decorative).

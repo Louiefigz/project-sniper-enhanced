@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/cut-repair-automated-qc-bundle-v1.schema.json",
+  "title": "CutRepairAutomatedQcBundleV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "preparationHash",
+    "candidateDescriptorHash",
+    "toolManifestHash",
+    "operationHash",
+    "candidateCompositeSha256",
+    "alignment",
+    "vad",
+    "retranscription",
+    "seam",
+    "operatorAuditionIncluded"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "cut-repair-automated-qc-bundle" },
+    "preparationHash": { "$ref": "#/$defs/sha256" },
+    "candidateDescriptorHash": { "$ref": "#/$defs/sha256" },
+    "toolManifestHash": { "$ref": "#/$defs/sha256" },
+    "operationHash": { "$ref": "#/$defs/sha256" },
+    "candidateCompositeSha256": { "$ref": "#/$defs/sha256" },
+    "alignment": { "$ref": "#/$defs/lane" },
+    "vad": { "$ref": "#/$defs/lane" },
+    "retranscription": { "$ref": "#/$defs/lane" },
+    "seam": { "$ref": "#/$defs/lane" },
+    "operatorAuditionIncluded": { "const": false }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "lane": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "receiptHash",
+        "candidateCompositeSha256",
+        "receipt"
+      ],
+      "properties": {
+        "status": { "const": "bounded-pass" },
+        "receiptHash": { "$ref": "#/$defs/sha256" },
+        "candidateCompositeSha256": { "$ref": "#/$defs/sha256" },
+        "receipt": { "type": "object" }
+      }
+    }
+  }
+}

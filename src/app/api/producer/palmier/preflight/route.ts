@@ -67,7 +67,10 @@ function resolveInput(dir: string | undefined, plan: unknown): PreflightInput | 
 
 function runPreflight(input: PreflightInput): Promise<{ stdout: string; code: number }> {
   return new Promise((resolve) => {
-    const args = [PUSH, input.planPath, input.manifestPath, "--preflight"];
+    const args = [
+      PUSH, input.planPath, input.manifestPath, "--preflight",
+      "--require-source-set-admission",
+    ];
     const { memoryPlan } = input;
     if (memoryPlan) args.push("--plan-stdin");
     const proc = spawn(pythonInterpreter(), args, {

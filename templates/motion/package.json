@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "hyperframes": "0.7.33"
+    "hyperframes": "0.8.31"
   },
   "scripts": {
     "dev": "hyperframes preview",

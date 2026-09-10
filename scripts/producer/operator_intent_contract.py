@@ -39,8 +39,17 @@ def _rows(plan: dict, key: str) -> list:
 
 
 def _captions_present(plan: dict, mode: str) -> bool:
-    if _rows(plan, "captionsTrack"):
-        return True
+    from captions.caption_plan_pipeline import validate_plan_caption_authority
+    try:
+        authority = validate_plan_caption_authority(plan)
+    except ValueError:
+        return False
+    if authority is not None:
+        track, _ = authority
+        authored = track["defaultPolicy"] != "off" or bool(track["groups"])
+        if mode == "short":
+            return authored and (plan.get("captions") or {}).get("burn") is True
+        return authored
     if mode == "longform":
         try:
             return lane_required(plan.get("target") or {}, "captions")
@@ -48,6 +57,20 @@ def _captions_present(plan: dict, mode: str) -> bool:
             return False
     captions = plan.get("captions")
     return isinstance(captions, dict) and captions.get("burn") is True
+
+
+def _check_unsupported_tracks(plan: dict, errors: list[str]) -> None:
+    """Reject ghost caption arrays; accept only the render-consumed V1 object."""
+    if "captionsTrack" not in plan:
+        return
+    captions_track = plan.get("captionsTrack")
+    if captions_track is None or captions_track == []:
+        return
+    from captions.caption_plan_pipeline import validate_plan_caption_authority
+    try:
+        validate_plan_caption_authority(plan)
+    except ValueError as exc:
+        errors.append(f"captionsTrack is not renderable: {exc}")
 
 
 def _transitions_present(plan: dict, mode: str) -> bool:
@@ -209,6 +232,7 @@ def evaluate(plan: dict, raw_expected: Any) -> dict:
         expected = _validate_expected(raw_expected)
     except ValueError as error:
         return {"ok": False, "errors": [str(error)], "warnings": [], "metrics": {}}
+    _check_unsupported_tracks(plan, errors)
     target = _check_identity(plan, expected, errors)
     _check_reference(target, expected, errors)
     _actual, wanted = _resolved_lanes(target, expected, errors)

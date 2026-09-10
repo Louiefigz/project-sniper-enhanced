@@ -10,7 +10,8 @@ manual changes on its next mirror.
 The safe unit is an immutable Palmier timeline revision:
 
 1. Read `get_projects` and require the expected project to be active.
-2. Read `get_timeline` with `captionDetail: true`.
+2. Read a compact `get_timeline`; when captions exist, merge bounded
+   `captionDetail: true` frame windows.
 3. Hash the entire returned JSON, including unknown fields. Defaults omitted by
    Palmier are deterministic; object key ordering is not, so keys are sorted.
 4. Immediately before work, compare the active project, timeline id, and full
@@ -47,8 +48,11 @@ application are not connected yet.
 Palmier's current `get_timeline` surface is rich: trims, transforms, opacity,
 audio deviations, color, effects, keyframes, text, and caption summaries are
 reported. Per-caption detail requires `captionDetail: true` and is capped at
-200 rows per caption group. A group above that cap is marked incomplete and AI
-forking fails closed; it must be paged before the claim can become complete.
+200 rows per caption group per response. The production reader starts from a
+compact full snapshot, recursively bisects saturated frame windows, merges rows
+by caption ID, requires identical values when a caption spans two windows, and
+proves a gap-free partition plus exact group cardinality. Timeline, track, or
+group ID drift and a changed closing compact snapshot fail closed.
 
 This hash proves only the MCP-readable timeline. It does not claim to capture
 an app property Palmier does not expose. Unknown exposed fields remain in the

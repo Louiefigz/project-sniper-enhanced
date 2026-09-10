@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
 import path from "path";
+import { resolvedAutoEditDeliveryPolicy } from "@/lib/producer/auto-edit-delivery-policy";
 import {
   autoEditJobPath,
   readAutoEditJob,
@@ -57,7 +58,7 @@ function validStoredRun(value: unknown): value is StoredRun {
   return typeof run.token === "string"
     && typeof run.ownerPid === "number"
     && (run.ownerIdentity === undefined || validProcessIdentity(run.ownerIdentity))
-    && ["running", "failed", "interrupted"].includes(String(run.status))
+    && ["running", "failed", "interrupted", "awaiting_cut_approval", "cut_accepted", "awaiting_treatment_brief", "treatment_admitted"].includes(String(run.status))
     && Array.isArray(run.events);
 }
 function readRun(dir: string): StoredRun | null {
@@ -222,6 +223,12 @@ export function producerRun(
   return {
     kind, status, phase, startedAt, updatedAt, message, events,
     ...(kind === "auto_edit" ? { controlToken: resolved.token } : {}),
+    ...(kind === "auto_edit" && job?.token === resolved.token && job.ctx.dir === key
+      ? { deliveryPolicy: resolvedAutoEditDeliveryPolicy(job.ctx) } : {}),
+    ...(kind === "auto_edit" && job?.token === resolved.token && job.ctx.dir === key
+      && job.ctx.workflowPolicy === "cut-first" ? { workflowPolicy: "cut-first" as const } : {}),
+    ...(kind === "auto_edit" && job?.token === resolved.token && job.ctx.dir === key
+      && job.ctx.workflowV2?.schemaVersion === 2 ? { workflowVersion: 2 as const } : {}),
   };
 }
 export function producerRunActive(dir: string): boolean {

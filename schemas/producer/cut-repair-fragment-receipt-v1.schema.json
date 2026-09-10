@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/cut-repair-fragment-receipt-v1.schema.json",
+  "title": "CutRepairFragmentReceiptV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "operationHash",
+    "method",
+    "edge",
+    "exactOutputDurationPreserved",
+    "dirtyFrameRange",
+    "dirtySampleRange",
+    "frameBoundaryResidualSamples",
+    "retime",
+    "inputs",
+    "output",
+    "tools",
+    "unchangedPictureMappingRanges",
+    "evidencePolicy"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "cut-repair-fragment" },
+    "operationHash": { "$ref": "#/$defs/sha256" },
+    "method": {
+      "enum": ["audio-lj-overlap", "extend-and-reclaim-silence"]
+    },
+    "edge": { "enum": ["start", "end"] },
+    "exactOutputDurationPreserved": { "const": true },
+    "dirtyFrameRange": { "$ref": "#/$defs/frameRange" },
+    "dirtySampleRange": { "$ref": "#/$defs/sampleRange" },
+    "frameBoundaryResidualSamples": { "type": "integer" },
+    "retime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestedSpeed",
+        "sourceSampleRange",
+        "sourceSampleRate",
+        "normalizedSourceSampleRange",
+        "outputSamples",
+        "effectiveRatio"
+      ],
+      "properties": {
+        "requestedSpeed": { "$ref": "positive-rational-v1.schema.json" },
+        "sourceSampleRange": { "$ref": "#/$defs/sampleRange" },
+        "sourceSampleRate": { "type": "integer", "minimum": 1 },
+        "normalizedSourceSampleRange": { "$ref": "#/$defs/sampleRange" },
+        "outputSamples": { "type": "integer", "minimum": 1 },
+        "effectiveRatio": { "$ref": "positive-rational-v1.schema.json" }
+      }
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["parent", "source"],
+      "properties": {
+        "parent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sha256",
+            "averageFrameRate",
+            "videoFrames",
+            "audioSampleRate",
+            "channelNormalization"
+          ],
+          "properties": {
+            "sha256": { "$ref": "#/$defs/sha256" },
+            "averageFrameRate": { "type": "string", "minLength": 1 },
+            "videoFrames": { "type": "integer", "minimum": 1 },
+            "audioSampleRate": { "type": "integer", "minimum": 1 },
+            "channelNormalization": {
+              "$ref": "channel-normalization-receipt-v1.schema.json"
+            }
+          }
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sha256",
+            "averageFrameRate",
+            "nominalFrameRate",
+            "timingClass",
+            "audioSampleRate",
+            "channelNormalization"
+          ],
+          "properties": {
+            "sha256": { "$ref": "#/$defs/sha256" },
+            "averageFrameRate": { "type": "string", "minLength": 1 },
+            "nominalFrameRate": { "type": "string", "minLength": 1 },
+            "timingClass": {
+              "enum": ["cfr", "normalized-from-vfr-source"]
+            },
+            "audioSampleRate": { "type": "integer", "minimum": 1 },
+            "channelNormalization": {
+              "$ref": "channel-normalization-receipt-v1.schema.json"
+            }
+          }
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "videoFrames",
+        "audioSamplesPerChannel",
+        "averageFrameRate",
+        "width",
+        "height",
+        "decode"
+      ],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "videoFrames": { "type": "integer", "minimum": 1 },
+        "audioSamplesPerChannel": { "type": "integer", "minimum": 1 },
+        "averageFrameRate": { "type": "string", "minLength": 1 },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "decode": { "const": "ffmpeg-xerror-full-av-v1" }
+      }
+    },
+    "tools": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ffmpegSha256", "ffprobeSha256"],
+      "properties": {
+        "ffmpegSha256": { "$ref": "#/$defs/sha256" },
+        "ffprobeSha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "unchangedPictureMappingRanges": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/frameRange" }
+    },
+    "evidencePolicy": {
+      "const": "alignment-and-vad-are-bounded-evidence-not-sole-audibility-proof"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "frameRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startFrame", "endFrameExclusive"],
+      "properties": {
+        "startFrame": { "type": "integer", "minimum": 0 },
+        "endFrameExclusive": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "sampleRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startSample", "endSampleExclusive"],
+      "properties": {
+        "startSample": { "type": "integer", "minimum": 0 },
+        "endSampleExclusive": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

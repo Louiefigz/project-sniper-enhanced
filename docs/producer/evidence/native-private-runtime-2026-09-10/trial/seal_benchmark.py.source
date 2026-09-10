@@ -1,0 +1,172 @@
+"""Preserve this completed fresh benchmark without promoting failed playback."""
+from __future__ import annotations
+
+import hashlib
+import json
+import shutil
+import time
+from datetime import UTC, datetime
+from pathlib import Path
+
+from trial_timing_report import report
+
+ROOT = Path(__file__).resolve().parent
+DESTINATION = Path('/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-fresh-native-b-2026-09-09')
+SOURCE = Path('/Users/aaronfigueroa/Downloads/C0679.MP4')
+SOURCE_SHA = '06c50ce8c2e9da0a954f9301b1cba0dbfeb62ecebcdd956a034eb1597a301e14'
+DELIVERY_SHA = '2b2b512eafecea3ef65768a676a78e76bf43bf07c09b0ab5ebad5a7e720846ee'
+
+
+def identity(path: Path) -> tuple:
+    """Bind the exact regular file through each streamed read."""
+    if path.is_symlink() or not path.is_file() or any(p.is_symlink() for p in path.parents):
+        raise ValueError(f'Not an ordinary file: {path}')
+    stat = path.stat()
+    return stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns
+
+
+def digest(path: Path) -> str:
+    """Hash without loading a media file into RAM; reject concurrent mutation."""
+    before = identity(path)
+    value = hashlib.sha256()
+    with path.open('rb') as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b''):
+            value.update(chunk)
+    if identity(path) != before:
+        raise RuntimeError(f'File changed during hash: {path}')
+    return value.hexdigest()
+
+
+def write_new(path: Path, value: dict) -> None:
+    """Write one new artifact; never replace a previous benchmark receipt."""
+    with path.open('x') as stream:
+        json.dump(value, stream, indent=2, allow_nan=False)
+
+
+def selected_files() -> list[Path]:
+    """Archive authored media and evidence, excluding regenerable large caches."""
+    files = [p for p in ROOT.iterdir() if p.is_file() and p.suffix != '.f32']
+    project = ROOT / 'project'
+    files += [p for p in project.rglob('*') if p.is_file()
+              and '.waveform-cache' not in p.relative_to(project).parts]
+    files += [ROOT / 'render' / name for name in ('delivery-master.mp4', 'native-master.mp4')]
+    files += [ROOT / 'fresh-delivery-audio/narration.m4a']
+    folders = ['native-references', 'native-reference-compiled', 'final-qc', 'delivery-qc-v2',
+               'source-qc', 'raw-stills-v2', 'raw-stills-v3', 'animated-stock-v6-frames']
+    for folder in folders:
+        files += [p for p in (ROOT / folder).rglob('*') if p.is_file()
+                  and p.suffix in {'.json', '.jsonl', '.html', '.png', '.jpg'}]
+    return sorted(set(files))
+
+
+def copy_verified(source: Path, target: Path, authority: str | None = None) -> dict:
+    """Verify source before/after copying and the archived bytes themselves."""
+    before = identity(source)
+    expected = digest(source)
+    if authority is not None and expected != authority:
+        raise RuntimeError(f'File differs from authoritative pin: {source}')
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with source.open('rb') as incoming, target.open('xb') as outgoing:
+        shutil.copyfileobj(incoming, outgoing, 1024 * 1024)
+    if identity(source) != before or digest(target) != expected:
+        raise RuntimeError(f'Copy failed integrity check: {source}')
+    return {'path': str(target.relative_to(DESTINATION)), 'sha256': expected,
+            'bytes': before[2], 'sourcePath': str(source)}
+
+
+def dependencies() -> list[dict]:
+    """Preserve actual explicit dependency pins, not a full runtime-closure claim."""
+    receipts = ['native-export-v1.render.json', 'native-references-v1.render.json',
+                'delivery-output-qc-v2.render.json', 'delivery-playback-v1.render.json']
+    pins = {}
+    for name in receipts:
+        pins.update(json.loads((ROOT / name).read_text())['additionalFilePinsBefore'])
+    records = []
+    for name, expected in sorted(pins.items()):
+        source = Path(name)
+        if source.is_relative_to(ROOT):
+            continue
+        if digest(source) != expected:
+            raise RuntimeError(f'Pinned external dependency changed: {source}')
+        target = DESTINATION / 'evidence-dependencies' / expected / source.name
+        records.append(copy_verified(source, target, expected))
+    return records
+
+
+def verify_completed_trial() -> dict:
+    """A failed benchmark can be sealed, but cannot become an approved delivery."""
+    playback = json.loads((ROOT / 'delivery-playback-v1.render.json').read_text())
+    required = ('sourceStable', 'sdkStable', 'sandboxStable', 'additionalFilesStable', 'leaseCleanupVerified')
+    if not all(playback.get(key) is True for key in required):
+        raise RuntimeError('Playback source closure or cleanup incomplete')
+    if playback.get('exitCode') != 1 or not playback['cleanup']['verified']:
+        raise RuntimeError('Unexpected first playback result; review before sealing')
+    quality = json.loads((ROOT / 'delivery-qc-v2/native-qc.json').read_text())
+    if quality.get('status') != 'objective-file-checks-pass-awaiting-playback':
+        raise RuntimeError('Objective file checks did not pass')
+    if quality['losslessAssembly']['outputSha256'] != DELIVERY_SHA:
+        raise RuntimeError('Objective receipt is bound to another output')
+    observed = json.loads((ROOT / 'delivery-v1-playback.json').read_text())
+    if observed.get('status') != 'failed' or observed.get('source') != str(ROOT / 'render/delivery-master.mp4'):
+        raise RuntimeError('Actual playback failure receipt is missing or bound elsewhere')
+    if not observed['observation']['final']['ended'] or observed['observation']['final']['dropped'] != 4:
+        raise RuntimeError('Unexpected actual playback failure; inspect before sealing')
+    if playback['additionalFilePinsAfter'].get(observed['source']) != DELIVERY_SHA:
+        raise RuntimeError('Playback guard did not pin the corrected output')
+    source_started = time.monotonic()
+    if digest(SOURCE) != SOURCE_SHA or digest(ROOT / 'render/delivery-master.mp4') != DELIVERY_SHA:
+        raise RuntimeError('Source or corrected output hash mismatch')
+    return {'sourcePath': str(SOURCE), 'sourceSha256': SOURCE_SHA,
+            'sourceBytes': SOURCE.stat().st_size, 'verifiedAt': datetime.now(UTC).isoformat(),
+            'verificationSeconds': time.monotonic() - source_started, 'sourceModified': False}
+
+
+def verify_archived_project(records: list[dict]) -> None:
+    """Require the archive to match the already-tested source closure."""
+    playback = json.loads((ROOT / 'delivery-playback-v1.render.json').read_text())
+    pins = playback['additionalFilePinsAfter']
+    copied = {row['sourcePath']: row['sha256'] for row in records}
+    required = {name: sha for name, sha in pins.items()
+                if Path(name).is_relative_to(ROOT / 'project')}
+    required[str(ROOT / 'render/delivery-master.mp4')] = DELIVERY_SHA
+    if not required or any(copied.get(name) != sha for name, sha in required.items()):
+        raise RuntimeError('Archived project differs from tested source closure')
+
+
+def main() -> None:
+    """Create an exclusive tamper-evident package with all failure labels retained."""
+    if DESTINATION.exists():
+        raise FileExistsError(DESTINATION)
+    source = verify_completed_trial()
+    files = selected_files()
+    needed = sum(identity(p)[2] for p in files)
+    if shutil.disk_usage(DESTINATION.parent).free - needed < 10 * 1024**3:
+        raise RuntimeError('Archive would violate the ten-GiB free disk floor')
+    DESTINATION.mkdir()
+    records = [copy_verified(p, DESTINATION / p.relative_to(ROOT)) for p in files]
+    records += dependencies()
+    verify_archived_project(records)
+    timing = report()
+    manifest = {'schemaVersion': 1, 'kind': 'fresh-input-benchmark-seal',
+        'status': 'file-qc-passed-playback-failed', 'approved': False, 'goalComplete': False,
+        'sealedAt': datetime.now(UTC).isoformat(), 'source': source, 'timing': timing,
+        'files': records, 'fileCount': len(records), 'totalBytes': sum(r['bytes'] for r in records),
+        'excluded': ['original raw footage', '29GB fresh native PNG cache', 'waveform cache',
+                     'intermediate cut media', 'decoded QC PCM/gray derivatives', 'scratch browser data'],
+        'externalRetainedRoot': str(ROOT),
+        'compiledCacheLinkCopied': False, 'projectAssetClosureVerified': False,
+        'projectAssetScope': 'Copied regular authored files; SDK dynamic dependency closure is not verified',
+        'portableSdkRuntimeIncluded': False, 'allTransitiveRuntimeDependenciesPinned': False,
+        'humanListening': False, 'zeroDropPlaybackPassed': False,
+        'laterRetriesMayReplaceFirstFailure': False}
+    write_new(DESTINATION / 'MANIFEST.json', manifest)
+    seal = {'manifestSha256': digest(DESTINATION / 'MANIFEST.json'),
+            'deliverySha256': DELIVERY_SHA, 'status': manifest['status'],
+            'approved': False, 'fileCount': len(records), 'archive': str(DESTINATION)}
+    write_new(DESTINATION / 'SEAL.json', seal)
+    print(json.dumps({**seal, 'sealedAt': manifest['sealedAt'],
+                      'trialWallSeconds': timing['elapsedWallSeconds']}, allow_nan=False))
+
+
+if __name__ == '__main__':
+    main()

@@ -6,7 +6,7 @@ import { atomicWriteJsonSync } from "@/lib/server/atomic-file";
 import { LANES, resolveLanes } from "@/lib/producer/intent-presets";
 import type { AutoEditCtx } from "../auto-edit/stream";
 import type { LiveBuildPreflight } from "./preflight";
-import { liveBuildJournalPath } from "./state";
+import { closeLiveBuildJournal } from "./journal";
 
 export interface TimelineIdentity {
   projectId: string;
@@ -24,6 +24,8 @@ export interface PalmierLiveBuildQcAuthority {
     hash: string;
     planHash: string;
     journalHash: string;
+    journalLifecycleDigest: string;
+    headFingerprint: string;
     lanes: string[];
     parent: TimelineIdentity;
     operationCount: number;
@@ -37,6 +39,7 @@ interface CaptureInput {
   parent: TimelineIdentity;
   sessionId: string;
   operationCount: number;
+  candidateFingerprint: string;
 }
 
 function sha(value: string | Buffer): string {
@@ -66,10 +69,9 @@ export function captureLiveBuildQcAuthority(input: CaptureInput): {
 } {
   const { preflight } = input;
   exactHash(preflight.planPath, preflight.planHash, "Approved plan");
-  const journalPath = liveBuildJournalPath(preflight.dir);
-  const journalHash = fileSha256(journalPath);
-  if (!journalHash || input.operationCount < 1) {
-    throw new Error("Live build produced no hash-bound Palmier mutation journal.");
+  const journal = closeLiveBuildJournal(preflight.dir, input.candidateFingerprint);
+  if (journal.operationCount !== input.operationCount) {
+    throw new Error("Live build operation count differs from the closed journal.");
   }
   const lanes = activeLanes(preflight.ctx);
   const request = `Execute approved Producer plan ${preflight.planHash} exactly in the governed Palmier candidate.`;
@@ -86,8 +88,7 @@ export function captureLiveBuildQcAuthority(input: CaptureInput): {
     controller: { lanes },
     parent: input.parent,
     plan: { path: preflight.planPath, hash: preflight.planHash },
-    journal: { path: journalPath, hash: journalHash,
-      operationCount: input.operationCount },
+    journal,
     planningReviews: preflight.planningReviews,
     sessionId: input.sessionId,
   };
@@ -100,7 +101,9 @@ export function captureLiveBuildQcAuthority(input: CaptureInput): {
     captureId,
     liveInput: {
       path: liveInputPath, hash: liveInputHash,
-      planHash: preflight.planHash, journalHash, lanes,
+      planHash: preflight.planHash, journalHash: journal.hash,
+      journalLifecycleDigest: journal.lifecycleDigest,
+      headFingerprint: journal.headFingerprint, lanes,
       parent: input.parent, operationCount: input.operationCount,
       sessionId: input.sessionId,
     },

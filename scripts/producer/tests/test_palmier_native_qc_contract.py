@@ -15,7 +15,9 @@ from fingerprints import file_sha256
 from palmier.mcp_client import PalmierError
 from palmier.native_qc_audit import (_declared_windows, _export_checks,
                                      _review_frames, run_native_audit)
-from palmier.native_qc_contract import authority_from_value, stable_hash
+from palmier.native_qc_contract import (
+    authority_from_value, export_path, stable_hash, validate_export,
+)
 from palmier.native_qc_export import export_candidate
 from palmier.timeline_authority import record_authority, snapshot
 from test_palmier_native_delta import NativeClient, _record, _timeline
@@ -123,7 +125,7 @@ class NativeInputAuthorityTests(unittest.TestCase):
 
 
 class CandidateExportTests(unittest.TestCase):
-    def test_audio_failure_never_overwrites_last_candidate_export(self):
+    def test_audio_stream_failure_never_overwrites_last_candidate_export(self):
         class Client:
             def call(self, _tool, args):
                 self.args = args
@@ -142,11 +144,51 @@ class CandidateExportTests(unittest.TestCase):
                           return_value=probe), \
                     patch("palmier.native_qc_export.ffprobe_json",
                           return_value={"streams": [{"codec_type": "video"}]}):
-                with self.assertRaisesRegex(PalmierError, "has no audio"):
+                with self.assertRaisesRegex(PalmierError,
+                                            "encoded audio stream"):
                     export_candidate(client, tmp, found)
             with open(final, "rb") as handle:
                 self.assertEqual(handle.read(), b"previous-approved-bytes")
             self.assertEqual(client.args["timelineId"], "head")
+
+    def test_multiple_audio_streams_fail_before_decode_or_publish(self):
+        class Client:
+            def call(self, _tool, args):
+                with open(args["outputPath"], "wb") as handle:
+                    handle.write(b"candidate")
+                return {"ok": True}
+        with tempfile.TemporaryDirectory() as tmp:
+            found = snapshot("project-1", _timeline())
+            probe = SimpleNamespace(duration_s=5.0, frame_error=0.0)
+            streams = [{"codec_type": "video"}, {"codec_type": "audio"},
+                       {"codec_type": "audio"}]
+            with patch("palmier.native_qc_export.wait_for_export"), \
+                    patch("palmier.native_qc_export.verify_export",
+                          return_value=probe), \
+                    patch("palmier.native_qc_export.ffprobe_json",
+                          return_value={"streams": streams}), \
+                    patch("palmier.native_qc_export._full_decode") as decode:
+                with self.assertRaisesRegex(PalmierError, "encoded audio stream"):
+                    export_candidate(Client(), tmp, found)
+            decode.assert_not_called()
+            self.assertFalse(os.path.exists(export_path(tmp)))
+
+    def test_durable_export_requires_exact_decode_and_one_audio_stream(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            media = export_path(tmp)
+            with open(media, "wb") as handle:
+                handle.write(b"candidate")
+            exact = {"path": media, "hash": file_sha256(media),
+                     "audioPresent": True, "audioStreamCount": 1,
+                     "videoStreamCount": 1,
+                     "fullDecode": "ffmpeg-xerror-av-v1"}
+            receipt = {"outDir": tmp, "export": exact}
+            self.assertEqual(validate_export(receipt), exact)
+            for key in ("audioStreamCount", "videoStreamCount", "fullDecode"):
+                broken = {name: value for name, value in exact.items()
+                          if name != key}
+                with self.assertRaisesRegex(PalmierError, "exact one-audio"):
+                    validate_export({"outDir": tmp, "export": broken})
 
 
 class NativeReviewFrameTests(unittest.TestCase):
@@ -161,9 +203,11 @@ class NativeReviewFrameTests(unittest.TestCase):
                          [(5.0, 8.0)])
 
     def test_declared_freeze_is_a_pass_but_unplanned_freeze_warns(self):
-        output = ("lavfi.freezedetect.freeze_start: 34\n"
-                  "lavfi.freezedetect.freeze_duration: 2.125\n")
-        with patch("audit.audit_glitch._ff_output", return_value=output):
+        output = ("[freezedetect @ 0xTEST] lavfi.freezedetect.freeze_start: 34\n"
+                  "[freezedetect @ 0xTEST] lavfi.freezedetect.freeze_duration: 2.125\n"
+                  "[freezedetect @ 0xTEST] lavfi.freezedetect.freeze_end: 36.125\n")
+        # Parser/verdict-only fixture; strict whole-decode evidence has its own tests.
+        with patch("audit.audit_glitch.scan_glitch_filter", return_value=SimpleNamespace(stderr=output, ansi_stripped=False)):
             planned = detect_freeze("candidate.mp4", [(32.8, 36.8)])
             unplanned = detect_freeze("candidate.mp4")
         self.assertEqual(planned.status, PASS)
@@ -196,7 +240,11 @@ class NativeReviewFrameTests(unittest.TestCase):
             receipt = {"outDir": tmp, "authority": {"nativePlan": {
                            "operations": []}},
                        "export": {"path": media, "hash": file_sha256(media),
-                                  "audioPresent": True, "durationSeconds": 5.0,
+                                  "audioPresent": True,
+                                  "audioStreamCount": 1,
+                                  "videoStreamCount": 1,
+                                  "fullDecode": "ffmpeg-xerror-av-v1",
+                                  "durationSeconds": 5.0,
                                   "frameError": 0.0}}
             probe = {"streams": [
                 {"codec_type": "video", "width": 1920, "height": 1080,
@@ -228,12 +276,20 @@ class NativeReviewFrameTests(unittest.TestCase):
     def test_any_render_integrity_failure_persists_failed_audit_and_rejects(self):
         with tempfile.TemporaryDirectory() as tmp:
             found = snapshot("project-1", _timeline())
-            receipt = {"outDir": tmp, "export": {"hash": "e" * 64},
+            receipt = {"outDir": tmp, "export": {
+                           "hash": "e" * 64, "path": "candidate.mp4"},
                        "authority": {"inputDigest": "i" * 64}}
             failure = {"name": "glitch_black", "status": FAIL,
                        "measured": "black run", "detail": ""}
+            parity_path = os.path.join(tmp, "palmier.editable-parity.json")
+            with open(parity_path, "w", encoding="utf-8") as handle:
+                handle.write("{}\n")
+            parity = {"verdict": "pass", "blockedMetricIds": [],
+                      "digest": "p" * 64}
             with patch("palmier.native_qc_audit._export_checks",
-                       return_value=([failure], [])):
+                       return_value=([failure], [])), \
+                    patch("palmier.native_qc_audit.run_parity",
+                          return_value=parity):
                 with self.assertRaisesRegex(PalmierError, "failed deterministic"):
                     run_native_audit(tmp, receipt, found)
             with open(os.path.join(tmp, "palmier.native-audit.json"),

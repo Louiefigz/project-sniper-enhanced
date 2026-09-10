@@ -1,8 +1,10 @@
 import type { ProjectIntent } from "./intent-presets";
 import type { CandidateQcAction } from "./candidate-qc-action";
+import { isGuidedCheckpoint } from "./guided-checkpoint-state";
 import {
   nextProjectAction,
   projectPrimaryActionLabel,
+  projectCardSummary,
   type ProducerRunState,
   type StageFlags,
 } from "./project-state";
@@ -14,6 +16,8 @@ export type PalmierProjectStateKind =
   | "approved_mirror"
   | "approved_working_head"
   | "manual_working_head"
+  | "commit_recovery"
+  | "reconciliation_required"
   | "pending_candidate"
   | "approved_candidate"
   | "rejected_candidate"
@@ -32,7 +36,9 @@ export interface PalmierProjectState {
   approvedTimelineId?: string | null;
   approvalCurrent?: boolean;
   candidateQc?: {
-    state: "none" | "pending" | "prepared" | "checking" | "approved" | "stale" | "rejected" | "quarantined";
+    state: "none" | "pending" | "prepared" | "checking" | "approved"
+      | "commit-recovery" | "reconciliation"
+      | "stale" | "rejected" | "quarantined";
     active: boolean;
     action: CandidateQcAction | null;
     canRunQc: boolean;
@@ -103,6 +109,22 @@ function specialOrigin(input: ProjectCardStateInput): ProjectCardPresentation | 
 }
 
 function palmierRevision(input: ProjectCardStateInput): ProjectCardPresentation | null {
+  if (input.palmier.state === "commit_recovery"
+      || input.palmier.state === "reconciliation_required") {
+    const blocked = input.palmier.state === "reconciliation_required";
+    return {
+      label: blocked ? "Palmier commit needs reconciliation" : "Palmier commit needs recovery",
+      available: blocked
+        ? "Palmier and the local revision authority do not form one proved commit."
+        : "Palmier selected the approved candidate; its reserved local revision is not committed yet.",
+      working: "No completed dual commit is being reported.",
+      next: blocked
+        ? "Inspect the retained saga before any further promotion."
+        : "Resume Use approved candidate to finish the exact durable commit.",
+      safe: "The saga preserves both observed heads and never reports a partial commit as complete.",
+      primary: "open_palmier",
+    };
+  }
   if (input.palmier.state === "approved_working_head") {
     return {
       label: "Palmier edit approved",
@@ -236,6 +258,10 @@ function pipelineAvailable(stages: StageFlags): string {
 }
 
 export function projectCardPresentation(input: ProjectCardStateInput): ProjectCardPresentation {
+  if (isGuidedCheckpoint(input.run)) {
+    return { ...projectCardSummary(input.stages, input.run),
+      label: projectPrimaryActionLabel(input.stages, input.run), primary: "stage" };
+  }
   if (input.run?.status === "running") {
     return {
       label: "Working in background",
@@ -257,6 +283,8 @@ export function palmierActionLabel(palmier: PalmierProjectState, finished: boole
     approved_mirror: "Open approved Palmier edit",
     approved_working_head: "Open approved Palmier timeline",
     manual_working_head: "Open current Palmier edit",
+    commit_recovery: "Resume Palmier commit",
+    reconciliation_required: "Inspect Palmier reconciliation",
     pending_candidate: "Review Palmier candidate",
     approved_candidate: "Use approved candidate",
     rejected_candidate: "Open preserved Palmier parent",

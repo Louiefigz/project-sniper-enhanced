@@ -1,6 +1,6 @@
 ---
 name: reference-editor
-description: Study a finished reference or raw-plus-edited pair frame by frame, compile a verified style pack, and apply its editing mechanics to new footage through Producer and editable Palmier. Use for mimic-this-edit requests and benchmark matching.
+description: Study a finished reference or raw-plus-edited pair frame by frame and produce evidence-bound, reference-inspired guidance for Producer. Verified mimic/replication and editable Palmier application are not released capabilities.
 ---
 
 # Reference Editor adapter
@@ -11,5 +11,7 @@ Sniper reference workflow.
 
 Copy mechanics only. Never copy creator identity, words, claims, logos,
 footage, screenshots, music, or branding. Do not claim completion from a study
-or plan alone; satisfy the workflow's template proof, style-pack, application,
-and exact-output QC requirements.
+or plan alone. The legacy `mimic` identifier does not authorize an exact-match
+claim: P6 remains 0/7, and any Palmier application is an isolated P5-blocked
+experiment. Follow the canonical workflow's evidence, disclosure, and
+exact-output QC requirements.

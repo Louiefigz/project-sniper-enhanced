@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/cut-repair-ripple-analysis-v1.schema.json",
+  "title": "CutRepairRippleAnalysisV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "operation",
+    "status",
+    "resolvedTarget",
+    "candidates",
+    "recommendedCandidate",
+    "rippleImpact",
+    "evidencePolicy",
+    "routeStatus",
+    "contextAuthorityHash",
+    "parentRevisionHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "operation": { "const": "cut.restoreSpeech" },
+    "status": { "const": "NON_RIPPLE_IMPOSSIBLE" },
+    "resolvedTarget": { "$ref": "#/$defs/resolvedTarget" },
+    "candidates": {
+      "type": "array",
+      "maxItems": 0
+    },
+    "recommendedCandidate": { "type": "null" },
+    "rippleImpact": {
+      "$ref": "cut-repair-ripple-impact-v1.schema.json"
+    },
+    "evidencePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["alignment", "operatorReport"],
+      "properties": {
+        "alignment": {
+          "const": "bounded-evidence-not-sole-audibility-proof"
+        },
+        "operatorReport": {
+          "const": "ground-truth-when-audition-disagrees"
+        }
+      }
+    },
+    "routeStatus": { "const": "analysis-only-no-mutation" },
+    "contextAuthorityHash": { "$ref": "#/$defs/sha256" },
+    "parentRevisionHash": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "stableId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"
+    },
+    "resolvedTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "sourceId",
+        "wordIds",
+        "occurrence",
+        "sourceSampleRange",
+        "transcriptTimingHash"
+      ],
+      "properties": {
+        "kind": { "const": "word-range" },
+        "sourceId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "wordIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/stableId" }
+        },
+        "occurrence": { "type": "integer", "minimum": 1 },
+        "sourceSampleRange": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["startSample", "endSampleExclusive"],
+          "properties": {
+            "startSample": { "type": "integer", "minimum": 0 },
+            "endSampleExclusive": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "transcriptTimingHash": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}

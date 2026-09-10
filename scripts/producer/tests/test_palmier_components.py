@@ -28,9 +28,11 @@ class ComponentInventoryTests(unittest.TestCase):
                 {0: os.path.join(tmp, "graphic.mov")})
         self.assertEqual(set(paths), {
             "graphics:0", "source:a", "source:a:transcript", "broll:used",
-            "music:selected", "captions:0:srtPath", "title:0:renderPath",
-            "transition:0:sfx",
+            "music:selected",
         })
+        self.assertFalse(
+            {"captions:0:srtPath", "title:0:renderPath", "transition:0:sfx"}
+            & set(paths))
         self.assertNotIn("broll:unused", paths)
         self.assertTrue(all(os.path.isabs(path) for path in paths.values()))
 

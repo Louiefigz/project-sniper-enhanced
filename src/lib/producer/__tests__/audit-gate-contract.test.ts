@@ -3,6 +3,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { runAuditGate, validAuditSummary } from "../../../app/api/_lib/audit-gate";
+import { audioAuditFixture } from "./audit-audio-fixture";
 
 const dir = mkdtempSync(path.join(os.tmpdir(), "sniper-audit-contract-"));
 
@@ -10,7 +11,7 @@ async function run(): Promise<void> {
   const report = path.join(dir, "audit_report.md");
   const machine = path.join(dir, "audit_report.json");
   writeFileSync(report, "report");
-  writeFileSync(machine, "{}");
+  writeFileSync(machine, JSON.stringify(audioAuditFixture()));
   assert.equal(validAuditSummary({
     status: "done", overall: "pass", failed: 0, report, machine,
   }), null);
@@ -24,6 +25,16 @@ async function run(): Promise<void> {
   assert.match(validAuditSummary({
     status: "done", overall: "pass", report, machine,
   })!, /failed-check count/);
+  assert.match(validAuditSummary({
+    status: "done", overall: "pass", failed: 0, report, machine,
+  }, "b".repeat(64))!, /expected candidate/);
+  assert.match(validAuditSummary({
+    status: "done", overall: "pass", failed: 0, report, machine,
+  }, null)!, /expected candidate/);
+  writeFileSync(machine, JSON.stringify({ overall: "pass", checks: [] }));
+  assert.match(validAuditSummary({
+    status: "done", overall: "pass", failed: 0, report, machine,
+  })!, /policy v2/);
 
   // A hung audit is SIGTERMed and reported as a failed audit, never left
   // running unbounded. Python interpreter startup always outlives a 1 ms

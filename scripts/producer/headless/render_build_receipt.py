@@ -15,7 +15,8 @@ from .durable_files import (
     read_private_file,
     write_all,
 )
-from .render_build import render_build_manifest_digest
+from .render_build_manifest_v2_semantics import parse_render_build_manifest_v2
+from .render_build_receipt_v2_semantics import parse_render_build_receipt_v2
 
 _DIGEST = re.compile(r"[0-9a-f]{64}")
 _MAX_RECEIPT_BYTES = 2 * 1024 * 1024
@@ -39,10 +40,20 @@ def _canonical(value: object) -> bytes:
 
 
 def _value(manifest: dict) -> dict:
-    if not isinstance(manifest, dict):
+    if type(manifest) is not dict:
         raise RuntimeError("render build manifest must be an object")
-    return {"buildDigest": render_build_manifest_digest(manifest),
-            "manifest": manifest, "schemaVersion": 1}
+    parsed = parse_render_build_manifest_v2(_canonical(manifest)[:-1])
+    return {"buildDigest": parsed.build_digest,
+            "manifest": manifest, "schemaVersion": 2}
+
+
+def encode_render_build_receipt(manifest: dict) -> bytes:
+    """Freeze and encode only a closed current V2 build declaration."""
+    value = _value(json.loads(_canonical(manifest)))
+    raw = _canonical(value)
+    if len(raw) > _MAX_RECEIPT_BYTES:
+        raise RuntimeError("render build receipt exceeds 2 MiB")
+    return raw
 
 
 def _path(attempt_root: str, digest: str) -> str:
@@ -73,11 +84,9 @@ def _write_build_once(builds_fd: int, name: str, raw: bytes) -> None:
 
 def store_render_build(attempt_root: str,
                        manifest: dict) -> RenderBuildLocator:
-    """Persist exact build rows before producing an overlay seal."""
-    value = _value(json.loads(_canonical(manifest)))
-    raw, digest = _canonical(value), value["buildDigest"]
-    if len(raw) > _MAX_RECEIPT_BYTES:
-        raise RuntimeError("render build receipt exceeds 2 MiB")
+    """Persist a closed current V2 build before producing an overlay seal."""
+    raw = encode_render_build_receipt(manifest)
+    digest = parse_render_build_receipt_v2(raw).build_digest
     with locked_private_dir(attempt_root, ".render-build.lock") as root_fd:
         work_fd = private_child_dir(root_fd, "work")
         builds_fd = private_child_dir(work_fd, "render-builds")
@@ -92,7 +101,7 @@ def store_render_build(attempt_root: str,
 
 def load_render_build(attempt_root: str,
                       locator: RenderBuildLocator) -> dict:
-    """Reload, canonicalize, and independently hash retained build evidence."""
+    """Reload closed current V2 evidence; historical V1 needs its own reader."""
     expected = _path(attempt_root, locator.build_digest)
     if locator.path != expected or os.path.realpath(locator.path) != locator.path:
         raise RuntimeError("render build receipt locator is invalid")
@@ -102,18 +111,7 @@ def load_render_build(attempt_root: str,
             directory_fd, os.path.basename(expected), _MAX_RECEIPT_BYTES)
     finally:
         os.close(directory_fd)
-    try:
-        value = json.loads(raw)
-    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise RuntimeError("render build receipt is invalid JSON") from exc
-    valid = (isinstance(value, dict)
-             and set(value) == {"buildDigest", "manifest", "schemaVersion"}
-             and type(value.get("schemaVersion")) is int
-             and value.get("schemaVersion") == 1
-             and value.get("buildDigest") == locator.build_digest
-             and isinstance(value.get("manifest"), dict)
-             and render_build_manifest_digest(value["manifest"])
-             == locator.build_digest and raw == _canonical(value))
-    if not valid:
+    receipt = parse_render_build_receipt_v2(raw)
+    if receipt.build_digest != locator.build_digest:
         raise RuntimeError("render build receipt identity is invalid")
-    return value["manifest"]
+    return json.loads(receipt.manifest.document_json)

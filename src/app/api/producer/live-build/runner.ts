@@ -6,16 +6,31 @@ import {
 } from "./authority";
 import {
   checkpointLiveBuildCandidate,
-  prepareLiveBuildCandidate,
+  observeLiveBuildCandidate,
 } from "./candidate";
+import {
+  prepareLiveBuildCandidateRuntime,
+  sameLiveBuildTimelineIdentity,
+} from "./candidate-runtime";
+import {
+  appendLiveBuildHead,
+  appendLiveBuildOperationEvent,
+  latestLiveBuildHead,
+  liveBuildJournalCounts,
+  operationsAfterHead,
+  pendingMutationIds,
+  type LiveBuildJournalLedger,
+} from "./journal";
 import type { LiveBuildPreflight } from "./preflight";
 import { buildLiveBuildPrompt } from "./prompt";
-import { isLiveBuildMutationTool, runLiveBuildProcess } from "./process";
+import { runLiveBuildProcess } from "./process";
 import {
-  appendLiveBuildJournal,
-  assertLiveBuildRequest,
+  pauseLiveBuildNoDelta,
+  pauseLiveBuildRuntimeViolation,
+} from "./reconciliation";
+import {
   patchLiveBuildState,
-  prepareLiveBuildState,
+  readLiveBuildState,
   type LiveBuildState,
 } from "./state";
 import type { LiveBuildProcessResult } from "./process";
@@ -23,12 +38,6 @@ import { runLiveBuildCandidateQc } from "../palmier/candidate-qc/runner";
 import type { PalmierOpEvent } from "@/lib/producer/palmier-op-event";
 
 type Send = (event: Record<string, unknown>) => void;
-
-function sameIdentity(left: TimelineIdentity, right: TimelineIdentity): boolean {
-  return left.projectId === right.projectId
-    && left.timelineId === right.timelineId
-    && left.fingerprint === right.fingerprint;
-}
 
 function readDirs(input: LiveBuildPreflight): string[] {
   return [...new Set([
@@ -39,16 +48,12 @@ function readDirs(input: LiveBuildPreflight): string[] {
   ])];
 }
 
-function parentIdentity(input: LiveBuildPreflight): TimelineIdentity {
-  return { projectId: input.projectId, timelineId: input.timelineId,
-    fingerprint: input.timelineFingerprint };
-}
-
 interface PreparedRuntime {
   preflight: LiveBuildPreflight;
   parent: TimelineIdentity;
   candidate: TimelineIdentity;
   state: LiveBuildState;
+  ledger: LiveBuildJournalLedger;
   sessionRecorded: boolean;
   args: string[];
 }
@@ -59,26 +64,19 @@ interface ExecutedRuntime {
   candidate: TimelineIdentity;
 }
 
+interface ClosedOperationJournal {
+  operationCount: number;
+  candidate: TimelineIdentity;
+}
+
 export function recordLiveBuildOperation(
   dir: string,
   state: LiveBuildState,
   event: PalmierOpEvent,
-  mutations: Set<string>,
+  ledger: LiveBuildJournalLedger,
 ): LiveBuildState {
-  if (event.event === "palmier_op" && event.tool
-      && isLiveBuildMutationTool(event.tool)) {
-    mutations.add(event.operationId);
-    return patchLiveBuildState(dir, {
-      operationsSeen: state.operationsSeen + 1,
-    });
-  }
-  if (event.event === "palmier_op_result"
-      && mutations.has(event.operationId) && event.status === "applied") {
-    return patchLiveBuildState(dir, {
-      operationsCompleted: state.operationsCompleted + 1,
-    });
-  }
-  return state;
+  appendLiveBuildOperationEvent(dir, ledger, event);
+  return patchLiveBuildState(dir, liveBuildJournalCounts(ledger));
 }
 
 async function prepareRuntime(
@@ -87,42 +85,25 @@ async function prepareRuntime(
   send: Send,
   signal?: AbortSignal,
 ): Promise<PreparedRuntime> {
-  const parent = parentIdentity(preflight);
-  assertLiveBuildRequest({
-    dir: preflight.dir, planHash: preflight.planHash,
-    doctrineHash: preflight.doctrineHash, projectId: preflight.projectId,
-    projectPath: preflight.projectPath, parentTimelineId: parent.timelineId,
-    parentFingerprint: parent.fingerprint,
-  }, resume);
   send({ event: "live_build_progress", step: "candidate",
     message: resume ? "Restoring the retained editable candidate." : "Forking the verified parent into a visible editable candidate." });
-  const prepared = await prepareLiveBuildCandidate(preflight, resume, signal);
-  if (!sameIdentity(prepared.parent, parent)) {
-    throw new Error("Palmier changed between live-build preflight and candidate fork.");
-  }
-  const state = prepareLiveBuildState({
-    dir: preflight.dir, planHash: preflight.planHash,
-    doctrineHash: preflight.doctrineHash, projectId: preflight.projectId,
-    projectPath: preflight.projectPath, parentTimelineId: parent.timelineId,
-    parentFingerprint: parent.fingerprint,
-    candidateTimelineId: prepared.candidate.timelineId,
-    candidateFingerprint: prepared.candidate.fingerprint,
-    priorSessionId: preflight.priorSessionId,
-  }, resume);
+  const prepared = await prepareLiveBuildCandidateRuntime(
+    preflight, resume, signal);
   const execution = { ...preflight, timelineId: prepared.candidate.timelineId,
     timelineFingerprint: prepared.candidate.fingerprint };
-  const prompt = buildLiveBuildPrompt(execution, resume);
+  const prompt = buildLiveBuildPrompt(
+    execution, resume, prepared.state.resumeAuthority);
+  const { state } = prepared;
   const args = buildLiveBuildArgs({ prompt, sessionId: state.sessionId,
     resume: state.sessionEstablished, readDirs: readDirs(preflight) });
   send({ event: "live_build_started", runId: state.runId,
     sessionId: state.sessionId, timelineId: prepared.candidate.timelineId,
     message: "Claude is applying the approved plan directly to the visible Palmier candidate." });
-  return { preflight, parent, candidate: prepared.candidate, state,
+  return { preflight, ...prepared,
     sessionRecorded: state.sessionEstablished, args };
 }
 
 function processCallbacks(runtime: PreparedRuntime, send: Send) {
-  const mutations = new Set<string>();
   return {
     onSession: () => {
       if (runtime.sessionRecorded) return;
@@ -132,10 +113,14 @@ function processCallbacks(runtime: PreparedRuntime, send: Send) {
       });
     },
     onEvent: (event: PalmierOpEvent) => {
-      appendLiveBuildJournal(runtime.preflight.dir, { ...event });
-      runtime.state = recordLiveBuildOperation(
-        runtime.preflight.dir, runtime.state, event, mutations,
-      );
+      try {
+        runtime.state = recordLiveBuildOperation(
+          runtime.preflight.dir, runtime.state, event, runtime.ledger,
+        );
+      } catch (error) {
+        pauseLiveBuildRuntimeViolation(
+          runtime.preflight.dir, runtime.state, error, [event.operationId]);
+      }
       send({ ...event });
     },
   };
@@ -168,6 +153,47 @@ function qcFailure(error: Error, runtime: PreparedRuntime) {
   };
 }
 
+async function closeOperationJournal(
+  runtime: PreparedRuntime,
+  result: LiveBuildProcessResult,
+  signal?: AbortSignal,
+): Promise<ClosedOperationJournal> {
+  const counts = liveBuildJournalCounts(runtime.ledger);
+  if (pendingMutationIds(runtime.ledger).length
+      || result.operationsSeen !== result.operationsCompleted) {
+    throw new Error(
+      "Palmier live build ended with an unresolved mutation lifecycle.");
+  }
+  const observed = await observeLiveBuildCandidate(runtime.preflight, signal);
+  if (!sameLiveBuildTimelineIdentity(observed.parent, runtime.parent)
+      || observed.candidate.projectId !== runtime.candidate.projectId
+      || observed.candidate.timelineId !== runtime.candidate.timelineId) {
+    throw new Error(
+      "Palmier live-build candidate identity changed before journal closure.");
+  }
+  const head = latestLiveBuildHead(runtime.ledger);
+  if (!head) throw new Error("Palmier live-build journal has no initial head.");
+  const applied = operationsAfterHead(runtime.ledger)
+    .filter((operation) => operation.status === "applied");
+  if (applied.length
+      && observed.candidate.fingerprint === head.fingerprint) {
+    pauseLiveBuildNoDelta(
+      runtime.preflight.dir, runtime.state,
+      observed.candidate.fingerprint,
+      applied.map((operation) => operation.operationId));
+  }
+  appendLiveBuildHead(
+    runtime.preflight.dir, runtime.ledger, observed.candidate.fingerprint);
+  runtime.state = patchLiveBuildState(runtime.preflight.dir, {
+    sessionEstablished: true,
+    latestFingerprint: observed.candidate.fingerprint,
+  });
+  return {
+    operationCount: counts.operationsCompleted,
+    candidate: observed.candidate,
+  };
+}
+
 async function executeCandidate(
   runtime: PreparedRuntime,
   send: Send,
@@ -177,16 +203,22 @@ async function executeCandidate(
     args: runtime.args, cwd: process.cwd(), expectedSessionId: runtime.state.sessionId,
     signal, ...processCallbacks(runtime, send),
   });
-  const operationCount = runtime.state.operationsCompleted;
-  runtime.state = patchLiveBuildState(runtime.preflight.dir, {
-      sessionEstablished: true,
-  });
+  const closed = await closeOperationJournal(runtime, result, signal);
+  const { operationCount } = closed;
   emitLatency(result, send);
   const capture = captureLiveBuildQcAuthority({ preflight: runtime.preflight,
-    parent: runtime.parent, sessionId: runtime.state.sessionId, operationCount });
+    parent: runtime.parent, sessionId: runtime.state.sessionId, operationCount,
+    candidateFingerprint: closed.candidate.fingerprint });
   const checkpoint = await checkpointLiveBuildCandidate(
     runtime.preflight, capture.authorityPath, signal,
+    closed.candidate.fingerprint,
   );
+  if (!sameLiveBuildTimelineIdentity(checkpoint.parent, runtime.parent)
+      || !sameLiveBuildTimelineIdentity(
+        checkpoint.candidate, closed.candidate)) {
+    throw new Error(
+      "Palmier candidate changed after live-build journal closure.");
+  }
   runtime.state = patchLiveBuildState(runtime.preflight.dir, {
     latestFingerprint: checkpoint.candidate.fingerprint,
   });
@@ -233,12 +265,15 @@ export async function runLiveBuild(
     return await approveCandidate(runtime, executed, send, signal);
   } catch (reason) {
     const error = reason instanceof Error ? reason : new Error(String(reason));
-    patchLiveBuildState(preflight.dir, {
-      status: phase === "qc" ? "qc_failed" : signal?.aborted ? "interrupted" : "failed",
-      error: error.message,
-      sessionEstablished: runtime.sessionRecorded,
-      ...(phase === "qc" ? { qcFailure: qcFailure(error, runtime) } : {}),
-    });
+    const retained = readLiveBuildState(preflight.dir);
+    if (retained?.status !== "reconciliation_required") {
+      patchLiveBuildState(preflight.dir, {
+        status: phase === "qc" ? "qc_failed" : signal?.aborted ? "interrupted" : "failed",
+        error: error.message,
+        sessionEstablished: runtime.sessionRecorded,
+        ...(phase === "qc" ? { qcFailure: qcFailure(error, runtime) } : {}),
+      });
+    }
     throw error;
   }
 }

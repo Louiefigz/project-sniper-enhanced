@@ -14,7 +14,10 @@ Keep as many projects as you like and switch between them freely. Run **one acti
 
 ## What do I need to run it?
 
-A Mac, Project Sniper installed, and Palmier Pro open for finishing. A few free local tools (for transcription and rendering) are set up once during install. Full setup steps are in [Getting started](getting-started.md).
+A Mac and Project Sniper installed. Palmier Pro is optional for finishing and
+does not need to stay open while Sniper renders. A few free local tools (for
+transcription and rendering) are set up once during install. Full setup steps
+are in [Getting started](getting-started.md).
 
 ## The edit stopped partway — did I lose it?
 
@@ -22,7 +25,10 @@ No. Edits keep running even if you reload the page or restart, and if one is int
 
 ## Can I change the edit after it's done?
 
-Yes — strike words to cut them, drag graphics, adjust audio, or just ask for changes in plain language. Re-rendering only rebuilds what changed, so it's fast.
+Yes — strike words to cut them, drag graphics, adjust audio, or ask for changes
+in plain language. Eligible bounded changes reuse unaffected work. A broader or
+unsupported change may require a larger rebuild or stop for approval; the
+receipt tells you which happened.
 
 ## It didn't do something I asked for.
 

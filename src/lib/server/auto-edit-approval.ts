@@ -2,6 +2,7 @@ import { existsSync, lstatSync, readFileSync, realpathSync } from "node:fs";
 import path from "node:path";
 import { fileSha256 } from "./auto-edit-hash";
 import { stableAuthorityHash } from "./auto-edit-authority-snapshot";
+import { audioAuditFailure } from "@/lib/producer/audit-audio-policy";
 
 export interface HashedArtifactRef {
   path: string;
@@ -251,8 +252,9 @@ function validSummary(producerDir: string, approval: ApprovalRecord): boolean {
     && Array.isArray(aggregate.materialIssues) && aggregate.materialIssues.length === 0;
 }
 
-function validAuditMachine(item: HashedArtifactRef): boolean {
+function validAuditMachine(item: HashedArtifactRef, expectedSha256: string): boolean {
   const machine = readJson(item.path);
+  if (audioAuditFailure(machine, expectedSha256)) return false;
   if (machine?.overall !== "pass" && machine?.overall !== "warn") return false;
   if (!Array.isArray(machine.checks)) return false;
   return !machine.checks.some((check) => recordValue(check, "status") === "fail");
@@ -276,7 +278,7 @@ export function approvalEvidenceValid(
       || record.audit.digest !== auditDigest(record.audit)) return false;
   const auditArtifacts = [record.audit.machine, record.audit.report, ...record.audit.frames];
   if (!auditArtifacts.every((item) => verifiedArtifact(producerDir, item))
-      || !validAuditMachine(record.audit.machine)) return false;
+      || !validAuditMachine(record.audit.machine, record.finalHash)) return false;
   if (record.planningReviews.length !== record.planningRoundsRequired
       || new Set(record.planningReviews.map((item) => item.round)).size !== record.planningReviews.length
       || !record.planningReviews.every((item) => validPlanningEvidence(producerDir, item, record))) return false;

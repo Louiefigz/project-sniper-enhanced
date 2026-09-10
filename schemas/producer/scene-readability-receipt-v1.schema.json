@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/scene-readability-receipt-v1.schema.json",
+  "title": "SceneReadabilityReceiptV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "passed",
+    "method",
+    "sourceSha256",
+    "sourceFps",
+    "frameRange",
+    "sampleFrames",
+    "samplePixelCount",
+    "textBoxPixels",
+    "textColor",
+    "backing",
+    "minimumContrast",
+    "requiredContrast",
+    "ffmpegSha256"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "passed": { "const": true },
+    "method": { "const": "actual-footage-box-worst-pixel-v1" },
+    "sourceSha256": { "$ref": "#/$defs/sha256" },
+    "sourceFps": { "$ref": "positive-rational-v1.schema.json" },
+    "frameRange": { "$ref": "#/$defs/frameRange" },
+    "sampleFrames": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 9,
+      "uniqueItems": true,
+      "items": { "type": "integer", "minimum": 0 }
+    },
+    "samplePixelCount": { "type": "integer", "minimum": 64 },
+    "textBoxPixels": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "type": "integer", "minimum": 0 }
+    },
+    "textColor": { "$ref": "#/$defs/color" },
+    "backing": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/backing" }
+      ]
+    },
+    "minimumContrast": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 21
+    },
+    "requiredContrast": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 21
+    },
+    "ffmpegSha256": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "color": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}$"
+    },
+    "frameRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startFrame", "endFrameExclusive"],
+      "properties": {
+        "startFrame": { "type": "integer", "minimum": 0 },
+        "endFrameExclusive": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "backing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["color", "opacity", "assetProofSha256"],
+      "properties": {
+        "color": { "$ref": "#/$defs/color" },
+        "opacity": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "assetProofSha256": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}

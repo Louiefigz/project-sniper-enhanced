@@ -8,11 +8,13 @@ import stat
 import subprocess
 import time
 from dataclasses import dataclass
+from headless.render_log_guard import RenderLogGuard, read_render_log, require_supported_cli
 
 _IMAGE_ID = re.compile(r"sha256:[0-9a-f]{64}")
 _USER_ID = re.compile(r"[1-9][0-9]*:[1-9][0-9]*")
 _APPROVAL = "render_image_approval.json"
 _ABORT_RECONCILE_SECONDS = 60.0
+_MAX_ABORT_RECONCILE_SECONDS = 10 * 60.0
 _ABORT_STABLE_SECONDS = 3.0
 _ABORT_POLL_SECONDS = 0.25
 
@@ -137,7 +139,11 @@ def _force_remove(runtime: DockerRuntime, config_dir: str, name: str) -> bool:
     return result.returncode == 0
 
 
-def _is_absent(runtime: DockerRuntime, config_dir: str, name: str) -> bool:
+def _is_absent(
+    runtime: DockerRuntime,
+    config_dir: str,
+    name: str,
+) -> bool | None:
     """Accept only Docker's exact canonical no-such-container response."""
     env = docker_env(config_dir)
     expected = f"Error response from daemon: No such container: {name}"
@@ -145,8 +151,8 @@ def _is_absent(runtime: DockerRuntime, config_dir: str, name: str) -> bool:
         inspect = subprocess.run(command(runtime, "container", "inspect", name),
                                  stdin=subprocess.DEVNULL, capture_output=True,
                                  text=True, env=env, timeout=15, check=False)
-    except subprocess.TimeoutExpired as exc:
-        raise RuntimeError("could not prove render container absence") from exc
+    except subprocess.TimeoutExpired:
+        return None
     if (inspect.returncode == 1 and inspect.stdout.strip() == "[]"
             and inspect.stderr.strip() == expected):
         return True
@@ -157,8 +163,8 @@ def _is_absent(runtime: DockerRuntime, config_dir: str, name: str) -> bool:
 
 def remove_container(runtime: DockerRuntime, config_dir: str, name: str) -> dict:
     """Force removal and fail unless the exact random container is absent."""
-    _force_remove(runtime, config_dir, name)
     for attempt in range(10):
+        _force_remove(runtime, config_dir, name)
         if _is_absent(runtime, config_dir, name):
             return {"containerRef": name, "canonicalAbsenceProved": True,
                     "method": "docker-force-remove-plus-exact-inspect-absence"}
@@ -177,14 +183,23 @@ def _absence_start(previous: float | None, appeared: bool,
 
 
 def reconcile_launch_abort(runtime: DockerRuntime, config_dir: str,
-                           name: str) -> None:
+                           name: str, timeout_seconds: float =
+                           _ABORT_RECONCILE_SECONDS) -> None:
     """Remove late creates until absence is continuous after client death."""
-    deadline = time.monotonic() + _ABORT_RECONCILE_SECONDS
+    valid_timeout = (
+        type(timeout_seconds) in (int, float)
+        and 1.0 <= timeout_seconds <= _MAX_ABORT_RECONCILE_SECONDS
+    )
+    if not valid_timeout:
+        raise RuntimeError("launch-abort reconciliation timeout is invalid")
+    deadline = time.monotonic() + timeout_seconds
     absent_since = None
     while time.monotonic() < deadline:
-        appeared = _force_remove(runtime, config_dir, name)
+        before_absent = _is_absent(runtime, config_dir, name)
+        _force_remove(runtime, config_dir, name)
         absent = _is_absent(runtime, config_dir, name)
-        absent_since = _absence_start(absent_since, appeared, absent)
+        # Successful rm is not appearance; only exact observations establish absence.
+        absent_since = _absence_start(absent_since, before_absent is not True, absent is True)
         if (absent_since is not None
                 and time.monotonic() - absent_since >= _ABORT_STABLE_SECONDS):
             remove_container(runtime, config_dir, name)
@@ -263,8 +278,11 @@ def wait_and_copy(runtime: DockerRuntime, config_dir: str,
     """Copy from live quota tmpfs only after the wrapper seals its status."""
     deadline = time.monotonic() + 600
     delay = 0.1
+    require_supported_cli(runtime.approval)
+    guard = RenderLogGuard()
     while time.monotonic() < deadline:
         status = _exec_cat(runtime, config_dir, name, "/output/status")
+        guard.observe(read_render_log(runtime, config_dir, name), time.monotonic())
         if status.returncode == 0:
             break
         if _state(runtime, config_dir, name) != "running":
@@ -278,4 +296,5 @@ def wait_and_copy(runtime: DockerRuntime, config_dir: str,
         log = _exec_tail(runtime, config_dir, name, "/output/render.log")
         tail = log.stdout.strip()[-240:] if log.returncode == 0 else "log unavailable"
         raise RuntimeError(f"networkless HyperFrames render exited {code}: {tail}")
+    guard.observe(read_render_log(runtime, config_dir, name), time.monotonic(), finished=True)
     _stream_output(runtime, config_dir, name, destination)

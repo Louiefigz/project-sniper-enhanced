@@ -22,10 +22,67 @@ import {
 } from "@/lib/server/producer-run-registry";
 import { snapshotPlan } from "../../_lib/plan-snapshots";
 import { retainedClaudeSessionId } from "./authoring-session";
-import { type PreparedRequest } from "./request";
+import { guardPendingCutApproval, type PreparedRequest } from "./request";
 import { RequestFailure } from "./request-failure";
 import { refitSavedPlanBeforeReview } from "./saved-plan-request";
 import { type AutoEditCtx } from "./stream";
+
+import {
+  guardPalmierCanonicalForAiEdit,
+  PalmierCanonicalError,
+} from "../ai-edit/palmier-canonical";
+import {
+  classifyPalmierWorkspace,
+  type PalmierWorkspaceClassification,
+} from "../ai-edit/palmier-native-stream";
+import { guardMp4LaunchAuthority } from "./mp4-launch-authority";
+import { resolvedAutoEditDeliveryPolicy } from
+  "@/lib/producer/auto-edit-delivery-policy";
+
+export interface PalmierLaunchDependencies {
+  classify: (dir: string) => PalmierWorkspaceClassification;
+  legacyGuard: (dir: string) => Promise<void>;
+}
+
+const PALMIER_LAUNCH_DEPENDENCIES: PalmierLaunchDependencies = {
+  classify: classifyPalmierWorkspace,
+  legacyGuard: guardPalmierCanonicalForAiEdit,
+};
+
+/** Let a managed Palmier run reconcile its own working head inside the worker.
+ *
+ * The plan-only guard intentionally rejects manual/promoted Palmier origins.
+ * Calling it before a Palmier-primary worker starts would prevent the native
+ * reconciler from adopting precisely the manual readback it is designed to
+ * edit. Invalid managed metadata still fails closed; projects without a
+ * managed workspace retain the legacy plan-first guard.
+ */
+export async function guardPalmierForAutoEditLaunch(
+  dir: string,
+  dependencies: PalmierLaunchDependencies = PALMIER_LAUNCH_DEPENDENCIES,
+): Promise<void> {
+  const workspace = dependencies.classify(dir);
+  if (workspace.state === "invalid") {
+    throw new PalmierCanonicalError(
+      `${workspace.error} Refusing to launch against an unprovable Palmier working head.`,
+      409,
+    );
+  }
+  if (workspace.state === "managed") return;
+  await dependencies.legacyGuard(dir);
+}
+
+/** New MP4 projects avoid Palmier; legacy heads require explicit migration safety. */
+export async function guardAutoEditDeliveryForLaunch(
+  ctx: AutoEditCtx,
+  dependencies: PalmierLaunchDependencies = PALMIER_LAUNCH_DEPENDENCIES,
+): Promise<void> {
+  if (resolvedAutoEditDeliveryPolicy(ctx) === "mp4-only") {
+    await guardMp4LaunchAuthority(ctx.dir, dependencies.legacyGuard);
+    return;
+  }
+  await guardPalmierForAutoEditLaunch(ctx.dir, dependencies);
+}
 
 export interface StartedRun {
   jobPath: string;
@@ -91,6 +148,7 @@ function resumeSource(ctx: AutoEditCtx): { job?: AutoEditJob; bootstrapPlanHash?
 }
 
 function inactiveDurableJob(ctx: AutoEditCtx): AutoEditJob | null {
+  guardPendingCutApproval(ctx.dir);
   const durable = recoverAutoEditJob(autoEditJobPath(ctx.dir));
   if (producerRunActive(ctx.dir) || durable?.status === "running") {
     throw new RequestFailure("Auto Edit is already running for this project.", 409);
@@ -167,17 +225,21 @@ interface WorkerLaunch {
   ctx: AutoEditCtx;
   pinnedCtx: AutoEditCtx;
   source: RunSource;
+  reviewSavedPlan: boolean;
   token: string;
   phase: AutoEditJob["phase"];
   message: string;
 }
 
 async function launchWorker(input: WorkerLaunch): Promise<void> {
-  const { ctx, pinnedCtx, source, token, phase, message } = input;
+  const {
+    ctx, pinnedCtx, source, reviewSavedPlan, token, phase, message,
+  } = input;
   let job: AutoEditJob | undefined;
   try {
     job = startAutoEditJob({ ctx: pinnedCtx, token, snapshots: source.snapshots,
-      resume: source.job, bootstrapPlanHash: source.bootstrapPlanHash });
+      resume: source.job, bootstrapPlanHash: source.bootstrapPlanHash,
+      reviewSavedPlan });
     beginProducerRunWithToken({ dir: ctx.dir, kind: "auto_edit", phase, message, token });
     const workerPid = await launchDetachedAutoEditWorker(autoEditJobPath(ctx.dir));
     dlog("producer:auto-edit", "detached worker launched", {
@@ -199,6 +261,10 @@ export async function startDetachedRun(request: PreparedRequest): Promise<Starte
   const source = await preparedRunSource(request, inactiveDurableJob(ctx));
   const token = newProducerRunToken();
   const pinnedCtx = pinnedRunContext(ctx, source, token);
-  await launchWorker({ ctx, pinnedCtx, source, token, ...runDescription(source, resume) });
+  await launchWorker({
+    ctx, pinnedCtx, source, token,
+    reviewSavedPlan: request.reviewSavedPlan === true,
+    ...runDescription(source, resume),
+  });
   return { jobPath: autoEditJobPath(ctx.dir), token };
 }

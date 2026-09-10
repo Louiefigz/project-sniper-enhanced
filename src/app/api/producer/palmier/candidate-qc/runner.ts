@@ -19,6 +19,9 @@ import {
   createReplacementCandidate,
   rejectFailedCandidate,
 } from "./repair";
+import { createPalmierNativeSagaBridge } from "./saga-bridge-runner";
+import { commitApprovedPalmierCandidateSync } from
+  "@/lib/server/producer-palmier-native-commit";
 
 const CLI_TIMEOUT_MS = 30 * 60 * 1000;
 const SHA256 = /^[0-9a-f]{64}$/;
@@ -253,7 +256,14 @@ export function promoteCandidate(
   dependencies: QcDependencies = {},
   signal?: AbortSignal,
 ): Promise<Record<string, unknown>> {
-  return (dependencies.cli ?? runCli)(dir, "promote", undefined, signal);
+  if (dependencies.cli) {
+    return dependencies.cli(dir, "promote", undefined, signal);
+  }
+  const context = authorityContext(dir);
+  const bridge = createPalmierNativeSagaBridge(
+    dir, context.cli, signal);
+  const outcome = commitApprovedPalmierCandidateSync(dir, bridge);
+  return Promise.resolve({ ...outcome });
 }
 
 export function parentDriftMessage(error: unknown): string {

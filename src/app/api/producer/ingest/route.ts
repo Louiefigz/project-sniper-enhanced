@@ -13,7 +13,7 @@ import { workspaceRoot } from "../../_lib/workspace";
 import { derror, dlog } from "@/lib/debug";
 import { reconcileIntentCapabilities } from "@/lib/producer/intent-capabilities";
 import { validateIntent, type ProjectIntent } from "@/lib/producer/intent-presets";
-import type { AssetManifest } from "@/lib/producer/types";
+import { requireSourceSetAdmission, type AssetManifest } from "@/lib/producer/types";
 import {
   discardFreshIngestTarget,
   prepareIngestTarget,
@@ -23,7 +23,7 @@ import {
   type IngestTarget,
   type SourceCopyProgress,
 } from "./target";
-export const maxDuration = 600;
+export const maxDuration = 1800;
 export const dynamic = "force-dynamic";
 const SCRIPT_PATH = path.join(SCRIPTS_DIR, "producer", "ingest.py");
 const MANIFEST_NAME = "asset_manifest.json";
@@ -61,7 +61,6 @@ interface StreamContext {
   live: LiveIngest;
   controller: ReadableStreamDefaultController<Uint8Array>;
 }
-
 function json(value: unknown, status: number): Response {
   return new Response(JSON.stringify(value), {
     status,
@@ -206,6 +205,7 @@ function runIngestProcess(args: string[], emit: Emitter, live: LiveIngest): Prom
 function emitManifest(target: IngestTarget, intent: ProjectIntent | undefined, emit: Emitter): boolean {
   const manifestPath = path.join(target.manifestDir, MANIFEST_NAME);
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as AssetManifest;
+  requireSourceSetAdmission(manifest);
   const requested = requestedIngestIntent(target, intent);
   const resolution = requested ? reconcileIntentCapabilities(requested, manifest) : undefined;
   const effective = recordIngested(target, resolution);

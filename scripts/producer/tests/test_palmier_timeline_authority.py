@@ -72,16 +72,34 @@ class TimelineAuthorityTests(unittest.TestCase):
         self.assertNotEqual(snapshot("project-1", offline).fingerprint,
                             snapshot("project-1", online).fingerprint)
 
-    def test_caption_detail_is_requested_and_large_group_fails_closed(self):
+    def test_incomplete_large_caption_group_fails_closed(self):
         timeline = _timeline()
         timeline["tracks"].append({
             "type": "text", "clips": [],
             "captionGroups": [{"captionGroupId": "captions", "clipCount": 201}],
         })
         client = TimelineClient(timeline)
-        found = read_active(client, "project-1")
-        self.assertFalse(found.coverage["complete"])
-        self.assertIn(("get_timeline", {"captionDetail": True}), client.calls)
+        with self.assertRaisesRegex(PalmierError, "omitted requested"):
+            read_active(client, "project-1")
+        self.assertTrue(any(args.get("captionDetail") is True
+                            for _tool, args in client.calls))
+
+    def test_caption_row_ids_are_copy_generated_semantic_identity(self):
+        original = _timeline()
+        original["tracks"].append({
+            "id": "caption-track", "type": "video", "clips": [],
+            "captionGroups": [{
+                "captionGroupId": "group-a", "clipCount": 1,
+                "clips": [["caption-a", 10, 20, "same words"]],
+            }],
+        })
+        copied = copy.deepcopy(original)
+        copied["id"], copied["name"] = "copy", "Copy"
+        copied["tracks"][1]["id"] = "caption-track-copy"
+        copied["tracks"][1]["captionGroups"][0]["captionGroupId"] = "group-copy"
+        copied["tracks"][1]["captionGroups"][0]["clips"][0][0] = "caption-copy"
+        self.assertEqual(snapshot("project-1", original).semantic_fingerprint,
+                         snapshot("project-1", copied).semantic_fingerprint)
 
     def test_wrong_active_project_and_stale_precondition_never_fork(self):
         with self.assertRaises(TimelineConflict):

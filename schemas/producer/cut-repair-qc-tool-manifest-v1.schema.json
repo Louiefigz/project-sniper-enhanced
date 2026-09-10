@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/cut-repair-qc-tool-manifest-v1.schema.json",
+  "title": "CutRepairQcToolManifestV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "ffmpeg",
+    "whisper",
+    "independentAligner",
+    "visualLipSyncOracle",
+    "authorityHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "cut-repair-qc-tool-manifest" },
+    "ffmpeg": { "$ref": "#/$defs/runtime" },
+    "whisper": { "$ref": "#/$defs/modelRuntime" },
+    "independentAligner": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/aligner" }
+      ]
+    },
+    "visualLipSyncOracle": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/visualOracle" }
+      ]
+    },
+    "authorityHash": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "modelRuntime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "modelPath", "modelSha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "modelPath": { "type": "string", "minLength": 1 },
+        "modelSha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "aligner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "runtimePath",
+        "runtimeSha256",
+        "implementationPath",
+        "implementationSha256",
+        "policyPath",
+        "policySha256"
+      ],
+      "properties": {
+        "protocol": { "const": "deterministic-source-waveform-v1" },
+        "runtimePath": { "type": "string", "minLength": 1 },
+        "runtimeSha256": { "$ref": "#/$defs/sha256" },
+        "implementationPath": { "type": "string", "minLength": 1 },
+        "implementationSha256": { "$ref": "#/$defs/sha256" },
+        "policyPath": { "type": "string", "minLength": 1 },
+        "policySha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "visualOracle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol",
+        "runtimePath",
+        "runtimeSha256",
+        "implementationPath",
+        "implementationSha256",
+        "implementationScope",
+        "implementationNonClaims",
+        "policyPath",
+        "policySha256",
+        "implementationClosureHash",
+        "implementationFiles"
+      ],
+      "properties": {
+        "protocol": {
+          "const": "deterministic-selected-source-av-offset-v1"
+        },
+        "runtimePath": { "type": "string", "minLength": 1 },
+        "runtimeSha256": { "$ref": "#/$defs/sha256" },
+        "implementationPath": { "type": "string", "minLength": 1 },
+        "implementationSha256": { "$ref": "#/$defs/sha256" },
+        "implementationScope": {
+          "const": "visual-choice-seam-repository-code-v1"
+        },
+        "implementationNonClaims": {
+          "type": "array",
+          "prefixItems": [
+            { "const": "audio-seam-measurement" },
+            {
+              "const": "candidate-qc-orchestration-storage-or-promotion"
+            },
+            { "const": "python-stdlib-os-dylibs" }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "policyPath": { "type": "string", "minLength": 1 },
+        "policySha256": { "$ref": "#/$defs/sha256" },
+        "implementationClosureHash": { "$ref": "#/$defs/sha256" },
+        "implementationFiles": {
+          "type": "array",
+          "minItems": 9,
+          "maxItems": 9,
+          "prefixItems": [
+            { "$ref": "#/$defs/visualController" },
+            { "$ref": "#/$defs/visualMedia" },
+            { "$ref": "#/$defs/visualReceipt" },
+            { "$ref": "#/$defs/visualTypes" },
+            { "$ref": "#/$defs/visualAuthority" },
+            { "$ref": "#/$defs/visualQcTypes" },
+            { "$ref": "#/$defs/visualQcAdapter" },
+            { "$ref": "#/$defs/visualQcSeam" },
+            { "$ref": "#/$defs/visualSeamContract" }
+          ],
+          "items": false
+        }
+      }
+    },
+    "visualFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "path", "sha256"],
+      "properties": {
+        "role": { "type": "string" },
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "visualController": {
+      "allOf": [
+        { "$ref": "#/$defs/visualFile" },
+        { "properties": { "role": { "const": "controller" } } }
+      ]
+    },
+    "visualMedia": {
+      "allOf": [
+        { "$ref": "#/$defs/visualFile" },
+        { "properties": { "role": { "const": "media-decoder" } } }
+      ]
+    },
+    "visualReceipt": {
+      "allOf": [
+        { "$ref": "#/$defs/visualFile" },
+        { "properties": { "role": { "const": "receipt-projector" } } }
+      ]
+    },
+    "visualTypes": {
+      "allOf": [
+        { "$ref": "#/$defs/visualFile" },
+        { "properties": { "role": { "const": "visual-value-types" } } }
+      ]
+    },
+    "visualAuthority": {
+      "allOf": [
+        { "$ref": "#/$defs/visualFile" },
+        { "properties": { "role": { "const": "authority-hashing" } } }
+      ]
+    },
+    "visualQcTypes": {
+      "allOf": [
+        { "$ref": "#/$defs/visualFile" },
+        {
+          "properties": {
+            "role": { "const": "candidate-qc-value-types" }
+          }
+        }
+      ]
+    },
+    "visualQcAdapter": {
+      "allOf": [
+        { "$ref": "#/$defs/visualFile" },
+        {
+          "properties": {
+            "role": { "const": "candidate-qc-visual-adapter" }
+          }
+        }
+      ]
+    },
+    "visualQcSeam": {
+      "allOf": [
+        { "$ref": "#/$defs/visualFile" },
+        {
+          "properties": {
+            "role": { "const": "candidate-qc-seam-projector" }
+          }
+        }
+      ]
+    },
+    "visualSeamContract": {
+      "allOf": [
+        { "$ref": "#/$defs/visualFile" },
+        { "properties": { "role": { "const": "visual-seam-contract" } } }
+      ]
+    }
+  }
+}

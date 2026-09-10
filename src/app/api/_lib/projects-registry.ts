@@ -1,6 +1,7 @@
 import fs from "fs";
 import os from "os";
 import path from "path";
+import { workspaceOverride } from "./workspace";
 
 // PROJECT BROWSER registry — a JSON file at ~/.project-sniper/projects.json
 // mapping render out-dirs to titles, so the producer page can list "Recent
@@ -24,13 +25,16 @@ export interface ProjectListing extends ProjectEntry {
   mtime: number | null; // dir mtime (ms) when it exists
 }
 
-const REGISTRY_DIR = path.join(os.homedir(), ".project-sniper");
-const REGISTRY = path.join(REGISTRY_DIR, "projects.json");
+function registryPath(): string {
+  const isolated = workspaceOverride();
+  return path.join(isolated ?? os.homedir(), ".project-sniper", "projects.json");
+}
 
 function readRegistry(): ProjectEntry[] {
-  if (!fs.existsSync(REGISTRY)) return [];
-  const parsed = JSON.parse(fs.readFileSync(REGISTRY, "utf-8")) as unknown;
-  if (!Array.isArray(parsed)) throw new Error(`${REGISTRY} is not a JSON array`);
+  const file = registryPath();
+  if (!fs.existsSync(file)) return [];
+  const parsed = JSON.parse(fs.readFileSync(file, "utf-8")) as unknown;
+  if (!Array.isArray(parsed)) throw new Error(`${file} is not a JSON array`);
   return parsed.filter(
     (e): e is ProjectEntry =>
       !!e && typeof e === "object" && typeof (e as ProjectEntry).dir === "string",
@@ -38,8 +42,9 @@ function readRegistry(): ProjectEntry[] {
 }
 
 function writeRegistry(entries: ProjectEntry[]): void {
-  fs.mkdirSync(REGISTRY_DIR, { recursive: true });
-  fs.writeFileSync(REGISTRY, JSON.stringify(entries, null, 1));
+  const file = registryPath();
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(entries, null, 1));
 }
 
 /** Upsert one entry (keyed by dir); bumps updatedAt so it sorts to the top. */

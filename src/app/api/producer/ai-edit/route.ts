@@ -1,210 +1,154 @@
 import { NextRequest } from "next/server";
-import { spawn } from "child_process";
 import { rmSync } from "fs";
-import { claudeProcessEnv } from "../../_lib/ai-provider";
-import { runCodex } from "../../_lib/codex-cli";
-import {
-  shouldDetachProcessGroup,
-  terminateProcessTree,
-  trackProcessTree,
-} from "../../_lib/child-process-lifecycle";
+import { randomUUID } from "node:crypto";
 import { dlog, derror } from "@/lib/debug";
-import { REPO_ROOT } from "./doctrine";
 import {
   beginSurgicalReview,
-  finalizeSurgicalEdit,
   rollbackSurgicalEdit,
   type FinalizeSurgicalEditInput,
 } from "./finalize";
 import { buildAiEditPrompt } from "./prompt";
 import { prepareSurgicalRequest, surgicalAuthorityFailure } from "./prepare";
 import { guardProjectMutation, mutationProjectRoot } from "../../_lib/project-mutation";
-import { planRefitEvent } from "../../_lib/plan-refit-transaction";
 import {
-  AI_EDIT_TIMEOUT_MS,
   buildAiEditInvocation,
   preparePlanForAi,
   type AiEditInvocation,
 } from "./execution";
 import { classifyPalmierWorkspace, maybePalmierNativeEdit } from "./palmier-native-stream";
+import { createAiEditStream } from "./edit-streams";
+import { localApiRejection } from "@/lib/server/local-request-policy";
+import { canonicalProducerDir } from "../../_lib/workspace";
+import {
+  CUT_REPAIR_ROUTE_BLOCKER,
+  isWordSafeCutRepairIntent,
+  parseCutRepairDirective,
+  type CutRepairDirectiveV1,
+} from "./cut-repair-route-policy";
+import {
+  cutRepairHeader,
+  cutRepairOperation,
+  runCutRepairMode,
+} from "./cut-repair-route-dispatch";
+import { lookupProducerManifest } from "@/lib/server/producer-manifest";
 
-export { buildAiEditPrompt } from "./prompt";
-export { buildAiEditInvocation, claudeAiEditArgs } from "./execution";
 export const maxDuration = 1800;
 export const dynamic = "force-dynamic";
 
-// Subscription-brain bridge. The legacy path keeps the local `claude` CLI;
-// local-safe mode uses Codex with a workspace-write sandbox scoped to the job.
-// Both edit only edit_plan.json; the user re-renders (assemble) to see the change.
-const CLAUDE_BIN = process.env.CLAUDE_BIN || "claude";
-
-type CodexInvocation = Extract<AiEditInvocation, { provider: "codex" }>;
-type ClaudeInvocation = Extract<AiEditInvocation, { provider: "legacy" }>;
-
-async function completeGovernedEdit(
-  input: FinalizeSurgicalEditInput,
-  send: (value: Record<string, unknown>) => void,
-): Promise<void> {
-  send({
-    event: "surgical_review_started",
-    lanes: input.scope.lanes,
-    message: "Writer finished; running stored-intent, transcript/cut, hook, claims, lane lint, and fresh craft review.",
+function localRejection(req: NextRequest): Response | null {
+  const rejected = localApiRejection({
+    method: req.method,
+    pathname: req.nextUrl.pathname,
+    protocol: req.nextUrl.protocol,
+    host: req.headers.get("host"),
+    origin: req.headers.get("origin"),
+    secFetchSite: req.headers.get("sec-fetch-site"),
+    contentType: req.headers.get("content-type"),
   });
-  const result = await finalizeSurgicalEdit(input);
-  if (result.refit) send(planRefitEvent(result.refit));
-  send({
-    event: "surgical_review",
+  return rejected ? json({ error: rejected.error }, rejected.status) : null;
+}
+
+function canonicalBody(value: unknown): Record<string, unknown> | Response {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return json({ error: "Request body must be a JSON object" }, 400);
+  }
+  const body = value as Record<string, unknown>;
+  try {
+    return { ...body, dir: canonicalProducerDir(body.dir) };
+  } catch (error) {
+    return json({ error: (error as Error).message }, 400);
+  }
+}
+
+function cutOnlyScope(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const lanes = (value as Record<string, unknown>).lanes;
+  return Array.isArray(lanes) && lanes.length === 1 && lanes[0] === "cuts";
+}
+
+function cutRepairResponse(
+  directive: CutRepairDirectiveV1,
+  analysis: Record<string, unknown>,
+): Response {
+  return new Response(JSON.stringify({
     ok: true,
-    lanes: input.scope.lanes,
-    changedFields: result.changedFields,
-    summary: result.review.summary,
-  });
-}
-
-function codexAiEditStream(
-  invocation: CodexInvocation,
-  finalizer: FinalizeSurgicalEditInput,
-  release: () => void,
-): ReadableStream {
-  const encoder = new TextEncoder();
-  const abort = new AbortController();
-  let cancelled = false;
-  return new ReadableStream({
-    start(controller) {
-      const send = (value: Record<string, unknown>) => {
-        try { controller.enqueue(encoder.encode(`data: ${JSON.stringify(value)}\n\n`)); } catch {}
-      };
-      const keepalive = setInterval(() => {
-        try { controller.enqueue(encoder.encode(`: keepalive\n\n`)); } catch {}
-      }, 10000);
-      runCodex({
-        ...invocation.options,
-        signal: abort.signal,
-        onEvent: (event) => send({ ...event, provider: "codex" }),
-      })
-        .then(async (result) => {
-          dlog("producer:ai-edit", "codex closed", { ms: result.ms });
-          await completeGovernedEdit(finalizer, send);
-          send({ event: "ai_done", provider: "codex", ms: result.ms });
-        })
-        .catch((error: unknown) => {
-          if (cancelled) return;
-          rollbackSurgicalEdit(finalizer);
-          derror("producer:ai-edit", "codex failed", error);
-          const detail = error instanceof Error ? error.message : String(error);
-          send({ event: "error", provider: "codex", message: `Governed edit rejected: ${detail}` });
-        })
-        .finally(() => {
-          clearInterval(keepalive);
-          release();
-          try { controller.close(); } catch {}
-        });
-    },
-    cancel() {
-      cancelled = true;
-      abort.abort();
-      try { rollbackSurgicalEdit(finalizer); } finally { release(); }
+    mutation: directive.mode !== "analyze",
+    analysis,
+  }), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "X-Sniper-Edit-Mode": cutRepairHeader(directive.mode),
     },
   });
 }
 
-function claudeAiEditStream(
-  invocation: ClaudeInvocation,
-  finalizer: FinalizeSurgicalEditInput,
-  release: () => void,
-): ReadableStream {
-  const encoder = new TextEncoder();
-  const skillsEnv = claudeProcessEnv();
-  let active: ReturnType<typeof spawn> | undefined;
-  let cancelled = false;
-  return new ReadableStream({
-    start(controller) {
-      const send = (line: string) => {
-        try { controller.enqueue(encoder.encode(`data: ${line}\n\n`)); } catch {}
-      };
-      const sendObject = (value: Record<string, unknown>) => send(JSON.stringify(value));
-      sendObject({ event: "ai_model_selected", provider: "legacy", model: invocation.model });
-      const proc = trackProcessTree(spawn(CLAUDE_BIN, invocation.args, {
-        cwd: REPO_ROOT,
-        env: skillsEnv,
-        detached: shouldDetachProcessGroup(),
-      }));
-      active = proc;
-      let buf = "";
-      let errTail = "";
-      let timedOut = false;
-      const keepalive = setInterval(() => {
-        try { controller.enqueue(encoder.encode(`: keepalive\n\n`)); } catch {}
-      }, 10000);
-      const timeout = setTimeout(() => {
-        timedOut = true;
-        terminateProcessTree(proc);
-      }, AI_EDIT_TIMEOUT_MS);
-      proc.stdout.on("data", (data: Buffer) => {
-        buf += data.toString();
-        const parts = buf.split("\n");
-        buf = parts.pop() || "";
-        for (const line of parts) if (line.trim()) send(line);
-      });
-      proc.stderr.on("data", (data: Buffer) => {
-        errTail = (errTail + data.toString()).slice(-800);
-      });
-      proc.on("close", async (code) => {
-        active = undefined;
-        clearTimeout(timeout);
-        if (cancelled) {
-          clearInterval(keepalive);
-          release();
-          return;
-        }
-        if (buf.trim()) send(buf);
-        dlog("producer:ai-edit", "claude closed", { code, model: invocation.model });
-        try {
-          if (timedOut) throw new Error(`Claude timed out after ${AI_EDIT_TIMEOUT_MS / 1000}s`);
-          if (code !== 0) throw new Error(`Claude exited ${code}. ${errTail.slice(-400)}`);
-          await completeGovernedEdit(finalizer, sendObject);
-          sendObject({ event: "ai_done", provider: "legacy", model: invocation.model });
-        } catch (error) {
-          rollbackSurgicalEdit(finalizer);
-          const detail = error instanceof Error ? error.message : String(error);
-          sendObject({
-            event: "error", provider: "legacy", model: invocation.model,
-            message: `Governed edit rejected: ${detail}`,
-          });
-        } finally {
-          clearInterval(keepalive);
-          release();
-          try { controller.close(); } catch {}
-        }
-      });
-      proc.on("error", (error) => {
-        active = undefined;
-        clearTimeout(timeout);
-        if (cancelled) {
-          clearInterval(keepalive);
-          release();
-          return;
-        }
-        derror("producer:ai-edit", "claude spawn failed", error);
-        rollbackSurgicalEdit(finalizer);
-        clearInterval(keepalive);
-        release();
-        sendObject({
-          event: "error", provider: "legacy", model: invocation.model, message: error.message,
-        });
-        try { controller.close(); } catch {}
-      });
-    },
-    cancel() {
-      cancelled = true;
-      if (active) terminateProcessTree(active);
-      try { rollbackSurgicalEdit(finalizer); } finally { release(); }
-    },
+async function handleCutRepair(
+  submitted: unknown,
+  directive: CutRepairDirectiveV1,
+): Promise<Response> {
+  const body = canonicalBody(submitted);
+  if (body instanceof Response) return body;
+  if (!cutOnlyScope(body.scope)) {
+    return json({
+      error: "cut.restoreSpeech requires scope.lanes=[\"cuts\"]",
+    }, 400);
+  }
+  const dir = body.dir as string;
+  const guarded = guardProjectMutation({
+    projectRoot: mutationProjectRoot(dir),
+    producerDir: dir,
+    operation: cutRepairOperation(directive.mode),
+    allowCutRepairRecovery:
+      directive.mode === "reopen"
+      || directive.mode === "execute"
+      || directive.mode === "review"
+      || directive.mode === "approve",
   });
+  if (guarded.response) return guarded.response;
+  try {
+    const manifest = lookupProducerManifest(dir);
+    if (!manifest.path) {
+      throw new Error(
+        `${manifest.error} — re-ingest or bind one manifest before repair`);
+    }
+    const analysis = await runCutRepairMode(
+      dir, manifest.path, directive);
+    return cutRepairResponse(directive, analysis);
+  } catch (error) {
+    return json({
+      error: `Cut repair request failed closed: ${(error as Error).message}`,
+      code: "CUT_REPAIR_EVIDENCE_REQUIRED",
+    }, 422);
+  } finally {
+    guarded.lease.release();
+  }
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json().catch(() => null);
+  const rejected = localRejection(req);
+  if (rejected) return rejected;
+  const submitted = await req.json().catch(() => null);
+  const submittedRow = submitted && typeof submitted === "object"
+    && !Array.isArray(submitted)
+    ? submitted as Record<string, unknown> : null;
+  let cutRepairDirective: CutRepairDirectiveV1 | null;
+  try {
+    cutRepairDirective = parseCutRepairDirective(submittedRow?.request);
+  } catch (error) {
+    return json({ error: (error as Error).message }, 400);
+  }
+  if (cutRepairDirective) {
+    return handleCutRepair(submitted, cutRepairDirective);
+  }
+  if (isWordSafeCutRepairIntent(submittedRow?.request)) {
+    return json({
+      error: CUT_REPAIR_ROUTE_BLOCKER,
+      code: "FIRST_CLASS_CUT_REPAIR_ROUTE_REQUIRED",
+    }, 409);
+  }
+  const body = canonicalBody(submitted);
+  if (body instanceof Response) return body;
   const native = await maybePalmierNativeEdit(body);
   if (native) return native;
   let prepared = prepareSurgicalRequest(body);
@@ -217,11 +161,21 @@ export async function POST(req: NextRequest) {
   if (guarded.response) return guarded.response;
   let released = false;
   let stagingDir: string | undefined;
-  const release = () => {
+  const release = (preserveStaging = false) => {
     if (released) return;
-    released = true;
-    if (stagingDir) rmSync(stagingDir, { recursive: true, force: true });
+    let cleanupFailure: unknown;
+    if (stagingDir && !preserveStaging) {
+      try {
+        rmSync(stagingDir, { recursive: true, force: true });
+      } catch (error) {
+        cleanupFailure = error;
+      }
+    }
     guarded.lease.release();
+    released = true;
+    if (cleanupFailure) {
+      derror("producer:ai-edit", "staging cleanup failed after lease release", cleanupFailure);
+    }
   };
   // Re-read under the lease so the model never starts from a pre-lock plan.
   prepared = prepareSurgicalRequest(body);
@@ -246,18 +200,20 @@ export async function POST(req: NextRequest) {
   }
   let candidate: ReturnType<typeof preparePlanForAi>;
   try {
-    candidate = preparePlanForAi(planPath, plan);
+    const captionInput = scope.lanes.includes("captions")
+      ? { request, manifestPath, transcriptsDir } : undefined;
+    candidate = preparePlanForAi(planPath, plan, captionInput);
     stagingDir = candidate.stagingDir;
   } catch (error) {
     release();
-    return json({ error: `Could not stage this AI edit: ${(error as Error).message}` }, 500);
+    const status = scope.lanes.includes("captions") ? 422 : 500;
+    return json({ error: `Could not stage this AI edit: ${(error as Error).message}` }, status);
   }
   let invocation: AiEditInvocation;
   try {
     const prompt = buildAiEditPrompt(candidate.candidatePath, request, canvas, provider, scope);
     invocation = buildAiEditInvocation(provider, prompt, dir, candidate.candidatePath);
   } catch (error) {
-    rmSync(candidate.candidatePath, { force: true });
     release();
     return json({ error: `AI provider configuration failed: ${(error as Error).message}` }, 500);
   }
@@ -271,8 +227,10 @@ export async function POST(req: NextRequest) {
     request,
     scope,
     originalPlanText: candidate.originalPlanText,
+    parentPlanHash: candidate.parentPlanHash,
+    requestId: randomUUID(),
+    submittedAt: new Date().toISOString(),
   };
-  beginSurgicalReview(dir, scope);
   dlog("producer:ai-edit", `spawn ${invocation.label.toLowerCase()}`, {
     dir,
     request,
@@ -281,13 +239,13 @@ export async function POST(req: NextRequest) {
   });
   let stream: ReadableStream;
   try {
-    stream = invocation.provider === "codex"
-      ? codexAiEditStream(invocation, finalizer, release)
-      : claudeAiEditStream(invocation, finalizer, release);
+    beginSurgicalReview(dir, scope);
+    stream = createAiEditStream(invocation, finalizer, release);
   } catch (error) {
-    rollbackSurgicalEdit(finalizer);
-    release();
-    return json({ error: `Could not start this AI edit: ${(error as Error).message}` }, 500);
+    let failure: unknown = error;
+    try { rollbackSurgicalEdit(finalizer); } catch (recovery) { failure = recovery; }
+    try { release(); } catch (cleanup) { failure = cleanup; }
+    return json({ error: `Could not start this AI edit: ${(failure as Error).message}` }, 500);
   }
 
   return new Response(stream, {

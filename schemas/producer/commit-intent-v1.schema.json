@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/commit-intent-v1.schema.json",
+  "title": "CommitIntentV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "idempotencyKey",
+    "requestDigest",
+    "expectedParentRevisionHash",
+    "childRevisionHash",
+    "state",
+    "artifactHashes",
+    "receiptHash",
+    "recordedAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "idempotencyKey": { "$ref": "#/$defs/uuid" },
+    "requestDigest": { "$ref": "#/$defs/sha256" },
+    "expectedParentRevisionHash": { "$ref": "#/$defs/sha256" },
+    "childRevisionHash": { "$ref": "#/$defs/sha256" },
+    "state": {
+      "enum": [
+        "PREPARING",
+        "CANDIDATES_PROVED",
+        "PALMIER_ACTIVATING",
+        "PALMIER_ACTIVE",
+        "LOCAL_COMMITTING",
+        "COMMITTED",
+        "ABORTED",
+        "RECONCILIATION_REQUIRED"
+      ]
+    },
+    "artifactHashes": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/stableId" },
+      "additionalProperties": { "$ref": "#/$defs/sha256" }
+    },
+    "receiptHash": {
+      "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }]
+    },
+    "recordedAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "failureReason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "state": { "const": "COMMITTED" } },
+        "required": ["state"]
+      },
+      "then": {
+        "properties": {
+          "receiptHash": { "$ref": "#/$defs/sha256" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "enum": ["ABORTED", "RECONCILIATION_REQUIRED"]
+          }
+        },
+        "required": ["state"]
+      },
+      "then": {
+        "required": ["failureReason"]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": { "not": { "const": "COMMITTED" } }
+        },
+        "required": ["state"]
+      },
+      "then": {
+        "properties": {
+          "receiptHash": { "type": "null" }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "stableId": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]+$"
+    },
+    "uuid": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

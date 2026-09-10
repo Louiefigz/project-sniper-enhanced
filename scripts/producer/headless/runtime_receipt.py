@@ -8,6 +8,7 @@ import stat
 import tempfile
 
 from headless.container_io import promote_regular, verify_snapshot_archive
+from headless.container_live_policy import HYPERFRAMES_VERSION_LABEL, output_tmpfs_size
 
 
 def _read_json(path: str) -> dict:
@@ -74,11 +75,12 @@ _REQUIRED_HOST = {"NetworkMode": "none", "ReadonlyRootfs": True,
                   "PublishAllPorts": False}
 
 
-def _host_shape(host: dict, user: str, source: str) -> dict:
+def _host_shape(host: dict, user: str, source: str, version: object) -> dict:
     uid, gid = user.split(":", 1)
+    quota = output_tmpfs_size(version)
     tmpfs = {
         "/scratch": f"rw,nosuid,nodev,noexec,size=2g,uid={uid},gid={gid},mode=0700",
-        "/output": f"rw,nosuid,nodev,noexec,size=512m,uid={uid},gid={gid},mode=0700"}
+        "/output": f"rw,nosuid,nodev,noexec,size={quota},uid={uid},gid={gid},mode=0700"}
     host_mounts = host.get("Mounts") or []
     valid_mount = (len(host_mounts) == 1
                    and host_mounts[0].get("Type") == "bind"
@@ -102,6 +104,7 @@ def _host_shape(host: dict, user: str, source: str) -> dict:
 def _container_shape(value: dict, image_id: str, image: dict,
                      snapshot_sha256: str) -> dict:
     config, host = value.get("Config") or {}, value.get("HostConfig") or {}
+    version = ((image.get("Config") or {}).get("Labels") or {}).get(HYPERFRAMES_VERSION_LABEL)
     state, network = value.get("State") or {}, value.get("NetworkSettings") or {}
     mounts = value.get("Mounts") or []
     networks = network.get("Networks") or {}
@@ -118,6 +121,7 @@ def _container_shape(value: dict, image_id: str, image: dict,
     bad_state = (state.get("Paused") or state.get("Restarting")
                  or state.get("OOMKilled") or state.get("Dead"))
     if (value.get("Image") != image_id or config.get("Image") != image_id
+            or (config.get("Labels") or {}).get(HYPERFRAMES_VERSION_LABEL) != version
             or config.get("Entrypoint") != (image.get("Config") or {}).get("Entrypoint")
             or config.get("WorkingDir") != "/scratch" or config.get("User") in ("", "0", "0:0")
             or not state.get("Running") or state.get("Status") != "running" or bad_state
@@ -128,7 +132,7 @@ def _container_shape(value: dict, image_id: str, image: dict,
             or network.get("Ports") not in (None, {}) or not valid_mount):
         raise RuntimeError("stored runtime receipt fails offline container policy")
     source = mounts[0].get("Source")
-    _host_shape(host, config["User"], source)
+    _host_shape(host, config["User"], source, version)
     return {"Id": value.get("Id"), "Image": image_id, "Cmd": config.get("Cmd"),
             "Env": config.get("Env"), "Labels": config.get("Labels"),
             "User": config.get("User"), "HostConfig": host,
@@ -203,6 +207,13 @@ def _validate(receipt: dict, media_sha256: str) -> None:
     _manifest(receipt)
 
 
+def _json_shape(value: object) -> object:
+    """The archive proof as JSON would carry it (tuples become lists), or None."""
+    if not isinstance(value, dict):
+        return None
+    return {**value, "members": list(value.get("members") or ())}
+
+
 def validate_runtime_attestation(receipt: dict, media_path: str,
                                  media_sha256: str,
                                  expected_image_id: str) -> None:
@@ -210,11 +221,10 @@ def validate_runtime_attestation(receipt: dict, media_path: str,
     if not isinstance(receipt, dict) or receipt.get("imageId") != expected_image_id:
         raise RuntimeError("runtime receipt image is not controller-approved")
     _validate(receipt, media_sha256)
-    retained = verify_snapshot_archive(
+    retained = _json_shape(verify_snapshot_archive(
         media_path + ".input.tar", receipt["snapshotSha256"],
-        tuple(receipt["snapshotManifest"]))
-    retained = {**retained, "members": list(retained["members"])}
-    if receipt.get("retainedInputArchive") != retained:
+        tuple(receipt["snapshotManifest"])))
+    if _json_shape(receipt.get("retainedInputArchive")) != retained:
         raise RuntimeError("runtime receipt retained archive proof is inconsistent")
 
 
@@ -223,9 +233,12 @@ def bind_runtime_receipt(media_path: str, proof: dict) -> dict:
     receipt = _read_json(media_path + ".runtime.json")
     media_sha256 = str((proof.get("asset") or {}).get("sha256", ""))
     _validate(receipt, media_sha256)
-    receipt["retainedInputArchive"] = verify_snapshot_archive(
+    # JSON shape in memory too: the opening worker validates this bound proof
+    # BEFORE any JSON round trip, and a tuple of members must not read as a
+    # different archive than the list the sidecar carries (run #13, 2026-09-06).
+    receipt["retainedInputArchive"] = _json_shape(verify_snapshot_archive(
         media_path + ".input.tar", receipt["snapshotSha256"],
-        tuple(receipt["snapshotManifest"]))
+        tuple(receipt["snapshotManifest"])))
     bound = {**proof, "runtimeAttestation": receipt}
     sidecar = bound.get("sidecar")
     if sidecar != media_path + ".proof.json":
@@ -234,3 +247,44 @@ def bind_runtime_receipt(media_path: str, proof: dict) -> dict:
     os.unlink(sidecar)
     _write_new_json(sidecar, disk_proof)
     return bound
+
+def render_cache_identity(pipeline_root: str) -> bytes:
+    """Bind cache authority to every host policy and proof executable."""
+    from headless import container_renderer as adapter
+    runtime = adapter.required_runtime()
+    policy_dir = os.path.dirname(adapter.__file__)
+    files = {
+        "adapter": adapter.__file__,
+        "ioPolicy": os.path.join(policy_dir, "container_io.py"),
+        "livePolicy": os.path.join(policy_dir, "container_live_policy.py"),
+        "dockerIdentityPolicy": os.path.join(policy_dir, "docker_identity.py"),
+        "networkProbePolicy": os.path.join(policy_dir, "network_probe.py"),
+        "imageApproval": os.path.join(policy_dir, "render_image_approval.json"),
+        "imagePolicy": os.path.join(policy_dir, "container_policy.py"),
+        "renderLogHealthPolicy": os.path.join(policy_dir, "render_log_guard.py"),
+        "docker": runtime.docker,
+    }
+    proof_tools = {}
+    for label, env_key in (("ffmpeg", "SNIPER_PROOF_FFMPEG_PATH"),
+                           ("ffprobe", "SNIPER_PROOF_FFPROBE_PATH")):
+        path = os.path.realpath(os.environ.get(env_key, ""))
+        if not path or not os.path.isfile(path) or not os.access(path, os.X_OK):
+            raise RuntimeError(f"{env_key} is required for container cache identity")
+        proof_tools[label] = {"path": path, "sha256": adapter.file_sha256(path)}
+    with tempfile.TemporaryDirectory(prefix=".docker-identity-") as config_dir:
+        os.chmod(config_dir, 0o700)
+        daemon = adapter.daemon_identity(runtime, config_dir)
+    value = {"digests": {key: adapter.file_sha256(path) for key, path in files.items()},
+             "dockerRuntime": daemon,
+             "environment": adapter._container_env(adapter.SealedInput("", "0" * 64, ())),
+             "imageId": runtime.image_id, "policy": adapter.RENDER_POLICY_VERSION,
+             "proofTools": proof_tools, "userId": runtime.user_id}
+    return json.dumps(value, ensure_ascii=True, separators=(",", ":"),
+                      sort_keys=True).encode("utf-8")
+
+def parse_container_id(stdout: str) -> str:
+    """Require exactly one canonical container ID from detached Docker stdout."""
+    value = stdout.strip()
+    if not _SHA256.fullmatch(value):
+        raise RuntimeError("detached Docker launch returned an invalid container ID")
+    return value

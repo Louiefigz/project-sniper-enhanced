@@ -72,7 +72,7 @@ def _container(image_id: str, snapshot: str, container_name: str) -> dict:
         "Ulimits": [{"Name": "nofile", "Hard": 4096, "Soft": 4096}],
         "LogConfig": {"Type": "none"}, "RestartPolicy": {"Name": "no"},
         "Tmpfs": {"/scratch": "rw,nosuid,nodev,noexec,size=2g,uid=501,gid=20,mode=0700",
-                  "/output": "rw,nosuid,nodev,noexec,size=512m,uid=501,gid=20,mode=0700"},
+                  "/output": "rw,nosuid,nodev,noexec,size=1g,uid=501,gid=20,mode=0700"},
         "Mounts": [{"Type": "bind", "Source": "/sealed.tar",
                     "Target": "/request/render-input.tar", "ReadOnly": True}],
     }

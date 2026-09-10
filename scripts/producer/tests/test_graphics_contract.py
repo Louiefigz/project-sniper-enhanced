@@ -44,6 +44,20 @@ class StatementCardContractTests(unittest.TestCase):
                            "statements": "Ignored copy"},
                           "classic does not read spec.statements")
 
+    def test_classic_rejects_populated_statement_lands(self) -> None:
+        self.assert_error({"variant": "classic", "text": "Real copy",
+                           "statementLands": 2.1},
+                          "classic does not read spec.statementLands")
+
+    def test_classic_accepts_measured_empty_statement_defaults(self) -> None:
+        """The measured catalog defaults these to "" and compilers must emit
+        every declared default key; a blank drops no planned content."""
+        entry = _entry({"variant": "classic", "text": "Real copy",
+                        "headlineLines": "", "statements": "",
+                        "statementLands": ""})
+        self.assertEqual(tc.entry_errors(entry), [])
+        self.assertEqual(tc.planned_copy(entry), ["Real copy"])
+
     def test_nateherk_statement_sequence_passes(self) -> None:
         entry = _entry({"variant": "nateherk",
                         "statements": "FIRST CLAIM|SECOND CLAIM",

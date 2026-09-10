@@ -9,7 +9,9 @@ import {
   type GateBundleInput,
   type PlanningGateCommand,
   type PlanningGateRunner,
+  type PlanningGateRunOptions,
 } from "../../../app/api/producer/auto-edit/planning-gates";
+import { PLANNING_GATE_TIMEOUT_MS, planningGateTimeoutMs } from "@/app/api/producer/auto-edit/planning-gate-runner";
 
 assert.deepEqual(gateBundleOperatorIntent("produced", {
   mode: "longform",
@@ -66,6 +68,9 @@ assert.deepEqual(baseCommands[1].args, [
 assert.deepEqual(transcriptCutCommand(baseInput, "previsual").args, [
   baseInput.planPath, baseInput.transcriptsDir, baseInput.manifestPath, "--previsual",
 ]);
+assert.deepEqual(transcriptCutCommand(baseInput, "saved-plan").args, [
+  baseInput.planPath, baseInput.transcriptsDir, baseInput.manifestPath,
+], "saved full plans validate exact cut authority without the cut-writer lane restriction");
 assert.throws(
   () => planningGateCommands({ ...baseInput, cutApprovalPath: "" }),
   /require cut approval receipt/,
@@ -116,7 +121,7 @@ assert.equal(referenceCommand.gate, "reference_lint");
 assert.deepEqual(referenceCommand.args.slice(-2), ["--target-style", "caleb"]);
 
 function jsonResult(value: unknown, exit = 0) {
-  return { stdout: JSON.stringify(value), stderr: "", exit };
+  return { stdout: JSON.stringify(value), stderr: "", exit, processGroupStopped: true };
 }
 
 const invalid = parsePlanningGateVerdict(
@@ -175,6 +180,20 @@ async function main(): Promise<void> {
   ]);
   assert.equal(bundle.gates.hookContract.scope, "produced");
   assert.deepEqual(bundle.gates.referenceLint?.metrics, { cutsPerMin: 8 });
+  // The caller's remaining budget and per-gate owned environment reach EVERY gate spawn; the runner's own ceiling still caps.
+  const seenOptions: Array<[string, PlanningGateRunOptions | undefined]> = [];
+  const optionRunner: PlanningGateRunner = async (command, options) => { seenOptions.push([command.gate, options]); return jsonResult(fixtureFor(command)); };
+  const bounded = await runPlanningGateBundle(referenceInput, { run: optionRunner, timeoutMs: 1234,
+    env: (gate) => ({ SNIPER_RENDER_CONTAINER_NAME: `sniper-readiness-TEST-${gate}` }) });
+  assert.equal(bounded.ok, true); assert.equal(seenOptions.length, 9);
+  for (const [gate, options] of seenOptions) {
+    assert.ok(options?.timeoutMs && options.timeoutMs > 0 && options.timeoutMs <= 1234);
+    assert.deepEqual(options?.env, { SNIPER_RENDER_CONTAINER_NAME: `sniper-readiness-TEST-${gate}` });
+  }
+  assert.equal(planningGateTimeoutMs(undefined), PLANNING_GATE_TIMEOUT_MS);
+  assert.equal(planningGateTimeoutMs(1234.9), 1234); assert.equal(planningGateTimeoutMs(-5), 1);
+  assert.equal(planningGateTimeoutMs(PLANNING_GATE_TIMEOUT_MS * 4), PLANNING_GATE_TIMEOUT_MS);
+  assert.throws(() => planningGateTimeoutMs(Number.NaN));
   assert.deepEqual(bundle.warnings, [{ gate: "hook_contract", message: "soft hook note" }]);
   assert.equal(planningGateBundleEvent(bundle).event, "planning_gate_bundle");
 

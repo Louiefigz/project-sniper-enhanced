@@ -7,23 +7,14 @@ import os
 import tempfile
 from datetime import datetime, timezone
 
+from cross_runtime_canonical_json import canonical_compact_json
+
 RECEIPT_NAME = ".sniper-plan-refit.json"
 PENDING_NAME = ".sniper-plan-refit.pending.json"
 
 
-def _stable(value):
-    if isinstance(value, list):
-        return [_stable(item) for item in value]
-    if isinstance(value, dict):
-        return {key: _stable(value[key]) for key in sorted(value)}
-    if isinstance(value, float) and value.is_integer():
-        return int(value)
-    return value
-
-
 def _canonical(value) -> str:
-    return json.dumps(_stable(value), sort_keys=True, separators=(",", ":"),
-                      ensure_ascii=False, allow_nan=False)
+    return canonical_compact_json(value)
 
 
 def _hash_value(value) -> str:

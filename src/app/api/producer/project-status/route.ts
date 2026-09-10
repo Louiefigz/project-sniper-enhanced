@@ -1,23 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { findProjectRoot, readProjectJson, type ProjectJson } from "../../_lib/workspace";
-import {
-  previewAuthorityInvalidated,
-  readApproval,
-} from "@/lib/server/auto-edit-quality-artifacts";
-import { autoEditAuthoritySnapshot } from "@/lib/server/auto-edit-authority-snapshot";
-import {
-  qualityPolicyRequirement,
-  readQualityPolicyMarker,
-} from "@/lib/server/auto-edit-quality-policy";
+import { findProjectRoot, readProjectJson } from "../../_lib/workspace";
 import { producerRun } from "@/lib/server/producer-run-registry";
-import { reconcileIntentCapabilities } from "@/lib/producer/intent-capabilities";
-import type { ProjectIntent } from "@/lib/producer/intent-presets";
-import type { AssetManifest } from "@/lib/producer/types";
 import { lookupProducerManifest } from "@/lib/server/producer-manifest";
 import { currentPlanRefitReceipt } from "../../_lib/plan-refit-transaction";
 import { projectPalmierState } from "@/lib/server/project-palmier-state";
+import { projectRunTimings } from "@/lib/server/stage-timing-summary";
+
+import { approvedFinal, projectedIntentStatus } from "@/lib/server/project-status-projection";
 
 export const dynamic = "force-dynamic";
 
@@ -56,38 +47,6 @@ function transcribed(manifestPath: string): boolean {
   });
 }
 
-interface IntentStatus {
-  intent: ProjectIntent | null;
-  requestedIntent: ProjectIntent | null;
-  intentDecisions: NonNullable<ProjectJson["intentDecisions"]>;
-}
-
-/** Preview a legacy capability migration for the card; GET never writes project.json. */
-export function projectedIntentStatus(
-  project: ProjectJson | null,
-  manifestPath: string | null,
-): IntentStatus {
-  const stored = {
-    intent: project?.resolvedIntent ?? project?.intent ?? null,
-    requestedIntent: project?.requestedIntent ?? project?.intent ?? null,
-    intentDecisions: project?.intentDecisions ?? [],
-  };
-  if (!project || !manifestPath || !stored.requestedIntent) {
-    return stored;
-  }
-  try {
-    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as AssetManifest;
-    const resolution = reconcileIntentCapabilities(stored.requestedIntent, manifest);
-    return {
-      intent: resolution.resolvedIntent ?? null,
-      requestedIntent: resolution.requestedIntent,
-      intentDecisions: resolution.decisions,
-    };
-  } catch {
-    return stored;
-  }
-}
-
 function listSegments(root: string | null): { name: string; path: string }[] {
   if (!root) return [];
   const dir = path.join(root, "segments");
@@ -107,25 +66,6 @@ function listClipperFiles(root: string | null): { name: string; path: string }[]
     .filter((name) => name.toLowerCase().endsWith(".fcpxml"))
     .sort()
     .map((name) => ({ name, path: path.join(dir, name) }));
-}
-
-export function approvedFinal(producerDir: string): boolean {
-  if (!fs.existsSync(path.join(producerDir, "final.mp4"))) return false;
-  if (previewAuthorityInvalidated(producerDir)) return false;
-  const policy = qualityPolicyRequirement(producerDir);
-  if (policy.legacy) return true;
-  if (!policy.valid) return false;
-  try {
-    const marker = readQualityPolicyMarker(producerDir);
-    const approval = readApproval(producerDir);
-    if (marker?.mode !== "managed" || marker.ctx.dir !== producerDir || !approval) return false;
-    const authority = autoEditAuthoritySnapshot(marker.ctx);
-    return approval.authorityDigest === authority.digest
-      && approval.planHash === authority.planHash
-      && approval.manifestHash === authority.manifestHash;
-  } catch {
-    return false;
-  }
 }
 
 export async function GET(req: NextRequest) {
@@ -182,6 +122,7 @@ export async function GET(req: NextRequest) {
         path.join(producerDir, "edit_plan.json"),
       ),
       run,
+      timing: projectRunTimings(producerDir),
     });
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });

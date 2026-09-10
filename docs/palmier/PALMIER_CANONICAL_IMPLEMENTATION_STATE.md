@@ -1,10 +1,13 @@
 # Palmier-canonical implementation state
 
-**Audit date:** 2026-07-12  
-**Palmier inspected:** Palmier Pro 0.6.3 (build 64)  
-**Evidence:** current repository plus a read-only Palmier MCP handshake and
-tool-schema inspection. No Palmier mutation, model edit, render, or user-project
-write was used for this audit.
+**Palmier surface audit:** 2026-07-12, Palmier Pro 0.6.3 (build 64)
+
+**Implementation status updated:** 2026-07-30
+
+**Evidence:** current repository plus the original read-only Palmier MCP
+handshake and tool-schema inspection. The implementation update adds local and
+offline contract evidence only. No new connected Palmier mutation, model edit,
+render, or user-project write was used to qualify the updated claims.
 
 ## Product invariant
 
@@ -69,7 +72,43 @@ The current verified handoff can:
 - create a non-authoritative, source-only managed working view after ingest.
 
 That mirror remains a useful bootstrap. The native candidate path now starts a
-Palmier-canonical AI edit, but delivery promotion is not connected yet.
+Palmier-canonical AI edit, and the local promotion protocol is wired. It has not
+passed a representative connected short/long delivery cohort.
+
+The current tree also contains these local hybrid-delivery prerequisites:
+
+- a strict, fsynced live-build operation journal with stable operation IDs,
+  canonical tool/input hashes, explicit mutation classification, controller
+  readback heads, a replay fence, and fail-closed resume reconciliation;
+- immutable, content-addressed Desktop timeline snapshots captured before each
+  mutation so recovery does not mistake a mutable candidate for its before
+  state;
+- an Exact Master worklist that imports one dedicated linked A/V pair and
+  requires complete readback proving its exact media/window/canvas identity,
+  hidden and sync-locked video, and muted and sync-locked audio;
+- full-stream editable parity in native and Desktop deterministic QC, including
+  frame/timing/SSIM and decoded-audio metrics plus exact hash-bound approvals for
+  every accepted approximation; and
+- a governed one-scene Desktop revision that imports and replaces exactly one
+  bound clip and rejects any unrelated readback change.
+
+Those mechanisms are production-shaped local contracts, not connected-service
+qualification. Exact Master currently admits only projects whose Palmier
+project-rate scalar is an exact positive integer; fractional rates fail closed
+because the inspected readback has no exact rational project-rate field.
+Caption detail is now read through bounded recursive frame windows: the reader
+proves a gap-free `[0,totalFrames)` partition, deduplicates identical
+boundary-spanning rows, checks timeline/track/group identity, closes with a
+compact drift read, and requires every group count exactly. This is locally
+adversarial-tested but not yet connected-cohort evidence. The local Desktop
+compiler now makes `mastered-stereo` production-reachable: it derives a
+hash-bound PCM WAV from the trusted approved final, imports and places one
+full-length standalone route on a clean dedicated audio track, derives exact
+mute/unmute work from fresh readback, and persists authority only after the
+complete routing delta is proved. The separate Exact Master remains a hidden,
+muted, locked full A/V reference. This path is locally adversarial-tested, not
+yet connected-cohort evidence. `editable-stems` remains blocked because
+Palmier readback lacks stable stem-role/output-bus identity.
 
 ### Native adapter coverage
 
@@ -88,12 +127,13 @@ fresh doctrine-aware critic, and execute into a copied candidate timeline.
 Unsupported asset-generation lanes fail closed without falling back to the old
 plan or changing the working timeline.
 
-## Connected native candidate foundation
+## Native candidate implementation foundation
 
 The Ask-AI controller is now wired to these low-level seams:
 
 - `palmier.timeline-authority.json` snapshot/fingerprint support reads the
-  active managed project with `captionDetail: true`, records a full and a
+  active managed project compactly, adds bounded `captionDetail: true` frame
+  windows when caption groups exist, records a full and a
   copy-insensitive semantic hash, and classifies project/timeline/content drift.
 - `fork_candidate` checks the saved baseline, calls
   `create_timeline({name, from: timelineId})`, re-reads the new active timeline,
@@ -113,10 +153,14 @@ The Ask-AI controller is now wired to these low-level seams:
   and QC artifacts can be reused by the canonical controller.
 
 This foundation now executes a requested supported AI delta and resumes from a
-manual Palmier baseline. It deliberately does **not** yet approve or promote the
-candidate. Native candidate export, deterministic/rendered QC, compare-and-swap
-promotion, and durable native resume are still required before this becomes a
-complete Palmier-canonical delivery loop.
+manual Palmier baseline. The current local protocol also exports the explicit
+candidate, runs deterministic/rendered QC, guards promotion through expected
+parent and exact reserved-child state, and durably reconciles restart state.
+Those are implementation prerequisites, not proof of a complete connected
+Palmier-canonical delivery loop. No representative connected short/long cohort
+retains complete paged readback, exact-timeline export, audio-route authority,
+Exact Master readback at every released rate, editable parity, one-scene repair,
+disconnect recovery, and manual-edit preservation.
 
 ## Verified Palmier MCP surface
 
@@ -177,7 +221,8 @@ complete normalized readback as `workingHeadTimelineId`. Do not call it approved
 On project open, Ask AI, render/QC, and export:
 
 1. verify the active project id;
-2. read `get_timeline(captionDetail: true)`;
+2. read the compact timeline and any required bounded
+   `get_timeline(captionDetail: true,startFrame,endFrame)` windows;
 3. compare id and fingerprint to the saved working head;
 4. if Palmier changed, save that readback as the new working head and invalidate
    the prior approval before doing anything else.
@@ -228,30 +273,38 @@ head with its export/QC proof. The old timeline remains intact as history.
 
 ## Remaining end-to-end work
 
-1. Split the authority record into durable working-head, approved-head, and
-   pending-candidate records; do not overwrite the canonical baseline merely by
-   forking a candidate.
-2. Page caption-detail readback instead of permanently blocking groups above
-   Palmier's 200-row detail cap. Define and test which omitted/default fields are
+1. Run representative connected short and long projects through the current
+   expected-parent/reserved-child promotion protocol and retain complete
+   operation-ledger, working-head, approved-head, export, QC, and readback
+   evidence with zero unexplained mutations.
+2. Qualify the bounded caption-detail frame-window reader against connected
+   short and long timelines, including groups above Palmier's 200-row detail
+   cap. Define and test which omitted/default fields are
    normalized into the fingerprint.
-3. Extend `PalmierClient` to retain image/content blocks from
+3. Add an exact rational project-rate field or equivalent connected proof before
+   releasing Exact Master at fractional rates. Keep the current integer-only
+   admission fail-closed.
+4. Make one audio route production-reachable from the immutable worklist. Prove
+   mastered stereo end to end, then add stable stem-role/output-bus readback
+   before permitting editable-stems authority. One encoded export stream is not
+   timeline audio authority.
+5. Retain connected full-stream editable-parity/approval evidence and a
+   one-scene replacement that proves every unrelated clip and the ready Exact
+   Master reference remain exact.
+6. Run a connected fault cohort that disconnects at every mutation boundary and
+   proves apply-before-disconnect, no blind replay, and preservation, adoption,
+   or explicit invalidation of a real manual edit.
+7. Extend `PalmierClient` to retain image/content blocks from
    `inspect_timeline`; it currently concatenates text only.
-4. Extend the connected typed mutation-plan validator/executor as additional
+8. Extend the connected typed mutation-plan validator/executor as additional
    Palmier lanes earn deterministic adapters; unsupported lanes stay fail-closed.
-5. Extend the connected planner + fresh critic into a bounded candidate repair
+9. Extend the connected planner + fresh critic into a bounded candidate repair
    loop while preserving the controller-owned lane envelope.
-6. Export the explicit candidate timeline and bind existing deterministic and
-   visual QC evidence to its readback fingerprint.
-7. Implement conflict/rebase and candidate commit without using assistant-only
-   `undo` as rollback.
-8. Finish replacing the legacy `ownership: sniper|palmier` storage model with
-   working-vs-approved revision status. “Open in Palmier” is the normal path; manual
-   edits invalidate approval, not ownership.
-9. Add offline contract tests for manual drift adoption, full-copy id churn,
-   concurrent manual edit during execution/QC, partial mutation failure,
-   caption paging, explicit-id export, repair loops, and restart/resume.
+10. Finish replacing the legacy `ownership: sniper|palmier` storage model with
+    working-vs-approved revision status. “Open in Palmier” is the normal path;
+    manual edits invalidate approval, not ownership.
 
 Until these are complete, the safe behavior is to preserve every manual Palmier
 revision, route supported Ask-AI requests into a non-destructive native
 candidate, and reject unsupported lanes without falling back to the stale plan.
-No native candidate may claim delivery approval yet.
+No connected native candidate may claim complete hybrid-delivery approval yet.

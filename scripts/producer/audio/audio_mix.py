@@ -43,28 +43,43 @@ cleaned.
 CLI: audio_mix.py <video_in> <music_track> <out_with_music.mp4>
                   [--also-without out_no_music.mp4] [--work-dir DIR]
 
-Reuses master.py's public ``measure_integrated_lufs`` / ``has_audio`` and
-``producer_config`` (AUDIO, ENCODE). It does not edit or depend on master's
-private helpers; the two-pass loudnorm builder here mirrors master's approach
-(they cannot share code without editing master, which this stage must not do).
+Reuses master.py's public mastering dispatch and supplies a measurement callback
+for the exact float sum, so static-gain dry runs include both program and bed.
+The optional without-music variant is a delivery copy, not a raw stem export:
+an over-range program must be mastered before that copy can be requested.
 """
 
 from __future__ import annotations
 
 import json
-import math
 import os
 import re
 import shutil
 import sys
 import tempfile
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
+from functools import partial
 from typing import Optional
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # run-by-path: producer pkg root on sys.path
-from producer_config import AUDIO, ENCODE
-from audio.master import has_audio, measure_integrated_lufs
-from audio.audio_mix_bed import (AFMT, FLOAT_WAV, fit_length, prep_bed,
+from producer_config import AUDIO, ENCODE, AUDIO_MIX_POLICY_VERSION
+from audio.master import (
+    MASTERING_POLICY_VERSION, build_pass2_afilter, has_audio, measure_integrated_lufs,
+)
+from audio.channel_normalization import (
+    ChannelNormalizationError,
+    observe_channel_authority,
+    system_program_request,
+)
+from audio.channel_normalization_media import materialize_normalized_program
+from audio.audio_mix_delivery import render_qualified_mix
+from audio.audio_mix_picture import (
+    PictureSource, assert_picture_stable, observe_picture_source, verify_picture_copy,
+)
+from audio.audio_mix_without import (
+    WithoutDeliveryPlan, prepare_without_delivery, render_without_delivery,
+)
+from audio.audio_mix_bed import (AFMT, FLOAT_WAV, fit_length, prep_bed, float_pcm_samples,
                                  probe_video_duration, run as _run)
 
 _JSON_RE = re.compile(r"\{[^{}]*\}", re.S)
@@ -127,20 +142,25 @@ class _Ctx:
     dialogue: bool
     work: str
     warnings: list = field(default_factory=list)
+    delivery: dict = field(default_factory=dict)
+    without_plan: Optional[WithoutDeliveryPlan] = None
+    picture: Optional[PictureSource] = None
+
+
+@dataclass(frozen=True)
+class MixMasterJob:
+    """Separate float audio inputs from the original coded-picture authority."""
+
+    video_in: str
+    bed_path: str
+    out_path: str
+    duration: float
+    picture: PictureSource
 
 
 def emit(event: str, **fields) -> None:
     """Emit one NDJSON status line to stdout (worker convention)."""
     print(json.dumps({"event": event, **fields}, default=str), flush=True)
-
-
-def _finite(value: object) -> Optional[float]:
-    """Parse a loudnorm stat to a finite float, or None (silent/degenerate)."""
-    try:
-        num = float(value)  # type: ignore[arg-type]
-    except (TypeError, ValueError):
-        return None
-    return num if math.isfinite(num) else None
 
 
 def _parse_loudnorm_json(stderr: str) -> Optional[dict]:
@@ -155,18 +175,33 @@ def _parse_loudnorm_json(stderr: str) -> Optional[dict]:
     return None
 
 
-def duck_bed(video_in: str, bed_fit_wav: str, out_wav: str) -> dict:
+def duck_bed(video_in: str, bed_fit_wav: str, out_wav: str,
+             samples: int | None = None) -> dict:
     """Sidechain-duck the bed under the dialogue (input 0) → bed stem (out_wav)."""
-    fc = (f"[1:a]{AFMT}[bed];[0:a]{AFMT}[key];"
+    bed_samples = float_pcm_samples(bed_fit_wav)
+    samples = bed_samples if samples is None else samples
+    if type(samples) is not int or samples <= 0:
+        raise ValueError("exact ducking requires positive integer samples")
+    if bed_samples != samples:
+        raise ValueError("exact ducking bed does not cover its requested sample clock")
+    framing = f",atrim=end_sample={samples},asetpts=N/SR/TB,asetnsamples=n=1024:p=1"
+    # The key is an inaudible detector. Zero-fill after its genuine EOF so the
+    # compressor can release over a longer bed; never pad the ducked output.
+    fc = (f"[1:a]{AFMT}{framing}[bed];"
+          f"[0:a]{AFMT},apad=whole_len={samples}{framing}[key];"
           f"[bed][key]sidechaincompress="
           f"threshold={DUCK['threshold']}:ratio={DUCK['ratio']}:attack={DUCK['attack']}"
           f":release={DUCK['release']}:makeup={DUCK['makeup']}:knee={DUCK['knee']}"
-          f":detection={DUCK['detection']}:link={DUCK['link']}[ducked]")
-    cmd = ["ffmpeg", "-y", "-hide_banner", "-nostats", "-i", video_in, "-i", bed_fit_wav,
+          f":detection={DUCK['detection']}:link={DUCK['link']}[ducked-full]"
+          f";[ducked-full]atrim=end_sample={samples},asetpts=PTS-STARTPTS[ducked]")
+    cmd = ["ffmpeg", "-y", "-hide_banner", "-nostats", "-xerror", "-err_detect", "explode", "-i", video_in, "-i", bed_fit_wav,
            "-filter_complex", fc, "-map", "[ducked]", *FLOAT_WAV, out_wav]
     res = _run(cmd)
     ok = res.returncode == 0 and os.path.exists(out_wav)
-    return {"ok": ok, "stderr": "" if ok else res.stderr[-600:]}
+    if ok and float_pcm_samples(out_wav) != samples:
+        return {"ok": False, "stderr": "ducked bed did not preserve every fitted input sample"}
+    return {"ok": ok, "stderr": "" if ok else res.stderr[-600:],
+            "samples": samples, "audioMixPolicyVersion": AUDIO_MIX_POLICY_VERSION}
 
 
 def _silence_gaps(video_in: str) -> list[tuple[float, float]]:
@@ -212,21 +247,17 @@ def measure_duck_depth(video_in: str, bed_ducked_wav: str) -> dict:
             "bed_speech_db": round(speech_db, 2), "duck_depth_db": round(gap_db - speech_db, 2)}
 
 
-def _final_loudnorm(measured: Optional[dict]) -> tuple[str, bool]:
-    """Build the pass-2 loudnorm filter (linear if stats finite). Mirrors master.py."""
-    base = (f"loudnorm=I={AUDIO['lufs_target']}:TP={AUDIO['loudnorm_tp_param']}"
-            f":LRA={AUDIO['lra']}")
-    stats = None if measured is None else {
-        "measured_I": _finite(measured.get("input_i")),
-        "measured_TP": _finite(measured.get("input_tp")),
-        "measured_LRA": _finite(measured.get("input_lra")),
-        "measured_thresh": _finite(measured.get("input_thresh")),
-        "offset": _finite(measured.get("target_offset")),
-    }
-    if not stats or any(v is None for v in stats.values()):
-        return base, False
-    part = ":".join(f"{k}={v}" for k, v in stats.items())
-    return f"{base}:{part}:linear=true", True
+def _measure_mix_chain_lufs(video_in: str, bed_path: str,
+                            video_dur: float, chain: str) -> Optional[float]:
+    """Measure master's gain/limiter dry run on the same unquantized full sum."""
+    graph = (f"{_MIX};[mix]atrim=0:{video_dur:.6f},asetpts=PTS-STARTPTS,"
+             f"{chain},ebur128=peak=true[out]")
+    command = ["ffmpeg", "-hide_banner", "-nostats", "-i", video_in,
+               "-i", bed_path, "-filter_complex", graph, "-map", "[out]",
+               "-f", "null", "-"]
+    result = _run(command)
+    values = re.findall(r"\bI:\s*(-?\d+(?:\.\d+)?)\s*LUFS", result.stderr)
+    return float(values[-1]) if result.returncode == 0 and values else None
 
 
 def _measure_mix(video_in: str, bed_ducked_wav: str,
@@ -240,31 +271,73 @@ def _measure_mix(video_in: str, bed_ducked_wav: str,
     return _parse_loudnorm_json(_run(cmd).stderr)
 
 
-def mix_master(video_in: str, bed_ducked_wav: str, out_path: str,
-               video_dur: float) -> dict:
+def _render_mix_master(job: MixMasterJob, out_path: str) -> dict:
     """Sum dialogue + ducked bed → two-pass loudnorm → AAC; copy the video stream."""
+    video_in, bed_ducked_wav, video_dur = job.video_in, job.bed_path, job.duration
+    try:
+        assert_picture_stable(job.picture)
+    except ChannelNormalizationError as exc:
+        return _mix_failure(str(exc))
     measured = _measure_mix(video_in, bed_ducked_wav, video_dur)
-    afilter, linear = _final_loudnorm(measured)
+    afilter, note = build_pass2_afilter(
+        video_in, None, measured,
+        partial(_measure_mix_chain_lufs, video_in, bed_ducked_wav, video_dur))
     fc = (f"{_MIX};[mix]atrim=0:{video_dur:.6f},asetpts=PTS-STARTPTS,"
           f"{afilter}[aout]")
-    cmd = ["ffmpeg", "-y", "-hide_banner", "-nostats", "-i", video_in, "-i", bed_ducked_wav,
-           "-filter_complex", fc, "-map", "0:v:0", "-c:v", "copy", "-map", "[aout]",
+    cmd = ["ffmpeg", "-y", "-hide_banner", "-nostats", "-i", video_in, "-i", bed_ducked_wav]
+    picture_index = 0
+    if job.picture.path != video_in:
+        cmd += ["-i", job.picture.path]
+        picture_index = 2
+    cmd += ["-filter_complex", fc, "-map", f"{picture_index}:v:0", "-c:v", "copy", "-map", "[aout]",
            "-c:a", ENCODE["acodec"], "-b:a", ENCODE["audio_bitrate"],
            "-ar", str(ENCODE["audio_rate"]), "-ac", str(ENCODE["audio_channels"]),
-           "-t", f"{video_dur:.6f}", "-movflags", ENCODE["movflags"], out_path]
-    res = _run(cmd)
-    ok = res.returncode == 0 and os.path.exists(out_path)
-    return {"ok": ok, "linear": linear, "stderr": "" if ok else res.stderr[-800:]}
-
-
-def remux_without(video_in: str, out_path: str) -> dict:
-    """Copy-remux the input untouched (video + original dialogue) — mux-only cost."""
-    cmd = ["ffmpeg", "-y", "-hide_banner", "-nostats", "-i", video_in,
-           "-map", "0:v:0", "-map", "0:a:0?", "-c", "copy",
+           "-t", f"{video_dur:.6f}", "-video_track_timescale", str(job.picture.time_base.denominator),
            "-movflags", ENCODE["movflags"], out_path]
     res = _run(cmd)
     ok = res.returncode == 0 and os.path.exists(out_path)
-    return {"ok": ok, "stderr": "" if ok else res.stderr[-500:]}
+    try:
+        picture_proof = verify_picture_copy(job.picture, out_path) if ok else None
+    except ChannelNormalizationError as exc:
+        return _mix_failure(str(exc))
+    return {"ok": ok, "linear": note is None, "mastering_note": note,
+            "mastering_policy_version": MASTERING_POLICY_VERSION,
+            "picture": picture_proof,
+            "stderr": "" if ok else res.stderr[-800:]}
+
+
+def _mix_failure(detail: str) -> dict:
+    """Return failed picture authority through the retained-candidate contract."""
+    return {"ok": False, "linear": False, "mastering_note": None,
+            "mastering_policy_version": MASTERING_POLICY_VERSION, "stderr": detail}
+
+
+def mix_master(video_in: str, bed_ducked_wav: str, out_path: str,
+               video_dur: float) -> dict:
+    """Render privately; only replace delivery after whole-output LUFS/TP pass."""
+    picture = observe_picture_source(video_in, video_dur)
+    return _publish_mix(MixMasterJob(video_in, bed_ducked_wav, out_path, video_dur, picture))
+
+
+def _publish_mix(job: MixMasterJob) -> dict:
+    """Bind original picture verification to the isolated AAC candidate render."""
+    return render_qualified_mix(job.out_path, lambda candidate: _render_mix_master(job, candidate))
+
+
+def remux_without(video_in: str, out_path: str) -> dict:
+    """Deliver compatible AAC; retain original AAC only when verified safe."""
+    try:
+        authority = observe_channel_authority(system_program_request(video_in))
+        duration = probe_video_duration(video_in)
+        if not duration:
+            return {"ok": False, "stderr": "without-music picture duration is unproved"}
+        with tempfile.TemporaryDirectory(prefix="without-normalized-") as directory:
+            normalized = os.path.join(directory, "program.mkv")
+            materialize_normalized_program(authority, normalized)
+            plan = prepare_without_delivery(authority, normalized, duration)
+            return render_without_delivery(plan, out_path)
+    except ChannelNormalizationError as exc:
+        return {"ok": False, "stderr": str(exc)}
 
 
 def _bed_target_lufs(ctx: _Ctx) -> tuple[float, Optional[float]]:
@@ -295,12 +368,18 @@ def _pipeline(ctx: _Ctx) -> dict:
     ducked, depth = _make_bed_stem(ctx, fit)
     if ducked is None:
         return {"status": "error", "error": "ducking failed", "detail": depth}
-    mm = mix_master(ctx.spec.video_in, ducked, ctx.spec.out_with, ctx.video_dur)
+    if ctx.picture is None:
+        return {"status": "error", "error": "original picture authority is missing"}
+    mm = _publish_mix(MixMasterJob(
+        ctx.spec.video_in, ducked, ctx.spec.out_with, ctx.video_dur, ctx.picture))
     emit("mix_master", ok=mm["ok"], linear=mm["linear"])
     if not mm["ok"]:
-        return {"status": "error", "error": "mix/master failed", "detail": mm["stderr"]}
-    if not mm["linear"]:
-        ctx.warnings.append("final loudnorm fell back to dynamic (mix stats non-finite)")
+        return {"status": "error", "error": "mix/master failed", "detail": mm["stderr"],
+                "unapproved_candidate": mm.get("unapprovedCandidate"),
+                "delivery": mm.get("delivery")}
+    if mm["mastering_note"]:
+        ctx.warnings.append(mm["mastering_note"])
+    ctx.delivery = mm["delivery"]
     return _finalize(ctx, prep, fitr, depth)
 
 
@@ -325,23 +404,27 @@ def _make_bed_stem(ctx: _Ctx, fit: str) -> tuple[Optional[str], dict]:
 def _finalize(ctx: _Ctx, prep: dict, fitr: dict, depth: dict) -> dict:
     """Verify the with-music LUFS, optionally remux the without variant, summarize."""
     spec = ctx.spec
-    final_lufs = measure_integrated_lufs(spec.out_with)
-    within = (final_lufs is not None
-              and abs(final_lufs - AUDIO["lufs_target"]) <= AUDIO["lufs_tolerance"])
-    if not within:
-        ctx.warnings.append(f"with-music LUFS {final_lufs} outside "
-                            f"{AUDIO['lufs_target']}+/-{AUDIO['lufs_tolerance']}")
+    final_lufs = ctx.delivery["integratedLufs"]
+    within = ctx.delivery["lufsWithinTolerance"]
     without = None
+    without_result = None
     if spec.out_without:
-        rw = remux_without(spec.video_in, spec.out_without)
+        if ctx.without_plan is None:
+            return {"status": "error", "error": "without-music preflight plan is missing",
+                    "with_music": spec.out_with, "without_music": None}
+        rw = render_without_delivery(ctx.without_plan, spec.out_without)
+        without_result = rw
         emit("remux_without", ok=rw["ok"])
         without = spec.out_without if rw["ok"] else None
         if not rw["ok"]:
-            ctx.warnings.append("without-music remux failed")
+            return {"status": "error", "error": "requested without-music variant failed",
+                    "detail": rw["stderr"], "with_music": spec.out_with,
+                    "without_music": None, "without_delivery": rw}
     return {
         "status": "done",
         "with_music": spec.out_with,
         "without_music": without,
+        "without_delivery": without_result,
         "video_dur_s": round(ctx.video_dur, 3),
         "bed_measured_lufs": prep["measured_lufs"],
         "bed_target_lufs": prep["target_lufs"],
@@ -350,6 +433,10 @@ def _finalize(ctx: _Ctx, prep: dict, fitr: dict, depth: dict) -> dict:
         "duck_depth": depth,
         "final_lufs": final_lufs,
         "lufs_within_tolerance": within,
+        "mastering_policy_version": MASTERING_POLICY_VERSION,
+        "audio_mix_policy_version": AUDIO_MIX_POLICY_VERSION,
+        "final_true_peak_dbtp": ctx.delivery["truePeakDbtp"],
+        "delivery": ctx.delivery,
         "work_dir": ctx.work,
         "warnings": ctx.warnings,
     }
@@ -361,6 +448,23 @@ def _work_dir(requested: Optional[str]) -> tuple[str, bool]:
         os.makedirs(requested, exist_ok=True)
         return requested, False
     return tempfile.mkdtemp(prefix="producer-audiomix-"), True
+
+
+def _normalize_context(ctx: _Ctx) -> Optional[dict]:
+    """Keep picture authority original while replacing only the program audio leg."""
+    if not ctx.dialogue:
+        ctx.picture = observe_picture_source(ctx.spec.video_in, ctx.video_dur)
+        return None
+    authority = observe_channel_authority(system_program_request(ctx.spec.video_in))
+    ctx.picture = observe_picture_source(
+        ctx.spec.video_in, ctx.video_dur, authority.request.source_sha256)
+    normalized_dir = tempfile.mkdtemp(prefix="channel-normalization-", dir=ctx.work)
+    normalized = os.path.join(normalized_dir, "program.mkv")
+    materialized = materialize_normalized_program(authority, normalized)
+    if ctx.spec.out_without:
+        ctx.without_plan = prepare_without_delivery(authority, normalized, ctx.video_dur)
+    ctx.spec = replace(ctx.spec, video_in=normalized)
+    return {"receipt": authority.receipt, "materialization": materialized}
 
 
 def run_audio_mix(spec: MixSpec) -> dict:
@@ -378,9 +482,21 @@ def run_audio_mix(spec: MixSpec) -> dict:
     if not dialogue:
         warnings.append("input has no audio track — bed becomes the sole audio; ducking skipped")
     work, cleanup = _work_dir(spec.work_dir)
-    ctx = _Ctx(spec=spec, video_dur=video_dur, dialogue=dialogue, work=work, warnings=warnings)
     try:
-        return _pipeline(ctx)
+        ctx = _Ctx(
+            spec=spec, video_dur=video_dur, dialogue=dialogue,
+            work=work, warnings=warnings)
+        normalization = _normalize_context(ctx)
+        if spec.out_without and ctx.without_plan is None:
+            return {"status": "error", "error": "without-music program audio is absent"}
+        result = _pipeline(ctx)
+        if normalization is not None:
+            result["channel_normalization"] = normalization
+        return result
+    except ChannelNormalizationError as exc:
+        return {"status": "error", "error":
+                f"program channel normalization or delivery preflight failed: {exc}",
+                "detail": str(exc), "with_music": None, "without_music": None}
     finally:
         if cleanup:
             shutil.rmtree(work, ignore_errors=True)

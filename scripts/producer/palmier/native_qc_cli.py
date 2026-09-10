@@ -15,6 +15,7 @@ from palmier.native_qc import (finalize_approval, prepare_qc,  # noqa: E402
                                promote_approved, run_deterministic_qc)
 from palmier.native_qc_repair import reject_for_repair  # noqa: E402
 from palmier.native_qc_contract import (export_path, qc_path)  # noqa: E402
+from palmier.saga_bridge import (observe_head, prove_candidate)  # noqa: E402
 from palmier.sync_lock import SyncLock, SyncLockState  # noqa: E402
 from palmier.timeline_authority import TimelineConflict  # noqa: E402
 
@@ -40,8 +41,11 @@ def _parse(argv: list[str] | None) -> Command:
     actions.add_argument("--finalize-approval", metavar="REVIEWS_JSON")
     actions.add_argument("--reject-for-repair", metavar="REASON_JSON")
     actions.add_argument("--promote", action="store_true")
+    actions.add_argument("--saga-prove", action="store_true")
+    actions.add_argument("--saga-observe", action="store_true")
     args = parser.parse_args(argv)
-    action = ("prepare" if args.prepare else "finalize-approval"
+    action = ("saga-prove" if args.saga_prove else "saga-observe"
+              if args.saga_observe else "prepare" if args.prepare else "finalize-approval"
               if args.finalize_approval else "reject-for-repair"
               if args.reject_for_repair else "audit" if args.audit else "promote")
     value = args.prepare or args.finalize_approval or args.reject_for_repair
@@ -70,10 +74,16 @@ def _perform(client: PalmierClient, command: Command) -> dict:
         return finalize_approval(client, command.out_dir, str(command.value))
     if command.action == "reject-for-repair":
         return reject_for_repair(client, command.out_dir, str(command.value))
+    if command.action == "saga-prove":
+        return prove_candidate(client, command.out_dir)
+    if command.action == "saga-observe":
+        return observe_head(client, command.out_dir)
     return promote_approved(client, command.out_dir)
 
 
 def _summary(command: Command, receipt: dict) -> dict:
+    if command.action in ("saga-prove", "saga-observe"):
+        return receipt
     candidate, parent = receipt.get("candidate") or {}, receipt.get("parent") or {}
     status = {"prepared": "qc-prepared", "deterministic-passed": "deterministic-passed",
               "qc-approved": "qc-approved", "promoted": "candidate-promoted",

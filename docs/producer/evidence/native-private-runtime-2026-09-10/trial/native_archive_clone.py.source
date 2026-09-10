@@ -1,0 +1,76 @@
+"""Fail-closed macOS COW archival without hard links or full-copy fallback."""
+from __future__ import annotations
+
+import ctypes
+import json
+import os
+import shutil
+from pathlib import Path
+
+import seal_benchmark as archive
+
+DISK_RESERVE = 10 * 1024**3
+
+
+def disk_reserve(path: Path) -> None:
+    """Retain the unchanged real ten-GiB free-space floor for every clone."""
+    if shutil.disk_usage(path).free <= DISK_RESERVE:
+        raise RuntimeError('Native archive clone would breach the disk reserve')
+
+
+def clone_new(source: Path, target: Path) -> None:
+    """Call the documented atomic clonefile syscall; unsupported means failure."""
+    archive.identity(source)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if target.exists() or target.is_symlink() or any(p.is_symlink() for p in target.parents):
+        raise FileExistsError('Clone target must be new and ordinary: ' + str(target))
+    disk_reserve(target.parent)
+    function = ctypes.CDLL(None, use_errno=True).clonefile
+    function.argtypes, function.restype = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int], ctypes.c_int
+    if function(os.fsencode(source), os.fsencode(target), 0) != 0:
+        error = ctypes.get_errno()
+        raise OSError(error, os.strerror(error), str(target))
+    if archive.identity(source)[:2] == archive.identity(target)[:2]:
+        raise RuntimeError('Archive is not an independent inode')
+    disk_reserve(target.parent)
+
+
+def copy_verified(source: Path, target: Path, authority: str | None = None) -> dict:
+    """Hash before/after and the cloned bytes, rejecting concurrent source change."""
+    before, expected = archive.identity(source), archive.digest(source)
+    if authority is not None and expected != authority:
+        raise RuntimeError('Source differs from authoritative pin: ' + str(source))
+    clone_new(source, target)
+    if archive.identity(source) != before or archive.digest(target) != expected:
+        raise RuntimeError('Cloned archive does not match unchanged source: ' + str(source))
+    return {'path': str(target.relative_to(archive.DESTINATION)), 'sha256': expected,
+        'bytes': before[2], 'sourcePath': str(source), 'copyMethod': 'macOS-clonefile-COW',
+        'independentInode': True, 'hardLink': False, 'fullCopyFallback': False}
+
+
+def canary() -> None:
+    """Mutate only a disposable clone and prove the original font is unchanged."""
+    root = Path(__file__).resolve().parent
+    source = root / 'revision-work/project/assets/display.woff2'
+    target = root / 'revision-work/archive-clone-native-canary/disposable-font-copy.woff2'
+    expected, before = archive.digest(source), archive.identity(source)
+    clone_new(source, target)
+    if archive.digest(target) != expected:
+        raise RuntimeError('Canary clone differs before disposable modification')
+    with target.open('r+b') as handle:
+        first = handle.read(1)
+        handle.seek(0)
+        handle.write(bytes([first[0] ^ 1]))
+    if archive.digest(source) != expected or archive.identity(source) != before:
+        raise RuntimeError('Original was affected by disposable-clone mutation')
+    if archive.digest(target) == expected:
+        raise RuntimeError('Disposable modification did not occur')
+    receipt = {'status': 'pass', 'source': str(source), 'sourceSha256': expected,
+        'sourceUnchanged': True, 'disposableTarget': str(target),
+        'copyOnWriteIsolationVerified': True, 'hardLink': False, 'fallbackUsed': False}
+    archive.write_new(root / 'native-archive-clone-canary.json', receipt)
+    print(json.dumps(receipt))
+
+
+if __name__ == '__main__':
+    canary()

@@ -20,24 +20,11 @@ from dataclasses import dataclass
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from audit.audit_checks import CheckResult, FAIL, PASS, WARN  # noqa: E402
-from audit.audit_probe import edge_density, extract_frame  # noqa: E402
-from producer_config import CANVAS, CAPTIONS, HOOK_CARD, SAFE_BOX  # noqa: E402
+from audit.audit_probe import extract_frame  # noqa: E402
+from audit.audit_frame_batch import extract_nearby_frames, review_batch_eligible  # noqa: E402
+from audit.audit_safe_zone import scan_safe_zone  # noqa: E402
+from stage_timing import stage_span  # noqa: E402
 
-# The bottom platform-UI danger zone starts just below the safe box (canvas
-# height minus the bottom margin). Critical elements must stay ABOVE this line;
-# text/graphics found below it can collide with the TikTok/Reels/Shorts UI.
-DANGER_ZONE_TOP = CANVAS["height"] - SAFE_BOX["bottom"]      # 1920 - 520 = 1400
-# Blurred pads / smooth backgrounds read ~0.0 strong-edge density here; real
-# footage detail reads ~0.02-0.03; burned caption text reads ~0.05+. 0.015
-# cleanly separates "smooth & safe" from "detail present in the UI zone"
-# (calibrated on real blurpad vs center-crop renders, 2026-07-04). It is a
-# detail detector, not an OCR — honest false positives on busy footage.
-DANGER_EDGE_DENSITY_WARN = 0.015
-EDGE_STEP_THRESHOLD = 40            # per-pixel luma step counted as an "edge"
-# The two bands that legitimately carry text — excluded from the danger scan by
-# construction (both sit above DANGER_ZONE_TOP), named here for the report.
-CAPTION_BAND = CAPTIONS["y_band"]          # (1150, 1340)
-HOOK_BAND = HOOK_CARD["y_range"]           # (250, 560)
 FRAME_END_PAD_S = 0.1
 GRAPHIC_PHASE_PAD_S = 0.6
 TIMESTAMP_PRECISION = 3
@@ -184,7 +171,7 @@ def _clamp_time(timestamp: float, output_duration: float) -> float:
 
 
 def extract_review_frames(final_path: str, out_dir: str,
-                          frames: list[FrameRef]) -> list[FrameRef]:
+                          frames: list[FrameRef], probe: dict | None = None) -> list[FrameRef]:
     """Extract every planned frame into ``<out_dir>/audit_frames/``.
 
     Returns the same refs with ``path`` populated (empty string on a failed
@@ -192,13 +179,14 @@ def extract_review_frames(final_path: str, out_dir: str,
     """
     frames_dir = os.path.join(out_dir, "audit_frames")
     os.makedirs(frames_dir, exist_ok=True)
-    done: list[FrameRef] = []
-    for ref in frames:
-        out_path = os.path.join(frames_dir, f"{ref.label}_t{ref.timestamp:07.3f}.jpg")
-        ok = extract_frame(final_path, ref.timestamp, out_path)
-        done.append(FrameRef(ref.label, ref.kind, ref.timestamp,
-                             out_path if ok else "", ref.note))
-    return done
+    requested = [(ref.timestamp, os.path.join(frames_dir, f"{ref.label}_t{ref.timestamp:07.3f}.jpg")) for ref in frames]
+    eligible = review_batch_eligible(probe)
+    with stage_span(out_dir, "audit_review_frame_extraction", {"evidenceImages": len(frames),
+                    "phase": "nearby-batch" if eligible else "serial-unqualified"}):
+        results = (extract_nearby_frames(final_path, requested, extract_frame) if eligible
+                   else [extract_frame(final_path, timestamp, destination) for timestamp, destination in requested])
+    return [FrameRef(ref.label, ref.kind, ref.timestamp, destination if ok else "", ref.note)
+            for ref, (_, destination), ok in zip(frames, requested, results)]
 
 
 def check_frame_extraction(frames: list[FrameRef]) -> CheckResult:
@@ -213,28 +201,3 @@ def check_frame_extraction(frames: list[FrameRef]) -> CheckResult:
         "review_frames_extracted", PASS,
         f"{len(frames)}/{len(frames)} required frame(s)",
         "every planned visual-review frame extracted")
-
-
-def scan_safe_zone(frames: list[FrameRef]) -> list[CheckResult]:
-    """Edge-density heuristic on caption-beat frames: warn when text-like detail
-    sits in the bottom UI danger zone (below the safe box).
-
-    One result per scanned caption frame. Always WARN-or-PASS, never FAIL — this
-    is a heuristic prone to honest false positives on busy footage; the human
-    vision review is the real arbiter.
-    """
-    results: list[CheckResult] = []
-    for ref in frames:
-        if ref.kind != "caption" or not ref.path:
-            continue
-        density = edge_density(ref.path, DANGER_ZONE_TOP, CANVAS["height"],
-                               EDGE_STEP_THRESHOLD)
-        if density is None:
-            continue
-        measured = f"edge density {density:.3f} in y>{DANGER_ZONE_TOP}"
-        detail = (f"warn >= {DANGER_EDGE_DENSITY_WARN}; heuristic (detail, not "
-                  f"OCR) — confirm by eye")
-        status = WARN if density >= DANGER_EDGE_DENSITY_WARN else PASS
-        results.append(CheckResult(f"safe_zone_{ref.label}", status,
-                                   measured, detail))
-    return results

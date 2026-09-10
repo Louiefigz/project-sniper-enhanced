@@ -71,6 +71,8 @@ assert.match(editorRunLockReason(runningStatus, null) ?? "", /rendering a privat
 assert.match(editorRunLockReason(null, null) ?? "", /Checking whether/);
 assert.match(editorRunLockReason(null, "offline") ?? "", /remain locked/);
 assert.equal(editorRunLockReason({ ...runningStatus, run: null }, null), null);
+assert.match(editorRunLockReason({ ...runningStatus,
+  run: { ...runningStatus.run, status: "awaiting_cut_approval" } }, null) ?? "", /exact cut preview/);
 
 const managedStatus = {
   ...runningStatus,

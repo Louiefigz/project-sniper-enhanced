@@ -8,6 +8,16 @@ from dataclasses import dataclass
 
 from headless.container_policy import DockerRuntime, command, docker_env
 
+HYPERFRAMES_VERSION_LABEL = "io.project-sniper.hyperframes-version"
+
+
+def output_tmpfs_size(version: object) -> str:
+    """Keep exact historical quotas; give 0.8.31 its required disk headroom."""
+    quotas = {"0.7.33": "1g", "0.8.31": "2g"}
+    if type(version) is not str or version not in quotas:
+        raise RuntimeError("unsupported renderer version for output tmpfs policy")
+    return quotas[version]
+
 
 @dataclass(frozen=True)
 class ContainerExpectation:
@@ -29,7 +39,7 @@ def _required_host() -> dict:
             "PublishAllPorts": False}
 
 
-def _host_policy(actual: dict, expected: ContainerExpectation) -> None:
+def _host_policy(actual: dict, expected: ContainerExpectation, version: object) -> None:
     host = actual.get("HostConfig") or {}
     for key, value in _required_host().items():
         if host.get(key) != value:
@@ -50,9 +60,10 @@ def _host_policy(actual: dict, expected: ContainerExpectation) -> None:
             or (host.get("RestartPolicy") or {}).get("Name") != "no"):
         raise RuntimeError("live container lifecycle policy failed")
     uid, gid = actual["Config"]["User"].split(":", 1)
+    quota = output_tmpfs_size(version)
     expected_tmpfs = {
         "/scratch": f"rw,nosuid,nodev,noexec,size=2g,uid={uid},gid={gid},mode=0700",
-        "/output": f"rw,nosuid,nodev,noexec,size=512m,uid={uid},gid={gid},mode=0700"}
+        "/output": f"rw,nosuid,nodev,noexec,size={quota},uid={uid},gid={gid},mode=0700"}
     if host.get("Tmpfs") != expected_tmpfs:
         raise RuntimeError("live container tmpfs policy failed")
     mounts = actual.get("Mounts") or []
@@ -131,6 +142,6 @@ def attest_container(runtime: DockerRuntime, config_dir: str,
             or config.get("Cmd") != list(expected.command)):
         raise RuntimeError("live container identity/command attestation failed")
     _environment(config, runtime, expected)
-    _host_policy(actual, expected)
+    _host_policy(actual, expected, runtime.approval["labels"].get(HYPERFRAMES_VERSION_LABEL))
     _network(actual)
     return actual

@@ -18,7 +18,11 @@ slots are exempt here: a source receipt ("CLAIM SOURCE … JUL 09 2026") cites
 the source, not the narration, and icon slots hold filenames.
 
 Checked copy: every string in each ``graphicsTrack[].spec`` (nested lists/
-objects included) plus ``titleCards[].text``. A card with no numeric copy
+objects included) plus ``titleCards[].text``. Numeric leaves of a dict that
+declares a prefix/suffix affix slot (count-up's start/end) are checked as
+their PAINTED string forms ("250%") — a hero number carried as a JSON number
+must not slip past the gate just because it is not a string (review F2);
+zero is exempt as the null counting origin. A card with no numeric copy
 carries no deterministic obligation.
 
 PHRASE GROUNDING (showpiece QC 2026-07-10, FAILURE_LEDGER.md LL-003): the
@@ -162,14 +166,49 @@ def window_values(words: list[dict]) -> tuple[set[float], set[str]]:
     return vals, raws
 
 
+_AFFIX_KEYS = ("prefix", "suffix")
+
+
+def _painted_number(value: Any) -> str | None:
+    """The string a comp PAINTS for one numeric leaf; None when it is not a
+    painted claim (bools, non-numbers, and zero — the null origin a counter
+    departs from, not authored copy)."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    if value == 0:
+        return None
+    return str(int(value)) if float(value) == int(value) else f"{value:g}"
+
+
+def _affixed_numbers(node: dict, path: str) -> list[tuple[str, str]]:
+    """(path, painted) rows for numeric leaves of an AFFIX-carrying dict.
+
+    A spec that declares a prefix/suffix slot (count-up's start/end) renders
+    its numbers AS COPY through that lockup — so the hero number a JSON
+    number carries must face the truth gate as the exact painted string
+    ("250%"), review F2. Dicts without affix slots keep numbers exempt
+    (timing/geometry knobs are not copy).
+    """
+    if not any(isinstance(node.get(key), str) for key in _AFFIX_KEYS):
+        return []
+    prefix = node.get("prefix") if isinstance(node.get("prefix"), str) else ""
+    suffix = node.get("suffix") if isinstance(node.get("suffix"), str) else ""
+    return [(f"{path}.{key}", f"{prefix}{painted}{suffix}")
+            for key, value in node.items()
+            for painted in (_painted_number(value),) if painted is not None]
+
+
 def _spec_strings(node: Any, path: str = "spec") -> list[tuple[str, str]]:
-    """(path, text) for every string in a spec tree, skipping exempt slots."""
+    """(path, text) for every string in a spec tree, skipping exempt slots;
+    numeric leaves painted through an affix lockup ride along as their
+    painted string forms."""
     if isinstance(node, str):
         return [(path, node)]
     if isinstance(node, dict):
         return [p for k, v in node.items()
                 if not str(k).lower().startswith(_SKIP_PREFIXES)
-                for p in _spec_strings(v, f"{path}.{k}")]
+                for p in _spec_strings(v, f"{path}.{k}")] \
+            + _affixed_numbers(node, path)
     if isinstance(node, (list, tuple)):
         return [p for j, v in enumerate(node)
                 for p in _spec_strings(v, f"{path}[{j}]")]

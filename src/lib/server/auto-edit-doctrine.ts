@@ -13,6 +13,7 @@ import type {
   AutoEditCtx,
   AutoEditDoctrineAuthority,
 } from "@/app/api/producer/auto-edit/stream";
+import { canonicalJsonSha256 } from "./auto-edit-hash";
 
 export const PRODUCER_CORE_DOCTRINE_PATHS = [
   ".agents/skills/producer/SKILL.md",
@@ -72,18 +73,6 @@ interface DoctrineSnapshot {
   lockHash: string;
 }
 
-function stableValue(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (!value || typeof value !== "object") return value;
-  return Object.fromEntries(Object.entries(value as Record<string, unknown>)
-    .sort(([left], [right]) => left.localeCompare(right))
-    .map(([key, item]) => [key, stableValue(item)]));
-}
-
-function stableHash(value: unknown): string {
-  return createHash("sha256").update(JSON.stringify(stableValue(value))).digest("hex");
-}
-
 function textHash(content: string): string {
   return createHash("sha256").update(content, "utf8").digest("hex");
 }
@@ -141,7 +130,7 @@ function captureRows(
 
 function snapshotValue(runId: string, rows: DoctrineRow[]): DoctrineSnapshot {
   const receipts = rows.map(({ path: rowPath, hash }) => ({ path: rowPath, hash }));
-  const doctrineHash = stableHash({ schemaVersion: 1, files: receipts });
+  const doctrineHash = canonicalJsonSha256({ schemaVersion: 1, files: receipts });
   const base = {
     schemaVersion: 1 as const,
     state: "pinned" as const,
@@ -156,7 +145,7 @@ function snapshotValue(runId: string, rows: DoctrineRow[]): DoctrineSnapshot {
       evidenceHash: null,
     },
   };
-  return { ...base, files: rows, lockHash: stableHash(base) };
+  return { ...base, files: rows, lockHash: canonicalJsonSha256(base) };
 }
 
 function writeSnapshotTree(staging: string, snapshot: DoctrineSnapshot): void {
@@ -248,13 +237,13 @@ export function restoreAutoEditDoctrine(
   verifyRows(expected.snapshotPath, value);
   const receipt = { ...value, files: value.files.map(({ path: rowPath, hash }) => ({ path: rowPath, hash })) };
   delete (receipt as Partial<DoctrineSnapshot>).lockHash;
-  const doctrineHash = stableHash({ schemaVersion: 1, files: receipt.files });
-  if (doctrineHash !== value.doctrineHash || stableHash(receipt) !== value.lockHash
+  const doctrineHash = canonicalJsonSha256({ schemaVersion: 1, files: receipt.files });
+  if (doctrineHash !== value.doctrineHash || canonicalJsonSha256(receipt) !== value.lockHash
       || value.runId !== expected.runId || value.doctrineHash !== expected.doctrineHash) {
     throw new Error("Pinned Producer doctrine authority does not match its receipt");
   }
   const restored = authority(path.dirname(expected.snapshotPath), value);
-  if (stableHash(restored.files) !== stableHash(expected.files)) {
+  if (canonicalJsonSha256(restored.files) !== canonicalJsonSha256(expected.files)) {
     throw new Error("Pinned Producer doctrine file map was changed");
   }
   return restored;

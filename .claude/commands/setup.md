@@ -146,8 +146,9 @@ the whole point is that they **don't run a dev server**; they just ask you:
 > I'll load the `producer` skill and drive the whole pipeline (ingest → gated edit plan →
 > render). Your finished `final.mp4` lands in `~/ProjectSniper/<slug>/`.
 >
-> Optional extras: open **Palmier Pro** first if you want to watch/adjust the edit in a real
-> NLE, and there's an optional web GUI at `npm run dev` (http://localhost:3000) — but neither
-> is required.
+> Optional extras: open **Palmier Pro** if you want the approved one-clip flat mirror for
+> manual review. The editable native-candidate branch is an isolated P5-blocked experiment.
+> There's also an optional web GUI at `npm run dev` (http://localhost:3000), but neither is
+> required.
 
 Keep the closing short. Do not paste the full README back at them.

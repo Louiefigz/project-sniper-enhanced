@@ -2,6 +2,7 @@
 import unittest
 
 from _common import *  # noqa: F401,F403
+from edit.cut_repair_context_timeline import segments as exact_segments
 
 
 class CompileTimelineTests(unittest.TestCase):
@@ -73,6 +74,51 @@ class CompileTimelineTests(unittest.TestCase):
     def test_dict_round_trip(self) -> None:
         restored = ct.TimelineMap.from_dict(self.tmap.to_dict())
         self.assertEqual(restored.segments, self.tmap.segments)
+
+    def test_lf14_frame_duration_survives_canonical_sidecar_precision(self) -> None:
+        plan = {"cutTrack": [
+            {
+                "sourceId": "raw-1", "start": 70.07,
+                "end": 733.2325, "speed": 1.0,
+            },
+            {
+                "sourceId": "raw-1", "start": 736.5691666666667,
+                "end": 913.3707916666667, "speed": 1.0,
+            },
+        ]}
+        timeline = ct.compile_plan(plan)
+        document = timeline.to_dict()
+        self.assertEqual(timeline.output_duration, 839.964125)
+        self.assertEqual(document["outputDuration"], 839.964125)
+        self.assertEqual(document["segments"][-1]["out_end"], 839.964125)
+        self.assertEqual(
+            ct.TimelineMap.from_dict(document).output_duration,
+            839.964125,
+        )
+
+    def test_lf14_precision_reaches_exact_repair_frame_projection(self) -> None:
+        plan = {"cutTrack": [
+            {
+                "sourceId": "raw-1", "start": 70.07,
+                "end": 733.2325, "speed": 1.0,
+            },
+            {
+                "sourceId": "raw-1", "start": 736.5691666666667,
+                "end": 913.3707916666667, "speed": 1.0,
+            },
+        ]}
+        sources = {"raw-1": {
+            "fps": 23.976, "vfr": False,
+            "audio": {"sampleRate": 48_000},
+        }}
+        rows, total = exact_segments(plan, sources, (24_000, 1_001))
+        self.assertEqual(total, 20_139)
+        self.assertEqual(rows[0]["outputFrames"], {
+            "startFrame": 0, "endFrameExclusive": 15_900,
+        })
+        self.assertEqual(rows[1]["outputFrames"], {
+            "startFrame": 15_900, "endFrameExclusive": 20_139,
+        })
 
 
 class DisplayDimsTests(unittest.TestCase):

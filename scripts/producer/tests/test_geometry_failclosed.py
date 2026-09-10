@@ -44,6 +44,8 @@ class NoLegalRegionRaiseTests(unittest.TestCase):
                                return_value=fmap), \
              mock.patch.object(ga, "_content_bbox",
                                return_value=(60, 300, 960, 900)), \
+             mock.patch.object(ga, "_clip_dims",
+                               return_value=(1080, 1920)), \
              mock.patch.object(ga, "resolve_offset",
                                side_effect=AssertionError("seed nudge used")):
             with self.assertRaises(NoLegalRegion) as caught:
@@ -63,7 +65,9 @@ class NoLegalRegionRaiseTests(unittest.TestCase):
         with mock.patch.object(freespace, "build_free_map",
                                return_value=fmap), \
              mock.patch.object(ga, "_content_bbox",
-                               return_value=(200, 855, 880, 1055)):
+                               return_value=(200, 855, 880, 1055)), \
+             mock.patch.object(ga, "_clip_dims",
+                               return_value=(1080, 1920)):
             x, y, meta = ga.resolve_offset_v2(_entry(), "comp.mov", "base.mp4")
         self.assertIsNotNone(meta["region"])
         self.assertNotEqual(meta["region"], "v1-deviation")
@@ -98,6 +102,16 @@ class PlacementFailClosedTests(unittest.TestCase):
         self.assertEqual(row["region"], "v1-fallback")
         self.assertEqual(row["lane"], "graphics")
         self.assertIn("cv2", row["evidence"])
+
+    def test_face_aware_free_band_environment_failure_blocks(self) -> None:
+        entry = _entry(anchor="free-band")
+        with mock.patch.object(sp, "resolve_offset_v2",
+                               side_effect=ImportError("No module named cv2")), \
+             mock.patch.object(sp, "resolve_offset",
+                               side_effect=AssertionError("fallback used")):
+            with self.assertRaisesRegex(
+                    RuntimeError, "refusing the authored origin"):
+                sp.resolve_placement(entry, "comp.mov", "base.mp4")
 
     def test_environment_gate_is_registered_as_advisory(self) -> None:
         verdict = gate_policy.Verdict("placement_environment", "WARN",

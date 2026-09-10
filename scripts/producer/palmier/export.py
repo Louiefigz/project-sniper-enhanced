@@ -23,6 +23,7 @@ from audit.audit_checks import FAIL
 from palmier.audio_finish import (FinishReport, FinishSpec,
                                   finish_authoritative_audio)
 from palmier.mcp_client import PalmierError, emit
+from palmier.process_deadline import process_timeout
 
 FINAL_NAME = "final.palmier.mp4"
 TEMP_NAME = "final.palmier.tmp.mp4"
@@ -121,7 +122,9 @@ def _probe_json(path: str) -> dict:
            "-show_entries", "stream=codec_type,duration:format=duration",
            "-of", "json", path]
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        proc = subprocess.run(
+            cmd, capture_output=True, text=True, check=False,
+            timeout=process_timeout())
     except OSError as exc:
         raise PalmierError(f"could not run ffprobe: {exc}") from exc
     if proc.returncode != 0:

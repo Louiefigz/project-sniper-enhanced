@@ -1,5 +1,6 @@
 import type { ProjectIntent } from "./intent-presets";
 import type { AssetManifest, ManifestSource } from "./types";
+import type { AutoEditDeliveryPolicy } from "./auto-edit-delivery-policy";
 
 const SHORT_PLATFORMS = ["tiktok", "reels", "shorts"];
 const LONGFORM_PLATFORMS = ["youtube"];
@@ -17,6 +18,7 @@ function starterTarget(intent: ProjectIntent, durationTargetS: number) {
     durationTargetS,
     platforms: mode === "longform" ? LONGFORM_PLATFORMS : SHORT_PLATFORMS,
     scope: intent.scope,
+    ...(intent.music !== undefined ? { music: intent.music } : {}),
     ...(intent.excerpt !== undefined ? { excerpt: intent.excerpt } : {}),
     ...(Object.keys(intent.lanes).length ? { lanes: intent.lanes } : {}),
     ...(intent.pace ? { pace: intent.pace } : {}),
@@ -32,9 +34,11 @@ function starterTarget(intent: ProjectIntent, durationTargetS: number) {
 export function buildStarterPlan(manifest: AssetManifest, intent: ProjectIntent) {
   const source = manifest.sources[0];
   const longform = intent.mode === "longform";
+  const trimOnly = intent.scope === "trim";
   const end = sourceEnd(source, longform);
   return {
     planVersion: 1,
+    audioAuthorityMode: "mastered-stereo" as const,
     target: starterTarget(intent, end),
     cutTrack: [{
       sourceId: source?.id ?? "raw-1",
@@ -44,8 +48,13 @@ export function buildStarterPlan(manifest: AssetManifest, intent: ProjectIntent)
       rationale: "",
     }],
     reframe: { strategy: longform ? "none" : "face" },
-    titleCards: [{ outStart: 0, outEnd: 3, text: "Your hook here", style: "hook" }],
-    captions: { burn: !longform, style: longform ? "line" : "karaoke" },
+    titleCards: trimOnly
+      ? []
+      : [{ outStart: 0, outEnd: 3, text: "Your hook here", style: "hook" }],
+    captions: {
+      burn: !trimOnly && !longform,
+      style: longform ? "line" : "karaoke",
+    },
     brollTrack: [],
     music: { enabled: intent.music === true },
     ...(intent.audioEnhance ? { audioEnhance: intent.audioEnhance } : {}),
@@ -56,11 +65,13 @@ export function buildStarterPlan(manifest: AssetManifest, intent: ProjectIntent)
 export function buildAutoEditRequest(
   dir: string,
   intent?: ProjectIntent | null,
+  deliveryPolicy?: AutoEditDeliveryPolicy,
 ): Record<string, unknown> {
   if (!intent) {
     throw new Error("Auto Edit requires a stored edit intent; choose Short/Long and an edit level first");
   }
   const body: Record<string, unknown> = { dir, scope: intent.scope };
+  if (deliveryPolicy) body.deliveryPolicy = deliveryPolicy;
   body.mode = intent.mode;
   if (intent.excerpt !== undefined) body.excerpt = intent.excerpt;
   body.lanes = intent.lanes;
@@ -78,6 +89,12 @@ export function buildAutoEditRequest(
 export function buildResumeAutoEditRequest(
   dir: string,
   intent?: ProjectIntent | null,
+  deliveryPolicy?: AutoEditDeliveryPolicy,
+  workflowPolicy?: "cut-first",
 ): Record<string, unknown> {
-  return { ...buildAutoEditRequest(dir, intent), resume: true };
+  if (workflowPolicy !== undefined && (workflowPolicy !== "cut-first" || deliveryPolicy !== "mp4-only")) {
+    throw new Error("Cut-first continuation requires the saved MP4-only workflow");
+  }
+  return { ...buildAutoEditRequest(dir, intent, deliveryPolicy), resume: true,
+    ...(workflowPolicy ? { workflowPolicy } : {}) };
 }

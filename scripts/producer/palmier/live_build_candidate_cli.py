@@ -5,11 +5,13 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from palmier.live_build_candidate import (checkpoint_live_candidate,  # noqa: E402
                                            fork_live_candidate,
+                                           observe_live_candidate,
                                            resume_live_candidate)
 from palmier.mcp_client import PalmierClient, PalmierError  # noqa: E402
 from palmier.sync_lock import SyncLock, SyncLockState  # noqa: E402
@@ -27,7 +29,9 @@ def _parse(argv: list[str] | None) -> argparse.Namespace:
     actions = parser.add_mutually_exclusive_group(required=True)
     actions.add_argument("--fork", metavar="NAME")
     actions.add_argument("--resume", action="store_true")
+    actions.add_argument("--observe", action="store_true")
     actions.add_argument("--checkpoint", metavar="AUTHORITY_JSON")
+    parser.add_argument("--expected-candidate-fingerprint")
     args = parser.parse_args(argv)
     args.out_dir = os.path.realpath(args.out_dir)
     if not os.path.isdir(args.out_dir):
@@ -38,6 +42,11 @@ def _parse(argv: list[str] | None) -> argparse.Namespace:
         args.checkpoint = os.path.realpath(args.checkpoint)
         if not os.path.isfile(args.checkpoint):
             raise PalmierError("Palmier live-build authority file is missing")
+    expected = args.expected_candidate_fingerprint
+    if expected is not None and (not re.fullmatch(r"[0-9a-f]{64}", expected)
+                                 or not (args.resume or args.checkpoint)):
+        raise PalmierError(
+            "expected candidate fingerprint requires resume/checkpoint SHA-256")
     return args
 
 
@@ -62,10 +71,14 @@ def run(argv: list[str] | None = None) -> tuple[dict, int]:
         if args.fork is not None:
             candidate = fork_live_candidate(client, args.out_dir, args.fork)
         elif args.resume:
-            candidate = resume_live_candidate(client, args.out_dir)
+            candidate = resume_live_candidate(
+                client, args.out_dir, args.expected_candidate_fingerprint)
+        elif args.observe:
+            candidate = observe_live_candidate(client, args.out_dir)
         else:
             candidate = checkpoint_live_candidate(
-                client, args.out_dir, str(args.checkpoint))
+                client, args.out_dir, str(args.checkpoint),
+                args.expected_candidate_fingerprint)
         return _summary(candidate), 0
     finally:
         result.lease.release()

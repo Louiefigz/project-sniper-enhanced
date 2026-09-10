@@ -1,0 +1,42 @@
+{
+  "recordedAt": "2026-09-09T17:26:51.287994+00:00",
+  "status": "startup-error-classified-not-fixed",
+  "diagnosticElapsedSeconds": 4.846931624924764,
+  "playbackChanged": false,
+  "authoredSourceChanged": false,
+  "installedSdkChanged": false,
+  "observedCause": [
+    "The preview iframe attempted to load the GSAP 3.12.5 MotionPathPlugin script from jsDelivr.",
+    "That HTMLScriptElement emitted an error event.",
+    "The injected fallback requested the 3.15.0 version, which also emitted an error event.",
+    "The fallback Promise rejected with the script Event; its unhandled rejection produced Event: Event."
+  ],
+  "sourceEvidence": {
+    "cli": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js",
+    "cliSha256": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "fallbackStartLine": 115167,
+    "studioSourceMap": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/studio/index.js.map",
+    "studioSourceMapSha256": "affde3a8437a3173aed1559bc8011b3d1096c94d4064f8f0633acb76e1d4245e",
+    "studioSource": "../src/utils/gsapSoftReload.ts",
+    "studioSourceSha256": "9e4606979dad8d9c2102c316f42392ab8449ae5b7d1c52f85a8bf2ff649f1b45",
+    "studioLoaderLines": [
+      47,
+      78
+    ],
+    "behavior": "NLEContext calls ensureMotionPathPluginLoaded on iframe load. It preloads the plugin even when no authored motionPath is present. Its own onerror finalizes; the separate CLI fallback rejects without a catch."
+  },
+  "localAssetSearch": {
+    "roots": [
+      "repository",
+      "Codex plugin cache",
+      "npm cache filenames"
+    ],
+    "result": "No MotionPathPlugin filename found. This does not prove that no copy exists elsewhere or inside archives."
+  },
+  "interpretation": "An editor startup dependency failed under local-only networking. This is not evidence of an audio-media failure or of the renderer memory root cause.",
+  "qualityStatus": "Keep the original playback telemetry-failed receipt. Its audio timing and no-disruption subchecks passed; startup dependency handling remains unresolved.",
+  "limitations": [
+    "Only startup was observed in this diagnostic; no playback, export, listening or full-video approval.",
+    "No network download or SDK/source patch was made."
+  ]
+}

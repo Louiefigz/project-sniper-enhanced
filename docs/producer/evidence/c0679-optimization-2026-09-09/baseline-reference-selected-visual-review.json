@@ -1,0 +1,48 @@
+{
+  "recordedAt": "2026-09-09T17:48:40.345238+00:00",
+  "status": "baseline-selected-frames-reviewed-paired-candidate-pending",
+  "captureReceipt": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-baseline-v3-barrier.capture.json",
+  "captureReceiptSha256": "12fb1e92adf31fb3b0025ecfde986b14011f12c830c0b92b5017573ccb4ac6d3",
+  "framesInspected": [
+    {
+      "frameIndex": 0,
+      "time": 0,
+      "path": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-baseline-v3-barrier.frames/batch-0/frame_000000.jpg",
+      "sha256": "84837a7c94a6bc89c4a6f785dc75dadcb6378c72d33efe0612c739c0378ae5e9",
+      "visualObservation": "Full presenter visible with unobstructed face and usable headroom; no graphic covers the speaker."
+    },
+    {
+      "frameIndex": 199,
+      "time": 8.299958333333333,
+      "path": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-baseline-v3-barrier.frames/batch-0/frame_000199.jpg",
+      "sha256": "42e4e4a01422fba0ca4ca11ab7773290532b75461416ea58f714a4a4b47d1df8",
+      "visualObservation": "Right presenter inset has visible padding and rounded corners; the left headline is legible and does not overlap the face."
+    },
+    {
+      "frameIndex": 500,
+      "time": 20.854166666666664,
+      "path": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-baseline-v3-barrier.frames/batch-1/frame_000500.jpg",
+      "sha256": "71f8dda85bebbaf750343438b16bf1147700a3d5371ce1e5885361768b3e1670",
+      "visualObservation": "Left presenter inset retains padding and rounded corners; prompt-to-content diagram and headline are legible on the right."
+    },
+    {
+      "frameIndex": 625,
+      "time": 26.067708333333332,
+      "path": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-baseline-v3-barrier.frames/batch-2/frame_000625.jpg",
+      "sha256": "db278b1f4718ac45c04d49d2562844b2a4d9a6c104e19412080d6c4c84c0fcfd",
+      "visualObservation": "Name overlay sits in the lower left while the presenter remains full screen and the face unobstructed."
+    },
+    {
+      "frameIndex": 744,
+      "time": 31.031,
+      "path": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-baseline-v3-barrier.frames/batch-3/frame_000744.jpg",
+      "sha256": "687eba08e70a733bf8108f2c58d5b8618666ed074155e900a6cd0303ca616588",
+      "visualObservation": "Full presenter composition returns with no leftover title or diagram visible."
+    }
+  ],
+  "method": "Direct visual inspection of the five actual JPEG95 native captures using view_image.",
+  "limitations": [
+    "Five selected baseline frames only; not all 55 images, a motion review, candidate parity, or full-video approval.",
+    "No image or authored source was changed."
+  ]
+}

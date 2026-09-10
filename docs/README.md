@@ -4,12 +4,14 @@
 
 1. [`PIPELINE.md`](PIPELINE.md) — the canonical doctrine: footage in → in-house render → **optional** Palmier mirror out. Wins every contradiction.
 2. [`PRODUCER_README.md`](producer/PRODUCER_README.md) — the operator's manual: what to ask for and what you get back.
-3. [`HANDOFF.md`](HANDOFF.md) — current state: the verified `/producer` loop, test invocation, known gaps.
+3. [`12_SHORT_LONG_EXECUTABLE_MATRIX.md`](producer/command-driven-editing/12_SHORT_LONG_EXECUTABLE_MATRIX.md) — current route/workflow behavior, incremental boundaries, and explicit blockers.
+4. [`HANDOFF.md`](HANDOFF.md) — historical 2026-07-10 implementation snapshot; not current release evidence.
 
 New to the whole app? Start at the repo root [`README.md`](../README.md) (setup + the easy **Claude Code desktop** path) and [`CLAUDE.md`](../CLAUDE.md) (architecture + read-order).
 
 ## Architecture / design records
 
+- [`COMMAND_DRIVEN_EDITING_EXECUTION_PLAN.md`](producer/COMMAND_DRIVEN_EDITING_EXECUTION_PLAN.md) — modular next-step plan beginning with the audited reuse/extend/replace map, then cut-first/autopilot workflows, typed incremental edits, custom HyperFrames scenes, range captions, Palmier hybrid review, legacy regression gates, and bounded performance qualification.
 - [`PRODUCER_PLAN.md`](producer/PRODUCER_PLAN.md) — full architecture design record.
 - [`AUTO_EDIT_LANE.md`](producer/AUTO_EDIT_LANE.md) — the one-click Auto-edit lane: the detached worker + bounded plan-review/QC controller (how the GUI actually drives the CLI brain).
 - [`HEADLESS_EXECUTION_OPTIMIZATION_DOSSIER.md`](producer/HEADLESS_EXECUTION_OPTIMIZATION_DOSSIER.md) — living decision record and confidence gates for the active Claude Code/Codex Desktop → deterministic-MP4 optimization; GUI and Palmier execution are excluded.
@@ -30,7 +32,7 @@ New to the whole app? Start at the repo root [`README.md`](../README.md) (setup 
 - [`HEADLESS_EXECUTION_ADVERSARIAL_AUDIT_2026-07-19_ROUND_14.md`](audits/HEADLESS_EXECUTION_ADVERSARIAL_AUDIT_2026-07-19_ROUND_14.md) — current MP4-only implementation audit; closes request-entry, source-capture, archive, build, worker, and controller-lease attacks while disproving direct startup reconciliation.
 - [`LOCAL_CODEX_AUDIT.md`](audits/LOCAL_CODEX_AUDIT.md) — local Codex/Sol capability + data-egress matrix.
 - [`PRODUCER_EDGE_CASES.md`](producer/PRODUCER_EDGE_CASES.md) — error-handling scenarios.
-- [`PRODUCER_MOTION_GRAPHICS_PLAN.md`](producer/PRODUCER_MOTION_GRAPHICS_PLAN.md) — MG-track design record (**historical**: header still says DRAFT, but the MG system shipped — the live map is `scripts/producer/CLAUDE.md`).
+- [`PRODUCER_MOTION_GRAPHICS_PLAN.md`](producer/PRODUCER_MOTION_GRAPHICS_PLAN.md) — MG-track design record (**historical**: the registered composition system shipped; this is not a claim that Ask Editor can author arbitrary one-off motion — the live map is `scripts/producer/CLAUDE.md`).
 - GUI performance: [`GUI_UX_AUDIT.md`](audits/GUI_UX_AUDIT.md) · [`GUI_LATENCY_TEARDOWN.md`](audits/GUI_LATENCY_TEARDOWN.md) · [`PRODUCER_LATENCY_OPTIMIZATION_PUNCHLIST.md`](producer/PRODUCER_LATENCY_OPTIMIZATION_PUNCHLIST.md).
 - Defect ledger + QC brief: `scripts/producer/docs/findings/` (`FAILURE_LEDGER.md`, `QC_CHECKLIST.md`).
 

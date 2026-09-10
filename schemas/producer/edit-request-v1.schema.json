@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/edit-request-v1.schema.json",
+  "title": "EditRequestV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "requestId",
+    "idempotencyKey",
+    "parentRevisionHash",
+    "workflow",
+    "rawIntent",
+    "submittedAt",
+    "clauses"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "requestId": { "$ref": "#/$defs/uuid" },
+    "idempotencyKey": { "$ref": "#/$defs/uuid" },
+    "parentRevisionHash": { "$ref": "#/$defs/sha256" },
+    "workflow": { "enum": ["cut-first", "autopilot"] },
+    "rawIntent": { "type": "string", "minLength": 1, "maxLength": 100000 },
+    "submittedAt": { "type": "string", "format": "date-time" },
+    "clauses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "clause-state-v1.schema.json"
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "uuid": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

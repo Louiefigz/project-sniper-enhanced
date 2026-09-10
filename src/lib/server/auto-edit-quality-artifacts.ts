@@ -16,6 +16,8 @@ import {
   type ApprovalRecord,
 } from "./auto-edit-approval";
 import { fileSha256 } from "./auto-edit-hash";
+import { QC_PROMOTION_RECONCILIATION_FILE } from
+  "./ask-editor-reconciliation";
 
 export type {
   ApprovalRecord,
@@ -28,6 +30,8 @@ export type {
 export const AUTO_EDIT_QC_DIR = ".sniper-qc";
 export const AUTO_EDIT_APPROVAL_FILE = ".sniper-qc-approved.json";
 export const AUTO_EDIT_PREVIEW_STALE_FILE = ".sniper-preview-stale.json";
+export const AUTO_EDIT_PROMOTION_RECONCILIATION_FILE =
+  QC_PROMOTION_RECONCILIATION_FILE;
 
 function safeToken(token: string): string {
   return token.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-96);
@@ -195,50 +199,13 @@ export function invalidateApprovedPreview(dir: string, reason: string): void {
   }
 }
 
-function moveIfPresent(source: string, destination: string): void {
-  if (!existsSync(source)) return;
-  rmSync(destination, { recursive: true, force: true });
-  renameSync(source, destination);
-}
-
-function promoteDiagnostics(candidateDir: string, producerDir: string): void {
-  for (const name of ["audit_report.json", "audit_report.md", "graphics_placements.json"]) {
-    const source = path.join(candidateDir, name);
-    const destination = path.join(producerDir, name);
-    rmSync(destination, { recursive: true, force: true });
-    if (existsSync(source)) cpSync(source, destination, { recursive: true, force: true });
-  }
-  const frames = path.join(candidateDir, "audit_frames");
-  const framesDestination = path.join(producerDir, "audit_frames");
-  rmSync(framesDestination, { recursive: true, force: true });
-  if (existsSync(frames)) cpSync(frames, framesDestination, {
-    recursive: true, force: true,
-  });
-}
-
-function promoteMedia(candidate: string, producerDir: string): void {
-  const candidateProof = `${candidate}.assembled.json`;
-  const candidateProxy = candidate.replace(/\.mp4$/, ".proxy.mp4");
-  moveIfPresent(candidate, path.join(producerDir, "final.mp4"));
-  moveIfPresent(candidateProof, path.join(producerDir, "final.mp4.assembled.json"));
-  moveIfPresent(candidateProxy, path.join(producerDir, "final.proxy.mp4"));
-}
-
-function assertPromotionAuthority(candidate: string, producerDir: string, record: ApprovalRecord): void {
+export function assertPromotionAuthority(candidate: string, producerDir: string, record: ApprovalRecord): void {
   if (!existsSync(candidate) || !existsSync(`${candidate}.assembled.json`)) {
     throw new Error("approved candidate or its assembly authority proof is missing");
   }
   if (!approvalEvidenceValid(producerDir, candidate, record)) {
     throw new Error("approved candidate or its QC evidence does not match the approval record");
   }
-}
-
-function writeApproval(dir: string, record: ApprovalRecord): void {
-  const destination = approvalPath(dir);
-  const temporary = `${destination}.${randomUUID()}.tmp`;
-  writeFileSync(temporary, `${JSON.stringify(record, null, 2)}\n`, { flag: "wx", mode: 0o600 });
-  renameSync(temporary, destination);
-  rmSync(previewStalePath(dir), { force: true });
 }
 
 export function writeQualityJson(destination: string, value: unknown): string {
@@ -249,19 +216,14 @@ export function writeQualityJson(destination: string, value: unknown): string {
   return destination;
 }
 
-export function promoteApprovedCandidate(
-  candidate: string,
-  producerDir: string,
-  record: ApprovalRecord,
-): void {
-  assertPromotionAuthority(candidate, producerDir, record);
-  const candidateDir = path.dirname(candidate);
-  promoteMedia(candidate, producerDir);
-  promoteDiagnostics(candidateDir, producerDir);
-  writeApproval(producerDir, record);
-}
-
 export function preserveReviewArtifact(source: string, destination: string): void {
   mkdirSync(path.dirname(destination), { recursive: true });
   if (existsSync(source)) cpSync(source, destination, { recursive: true, force: true });
 }
+
+export {
+  candidatePromotionTransactionId,
+  promoteApprovedCandidate,
+  recoverApprovedCandidatePromotionSync,
+  type CandidatePromotionHooks,
+} from "./auto-edit-candidate-promotion";

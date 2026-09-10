@@ -14,7 +14,8 @@ _IMAGE = "sha256:" + "a" * 64
 
 
 def _paths() -> cr.RenderPaths:
-    runtime = DockerRuntime("/docker", "/docker.sock", _IMAGE, "501:20", {})
+    runtime = DockerRuntime("/docker", "/docker.sock", _IMAGE, "501:20",
+                            {"labels": {"io.project-sniper.hyperframes-version": "0.7.33"}})
     snapshot = SealedInput("/private/render-input.tar", "b" * 64, ())
     return cr.RenderPaths(runtime, "/docker-config", snapshot,
                           "/private/copied.mov")
@@ -41,7 +42,7 @@ class ContainerRendererTests(unittest.TestCase):
         paths = _paths()
         request = cr.RenderRequest("compositions/section-marker.html", "mov",
                                    "/final/section-marker.mov", paths.snapshot,
-                                   "sniper-render-" + "d" * 32)
+                                   "sniper-render-" + "d" * 32, 30000 / 1001)
         command = cr._command(paths, request, "sniper-render-test")
         self.assertEqual(command[command.index("--network") + 1], "none")
         self.assertIn("--read-only", command)
@@ -52,7 +53,7 @@ class ContainerRendererTests(unittest.TestCase):
                          "unix:///docker.sock")
         joined = "\n".join(command)
         self.assertIn("src=/private/render-input.tar", joined)
-        self.assertIn("/output:rw,nosuid,nodev,noexec,size=512m", joined)
+        self.assertIn("/output:rw,nosuid,nodev,noexec,size=1g", joined)
         self.assertIn("--detach", command)
         self.assertNotIn("node_modules", joined)
         self.assertNotIn("src=/pipeline", joined)
@@ -60,6 +61,8 @@ class ContainerRendererTests(unittest.TestCase):
         self.assertEqual(command[command.index("--log-driver") + 1], "none")
         self.assertEqual(command[command.index("--memory-swap") + 1], "4g")
         self.assertIn("io.project-sniper.render-name=sniper-render-test", command)
+        self.assertEqual(
+            command[command.index("--fps") + 1], "30000/1001")
 
     def test_environment_has_no_account_or_secret_state(self) -> None:
         env = cr._container_env(_paths().snapshot)

@@ -1,6 +1,10 @@
 import { createHash } from "crypto";
 import { closeSync, existsSync, openSync, readSync } from "fs";
 import type { AutoEditCtx } from "@/app/api/producer/auto-edit/stream";
+import {
+  DEFAULT_AUTO_EDIT_DELIVERY_POLICY,
+  resolvedAutoEditDeliveryPolicy,
+} from "@/lib/producer/auto-edit-delivery-policy";
 
 const HASH_CHUNK_BYTES = 1024 * 1024;
 
@@ -16,19 +20,41 @@ function compareCodePoints(left: string, right: string): number {
   return leftPoints.length - rightPoints.length;
 }
 
-function stableValue(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (!value || typeof value !== "object") return value;
-  return Object.fromEntries(
-    Object.entries(value as Record<string, unknown>)
-      .sort(([left], [right]) => compareCodePoints(left, right))
-      .map(([key, item]) => [key, stableValue(item)]),
-  );
+function canonicalToken(value: unknown): string | undefined {
+  if (Array.isArray(value)) {
+    const rows = Array.from(
+      value, (item) => canonicalToken(item) ?? "null");
+    return `[${rows.join(",")}]`;
+  }
+  if (typeof value === "bigint") {
+    throw new Error("canonical bigint is outside the JSON domain");
+  }
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)
+        || (Number.isInteger(value) && !Number.isSafeInteger(value))) {
+      throw new Error("canonical number is outside the cross-runtime domain");
+    }
+    return JSON.stringify(value);
+  }
+  if (value === null || typeof value === "string"
+      || typeof value === "boolean") return JSON.stringify(value);
+  if (typeof value !== "object") return undefined;
+  const entries = Object.entries(value as Record<string, unknown>)
+    .sort(([left], [right]) => compareCodePoints(left, right))
+    .flatMap(([key, item]) => {
+      const token = canonicalToken(item);
+      return token === undefined ? [] : [`${JSON.stringify(key)}:${token}`];
+    });
+  return `{${entries.join(",")}}`;
 }
 
 /** Compact JSON with Python sort_keys=True Unicode code-point key order. */
 export function canonicalJson(value: unknown): string {
-  return JSON.stringify(stableValue(value));
+  const token = canonicalToken(value);
+  if (token === undefined) {
+    throw new Error("canonical value is outside the JSON domain");
+  }
+  return token;
 }
 
 export function canonicalJsonSha256(value: unknown): string {
@@ -42,13 +68,20 @@ export function autoEditRequestKey(ctx: AutoEditCtx): string {
     templateUsage: _runtimeTemplateUsage,
     brainSessionId: _runtimeBrainSessionId,
     brainSessionEstablished: _runtimeBrainSessionEstablished,
-    ...request
+    ...requestValue
   } = ctx;
   void _runtimeDoctrine;
   void _runtimePipeline;
   void _runtimeTemplateUsage;
   void _runtimeBrainSessionId;
   void _runtimeBrainSessionEstablished;
+  const request = { ...requestValue } as Partial<AutoEditCtx>;
+  // The historical request identity omitted deliveryPolicy because every run
+  // was hybrid. Keep that canonical spelling for the default so old durable
+  // journals remain resumable; MP4-only remains a distinct identity.
+  if (resolvedAutoEditDeliveryPolicy(request) === DEFAULT_AUTO_EDIT_DELIVERY_POLICY) {
+    delete request.deliveryPolicy;
+  }
   return canonicalJsonSha256(request);
 }
 

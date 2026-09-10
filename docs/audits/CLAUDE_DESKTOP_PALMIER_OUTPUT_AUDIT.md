@@ -1,5 +1,12 @@
 # Claude Code Desktop → Palmier output audit
 
+> **Historical audit.** Its prescribed first-60 exercise was later run and
+> exposed additional failures rather than qualifying the product: 56m48s,
+> candidate QC still pending, seven lost karaoke timings, and an accepted
+> 3840×2160 canvas. Current local contracts and remaining connected blockers are
+> tracked in
+> `docs/producer/command-driven-editing/17_P5_EXIT_AUDIT.md`.
+
 ## Verdict
 
 The poor output was not primarily a model-intelligence problem. The repository
@@ -101,5 +108,6 @@ export hash, and deterministic audit digest.
   LUT are allowed; guessed presets are not.
 - Advanced b-roll focus operations may need an own-screen rendered asset even
   though ordinary b-roll placement is native.
-- Full first-60-seconds live proof remains required before calling the whole
-  Desktop path production-proven.
+- A passing representative connected short/long cohort remains required before
+  calling the Desktop path production-proven; the historical first-60 run was
+  a falsifier, not that proof.

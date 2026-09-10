@@ -11,6 +11,7 @@ import {
   projectStatusUrl,
 } from "@/lib/producer/project-status-polling";
 import { SerialRequestQueue } from "@/lib/producer/serial-request-queue";
+import type { RunTimingReport } from "@/lib/producer/run-timing";
 import {
   STAGE_ORDER,
   type ProducerRunState,
@@ -62,6 +63,7 @@ export interface ProjectStatus {
   palmier: PalmierProjectState;
   planRefit?: ProjectPlanRefitReceipt | null;
   run: ProducerRunState | null;
+  timing?: RunTimingReport | null;
 }
 
 export { STAGE_ORDER };

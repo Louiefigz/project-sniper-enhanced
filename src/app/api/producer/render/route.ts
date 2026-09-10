@@ -17,6 +17,7 @@ import {
 } from "@/lib/server/producer-run-registry";
 import { guardProjectMutation, mutationProjectRoot } from "../../_lib/project-mutation";
 import { assertTemplateUsageApprovalCurrent } from "@/lib/server/template-usage-approval";
+import { editorReadyRenderGraphArgs } from "@/lib/server/current-render-graph-command";
 
 export const maxDuration = 600;
 export const dynamic = "force-dynamic";
@@ -31,12 +32,8 @@ const ASSEMBLE = path.join(SCRIPTS_DIR, "producer", "assemble.py");
 //      base_final.mp4 so it becomes the assemble base.
 //   2. assemble.py <base_final> <edit_plan> <final.mp4> --fingerprint --auto-base
 //      → composites graphicsTrack (+ music) onto the base.
-// A monolithic render left no base artifacts, so EVERY editor affordance
-// (assemble / words / speech-cleanup / source-frame) 409'd on a fresh render.
-// This way each new render opens FULLY working in the editor and re-renders
-// on the fast assemble path. Both processes' NDJSON streams through as SSE,
-// stage-tagged. render.py cleans its OWN temp workdir only when --workdir is
-// omitted; we pass one under os.tmpdir(), so THIS route owns its cleanup.
+// This leaves editor base artifacts, streams both stages as SSE, and gives the
+// route ownership of the explicit temporary workdir.
 
 interface Emitter {
   raw: (line: string) => void; // one NDJSON line → SSE data frame, verbatim
@@ -187,8 +184,12 @@ export async function POST(req: NextRequest) {
     throw error;
   }
 
-  const baseArgs = [RENDER, resolvedPlanPath, manifestPath, out, "--workdir", workDir, "--skip-graphics"];
-  const asmArgs = [ASSEMBLE, baseVideo, outPlanPath, finalVideo, "--fingerprint", fingerprint, "--auto-base"];
+  const { baseArgs, assembleArgs: asmArgs } = editorReadyRenderGraphArgs({
+    producerDir: out, sourcePlanPath: resolvedPlanPath,
+    outputPlanPath: outPlanPath, manifestPath, basePath: baseVideo,
+    outputPath: finalVideo, fingerprintPath: fingerprint, workDir,
+    renderScript: RENDER, assembleScript: ASSEMBLE,
+  });
   dlog("producer:render", "editor-ready render", { base: baseArgs.slice(1), assemble: asmArgs.slice(1) });
 
   const cleanup = () => rmSync(workDir, { recursive: true, force: true });

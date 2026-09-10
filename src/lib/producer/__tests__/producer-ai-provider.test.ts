@@ -10,10 +10,10 @@ import {
   claudeSettings,
   codexSettings,
 } from "../../../app/api/_lib/ai-provider";
-import {
-  buildAiEditInvocation,
-  buildAiEditPrompt,
-} from "../../../app/api/producer/ai-edit/route";
+import { buildAiEditInvocation } from
+  "../../../app/api/producer/ai-edit/execution";
+import { buildAiEditPrompt } from
+  "../../../app/api/producer/ai-edit/prompt";
 import {
   authoringPermissionDenial,
   authoringStreamSessionId,
@@ -28,6 +28,7 @@ import { claudeCutAuthoringBashPatterns } from
   "../../../app/api/producer/auto-edit/cut-authoring-prompt";
 import type { AutoEditCtx } from "../../../app/api/producer/auto-edit/stream";
 import { authoringReasoning } from "../../../app/api/producer/auto-edit/authoring-reasoning";
+import { MODES, SCOPES } from "../intent-presets";
 
 const ctx: AutoEditCtx = {
   dir: "/tmp/sniper job/producer",
@@ -91,6 +92,10 @@ assert.deepEqual(
     PATH: "/usr/bin",
     CLAUDE_CONFIG_DIR: "/Users/test/.claude",
     CLAUDE_CODE_OAUTH_TOKEN: "subscription-token",
+    CLAUDE_CODE_USE_BEDROCK: "1",
+    CLAUDE_CODE_USE_VERTEX: "1",
+    CLAUDE_CODE_API_KEY_HELPER_TTL_MS: "1",
+    CLAUDE_CODE_DISABLE_FAST_MODE: "0",
     ANTHROPIC_API_KEY: "must-not-leak",
     ANTHROPIC_AUTH_TOKEN: "must-not-leak",
     DEEPGRAM_API_KEY: "must-not-leak",
@@ -101,6 +106,7 @@ assert.deepEqual(
     PATH: "/usr/bin",
     CLAUDE_CONFIG_DIR: "/Users/test/.claude",
     CLAUDE_CODE_OAUTH_TOKEN: "subscription-token",
+    CLAUDE_CODE_DISABLE_FAST_MODE: "1",
   },
 );
 
@@ -113,6 +119,9 @@ for (const prompt of [editPrompt, codexPrompt]) {
   assert.ok(prompt.includes(`${process.cwd()}/scripts/producer/plan_lint.py`));
   assert.ok(prompt.includes("Requested lanes: cuts"));
   assert.ok(prompt.includes("fresh read-only critic"));
+  assert.equal(prompt.includes("treatmentMap, captionsTrack"), false);
+  assert.ok(prompt.includes("CaptionTrackV1 is renderable"));
+  assert.ok(prompt.includes("controller code stamps"));
 }
 assert.ok(codexPrompt.includes("BEGIN_OPERATOR_REQUEST_JSON"));
 assert.ok(codexPrompt.includes(JSON.stringify({
@@ -197,6 +206,10 @@ const [cutSpeech, cutGate] = claudeCutAuthoringBashPatterns(ctx);
 assert.ok(cutPrompt.includes("CUT EDITOR"));
 assert.ok(cutPrompt.includes("--previsual"));
 assert.ok(cutPrompt.includes("CUT_AUTHORING_BLOCKED permission_allowlist_mismatch"));
+assert.ok(cutPrompt.includes(`"mode":"${MODES.join("|")}"`));
+assert.ok(cutPrompt.includes(`"scope":"${SCOPES.join("|")}"`));
+assert.equal(cutPrompt.includes('"mode":"longform|shortform"'), false);
+assert.equal(cutPrompt.includes('"scope":"clean|produced"'), false);
 assert.equal(cutPrompt.includes("graphics_planner.py"), false);
 assert.ok(cutAllowed.includes(`Bash(${cutSpeech})`));
 assert.ok(cutAllowed.includes(`Bash(${cutGate})`));
@@ -251,7 +264,7 @@ async function testCodexAuthoring(): Promise<void> {
       assert.ok(options.prompt.includes(`${process.cwd()}/scripts/producer/planner/pacing.py`));
       assert.ok(options.prompt.includes(`${ctx.dir}/graphics_proposal.json`));
       assert.equal(options.prompt.includes("run graphics_planner.py"), false);
-      options.onEvent?.({ type: "item.completed", item: { type: "agent_message" } });
+      options.onEvent?.({ type: "item.completed", item: { type: "agent_message", text: "AUTHORED ok segments=7 graphics=3" } });
       return {
         message: "AUTHORED ok segments=7 graphics=3",
         stderr: "",
@@ -271,7 +284,7 @@ async function testCodexAuthoring(): Promise<void> {
   });
   assert.deepEqual(events[1], {
     type: "item.completed",
-    item: { type: "agent_message" },
+    item: { type: "agent_message", text: "AUTHORED ok segments=7 graphics=3" },
     event: "authoring_item.completed",
     provider: "codex",
   });

@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/cut-repair-ripple-reopen-action-v1.schema.json",
+  "title": "CutRepairRippleReopenActionV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "idempotencyKey",
+    "expectedParentRevisionHash",
+    "parentPictureLockHash",
+    "target",
+    "targetHash",
+    "analysis",
+    "analysisHash",
+    "impactHash",
+    "preservedPlanObjectHash",
+    "preservedPlanContentHash",
+    "preservedTimelineMapHash",
+    "preservedRenderGraphHash",
+    "preservedProjectionReceiptHash",
+    "requestedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "cut-repair-ripple-reopen-action" },
+    "idempotencyKey": { "$ref": "#/$defs/uuid" },
+    "expectedParentRevisionHash": { "$ref": "#/$defs/sha256" },
+    "parentPictureLockHash": { "$ref": "#/$defs/sha256" },
+    "target": { "$ref": "#/$defs/target" },
+    "targetHash": { "$ref": "#/$defs/sha256" },
+    "analysis": {
+      "$ref": "cut-repair-ripple-analysis-v1.schema.json"
+    },
+    "analysisHash": { "$ref": "#/$defs/sha256" },
+    "impactHash": { "$ref": "#/$defs/sha256" },
+    "preservedPlanObjectHash": { "$ref": "#/$defs/sha256" },
+    "preservedPlanContentHash": { "$ref": "#/$defs/sha256" },
+    "preservedTimelineMapHash": { "$ref": "#/$defs/sha256" },
+    "preservedRenderGraphHash": { "$ref": "#/$defs/sha256" },
+    "preservedProjectionReceiptHash": {
+      "oneOf": [
+        { "$ref": "#/$defs/sha256" },
+        { "type": "null" }
+      ]
+    },
+    "requestedAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["phrase"],
+      "properties": {
+        "phrase": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "sourceId": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "occurrence": { "type": "integer", "minimum": 1 },
+        "speaker": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "beforeContext": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "afterContext": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "approximateSourceSample": { "type": "integer", "minimum": 0 },
+        "toleranceSamples": { "type": "integer", "minimum": 0 }
+      },
+      "dependentRequired": {
+        "approximateSourceSample": ["toleranceSamples"],
+        "toleranceSamples": ["approximateSourceSample"]
+      }
+    }
+  }
+}

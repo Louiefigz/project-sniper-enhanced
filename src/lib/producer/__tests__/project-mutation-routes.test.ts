@@ -9,8 +9,12 @@ const routes = [
   "src/app/api/producer/ingest/route.ts",
   "src/app/api/producer/ai-edit/route.ts",
   "src/app/api/producer/render/route.ts",
+  "src/app/api/producer/scene-review/route.ts",
   "src/app/api/producer/assemble/route.ts",
   "src/app/api/producer/palmier/push/route.ts",
+  "src/app/api/producer/palmier/workspace/route.ts",
+  "src/app/api/producer/palmier/open/route.ts",
+  "src/app/api/producer/palmier/ownership/route.ts",
 ];
 
 for (const route of routes) {
@@ -26,7 +30,8 @@ for (const route of [
 }
 assert.match(source("src/app/api/producer/save-plan/route.ts"), /clearTemplateUsageApproval\(/,
   "saving a draft must invalidate its prior template-history delivery authority");
-assert.match(source("src/app/api/producer/ai-edit/finalize.ts"), /writeTemplateUsageApproval\(/,
+assert.match(source("src/app/api/producer/ai-edit/finalize-sidecars.ts"),
+  /writeTemplateUsageApproval\)/,
   "surgical history authority must commit only after the critic passes and the candidate is promoted");
 assert.match(source("src/app/api/producer/save-plan/transaction.ts"),
   /atomicWriteJsonSync\(filePath, plan\)/);
@@ -40,6 +45,9 @@ assert.match(source("src/app/api/producer/auto-edit/route.ts"), /guardProjectMut
   "Auto Edit launch must fence concurrent mutation requests");
 assert.match(source("src/app/api/producer/render/route.ts"), /finally \{[\s\S]*releaseLease\(\)/,
   "fresh render must hold the shared writer lease through process exit and QC");
+assert.match(source("src/app/api/producer/scene-review/route.ts"),
+  /finally \{[\s\S]*guarded\.lease\.release\(\)/,
+  "private scene review must hold the shared writer lease through process exit");
 assert.match(source("src/app/api/producer/assemble/route.ts"), /guarded\.lease\.release\(\)/,
   "assemble must release its shared writer lease through its idempotent teardown");
 assert.match(source("src/app/api/producer/ai-edit/route.ts"),

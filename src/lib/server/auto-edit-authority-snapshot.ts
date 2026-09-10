@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import {
   existsSync,
   lstatSync,
@@ -7,10 +6,12 @@ import {
 } from "node:fs";
 import path from "node:path";
 import type { AutoEditCtx } from "@/app/api/producer/auto-edit/stream";
-import { fileSha256 } from "./auto-edit-hash";
+import { canonicalJsonSha256, fileSha256 } from "./auto-edit-hash";
 import { planContentHash } from "./auto-edit-authority";
 import { restoreAutoEditDoctrine } from "./auto-edit-doctrine";
 import { restoreAutoEditPipeline } from "./auto-edit-pipeline-authority";
+import { readCutPreviewObject, observeCutPreviewFile } from "@/app/api/producer/auto-edit/cut-preview-receipt";
+import { objectValue } from "@/lib/producer/contracts/validation";
 
 export const AUTO_EDIT_AUTHORITY_SCHEMA_VERSION = 1 as const;
 export const AUTO_EDIT_QUALITY_POLICY_VERSION = 1 as const;
@@ -37,18 +38,8 @@ function compareText(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 
-function stableValue(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (!value || typeof value !== "object") return value;
-  return Object.fromEntries(
-    Object.entries(value as Record<string, unknown>)
-      .sort(([left], [right]) => compareText(left, right))
-      .map(([key, item]) => [key, stableValue(item)]),
-  );
-}
-
 export function stableAuthorityHash(value: unknown): string {
-  return createHash("sha256").update(JSON.stringify(stableValue(value))).digest("hex");
+  return canonicalJsonSha256(value);
 }
 
 function logicalFile(filePath: string, base: string): FileAuthority {
@@ -74,7 +65,7 @@ function storedIntent(ctx: AutoEditCtx): unknown {
   return (project as Record<string, unknown>).intent ?? null;
 }
 
-function transcriptFiles(ctx: AutoEditCtx): FileAuthority[] {
+function transcriptFiles(ctx: Pick<AutoEditCtx, "manifestPath" | "transcriptsDir">): FileAuthority[] {
   const manifest = jsonValue(ctx.manifestPath) as { sources?: unknown } | null;
   if (!manifest || !Array.isArray(manifest.sources)) return [];
   return manifest.sources.map((source, index) => {
@@ -87,6 +78,25 @@ function transcriptFiles(ctx: AutoEditCtx): FileAuthority[] {
       ? transcript : path.join(path.dirname(ctx.manifestPath), transcript);
     return logicalFile(resolved, ctx.transcriptsDir);
   });
+}
+
+function boundedTranscriptAuthority(source: unknown, ctx: Pick<AutoEditCtx, "manifestPath" | "transcriptsDir">): FileAuthority {
+  const name = objectValue(source, "authored source").transcriptPath;
+  if (typeof name !== "string" || !name.trim() || /[\0\r\n]/u.test(name)) throw new Error("Authored source requires a transcript path");
+  const resolved = path.resolve(path.dirname(ctx.manifestPath), name);
+  const held = readCutPreviewObject(resolved);
+  objectValue(held.value, "authored source transcript");
+  const relative = path.relative(ctx.transcriptsDir, resolved);
+  return { path: (relative && !relative.startsWith("..") ? relative : path.basename(resolved)).split(path.sep).join("/"), hash: held.sha256 };
+}
+
+/** Strict bounded reobservation for new authored intake; matches the existing transcript digest domain. */
+export function autoEditTranscriptDigest(ctx: Pick<AutoEditCtx, "manifestPath" | "transcriptsDir">): string {
+  const held = readCutPreviewObject(ctx.manifestPath), manifest = objectValue(held.value, "authored manifest");
+  if (!Array.isArray(manifest.sources) || !manifest.sources.length) throw new Error("Authored manifest requires sources");
+  const files = manifest.sources.map(source => boundedTranscriptAuthority(source, ctx));
+  if (observeCutPreviewFile(ctx.manifestPath, 16 * 1024 * 1024).sha256 !== held.sha256) throw new Error("Authored manifest changed during transcript observation");
+  return stableAuthorityHash(files);
 }
 
 function referenceFiles(ctx: AutoEditCtx): FileAuthority[] {

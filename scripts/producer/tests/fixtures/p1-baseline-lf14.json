@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "p1-shadow-lf14",
+  "evidenceClass": "synthetic-harness-validation",
+  "mode": "longform",
+  "durationFrames": 25200,
+  "fps": { "numerator": "30", "denominator": "1" },
+  "outputPaths": ["p1-shadow-lf14.output.json"]
+}

@@ -2,8 +2,8 @@
 """occupancy — THE shared frame-occupancy predicate (geometry contract v3 #3).
 
 One function decides what part of the delivery canvas is occupied: the
-expanded face+hair box, the body column, and the burned-caption band
-(``producer_config.CAPTIONS['y_band']``, honoring the plan's
+expanded face+hair box, the body column, and the aspect-aware caption band,
+honoring the plan's
 ``captions.bandYOffsetPx`` up-shift). Both the PLAN-TIME feasibility lint
 (:mod:`planner.geometry_feasibility`) and the RENDER-TIME placement authority
 (``free_space.build_free_map`` → ``resolve_offset_v2``) consume
@@ -32,7 +32,9 @@ from dataclasses import dataclass
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from producer_config import CAPTIONS, FREE_SPACE  # noqa: E402
+from producer_config import (CANVAS_BY_ASPECT, CAPTION_LAYOUT_BY_ASPECT,  # noqa: E402
+                             FREE_SPACE)
+from planner.delivery_canvas import canvas_aspect  # noqa: E402
 from planner.free_space import (Grid, FreeMap, body_column,  # noqa: E402
                                 build_occupancy, candidate_regions,
                                 expand_face, score_regions)
@@ -85,8 +87,8 @@ def plan_band_offset(plan: dict) -> float:
 def caption_band_rect(canvas: tuple, band_y_offset_px: float = 0.0) -> tuple:
     """The burned-caption occupancy rect ``(x0, y0, x1, y1)`` px.
 
-    Full canvas width at ``CAPTIONS['y_band']``, shifted UP by the plan's
-    ``bandYOffsetPx`` (the C12 up-shift) and floored at 0.
+    The configured aspect band is scaled to the actual delivery resolution,
+    then shifted up by the equivalently scaled ``bandYOffsetPx``.
 
     Args:
         canvas: ``(width, height)`` of the delivery canvas.
@@ -95,9 +97,13 @@ def caption_band_rect(canvas: tuple, band_y_offset_px: float = 0.0) -> tuple:
     Returns:
         The band rect in canvas px.
     """
-    y0, y1 = CAPTIONS["y_band"]
-    return (0.0, max(0.0, y0 - band_y_offset_px), float(canvas[0]),
-            max(0.0, y1 - band_y_offset_px))
+    aspect = canvas_aspect(canvas)
+    base = CANVAS_BY_ASPECT[aspect]
+    scale_y = float(canvas[1]) / float(base["height"])
+    y0, y1 = CAPTION_LAYOUT_BY_ASPECT[aspect]["y_band"]
+    shift = float(band_y_offset_px) * scale_y
+    return (0.0, max(0.0, y0 * scale_y - shift), float(canvas[0]),
+            max(0.0, y1 * scale_y - shift))
 
 
 def occupied_rects(face_px: tuple, canvas: tuple,

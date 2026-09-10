@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs, { existsSync } from "fs";
 import path from "path";
 import {
   approvalPath,
@@ -12,6 +12,8 @@ import {
 } from "@/lib/server/auto-edit-quality-policy";
 import { lookupProducerManifest } from "@/lib/server/producer-manifest";
 import { templateUsageApprovalRequired } from "@/lib/server/template-usage-approval";
+
+import { producerRunActive } from "@/lib/server/producer-run-registry";
 
 // Shared helpers for the /api/producer/palmier/* routes. Before handoff,
 // Sniper's reviewed plan builds the managed Palmier workspace. After handoff,
@@ -145,4 +147,54 @@ export async function palmierRpc(
     if ("result" in obj) return { result: obj.result, sessionId: sid };
   }
   throw new Error(`Palmier returned no JSON-RPC response for ${method}`);
+}
+
+export interface Handoff {
+  projectPath: string;
+  timelineId: string;
+  planHash: string;
+  ownership: "sniper" | "palmier";
+}
+
+interface HandoffError {
+  error: string;
+  status: number;
+}
+
+/** Ownership may not move while Sniper is still changing the managed project. */
+export function activePalmierHandoffBlock(dir: string): string | null {
+  return producerRunActive(dir)
+    ? "Sniper is still working on this project. Stop and keep its checkpoint before taking control in Palmier."
+    : null;
+}
+
+export function loadHandoff(dir: string): Handoff | HandoffError {
+  const state = readJsonObject(palmierStatePath(dir));
+  const projectPath = typeof state?.projectPath === "string" && existsSync(state.projectPath)
+    ? state.projectPath
+    : null;
+  const timelineId = typeof state?.latestTimelineId === "string" ? state.latestTimelineId : null;
+  const planHash = typeof state?.lastPushPlanHash === "string" ? state.lastPushPlanHash : null;
+  const ownership = state?.ownership === "palmier" ? "palmier" : "sniper";
+  if (!projectPath || !timelineId || !planHash) {
+    return { error: "No verified Palmier handoff exists for this project yet.", status: 409 };
+  }
+  const parity = asObject(state?.parity);
+  const verification = asObject(state?.verification);
+  const proofMatches = verification?.planHash === planHash
+    && verification?.timelineId === timelineId;
+  if (state?.schemaVersion !== 4 || state?.mirrorMode !== "visual-master"
+      || parity?.mirrorReady !== true || verification?.ok !== true || !proofMatches) {
+    return {
+      error: "Palmier mirror proof is incomplete. Update the mirror before opening it.",
+      status: 409,
+    };
+  }
+  return { projectPath, timelineId, planHash, ownership };
+}
+
+function asObject(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
 }

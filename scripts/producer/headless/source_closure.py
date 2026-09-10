@@ -1,7 +1,9 @@
 """Strict local dependency discovery for sealed motion HTML and CSS."""
 from __future__ import annotations
 
+import os
 import re
+from collections.abc import Callable, Iterable
 from html.parser import HTMLParser
 
 _CSS_REF = re.compile(
@@ -127,9 +129,11 @@ def _references(relative: str, data: bytes) -> set[str]:
     return set()
 
 
-def discover_sources(composition_html: str, reader) -> dict[str, bytes]:
-    """Read the recursively declared, root-relative local source closure."""
-    pending = set(_BASE_FILES) | _html_references(composition_html)
+def discover_source_set(compositions: Iterable[str], reader: Callable[[str], bytes]) -> dict[str, bytes]:
+    """Read each shared dependency once per observation, with no persistent cache."""
+    pending = set(_BASE_FILES)
+    for composition in compositions:
+        pending.update(_html_references(composition))
     sources: dict[str, bytes] = {}
     while pending:
         relative = min(pending)
@@ -140,3 +144,28 @@ def discover_sources(composition_html: str, reader) -> dict[str, bytes]:
         sources[relative] = data
         pending.update(_references(relative, data) - sources.keys())
     return sources
+
+
+def discover_sources(composition_html: str, reader: Callable[[str], bytes]) -> dict[str, bytes]:
+    """Read the recursively declared, root-relative local source closure."""
+    return discover_source_set((composition_html,), reader)
+
+
+def _read_root_source(root: str, relative: str) -> bytes:
+    """Read one regular, non-symlink dependency below ``root``."""
+    candidate = os.path.abspath(os.path.join(root, relative))
+    if (os.path.commonpath((candidate, root)) != root
+            or os.path.islink(candidate) or not os.path.isfile(candidate)):
+        raise RuntimeError(f"invalid local render dependency: {relative}")
+    with open(candidate, "rb") as handle:
+        return handle.read()
+
+
+def discover_root_sources(composition_html: str,
+                          root: str) -> dict[str, bytes]:
+    """Discover a composition's closure below one canonical local root."""
+    canonical = os.path.abspath(root)
+    if canonical != root or os.path.islink(root) or not os.path.isdir(root):
+        raise RuntimeError("render source root is not a canonical directory")
+    return discover_sources(
+        composition_html, lambda relative: _read_root_source(root, relative))

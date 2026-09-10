@@ -36,7 +36,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # run-by-path: producer pkg root on sys.path
 from audio.audio_enhance import run_audio_enhance
 from audio.audio_gain import apply_gain, overlap_error, parse_windows
-from audio.master import build_pass2_afilter, dead_channel_prefix, measure_loudness
+from audio.master import (MASTERING_POLICY_VERSION, build_pass2_afilter,
+                          dead_channel_prefix, measure_loudness)
 from fingerprints import file_sha256, fingerprint_record, write_json_atomic
 from producer_config import ENCODE
 
@@ -142,7 +143,8 @@ def clear_audio_intent(fingerprint_path: str) -> None:
         pass
 
 
-def update_base_records(fingerprint_path: str, plan: dict) -> None:
+def update_base_records(fingerprint_path: str, plan: dict,
+                        mastering_policy: object = MASTERING_POLICY_VERSION) -> None:
     """Refresh base.fingerprint.json (split prints; outputDuration/manifestPath
     preserved) + the base_plan.json snapshot after an audio-only bus rebuild.
 
@@ -154,6 +156,9 @@ def update_base_records(fingerprint_path: str, plan: dict) -> None:
         with open(fingerprint_path) as f:
             rec = json.load(f)
     rec.update(fingerprint_record(plan))
+    # Recovery must describe the policy that actually produced these bytes.
+    # An old intent has no policy proof; do not bless it with current code.
+    rec["masteringPolicyVersion"] = mastering_policy
     write_json_atomic(fingerprint_path, rec)
     write_json_atomic(os.path.join(os.path.dirname(fingerprint_path),
                                    "base_plan.json"), plan, indent=1)
@@ -175,7 +180,7 @@ def commit_audio_base(base: str, new_base: str, plan: dict,
         audio_intent_path(fingerprint_path),
         {"newBaseHash": file_sha256(new_base),
          "oldBaseHash": file_sha256(base) if os.path.exists(base) else None,
-         "plan": plan})
+         "plan": plan, "masteringPolicyVersion": MASTERING_POLICY_VERSION})
     os.replace(new_base, base)
     update_base_records(fingerprint_path, plan)
     clear_audio_intent(fingerprint_path)
@@ -207,7 +212,8 @@ def recover_audio_intent(base: str, fingerprint_path: str) -> str | None:
     current = file_sha256(base) if os.path.exists(base) else None
     if current == intent.get("newBaseHash") and current is not None \
             and isinstance(intent.get("plan"), dict):
-        update_base_records(fingerprint_path, intent["plan"])
+        update_base_records(fingerprint_path, intent["plan"],
+                            intent.get("masteringPolicyVersion"))
         clear_audio_intent(fingerprint_path)
         return "finalized"
     clear_audio_intent(fingerprint_path)

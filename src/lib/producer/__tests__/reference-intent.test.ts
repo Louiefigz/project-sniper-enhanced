@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { buildAuthoringPrompt } from "../../../app/api/producer/auto-edit/authoring-prompt";
-import { validateReferenceSelection } from "../../../app/api/producer/auto-edit/route";
+import { validateReferenceSelection } from "../../../app/api/producer/auto-edit/saved-plan-request";
 import { parseAutoEditIntent, type AutoEditCtx } from "../../../app/api/producer/auto-edit/stream";
 import type { ReferenceDecision } from "../../../app/api/_lib/reference-types";
 import { buildAutoEditRequest, buildStarterPlan } from "../intent-flow";
@@ -196,6 +196,21 @@ assert.ok(prompt.includes("Never copy its words"));
 assert.ok(prompt.includes(JSON.stringify("Outdoor proof reel")));
 assert.ok(prompt.includes(JSON.stringify(ctx.referenceStudy!.title)));
 assert.equal(prompt.includes('"style": "Outdoor proof reel"'), false);
+
+const mimicPrompt = buildAuthoringPrompt({
+  ...ctx,
+  intent: validateIntent({
+    mode: "short", scope: "produced", lanes: {}, reference: mimicReference,
+  }),
+  referenceStudy: {
+    ...ctx.referenceStudy!,
+    id: mimicReference.id,
+    title: mimicReference.title,
+  },
+}, "codex");
+assert.ok(mimicPrompt.includes("reference-inspired guidance"));
+assert.ok(mimicPrompt.includes("not verified mimic"));
+assert.ok(mimicPrompt.includes("must not claim exact replication"));
 
 const decision: ReferenceDecision = {
   schemaVersion: 1,

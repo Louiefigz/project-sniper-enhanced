@@ -49,27 +49,28 @@ SLUG="<slug>"; VIDEO="<absolute path to the recording>"
 OUT="$HOME/ProjectSniper/$SLUG/segmenter"; mkdir -p "$OUT/clips"
 ```
 
-### 2. Transcribe (mirrors the app — Deepgram by default)
+### 2. Transcribe locally (no paid fallback)
 
-Load the app's env so the provider + keys match the GUI exactly, then transcribe.
-Deepgram is used when `DEEPGRAM_API_KEY` is set (the normal path); it receives the
-extracted **audio only**, never the video (the repo's no-video-egress rule).
+Use the installed local Whisper runtime/model. A saved key, provider environment
+variable, or missing local model is not permission to use a paid service. Do not
+source credential files for local transcription.
 
 ```bash
-# load both env files exactly like Next does (.env.local overrides .env).
-# NOTE the ./ prefix — zsh's `source` searches $PATH for a bare name.
-set -a; [ -f .env ] && . ./.env; [ -f .env.local ] && . ./.env.local; set +a
-.venv/bin/python3 scripts/transcribe.py "$VIDEO" > "$OUT/transcript.raw.jsonl" 2> "$OUT/transcribe.log"
+.venv/bin/python3 scripts/transcribe.py "$VIDEO" --provider local-whisper > "$OUT/transcript.raw.jsonl" 2> "$OUT/transcribe.log"
 tail -n 1 "$OUT/transcript.raw.jsonl" > "$OUT/transcript.json"
 ```
 
 The final stdout line is the result: `{"transcript": [ {start,end,text,words:[{word,start,end}]}, ... ]}`.
 If that last line has an `"error"` key:
-- `DEEPGRAM_API_KEY not set` → the user has no Deepgram key. Offer the keyless
-  local fallback (lower quality, no diarization): re-run the command above with
-  `SNIPER_TRANSCRIBE_PROVIDER=local-whisper` prefixed. (Needs `whisper-cli` + a
-  model — run `/setup` if missing.)
-- otherwise report the error verbatim; do not fabricate a transcript.
+- Missing `whisper-cli` or model → report the dependency; ask before downloading
+  or installing. Local transcription does not provide speaker diarization;
+  inspect word timing and uncertain speech instead of assuming paid-provider parity.
+- Otherwise report the error; do not fabricate a transcript or switch providers.
+
+Only a separate, explicit user authorization for this paid invocation allows
+`--provider deepgram --authorize-paid-asr deepgram` together. Never add those
+flags under a subscription/local-only request. Keep the distinct segmenter and
+clipper media/diarization responsibilities; no raw video egress.
 
 ### 3. Decide the segments (you, the brain)
 
@@ -129,6 +130,7 @@ they contain. Keep it short.
 ## Notes
 
 - Accepted inputs: mp4/mov/webm/mkv/avi/m4v (video) or common audio files.
-- Prerequisites (ffmpeg, `.venv`, Deepgram key or local whisper): run `/setup`
-  first if anything is missing.
-- No API keys are written anywhere; you only read `.env` / `.env.local` to match the app.
+- Prerequisites: ffmpeg, `.venv`, installed local Whisper runtime/model. Use
+  `/setup` with the user's installation authorization if anything is missing.
+- Use subscription-backed agent reasoning. No paid API or credit fallback is
+  authorized by a local transcription or segmentation request.

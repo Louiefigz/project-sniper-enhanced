@@ -1,10 +1,13 @@
 # Palmier visual-mirror and editability contract
 
-**Status:** enforced for bootstrap publication and fidelity proof. It is not the
-edit-authority contract. Once a managed Palmier working timeline exists,
-Palmier is the canonical editable source described in
-`PALMIER_CANONICAL_WORKFLOW.md`; Sniper's master is a reviewed seed/export, not
-permission to overwrite a newer Palmier revision.
+**Status:** enforced for approved exact-master publication and flat-mirror
+fidelity proof. That path is release-safe. It is not evidence that editable or
+hybrid Palmier delivery is qualified. The native candidate/promotion protocol
+is wired and production-callable locally, but remains isolated and P5-blocked
+pending representative connected short/long proof. Within that experimental
+workflow, Palmier authority follows `PALMIER_CANONICAL_WORKFLOW.md`; Sniper's
+master is a reviewed seed/export, not permission to overwrite a newer Palmier
+revision.
 
 ## Product invariant
 
@@ -44,13 +47,14 @@ render is gapless by construction; a black frame can only come from a hand-build
 ## Composition-doctrine coverage per aspect × path
 
 The rendered master carries the full doctrine for both aspects; the flat
-**mirror** copies it pixel-exact. The **native-translate** path (editable clips)
-is a future, additive option that today drops several lanes — never make it the
-default (it would lose the very doctrine being requested).
+**mirror** copies the approved file exactly. The **native-translate** path
+(editable clips) is an isolated experimental option that drops or approximates
+several lanes and is P5-blocked. Never make it the default or present it as a
+qualified handoff.
 
 | Lane | Longform (16:9) mirror | Shortform (9:16) mirror | Native-translate (editable) |
 |---|---|---|---|
-| Face-recompose / body-track | baked (render.py `recompose_stage` stamps it, even without upstream fold) | baked (`reframe.py` 16:9→9:16 face-track) | longform: only if a `role:"recompose"` window is folded in; **shortform: MISSING** (blocked at sync) |
+| Recompose / vertical framing | bounded recompose windows are baked | bounded face selection is baked, with center-crop or blur-pad fallback; **not continuous subject tracking** | longform: only if a `role:"recompose"` window is folded in; **shortform: MISSING** (blocked at sync) |
 | Transitions | baked | baked | **errors** (Palmier has no native primitive) |
 | Eased-zoom motion | baked | baked | native scale/position keyframes ✓ (the one clean lane) |
 | Gap-fill / continuity | baked (gapless by construction) | baked | native cuts tile frame-contiguous |
@@ -108,11 +112,20 @@ authority and invalidates approval even if an older sidecar still says
 - The current UI deliberately exposes no take-control/reclaim ceremony.
 
 There is deliberately no lossy Palmier→`edit_plan.json` synchronization. The
-canonical path reads Palmier directly, forks the current timeline, and applies
-a governed native delta. Until that delta adapter is complete, manual Palmier
-revisions block the legacy plan writer rather than being flattened or erased.
+native candidate path reads Palmier directly, forks the current timeline, and
+applies a governed delta. Its local executor/QC/promotion protocol exists, but
+the editable result remains experimental until the connected P5 cohort passes.
+Manual Palmier revisions block the legacy plan writer rather than being
+flattened or erased.
 
-**Ownership note (code vs UI):** the code still enforces a compatibility lease — sync refuses to sync when ownership == "palmier" (scripts/producer/palmier/sync.py:240-247) and scripts/producer/palmier/ownership.py still ships --handoff/--reclaim. But the current UI exposes **no** take-control/reclaim ceremony, and the native-promotion path this lease guards is **not wired yet** (see PALMIER_CANONICAL_IMPLEMENTATION_STATE.md, remaining-work item 8). Treat the lease as an internal compatibility mechanism, not a user-facing step.
+**Ownership note (code vs UI):** the code still enforces a compatibility lease
+— sync refuses to sync when `ownership == "palmier"`
+(`scripts/producer/palmier/sync.py:240-247`) and
+`scripts/producer/palmier/ownership.py` still ships `--handoff`/`--reclaim`.
+The native candidate and guarded promotion path are now wired, but the current
+UI exposes no general take-control/reclaim ceremony and connected qualification
+is open. Treat the lease as an internal compatibility mechanism, not proof of a
+released editable workflow.
 
 ## What arrives in Palmier
 

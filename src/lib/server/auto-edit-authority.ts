@@ -17,8 +17,18 @@ interface AuthorityProof {
 function canonicalJson(value: unknown): string {
   if (value === null) return "null";
   if (typeof value === "string") return JSON.stringify(value);
-  if (typeof value === "number" || typeof value === "boolean") return JSON.stringify(value);
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)
+        || (Number.isInteger(value) && !Number.isSafeInteger(value))) {
+      throw new Error("plan number is outside the cross-runtime domain");
+    }
+    return JSON.stringify(value);
+  }
+  if (typeof value === "boolean") return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(", ")}]`;
+  if (typeof value !== "object" || value === undefined) {
+    throw new Error("plan value is outside the JSON domain");
+  }
   const entries = Object.entries(value as Record<string, unknown>)
     .sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0)
     .map(([key, item]) => `${JSON.stringify(key)}: ${canonicalJson(item)}`);
@@ -30,29 +40,46 @@ function renderedPlanContent(plan: Record<string, unknown>): Record<string, unkn
     "cutTrack", "graphicsTrack", "punchIns", "transitions", "audioGain",
     "titleCards", "brollTrack", "treatmentMap", "chapters", "sfxTrack",
   ]);
-  const metadata = new Set(["id", "generation", "version", "sourceAnchor", "dependencies"]);
+  const metadata = new Set([
+    "id", "generation", "version", "sourceAnchor", "dependencies",
+    "confidence", "evidence", "rationale", "reason", "semanticBeatId",
+    "trigger",
+  ]);
   const content = Object.fromEntries(
     Object.entries(plan).filter(([key]) => key !== "planVersion"
-      && key !== "graphicsDecisions" && key !== "persistentText" && !key.startsWith("_")),
+      && key !== "graphicsDecisions" && key !== "persistentText"
+      && key !== "cutDecisions"
+      && key !== "cutRepairPicturePlanAuthority" && key !== "ending"
+      && key !== "transitionRationale" && key !== "treatmentMap"
+      && !key.startsWith("_")),
   );
   return Object.fromEntries(Object.entries(content).map(([lane, value]) => {
     if (!elementTracks.has(lane) || !Array.isArray(value)) return [lane, value];
     const rows = value.map((row) => {
       if (!row || typeof row !== "object" || Array.isArray(row)) return row;
-      return Object.fromEntries(Object.entries(row).filter(([key]) =>
-        !metadata.has(key) && !(lane === "graphicsTrack" && key === "semanticBeatId")));
+      return Object.fromEntries(Object.entries(row).filter(
+        ([key]) => !metadata.has(key)));
     });
     return [lane, rows];
   }));
 }
 
+/** Exact object-value counterpart of fingerprints.py plan_content_hash. */
+export function planObjectContentHash(value: unknown): string | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  try {
+    const canonical = canonicalJson(
+      renderedPlanContent(value as Record<string, unknown>));
+    return createHash("sha256").update(canonical).digest("hex");
+  } catch {
+    return undefined;
+  }
+}
+
 /** Exact TypeScript counterpart of fingerprints.py plan_content_hash. */
 export function planContentHash(planPath: string): string | undefined {
   try {
-    const value: unknown = JSON.parse(readFileSync(planPath, "utf8"));
-    if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
-    const canonical = canonicalJson(renderedPlanContent(value as Record<string, unknown>));
-    return createHash("sha256").update(canonical).digest("hex");
+    return planObjectContentHash(JSON.parse(readFileSync(planPath, "utf8")));
   } catch {
     return undefined;
   }

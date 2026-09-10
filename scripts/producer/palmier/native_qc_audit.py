@@ -11,6 +11,9 @@ from audit.audit_glitch import check_glitch_screens
 from audit.audit_motion import check_smoothness
 from audit.audit_probe import ffprobe_json, first_stream, fps_from_stream
 from fingerprints import file_sha256
+from palmier.editable_parity_contract import receipt_path as parity_path
+from palmier.editable_parity_contract import run_parity
+from palmier.master import authority_hash as master_authority_hash
 from palmier.mcp_client import PalmierError
 from palmier.native_qc_contract import (audit_path, now, stable_hash,
                                         validate_export)
@@ -185,6 +188,21 @@ def run_native_audit(out_dir: str, receipt: dict,
     """Build a deterministic audit artifact; caller rechecks drift before authority."""
     graph = structural_proof(found)
     checks, frames = _export_checks(receipt, found)
+    if (receipt.get("authority") or {}).get("kind") in {
+            "live-build", "desktop-build"}:
+        authority = receipt["authority"]
+        master_hash = master_authority_hash(out_dir, authority["planHash"])
+        parity = run_parity(
+            out_dir, receipt["export"]["path"], master_hash)
+        blocked = ", ".join(parity["blockedMetricIds"]) or "none"
+        checks.append({
+            "name": "editable_master_parity",
+            "status": PASS if parity["verdict"] == "pass" else FAIL,
+            "measured": parity["digest"],
+            "detail": f"blocked metrics: {blocked}",
+            "evidence": {"path": parity_path(out_dir),
+                         "hash": file_sha256(parity_path(out_dir))},
+        })
     checks = [*graph["checks"], *checks]
     content = {"schemaVersion": 1, "stage": "palmier-native-audit",
                "candidateFingerprint": found.fingerprint,

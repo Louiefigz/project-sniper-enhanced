@@ -4,16 +4,18 @@ import { useState } from "react";
 import AudioPanel from "./audio-panel";
 import ElementsPanel from "./elements-panel";
 import LayoutPanel from "./layout-panel";
+import ColorPanel from "./color-panel";
 import type { EditPlan } from "@/lib/producer/edit-plan";
 import type { Win } from "@/lib/producer/timeline-scale";
 import { planCanvas, type CompCatalogEntry } from "@/lib/producer/comps-catalog";
 
-type PanelId = "audio" | "elements" | "layout";
+type PanelId = "audio" | "elements" | "layout" | "color";
 
 const PANELS: { id: PanelId; label: string; icon: string }[] = [
   { id: "audio", label: "Audio", icon: "♪" },
   { id: "elements", label: "Elements", icon: "▦" },
   { id: "layout", label: "Layout", icon: "◫" },
+  { id: "color", label: "Color", icon: "◐" },
 ];
 
 interface Props {
@@ -81,6 +83,7 @@ export default function RightRail({
             {open === "layout" && (
               <LayoutPanel plan={plan} dir={dir} playhead={playhead} onMutate={onMutate} />
             )}
+            {open === "color" && <ColorPanel dir={dir} plan={plan} />}
           </div>
         </aside>
       )}

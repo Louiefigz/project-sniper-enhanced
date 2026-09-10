@@ -11,6 +11,7 @@ import {
   DIRECTIVE_WORDS,
   INTENT_PRESETS,
   LANES,
+  MODES,
   PACES,
   SCOPES,
   SCOPE_LANE_DEFAULTS,
@@ -64,6 +65,15 @@ const PRODUCER_CONFIG = readFileSync(
   assert.ok(m, "edit_scope.py _DIRECTIVE_WORDS not found");
   const py = [...m![1].matchAll(/"(\w+)"/g)].map((x) => x[1]).sort();
   assert.deepEqual([...DIRECTIVE_WORDS].sort(), py, "directive words must match");
+}
+
+// 3a) Delivery modes are sourced from producer_config.MODES.
+{
+  const m = PRODUCER_CONFIG.match(/^MODES = \{([\s\S]*?)^\}/m);
+  assert.ok(m, "producer_config.py MODES dict not found");
+  const pyModes = [...m![1].matchAll(/^    "([^"]+)": \{/gm)]
+    .map((entry) => entry[1]);
+  assert.deepEqual([...MODES], pyModes, "delivery modes must match producer_config.py");
 }
 
 // 3b) Every pace (incl. every style) has its pacing_<pace> profile in

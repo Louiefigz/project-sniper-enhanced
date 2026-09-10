@@ -1,5 +1,8 @@
 import { spawn } from "child_process";
-import { existsSync } from "fs";
+import { stageTimingEnv } from "@/lib/server/stage-timing-context";
+import { existsSync, readFileSync } from "fs";
+import { audioAuditFailure } from "@/lib/producer/audit-audio-policy";
+import { fileSha256 } from "@/lib/server/auto-edit-hash";
 import path from "path";
 import {
   shouldDetachProcessGroup,
@@ -34,7 +37,9 @@ interface AuditSummary {
   error?: string;
 }
 
-export function validAuditSummary(summary: AuditSummary | null): string | null {
+export function validAuditSummary(
+  summary: AuditSummary | null, expectedSha256?: string | null,
+): string | null {
   if (!summary) return "audit produced no parsable verdict";
   if (summary.status !== "done") return "audit final verdict is not a done event";
   if (!["pass", "warn", "fail"].includes(String(summary.overall))) {
@@ -46,6 +51,15 @@ export function validAuditSummary(summary: AuditSummary | null): string | null {
   if (typeof summary.report !== "string" || typeof summary.machine !== "string"
       || !existsSync(summary.report) || !existsSync(summary.machine)) {
     return "audit report evidence is missing from disk";
+  }
+  if (summary.overall !== "fail" && summary.failed === 0) {
+    try {
+      const machine = JSON.parse(readFileSync(summary.machine, "utf8"));
+      if (machine?.overall !== summary.overall) return "audit machine and summary verdicts disagree";
+      return audioAuditFailure(machine, expectedSha256);
+    } catch {
+      return "audit machine evidence is unreadable";
+    }
   }
   return null;
 }
@@ -66,7 +80,7 @@ export interface AuditGateOutcome {
 
 /** Spawn audit_render.py and parse its final NDJSON verdict line. */
 function spawnAudit(outDir: string, timeoutMs: number): Promise<AuditExit> {
-  const env: NodeJS.ProcessEnv = { ...process.env };
+  const env: NodeJS.ProcessEnv = stageTimingEnv();
   env.PYTHONPATH = env.PYTHONPATH ? `${PRODUCER_DIR}:${env.PYTHONPATH}` : PRODUCER_DIR;
   return new Promise((resolve) => {
     const proc = trackProcessTree(spawn(pythonInterpreter(), [AUDIT_RENDER, outDir], {
@@ -124,7 +138,7 @@ export async function runAuditGate(
       failure: `Audit B contract failed: ${message}. ${errTail.slice(-300)}`,
     };
   }
-  const invalid = validAuditSummary(summary);
+  const invalid = validAuditSummary(summary, fileSha256(path.join(outDir, "final.mp4")) ?? null);
   if (invalid) {
     return {
       event: { event: "audit", overall: "error", message: `${invalid} (exit ${code})` },

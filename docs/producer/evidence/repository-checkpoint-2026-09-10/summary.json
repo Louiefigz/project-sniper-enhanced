@@ -1,0 +1,117 @@
+{
+  "kind": "development-checkpoint-validation",
+  "fullSuitePass": false,
+  "typeCheck": "passed",
+  "lint": {
+    "errors": 0,
+    "warnings": 41
+  },
+  "nativePreflight": {
+    "tests": 43,
+    "seconds": 11.4,
+    "passed": true
+  },
+  "isolatedPythonDiagnostic": {
+    "tests": 21,
+    "failures": 3,
+    "errors": 3,
+    "passed": 15
+  },
+  "broadRuns": {
+    "npm": "initial sandbox process-table failure; affected six tests passed with normal access; continuation deliberately interrupted",
+    "python": "deliberately interrupted after observing regressions",
+    "interruptedExitCode": 130
+  },
+  "observedPythonFailureMarkers": [
+    "test_policy_retains_exact_mounts_network_memory_and_no_pull (test_color_diagnostic.ColorDiagnosticTests.test_policy_retains_exact_mounts_network_memory_and_no_pull) ... FAIL",
+    "test_retained_cross_product_is_fresh (test_comp_rate_matrix.CompRateMatrixTests.test_retained_cross_product_is_fresh) ... FAIL",
+    "test_frozen_catalog_covers_transitive_local_execution_imports (test_compositor_build_receipt_semantics.CompositorBuildReceiptSemanticTests.test_frozen_catalog_covers_transitive_local_execution_imports) ... FAIL",
+    "test_repository_measured_baselines_are_closed (test_current_system_inventory_check.CurrentSystemInventoryCheckTests.test_repository_measured_baselines_are_closed) ... ERROR",
+    "test_repository_registry_is_exact_and_complete (test_external_ingress_registry.ExternalIngressRegistryTests.test_repository_registry_is_exact_and_complete) ... ERROR",
+    "test_real_owner_signal_waits_for_exact_daemon_cleanup_then_cancels (test_grade_observation_policy.GradeObservationCleanupTests.test_real_owner_signal_waits_for_exact_daemon_cleanup_then_cancels) ... ERROR",
+    "test_render_routes_broll_before_graphics (test_graphics_broll_layering.GraphicsOverBrollLayeringTests.test_render_routes_broll_before_graphics) ... ERROR",
+    "test_real_cut_and_four_quality_clis_pass_without_media_or_gate_stubs (test_guided_body_program.GuidedBodyProgramTests.test_real_cut_and_four_quality_clis_pass_without_media_or_gate_stubs) ... FAIL",
+    "test_final_source_recheck_racing_cut_support_cannot_return_verified (test_guided_body_qc.GuidedBodyQcTests.test_final_source_recheck_racing_cut_support_cannot_return_verified) ... FAIL",
+    "test_actual_assembly_result_decodes_and_rebinds_full_master_qc_and_cut_support (test_guided_body_result_media.BodyResultActualMediaTests.test_actual_assembly_result_decodes_and_rebinds_full_master_qc_and_cut_support) ... ERROR",
+    "Normal phase telemetry appends; original entry events remain immutable. ... ERROR",
+    "Code, template, tool, original source and control drift remain distinct. ... ERROR",
+    "Code, template, tool, original source and control drift remain distinct. ... ERROR",
+    "Code, template, tool, original source and control drift remain distinct. ... ERROR",
+    "Code, template, tool, original source and control drift remain distinct. ... ERROR",
+    "Code, template, tool, original source and control drift remain distinct. ... ERROR",
+    "Code, template, tool, original source and control drift remain distinct. ... ERROR",
+    "Code, template, tool, original source and control drift remain distinct. ... ERROR",
+    "Code, template, tool, original source and control drift remain distinct. ... ERROR",
+    "Code, template, tool, original source and control drift remain distinct. ... ERROR",
+    "Code, template, tool, original source and control drift remain distinct. ... ERROR",
+    "Code, template, tool, original source and control drift remain distinct. ... ERROR",
+    "Code, template, tool, original source and control drift remain distinct. ... ERROR",
+    "Code, template, tool, original source and control drift remain distinct. ... ERROR",
+    "Neither constructor time nor a later guard gets a replacement allowance. ... ERROR",
+    "A new holder cannot adopt a snapshot changed after initial admission. ... ERROR",
+    "The final source observer is closed against entry metadata and original time. ... ERROR",
+    "Moving a file into a replacement directory cannot keep its old ancestry. ... ERROR",
+    "Equal-looking copies, method override and scalar mutation cannot renew work. ... ERROR",
+    "Equal-looking copies, method override and scalar mutation cannot renew work. ... ERROR",
+    "Equal-looking copies, method override and scalar mutation cannot renew work. ... ERROR",
+    "Equal-looking copies, method override and scalar mutation cannot renew work. ... ERROR",
+    "Equal-looking copies, method override and scalar mutation cannot renew work. ... ERROR",
+    "Equal-looking copies, method override and scalar mutation cannot renew work. ... ERROR",
+    "Initial source capture is reused;100 actual guards have no file-hash calls. ... ERROR",
+    "The actual constructor cannot seal a substituted capture after hashing. ... ERROR",
+    "The last original source sweep cannot replace already-held control rows. ... ERROR",
+    "A replaced inspection method must not replace private security comparisons. ... ERROR",
+    "Stat rows, ancestry, source runtime and socket holds retain their origin. ... ERROR",
+    "An empty secondary alias cannot waive the initially verified source set. ... ERROR",
+    "Measure256 extra pins/32 sources, not real-project or video performance. ... ERROR"
+  ],
+  "logs": [
+    {
+      "file": "typecheck.log",
+      "sha256": "d85046a7bd990a7c70bea4e30fcad9808a7cf24dbab5b4c3f01d7335e64ccebd",
+      "bytes": 60
+    },
+    {
+      "file": "lint.log",
+      "sha256": "155dc4bb98cdbf0fcbc643fbcb18b73d4cb16646277db2e0456f556bf44e6853",
+      "bytes": 5751
+    },
+    {
+      "file": "npm-test.log",
+      "sha256": "86f3cf2a831567747c104ee411dad99d154003cfef4b512c9566c4cd9d5c763b",
+      "bytes": 78936
+    },
+    {
+      "file": "color-diagnostic-retry.log",
+      "sha256": "06c39281ec2aa3f075a89329d361f073caeff47d1002b657f6cf16207e3a4948",
+      "bytes": 627
+    },
+    {
+      "file": "npm-resume.log",
+      "sha256": "af9de2237df94b55df5236244fc0dc2be6b948b15acd12d88a1e2b9dfebba35a",
+      "bytes": 21122
+    },
+    {
+      "file": "python-test.log",
+      "sha256": "c9a75758c047cd97870182a4749d0f81375c6853d9cba9427ea8abcca6acf924",
+      "bytes": 520273
+    },
+    {
+      "file": "python-failure-details.log",
+      "sha256": "65ad56886e04cb8212f4e421752a9ea104e836911c6881df8720b01e64fffd11",
+      "bytes": 6473
+    },
+    {
+      "file": "native-preflight.log",
+      "sha256": "ef6575fbf59eb0a0c65c5abac1db586e3ae254349f3b8c821ee7f3d0ce51d47e",
+      "bytes": 884
+    },
+    {
+      "file": "staged-diffcheck.log",
+      "sha256": "198365e3364153b016907d84b6a787fd340c21517461c8578f18642f6da0ec45",
+      "bytes": 180839
+    }
+  ],
+  "sourceWhitespaceCheck": "passed; verbatim docs/producer/evidence and vendor/hyperframes-catalog excluded from authored-source check",
+  "credentialScan": "no private-key/service-token signatures; two intentional credential-URL rejection fixtures"
+}

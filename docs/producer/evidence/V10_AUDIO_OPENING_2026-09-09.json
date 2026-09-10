@@ -1,0 +1,233 @@
+{
+  "recordedAt": "2026-09-09T09:40:26.829Z",
+  "status": "passed-mirror-only",
+  "scope": "actual-sixteen-second-non-speech-V10-audio-master-and-opening-integration",
+  "mirror": "/private/tmp/sniper-upgrade-build-qOKgnu",
+  "productionDefaultVersion": 5,
+  "liveV10Activated": false,
+  "changes": [
+    {
+      "path": "src/lib/server/guided-proposal-history-snapshot.ts",
+      "sha256": "97f3fd99d6a5caf5dfaf68ffe5c77a8cbdb67229fc7368ee4355f4c240a15f32",
+      "purpose": "Admit actual V10 with every inherited caption and additive audio source pin, retaining original snapshot/schema/runtime validation."
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-history-snapshot.test.ts",
+      "sha256": "3dc86cc66c00a20ceb2b8baf62863bcc0f30038dd974470f7748256bef8ccaa3",
+      "purpose": "Actual V2–V10 snapshots plus exact required-pin, substitution, downgrade and unsupported-version negatives."
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-v10-audio-opening.test.ts",
+      "sha256": "ab8fbd302e12914269384627edac6ce68db7bd5331f4bcd2f956df80ea1d00f8",
+      "purpose": "Opt-in actual source/cut/readiness/master/opening; early canonical-venv preflight and readback assertions."
+    }
+  ],
+  "native": {
+    "attempts": [
+      {
+        "path": "/private/tmp/sniper-v10-audio-opening-native-20260909.IoLo4h/result.json",
+        "startedAt": "2026-09-09T09:25:41.935Z",
+        "endedAt": "2026-09-09T09:26:11.306Z",
+        "wallMs": 29369.824,
+        "status": 1,
+        "signal": null,
+        "sourceUnchanged": true
+      },
+      {
+        "path": "/private/tmp/sniper-v10-audio-opening-native-20260909.759LZ2/result.json",
+        "startedAt": "2026-09-09T09:34:28.043Z",
+        "endedAt": "2026-09-09T09:34:55.832Z",
+        "wallMs": 27787.289583,
+        "status": 1,
+        "signal": null,
+        "sourceUnchanged": true
+      },
+      {
+        "path": "/private/tmp/sniper-v10-audio-opening-native-20260909.pnqQpt/result.json",
+        "startedAt": "2026-09-09T09:37:07.123Z",
+        "endedAt": "2026-09-09T09:38:23.878Z",
+        "wallMs": 76753.00008299999,
+        "status": 0,
+        "signal": null,
+        "sourceUnchanged": true
+      }
+    ],
+    "setupMs": 23644.163542000002,
+    "renderAndReadbackMs": 51981.16912500001,
+    "elapsedMs": 75719.681417,
+    "masterPath": "/private/tmp/sniper-v10-audio-opening-eedKw7/test-only-cut-review-e48b3d4c/producer/guided-v2-operations/88b80f75-e6df-4c62-a78a-368a168b74c2/executions/8cf96f34-d818-4540-a1d5-c8e6194c6cfa/media-output/full-program-base/.source-float-v2-9t27bpax/.program-master-v2-w0m1_0fr/master-receipt.json",
+    "masterSha256": "9cf6a6d47803b0be3f6f0fb1eb50b82a209380cfa8ec1765a9438800bea8e9e2",
+    "measurement": {
+      "audioDecodeError": "",
+      "audioDecodeExitCode": 0,
+      "audioDecodeSucceeded": true,
+      "integratedLufs": -14,
+      "lufsResidual": 0,
+      "lufsTarget": -14,
+      "lufsTolerance": 1,
+      "lufsWithinTolerance": true,
+      "policyVersion": 2,
+      "qualified": true,
+      "truePeakCeilingDbtp": -1.5,
+      "truePeakDbtp": -5.68,
+      "truePeakExcessDb": 0,
+      "truePeakWithinCeiling": true
+    },
+    "timing": {
+      "generationStartedAt": "2026-09-09T09:37:21.218Z",
+      "engineElapsedMs": 37838.953041999994,
+      "cleanupElapsedMs": 678.9554579999967,
+      "elapsedStatus": "completed",
+      "coverage": "recorded-owned-attempt-only"
+    },
+    "masterAudioSha256": "84678e65fb8de86356aa3c6cbe74d2f75034b43d2545759971bee671c3cc7416",
+    "outputSha256": "abd4d0aa91f3d32fcf1bb762731ce90cb5ff60fbb6ac38309cac3f9d9543b9b7"
+  },
+  "originalCaps": {
+    "sourceMs": 60000,
+    "callerMs": 600000,
+    "observerMs": 650000
+  },
+  "tests": {
+    "redSnapshot": {
+      "passed": 11,
+      "failed": 4,
+      "testMs": 511.261542,
+      "toolChunk": "8c6522"
+    },
+    "focusedUnion": {
+      "passed": 62,
+      "failed": 0,
+      "nativeSkipped": 1,
+      "testMs": 27413.609958,
+      "toolChunk": "28825b"
+    },
+    "venvProcessCohort": {
+      "passed": 17,
+      "failed": 1,
+      "nativeSkipped": 1,
+      "testMs": 3090.520917,
+      "failure": "Sandbox denies process identity lookup; status stays unresolved-unknown-descendant.",
+      "toolChunk": "d05b87"
+    },
+    "sameProcessCaseWithProcessReadPermission": {
+      "passed": 1,
+      "failed": 0,
+      "testMs": 1332.38975,
+      "toolChunk": "bed31b"
+    },
+    "finalTypeCheck": {
+      "passed": true,
+      "toolChunk": "d841d9"
+    },
+    "finalLint": {
+      "passed": true,
+      "toolChunk": "661b1a"
+    }
+  },
+  "postRunOwnership": {
+    "observedAt": "2026-09-09T09:40:26.829Z",
+    "scope": "post-success-owned-resource-observation-not-automatic-cancellation-proof",
+    "containers": [
+      {
+        "name": "sniper-media-probe-372bc3a1c96b4a68ba60e531c94587ab",
+        "status": 1,
+        "signal": null,
+        "stdout": "[]\n",
+        "stderr": "Error response from daemon: No such container: sniper-media-probe-372bc3a1c96b4a68ba60e531c94587ab\n"
+      },
+      {
+        "name": "sniper-render-c0838908fcc01851ce7a22f387885a70",
+        "status": 1,
+        "signal": null,
+        "stdout": "[]\n",
+        "stderr": "Error response from daemon: No such container: sniper-render-c0838908fcc01851ce7a22f387885a70\n"
+      },
+      {
+        "name": "sniper-render-2ea49a9396996a4616e2337fdd10b1ce",
+        "status": 1,
+        "signal": null,
+        "stdout": "[]\n",
+        "stderr": "Error response from daemon: No such container: sniper-render-2ea49a9396996a4616e2337fdd10b1ce\n"
+      },
+      {
+        "name": "sniper-render-5eee46d09f3395899b4d09164ab2ea9e",
+        "status": 1,
+        "signal": null,
+        "stdout": "[]\n",
+        "stderr": "Error response from daemon: No such container: sniper-render-5eee46d09f3395899b4d09164ab2ea9e\n"
+      },
+      {
+        "name": "sniper-render-19dc533f12bb0645fd6ed8d7bd5e0bd4",
+        "status": 1,
+        "signal": null,
+        "stdout": "[]\n",
+        "stderr": "Error response from daemon: No such container: sniper-render-19dc533f12bb0645fd6ed8d7bd5e0bd4\n"
+      },
+      {
+        "name": "sniper-render-40ca089633f611d2a9f7136add20a886",
+        "status": 1,
+        "signal": null,
+        "stdout": "[]\n",
+        "stderr": "Error response from daemon: No such container: sniper-render-40ca089633f611d2a9f7136add20a886\n"
+      },
+      {
+        "name": "sniper-render-e3659880b49dea565baca8364291807b",
+        "status": 1,
+        "signal": null,
+        "stdout": "[]\n",
+        "stderr": "Error response from daemon: No such container: sniper-render-e3659880b49dea565baca8364291807b\n"
+      },
+      {
+        "name": "sniper-render-ce2397352a1bf5bd8c75e0b9166d99ca",
+        "status": 1,
+        "signal": null,
+        "stdout": "[]\n",
+        "stderr": "Error response from daemon: No such container: sniper-render-ce2397352a1bf5bd8c75e0b9166d99ca\n"
+      },
+      {
+        "name": "sniper-render-f7704f69de24173332a4afa3dab0d376",
+        "status": 1,
+        "signal": null,
+        "stdout": "[]\n",
+        "stderr": "Error response from daemon: No such container: sniper-render-f7704f69de24173332a4afa3dab0d376\n"
+      },
+      {
+        "name": "sniper-render-72d07b965bed660277d859ce54de2f74",
+        "status": 1,
+        "signal": null,
+        "stdout": "[]\n",
+        "stderr": "Error response from daemon: No such container: sniper-render-72d07b965bed660277d859ce54de2f74\n"
+      }
+    ],
+    "recordedPids": [
+      10574,
+      11216,
+      11329,
+      11401,
+      11712
+    ],
+    "processes": [],
+    "psStatus": 0,
+    "rootLocks": [],
+    "producerLocks": [
+      "generation-clock-observations",
+      "picture_locks"
+    ]
+  },
+  "notes": [
+    "Attempt1 stopped before media: Unsupported historical proposal schema. It remains untouched.",
+    "Attempt2 stopped before media: noncanonical MIRROR .venv alias. Existing SNIPER_PYTHON_VENV_ROOT explicitly selects the unchanged installed canonical venv in attempt3; no runtime guard weakened.",
+    "All ten exact owned containers and source group were observed absent after both failed attempts (tool chunks 3d8860 and bbf3c7).",
+    "Actual voice-strong cleanup and +3dB premaster gain ran in cleanup->gain->sfx->music->master order. No final-loudness increase promise: master remains -14 LUFS.",
+    "Core/review each have480 frames at30/1 and768000 samples at48kHz; both cover this whole16s test.",
+    "Prepared source, accepted initial four-field cut, original raw request and failed history were not retrofitted."
+  ],
+  "limitations": [
+    "No real speech/listening, human creative acceptance, delivery approval or C0679 qualification.",
+    "No caption/audio/presenter/short/source2 combination qualification or production default activation.",
+    "No nonempty body continuation/reuse, scoped revision, full300s longform or ten-minute/two-hour performance claim.",
+    "Normal-run cleanup was observed; automatic source-admission-container cleanup after outer-worker death remains unqualified.",
+    "No model/provider calls, installs, downloads, paid APIs or original footage changes."
+  ]
+}

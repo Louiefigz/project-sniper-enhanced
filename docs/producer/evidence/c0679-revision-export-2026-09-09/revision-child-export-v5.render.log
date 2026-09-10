@@ -1,0 +1,12 @@
+
+◆  Rendering project/compositions/panel-02.html → /private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/revision-work/render-v5/panel-02.mp4
+   24000/1001fps · high · 1 workers
+
+[?25l│
+◇  Browser: env
+[?25h
+  ✗ standalone_composition_wrapped_in_template: Root index.html is wrapped in a <template> tag. Only sub-compositions loaded via data-composition-src should use <template> wrappers. The runtime cannot play a standalone composition inside a template.
+    Fix: Remove the <template> wrapper. Use <!DOCTYPE html><html>...<div data-composition-id>...</div>...</html> instead.
+
+  Aborting render due to lint issues (--strict mode).
+

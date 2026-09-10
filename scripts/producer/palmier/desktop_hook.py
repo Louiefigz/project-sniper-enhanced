@@ -6,15 +6,24 @@ import json
 from typing import Any, Callable
 
 from palmier.candidate_receipt import load_candidate, save_candidate
+from palmier.desktop_bound_operations import (bind_desktop_operation,
+                                               observe_desktop_operation)
+from palmier.desktop_audio_master_guard import \
+    assert_mastered_stereo_mutation_allowed
+from palmier.desktop_exact_master_contract import assert_reference_mutation_allowed
 from palmier.desktop_hook_authority import (read_bound_json,
                                             validate_authority)
+from palmier.desktop_operation_snapshot import (load_before_snapshot,
+                                                 write_before_snapshot)
 from palmier.desktop_state import (append_journal, load_pointer, now,
                                    save_state)
 from palmier.desktop_element_types import ElementObservation
-from palmier.desktop_elements import bind_operation, observe_bound_operation
 from palmier.desktop_revision_progress import (authorize_revision_binding,
                                                 record_revision_binding)
 from palmier.desktop_text import exact_text_addition
+from palmier.desktop_caption_shards import assert_caption_mutation_allowed
+from palmier.desktop_caption_pages import \
+    assert_caption_page_mutation_allowed
 from palmier.mcp_client import PalmierClient, PalmierError
 from palmier.timeline_authority import read_active
 
@@ -169,8 +178,13 @@ def authorize_pre(event: dict, repo: str,
     client = client_factory()
     found = _head(client, state)
     args = event.get("tool_input") or {}
+    assert_reference_mutation_allowed(tool, args, state)
+    assert_mastered_stereo_mutation_allowed(
+        tool, args, state, found.timeline)
+    assert_caption_mutation_allowed(tool, args, state)
+    assert_caption_page_mutation_allowed(tool, args, state)
     _validate_args(tool, args, state, found.timeline)
-    binding = bind_operation(tool, args, state)
+    binding = bind_desktop_operation(tool, args, state, found.timeline)
     authorize_revision_binding(state, binding)
     key = _operation_key(tool, args, _operation_scope(state))
     if key in state.get("verifiedOperationKeys", []):
@@ -179,6 +193,7 @@ def authorize_pre(event: dict, repo: str,
         "key": key, "tool": tool, "argsHash": hashlib.sha256(
             json.dumps(args, sort_keys=True, separators=(",", ":")).encode()).hexdigest(),
         "beforeFingerprint": found.fingerprint, "startedAt": now(),
+        "beforeSnapshot": write_before_snapshot(state, found),
     }
     if binding is not None:
         state["pendingOperation"]["binding"] = binding
@@ -208,9 +223,10 @@ def _tool_failed(event: dict) -> bool:
 
 def _observe_failed(state: dict, pending: dict, repo: str,
                     client_factory: Callable[[], Any]) -> None:
+    before = load_before_snapshot(state, pending)
     found = read_active(client_factory(), state["projectId"])
     unchanged = found.timeline_id == state["candidate"]["timelineId"] \
-        and found.fingerprint == pending["beforeFingerprint"]
+        and found.fingerprint == before.fingerprint
     if not unchanged:
         state.update({"status": "paused", "updatedAt": now()})
         save_state(repo, state)
@@ -241,17 +257,18 @@ def observe_post(event: dict, repo: str,
     found = read_active(client, state["projectId"])
     if found.timeline_id != state["candidate"]["timelineId"]:
         raise PalmierError("Palmier switched timelines during a Desktop mutation")
+    if found.coverage.get("complete") is not True:
+        raise PalmierError("Palmier mutation readback is incomplete")
     unchanged_ok = tool in {"import_media", "organize_media"}
     if found.fingerprint == pending["beforeFingerprint"] and not unchanged_ok:
         state.update({"status": "paused", "updatedAt": now()})
         save_state(repo, state)
         raise PalmierError(f"Palmier {tool} produced no observable timeline change")
-    candidate = load_candidate(state["outDir"])
-    if candidate is None or not isinstance(candidate.get("timeline"), dict):
-        raise PalmierError("Desktop Palmier candidate has no prior readback")
+    before = load_before_snapshot(state, pending)
     try:
-        observe_bound_operation(ElementObservation(
-            state, pending, candidate["timeline"], found.timeline, event))
+        observe_desktop_operation(ElementObservation(
+            state, pending, before.timeline, found.timeline, event,
+            found.coverage))
     except PalmierError:
         state.update({"status": "paused", "updatedAt": now()})
         save_state(repo, state)

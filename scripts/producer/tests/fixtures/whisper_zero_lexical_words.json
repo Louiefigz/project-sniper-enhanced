@@ -1,0 +1,118 @@
+{
+  "scope": "retained-whisper-recognition-not-acoustically-qualified",
+  "source": {
+    "path": "/private/tmp/sniper-c0679-current-20260907.9p06WA/full-token-raw-diagnostic-1/raw.json",
+    "sha256": "d3db91e5d1683432f8e8be74eab1c6ea13716c967a39c146e2951090a67db12f"
+  },
+  "model": {
+    "type": "small",
+    "multilingual": false,
+    "vocab": 51864,
+    "audio": {
+      "ctx": 1500,
+      "state": 768,
+      "head": 12,
+      "layer": 12
+    },
+    "text": {
+      "ctx": 448,
+      "state": 768,
+      "head": 12,
+      "layer": 12
+    },
+    "mels": 80,
+    "ftype": 1
+  },
+  "rows": [
+    {
+      "index": 322,
+      "row": {
+        "timestamps": {
+          "from": "00:02:02,820",
+          "to": "00:02:02,870"
+        },
+        "offsets": {
+          "from": 122820,
+          "to": 122870
+        },
+        "text": " of",
+        "tokens": [
+          {
+            "text": " of",
+            "timestamps": {
+              "from": "00:02:02,820",
+              "to": "00:02:02,820"
+            },
+            "offsets": {
+              "from": 122820,
+              "to": 122820
+            },
+            "id": 286,
+            "p": 0.990875,
+            "t_dtw": -1
+          }
+        ]
+      }
+    },
+    {
+      "index": 639,
+      "row": {
+        "timestamps": {
+          "from": "00:03:51,230",
+          "to": "00:03:51,250"
+        },
+        "offsets": {
+          "from": 231230,
+          "to": 231250
+        },
+        "text": " a",
+        "tokens": [
+          {
+            "text": " a",
+            "timestamps": {
+              "from": "00:03:51,230",
+              "to": "00:03:51,230"
+            },
+            "offsets": {
+              "from": 231230,
+              "to": 231230
+            },
+            "id": 257,
+            "p": 0.999131,
+            "t_dtw": -1
+          }
+        ]
+      }
+    },
+    {
+      "index": 2180,
+      "row": {
+        "timestamps": {
+          "from": "00:13:21,790",
+          "to": "00:13:21,850"
+        },
+        "offsets": {
+          "from": 801790,
+          "to": 801850
+        },
+        "text": " I",
+        "tokens": [
+          {
+            "text": " I",
+            "timestamps": {
+              "from": "00:13:21,790",
+              "to": "00:13:21,790"
+            },
+            "offsets": {
+              "from": 801790,
+              "to": 801790
+            },
+            "id": 314,
+            "p": 0.972201,
+            "t_dtw": -1
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,6 +1,8 @@
 import { spawn } from "child_process";
 import path from "path";
 import readline from "readline";
+import { admitSubscriptionInvocation } from "./subscription-invocation";
+import { CODEX_SUBSCRIPTION_CONFIG } from "./subscription-policy";
 import {
   codexProcessEnv,
   codexReasoningLevel,
@@ -20,7 +22,15 @@ export type CodexSchema =
   | "clipper-validation"
   | "palmier-mutation-plan"
   | "producer-review"
-  | "producer-revision";
+  | "producer-revision"
+  | "producer-treatment-proposal"
+  | "producer-treatment-proposal-v3"
+  | "producer-treatment-proposal-v4"
+  | "producer-treatment-proposal-v5"
+  | "producer-treatment-proposal-v6"
+  | "producer-treatment-proposal-v7"
+  | "producer-treatment-proposal-v8"
+  | "producer-proposal-readiness";
 
 export interface CodexRunOptions {
   prompt: string;
@@ -35,6 +45,8 @@ export interface CodexRunOptions {
   tools?: "default" | "none";
   onEvent?: (event: Record<string, unknown>) => void;
   signal?: AbortSignal;
+  /** Optional aggregate stdout+stderr byte budget; never truncate a successful result. */
+  maxOutputBytes?: number;
 }
 
 export interface CodexRunResult {
@@ -50,6 +62,14 @@ const SCHEMAS: Record<CodexSchema, string> = {
   "palmier-mutation-plan": "palmier-mutation-plan.schema.json",
   "producer-review": "producer-review.schema.json",
   "producer-revision": "producer-revision.schema.json",
+  "producer-treatment-proposal": "../producer/treatment-proposal-v2.schema.json",
+  "producer-treatment-proposal-v3": "../producer/treatment-proposal-v3.schema.json",
+  "producer-treatment-proposal-v4": "../producer/treatment-proposal-v4.schema.json",
+  "producer-treatment-proposal-v5": "../producer/treatment-proposal-v5.schema.json",
+  "producer-treatment-proposal-v6": "../producer/treatment-proposal-v6.schema.json",
+  "producer-treatment-proposal-v7": "../producer/treatment-proposal-v7.schema.json",
+  "producer-treatment-proposal-v8": "../producer/treatment-proposal-v8.schema.json",
+  "producer-proposal-readiness": "../producer/proposal-readiness-v1.schema.json",
 };
 
 const MAX_STDERR_CHARS = 8_000;
@@ -87,6 +107,8 @@ export function buildCodexArgs(options: Omit<CodexRunOptions, "prompt" | "onEven
     "--ephemeral",
     "--strict-config",
     "--model", settings.model,
+    ...CODEX_SUBSCRIPTION_CONFIG,
+    "-c", 'model_provider="openai"',
     "-c", `model_reasoning_effort=${configValue(reasoning)}`,
     "-c", 'web_search="disabled"',
     "-c", "features.apps=false",
@@ -116,13 +138,20 @@ function codexError(code: number | null, stderr: string, message: string): Error
   return new Error(`Codex exited ${code ?? "without a status"}${detail ? `: ${detail}` : ""}`);
 }
 
-export function runCodex(options: CodexRunOptions): Promise<CodexRunResult> {
+export async function runCodex(options: CodexRunOptions): Promise<CodexRunResult> {
+  if (options.maxOutputBytes !== undefined && (!Number.isSafeInteger(options.maxOutputBytes)
+      || options.maxOutputBytes < 1 || options.maxOutputBytes > 16 * 1024 * 1024)) {
+    throw new Error("Codex output budget is invalid");
+  }
+  const settings = codexSettings();
+  const admitted = await admitSubscriptionInvocation({ provider: "codex", bin: settings.bin,
+    args: buildCodexArgs(options), cwd: options.cwd ?? process.cwd(), env: codexProcessEnv(),
+    timeoutMs: options.timeoutMs, signal: options.signal });
   return new Promise((resolve, reject) => {
-    const settings = codexSettings();
-    const started = Date.now();
-    const proc = trackProcessTree(spawn(settings.bin, buildCodexArgs(options), {
-      cwd: options.cwd ?? process.cwd(),
-      env: codexProcessEnv(),
+    const timeoutMs = admitted.remainingMs();
+    const proc = trackProcessTree(spawn(admitted.bin, admitted.args, {
+      cwd: admitted.cwd,
+      env: admitted.env,
       stdio: ["pipe", "pipe", "pipe"],
       detached: shouldDetachProcessGroup(),
     }));
@@ -130,6 +159,7 @@ export function runCodex(options: CodexRunOptions): Promise<CodexRunResult> {
     let stderr = "";
     let settled = false;
     let stopError: Error | undefined;
+    let outputBytes = 0;
     let forceSettle: ReturnType<typeof setTimeout> | undefined;
     const abort = () => {
       requestStop(new Error("Codex run was cancelled"));
@@ -143,7 +173,7 @@ export function runCodex(options: CodexRunOptions): Promise<CodexRunResult> {
       options.signal?.removeEventListener("abort", abort);
       lines.close();
       if (error) reject(error);
-      else resolve({ message, stderr, ms: Date.now() - started });
+      else resolve({ message, stderr, ms: admitted.elapsedMs() });
     };
     const requestStop = (error: Error) => {
       if (settled || stopError) return;
@@ -151,7 +181,17 @@ export function runCodex(options: CodexRunOptions): Promise<CodexRunResult> {
       terminateProcessTree(proc);
       forceSettle = setTimeout(() => finish(error), PROCESS_TERM_GRACE_MS + 1_000);
     };
+    const countOutput = (data: Buffer) => {
+      if (options.maxOutputBytes === undefined || stopError) return;
+      outputBytes += data.length;
+      if (outputBytes <= options.maxOutputBytes) return;
+      lines.close(); proc.stdout.pause();
+      requestStop(new Error(`Codex exceeded its ${options.maxOutputBytes}-byte output budget`));
+    };
+    proc.stdout.prependListener("data", countOutput);
+    proc.stderr.prependListener("data", countOutput);
     lines.on("line", (line) => {
+      if (stopError) return;
       if (!line.trim()) return;
       try {
         const event = JSON.parse(line) as Record<string, unknown>;
@@ -162,6 +202,7 @@ export function runCodex(options: CodexRunOptions): Promise<CodexRunResult> {
       }
     });
     proc.stderr.on("data", (data: Buffer) => {
+      if (stopError) return;
       stderr = (stderr + data.toString()).slice(-MAX_STDERR_CHARS);
     });
     proc.on("error", (error) => finish(stopError ?? error));
@@ -172,7 +213,7 @@ export function runCodex(options: CodexRunOptions): Promise<CodexRunResult> {
     });
     const timer = setTimeout(() => {
       requestStop(new Error(`Codex timed out after ${Math.round(options.timeoutMs / 1_000)}s`));
-    }, options.timeoutMs);
+    }, timeoutMs);
     options.signal?.addEventListener("abort", abort, { once: true });
     if (options.signal?.aborted) abort();
     proc.stdin.on("error", (error) => finish(stopError ?? error));

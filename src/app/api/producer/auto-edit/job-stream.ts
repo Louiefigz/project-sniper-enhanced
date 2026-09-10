@@ -14,6 +14,7 @@ interface StreamSession {
   cursor: number;
   sawError: boolean;
   sawOutputs: boolean;
+  sawWaiting: boolean;
   lastProgressKey?: string;
 }
 
@@ -33,6 +34,7 @@ function send(session: StreamSession, payload: Record<string, unknown>): void {
   if (session.closed) return;
   session.sawError ||= payload.event === "error";
   session.sawOutputs ||= payload.event === "outputs";
+  session.sawWaiting ||= payload.event === "awaiting_cut_approval";
   try {
     session.controller?.enqueue(session.encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
   } catch {
@@ -75,6 +77,16 @@ function pump(session: StreamSession): void {
       if (!session.sawError) send(session, terminalError(job.status, job.error ?? job.message));
       closeSession(session);
     }
+    if (job.status === "awaiting_cut_approval") {
+      if (!session.sawWaiting) send(session, { event: "awaiting_cut_approval",
+        requestHash: job.cutApprovalRequest!.requestHash, message: job.message, recovered: true });
+      closeSession(session);
+    }
+    if (job.status === "cut_accepted") {
+      send(session, { event: "cut_accepted", requestHash: job.cutApprovalRequest!.requestHash,
+        acceptanceHash: job.cutAcceptance!.acceptanceHash, message: job.message, recovered: true });
+      closeSession(session);
+    }
   } catch (error) {
     send(session, terminalError("failed", error instanceof Error ? error.message : String(error)));
     closeSession(session);
@@ -100,6 +112,7 @@ export function autoEditJobStream(jobPath: string, expectedToken: string): Reada
     cursor: 0,
     sawError: false,
     sawOutputs: false,
+    sawWaiting: false,
     lastProgressKey: undefined,
   };
   return new ReadableStream({

@@ -23,16 +23,16 @@ intent and render truth diverged in machine-readable data.
 - Delivered master duration: 670s.
 - Available prior deterministic audit duration: 47.3s, itself FAIL.
 
-The live Claude Desktop → Palmier first-60 acceptance test exposed the same
-failure at a smaller scale. Its first exact export was structurally valid, but
-the presenter was severely lavender and washed out because Palmier interpreted
-small planned color "adjustments" as absolute control values. A source-frame
-versus export-frame comparison caught it; resetting the three base clips fixed
-it. Render review also caught two inconsistent product-name spellings, white captions over
-a white graphic, and a stable 110 Hz tone that became obvious after loudness
-normalization. The repaired 43.792-second export measured -14.1 LUFS and -2.7
-dBTP, passed all 46 required review frames, and bound its two human review lenses
-to the exact candidate and export hashes.
+The historical Claude Desktop → Palmier first-60 run exposed the same failure at
+a smaller scale. It proved substantial transport and mutation mechanics, but
+failed later product-quality review: **56m48s** from capture to Desktop
+completion, Palmier QC still pending, seven corrected captions stripped of
+per-word karaoke timing, and a wrong 3840×2160 canvas accepted for a requested
+9:16 short. Color comparison also found a severely lavender presenter after
+small planned adjustments were interpreted as absolute values. The retained
+review receipt's `wordLock: pass` despite the seven timing losses demonstrates
+why self-attested review JSON is not render truth. This specimen is not
+connected Palmier/P5 qualification.
 
 The failed lint was not a weak heuristic. It named every mismatched graphic and
 also caught density, variety, recompose, pacing, and empty-chrome defects.
@@ -104,6 +104,12 @@ decision.kind == track.kind
 
 If any comparison fails, there is no stylistic rationale that makes the export
 valid.
+
+Until connected hybrid P5 qualification closes, the safe deliverables are the
+exact audited MP4 and its approved one-clip flat mirror. Editable Palmier remains
+a local, production-shaped, isolated experiment. Reference study/profile data
+may guide an edit, but verified mimic is not released (P6 0/7), and the complete
+short/long product is not P7/P8-qualified.
 
 ## Why this generalizes
 

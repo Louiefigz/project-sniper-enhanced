@@ -10,6 +10,7 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from cross_runtime_canonical_json import canonical_compact_json  # noqa: E402
 from learning.doctrine_lifecycle import (  # noqa: E402
     DoctrineLifecycleError,
     PRODUCER_CORE_DOCTRINE_PATHS,
@@ -33,8 +34,7 @@ _REPO = Path(__file__).resolve().parents[3]
 
 
 def _hash(value: object) -> str:
-    blob = json.dumps(value, sort_keys=True, separators=(",", ":"),
-                      ensure_ascii=False, allow_nan=False)
+    blob = canonical_compact_json(value)
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
 

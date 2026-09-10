@@ -3,6 +3,7 @@ import json
 import os
 import tempfile
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from _common import *  # noqa: F401,F403
@@ -15,8 +16,10 @@ from palmier.desktop_lease import renew
 from palmier.desktop_hook import authorize_pre, observe_post
 from palmier.desktop_manifest import _visual_steps, prepare_desktop_manifest
 from palmier.desktop_state import DesktopStageInput
+from palmier.master import MasterFacts
 from palmier.mcp_client import PalmierError
 from palmier.timeline_authority import snapshot
+from palmier.desktop_caption_shard_plan import FULL_CANVAS_TRANSFORM, GRAPHICS_OP
 
 
 class DesktopClient:
@@ -97,6 +100,14 @@ class DesktopAuthorityHookTests(unittest.TestCase):
         return self.client
 
     def _event(self):
+        state = load_state(self.out)
+        with open(state["operations"]["path"], encoding="utf-8") as handle:
+            operations = json.load(handle)
+        operations["steps"] = [{"op": "keyframes", "clip": 0, "property": "scale",
+                                "rows": [[0, 1.0], [12, 1.08]]}]
+        self._write("operations.json", operations)
+        state["operations"] = self._ref("operations.json")
+        save_state(self.repo, state)
         return {"tool_name": "mcp__palmier-pro__set_keyframes",
                 "tool_input": {"clipId": "clip-1", "property": "scale",
                                "keyframes": [[0, 1.0], [12, 1.08]]}}
@@ -105,14 +116,14 @@ class DesktopAuthorityHookTests(unittest.TestCase):
         event = self._event()
         authorize_pre(event, self.repo, self._factory)
         self.assertIsNotNone(load_state(self.out)["pendingOperation"])
-        self.client.timeline["tracks"][0]["clips"][0]["scale"] = 1.08
+        self.client.timeline["tracks"][0]["clips"][0]["keyframes"] = {"scale": [[0, 1.0], [12, 1.08]]}
         observe_post(event, self.repo, self._factory)
         state = load_state(self.out)
         self.assertEqual(state["operationCount"], 1)
         self.assertIsNone(state["pendingOperation"])
         self.assertEqual(state["expectedFingerprint"],
                          state["candidate"]["fingerprint"])
-        with self.assertRaisesRegex(PalmierError, "replay"):
+        with self.assertRaisesRegex(PalmierError, "unique bound worklist mutation"):
             authorize_pre(event, self.repo, self._factory)
 
     def test_cut_stage_cannot_author_graphics(self):
@@ -136,15 +147,23 @@ class DesktopAuthorityHookTests(unittest.TestCase):
             observe_post(event, self.repo, self._factory)
         self.assertEqual(load_state(self.out)["status"], "paused")
 
-    def test_reconcile_adopts_only_the_reserved_landed_operation(self):
+    def test_scalar_scale_change_cannot_stand_in_for_bound_keyframe_readback(self):
         event = self._event()
         authorize_pre(event, self.repo, self._factory)
         self.client.timeline["tracks"][0]["clips"][0]["scale"] = 1.08
+        with self.assertRaisesRegex(PalmierError, "non-keyframe clip state"):
+            observe_post(event, self.repo, self._factory)
+        self.assertEqual(load_state(self.out)["status"], "paused")
+
+    def test_reconcile_adopts_only_the_reserved_landed_operation(self):
+        event = self._event()
+        authorize_pre(event, self.repo, self._factory)
+        self.client.timeline["tracks"][0]["clips"][0]["keyframes"] = {"scale": [[0, 1.0], [12, 1.08]]}
         state = reconcile(self.client, self.repo)
         self.assertEqual(state["operationCount"], 1)
         self.assertIsNone(state["pendingOperation"])
         self.assertEqual(load_candidate(self.out)["timeline"]
-                         ["tracks"][0]["clips"][0]["scale"], 1.08)
+                         ["tracks"][0]["clips"][0]["keyframes"], {"scale": [[0, 1.0], [12, 1.08]]})
 
     def test_import_must_use_a_path_from_the_bound_worklist(self):
         asset = os.path.join(self.out, "graphic.mov")
@@ -169,8 +188,9 @@ class DesktopAuthorityHookTests(unittest.TestCase):
 
     def test_caption_detail_rows_are_valid_update_text_targets(self):
         self.client.timeline["tracks"].append({
-            "type": "video", "captionGroups": [{"clips": [
-                ["caption-1", 0, 12, "wrong words"]]}]})
+            "type": "video", "captionGroups": [{
+                "captionGroupId": "captions", "clipCount": 1,
+                "clips": [["caption-1", 0, 12, "wrong words"]]}]})
         found = snapshot("project", self.client.timeline)
         state = load_state(self.out)
         state["expectedFingerprint"] = found.fingerprint
@@ -200,13 +220,16 @@ class DesktopAuthorityHookTests(unittest.TestCase):
         rows[0]["checks"].pop("contrast")
         with open(reviews, "w", encoding="utf-8") as handle:
             json.dump({"schemaVersion": 1, "reviews": rows}, handle)
-        with self.assertRaisesRegex(PalmierError, "stale or did not pass"):
-            approve(self.client, self.repo, reviews)
-        rows[0]["checks"]["contrast"] = "pass"
-        with open(reviews, "w", encoding="utf-8") as handle:
-            json.dump({"schemaVersion": 1, "reviews": rows}, handle)
-        self.assertEqual(approve(self.client, self.repo, reviews)["status"],
-                         "complete")
+        with patch(
+                "palmier.desktop_authority.validate_current_desktop_qc",
+                return_value=state["qc"]):
+            with self.assertRaisesRegex(PalmierError, "stale or did not pass"):
+                approve(self.client, self.repo, reviews)
+            rows[0]["checks"]["contrast"] = "pass"
+            with open(reviews, "w", encoding="utf-8") as handle:
+                json.dump({"schemaVersion": 1, "reviews": rows}, handle)
+            self.assertEqual(approve(self.client, self.repo, reviews)["status"],
+                             "complete")
 
     def test_advance_invalidates_stale_qc_and_reviews(self):
         state = load_state(self.out)
@@ -258,17 +281,17 @@ class DesktopAuthorityHookTests(unittest.TestCase):
 
 
 class DesktopManifestTests(unittest.TestCase):
-    def test_visual_worklist_layers_overlapping_overlays(self):
+    def test_visual_worklist_preserves_plan_order_on_exact_full_canvas_tracks(self):
         steps = _visual_steps([{"op": "overlays", "entries": [
-            {"mediaKey": "card-a", "startFrame": 0, "endFrame": 40},
-            {"mediaKey": "card-b", "startFrame": 40, "endFrame": 80},
-            {"mediaKey": "transition", "startFrame": 30, "endFrame": 35},
+            {"mediaKey": "card-a", "startFrame": 0, "endFrame": 40, "transform": FULL_CANVAS_TRANSFORM},
+            {"mediaKey": "card-b", "startFrame": 40, "endFrame": 80, "transform": FULL_CANVAS_TRANSFORM},
+            {"mediaKey": "transition", "startFrame": 30, "endFrame": 35, "transform": FULL_CANVAS_TRANSFORM},
         ]}])
-        self.assertEqual(len(steps), 2)
-        self.assertEqual([row["layer"] for row in steps], [0, 1])
-        self.assertEqual([row["mediaKey"] for row in steps[0]["entries"]],
-                         ["card-a", "card-b"])
-        self.assertEqual(steps[1]["entries"][0]["mediaKey"], "transition")
+        self.assertEqual([row["mediaKey"] for row in steps], ["card-a", "card-b", "transition"])
+        self.assertTrue(all(row["op"] == GRAPHICS_OP and row["transform"] == FULL_CANVAS_TRANSFORM
+                            and row["trackPolicy"] == "new-top-video-track-per-graphic" for row in steps))
+        with self.assertRaisesRegex(PalmierError, "normalized full-canvas"):
+            _visual_steps([{"op": "overlays", "entries": [{"mediaKey": "unproved"}]}])
 
     def test_cut_worklist_edits_existing_source_without_duplicate_import(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -299,8 +322,7 @@ class DesktopManifestTests(unittest.TestCase):
             source = os.path.join(tmp, "source.mp4")
             broll = os.path.join(tmp, "broll.mp4")
             music = os.path.join(tmp, "music.wav")
-            master = os.path.join(tmp, "master.wav")
-            for path in (source, broll, music, master):
+            for path in (source, broll, music):
                 open(path, "w", encoding="utf-8").close()
             plan_path = os.path.join(tmp, "edit_plan.json")
             manifest_path = os.path.join(tmp, "asset_manifest.json")
@@ -314,10 +336,7 @@ class DesktopManifestTests(unittest.TestCase):
                     "captions": {"burn": False, "style": "line"},
                     "audioEnhance": {"preset": "voice",
                                      "palmierDenoise": {"enabled": True,
-                                                        "strength": 0.45},
-                                     "palmierAudioMaster": {"path": master,
-                                         "targetLUFS": -14,
-                                         "targetTruePeak": -1.5}},
+                                                        "strength": 0.45}},
                     "baselineLook": {"palmierColor": {"contrast": 0.1}},
                 }, handle)
             with open(manifest_path, "w", encoding="utf-8") as handle:
@@ -330,14 +349,24 @@ class DesktopManifestTests(unittest.TestCase):
                 }, handle)
             inputs = DesktopStageInput(
                 tmp, tmp, plan_path, manifest_path, "visual")
-            result = prepare_desktop_manifest(inputs, {
-                    "projectName": "demo", "projectSettings": {
-                        "fps": 24, "width": 1920, "height": 1080}})
+            master = MasterFacts(
+                source, file_sha256(source), 5.0, 24.0, 1920, 1080, 120,
+                "24/1")
+            probe = SimpleNamespace(
+                audio_present=True, audio_channels=2, audio_sample_rate=48000)
+            with patch("palmier.desktop_exact_master_plan.approved_master",
+                       return_value=master), patch(
+                           "palmier.desktop_frame_authority.approved_master",
+                           return_value=master), patch(
+                           "palmier.desktop_exact_master_plan.probe_media",
+                           return_value=probe):
+                result = prepare_desktop_manifest(inputs, {
+                        "projectName": "demo", "projectSettings": {
+                            "fps": 24, "width": 1920, "height": 1080}})
             content = result["content"]
             ops = {row["op"] for row in content["steps"]}
             self.assertTrue({"native-broll", "native-music", "native-captions",
-                             "native-denoise", "native-color",
-                             "native-audio-master"} <= ops)
+                             "native-denoise", "native-color"} <= ops)
             path_steps = [row for row in content["steps"] if row.get("path")]
             self.assertTrue(path_steps)
             self.assertTrue(all(row.get("fileHash") for row in path_steps))
@@ -345,8 +374,52 @@ class DesktopManifestTests(unittest.TestCase):
                        content["capability"]["omissions"]}
             self.assertFalse({"broll", "music", "captions", "audio", "color"}
                              & omitted)
+            self.assertEqual(content["capability"]["audioAuthority"], {
+                "schemaVersion": 1, "mode": "editable-stems",
+                "status": "blocked",
+                "blockerCode": "routing-readback-unsupported",
+            })
             self.assertEqual(content["qualityContract"]["contrast"]
                              ["normalTextMin"], 4.5)
+
+    def test_visual_worklist_rejects_unadmitted_audio_master_and_lut(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source = os.path.join(tmp, "source.mp4")
+            audio = os.path.join(tmp, "master.wav")
+            for path in (source, audio):
+                open(path, "w", encoding="utf-8").close()
+            plan_path = os.path.join(tmp, "edit_plan.json")
+            manifest_path = os.path.join(tmp, "asset_manifest.json")
+            manifest = {"sources": [{
+                "id": "src", "role": "primary", "path": source,
+                "fps": 24, "resolution": [1920, 1080],
+            }]}
+            with open(manifest_path, "w", encoding="utf-8") as handle:
+                json.dump(manifest, handle)
+            inputs = DesktopStageInput(
+                tmp, tmp, plan_path, manifest_path, "visual")
+            project = {"projectName": "demo", "projectSettings": {
+                "fps": 24, "width": 1920, "height": 1080}}
+            plans = (
+                {"audioEnhance": {"palmierAudioMaster": {"path": audio}}},
+                {"baselineLook": {"lut": audio}},
+            )
+            for addition in plans:
+                with self.subTest(addition=addition):
+                    with open(plan_path, "w", encoding="utf-8") as handle:
+                        json.dump({
+                            "target": {"mode": "longform"},
+                            "cutTrack": [{
+                                "sourceId": "src", "start": 0, "end": 5,
+                            }],
+                            **addition,
+                        }, handle)
+                    with self.assertRaisesRegex(
+                            PalmierError, "external-media authority"), patch(
+                                "palmier.desktop_frame_authority.approved_master",
+                                return_value=MasterFacts(source, file_sha256(source), 5.0, 24.0,
+                                                         1920, 1080, 120, "24/1")):
+                        prepare_desktop_manifest(inputs, project)
 
 
 if __name__ == "__main__":

@@ -177,7 +177,9 @@ class SeverityFlipTests(unittest.TestCase):
                                              "kind": "chip-row",
                                              "cached": True, "key": "k"}), \
              mock.patch.object(gf, "_content_bbox",
-                               return_value=(60, 300, 960, 900)):
+                               return_value=(60, 300, 960, 900)), \
+             mock.patch.object(gf, "_clip_dims",
+                               return_value=(1080, 1920)):
             gf.check_window(run, "graphicsTrack[0] chip-row", entry, tight)
         self.assertEqual(len(run.verdicts), 1)
         self.assertEqual(run.verdicts[0].severity, "FAIL")

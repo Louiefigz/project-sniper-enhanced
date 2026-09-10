@@ -137,9 +137,11 @@ class ExitOnCutTests(unittest.TestCase):
 
     def test_no_flags_is_passthrough(self) -> None:
         plan = _two_cut_plan([_gfx()])
+        original = copy.deepcopy(plan)
         track, clamped = eoc.apply_exit_on_cut(plan)
         self.assertEqual(clamped, 0)
-        self.assertIs(track, plan["graphicsTrack"])
+        self.assertEqual(track, plan["graphicsTrack"])
+        self.assertEqual(plan, original)
 
     def test_lint_rejects_non_boolean_flag(self) -> None:
         plan = _two_cut_plan([_gfx(exitOnCut="yes")])

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/auto-edit-delivery-receipt-v1.schema.json",
+  "title": "AutoEditDeliveryReceiptV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "runId",
+    "artifactToken",
+    "requestKey",
+    "deliveryPolicy",
+    "observedPalmierAdapterCalls",
+    "protectedBoundaries",
+    "finalHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "auto-edit-delivery-receipt" },
+    "runId": { "type": "string", "minLength": 1 },
+    "artifactToken": { "type": "string", "minLength": 1 },
+    "requestKey": { "$ref": "#/$defs/sha256" },
+    "deliveryPolicy": { "const": "mp4-only" },
+    "observedPalmierAdapterCalls": { "const": 0 },
+    "protectedBoundaries": {
+      "type": "array",
+      "prefixItems": [
+        { "const": "launch-guard" },
+        { "const": "native-primary-selection" },
+        { "const": "cut-checkpoint" },
+        { "const": "plan-checkpoint" },
+        { "const": "revision-checkpoint" },
+        { "const": "render-checkpoint" },
+        { "const": "qc-repair-checkpoint" },
+        { "const": "approved-mirror" }
+      ],
+      "items": false,
+      "minItems": 8,
+      "maxItems": 8
+    },
+    "finalHash": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

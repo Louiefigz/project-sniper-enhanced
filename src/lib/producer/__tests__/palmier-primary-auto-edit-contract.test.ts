@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import {
   PalmierPrimaryError,
   runPalmierPrimaryAutoEdit,
@@ -247,4 +248,43 @@ test("promotion cannot substitute a different timeline for the reviewed candidat
 
   assert.equal(events.some((event) => event.event === "outputs"), false);
   assert.equal(events.some((event) => event.event === "candidate_promoted"), false);
+});
+
+test("resumed promoted candidate reconciles the durable dual commit before outputs", async () => {
+  const ctx = context("light");
+  const selected = selectPalmierPrimaryBuild(ctx, editableWorkspace);
+  assert.equal(selected.kind, "native");
+  if (selected.kind !== "native") return;
+  const { run, events } = runtime(ctx);
+  run.job.attempts = 2;
+  let recoveryCalls = 0;
+  const timelineId = "promoted-candidate-needing-local-recovery";
+  const handled = await runPalmierPrimaryAutoEdit(run, {
+    classify: editableWorkspace,
+    candidate: () => ({
+      status: "promoted",
+      timelineId,
+      requestHash: createHash("sha256")
+        .update(selected.input.request, "utf8").digest("hex"),
+    }),
+    nativeEdit: async () => {
+      throw new Error("a promoted candidate must not be rebuilt");
+    },
+    qc: async () => {
+      throw new Error("a promoted candidate must not rerun QC");
+    },
+    promote: async () => {
+      recoveryCalls += 1;
+      return {
+        status: "candidate-promoted",
+        approvedHead: { timelineId },
+        sagaState: "COMMITTED",
+      };
+    },
+  });
+
+  assert.equal(handled, true);
+  assert.equal(recoveryCalls, 1);
+  assert.ok(events.some((event) => event.event === "outputs"
+    && event.resumed === true && event.timelineId === timelineId));
 });

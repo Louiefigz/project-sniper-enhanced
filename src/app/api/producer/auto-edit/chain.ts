@@ -6,6 +6,9 @@ import { dlog } from "@/lib/debug";
 import type { ReferenceIntent } from "@/lib/producer/intent-presets";
 import { AutoEditError, Send, SendRaw, lineSplitter, tailCollector } from "./stream";
 import { lookupProducerManifest } from "@/lib/server/producer-manifest";
+import { currentRenderGraphArgs } from
+  "@/lib/server/current-render-graph-command";
+import { stageTimingEnv } from "@/lib/server/stage-timing-context";
 
 // PHASE 2 plumbing — everything deterministic that wraps the authoring:
 // manifest resolution, the route-side plan_lint gate (belt over suspenders —
@@ -52,7 +55,7 @@ export interface ReferenceLintVerdict extends LintVerdict {
 export function runLintGate(planPath: string, manifestPath: string): Promise<LintVerdict> {
   return new Promise((resolve) => {
     const proc = spawn(pythonInterpreter(), [PLAN_LINT, planPath, manifestPath], {
-      env: { ...process.env },
+      env: stageTimingEnv(),
     });
     let stdout = "";
     proc.stdout.on("data", (d: Buffer) => (stdout += d.toString()));
@@ -86,7 +89,7 @@ export function runReferenceGate(
     args.push("--target-style", reference.targetStyle);
   }
   return new Promise((resolve) => {
-    const proc = spawn(pythonInterpreter(), args, { env: { ...process.env } });
+    const proc = spawn(pythonInterpreter(), args, { env: stageTimingEnv() });
     let stdout = "";
     proc.stdout.on("data", (data: Buffer) => (stdout += data.toString()));
     proc.stderr.on("data", (data: Buffer) => process.stderr.write(data));
@@ -119,7 +122,7 @@ function parseReferenceVerdict(stdout: string, code: number | null): ReferenceLi
  */
 export function runBaseGuard(dir: string, sendRaw: SendRaw): Promise<void> {
   return new Promise((resolve, reject) => {
-    const proc = spawn(pythonInterpreter(), [BASE_GUARD, dir], { env: { ...process.env } });
+    const proc = spawn(pythonInterpreter(), [BASE_GUARD, dir], { env: stageTimingEnv() });
     let stdout = "";
     proc.stdout.on("data", (d: Buffer) => (stdout += d.toString()));
     proc.stderr.on("data", (d: Buffer) => process.stderr.write(d));
@@ -143,7 +146,7 @@ export function assembleCommandArgs(
   manifestPath: string,
   outputPath = path.join(dir, "final.mp4"),
 ): string[] {
-  return [
+  const rendererArgs = [
     ASSEMBLE,
     path.join(dir, "base_final.mp4"),
     path.join(dir, "edit_plan.json"),
@@ -151,7 +154,18 @@ export function assembleCommandArgs(
     "--auto-base",
     "--fingerprint", path.join(dir, "base.fingerprint.json"),
     "--manifest", manifestPath,
+    "--require-source-set-admission",
   ];
+  return currentRenderGraphArgs({
+    phase: "assemble",
+    producerDir: dir,
+    planPath: path.join(dir, "edit_plan.json"),
+    manifestPath,
+    basePath: path.join(dir, "base_final.mp4"),
+    outputPath,
+    rendererArgs,
+    deferActive: true,
+  });
 }
 
 export function runAssemble(
@@ -161,9 +175,11 @@ export function runAssemble(
   outputPath = path.join(dir, "final.mp4"),
 ): Promise<{ code: number; errTail: string }> {
   const args = assembleCommandArgs(dir, manifestPath, outputPath);
-  dlog("producer:auto-edit", "spawn assemble.py", { dir, args: args.slice(1) });
+  dlog("producer:auto-edit", "spawn graph-gated assemble", {
+    dir, args: args.slice(1),
+  });
   return new Promise((resolve) => {
-    const proc = spawn(pythonInterpreter(), args, { env: { ...process.env } });
+    const proc = spawn(pythonInterpreter(), args, { env: stageTimingEnv() });
     // One tail over BOTH streams: assemble.py emits its typed errors (e.g.
     // "NoLegalRegion: {...}") as NDJSON on STDOUT via emit(), and the geometry
     // re-plan route keys on that token surviving into errTail (contract v3 A2).

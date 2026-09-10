@@ -1,0 +1,198 @@
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, renameSync, rmSync,
+  symlinkSync, unlinkSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import test from 'node:test';
+import { NativeFrameTransport, FRAME_PREFIX } from './hyperframes/dist/frame-source-transport.mjs';
+
+const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=', 'base64');
+const hash = (value) => createHash('sha256').update(value).digest('hex');
+const tick = () => new Promise((resolve) => setTimeout(resolve, 20));
+
+function fixture(t) {
+  const directory = mkdtempSync('/private/tmp/sniper-frame-unit-');
+  const path = join(directory, 'frame_00001.png');
+  writeFileSync(path, PNG);
+  const transport = new NativeFrameTransport();
+  transport.report = () => {};
+  transport.configure([directory]);
+  t.after(async () => { transport.close(); await tick(); rmSync(directory, { recursive: true }); });
+  return { directory, path, transport };
+}
+
+function request(url, options) {
+  return new Request('http://localhost:43210' + url, options);
+}
+
+test('exact registered source bytes, same-origin capability, MIME and no-store', async (t) => {
+  const { transport, path } = fixture(t);
+  const url = transport.resolve(path);
+  assert.match(url, /^\/__sniper_native_frame\/[a-f0-9]{64}$/);
+  assert.equal(url.includes(path), false);
+  assert.equal(transport.resolve(path), url);
+  const result = transport.handle(request(url));
+  assert.equal(result.status, 200);
+  assert.equal(result.headers.get('cache-control'), 'no-store');
+  assert.equal(result.headers.get('content-type'), 'image/png');
+  assert.equal(Number(result.headers.get('content-length')), PNG.length);
+  assert.equal(hash(Buffer.from(await result.arrayBuffer())), hash(readFileSync(path)));
+  await tick();
+  assert.equal(transport.stats().registrations, 1);
+  assert.equal(transport.stats().activeStreams, 0);
+  assert.equal(transport.stats().base64Fallbacks, 0);
+});
+
+test('unknown, malformed, missing and traversal tokens terminate in 404', (t) => {
+  const { transport } = fixture(t);
+  for (const suffix of ['', 'a'.repeat(64), '%2e%2e/x', '../index.html', 'x/y', '?path=/etc/passwd']) {
+    assert.equal(transport.handle(request(FRAME_PREFIX + suffix)).status, 404);
+  }
+  assert.equal(transport.stats().entries, 0);
+  transport.assertHealthy();
+});
+
+test('HEAD admits same identity without a stream and methods are bounded', (t) => {
+  const { transport, path } = fixture(t);
+  const url = transport.resolve(path);
+  const response = transport.handle(request(url, { method: 'HEAD' }));
+  assert.equal(response.body, null);
+  assert.equal(response.status, 200);
+  assert.equal(transport.stats().activeStreams, 0);
+  assert.equal(transport.handle(request(url, { method: 'POST' })).status, 405);
+});
+
+test('unconfigured, closed, relative, nonimage and outside-root resolution throws', (t) => {
+  const { transport, path } = fixture(t);
+  assert.throws(() => new NativeFrameTransport().resolve(path), /Unconfigured/);
+  for (const value of ['frame_00001.png', '/etc/passwd', '/private/tmp/elsewhere.png']) {
+    assert.throws(() => transport.resolve(value));
+  }
+  transport.close();
+  assert.throws(() => transport.resolve(path), /closed/);
+  assert.equal(transport.handle(request(FRAME_PREFIX + 'f'.repeat(64))).status, 404);
+});
+
+test('symlink, directory and FIFO sources are rejected without blocking', (t) => {
+  const { directory, path, transport } = fixture(t);
+  const link = join(directory, 'link.png');
+  symlinkSync(path, link);
+  assert.throws(() => transport.resolve(link), /canonical/);
+  const fifo = join(directory, 'fifo.png');
+  assert.equal(spawnSync('/usr/bin/mkfifo', [fifo], { timeout: 1000 }).status, 0);
+  assert.throws(() => transport.resolve(fifo), /regular image/);
+  assert.throws(() => transport.resolve(directory));
+});
+
+test('deleted registered source fails closed and latches failure', (t) => {
+  const { path, transport } = fixture(t);
+  const url = transport.resolve(path);
+  rmSync(path);
+  assert.equal(transport.handle(request(url)).status, 500);
+  assert.throws(() => transport.assertHealthy(), /failed/);
+  assert.throws(() => transport.resolve(path), /failed/);
+});
+
+test('replaced inode and changed bytes fail before response', (t) => {
+  const { directory, path, transport } = fixture(t);
+  const url = transport.resolve(path);
+  renameSync(path, join(directory, 'original.png'));
+  writeFileSync(path, PNG);
+  assert.equal(transport.handle(request(url)).status, 500);
+  assert.equal(transport.stats().activeStreams, 0);
+});
+
+test('in-place changed size fails before response', (t) => {
+  const { path, transport } = fixture(t);
+  const url = transport.resolve(path);
+  writeFileSync(path, Buffer.concat([PNG, PNG]));
+  assert.equal(transport.handle(request(url)).status, 500);
+});
+
+test('same root is configured once', (t) => {
+  const { directory, transport } = fixture(t);
+  assert.throws(() => transport.configure([directory]), /one explicit/);
+});
+
+for (const mode of ['new-directory', 'parent-symlink']) {
+  test(`registered extraction root replacement fails: ${mode}`, (t) => {
+    const { directory, path, transport } = fixture(t);
+    const url = transport.resolve(path);
+    const moved = directory + '-moved';
+    renameSync(directory, moved);
+    t.after(() => rmSync(moved, { recursive: true }));
+    if (mode === 'new-directory') {
+      mkdirSync(directory);
+      writeFileSync(path, PNG);
+    } else {
+      symlinkSync(moved, directory);
+    }
+    assert.equal(transport.handle(request(url)).status, 500);
+    assert.throws(() => transport.assertHealthy(), /failed/);
+  });
+}
+
+test('cancelled response closes its descriptor and cannot qualify', async (t) => {
+  const { path, transport } = fixture(t);
+  writeFileSync(path, Buffer.alloc(8 * 1024 * 1024, 1));
+  const controller = new AbortController();
+  const response = transport.handle(request(transport.resolve(path), { signal: controller.signal }));
+  const consume = response.arrayBuffer();
+  controller.abort();
+  await assert.rejects(consume);
+  await tick();
+  assert.equal(transport.stats().activeStreams, 0);
+  assert.equal(transport.stats().aborted, 1);
+  assert.throws(() => transport.assertHealthy(), /failed/);
+});
+
+test('shutdown clears registrations and closes a pending descriptor', async (t) => {
+  const { path, transport } = fixture(t);
+  writeFileSync(path, Buffer.alloc(8 * 1024 * 1024, 1));
+  const response = transport.handle(request(transport.resolve(path)));
+  const consuming = response.arrayBuffer();
+  transport.close();
+  await assert.rejects(consuming);
+  await tick();
+  assert.equal(transport.stats().entries, 0);
+  assert.equal(transport.stats().activeStreams, 0);
+});
+
+test('many sequential requests retain metadata only and no extra descriptors', async (t) => {
+  const { directory, transport } = fixture(t);
+  const before = readdirSync('/dev/fd').length;
+  for (let index = 0; index < 50; index++) {
+    const path = join(directory, `frame_${index}.png`);
+    writeFileSync(path, PNG);
+    const response = transport.handle(request(transport.resolve(path)));
+    assert.equal(hash(Buffer.from(await response.arrayBuffer())), hash(PNG));
+  }
+  await tick();
+  assert.equal(transport.stats().entries, 50);
+  assert.equal(transport.stats().activeStreams, 0);
+  assert.ok(readdirSync('/dev/fd').length <= before + 1);
+  for (const entry of transport.entries.values()) {
+    assert.deepEqual(Object.keys(entry).sort(), ['identity', 'mime', 'path', 'source']);
+  }
+});
+
+test('only explicitly configured native directory aliases are admitted', async (t) => {
+  const { directory, path, transport } = fixture(t);
+  const parent = mkdtempSync('/private/tmp/sniper-native-alias-unit-');
+  const alias = join(parent, 'presenter');
+  symlinkSync(directory, alias);
+  const lookupPath = join(alias, 'frame_00001.png');
+  assert.throws(() => transport.resolve(lookupPath), /no admitted/);
+  const native = new NativeFrameTransport();
+  native.report = () => {};
+  native.configure([alias]);
+  t.after(async () => { native.close(); await tick(); rmSync(parent, { recursive: true }); });
+  const url = native.resolve(lookupPath);
+  assert.deepEqual(Buffer.from(await native.handle(request(url)).arrayBuffer()), readFileSync(path));
+  unlinkSync(alias);
+  mkdirSync(alias);
+  writeFileSync(lookupPath, PNG);
+  assert.equal(native.handle(request(url)).status, 500);
+  assert.throws(() => native.assertHealthy(), /failed/);
+});

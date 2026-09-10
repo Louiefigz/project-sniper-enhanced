@@ -7,9 +7,10 @@ import json
 import re
 
 from transcript_cut_evidence import (
-    SourceEvidence, file_hash, source_evidence, stable_hash,
+    SourceEvidence, file_hash, load_cut_parent, recheck_cut_parents, source_evidence, stable_hash,
 )
 from transcript_cut_quality import inspect_output
+from transcript_timing_review import ReviewInput, consume as consume_timing_reviews
 
 BOUNDARY_EPS_S, GAP_MATCH_EPS_S = 0.015, 0.05
 MAX_SEAM_SILENCE_S, MIN_REMOVAL_S = 0.75, 0.04
@@ -241,11 +242,9 @@ def check(plan_path: str, transcripts_dir: str, manifest_path: str,
     errors: list[str] = []
     warnings: list[str] = []
     try:
-        with open(plan_path) as handle:
-            plan = json.load(handle)
-        with open(manifest_path) as handle:
-            manifest = json.load(handle)
-    except (OSError, json.JSONDecodeError) as exc:
+        held_plan, held_manifest = load_cut_parent(plan_path), load_cut_parent(manifest_path)
+        plan, manifest = held_plan.value, held_manifest.value
+    except (OSError, RuntimeError, ValueError) as exc:
         return {"scope": "transcript_cut", "ok": False, "errors": [str(exc)],
                 "warnings": [], "metrics": {}}
     if not plan.get("cutTrack"):
@@ -259,11 +258,13 @@ def check(plan_path: str, transcripts_dir: str, manifest_path: str,
     removals = _validate_removals(plan, sources, ranges, errors)
     output_quality, quality_errors, quality_warnings = inspect_output(
         plan, sources, BOUNDARY_EPS_S)
+    output_quality, quality_errors = consume_timing_reviews(
+        ReviewInput(plan_path, manifest_path, transcripts_dir, plan, manifest, sources), output_quality, quality_errors)
     errors.extend(quality_errors)
     warnings.extend(quality_warnings)
     receipt = {
         "schemaVersion": 1, "stage": "previsual" if previsual else "planning_gate",
-        "planHash": file_hash(plan_path), "manifestHash": file_hash(manifest_path),
+        "planHash": held_plan.sha256, "manifestHash": held_manifest.sha256,
         "transcriptDigest": stable_hash(transcript_files),
         "cutTrackDigest": stable_hash(plan.get("cutTrack") or []),
         "cutDecisionsDigest": stable_hash(plan.get("cutDecisions") or {}),
@@ -272,6 +273,7 @@ def check(plan_path: str, transcripts_dir: str, manifest_path: str,
     }
     if approval_path:
         _check_approval(approval_path, receipt, errors)
+    recheck_cut_parents((held_plan, held_manifest), errors)
     return {"scope": "transcript_cut", "ok": not errors, "errors": errors,
             "warnings": warnings, "metrics": {"receipt": receipt}}
 

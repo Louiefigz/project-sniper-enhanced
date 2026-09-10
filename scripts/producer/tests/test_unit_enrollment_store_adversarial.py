@@ -107,7 +107,8 @@ class UnitEnrollmentStoreAdversarialTests(unittest.TestCase):
             reobserve_prospective_unit_enrollment_v1(self._read_request())
         os.unlink(unexpected)
         enrollment_path = os.path.join(record, "enrollment.json")
-        document = json.loads(open(enrollment_path, "rb").read())
+        with open(enrollment_path, "rb") as handle:
+            document = json.loads(handle.read())
         document["enrollmentClock"]["sequence"] += 1
         with open(enrollment_path, "wb") as handle:
             handle.write(
@@ -128,7 +129,8 @@ class UnitEnrollmentStoreAdversarialTests(unittest.TestCase):
         with self.assertRaises(UnitEnrollmentStoreError):
             reobserve_prospective_unit_enrollment_v1(self._read_request())
         os.chmod(enrollment_path, 0o600)
-        raw = open(enrollment_path, "rb").read()
+        with open(enrollment_path, "rb") as handle:
+            raw = handle.read()
         with tempfile.NamedTemporaryFile() as external:
             external.write(raw)
             external.flush()

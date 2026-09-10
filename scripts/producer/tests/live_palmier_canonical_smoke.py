@@ -21,9 +21,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from palmier.export import verify_export, wait_for_export  # noqa: E402
 from palmier.executor import Executor  # noqa: E402
+from palmier.keyframe_readback import (                     # noqa: E402
+    compare_keyframe_rows, keyframe_map)
 from palmier.mcp_client import PalmierClient, PalmierError  # noqa: E402
 from palmier.translate_math import build_placements, punch_keyframes  # noqa: E402
-from palmier.verify import _keyframe_map  # noqa: E402
 from palmier.timeline_authority import (                    # noqa: E402
     _content_timeline, _semantic, compare_authority, fork_candidate,
     record_authority, snapshot)
@@ -95,18 +96,19 @@ def _prove_motion(client: PalmierClient, clip: dict) -> dict:
         executor._op_keyframes({
             "op": "keyframes", "clip": 0, "property": prop, "rows": rows})
     actual_clip = _visual_clip(client.call_json("get_timeline", {}))
-    actual = _keyframe_map(actual_clip)
+    actual = keyframe_map(actual_clip)
     if not actual:
         raise PalmierError("live motion smoke readback exposed no keyframes")
+    readback = {}
     for prop, rows in expected.items():
-        stripped = [row[:-1] for row in rows]
-        if actual.get(prop) not in (rows, stripped):
-            raise PalmierError(f"live motion smoke {prop} readback differs")
+        readback[prop] = compare_keyframe_rows(
+            actual.get(prop), rows).as_dict()
     scale = max(row[1] for row in actual["scale"])
     position_x = [row[1] for row in actual["position"]]
     if scale <= 1.1 or max(position_x) - min(position_x) <= 0.01:
         raise PalmierError("live motion smoke has no material scale/pan")
-    return {"properties": sorted(expected), "maxScale": scale,
+    return {"properties": sorted(expected), "readback": readback,
+            "maxScale": scale,
             "positionRangeX": max(position_x) - min(position_x)}
 
 

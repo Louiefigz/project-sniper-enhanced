@@ -96,7 +96,8 @@ function gateFailure(
     throw new AutoEditError("planning authority changed before gate-failure evidence was committed");
   }
   run.io.send({
-    event: "planning_gate_revision_required", round,
+    event: run.job.reviewSavedPlan
+      ? "saved_plan_planning_gate_failed" : "planning_gate_revision_required",
     materialIssues: failure.review.materialIssues.length,
   });
   return { round, ...failure, gates, authority };
@@ -116,7 +117,10 @@ export async function runPlanningReviewBatch(
   if (!sameAutoEditAuthority(authority, deps.authority(run.job.ctx))) {
     throw new AutoEditError("planning authority changed while deterministic gates were running");
   }
-  run.io.send(planningGateBundleEvent(gates));
+  run.io.send({
+    ...planningGateBundleEvent(gates),
+    ...(run.job.reviewSavedPlan ? { immutableSavedPlan: true } : {}),
+  });
   const context = { run, gates, authority, deps };
   if (!gates.ok) return [gateFailure(context, firstRound)];
   const entries = Array.from({ length: count }, (_, index) => {

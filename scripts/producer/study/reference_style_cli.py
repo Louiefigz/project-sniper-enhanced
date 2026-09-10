@@ -44,6 +44,7 @@ def _compile(args: argparse.Namespace) -> dict:
     pack = compile_style_pack(inputs)
     _atomic_json(args.output, pack)
     return {"status": "style-pack-ready", "path": os.path.abspath(args.output),
+            "releaseClass": pack["releaseClass"],
             "windows": len(pack["grammar"]["windows"]),
             "templates": sum(1 for row in pack["grammar"]["windows"]
                              if row.get("template"))}

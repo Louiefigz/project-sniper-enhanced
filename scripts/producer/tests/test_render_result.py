@@ -10,6 +10,7 @@ from pathlib import Path
 from unittest import mock
 
 from _common import pl  # noqa: F401
+from _current_render_build_fixture import current_manifest
 from _render_lane_proof import ProofInputs, build_full_proof
 from headless import render_lane
 from headless.render_lane import OverlayLaunchRequest
@@ -44,7 +45,7 @@ class RenderResultTests(unittest.TestCase):
             "overlays": [{"overlayId": "overlay-1", "entry": entry}],
         })
         request_digest = artifact.request_digest
-        build = store_render_build(str(self.attempt), {"testBuild": True})
+        build = store_render_build(str(self.attempt), current_manifest())
         build_digest = build.build_digest
         prepared = OverlayPrepareRequest(
             str(self.attempt), "attempt", request_digest, build_digest,
@@ -68,7 +69,7 @@ class RenderResultTests(unittest.TestCase):
         path = Path(self.binding.cache_dir) / f"{key}.mov"
         path.write_bytes(b"rendered")
         path.chmod(0o600)
-        return {"cached": False, "fmt": "mov", "key": key,
+        return {"cached": False, "fmt": "mov", "fps": "30", "key": key,
                 "kind": "section-marker", "path": str(path),
                 "proof": build_full_proof(
                     path, key, image_id,

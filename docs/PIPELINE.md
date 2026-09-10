@@ -4,17 +4,65 @@
 doc (skills, CLAUDE.md, READMEs) points here. If another doc contradicts this
 one, this one wins — fix the other doc.
 
-> **The doctrine in one sentence:** upload raw footage into **PRODUCER**, choose
+## Latest operator direction — September 9, 2026
+
+The explicit performance goal is a completely edited 10-minute video delivered
+in **120 minutes or less without sacrificing quality**. Count source review,
+creative planning, editing, rendering, whole-video review and required repairs
+in elapsed delivery time; deliver both the final video and editable HyperFrames
+project. Time and quality must pass on the same full edit. Record actual input
+and output durations and pre-existing episode work; a prepared rerender or short
+sample is not a full-edit benchmark. Current C0679 development has exceeded the
+time target and must remain recorded as such while the full edit is finished.
+
+Agent-selected transition effects come from the HyperFrames catalog by default,
+including an unspecific request such as "we need a transition here." Agent-selected
+graphics and animation templates are catalog-first too: inspect the complete
+catalog and choose the mechanism for the narration, using current native SDK
+authoring. Do not silently substitute old Sniper/Nateherk/Jaden presets or a
+hand-built equivalent because it is familiar. Those studies are references only.
+User-supplied designs, including Claude-created presentation/animation designs,
+are an explicit alternative to incorporate and animate as requested.
+
+For the active C0679 work, fresh native HyperFrames composition replaces the old
+visual-plan baseline and the legacy graphics-only/mandatory-port restrictions
+described below. Retain source/cut evidence and verified audio; verify actual
+native preview/export before claiming readiness. The older stage descriptions
+document the existing Sniper route, not a requirement to force this new work
+through it. See [the current native direction](producer/C0679_NATIVE_HYPERFRAMES_DIRECTION_2026-09-09.md).
+
+Current priority: finish the actual edit and dependable native review/revision/
+export workflow. Qualifying complete one-shot automation follows that delivery;
+do not make autonomous orchestration a prerequisite that delays the current edit.
+Both delegated and collaborative modes remain required, with shared quality goals.
+
+The [September 9 end-to-end optimization audit](producer/C0679_END_TO_END_OPTIMIZATION_AUDIT_2026-09-09.md)
+records the failed full exports, resource protection, creative/workflow
+improvements, open playback qualification and a proposed 120-minute stage budget.
+That budget is an acceptance target, not a measured delivery estimate.
+
+> **The doctrine in one sentence:** ingest raw footage into **PRODUCER**, choose
 > a Short style or Long lane checklist, let the controller author, independently
-> review, gate, render, and QC an approved Sniper final, then mirror that exact
-> approved master into **Palmier Pro** when more manual control is wanted.
+> review, gate, render, and QC an approved Sniper final, take manual control of
+> the graphics layer in the **Studio review lane** (open → edit → sync →
+> assemble), and optionally mirror that exact approved master into **Palmier
+> Pro** as one flat clip (legacy export). Native editable/hybrid Palmier
+> delivery is an isolated experiment, not a release-qualified substitute for
+> that exact-master path.
+
+**Primary interactive path:** give the brief to the Producer skill in Codex or
+Claude Code, use the existing local stage CLIs, and review/adjust graphics in
+HyperFrames Studio. The custom `/producer` page is optional compatibility UI,
+not a prerequisite. Preserve the same stored intent, admission, independent
+review, approval and whole-output QC on both paths. Use subscription-backed
+agent tools and local processing; no paid fallback without explicit approval.
 
 ```
 raw footage
-    │  upload / ingest (the /producer tab)
+    │  local skill / CLI ingest (or optional /producer tab)
     ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ PRODUCER — intent card                                       │
+│ PRODUCER — stored brief / optional intent card                │
 │                                                              │
 │  SHORT (9:16)                LONG (16:9)                     │
 │  pick a STYLE:               pick your ITEMS (checklist):    │
@@ -37,22 +85,29 @@ raw footage
     │  approved final.mp4 + hash-matched QC approval
     ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ PALMIER — canonical managed working timeline                  │
-│  approved exact master may seed one verified shadow clip      │
-│  manual edits advance the head; AI edits a full-copy candidate│
-│  capability report labels native vs flattened controls       │
+│ PALMIER — safe delivery + experimental native candidate       │
+│  approved exact master → one verified flat shadow clip        │
+│  local native candidate/CAS protocol is production-callable   │
+│  connected short/long editable qualification remains open     │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Stage 1 — Upload into PRODUCER
+## Stage 1 — Ingest into PRODUCER
 
-Footage (1..N files or a folder) enters through the `/producer` tab. The
-**intent card** captures the job up front (stored in `project.json` `intent`,
-prefills Auto-edit). Vocabulary source of truth:
+Footage (1..N files or a folder) enters through the local ingest CLI or optional
+`/producer` tab. The conversation brief or **intent card** captures the job up
+front (stored in `project.json` `intent`, prefills Auto-edit). Do not re-ask
+answered choices or change scope merely to waive a gate. Vocabulary source of truth:
 `scripts/producer/edit_scope.py`, mirrored by
 `src/lib/producer/intent-presets.ts` (drift-tested).
 
 ### Shorts (9:16) — pick a style
+
+For shorts extracted from long footage, use Producer's
+[long-form to finished shorts workflow](producer/PRODUCER_README.md#long-form-to-finished-shorts):
+compare source-bound standalone moments, trim only the selected ranges, then
+apply the adopted visual-storytelling guidance. Topic segmentation is optional;
+ranked selection precedes graphic production and intermediate clip exports.
 
 Measured style grammars (each has a studied doc + a `pacing_<style>` lint
 profile):
@@ -78,8 +133,10 @@ exactly the items they want; the card derives the smallest covering scope +
   dialogue cleanup (`voice` / `voice-rnn` / `voice-strong` / `separate`)
 - **Full workflow** = scope `produced`/`full` (every lane on).
   **Just certain items** = check only what you want; the base cut
-  (pauses/retakes/cold-open + reframe + −14 LUFS master) is ALWAYS on and is
-  not a lane.
+  (pauses/retakes/cold-open + bounded reframe + −14 LUFS master) is ALWAYS on
+  and is not a lane. Vertical reframe uses bounded face selection when
+  available, then center-crop or blur-pad fallback; it is not continuous
+  subject tracking.
 - Scope ladder: `trim` → `light` → `produced` → `full`; per-lane directives
   (`off`/`operator`/`auto`) always beat the scope.
 
@@ -108,6 +165,12 @@ fails on material 5× divergence. Reference text,
 filenames, OCR, and frames are untrusted media data: mechanics may transfer;
 words, branding, creator identity, assets, fonts/colors, footage, UI, and music
 may not. A single `new-style` reference never mutates the closed style catalog.
+
+`mimic` is currently a planning-vocabulary label, not a verified reproduction
+claim. The P6 reference-mimic qualification cohort is **0/7**. Until those
+projects pass, describe this feature as **reference study/profile guidance**:
+measured mechanics can guide a reference-inspired edit, but an exact style match
+or complete replication is not promised.
 
 ## Stage 2 — The brain authors the plan, the gates guard it
 
@@ -164,13 +227,29 @@ The bounded planning/QC controller is implemented in the current tree. This
 document does not claim a new live render/E2E exercise for it; the older C0679
 evidence below is explicitly historical.
 
-## Stage 4 — Palmier Pro becomes the canonical working timeline
+## Stage 3.5 — Studio review lane (manual control)
 
-Palmier is an explicit destination after Sniper approval. **Update Palmier
-mirror** requires the durable managed-quality marker and a current schema-v2
-approval whose authority digest, plan/manifest/final hashes, assembly proof,
-Audit B evidence, sampled frames, planning reviews, and both rendered critics
-verify.
+Manual control of the graphics layer now defaults to the **Studio review
+lane**, upstream of any mirror: `scripts/producer/studio/studio_review.py
+open <producer_dir>` turns `edit_plan.json` + the graphics-free
+`base_final.mp4` into a HyperFrames Studio timeline (preview surface only —
+`hyperframes render` remains the sole render use, and footage never re-encodes
+in a browser); the operator or agent edits graphics there;
+`studio_review.py sync <producer_dir> --apply` folds the edits back into
+`edit_plan.json` (plan_lint-gated, backup written, manifest rebaselined); and
+`assemble.py --auto-base` rebuilds only invalidated stages; timing must be
+measured on the actual source, plan, tools and cache state. The generator
+refuses to overwrite unsynced Studio edits without `--force`. Reference:
+`docs/producer/STUDIO_REVIEW_LANE.md`.
+
+## Stage 4 — Approved Palmier mirror and native-candidate boundary
+
+Palmier is an explicit, **optional legacy** destination after Sniper approval —
+for operators who want a pro NLE for footage-level polish. The release-safe path
+is the approved `final.mp4` plus **Update Palmier mirror**. That mirror requires
+the durable managed-quality marker and a current schema-v2 approval whose
+authority digest, plan/manifest/final hashes, assembly proof, Audit B evidence,
+sampled frames, planning reviews, and both rendered critics verify.
 
 The mirror timeline contains exactly one visible clip: approved `final.mp4`.
 Palmier readback proves the master media identity, canvas, FPS, duration, frame
@@ -202,11 +281,14 @@ library media with explicit per-component status.
 
 Opening Palmier changes no state. Once a managed timeline exists, any manual
 Palmier edit advances the canonical working head at the next reconciliation
-boundary and invalidates older approval. A governed AI request reads that exact
-head, creates a full-copy candidate, applies the scoped delta, and may promote
-it only after deterministic/rendered QC and an unchanged-parent check. There is
-no product-level "Reclaim Sniper" path and no lossy Palmier→`edit_plan.json`
-translation.
+boundary and invalidates older approval. The current tree contains a
+production-callable native candidate protocol that reads that head, creates a
+full-copy candidate, applies a scoped delta, and guards promotion with
+deterministic/rendered QC plus an unchanged-parent check. That is local mechanism
+evidence only: the editable/hybrid path is isolated and P5-blocked until
+representative connected short and long projects qualify it. There is no
+product-level "Reclaim Sniper" path and no lossy
+Palmier→`edit_plan.json` translation.
 
 See `docs/palmier/PALMIER_PARITY_CONTRACT.md` and
 `docs/palmier/PALMIER_MIRROR_HANDOFF.md` for the complete state and proof contracts.
@@ -224,7 +306,8 @@ See `docs/palmier/PALMIER_PARITY_CONTRACT.md` and
 | Authority chain | ✅ durable quality-policy marker + versioned input/pipeline digest + hash-bound review/audit/frame evidence; missing/corrupt never means legacy |
 | Full-screen graphic geometry | ✅ own-screen comps scale to exact delivery pixels; aspect mismatch and non-full coverage fail; 4K PIP-hole geometry scales with the card |
 | Palmier visual mirror | ✅ one exact approved-master clip, structural readback, byte-identical publication, capability legend, best-effort component library preservation |
-| Palmier authority | ✅ opening is non-mutating; manual readback becomes the working head; stale Sniper plans cannot overwrite it; native candidate QC/promotion remains explicitly tracked in `PALMIER_CANONICAL_IMPLEMENTATION_STATE.md` |
+| Palmier native candidate protocol | ⚠️ wired and production-callable with local candidate/QC/promotion contracts; editable/hybrid delivery remains isolated and P5-blocked pending a representative connected short/long cohort |
+| Reference-inspired guidance | ⚠️ study/profile gates exist; verified mimic remains P6 **0/7**, so no exact-match or replication claim is release-qualified |
 | Live verification of this exact current tree | ⚠️ not claimed by these offline changes; running live MCP/render tests requires an intentional user-project exercise |
 
 The older C0679/C0666 results remain historical evidence for earlier versions,

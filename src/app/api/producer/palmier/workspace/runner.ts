@@ -17,7 +17,16 @@ export function draftArgs(input: {
   mode: "short" | "longform";
   workingPath?: string;
 }): string[] {
-  const args = [SCRIPT, input.manifestPath, input.dir, "--name", input.name, "--mode", input.mode];
+  const args = [
+    SCRIPT,
+    input.manifestPath,
+    input.dir,
+    "--require-source-set-admission",
+    "--name",
+    input.name,
+    "--mode",
+    input.mode,
+  ];
   if (input.workingPath) args.push("--working-media", input.workingPath);
   return args;
 }

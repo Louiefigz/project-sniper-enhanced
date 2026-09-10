@@ -69,7 +69,24 @@ def _canvas_dims(raw: object) -> tuple[float, float] | None:
 
 
 def _fixed_edge_error(graphic: dict, row: dict) -> str | None:
-    """Require registered edge rails to remain flush to their authored edge."""
+    """Require registered rails to stay INSIDE their registered edge band.
+
+    The recompose contract clears the face out of ``1 - width_frac`` of the
+    canvas and assumes the rail's pixels live in the remaining edge band —
+    that band is the invariant to verify, using the registry's own
+    ``width_frac``/``side`` numbers. Flush-to-edge was the old expectation,
+    but it only describes FIELD rails (nateherk-rail's cream field measures
+    [0, 0, 633, 1079]); glass-rail's anatomy is floating glass pills with
+    comp-internal margins and vertical centering, so a correct delivery
+    (measured 4K: pills at [52, 750, 1214, 1496], band bound 1268) can never
+    touch the canvas edges. Containment still catches every real drift: a
+    rail escaping toward the cleared face region crosses the band bound.
+
+    Explicit own-screen entries use the complete native canvas, not this
+    free-band rail geometry. Their exact delivery coverage is checked below.
+    """
+    if graphic.get("anchor") == "own-screen":
+        return None
     geometry = MOTION["recompose"]["geometry"].get(str(graphic.get("kind")))
     if not isinstance(geometry, dict):
         return None
@@ -81,11 +98,16 @@ def _fixed_edge_error(graphic: dict, row: dict) -> str | None:
     if side == "spec":
         side = str((graphic.get("spec") or {}).get(
             "side", geometry.get("default_side", "left")))
-    edge = bbox[0] if side == "left" else canvas[0] - 1 - bbox[2]
-    vertical = max(abs(bbox[1]), abs(canvas[1] - 1 - bbox[3]))
-    if abs(edge) > 2 or vertical > 2:
-        return (f"fixed-edge {side} rail shifted off its authored canvas edge "
-                f"(bbox {row['placedBBox']}, canvas {row.get('canvas')})")
+    band = float(geometry["width_frac"]) * canvas[0]
+    if side == "left":
+        horizontal = max(-bbox[0], bbox[2] - band)
+    else:
+        horizontal = max(bbox[2] - (canvas[0] - 1), (canvas[0] - band) - bbox[0])
+    vertical = max(-bbox[1], bbox[3] - (canvas[1] - 1))
+    if horizontal > 2 or vertical > 2:
+        return (f"fixed-edge {side} rail shifted off its registered edge band "
+                f"(bbox {row['placedBBox']}, canvas {row.get('canvas')}, "
+                f"band {band:.0f}px)")
     return None
 
 

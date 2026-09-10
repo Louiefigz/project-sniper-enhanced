@@ -106,6 +106,18 @@ class SemanticBeatTests(unittest.TestCase):
             self.assertTrue(beat["compatibleKinds"], beat)
             self.assertTrue(beat["beatId"].startswith("intro-"), beat)
 
+    def test_number_painting_kinds_need_a_spoken_number_in_the_beat_window(self) -> None:
+        from producer_config import MOTION
+        words = _words()
+        beat = next(row for row in isc.semantic_beats(words, 44.0) if row["shape"] == "comparison")
+        self.assertIn("chart-story", MOTION["card_form_map"]["comparison"])
+        self.assertNotIn("chart-story", beat["compatibleKinds"], beat)     # "Pro versus manual" speaks no number
+        self.assertNotIn("count-up", beat["compatibleKinds"], beat)
+        self.assertIn("nateherk-scoreboard", beat["compatibleKinds"], beat)
+        spoken = sorted(words + [{"word": "12", "start": 10.38, "end": 10.48}], key=lambda w: w["start"])
+        spoken_beat = next(row for row in isc.semantic_beats(spoken, 44.0) if row["shape"] == "comparison")
+        self.assertIn("chart-story", spoken_beat["compatibleKinds"], spoken_beat)
+
     def test_measure_noun_is_scale_not_a_list(self) -> None:
         beats = isc.semantic_beats(_words(), 44.0)
         years = next(beat for beat in beats if "ten years" in beat["evidence"])

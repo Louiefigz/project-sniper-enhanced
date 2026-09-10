@@ -6,15 +6,17 @@ state, or publication.  Callers provide every overlay path and placement.
 
 from __future__ import annotations
 
-import os
 import subprocess
-import tempfile
 from dataclasses import dataclass
+from fractions import Fraction
 from typing import Callable
 
 from producer_config import CANVAS, ENCODE
+from graphics.composite_layers import (caption_layer_policy, frame_window as _frame_window,
+                                      ordered_clips, validate_caption_tails)
+from graphics.presenter_layout_graph import (PresenterGraphSpec, build_presenter_graph,
+                                            presenter_input_arguments, validate_presenter_graph)
 
-_CHUNK = 8
 _FOCUS_BLUR = 20
 _TAKEOVER_SIGMA = 24
 
@@ -28,6 +30,11 @@ class CompositeOptions:
     ffmpeg: str = "ffmpeg"
     ffprobe: str = "ffprobe"
     command_runner: Callable[[list[str]], None] | None = None
+    frame_rate: str | None = None
+    frame_range: tuple[int, int] | None = None
+    video_only: bool = False
+    caption_tail: int | None = None  # Explicit held caption pages AFTER sorted graphics.
+    presenter: PresenterGraphSpec | None = None  # Low-level opt-in; no released Producer owner.
 
 
 @dataclass
@@ -36,6 +43,7 @@ class _Graph:
 
     parts: list[str]
     eof_pass: bool = False
+    frame_rate: str | None = None
 
 
 def run_command(cmd: list[str]) -> None:
@@ -71,6 +79,24 @@ def probe_frames(path: str, ffprobe: str = "ffprobe") -> int:
         raise RuntimeError(f"ffprobe returned no packet count for {path}") from exc
 
 
+def _gate(clip: dict, graph: _Graph) -> str:
+    """Keep legacy gates unchanged; the private opt-in uses exact frame indices."""
+    if graph.frame_rate is not None:
+        start, end = _frame_window(clip)
+        return f"enable='gte(n,{start})*lt(n,{end})'"
+    start, end = float(clip["outStart"]), float(clip["outEnd"])
+    return f"enable='between(t,{start:.4f},{end:.4f})'"
+
+
+def _overlay_origin(clip: dict, graph: _Graph) -> str:
+    """Maintain the original absolute animation origin without decimal truncation."""
+    if graph.frame_rate is None:
+        return f"{float(clip['outStart']):.4f}/TB"
+    start, _end = _frame_window(clip)
+    rate = Fraction(graph.frame_rate)
+    return f"{start}*{rate.denominator}/({rate.numerator}*TB)"
+
+
 def _pip_hole(prev: str, clip: dict, idx: int, graph: _Graph) -> str:
     if not clip.get("pipHole"):
         return prev
@@ -82,15 +108,13 @@ def _pip_hole(prev: str, clip: dict, idx: int, graph: _Graph) -> str:
         f"scale={hw}:{hh}:flags=lanczos[ph{idx}s]"
     )
     based = f"[phb{idx}]"
-    start, end = float(clip["outStart"]), float(clip["outEnd"])
-    gate = f"enable='between(t,{start:.4f},{end:.4f})'"
+    gate = _gate(clip, graph)
     graph.parts.append(f"[ph{idx}a][ph{idx}s]overlay=x={hx}:y={hy}:{gate}{based}")
     return based
 
 
 def _base_effects(prev: str, clip: dict, idx: int, graph: _Graph) -> str:
-    start, end = float(clip["outStart"]), float(clip["outEnd"])
-    gate = f"enable='between(t,{start:.4f},{end:.4f})'"
+    gate = _gate(clip, graph)
     if clip.get("takeoverBase") == "blur-desat":
         graph.parts.append(f"{prev}split[tb{idx}a][tb{idx}b]")
         graph.parts.append(
@@ -109,8 +133,7 @@ def _base_effects(prev: str, clip: dict, idx: int, graph: _Graph) -> str:
 
 def _overlay_clip(prev: str, clip: dict, idx: int, graph: _Graph) -> str:
     """Composite one time-gated overlay and return its output label."""
-    start, end = float(clip["outStart"]), float(clip["outEnd"])
-    gate = f"enable='between(t,{start:.4f},{end:.4f})'"
+    gate = _gate(clip, graph)
     prev = _pip_hole(prev, clip, idx, graph)
     prev = _base_effects(prev, clip, idx, graph)
     x, y = int(clip.get("x", 0)), int(clip.get("y", 0))
@@ -121,31 +144,73 @@ def _overlay_clip(prev: str, clip: dict, idx: int, graph: _Graph) -> str:
     return out
 
 
-def build_graph(clips: list[dict], eof_pass: bool = False) -> tuple[str, str]:
+def build_graph(clips: list[dict], eof_pass: bool = False, frame_rate: str | None = None,
+                presenter: PresenterGraphSpec | None = None) -> tuple[str, str]:
     """Build the proven input-0 base plus ordered overlay filter graph."""
-    graph = _Graph(parts=[], eof_pass=eof_pass)
+    graph = _Graph(parts=[], eof_pass=eof_pass, frame_rate=frame_rate)
+    previous = "[0:v]"
+    if presenter is not None:
+        if frame_rate != presenter.frame_rate:
+            raise ValueError("presenter graph differs from the held compositor clock")
+        graph.parts, previous = build_presenter_graph(presenter, len(clips) + 1)
     for idx, clip in enumerate(clips):
-        start = float(clip["outStart"])
         prefix = ""
         if clip.get("scaleDims"):
             width, height = clip["scaleDims"]
             prefix = f"scale={width}:{height}:flags=lanczos,"
         graph.parts.append(
-            f"[{idx + 1}:v]{prefix}setpts=PTS-STARTPTS+{start:.4f}/TB[ov{idx}]"
+            f"[{idx + 1}:v]{prefix}setpts=PTS-STARTPTS+{_overlay_origin(clip, graph)}[ov{idx}]"
         )
-    previous = "[0:v]"
     for idx, clip in enumerate(clips):
         previous = _overlay_clip(previous, clip, idx, graph)
     return ";".join(graph.parts), previous
 
 
+def _range_graph(graph: str, final: str, options: CompositeOptions) -> tuple[str, str]:
+    """Trim only AFTER global composition; never restart an intersecting animation."""
+    if options.frame_range is None:
+        return graph, final
+    start, end = options.frame_range
+    tail = f"{final}trim=start_frame={start}:end_frame={end},setpts=PTS-STARTPTS[range]"
+    return (graph + ";" if graph else "") + tail, "[range]"
+
+
+def _options_valid(options: CompositeOptions) -> None:
+    """The development range lane must be explicit and cannot silently copy audio."""
+    if options.presenter is not None:
+        validate_presenter_graph(options.presenter)
+        if options.frame_rate != options.presenter.frame_rate or not options.video_only:
+            raise ValueError("presenter composition requires its exact picture-only clock")
+    if options.frame_rate is None:
+        if options.frame_range is not None or options.video_only:
+            raise ValueError("private range compositor needs an exact frame rate")
+        return
+    if type(options.frame_rate) is not str or Fraction(options.frame_rate) <= 0 or not options.video_only:
+        raise ValueError("private exact-frame compositor is picture-only")
+    if options.frame_range is not None:
+        if type(options.frame_range) is not tuple or len(options.frame_range) != 2:
+            raise ValueError("private compositor frame range is malformed")
+        start, end = options.frame_range
+        _frame_window({"startFrame": start, "endFrameExclusive": end})
+        if options.presenter is not None and end > options.presenter.canvas.total_frames:
+            raise ValueError("presenter compositor range exceeds its held base")
+
+
 def _composite_pass(
     video_in: str, clips: list[dict], video_out: str, options: CompositeOptions
 ) -> None:
-    cmd = [options.ffmpeg, "-y", "-hide_banner", "-loglevel", "error", "-i", video_in]
+    """Build one ordinary encode with optional explicit picture-only layers."""
+    strict = options.frame_rate is not None
+    cmd = [options.ffmpeg, "-n" if strict else "-y", "-hide_banner", "-loglevel", "error"]
+    if strict:
+        cmd += ["-nostdin", "-xerror", "-err_detect", "explode"]
+    cmd += ["-i", video_in]
     for clip in clips:
         cmd.extend(("-i", clip["path"]))
-    graph, final = build_graph(clips, options.eof_pass)
+    if options.presenter is not None:
+        cmd += presenter_input_arguments(options.presenter)
+    graph, final = build_graph(clips, options.eof_pass, options.frame_rate, options.presenter)
+    graph, final = _range_graph(graph, final, options)
     map_label, extra = final, []
     if options.ydif_file:
         escaped = options.ydif_file.replace("'", r"'\''")
@@ -162,8 +227,7 @@ def _composite_pass(
             graph,
             "-map",
             map_label,
-            "-map",
-            "0:a?",
+            *(() if options.video_only else ("-map", "0:a?")),
             "-c:v",
             ENCODE["vcodec"],
             "-crf",
@@ -172,8 +236,8 @@ def _composite_pass(
             ENCODE["composite_preset"],
             "-pix_fmt",
             CANVAS["pix_fmt"],
-            "-c:a",
-            "copy",
+            *(("-an",) if options.video_only else ("-c:a", "copy")),
+            *(("-frames:v", str(options.frame_range[1] - options.frame_range[0])) if options.frame_range else ()),
             "-movflags",
             "+faststart",
             video_out,
@@ -183,43 +247,19 @@ def _composite_pass(
     (options.command_runner or run_command)(cmd)
 
 
-def _clean_temp(path: str) -> None:
-    for name in os.listdir(path):
-        os.remove(os.path.join(path, name))
-    os.rmdir(path)
-
-
 def composite(
     video_in: str,
     clips: list[dict],
     video_out: str,
     options: CompositeOptions | None = None,
 ) -> int:
-    """Composite pre-rendered clips, with at most eight inputs per FFmpeg pass."""
+    """Composite every ordered clip in one graph and one picture encode."""
     options = options or CompositeOptions()
-    ordered = sorted(clips, key=lambda clip: float(clip["outStart"]))
-    chunks = [ordered[idx : idx + _CHUNK] for idx in range(0, len(ordered), _CHUNK)]
-    if not chunks:
+    _options_valid(options)
+    if options.caption_tail is not None and (options.frame_rate is None or not options.video_only):
+        raise ValueError("caption-tail composition requires exact-frame picture-only execution")
+    ordered = ordered_clips(clips, options.caption_tail)
+    if not ordered and options.frame_range is None and options.presenter is None:
         raise RuntimeError("prebound composite requires at least one overlay")
-    if len(chunks) == 1:
-        _composite_pass(video_in, chunks[0], video_out, options)
-        return 1
-    middle = CompositeOptions(
-        eof_pass=options.eof_pass,
-        ffmpeg=options.ffmpeg,
-        ffprobe=options.ffprobe,
-        command_runner=options.command_runner,
-    )
-    temp = tempfile.mkdtemp(
-        prefix="graphics-passes-", dir=os.path.dirname(os.path.abspath(video_out))
-    )
-    try:
-        source = video_in
-        for idx, chunk in enumerate(chunks):
-            final = idx == len(chunks) - 1
-            target = video_out if final else os.path.join(temp, f"pass_{idx:02d}.mp4")
-            _composite_pass(source, chunk, target, options if final else middle)
-            source = target
-        return len(chunks)
-    finally:
-        _clean_temp(temp)
+    _composite_pass(video_in, ordered, video_out, options)
+    return 1

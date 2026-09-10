@@ -9,6 +9,7 @@ import os
 import shutil
 import tempfile
 import unittest
+from pathlib import Path
 from unittest import mock
 
 from _common import pl  # noqa: F401
@@ -84,7 +85,7 @@ class OperationAdmissionV3StoreAdversarialTests(unittest.TestCase):
             "artifacts",
             self.request.admission.operation.artifact.relative_path,
         )
-        raw = bytearray(open(operation_path, "rb").read())
+        raw = bytearray(Path(operation_path).read_bytes())
         raw[-1] ^= 1
         with open(operation_path, "wb") as handle:
             handle.write(raw)

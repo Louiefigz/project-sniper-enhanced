@@ -31,16 +31,20 @@ assert.match(runtime, /if \(!status\) return "Claude Code · sonnet"/,
   "the launch caption must name Claude Code and its explicit default model immediately");
 
 for (const [label, code] of Object.entries({ launch, stages, manual, editor })) {
-  assert.match(code, /launchAutoEditFromPalmier/,
-    `${label} must use the shared Palmier-first auto-edit launcher`);
+  assert.match(code, /launchAutoEditFromHyperframes/,
+    `${label} must use the shared explicit MP4-only auto-edit launcher`);
   assert.doesNotMatch(code, /fetch\("\/api\/producer\/auto-edit"/,
-    `${label} must not bypass the Palmier-first launcher`);
+    `${label} must not bypass the shared launcher`);
 }
 
-assert.match(launch, /Generate in Palmier →[\s\S]*\{brain\} · Palmier opens first/,
+assert.match(launch, /Generate video →[\s\S]*\{brain\} · HyperFrames review/,
   "the new-edit action must show the selected brain underneath its button");
-assert.match(stages, /\{c\.brain\} · Palmier opens first/,
+assert.match(stages, /\{c\.brain\} · HyperFrames review/,
   "continue-project actions must show the selected brain underneath their button");
+assert.match(stages, /async function runControllerAutoEdit\([\s\S]*?launch = launchAutoEditFromHyperframes/,
+  "fresh and saved-plan actions must keep the HyperFrames default");
+assert.match(stages, /buildResumeAutoEditRequest\(status\.producerDir, status\.intent, policy, status\.run\?\.workflowPolicy\)/,
+  "Resume must send its proved delivery and workflow policies explicitly, never infer new defaults in the launcher");
 
 const actionSections = [
   ["AutoEditAction", "function ResumeEditAction"],
@@ -50,10 +54,10 @@ const actionSections = [
 ] as const;
 for (const [name, end] of actionSections) {
   const code = section(stages, `function ${name}`, end);
-  assert.match(code, /<LaunchAction c=\{c\}>/,
-    `${name} must visibly identify the editor and Palmier-first behavior`);
-  assert.match(code, /runPalmierAutoEdit|reviewSavedPlan/,
-    `${name} must open Palmier before starting or resuming controller work`);
+  assert.match(code, /<LaunchAction c=\{c\}(?: caption=\{caption\})?>/,
+    `${name} must visibly identify the editor and checked delivery behavior`);
+  assert.match(code, /runControllerAutoEdit|resumeSavedAutoEdit|reviewSavedPlan/,
+    `${name} must use the shared controller workflow`);
 }
 
 console.log("palmier-launch-contract.test.ts: all assertions passed");

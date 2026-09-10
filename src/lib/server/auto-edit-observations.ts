@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import {
   existsSync,
   mkdirSync,
@@ -11,7 +11,11 @@ import path from "node:path";
 import type { AuditBOutcome } from "@/app/api/producer/auto-edit/chain";
 import type { ProducerReview } from "@/app/api/producer/auto-edit/review-contract";
 import type { AutoEditCtx } from "@/app/api/producer/auto-edit/stream";
-import { fileSha256 } from "./auto-edit-hash";
+import {
+  canonicalJson,
+  canonicalJsonSha256,
+  fileSha256,
+} from "./auto-edit-hash";
 import { restoreAutoEditDoctrine } from "./auto-edit-doctrine";
 
 interface ObservationCore {
@@ -61,22 +65,6 @@ interface AuditCheckInput {
   index: number;
 }
 
-function stableValue(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (!value || typeof value !== "object") return value;
-  return Object.fromEntries(Object.entries(value as Record<string, unknown>)
-    .sort(([left], [right]) => left.localeCompare(right))
-    .map(([key, item]) => [key, stableValue(item)]));
-}
-
-function stableJson(value: unknown): string {
-  return JSON.stringify(stableValue(value));
-}
-
-function stableHash(value: unknown): string {
-  return createHash("sha256").update(stableJson(value)).digest("hex");
-}
-
 function safeId(value: string): string {
   const safe = value.replace(/[^A-Za-z0-9._-]/g, "_").slice(0, 180);
   if (!safe) throw new Error("learning observation id is empty");
@@ -93,12 +81,12 @@ function writeObservation(ctx: AutoEditCtx, core: ObservationCore): string | nul
   const dir = observationDir(ctx);
   if (!dir) return null;
   const receipt: ObservationReceipt = {
-    ...core, status: "observed", observationHash: stableHash(core),
+    ...core, status: "observed", observationHash: canonicalJsonSha256(core),
   };
   const destination = path.join(dir, `${safeId(core.observationId)}.json`);
   if (existsSync(destination)) {
     const existing: unknown = JSON.parse(readFileSync(destination, "utf8"));
-    if (stableJson(existing) !== stableJson(receipt)) {
+    if (canonicalJson(existing) !== canonicalJson(receipt)) {
       throw new Error(`learning observation collision: ${core.observationId}`);
     }
     return destination;

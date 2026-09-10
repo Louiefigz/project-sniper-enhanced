@@ -101,7 +101,8 @@ class Utt:
 
 def load(path: str) -> list[Utt]:
     """Parse a transcribe.py transcript file into Utt objects."""
-    obj = json.load(open(path))
+    with open(path, encoding="utf-8") as stream:
+        obj = json.load(stream)
     raw = obj["transcript"] if isinstance(obj, dict) else obj
     utts: list[Utt] = []
     for i, u in enumerate(raw):

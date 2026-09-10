@@ -1,0 +1,1379 @@
+{
+  "startedAt": "2026-09-09T20:22:20.621780+00:00",
+  "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/full-native-high-v10-lossless-av-color.mp4",
+  "sources": {
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/full-native-high-v8-url.mp4": "73f883d2b03aa2129b605fe298147bf834e9e3b5d0de485f9dfc2b6e98d43a8c",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/mastered-audio-headroom-v1/base-mastered.DRAFT.mp4": "374fcd0e8d276a954c04a4c4bb5a49c82753508c2dd914f2920995b59972ebe2"
+  },
+  "humanListened": false,
+  "creativeApproved": false,
+  "deliveryApproved": false,
+  "fullEditTwoHourTargetMet": false,
+  "phases": {
+    "assembly": {
+      "passed": true,
+      "elapsedSeconds": 1.4342027080710977
+    },
+    "streamPreservation": {
+      "passed": true,
+      "packetCounts": {
+        "v:0": 16394,
+        "a:0": 32053
+      },
+      "allPacketPayloadsClocksAndSideDataIdentical": true,
+      "decodedNativeYuvIdentical": true,
+      "decodedYuvFrameReceiptSha256": "4f83e64da11cd618e0e33096d3cee583709a7a603d4f36a44de88fd4714f211e",
+      "spsDelta": {
+        "changedField": "transfer_characteristics",
+        "before": 1,
+        "after": 13,
+        "otherTracedExtradataFieldsIdentical": true,
+        "comparedFields": 82
+      },
+      "containerNclx": {
+        "primaries": 1,
+        "transfer": 13,
+        "matrix": 1,
+        "fullRange": false,
+        "reserved": 0
+      },
+      "audioDecoderConfigurationIdentical": true,
+      "videoReencoded": false,
+      "additionalAudioEncode": false,
+      "elapsedSeconds": 143.82930720807053
+    },
+    "wholeOutput": {
+      "passed": true,
+      "phases": {
+        "picture": {
+          "passed": true,
+          "frames": 16394,
+          "zeroBasedCfr": true,
+          "wholeStrictDecode": true,
+          "stream": {
+            "index": 0,
+            "codec_name": "h264",
+            "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+            "profile": "High",
+            "codec_type": "video",
+            "codec_tag_string": "avc1",
+            "codec_tag": "0x31637661",
+            "width": 1920,
+            "height": 1080,
+            "coded_width": 1920,
+            "coded_height": 1080,
+            "has_b_frames": 0,
+            "sample_aspect_ratio": "1:1",
+            "display_aspect_ratio": "16:9",
+            "pix_fmt": "yuv420p",
+            "level": 50,
+            "color_range": "tv",
+            "color_space": "bt709",
+            "color_transfer": "iec61966-2-1",
+            "color_primaries": "bt709",
+            "chroma_location": "left",
+            "field_order": "progressive",
+            "refs": 1,
+            "is_avc": "true",
+            "nal_length_size": "4",
+            "id": "0x1",
+            "r_frame_rate": "24000/1001",
+            "avg_frame_rate": "24000/1001",
+            "time_base": "1/24000",
+            "start_pts": 0,
+            "start_time": "0.000000",
+            "duration_ts": 16410394,
+            "duration": "683.766417",
+            "bit_rate": "9985213",
+            "bits_per_raw_sample": "8",
+            "nb_frames": "16394",
+            "extradata_size": 49,
+            "disposition": {
+              "default": 1,
+              "dub": 0,
+              "original": 0,
+              "comment": 0,
+              "lyrics": 0,
+              "karaoke": 0,
+              "forced": 0,
+              "hearing_impaired": 0,
+              "visual_impaired": 0,
+              "clean_effects": 0,
+              "attached_pic": 0,
+              "timed_thumbnails": 0,
+              "non_diegetic": 0,
+              "captions": 0,
+              "descriptions": 0,
+              "metadata": 0,
+              "dependent": 0,
+              "still_image": 0,
+              "multilayer": 0
+            },
+            "tags": {
+              "language": "und",
+              "handler_name": "VideoHandler",
+              "vendor_id": "[0][0][0][0]",
+              "encoder": "Lavc62.11.100 libx264"
+            }
+          },
+          "elapsedSeconds": 12.381836791988462
+        },
+        "audioClock": {
+          "passed": true,
+          "sampleRate": 48000,
+          "channels": 2,
+          "codec": "aac",
+          "startPts": 0,
+          "timeBase": "1/48000",
+          "presentedSamples": 32820788,
+          "decodedSamples": 32821248,
+          "trailingPaddingSamples": 460,
+          "elapsedSeconds": 0.7056412498932332
+        },
+        "loudness": {
+          "passed": true,
+          "policyVersion": 2,
+          "integratedLufs": -14.61,
+          "truePeakDbtp": -1.86,
+          "lufsTarget": -14.0,
+          "lufsTolerance": 1.0,
+          "truePeakCeilingDbtp": -1.5,
+          "lufsResidual": -0.6099999999999994,
+          "truePeakExcessDb": 0,
+          "lufsWithinTolerance": true,
+          "truePeakWithinCeiling": true,
+          "audioDecodeSucceeded": true,
+          "audioDecodeExitCode": 0,
+          "audioDecodeError": "",
+          "qualified": true,
+          "elapsedSeconds": 19.16927854088135
+        },
+        "audioQuality": {
+          "passed": true,
+          "checks": [
+            {
+              "name": "audio_av_timing",
+              "status": "pass",
+              "measured": "start +0.000s; end skew +0.000s (V 683.766s / A 683.766s)",
+              "detail": "start <= 0.080s; end <= 0.120s"
+            },
+            {
+              "name": "audio_channel_balance",
+              "status": "pass",
+              "measured": "L -18.7 / R -18.7 dBFS; median delta +0.0 dB, direction 38%",
+              "detail": "fail if dead or >12 dB consistently"
+            },
+            {
+              "name": "audio_tonal_hum",
+              "status": "pass",
+              "measured": "138.0 Hz; prominence 11.5 dB; level -40.6 dBFS; stable 2%/1.5s",
+              "detail": "stable narrow tone, not broadband low-frequency noise"
+            },
+            {
+              "name": "audio_ending_mix",
+              "status": "pass",
+              "measured": "music disabled/not declared",
+              "detail": "ending dominance check not applicable"
+            }
+          ],
+          "elapsedSeconds": 0.9933166250120848
+        },
+        "audioContinuity": {
+          "passed": true,
+          "sampleRate": 8000,
+          "referenceSamples": 5470132,
+          "outputSamples": 5470208,
+          "comparedSeconds": 683.7665,
+          "overlappingWindows": [
+            {
+              "start": 0.0,
+              "end": 10.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.999920718488679,
+              "gainDb": -0.00978115484058876
+            },
+            {
+              "start": 5.0,
+              "end": 15.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999403494910781,
+              "gainDb": -0.007816023099083653
+            },
+            {
+              "start": 10.0,
+              "end": 20.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998174313034515,
+              "gainDb": -0.015232483031119926
+            },
+            {
+              "start": 15.0,
+              "end": 25.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998280436010342,
+              "gainDb": -0.014373678968041226
+            },
+            {
+              "start": 20.0,
+              "end": 30.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999150343230985,
+              "gainDb": -0.012252750990852329
+            },
+            {
+              "start": 25.0,
+              "end": 35.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998933338769854,
+              "gainDb": -0.016437602696370218
+            },
+            {
+              "start": 30.0,
+              "end": 40.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998959284261667,
+              "gainDb": -0.011546584552577996
+            },
+            {
+              "start": 35.0,
+              "end": 45.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998732643052389,
+              "gainDb": -0.012128878643642997
+            },
+            {
+              "start": 40.0,
+              "end": 50.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999078626359099,
+              "gainDb": -0.01247330966370215
+            },
+            {
+              "start": 45.0,
+              "end": 55.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998937531437202,
+              "gainDb": -0.014148943405226658
+            },
+            {
+              "start": 50.0,
+              "end": 60.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998811858322245,
+              "gainDb": -0.01531067464487059
+            },
+            {
+              "start": 55.0,
+              "end": 65.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998483469213493,
+              "gainDb": -0.012457055754258713
+            },
+            {
+              "start": 60.0,
+              "end": 70.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998239581735493,
+              "gainDb": -0.013199033165194187
+            },
+            {
+              "start": 65.0,
+              "end": 75.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999032311421293,
+              "gainDb": -0.010837778052721991
+            },
+            {
+              "start": 70.0,
+              "end": 80.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998455229293346,
+              "gainDb": -0.01538927510140271
+            },
+            {
+              "start": 75.0,
+              "end": 85.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998495128281438,
+              "gainDb": -0.01589187480327449
+            },
+            {
+              "start": 80.0,
+              "end": 90.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999246591238795,
+              "gainDb": -0.009437895956779909
+            },
+            {
+              "start": 85.0,
+              "end": 95.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998881357079914,
+              "gainDb": -0.012504749250854149
+            },
+            {
+              "start": 90.0,
+              "end": 100.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998777086483908,
+              "gainDb": -0.01471515421051071
+            },
+            {
+              "start": 95.0,
+              "end": 105.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999124694215629,
+              "gainDb": -0.0112150826893203
+            },
+            {
+              "start": 100.0,
+              "end": 110.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.999791329921215,
+              "gainDb": -0.01871717726456107
+            },
+            {
+              "start": 105.0,
+              "end": 115.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9997954820658497,
+              "gainDb": -0.019785955008801648
+            },
+            {
+              "start": 110.0,
+              "end": 120.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.999908051007452,
+              "gainDb": -0.014458138499616302
+            },
+            {
+              "start": 115.0,
+              "end": 125.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999012195999004,
+              "gainDb": -0.015145500885683245
+            },
+            {
+              "start": 120.0,
+              "end": 130.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998658018484051,
+              "gainDb": -0.015212102648371875
+            },
+            {
+              "start": 125.0,
+              "end": 135.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998787230596123,
+              "gainDb": -0.01173451896851107
+            },
+            {
+              "start": 130.0,
+              "end": 140.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999225861081399,
+              "gainDb": -0.008419566677608738
+            },
+            {
+              "start": 135.0,
+              "end": 145.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999444688099725,
+              "gainDb": -0.007808997965779347
+            },
+            {
+              "start": 140.0,
+              "end": 150.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999028196534772,
+              "gainDb": -0.011749205237990843
+            },
+            {
+              "start": 145.0,
+              "end": 155.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.999909269850129,
+              "gainDb": -0.011336551547986861
+            },
+            {
+              "start": 150.0,
+              "end": 160.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999061144036027,
+              "gainDb": -0.009958111829444515
+            },
+            {
+              "start": 155.0,
+              "end": 165.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998852908909028,
+              "gainDb": -0.012040815746807574
+            },
+            {
+              "start": 160.0,
+              "end": 170.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999357792383518,
+              "gainDb": -0.010007574996546266
+            },
+            {
+              "start": 165.0,
+              "end": 175.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999172519225177,
+              "gainDb": -0.00901800632509828
+            },
+            {
+              "start": 170.0,
+              "end": 180.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.999827473499564,
+              "gainDb": -0.015104442217999182
+            },
+            {
+              "start": 175.0,
+              "end": 185.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998282988441805,
+              "gainDb": -0.016094980611588084
+            },
+            {
+              "start": 180.0,
+              "end": 190.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998583894426184,
+              "gainDb": -0.014739411348373655
+            },
+            {
+              "start": 185.0,
+              "end": 195.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998707439665311,
+              "gainDb": -0.01754990167540497
+            },
+            {
+              "start": 190.0,
+              "end": 200.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998148878029086,
+              "gainDb": -0.021762381937808283
+            },
+            {
+              "start": 195.0,
+              "end": 205.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998395470303802,
+              "gainDb": -0.018930651687448716
+            },
+            {
+              "start": 200.0,
+              "end": 210.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999036099898664,
+              "gainDb": -0.01456265909787399
+            },
+            {
+              "start": 205.0,
+              "end": 215.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998670855136218,
+              "gainDb": -0.015175041739118263
+            },
+            {
+              "start": 210.0,
+              "end": 220.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998602792610222,
+              "gainDb": -0.015822715301239906
+            },
+            {
+              "start": 215.0,
+              "end": 225.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998917701960294,
+              "gainDb": -0.01478526994659931
+            },
+            {
+              "start": 220.0,
+              "end": 230.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9996572033502993,
+              "gainDb": -0.02744324781528194
+            },
+            {
+              "start": 225.0,
+              "end": 235.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9996643481263772,
+              "gainDb": -0.027347911406178062
+            },
+            {
+              "start": 230.0,
+              "end": 240.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998762408616162,
+              "gainDb": -0.01586307073641969
+            },
+            {
+              "start": 235.0,
+              "end": 245.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998580468766636,
+              "gainDb": -0.013448548108905271
+            },
+            {
+              "start": 240.0,
+              "end": 250.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998481438292901,
+              "gainDb": -0.01320610363396323
+            },
+            {
+              "start": 245.0,
+              "end": 255.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998536669060426,
+              "gainDb": -0.013306893665527442
+            },
+            {
+              "start": 250.0,
+              "end": 260.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998622532656397,
+              "gainDb": -0.011287246424368793
+            },
+            {
+              "start": 255.0,
+              "end": 265.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9997770983960463,
+              "gainDb": -0.021223422089537116
+            },
+            {
+              "start": 260.0,
+              "end": 270.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9997372122227512,
+              "gainDb": -0.026377137763794776
+            },
+            {
+              "start": 265.0,
+              "end": 275.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998574587711818,
+              "gainDb": -0.015992751128771517
+            },
+            {
+              "start": 270.0,
+              "end": 280.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998928821986703,
+              "gainDb": -0.014792949755194245
+            },
+            {
+              "start": 275.0,
+              "end": 285.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998432601188922,
+              "gainDb": -0.01811459020706515
+            },
+            {
+              "start": 280.0,
+              "end": 290.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998630699864118,
+              "gainDb": -0.01624583827917522
+            },
+            {
+              "start": 285.0,
+              "end": 295.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998349928759488,
+              "gainDb": -0.017645294452360377
+            },
+            {
+              "start": 290.0,
+              "end": 300.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998377286174953,
+              "gainDb": -0.017017038168538084
+            },
+            {
+              "start": 295.0,
+              "end": 305.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998263081822077,
+              "gainDb": -0.01569488764571273
+            },
+            {
+              "start": 300.0,
+              "end": 310.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9997830669150958,
+              "gainDb": -0.018377551653679023
+            },
+            {
+              "start": 305.0,
+              "end": 315.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998456859762521,
+              "gainDb": -0.01643756475302793
+            },
+            {
+              "start": 310.0,
+              "end": 320.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.999861768829299,
+              "gainDb": -0.014850531514847701
+            },
+            {
+              "start": 315.0,
+              "end": 325.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998149097061768,
+              "gainDb": -0.016672179166686972
+            },
+            {
+              "start": 320.0,
+              "end": 330.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998408231261506,
+              "gainDb": -0.014984322149921816
+            },
+            {
+              "start": 325.0,
+              "end": 335.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998040364668548,
+              "gainDb": -0.017490618920608575
+            },
+            {
+              "start": 330.0,
+              "end": 340.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9996506995694233,
+              "gainDb": -0.027155077771839904
+            },
+            {
+              "start": 335.0,
+              "end": 345.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9997338498196081,
+              "gainDb": -0.024074112921252583
+            },
+            {
+              "start": 340.0,
+              "end": 350.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9997405595936786,
+              "gainDb": -0.026978576608803803
+            },
+            {
+              "start": 345.0,
+              "end": 355.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.999727740347342,
+              "gainDb": -0.0250530386840757
+            },
+            {
+              "start": 350.0,
+              "end": 360.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998766707401656,
+              "gainDb": -0.013721821251140342
+            },
+            {
+              "start": 355.0,
+              "end": 365.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998882339574572,
+              "gainDb": -0.013170606220049579
+            },
+            {
+              "start": 360.0,
+              "end": 370.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999041744216829,
+              "gainDb": -0.013754053929201907
+            },
+            {
+              "start": 365.0,
+              "end": 375.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998861639736867,
+              "gainDb": -0.01404576900344274
+            },
+            {
+              "start": 370.0,
+              "end": 380.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998873547454343,
+              "gainDb": -0.011809395243456205
+            },
+            {
+              "start": 375.0,
+              "end": 385.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998224175655687,
+              "gainDb": -0.019685646336481163
+            },
+            {
+              "start": 380.0,
+              "end": 390.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9997481578242472,
+              "gainDb": -0.02644659133256178
+            },
+            {
+              "start": 385.0,
+              "end": 395.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.999837906792727,
+              "gainDb": -0.018185563517709512
+            },
+            {
+              "start": 390.0,
+              "end": 400.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999119363644482,
+              "gainDb": -0.012208684112137913
+            },
+            {
+              "start": 395.0,
+              "end": 405.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998982249777874,
+              "gainDb": -0.014651026232680893
+            },
+            {
+              "start": 400.0,
+              "end": 410.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998644277550481,
+              "gainDb": -0.016923464050851888
+            },
+            {
+              "start": 405.0,
+              "end": 415.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998986142930445,
+              "gainDb": -0.014428472080744048
+            },
+            {
+              "start": 410.0,
+              "end": 420.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999482078474139,
+              "gainDb": -0.010093798824023038
+            },
+            {
+              "start": 415.0,
+              "end": 425.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999704856971237,
+              "gainDb": -0.0045862044816857945
+            },
+            {
+              "start": 420.0,
+              "end": 430.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999394112125264,
+              "gainDb": -0.0071464245458416386
+            },
+            {
+              "start": 425.0,
+              "end": 435.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998249540336378,
+              "gainDb": -0.01946714995587886
+            },
+            {
+              "start": 430.0,
+              "end": 440.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9997871625309698,
+              "gainDb": -0.020308897992205324
+            },
+            {
+              "start": 435.0,
+              "end": 445.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9997349540296516,
+              "gainDb": -0.02203288371554672
+            },
+            {
+              "start": 440.0,
+              "end": 450.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9997697619975418,
+              "gainDb": -0.020202062448933474
+            },
+            {
+              "start": 445.0,
+              "end": 455.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998230258252901,
+              "gainDb": -0.016994816076877646
+            },
+            {
+              "start": 450.0,
+              "end": 460.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9997921308151966,
+              "gainDb": -0.01828534098937697
+            },
+            {
+              "start": 455.0,
+              "end": 465.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998574039684412,
+              "gainDb": -0.012340832583000285
+            },
+            {
+              "start": 460.0,
+              "end": 470.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.99990743188803,
+              "gainDb": -0.010804981585688128
+            },
+            {
+              "start": 465.0,
+              "end": 475.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9997384968370114,
+              "gainDb": -0.022399826567004667
+            },
+            {
+              "start": 470.0,
+              "end": 480.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998317050195616,
+              "gainDb": -0.016502241373365735
+            },
+            {
+              "start": 475.0,
+              "end": 485.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999314261480062,
+              "gainDb": -0.009493485725672244
+            },
+            {
+              "start": 480.0,
+              "end": 490.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998712526249768,
+              "gainDb": -0.01303146796077211
+            },
+            {
+              "start": 485.0,
+              "end": 495.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998258031038192,
+              "gainDb": -0.01986170396878298
+            },
+            {
+              "start": 490.0,
+              "end": 500.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.999774678236217,
+              "gainDb": -0.025778580973790002
+            },
+            {
+              "start": 495.0,
+              "end": 505.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998409749378141,
+              "gainDb": -0.01771431461720468
+            },
+            {
+              "start": 500.0,
+              "end": 510.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998747925820419,
+              "gainDb": -0.009251089028698279
+            },
+            {
+              "start": 505.0,
+              "end": 515.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998277327428333,
+              "gainDb": -0.011301206626868485
+            },
+            {
+              "start": 510.0,
+              "end": 520.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998050208734856,
+              "gainDb": -0.017483592209842636
+            },
+            {
+              "start": 515.0,
+              "end": 525.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.999813813852357,
+              "gainDb": -0.018109161088726042
+            },
+            {
+              "start": 520.0,
+              "end": 530.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999043864335612,
+              "gainDb": -0.010984202286730558
+            },
+            {
+              "start": 525.0,
+              "end": 535.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998560531829663,
+              "gainDb": -0.014421269161134153
+            },
+            {
+              "start": 530.0,
+              "end": 540.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998327226518279,
+              "gainDb": -0.01599909438036845
+            },
+            {
+              "start": 535.0,
+              "end": 545.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.999911722001274,
+              "gainDb": -0.009776877389754527
+            },
+            {
+              "start": 540.0,
+              "end": 550.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999412627349478,
+              "gainDb": -0.0072403874614533955
+            },
+            {
+              "start": 545.0,
+              "end": 555.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998724104660789,
+              "gainDb": -0.014138126145518244
+            },
+            {
+              "start": 550.0,
+              "end": 560.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998354071522961,
+              "gainDb": -0.01869950378791085
+            },
+            {
+              "start": 555.0,
+              "end": 565.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998724930213717,
+              "gainDb": -0.014786353269434283
+            },
+            {
+              "start": 560.0,
+              "end": 570.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998815268256281,
+              "gainDb": -0.012593757332388475
+            },
+            {
+              "start": 565.0,
+              "end": 575.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9997805709204328,
+              "gainDb": -0.01723863389420958
+            },
+            {
+              "start": 570.0,
+              "end": 580.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9997253899796172,
+              "gainDb": -0.020277662558190752
+            },
+            {
+              "start": 575.0,
+              "end": 585.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.999857784920625,
+              "gainDb": -0.013017938269631395
+            },
+            {
+              "start": 580.0,
+              "end": 590.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998393966436357,
+              "gainDb": -0.017036590797483563
+            },
+            {
+              "start": 585.0,
+              "end": 595.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998523385152198,
+              "gainDb": -0.01835987459537465
+            },
+            {
+              "start": 590.0,
+              "end": 600.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998806614152563,
+              "gainDb": -0.017167958045009014
+            },
+            {
+              "start": 595.0,
+              "end": 605.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998703660256153,
+              "gainDb": -0.015531434118836953
+            },
+            {
+              "start": 600.0,
+              "end": 610.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999230673979216,
+              "gainDb": -0.010094552912990355
+            },
+            {
+              "start": 605.0,
+              "end": 615.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998669982586115,
+              "gainDb": -0.018630633335547053
+            },
+            {
+              "start": 610.0,
+              "end": 620.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998452134830559,
+              "gainDb": -0.018231484548194413
+            },
+            {
+              "start": 615.0,
+              "end": 625.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998372299465507,
+              "gainDb": -0.01795642122713226
+            },
+            {
+              "start": 620.0,
+              "end": 630.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998315095999061,
+              "gainDb": -0.0183796136265005
+            },
+            {
+              "start": 625.0,
+              "end": 635.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998177062588625,
+              "gainDb": -0.017369213442698924
+            },
+            {
+              "start": 630.0,
+              "end": 640.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998026708920188,
+              "gainDb": -0.018460263016419537
+            },
+            {
+              "start": 635.0,
+              "end": 645.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998150810460318,
+              "gainDb": -0.01765899636690065
+            },
+            {
+              "start": 640.0,
+              "end": 650.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9997996912733912,
+              "gainDb": -0.015549498106076455
+            },
+            {
+              "start": 645.0,
+              "end": 655.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998613647811739,
+              "gainDb": -0.01120132121008387
+            },
+            {
+              "start": 650.0,
+              "end": 660.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.999864448005767,
+              "gainDb": -0.014849139910226176
+            },
+            {
+              "start": 655.0,
+              "end": 665.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9997959991245048,
+              "gainDb": -0.01825007299497809
+            },
+            {
+              "start": 660.0,
+              "end": 670.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9997979009384073,
+              "gainDb": -0.0202238146961215
+            },
+            {
+              "start": 665.0,
+              "end": 675.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998718338607033,
+              "gainDb": -0.016493195580077155
+            },
+            {
+              "start": 670.0,
+              "end": 680.0,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9998280859463037,
+              "gainDb": -0.013210678251822764
+            },
+            {
+              "start": 675.0,
+              "end": 683.7665,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9997746321632945,
+              "gainDb": -0.011749512815588203
+            },
+            {
+              "start": 680.0,
+              "end": 683.7665,
+              "lagSeconds": 0.0,
+              "zeroLagCorrelation": 0.9999817581595709,
+              "gainDb": 0.0002568639558133892
+            }
+          ],
+          "failedWindows": [],
+          "newDropout20msBlocks": [],
+          "criteria": {
+            "maxLagSeconds": 0.01,
+            "minCorrelation": 0.98,
+            "maxAbsGainDb": 0.5
+          },
+          "perceptualListeningClaim": false,
+          "elapsedSeconds": 1.3762322498951107
+        },
+        "declaredColor": {
+          "passed": true,
+          "inputMetadataOverrides": false,
+          "outputSpace": "sRGB",
+          "nativeReferences": [
+            {
+              "sourceFrameIndex": 312,
+              "selectedSourcePath": "/private/tmp/hyperframes-extract-cache-501/hfcache-v4-5610bca5f73df075/frame_00313.png",
+              "selectedSourceSha256": "f6c747e8aa9dbdddb11f888737769b81a1a1660e8c6c3291737b78d995d5e31d",
+              "frameIndex": 312,
+              "time": 13.013,
+              "path": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-candidate-v1-barrier.frames/batch-1/frame_000312.jpg",
+              "captureTimeMs": 89,
+              "sha256": "8a753b2394ba3ba53338ef4fbaa4d91c0cb69a51a13529519df12615acb9cc03"
+            },
+            {
+              "sourceFrameIndex": 383,
+              "selectedSourcePath": "/private/tmp/hyperframes-extract-cache-501/hfcache-v4-5610bca5f73df075/frame_00384.png",
+              "selectedSourceSha256": "3d92265e02ac0020d1f58b85dffa33ee3fc72d233fa2a802864315cb29b5b611",
+              "frameIndex": 383,
+              "time": 15.974291666666666,
+              "path": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-candidate-v1-barrier.frames/batch-1/frame_000383.jpg",
+              "captureTimeMs": 88,
+              "sha256": "aa1d0e52895afd70d20c4cfcf4b603eb20e162fca36a11abb3999aefcf87a923"
+            },
+            {
+              "sourceFrameIndex": 653,
+              "selectedSourcePath": "/private/tmp/hyperframes-extract-cache-501/hfcache-v4-5610bca5f73df075/frame_00654.png",
+              "selectedSourceSha256": "46583e4773f42ef55ff37a1ce850533e268eb7ba8579ee484abbd72d4a3472f0",
+              "frameIndex": 653,
+              "time": 27.235541666666666,
+              "path": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-candidate-v1-barrier.frames/batch-3/frame_000653.jpg",
+              "captureTimeMs": 93,
+              "sha256": "a8778c4356b8116b0f9119796975089a977f46e4cba030ec81ebc2902505cb08"
+            }
+          ],
+          "observations": [
+            {
+              "frameIndex": 312,
+              "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/full-native-high-v10-lossless-av-color.color-review/actual-declared-312.png",
+              "metrics": {
+                "whole": {
+                  "mae": 1.3931966949588477,
+                  "meanRgbShift": [
+                    -1.1529914158950618,
+                    0.7111636766975309,
+                    -0.9068595679012346
+                  ],
+                  "psnrDb": 42.751342848889806
+                },
+                "presenter": {
+                  "mae": 1.5361956686354687,
+                  "meanRgbShift": [
+                    -1.0038936846887778,
+                    0.6904293502953203,
+                    -0.9148182644252613
+                  ],
+                  "psnrDb": 41.77626151691149
+                },
+                "rightGraphics": {
+                  "mae": 1.309750164365549,
+                  "meanRgbShift": [
+                    -1.2691518737672585,
+                    0.7078920118343195,
+                    -0.946664201183432
+                  ],
+                  "psnrDb": 43.4834655318998
+                },
+                "lowerThird": {
+                  "mae": 1.3944950248756218,
+                  "meanRgbShift": [
+                    -1.260731343283582,
+                    0.5516268656716418,
+                    -0.9748731343283582
+                  ],
+                  "psnrDb": 42.74488184241606
+                }
+              }
+            },
+            {
+              "frameIndex": 383,
+              "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/full-native-high-v10-lossless-av-color.color-review/actual-declared-383.png",
+              "metrics": {
+                "whole": {
+                  "mae": 0.7683878279320988,
+                  "meanRgbShift": [
+                    -0.321806037808642,
+                    0.9170201581790124,
+                    -0.3228911072530864
+                  ],
+                  "psnrDb": 44.2870958451642
+                },
+                "presenter": {
+                  "mae": 0.667882023322732,
+                  "meanRgbShift": [
+                    -0.16739890958655157,
+                    0.9957110404361654,
+                    -0.3147296683325761
+                  ],
+                  "psnrDb": 41.777637413376176
+                },
+                "rightGraphics": {
+                  "mae": 0.33333990795529256,
+                  "meanRgbShift": [
+                    1.972386587771203e-05,
+                    0.9999802761341223,
+                    1.972386587771203e-05
+                  ],
+                  "psnrDb": 52.901930497059354
+                },
+                "lowerThird": {
+                  "mae": 1.221960199004975,
+                  "meanRgbShift": [
+                    -0.7690820895522388,
+                    0.7300149253731343,
+                    -0.7522910447761194
+                  ],
+                  "psnrDb": 43.10736142388444
+                }
+              }
+            },
+            {
+              "frameIndex": 653,
+              "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/full-native-high-v10-lossless-av-color.color-review/actual-declared-653.png",
+              "metrics": {
+                "whole": {
+                  "mae": 1.426744470164609,
+                  "meanRgbShift": [
+                    -1.0952686149691357,
+                    0.7451774691358025,
+                    -0.869227912808642
+                  ],
+                  "psnrDb": 42.107898374566666
+                },
+                "presenter": {
+                  "mae": 1.5918635468726337,
+                  "meanRgbShift": [
+                    -1.000988187187642,
+                    0.7074352567014993,
+                    -0.8950408905043162
+                  ],
+                  "psnrDb": 41.40875531167864
+                },
+                "rightGraphics": {
+                  "mae": 1.2496630506245892,
+                  "meanRgbShift": [
+                    -1.0090014792899409,
+                    0.7580103550295858,
+                    -0.8403698224852071
+                  ],
+                  "psnrDb": 41.797463918563
+                },
+                "lowerThird": {
+                  "mae": 1.680950248756219,
+                  "meanRgbShift": [
+                    -1.246902985074627,
+                    0.7653731343283582,
+                    -0.9489626865671642
+                  ],
+                  "psnrDb": 41.132232282271104
+                }
+              }
+            }
+          ],
+          "predeclaredCriteria": {
+            "wholeMaximumMae": 2,
+            "wholeMinimumPsnrDb": 40
+          },
+          "scope": "Three exact canonical-color checkpoints, not perceptual approval",
+          "elapsedSeconds": 0.9411979999858886
+        }
+      },
+      "humanListened": false,
+      "creativeApproved": false,
+      "deliveryApproved": false,
+      "elapsedSeconds": 36.45433475007303
+    }
+  },
+  "command": [
+    "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffmpeg",
+    "-nostdin",
+    "-v",
+    "error",
+    "-xerror",
+    "-i",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/full-native-high-v8-url.mp4",
+    "-i",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/mastered-audio-headroom-v1/base-mastered.DRAFT.mp4",
+    "-map",
+    "0:v:0",
+    "-map",
+    "1:a:0",
+    "-c:v",
+    "copy",
+    "-c:a",
+    "copy",
+    "-bsf:v",
+    "h264_metadata=transfer_characteristics=13",
+    "-color_primaries:v",
+    "bt709",
+    "-colorspace:v",
+    "bt709",
+    "-color_trc:v",
+    "iec61966-2-1",
+    "-color_range:v",
+    "tv",
+    "-movie_timescale",
+    "48000",
+    "-video_track_timescale",
+    "24000",
+    "-movflags",
+    "+faststart",
+    "-n",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/full-native-high-v10-lossless-av-color.mp4"
+  ],
+  "sha256BeforeQc": "eef61c5a2a410d869c79c13c6fb9ba69f52690377d0a99c3fbd53db3ffa50181",
+  "sha256AfterQc": "eef61c5a2a410d869c79c13c6fb9ba69f52690377d0a99c3fbd53db3ffa50181",
+  "bytesStable": true,
+  "status": "objective-qualified-awaiting-perceptual-review",
+  "elapsedSeconds": 187.18379224999808,
+  "completedAt": "2026-09-09T20:25:25.501463+00:00"
+}

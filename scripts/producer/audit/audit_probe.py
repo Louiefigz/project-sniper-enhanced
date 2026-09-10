@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import json
 import os
-import re
 import struct
 import subprocess
 import sys
@@ -21,17 +20,14 @@ from typing import Optional
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from PIL import Image, ImageChops  # noqa: E402
-
-# ebur128 summary parsing (integrated loudness + true peak). The per-frame log
-# lines use ``TPK:`` / ``FTPK:``; only the final Summary block uses ``Peak:``,
-# so the true-peak regex never collides with the running per-frame peaks.
-_LUFS_RE = re.compile(r"\bI:\s*(-?\d+(?:\.\d+)?)\s*LUFS")
-_TRUE_PEAK_RE = re.compile(r"Peak:\s*(-?\d+(?:\.\d+)?)\s+dBFS")
-
+from palmier.process_deadline import process_timeout  # noqa: E402
+from audio.audio_mix_delivery import measure_delivery  # noqa: E402
 
 def run_ff(cmd: list[str]) -> subprocess.CompletedProcess:
     """Run an ffmpeg/ffprobe command, capturing stdout+stderr as text."""
-    return subprocess.run(cmd, capture_output=True, text=True)
+    return subprocess.run(
+        cmd, capture_output=True, text=True,
+        timeout=process_timeout())
 
 
 def ffprobe_json(path: str) -> dict:
@@ -97,18 +93,9 @@ def fps_from_stream(stream: dict) -> Optional[float]:
 
 
 def measure_loudness(path: str) -> tuple[Optional[float], Optional[float]]:
-    """Single ebur128 pass → (integrated LUFS, true peak dBTP).
-
-    Either element is None when the file has no audio or the summary can't be
-    parsed. The verify-pass filter matches ``master.measure_integrated_lufs``.
-    """
-    proc = run_ff(["ffmpeg", "-hide_banner", "-nostats", "-i", path,
-                   "-map", "0:a:0", "-af", "ebur128=peak=true", "-f", "null", "-"])
-    lufs_hits = _LUFS_RE.findall(proc.stderr)
-    peak_hits = _TRUE_PEAK_RE.findall(proc.stderr)
-    lufs = float(lufs_hits[-1]) if lufs_hits else None
-    peak = float(peak_hits[-1]) if peak_hits else None
-    return lufs, peak
+    """Shared whole-decode observation; partial statistics are unmeasured."""
+    observed = measure_delivery(path)
+    return observed["integratedLufs"], observed["truePeakDbtp"]
 
 
 def is_faststart(path: str) -> Optional[bool]:
@@ -183,25 +170,29 @@ def extract_frame(src: str, timestamp: float, out_path: str) -> bool:
     return proc.returncode == 0 and os.path.exists(out_path)
 
 
-def edge_density(path: str, y0: int, y1: int, threshold: int = 40) -> Optional[float]:
-    """Fraction of horizontally-adjacent pixel pairs in band [y0, y1) whose luma
-    step exceeds ``threshold`` — a cheap text/detail detector (PIL-only, no
-    OpenCV). Blurred pads read ~0.0; burned text/graphics read high. Returns
-    None if the image can't be read."""
-    try:
-        with Image.open(path) as image:
-            grey = image.convert("L")
-    except (OSError, ValueError):
+def edge_density_image(image: Image.Image, y0: int, y1: int,
+                       threshold: int = 40) -> Optional[float]:
+    """Measure one held raster; invalid or unmeasurable bands return None."""
+    width, height = image.size
+    if any(type(value) is not int for value in (y0, y1, threshold)):
         return None
-    width, height = grey.size
-    top, bottom = max(0, y0), min(height, y1)
-    if bottom - top < 2 or width < 2:
-        return 0.0
-    band = grey.crop((0, top, width, bottom))
+    if not 0 <= y0 < y1 <= height or y1 - y0 < 2 or width < 2:
+        return None
+    if not 0 <= threshold <= 255:
+        return None
+    band = image.convert("L").crop((0, y0, width, y1))
     band_w, band_h = band.size
     left = band.crop((0, 0, band_w - 1, band_h))
     right = band.crop((1, 0, band_w, band_h))
     diff = ImageChops.difference(left, right)
     strong = diff.point(lambda p: 255 if p > threshold else 0).histogram()[255]
-    total = (band_w - 1) * band_h
-    return strong / total if total else 0.0
+    return strong / ((band_w - 1) * band_h)
+
+
+def edge_density(path: str, y0: int, y1: int, threshold: int = 40) -> Optional[float]:
+    """Measure actual band pixels; never confuse a missing band with zero."""
+    try:
+        with Image.open(path) as image:
+            return edge_density_image(image, y0, y1, threshold)
+    except (OSError, ValueError, Image.DecompressionBombError):
+        return None

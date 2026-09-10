@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/program-audio-mix-registry-v1.schema.json",
+  "title": "ProgramAudioMixRegistryV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "scanRoot",
+    "discoveryTokens",
+    "consumers",
+    "dependencies",
+    "boundaries"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "program-audio-mix-registry" },
+    "scanRoot": { "const": "scripts/producer" },
+    "discoveryTokens": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "amix=inputs=",
+          "amerge=inputs=",
+          "join=inputs=",
+          "acrossfade=",
+          "sidechaincompress=",
+          "v=0:a=1"
+        ]
+      }
+    },
+    "consumers": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/consumer" }
+    },
+    "dependencies": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/dependency" }
+    },
+    "boundaries": {
+      "type": "array",
+      "minItems": 3,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/boundary" }
+    }
+  },
+  "$defs": {
+    "path": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_./-]+$"
+    },
+    "consumer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "path",
+        "sourceToken",
+        "expectedOccurrences",
+        "consumerKind",
+        "normalizationAuthority",
+        "authorityPaths",
+        "testPaths",
+        "exemption"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{2,63}$"
+        },
+        "path": { "$ref": "#/$defs/path" },
+        "sourceToken": { "type": "string", "minLength": 8 },
+        "expectedOccurrences": { "const": 1 },
+        "consumerKind": {
+          "enum": [
+            "program-mix",
+            "program-control",
+            "derived-program-mix",
+            "asset-only-mix"
+          ]
+        },
+        "normalizationAuthority": {
+          "type": "string",
+          "minLength": 10
+        },
+        "authorityPaths": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/path" }
+        },
+        "testPaths": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/path" }
+        },
+        "exemption": {
+          "type": ["string", "null"],
+          "minLength": 10
+        }
+      }
+    },
+    "boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "path",
+        "boundaryKind",
+        "guarantee",
+        "authorityPaths",
+        "testPaths"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{2,63}$"
+        },
+        "path": { "$ref": "#/$defs/path" },
+        "boundaryKind": {
+          "enum": [
+            "renderer-orchestration",
+            "audio-fast-path",
+            "palmier-handoff"
+          ]
+        },
+        "guarantee": { "type": "string", "minLength": 20 },
+        "authorityPaths": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/path" }
+        },
+        "testPaths": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/path" }
+        }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["consumerId", "enforcementTokens"],
+      "properties": {
+        "consumerId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{2,63}$"
+        },
+        "enforcementTokens": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path", "token"],
+            "properties": {
+              "path": { "$ref": "#/$defs/path" },
+              "token": { "type": "string", "minLength": 8 }
+            }
+          }
+        }
+      }
+    }
+  }
+}

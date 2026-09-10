@@ -55,6 +55,7 @@ const SAFE_ENV_KEYS = new Set([
 const CLAUDE_ENV_KEYS = new Set([
   ...SAFE_ENV_KEYS,
   "CLAUDE_CONFIG_DIR",
+  "CLAUDE_CODE_OAUTH_TOKEN",
 ]);
 
 function enumEnv<T extends string>(name: string, values: readonly T[], fallback: T): T {
@@ -152,10 +153,9 @@ export function codexProcessEnv(source: EnvSource = process.env): NodeJS.Process
  * app's Deepgram/OpenAI/database credentials to model-invoked tools.
  */
 export function claudeProcessEnv(source: EnvSource = process.env): NodeJS.ProcessEnv {
-  return Object.fromEntries(
-    Object.entries(source).filter(
-      ([key, value]) =>
-        value !== undefined && (CLAUDE_ENV_KEYS.has(key) || key.startsWith("CLAUDE_CODE_")),
-    ),
-  ) as NodeJS.ProcessEnv;
+  const env = Object.fromEntries(Object.entries(source).filter(
+    ([key, value]) => value !== undefined && CLAUDE_ENV_KEYS.has(key),
+  )) as NodeJS.ProcessEnv;
+  env.CLAUDE_CODE_DISABLE_FAST_MODE = "1";
+  return env;
 }

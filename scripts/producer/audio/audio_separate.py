@@ -25,10 +25,18 @@ import subprocess
 import sys
 import tempfile
 import time
+from dataclasses import dataclass
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from audio.master import has_audio
+from audio.channel_normalization import (
+    ChannelAuthority,
+    ChannelNormalizationError,
+    observe_channel_authority,
+    system_program_request,
+)
+from fingerprints import file_sha256
 from producer_config import ENCODE
 
 DEMUCS_MODEL = "htdemucs"          # default Demucs v4 hybrid transformer
@@ -36,6 +44,17 @@ RESIDUAL_DB_DEFAULT = -60.0        # bed level for the non-vocal stem (~mute)
 RESIDUAL_DB_MIN, RESIDUAL_DB_MAX = -90.0, 0.0
 _VENV_PY = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                         ".demucs-venv", "bin", "python3")
+
+
+@dataclass(frozen=True)
+class SeparateJob:
+    """One normalized source-separation execution."""
+
+    video_in: str
+    video_out: str
+    residual_db: float
+    work: str
+    authority: ChannelAuthority
 
 
 def emit(event: str, **fields) -> None:
@@ -63,14 +82,22 @@ def demucs_python() -> str:
         "or create scripts/producer/audio/.demucs-venv (python3.12) with it")
 
 
-def extract_wav(video_in: str, wav_out: str) -> dict:
+def extract_wav(
+    video_in: str,
+    wav_out: str,
+    channel_filter: str = "aformat=channel_layouts=stereo",
+) -> dict:
     """Extract the dialogue bus as 48 kHz stereo PCM for Demucs."""
     cmd = ["ffmpeg", "-y", "-hide_banner", "-nostats", "-i", video_in,
-           "-map", "0:a:0", "-ac", "2", "-ar", "48000",
+           "-map", "0:a:0", "-af", channel_filter,
+           "-ac", "2", "-ar", "48000",
            "-c:a", "pcm_s16le", wav_out]
     res = _run(cmd)
     ok = res.returncode == 0 and os.path.exists(wav_out)
-    return {"ok": ok, "stderr": "" if ok else res.stderr[-600:]}
+    return {
+        "ok": ok, "stderr": "" if ok else res.stderr[-600:],
+        "sha256": file_sha256(wav_out) if ok else None,
+    }
 
 
 def run_demucs(wav_in: str, out_dir: str) -> dict:
@@ -116,36 +143,43 @@ def run_separate(video_in: str, video_out: str,
         return {"status": "error", "error": "input has no audio stream to separate"}
     work = tempfile.mkdtemp(prefix="producer-separate-")
     try:
-        return _pipeline(video_in, video_out, residual_db, work)
-    except RuntimeError as exc:
+        authority = observe_channel_authority(
+            system_program_request(video_in))
+        return _pipeline(SeparateJob(
+            video_in, video_out, residual_db, work, authority))
+    except (ChannelNormalizationError, RuntimeError) as exc:
         return {"status": "error", "error": str(exc)}
     finally:
         shutil.rmtree(work, ignore_errors=True)
 
 
-def _pipeline(video_in: str, video_out: str,
-              residual_db: float, work: str) -> dict:
+def _pipeline(job: SeparateJob) -> dict:
     """The staged pass, emitting one NDJSON line per stage."""
-    wav = os.path.join(work, "dialogue.wav")
-    ext = extract_wav(video_in, wav)
+    wav = os.path.join(job.work, "dialogue.wav")
+    ext = extract_wav(
+        job.video_in, wav, job.authority.filter_for("stereo"))
+    job.authority.assert_stable()
     emit("separate_extract", ok=ext["ok"])
     if not ext["ok"]:
         return {"status": "error", "error": "wav extract failed",
                 "detail": ext["stderr"]}
-    dem = run_demucs(wav, work)
+    dem = run_demucs(wav, job.work)
     emit("separate_demucs", ok=dem["ok"], model=DEMUCS_MODEL,
          elapsed_s=dem["elapsed_s"])
     if not dem["ok"]:
         return {"status": "error", "error": "demucs separation failed",
                 "detail": dem["stderr"]}
-    mix = remix(video_in, dem, residual_db, video_out)
-    emit("separate_remix", ok=mix["ok"], residual_db=residual_db)
+    mix = remix(
+        job.video_in, dem, job.residual_db, job.video_out)
+    emit("separate_remix", ok=mix["ok"], residual_db=job.residual_db)
     if not mix["ok"]:
         return {"status": "error", "error": "remix failed",
                 "detail": mix["stderr"]}
     return {"status": "ok", "preset": "separate", "model": DEMUCS_MODEL,
-            "residual_db": residual_db, "demucs_elapsed_s": dem["elapsed_s"],
-            "out": video_out}
+            "residual_db": job.residual_db,
+            "demucs_elapsed_s": dem["elapsed_s"], "out": job.video_out,
+            "channel_normalization": job.authority.receipt,
+            "normalized_dialogue_sha256": ext["sha256"]}
 
 
 def main() -> None:

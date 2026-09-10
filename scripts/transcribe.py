@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Transcribe media with Deepgram (default) or local whisper.cpp."""
+"""Transcribe locally by default; paid Deepgram requires explicit CLI approval."""
 
 import asyncio
 import json
@@ -12,10 +12,14 @@ import time
 from pathlib import Path
 from typing import List, Optional
 
-from deepgram import AsyncDeepgramClient
+from asr_policy import paid_deepgram_client, require_paid_asr, run_asr_cli
+from local_asr_cli import (emit_local_result, local_cli_context,
+                           parse_transcription_arguments, reject_local_controls)
+from local_asr_deadline import LocalAsrDeadline
 from local_whisper import (LOCAL_PROVIDER, LocalTranscribeRequest,
                            LocalWhisperError, transcribe_media,
                            transcription_provider)
+from transcribe_input import TranscribeInputError, probe_transcribe_input
 
 _SNIPER_DEBUG = os.environ.get("SNIPER_DEBUG") != "0"
 
@@ -35,10 +39,6 @@ def dbg(scope: str, event: str, **data):
 MAX_DEEPGRAM_FILE_SIZE = 25 * 1024 * 1024  # 25MB upload limit
 CHUNK_DURATION_SECONDS = 600  # 10 minutes per chunk
 FRAGMENT_TEMPLATE = "chunk-%03d.mp3"
-AUDIO_EXTENSIONS = {".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".opus", ".wma"}
-VIDEO_EXTENSIONS = {".mp4", ".mov", ".webm", ".mkv", ".avi", ".m4v"}
-
-
 def run_command(cmd: List[str]) -> str:
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
@@ -175,6 +175,7 @@ def build_transcript_entries(chunk_data: dict, offset: float) -> List[dict]:
 
 async def run_transcription(audio_path: str, audio_offset: float = 0.0) -> None:
     """Single async entry point — all Deepgram calls happen here."""
+    require_paid_asr()
     dbg("transcribe", "run.enter", audio_path=audio_path, audio_offset=audio_offset)
     _, duration = get_audio_metadata(audio_path)
     chunk_paths, chunk_dir = split_audio_if_needed(audio_path)
@@ -182,7 +183,7 @@ async def run_transcription(audio_path: str, audio_offset: float = 0.0) -> None:
     offsets = get_chunk_offsets(audio_path, total_chunks) if total_chunks > 1 else [0.0]
     dbg("transcribe", "run.plan", probe_duration=duration, total_chunks=total_chunks, offsets=offsets)
 
-    client = AsyncDeepgramClient(api_key=os.environ["DEEPGRAM_API_KEY"])
+    client = paid_deepgram_client()
     transcript: List[dict] = []
     detected_language: Optional[str] = None
 
@@ -209,6 +210,7 @@ async def run_transcription(audio_path: str, audio_offset: float = 0.0) -> None:
             with open(chunk_path, "rb") as f:
                 audio_bytes = f.read()
 
+            require_paid_asr()
             response = await client.listen.v1.media.transcribe_file(
                 request=audio_bytes,
                 **transcribe_kwargs,
@@ -251,50 +253,45 @@ async def run_transcription(audio_path: str, audio_offset: float = 0.0) -> None:
     )
 
 
-def run_local_transcription(media_path: str) -> None:
+def run_local_transcription(media_path: str, deadline: LocalAsrDeadline) -> None:
     """Run the no-network whisper.cpp lane and preserve the worker NDJSON shape."""
-    dbg("transcribe", "local.enter", media_path=media_path)
+    deadline.guard()
+    if not os.path.exists(media_path):
+        raise LocalWhisperError(f"File not found: {media_path}")
+    deadline.guard()
     result = transcribe_media(
         LocalTranscribeRequest(path=media_path),
         emit=lambda event: print(json.dumps(event), flush=True),
+        deadline=deadline,
     )
-    dbg("transcribe", "local.done", model=result["model"],
-        utterances=len(result["transcript"]))
-    print(json.dumps(result), flush=True)
+    emit_local_result(result, deadline)
 
 
 async def main() -> None:
-    if len(sys.argv) < 2:
-        print(json.dumps({"error": "Usage: transcribe.py <audio_path>"}), flush=True)
+    options = parse_transcription_arguments(sys.argv[1:])
+    audio_path = options.media_path
+    try:
+        provider = transcription_provider()
+        if provider == LOCAL_PROVIDER:
+            with local_cli_context(options) as deadline:
+                run_local_transcription(audio_path, deadline)
+            return
+        reject_local_controls(options)
+    except (RuntimeError, OSError, ValueError) as exc:
+        print(json.dumps({"error": str(exc)}), flush=True)
         sys.exit(1)
-
-    audio_path = sys.argv[1]
 
     if not os.path.exists(audio_path):
         print(json.dumps({"error": f"File not found: {audio_path}"}), flush=True)
         sys.exit(1)
 
-    is_video = any(audio_path.lower().endswith(ext) for ext in VIDEO_EXTENSIONS)
-    is_audio = any(audio_path.lower().endswith(ext) for ext in AUDIO_EXTENSIONS)
-    dbg("transcribe", "main.input", audio_path=audio_path, is_video=is_video, is_audio=is_audio)
-
-    if not is_audio and not is_video:
-        print(json.dumps({"error": "Unsupported file type. Please provide a video (mp4, mov) or audio file (mp3, wav, m4a, etc.)"}), flush=True)
-        sys.exit(1)
-
     try:
-        provider = transcription_provider()
-    except LocalWhisperError as exc:
+        media = probe_transcribe_input(audio_path)
+    except TranscribeInputError as exc:
         print(json.dumps({"error": str(exc)}), flush=True)
         sys.exit(1)
-
-    if provider == LOCAL_PROVIDER:
-        try:
-            run_local_transcription(audio_path)
-        except (LocalWhisperError, OSError, ValueError) as exc:
-            print(json.dumps({"error": str(exc)}), flush=True)
-            sys.exit(1)
-        return
+    is_video, is_audio = media.is_video, media.is_audio
+    dbg("transcribe", "main.input", audio_path=audio_path, is_video=is_video, is_audio=is_audio)
 
     if not os.environ.get("DEEPGRAM_API_KEY"):
         print(json.dumps({"error": "DEEPGRAM_API_KEY not set"}), flush=True)
@@ -345,4 +342,8 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(run_asr_cli(main))
+    except RuntimeError as exc:
+        print(json.dumps({"error": str(exc)}), flush=True)
+        sys.exit(1)

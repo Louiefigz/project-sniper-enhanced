@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "kind": "cut-repair-source-waveform-alignment-policy",
+  "frameSamples": 480,
+  "hopSamples": 240,
+  "minimumScorePpm": 850000,
+  "peakSeparationRatioPpm": 500000,
+  "maximumObservationSamples": 1440000
+}

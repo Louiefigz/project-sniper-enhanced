@@ -29,10 +29,24 @@ export interface PlanningGateProcessResult {
   exit: number | null;
   spawnError?: string;
   timedOut?: boolean;
+  cancelled?: boolean;
+  /** Actual owned-runner observation only; missing means unknown, never stopped. */
+  processGroupStopped?: boolean;
+  forcedStop?: boolean;
+}
+
+/** Per-invocation bounds a caller supplies; the default runner still caps every gate at its own ceiling. */
+export interface PlanningGateRunOptions {
+  /** Remaining wall-clock budget for THIS gate (ms); omitted means the runner's default ceiling. */
+  timeoutMs?: number;
+  /** Extra child environment (e.g. an owned sealed-renderer container name); it never replaces the base env. */
+  env?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export type PlanningGateRunner = (
   command: PlanningGateCommand,
+  options?: PlanningGateRunOptions,
 ) => Promise<PlanningGateProcessResult>;
 
 export interface PlanningGateVerdict {
@@ -43,6 +57,7 @@ export interface PlanningGateVerdict {
   exit: number;
   scope?: string;
   metrics?: Record<string, unknown>;
+  processGroupStopped?: boolean;
 }
 
 export interface GateBundleFinding {
@@ -52,6 +67,8 @@ export interface GateBundleFinding {
 
 export interface GateBundleVerdict {
   ok: boolean;
+  /** All launched gates settled with observed owned-group absence; not Docker or nested-session proof. */
+  processesStopped?: boolean;
   errors: GateBundleFinding[];
   warnings: GateBundleFinding[];
   gates: {
@@ -90,4 +107,9 @@ export interface GateBundleInput {
 
 export interface PlanningGateDependencies {
   run?: PlanningGateRunner;
+  /** One decreasing request remainder across both gate waves; each runner also keeps its own ceiling. */
+  timeoutMs?: number;
+  /** Per-gate child environment; a sealed renderer needs a caller-owned container name for each gate. */
+  env?: (gate: PlanningGateId) => Record<string, string>;
+  signal?: AbortSignal;
 }

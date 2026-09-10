@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "nonce": "81d8e97503c64012ac619ec0594fed74",
+  "originalMarker": {
+    "nonce": "81d8e97503c64012ac619ec0594fed74",
+    "processes": [
+      {
+        "pgid": 78040,
+        "pid": 78040,
+        "started": "Wed Sep  9 12:40:20 2026"
+      },
+      {
+        "pgid": 78040,
+        "pid": 78051,
+        "started": "Wed Sep  9 12:40:20 2026"
+      },
+      {
+        "pgid": 78056,
+        "pid": 78056,
+        "started": "Wed Sep  9 12:40:20 2026"
+      },
+      {
+        "pgid": 78056,
+        "pid": 78057,
+        "started": "Wed Sep  9 12:40:20 2026"
+      },
+      {
+        "pgid": 78056,
+        "pid": 78058,
+        "started": "Wed Sep  9 12:40:20 2026"
+      },
+      {
+        "pgid": 78056,
+        "pid": 78059,
+        "started": "Wed Sep  9 12:40:20 2026"
+      },
+      {
+        "pgid": 78056,
+        "pid": 78060,
+        "started": "Wed Sep  9 12:40:21 2026"
+      },
+      {
+        "pgid": 78072,
+        "pid": 78072,
+        "started": "Wed Sep  9 12:40:23 2026"
+      },
+      {
+        "pgid": 78072,
+        "pid": 78073,
+        "started": "Wed Sep  9 12:40:23 2026"
+      },
+      {
+        "pgid": 78072,
+        "pid": 78074,
+        "started": "Wed Sep  9 12:40:23 2026"
+      },
+      {
+        "pgid": 78072,
+        "pid": 78075,
+        "started": "Wed Sep  9 12:40:23 2026"
+      },
+      {
+        "pgid": 78072,
+        "pid": 78076,
+        "started": "Wed Sep  9 12:40:23 2026"
+      },
+      {
+        "pgid": 78085,
+        "pid": 78085,
+        "started": "Wed Sep  9 12:40:26 2026"
+      },
+      {
+        "pgid": 78085,
+        "pid": 78086,
+        "started": "Wed Sep  9 12:40:26 2026"
+      },
+      {
+        "pgid": 78085,
+        "pid": 78087,
+        "started": "Wed Sep  9 12:40:26 2026"
+      },
+      {
+        "pgid": 78085,
+        "pid": 78089,
+        "started": "Wed Sep  9 12:40:26 2026"
+      },
+      {
+        "pgid": 78085,
+        "pid": 78090,
+        "started": "Wed Sep  9 12:40:26 2026"
+      },
+      {
+        "pgid": 78102,
+        "pid": 78102,
+        "started": "Wed Sep  9 12:40:29 2026"
+      },
+      {
+        "pgid": 78102,
+        "pid": 78103,
+        "started": "Wed Sep  9 12:40:29 2026"
+      },
+      {
+        "pgid": 78102,
+        "pid": 78104,
+        "started": "Wed Sep  9 12:40:29 2026"
+      },
+      {
+        "pgid": 78102,
+        "pid": 78105,
+        "started": "Wed Sep  9 12:40:29 2026"
+      },
+      {
+        "pgid": 78102,
+        "pid": 78106,
+        "started": "Wed Sep  9 12:40:29 2026"
+      }
+    ],
+    "project": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1",
+    "schemaVersion": 1,
+    "startedAt": 1788975618.806835,
+    "supervisorPid": 78026
+  },
+  "originalMarkerSha256": "ba4f47dfa2c3dbc48dd5ab41c0e7f9dff625a26f76562ff7a4327f21a0db1b5d",
+  "firstCheck": {
+    "verifiedAt": 1788975728.2322218,
+    "supervisorAbsent": true,
+    "recordedChildrenAbsent": true,
+    "recordedIdentityCount": 22,
+    "reusedChildPids": []
+  },
+  "finalCheck": {
+    "verifiedAt": 1788975728.254949,
+    "supervisorAbsent": true,
+    "recordedChildrenAbsent": true,
+    "recordedIdentityCount": 22,
+    "reusedChildPids": []
+  },
+  "status": "recorded-process-absence-verified",
+  "signals": [],
+  "scope": "Explicit recovery only; no output quality or unobserved-child claim"
+}

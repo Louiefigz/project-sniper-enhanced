@@ -13,7 +13,7 @@ interface Props {
   onMutate: (fn: (p: EditPlan) => EditPlan) => void;
 }
 
-const REBUILD_HINT = "layout changes re-render the base (~3 min)";
+const REBUILD_HINT = "Layout changes rebuild the base; the run records the actual elapsed time.";
 const FRAC_DEFAULT = 0.5;
 
 function Hint({ text }: { text: string }) {

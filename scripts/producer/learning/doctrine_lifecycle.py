@@ -7,10 +7,11 @@ operator approval authorize a different lock for a different run id.
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 from dataclasses import dataclass
 from typing import Iterable, Mapping, Sequence
+
+from cross_runtime_canonical_json import canonical_compact_json
 
 _SHA = re.compile(r"^[0-9a-f]{64}$")
 PRODUCER_CORE_DOCTRINE_PATHS = (
@@ -25,8 +26,7 @@ class DoctrineLifecycleError(ValueError):
     """A doctrine artifact or state transition violates the lifecycle."""
 
 def _canonical(value: object) -> str:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"),
-                      ensure_ascii=False, allow_nan=False)
+    return canonical_compact_json(value)
 
 def _hash(value: object) -> str:
     return hashlib.sha256(_canonical(value).encode("utf-8")).hexdigest()

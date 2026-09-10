@@ -1,13 +1,10 @@
 import {
-  createReadStream,
-  createWriteStream,
   mkdirSync,
   renameSync,
   rmSync,
 } from "fs";
 import { lstat, mkdir, readdir } from "fs/promises";
 import { randomUUID } from "crypto";
-import { pipeline } from "stream/promises";
 import path from "path";
 import {
   createProjectRoot,
@@ -19,6 +16,11 @@ import {
 import { upsertProject } from "../../_lib/projects-registry";
 import type { IntentCapabilityResolution } from "@/lib/producer/intent-capabilities";
 import type { ProjectIntent } from "@/lib/producer/intent-presets";
+import {
+  copyStableSource,
+  stableCopySource,
+  type StableCopySource,
+} from "./source-copy";
 
 // WORKSPACE TARGET RESOLUTION for the ingest route. Default (no outDir, no
 // projectRoot): create a NEW workspace project — footage ≤2GB is COPIED into
@@ -49,14 +51,8 @@ export interface PreparedIngestTarget {
   totalBytes: number;
 }
 
-interface CopyEntry {
-  source: string;
-  relative: string;
-  size: number;
-}
-
 interface ScanState {
-  entries: CopyEntry[];
+  entries: StableCopySource[];
   totalBytes: number;
   tooLarge: boolean;
 }
@@ -80,46 +76,40 @@ async function scanDirectory(
       continue;
     }
     if (!entry.isFile()) throw new Error(`Source folders cannot contain symbolic links: ${absolute}`);
-    const size = (await lstat(absolute)).size;
-    state.entries.push({ source: absolute, relative: path.relative(base, absolute), size });
+    const info = await lstat(absolute, { bigint: true });
+    if (!info.isFile() || info.isSymbolicLink()) {
+      throw new Error(`Source file changed while scanning: ${absolute}`);
+    }
+    const size = Number(info.size);
+    state.entries.push(
+      stableCopySource(absolute, path.relative(base, absolute), info),
+    );
     state.totalBytes += size;
     state.tooLarge = state.totalBytes > COPY_LIMIT_BYTES;
   }
 }
 
 async function scanSource(inputPath: string, signal: AbortSignal): Promise<{
-  entries: CopyEntry[];
+  entries: StableCopySource[];
   totalBytes: number;
   directory: boolean;
   tooLarge: boolean;
 }> {
   abortIfNeeded(signal);
-  const stat = await lstat(inputPath);
+  const stat = await lstat(inputPath, { bigint: true });
   if (stat.isFile()) {
+    const size = Number(stat.size);
     return {
-      entries: [{ source: inputPath, relative: path.basename(inputPath), size: stat.size }],
-      totalBytes: stat.size,
+      entries: [stableCopySource(inputPath, path.basename(inputPath), stat)],
+      totalBytes: size,
       directory: false,
-      tooLarge: stat.size > COPY_LIMIT_BYTES,
+      tooLarge: size > COPY_LIMIT_BYTES,
     };
   }
   if (!stat.isDirectory()) throw new Error(`Unsupported source type: ${inputPath}`);
   const state: ScanState = { entries: [], totalBytes: 0, tooLarge: false };
   await scanDirectory(inputPath, inputPath, state, signal);
   return { ...state, directory: true };
-}
-
-async function copyEntry(
-  entry: CopyEntry,
-  staging: string,
-  onChunk: (bytes: number) => void,
-  signal: AbortSignal,
-): Promise<void> {
-  const destination = path.join(staging, entry.relative);
-  await mkdir(path.dirname(destination), { recursive: true });
-  const reader = createReadStream(entry.source);
-  reader.on("data", (chunk) => onChunk(Buffer.byteLength(chunk)));
-  await pipeline(reader, createWriteStream(destination, { flags: "wx" }), { signal });
 }
 
 function initializeFreshProject(target: IngestTarget, referenced: boolean): void {
@@ -155,10 +145,16 @@ export async function prepareIngestTarget(
   try {
     await mkdir(staging, { recursive: false });
     for (const entry of scan.entries) {
-      await copyEntry(entry, staging, (bytes) => {
-        copiedBytes += bytes;
-        onProgress({ copiedBytes, totalBytes: scan.totalBytes, currentFile: entry.relative });
-      }, signal);
+      await copyStableSource(
+        entry, path.join(staging, entry.relative), (bytes) => {
+          copiedBytes += bytes;
+          onProgress({
+            copiedBytes,
+            totalBytes: scan.totalBytes,
+            currentFile: entry.relative,
+          });
+        }, signal,
+      );
     }
     abortIfNeeded(signal);
     renameSync(staging, target.manifestDir);

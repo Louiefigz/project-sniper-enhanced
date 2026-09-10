@@ -15,7 +15,7 @@ if str(PRODUCER_DIR) not in sys.path:
 
 import ingest
 import ingest_scan
-from ingest_probe import MediaProbe
+from ingest_probe import MediaProbe, probe_media
 
 
 def audio_probe(present: bool = True) -> MediaProbe:
@@ -31,6 +31,27 @@ def audio_probe(present: bool = True) -> MediaProbe:
         audio_channels=2 if present else None,
         audio_sample_rate=48000 if present else None,
     )
+
+
+class ExactRateProbeTest(unittest.TestCase):
+    def test_probe_preserves_canonical_r_frame_rate(self) -> None:
+        payload = {
+            "format": {"duration": "1.001"},
+            "streams": [
+                {
+                    "codec_type": "video", "width": 1920, "height": 1080,
+                    "r_frame_rate": "60000/2002",
+                    "avg_frame_rate": "30000/1001",
+                },
+                {
+                    "codec_type": "audio", "channels": 2,
+                    "sample_rate": "48000",
+                },
+            ],
+        }
+        with patch("ingest_probe.ffprobe_json", return_value=payload):
+            result = probe_media("fixture.mp4")
+        self.assertEqual(result.frame_rate, "30000/1001")
 
 
 class MusicIngestTest(unittest.TestCase):

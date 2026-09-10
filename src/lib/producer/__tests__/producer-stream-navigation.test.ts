@@ -13,6 +13,8 @@ assert.match(route, /source_copy_progress/);
 assert.match(route, /prepareIngestTarget\(/);
 assert.match(route, /cancel: stop/);
 assert.match(route, /terminateProcessTree\(live\.proc\)/);
+assert.match(route, /maxDuration = 1800/,
+  "ingest route must outlive the bounded 1,200-second decode plus overhead");
 assert.ok(
   route.indexOf("guardProjectMutation({") < route.indexOf("resolveIngestTarget("),
   "a writer lease must precede fresh project creation",

@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
-"""ingest_scan — b-roll + music cataloging for the PRODUCER asset manifest.
-
-B-roll: ffprobe metadata + orientation + kind, with vision fields left
-``pending`` (Phase 2 fills description/hasBurnedText). Results are cached in
-``broll/broll_catalog.json`` keyed by (path, mtime) so re-runs are
-free and later vision descriptions survive. Music: ``music/<vibe>/track.*``
-convention → vibe tags from the folder. See docs/producer/PRODUCER_PLAN.md §2.1, §7.5.
+"""Catalog Producer b-roll/music and atomically publish manifest artifacts.
+Metadata is cached by path/mtime; music tags come from folders.
 """
 
 from __future__ import annotations
@@ -14,7 +9,7 @@ import json
 import os
 import tempfile
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 
 from ingest_probe import (
     AUDIO_EXTS,
@@ -27,13 +22,15 @@ from ingest_probe import (
 )
 
 BROLL_CATALOG_NAME = "broll_catalog.json"
-# The committed repo catalog stores repo-relative paths (broll/…) so it works
-# on any checkout; readers resolve them here, writers relativize them back.
+# Committed catalog paths are repo-relative; readers anchor them here.
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
-def atomic_write_json(destination: Path, value: object) -> None:
+def atomic_write_json(destination: Path, value: object,
+                      guard: Callable[[], None] | None = None) -> None:
     """Replace JSON in one rename so readers never observe a partial file."""
+    if guard:
+        guard()
     descriptor, staged = tempfile.mkstemp(
         prefix=f".{destination.name}.", suffix=".tmp", dir=destination.parent
     )
@@ -43,7 +40,14 @@ def atomic_write_json(destination: Path, value: object) -> None:
             handle.write("\n")
             handle.flush()
             os.fsync(handle.fileno())
+        if guard:
+            guard()
         os.replace(staged, destination)
+        directory = os.open(destination.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
     finally:
         try:
             os.unlink(staged)
@@ -126,14 +130,23 @@ def _load_broll_cache(cache_path: Path) -> dict:
         warn(f"unreadable broll cache {cache_path}; rebuilding")
         return {}
     records: dict = {}
+    seen: set[str] = set()
     for r in data:
         if not (isinstance(r, dict) and "path" in r):
             continue
-        resolved = _resolve_catalog_path(r["path"])
-        if not resolved.exists():
+        key = _resolve_catalog_path(r.get("originalPath", r["path"]))
+        identity = str(key)
+        if identity in seen:
+            raise RuntimeError("broll catalog repeats an originalPath identity")
+        seen.add(identity)
+        executable = _resolve_catalog_path(r["path"])
+        if not executable.exists():
             warn(f"broll catalog entry missing on disk, skipping: {r['path']}")
             continue
-        records[str(resolved)] = {**r, "path": str(resolved)}
+        row = {**r, "path": str(executable)}
+        if "originalPath" in row:
+            row["originalPath"] = str(key)
+        records[identity] = row
     return records
 
 

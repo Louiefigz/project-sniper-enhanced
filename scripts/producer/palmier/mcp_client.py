@@ -15,6 +15,7 @@ import json
 import time
 import urllib.error
 import urllib.request
+from typing import Callable
 
 DEFAULT_URL = "http://127.0.0.1:19789/mcp"
 PROTOCOL_VERSION = "2025-06-18"
@@ -41,6 +42,19 @@ class PalmierClient:
         self.timeout_s = timeout_s
         self.session_id: str | None = None
         self._next_id = 0
+        self._timeout_provider: Callable[[], float] | None = None
+
+    def set_timeout_provider(
+            self, provider: Callable[[], float] | None) -> None:
+        """Refresh the timeout immediately before every protocol request."""
+        self._timeout_provider = provider
+
+    def _request_timeout(self) -> float:
+        value = self._timeout_provider() \
+            if self._timeout_provider is not None else self.timeout_s
+        if value <= 0:
+            raise PalmierError("Palmier MCP request deadline expired")
+        return min(float(self.timeout_s), float(value))
 
     def handshake(self) -> None:
         """initialize → notifications/initialized. Raises if unreachable."""
@@ -104,6 +118,30 @@ class PalmierClient:
                     f"(status {status})")
             time.sleep(poll_s)
 
+    def close(self) -> None:
+        """Terminate this MCP session with the protocol DELETE handshake."""
+        session_id = self.session_id
+        if session_id is None:
+            return
+        headers = {
+            "Accept": "application/json, text/event-stream",
+            "Mcp-Session-Id": session_id,
+        }
+        request = urllib.request.Request(
+            self.url, headers=headers, method="DELETE")
+        try:
+            with urllib.request.urlopen(
+                    request, timeout=self._request_timeout()) as response:
+                if response.status not in {200, 202, 204}:
+                    raise PalmierError(
+                        f"Palmier MCP session DELETE returned {response.status}")
+                response.read()
+        except urllib.error.URLError as exc:
+            raise PalmierError(
+                f"Palmier MCP session {session_id} did not terminate: {exc}") from exc
+        finally:
+            self.session_id = None
+
     def _rpc(self, method: str, params: dict, notification: bool = False):
         body: dict = {"jsonrpc": "2.0", "method": method, "params": params}
         if not notification:
@@ -116,7 +154,8 @@ class PalmierClient:
         req = urllib.request.Request(self.url, data=json.dumps(body).encode(),
                                      headers=headers, method="POST")
         try:
-            with urllib.request.urlopen(req, timeout=self.timeout_s) as r:
+            with urllib.request.urlopen(
+                    req, timeout=self._request_timeout()) as r:
                 if r.headers.get("Mcp-Session-Id"):
                     self.session_id = r.headers.get("Mcp-Session-Id")
                 raw = r.read().decode()

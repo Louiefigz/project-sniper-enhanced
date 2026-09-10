@@ -1,0 +1,788 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-09-08",
+  "completeness": "complete",
+  "phaseExit": "passed",
+  "routeRoot": "src/app/api/producer",
+  "routeGroups": [
+    {
+      "groupId": "editing-orchestration",
+      "routes": [
+        "src/app/api/producer/ai-edit/route.ts",
+        "src/app/api/producer/auto-edit/route.ts"
+      ],
+      "role": "Command-driven incremental edits and full automatic editing.",
+      "modePolicy": "mode-aware",
+      "short": {
+        "status": "compatibility",
+        "behavior": "Uses short pacing, vertical-safe layouts, burned-caption defaults, and the shared isolated-candidate QC path.",
+        "blockers": [
+          "Short graphics repairs outside caption shards still cross the monolithic compatibility compositor.",
+          "The bounded P2 structured repair lifecycle is released, but free-form creator-footage repair, general populated-layer picture repair, and connected Palmier readback remain unqualified."
+        ]
+      },
+      "longform": {
+        "status": "compatibility",
+        "behavior": "Uses long-form planning, front-loaded pacing, chapters/SRT policy, and retained graphics/audio fast paths before isolated-candidate QC.",
+        "blockers": [
+          "The retained fast paths are not a qualified 10-14 minute incremental render graph or 90-minute SLA.",
+          "The bounded P2 structured repair lifecycle is released, but free-form creator-footage repair, general populated-layer picture repair, and connected Palmier readback remain unqualified."
+        ]
+      },
+      "incrementalBoundary": "Plan-only requests are surgical; caption shards and governed scene units can be local. Other changed plan lanes may rebuild the compatibility base or whole composite.",
+      "palmierBoundary": "Auto Edit defaults to the Palmier-hybrid compatibility workflow; ai-edit may select a managed Palmier path. Native fidelity and full hybrid export remain separately gated."
+    },
+    {
+      "groupId": "render-and-assemble",
+      "routes": [
+        "src/app/api/producer/assemble/route.ts",
+        "src/app/api/producer/render/route.ts"
+      ],
+      "role": "Create an editor-ready base and assemble the approved final MP4.",
+      "modePolicy": "mode-aware",
+      "short": {
+        "status": "compatibility",
+        "behavior": "Renders short-safe captions/layout and reuses the base only when compatibility fingerprints permit.",
+        "blockers": [
+          "Graphics-only short repairs can still re-enter a monolithic graphics composite."
+        ]
+      },
+      "longform": {
+        "status": "compatibility",
+        "behavior": "Supports retained graphics-only and audio-only paths over the editor-ready base.",
+        "blockers": [
+          "Whole-cut video fingerprints and incomplete cross-lane dependencies prevent a fully qualified dirty graph."
+        ]
+      },
+      "incrementalBoundary": "Caption shards and selected graphics/audio lanes reuse stable media; cut, zoom, reframe, or stale dependencies rebuild the base.",
+      "palmierBoundary": "These routes author the exact MP4 authority. Palmier publication is a separate delivery action."
+    },
+    {
+      "groupId": "plan-authority",
+      "routes": [
+        "src/app/api/producer/intent/route.ts",
+        "src/app/api/producer/lint/route.ts",
+        "src/app/api/producer/plan/route.ts",
+        "src/app/api/producer/save-plan/route.ts"
+      ],
+      "role": "Persist operator intent, validate plans, and expose the current plan.",
+      "modePolicy": "mode-aware",
+      "short": {
+        "status": "released",
+        "behavior": "Accepts canonical story form short independently from canvas and validates short-specific plan rules.",
+        "blockers": []
+      },
+      "longform": {
+        "status": "released",
+        "behavior": "Accepts canonical story form longform independently from canvas and validates long-form-specific plan rules.",
+        "blockers": []
+      },
+      "incrementalBoundary": "These routes mutate or validate JSON authority only; they do not render media.",
+      "palmierBoundary": "Plan authority does not itself claim a Palmier timeline mutation."
+    },
+    {
+      "groupId": "media-inspection",
+      "routes": [
+        "src/app/api/producer/comp-html/route.ts",
+        "src/app/api/producer/comps/route.ts",
+        "src/app/api/producer/filmstrip/route.ts",
+        "src/app/api/producer/reveal/route.ts",
+        "src/app/api/producer/source-frame/route.ts",
+        "src/app/api/producer/transcript/route.ts",
+        "src/app/api/producer/waveform/route.ts",
+        "src/app/api/producer/words/route.ts"
+      ],
+      "role": "Read-only composition, frame, transcript, and waveform inspection.",
+      "modePolicy": "form-neutral",
+      "short": {
+        "status": "released",
+        "behavior": "Reads the selected project's exact source/derived evidence without choosing short policy.",
+        "blockers": []
+      },
+      "longform": {
+        "status": "released",
+        "behavior": "Reads the selected project's exact source/derived evidence without choosing long-form policy.",
+        "blockers": []
+      },
+      "incrementalBoundary": "Read-only inspection does not invalidate or render timeline nodes.",
+      "palmierBoundary": "No Palmier mutation is authorized."
+    },
+    {
+      "groupId": "media-ingress",
+      "routes": [
+        "src/app/api/producer/ingest/route.ts",
+        "src/app/api/producer/pick-file/route.ts",
+        "src/app/api/producer/transcript-authority/route.ts"
+      ],
+      "role": "Select, snapshot, admit, and inventory source media, including guarded exact-media transcript-authority promotion.",
+      "modePolicy": "form-neutral",
+      "short": {
+        "status": "released",
+        "behavior": "Admits immutable source media before short-form planning and can promote a timing-valid transcript only from an exact-media donor.",
+        "blockers": []
+      },
+      "longform": {
+        "status": "released",
+        "behavior": "Admits immutable source media before long-form planning and can promote a timing-valid transcript only from an exact-media donor.",
+        "blockers": []
+      },
+      "incrementalBoundary": "A source-set change invalidates dependent compilation/render authority in either form.",
+      "palmierBoundary": "Ingress does not select Palmier as timeline authority."
+    },
+    {
+      "groupId": "project-registry",
+      "routes": [
+        "src/app/api/producer/project-status/route.ts",
+        "src/app/api/producer/projects/route.ts"
+      ],
+      "role": "List projects and report durable producer status.",
+      "modePolicy": "form-neutral",
+      "short": {
+        "status": "released",
+        "behavior": "Reports the stored short project state without changing it.",
+        "blockers": []
+      },
+      "longform": {
+        "status": "released",
+        "behavior": "Reports the stored long-form project state without changing it.",
+        "blockers": []
+      },
+      "incrementalBoundary": "Status reads do not invalidate media.",
+      "palmierBoundary": "Palmier status is reported only from its explicit state records."
+    },
+    {
+      "groupId": "reference-study",
+      "routes": [
+        "src/app/api/producer/references/decision/route.ts",
+        "src/app/api/producer/references/fetch/route.ts",
+        "src/app/api/producer/references/route.ts",
+        "src/app/api/producer/references/study/route.ts"
+      ],
+      "role": "Admit a reference, study its mechanics, and retain operator strategy.",
+      "modePolicy": "mode-aware",
+      "short": {
+        "status": "compatibility",
+        "behavior": "Can study a short reference and feed the current planning prompts.",
+        "blockers": [
+          "Verified mimic on unseen footage is not P6-qualified."
+        ]
+      },
+      "longform": {
+        "status": "compatibility",
+        "behavior": "Can study a long-form reference and feed the current planning prompts.",
+        "blockers": [
+          "Verified mimic on unseen footage is not P6-qualified."
+        ]
+      },
+      "incrementalBoundary": "A changed reference profile invalidates planning/scene dependencies, not unrelated admitted source bytes.",
+      "palmierBoundary": "Reference study supplies intent; it does not itself mutate Palmier."
+    },
+    {
+      "groupId": "palmier-delivery",
+      "routes": [
+        "src/app/api/producer/live-build/route.ts",
+        "src/app/api/producer/palmier/candidate-qc/route.ts",
+        "src/app/api/producer/palmier/open/route.ts",
+        "src/app/api/producer/palmier/ownership/route.ts",
+        "src/app/api/producer/palmier/preflight/route.ts",
+        "src/app/api/producer/palmier/push/route.ts",
+        "src/app/api/producer/palmier/status/route.ts",
+        "src/app/api/producer/palmier/view/route.ts",
+        "src/app/api/producer/palmier/workspace/route.ts"
+      ],
+      "role": "Open, inspect, build, QC, push, and reconcile Palmier delivery state.",
+      "modePolicy": "delivery-only",
+      "short": {
+        "status": "compatibility",
+        "behavior": "Supports a local production-callable mastered-stereo route, exact hidden-master path, strict editable-parity contract, one-scene replacement executor, durable mutation journal, and immutable pre-mutation crash snapshots.",
+        "blockers": [
+          "Connected representative short export/readback, passing mastered-stereo audio-route authority, exact-master mutation, disconnect recovery, and manual-edit preservation are not qualified; editable stems lack stable role/output-bus readback."
+        ]
+      },
+      "longform": {
+        "status": "compatibility",
+        "behavior": "Supports the same local mastered-stereo and delivery prerequisites for long-form candidates, including exact full-stream parity and fail-closed reconciliation.",
+        "blockers": [
+          "Connected representative long-form export/readback, paging, bounded timeout, passing mastered-stereo audio-route authority, disconnect recovery, and manual-edit preservation are not qualified; editable stems lack stable role/output-bus readback."
+        ]
+      },
+      "incrementalBoundary": "Only a proved Palmier lane update may replace its bound clips; otherwise delivery falls back to a baked exact master.",
+      "palmierBoundary": "Palmier calls are confined to this delivery family or explicitly selected Palmier-hybrid orchestration."
+    },
+    {
+      "groupId": "auto-edit-control",
+      "routes": [
+        "src/app/api/producer/auto-edit/stop/route.ts"
+      ],
+      "role": "Fence and stop the current Auto Edit worker.",
+      "modePolicy": "form-neutral",
+      "short": {
+        "status": "released",
+        "behavior": "Stops a short-form worker at the same durable boundaries.",
+        "blockers": []
+      },
+      "longform": {
+        "status": "released",
+        "behavior": "Stops a long-form worker at the same durable boundaries.",
+        "blockers": []
+      },
+      "incrementalBoundary": "Stopping preserves completed checkpoints and prevents stale worker publication.",
+      "palmierBoundary": "Stop does not start a new Palmier mutation."
+    },
+    {
+      "groupId": "speech-cleanup",
+      "routes": [
+        "src/app/api/producer/speech-cleanup/route.ts"
+      ],
+      "role": "Run the legacy speech-cleanup compatibility operation.",
+      "modePolicy": "mode-aware",
+      "short": {
+        "status": "compatibility",
+        "behavior": "Cleans selected short-form speech through the legacy route.",
+        "blockers": [
+          "This route is not the first-class non-ripple word-repair approval workflow."
+        ]
+      },
+      "longform": {
+        "status": "compatibility",
+        "behavior": "Cleans selected long-form speech through the legacy route.",
+        "blockers": [
+          "This route is not the first-class non-ripple word-repair approval workflow."
+        ]
+      },
+      "incrementalBoundary": "Legacy cleanup follows its own media boundary; phrase repair must use cut.restoreSpeech.",
+      "palmierBoundary": "No first-class sample-exact native Palmier L/J guarantee is claimed."
+    },
+    {
+      "groupId": "scene-review",
+      "routes": [
+        "src/app/api/producer/scene-review/route.ts"
+      ],
+      "role": "Create or replay one governed private scene-unit review repair.",
+      "modePolicy": "mode-aware",
+      "short": {
+        "status": "compatibility",
+        "behavior": "Renders only the named governed scene unit into a private review fragment while preserving the approved base and every unrelated scene.",
+        "blockers": [
+          "Legacy short graphics outside governed scene packages still use the broader compatibility compositor."
+        ]
+      },
+      "longform": {
+        "status": "compatibility",
+        "behavior": "The retained 14-minute, 50-scene proof renders one dirty unit, reuses the other unit and 49 scenes, and never re-encodes the full base or full duration.",
+        "blockers": [
+          "This private review route is not general final-master dirty-window assembly or a connected editor replacement."
+        ]
+      },
+      "incrementalBoundary": "Only the named scene/unit package may render; exact project fanout preserves unrelated scenes and the approved base, and the route never publishes active output.",
+      "palmierBoundary": "The route creates private local review media only; connected Palmier replacement remains separately gated."
+    },
+    {
+      "groupId": "hyperframes-studio-review",
+      "routes": ["src/app/api/producer/studio/route.ts", "src/app/api/producer/studio/import/route.ts"],
+      "role": "Inspect/open a parent-bound HyperFrames projection or explicitly preview/apply supported Studio edits to a draft, never approve delivery.",
+      "modePolicy": "form-neutral",
+      "short": {
+        "status": "unqualified",
+        "behavior": "Provides guarded status/open/reuse for short-form graphics timing and copy review.",
+        "blockers": ["Short-form real-player qualification, safe sync, audiovisual comparison and spatial preview/export parity remain open."]
+      },
+      "longform": {
+        "status": "unqualified",
+        "behavior": "A 12-second synthetic 1080p project plays in the actual embedded Studio UI; the projection is not an approved final.",
+        "blockers": ["Creator-footage long-form qualification, safe sync, source-mutation regression and final render parity remain open."]
+      },
+      "incrementalBoundary": "Reuses a current projection without overwriting pending edits; draft import requires exact original/current/proposal authority and the project lease. It cannot render or replace a final master.",
+      "palmierBoundary": "No Palmier launch or delivery adapter is needed for this review surface; legacy project migration remains explicitly guarded."
+    },
+    {
+      "groupId": "guided-cut-review",
+      "routes": ["src/app/api/producer/cut-review/route.ts", "src/app/api/producer/cut-review/video/route.ts"],
+      "role": "Read the exact paused cut-review descriptor and stream its receipt-bound private media without accepting or rendering anything.",
+      "modePolicy": "form-neutral",
+      "short": {
+        "status": "unqualified",
+        "behavior": "Private cut-only preview readback requires the exact waiting job, review request, source-set receipt and rendered media identity.",
+        "blockers": ["Actual short-form review UI, explicit acceptance/continuation and preview/final audio parity remain open."]
+      },
+      "longform": {
+        "status": "unqualified",
+        "behavior": "Same private preview contract; range streaming hashes and serves one checked file descriptor and never accepts a caller-selected media path.",
+        "blockers": ["Creator-footage long-form playback, approval/brief handoff, complete audiovisual comparison and measured throughput remain open."]
+      },
+      "incrementalBoundary": "Read-only exact cut artifact, not graphics, final crop, grade, mix or delivery approval. Earlier pointerless checkpoints cannot be accepted.",
+      "palmierBoundary": "Explicit MP4 cut-first jobs only; no Palmier operation is invoked."
+    },
+    {
+      "groupId": "guided-cut-acceptance",
+      "routes": ["src/app/api/producer/cut-review/accept/route.ts", "src/app/api/producer/cut-review/decision/route.ts"],
+      "role": "Explicit exact-preview human acceptance, historical accepted-cut readback and separately requested continuation retry.",
+      "modePolicy": "form-neutral",
+      "short": {
+        "status": "unqualified",
+        "behavior": "Requires four explicit human attestations, exact paused preview identities and fresh admitted source-byte verification; records an immutable cut-only decision before worker handoff.",
+        "blockers": ["Actual short-form human acceptance UI qualification, changed post-cut treatment handoff and full audiovisual quality comparison remain open."]
+      },
+      "longform": {
+        "status": "unqualified",
+        "behavior": "The same exact-v1 decision continues the previously bound brief; replay cannot spawn another worker and pending continuation requires explicit retry.",
+        "blockers": ["Creator-footage long-form audition and human review, intro checkpoint, new treatment authority and end-to-end throughput remain unproved."]
+      },
+      "incrementalBoundary": "Acceptance is scoped only to the unchanged cut. It cannot change the brief, regenerate the story, bypass final QC, or turn a worker completion into delivery approval.",
+      "palmierBoundary": "Explicit MP4 cut-first jobs only; no legacy delivery-policy migration."
+    },
+    {
+      "groupId": "guided-opening-launch",
+      "routes": ["src/app/api/producer/guided-opening/launch/route.ts"],
+      "role": "Inspect launch eligibility or explicitly request one detached, journal-bound opening controller; never infer liveness or retry authority from a recorded request.",
+      "modePolicy": "mode-aware",
+      "short": {
+        "status": "unqualified",
+        "behavior": "Local GET reads launch metadata; explicit POST requires the accepted cut, clean treatment readiness, exact submission, project lease and original remaining generation budget. Unsupported requested lanes are refused rather than omitted.",
+        "blockers": ["Representative short-form creator-footage, audiovisual quality and end-to-end latency qualification remain open; public source-color V2 media execution remains explicitly fenced."]
+      },
+      "longform": {
+        "status": "unqualified",
+        "behavior": "The same one-shot controller can execute the admitted opening and transition-context profile, reconcile owned resources, requalify and select private review media. A recorded launch is not proof of a running worker; uncertain or failed launches cannot automatically restart.",
+        "blockers": ["Retained synthetic long-form mechanics do not qualify creator footage, complete-body generation, delivery or the two-hour target; public source-color V2 media execution remains explicitly fenced."]
+      },
+      "incrementalBoundary": "Bound to the exact existing cut, treatment and journal; the detached handoff carries the original clock. Launch does not itself approve the opening, generate the full body or approve delivery.",
+      "palmierBoundary": "Private guided MP4 opening only; no Palmier mutation or delivery-policy migration."
+    },
+    {
+      "groupId": "guided-opening-review",
+      "routes": ["src/app/api/producer/guided-opening/media/route.ts", "src/app/api/producer/guided-opening/status/route.ts"],
+      "role": "Observe current opening ownership and selected evidence, or stream an exact selected private core/review artifact without generation or approval.",
+      "modePolicy": "form-neutral",
+      "short": {
+        "status": "unqualified",
+        "behavior": "Local read-only status preserves unresolved-claim priority and reports last-qualified selection, not fresh source requalification. Playback requires exact current selection/range/media hashes and hashes the entire selected artifact through the same descriptor it serves.",
+        "blockers": ["Representative short-form playback, word-timed visual placement and creator audiovisual review remain unqualified; metadata and streaming tests are not subjective quality approval."]
+      },
+      "longform": {
+        "status": "unqualified",
+        "behavior": "The same exact private core/context readback rejects stale or unbound media without accepting an arbitrary path. Status and seeks do not launch generation, clear ownership, renew the original generation budget or approve anything.",
+        "blockers": ["Creator-footage long-form opening/body continuity, listening and final-composite comparison remain open; retained synthetic playback does not qualify complete-output quality or throughput."]
+      },
+      "incrementalBoundary": "Read-only evidence and selected-media access. Current unresolved ownership blocks selection; cheap status does not substitute for the strong read-only child required at selection and approval.",
+      "palmierBoundary": "No Palmier operation; the returned private MP4 range is not delivery authority."
+    },
+    {
+      "groupId": "guided-opening-approval",
+      "routes": ["src/app/api/producer/guided-opening/approve/route.ts"],
+      "role": "Record an explicit local human opening-only decision after exact-selection requalification, preserving separate body and delivery gates.",
+      "modePolicy": "form-neutral",
+      "short": {
+        "status": "unqualified",
+        "behavior": "A bounded same-origin submission must contain all explicit human attestations and exact selected identities. Under the project lease, current source/pipeline/output requalification precedes the immutable opening-only approval; no render is launched.",
+        "blockers": ["Actual creator short-form human review and audiovisual qualification remain open; synthetic attestations and automated readback do not constitute human acceptance or delivery approval."]
+      },
+      "longform": {
+        "status": "unqualified",
+        "behavior": "The same guarded approval binds the actual current selection and its versioned retained proof. Approval uses a separate bounded read-only allowance, not a renewed generation budget, and always leaves bodyGenerated and deliveryApproved false.",
+        "blockers": ["Creator-footage long-form listening, opening-to-body continuity and full-output qualification remain open; source-color proof handling does not release the fenced native execution workflow."]
+      },
+      "incrementalBoundary": "Only an exact reviewed opening may be approved. This endpoint cannot change the cut or treatment, generate the body, release unresolved ownership, or turn worker completion into human approval.",
+      "palmierBoundary": "No Palmier mutation or delivery approval; those remain separate explicit workflows."
+    },
+    {
+      "groupId": "private-color-diagnostic",
+      "routes": ["src/app/api/producer/color-diagnostic/route.ts"],
+      "role": "Read bounded source context or explicitly run an owned, private source-color diagnostic and inspect its project-bound status.",
+      "modePolicy": "form-neutral",
+      "short": {
+        "status": "unqualified",
+        "behavior": "Samples retained source/lighting groups under explicit unknown-by-default profile and transform history; no plan or grade is applied.",
+        "blockers": ["Synthetic Color UI/API lifecycle has been exercised; creator footage, grading schema, operator image comparison and browser/final color parity remain unqualified."]
+      },
+      "longform": {
+        "status": "unqualified",
+        "behavior": "Private diagnostics cover late retained intervals within a declared sample budget; omissions and intentional lighting remain visible.",
+        "blockers": ["Whole-source hashing cost on representative long-form media, operator recovery from uncertain cleanup and meaningful audiovisual color comparison remain unproved."]
+      },
+      "incrementalBoundary": "New private evidence only, exact plan/manifest parents and admitted source bytes. Unreviewed luma screening is not applicable to a plan, not a grade, and never delivery approval.",
+      "palmierBoundary": "No Palmier operation or delivery-policy change; the existing project mutation boundary remains required."
+    }
+  ],
+  "workflows": [
+    {
+      "workflowId": "initial-auto-edit",
+      "entrypoints": [
+        "src/app/api/producer/auto-edit/route.ts",
+        "scripts/producer/render.py"
+      ],
+      "short": {
+        "status": "compatibility",
+        "behavior": "Cut-first authoring uses short pacing, safe-zone, split-layout, and burned-caption policy.",
+        "blockers": [
+          "The complete short build still uses compatibility render boundaries."
+        ]
+      },
+      "longform": {
+        "status": "compatibility",
+        "behavior": "Cut-first authoring uses long-form planning, pacing envelopes, SRT/chapters, and retained lane fast paths.",
+        "blockers": [
+          "A complete 10-14 minute build is not yet qualified against the 90-minute target."
+        ]
+      },
+      "incrementalBoundary": "Initial build may render the full base; subsequent changes follow the lane-specific rows below.",
+      "palmierBoundary": "Exact MP4 is canonical unless an explicit Palmier delivery workflow proves and promotes its own candidate."
+    },
+    {
+      "workflowId": "incremental-plan-edit",
+      "entrypoints": [
+        "src/app/api/producer/ai-edit/route.ts",
+        "src/app/api/producer/assemble/route.ts"
+      ],
+      "short": {
+        "status": "compatibility",
+        "behavior": "Plan mutation is surgical, but non-caption visual changes may still invoke the broader short compositor.",
+        "blockers": [
+          "Short graphics repair is not universally one-unit dirty rendering."
+        ]
+      },
+      "longform": {
+        "status": "compatibility",
+        "behavior": "Plan mutation is surgical and retained graphics/audio paths can avoid rebuilding the base.",
+        "blockers": [
+          "Cross-lane fingerprints are not yet a complete semantic render graph."
+        ]
+      },
+      "incrementalBoundary": "Unchanged plan fields must stay byte-identical; media reuse is permitted only where the current fingerprints/graph prove it.",
+      "palmierBoundary": "An incremental Sniper edit does not silently mutate a human-owned Palmier head."
+    },
+    {
+      "workflowId": "non-ripple-word-repair",
+      "entrypoints": [
+        "src/app/api/producer/ai-edit/route.ts",
+        "scripts/producer/edit/cut_repair_route.py"
+      ],
+      "short": {
+        "status": "unqualified",
+        "behavior": "The bounded P2 contract has exact analysis, private candidate preparation, independent alignment evidence, governed review/approval/promotion, and unchanged-outside-window proof.",
+        "blockers": [
+          "Free-form creator requests, creator-speech/operator-audition qualification, general picture repair with populated treatment lanes, and connected Palmier readback remain release gates."
+        ]
+      },
+      "longform": {
+        "status": "unqualified",
+        "behavior": "The bounded P2 contract also covers all released rates, normalized VFR, multi-source fixtures, caption refit, L/J projection, and exact non-ripple preservation.",
+        "blockers": [
+          "Free-form creator requests, creator-speech/operator-audition qualification, general layered dirty-window recomposition, native sample-exact Palmier L/J, and connected long-form readback remain release gates."
+        ]
+      },
+      "incrementalBoundary": "Only the selected dirty audio/picture window may change; promotion requires unchanged outside-window picture/mapping and candidate-bound QC.",
+      "palmierBoundary": "Unselected delivery is exact local-only; selected native L/J remains unqualified and may require a baked exact master."
+    },
+    {
+      "workflowId": "range-karaoke-captions",
+      "entrypoints": [
+        "scripts/producer/captions/caption_shards.py",
+        "scripts/producer/captions/caption_compile.py"
+      ],
+      "short": {
+        "status": "released",
+        "behavior": "Arbitrary phrase/range karaoke compiles to short-safe bounded alpha shards.",
+        "blockers": []
+      },
+      "longform": {
+        "status": "released",
+        "behavior": "Arbitrary phrase/range karaoke compiles to long-form bounded alpha shards plus shared SRT/chapter authority.",
+        "blockers": []
+      },
+      "incrementalBoundary": "A caption-only edit rebuilds affected alpha shards and caption preview nodes while preserving the caption-free base and audio.",
+      "palmierBoundary": "Palmier caption disposition is compiled from the same word/timeline authority; native delivery stays subject to its delivery gate."
+    },
+    {
+      "workflowId": "project-custom-motion",
+      "entrypoints": [
+        "scripts/producer/graphics/scene_package_cli.py",
+        "scripts/producer/graphics/scene_executor.py"
+      ],
+      "short": {
+        "status": "released",
+        "behavior": "Direct Codex/Claude CLI authoring supports project scenes, assets, 9:16/other released aspects, and all measured rates.",
+        "blockers": []
+      },
+      "longform": {
+        "status": "released",
+        "behavior": "Direct Codex/Claude CLI authoring supports project scenes, assets, 16:9/other released aspects, and all measured rates.",
+        "blockers": []
+      },
+      "incrementalBoundary": "Scene units are independently cacheable; right-copy repair renders one unit and a timing move reuses scene media.",
+      "palmierBoundary": "Released projection is baked-regenerable with exact media bindings; native After Effects-style keyframe parity is not claimed."
+    },
+    {
+      "workflowId": "graphics-copy-repair",
+      "entrypoints": [
+        "scripts/producer/graphics/graphics_stage.py",
+        "scripts/producer/graphics/scene_package_cli.py"
+      ],
+      "short": {
+        "status": "compatibility",
+        "behavior": "Governed scene-package copy repair can render one unit, while legacy catalog graphics still use the broader short graphics path.",
+        "blockers": [
+          "The legacy short graphics lane is not universally unit-dirty."
+        ]
+      },
+      "longform": {
+        "status": "compatibility",
+        "behavior": "Governed scene-package copy repair renders one unit and the retained long-form graphics path can reuse the base.",
+        "blockers": [
+          "General final-master dirty-window assembly and connected one-clip replacement remain unqualified."
+        ]
+      },
+      "incrementalBoundary": "Project-scene units are local; legacy graphics reuse follows current fingerprint authority.",
+      "palmierBoundary": "A changed scene unit replaces its baked-regenerable clip only after exact binding/readback."
+    },
+    {
+      "workflowId": "continuous-subject-reframe",
+      "entrypoints": [
+        "scripts/producer/motion/reframe.py",
+        "scripts/producer/plan_lint_reframe.py"
+      ],
+      "short": {
+        "status": "unsupported",
+        "behavior": "Face/split primitives do not constitute released continuous tracking.",
+        "blockers": [
+          "No-face, multi-face, occlusion, screen-share, boundary, motion, canvas/FPS, and override fixtures are incomplete."
+        ]
+      },
+      "longform": {
+        "status": "unsupported",
+        "behavior": "reframe.track remains reserved and accepts only false.",
+        "blockers": [
+          "No-face, multi-face, occlusion, screen-share, boundary, motion, canvas/FPS, and override fixtures are incomplete."
+        ]
+      },
+      "incrementalBoundary": "No continuous-tracking node may be scheduled.",
+      "palmierBoundary": "No native or baked continuous-reframe claim is released."
+    },
+    {
+      "workflowId": "animated-pip",
+      "entrypoints": [
+        "scripts/producer/graphics/pip_takeover.py",
+        "scripts/producer/plan_lint_reframe.py"
+      ],
+      "short": {
+        "status": "unsupported",
+        "behavior": "The primitive exists but needsPip is rejected and no production planner/renderer route wires it.",
+        "blockers": [
+          "Animated PIP fixture and production wiring gates are incomplete."
+        ]
+      },
+      "longform": {
+        "status": "unsupported",
+        "behavior": "The primitive exists but needsPip is rejected and no production planner/renderer route wires it.",
+        "blockers": [
+          "Animated PIP fixture and production wiring gates are incomplete."
+        ]
+      },
+      "incrementalBoundary": "No animated-PIP node may be scheduled.",
+      "palmierBoundary": "No native or baked animated-PIP claim is released."
+    },
+    {
+      "workflowId": "hybrid-editable-palmier",
+      "entrypoints": [
+        "src/app/api/producer/palmier/push/route.ts",
+        "scripts/producer/palmier/push.py"
+      ],
+      "short": {
+        "status": "unsupported",
+        "behavior": "A local production-callable mastered-stereo route plus exact-master, editable-parity, scene-replacement, durable mutation-journal, and crash-snapshot prerequisites exist, but connected editable short parity is not qualified.",
+        "blockers": [
+          "Connected short export with complete readback, a passing mastered-stereo audio-route authority, exact-master mutation, one-scene replacement, disconnect recovery, and manual-edit preservation remains; editable stems lack stable role/output-bus readback."
+        ]
+      },
+      "longform": {
+        "status": "unsupported",
+        "behavior": "A local production-callable mastered-stereo route plus exact-master, editable-parity, scene-replacement, durable mutation-journal, and crash-snapshot prerequisites exist, but connected editable long-form parity is not qualified.",
+        "blockers": [
+          "Connected long-form export with paged complete readback, bounded timeout, a passing mastered-stereo audio-route authority, exact-master mutation, one-scene replacement, disconnect recovery, and manual-edit preservation remains; editable stems lack stable role/output-bus readback."
+        ]
+      },
+      "incrementalBoundary": "Baked exact masters remain the fallback until each editable lane proves local replacement.",
+      "palmierBoundary": "P5 is the release gate for complete hybrid delivery."
+    },
+    {
+      "workflowId": "reference-style-replication",
+      "entrypoints": [
+        "scripts/producer/study/fetch_reference.py",
+        "src/app/api/producer/references/study/route.ts"
+      ],
+      "short": {
+        "status": "unqualified",
+        "behavior": "Reference study can inform current short planning, but objective verified mimic is not released.",
+        "blockers": [
+          "Three-pack objective tolerance, rights, reviewer-adjudication, and unseen-footage gates remain."
+        ]
+      },
+      "longform": {
+        "status": "unqualified",
+        "behavior": "Reference study can inform current long-form planning, but objective verified mimic is not released.",
+        "blockers": [
+          "Three-pack objective tolerance, rights, reviewer-adjudication, and unseen-footage gates remain."
+        ]
+      },
+      "incrementalBoundary": "A verified pack would invalidate only mechanics it binds; current prompt guidance does not prove that closure.",
+      "palmierBoundary": "Reference mechanics do not authorize copying identity assets or native Palmier parity."
+    },
+    {
+      "workflowId": "full-build-performance",
+      "entrypoints": [
+        "scripts/producer/current_full_path_baseline.py",
+        "scripts/producer/prepare_current_baseline.py"
+      ],
+      "short": {
+        "status": "unqualified",
+        "behavior": "A retained 45-second current-path cold/warm baseline exists.",
+        "blockers": [
+          "The baseline is not a qualified optimized-graph latency SLA."
+        ]
+      },
+      "longform": {
+        "status": "unqualified",
+        "behavior": "A retained LF-14 current-path cold/warm baseline exists and is faster than 90 minutes on the measured fixture.",
+        "blockers": [
+          "The 90-minute target is not qualified on complete creator projects or an untouched cohort."
+        ]
+      },
+      "incrementalBoundary": "Baseline traces measure the current path; they do not prove every incremental edit stays local.",
+      "palmierBoundary": "Performance qualification includes exact MP4; complete hybrid Palmier timing is a later cohort."
+    }
+  ],
+  "evidence": {
+    "editing-orchestration": [
+      "src/lib/producer/__tests__/auto-edit-pipeline-resume.test.ts",
+      "src/lib/producer/__tests__/ask-edit-cut-repair-route.test.ts"
+    ],
+    "render-and-assemble": [
+      "src/lib/server/__tests__/current-render-graph-command.test.ts",
+      "src/lib/producer/__tests__/gui-render-authority.test.ts"
+    ],
+    "plan-authority": [
+      "src/lib/producer/__tests__/edit-plan.test.ts",
+      "src/lib/producer/__tests__/intent-presets.test.ts",
+      "src/lib/producer/__tests__/save-plan-transaction.test.ts"
+    ],
+    "media-inspection": [
+      "src/lib/producer/__tests__/transcript-route.test.ts",
+      "src/lib/producer/__tests__/comps-catalog-coverage.test.ts"
+    ],
+    "media-ingress": [
+      "src/lib/producer/__tests__/ingest-source-placement.test.ts",
+      "src/lib/producer/__tests__/native-media-picker.test.ts",
+      "src/lib/server/__tests__/producer-transcript-authority-route.test.ts",
+      "scripts/producer/tests/test_promote_transcript_authority.py"
+    ],
+    "project-registry": [
+      "src/lib/producer/__tests__/project-state.test.ts",
+      "src/lib/producer/__tests__/projects-client.test.ts"
+    ],
+    "reference-study": [
+      "src/lib/producer/__tests__/reference-study-files.test.ts",
+      "src/lib/producer/__tests__/reference-intake-policy.test.ts"
+    ],
+    "palmier-delivery": [
+      "src/lib/producer/__tests__/palmier-parity.test.ts",
+      "src/lib/producer/__tests__/palmier-working-checkpoints.test.ts"
+    ],
+    "auto-edit-control": [
+      "src/lib/server/__tests__/auto-edit-stop.test.ts"
+    ],
+    "speech-cleanup": [
+      "src/lib/producer/__tests__/project-mutation-routes.test.ts"
+    ],
+    "scene-review": [
+      "src/lib/server/__tests__/scene-review-route.test.ts",
+      "scripts/producer/tests/test_p5_review_repair_artifact.py"
+    ],
+    "initial-auto-edit": [
+      "src/lib/producer/__tests__/auto-edit-pipeline-resume.test.ts",
+      "scripts/producer/tests/test_longform_outputs.py"
+    ],
+    "incremental-plan-edit": [
+      "src/lib/producer/__tests__/surgical-edit.test.ts",
+      "scripts/producer/tests/test_current_render_graph.py"
+    ],
+    "non-ripple-word-repair": [
+      "src/lib/producer/__tests__/p2-cut-repair-review-approve-orchestration.test.ts",
+      "scripts/producer/tests/test_p2_cut_repair_route.py"
+    ],
+    "range-karaoke-captions": [
+      "scripts/producer/tests/test_caption_shards.py",
+      "scripts/producer/tests/test_caption_compile.py"
+    ],
+    "project-custom-motion": [
+      "scripts/producer/tests/test_scene_package.py",
+      "scripts/producer/tests/test_scene_brief_matrix.py"
+    ],
+    "graphics-copy-repair": [
+      "src/lib/producer/__tests__/set-graphic-text-v1.test.ts",
+      "scripts/producer/tests/test_scene_package.py"
+    ],
+    "continuous-subject-reframe": [
+      "scripts/producer/tests/test_reframe_split.py",
+      "scripts/producer/tests/test_plan_lint.py"
+    ],
+    "animated-pip": [
+      "scripts/producer/tests/test_plan_lint.py",
+      "scripts/producer/graphics/pip_takeover.py"
+    ],
+    "hybrid-editable-palmier": [
+      "src/lib/producer/__tests__/palmier-parity.test.ts",
+      "scripts/producer/tests/test_palmier_scene_bindings.py"
+    ],
+    "reference-style-replication": [
+      "scripts/producer/tests/test_reference_style_pack.py",
+      "scripts/producer/tests/test_reference_intake.py"
+    ],
+    "hyperframes-studio-review": [
+      "src/app/api/producer/studio/route.ts",
+      "src/app/api/producer/studio/import/route.ts",
+      "src/lib/producer/__tests__/studio-review-client.test.ts",
+      "scripts/producer/tests/test_studio_host_ids.py",
+      "docs/producer/TWO_HOUR_IMPLEMENTATION_LOG_2026-09-06.md"
+    ],
+    "guided-cut-review": [
+      "src/lib/producer/__tests__/guided-preview-boundary.test.ts",
+      "src/lib/producer/__tests__/cut-review-media.test.ts",
+      "docs/producer/TWO_HOUR_IMPLEMENTATION_LOG_2026-09-06.md"
+    ],
+    "guided-cut-acceptance": [
+      "src/lib/server/__tests__/human-cut-acceptance.test.ts",
+      "src/lib/producer/__tests__/cut-acceptance-request.test.ts",
+      "src/lib/producer/__tests__/cut-acceptance-client.test.ts",
+      "docs/producer/TWO_HOUR_IMPLEMENTATION_LOG_2026-09-06.md"
+    ],
+    "guided-opening-launch": [
+      "src/lib/server/guided-opening-launcher.ts",
+      "src/lib/server/guided-opening-execution.ts",
+      "src/lib/server/__tests__/guided-opening-launch-route.test.ts",
+      "src/lib/server/__tests__/guided-opening-launch-store.test.ts"
+    ],
+    "guided-opening-review": [
+      "src/app/api/producer/guided-opening/media/route.ts",
+      "src/lib/server/__tests__/guided-opening-status.test.ts",
+      "src/lib/producer/__tests__/guided-opening-client.test.ts"
+    ],
+    "guided-opening-approval": [
+      "src/app/api/producer/guided-opening/approve/route.ts",
+      "src/lib/server/__tests__/guided-opening-approval.test.ts",
+      "src/lib/server/__tests__/guided-source-color-approval-integration.test.ts",
+      "docs/producer/TWO_HOUR_IMPLEMENTATION_LOG_2026-09-06.md"
+    ],
+    "private-color-diagnostic": [
+      "src/app/api/producer/color-diagnostic/route.ts",
+      "src/lib/server/__tests__/color-diagnostic-api.test.ts",
+      "src/lib/server/__tests__/color-diagnostic-projection.test.ts",
+      "src/lib/producer/__tests__/color-diagnostic-client.test.ts",
+      "src/lib/producer/__tests__/color-diagnostic-flow.test.ts",
+      "docs/producer/TWO_HOUR_IMPLEMENTATION_LOG_2026-09-06.md"
+    ],
+    "full-build-performance": [
+      "scripts/producer/tests/test_baseline_trace.py",
+      "docs/producer/command-driven-editing/contracts/p0-current-lf14-baseline-v1.json"
+    ]
+  }
+}

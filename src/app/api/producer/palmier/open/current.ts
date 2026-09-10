@@ -16,7 +16,10 @@ export async function currentPreflight(dir: string): Promise<CurrentPreflight> {
   const planPath = path.join(dir, "edit_plan.json");
   const manifestPath = findManifest(dir);
   if (!manifestPath) throw new Error("No asset manifest exists for this project.");
-  const result = await run([PUSH, planPath, manifestPath, "--preflight"]);
+  const result = await run([
+    PUSH, planPath, manifestPath, "--preflight",
+    "--require-source-set-admission",
+  ]);
   const line = result.stdout.trim().split("\n").filter(Boolean).pop() ?? "";
   try {
     return JSON.parse(line) as CurrentPreflight;

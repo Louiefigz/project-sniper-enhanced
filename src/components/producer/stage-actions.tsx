@@ -6,6 +6,7 @@ import { readEventStream } from "@/lib/producer/sse";
 import { intentBadge } from "@/lib/producer/intent-presets";
 import { buildAutoEditRequest, buildResumeAutoEditRequest } from "@/lib/producer/intent-flow";
 import { approvedOutputEvent } from "@/lib/producer/editor-preview-authority";
+import { isTreatmentCheckpoint, TREATMENT_INTEGRATION_NOTICE } from "@/lib/producer/guided-checkpoint-state";
 import {
   canResumeAutoEdit,
   nextProjectAction,
@@ -21,9 +22,11 @@ import {
 } from "./stage-action-status";
 import type { ProjectStatus } from "./use-project-status";
 import MissingIntentAction from "./missing-intent-action";
+import { CutReviewControl } from "./cut-review-panel";
 import { IngestAction, type IngestedPayload } from "./stage-ingest";
 import {
   editorBrainLabel,
+  launchAutoEditFromHyperframes,
   launchAutoEditFromPalmier,
   useEditorRuntime,
 } from "./use-editor-runtime";
@@ -70,14 +73,15 @@ interface ActionCtx {
   brain: string;
 }
 
-async function runPalmierAutoEdit(
-  c: ActionCtx,
+async function runControllerAutoEdit(
+  c: Pick<ActionCtx, "status" | "onEvent">,
   request: Record<string, unknown>,
   onEvent: (event: Record<string, unknown>) => void = c.onEvent,
+  launch = launchAutoEditFromHyperframes,
 ): Promise<void> {
   const mode = c.status.intent?.mode;
-  if (!mode) throw new Error("Choose Short or Long before opening Palmier.");
-  const response = await launchAutoEditFromPalmier({
+  if (!mode) throw new Error("Choose Short or Long before starting the edit.");
+  const response = await launch({
     dir: c.status.producerDir,
     mode,
     request,
@@ -85,11 +89,11 @@ async function runPalmierAutoEdit(
   await readEventStream(response, (event) => {
     onEvent(event as Record<string, unknown>);
     if (event.event === "error") throw new Error(String(event.message ?? "stream error"));
-  }, undefined, "outputs");
+  }, undefined, request.workflowPolicy === "cut-first" ? ["outputs", "awaiting_cut_approval"] : "outputs");
 }
 
 function reviewSavedPlan(c: ActionCtx): Promise<void> {
-  return runPalmierAutoEdit(
+  return runControllerAutoEdit(
     c,
     { dir: c.status.producerDir, reviewSavedPlan: true },
     (event) => {
@@ -99,12 +103,12 @@ function reviewSavedPlan(c: ActionCtx): Promise<void> {
   );
 }
 
-function LaunchAction({ c, children }: { c: ActionCtx; children: ReactNode }) {
+function LaunchAction({ c, children, caption }: { c: ActionCtx; children: ReactNode; caption?: string }) {
   return (
     <span className="flex flex-col items-end gap-0.5">
       {children}
       <span className="text-right text-[9px] text-muted-foreground">
-        {c.brain} · Palmier opens first
+        {caption ?? <>{c.brain} · HyperFrames review · QC-approved MP4</>}
       </span>
     </span>
   );
@@ -121,7 +125,7 @@ function AutoEditAction({ c, label = "Create first edit" }: { c: ActionCtx; labe
           size="xs"
           disabled={c.state.running}
           title={`The configured AI editor authors edit_plan.json honoring the stored intent (${intentBadge(intent)}), then assemble renders it (SSE)`}
-          onClick={() => c.run("auto_edit", () => runPalmierAutoEdit(
+          onClick={() => c.run("auto_edit", () => runControllerAutoEdit(
             c,
             buildAutoEditRequest(c.status.producerDir, intent),
           ))}
@@ -136,27 +140,46 @@ function AutoEditAction({ c, label = "Create first edit" }: { c: ActionCtx; labe
   );
 }
 
+/** Resume the journal's proved delivery route; unknown policy never becomes a fresh run. */
+export async function resumeSavedAutoEdit(
+  status: ProjectStatus,
+  onEvent: (event: Record<string, unknown>) => void,
+): Promise<void> {
+  const policy = status.run?.deliveryPolicy;
+  if (!canResumeAutoEdit(status.run) || (policy !== "mp4-only" && policy !== "palmier-hybrid")) {
+    throw new Error("The saved delivery policy is unavailable. Inspect the durable job journal before resuming.");
+  }
+  if (!status.intent) throw new Error("Stored edit intent is missing.");
+  await runControllerAutoEdit({ status, onEvent },
+    buildResumeAutoEditRequest(status.producerDir, status.intent, policy, status.run?.workflowPolicy), onEvent,
+    policy === "palmier-hybrid" ? launchAutoEditFromPalmier : launchAutoEditFromHyperframes);
+}
+
 function ResumeEditAction({ c }: { c: ActionCtx }) {
   const intent = c.status.intent;
   if (!intent) {
     return <MissingIntentAction dir={c.status.producerDir} state={c.state} run={c.run} primary={c.primary} />;
   }
-  const resume = () => runPalmierAutoEdit(
-    c,
-    buildResumeAutoEditRequest(c.status.producerDir, intent),
-  );
+  const policy = c.status.run?.deliveryPolicy;
+  const legacy = policy === "palmier-hybrid";
+  const known = legacy || policy === "mp4-only";
+  const caption = !known ? "Saved policy unavailable · inspect the job journal"
+    : legacy ? `${c.brain} · Legacy Palmier · original delivery policy` : undefined;
+  const resume = () => resumeSavedAutoEdit(c.status, c.onEvent);
   return (
     <ActionShell state={c.state}>
-      <LaunchAction c={c}>
+      <LaunchAction c={c} caption={caption}>
         <Button
           type="button"
           variant={c.primary ? "default" : "ghost"}
           size="xs"
-          disabled={c.state.running}
-          title="Continue this interrupted edit from the last safe checkpoint"
+          disabled={c.state.running || !known}
+          title={known ? "Continue this interrupted edit with its original delivery policy"
+            : "The durable job's delivery policy could not be verified; inspect it before resuming"}
           onClick={() => c.run("resume_edit", resume)}
         >
-          <Spinner on={c.state.running} /> Resume Edit
+          <Spinner on={c.state.running} /> {!known ? "Resume unavailable"
+            : legacy ? "Resume legacy Palmier edit" : "Resume Edit"}
         </Button>
       </LaunchAction>
     </ActionShell>
@@ -203,6 +226,19 @@ function RerenderAction({ c }: { c: ActionCtx }) {
   );
 }
 
+function RecoveryActions({ c }: { c: ActionCtx }) {
+  const { status } = c;
+  const canOfferAlternative = status.run?.workflowPolicy !== "cut-first";
+  let alternative: ReactNode = null;
+  if (canOfferAlternative && status.run?.status === "failed" && status.stages.plan) {
+    alternative = <RenderPlanAction c={{ ...c, primary: false }} label="Resume review & QC" />;
+  }
+  if (canOfferAlternative && status.run?.status !== "failed" && status.intent) {
+    alternative = <AutoEditAction c={{ ...c, primary: false }} label="Retry fresh" />;
+  }
+  return <div className="flex flex-wrap items-start justify-end gap-1"><ResumeEditAction c={c} />{alternative}</div>;
+}
+
 export function StageActionButton({
   status,
   onIngested,
@@ -219,25 +255,14 @@ export function StageActionButton({
   if (status.run?.status === "running") {
     return <ActiveRun run={status.run} dir={status.producerDir} onStopped={onRefresh} />;
   }
+  if (isTreatmentCheckpoint(status.run)) return <Button variant="ghost" size="xs"
+    title={TREATMENT_INTEGRATION_NOTICE} onClick={onRefresh}>Recheck guided checkpoint</Button>;
+  if (status.run?.status === "awaiting_cut_approval") return <CutReviewControl dir={status.producerDir} onStatusChanged={onRefresh} />;
+  if (status.run?.status === "cut_accepted") return <CutReviewControl dir={status.producerDir} accepted onStatusChanged={onRefresh} />;
   if (state.running) return <LocalRun state={state} />;
   const action = nextProjectAction(status.stages);
   const c: ActionCtx = { status, state, run, onEvent, primary, brain: editorBrainLabel(runtime) };
-  if (status.run?.status === "failed" && canResumeAutoEdit(status.run)) {
-    return (
-      <div className="flex flex-wrap items-start justify-end gap-1">
-        <ResumeEditAction c={c} />
-        {status.stages.plan && <RenderPlanAction c={{ ...c, primary: false }} label="Resume review & QC" />}
-      </div>
-    );
-  }
-  if (canResumeAutoEdit(status.run)) {
-    return (
-      <div className="flex flex-wrap items-start justify-end gap-1">
-        <ResumeEditAction c={c} />
-        {status.intent && <AutoEditAction c={{ ...c, primary: false }} label="Retry fresh" />}
-      </div>
-    );
-  }
+  if (canResumeAutoEdit(status.run)) return <RecoveryActions c={c} />;
   if (!status.intent && ["generate", "render_plan", "assemble"].includes(action)) {
     return <MissingIntentAction dir={status.producerDir} state={state} run={run} primary={primary} />;
   }

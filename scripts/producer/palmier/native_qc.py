@@ -7,6 +7,8 @@ from typing import Any
 
 from fingerprints import file_sha256
 from palmier.candidate_receipt import load_candidate, save_candidate
+from palmier.editable_parity_contract import validate_parity
+from palmier.master import authority_hash as master_authority_hash
 from palmier.mcp_client import PalmierError
 from palmier.native_qc_audit import run_native_audit, structural_proof
 from palmier.native_qc_authority import (
@@ -94,16 +96,42 @@ def _audit_current(receipt: dict, found: Any) -> None:
         "inputAuthorityDigest", "checks", "frames")}
     if stable_hash(content) != deterministic.get("digest"):
         raise PalmierError("Palmier native deterministic audit digest is invalid")
+    authority, export = (receipt.get("authority") or {},
+                         receipt.get("export") or {})
+    if deterministic.get("exportHash") != export.get("hash") \
+            or deterministic.get("inputAuthorityDigest") \
+            != authority.get("inputDigest"):
+        raise PalmierError("Palmier native deterministic audit binding is stale")
     path = deterministic.get("auditPath")
     if path != audit_path(receipt["outDir"]) or not os.path.isfile(path) \
             or file_sha256(path) != deterministic.get("auditHash"):
         raise PalmierError("Palmier native deterministic audit artifact changed")
     if deterministic.get("candidateFingerprint") != found.fingerprint:
         raise PalmierError("Palmier native deterministic audit candidate is stale")
+    if authority.get("kind") in {"live-build", "desktop-build"}:
+        master_hash = master_authority_hash(
+            receipt["outDir"], authority["planHash"])
+        parity = validate_parity(
+            receipt["outDir"], receipt["export"]["hash"], master_hash)
+        parity_check = next((row for row in deterministic.get("checks") or []
+                             if isinstance(row, dict)
+                             and row.get("name") == "editable_master_parity"), None)
+        evidence = parity_check.get("evidence") \
+            if isinstance(parity_check, dict) else None
+        if not isinstance(evidence, dict) or parity_check.get("measured") \
+                != parity.get("digest") \
+                or not os.path.isfile(str(evidence.get("path"))) \
+                or file_sha256(evidence["path"]) != evidence.get("hash"):
+            raise PalmierError("Palmier editable parity evidence is stale")
     for frame in deterministic.get("frames") or []:
         if not isinstance(frame, dict) or not os.path.isfile(str(frame.get("path"))) \
                 or file_sha256(frame["path"]) != frame.get("hash"):
             raise PalmierError("Palmier native deterministic review frame changed")
+
+
+def validate_current_audit(receipt: dict, found: Any) -> None:
+    """Public shared validator for native and Desktop approval paths."""
+    _audit_current(receipt, found)
 
 
 def run_deterministic_qc(client: Any, out_dir: str) -> dict:
@@ -179,6 +207,11 @@ def _validate_approval(receipt: dict, candidate_now: Any) -> None:
         raise PalmierError("Palmier native QC approval digest is invalid")
     validate_reviews({"schemaVersion": 1,
                       "reviews": list((receipt.get("reviews") or {}).values())}, receipt)
+
+
+def validate_approved_candidate(receipt: dict, candidate_now: Any) -> None:
+    """Public non-mutating revalidation used by the durable commit saga."""
+    _validate_approval(receipt, candidate_now)
 
 
 def _activate_and_publish(client: Any, out_dir: str, visible: Any,

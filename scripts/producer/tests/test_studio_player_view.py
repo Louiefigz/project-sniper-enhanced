@@ -1,0 +1,292 @@
+"""Studio PLAYER acceptance gate — the review project in the real player.
+
+The generator suites prove the emitted files; nothing before this suite ever
+looked at the PLAYING timeline, which is how a broken host page (inlined
+``</script`` truncation, unscaled 4K slots) shipped. This gate generates a
+review project, serves it with the REAL pinned Studio server, drives the
+actual player in headless Chrome via ``studio_player_probe.cjs``, seeks
+plan-derived beats, and asserts on what renders: zero page errors, zero
+console errors / HTTP>=400s, gsap + every timeline registered, each active
+slot's mounted comp covering the stage, no raw text outside mounted comps,
+and a painted (non-black) base video. Screenshots land in
+``tests/.artifacts/studio-player-view/`` for human review.
+"""
+import glob
+import json
+import os
+import shutil
+import signal
+import subprocess
+import tempfile
+import unittest
+import urllib.request
+
+from _common import *  # noqa: F401,F403
+from _common import _HAVE_FFMPEG
+
+from graphics.graphics_render import HYPERFRAMES_BIN
+from studio.studio_project import GenerateRequest, generate_project
+from studio.studio_server import pick_free_port
+
+_TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(_TESTS_DIR)))
+_PROBE = os.path.join(_TESTS_DIR, "studio_player_probe.cjs")
+_PUPPETEER_DIR = os.path.join(_REPO_ROOT, "templates", "motion",
+                              "node_modules", "puppeteer-core")
+_SETTLE_MS = 1200
+_COVERAGE_FLOOR = 0.9
+_MIN_VIDEO_CHANNEL = 32
+_ASPECT_TOLERANCE = 0.002
+
+
+def _chrome_path() -> str | None:
+    """Headless chrome: explicit env override, else puppeteer's cache."""
+    env = os.environ.get("PUPPETEER_EXECUTABLE_PATH")
+    if env and os.path.isfile(env):
+        return env
+    hits = glob.glob(os.path.expanduser(
+        "~/.cache/puppeteer/chrome-headless-shell/*/chrome-headless-shell-*/"
+        "chrome-headless-shell"))
+    return sorted(hits)[-1] if hits else None
+
+
+def _skip_reason() -> str | None:
+    if not _HAVE_FFMPEG:
+        return "ffmpeg not on PATH"
+    if shutil.which("node") is None:
+        return "node not on PATH"
+    if not os.path.isfile(HYPERFRAMES_BIN):
+        return f"pinned hyperframes CLI missing: {HYPERFRAMES_BIN} " \
+               "(run npm install in templates/motion)"
+    if not os.path.isdir(_PUPPETEER_DIR):
+        return f"puppeteer-core missing: {_PUPPETEER_DIR} " \
+               "(run npm install in templates/motion)"
+    if _chrome_path() is None:
+        return "chrome-headless-shell absent — install it with " \
+               "`npx puppeteer browsers install chrome-headless-shell` " \
+               "or set PUPPETEER_EXECUTABLE_PATH"
+    return None
+
+
+def _player_plan() -> dict:
+    """3 real kinds at separated windows over a 12s base (like _studio_plan)."""
+    return {
+        "planVersion": 1,
+        "target": {"mode": "longform"},
+        "cutTrack": [
+            {"sourceId": "raw-1", "start": 0.0, "end": 12.0, "speed": 1.0},
+        ],
+        "graphicsTrack": [
+            {"kind": "statement-card", "outStart": 1.0, "outEnd": 3.5,
+             "anchor": "own-screen", "reason": "thesis takeover",
+             "spec": {"variant": "classic",
+                      "text": "Ship the *system* not the tactic"}},
+            {"kind": "text-element-wide", "outStart": 4.5, "outEnd": 6.5,
+             "anchor": "free-band", "reason": "callout",
+             "spec": {"text": "Callout copy", "fontSize": 72}},
+            {"kind": "kinetic-quote-wide", "outStart": 7.5, "outEnd": 10.5,
+             "anchor": "own-screen", "reason": "quote",
+             "spec": {"words": "More tactics was never the answer",
+                      "emphasisWords": "never"}},
+        ],
+    }
+
+
+def _make_base_4k(path: str) -> None:
+    subprocess.run(
+        ["ffmpeg", "-y", "-v", "error", "-f", "lavfi",
+         "-i", "color=c=0x336699:s=3840x2160:d=12:r=30",
+         "-c:v", "libx264", "-preset", "ultrafast", "-crf", "30",
+         "-pix_fmt", "yuv420p", path], check=True)
+
+
+@unittest.skipIf(_skip_reason() is not None, _skip_reason() or "")
+class StudioPlayerViewTests(unittest.TestCase):
+    """One server + one probe run; every assertion reads the same facts."""
+
+    maxDiff = None
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.tmp = tempfile.mkdtemp(prefix="studio-player-view-")
+        cls.addClassCleanup(shutil.rmtree, cls.tmp)
+        cls.shots_dir = tempfile.mkdtemp(prefix="studio-player-shots-")
+        print(f"Retained synthetic Studio player screenshots: {cls.shots_dir}", flush=True)
+        cls.studio_dir = os.path.join(cls.tmp, "studio-gate")
+        base = os.path.join(cls.tmp, "base.mp4")
+        plan_path = os.path.join(cls.tmp, "edit_plan.json")
+        _make_base_4k(base)
+        with open(plan_path, "w", encoding="utf-8") as handle:
+            json.dump(_player_plan(), handle)
+        generate_project(GenerateRequest(plan_path, base, cls.studio_dir))
+        with open(os.path.join(cls.studio_dir, "studio.manifest.json"),
+                  encoding="utf-8") as handle:
+            cls.manifest = json.load(handle)
+        # Keep tests out of the operator's default 3990-3999 preview range.
+        cls.port = pick_free_port((41000, 41100))
+        cls.server = subprocess.Popen(
+            ["node", HYPERFRAMES_BIN, "preview", cls.studio_dir,
+             "--port", str(cls.port), "--no-open"],
+            cwd=cls.studio_dir, stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            start_new_session=True)
+        cls.addClassCleanup(cls._stop_server)
+        cls._wait_ready()
+        cls.result = cls._run_probe()
+
+    @classmethod
+    def _stop_server(cls) -> None:
+        """Reap this test's own server even when setUpClass fails."""
+        if cls.server.poll() is not None:
+            return
+        try:
+            os.killpg(cls.server.pid, signal.SIGTERM)
+            cls.server.wait(timeout=10)
+        except ProcessLookupError:
+            cls.server.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            try:
+                os.killpg(cls.server.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            cls.server.wait(timeout=5)
+
+    @classmethod
+    def _wait_ready(cls) -> None:
+        for _ in range(60):
+            try:
+                with urllib.request.urlopen(
+                        f"http://127.0.0.1:{cls.port}/api/projects",
+                        timeout=2) as response:
+                    if response.status == 200:
+                        return
+            except OSError:
+                pass
+            if cls.server.poll() is not None:
+                raise RuntimeError("studio preview server exited early")
+            import time
+            time.sleep(0.5)
+        raise RuntimeError("studio preview server never became ready")
+
+    @classmethod
+    def _run_probe(cls) -> dict:
+        beats = [round((e["outStart"] + e["outEnd"]) / 2.0, 2)
+                 for e in cls.manifest["entries"]]
+        config = {
+            "puppeteerDir": _PUPPETEER_DIR,
+            "chrome": _chrome_path(),
+            "url": f"http://127.0.0.1:{cls.port}/#project/"
+                   f"{os.path.basename(cls.studio_dir)}",
+            "shotsDir": cls.shots_dir,
+            "settleMs": _SETTLE_MS,
+            "beats": beats,
+        }
+        config_path = os.path.join(cls.tmp, "probe-config.json")
+        with open(config_path, "w", encoding="utf-8") as handle:
+            json.dump(config, handle)
+        proc = subprocess.run(["node", _PROBE, config_path],
+                              capture_output=True, text=True, timeout=120)
+        if proc.returncode != 0:
+            raise RuntimeError(
+                f"probe failed ({proc.returncode}): {proc.stderr[-800:]}")
+        return json.loads(proc.stdout)
+
+    # ---- the gate ----------------------------------------------------
+
+    def _expected_slots(self, beat: float) -> list[dict]:
+        return [entry for entry in self.manifest["entries"]
+                if entry["outStart"] < beat < entry["outEnd"]]
+
+    def test_host_frame_and_player_found(self) -> None:
+        self.assertTrue(self.result["hostFrameFound"],
+                        "player never exposed the review host frame "
+                        f"(shots: {self.shots_dir})")
+        self.assertEqual(len(self.result["beats"]),
+                         len(self.manifest["entries"]))
+
+    def test_no_page_errors(self) -> None:
+        self.assertEqual(self.result["pageErrors"], [])
+
+    def test_no_console_errors_or_failed_requests(self) -> None:
+        self.assertEqual(self.result["consoleErrors"], [])
+        self.assertEqual(self.result["badResponses"], [])
+
+    def test_gsap_and_every_timeline_registered(self) -> None:
+        for facts in self.result["beats"]:
+            self.assertIn(facts["gsapType"], ("function", "object"),
+                          "gsap must be live in the host frame")
+            keys = set(facts["timelineKeys"])
+            self.assertNotEqual(keys - {"__proxied"}, set(),
+                                "only the Studio proxy marker is registered "
+                                "— the page registered zero timelines")
+            self.assertIn("review", keys)
+            for entry in self.manifest["entries"]:
+                self.assertIn(entry["instanceId"], keys)
+
+    def test_active_slots_visible_and_stage_covering(self) -> None:
+        for facts in self.result["beats"]:
+            slots = {slot["id"]: slot for slot in facts["slots"]}
+            stage_w, stage_h = facts["stage"]
+            for entry in self._expected_slots(facts["beat"]):
+                slot = slots.get(entry["slot"])
+                self.assertIsNotNone(
+                    slot, f"slot {entry['slot']} missing at {facts['beat']}s")
+                self.assertTrue(
+                    slot["visible"],
+                    f"{entry['slot']} not visible at {facts['beat']}s")
+                self.assertIsNotNone(
+                    slot["childRect"],
+                    f"{entry['slot']} mounted nothing at {facts['beat']}s")
+                comp_html = os.path.join(self.studio_dir, entry["file"])
+                self.assertTrue(os.path.isfile(comp_html))
+                same_aspect = self._same_aspect(slot, (stage_w, stage_h))
+                if entry["anchor"] == "own-screen" or same_aspect:
+                    self.assertGreaterEqual(
+                        slot["coverage"], _COVERAGE_FLOOR,
+                        f"{entry['slot']} ({entry['kind']}) covers "
+                        f"{slot['coverage']:.2f} of the stage at "
+                        f"{facts['beat']}s — unscaled mount? "
+                        f"(shots: {self.shots_dir})")
+                else:
+                    x, y, w, h = slot["childRect"]
+                    self.assertGreater(w * h, 0)
+                    self.assertGreaterEqual(x, -2)
+                    self.assertGreaterEqual(y, -2)
+                    self.assertLessEqual(x + w, stage_w + 2)
+                    self.assertLessEqual(y + h, stage_h + 2)
+
+    @staticmethod
+    def _same_aspect(slot: dict, stage: tuple[float, float]) -> bool:
+        _, _, width, height = slot["childRect"]
+        if not width or not height or not stage[1]:
+            return False
+        return abs(width / height
+                   - stage[0] / stage[1]) <= _ASPECT_TOLERANCE * 4
+
+    def test_no_raw_text_outside_comps(self) -> None:
+        for facts in self.result["beats"]:
+            self.assertEqual(
+                facts["rawText"], [],
+                f"raw text in the player DOM at {facts['beat']}s "
+                f"(shots: {self.shots_dir})")
+
+    def test_video_painted(self) -> None:
+        for facts in self.result["beats"]:
+            video = facts["video"]
+            self.assertIsNotNone(video, "review-base video element missing")
+            self.assertGreaterEqual(video["readyState"], 2,
+                                    f"video not decodable at {facts['beat']}s")
+            self.assertIsNotNone(video["maxChannel"],
+                                 video.get("sampleError"))
+            self.assertGreater(video["maxChannel"], _MIN_VIDEO_CHANNEL,
+                               f"black frame at {facts['beat']}s")
+
+    def test_timeline_plays(self) -> None:
+        play = self.result["play"]
+        self.assertIsNotNone(play)
+        self.assertGreater(play["after"], play["before"],
+                           "player.play() did not advance the timeline")
+
+
+if __name__ == "__main__":
+    unittest.main()

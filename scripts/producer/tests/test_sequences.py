@@ -102,17 +102,20 @@ class FillListSpecTests(unittest.TestCase):
         self.assertEqual([k for k in cand["spec"] if k.startswith("item")],
                          ["item1", "item2"])
 
-    def test_label_and_title_word_capped(self) -> None:
+    def test_oversized_label_and_title_request_rewrite(self) -> None:
+        """Fit failures keep complete copy pending instead of truncating it."""
         beat = self._beat()
         long_label = "one two three four five six seven eight"
         cand = gcopy.fill_list_spec(
             beat, [{"anchorIndex": 0, "label": long_label},
                    {"anchorIndex": 1, "label": "fine"}],
             title="a very long title indeed here")
-        self.assertLessEqual(len(cand["spec"]["item1"].split()),
-                             gcopy.LABEL_MAX_WORDS)
-        self.assertLessEqual(len(cand["spec"]["title"].split()),
-                             gcopy.TITLE_MAX_WORDS)
+        self.assertTrue(cand["needsCopy"])
+        self.assertEqual(cand["spec"], {})
+        self.assertEqual(cand["copyRepair"]["originalItems"][0]["label"],
+                         long_label)
+        self.assertEqual([row["field"] for row in cand["copyRepair"]["issues"]],
+                         ["title", "items[0].label"])
 
 
 if __name__ == "__main__":

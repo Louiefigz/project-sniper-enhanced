@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/channel-normalization-receipt-v1.schema.json",
+  "title": "ChannelNormalizationReceiptV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "source",
+    "stream",
+    "decision",
+    "tools",
+    "receiptHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "channel-normalization-receipt" },
+    "source": { "$ref": "#/$defs/source" },
+    "stream": { "$ref": "#/$defs/stream" },
+    "decision": { "$ref": "#/$defs/decision" },
+    "tools": { "$ref": "#/$defs/tools" },
+    "receiptHash": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "safeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "sizeBytes",
+        "selector",
+        "selectedStreamIndex"
+      ],
+      "properties": {
+        "path": { "$ref": "#/$defs/path" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "sizeBytes": { "$ref": "#/$defs/safeInteger" },
+        "selector": {
+          "type": "string",
+          "pattern": "^(?:a:0|stream:[0-9]+)$"
+        },
+        "selectedStreamIndex": { "$ref": "#/$defs/safeInteger" }
+      }
+    },
+    "stream": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "codec",
+        "sampleRate",
+        "channels",
+        "channelLayout",
+        "peakDbfs"
+      ],
+      "properties": {
+        "codec": { "type": "string", "minLength": 1 },
+        "sampleRate": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "channels": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
+        "channelLayout": { "type": "string", "minLength": 1 },
+        "peakDbfs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "type": "string",
+            "pattern": "^(?:negative-infinity|-?[0-9]+\\.[0-9]{6})$"
+          }
+        }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "deadChannel",
+        "liveChannel",
+        "floorDb",
+        "minimumDeltaDb",
+        "stereoFilter",
+        "monoFilter"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "dead-channel-repaired",
+            "mono-duplicated",
+            "stereo-verified",
+            "multichannel-downmixed"
+          ]
+        },
+        "deadChannel": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 63
+        },
+        "liveChannel": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 63
+        },
+        "floorDb": { "const": -50.0 },
+        "minimumDeltaDb": { "const": 25.0 },
+        "stereoFilter": {
+          "enum": [
+            "anull",
+            "pan=stereo|c0=c0|c1=c0",
+            "pan=stereo|c0=c1|c1=c1",
+            "aformat=channel_layouts=stereo"
+          ]
+        },
+        "monoFilter": {
+          "enum": [
+            "anull",
+            "pan=mono|c0=c0",
+            "pan=mono|c0=c1",
+            "aformat=channel_layouts=mono"
+          ]
+        }
+      }
+    },
+    "tools": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ffmpegPath",
+        "ffmpegSha256",
+        "ffprobePath",
+        "ffprobeSha256",
+        "peakFilter"
+      ],
+      "properties": {
+        "ffmpegPath": { "$ref": "#/$defs/path" },
+        "ffmpegSha256": { "$ref": "#/$defs/sha256" },
+        "ffprobePath": { "$ref": "#/$defs/path" },
+        "ffprobeSha256": { "$ref": "#/$defs/sha256" },
+        "peakFilter": { "const": "astats=metadata=0:reset=0" }
+      }
+    }
+  }
+}

@@ -24,8 +24,8 @@ export default function RecentProjects({
 }) {
   const registry = useRecentProjects();
   const visibleProjects = useMemo(
-    () => registry.projects.slice(0, registry.showAll ? 8 : 3),
-    [registry.projects, registry.showAll],
+    () => registry.projects.slice(0, registry.visibleCount),
+    [registry.projects, registry.visibleCount],
   );
   const statusDirs = useMemo(
     () => registry.projects.filter((project) => project.exists).map((project) => project.dir),
@@ -49,8 +49,8 @@ export default function RecentProjects({
     <ProjectListSection
       projects={registry.projects}
       visibleProjects={visibleProjects}
-      showAll={registry.showAll}
-      onToggle={() => registry.setShowAll((value) => !value)}
+      onMore={registry.showMore}
+      onFewer={registry.showFewer}
       statuses={projectStatuses}
       onOpen={onOpen}
       onRemove={registry.remove}
@@ -63,8 +63,8 @@ export default function RecentProjects({
 interface ProjectListSectionProps {
   projects: Listing[];
   visibleProjects: Listing[];
-  showAll: boolean;
-  onToggle: () => void;
+  onMore: () => void;
+  onFewer: () => void;
   statuses: ReturnType<typeof useProjectStatuses>;
   onOpen: (dir: string, displayName?: string) => void;
   onRemove: (dir: string) => void;
@@ -72,7 +72,8 @@ interface ProjectListSectionProps {
   onIngested?: (payload: IngestedPayload) => void;
 }
 
-function ProjectListSection(props: ProjectListSectionProps) {
+export function ProjectListSection(props: ProjectListSectionProps) {
+  const remaining = Math.min(5, props.projects.length - props.visibleProjects.length);
   return (
     <section className="my-8 rounded-lg border border-border bg-card/50 p-4" aria-labelledby="recent-projects-title">
       <div id="recent-projects-title" className="text-sm font-semibold text-foreground">Continue a project</div>
@@ -94,9 +95,14 @@ function ProjectListSection(props: ProjectListSectionProps) {
           />
         ))}
       </ul>
-      {props.projects.length > 3 && (
-        <button type="button" onClick={props.onToggle} className="mt-3 text-xs text-signal hover:underline">
-          {props.showAll ? "Show fewer projects" : `Show ${Math.min(8, props.projects.length) - 3} more projects`}
+      {props.visibleProjects.length < props.projects.length && (
+        <button type="button" onClick={props.onMore} className="mr-4 mt-3 text-xs text-signal hover:underline">
+          Show {remaining} more {remaining === 1 ? "project" : "projects"}
+        </button>
+      )}
+      {props.visibleProjects.length > 3 && (
+        <button type="button" onClick={props.onFewer} className="mt-3 text-xs text-signal hover:underline">
+          Show fewer projects
         </button>
       )}
     </section>

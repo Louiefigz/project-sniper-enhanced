@@ -25,6 +25,7 @@ from scipy import signal  # noqa: E402
 
 from audit.audit_checks import CheckResult, FAIL, PASS, WARN  # noqa: E402
 from audit.audit_probe import ffprobe_json, first_stream  # noqa: E402
+from palmier.process_deadline import process_timeout  # noqa: E402
 
 SAMPLE_RATE = 8000
 HUM_SAMPLE_RATE = 1000
@@ -108,7 +109,8 @@ def _decode_stereo(final_path: str) -> Optional[np.ndarray]:
     """Decode the final audio to compact 8 kHz float stereo for analysis."""
     cmd = ["ffmpeg", "-v", "error", "-i", final_path, "-map", "0:a:0",
            "-vn", "-ac", "2", "-ar", str(SAMPLE_RATE), "-f", "f32le", "pipe:1"]
-    proc = subprocess.run(cmd, capture_output=True)
+    proc = subprocess.run(
+        cmd, capture_output=True, timeout=process_timeout())
     if proc.returncode != 0 or not proc.stdout:
         return None
     raw = np.frombuffer(proc.stdout, dtype="<f4")

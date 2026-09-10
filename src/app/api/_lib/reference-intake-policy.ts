@@ -1,5 +1,3 @@
-import { spawnSync } from "child_process";
-
 export const MAX_REFERENCE_BYTES = BigInt(2 * 1024 ** 3);
 export const MIN_FREE_BYTES = BigInt(5 * 1024 ** 3);
 export const MAX_REFERENCE_DURATION_S = 3600;
@@ -43,21 +41,4 @@ export function parseReferenceProbe(value: unknown): {
     );
   }
   return { width, height, durationS };
-}
-
-export function validateCopiedReference(file: string): void {
-  const result = spawnSync("ffprobe", ["-v", "error", "-select_streams", "v:0",
-    "-show_entries", "stream=codec_type,width,height:format=duration", "-of", "json", file],
-  { encoding: "utf8", timeout: 30_000 });
-  if (result.error || result.status !== 0) {
-    const detail = (result.stderr || result.error?.message || "ffprobe failed").trim();
-    throw new ReferenceMediaError(`copied reference is not readable media: ${detail.slice(-300)}`);
-  }
-  let payload: unknown;
-  try {
-    payload = JSON.parse(result.stdout || "{}");
-  } catch {
-    throw new ReferenceMediaError("ffprobe returned malformed media metadata");
-  }
-  parseReferenceProbe(payload);
 }

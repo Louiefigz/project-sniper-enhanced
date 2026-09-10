@@ -42,7 +42,10 @@ class ErrorEnvelopeTests(unittest.TestCase):
     def test_missing_inputs_emit_exactly_one_error_frame(self):
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
-            code = push.main(["/no/edit-plan.json", "/no/manifest.json"])
+            code = push.main([
+                "/no/edit-plan.json", "/no/manifest.json",
+                "--allow-legacy-unadmitted",
+            ])
         frames = [json.loads(line) for line in output.getvalue().splitlines()]
         self.assertEqual(code, 1)
         self.assertEqual(len([frame for frame in frames if "error" in frame]), 1)
@@ -60,7 +63,10 @@ class ErrorEnvelopeTests(unittest.TestCase):
                            "music": []}, handle)
             output = io.StringIO()
             with contextlib.redirect_stdout(output):
-                code = push.main([plan, manifest, "--preflight"])
+                code = push.main([
+                    plan, manifest, "--preflight",
+                    "--allow-legacy-unadmitted",
+                ])
         verdict = json.loads(output.getvalue())
         self.assertEqual(code, 0)
         self.assertFalse(verdict["ok"])
@@ -83,7 +89,9 @@ class ErrorEnvelopeTests(unittest.TestCase):
             with patch("sys.stdin", io.StringIO(json.dumps(memory))), \
                     contextlib.redirect_stdout(output):
                 code = push.main([
-                    plan_path, manifest, "--preflight", "--plan-stdin"])
+                    plan_path, manifest, "--preflight", "--plan-stdin",
+                    "--allow-legacy-unadmitted",
+                ])
             with open(plan_path) as handle:
                 self.assertEqual(json.load(handle), saved)
         verdict = json.loads(output.getvalue())

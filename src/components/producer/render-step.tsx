@@ -11,7 +11,7 @@ import { dlog, derror } from "@/lib/debug";
 import StreamLog from "./stream-log";
 import {
   editorBrainLabel,
-  launchAutoEditFromPalmier,
+  launchAutoEditFromHyperframes,
   useEditorRuntime,
 } from "./use-editor-runtime";
 
@@ -57,8 +57,8 @@ export default function RenderStep({
           throw new Error(detail.error || `save-plan ${saved.status}`);
         }
         push("info", "✓ manual plan saved · previous preview is now stale");
-        push("info", `Opening Palmier before ${brain} starts review…`);
-        const res = await launchAutoEditFromPalmier({
+        push("info", `${brain} is starting the reviewed MP4 pipeline…`);
+        const res = await launchAutoEditFromHyperframes({
           dir: outDir,
           request: { dir: outDir, reviewSavedPlan: true },
           signal: ctrl.signal,
@@ -123,7 +123,7 @@ export default function RenderStep({
             {phase === "running" ? "Reviewing and rendering…" : phase === "done" ? "Approved render complete" : "Render failed"}
           </h1>
           <p className="truncate font-mono text-[11px] text-muted-foreground/60">{outDir}</p>
-          <p className="text-[10px] text-muted-foreground">{brain} · Palmier opens first</p>
+          <p className="text-[10px] text-muted-foreground">{brain} · HyperFrames review · QC-approved MP4</p>
         </div>
       </div>
 

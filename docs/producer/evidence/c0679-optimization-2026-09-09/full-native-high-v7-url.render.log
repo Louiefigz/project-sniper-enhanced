@@ -1,0 +1,12 @@
+
+◆  Rendering native-presenter-v1 → /private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/full-native-high-v7-url.mp4
+   24000/1001fps · high · 1 workers
+
+[?25l│
+◇  Browser: env
+[?25h
+  ✗ multiple_root_compositions: Multiple root-level HTML files with data-composition-id: index.html, test-only-transport-4320frames.html, test-only-transport-48frames.html, test-only-transport-800frames.html. The runtime may discover both as entry points, causing duplicate audio playback.
+    Fix: A project should have exactly one root index.html with data-composition-id. Remove or rename extra files.
+
+  Aborting render due to lint issues (--strict mode).
+

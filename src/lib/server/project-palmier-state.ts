@@ -93,6 +93,8 @@ function stateDetail(state: PalmierProjectStateKind): string {
     approved_mirror: "Palmier contains the verified approved edit.",
     approved_working_head: "Palmier contains the exact editable timeline that passed QC and is both the current working head and approved head.",
     manual_working_head: "Palmier contains a newer manual revision that is now the working source of truth.",
+    commit_recovery: "Palmier selected the approved candidate, but its reserved local revision still needs durable recovery.",
+    reconciliation_required: "Palmier and the local revision authority conflict; the retained saga requires explicit reconciliation.",
     pending_candidate: "A review-only AI candidate is ready in Palmier; its parent remains canonical until the candidate passes QC and you choose to use it.",
     approved_candidate: "The review-only candidate passed current exported QC. It is not the working head until you deliberately use it.",
     rejected_candidate: "The rejected candidate is archived for diagnosis; the verified parent remains the Palmier working head.",
@@ -101,6 +103,24 @@ function stateDetail(state: PalmierProjectStateKind): string {
     unavailable: "The Palmier workspace record is incomplete or unreadable.",
   };
   return copy[state];
+}
+
+function stateTimelines(
+  candidate: Record<string, unknown> | null,
+  authority: Record<string, unknown> | null,
+  savedTimeline: string,
+): { timelineId: string; approvedTimelineId: string | null } {
+  const candidateBase = candidate?.base as Record<string, unknown> | undefined;
+  const candidateTarget = candidate?.status === "quarantined"
+    || candidate?.status === "quarantined-recovered"
+    || candidate?.status === "qc-rejected"
+    ? stringValue(candidateBase?.timelineId)
+    : stringValue(candidate?.timelineId);
+  const timelineId =
+    candidateTarget ?? stringValue(authority?.timelineId) ?? savedTimeline;
+  const approvedHead =
+    authority?.approvedHead as Record<string, unknown> | undefined;
+  return { timelineId, approvedTimelineId: stringValue(approvedHead?.timelineId) };
 }
 
 export function projectPalmierState(producerDir: string): PalmierProjectState {
@@ -116,17 +136,18 @@ export function projectPalmierState(producerDir: string): PalmierProjectState {
   }
   const authority = readObject(path.join(producerDir, "palmier.timeline-authority.json"));
   const approvedCandidate = currentApprovedCandidate(producerDir, projectId);
-  const candidate = approvedCandidate ?? liveCandidate(producerDir, projectId);
   const qc = palmierCandidateQcState(producerDir);
-  const state = kindFromRecords(sidecar, authority, candidate, approvedCandidate != null);
-  const candidateBase = candidate?.base as Record<string, unknown> | undefined;
-  const candidateTarget = candidate?.status === "quarantined"
-    || candidate?.status === "quarantined-recovered" || candidate?.status === "qc-rejected"
-    ? stringValue(candidateBase?.timelineId)
-    : stringValue(candidate?.timelineId);
-  const timelineId = candidateTarget ?? stringValue(authority?.timelineId) ?? savedTimeline;
-  const approvedHead = authority?.approvedHead as Record<string, unknown> | undefined;
-  const approvedTimelineId = stringValue(approvedHead?.timelineId);
+  const recoveringCandidate = ["commit-recovery", "reconciliation"].includes(qc.state)
+    ? candidateReceipt(producerDir) : null;
+  const candidate = approvedCandidate ?? recoveringCandidate
+    ?? liveCandidate(producerDir, projectId);
+  const normalState = kindFromRecords(
+    sidecar, authority, candidate, approvedCandidate != null);
+  const state = qc.state === "commit-recovery"
+    ? "commit_recovery" : qc.state === "reconciliation"
+      ? "reconciliation_required" : normalState;
+  const { timelineId, approvedTimelineId } =
+    stateTimelines(candidate, authority, savedTimeline);
   const detail = state === "manual_working_head" && approvedTimelineId
     ? `${stateDetail(state)} Last approved delivery: ${approvedTimelineId}.`
     : stateDetail(state);

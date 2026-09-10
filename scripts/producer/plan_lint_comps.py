@@ -20,10 +20,10 @@ against it BEFORE any render exists:
 * (d) PARTIAL FADE: ``fadeClass: "partial-fade"`` WARNs with the measured
   terminal alpha — residual pixels linger at the window end.
 
-Missing/unreadable matrix = ONE SKIP-with-evidence verdict via
-:mod:`gate_policy` (never a crash, never a silent pass). A kind absent from
-the matrix WARNs (``unmeasured comp``); a row without a render measurement
-(probe still running / renderError) SKIPs the fade rules with evidence.
+Missing, stale, unreadable, or inventory-incomplete matrix = one blocking
+verdict. A referenced kind absent from the matrix, without a complete render
+measurement, or carrying ``renderError`` also blocks. Declared template
+metadata is never accepted as physical capability evidence.
 ``plan_lint.lint`` dispatches via :func:`check_comp_matrix`;
 ``graphics/comp_measure`` reuses :func:`ownscreen_matrix_verdicts` as its
 pre-render fail-fast.
@@ -31,13 +31,16 @@ pre-render fail-fast.
 
 from __future__ import annotations
 
-import json
 import os
 from typing import Any, Optional
 
 import gate_policy
 from gate_policy import Verdict
 from compile_timeline import compile_plan
+from graphics.comp_capability_artifact import (
+    capability_row_issue,
+    load_artifact,
+)
 from graphics.comp_measure_rules import _ASPECT_TOL, _delivery_canvas
 from graphics.graphics_render import COMPOSITIONS_DIR
 from producer_config import COMP_MEASURE, MODES
@@ -57,28 +60,16 @@ _SEAM_TOL_S = COMP_MEASURE["seam_tol_s"]
 
 
 def load_matrix(path: Optional[str] = None) -> tuple[Optional[dict], str]:
-    """The matrix's comps map, or ``(None, why)`` — never raises.
+    """The fresh matrix's comps map, or ``(None, why)`` — never raises.
 
     Args:
         path: Matrix file path (default: :data:`DEFAULT_MATRIX_PATH`).
 
     Returns:
-        ``(comps, "")`` when readable and well-shaped, else ``(None,
-        evidence)`` for the SKIP-with-evidence verdict.
+        ``(comps, "")`` when integral, fresh, and inventory-complete, else
+        ``(None, evidence)`` for a fail-closed verdict.
     """
-    path = path or DEFAULT_MATRIX_PATH
-    if not os.path.isfile(path):
-        return None, (f"matrix file missing: {path} — run "
-                      "graphics/comp_catalog_probe.py")
-    try:
-        with open(path, encoding="utf-8") as handle:
-            data = json.load(handle)
-    except (OSError, json.JSONDecodeError) as exc:
-        return None, f"matrix unreadable: {path} — {exc}"
-    comps = data.get("comps") if isinstance(data, dict) else None
-    if not isinstance(comps, dict) or not comps:
-        return None, f"matrix malformed: {path} carries no comps map"
-    return comps, ""
+    return load_artifact(path or DEFAULT_MATRIX_PATH)
 
 
 def _row_canvas(row: dict) -> Optional[tuple[int, int]]:
@@ -212,17 +203,9 @@ def _hold_verdicts(entry: dict, seam_map: Optional[tuple],
 
 def _fade_verdicts(entry: dict, row: dict, seam_map: Optional[tuple],
                    ctx: tuple) -> list:
-    """(c)+(d) fade-class rules; SKIP-with-evidence when unmeasured."""
+    """(c)+(d) fade-class rules after row completeness was proved."""
     tag, mode = ctx
     fade = row.get("fadeClass")
-    if fade is None:
-        why = row.get("renderError")
-        detail = (f"render probe failed: {why}" if why
-                  else "the render pass has not measured it yet")
-        return [Verdict(GATE, "SKIP", (
-            f"{tag}: comp has no measured fadeClass ({detail}) — the "
-            "hold-to-cut/partial-fade checks cannot run"),
-            lane="graphics", mode=mode)]
     if fade == "partial-fade":
         alpha = row.get("terminalAlpha") or {}
         return [Verdict(GATE, "WARN", (
@@ -253,8 +236,8 @@ def matrix_verdicts(plan: dict,
     mode = mode_raw if mode_raw in MODES else None
     comps, why = load_matrix(matrix_path)
     if comps is None:
-        return [Verdict(GATE, "SKIP", (
-            f"comp-capability checks cannot run — {why}; "
+        return [Verdict(GATE, "FAIL", (
+            f"comp-capability authority is unavailable — {why}; "
             f"{len(track)} graphicsTrack entr"
             f"{'y' if len(track) == 1 else 'ies'} unchecked"),
             lane="graphics", mode=mode)]
@@ -265,11 +248,18 @@ def matrix_verdicts(plan: dict,
         tag = f"graphicsTrack[{i}] {kind}"
         row = comps.get(kind)
         if row is None:
-            out.append(Verdict(GATE, "WARN", (
-                f"{tag}: unmeasured comp — kind {kind!r} has no "
+            out.append(Verdict(GATE, "FAIL", (
+                f"{tag}: unavailable comp — kind {kind!r} has no "
                 "comp_capabilities entry (matrix stale? re-run "
                 "graphics/comp_catalog_probe.py)"), lane="graphics",
                 mode=mode))
+            continue
+        issue = capability_row_issue(row)
+        if issue is not None:
+            out.append(Verdict(GATE, "FAIL", (
+                f"{tag}: capability is not release-ready — {issue}; re-run "
+                "graphics/comp_catalog_probe.py and fix the render proof"),
+                lane="graphics", mode=mode))
             continue
         ctx = (tag, mode)
         out.extend(_overlay_verdicts(entry, row, comps, ctx))

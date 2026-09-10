@@ -1,0 +1,61 @@
+/** Native higher-fidelity re-export using the SDK's supported CRF override. */
+const fs=require('node:fs'),path=require('node:path'),{spawn}=require('node:child_process');
+const {createHash}=require('node:crypto');
+const {createTraceObserver}=require('./native_trace_observer.cjs');
+const config=JSON.parse(fs.readFileSync(process.argv[2]));
+const receipt={status:'failed',scope:'Current creative revision; not fresh benchmark',
+  startedUtc:new Date().toISOString(),humanListening:false,output:config.output,crf:config.crf};
+const hash=file=>createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+const requireThat=(value,message)=>{if(!value)throw Error(message);};
+
+function verify() {
+  const reference=JSON.parse(fs.readFileSync(config.reference));
+  requireThat(reference.status==='native-captured-awaiting-visual-and-export-qc','Native source reference incomplete');
+  requireThat(hash(path.join(config.project,'index.html'))===reference.staging.entrySha256,'Staged entry changed');
+  requireThat(hash(reference.compiled.path)===reference.compiled.sha256,'Native compiled reference changed');
+  requireThat(fs.existsSync(path.join(config.cache,'.hf-complete')),'Verified extraction cache absent');
+  requireThat(!fs.existsSync(config.output),'Export output already exists');
+  requireThat(Number.isInteger(config.crf)&&config.crf>=1&&config.crf<=15,'Require supported higher-fidelity non-lossless H264 CRF');
+  const stat=fs.statfsSync(path.dirname(config.project));
+  requireThat(Number(stat.bavail)*Number(stat.bsize)>14*1024**3,'Need output space plus10GiB reserve');
+  return reference;
+}
+
+async function render(reference) {
+  fs.mkdirSync(path.dirname(config.output),{recursive:true});
+  const cacheRoot=path.dirname(config.cache),allowed=new Set(fs.readdirSync(cacheRoot));
+  const args=[config.cli,'render',config.project,'-c','index.html','--fps','24000/1001',
+    '--quality','high','--crf',String(config.crf),'--workers','1','--low-memory-mode',
+    '--no-browser-gpu','--video-frame-format','png','--strict','--no-best-effort',
+    '--frames-cache-dir',cacheRoot,'--output',config.output];
+  receipt.command=[process.execPath,...args];receipt.referenceSha256=hash(config.reference);
+  const child=spawn(process.execPath,args,{env:process.env,stdio:['ignore','pipe','pipe']});
+  let failure=null;
+  const reject=message=>{failure=message;child.kill('SIGINT');};
+  const observer=createTraceObserver({compiledSha256:reference.compiled.sha256,onFailure:reject});
+  for(const stream of ['stdout','stderr'])child[stream].on('data',data=>{
+    process[stream].write(data);observer.feed(stream,data);
+  });
+  const monitor=setInterval(()=>{
+    const unexpected=fs.readdirSync(cacheRoot).filter(name=>name.startsWith('hfcache-')&&!allowed.has(name));
+    if(unexpected.length)reject('Unexpected cache extraction: '+unexpected.join(','));
+  },100);
+  try {
+    receipt.exitCode=await new Promise((resolve,rejectError)=>{
+      child.once('error',rejectError);child.once('close',resolve);
+    });
+  } finally {clearInterval(monitor);}
+  const trace=observer.finish();
+  receipt.cacheEvidence=trace.cache;receipt.traceEvidence=trace;
+  requireThat(!failure,failure);requireThat(receipt.exitCode===0,'Native export failed');
+  requireThat(!trace.failure,trace.failure);
+  requireThat(fs.statSync(config.output).size>0,'Native output is empty');
+  receipt.status='rendered-awaiting-delivery-qc';receipt.outputBytes=fs.statSync(config.output).size;
+}
+
+(async()=>{
+  try{await render(verify());}
+  catch(error){receipt.error=String(error.stack||error);process.exitCode=1;}
+  finally{receipt.finishedUtc=new Date().toISOString();
+    fs.writeFileSync(config.receipt,JSON.stringify(receipt,null,2),{flag:'wx'});}
+})();

@@ -14,6 +14,7 @@ class ElementObservation:
     before: dict
     after: dict
     event: dict
+    coverage: dict | None = None
 
 
 @dataclass(frozen=True)
@@ -26,3 +27,4 @@ class RecoveryObservation:
     after: dict
     client: Any
     media_ref: str | None = None
+    coverage: dict | None = None

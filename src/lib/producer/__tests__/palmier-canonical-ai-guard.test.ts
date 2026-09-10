@@ -3,7 +3,7 @@ import {
   guardPalmierCanonicalForAiEdit,
   PalmierCanonicalError,
 } from "../../../app/api/producer/ai-edit/palmier-canonical";
-import { guardPalmierForAutoEditLaunch } from "../../../app/api/producer/auto-edit/route";
+import { guardPalmierForAutoEditLaunch } from "../../../app/api/producer/auto-edit/launch";
 
 async function main(): Promise<void> {
   let called = false;

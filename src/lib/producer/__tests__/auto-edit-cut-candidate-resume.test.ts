@@ -95,22 +95,34 @@ function dependencies(order: string[]): AuthoringStageDependencies {
       order.push("validate-cut-candidate");
       return approval();
     },
+    validateSavedCut: async () => approval(),
     reviewCut: async () => {
       order.push("review-cut");
       return {} as Awaited<ReturnType<AuthoringStageDependencies["reviewCut"]>>;
     },
-    verifyReviewCut: () => ({} as ReturnType<AuthoringStageDependencies["verifyReviewCut"]>),
+    verifyReviewCut: () => {
+      order.push("verify-review-cut");
+      return {} as ReturnType<AuthoringStageDependencies["verifyReviewCut"]>;
+    },
     approveCut: async (ctx) => {
       order.push("approve-cut");
       writeFileSync(cutApprovalPath(ctx), JSON.stringify(approval()));
       return approval();
     },
+    approveSavedCut: async () => approval(),
     verifyCut: async () => {
       order.push("verify-cut");
       return {
         gate: "transcript_cut", ok: true, errors: [], warnings: [], exit: 0,
         metrics: { receipt: { ...approval(), stage: "planning_gate" } },
       };
+    },
+    lockCut: async () => {
+      order.push("lock-cut");
+      return {
+        hash: "f".repeat(64), projectionHash: "e".repeat(64), reused: true,
+        lock: { timelineMapHash: "d".repeat(64) },
+      } as Awaited<ReturnType<AuthoringStageDependencies["lockCut"]>>;
     },
   };
 }
@@ -121,8 +133,8 @@ async function testValidatedCandidateSkipsCutWriter(root: string): Promise<void>
   const order: string[] = [];
   await runAuthorStage(run, dependencies(order));
   assert.deepEqual(order, [
-    "validate-cut-candidate", "review-cut", "approve-cut", "verify-cut",
-    "author-visual", "verify-cut",
+    "validate-cut-candidate", "review-cut", "approve-cut", "verify-cut", "verify-review-cut",
+    "lock-cut", "author-visual", "verify-cut", "verify-review-cut", "lock-cut",
   ]);
   assert.ok(events.some((event) => event.event === "cut_candidate_reused"));
 }

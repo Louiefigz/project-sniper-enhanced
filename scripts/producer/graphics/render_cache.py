@@ -11,7 +11,9 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Callable, Iterator
 
+from color.deadline import WallBudgetExceeded
 from headless.container_io import promote_regular
+from headless.process_runner import ProcessDeadlineError
 
 
 @dataclass(frozen=True)
@@ -152,6 +154,8 @@ def _existing_hit(output: str, prove: Callable[[str], dict]) -> dict | None:
         return None
     try:
         return _proved_hit(output, prove)
+    except (WallBudgetExceeded, ProcessDeadlineError, TimeoutError):
+        raise
     except (OSError, RuntimeError, ValueError):
         _quarantine(output)
         return None

@@ -211,6 +211,9 @@ class RevisionManifestIntegrationTests(unittest.TestCase):
             state = {"projectSettings": {"fps": 24, "width": 1920,
                                           "height": 1080},
                      "plan": {"path": old_path},
+                     "exactMasterReference": {"status": "ready", "startFrame": 0,
+                         "endFrame": 20160, "hidden": True, "muted": True,
+                         "assetPath": source, "assetHash": fpr.file_sha256(source)},
                      "expectedFingerprint": "candidate",
                      "elementLedger": _ledger(old)}
             inputs = DesktopStageInput(

@@ -48,7 +48,10 @@ from dataclasses import dataclass
 from typing import Callable
 
 from edit_scope import lane_required, resolve_scope
-from graphics.comp_capabilities import measured_aspect
+from graphics.comp_capabilities import (
+    is_aspect_legal_kind,
+    measured_aspect,
+)
 from planner.graphics_planner_density import reject_cand
 from planner.graphics_planner_items import phrase, whiteboard_maps as _scan_maps
 from planner.graphics_planner_sequences import sequence_beats as _scan_beats
@@ -106,6 +109,27 @@ KIND_CANVAS_FALLBACK = {
     # operator/brain-only layout pieces dropped via the editor + placement.
     "text-element": "9:16", "text-element-wide": "16:9",
     "container-shape": "9:16", "container-shape-wide": "16:9",
+    # Hand-drawn (hw) family (catalog port wave A, 2026-08-28): deliberately
+    # TRIGGER-LESS, same doctrine as glitch-hit — a marker stroke needs the
+    # brain to pick the emphasized WORD, a callout circle needs a REGION of
+    # the frame, and no transcript detector earns either; auto-firing them
+    # reads as noise, not emphasis. hw-scribble-transition is a seam-cover
+    # stinger the brain/operator places spanning a cut (alpha sibling of
+    # stinger-wipe). Registered so the canvas filter and lint's comp-file
+    # check know the kinds when a plan carries them.
+    "marker-highlight": "9:16", "hw-callout-circle": "9:16",
+    "hw-scribble-transition": "9:16",
+    # Catalog data/hook/screen family (port wave B, 2026-08-28). chart-story
+    # and count-up join MOTION["card_form_map"] (information-shape data
+    # cards: trend/comparison charts + hero-metric counter) and line-swap
+    # joins the thesis family — the brain selects them by shape; no
+    # transcript trigger fires them. ui-focus-zoom is deliberately
+    # TRIGGER-LESS everywhere (glitch-hit doctrine): it needs a
+    # brain-supplied screenshot asset (spec.image) plus an anchor region,
+    # and no transcript detector earns either. Registered so the canvas
+    # filter and lint's comp-file check know the kinds.
+    "chart-story": "16:9", "count-up": "9:16",
+    "line-swap": "9:16", "ui-focus-zoom": "16:9",
 }
 
 # Own-screen cutaway density. HOOK WINDOW: operator doctrine (2026-07-06):
@@ -204,21 +228,16 @@ def _canvas_of(width: int, height: int) -> str:
 def canvas_ok(kind: str, aspect: str) -> bool:
     """MG-4.3: a kind is proposable only on its own canvas ('any' = both).
 
-    The MEASURED matrix (templates/motion/comp_capabilities.json, when the
-    probe has built it) is authoritative and wins over the declared
-    data-width/height derivation — declared dims drifted from the rendered
-    canvas through the 2026-07-23 mint cycles (LL-036/LL-037). Unmeasured
-    kinds fall back to the derived map; unknown kinds pass (high-recall
-    proposer; the brain reviews)."""
-    measured = measured_aspect(kind)
-    if measured is not None:
-        return measured == aspect
-    return kind_canvas().get(kind, "any") in ("any", aspect)
+    The fresh MEASURED matrix is authoritative. Declared dimensions drifted
+    from rendered canvases through the 2026-07-23 mint cycles
+    (LL-036/LL-037), so unavailable/unmeasured/error kinds are not proposed.
+    """
+    return is_aspect_legal_kind(kind, aspect)
 
 
 def effective_canvas(kind: str) -> str:
     """The canvas the filter judged ``kind`` by (measured wins, for messages)."""
-    return measured_aspect(kind) or kind_canvas().get(kind, "any")
+    return measured_aspect(kind) or "unavailable"
 
 
 def natural_aspect(mode: str) -> str:

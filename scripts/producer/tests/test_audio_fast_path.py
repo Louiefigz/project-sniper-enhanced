@@ -86,7 +86,8 @@ class FingerprintSplitTests(unittest.TestCase):
     def test_record_carries_all_three_prints(self) -> None:
         rec = fpr.fingerprint_record(_plan())
         self.assertEqual(set(rec),
-                         {"fingerprint", "videoFingerprint", "audioFingerprint"})
+                         {"fingerprint", "videoFingerprint", "audioFingerprint",
+                          "masteringPolicyVersion", "audioClockPolicy"})
 
 
 class SerializationCanonTests(unittest.TestCase):
@@ -181,15 +182,14 @@ class DispatchMatrixTests(unittest.TestCase):
         self._write_fp(_plan())
         self.assertEqual(asm._base_state(self.base, _plan(), self.fp), "current")
 
-    def test_legacy_fingerprint_with_snapshot_detects_audio_stale(self) -> None:
-        # Pre-split fingerprint file + base_plan.json snapshot: the split
-        # prints are DERIVED from the snapshot so old bases stay eligible.
+    def test_legacy_fingerprint_with_snapshot_requires_full_rebuild(self) -> None:
+        # A plan snapshot proves old intent, not the executed mastering policy.
         old = _plan()
         self._write_fp(old, legacy=True)
         with open(os.path.join(self.tmp.name, "base_plan.json"), "w") as f:
             json.dump(old, f)
         new = _plan(audioGain=[{"outStart": 1.0, "outEnd": 2.0, "dB": -2.0}])
-        self.assertEqual(asm._base_state(self.base, new, self.fp), "audio_stale")
+        self.assertEqual(asm._base_state(self.base, new, self.fp), "stale")
 
     def test_legacy_fingerprint_without_snapshot_is_stale(self) -> None:
         self._write_fp(_plan(), legacy=True)

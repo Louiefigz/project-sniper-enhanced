@@ -22,7 +22,12 @@ export {
 
 const require = createRequire(import.meta.url);
 const { loadEnvConfig } = require("@next/env");
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+export function supervisorRoot(moduleUrl = import.meta.url) {
+  return path.resolve(path.dirname(fileURLToPath(moduleUrl)), "..", "..");
+}
+
+const ROOT = supervisorRoot();
 const NEXT_BIN = path.join(ROOT, "node_modules", "next", "dist", "bin", "next");
 const FAST_EXIT_MS = 30_000;
 const MAX_FAST_EXITS = 3;

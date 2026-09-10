@@ -12,6 +12,7 @@ from typing import Any
 
 from graphics.template_contract import planned_copy, resolved_assets
 from graphics.frame_oracles import terminal_alpha
+from graphics.frame_quantization import rounded_frame_index
 
 _SAMPLE_WIDTH, _SAMPLE_HEIGHT, _SAMPLE_FPS = 96, 54, 10
 _MIN_AREA_RATIO, _MIN_SUSTAINED_FRACTION, _MIN_PIXEL_DELTA = 0.001, 0.5, 6
@@ -243,7 +244,7 @@ def _validate_stream(stream: dict,
                            f"planned {request.expected_duration:.4f}s "
                            f"(tol {tolerance:.4f}s)")
     frames = int(_number(stream.get("nb_frames")) or 0)
-    expected_frames = round(request.expected_duration * request.expected_fps)
+    expected_frames = rounded_frame_index(request.expected_duration, request.expected_fps)
     if frames != expected_frames or frames <= 0:
         raise RuntimeError(f"graphic asset frame count {frames} != {expected_frames}")
     _validate_codec(stream, request.fmt)

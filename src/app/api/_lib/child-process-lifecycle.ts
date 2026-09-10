@@ -1,7 +1,15 @@
 import type { ChildProcess } from "child_process";
+import { AsyncLocalStorage } from "node:async_hooks";
 
 export const PROCESS_TERM_GRACE_MS = 5_000;
 const trackedProcessTrees = new Set<ChildProcess>();
+const processObserver = new AsyncLocalStorage<(child: ChildProcess) => void>();
+
+/** Opt-in observation only; historical tracking/termination semantics remain unchanged. */
+export function withTrackedProcessObserver<T>(observer: (child: ChildProcess) => void, run: () => T): T {
+  if (processObserver.getStore()) throw new Error("Nested process-tree observation is unsupported");
+  return processObserver.run(observer, run);
+}
 
 type SignalProcess = (target: number, signal: NodeJS.Signals | 0) => void;
 type ScheduledTimer = ReturnType<typeof setTimeout> & { unref?: () => void };
@@ -33,6 +41,7 @@ export function shouldDetachProcessGroup(platform: NodeJS.Platform = process.pla
 /** Register a detached subgroup so its owning worker can stop it on shutdown. */
 export function trackProcessTree<T extends ChildProcess>(child: T): T {
   trackedProcessTrees.add(child);
+  processObserver.getStore()?.(child);
   const forget = () => trackedProcessTrees.delete(child);
   child.once("close", forget);
   child.once("error", forget);

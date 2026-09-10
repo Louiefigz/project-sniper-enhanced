@@ -3,8 +3,8 @@
 The SNIPER_VERIFY_PLACEMENT env gate is gone: run_graphics_stage verifies
 anchor-resolved face placements by default. WARN mode (uncalibrated) NEVER
 raises on a hit — log + continue (the wedge-after-wall class stays dead);
-the allow-vocabulary SKIPs pip_hole comps, brollTrack overlaps, and
-hook-card overlays with evidence; operator-explicit pins WARN and never
+the allow-vocabulary SKIPs pip_hole comps and fully covered brollTrack or
+hook-card intervals with evidence; operator-explicit pins WARN and never
 FAIL; environment failures SKIP in every mode; calibrated FAIL mode blocks.
 """
 import inspect
@@ -16,6 +16,7 @@ from _common import *  # noqa: F401,F403
 import gate_policy
 from graphics import graphics_stage as gstage
 from graphics import placement_verify as pv
+from planner import verified_frame_sampling
 
 
 def _clip(**over) -> dict:
@@ -145,18 +146,20 @@ class SkipVocabularyTests(unittest.TestCase):
         row = self._skip_row(_clip(pipHole={"crop": [0, 0, 1, 1]}), None)
         self.assertIn("pip_hole", row["evidence"])
 
-    def test_broll_overlap_skips_with_evidence(self) -> None:
-        row = self._skip_row(_clip(), {"broll": [[5.0, 6.5]], "cards": []})
+    def test_full_broll_coverage_skips_with_evidence(self) -> None:
+        row = self._skip_row(_clip(), {"broll": [[3.0, 6.5]], "cards": []})
         self.assertIn("brollTrack", row["evidence"])
 
-    def test_hook_card_overlap_skips_with_evidence(self) -> None:
-        row = self._skip_row(_clip(), {"broll": [], "cards": [[3.0, 4.5]]})
+    def test_full_hook_card_coverage_skips_with_evidence(self) -> None:
+        row = self._skip_row(_clip(), {"broll": [], "cards": [[3.0, 6.5]]})
         self.assertIn("hook-card", row["evidence"])
 
     def test_non_overlapping_occlusions_still_verify(self) -> None:
         ctx, rec = _ctx("WARN", occlusions={"broll": [[8.0, 9.0]],
                                             "cards": [[0.0, 1.0]]})
-        with mock.patch.object(pv, "verify_placement",
+        with mock.patch.object(verified_frame_sampling, "frame_timestamps",
+                               return_value=(4.0, 5.0, 6.0)), \
+             mock.patch.object(pv, "verify_placement",
                                return_value=(True, {"ok": True})) as vp:
             pv.run_verify([_clip()], "final.mp4", ctx)
         vp.assert_called_once()
@@ -169,6 +172,15 @@ class SkipVocabularyTests(unittest.TestCase):
                 [_clip(anchor="free-band"), _clip(anchor="own-screen")],
                 "final.mp4", ctx)
         self.assertEqual(checked, 0)
+
+    def test_face_aware_free_band_is_checked(self) -> None:
+        ctx, _rec = _ctx("FAIL")
+        clip = _clip(anchor="free-band", faceAware=True)
+        with mock.patch.object(pv, "verify_placement",
+                               return_value=(True, {"ok": True})) as verify:
+            checked = pv.run_verify([clip], "final.mp4", ctx)
+        self.assertEqual(checked, 1)
+        verify.assert_called_once()
 
 
 class ExplicitPinTests(unittest.TestCase):

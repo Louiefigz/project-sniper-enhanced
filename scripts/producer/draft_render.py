@@ -54,6 +54,7 @@ from typing import Optional
 
 from ingest_probe import probe_media
 from producer_config import DRAFT
+from stage_timing_context import timing_environment
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 FONTS_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, "..", "..", "assets", "fonts"))
@@ -211,7 +212,8 @@ def run_base_render(job: DraftJob) -> None:
     if not job.audit:
         cmd.append("--no-audit")
     emit(status="stage_start", stage="draft_base_render", out=job.draft_dir)
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, text=True)
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, text=True,
+                            env=timing_environment())
     assert proc.stdout is not None
     for line in proc.stdout:
         sys.stdout.write(line)

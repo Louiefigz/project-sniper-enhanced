@@ -15,6 +15,7 @@ _ICON_KEY = re.compile(r"icon\d*\Z")
 _ASSET_ONLY_SLOTS = {
     "icon-badge-wide": ("icon1", "icon2", "icon3"),
     "logo-card": ("iconFile",),
+    "stroke-draw-badge": ("icon",),
 }
 
 
@@ -33,6 +34,15 @@ def asset_contract(kind: str, declared: dict[str, dict]) -> dict:
     return {"assetOnly": kind in _ASSET_ONLY_SLOTS,
             "selectorVariables": icon_keys(declared),
             "requiredExplicitSelectors": list(_ASSET_ONLY_SLOTS.get(kind, ()))}
+
+
+def effective_asset_spec(spec: dict, declared: dict[str, dict]) -> dict:
+    """Bind omitted declared asset defaults while preserving explicit blanks."""
+    keys = icon_keys(declared)
+    if declared.get("image", {}).get("type") == "string":
+        keys.append("image")
+    defaults = {key: declared[key]["default"] for key in keys if "default" in declared[key]}
+    return {**defaults, **spec}
 
 
 def _selector_path(value: str) -> str | None:
@@ -65,8 +75,9 @@ def selector_errors(kind: str, spec: dict,
         errors.append("asset-only template must explicitly override " +
                       ", ".join(f"spec.{key}" for key in missing))
     selected = []
+    effective = effective_asset_spec(spec, declared)
     for key in icon_keys(declared):
-        value = spec.get(key)
+        value = effective.get(key)
         if value is None:
             continue
         if not isinstance(value, str):
@@ -87,8 +98,15 @@ def resolved_selectors(spec: dict, declared: dict[str, dict]) -> list[dict]:
     """Resolved selectors after selector_errors has accepted the entry."""
     rows = []
     for key in icon_keys(declared):
+        if key not in spec:
+            continue
         value = spec.get(key)
+        if not isinstance(value, str):
+            raise ValueError(f"spec.{key} must be a string asset selector")
+        if not value.strip():
+            continue
         path = _selector_path(value) if isinstance(value, str) else None
-        if path:
-            rows.append({"field": key, "selector": value, "path": path})
+        if path is None:
+            raise ValueError(f"spec.{key} asset {value!r} does not resolve under templates/motion/icons")
+        rows.append({"field": key, "selector": value, "path": path})
     return rows

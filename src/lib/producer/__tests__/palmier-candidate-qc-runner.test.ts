@@ -10,6 +10,12 @@ import {
 } from "../../../app/api/producer/palmier/candidate-qc/runner";
 import type { PalmierNativeQcAuthority } from "../../../app/api/producer/ai-edit/palmier-native-authority";
 import type { PalmierLiveBuildQcAuthority } from "../../../app/api/producer/live-build/authority";
+import {
+  appendLiveBuildHead,
+  appendLiveBuildOperationEvent,
+  closeLiveBuildJournal,
+  emptyLiveBuildJournal,
+} from "../../../app/api/producer/live-build/journal";
 
 function sha(value: string | Buffer): string {
   return createHash("sha256").update(value).digest("hex");
@@ -89,12 +95,22 @@ function liveFixture(dir: string): {
 } {
   const base = fixture(dir, "live");
   const planPath = path.join(dir, "live-edit-plan.json");
-  const journalPath = path.join(dir, ".palmier-live-build.jsonl");
   writeFileSync(planPath, JSON.stringify({ planVersion: 1,
     target: { mode: "longform" }, cutTrack: [] }));
-  writeFileSync(journalPath, `${JSON.stringify({
-    event: "palmier_op_result", status: "applied",
-  })}\n`);
+  const ledger = emptyLiveBuildJournal();
+  appendLiveBuildHead(dir, ledger, "e".repeat(64));
+  appendLiveBuildOperationEvent(dir, ledger, {
+    event: "palmier_op", operationId: "op-live", tool: "remove_words",
+    input: { words: ["um"] }, status: "applying", elapsedMs: 1,
+  });
+  appendLiveBuildOperationEvent(dir, ledger, {
+    event: "palmier_op_result", operationId: "op-live",
+    status: "applied", elapsedMs: 2,
+  });
+  const candidateFingerprint = String(
+    (base.receipt.candidate as Record<string, unknown>).fingerprint);
+  appendLiveBuildHead(dir, ledger, candidateFingerprint);
+  const closed = closeLiveBuildJournal(dir, candidateFingerprint);
   const captureId = "live-test-capture";
   const request = `Execute approved Producer plan ${sha(readFileSync(planPath))} exactly in the governed Palmier candidate.`;
   const requestHash = sha(request);
@@ -105,8 +121,7 @@ function liveFixture(dir: string): {
     request: { text: request, hash: requestHash },
     controller: { lanes: ["cuts"] }, parent,
     plan: { path: planPath, hash: sha(readFileSync(planPath)) },
-    journal: { path: journalPath, hash: sha(readFileSync(journalPath)),
-      operationCount: 1 },
+    journal: closed,
     planningReviews: [], sessionId: "session-live",
   }));
   return { receipt: base.receipt, authority: {
@@ -114,7 +129,9 @@ function liveFixture(dir: string): {
     requestHash, captureId,
     liveInput: { path: inputPath, hash: sha(readFileSync(inputPath)),
       planHash: sha(readFileSync(planPath)),
-      journalHash: sha(readFileSync(journalPath)), lanes: ["cuts"], parent,
+      journalHash: closed.hash,
+      journalLifecycleDigest: closed.lifecycleDigest,
+      headFingerprint: closed.headFingerprint, lanes: ["cuts"], parent,
       operationCount: 1, sessionId: "session-live" },
     ctx: { ...base.authority.ctx, planPath },
   } };

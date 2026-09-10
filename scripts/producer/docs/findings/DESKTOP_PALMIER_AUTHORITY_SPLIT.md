@@ -78,6 +78,9 @@ use exact Palmier knobs/a real LUT, then inspect the exported candidate.
 
 Unit tests prove authority, replay, stage-scope, readback, reconciliation, and
 transition-preview contracts offline. The prior smoke proves a retained Claude
-session can call Palmier text and motion tools. A complete first-60-seconds live
-run is still required to prove real imports, cuts, catalog graphics, b-roll,
-captions/color/audio, export, and both review receipts in one candidate.
+session can call Palmier text and motion tools. A later first-60 run exercised
+more transport and mutation mechanics, but failed product-quality review after
+56m48s: QC remained pending, seven captions lost karaoke timing, and the wrong
+3840×2160 canvas was accepted. Representative connected short/long evidence,
+complete readback/export, audio-route authority, and failure/manual-edit
+preservation are still required before the Desktop path is P5-qualified.

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import AskClaudeBar from "./ask-claude-bar";
 import EditorHeader from "./editor-header";
 import EditorLockOverlay from "./editor-lock-overlay";
@@ -20,14 +21,15 @@ interface SurfaceProps {
   onProjectStatusChanged?: () => void;
 }
 
-function confirmedBack(onBack: (() => void) | undefined, dirty: boolean) {
+export function confirmedBack(onBack: (() => void) | undefined, dirty: boolean,
+  confirmDiscard = () => window.confirm("Discard unsaved timeline changes and return to projects?")) {
   if (!onBack) return undefined;
   return () => {
-    if (!dirty || window.confirm("Discard unsaved timeline changes and return to projects?")) onBack();
+    if (!dirty || confirmDiscard()) onBack();
   };
 }
 
-function EditorHeaderSection({ editor, title, onBack }: SurfaceProps) {
+function EditorHeaderSection({ editor, title, onBack, onProjectStatusChanged }: SurfaceProps) {
   const {
     history, actions, undo, redo, saveBlocked,
     externalLockReason, palmierLockReason, mutationLockReason,
@@ -46,6 +48,7 @@ function EditorHeaderSection({ editor, title, onBack }: SurfaceProps) {
       />
       <EditorHeader
         title={title}
+        producerDir={editor.paths.base}
         onBack={confirmedBack(onBack, history.dirty)}
         reState={actions.reState}
         reMsg={actions.reMsg}
@@ -62,6 +65,16 @@ function EditorHeaderSection({ editor, title, onBack }: SurfaceProps) {
         onRedo={redo}
         onSave={actions.save}
         onReRender={actions.reRender}
+        onStudioDraftInvalidated={actions.invalidatePreviewAuthority}
+        onStudioDraftChanged={async () => {
+          actions.invalidatePreviewAuthority();
+          editor.ui.setPalmierView("internal");
+          const reloaded = await actions.reloadPlan(true);
+          if (!reloaded) actions.addWarningEvent({ status: "warning",
+            message: "Studio may have saved a newer draft, but reload failed. Reopen the editor before editing; the preview remains out of date." });
+          onProjectStatusChanged?.();
+          return reloaded;
+        }}
         revealLabel={palmier ? "Show Palmier export" : unapproved ? "Show review copy" : "Show Sniper final"}
         revealTitle={palmier
           ? "opens Finder at the last verified Palmier export"
@@ -77,12 +90,17 @@ function PalmierSection({
   editor, onProjectStatusChanged,
 }: Pick<SurfaceProps, "editor" | "onProjectStatusChanged">) {
   const { history, actions, externalLockReason } = editor.planState;
+  const [expanded, setExpanded] = useState(false);
+  const legacyActive = editor.ui.palmierView === "palmier" || editor.planState.palmierLockReason != null;
   const busyBlocked = externalLockReason ?? (actions.reState === "running"
     ? "re-render is running — push when it finishes"
     : editor.ui.aiBusy ? "AI editor is editing the plan — push when it finishes" : null);
   return (
     <>
-      <PalmierBar
+      <details open={expanded || legacyActive} onToggle={(event) => setExpanded(event.currentTarget.open)}
+        className="border-b border-neutral-800 px-4 py-1 text-xs text-neutral-400">
+      <summary className="cursor-pointer">Legacy Palmier tools</summary>
+      {(expanded || legacyActive) && <PalmierBar
         dir={editor.paths.base}
         dirty={history.dirty}
         sniperPreviewCurrent={actions.previewAuthority === "current"}
@@ -96,7 +114,8 @@ function PalmierSection({
         }}
         onProjectStatusChanged={onProjectStatusChanged}
         onWarningEvent={actions.addWarningEvent}
-      />
+      />}
+      </details>
       <WarningsStrip warnings={actions.warnings} onDismiss={actions.dismissWarnings} />
     </>
   );

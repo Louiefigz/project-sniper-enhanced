@@ -52,12 +52,17 @@ async function run(): Promise<void> {
   assert.equal(processResult.event.timelineId, "streamed");
   assert.equal(streamed.at(-1)?.timelineId, "streamed");
 
-  assert.deepEqual(checkpointCommand(ctx, {
+  const renderCheckpoint = checkpointCommand(ctx, {
     stage: "render", round: 2, mediaPath: "/candidate.mp4",
-  }).slice(-6), ["--stage", "render", "--round", "2", "--media", "/candidate.mp4"]);
+  });
+  assert.ok(renderCheckpoint.includes("--require-source-set-admission"));
+  assert.deepEqual(renderCheckpoint.slice(-6),
+    ["--stage", "render", "--round", "2", "--media", "/candidate.mp4"]);
   assert.deepEqual(checkpointCommand(ctx, { stage: "cut", round: 0 }).slice(-4),
     ["--stage", "cut", "--round", "0"]);
-  assert.equal(approvedMirrorCommand(ctx).at(-1), path.join(dir, "final.palmier.mp4"));
+  const mirrorCommand = approvedMirrorCommand(ctx);
+  assert.ok(mirrorCommand.includes("--require-source-set-admission"));
+  assert.equal(mirrorCommand.at(-1), path.join(dir, "final.palmier.mp4"));
 
   const absent = await publishPalmierWorkingCheckpoint(ctx, { stage: "plan", round: 0 }, send,
     async () => { throw new Error("absent workspace must not spawn"); });

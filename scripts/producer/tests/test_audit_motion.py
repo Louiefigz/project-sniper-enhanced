@@ -6,6 +6,7 @@ fast; the whole class skips when ffmpeg is absent (like the other motion tests).
 """
 import glob
 import unittest
+from unittest import mock
 
 from _common import *  # noqa: F401,F403
 
@@ -89,6 +90,41 @@ class AuditMotionTests(unittest.TestCase):
         failures = [r for r in res if r.status == amot.FAIL]
         self.assertTrue(failures)
         self.assertTrue(any("plan cuts" in r.measured for r in failures), res)
+
+    def test_same_camera_cuts_pass_with_exact_delivery_lineage(self) -> None:
+        plan = {"target": {"mode": "longform", "treatment": "produced"},
+                "cutTrack": [
+                    {"sourceId": "raw", "start": 0.0, "end": 2.0},
+                    {"sourceId": "raw", "start": 3.0, "end": 5.0},
+                    {"sourceId": "raw", "start": 6.0, "end": 8.0},
+                ]}
+        proof = amot.CutProof(3, 144, "assembled-final")
+        with mock.patch.object(amot, "_scene_times", return_value=[]), \
+                mock.patch.object(
+                    amot, "_seams_manifested", return_value=(0, 2)), \
+                mock.patch.object(
+                    amot, "_sealed_cut_lineage", return_value=proof):
+            res = amot.check_pacing_rendered(
+                self.static, 6.0, plan, "longform")
+        self.assertEqual(res[0].status, amot.PASS)
+        self.assertIn("144 exact frames", res[0].measured)
+
+    def test_lineage_with_wrong_part_cardinality_fails_closed(self) -> None:
+        plan = {"target": {"mode": "longform", "treatment": "produced"},
+                "cutTrack": [
+                    {"sourceId": "raw", "start": 0.0, "end": 2.0},
+                    {"sourceId": "raw", "start": 3.0, "end": 5.0},
+                    {"sourceId": "raw", "start": 6.0, "end": 8.0},
+                ]}
+        proof = amot.CutProof(2, 144, "assembled-final")
+        with mock.patch.object(amot, "_scene_times", return_value=[]), \
+                mock.patch.object(
+                    amot, "_seams_manifested", return_value=(0, 2)), \
+                mock.patch.object(
+                    amot, "_sealed_cut_lineage", return_value=proof):
+            res = amot.check_pacing_rendered(
+                self.static, 6.0, plan, "longform")
+        self.assertEqual(res[0].status, amot.FAIL)
 
     # -- check_presence --------------------------------------------------------
     def test_presence_moving_window_passes(self) -> None:

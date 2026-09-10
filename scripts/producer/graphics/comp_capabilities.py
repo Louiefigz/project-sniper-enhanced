@@ -10,19 +10,18 @@ planner could read — five comps failed one-at-a-time through render/mint
 cycles on 2026-07-23 (FAILURE_LEDGER LL-036/LL-037) before the matrix turned
 discovery-by-render-failure into plan-time data.
 
-This module is the plan-time predicate surface, the sibling of
-``graphics.form_allocation.is_gate_executable_kind`` (the canvas-pip-list
-precedent): consumed wherever kinds are proposed/mapped so the planner can
-never propose an aspect-illegal comp. Posture matches
-``graphics_planner_longform.canvas_ok``: an UNMEASURED kind (matrix absent or
-comp not probed yet) passes — the derived MG-4.3 canvas filter and the render
-proofs still stand behind it — while a MEASURED aspect is authoritative and
-wins over any declared/derived canvas.
+This module is the plan-time predicate surface. Only a kind backed by a fresh,
+complete, successful measured row is proposable. Missing/stale/unmeasured/error
+state is unavailable, never a permissive fallback to declared dimensions.
 """
 from __future__ import annotations
 
-import json
 import os
+
+from graphics.comp_capability_artifact import (
+    capability_row_issue,
+    load_artifact,
+)
 
 _MATRIX_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -30,26 +29,22 @@ _MATRIX_PATH = os.path.join(
 _ASPECTS = ("9:16", "16:9")
 
 _matrix_cache: dict | None = None
+_matrix_error: str | None = None
 
 
 def capability_matrix() -> dict:
-    """kind → measured capability entry; ``{}`` when the matrix isn't built.
+    """Kind → release-ready measured capability entry.
 
     Returns:
-        The ``comps`` map of ``comp_capabilities.json`` (schemaVersion 1), or
-        an empty dict when the probe has not written the file yet — absence
-        means "no measured data", never an error (the probe is a one-time
-        batch measure; every predicate here degrades to permissive).
+        Only complete successful rows from a fresh artifact. ``{}`` means
+        capability authority is unavailable; all predicates then fail closed.
     """
-    global _matrix_cache
+    global _matrix_cache, _matrix_error
     if _matrix_cache is None:
-        try:
-            with open(_MATRIX_PATH, encoding="utf-8") as handle:
-                loaded = json.load(handle)
-            comps = loaded.get("comps") if isinstance(loaded, dict) else None
-            _matrix_cache = dict(comps) if isinstance(comps, dict) else {}
-        except (OSError, json.JSONDecodeError, ValueError):
-            _matrix_cache = {}
+        comps, _matrix_error = load_artifact(_MATRIX_PATH)
+        _matrix_cache = {
+            kind: row for kind, row in (comps or {}).items()
+            if capability_row_issue(row) is None}
     return _matrix_cache
 
 
@@ -60,12 +55,19 @@ def measured_aspect(kind: str) -> str | None:
         kind: A registered composition kind (comp file stem).
 
     Returns:
-        ``"9:16"`` / ``"16:9"`` from the matrix's static probe, or ``None``
-        when the matrix (or this kind's entry) doesn't exist yet.
+        ``"9:16"`` / ``"16:9"`` from a release-ready measured row, or
+        ``None`` when capability authority is unavailable.
     """
     entry = capability_matrix().get(kind)
     aspect = entry.get("aspect") if isinstance(entry, dict) else None
     return aspect if aspect in _ASPECTS else None
+
+
+def measured_fade_class(kind: str) -> str | None:
+    """Return the fresh measured terminal behavior for one released comp."""
+    entry = capability_matrix().get(kind)
+    fade = entry.get("fadeClass") if isinstance(entry, dict) else None
+    return fade if fade in {"fades-clean", "hold-to-cut", "partial-fade"} else None
 
 
 def is_aspect_legal_kind(kind: str, aspect: str) -> bool:
@@ -80,8 +82,7 @@ def is_aspect_legal_kind(kind: str, aspect: str) -> bool:
         aspect: The delivery aspect the plan renders at ("9:16"/"16:9").
 
     Returns:
-        False only when the matrix has MEASURED this kind at a different
-        aspect; True for a matching measurement or an unmeasured kind.
+        True only for a release-ready measurement matching ``aspect``.
     """
     measured = measured_aspect(kind)
-    return measured is None or measured == aspect
+    return measured == aspect

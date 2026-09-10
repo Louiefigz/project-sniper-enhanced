@@ -43,11 +43,26 @@ const CONFIG_DIR = path.join(os.homedir(), ".project-sniper");
 const CONFIG = path.join(CONFIG_DIR, "config.json");
 const DEFAULT_ROOT = path.join(os.homedir(), "ProjectSniper");
 
-/** Workspace root from ~/.project-sniper/config.json — created with the default on first read. */
-export function workspaceRoot(): string {
+/** Process-local workspace for isolated UI/qualification runs; never edits user config. */
+export function workspaceOverride(): string | null {
+  const value = process.env.SNIPER_WORKSPACE_ROOT;
+  if (value === undefined) return null;
+  const resolved = path.resolve(value);
+  if (!path.isAbsolute(value) || value.split(path.sep).includes("..") || path.parse(resolved).root === resolved) {
+    throw new Error("SNIPER_WORKSPACE_ROOT must name an absolute, non-root workspace directory without traversal");
+  }
+  return resolved;
+}
+
+/** Read the workspace; read-only callers must not initialize personal config. */
+export function workspaceRoot(options: { initialize?: boolean } = {}): string {
+  const isolated = workspaceOverride();
+  if (isolated !== null) return isolated;
   if (!fs.existsSync(CONFIG)) {
-    fs.mkdirSync(CONFIG_DIR, { recursive: true });
-    fs.writeFileSync(CONFIG, JSON.stringify({ workspaceRoot: DEFAULT_ROOT }, null, 1));
+    if (options.initialize !== false) {
+      fs.mkdirSync(CONFIG_DIR, { recursive: true });
+      fs.writeFileSync(CONFIG, JSON.stringify({ workspaceRoot: DEFAULT_ROOT }, null, 1));
+    }
     return DEFAULT_ROOT;
   }
   const cfg = JSON.parse(fs.readFileSync(CONFIG, "utf-8")) as { workspaceRoot?: unknown };
@@ -182,6 +197,32 @@ export function findProjectRoot(dir: string): string | null {
     return parent;
   }
   return null;
+}
+
+/** Resolve one real producer/ directory contained by the configured workspace. */
+export function canonicalProducerDir(value: unknown): string {
+  if (typeof value !== "string" || !path.isAbsolute(value)) {
+    throw new Error("dir must be an absolute Producer project path");
+  }
+  let dir: string;
+  try {
+    dir = fs.realpathSync(value.replace(/\/$/, ""));
+  } catch {
+    throw new Error(`dir not found: ${value}`);
+  }
+  const workspace = fs.realpathSync(workspaceRoot({ initialize: false }));
+  const relative = path.relative(workspace, dir);
+  const projectRoot = findProjectRoot(dir);
+  const outside = relative === "" || relative.startsWith("..")
+    || path.isAbsolute(relative);
+  if (outside || !projectRoot
+      || dir !== path.join(fs.realpathSync(projectRoot), "producer")) {
+    throw new Error(
+      "This operation may target only a canonical producer/ directory "
+        + "inside the configured local workspace",
+    );
+  }
+  return dir;
 }
 
 /** Recursive byte size of a file or directory (for the ≤2GB copy rule). */

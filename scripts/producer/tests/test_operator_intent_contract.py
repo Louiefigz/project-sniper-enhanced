@@ -4,6 +4,7 @@ import unittest
 
 from _common import *  # noqa: F401,F403
 import operator_intent_contract as contract
+from transcript_cut_contract import _check_previsual
 
 
 EXPECTED = {
@@ -31,6 +32,32 @@ PLAN = {
 
 
 class OperatorIntentContractTests(unittest.TestCase):
+    def test_requested_music_stays_deferred_until_full_finishing_gate(self) -> None:
+        """Pure real gate functions; no source, media, or acceptance is simulated."""
+        expected = {"mode": "longform", "scope": "trim", "lanes": {}, "music": True}
+        plan = {"planVersion": 1, "target": copy.deepcopy(expected),
+                "cutTrack": [{"sourceId": "TEST", "start": 0, "end": 1, "speed": 1}],
+                "cutDecisions": {"schemaVersion": 1, "removals": []}}
+        original = copy.deepcopy(plan)
+        errors = []
+        _check_previsual(plan, errors)
+        self.assertEqual(errors, [])
+        self.assertIn("plan.music.enabled does not match stored operator intent",
+                      contract.evaluate(plan, expected)["errors"])
+        candidate = copy.deepcopy(plan)
+        candidate["music"] = {"enabled": True, "assetId": "TEST-admitted-choice"}
+        self.assertTrue(contract.evaluate(candidate, expected)["ok"])
+        _check_previsual(candidate, errors)
+        self.assertTrue(any("populated downstream fields: music" in error for error in errors))
+        self.assertEqual(plan, original)
+
+    def test_target_music_cannot_replace_actual_stored_operator_intent(self) -> None:
+        expected = {"mode": "longform", "scope": "trim", "lanes": {}, "music": False}
+        plan = {"target": {**expected, "music": True},
+                "music": {"enabled": True, "assetId": "TEST"}}
+        self.assertIn("plan.music.enabled does not match stored operator intent",
+                      contract.evaluate(plan, expected)["errors"])
+
     def test_matching_produced_plan_passes(self) -> None:
         self.assertTrue(contract.evaluate(PLAN, EXPECTED)["ok"])
 
@@ -134,6 +161,47 @@ class OperatorIntentContractTests(unittest.TestCase):
         plan["target"]["lanes"] = {"captions": "off"}
         verdict = contract.evaluate(plan, expected)
         self.assertTrue(verdict["ok"], verdict["errors"])
+        self.assertFalse(verdict["metrics"]["laneEvidence"]["captions"])
+
+    def test_captions_track_is_rejected_and_never_counts_as_evidence(self) -> None:
+        expected = copy.deepcopy(EXPECTED)
+        expected["mode"] = "short"
+        plan = copy.deepcopy(PLAN)
+        plan["target"]["mode"] = "short"
+        plan["captions"] = {"burn": False}
+        plan["captionsTrack"] = [
+            {"outStart": 0, "outEnd": 2, "text": "This will not render"},
+        ]
+        verdict = contract.evaluate(plan, expected)
+        self.assertFalse(verdict["ok"], verdict["errors"])
+        self.assertFalse(verdict["metrics"]["laneEvidence"]["captions"])
+        self.assertTrue(any("captionsTrack is not renderable" in error
+                            for error in verdict["errors"]), verdict["errors"])
+        self.assertTrue(any("no captions coverage" in error
+                            for error in verdict["errors"]), verdict["errors"])
+
+    def test_empty_captions_track_is_backward_compatible(self) -> None:
+        plan = copy.deepcopy(PLAN)
+        plan["captionsTrack"] = []
+        self.assertTrue(contract.evaluate(plan, EXPECTED)["ok"])
+
+    def test_strict_caption_track_counts_only_when_its_delivery_is_real(self) -> None:
+        expected = copy.deepcopy(EXPECTED)
+        expected["mode"] = "short"
+        plan = copy.deepcopy(PLAN)
+        plan["target"]["mode"] = "short"
+        plan["captions"] = {"burn": True}
+        plan["captionsTrack"] = {
+            "schemaVersion": 1,
+            "source": "kept-transcript",
+            "defaultPolicy": "karaoke",
+            "groups": [],
+        }
+        verdict = contract.evaluate(plan, expected)
+        self.assertTrue(verdict["ok"], verdict["errors"])
+        plan["captions"]["burn"] = False
+        verdict = contract.evaluate(plan, expected)
+        self.assertFalse(verdict["ok"])
         self.assertFalse(verdict["metrics"]["laneEvidence"]["captions"])
 
     def test_auto_transitions_missing_or_malformed_still_fail(self) -> None:

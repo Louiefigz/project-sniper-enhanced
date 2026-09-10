@@ -1,8 +1,14 @@
 import type { ProjectIntent } from "./intent-presets";
+import type { AutoEditDeliveryPolicy } from "./auto-edit-delivery-policy";
+import { runPhaseLabel } from "./project-progress";
+import { isTreatmentCheckpoint, treatmentCheckpointCopy, treatmentCheckpointLabel, treatmentCheckpointSummary } from "./guided-checkpoint-state";
 
 export {
   boundedAutoEditProgressMessage,
   streamProgressMessage,
+  runPhaseLabel,
+  runPhaseRemainingLabel,
+  elapsedRunLabel,
 } from "./project-progress";
 
 export interface StageFlags {
@@ -47,7 +53,8 @@ export type ProducerRunPhase =
   | "rendering"
   | "quality_check"
   | "repairing";
-export type ProducerRunStatus = "running" | "failed" | "interrupted";
+export type ProducerRunStatus = "running" | "failed" | "interrupted" | "awaiting_cut_approval" | "cut_accepted"
+  | "awaiting_treatment_brief" | "treatment_admitted";
 
 export interface ProducerRunEvent {
   at: string;
@@ -64,6 +71,12 @@ export interface ProducerRunState {
   events: ProducerRunEvent[];
   /** Opaque current-attempt fence for local run controls; never a worker PID. */
   controlToken?: string;
+  /** Present only when a matching, valid durable Auto Edit journal proves it. */
+  deliveryPolicy?: AutoEditDeliveryPolicy;
+  /** Present only when proved by the matching durable cut-first journal. */
+  workflowPolicy?: "cut-first";
+  /** Proved only by the matching closed, versioned durable launch context. */
+  workflowVersion?: 2;
 }
 
 const PHASE_COPY: Record<ProjectPhase, ProjectPhaseCopy> = {
@@ -116,6 +129,14 @@ export function projectPhase(stages: StageFlags): ProjectPhase {
 }
 
 export function projectPhaseCopy(stages: StageFlags, run?: ProducerRunState | null): ProjectPhaseCopy {
+  const treatment = treatmentCheckpointCopy(run);
+  if (treatment) return treatment;
+  if (run?.status === "cut_accepted") {
+    return { label: "Cut accepted · continuation pending", detail: "Your cut acceptance is saved. A production worker has not yet been confirmed.", tone: "ready" };
+  }
+  if (run?.status === "awaiting_cut_approval") {
+    return { label: "Cut ready for your review", detail: "Play the reviewed cut before the visual treatment stage. This is not a finished video.", tone: "ready" };
+  }
   if (run?.status === "running") {
     return { label: runPhaseLabel(run.phase), detail: run.message, tone: "running" };
   }
@@ -139,7 +160,7 @@ export function projectPhaseCopy(stages: StageFlags, run?: ProducerRunState | nu
 }
 
 export function canResumeAutoEdit(run?: ProducerRunState | null): boolean {
-  return run?.kind === "auto_edit" && ["failed", "interrupted"].includes(run.status);
+  return !isTreatmentCheckpoint(run) && run?.kind === "auto_edit" && ["failed", "interrupted"].includes(run.status);
 }
 
 export function nextProjectAction(stages: StageFlags): ProjectAction {
@@ -161,6 +182,9 @@ export function projectPrimaryActionLabel(
   stages: StageFlags,
   run?: ProducerRunState | null,
 ): string {
+  if (isTreatmentCheckpoint(run)) return treatmentCheckpointLabel(run);
+  if (run?.status === "cut_accepted") return "Continue accepted cut";
+  if (run?.status === "awaiting_cut_approval") return "Review cut";
   if (canResumeAutoEdit(run)) return "Resume edit";
   if (run?.status === "failed") {
     return run.kind === "auto_edit" ? "Retry edit" : "Retry review & render";
@@ -217,7 +241,21 @@ export function projectCardSummary(
   run?: ProducerRunState | null,
   hasStoredIntent = true,
 ): ProjectCardSummary {
+  const treatment = treatmentCheckpointSummary(run);
+  if (treatment) return treatment;
   const available = AVAILABLE_COPY[projectPhase(stages)];
+  if (run?.status === "cut_accepted") {
+    return { available: "Your exact cut acceptance is saved; this is not final-video approval.",
+      working: "Continuation is pending. Sniper has not confirmed that a production worker is running.",
+      next: "Continue the accepted cut using its saved acceptance, without making a new edit request.",
+      safe: "Closing the project does not discard acceptance. Ordinary Generate and Resume cannot bypass the pending continuation." };
+  }
+  if (run?.status === "awaiting_cut_approval") {
+    return { available: "An independently reviewed story cut and private playback checkpoint are saved.",
+      working: run.message || "The job is at cut review; inspect the checkpoint for decision and verification status.",
+      next: "Choose Review cut to watch the exact preview. It is not an approved final.",
+      safe: "Opening or playing the preview does not accept the cut. Ordinary Generate and Resume cannot bypass this checkpoint." };
+  }
   if (run?.status === "running") {
     return {
       available,
@@ -247,35 +285,4 @@ export function requestedEditLabel(intent: ProjectIntent): string {
   const format = intent.mode === "longform" ? "Long (16:9)" : "Short (9:16)";
   const level = `${intent.scope[0].toUpperCase()}${intent.scope.slice(1)} edit`;
   return `${format} · ${level}`;
-}
-
-export function runPhaseLabel(phase: ProducerRunPhase): string {
-  const labels: Record<ProducerRunPhase, string> = {
-    authoring: "Generating edit plan",
-    planning_review: "Reviewing edit plan",
-    validating: "Validating edit plan",
-    rendering: "Rendering video",
-    quality_check: "Running final QC",
-    repairing: "Repairing QC findings",
-  };
-  return labels[phase];
-}
-
-export function runPhaseRemainingLabel(phase: ProducerRunPhase): string {
-  const labels: Record<ProducerRunPhase, string> = {
-    authoring: "Next: planning reviews, deterministic gates, a candidate render, and QC.",
-    planning_review: "Next: finish the required plan reviews and gates, then render a candidate.",
-    validating: "Next: render a candidate, then run deterministic and visual QC.",
-    rendering: "Next: Audit B plus independent composition and editorial reviews.",
-    quality_check: "Next: approve and promote this candidate, or repair and render another.",
-    repairing: "Next: re-review the repaired plan, render a fresh candidate, and run QC again.",
-  };
-  return labels[phase];
-}
-
-export function elapsedRunLabel(startedAt: string, now = Date.now()): string {
-  const elapsed = Math.max(0, now - Date.parse(startedAt));
-  const minutes = Math.floor(elapsed / 60_000);
-  const seconds = Math.floor((elapsed % 60_000) / 1_000);
-  return minutes > 0 ? `${minutes}m ${seconds}s elapsed` : `${seconds}s elapsed`;
 }

@@ -1,0 +1,54 @@
+{
+  "recordedAt": "2026-09-09T16:48:10.326924+00:00",
+  "testCount": 101,
+  "testElapsedSeconds": 0.45,
+  "status": "passed",
+  "suite": [
+    "test_native_work_lease",
+    "test_managed_preview",
+    "test_managed_preview_tree",
+    "test_native_render_resources",
+    "test_studio_review_commands",
+    "test_studio_review",
+    "test_studio_review_versions"
+  ],
+  "scope": "Kernel locks, private registry, resource policy, preview lifecycle and harmless detached-child cleanup; no full export or memory-growth fix qualification",
+  "files": [
+    {
+      "path": "PROJECT_SNIPER/scripts/producer/native_work_lease.py",
+      "sha256": "bcea94536ba8d1aaf37288066042fad11e819a6e0a6d10d33376e4194ea5cbee"
+    },
+    {
+      "path": "PROJECT_SNIPER/scripts/producer/studio/managed_preview.py",
+      "sha256": "3b827f5e80aa1f60c29d9791c0d1f83dc2c0f11f423215cea295b51a2cdcbbca"
+    },
+    {
+      "path": "PROJECT_SNIPER/scripts/producer/studio/managed_preview_state.py",
+      "sha256": "72f3471170d975a9d354f39ed998d0a80a205a40b55daead739464526ac06afe"
+    },
+    {
+      "path": "PROJECT_SNIPER/scripts/producer/studio/studio_server.py",
+      "sha256": "f08910294bad7df8fe85500029e0bc14dc3cbc60cec285d18c51c0f13373dc92"
+    },
+    {
+      "path": "PROJECT_SNIPER/scripts/producer/studio/studio_review.py",
+      "sha256": "ab3e36019eb87da2d6af7cdcea8d2baf513c3ee6d070d98053bb593979f2e170"
+    },
+    {
+      "path": "PROJECT_SNIPER/scripts/producer/tests/test_native_work_lease.py",
+      "sha256": "3699fc1f958fb8004a77fdd170e5c249e1754b5330b2132856cc44847448b44e"
+    },
+    {
+      "path": "PROJECT_SNIPER/scripts/producer/tests/test_managed_preview.py",
+      "sha256": "f18c9179c74dc54ae272cfc4a725ef01e41eb9648da58110d66fed435d5cde97"
+    },
+    {
+      "path": "PROJECT_SNIPER/scripts/producer/tests/test_managed_preview_tree.py",
+      "sha256": "0403ffde93965909eb5ac455fdb653edd870641ebe78d09e206590558460eb6f"
+    },
+    {
+      "path": "PROJECT_SNIPER/scripts/producer/tests/test_studio_review.py",
+      "sha256": "6ad920119d8283c8eee20b5bde41fdae6702e1b20a7ee37f2cf9ccb93e976d50"
+    }
+  ]
+}

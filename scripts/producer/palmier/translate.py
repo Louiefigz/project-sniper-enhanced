@@ -190,7 +190,13 @@ def _tail_steps(plan: dict, fps: float, warn: list[dict],
         steps.append({"op": "text", "content": card["text"],
                       "startFrame": round(float(card["outStart"]) * fps),
                       "endFrame": round(float(card["outEnd"]) * fps)})
-    if (plan.get("captions") or {}).get("burn"):
+    if isinstance(plan.get("captionsTrack"), dict):
+        warn.append({"op": "warn", "message":
+                     "CaptionTrackV1 is mirrored from the approved master and "
+                     "preserved as regenerable caption artifacts; native "
+                     "captions remain disabled because exact timing/style "
+                     "readback is unproved"})
+    elif (plan.get("captions") or {}).get("burn"):
         warn.append({"op": "warn", "message":
                      "captions.burn=true not translated — Palmier re-transcribes "
                      "(word timing lost); burn via the in-house renderer or "

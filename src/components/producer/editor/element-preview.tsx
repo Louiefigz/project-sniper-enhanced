@@ -10,6 +10,7 @@ import {
 } from "react";
 import type { CompCanvas, CompCatalogEntry } from "@/lib/producer/comps-catalog";
 import { parseDims, parseRootDuration, useCompHtml } from "./use-comp-html";
+import { usePreviewHealth } from "./use-preview-health";
 
 // LIVE ELEMENT PREVIEW — the ELEMENTS panel's mini comp player. Every catalog
 // comp registers a PAUSED GSAP timeline (window.__timelines) and never
@@ -132,14 +133,15 @@ export function ElementPreview({ kind, spec, canvas, maxHeight, loop, loopId, on
   const { html, err } = useCompHtml(kind, specJson, null, seen);
   const dims = useMemo(() => parseDims(html), [html]);
   const durationS = useMemo(() => parseRootDuration(html, DEFAULT_DURATION_S), [html]);
+  const health = usePreviewHealth(iframeRef, html);
 
   // Drive the shared loop ONLY while visible and booted; scrolling the card out
   // of view (or unmounting — panel/showcase close) unregisters it.
   useEffect(() => {
-    if (!inView || !html || err) return;
+    if (!inView || !html || err || health.error) return;
     loop.register(loopId, () => iframeRef.current?.contentWindow ?? null, durationS);
     return () => loop.unregister(loopId);
-  }, [inView, html, err, durationS, loop, loopId]);
+  }, [inView, html, err, health.error, durationS, loop, loopId]);
 
   const [bw, bh] = canvas === "16:9" ? [16, 9] : [9, 16];
   const stageH = width ? Math.min((width * bh) / bw, maxHeight) : 0;
@@ -150,18 +152,27 @@ export function ElementPreview({ kind, spec, canvas, maxHeight, loop, loopId, on
       ref={wrapRef}
       onClick={onClick}
       role={onClick ? "button" : undefined}
+      aria-label={onClick ? `Preview ${kind}` : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        onClick();
+      } : undefined}
       title={onClick ? "Expand preview" : undefined}
+      data-preview-state={err || health.error ? "failed" : health.ready ? "ready" : "loading"}
       className={`relative flex w-full items-center justify-center overflow-hidden rounded border border-neutral-800 bg-gradient-to-br from-neutral-800/70 via-neutral-900 to-neutral-950 ${
         onClick ? "cursor-zoom-in hover:border-neutral-600" : ""
       } ${className ?? ""}`}
       style={{ height: stageH || 96 }}
     >
       {seen && html && !err && (
-        <PreviewStage kind={kind} html={html} dims={dims} scale={scale} iframeRef={iframeRef} />
+        <PreviewStage kind={kind} html={html} dims={dims} scale={scale} iframeRef={iframeRef}
+          onLoad={health.requestHealth} />
       )}
-      {err && (
-        <span className="absolute inset-0 flex items-center justify-center p-2 text-center text-[10px] text-rose-300">
-          preview failed: {err}
+      {(err || health.error) && (
+        <span role="alert" className="absolute inset-0 flex items-center justify-center bg-neutral-950/90 p-2 text-center text-[10px] text-rose-300">
+          preview failed: {err || health.error}
         </span>
       )}
     </div>
@@ -174,10 +185,11 @@ interface StageProps {
   dims: { w: number; h: number };
   scale: number;
   iframeRef: RefObject<HTMLIFrameElement | null>;
+  onLoad: () => void;
 }
 
 /** The scaled, sandboxed comp iframe (pointer-events off — clicks belong to the wrapper). */
-function PreviewStage({ kind, html, dims, scale, iframeRef }: StageProps) {
+function PreviewStage({ kind, html, dims, scale, iframeRef, onLoad }: StageProps) {
   return (
     <div className="relative overflow-hidden" style={{ width: dims.w * scale, height: dims.h * scale }}>
       <iframe
@@ -185,6 +197,7 @@ function PreviewStage({ kind, html, dims, scale, iframeRef }: StageProps) {
         sandbox="allow-scripts"
         srcDoc={html}
         title={`element preview: ${kind}`}
+        onLoad={onLoad}
         style={{
           width: dims.w,
           height: dims.h,

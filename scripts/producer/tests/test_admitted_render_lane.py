@@ -13,6 +13,7 @@ from types import SimpleNamespace
 from unittest import mock
 
 from _common import pl  # noqa: F401
+from _current_render_build_fixture import current_manifest
 from headless import admitted_render_lane as lane_module
 from headless import render_admission_artifact as artifact_module
 from headless.admitted_render_lane import (
@@ -36,8 +37,8 @@ from headless.render_runtime import RendererRuntime
 PRODUCER_DIR = Path(__file__).resolve().parents[1]
 REPO_ROOT = PRODUCER_DIR.parents[1]
 ATTEMPT = "22222222-2222-4222-8222-222222222222"
-BUILD_A = {"schemaVersion": 1, "policy": "lane-a", "implementation": []}
-BUILD_B = {"schemaVersion": 1, "policy": "lane-b", "implementation": []}
+BUILD_A = current_manifest("lane-a")
+BUILD_B = current_manifest("lane-b")
 
 
 def _entry(label: str, duration: float) -> dict:

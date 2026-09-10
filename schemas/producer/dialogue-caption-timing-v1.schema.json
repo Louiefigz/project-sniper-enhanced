@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/dialogue-caption-timing-v1.schema.json",
+  "title": "DialogueCaptionTimingV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "dialogueMapHash",
+    "dialogueTrackHash",
+    "pictureTimelineMapHash",
+    "fps",
+    "sampleRate",
+    "words"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "dialogue-caption-timing" },
+    "dialogueMapHash": { "$ref": "#/$defs/sha256" },
+    "dialogueTrackHash": { "$ref": "#/$defs/sha256" },
+    "pictureTimelineMapHash": { "$ref": "#/$defs/sha256" },
+    "fps": { "$ref": "positive-rational-v1.schema.json" },
+    "sampleRate": { "$ref": "#/$defs/positiveSafeInteger" },
+    "words": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/word" }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "wordId": {
+      "type": "string",
+      "pattern": "^w-[0-9a-f]{16}$"
+    },
+    "stableId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"
+    },
+    "safeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "positiveSafeInteger": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "sampleRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startSample", "endSampleExclusive"],
+      "properties": {
+        "startSample": { "$ref": "#/$defs/safeInteger" },
+        "endSampleExclusive": { "$ref": "#/$defs/positiveSafeInteger" }
+      }
+    },
+    "stableIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/stableId" }
+    },
+    "roles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "enum": ["primary", "j-cut-handle", "l-cut-handle"]
+      }
+    },
+    "word": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "wordId",
+        "sourceWordId",
+        "occurrence",
+        "text",
+        "sourceId",
+        "sourceSampleRate",
+        "sourceSampleRange",
+        "transcriptTimingHash",
+        "ownerCutSegmentId",
+        "ownerElementVersion",
+        "dialogueSegmentIds",
+        "dialogueRoles",
+        "coveringCutSegmentIds",
+        "startSample",
+        "endSampleExclusive",
+        "startFrame",
+        "endFrameExclusive"
+      ],
+      "properties": {
+        "wordId": { "$ref": "#/$defs/wordId" },
+        "sourceWordId": { "$ref": "#/$defs/wordId" },
+        "occurrence": { "$ref": "#/$defs/positiveSafeInteger" },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "sourceId": { "$ref": "#/$defs/stableId" },
+        "sourceSampleRate": { "$ref": "#/$defs/positiveSafeInteger" },
+        "sourceSampleRange": { "$ref": "#/$defs/sampleRange" },
+        "transcriptTimingHash": { "$ref": "#/$defs/sha256" },
+        "ownerCutSegmentId": { "$ref": "#/$defs/stableId" },
+        "ownerElementVersion": { "$ref": "#/$defs/positiveSafeInteger" },
+        "dialogueSegmentIds": { "$ref": "#/$defs/stableIds" },
+        "dialogueRoles": { "$ref": "#/$defs/roles" },
+        "coveringCutSegmentIds": { "$ref": "#/$defs/stableIds" },
+        "startSample": { "$ref": "#/$defs/safeInteger" },
+        "endSampleExclusive": { "$ref": "#/$defs/positiveSafeInteger" },
+        "startFrame": { "$ref": "#/$defs/safeInteger" },
+        "endFrameExclusive": { "$ref": "#/$defs/positiveSafeInteger" },
+        "speaker": {
+          "oneOf": [
+            { "type": "string", "minLength": 1, "maxLength": 128 },
+            {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          ]
+        }
+      }
+    }
+  }
+}

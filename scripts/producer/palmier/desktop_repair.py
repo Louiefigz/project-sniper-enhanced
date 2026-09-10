@@ -6,14 +6,24 @@ import os
 from dataclasses import dataclass
 
 from fingerprints import file_sha256, json_canon
-from graphics.graphics_render import render_entry, timeline_padded_entry
+from graphics.graphics_render import (
+    render_entry_at_rate as render_entry,
+    timeline_padded_entry,
+)
+from graphics.placement_context import bind_plan_face_bbox
+from palmier.checkpoint_graphics import (
+    PlacementBakeContext,
+    assert_reference_current,
+    bake_rendered_graphic,
+)
 from palmier.mcp_client import PalmierError
 from palmier.presenter_asset import PresenterRequest, fill_presenter_entry
 
 _FIXED_LANES = (
     "target", "cutTrack", "punchIns", "transitions", "brollTrack", "reframe",
     "captions", "music", "audioEnhance", "audioGain", "baselineLook",
-    "titleCards", "faceBBoxNorm", "treatmentMap", "sfxTrack", "chapters",
+    "audioAuthorityMode", "titleCards", "faceBBoxNorm", "treatmentMap",
+    "sfxTrack", "chapters",
 )
 
 
@@ -24,6 +34,7 @@ class RepairRenderContext:
     fps: float
     cache_dir: str
     source: dict
+    placement: PlacementBakeContext | None = None
 
 
 def _same(left: object, right: object) -> bool:
@@ -84,7 +95,39 @@ def _assert_scope(old: dict, new: dict) -> tuple[dict[str, dict], dict[str, dict
 
 def _render_payload(row: dict) -> dict:
     return {key: row.get(key) for key in
-            ("kind", "anchor", "outStart", "outEnd", "spec", "faceCx")}
+            ("kind", "anchor", "outStart", "outEnd", "spec", "faceCx",
+             "placement", "faceBBoxNorm", "gazeXY", "takeoverBase")}
+
+
+def validate_one_graphic_repair(old_plan: dict, new_plan: dict) -> str:
+    """Require a repair plan to alter exactly one graphic pixel payload."""
+    before, after = _assert_scope(old_plan, new_plan)
+    ignored = {"graphicsTrack", "planVersion", "graphicsDecisions"}
+    changed_lanes = [
+        key for key in sorted(set(old_plan) | set(new_plan))
+        if not key.startswith("_") and key not in ignored
+        and not _same(old_plan.get(key), new_plan.get(key))
+    ]
+    if changed_lanes:
+        raise PalmierError(
+            "one-graphic acceptance repair changes other plan lanes: "
+            + ", ".join(changed_lanes))
+    changed = [
+        ident for ident in sorted(after)
+        if not _same(
+            _render_payload(before[ident]), _render_payload(after[ident]))
+    ]
+    if len(changed) != 1:
+        raise PalmierError(
+            "live acceptance repair must change exactly one graphic")
+    return changed[0]
+
+
+def _placement_context(context: RepairRenderContext) -> PlacementBakeContext:
+    if context.placement is None:
+        raise PalmierError(
+            "scoped graphic repair has no delivery placement authority")
+    return context.placement
 
 
 def render_changed_graphics(old_plan: dict, new_plan: dict,
@@ -97,19 +140,24 @@ def render_changed_graphics(old_plan: dict, new_plan: dict,
     if not changed:
         raise PalmierError("scoped repair found no changed graphic pixels")
     imports, overlays = [], []
+    placement = _placement_context(context)
     for ident in changed:
-        row = after[ident]
+        row = bind_plan_face_bbox([after[ident]], new_plan)[0]
         render_row = timeline_padded_entry(row, context.fps)
-        rendered = render_entry(render_row, context.cache_dir)
+        rendered = render_entry(render_row, context.cache_dir, context.fps)
         rendered = fill_presenter_entry(PresenterRequest(
             new_plan, context.source, row, rendered, context.cache_dir))
+        rendered = bake_rendered_graphic(row, rendered, placement)
         proof = rendered.get("proof")
         if not isinstance(proof, dict) or proof.get("schemaVersion") != 1:
             raise PalmierError(f"graphic {ident!r} has no rendered asset proof")
         key = f"repair-source:{ident}"
+        receipt_path = rendered["path"] + ".placement.json"
         imports.append({"op": "import", "key": key,
                         "path": rendered["path"], "elementId": ident,
-                        "stableIdentity": True})
+                        "stableIdentity": True,
+                        "placementReceiptPath": receipt_path,
+                        "placementReceiptHash": file_sha256(receipt_path)})
         overlays.append({
             "mediaKey": key, "elementId": ident, "stableIdentity": True,
             "startFrame": round(float(row["outStart"]) * context.fps),
@@ -117,6 +165,7 @@ def render_changed_graphics(old_plan: dict, new_plan: dict,
             "transform": {"width": 1.0, "height": 1.0,
                           "centerX": 0.5, "centerY": 0.5},
         })
+    assert_reference_current(placement)
     return [*imports, {"op": "overlays", "entries": overlays}]
 
 
@@ -172,6 +221,8 @@ def _replacement(ident: str, overlay: dict, asset: dict,
         "startFrame": overlay["startFrame"], "endFrame": overlay["endFrame"],
         "transform": overlay.get("transform"),
         "path": asset["path"], "fileHash": asset["fileHash"],
+        "placementReceiptPath": asset.get("placementReceiptPath"),
+        "placementReceiptHash": asset.get("placementReceiptHash"),
         "rules": [
             "import the bound asset, then add it at this exact track/window",
             "the old clip may be auto-replaced; remove it only if readback retains it",

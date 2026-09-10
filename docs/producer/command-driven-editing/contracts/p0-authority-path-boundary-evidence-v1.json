@@ -1,0 +1,340 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-07-30",
+  "concerns": [
+    "caller-supplied-output-root",
+    "dynamically-constructed-filename",
+    "external-store",
+    "non-prefixed-authority"
+  ],
+  "records": [
+    {
+      "evidenceId": "dynamic-content-addressed-json-and-media",
+      "concern": "dynamically-constructed-filename",
+      "disposition": "artifact-bound",
+      "artifactIds": [
+        "revision-store-v1",
+        "external-media-snapshot-shadow",
+        "producer-ingest-source-set-v1",
+        "reference-media-admission"
+      ],
+      "finding": "Digest-derived object, snapshot, source-set, and receipt names are constructed at runtime; their stores and lifecycle owners are inventoried rather than discoverable as fixed hidden literals.",
+      "sites": [
+        {
+          "path": "src/lib/server/producer-authority-files.ts",
+          "tokens": [
+            "path.join(directory, `${hash}.json`)"
+          ]
+        },
+        {
+          "path": "src/lib/server/content-addressed-file.ts",
+          "tokens": [
+            "`${expectedHash}${extension}`"
+          ]
+        },
+        {
+          "path": "scripts/producer/headless/external_media_snapshot.py",
+          "tokens": [
+            "f\"{digest}.media\""
+          ]
+        },
+        {
+          "path": "scripts/producer/ingest_admission.py",
+          "tokens": [
+            "f\"{receipt_sha256}.json\""
+          ]
+        },
+        {
+          "path": "scripts/producer/headless/admit_external_media_cli.py",
+          "tokens": [
+            "f\"{receipt_sha256}.json\""
+          ]
+        }
+      ]
+    },
+    {
+      "evidenceId": "dynamic-run-learning-and-review-paths",
+      "concern": "dynamically-constructed-filename",
+      "disposition": "artifact-bound",
+      "artifactIds": [
+        "producer-learning-root",
+        "producer-learning-qc-history",
+        "producer-learning-run-snapshots"
+      ],
+      "finding": "Run, capture, lens, and archive identities create nested learning paths dynamically; the root plus doctrine/pipeline and QC subfamilies are inventoried separately.",
+      "sites": [
+        {
+          "path": "src/lib/server/auto-edit-doctrine.ts",
+          "tokens": [
+            "path.join(runs, stableRunId, \"doctrine\")"
+          ]
+        },
+        {
+          "path": "src/lib/server/auto-edit-pipeline-authority.ts",
+          "tokens": [
+            "path.join(runs, stableRunId, \"pipeline\")"
+          ]
+        },
+        {
+          "path": "src/app/api/producer/palmier/candidate-qc/reviewer.ts",
+          "tokens": [
+            "`${lens}-${Date.now()}-${randomUUID()}.json`"
+          ]
+        },
+        {
+          "path": "scripts/producer/palmier/native_qc_archive.py",
+          "tokens": [
+            "f\".{name}.tmp\""
+          ]
+        }
+      ]
+    },
+    {
+      "evidenceId": "current-render-artifact-root-boundary",
+      "concern": "caller-supplied-output-root",
+      "disposition": "artifact-bound",
+      "artifactIds": [
+        "current-render-graph-v1",
+        "assembled-media-authority",
+        "caption-render-authority-v1"
+      ],
+      "finding": "The graph authority stays under producerDir while artifactDir selects private timeline, caption, and composite outputs; the CLI canonicalizes and requires the supplied directory before work.",
+      "sites": [
+        {
+          "path": "scripts/producer/current_render_graph_inputs.py",
+          "tokens": [
+            "artifact_dir: Path | None = None",
+            "return self.artifact_dir or self.producer_dir"
+          ]
+        },
+        {
+          "path": "scripts/producer/current_render_graph_cli.py",
+          "tokens": [
+            "parser.add_argument(\"--artifact-dir\", type=Path)",
+            "artifact_dir = (args.artifact_dir or producer_dir).resolve(strict=True)"
+          ]
+        }
+      ]
+    },
+    {
+      "evidenceId": "scene-package-explicit-roots",
+      "concern": "caller-supplied-output-root",
+      "disposition": "artifact-bound",
+      "artifactIds": [
+        "scene-package-cli-v1",
+        "scene-authoring-stage-receipt"
+      ],
+      "finding": "Scene package, bundle, snapshot, cache, attempt, and receipt roots are explicit CLI boundaries; normalization and unused-output checks occur before durable publication.",
+      "sites": [
+        {
+          "path": "scripts/producer/graphics/scene_package_cli.py",
+          "tokens": [
+            "parser.add_argument(\"--bundle-store\")",
+            "parser.add_argument(\"--media-snapshot-store\")",
+            "package.add_argument(\"--receipt-out\", required=True)",
+            "stage.add_argument(\"--attempt-dir\", required=True)"
+          ]
+        }
+      ]
+    },
+    {
+      "evidenceId": "reference-admission-external-store",
+      "concern": "external-store",
+      "disposition": "artifact-bound",
+      "artifactIds": [
+        "reference-media-admission",
+        "reference-admission-transaction"
+      ],
+      "finding": "Reference media enters a caller-selected store only through the sandbox admission CLI, then TypeScript revalidates exact snapshot and receipt locations before exposing the reference.",
+      "sites": [
+        {
+          "path": "scripts/producer/headless/admit_external_media_cli.py",
+          "tokens": [
+            "parser.add_argument(\"--store\", required=True)",
+            "root = Path(os.path.abspath(store))"
+          ]
+        },
+      {
+        "path": "src/app/api/_lib/reference-media-admission.ts",
+        "tokens": [
+          "path.resolve(store)",
+          "parseReferenceAdmission(authority, result.store)"
+        ]
+      },
+        {
+          "path": "src/app/api/_lib/reference-admission-verifier.ts",
+          "tokens": [
+            "admission.receiptPath === path.join("
+          ]
+        }
+      ]
+    },
+    {
+      "evidenceId": "external-media-snapshot-store",
+      "concern": "external-store",
+      "disposition": "artifact-bound",
+      "artifactIds": [
+        "external-media-snapshot-shadow"
+      ],
+      "finding": "The external-media probe accepts a store boundary, creates a content-addressed immutable snapshot, and returns a receipt whose consumer must rehash the stored bytes.",
+      "sites": [
+        {
+          "path": "scripts/producer/headless/external_media_snapshot.py",
+          "tokens": [
+            "destination = os.path.join(store, f\"{digest}.media\")"
+          ]
+        },
+        {
+          "path": "scripts/producer/headless/external_media_probe.py",
+          "tokens": [
+            "capture_external_media_snapshot(source, snapshot_store)"
+          ]
+        }
+      ]
+    },
+    {
+      "evidenceId": "non-prefixed-core-project-authorities",
+      "concern": "non-prefixed-authority",
+      "disposition": "artifact-bound",
+      "artifactIds": [
+        "project-intent",
+        "asset-manifest",
+        "edit-plan",
+        "assembled-media-authority"
+      ],
+      "finding": "Core project metadata, source manifest, edit plan, and assembled provenance do not use hidden prefixes; their fixed tokens remain covered by the artifact call-site audit.",
+      "sites": [
+        {
+          "path": "src/app/api/_lib/workspace.ts",
+          "tokens": [
+            "project.json"
+          ]
+        },
+        {
+          "path": "scripts/producer/ingest.py",
+          "tokens": [
+            "asset_manifest.json"
+          ]
+        },
+        {
+          "path": "scripts/producer/render.py",
+          "tokens": [
+            "edit_plan.json"
+          ]
+        },
+        {
+        "path": "scripts/producer/fingerprint_io.py",
+          "tokens": [
+            ".assembled.json"
+          ]
+        }
+      ]
+    },
+    {
+      "evidenceId": "non-prefixed-caption-palmier-and-stage-authorities",
+      "concern": "non-prefixed-authority",
+      "disposition": "artifact-bound",
+      "artifactIds": [
+        "caption-render-authority-v1",
+        "palmier-timeline-authority",
+        "scene-authoring-stage-receipt"
+      ],
+      "finding": "Caption, Palmier timeline, and scene-stage receipts use descriptive non-hidden names and are retained as explicit artifact rows.",
+      "sites": [
+        {
+          "path": "scripts/producer/captions/caption_authority.py",
+          "tokens": [
+            "caption_authority.json"
+          ]
+        },
+        {
+          "path": "scripts/producer/palmier/timeline_authority.py",
+          "tokens": [
+            "palmier.timeline-authority.json"
+          ]
+        },
+        {
+          "path": "scripts/producer/graphics/scene_authoring_stage.py",
+          "tokens": [
+            "stage-receipt.json"
+          ]
+        }
+      ]
+    },
+    {
+      "evidenceId": "bounded-tool-execution-output-domains",
+      "concern": "caller-supplied-output-root",
+      "disposition": "artifact-bound",
+      "artifactIds": [
+        "bounded-command-execution-adapters",
+        "frameio-review-report",
+        "palmier-current-preflight-boundary"
+      ],
+      "finding": "Generic runCmd/spawnPython/Codex adapters delegate explicit command, cwd, and output arguments to reviewed callers; Palmier preflight is stdout-only, while FRAME.IO review defaults durable results.json/report.html to the selected media parent and is inventoried as its own output family.",
+      "sites": [
+        {
+          "path": "src/app/api/_lib/run-cmd.ts",
+          "tokens": [
+            "spawn(cmd, args)"
+          ]
+        },
+        {
+          "path": "src/app/api/_lib/spawn-python.ts",
+          "tokens": [
+            "spawn(pythonInterpreter(), [scriptPath, ...args]"
+          ]
+        },
+        {
+          "path": "src/app/api/_lib/codex-cli.ts",
+          "tokens": [
+            "cwd: options.cwd ?? process.cwd()"
+          ]
+        },
+        {
+          "path": "src/app/api/frameio-review/review/route.ts",
+          "tokens": [
+            "\"frameio\", \"review.py\""
+          ]
+        },
+        {
+          "path": "src/app/api/producer/palmier/open/current.ts",
+          "tokens": [
+            "PUSH, planPath, manifestPath, \"--preflight\""
+          ]
+        }
+      ]
+    },
+    {
+      "evidenceId": "probe-and-repair-private-workspaces",
+      "concern": "caller-supplied-output-root",
+      "disposition": "ephemeral-non-authority",
+      "artifactIds": [],
+      "finding": "Probe and repair work roots are private temporary directories; only their separately hash-bound output receipts or content-addressed media may cross promotion.",
+      "sites": [
+        {
+          "path": "scripts/producer/headless/external_media_probe.py",
+          "tokens": [
+            "tempfile.TemporaryDirectory(prefix=\".sniper-media-probe-\")"
+          ]
+        },
+        {
+          "path": "scripts/producer/edit/repair_fragment.py",
+          "tokens": [
+            "tempfile.mkdtemp(prefix=\".sniper-repair-\", dir=directory)"
+          ]
+        },
+        {
+          "path": "scripts/producer/edit/repair_composite.py",
+          "tokens": [
+            "prefix=\".sniper-repair-composite-\""
+          ]
+        }
+      ]
+    }
+  ],
+  "knownLimitations": [
+    "This source-checked manual evidence supplements the separate Python and TypeScript persistence-call AST scan. That scan enumerates declared filesystem primitives but does not infer arbitrary custom-wrapper or spawned-process side effects.",
+    "Caller-supplied roots are classified at their declared validation boundaries; the evidence does not prove every transitive filesystem operation under those roots.",
+    "External services and databases outside the four source roots remain out of this repository-local inventory scope."
+  ]
+}

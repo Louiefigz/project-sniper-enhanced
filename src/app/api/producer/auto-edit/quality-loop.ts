@@ -1,9 +1,13 @@
 import path from "path";
+import { readFileSync } from "node:fs";
+import { audioAuditFailure } from "@/lib/producer/audit-audio-policy";
 import { snapshotPlan } from "../../_lib/plan-snapshots";
 import { planContentHash } from "@/lib/server/auto-edit-authority";
 import { autoEditAuthoritySnapshot, type AutoEditAuthoritySnapshot } from "@/lib/server/auto-edit-authority-snapshot";
 import { fileSha256, type AutoEditJob, type CheckpointUpdate } from "@/lib/server/auto-edit-job-store";
-import { promoteApprovedCandidate, type HashedArtifactRef, writeQualityJson } from "@/lib/server/auto-edit-quality-artifacts";
+import { type HashedArtifactRef, writeQualityJson } from "@/lib/server/auto-edit-quality-artifacts";
+import { promoteApprovedCandidateWithRenderGraph } from
+  "@/lib/server/current-render-graph-candidate";
 import {
   runProducerReview,
   runProducerRevision,
@@ -52,7 +56,7 @@ export interface QualityLoopDependencies {
   hash: typeof fileSha256;
   contentHash: typeof planContentHash;
   snapshot: typeof snapshotPlan;
-  promote: typeof promoteApprovedCandidate;
+  promote: typeof promoteApprovedCandidateWithRenderGraph;
   writeJson: typeof writeQualityJson;
   authority: typeof autoEditAuthoritySnapshot;
   checkpoint: typeof publishPalmierWorkingCheckpoint;
@@ -76,7 +80,7 @@ const DEFAULT_DEPS: QualityLoopDependencies = {
   hash: fileSha256,
   contentHash: planContentHash,
   snapshot: snapshotPlan,
-  promote: promoteApprovedCandidate,
+  promote: promoteApprovedCandidateWithRenderGraph,
   writeJson: writeQualityJson,
   authority: autoEditAuthoritySnapshot,
   checkpoint: publishPalmierWorkingCheckpoint,
@@ -85,10 +89,9 @@ const DEFAULT_DEPS: QualityLoopDependencies = {
 async function runLensReview(
   run: QualityLoopRuntime,
   lens: VisualReviewLens,
-  evidence: BoundRenderedEvidence,
-  authority: AutoEditAuthoritySnapshot,
-  deps: QualityLoopDependencies,
+  input: { evidence: BoundRenderedEvidence; authority: AutoEditAuthoritySnapshot; deps: QualityLoopDependencies },
 ): Promise<QualityLensReview> {
+  const { evidence, authority, deps } = input;
   const round = run.job.qcRound!;
   run.io.send({
     event: "rendered_review_started", lens, qcRound: round,
@@ -131,23 +134,62 @@ async function visualReviews(
 ): Promise<QualityLensReview[]> {
   if (!evidence) return [];
   return Promise.all(VISUAL_REVIEW_LENSES.map((lens) =>
-    runLensReview(run, lens, evidence, authority, deps)));
+    runLensReview(run, lens, { evidence, authority, deps })));
 }
 function persistSummary(
   run: QualityLoopRuntime,
-  audit: AuditBOutcome,
-  review: ProducerReview,
-  reviews: QualityLensReview[],
-  authority: AutoEditAuthoritySnapshot,
-  evidence: BoundRenderedEvidence,
+  input: { audit: AuditBOutcome; review: ProducerReview; reviews: QualityLensReview[];
+    authority: AutoEditAuthoritySnapshot; evidence: BoundRenderedEvidence },
   deps: QualityLoopDependencies,
 ): HashedArtifactRef {
+  const { audit, review, reviews, authority, evidence } = input;
   const refs = reviews.map((item) => artifactRef(item.path));
   const destination = path.join(path.dirname(run.job.candidatePath!), "quality-summary.json");
   deps.writeJson(destination, qualitySummaryValue(
     run.job, authority, evidence.authority, audit, review, refs,
   ));
   return artifactRef(destination);
+}
+
+async function blockMechanicalAudio(
+  run: QualityLoopRuntime, audit: AuditBOutcome, deps: QualityLoopDependencies,
+): Promise<void> {
+  let reason: string | null;
+  try {
+    reason = audioAuditFailure(
+      JSON.parse(readFileSync(String(audit.event.machine), "utf8")), run.job.candidateHash ?? null);
+  } catch {
+    reason = "audio audit report is missing or unreadable";
+  }
+  if (!reason) return;
+  await deps.renderCheckpointSettled();
+  run.io.send({ event: "quality_blocked", stage: "quality", round: run.job.qcRound,
+    unresolvedFindingIds: ["QC_AUDIO_DELIVERY"], materialIssueCount: 1, message: reason });
+  throw new AutoEditError(`candidate has non-plan-repairable defects: QC_AUDIO_DELIVERY: ${reason}`);
+}
+
+/** No visual vote can approve an already failed last-round candidate, and the
+ * cap forbids another repair. Keep the failed evidence, not unused paid work. */
+async function blockExhaustedDeterministicRound(run: QualityLoopRuntime, input: {
+  audit: AuditBOutcome; evidence: BoundRenderedEvidence | null; authority: AutoEditAuthoritySnapshot;
+}, deps: QualityLoopDependencies): Promise<void> {
+  const round = run.job.qcRound!;
+  if (round < MAX_QC_RENDER_ROUNDS) return;
+  const review = aggregateQualityReview(input.audit, input.evidence?.prompt ?? null, []);
+  if (!review.materialIssues.length) return;
+  await deps.renderCheckpointSettled();
+  const issueCodes = review.materialIssues.map((issue) => issue.code);
+  deps.writeJson(path.join(path.dirname(run.job.candidatePath!), "terminal-mechanical-routing.json"), {
+    schemaVersion: 1, kind: "exhausted-deterministic-qc-routing", policyVersion: 1,
+    scope: "failed-candidate-routing-not-quality-or-delivery-approval", round, maxRounds: MAX_QC_RENDER_ROUNDS,
+    inputAuthority: input.authority, candidateHash: run.job.candidateHash,
+    audit: input.audit, evidence: input.evidence?.authority ?? null, materialIssues: review.materialIssues,
+    renderedCritics: "not-run", reason: "deterministic-failure-and-no-repair-round-remains", approved: false,
+  });
+  run.io.send({ event: "max_rounds_exhausted", stage: "quality", round,
+    unresolvedFindingIds: issueCodes, materialIssueCount: issueCodes.length,
+    message: "Deterministic QC failed on the last allowed round; visual critics were not run and no candidate was approved." });
+  throw new AutoEditError(`candidate cannot be approved: ${issueCodes.join(", ")}`);
 }
 
 export async function runQualityReviewRound(
@@ -161,6 +203,17 @@ export async function runQualityReviewRound(
     message: `Running deterministic and visual QC for candidate ${candidate.round}/${MAX_QC_RENDER_ROUNDS}.`,
     qcRound: candidate.round, qcRoundsMax: MAX_QC_RENDER_ROUNDS,
   });
+  const { reviews, authority, evidence, aggregate, qualitySummary } = await collectCandidateReviews(run, candidate, deps);
+  // Candidate/input mutations must wait for the overlapped courtesy publish.
+  await deps.renderCheckpointSettled();
+  if (!aggregate.materialIssues.length && evidence && qualitySummary) {
+    return approveCandidate(run, reviews, authority, evidence, qualitySummary, deps);
+  }
+  return repairCandidate(run, aggregate, deps);
+}
+
+async function collectCandidateReviews(run: QualityLoopRuntime, candidate: ReturnType<typeof requiredCandidate>,
+  deps: QualityLoopDependencies) {
   const authority = deps.authority(run.job.ctx);
   if (authority.digest !== run.job.renderedAuthorityDigest) {
     throw new AutoEditError("candidate QC authority does not match the reviewed render authority");
@@ -174,19 +227,13 @@ export async function runQualityReviewRound(
   if (deps.authority(run.job.ctx).digest !== authority.digest) {
     throw new AutoEditError("input or pipeline authority changed while deterministic QC was running");
   }
+  await blockMechanicalAudio(run, audit, deps);
   const evidence = captureRenderedEvidence(candidate.path, candidate.dir, audit);
+  await blockExhaustedDeterministicRound(run, { audit, evidence, authority }, deps);
   const reviews = await visualReviews(run, evidence, authority, deps);
   const aggregate = aggregateQualityReview(audit, evidence?.prompt ?? null, reviews);
   const qualitySummary = evidence
-    ? persistSummary(run, audit, aggregate, reviews, authority, evidence, deps)
+    ? persistSummary(run, { audit, review: aggregate, reviews, authority, evidence }, deps)
     : null;
-  // Everything above only READS the render checkpoint's inputs and may safely
-  // overlap it. Both paths below mutate them — approval promotes (moves) the
-  // candidate, repair rewrites edit_plan.json and publishes its own Palmier
-  // checkpoint — so the overlapped publish must be settled first.
-  await deps.renderCheckpointSettled();
-  if (!aggregate.materialIssues.length && evidence && qualitySummary) {
-    return approveCandidate(run, reviews, authority, evidence, qualitySummary, deps);
-  }
-  return repairCandidate(run, aggregate, deps);
+  return { reviews, authority, evidence, aggregate, qualitySummary };
 }

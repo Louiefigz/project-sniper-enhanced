@@ -12,7 +12,7 @@ background are, then exposing the emptiest LEGAL regions so a graphic can be
 placed ABSOLUTELY into free space (R3: "the headroom IS the graphics canvas").
 
 For a graphic's output time window it samples a handful of frames and fuses
-three occupancy signals onto a grid over the 1080x1920 canvas:
+three occupancy signals onto a grid over the decoded delivery canvas:
 
   * face + hair — the Haar face box (reused from face_track / visual_state). The
     hair top is MEASURED (``measure_hair_top``, median-background subtraction: the
@@ -43,15 +43,13 @@ CLI:  free_space.py <video.mp4> <outStart> <outEnd> [--face-bbox x,y,w,h]
 
 from __future__ import annotations
 
-import argparse
-import json
 import os
 import sys
 from dataclasses import dataclass, field
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from producer_config import CANVAS, FREE_SPACE, SAFE_BOX  # noqa: E402
+from producer_config import FREE_SPACE, SAFE_BOX  # noqa: E402
 
 
 # =========================================================================== #
@@ -295,144 +293,8 @@ def place_content(content_bbox: tuple, region: Region) -> tuple:
     return int(round(tx - ccx)), int(round(ty - ccy))
 
 
-def suggest_caption_band(free_map: "FreeMap", cfg: dict = FREE_SPACE,
-                         safe: dict = SAFE_BOX) -> tuple:
-    """Recommended caption y-band ``(y0, y1)`` px given the frame's occupancy.
-
-    When the mid-frame is body-occupied (face high, torso/hands filling the
-    middle — the car3 framing) captions read better DROPPED to the lower band
-    near the baseline ceiling. Returns the low band only in that case, else
-    ``None`` (caller keeps its default band); render.py owns the wiring.
-    """
-    body = free_map.body_col
-    mid_y = free_map.canvas_h * 0.5
-    body_high = body is not None and body[1] <= mid_y   # chin at/above mid-frame
-    if not body_high:
-        return None
-    lo_frac, hi_frac = cfg["caption_low_band"]
-    y0 = int(free_map.canvas_h * lo_frac)
-    y1 = min(int(free_map.canvas_h * hi_frac), free_map.canvas_h - safe["bottom"])
-    return (y0, y1)
-
-
-# =========================================================================== #
-# Map + verify from a real video window (OpenCV via free_space_sample).
-# =========================================================================== #
-def build_free_map(video_path: str, window: tuple,
-                   face_bbox_norm: list | None = None,
-                   band_y_offset_px: float = 0.0) -> FreeMap:
-    """Measure the ranked free-space map for a graphic ``window`` (s, e).
-
-    The entry's coarse ``face_bbox_norm`` (v1's input) SEEDS placement and is
-    used verbatim if no face is detected. ``band_y_offset_px`` is the plan's
-    ``captions.bandYOffsetPx`` — the caption band must be modeled where the
-    captions actually render (an up-shifted band is disjoint-above the
-    default, never a subset of it).
-    """
-    from planner.free_space_sample import measure_hair_top, sample_window
-    from planner.occupancy import OccupancyExtras, build_map
-
-    out_start, out_end = float(window[0]), float(window[1])
-    canvas_w, canvas_h = CANVAS["width"], CANVAS["height"]
-    frames, face_px, busy = sample_window(video_path, out_start, out_end)
-    if face_px is None and face_bbox_norm is not None:
-        face_px = norm_to_px(face_bbox_norm, canvas_w, canvas_h)
-    if face_px is None:
-        raise RuntimeError("no face detected and no faceBBoxNorm hint supplied — "
-                           "cannot build a face-relative free-space map")
-    hair = measure_hair_top(frames, face_px[0] + face_px[2] / 2.0,
-                            face_px[1]) if frames else None
-    return build_map(face_px, busy, (canvas_w, canvas_h),
-                     OccupancyExtras(hair_top=hair,
-                                     band_y_offset_px=band_y_offset_px))
-
-
-def assemble_free_map(face_px: tuple, busy_cells: set, canvas: tuple,
-                      hair_top: float | None = None) -> FreeMap:
-    """Assemble the scored map through the SHARED occupancy predicate
-    (``planner.occupancy.build_map``, v3 #3): face+hair, body column, AND the
-    burned-caption band. Band offset is 0 here: this seam is for callers with
-    NO plan context (CLI probes/tests); plan-aware paths use
-    :func:`build_free_map` / ``occupancy.build_map`` with the real offset.
-    """
-    from planner.occupancy import OccupancyExtras, build_map
-
-    return build_map(face_px, busy_cells, canvas,
-                     OccupancyExtras(hair_top=hair_top))
-
-
-def verify_placement(render: str, out_start: float, out_end: float,
-                     placed_bbox: tuple) -> tuple:
-    """Re-measure a COMPOSITE render and assert a graphic clears the face+hair.
-
-    Independent post-composite check: detect the face in the FINAL render at
-    the graphic's window, measure the hair top, expand to the face+hair box,
-    and assert ``placed_bbox`` does not intersect it (inflated by
-    ``verify_min_gap_px``). Returns ``(ok, detail)``; ``gapPx`` = headroom
-    clearance (face top - graphic bottom, >0 when fully above the face).
-    """
-    from planner.free_space_sample import measure_hair_top, sample_window
-
-    frames, face_px, _busy = sample_window(render, out_start, out_end)
-    if face_px is None:
-        return False, {"ok": False, "reason": "no face detected in the render"}
-    # Exclude the just-placed graphic so its motion isn't mistaken for hair.
-    hair = measure_hair_top(frames, face_px[0] + face_px[2] / 2.0,
-                            face_px[1], exclude=placed_bbox) if frames else None
-    ex0, ey0, ex1, ey1 = expand_face(face_px, hair_top=hair)
-    px0, py0, px1, py1 = placed_bbox
-    gap = FREE_SPACE["verify_min_gap_px"]
-    ix = max(0.0, min(px1, ex1 + gap) - max(px0, ex0 - gap))
-    iy = max(0.0, min(py1, ey1 + gap) - max(py0, ey0 - gap))
-    inter = ix * iy
-    return inter == 0, {"ok": inter == 0, "intersection": round(inter, 1),
-                        "gapPx": round(ey0 - py1, 1), "hairMeasured": hair is not None,
-                        "expandedFace": [int(v) for v in (ex0, ey0, ex1, ey1)],
-                        "placedBBox": [int(v) for v in placed_bbox]}
-
-
-# =========================================================================== #
-# CLI
-# =========================================================================== #
-def _run_verify(ap: argparse.ArgumentParser, args) -> None:
-    """--verify mode: re-measure a composite render; exit 1 on face intersection."""
-    if not (args.window and args.placed_bbox):
-        ap.error("--verify needs --window s,e and --placed-bbox x0,y0,x1,y1")
-    s, e = (float(v) for v in args.window.split(","))
-    placed = tuple(float(v) for v in args.placed_bbox.split(","))
-    ok, detail = verify_placement(args.verify, s, e, placed)
-    print(json.dumps(detail, indent=2))
-    sys.exit(0 if ok else 1)
-
-
-def main() -> None:
-    ap = argparse.ArgumentParser(description="Placement v2 free-space map")
-    ap.add_argument("video", nargs="?")
-    ap.add_argument("out_start", nargs="?", type=float)
-    ap.add_argument("out_end", nargs="?", type=float)
-    ap.add_argument("--face-bbox", default=None,
-                    help="seed faceBBoxNorm 'x,y,w,h' (0..1) if detection fails")
-    ap.add_argument("--verify", metavar="RENDER", default=None,
-                    help="re-measure a composite render (needs --window/--placed-bbox)")
-    ap.add_argument("--window", default=None, help="graphic window 's,e' (with --verify)")
-    ap.add_argument("--placed-bbox", default=None,
-                    help="placed content bbox 'x0,y0,x1,y1' (with --verify)")
-    args = ap.parse_args()
-    try:
-        if args.verify:
-            _run_verify(ap, args)
-            return
-        if args.video is None or args.out_start is None or args.out_end is None:
-            ap.error("give <video> <outStart> <outEnd>, or --verify RENDER ...")
-        hint = [float(v) for v in args.face_bbox.split(",")] if args.face_bbox else None
-        fmap = build_free_map(args.video, (args.out_start, args.out_end), hint)
-        out = fmap.as_dict()
-        out["suggestedCaptionBand"] = suggest_caption_band(fmap)
-        print(json.dumps(out, indent=2))
-    except (OSError, ValueError, RuntimeError) as exc:
-        print(json.dumps({"error": str(exc)}))
-        sys.exit(1)
-
+from planner.free_space_runtime import (assemble_free_map, build_free_map, main,
+                                        suggest_caption_band, verify_placement)
 
 if __name__ == "__main__":
     main()

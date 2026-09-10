@@ -324,6 +324,7 @@ class PipHoleGraphTests(unittest.TestCase):
         with mock.patch.object(gs, "render_entry", return_value={
                 "path": "c.mov", "cached": True, "key": "k",
                 "kind": "nateherk-takeover", "fmt": "mov"}), \
+             mock.patch.object(gs, "_clip_fps", return_value=30.0), \
              mock.patch.object(gs, "_clip_dims", return_value=(1920, 1080)), \
              mock.patch.object(spl, "_clip_dims", return_value=(1920, 1080)), \
              mock.patch("graphics.pip_takeover.probe_dims",

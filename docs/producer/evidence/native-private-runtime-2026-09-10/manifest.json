@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "kind": "frozen-source-evidence-not-installed-runtime",
+  "checks": {
+    "allSourceBytesMatch": true,
+    "runtimeReconstruction": true,
+    "realmCliReconstruction": true,
+    "frameTransportReconstruction": true,
+    "testLibraries": [
+      {
+        "name": "baseline",
+        "matched": true
+      },
+      {
+        "name": "candidate",
+        "matched": true
+      }
+    ]
+  },
+  "files": [
+    {
+      "original": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/build-native-test-library.mjs",
+      "relative": "transport/build-native-test-library.mjs.source",
+      "sha256": "b5aacbda31d8ef8453f9fd30f1a6c6877c499ad6af00d4d48e51aed7c9c4f7dc",
+      "bytes": 1898,
+      "sourceBytesMatch": true
+    },
+    {
+      "original": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/qualified_native_admission.py",
+      "relative": "transport/qualified_native_admission.py.source",
+      "sha256": "7d8e6ccf4f701acfedaf3e2f8581e52a8a31f0f73ef0dba705cf54555cf01199",
+      "bytes": 6173,
+      "sourceBytesMatch": true
+    },
+    {
+      "original": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/hyperframes/dist/frame-source-transport.mjs",
+      "relative": "transport/frame-source-transport.mjs.source",
+      "sha256": "20de6c202787a0aa47a8227e54925a1765be871a5bb8b4167032d550b2f55784",
+      "bytes": 8466,
+      "sourceBytesMatch": true
+    },
+    {
+      "original": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/test-frame-source-transport.mjs",
+      "relative": "transport/test-frame-source-transport.mjs.source",
+      "sha256": "3685abaa90a52e18e8087229425151d5cb7ad4d887d09f7cef0af47e435a73bf",
+      "bytes": 8617,
+      "sourceBytesMatch": true
+    },
+    {
+      "original": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native_bounded_config.py",
+      "relative": "guard/native_bounded_config.py.source",
+      "sha256": "969db84674f968a7fbf589bdb316c404033498e3d3432adc81608a8cc1bb2cee",
+      "bytes": 5101,
+      "sourceBytesMatch": true
+    },
+    {
+      "original": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native_owned_processes.py",
+      "relative": "guard/native_owned_processes.py.source",
+      "sha256": "7c794c4c199e1c7a311171f835ff6cde938fda419e5c66eb3b2b2e5e3cbe74c8",
+      "bytes": 6279,
+      "sourceBytesMatch": true
+    },
+    {
+      "original": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/render_native_bounded.py",
+      "relative": "guard/render_native_bounded.py.source",
+      "sha256": "a5cccb20c65153ca3b63567243f0127ff12d6631776c0549e8ae1132556e5cf7",
+      "bytes": 15186,
+      "sourceBytesMatch": true
+    },
+    {
+      "original": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/chrome-headless-shell-bounded.py",
+      "relative": "guard/chrome-headless-shell-bounded.py.source",
+      "sha256": "6705cbc3d9580245b72c3830c8e3e47fd7195d04df993f3867544461a90b6447",
+      "bytes": 3148,
+      "sourceBytesMatch": true
+    },
+    {
+      "original": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/test_native_owned_processes.py",
+      "relative": "guard/test_native_owned_processes.py.source",
+      "sha256": "d0231aebedee7befd897dbe39e7c3914836fa7f2204ce150d9b4ea7384462b03",
+      "bytes": 11331,
+      "sourceBytesMatch": true
+    },
+    {
+      "original": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/test_render_native_bounded.py",
+      "relative": "guard/test_render_native_bounded.py.source",
+      "sha256": "ab1e03e7d49d0557846b664c26f4cbc02fc28a9ce4704c348df8fccc76eafd67",
+      "bytes": 8691,
+      "sourceBytesMatch": true
+    },
+    {
+      "original": "/private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/localhost-only.sb",
+      "relative": "realm/localhost-only.sb.source",
+      "sha256": "44309d0cf11391ec665221c43d73a40d81ad05009d517c4986aaff302dfee0ea",
+      "bytes": 236,
+      "sourceBytesMatch": true
+    },
+    {
+      "original": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native_measurement_retry.py",
+      "relative": "trial/native_measurement_retry.py.source",
+      "sha256": "e437c2a71c8e1a3a93acf8acd20fe674b3033e796649db7c63d45f46328545f6",
+      "bytes": 7939,
+      "sourceBytesMatch": true
+    },
+    {
+      "original": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native_trace_observer.cjs",
+      "relative": "trial/native_trace_observer.cjs.source",
+      "sha256": "0f6b6d2e976872a709bf13c63008fabceaee3903a8ea1f7136bbcba96ca6198a",
+      "bytes": 1970,
+      "sourceBytesMatch": true
+    },
+    {
+      "original": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/capture_creative_native_v3.mjs",
+      "relative": "trial/capture_creative_native_v3.mjs.source",
+      "sha256": "43ac65edec69895d376c7f1c6e5616849436aed229b0738475d33cffc7c49b2f",
+      "bytes": 8467,
+      "sourceBytesMatch": true
+    },
+    {
+      "original": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/export_creative_revision_v3.cjs",
+      "relative": "trial/export_creative_revision_v3.cjs.source",
+      "sha256": "a910a65e6369f1eb8ee14cb539ecbdb8d2050254dbbc6cdb77bdd8514f69dd8a",
+      "bytes": 3733,
+      "sourceBytesMatch": true
+    },
+    {
+      "original": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_native_phase_v5.py",
+      "relative": "trial/run_native_phase_v5.py.source",
+      "sha256": "6c4aa1f764069891ae08fa1fac96707dfc71d475f38e46042166e33b1e4e41e2",
+      "bytes": 4484,
+      "sourceBytesMatch": true
+    },
+    {
+      "original": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_phase.py",
+      "relative": "trial/run_phase.py.source",
+      "sha256": "4f450f87d0b61970a15d2d3d060c0d0a4964ae4141a1e2a68134519b3d6379c8",
+      "bytes": 3698,
+      "sourceBytesMatch": true
+    },
+    {
+      "original": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native_archive_clone.py",
+      "relative": "trial/native_archive_clone.py.source",
+      "sha256": "f9ae7f196ffdf8f6a47101c274fdcc87fabf308efcb5c575cc908cb3cc996491",
+      "bytes": 3604,
+      "sourceBytesMatch": true
+    },
+    {
+      "original": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/seal_benchmark.py",
+      "relative": "trial/seal_benchmark.py.source",
+      "sha256": "221d2c79c4ccfe3e6648cb54afbc3846b21eb25ac5c445f9080ae79e5e7f5613",
+      "bytes": 9202,
+      "sourceBytesMatch": true
+    },
+    {
+      "relative": "transport/official-0.8.31-frame-transport.patch.source",
+      "sha256": "7e745adda31d29fe6fab493a2fbcae5595d06a4d83012da6c38a35ea0d17895d",
+      "bytes": 5235,
+      "sourceBytesMatch": null
+    },
+    {
+      "relative": "realm/reconstruction-recipe.json",
+      "sha256": "6a9ab7535cf542196b2c821695f8fec9f8c90204af3112e88c78c31d2485bf51",
+      "bytes": 7880,
+      "sourceBytesMatch": null
+    }
+  ]
+}

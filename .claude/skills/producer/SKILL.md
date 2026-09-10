@@ -14,26 +14,175 @@ description: >
   SNIPER app itself, or for script WRITING (that's the rag-system's domain).
 ---
 
-# PRODUCER — skill v2 (Desktop-native Palmier + deterministic fallback)
+# PRODUCER — Codex / Claude skill → deterministic video + HyperFrames Studio
 
 You are the **brain** of the PRODUCER pipeline. You make every creative
-decision; the deterministic Python renderer executes them. You NEVER run ffmpeg
-by hand for the edit itself — you author `edit_plan.json` and drive the stage
-CLIs. Operator manual: `docs/producer/PRODUCER_README.md` · architecture:
+decision. In the deterministic file route, the Python renderer executes them:
+author `edit_plan.json` and drive the stage CLIs, never hand-run ffmpeg for the
+edit itself. Explicit native HyperFrames projects follow the routing exception
+in **Visual storytelling** below. Operator manual: `docs/producer/PRODUCER_README.md` · architecture:
 `docs/producer/PRODUCER_PLAN.md` · edge cases: `docs/producer/PRODUCER_EDGE_CASES.md`.
+
+The safe publishing paths are the exact audited MP4 and its approved one-clip
+flat mirror. The complete short/long product is not yet P7/P8-qualified.
+
+## Existing-project revisions — scope before the new-edit workflow
+
+For feedback on an existing edit, inspect its current plan, admitted manifest,
+stored intent, output-time map and approval state first. Resolve the requested
+output timestamp to the exact graphic/clip; ask only for missing replacement
+copy or an ambiguous target. A copy-only graphics change must preserve all
+unrequested IDs, kinds, anchors, windows, cuts, audio, captions, grade and motion.
+Do not rerun ingest/ASR, style selection, recomposition, retake scanning, or the
+new-edit proposers merely because the existing scope is produced/full. The
+"EVERY step" and "recompose first" instructions below govern new/full replans,
+not this bounded repair. Broaden scope only if the requested change actually
+invalidates a dependency; explain the required rebuild. Obtain explicit user
+approval before any materially unrelated change or expansion of stored intent.
+
+For a Studio-supported text/timing change: read the Studio reference, inspect
+`status`/`context`, make the scoped edit, dry-run sync, and verify the diff touches
+only the intended fields. Apply with the exact admitted manifest. If that stales
+a required receipt, run the applicable current-plan gates and independent
+reviews, then obtain the post-review receipt before ordinary assembly. Never
+use `sync --apply --assemble` to jump from a newly changed auto-graphics plan
+past that review wall. Verify the exact rebuilt output, report reused versus
+rebuilt stages and actual timings, and retain the prior approved version.
+
+## Visual storytelling — produced/full plans and creative revisions
+
+Apply this to authored visual treatment in shorts and longs. Preserve trim/light
+scope, disabled or operator-owned lanes, accepted cuts and copy-only revision
+boundaries. Existing jobs retain their pinned doctrine; apply new creative
+direction to a separate authorized revision, never rewrite a sealed benchmark.
+
+**Aaron's presenter-led preference:** establish him in a strong full-frame
+opening shot, rather than opening with a tiny picture inside a card. This does
+not require holding full frame throughout the hook or for 15 seconds. A few
+seconds may be enough; neither 3 nor 15 seconds is a mandated duration. Then
+choose the next composition from the story and spoken cue. Use overlays,
+diagrams, images and layout changes when they advance the idea; do not delay
+them to satisfy a presenter hold. The editor owns those decisions. This is
+Aaron's channel brief, not a rule for unrelated faceless, product-only or
+differently briefed videos.
+
+Before choosing templates, read the kept speech and inspect available footage.
+In the existing scene plan/review notes, connect the viewer's question, what
+appears now, the evidence or change that develops the idea, and its source-backed
+payoff. Shorts need a self-contained answer before the CTA; a long explanation
+can build a diagram, focus on a part, then return to the completed overview.
+Use continuity and callbacks where helpful without forcing one permanent canvas.
+
+Choose the information form AND the whole shot composition for each beat:
+
+| What the viewer needs to understand | Candidate visual expression |
+| --- | --- |
+| A person, experience or direct point | Full presenter; selective push/pull or concise typography in clear space |
+| A real action and its result | Admitted moving footage or a product demonstration with a precise highlight |
+| A relationship, cause or changing workflow | Nodes, branches, a process, before/after or an evolving diagram |
+| A quantity, range or supported comparison | Number treatment, chart or comparison with truthful labels and geometry |
+| Criteria, steps or a distinction | A checklist, staggered list, matrix, annotations or typographic contrast |
+| A chapter turn, emphasis or visual cut repair | A purposeful card, image, reveal or transition |
+
+These are choices, not a rotation or requirement to use every family. An image
+must explain the spoken point; do not invent data for a graph or pass an
+illustrative mockup off as demonstrated evidence. Preserve source qualifications
+and ranges. Graphics should add an explanation rather than repeat captions and
+narration verbatim. Animate the relevant action and consequence on spoken cues,
+with time to read the result; sound cues, when used, support that action and speech.
+
+For Aaron's native Studio edits, vary full presenter, graphics over the studio
+shot, left/right teaching layouts, a live corner inset, and selective full-screen
+explanations without him. Choose placement to serve the idea and clear the actual
+content. Keep the face and necessary gestures safely framed through entry,
+movement and exit; inspect intermediate motion, not just settled endpoints.
+Do not mirror his footage to switch sides or add continuous head-following motion.
+Keep a coherent palette, type system and motion language while varying scale,
+hierarchy, image treatment, graphic anatomy, reveal and presenter placement.
+
+**Review the sequence, not template counts.** Compare adjacent shots with their
+headings mentally removed. Repeating the same notebook sheet, box entrance and
+text build is still repetitive despite different titles, colors or template IDs.
+Repair unnecessary repetition across the whole video, including the middle and
+ending. An evolving explanation may intentionally hold its composition. Aaron's
+first-minute brief calls for purposeful activity about every 2–4 seconds; a
+reveal, highlight or demonstration can supply it without a new card each time.
+The body follows the lesson with graphics throughout where useful and room for
+natural delivery. Review actual scene changes and audio before claiming success.
+
+This guidance distills the completed 14-skill student-kit audit, particularly
+`short-form-edit`, `video-storytelling` and `hyperframes-video-beats`. Provenance
+and exclusions are in `docs/producer/HYPERFRAMES_STUDENT_KIT_FULL_AUDIT_2026-09-09.md`
+(background research, not an additional required headless input). Search the
+existing whole catalog for suitable mechanisms and keep current-runtime
+compatibility authoritative. Extend our motion cards; import neither the kit's
+older runtime nor its fixed layouts, mandatory extra renders or duplicate editor.
+The legacy short-form scaffold is not the new shorts workflow.
+
+**Explicit native-project routing:** when the operator has selected the native
+HyperFrames composition route, use that project's approved native direction and
+the installed SDK instructions. For C0679, that direction is
+`docs/producer/C0679_NATIVE_HYPERFRAMES_DIRECTION_2026-09-09.md`. The legacy
+`face-bridge` two-chassis grammar, compulsory presenter hole and review-only
+Studio export prohibition below describe their existing routes; they must not
+replace the explicitly selected native composition. This does not silently
+change a stored legacy/headless job's profile or waive its gates. Retain native
+editable layers for visual revisions and perform the applicable playback/export
+checks on the actual candidate before delivery.
+
+**Aaron's review handoff:** open the next ready project visibly in Chrome at the
+verified live Studio URL and position it at the beginning for the opening review.
+Verify the correct project/duration and loaded footage. A pasted URL, background
+tab or different browser is not this handoff. Keep an active review position
+unchanged until the next candidate is ready; report if Chrome opening fails.
+Headless writers leave this action to the owning interactive task/controller.
 
 ## DESTINATION FIRST — where every job starts and ends
 
 Choose the destination from the operator's words. Do not force a Palmier job
 through the GUI or a flattened mirror.
 
-- **Claude Code Desktop → Palmier requested:** Palmier is the primary editable
-  destination. Use one retained Claude session, the staged Desktop authority,
+**Default direct workflow:** take the brief in Codex or Claude Code, drive the
+existing local Producer stage CLIs, and use HyperFrames Studio for graphics
+review and adjustment. The custom Sniper `/producer` page is optional; do not
+require it or start a web-UI development task to complete a video. Direct use
+does not waive admission, stored intent, independent review, or delivery QC.
+Read `docs/producer/STUDIO_REVIEW_LANE.md` before the Studio stage.
+For an existing guided checkpoint, read
+`docs/producer/CODEX_COMMAND_WORKFLOW.md` for direct metadata, local review-file
+verification, explicit opening approval and foreground body continuation.
+The body command reuses the exact approved opening's whole-program picture and
+PCM master; it does not authorize a new cut or silently change the visual plan.
+It produces only a private mechanically checked candidate, not body/delivery
+approval. Respect the documented supported workload and qualification status.
+Do not bypass a blocked checkpoint with an ordinary render or a new request ID.
+
+- **Claude Code Desktop → Palmier requested:** treat Palmier as an isolated,
+  experimental editable candidate, not a released publishing destination. The
+  local contracts are production-shaped, but connected hybrid delivery remains
+  P5-blocked. Use one retained Claude session, the staged Desktop authority,
   direct `mcp__palmier-pro__*` calls, fresh readback after each risky batch, and
   exact-candidate QC. Direct drive is allowed only inside that candidate-scoped
   authority; ungoverned hand-driving remains forbidden.
 - **Rendered file requested:** use the deterministic in-house renderer below.
-- **Approved flat mirror requested:** use `push.py` only for the one-clip mirror.
+  After render/assemble, **HyperFrames Studio is the review/manual-control
+  surface** for the graphics layer
+  (`scripts/producer/studio/studio_review.py`; see step 6 and
+  `docs/producer/STUDIO_REVIEW_LANE.md`).
+- **Project-scoped custom motion requested:** use the governed
+  `graphics/scene_package_cli.py` path directly from Codex/Claude Code. Stage
+  the closed authoring packet into a new mode-`0700` attempt, write only inside
+  its bundle directory, promote the validated bundle as a content-addressed
+  generation, and make `ScenePackageV1` name that exact bundle ID/hash. Run the
+  CLI `package` or `render` command with an unused durable receipt path. Never
+  resolve `CURRENT`, bypass asset/readability admission, or call this an Ask
+  Editor UI flow. Palmier receives proved baked-regenerable scene/unit media,
+  not native keyframe-layer parity. The staging receipt proves an application
+  path boundary only; it explicitly does not prove OS sandboxing or model write
+  isolation. A direct local render also does not prove OS-level network denial;
+  that claim requires the governed `SNIPER_RENDER_IMAGE_ID` OCI path.
+- **Approved flat mirror requested (optional legacy):** use `push.py` only for
+  the one-clip mirror; Studio (above) is the default manual-control surface.
 
 For the Desktop-native branch, progress is deliberately incremental:
 
@@ -77,13 +226,16 @@ For the Desktop-native branch, progress is deliberately incremental:
 
 The in-house branch remains:
 
-1. **In**: raw footage lands via the `/producer` tab ingest; the **intent card**
-   captures the ask up front — **Short (9:16)** with a **style** (Caleb light /
+1. **In**: raw footage enters through the local ingest CLI (or the optional
+   `/producer` tab). Capture the ask up front in the project's stored intent —
+   **Short (9:16)** with a **style** (Caleb light /
    Jaden produced / Angela involved, + generics), or **Long (16:9)** with a
    **checklist of items** (lanes: motion · graphics · transitions · captions ·
    broll · credibility, + music/audio-enhance) — full workflow or just certain
    items. Honor `project.json` `intent` as the operator's answer to the
-   creative-scope round; don't re-ask what the card already answered.
+   creative-scope round; don't re-ask what the conversation or card already
+   answered. Persist only choices the operator actually made; never change
+   scope or lane ownership to get past a failed gate.
 2. **Through**: you author the gated `edit_plan.json` exactly as this skill
    describes. The plan stays the determinism boundary regardless of renderer.
 3. **Out**: the **in-house `assemble.py`/ffmpeg renderer is the canonical file
@@ -113,13 +265,15 @@ If those hash-bound artifacts already exist, NEVER rerun video download/OCR or
 the deep extractor inside a production job; reference analysis is cached input,
 not a serial precondition repeated for every edit.
 
-When `reference_style_pack.json` exists, read it in full. A `mimic` job created
-through the `reference-editor` skill must have a release-ready pack; bind every
+When `reference_style_pack.json` exists, read it in full as study/profile
+guidance. The legacy `mimic` strategy name does not establish verified
+replication; P6 remains 0/7 and the capability is not released. Bind every
 reference-derived graphic/transition/punch to its `referenceGrammarId` and run
 `reference_style_pack_lint.py` in addition to `reference_profile_lint.py`.
 Aggregate profile rates never override the pack's twice-reviewed window grammar.
 
-- `mimic` copies measured mechanics for this edit only.
+- `mimic` is a legacy identifier for reference-inspired mechanics guidance on
+  this edit only; never report it as a verified style match.
 - `extend` may extend only the selected closed Caleb/Jaden/Angela short grammar;
   read that grammar's canonical doc as well.
 - `new-style` is a provisional, reference-bound candidate. Never add its label
@@ -141,12 +295,14 @@ identity/mode/strategy errors must be fixed before rendering.
 | Audit B post-render QC (`audit/audit_render.py <out_dir>` — run it on EVERY render before presenting; exit 1 = fix before delivery) | ✅ Phase 2 |
 | Music machinery (`audio/audio_mix.py <master> <track> <out> --also-without` — bed pre-norm, loop/trim, ducking, both variants). NOT yet wired into render.py; run as a post-step. No music library exists yet | ✅ machinery / 🔜 library |
 | Long-form: breathing-room cut + SRT sidecar + chapters (`longform_outputs.py`) | ✅ Phase 3 (2026-07-04) |
+| First-class range captions: stable-word `CaptionTrackV1`, repeated-occurrence corrections, semantic chapters, bounded/cacheable RGBA shards, SRT + regenerable Palmier projection, caption-free composite reuse, font-byte/safe-bound proof | ✅ P3 released (2026-07-29) |
+| Governed project-scoped custom motion: exact `ScenePackageV1` + content-addressed bundle, production `scene_package_cli.py`, unit/full render proofs, rights/readability admission, local repair closures, and baked-regenerable Palmier unit readback. Direct Codex/Claude Code workflow only; no Ask Editor UI, local-mode OS network-denial, OS/model-isolation, continuous-reframe, or animated-PIP claim. | ✅ P4 released (2026-07-29) |
 | Live app: `/producer` page — the GUI authors plans **headlessly** via a detached auto-edit worker + bounded plan-review/QC controller (no longer a hand-authored scaffold). The controller spawns the `claude`/`codex` CLI as the brain, then runs the same gates + a fresh independent critic this skill describes. See `docs/producer/AUTO_EDIT_LANE.md`. | ✅ wired |
 | MG-2 (2026-07-05): graphicsTrack + treatmentMap + visual-state doctrine lint, motion_triggers.py (candidate detection), visual_state.py (zone classification), graphics_stage.py (cached hyperframes compositing, own-screen ASS suppression), audioGain, captions.corrections — ALL wired into render.py | ✅ Phase MG-2 |
 | MG-4 (2026-07-05): `graphics_planner.py` — auto-graphics PROPOSER. Kept words → triggers → doctrine-legal, R12-filtered, density-trimmed ranked graphics proposal + treatmentMap suggestion (you review, operator vetoes; never auto-injects) | ✅ Phase MG-4 |
 | Longform edit brain (2026-07-05): `retake_scan.py` (raw-only retake PROPOSER — near-duplicate re-deliveries → keep-later table + cut ranges, evidence-quoted) + `pause_scan.py` (inter-sentence pause-tightening + protected-pause flags). Doctrine from `docs/studies/EDIT_DECISION_STUDY.md` + `docs/studies/LONGFORM_VISUAL_STUDY.md`. You review; operator vetoes; never auto-injects | ✅ Phase 3+ |
 | Two-track motion / eased-zoom v2 (2026-07-06, `docs/studies/MOTION_GRAMMAR_STUDY.md` G1/G2/G6): longform carries sparse SEMANTIC zooms (thesis punches, brackets, boundary punch-outs) AND a continuous **aliveness creep** so the frame is never frozen; `punch_in.py` eased-attack push (mid-shot pushes ease in, snap only on cuts) + face-recompose + smoothstep ramps; `graphics_planner_zoom.py` carpets the creep; `plan_lint_motion` exempts `role:"aliveness"` from the zoom cadence cap | ✅ shipped — measured better, NOT yet pro-grade. C0679 A/B (zoom layer only): snap frac 0.84→0.30, frozen 71%→49%, longest hold 35.8→27.2s, eased zooms 3→9/13. Future work: segment HEADS uncarpeted, pushes ease-in but snap-out, full-stack validation still rendering |
-| Desktop-native Palmier candidate: staged cut→visual authority, direct imports/cuts/text/keyframes/graphics/b-roll/music/captions/color calls, per-mutation CAS readback, resumable journal, exact export + Audit B + two rendered-review lenses | ✅ wired; live first-60 proof passed 2026-07-15; 14-minute/50-element offline revision proof passed 2026-07-16; live long-duration endurance still required |
+| Desktop-native Palmier candidate: staged cut→visual authority, direct imports/cuts/text/keyframes/graphics/b-roll/music/captions/color calls, per-mutation CAS readback, resumable journal, exact export + Audit B + two rendered-review lenses | 🧪 local/production-shaped, connected hybrid P5-blocked. The historical first-60 run proved transport/mutation mechanics but failed product-quality review: 56m48s, QC pending, seven karaoke timings lost, wrong 3840×2160 canvas accepted. The 14-minute/50-element proof is offline revision evidence only. |
 | B-roll placement + vision catalog | ✅ native placement from real manifest receipts; generation remains 🔜 and must not be improvised |
 
 Reframe + graphics doctrine (distinct from the treatment LEVEL below; this is
@@ -175,6 +331,13 @@ runs never double-ask). The purpose is calibrating how involved the
 operator wants to be — do NOT silently do the heavy lifting on taste
 decisions the operator may want to own.
 
+For a granular range request, use the staged stable-word index and
+`CaptionTrackV1` operations. Resolve a quoted phrase to one explicit occurrence;
+never globally replace repeated text or invent word IDs. Caption-only revisions
+must preserve the caption-free picture/graphics composite and rebuild only
+changed shard keys. Plans without `captionsTrack` remain on the legacy adapter
+and cannot be described as range-local caption edits.
+
 ## What you produce — INPUT × OUTPUT × TREATMENT LEVEL
 
 Every job is three choices; read them off the request, ask only what's genuinely
@@ -185,7 +348,9 @@ ambiguous.
 - **OUTPUT** — a **long-form** cut, a **short** (or several), or **clips from a
   long recording** (SEGMENT → optionally push each clip through as a produced
   short). The batch form *"give me the best N shorts from this recording"* =
-  segment → rank the peak moments → produce the top N as shorts.
+  read the full source → compare standalone moments → trim the selected ranges
+  → produce each short. Topic segmentation is optional navigation; it does not
+  rank short suitability or require exporting intermediate clips.
 - **SCOPE** (`target.scope`, default `produced`) — the malleable ladder from a
   PIECE to the WHOLE thing. The skill does exactly as much as the operator asks;
   the Hook Contract (step 4) then enforces only what the scope activates.
@@ -243,6 +408,36 @@ Catalog in code: `producer_config.py` TREATMENTS (per-level flags) + MODES
 plan with the engaging tracks empty (render.py skips empty tracks; no code branch
 needed).
 
+### Long-form source to finished shorts
+
+For repurposing requests, read **Long-form to finished shorts** in
+`docs/producer/PRODUCER_README.md` before selecting material. Use the pinned copy
+when running under a doctrine snapshot. Producer owns selection through delivery;
+Segmenter is optional and Clipper is not a mandatory intermediate export.
+Rank source-bound candidates by cold-viewer clarity, hook/payoff, useful evidence,
+context cost and portrait feasibility; retain the rationale in existing review
+notes. Inspect actual shortlisted footage, deduplicate overlapping ideas, then
+compile the winner directly from original source ranges. A topic boundary or a
+high-energy sentence alone does not establish a suitable short.
+
+**Aaron's selection preference:** show the ranked strongest moments before
+trimming or producing a short. Include source timestamps and watchable source
+previews, exact hook/payoff excerpts, estimated edited length, why each works,
+and a brief student-kit visual-storytelling idea. Recommend a favorite, then
+wait for his selection. Reuse a moment he already chose; an explicit request
+to choose and proceed overrides this default. Ranking alone is not selection.
+
+Finished-source repurposing refines the generic raw-footage steps below: review
+pause/retake proposals before applying them, preserve deliberate callbacks and
+natural speed unless retiming is warranted and supported, and account for baked
+captions, graphics and music. Select the short before spending on visual treatment.
+Apply **Visual storytelling** to the selected cut: source-backed promise, visual
+evidence/development and a complete payoff. Continue through the requested Studio
+and MP4 route with actual full-output review. Analysis-only requests stop at the
+shortlist; a request to make the short continues under existing authorization and
+applicable gates. This is an agent-directed workflow, not a released batch-ranking
+endpoint or a measured retention/turnaround guarantee.
+
 ## The workflow (branches on TREATMENT LEVEL)
 
 **Branch first on `target.treatment` (default `produced`).**
@@ -258,8 +453,29 @@ Both share the cut spine (retake/pause/outtake — the PRODUCE LONGFORM doctrine
 below) and the mode's base reframe + captions; only the engaging lanes differ.
 
 1. **Ingest** — `python3 scripts/producer/ingest.py <project_dir> --out <work>/asset_manifest.json`.
-   Transcripts cost ~$0.26/hr via Deepgram; NEVER re-transcribe a source whose
-   transcript file already exists.
+   Use local Whisper for new transcripts under the subscription/local-only
+   policy. Check local runtime/model availability first; a missing local
+   dependency is not permission to call Deepgram, OpenAI, or another paid API.
+   Reuse admitted, source-bound transcripts; a matching filename alone does
+   not establish provenance or accurate word timing. Review suspicious spans
+   against source audio before editing around them.
+   An overlong function-word timestamp or low ASR confidence is uncertainty,
+   not proof of silence. If the cut gate requires source timing review, preserve
+   the candidate and pause that authoring stage; never delete another word or
+   move the boundary merely to get a passing gate. Use the existing local
+   `transcript_timing_review.py prepare|status` route to identify exact source
+   review windows. `record` requires the user's explicit reviewed submission:
+   never invent listening/boundary attestations or mark uncertainty resolved
+   because a file exists. Keep unresolved decisions unresolved. This narrow
+   review cannot waive duplicate, mid-word, source-integrity or other cut gates,
+   and it does not approve the full cut or final delivery. Do not rewrite the
+   admitted transcript or call a paid transcription provider to bypass review.
+   If actual source review establishes that a word's bounds or transcription
+   must change, read `docs/producer/SOURCE_WORD_CORRECTION_WORKFLOW.md` and use
+   its existing immutable correction commands. Timing v1 and one-to-one text
+   v2 are distinct reviewed operations; neither invents alignment or edits what
+   the speaker meant. Publish the explicit new manifest and author a fresh cut
+   revision through the normal gates; old cut/preview approvals do not transfer.
 2. **Understand the source before deciding the current stage** — read ALL
    transcripts (word-level JSON) + the manifest before choosing the cut spine.
    For multi-source projects reason globally: the best hook may be in file 2,
@@ -337,6 +553,23 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
      card. The release gates enforce dense-window coverage, maximum feasible
      contextual form diversity, cream/dark rhythm, presenter holes, module-level
      animation receipts, and the benchmark camera-motion ceiling.
+   - **Catalog-first discovery — search the WHOLE recorded catalog BEFORE
+     choosing forms**, reusing suitable catalog mechanics before hand-building
+     equivalents. Run
+     `.venv/bin/python3 scripts/producer/graphics/catalog_discovery_cli.py
+     --format text search "<what the beat needs>" --declared-aspect <9:16|16:9>`
+     (add `--status integrated-measured` to see only kinds proposable today),
+     then `… lookup <name>` for the selected candidates. Declared aspect is a
+     discovery filter, not measured compatibility. Read
+     `integration.status` honestly: only `integrated-measured` kinds enter the
+     plan, through the existing adapters (they are the same fresh matrix rows
+     the predicates below read); `integrated-unmeasured` means there is no valid
+     current measured row (see its stated reason) — not proposable; `reference` and
+     `reference-missing-source` are porting-contract work — name the item, its
+     source path and its listed adaptation notes in your report so the
+     operator can request the port. Discovery output is evidence, not
+     admission: a search hit never makes a mirror item plannable, never
+     approves copy/dimensions/duration/FPS, and never replaces this step's gates.
    - **Comp physics — read `templates/motion/comp_capabilities.json` BEFORE
      choosing forms** (also re-check in step 4's graphics pass). The matrix is
      MEASURED data (`graphics/comp_catalog_probe.py`, one real render per
@@ -372,11 +605,20 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
      make with string rules ("first person" grammar / "video-first" modifier vs
      "First, sharpen the pain" step). Read `rawSpan`; if it is NOT a genuine 2+-
      step list, DROP the beat (clean head — most ordinals aren't lists). If it
-     is, write a short imperative label (≤6 words) per REAL step and call
+     is, write a short imperative label (≤6 words) per REAL step and a title
+     (≤5 words), then call
      `graphics_copy.fill_list_spec(beat, items, title)` where `items` =
      `[{"anchorIndex": i, "label": "…"}]` — it times each label to its ordinal's
-     spoken start and returns the merge-ready entry. This is YOUR call in the
-     skill flow ($0) — there is no pipeline API path or flag.
+     spoken start. A successful fit returns the merge-ready entry; oversized
+     copy returns `needsCopy: true`, empty `spec` and `copyRepair` with the full
+     original copy and field limits. Keep that unresolved beat, its raw context,
+     anchors and requested treatment. Rewrite a shorter COMPLETE formulation,
+     preserving the subject, condition, comparison and negation, then call the
+     helper again with the same chosen anchor indices. Repeat the existing
+     transcript-grounding and semantic review before merge; passing the word
+     limit does not prove equivalent meaning. Do not truncate, drop the visual
+     or reset the request budget to escape a copy repair. This is YOUR call in
+     the skill flow ($0) — there is no pipeline API path or flag.
    - `brollIllustration` SLOTS (`needsConcept`) are the concept-illustration
      b-roll lane (longform, grounded in the pro longs — a flat-vector cutaway on
      an abstract beat: "getting your data ready", "roadmap to growth"). The
@@ -386,7 +628,8 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
      few genuinely worth a picture (usually ≤1 per ~60–90s, like the pros), DROP
      the rest (most body sentences earn nothing — "B, Ali, lower it" is not an
      illustration). For a keeper, pick a REAL illustration `assetId` from the
-     manifest `broll` pool (or run `broll_pool.py resolve` to tag-match) and call
+     manifest `broll` pool (or run `broll_pool.py resolve ... --manifest
+     <asset_manifest.json>` to tag-match admitted snapshots) and call
      `graphics_copy.fill_illustration_spec(beat, assetId, pool_ids, caption)` —
      an id outside the pool returns None (never invent one; no fallback). A
      filled slot is an ordinary `brollTrack` row (renders full-frame via
@@ -448,8 +691,9 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
    HERE — never leave pacing to Audit B.
 4. **Visual-plan convergence — AUDIT SEVERAL ROUNDS AFTER THE CUT IS SAFE.**
    The cut-only previsual has already passed its transcript gate and landed in
-   the Desktop Palmier candidate. Converge the downstream visual plan before
-   unlocking the visual stage. NEVER one-shot it. Loop:
+   the selected destination's cut-review candidate. Converge the downstream
+   visual plan before unlocking the visual stage. One user request can drive
+   the whole job, but a single unverified model pass cannot approve it. Loop:
    author → audit → revise → re-audit, until it stops improving. Minimum **2 audit
    rounds for `produced`/`full`** (1 light pass is fine for `trim`/`light`); cap at
    4 so it terminates.
@@ -665,7 +909,8 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
    provenance sidecar, and delivery governance keys on `final.mp4` — never
    present `draft.mp4` as final, and the review wall (steps 4c critic
    convergence + 7/7.5) still runs before anything IS presented as final.
-6. **Execute the selected destination.** For Desktop-native Palmier, run the
+6. **Execute the selected destination.** For an isolated experimental
+   Desktop-native Palmier candidate, run the
    `desktop_cli.py advance ... --stage visual` contract above, then execute its
    returned, content-addressed bound worklist in dependency order: imports → graphic/b-roll placement →
    measured recompose/motion → captions/color/audio. Read back after each risky
@@ -680,7 +925,33 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
    for **clean-cut** those tracks are empty and no-op, so this same chain ships
    the bare cut. Renders land in the project's `producer/` dir under
    `~/ProjectSniper/<slug>/`.
-   **Flat-mirror note (docs/PIPELINE.md):** when the operator explicitly wants
+   **Studio review lane (the DEFAULT manual-control path after
+   render/assemble):** `scripts/producer/studio/studio_review.py open
+   <producer_dir>` generates `<producer_dir>/studio/` from `edit_plan.json` +
+   `base_final.mp4` and serves it in HyperFrames Studio (pinned CLI, browser
+   opens) for hand/agent adjustment of the graphics layer; then
+   `studio_review.py sync <producer_dir> --apply` folds the Studio edits back
+   into `edit_plan.json` (baseline-diff gated: only NEW gate failures the
+   edit introduces block, so legacy plans still take edits; backup written)
+   then rerun applicable gates/reviews and renew any required stale receipt
+   before the incremental rebuild. Sync prints a shell-quoted assembly command
+   with the same resolved manifest (`--manifest` overrides discovery).
+   `sync --apply --assemble` is a convenience only when no intervening review
+   is required (for example a clean resync after the review wall has passed).
+   Reuse depends on current source/plan/tool fingerprints: graphics-only
+   changes can retain the base; cut, motion, reframe, or grade changes may
+   invalidate it. Measure actual elapsed time; do not promise an 86-second
+   rebuild or call an opening-only test a ten-minute-video benchmark.
+   Loop: generate → open → edit → sync → assemble; `status` prints the next
+   action, `context` is the agent bridge. `--assemble` requires `--apply`.
+   Studio is a review surface only — never `hyperframes render` the studio
+   dir. Governance: produced/full assembles want the template-usage receipt,
+   which a sync-applied plan change stales. Repeat applicable gates/reviews
+   before issuing a fresh receipt. Operator-controlled graphics requires the
+   user's explicit ownership choice, not merely an edit in Studio. Never
+   switch `lanes.graphics` to `operator` to avoid a failed or stale receipt.
+   Reference: `docs/producer/STUDIO_REVIEW_LANE.md`.
+   **Optional legacy mirror (docs/PIPELINE.md):** when the operator explicitly wants
    the approved file mirrored into **Palmier Pro**, run the translator —
    `palmier/push.py <plan> <manifest> [--export]` (app must be open; `--export`
    → `<project>/final.palmier.mp4`) — and relay its NDJSON warnings verbatim. The
@@ -688,7 +959,7 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
    transitions/graphics/motion are **baked into that master** (they play, but are
    not native, re-editable Palmier clips). The "transitions unsupported" error
    belongs to the native-translation path, not this mirror push.
-7. **Verify before presenting.** Desktop Palmier jobs must run
+7. **Verify before presenting.** Experimental Desktop Palmier jobs must run
    `desktop_cli.py qc`; it exports the exact candidate id, verifies duration,
    canvas, fps, native audio, loudness, glitches/freezes/flashes, smoothness,
    graph structure, and extracts plan-aware frames. Review those frames for:
@@ -696,11 +967,16 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
    normal, 3:1 large), consistent font family/scale/color, skin tone and shot
    matching, spelling, word-lock, graphic-form variety, transition motivation,
    and blank/occluded states. Both composition and editorial review receipts
-   must pass before `approve` can complete the authority. File-render jobs keep
-   the Phase 1 checks: ffprobe duration ==
+   must pass before `approve` can complete the authority. File-render jobs run
+   Audit B on the exact output and the full standing panel brief in
+   `scripts/producer/docs/findings/QC_CHECKLIST.md`: ffprobe duration ==
    compiler prediction ±1 frame; 1080×1920 (shorts); ebur128 integrated within
-   ±1 LU of −14; watch 2–3 extracted frames to confirm captions sit in the
-   caption band and the crop framing is sane. Report these numbers.
+   ±1 LU of −14, plus the checklist's peak/channel/endpoint checks. Inspect
+   entrance/exit bursts, every distinct graphic state, phone-size readability,
+   face safety, and source-to-output skin tone/shot matching. Listen to real
+   dialogue seams and the intro/outro. Two or three stills, a tone fixture,
+   or a successful encode cannot establish audiovisual quality. Report actual
+   measurements and explicitly identify any checks that could not be performed.
 7.5 **Reviewer pass (Audit C — free insurance, ALWAYS before presenting):**
    spawn a FRESH subagent (it did not author the plan) with the audit frames +
    report + this checklist: every rendered text spelled correctly (cards,
@@ -709,7 +985,9 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
    caption legibility per frame. Fix or flag findings BEFORE the operator
    sees the render. Two intensities: STANDARD (audit frames — every render)
    and DEEP (FRAME.IO-style pHash dedup → vision-review every UNIQUE visual
-   state — the pre-publish tier; machinery at scripts/frameio/). Deterministic
+   state — the pre-publish tier). Use local extraction and subscription-backed
+   visual review; `scripts/frameio/` contains API-backed machinery and is not
+   authorized by a subscription-only request. Deterministic
    full-frame glitch screens (blackdetect/freezedetect) ride Audit B.
 8. **Feedback** — operator notes reference OUTPUT time; use
    `timeline_map.json` (`to_source`) to find the source ranges; produce plan
@@ -834,10 +1112,11 @@ numbers are in `docs/studies/MOTION_GRAMMAR_STUDY.md`.
 pairs): the full study→rules→templates→bake-in loop. Invoke it before
 building anything from examples.
 
-`reference-editor` — the strict URL/local-reference orchestration layer. It runs
+`reference-editor` — the strict URL/local-reference study layer. It runs
 source-cadence frame study, two independent full-window visual reviews,
 adjudication, template proof, and style-pack compilation before invoking this
-skill to apply the grammar in Palmier.
+skill for reference-inspired plan guidance. Verified mimic is not released
+(P6 0/7), and Palmier application remains an isolated P5-blocked experiment.
 
 ## House rules (non-negotiable)
 
@@ -857,7 +1136,16 @@ skill to apply the grammar in Palmier.
   Higgsfield is opt-in only, with the prompt-review protocol: propose/discuss
   prompts first, agree, generate, review together before anything enters a
   composition. AI imagery varies wildly — never fire-and-forget.
-- **Costs**: Deepgram per new source only; Higgsfield only with operator OK;
-  everything else $0.
-- Repo invariants (CLAUDE.md): never modify `export_mp4.py` stream-copy,
-  `transcribe.py`/`clipper_transcribe.py`, or the multicam pipeline.
+- **Costs**: use subscription-backed agent tools and local processing by
+  default. No paid API, credit purchase, overage, or silent provider fallback
+  without explicit user approval. An API key, environment variable, CLI login,
+  or installed SDK is not spending permission. Verify subscription admission
+  before CLI inference; unknown authentication or exhausted usage stops that
+  invocation. CLI authentication alone does not prove no subscription overage.
+  Never invoke an optional paid-ASR authorization flag on the user's behalf
+  under a no-paid request. Local model downloads still need network/installation
+  permission; don't claim all compute or third-party media is universally free.
+- During a creator edit, do not ad-hoc modify renderer/transcriber code to
+  force a result. Application-development requests are separate. Preserve
+  `export_mp4.py` stream-copy and keep the distinct segmenter/clipper
+  transcription and multicam responsibilities required by root `CLAUDE.md`.

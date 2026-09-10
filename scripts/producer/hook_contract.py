@@ -235,7 +235,7 @@ def check_hook_contract(plan: dict, words_out: list[dict], target: dict,
     if lane_required(target, "captions") and target.get("mode") == "short":
         caps = plan.get("captions") or {}
         burn_on = caps.get("burn", MODES.get("short", {}).get("captions_burn", True))
-        if not (burn_on or plan.get("captionsTrack")):
+        if not burn_on:
             rep.error("hook: a short needs on-screen captions but none will render — "
                       "set captions.burn (words-on-screen is a shorts format element)")
 

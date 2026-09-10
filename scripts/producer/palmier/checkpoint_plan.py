@@ -4,7 +4,11 @@ from __future__ import annotations
 from copy import deepcopy
 from dataclasses import dataclass
 
-from graphics.graphics_render import render_entry, timeline_padded_entry
+from graphics.graphics_render import (
+    render_entry_at_rate as render_entry,
+    timeline_padded_entry,
+)
+from graphics.exit_on_cut import apply_exit_on_cut
 from motion.punch_in import parse_windows
 from motion.recompose import apply_recompose, requires_recompose, stamp_face_bbox
 from palmier.mcp_client import PalmierError, emit
@@ -121,7 +125,7 @@ def _render_graphics(plan: dict, cache_dir: str | None,
     for original_index, row in enumerate(rows):
         try:
             render_row = timeline_padded_entry(row, fps) if fps else row
-            result = render_entry(render_row, cache_dir)
+            result = render_entry(render_row, cache_dir, fps or 30.0)
         except Exception as exc:
             emit(status="checkpoint_graphic_failed", index=original_index,
                  reason=str(exc), required=True)
@@ -227,6 +231,9 @@ def prepare_checkpoint_plan(plan: dict, cache_dir: str | None = None,
     _apply_required_recompose(working, source_path)
     _filter_punches(working)
     _strip_grade(working, omissions)
+    effective_graphics, _clamped = apply_exit_on_cut(working)
+    if working.get("graphicsTrack"):
+        working["graphicsTrack"] = effective_graphics
     graphics = _render_graphics(working, cache_dir, omissions, fps) \
         if render_graphics else {}
     if render_graphics and all(_positive_fact(value)

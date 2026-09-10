@@ -4,6 +4,9 @@ import path from "path";
 import { COMPS_CATALOG } from "@/lib/producer/comps-catalog";
 import { dlog } from "@/lib/debug";
 import { seekShim } from "./preview-shim";
+import { MOTION_DIR, inlineRuntimeAssets, servePreviewImage, serveRuntime } from "./preview-assets";
+import { buildMediaMap, PreviewMediaError } from "./preview-media";
+import { mediaShim } from "./preview-media-shim";
 
 export const dynamic = "force-dynamic";
 
@@ -19,24 +22,18 @@ export const dynamic = "force-dynamic";
 //     their inline defaults exactly like a CLI render);
 //   - duration → the root data-duration attribute is rewritten (same regex
 //     contract as _set_root_duration: the tag carrying data-composition-id).
-// Extra, preview-only plumbing: tokens.css is INLINED (srcdoc iframes resolve
-// "/tokens.css" against the app origin → 404) and "/icons/…" references are
-// rewritten to this route's ?icon= file server. An injected message listener
+// Extra, preview-only plumbing: the fixed local runtime/CSS allowlist is
+// safely inlined. Opaque srcdoc origins cannot fetch local API resources;
+// neither the global local-request policy nor the sandbox is relaxed.
+// Source files/variables are unchanged. Only declared local icon/image resources
+// are embedded, with a frame-local exact URL adapter for img.src and SVG XHR.
+// An injected message listener
 // (preview-shim.ts) seeks every registered window.__timelines timeline
 // ({type:"hf-seek", t}) and measures the comp's painted-content bbox for the
 // drag-to-place preview ({type:"hf-measure", ts} → "hf-content-origin").
 
-const MOTION_DIR = path.join(process.cwd(), "templates", "motion");
 const COMPOSITIONS_DIR = path.join(MOTION_DIR, "compositions");
-const ICONS_DIR = path.join(MOTION_DIR, "icons");
 const KNOWN_KINDS = new Set(COMPS_CATALOG.map((c) => c.kind));
-
-const ICON_TYPES: Record<string, string> = {
-  ".svg": "image/svg+xml",
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".webp": "image/webp",
-};
 
 // Mirrors graphics_render._ROOT_TAG_RE / _DURATION_RE: rewrite ONLY the
 // composition root's data-duration; child clips keep their ="60" sentinels.
@@ -45,34 +42,24 @@ const ROOT_TAG_RE = /<[^>]*data-composition-id="[^"]*"[^>]*>/;
 function buildPreviewHtml(kind: string, spec: Record<string, unknown>, duration: number | null): string {
   const compPath = path.join(COMPOSITIONS_DIR, `${kind}.html`);
   let html = fs.readFileSync(compPath, "utf-8");
+  const media = mediaShim(buildMediaMap(html, kind, spec));
 
   if (duration !== null) {
     html = html.replace(ROOT_TAG_RE, (tag) => tag.replace(/data-duration="[^"]*"/, `data-duration="${duration}"`));
   }
-  // Inline the brand tokens (the comps <link href="/tokens.css">).
-  const tokens = fs.readFileSync(path.join(MOTION_DIR, "tokens.css"), "utf-8");
-  html = html.replace(/<link[^>]*href="\/tokens\.css"[^>]*\/?>/, `<style>${tokens}</style>`);
-  // Route icon fetches (static src= AND the comps' runtime "/icons/"+file
-  // string concat) through this route's ?icon= file server.
-  html = html.split('"/icons/').join('"/api/producer/comp-html?icon=');
+  html = inlineRuntimeAssets(html);
   // Variables + seek listener must be defined BEFORE the comp's own script runs.
-  return html.replace(/<head[^>]*>/, (m) => `${m}\n${seekShim(spec)}`);
-}
-
-function serveIcon(name: string): Response {
-  if (name !== path.basename(name)) return json({ error: "Forbidden icon path" }, 403);
-  const type = ICON_TYPES[path.extname(name).toLowerCase()];
-  const file = path.join(ICONS_DIR, name);
-  if (!type || !fs.existsSync(file)) return json({ error: `unknown icon '${name}'` }, 404);
-  return new Response(new Uint8Array(fs.readFileSync(file)), {
-    headers: { "Content-Type": type, "Cache-Control": "public, max-age=3600" },
-  });
+  return html.replace(/<head[^>]*>/, (m) => `${m}\n${seekShim(spec)}${media}`);
 }
 
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams;
+  const runtime = q.get("runtime");
+  if (runtime !== null) return serveRuntime(runtime, q.get("sha"));
   const icon = q.get("icon");
-  if (icon) return serveIcon(icon);
+  if (icon) return servePreviewImage("icons", icon);
+  const asset = q.get("asset");
+  if (asset) return servePreviewImage("assets", asset);
 
   const kind = q.get("kind") || "";
   if (!KNOWN_KINDS.has(kind)) {
@@ -102,7 +89,7 @@ export async function GET(req: NextRequest) {
       headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" },
     });
   } catch (e) {
-    return json({ error: (e as Error).message }, 500);
+    return json({ error: (e as Error).message }, e instanceof PreviewMediaError ? 422 : 500);
   }
 }
 

@@ -30,9 +30,13 @@ fi
   /usr/bin/tar --extract --file "$copy" --directory /scratch/project \
   --no-same-owner --no-same-permissions
 
+cli=/opt/sniper-motion/node_modules/hyperframes/dist/cli.js
+if [ -n "${SNIPER_LAYOUT_REQUEST:-}" ]; then
+  cli=/opt/sniper-motion/container/layout_observer_launch.mjs
+fi
 set +e
 /usr/bin/timeout --signal=TERM --kill-after=10s 600s \
-  /usr/bin/node /opt/sniper-motion/node_modules/hyperframes/dist/cli.js "$@" \
+  /usr/bin/node "$cli" "$@" \
   > /output/render.log 2>&1
 render_status=$?
 set -e

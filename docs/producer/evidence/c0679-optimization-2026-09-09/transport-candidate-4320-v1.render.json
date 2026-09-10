@@ -1,0 +1,376 @@
+{
+  "status": "rendered-awaiting-output-qc",
+  "startedAt": "2026-09-09T17:49:42.005691+00:00",
+  "admission": {
+    "entry": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/test-only-transport-4320frames.html",
+    "entrySha256": "bfa4e4ca334bdfc457fd302afc5e34f895b469da2c2e4d92216161df99fd94d7",
+    "output": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/transport-candidate-4320-v1.mp4",
+    "frameCount": 4320,
+    "duration": 180.18,
+    "sourceCacheFrameCount": 16394,
+    "sourceDuration": 683.7664166666667,
+    "sourceCacheComplete": true,
+    "cache": "/private/tmp/hyperframes-extract-cache-501/hfcache-v4-5610bca5f73df075",
+    "sdkVersion": "0.8.31",
+    "sandboxSha256": "44309d0cf11391ec665221c43d73a40d81ad05009d517c4986aaff302dfee0ea",
+    "chromeSha256": "3985a87c5905cf9ecd25d49638822cf071a517f5d976ef8c5e8fe2c6d5496cae",
+    "installedSdkSha256": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "mode": "candidate-4320",
+    "sdkSha256": "6d359af9c049a43402101da1b707663c285b89499109dfa687948777614b7985"
+  },
+  "project": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1",
+  "output": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/transport-candidate-4320-v1.mp4",
+  "sdkVersion": "0.8.31",
+  "sourceHashesBefore": {
+    "extension-194-367.css": "a9d32e3015cbe7a31c610ed293ff21ed95c6aadaf4410a21384ce2d84fce31ae",
+    "extension-194-367.js": "8a96c69f01a5b08e87d707986209677255374455f9b85daeab9e73b2fdfb9353",
+    "extension-32-75.css": "6856455522448b2e3d5186522982379e58c7a7e663d9ba6c830b7dd8cf36e4d4",
+    "extension-32-75.js": "f2e1b9737c98bc734c8beba94d14365977862f36c625ae6f27a3862853b07f2b",
+    "extension-367-end.css": "6877c5d777f4e606ac89c3854eef9d04f0030f7718d2e74a29a01c95ead093aa",
+    "extension-367-end.js": "694ece67b6b23f30abb70f7e5104d67ac6c1f8ff7c4682534f9216645ff83c99",
+    "extension-75-194.css": "20619092f95c4dcb9b7afa88b510143789c60f12a19aa3557cee143da4752505",
+    "extension-75-194.js": "31a29d27e632eca5d91b52bd5bfcd908c9b4197a05857d9dde9cfee0e28da068",
+    "hyperframes.json": "f311a7b6cdca37251313743f24c44a5b2d7f80311af0758508fcf447443e18f2",
+    "index.html": "bc95f3ccdeaa2953d2cf1aa178d9e4ad0ba4b62a022b1a340cdb63df8c493577",
+    "motion.js": "3536dd792fc44f5efcb30366041d93b3489b38f435c5f79c084600d77cf07bb2",
+    "scene.css": "4e3b8aec22335e82cee1764dd5e9b4f1c6b47aa770161f60d879894422f6471a"
+  },
+  "fullEditTwoHourTargetAlreadyMissed": true,
+  "renderOnlyTiming": true,
+  "policy": {
+    "admission_free_percent": 25,
+    "stop_free_percent": 10,
+    "maximum_compressor_fraction": 0.25,
+    "maximum_owned_gib": 6,
+    "maximum_process_gib": 5,
+    "maximum_swap_growth_gib": 1,
+    "minimum_disk_free_gib": 10,
+    "minimum_unused_physical_gib": 6,
+    "maximum_snapshot_age_seconds": 30
+  },
+  "args": [
+    "/usr/bin/sandbox-exec",
+    "-f",
+    "/private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/localhost-only.sb",
+    "/opt/homebrew/Cellar/node/23.10.0_1/bin/node",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/hyperframes/dist/cli.js",
+    "render",
+    ".",
+    "--composition",
+    "test-only-transport-4320frames.html",
+    "--fps",
+    "24000/1001",
+    "--quality",
+    "high",
+    "--workers",
+    "1",
+    "--low-memory-mode",
+    "--no-browser-gpu",
+    "--video-frame-format",
+    "png",
+    "--strict",
+    "--no-best-effort",
+    "--output",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/transport-candidate-4320-v1.mp4"
+  ],
+  "nativeOverrides": {
+    "PATH": "/opt/homebrew/Cellar/node/23.10.0_1/bin:/opt/homebrew/Cellar/ffmpeg/8.0_1/bin:/usr/bin:/bin",
+    "TMPDIR": "/private/tmp",
+    "LC_ALL": "C",
+    "HYPERFRAMES_BROWSER_PATH": "/Users/aaronfigueroa/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-152.0.7928.2/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+    "HYPERFRAMES_FFMPEG_PATH": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffmpeg",
+    "HYPERFRAMES_FFPROBE_PATH": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffprobe",
+    "PRODUCER_LOW_MEMORY_MODE": "true",
+    "PRODUCER_FRAME_DATA_URI_CACHE_LIMIT": "32",
+    "PRODUCER_FRAME_DATA_URI_CACHE_BYTES_MB": "64",
+    "PRODUCER_EXPERIMENTAL_FAST_CAPTURE": "false",
+    "PRODUCER_STREAMING_ENCODE_MAX_DURATION_SECONDS": "900",
+    "FFMPEG_STREAMING_TIMEOUT_MS": "5400000",
+    "HYPERFRAMES_EXTRACT_CACHE_MAX_MB": "65536",
+    "SNIPER_NATIVE_FRAME_TRANSPORT": "url-v1"
+  },
+  "runDeadlineSeconds": 1000,
+  "supervisorSigkillProtection": false,
+  "additionalFilePinsBefore": {
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/hyperframes/dist/frame-source-transport.mjs": "20de6c202787a0aa47a8227e54925a1765be871a5bb8b4167032d550b2f55784",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/test-only-transport-4320frames.html": "bfa4e4ca334bdfc457fd302afc5e34f895b469da2c2e4d92216161df99fd94d7",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/fault-preload.mjs": "1cd82cbfce3cc3a6c26ca0610fb08b121b0ba24d42844b9c0a9495ab4950a051",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/CANARY_PROTOCOL.md": "dcc59e4832b33d57a75c1aee09c77650f71b3d37987824b9f29643ffeaf2b0e6",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/canary_progress.py": "ddd0cb8e0adf1ff4775debd204b1609fd8c3912e210aa39420663c6844d33dc6",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/run-canary.py": "660760b63d0db1227bbd9f2eb5312c1898d8aabb14bbac9f31b0f42a1980e972",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/render_native_bounded.py": "a5cccb20c65153ca3b63567243f0127ff12d6631776c0549e8ae1132556e5cf7",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native_owned_processes.py": "7c794c4c199e1c7a311171f835ff6cde938fda419e5c66eb3b2b2e5e3cbe74c8",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/native_render_resources.py": "9501a54ee94bbb25e2f504c966c941c2782fd588ee031bf4af904f0c0e668cc4",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/native_render_processes.py": "0132813c6b70399248fe3035b05efce333bccaa4845ee2721a442c85188e9220",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/native_work_lease.py": "bcea94536ba8d1aaf37288066042fad11e819a6e0a6d10d33376e4194ea5cbee",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/analyze-memory-canary.py": "ad5f82eae277bc0886c1018050dd1efa23d12a18f84a210357a0a5be1cf28137"
+  },
+  "baseline": {
+    "measured_at": 1788976182.007179,
+    "physical_bytes": 68719476736,
+    "free_percent": 88.0,
+    "swap_used_bytes": 9370473594,
+    "compressor_bytes": 1885339648,
+    "disk_free_bytes": 74998812672,
+    "owned_footprint_bytes": 0,
+    "largest_owned_process_bytes": 0,
+    "owned_pids": [],
+    "processes": [],
+    "identity_verified": false,
+    "unused_physical_bytes": 12884901888,
+    "missing_registered_pids": [],
+    "reused_registered_pids": [],
+    "kernel_pressure_level": 1
+  },
+  "logPath": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/transport-candidate-4320-v1.render.log",
+  "pid": 79155,
+  "nativeLaunchedAt": "2026-09-09T17:49:43.492772+00:00",
+  "ownerIdentities": [
+    {
+      "pid": 79155,
+      "parent_pid": 79147,
+      "pgid": 79155,
+      "started": "Wed Sep  9 12:49:43 2026"
+    },
+    {
+      "pid": 79184,
+      "parent_pid": 79155,
+      "pgid": 79155,
+      "started": "Wed Sep  9 12:49:44 2026"
+    },
+    {
+      "pid": 79188,
+      "parent_pid": 79155,
+      "pgid": 79155,
+      "started": "Wed Sep  9 12:49:44 2026"
+    },
+    {
+      "pid": 79277,
+      "parent_pid": 79155,
+      "pgid": 79155,
+      "started": "Wed Sep  9 12:50:14 2026"
+    },
+    {
+      "pid": 79295,
+      "parent_pid": 79155,
+      "pgid": 79155,
+      "started": "Wed Sep  9 12:50:18 2026"
+    },
+    {
+      "pid": 79297,
+      "parent_pid": 79155,
+      "pgid": 79297,
+      "started": "Wed Sep  9 12:50:18 2026"
+    },
+    {
+      "pid": 79298,
+      "parent_pid": 79297,
+      "pgid": 79297,
+      "started": "Wed Sep  9 12:50:18 2026"
+    },
+    {
+      "pid": 79299,
+      "parent_pid": 79297,
+      "pgid": 79297,
+      "started": "Wed Sep  9 12:50:18 2026"
+    },
+    {
+      "pid": 79300,
+      "parent_pid": 79297,
+      "pgid": 79297,
+      "started": "Wed Sep  9 12:50:18 2026"
+    },
+    {
+      "pid": 79301,
+      "parent_pid": 79297,
+      "pgid": 79297,
+      "started": "Wed Sep  9 12:50:18 2026"
+    },
+    {
+      "pid": 80963,
+      "parent_pid": 79155,
+      "pgid": 79155,
+      "started": "Wed Sep  9 12:56:46 2026"
+    }
+  ],
+  "measurementFailureEvidence": [
+    {
+      "reason": "identity-not-stable-across-footprint-read",
+      "identities": [
+        {
+          "pid": 79184,
+          "started": "Wed Sep  9 12:49:44 2026",
+          "pgid": 79155
+        },
+        {
+          "pid": 79188,
+          "started": "Wed Sep  9 12:49:44 2026",
+          "pgid": 79155
+        }
+      ]
+    },
+    {
+      "reason": "identity-not-stable-across-footprint-read",
+      "identities": [
+        {
+          "pid": 80963,
+          "started": "Wed Sep  9 12:56:46 2026",
+          "pgid": 79155
+        }
+      ]
+    }
+  ],
+  "processExitMeasurementRetries": 2,
+  "latestResourceSnapshot": {
+    "measured_at": 1788976607.869879,
+    "physical_bytes": 68719476736,
+    "free_percent": 86.0,
+    "swap_used_bytes": 9336919162,
+    "compressor_bytes": 1772093440,
+    "disk_free_bytes": 64162533376,
+    "owned_footprint_bytes": 177816576,
+    "largest_owned_process_bytes": 169869312,
+    "owned_pids": [
+      79155,
+      80963
+    ],
+    "processes": [
+      {
+        "pid": 79155,
+        "parent_pid": 79147,
+        "pgid": 79155,
+        "started": "Wed Sep  9 12:49:43 2026",
+        "footprint_bytes": 169869312,
+        "compressed_bytes": 0
+      },
+      {
+        "pid": 80963,
+        "parent_pid": 79155,
+        "pgid": 79155,
+        "started": "Wed Sep  9 12:56:46 2026",
+        "footprint_bytes": 7947264,
+        "compressed_bytes": 0
+      }
+    ],
+    "identity_verified": true,
+    "unused_physical_bytes": 2346713088,
+    "missing_registered_pids": [
+      79184,
+      79188,
+      79277,
+      79295,
+      79297,
+      79298,
+      79299,
+      79300,
+      79301
+    ],
+    "reused_registered_pids": [],
+    "kernel_pressure_level": 1,
+    "warnings": [
+      "unused physical RAM is below the reserved host margin"
+    ],
+    "progressBefore": {
+      "observedAtUnix": 1788976606.343594,
+      "captureFramesCompleted": 4320,
+      "captureTotalFrames": 4320,
+      "captureActive": false,
+      "transport": {
+        "event": "progress",
+        "atUnixMs": 1788976586428,
+        "registrations": 4096,
+        "requests": 4095,
+        "completed": 4095,
+        "head": 0,
+        "rejected": 0,
+        "errors": 0,
+        "aborted": 0,
+        "peakStreams": 1,
+        "peakSourceDescriptors": 1,
+        "bytes": 10001152777,
+        "base64Fallbacks": 0,
+        "entries": 4096,
+        "activeStreams": 0,
+        "activeSourceDescriptors": 0,
+        "closed": false,
+        "failed": false,
+        "mode": "same-origin-url"
+      },
+      "alignment": "Observed progress bounds, not estimated fps or exact simultaneous frame"
+    },
+    "progressAfter": {
+      "observedAtUnix": 1788976609.35391,
+      "captureFramesCompleted": 4320,
+      "captureTotalFrames": 4320,
+      "captureActive": false,
+      "transport": {
+        "event": "close",
+        "atUnixMs": 1788976606413,
+        "registrations": 4320,
+        "requests": 4320,
+        "completed": 4320,
+        "head": 0,
+        "rejected": 0,
+        "errors": 0,
+        "aborted": 0,
+        "peakStreams": 1,
+        "peakSourceDescriptors": 1,
+        "bytes": 10553378339,
+        "base64Fallbacks": 0,
+        "entries": 0,
+        "activeStreams": 0,
+        "activeSourceDescriptors": 0,
+        "closed": true,
+        "failed": false,
+        "mode": "same-origin-url"
+      },
+      "alignment": "Observed progress bounds, not estimated fps or exact simultaneous frame"
+    }
+  },
+  "cleanup": {
+    "verified": true,
+    "survivors": [],
+    "signals": [],
+    "scope": "Recorded owned identities; not an unobserved-child guarantee"
+  },
+  "exitCode": 0,
+  "leaseCleanupVerified": true,
+  "elapsedSeconds": 428.9966739169322,
+  "completedAt": "2026-09-09T17:56:51.009417+00:00",
+  "abortReason": null,
+  "sourceHashesAfter": {
+    "extension-194-367.css": "a9d32e3015cbe7a31c610ed293ff21ed95c6aadaf4410a21384ce2d84fce31ae",
+    "extension-194-367.js": "8a96c69f01a5b08e87d707986209677255374455f9b85daeab9e73b2fdfb9353",
+    "extension-32-75.css": "6856455522448b2e3d5186522982379e58c7a7e663d9ba6c830b7dd8cf36e4d4",
+    "extension-32-75.js": "f2e1b9737c98bc734c8beba94d14365977862f36c625ae6f27a3862853b07f2b",
+    "extension-367-end.css": "6877c5d777f4e606ac89c3854eef9d04f0030f7718d2e74a29a01c95ead093aa",
+    "extension-367-end.js": "694ece67b6b23f30abb70f7e5104d67ac6c1f8ff7c4682534f9216645ff83c99",
+    "extension-75-194.css": "20619092f95c4dcb9b7afa88b510143789c60f12a19aa3557cee143da4752505",
+    "extension-75-194.js": "31a29d27e632eca5d91b52bd5bfcd908c9b4197a05857d9dde9cfee0e28da068",
+    "hyperframes.json": "f311a7b6cdca37251313743f24c44a5b2d7f80311af0758508fcf447443e18f2",
+    "index.html": "bc95f3ccdeaa2953d2cf1aa178d9e4ad0ba4b62a022b1a340cdb63df8c493577",
+    "motion.js": "3536dd792fc44f5efcb30366041d93b3489b38f435c5f79c084600d77cf07bb2",
+    "scene.css": "4e3b8aec22335e82cee1764dd5e9b4f1c6b47aa770161f60d879894422f6471a"
+  },
+  "sourceStable": true,
+  "sdkStable": true,
+  "sandboxStable": true,
+  "additionalFilePinsAfter": {
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/hyperframes/dist/frame-source-transport.mjs": "20de6c202787a0aa47a8227e54925a1765be871a5bb8b4167032d550b2f55784",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/test-only-transport-4320frames.html": "bfa4e4ca334bdfc457fd302afc5e34f895b469da2c2e4d92216161df99fd94d7",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/fault-preload.mjs": "1cd82cbfce3cc3a6c26ca0610fb08b121b0ba24d42844b9c0a9495ab4950a051",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/CANARY_PROTOCOL.md": "dcc59e4832b33d57a75c1aee09c77650f71b3d37987824b9f29643ffeaf2b0e6",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/canary_progress.py": "ddd0cb8e0adf1ff4775debd204b1609fd8c3912e210aa39420663c6844d33dc6",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/run-canary.py": "660760b63d0db1227bbd9f2eb5312c1898d8aabb14bbac9f31b0f42a1980e972",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/render_native_bounded.py": "a5cccb20c65153ca3b63567243f0127ff12d6631776c0549e8ae1132556e5cf7",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native_owned_processes.py": "7c794c4c199e1c7a311171f835ff6cde938fda419e5c66eb3b2b2e5e3cbe74c8",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/native_render_resources.py": "9501a54ee94bbb25e2f504c966c941c2782fd588ee031bf4af904f0c0e668cc4",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/native_render_processes.py": "0132813c6b70399248fe3035b05efce333bccaa4845ee2721a442c85188e9220",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/native_work_lease.py": "bcea94536ba8d1aaf37288066042fad11e819a6e0a6d10d33376e4194ea5cbee",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/analyze-memory-canary.py": "ad5f82eae277bc0886c1018050dd1efa23d12a18f84a210357a0a5be1cf28137"
+  },
+  "additionalFilesStable": true,
+  "outputBytes": 215221656
+}

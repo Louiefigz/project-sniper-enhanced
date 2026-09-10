@@ -12,8 +12,8 @@ from palmier.mcp_client import PalmierError
 _FIXED_LANES = (
     "target", "cutTrack", "graphicsTrack", "punchIns", "transitions",
     "brollTrack", "reframe", "captions", "music", "audioEnhance",
-    "audioGain", "baselineLook", "titleCards", "faceBBoxNorm", "treatmentMap",
-    "sfxTrack", "chapters",
+    "audioGain", "audioAuthorityMode", "baselineLook", "titleCards",
+    "faceBBoxNorm", "treatmentMap", "sfxTrack", "chapters",
 )
 _STYLE_FIELDS = (
     "fontName", "fontSize", "color", "backgroundColor", "borderColor",

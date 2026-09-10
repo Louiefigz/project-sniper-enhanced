@@ -1,6 +1,5 @@
 import {
   appendAutoEditJobEvent,
-  completeAutoEditJob,
   failAutoEditJob,
   interruptAutoEditJob,
   markAutoEditWorker,
@@ -9,6 +8,7 @@ import {
   durableProcessGroupAlive,
   readAutoEditJob,
   type CheckpointUpdate,
+  type AutoEditJob,
 } from "@/lib/server/auto-edit-job-store";
 import { createBrainHeartbeat } from "@/lib/server/auto-edit-heartbeat";
 import { boundAutoEditLog } from "@/lib/server/auto-edit-log";
@@ -16,11 +16,9 @@ import { boundedAutoEditProgressMessage } from "@/lib/producer/project-state";
 import { eventElapsedSuffix } from "@/lib/producer/auto-edit-progress";
 import {
   appendProducerRunEvent,
-  completeProducerRun,
   failProducerRun,
   heartbeatProducerRun,
   interruptProducerRun,
-  setProducerRunOwner,
   updateProducerRun,
 } from "@/lib/server/producer-run-registry";
 import { runAutoEditPipeline } from "./pipeline";
@@ -30,6 +28,18 @@ import {
   terminateTrackedProcessTrees,
 } from "../../_lib/child-process-lifecycle";
 import { brainProvider, brainProviderLabel, type BrainProvider } from "../../_lib/ai-provider";
+import { settleWorkerExecution, withWorkerMutationLease } from "./worker-outcome";
+import { timedStage } from "@/lib/server/stage-timing";
+import { withStageTimingContext } from "@/lib/server/stage-timing-context";
+import type { ProjectMutationLease } from "@/lib/server/project-mutation-lease";
+import { renderPrivateCutPreview } from "./cut-preview";
+import { verifyHumanAcceptedCut } from "@/lib/server/human-cut-acceptance-store";
+import { verifyHumanAcceptedSourceBytes } from "@/lib/server/human-cut-source-verification";
+import { runBootstrapWorker } from "@/lib/server/guided-project-bootstrap-worker";
+import { retainBootstrapFailure } from "@/lib/server/guided-project-bootstrap-store";
+import { hasGuidedBootstrap } from "@/lib/server/guided-project-bootstrap-contract";
+import { authoredPreparationRemainingMs, withAuthoredPreparationDeadline,
+  AUTHORED_PREPARATION_LIMIT_MS } from "@/lib/server/guided-project-preparation-deadline";
 
 const TRACKED_TREE_GRACE_MS = PROCESS_TERM_GRACE_MS - 1_000;
 
@@ -38,8 +48,9 @@ function delay(ms: number): Promise<void> {
 }
 
 async function claimJob(jobPath: string, token: string) {
-  for (let attempt = 0; attempt < 20; attempt += 1) {
+  for (let attempt = 0; attempt < 200; attempt += 1) {
     const job = readAutoEditJob(jobPath);
+    if (job?.status === "cut_accepted" && job.token === token) { await delay(25); continue; }
     if (!job || job.status !== "running") throw new Error(`No runnable Auto Edit job at ${jobPath}`);
     if (job.token !== token) throw new Error(`Auto Edit worker token ${token} is stale`);
     if (job.workerPid === process.pid) {
@@ -51,6 +62,8 @@ async function claimJob(jobPath: string, token: string) {
     }
     await delay(25);
   }
+  const current = readAutoEditJob(jobPath);
+  if (current?.cutAcceptance || (current && hasGuidedBootstrap(current.ctx))) throw new Error("Cut worker did not receive the exact parent ownership handoff");
   return markAutoEditWorker(jobPath, token, process.pid);
 }
 
@@ -62,6 +75,7 @@ function progressMessage(payload: Record<string, unknown>): string | null {
     ? payload.provider as BrainProvider
     : brainProvider();
   const brain = brainProviderLabel(provider);
+  if (event === "cut_preview_started") return "Rendering and verifying the exact cut preview; visual authoring has not started.";
   if ((event === "palmier_native_progress" || event === "candidate_qc_progress"
       || event === "palmier_primary_blocked")
       && typeof payload.message === "string") return payload.message;
@@ -71,7 +85,10 @@ function progressMessage(payload: Record<string, unknown>): string | null {
       ? (item as Record<string, unknown>).lane : null).filter(Boolean).join(", ");
     return `Palmier-native editable build selected${lanes ? `; declared limits: ${lanes}` : ""}.`;
   }
-  if (event === "start") return `${brain} started Auto Edit in its detached worker; Palmier is the visible workbench.`;
+  if (event === "start") {
+    const workbench = payload.workbench === "MP4" ? "MP4 delivery" : "Palmier";
+    return `${brain} started Auto Edit in its detached worker; ${workbench} is the workbench.`;
+  }
   if (event === "authoring_started" && payload.stage === "cut") {
     return `${brain} is authoring the transcript-first cut.`;
   }
@@ -112,10 +129,13 @@ function parsedLine(line: string): Record<string, unknown> {
   return { event: "log", stream: "stdout", text: line.slice(0, 2_000) };
 }
 
-async function runWorker(jobPath: string, token: string): Promise<void> {
-  let job = await claimJob(jobPath, token);
-  setProducerRunOwner(job.ctx.dir, job.token, process.pid, true);
-
+async function runOwnedWorker(
+  jobPath: string,
+  token: string,
+  initialJob: AutoEditJob,
+  lease: ProjectMutationLease,
+): Promise<void> {
+  let job = initialJob;
   const heartbeat = createBrainHeartbeat((message) => {
     const updated = heartbeatAutoEditJob(jobPath, token, message);
     heartbeatProducerRun(updated.ctx.dir, updated.token, updated.phase, message);
@@ -137,8 +157,9 @@ async function runWorker(jobPath: string, token: string): Promise<void> {
     return updated;
   };
 
-  try {
-    await runAutoEditPipeline({
+  await settleWorkerExecution({
+    jobPath, token, send, stopHeartbeat: heartbeat.stop,
+    run: () => runAutoEditPipeline({
       job,
       io: {
         send,
@@ -151,22 +172,50 @@ async function runWorker(jobPath: string, token: string): Promise<void> {
           return updated;
         },
       },
-    });
-    send({ event: "complete", outDir: job.ctx.dir });
-    completeAutoEditJob(jobPath, token);
-    completeProducerRun(job.ctx.dir, job.token);
-  } finally {
-    heartbeat.stop();
-  }
+    }, { cutApprovalAccepted: async (currentJob, verified) => {
+      verifyHumanAcceptedCut(currentJob, verified);
+      await verifyHumanAcceptedSourceBytes({ job: currentJob, lease });
+      return true;
+    }, prepareCutPreview: async (currentJob, request) => {
+      const { receipt } = await renderPrivateCutPreview({ job: currentJob, request, lease });
+      return { executionKey: receipt.executionKey, receiptHash: receipt.receiptHash };
+    } }),
+  });
+}
+
+async function runWorker(jobPath: string, token: string, expire: (job: AutoEditJob) => void): Promise<void> {
+  const job = await claimJob(jobPath, token);
+  await withAuthoredPreparationDeadline(job, () => expire(job), () => withStageTimingContext({
+    runId: job.artifactToken ?? job.token, attemptId: job.token, attemptNo: job.attempts,
+  }, () => timedStage(job.ctx.dir, "worker_run", () => runClaimedWorker(jobPath, token, job))));
+}
+
+async function runClaimedWorker(jobPath: string, token: string, job: AutoEditJob): Promise<void> {
+  await withWorkerMutationLease(job, (lease) => runBootstrapWorker(job, lease, () => runOwnedWorker(jobPath, token, job, lease)));
 }
 
 function markInterrupted(jobPath: string, token: string, signal: string): void {
   const job = readAutoEditJob(jobPath);
+  if (job?.token === token && hasGuidedBootstrap(job.ctx)) {
+    try { retainBootstrapFailure(job.ctx.dir, `Bootstrap worker received ${signal}; nested cleanup is unknown`, { verified: false, forcedStop: true }); }
+    catch { console.error("[SNIPER:bootstrap] Unable to retain shutdown uncertainty; no recovery is authorized"); }
+  }
   if (!job || job.token !== token || job.status !== "running") return;
   const message = `Detached Auto Edit worker received ${signal} during ${job.phase}; resume from ${job.checkpoint}.`;
   try { appendAutoEditJobEvent(jobPath, token, { event: "interrupted", signal, message }); } catch {}
   try { interruptAutoEditJob(jobPath, token, message, process.pid); } catch {}
   try { interruptProducerRun(job.ctx.dir, token, message); } catch {}
+}
+
+/** Retain the deadline cause and uncertainty before invoking the existing signal shutdown. */
+function markPreparationExpired(jobPath: string, token: string, job: AutoEditJob): void {
+  let message = "Authored cut PREPARATION expired; cleanup remains unknown";
+  try { authoredPreparationRemainingMs(job.ctx); }
+  catch (error) { message = error instanceof Error ? error.message : String(error); }
+  try { retainBootstrapFailure(job.ctx.dir, message, { verified: false, forcedStop: true }); }
+  catch { console.error("[SNIPER:bootstrap] Unable to retain preparation deadline uncertainty; no recovery is authorized"); }
+  try { appendAutoEditJobEvent(jobPath, token, { event: "authored_preparation_deadline", message,
+    limitMs: AUTHORED_PREPARATION_LIMIT_MS, cleanup: "unknown", retryable: false }); } catch {}
 }
 
 function terminateOwnProcessGroup(signal: "SIGINT" | "SIGTERM"): never {
@@ -195,7 +244,7 @@ async function main(): Promise<void> {
   process.once("SIGINT", () => onSignal("SIGINT"));
   process.once("SIGTERM", () => onSignal("SIGTERM"));
   try {
-    await runWorker(jobPath, token);
+    await runWorker(jobPath, token, (job) => { markPreparationExpired(jobPath, token, job); onSignal("SIGTERM"); });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     const job = readAutoEditJob(jobPath);

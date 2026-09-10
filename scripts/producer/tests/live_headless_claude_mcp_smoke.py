@@ -18,8 +18,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from palmier.keyframe_readback import keyframe_map  # noqa: E402
 from palmier.mcp_client import PalmierClient, PalmierError  # noqa: E402
-from palmier.verify import _keyframe_map  # noqa: E402
 
 PREFIX = "Sniper Headless Claude MCP Test"
 MCP_CONFIG = json.dumps({"mcpServers": {"palmier-pro": {
@@ -86,29 +86,11 @@ def _claude_args(prompt: str, session_id: str, resume: bool) -> list[str]:
 
 
 def _run_claude(prompt: str, session_id: str, resume: bool) -> dict:
-    """Run one Claude turn and return bounded stream evidence."""
-    started = time.monotonic()
-    result = subprocess.run(
-        _claude_args(prompt, session_id, resume), check=False,
-        capture_output=True, text=True, timeout=240)
-    events = _events(result.stdout)
-    uses = _tool_uses(events)
-    if result.returncode != 0:
-        detail = result.stderr.strip() or result.stdout[-2_000:]
-        raise PalmierError(f"Claude exited {result.returncode}: {detail}")
-    names = [str(row.get("name")) for row in uses]
-    return {
-        "elapsedS": round(time.monotonic() - started, 3),
-        "toolNames": names,
-        "skillInvoked": any(name == "Skill" and
-                             row.get("input", {}).get("skill") == "producer"
-                             for name, row in zip(names, uses)),
-        "mcpToolCount": sum(name.startswith("mcp__palmier-pro__") for name in names),
-        "sessionIds": sorted({str(row.get("session_id")) for row in events
-                              if row.get("session_id")}),
-        "result": next((row.get("result") for row in reversed(events)
-                        if row.get("type") == "result"), None),
-    }
+    """Reject this legacy harness until its streaming admission is qualified."""
+    raise PalmierError(
+        "Subscription admission not qualified for the legacy headless Claude "
+        "harness; no provider was invoked. Use an explicitly requested Codex "
+        "subscription-agent review of local evidence, not an automatic fallback.")
 
 
 def _matte_clip(timeline: dict) -> dict:
@@ -136,7 +118,7 @@ def _text_proof(timeline: dict) -> dict:
 def _motion_proof(timeline: dict) -> dict:
     """Prove Claude's resumed turn wrote material scale keyframes."""
     clip = _matte_clip(timeline)
-    rows = _keyframe_map(clip).get("scale", [])
+    rows = (keyframe_map(clip) or {}).get("scale", [])
     if len(rows) < 3 or max(float(row[1]) for row in rows) < 1.07:
         raise PalmierError(f"scale keyframes missing or immaterial: {rows}")
     return {"clipId": clip.get("id"), "scaleKeyframes": rows}

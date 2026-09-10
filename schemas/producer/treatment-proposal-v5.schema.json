@@ -1,0 +1,467 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Unapproved full-program treatment proposal with explicit pinned caption presets",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "summary",
+    "clauses",
+    "beats",
+    "operations",
+    "openingEndAnchor",
+    "continuityEndAnchor",
+    "audioPolicy",
+    "colorPolicy",
+    "graphicsStyle",
+    "graphicsStyleRationale",
+    "beatDecisions",
+    "hookSeamDecisions"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 5
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "clauses": {
+      "type": "array",
+      "maxItems": 128,
+      "items": {
+        "$ref": "#/$defs/clause"
+      }
+    },
+    "beats": {
+      "type": "array",
+      "maxItems": 128,
+      "items": {
+        "$ref": "#/$defs/beat"
+      }
+    },
+    "operations": {
+      "type": "array",
+      "maxItems": 128,
+      "items": {
+        "$ref": "#/$defs/operation"
+      }
+    },
+    "openingEndAnchor": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 60001
+    },
+    "continuityEndAnchor": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 60001
+    },
+    "audioPolicy": {
+      "const": "preserve-full-program"
+    },
+    "colorPolicy": {
+      "enum": [
+        "preserve",
+        "warm",
+        "none"
+      ]
+    },
+    "graphicsStyle": {
+      "enum": [
+        "cutaway-only",
+        "overlay-rich",
+        "face-bridge"
+      ]
+    },
+    "graphicsStyleRationale": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 2000
+    },
+    "beatDecisions": {
+      "type": "array",
+      "maxItems": 128,
+      "items": {
+        "$ref": "#/$defs/beatDecision"
+      }
+    },
+    "hookSeamDecisions": {
+      "type": "array",
+      "maxItems": 128,
+      "items": {
+        "$ref": "#/$defs/hookSeamDecision"
+      }
+    }
+  },
+  "$defs": {
+    "indices": {
+      "type": "array",
+      "maxItems": 128,
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 127
+      }
+    },
+    "clause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start",
+        "end",
+        "quote",
+        "disposition",
+        "rationale",
+        "operationIndices"
+      ],
+      "properties": {
+        "start": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20000
+        },
+        "end": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20000
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        },
+        "disposition": {
+          "enum": [
+            "supported",
+            "ambiguous",
+            "unsupported",
+            "cut-affecting"
+          ]
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "operationIndices": {
+          "$ref": "#/$defs/indices"
+        }
+      }
+    },
+    "beat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "startAnchor",
+        "endAnchorExclusive",
+        "purpose",
+        "summary",
+        "supportsBeatIndices"
+      ],
+      "properties": {
+        "startAnchor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 60001
+        },
+        "endAnchorExclusive": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60001
+        },
+        "purpose": {
+          "enum": [
+            "opening",
+            "body",
+            "closing"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "supportsBeatIndices": {
+          "$ref": "#/$defs/indices"
+        }
+      }
+    },
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "clauseIndex",
+        "beatIndex",
+        "catalogKind",
+        "variables",
+        "grade",
+        "startAnchor",
+        "endAnchorExclusive",
+        "presentation",
+        "reason",
+        "captions"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "catalog-graphic",
+            "grade",
+            "preserve-cut",
+            "captions-full-program"
+          ]
+        },
+        "clauseIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 127
+        },
+        "beatIndex": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 127
+        },
+        "startAnchor": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 60001
+        },
+        "endAnchorExclusive": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 60001
+        },
+        "catalogKind": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 100
+        },
+        "variables": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "maxItems": 128,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "value"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "value": {
+                "type": [
+                  "string",
+                  "number",
+                  "boolean"
+                ],
+                "maxLength": 2000
+              }
+            }
+          }
+        },
+        "grade": {
+          "enum": [
+            "warm",
+            "none",
+            null
+          ]
+        },
+        "presentation": {
+          "$ref": "#/$defs/presentation"
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 8,
+          "maxLength": 2000
+        },
+        "captions": {
+          "$ref": "#/$defs/captionSelection"
+        }
+      }
+    },
+    "presentation": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "anchor",
+        "placement",
+        "compositeMode",
+        "baseTreatment",
+        "rationale"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "anchor": {
+          "enum": [
+            "own-screen",
+            "free-band"
+          ]
+        },
+        "placement": {
+          "enum": [
+            "full-canvas",
+            "measured-free-region"
+          ]
+        },
+        "compositeMode": {
+          "const": "normal"
+        },
+        "baseTreatment": {
+          "const": "preserve"
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    },
+    "beatDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "beatId",
+        "decision",
+        "reason",
+        "kind",
+        "alternativesConsidered",
+        "selectionReason",
+        "operationIndex"
+      ],
+      "properties": {
+        "beatId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "decision": {
+          "const": "graphic"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 2000
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "alternativesConsidered": {
+          "type": "array",
+          "maxItems": 128,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "selectionReason": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 2000
+        },
+        "operationIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 127
+        }
+      }
+    },
+    "hookSeamDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seamIndex",
+        "decision",
+        "reason",
+        "evidence"
+      ],
+      "properties": {
+        "seamIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 127
+        },
+        "decision": {
+          "const": "clean-hook"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 2000
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 12,
+          "maxLength": 2000
+        }
+      }
+    },
+    "captionSelection": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "preset",
+        "coverage",
+        "suppression"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "preset": {
+          "enum": [
+            "producer-config-line-v1",
+            "producer-config-karaoke-v1"
+          ]
+        },
+        "coverage": {
+          "const": "all-kept-transcript-words"
+        },
+        "suppression": {
+          "const": "none"
+        }
+      }
+    }
+  }
+}

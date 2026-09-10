@@ -3,9 +3,15 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
+
+from cross_runtime_canonical_json import canonical_compact_json
+from cut_preview_io import read_bytes
+from transcript_source_authority import verify_result
 
 
 @dataclass(frozen=True)
@@ -14,6 +20,45 @@ class SourceEvidence:
     duration: float
     transcript_path: str
     words: list[dict]
+
+
+@dataclass(frozen=True)
+class CutParent:
+    """Initial small document bytes, not a later hash of possibly changed input."""
+
+    path: str
+    raw: bytes
+    value: dict
+
+    @property
+    def sha256(self) -> str:
+        """Hash only the exact initial bytes that were parsed and validated."""
+        return hashlib.sha256(self.raw).hexdigest()
+
+
+def _parent_bytes(path: str) -> bytes:
+    """Keep legacy directory aliases readable, but never follow a file link."""
+    absolute = Path(os.path.abspath(path))
+    return read_bytes(absolute.parent.resolve(strict=True) / absolute.name)
+
+
+def load_cut_parent(path: str) -> CutParent:
+    """Capture one bounded initial JSON object for the entire cut check."""
+    raw = _parent_bytes(path)
+    value = json.loads(raw.decode("utf-8"))
+    if type(value) is not dict:
+        raise RuntimeError("cut parent must be a JSON object")
+    return CutParent(path, raw, value)
+
+
+def recheck_cut_parents(parents: tuple[CutParent, ...], errors: list[str]) -> None:
+    """Fail if receipt publication no longer refers to the initial parent bytes."""
+    for parent in parents:
+        try:
+            if _parent_bytes(parent.path) != parent.raw:
+                raise RuntimeError(f"{parent.path}: parent bytes changed during cut validation")
+        except (OSError, RuntimeError, ValueError) as exc:
+            errors.append(f"cut parent publication blocked: {exc}")
 
 
 def file_hash(path: str) -> str:
@@ -25,7 +70,7 @@ def file_hash(path: str) -> str:
 
 
 def stable_hash(value: Any) -> str:
-    raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    raw = canonical_compact_json(value)
     return hashlib.sha256(raw.encode()).hexdigest()
 
 
@@ -43,13 +88,28 @@ def _word_rows(payload: Any) -> list[dict]:
             for word in (row.get("words") or []) if isinstance(word, dict)]
 
 
-def _load_words(path: str, tag: str, errors: list[str]) -> list[dict]:
+def _load_payload(path: str, tag: str, errors: list[str]) -> Any:
     try:
         with open(path) as handle:
-            payload = json.load(handle)
+            return json.load(handle)
     except (OSError, json.JSONDecodeError) as exc:
         errors.append(f"{tag}: transcript unreadable: {exc}")
-        return []
+        return None
+
+
+def _confidence_fields(raw: dict, tag: str, errors: list[str]) -> dict | None:
+    """Keep optional, uncalibrated confidence; reject invalid supplied metadata."""
+    if "confidence" not in raw:
+        return {}
+    confidence = raw["confidence"]
+    if type(confidence) not in (int, float) or not 0 <= confidence <= 1 \
+            or not math.isfinite(confidence):
+        errors.append(f"{tag} has invalid confidence")
+        return None
+    return {"confidence": confidence}
+
+
+def _load_words(payload: Any, tag: str, errors: list[str]) -> list[dict]:
     words: list[dict] = []
     for index, raw in enumerate(_word_rows(payload)):
         try:
@@ -61,7 +121,10 @@ def _load_words(path: str, tag: str, errors: list[str]) -> list[dict]:
         if not text or end <= start:
             errors.append(f"{tag}: transcript word[{index}] is empty or end <= start")
             continue
-        words.append({"word": text, "start": start, "end": end})
+        confidence = _confidence_fields(raw, f"{tag}: transcript word[{index}]", errors)
+        if confidence is None:
+            continue
+        words.append({"word": text, "start": start, "end": end, **confidence})
     words.sort(key=lambda word: (word["start"], word["end"]))
     if not words:
         errors.append(f"{tag}: transcript contains no timed words")
@@ -75,6 +138,26 @@ def _resolve_transcript(source: dict, manifest_path: str) -> str:
     if os.path.isabs(relative):
         return relative
     return os.path.join(os.path.dirname(os.path.abspath(manifest_path)), relative)
+
+
+def _correction_problem(payload: object, source: dict, path: str,
+                        context: tuple[str | None, str]) -> str | None:
+    """Keep correction-store imports lazy to avoid the legacy review import cycle."""
+    expected, manifest_path = context
+    marked = type(payload) is dict and bool({"timingCorrectionAuthority", "sourceWordCorrectionAuthority"}.intersection(payload))
+    if not marked and ".sniper-timing-corrections" not in Path(path).parts \
+            and not Path(manifest_path).name.startswith("asset_manifest.timing-"):
+        return None
+    from transcript_correction_read import correction_error
+    try:
+        if hashlib.sha256(_parent_bytes(path)).hexdigest() != expected:
+            return "timing correction transcript changed after initial cut evidence observation"
+        problem = correction_error(payload, source, path, manifest_path)
+        if hashlib.sha256(_parent_bytes(path)).hexdigest() != expected:
+            return "timing correction transcript changed during cut evidence observation"
+        return problem
+    except (OSError, RuntimeError, ValueError) as exc:
+        return f"timing correction transcript observation blocked: {exc}"
 
 
 def source_evidence(manifest: dict, manifest_path: str, transcripts_dir: str,
@@ -104,6 +187,14 @@ def source_evidence(manifest: dict, manifest_path: str, transcripts_dir: str,
         except (KeyError, TypeError, ValueError):
             errors.append(f"{tag}: duration must be numeric")
             continue
+        payload = _load_payload(path, tag, errors)
+        if source.get("sourceSha256") is not None:
+            problem = verify_result(payload, source, path)
+            if problem:
+                errors.append(f"{tag}: {problem}")
+        correction_problem = _correction_problem(payload, source, path, (authority[-1]["hash"], manifest_path))
+        if correction_problem:
+            errors.append(f"{tag}: {correction_problem}")
         sources[source_id] = SourceEvidence(
-            source_id, duration, path, _load_words(path, tag, errors))
+            source_id, duration, path, _load_words(payload, tag, errors))
     return sources, authority

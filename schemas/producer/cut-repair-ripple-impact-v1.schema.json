@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/cut-repair-ripple-impact-v1.schema.json",
+  "title": "CutRepairRippleImpactV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "exact",
+    "requiredDurationDeltaFrames",
+    "newTotalOutputFrames",
+    "rippleFromFrame",
+    "reopensPictureLock",
+    "semanticClosureRequired",
+    "movedDependents",
+    "invalidatedDependents",
+    "unchangedOutputLockedIds"
+  ],
+  "properties": {
+    "exact": { "const": true },
+    "requiredDurationDeltaFrames": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "newTotalOutputFrames": {
+      "type": "integer",
+      "minimum": 2
+    },
+    "rippleFromFrame": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reopensPictureLock": { "const": true },
+    "semanticClosureRequired": { "const": true },
+    "movedDependents": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/movedDependent" }
+    },
+    "invalidatedDependents": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/stableId" }
+    },
+    "unchangedOutputLockedIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/stableId" }
+    }
+  },
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"
+    },
+    "frameRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startFrame", "endFrameExclusive"],
+      "properties": {
+        "startFrame": { "type": "integer", "minimum": 0 },
+        "endFrameExclusive": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "movedDependent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stableId", "elementKind", "from", "to"],
+      "properties": {
+        "stableId": { "$ref": "#/$defs/stableId" },
+        "elementKind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "from": { "$ref": "#/$defs/frameRange" },
+        "to": { "$ref": "#/$defs/frameRange" }
+      }
+    }
+  }
+}

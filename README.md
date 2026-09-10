@@ -1,39 +1,43 @@
 # 🎯 PROJECT SNIPER ENHANCED
 
 > A local-first AI video editing system for Claude Code desktop, rendered files,
-> Final Cut Pro, and editable Palmier Pro timelines.
+> Final Cut Pro, and isolated Palmier Pro timeline experiments.
 
 Project Sniper Enhanced combines **5 focused video-editing skills**, **7 slash
-commands**, **4 GUI workspaces**, **46 registered Producer motion compositions**,
-a deterministic render pipeline, and an incremental Palmier revision system.
+commands**, **4 GUI workspaces**, **53 registered Producer motion compositions**,
+a deterministic render pipeline, and a production-shaped local Palmier revision
+system whose connected hybrid workflow is still under qualification.
 
 Use it in whichever surface fits the job:
 
 | Surface | Best for | What it produces |
 |---|---|---|
-| **Claude Code desktop** | Talking to the editor in plain language; reference matching; building directly in Palmier | A governed edit plan, rendered deliverables, or an editable Palmier timeline |
+| **Claude Code desktop** | Talking to the editor in plain language; reference-inspired study/profile guidance; isolated Palmier experiments | A governed edit plan, rendered deliverables, or an experimental Palmier candidate |
 | **Web GUI** | Visual ingest, segmentation, word editing, timeline adjustment, Auto Edit, and text QC | MP4 clips, FCPXML, Producer projects, review reports |
-| **Palmier Pro** | Native timeline control and quick changes after an editable build | Stable-ID clips, text, graphic overlays, revisions, and exports |
+| **Palmier Pro** | Reviewing an approved flat mirror or exercising an isolated editable candidate | A visually exact one-clip mirror, or experimental stable-ID timeline operations |
 | **Headless CLIs** | Automation, debugging, CI, and deterministic stage-by-stage execution | The same manifests, plans, renders, audits, and revision receipts |
 
 ## Choose the destination first
 
 The requested destination determines the workflow; these are intentionally
-different products:
+different routes:
 
-1. **Editable Palmier build** — when the operator asks to build or continue in
-   Palmier, Claude Code drives Palmier directly inside a candidate-scoped,
-   resumable authority. The cut lands first, visual treatment follows, and
-   cards/text remain addressable by stable IDs.
+1. **Experimental editable Palmier build** — in an isolated, disposable
+   candidate, Claude Code can exercise the production-shaped resumable
+   authority, landing the cut before visual treatment and addressing cards/text
+   by stable IDs. Connected hybrid delivery remains P5-blocked; this is not a
+   released publishing path.
 2. **Rendered file** — when the operator asks for an MP4, Sniper's deterministic
    renderer produces and audits `final.mp4`.
 3. **Approved flat mirror** — when the operator explicitly wants the approved
    Sniper master mirrored into Palmier, the exact file is placed as one verified
    clip. It is visually exact but its baked layers are not individually editable.
 
-For long-form work, the recommended model is **Editable Build while iterating +
-one QC Master when publishing**. Small card/text changes touch only the bound
-element; a full master is rendered and audited once the batch is ready to ship.
+For both short- and long-form work, the safe publishing path is an exact,
+audited MP4, optionally placed in Palmier as the approved one-clip flat mirror.
+Use the editable candidate only for isolated experiments. Local contracts prove
+bounded card/text repair, but the complete short/long product is not yet
+P7/P8-qualified.
 
 ## Product at a glance
 
@@ -41,15 +45,16 @@ element; a full master is rendered and audited once the batch is ready to ship.
   boundaries, adjust them, and export separate single- or multicam MP4 clips.
 - **✂️ CLIPPER** — remove filler, false starts, repetition, and dead air at
   word level; export a clean MP4 and/or Final Cut Pro FCPXML.
-- **🎛️ PRODUCER** — the primary editing system for shorts and long-form:
+- **🎛️ PRODUCER** — the primary editing workflow for shorts and long-form:
   retakes, pauses, reframing, captions, graphics, motion, transitions, b-roll,
   audio, plan review, deterministic gates, rendered QC, feedback revisions, and
-  editable Palmier delivery.
+  exact MP4 delivery, plus an experimental Palmier candidate path.
 - **🔍 FRAME.IO REVIEW** — inspect an MP4 for visible typos, spelling,
   grammar, and broken text formatting using representative-frame selection.
 - **🧪 REFERENCE EDITOR** — study a finished reference or raw+edited pair
-  frame by frame, prove reusable templates, compile a style pack, and apply its
-  mechanics without copying the source creator's identity or assets.
+  frame by frame and compile evidence-bound profile guidance. Verified mimic is
+  not released (P6 is 0/7), so outputs are reference-inspired studies rather
+  than claims of complete style replication.
 
 ## Fastest start (Claude Code desktop)
 
@@ -79,13 +84,14 @@ is inside **Claude Code desktop**:
 3. **Open this project folder in Claude Code desktop** and just ask — e.g.
    *"cut a Jaden-produced short from this footage"* or *"clean-cut this long recording."*
    Claude loads the **`producer`** skill and chooses the requested destination:
-   governed editable Palmier build, deterministic rendered file, or approved
-   one-clip mirror.
+   deterministic rendered file, approved one-clip mirror, or an explicitly
+   experimental isolated Palmier candidate.
 
 **Where your files go:** everything lands under **`~/ProjectSniper/<slug>/`**.
 Rendered outputs and working files are in the project's `producer/` folder;
-reference studies live under `~/ProjectSniper/_references/`. Editable Palmier
-jobs also keep authority, operation, element-ledger, QC, and resume receipts there.
+reference studies live under `~/ProjectSniper/_references/`. Experimental
+Palmier jobs also keep authority, operation, element-ledger, QC, and resume
+receipts there.
 
 **More references & docs:** [`docs/README.md`](./docs/README.md).
 
@@ -118,19 +124,20 @@ invocation is easiest to verify.
 |---|---|
 | [`/setup`](./.claude/commands/setup.md) | Check the machine and install only missing prerequisites with approval. |
 | [`/produce`](./.claude/commands/produce.md) | Produce or revise a short, long-form edit, or trim-only render. |
-| [`/produce-palmier`](./.claude/commands/produce-palmier.md) | Build or revise an editable Palmier timeline. |
+| [`/produce-palmier`](./.claude/commands/produce-palmier.md) | Exercise an isolated experimental editable Palmier candidate. |
 | [`/clip`](./.claude/commands/clip.md) | Tighten one clip at word level and export MP4/FCPXML. |
 | [`/segment`](./.claude/commands/segment.md) | Split a long recording into separate topic/guest clips. |
-| [`/reference-edit`](./.claude/commands/reference-edit.md) | Study one benchmark meticulously and apply its mechanics to new footage. |
+| [`/reference-edit`](./.claude/commands/reference-edit.md) | Study one benchmark meticulously and produce reference-inspired guidance. |
 | [`/producer-study`](./.claude/commands/producer-study.md) | Teach the system reusable rules/templates from several references. |
 
 ## The five real Project Sniper skills
 
-### 1. Producer — complete short and long-form editing
+### 1. Producer — short and long-form editing workflow
 
 [`producer`](./.claude/skills/producer/SKILL.md) is the main workflow. Use it
-for trim-only edits, produced shorts, full long-form videos, revisions, and
-rendered-file or editable-Palmier delivery.
+for trim-only edits, produced shorts, long-form videos, revisions, and safe
+rendered-file delivery. The editable-Palmier branch is experimental and
+isolated; end-to-end short/long product qualification remains open.
 
 ```text
 /produce ~/Desktop/raw.mp4 Make a 45-second 9:16 produced short. Open on the
@@ -148,7 +155,8 @@ or music. Deliver a 16:9 MP4 with SRT and chapters.
 /produce ~/Desktop/session.mov Create the full 16:9 long-form edit. Preserve
 clean takes, tighten pauses, use graphics only when the content earns them,
 vary card forms, add restrained motion and motivated transitions, and keep
-music off. Build an editable Palmier version while we iterate.
+music off. Render an exact MP4; if we test the editable Palmier branch, use a
+disposable isolated candidate and do not treat it as the publishing authority.
 ```
 
 For a small revision, point at the existing project and use output time:
@@ -183,17 +191,19 @@ pre/post-roll, show me the boundaries first, then export the approved clips.
 
 For multicam, name the synchronized sources and lav tracks in the same request.
 
-### 4. Reference Editor — match one benchmark
+### 4. Reference Editor — study one benchmark
 
 [`reference-editor`](./.claude/skills/reference-editor/SKILL.md) is the public
-workflow for *"edit mine like this."* It studies the reference frame by frame,
-proves required templates, builds a style pack, and applies only its mechanics.
+workflow for *"study this style."* It studies the reference frame by frame,
+binds template evidence, and builds reference-inspired profile guidance.
+Exact/verified mimic is not a released capability (P6 remains 0/7).
 
 ```text
 /reference-edit ~/Desktop/benchmark.mp4 ~/Desktop/my-raw-footage.mp4 mimic
 Study only the sections marked as AI-edited. Analyze every cut, card, layout,
 animation, transition, caption, audio cue, and pacing decision. Build and prove
-the missing templates, then apply that grammar to my footage in editable Palmier.
+the missing templates, then use the measured grammar as guidance for an exact
+MP4 study render. Do not claim that the result replicates the reference.
 Do not copy the creator's words, branding, assets, music, or identity.
 ```
 
@@ -201,7 +211,7 @@ Do not copy the creator's words, branding, assets, music, or identity.
 
 [`producer-study`](./.claude/skills/producer-study/SKILL.md) is a maintainer
 workflow. Use it when several references should permanently improve Sniper's
-template catalog or doctrine. For a one-off mimic, use `reference-editor`.
+template catalog or doctrine. For a one-reference study, use `reference-editor`.
 
 ```text
 /producer-study ~/Desktop/reference-set/ Learn the recurring card families,
@@ -213,11 +223,15 @@ and document the new selection rules. Learn only; do not edit new footage yet.
 
 ## Producer graphics library
 
-The Producer registry currently contains **46 source-authored HTML motion
+The Producer registry currently contains **53 source-authored HTML motion
 compositions** in [`templates/motion/compositions/`](./templates/motion/compositions/).
 The catalog includes hook cards, statements, stats, receipts, pipelines,
 scoreboards, rails, gauges, lists, maps, quotes, takeovers, PIP-hole layouts,
-icons, lower-thirds, section markers, transitions, and 16:9 variants.
+icons, lower-thirds, section markers, transitions, and 16:9 variants — plus
+seven kinds ported 2026-08-28 from the vendored HyperFrames catalog
+(hand-drawn annotations, charts, counters, a hook line-swap, a screenshot
+punch-in, and a scribble stinger; see
+[`docs/producer/catalog-study/`](./docs/producer/catalog-study/)).
 
 The system is expected to choose a form from the beat's **information shape**
 (comparison → bars/scoreboard, process → pipeline/rail, evidence →
@@ -226,21 +240,24 @@ and avoid repeating the same anatomy consecutively. Operators can also name a
 specific composition directly.
 
 <details>
-<summary>All 46 registered motion compositions</summary>
+<summary>All 53 registered motion compositions</summary>
 
 ```text
 agenda-slide                 angela-caption-dual-mode
 angela-receipt-cell          angela-staircase-lockup
 angela-takeover-deck         avatar-bio-card
 blur-tease                   canvas-pip-list
-chip-row                     color-wash
-container-shape              container-shape-wide
+chart-story                  chip-row
+color-wash                   container-shape
+container-shape-wide         count-up
 fragment-payoff              glass-lower-third
 glass-rail                   glass-takeover-bg
-glitch-hit                   icon-badge
+glitch-hit                   hw-callout-circle
+hw-scribble-transition       icon-badge
 icon-badge-wide              jaden-shout-lockup
 kinetic-quote                kinetic-quote-wide
-list-build                   logo-card
+line-swap                    list-build
+logo-card                    marker-highlight
 nateherk-bullet-bars         nateherk-ledger-dark
 nateherk-pipeline            nateherk-rail
 nateherk-scoreboard          nateherk-takeover
@@ -248,10 +265,11 @@ schedule-stack               section-marker
 section-takeover             stat-card
 statement-card               stinger-wipe
 stroke-draw-badge            text-element
-text-element-wide            underline-circle
-versus-split                 whiteboard-connector
-whiteboard-list              whiteboard-map
-widget-gauge                 widget-pills
+text-element-wide            ui-focus-zoom
+underline-circle             versus-split
+whiteboard-connector         whiteboard-list
+whiteboard-map               widget-gauge
+widget-pills
 ```
 
 </details>
@@ -267,7 +285,8 @@ catalog is not presented as a Sniper capability.
 - **Inputs:** one or more raw files, a project folder, a finished long-form to
   mine for shorts, optional b-roll/music, or Segmenter/Clipper output.
 - **Outputs:** 9:16 short(s), 16:9 long-form, rough clips, deterministic MP4,
-  FCPXML/SRT/chapters where applicable, or an editable Palmier timeline.
+  FCPXML/SRT/chapters where applicable, or an experimental isolated Palmier
+  candidate.
 - **Scopes:** `trim` → `light` → `produced` → `full`, with independent
   lane overrides for motion, graphics, transitions, captions, b-roll,
   credibility, music, and dialogue cleanup.
@@ -302,10 +321,11 @@ catalog is not presented as a Sniper capability.
 - Unknown identifiers, stale plans, missing evidence, unsupported lanes, and
   active-project mismatches fail closed instead of guessing.
 
-## Editable Palmier revisions and long-form changes
+## Experimental editable Palmier revisions
 
-The editable-build path is designed so a two-word change in a 14-minute video
-does not force a 14-minute re-render.
+Local executor contracts are designed so a two-word change in a 14-minute video
+does not force a 14-minute re-render. They do not yet qualify the connected
+hybrid Palmier product.
 
 | Requested change | Current route |
 |---|---|
@@ -326,10 +346,13 @@ unrelated clips, and inspect dirty windows at before/entrance/middle/exit/after
 frames. Stopping after import or placement is resumable from verified receipts
 without replaying completed work.
 
-**Current proof level:** the first 60-second direct Palmier build was exercised
-live; a synthetic 14-minute/50-graphic plan proved bounded multi-card revisions
-offline. A live 30–60 minute Palmier endurance/parity run is still outstanding,
-so long-duration live-edit performance should not be presented as fully proven.
+**Current proof level:** the historical first-60 run proved substantial
+transport and mutation mechanics, but failed later product-quality review. It
+took **56m48s**, remained Palmier-QC-pending, lost per-word timing for seven
+karaoke captions, and accepted a wrong 3840×2160 canvas for a requested 9:16
+short. It is not connected Palmier/P5 qualification. A synthetic
+14-minute/50-graphic plan proves bounded local revision mechanics only; the
+connected hybrid path remains P5-blocked.
 
 ## What each tool does
 
@@ -358,8 +381,9 @@ confirm the format and choose one direction before the reference can be used:
 URL intake uses HTTPS and caps downloads at 1080p. URL and local intake both
 cap study media at 2 GiB / 60 minutes and require at least 5 GiB of free disk.
 
-- **Mimic this** — apply this asset's measured mechanics to the next edit. It
-  stays selected only while every engagement lane remains available to Auto-edit.
+- **Reference-inspired study** — use this asset's measured mechanics as
+  profile guidance for the next edit. This is not a verified mimic claim; P6
+  remains 0/7.
 - **Extend a style** — add evidence to the closed Caleb/Jaden/Angela short-form
   grammar selected by the operator.
 - **New style** — name a provisional candidate tied to this reference; it does
@@ -405,7 +429,7 @@ The Python pipeline is also runnable on its own:
 - Codex CLI (optional) — `codex` on PATH with a ChatGPT subscription login;
   enable it with `SNIPER_BRAIN_PROVIDER=codex`
 - whisper.cpp — `whisper-cli` plus a local model; required for no-audio-egress transcription
-- Palmier Pro (optional) — the AI-native NLE. When it's open it serves a local MCP at `http://127.0.0.1:19789/mcp`; a Claude client can drive it directly for interactive live editing. Setup (incl. the Claude Desktop bridge): [`docs/palmier/PALMIER_MCP_SETUP.md`](./docs/palmier/PALMIER_MCP_SETUP.md). The repo's checked-in `.mcp.json` auto-offers this server to Claude Code.
+- Palmier Pro (optional) — the AI-native NLE. When it's open it serves a local MCP at `http://127.0.0.1:19789/mcp`; a Claude client can drive an isolated experimental candidate. Connected hybrid delivery remains P5-blocked. Setup (incl. the Claude Desktop bridge): [`docs/palmier/PALMIER_MCP_SETUP.md`](./docs/palmier/PALMIER_MCP_SETUP.md). The repo's checked-in `.mcp.json` auto-offers this server to Claude Code.
 - tesseract — only for FRAME.IO REVIEW's optional `--mode ocr`; the default visual mode does not need it
 - macOS — file selection uses a native macOS picker (`osascript`); the app won't be able to pick files on other platforms yet
 
@@ -514,8 +538,9 @@ uses the same no-overlap and hidden-tab rules.
 
 **Historical live proof:** on 2026-07-12, Next restarted while the same detached
 ffmpeg worker continued and the browser reconnected to its running status.
-The current repository has 109 TypeScript test files; use `npm test`,
-`npm run type-check`, `npm run lint`, and `npm run build` as the release gate.
+Use `npm test`, `npm run type-check`, `npm run lint`, and `npm run build` as
+the current TypeScript release gate; do not infer the present suite size from
+older documentation.
 See the evidence trail in
 [`docs/PIPELINE.md`](./docs/PIPELINE.md).
 
@@ -532,7 +557,7 @@ edit at a time** and start the next when the current render finishes.
 
 ### First GUI-rendered edit in 5 steps
 
-The verified PRODUCER loop (full walkthrough in [`docs/HANDOFF.md`](./docs/HANDOFF.md);
+The GUI PRODUCER loop (full walkthrough in [`docs/HANDOFF.md`](./docs/HANDOFF.md);
 canonical pipeline doctrine in [`docs/PIPELINE.md`](./docs/PIPELINE.md)):
 
 1. **Ingest** — open the PRODUCER tab, pick your footage, and fill in the **intent
@@ -546,14 +571,20 @@ canonical pipeline doctrine in [`docs/PIPELINE.md`](./docs/PIPELINE.md)):
 3. **Polish in the editor** — strike words in the script to cut them, drag/trim
    blocks on the timeline, reposition graphics, adjust audio, or ask the configured
    AI editor for changes from the Ask-editor bar.
-4. **Re-render** — one button; smart dispatch re-renders only what changed
-   (graphics ≈ 18s, audio ≈ 12s, cut edits ≈ 3min full rebuild with automatic
-   window refit).
+4. **Re-render** — one button dispatches by change class. Caption shards and
+   governed scene units can rebuild locally; cut/zoom/reframe changes and
+   legacy short-form graphics may still require a broader or full rebuild.
+   Current boundaries are in the
+   [short/long executable matrix](./docs/producer/command-driven-editing/12_SHORT_LONG_EXECUTABLE_MATRIX.md).
 5. **Ship** — Reveal `final.mp4` in the project directory.
 
-### First editable Palmier build
+### Experimental editable Palmier exercise
 
-1. Open Palmier Pro and the intended project, then ask Claude Code to
+Use this only with an isolated disposable candidate; it is production-shaped
+but connected hybrid P5-blocked. Publish the exact audited MP4 or its approved
+flat mirror instead.
+
+1. Open Palmier Pro and the isolated project, then ask Claude Code to
    [`/produce-palmier`](./.claude/commands/produce-palmier.md) from footage or an
    existing Producer directory.
 2. Sniper binds the exact Palmier project/timeline, authors and gates a cut-only

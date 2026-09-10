@@ -7,6 +7,10 @@ import {
   runPalmierOwnership,
   type PalmierOwnershipAction,
 } from "./runner";
+import {
+  guardProjectMutation,
+  mutationProjectRoot,
+} from "../../../_lib/project-mutation";
 
 export const dynamic = "force-dynamic";
 
@@ -52,12 +56,21 @@ export async function POST(req: NextRequest) {
   if (rejection) return NextResponse.json({ error: rejection.error }, { status: rejection.status });
   try {
     const body = await req.json() as Record<string, unknown>;
-    const result = await runPalmierOwnership(
-      canonicalProducerDir(body.dir),
-      ownershipAction(body.action),
-    );
-    const status = result.code === 0 ? 200 : result.code === 75 ? 409 : 500;
-    return NextResponse.json(result.verdict, { status });
+    const dir = canonicalProducerDir(body.dir);
+    const action = ownershipAction(body.action);
+    const guarded = guardProjectMutation({
+      projectRoot: mutationProjectRoot(dir),
+      producerDir: dir,
+      operation: `${action === "handoff" ? "handing off" : "reclaiming"} Palmier ownership`,
+    });
+    if (guarded.response) return guarded.response;
+    try {
+      const result = await runPalmierOwnership(dir, action);
+      const status = result.code === 0 ? 200 : result.code === 75 ? 409 : 500;
+      return NextResponse.json(result.verdict, { status });
+    } finally {
+      guarded.lease.release();
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     const status = error instanceof OwnershipRequestError ? 400 : 500;

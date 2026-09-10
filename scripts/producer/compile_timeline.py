@@ -17,10 +17,30 @@ from __future__ import annotations
 import json
 import sys
 from dataclasses import asdict, dataclass
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
 from producer_config import AUDIO
 
 _JCUT = AUDIO["jcut"]
+TIMELINE_UNITS = 1_000_000
+_TIMELINE_QUANTUM = Decimal(1) / TIMELINE_UNITS
+
+
+def _decimal(value: object, label: str) -> Decimal:
+    if isinstance(value, bool):
+        raise ValueError(f"{label} must be a finite number")
+    try:
+        result = Decimal(str(value))
+    except (InvalidOperation, ValueError) as exc:
+        raise ValueError(f"{label} must be a finite number") from exc
+    if not result.is_finite():
+        raise ValueError(f"{label} must be a finite number")
+    return result
+
+
+def _timeline_seconds(value: Decimal) -> float:
+    """Canonical microsecond output used by sidecars and V1 projections."""
+    return float(value.quantize(_TIMELINE_QUANTUM, rounding=ROUND_HALF_UP))
 
 
 @dataclass(frozen=True)
@@ -99,7 +119,7 @@ class TimelineMap:
     def to_dict(self) -> dict:
         """Serialize the map (output duration + segments) to a plain dict."""
         return {
-            "outputDuration": round(self.output_duration, 4),
+            "outputDuration": self.output_duration,
             "segments": [asdict(s) for s in self.segments],
         }
 
@@ -163,26 +183,31 @@ def compile_plan(plan: dict) -> TimelineMap:
     expected to have passed plan_lint first.
     """
     segments: list[Segment] = []
-    cursor = 0.0
+    cursor = Decimal(0)
     prev_out_len = 0.0
     for i, r in enumerate(plan.get("cutTrack") or []):
-        start, end = float(r["start"]), float(r["end"])
-        speed = float(r.get("speed", 1.0)) or 1.0
-        if end <= start:
+        start_exact = _decimal(r["start"], f"cutTrack[{i}].start")
+        end_exact = _decimal(r["end"], f"cutTrack[{i}].end")
+        speed_exact = _decimal(r.get("speed", 1.0), f"cutTrack[{i}].speed")
+        if end_exact <= start_exact:
             raise ValueError(f"cutTrack[{i}]: end <= start")
-        out_len = (end - start) / speed
+        if speed_exact <= 0:
+            raise ValueError(f"cutTrack[{i}]: speed <= 0")
+        start, end, speed = (
+            float(start_exact), float(end_exact), float(speed_exact))
+        out_len = (end_exact - start_exact) / speed_exact
         segments.append(Segment(
             index=i,
             source_id=str(r["sourceId"]),
             src_start=start,
             src_end=end,
             speed=speed,
-            out_start=round(cursor, 4),
-            out_end=round(cursor + out_len, 4),
+            out_start=_timeline_seconds(cursor),
+            out_end=_timeline_seconds(cursor + out_len),
             audio_lead_s=parse_audio_lead(i, r, (start, speed), prev_out_len),
         ))
         cursor += out_len
-        prev_out_len = out_len
+        prev_out_len = float(out_len)
     return TimelineMap(segments)
 
 

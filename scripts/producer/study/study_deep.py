@@ -47,6 +47,8 @@ from study.deep_semantics import run_semantics  # noqa: E402
 from study.deep_signals import collect_signals, freeze_runs  # noqa: E402
 from study.deep_text import graphics_text, require_tesseract, states_text  # noqa: E402
 from study.deep_wordlock import load_words, word_lock_stats  # noqa: E402
+from study.study_transcribe import (add_asr_arguments, invocation_from_options,  # noqa: E402
+                                    use_asr_invocation)
 
 MAX_DEFAULT_FPS = 30.0     # native-fps analysis, capped (60fps doubles cost)
 
@@ -150,13 +152,15 @@ def main() -> int:
                              "sibling <stem>*.vtt is auto-discovered)")
     parser.add_argument("--skip-captions", action="store_true",
                         help="skip the full-video caption OCR sampling pass")
+    add_asr_arguments(parser)
     opts = parser.parse_args()
 
     if not os.path.isfile(opts.video):
         _emit("error", error=f"not a file: {opts.video}")
         return 1
     try:
-        run_deep(opts)
+        with use_asr_invocation(invocation_from_options(opts)):
+            run_deep(opts)
     except (OSError, RuntimeError, ValueError) as exc:
         _emit("error", error=str(exc))
         return 1

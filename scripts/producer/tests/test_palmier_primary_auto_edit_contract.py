@@ -113,13 +113,17 @@ class PrimaryQcContractTests(unittest.TestCase):
                     patch("palmier.native_qc_export.verify_export",
                           return_value=probe), \
                     patch("palmier.native_qc_export.ffprobe_json",
-                          return_value=media):
+                          return_value=media), \
+                    patch("palmier.native_qc_export._full_decode"):
                 result = export_candidate(client, out_dir, candidate)
 
             self.assertEqual(calls[0][0], "export_project")
             self.assertEqual(calls[0][1]["timelineId"], "editable-head-9")
             self.assertEqual(result["timelineId"], "editable-head-9")
             self.assertTrue(result["audioPresent"])
+            self.assertEqual(result["audioStreamCount"], 1)
+            self.assertEqual(result["videoStreamCount"], 1)
+            self.assertEqual(result["fullDecode"], "ffmpeg-xerror-av-v1")
 
 
 if __name__ == "__main__":

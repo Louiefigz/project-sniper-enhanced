@@ -10,6 +10,7 @@ from unittest import mock
 from _common import pl  # noqa: F401
 from graphics import asset_proof as proof
 from graphics import frame_oracles
+from graphics.frame_quantization import rounded_frame_index
 
 _STREAM = {"codec_type": "video", "codec_name": "h264", "profile": "High",
            "pix_fmt": "yuv420p", "width": 1920, "height": 1080,
@@ -48,6 +49,11 @@ class AssetProofStrictnessTests(unittest.TestCase):
                                        return_value={"streams": [stream]}):
                     with self.assertRaisesRegex(RuntimeError, "frame count"):
                         proof.prove_rendered_asset(_request(path))
+
+    def test_half_frame_ties_match_hyperframes_rounding(self) -> None:
+        self.assertEqual(rounded_frame_index(4.75, 30), 143)
+        self.assertEqual(rounded_frame_index(13.95, 30), 419)
+        self.assertEqual(rounded_frame_index(4.35, 30), 131)
 
     def test_full_decode_failure_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -104,19 +110,13 @@ class AssetProofStrictnessTests(unittest.TestCase):
                                side_effect=AssertionError("live reread")):
             self.assertEqual(proof._asset_inputs(_ENTRY, sealed), list(sealed))
 
+class HoldToCutExitPolicyTests(unittest.TestCase):
+    """Measured fade physics, not a duplicate hard-coded kind list, is truth."""
+
+    def test_no_hard_coded_hold_to_cut_registry_remains(self) -> None:
+        from graphics import template_visual_contract as visual
+        self.assertFalse(hasattr(visual, "HOLD_TO_CUT_KINDS"))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
-
-
-class HoldToCutExitPolicyTests(unittest.TestCase):
-    """Hold-style comps (statement-card etc.) legally end opaque - the overlay
-    enable-window clears them at composite - so the terminal-clear oracle is
-    waived for HOLD_TO_CUT_KINDS and enforced for fade-exit comps."""
-
-    def test_statement_card_is_declared_hold_to_cut(self) -> None:
-        from graphics.template_visual_contract import HOLD_TO_CUT_KINDS
-        self.assertIn("statement-card", HOLD_TO_CUT_KINDS)
-        self.assertIn("kinetic-quote", HOLD_TO_CUT_KINDS)
-        self.assertNotIn("chip-row", HOLD_TO_CUT_KINDS)
-        self.assertNotIn("list-build", HOLD_TO_CUT_KINDS)

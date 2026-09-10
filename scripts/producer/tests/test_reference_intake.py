@@ -23,7 +23,13 @@ class FetchArgvTests(unittest.TestCase):
         self.assertIn("--match-filter", argv)
         filter_value = argv[argv.index("--match-filter") + 1]
         self.assertEqual(filter_value, "duration <=? 3600")
-        self.assertIn("bestvideo[height<=1080]+bestaudio/best[height<=1080]", argv)
+        self.assertIn("best[height<=1080]/best", argv)
+        self.assertEqual(argv[argv.index("--downloader") + 1], "native")
+        self.assertIn("--hls-prefer-native", argv)
+        self.assertEqual(argv[argv.index("--fixup") + 1], "never")
+        self.assertNotIn("ffmpeg", " ".join(argv).lower())
+        self.assertNotIn("ffprobe", " ".join(argv).lower())
+        self.assertNotIn("--remux-video", argv)
         self.assertNotIn("--no-part", argv)
         self.assertNotIn("--cookies-from-browser", argv)
 
@@ -54,10 +60,10 @@ class FetchPolicyTests(unittest.TestCase):
         self.assertEqual(run.call_count, 2)
         self.assertIn("--cookies-from-browser", run.call_args_list[1].args[0])
 
-    @mock.patch.object(fetch, "probe_duration", return_value=3601.0)
-    def test_download_duration_is_bounded(self, _probe) -> None:
-        video = os.path.join(self.tmp.name, "too-long.mp4")
-        open(video, "wb").close()
+    def test_download_bytes_are_bounded_before_sandbox_admission(self) -> None:
+        video = os.path.join(self.tmp.name, "too-large.mp4")
+        with open(video, "wb") as handle:
+            handle.truncate(fetch.MAX_REFERENCE_BYTES + 1)
         self.assertIn("maximum", fetch.validate_download(video) or "")
 
     def test_newest_vtt_is_discovered(self) -> None:
@@ -68,6 +74,26 @@ class FetchPolicyTests(unittest.TestCase):
         os.utime(older, (1, 1))
         os.utime(newer, (2, 2))
         self.assertEqual(fetch.find_transcript(self.tmp.name), newer)
+
+    def test_unsafe_vtt_is_rejected_instead_of_left_unregistered(self) -> None:
+        transcript = os.path.join(self.tmp.name, "oversized.vtt")
+        with open(transcript, "wb") as handle:
+            handle.truncate(32 * 1024 ** 2 + 1)
+        with self.assertRaisesRegex(ValueError, "unsafe"):
+            fetch.find_transcript(self.tmp.name)
+
+    def test_direct_cli_url_policy_matches_the_product_allowlist(self) -> None:
+        self.assertEqual(
+            fetch.validate_url("https://www.youtube.com/watch?v=x"),
+            "https://www.youtube.com/watch?v=x",
+        )
+        for rejected in (
+                "http://youtube.com/watch?v=x",
+                "https://youtube.com.evil.test/watch?v=x",
+                "https://user:secret@youtube.com/watch?v=x",
+                f"https://youtube.com/{'x' * 2049}"):
+            with self.assertRaises(ValueError):
+                fetch.validate_url(rejected)
 
 
 class LocalStudyTranscriptTests(unittest.TestCase):

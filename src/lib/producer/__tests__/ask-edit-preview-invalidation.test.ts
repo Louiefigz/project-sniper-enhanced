@@ -10,6 +10,7 @@ const ask = source("src/components/producer/editor/ask-claude-bar.tsx");
 const surface = source("src/components/producer/editor/editor-view-sections.tsx");
 const actions = source("src/components/producer/editor/use-plan-actions.ts");
 const route = source("src/app/api/producer/ai-edit/route.ts");
+const prepare = source("src/app/api/producer/ai-edit/prepare.ts");
 
 assert.match(ask,
   /const editMode = res\.headers\.get\("X-Sniper-Edit-Mode"\);[\s\S]*editMode !== "palmier-native"[\s\S]*onInvalidateAuthority\(\)/,
@@ -28,8 +29,14 @@ assert.match(actions,
   "an older project-status response may not restore preview authority after Ask starts",
 );
 assert.ok(
-  route.indexOf("await invalidateAiEditAuthority(dir)") < route.indexOf("preparePlanForAi(planPath, plan)"),
+  route.indexOf("await surgicalAuthorityFailure(dir)")
+    < route.indexOf("preparePlanForAi(planPath, plan"),
   "disk/Palmier authority must be invalidated before the model-facing plan mutation starts",
+);
+assert.ok(
+  prepare.indexOf("assertNoPromotionReconciliation(dir)")
+    < prepare.indexOf("await invalidateAiEditAuthority(dir)"),
+  "an unresolved CAS recovery must block before any preview authority is revoked",
 );
 
 console.log("ask-edit-preview-invalidation.test.ts: all assertions passed");

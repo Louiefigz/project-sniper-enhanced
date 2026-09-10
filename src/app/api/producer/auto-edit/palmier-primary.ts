@@ -104,6 +104,30 @@ function approvedTimeline(
   return timelineId as string;
 }
 
+function nativeBuild(
+  run: PipelineRuntime,
+  selected: PalmierPrimaryBuild,
+): Extract<PalmierPrimaryBuild, { kind: "native" }> | null {
+  if (selected.kind === "legacy") return null;
+  if (selected.kind === "governed-plan") {
+    run.io.send({
+      event: "palmier_governed_plan_selected",
+      requiredLanes: selected.requiredLanes,
+      message: selected.message,
+    });
+    return null;
+  }
+  if (selected.kind === "blocked") {
+    run.io.send({ event: "palmier_primary_blocked", ...selected });
+    throw new PalmierPrimaryError(selected.message, selected.code);
+  }
+  run.io.send({
+    event: "palmier_primary_selected", mode: "palmier-native-initial",
+    editable: true, planReviewsRequired: 2, limitations: selected.limitations,
+  });
+  return selected;
+}
+
 function advanceToCandidate(run: PipelineRuntime, result: PalmierNativeResult): void {
   run.job = run.io.advance({
     checkpoint: "plan_reviewed", phase: "validating",
@@ -156,28 +180,16 @@ export async function runPalmierPrimaryAutoEdit(
   dependencies: PalmierPrimaryDependencies = {},
 ): Promise<boolean> {
   const deps = { ...DEFAULT_DEPS, ...dependencies };
-  const selected = selectPalmierPrimaryBuild(run.job.ctx, deps.classify);
-  if (selected.kind === "legacy") return false;
-  if (selected.kind === "governed-plan") {
-    run.io.send({
-      event: "palmier_governed_plan_selected",
-      requiredLanes: selected.requiredLanes,
-      message: selected.message,
-    });
-    return false;
-  }
-  if (selected.kind === "blocked") {
-    run.io.send({ event: "palmier_primary_blocked", ...selected });
-    throw new PalmierPrimaryError(selected.message, selected.code);
-  }
-  run.io.send({
-    event: "palmier_primary_selected", mode: "palmier-native-initial",
-    editable: true, planReviewsRequired: 2, limitations: selected.limitations,
-  });
+  const selected = nativeBuild(
+    run, selectPalmierPrimaryBuild(run.job.ctx, deps.classify),
+  );
+  if (!selected) return false;
   const existing = deps.candidate(run.job.ctx.dir);
   const phase = candidatePhase(run, existing, hashRequest(selected.input.request));
   let timelineId = typeof existing?.timelineId === "string" ? existing.timelineId : "";
   if (phase === "promoted") {
+    const recovered = await deps.promote(run.job.ctx.dir);
+    approvedTimeline(recovered, timelineId);
     run.io.send({ event: "outputs", approved: true, editable: true,
       mode: "palmier-native-initial", timelineId, resumed: true });
     return true;

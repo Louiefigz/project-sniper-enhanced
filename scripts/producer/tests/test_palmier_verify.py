@@ -106,7 +106,11 @@ class TimelineVerificationTests(unittest.TestCase):
         self.assertEqual(result["expected"]["counts"], {
             "cuts": 2, "overlays": 1, "texts": 1})
         self.assertEqual(result["keyframes"], {
-            "status": "verified", "easing": "verified", "properties": 1})
+            "status": "verified", "easing": "verified",
+            "numericQuantization": {
+                "decimalPlaces": 3, "allowedMaxAbsDifference": 0.0005,
+                "observedMaxAbsDifference": 0.0, "status": "exact"},
+            "properties": 1})
 
     def test_keyframe_values_verify_when_palmier_omits_easing_labels(self):
         timeline = _timeline()
@@ -115,7 +119,21 @@ class TimelineVerificationTests(unittest.TestCase):
         result = self.verify(timeline)
         self.assertEqual(result["keyframes"], {
             "status": "verified-values", "easing": "not_exposed",
+            "numericQuantization": {
+                "decimalPlaces": 3, "allowedMaxAbsDifference": 0.0005,
+                "observedMaxAbsDifference": 0.0, "status": "exact"},
             "properties": 1})
+
+    def test_quantized_keyframe_values_are_disclosed(self):
+        timeline = _timeline()
+        timeline["tracks"][1]["clips"][0]["keyframes"] = {
+            "scale": [[0, 1.0, 1.0], [12, 1.2, 1.1995]]}
+        result = self.verify(timeline)
+        self.assertEqual(result["keyframes"]["status"], "verified-values")
+        self.assertEqual(result["keyframes"]["easing"], "not_exposed")
+        self.assertEqual(result["keyframes"]["numericQuantization"], {
+            "decimalPlaces": 3, "allowedMaxAbsDifference": 0.0005,
+            "observedMaxAbsDifference": 0.0005, "status": "within_bound"})
 
     def test_required_keyframes_fail_when_mcp_omits_them(self):
         timeline = _timeline()
@@ -148,6 +166,16 @@ class TimelineVerificationTests(unittest.TestCase):
         with self.assertRaisesRegex(PalmierError, "position keyframes differ"):
             verify_generated_timeline(
                 TimelineClient(timeline), "shadow", lanes, _executor())
+
+    def test_extra_keyframe_property_or_clip_fails_closed(self):
+        timeline = _timeline()
+        timeline["tracks"][1]["clips"][0]["keyframes"]["position"] = ROWS
+        with self.assertRaisesRegex(PalmierError, "properties differ"):
+            self.verify(timeline)
+        timeline = _timeline()
+        timeline["tracks"][1]["clips"][1]["keyframes"] = {"scale": ROWS}
+        with self.assertRaisesRegex(PalmierError, "clip identities differ"):
+            self.verify(timeline)
 
     def test_timing_mismatch_fails_closed(self):
         timeline = _timeline()

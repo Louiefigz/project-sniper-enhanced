@@ -2,6 +2,7 @@
 <html
   lang="en"
   data-composition-variables='[
+    {"id":"layout","type":"enum","label":"Native layout intent (requires observed overlap review)","default":"full-canvas","options":[{"value":"full-canvas","label":"Original full canvas"},{"value":"caption-safe-upper-v1","label":"Upper full-width, no presenter, 2-6 nodes"},{"value":"teaching-full-width-v1","label":"Full-width teaching diagram, 2-6 nodes"}]},
     {"id":"eyebrow","type":"string","label":"Eyebrow microtext (mono caps + accent dot; empty = omit)","default":""},
     {"id":"eyebrowAccent","type":"enum","label":"Eyebrow dot semantic accent","default":"result","options":[{"value":"result","label":"Result (lime)"},{"value":"process","label":"Process (cyan)"}]},
     {"id":"headlineLines","type":"string","label":"Thesis headline, pipe-separated lines (2 max; line 2 in --accent-result)","default":""},
@@ -59,7 +60,7 @@
     <meta name="viewport" content="width=1920, height=1080" />
     <title>SNIPER · nateherk-pipeline</title>
     <link rel="stylesheet" href="/tokens.css" />
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="/vendor/gsap/gsap.min.js"></script>
     <script src="/motion-tokens.js"></script>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -207,6 +208,47 @@
       }
       #npl-foot.process .dot { background: var(--accent-process, #35b6d9); }
       #npl-foot.warn .dot { background: var(--accent-warn, #e8a13c); }
+      /* Opt-in teaching canvas: retain every node and original animation order.
+         Larger instructional labels, no reserved presenter band or face hole. */
+      #npl-root[data-sniper-layout="teaching-full-width-v1"] #npl-stage {
+        left: 96px; width: 1728px; padding: 64px 0; gap: 32px;
+      }
+      #npl-root[data-sniper-layout="teaching-full-width-v1"] #npl-explainer { max-width: 1600px; }
+      #npl-root[data-sniper-layout="teaching-full-width-v1"] .npl-node {
+        min-width: 0; min-height: 132px; padding: 24px 20px; gap: 16px;
+      }
+      #npl-root[data-sniper-layout="teaching-full-width-v1"] .npl-node .num { font-size: 24px; }
+      #npl-root[data-sniper-layout="teaching-full-width-v1"] .npl-node .label {
+        font-size: 36px; line-height: 1.3; letter-spacing: 0;
+      }
+      /* Explicit native intent only; actual overlap/legibility still requires
+         observation. No font scaling, copy suppression, or clipped overflow. */
+      #npl-root[data-sniper-layout="caption-safe-upper-v1"] #npl-stage {
+        left: 96px; top: 64px; width: 1728px; height: 528px;
+        display: grid; grid-template-columns: minmax(0, 1fr) auto;
+        padding: 0; gap: 14px; align-content: start;
+      }
+      #npl-root[data-sniper-layout="caption-safe-upper-v1"] .module { grid-column: 1 / -1; min-width: 0; }
+      /* Give unchanged glyphs full line boxes. Put provenance beside the
+         explainer to keep the full-size chain above the caption reserve. */
+      #npl-root[data-sniper-layout="caption-safe-upper-v1"] #npl-eyebrow { order: 1; line-height: 1.25; }
+      #npl-root[data-sniper-layout="caption-safe-upper-v1"] #npl-headline { order: 2; line-height: 1.25; }
+      #npl-root[data-sniper-layout="caption-safe-upper-v1"] #npl-explainer { order: 3; }
+      #npl-root[data-sniper-layout="caption-safe-upper-v1"] #npl-foot { order: 4; justify-self: start; }
+      #npl-root[data-sniper-layout="caption-safe-upper-v1"] #npl-chain { order: 5; }
+      #npl-root[data-sniper-layout="caption-safe-upper-v1"] #npl-stage:has(#npl-foot) #npl-explainer { grid-column: 1; }
+      #npl-root[data-sniper-layout="caption-safe-upper-v1"] #npl-stage:has(#npl-explainer) #npl-foot { grid-column: 2; }
+      #npl-root[data-sniper-layout="caption-safe-upper-v1"] #npl-explainer { max-width: 1728px; }
+      /* Same native hairline, now a real measurable protected DOM element.
+         Empty generated pseudo-paint has no independent DOM rectangle. */
+      #npl-root[data-sniper-layout="caption-safe-upper-v1"] .npl-node::after { content: none; }
+      #npl-root[data-sniper-layout="caption-safe-upper-v1"] .npl-native-cell { position: relative; }
+      #npl-root[data-sniper-layout="caption-safe-upper-v1"] .npl-native-cell > .npl-node { height: 100%; }
+      #npl-root[data-sniper-layout="caption-safe-upper-v1"] .npl-native-link {
+        /* Original node border is1px; this sibling uses its outer cell box. */
+        position: absolute; right: -17px; top: 50%; width: 18px; height: 1px;
+        background: rgba(255, 255, 255, 0.22);
+      }
     </style>
   </head>
   <body>
@@ -215,6 +257,7 @@
       data-composition-id="nateherk-pipeline"
       data-width="1920"
       data-height="1080"
+      data-start="0"
       data-duration="9"
     >
       <div id="npl-canvas"></div>
@@ -231,206 +274,15 @@
     </div>
 
     <script>
-      (function () {
-        "use strict";
-        const root = document.getElementById("npl-root");
-        const D = parseFloat(root.dataset.duration) || 9;
-        const M = window.__motionTokens;
-
-        // Build constants:
-        const LINE_STAGGER_S = 0.12;   // headline per-line ramp stagger
-        const NODE_STAGGER_S = 0.15;   // tile-by-tile along the chain —
-                                       // 6 tiles in 0.9s keeps the build in
-                                       // the §1.3 ~1.2-2s fully-built band
-        const LAND_DEFAULT_START_S = 0.2;
-        const LAND_DEFAULT_GAP_S = 0.9;
-
-        const defaults = {
-          eyebrow: "", eyebrowAccent: "result", headlineLines: "",
-          explainer: "", nodes: "", activeIndex: 0,
-          footChip: "", footAccent: "result",
-          moduleLands: "", exit: "hold", presenterFrame: false,
-        };
-        const CONTENT_KEYS = ["eyebrow", "headlineLines", "explainer",
-          "nodes", "footChip"];
-        // PREVIEW-ONLY demo — form #18 verbatim (169.5-179.5s).
-        const SAMPLE = {
-          eyebrow: "ONE INSTRUCTION TO FINISHED VIDEO",
-          headlineLines: "The chain changed.|The outcome held.",
-          nodes: "01~PROMPT|02~ELEVENLABS VOICE|03~HEYGEN AVATAR V|" +
-            "04~HYPERFRAMES EDIT|05~INDEPENDENT QA|06~FINISHED VIDEO",
-          activeIndex: 5,
-        };
-        const HF = window.__hyperframes;
-        let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
-        const isPreview = CONTENT_KEYS.every(function (k) {
-          return !(vars[k] == null ? "" : String(vars[k])).trim();
-        });
-        if (isPreview) vars = Object.assign({}, vars, SAMPLE);
-
-        // Framed presenter container: opt-in mask + ring (mirrors how the
-        // comp reads exit). The canvas mask + #npl-face-slot ring are scoped
-        // to .has-presenter; absent it the card renders opaque as before.
-        if (vars.presenterFrame === true || String(vars.presenterFrame) === "true") {
-          root.classList.add("has-presenter");
-        }
-
-        function str(k) { return (vars[k] == null ? "" : String(vars[k])).trim(); }
-
-        // ---- Fill / prune modules (unset content renders NOTHING) ----
-        const ebText = str("eyebrow");
-        const ebEl = document.getElementById("npl-eyebrow");
-        if (ebText) {
-          document.getElementById("npl-eyebrow-text").textContent = ebText;
-          if (str("eyebrowAccent") === "process") ebEl.classList.add("process");
-        } else { ebEl.remove(); }
-
-        const headEl = document.getElementById("npl-headline");
-        const heads = str("headlineLines");
-        if (heads) {
-          const lines = heads.split("|").map(function (s) { return s.trim(); });
-          if (lines.length > 2) {
-            throw new Error("nateherk-pipeline: headlineLines is 2 lines max " +
-              "(§1.1 thesis grammar), got " + lines.length);
-          }
-          lines.forEach(function (line, j) {
-            const el = document.createElement("span");
-            el.className = "line" + (j === 1 ? " l2" : "");
-            el.textContent = line;
-            headEl.appendChild(el);
-          });
-        } else { headEl.remove(); }
-
-        const expText = str("explainer");
-        const expEl = document.getElementById("npl-explainer");
-        if (expText) expEl.textContent = expText;
-        else expEl.remove();
-
-        // The chain: num~label tiles, 2-8; activeIndex bounds fail loudly.
-        const chainEl = document.getElementById("npl-chain");
-        const nodesRaw = str("nodes");
-        const nodeEls = [];
-        if (nodesRaw) {
-          const lines = nodesRaw.split("|");
-          if (lines.length < 2 || lines.length > 8) {
-            throw new Error("nateherk-pipeline: nodes needs 2-8 tiles, got " +
-              lines.length);
-          }
-          const activeRaw = vars.activeIndex;
-          const activeIndex = (activeRaw == null || String(activeRaw).trim() === "")
-            ? 0 : Number(activeRaw);
-          if (!isFinite(activeIndex) || activeIndex < 0 ||
-              activeIndex > lines.length || activeIndex % 1 !== 0) {
-            throw new Error("nateherk-pipeline: activeIndex must be an " +
-              "integer in [0," + lines.length + "], got '" +
-              vars.activeIndex + "'");
-          }
-          lines.forEach(function (line, i) {
-            const f = line.split("~").map(function (s) { return s.trim(); });
-            if (f.length !== 2 || !f[0] || !f[1]) {
-              throw new Error("nateherk-pipeline: node " + (i + 1) +
-                " needs num~label, got '" + line + "'");
-            }
-            const node = document.createElement("div");
-            node.className = "npl-node" + (i + 1 === activeIndex ? " active" : "");
-            const numrow = document.createElement("div");
-            numrow.className = "numrow";
-            const num = document.createElement("span");
-            num.className = "num";
-            num.textContent = f[0];
-            numrow.appendChild(num);
-            if (i + 1 === activeIndex) {
-              const dot = document.createElement("span");
-              dot.className = "activedot";
-              numrow.appendChild(dot);
-            }
-            const label = document.createElement("span");
-            label.className = "label";
-            label.textContent = f[1];
-            node.appendChild(numrow);
-            node.appendChild(label);
-            chainEl.appendChild(node);
-            nodeEls.push(node);
-          });
-        } else { chainEl.remove(); }
-
-        const footText = str("footChip");
-        const footEl = document.getElementById("npl-foot");
-        if (footText) {
-          document.getElementById("npl-foot-text").textContent = footText;
-          const fa = str("footAccent") || "result";
-          if (fa === "process" || fa === "warn") footEl.classList.add(fa);
-          else if (fa !== "result") {
-            throw new Error("nateherk-pipeline: footAccent '" + fa +
-              "' not in result|process|warn");
-          }
-        } else { footEl.remove(); }
-
-        // ---- Narration-paced lands ([head, chain, foot]) ----
-        const modules = [];
-        if (ebText || heads || expText) modules.push("head");
-        if (nodeEls.length) modules.push("chain");
-        if (footText) modules.push("foot");
-        let lands = [];
-        const landsVar = vars.moduleLands;
-        const landsRaw = Array.isArray(landsVar)
-          ? landsVar.map(String) : String(landsVar == null ? "" : landsVar).trim()
-            ? String(landsVar).split(/[|,]/) : [];
-        if (landsRaw.length) {
-          lands = landsRaw.map(function (s) { return parseFloat(s); });
-          if (lands.length !== modules.length || lands.some(function (t) { return !isFinite(t); })) {
-            throw new Error("nateherk-pipeline: moduleLands needs " +
-              modules.length + " finite times for modules [" +
-              modules.join(", ") + "], got '" + landsRaw.join(",") + "'");
-          }
-        } else {
-          modules.forEach(function (_, k) {
-            lands.push(LAND_DEFAULT_START_S + k * LAND_DEFAULT_GAP_S);
-          });
-        }
-        const landOf = {};
-        modules.forEach(function (name, k) { landOf[name] = lands[k]; });
-
-        // ---- Build (eyebrow-first -> headline -> tile-by-tile -> foot) ----
-        window.__timelines = window.__timelines || {};
-        const tl = gsap.timeline({ paused: true });
-
-        if (landOf.head != null) {
-          const t0 = landOf.head;
-          let headAt = t0;
-          if (ebText) {
-            M.textRamp(tl, ebEl, t0);
-            headAt = t0 + M.EYEBROW_LEAD_S;     // eyebrow leads (rank 3)
-          }
-          let lastAt = headAt;
-          if (heads) {
-            headEl.querySelectorAll(".line").forEach(function (lineEl, j) {
-              lastAt = headAt + j * LINE_STAGGER_S;
-              M.textRamp(tl, lineEl, lastAt);   // in-place ghost-resolve
-            });
-          }
-          if (expText) M.textRamp(tl, expEl, lastAt + LINE_STAGGER_S);
-        }
-
-        // Tiles land tile-by-tile along the chain (form #18 build).
-        if (landOf.chain != null) {
-          M.textRamp(tl, chainEl, landOf.chain);
-          nodeEls.forEach(function (el, i) {
-            M.textRamp(tl, el, landOf.chain + i * NODE_STAGGER_S);
-          });
-        }
-
-        // Footnote chip lands LAST (provenance module, §1.3).
-        if (landOf.foot != null) M.textRamp(tl, footEl, landOf.foot);
-
-        // exit:"blur-recede" (T-D): stage only; the canvas stays opaque.
-        if (String(vars.exit) === "blur-recede") {
-          M.blurRecede(tl, "#npl-stage-layer", D - M.EXIT_BLUR_S);
-        }
-
-        tl.seek(0);
-        window.__timelines["nateherk-pipeline"] = tl;
-      })();
+      window.__timelines = window.__timelines || {};
+    </script>
+    <script src="/nateherk-pipeline.js"></script>
+    <script>
+      const pipelineTimeline = window.__timelines["nateherk-pipeline"];
+      if (!pipelineTimeline || typeof pipelineTimeline.seek !== "function" ||
+          typeof pipelineTimeline.paused !== "function" || pipelineTimeline.paused() !== true) {
+        throw new Error("nateherk-pipeline: actual paused timeline was not registered");
+      }
     </script>
   </body>
 </html>

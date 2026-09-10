@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import json
 import os
+import stat
 import subprocess
 import tempfile
 import unittest
@@ -76,11 +77,22 @@ class RenderLaneFixture(unittest.TestCase):
         )
         socket_check.start()
         self.addCleanup(socket_check.stop)
+        socket_row = mock.patch(
+            "headless.render_build._socket_row", side_effect=self._socket_metadata)
+        socket_row.start()
+        self.addCleanup(socket_row.stop)
         lease = mock.patch(
             "headless.render_lane.container_lease", side_effect=fake_container_lease
         )
         lease.start()
         self.addCleanup(lease.stop)
+
+    @staticmethod
+    def _socket_metadata(path: str) -> dict:
+        """Describe a synthetic socket; this fixture performs no Docker I/O."""
+        info = Path(path).stat()
+        return {"path": path, "device": info.st_dev, "inode": info.st_ino,
+                "mode": stat.S_IFSOCK, "ownerUid": info.st_uid}
 
     def _runtime(self, image_id: str = IMAGE_ID) -> RendererRuntime:
         return RendererRuntime(
@@ -145,6 +157,7 @@ class RenderLaneFixture(unittest.TestCase):
         result = {
             "cached": False,
             "fmt": "mov",
+            "fps": "30",
             "key": seal.key,
             "kind": "section-marker",
             "path": str(path),

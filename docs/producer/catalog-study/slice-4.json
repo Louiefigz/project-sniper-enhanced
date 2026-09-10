@@ -1,0 +1,1355 @@
+[
+ {
+  "name": "state-chip-rail",
+  "type": "component",
+  "mechanism": "GSAP tl.set flips chip [data-state] attributes on a cue schedule; CSS owns all state paint; fromTo cascade entrance; deterministic width-fit math",
+  "variables": [
+   "states",
+   "times",
+   "badge_state",
+   "badges",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:chip-row (stateful snap machine)",
+  "quality": "clean: token-driven, well-guarded parsing",
+  "aspectFlex": "responsive",
+  "port": "P1: seek-exact process-status rail; overlaps nateherk-pipeline territory"
+ },
+ {
+  "name": "sticky-mock-swap",
+  "type": "component",
+  "mechanism": "Pinned skeleton app mock crossfades through 3 layout states while captions rise/hold/exit per phase-grid",
+  "variables": [
+   "captions",
+   "accent"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:product-demo skeleton feature tour",
+  "quality": "clean: phase math tidy",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "stitched-text-draw",
+  "type": "component",
+  "mechanism": "Custom single-stroke alphabet flattened to polylines, seeded-LCG stitch jitter, double-dash dashoffset ATTRIBUTE reveal painted per-frame from tl.time(); needle dot + thread-tail overshoot",
+  "variables": [
+   "text",
+   "stitch",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:hand-stitched word reveal",
+  "quality": "clean: large but disciplined glyph table",
+  "aspectFlex": "responsive",
+  "port": "P2: craft novelty, rare occasions"
+ },
+ {
+  "name": "stop-motion-cadence",
+  "type": "component",
+  "mechanism": "Quantizes tl.time() to floor(t*fps)/fps and drives ALL motion from stepped time: ballistic shape throws, squash-on-hit by integer step index, 2-frame sin-fold-hashed boil",
+  "variables": [
+   "fps",
+   "boil",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:stepped-time stop-motion law",
+  "quality": "clean: exemplary time-law demo",
+  "aspectFlex": "responsive",
+  "port": "P2: the quantize-first law is worth stealing; demo shapes are not"
+ },
+ {
+  "name": "store-badge-lockup",
+  "type": "component",
+  "mechanism": "Headline settles, then App Store / Google Play badges rise with stagger and fade out",
+  "variables": [
+   "headline",
+   "showApple",
+   "showGoogle"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:app-store CTA irrelevant to talking-head videos",
+  "quality": "clean",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "streaming-text",
+  "type": "component",
+  "mechanism": "Style-only fragment: script writes tone/size custom props; a host-timeline recipe reveals words in a measured AI-burst rhythm (GAPS table) with grey-to-ink ramp",
+  "variables": [
+   "size",
+   "tone"
+  ],
+  "scrubSafe": "conditional: paste-in fragment, no own timeline; safe only via host tl recipe",
+  "selfContained": true,
+  "fit": "new:AI-stream word reveal",
+  "quality": "mixed: hf-ui token boilerplate, px sizing",
+  "aspectFlex": "responsive",
+  "port": "P2: port the measured GAPS rhythm into text-element"
+ },
+ {
+  "name": "strikethrough-replace",
+  "type": "component",
+  "mechanism": "CSS-var strike bar scaleX draw + replacement word fade/lift, driven by host-timeline recipe",
+  "variables": [
+   "origin",
+   "thickness",
+   "tint",
+   "tone"
+  ],
+  "scrubSafe": "conditional: host-driven fragment",
+  "selfContained": true,
+  "fit": "new:strike-and-replace emphasis",
+  "quality": "clean: tiny; hardcoded 58px font",
+  "aspectFlex": "responsive",
+  "port": "P1: perfect myth-vs-fact swap beat; needs comp wrapper"
+ },
+ {
+  "name": "success-check",
+  "type": "component",
+  "mechanism": "SVG tick stroke-dash draw + halo pop + spin multiplier via custom props from host recipe",
+  "variables": [
+   "tint",
+   "size",
+   "ring",
+   "spin"
+  ],
+  "scrubSafe": "conditional: host-driven fragment",
+  "selfContained": true,
+  "fit": "upgrade:icon-badge (animated success state)",
+  "quality": "clean: tiny, px sizes",
+  "aspectFlex": "responsive",
+  "port": "P1: checklist done-tick beat; needs comp wrapper"
+ },
+ {
+  "name": "svg-line-draw-loader",
+  "type": "component",
+  "mechanism": "Single squiggle path stroke draw via hardcoded dasharray 900 custom prop; file carries unused grid/card CSS boilerplate",
+  "variables": [],
+  "scrubSafe": "conditional: host-driven fragment",
+  "selfContained": true,
+  "fit": "unfit:demo loader; svg-stroke-trace does this properly",
+  "quality": "wonky: dead CSS, magic constants, px-fixed",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "svg-mask-reveal",
+  "type": "component",
+  "mechanism": "Media rect visible only through an SVG text alpha mask, intersected with a CSS gradient sweep animated via @property custom prop on the registered timeline",
+  "variables": [
+   "text",
+   "revealProgress",
+   "featherPx"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:wordmark-window reveal",
+  "quality": "clean: careful mask-composite work",
+  "aspectFlex": "responsive",
+  "port": "P2: logo-oriented, occasional"
+ },
+ {
+  "name": "svg-stroke-trace",
+  "type": "component",
+  "mechanism": "Authored SVG path draws from measured getTotalLength dash; optional restrained fill when path closes; one drift cycle on hold",
+  "variables": [
+   "path",
+   "stroke_width",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:stroke-draw-badge (generic authored-path draw)",
+  "quality": "clean",
+  "aspectFlex": "responsive",
+  "port": "P1: general-purpose annotation/underline path draw primitive"
+ },
+ {
+  "name": "swipe-rail",
+  "type": "component",
+  "mechanism": "Contact circle leads card rail through drag, momentum carry, back.out snap to next card",
+  "variables": [
+   "card_count",
+   "accent",
+   "card_label_prefix"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:mobile gesture product-demo scaffold",
+  "quality": "mixed: hardcoded slate palette, not tokens",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "swirl-vortex",
+  "type": "block",
+  "mechanism": "Rasterizes two placeholder DOM scenes to WebGL textures via naive canvas-2d capturer, then FBM swirl shader transition rendered from tl.time() in onUpdate",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "transition",
+  "quality": "mixed: fixed 1920x1080 showcase, crude DOM capture, Google Fonts",
+  "aspectFlex": "16:9-only",
+  "port": "skip: A/B shader needs both scenes as textures; recipe reference only"
+ },
+ {
+  "name": "tabs-slide-indicator",
+  "type": "component",
+  "mechanism": "Pill indicator translateX between rebuilt tab buttons via custom props from host recipe",
+  "variables": [
+   "accent",
+   "width",
+   "shape",
+   "labels"
+  ],
+  "scrubSafe": "conditional: host-driven fragment",
+  "selfContained": true,
+  "fit": "unfit:UI widget demo",
+  "quality": "clean: tiny",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "telemetry-hud",
+  "type": "component",
+  "mechanism": "Corner brackets dash-draw (attribute dashoffset) + label:value readouts that slot-machine-tick via precomputed text-at-time tables (seeded LCG at build); content slot for framed subject",
+  "variables": [
+   "readouts",
+   "emphasize",
+   "cues",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:HUD data frame around slotted subject",
+  "quality": "clean: exemplary determinism engineering",
+  "aspectFlex": "responsive",
+  "port": "P0: dark data-display family fit; frames screenshots with ticking stats"
+ },
+ {
+  "name": "terminal-simulator",
+  "type": "component",
+  "mechanism": "STATIC skeleton terminal chrome; line bars scaleX via host recipe - despite description, NO typing or log streaming exists in the code",
+  "variables": [],
+  "scrubSafe": "conditional: host-driven fragment",
+  "selfContained": true,
+  "fit": "unfit:dev showcase skeleton; code contradicts description",
+  "quality": "wonky: static, px-fixed",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "testimonial-card",
+  "type": "component",
+  "mechanism": "Rating+quote block rises, avatar/name/handle stagger beneath; fractional star fill via width percent",
+  "variables": [
+   "quote",
+   "author",
+   "handle",
+   "rating"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:customer testimonial proof beat",
+  "quality": "clean: fully token-driven",
+  "aspectFlex": "responsive",
+  "port": "P1: social-proof cutaway"
+ },
+ {
+  "name": "testimonial-proof-card",
+  "type": "component",
+  "mechanism": "Quote tokenized to word spans, measured into rendered rows, rebuilt as per-line masks that rise; avatar slot; hand-drawn accent underline via getTotalLength dash; 1/sqrt(chars) font fit",
+  "variables": [
+   "quote",
+   "name",
+   "role",
+   "company",
+   "emphasis",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:kinetic-quote (adds attribution + emphasis underline)",
+  "quality": "clean: sophisticated line-mask build",
+  "aspectFlex": "responsive",
+  "port": "P0: quote-with-attribution card we lack; emphasis underline sells the beat"
+ },
+ {
+  "name": "text-shimmer",
+  "type": "component",
+  "mechanism": "background-clip:text specular gradient sweep via one backgroundPosition tween; clean before/after",
+  "variables": [
+   "text",
+   "accent",
+   "sweep_at"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:specular emphasis pass on headline",
+  "quality": "clean",
+  "aspectFlex": "responsive",
+  "port": "P1: subtle premium emphasis for statement text"
+ },
+ {
+  "name": "text-stagger",
+  "type": "component",
+  "mechanism": "Word spans rise through blur + shimmer gradient sweep via host recipe",
+  "variables": [
+   "text",
+   "size",
+   "tone",
+   "accent"
+  ],
+  "scrubSafe": "conditional: host-driven fragment",
+  "selfContained": true,
+  "fit": "upgrade:text-element entrance variant",
+  "quality": "clean: px sizing",
+  "aspectFlex": "responsive",
+  "port": "P2"
+ },
+ {
+  "name": "text-state-swap",
+  "type": "component",
+  "mechanism": "Two absolutely-stacked labels; outgoing blurs+lifts, incoming rises, via custom props from host recipe",
+  "variables": [
+   "from-text",
+   "to-text",
+   "distance",
+   "tone"
+  ],
+  "scrubSafe": "conditional: host-driven fragment",
+  "selfContained": true,
+  "fit": "new:micro status-label swap",
+  "quality": "clean: tiny; hardcoded 250x36px box",
+  "aspectFlex": "responsive",
+  "port": "P2"
+ },
+ {
+  "name": "texture-mask-text",
+  "type": "component",
+  "mechanism": "FILE MISSING from vendored mirror (compositions/components/texture-mask-text.html does not exist); index describes 66 CSS luminance texture masks over letterforms",
+  "variables": [],
+  "scrubSafe": "conditional: unverifiable",
+  "selfContained": false,
+  "fit": "unfit:missing file",
+  "quality": "wonky: cannot audit",
+  "aspectFlex": "responsive",
+  "port": "skip: record as missing"
+ },
+ {
+  "name": "thermal-distortion",
+  "type": "block",
+  "mechanism": "Same blueprint-showcase scaffold as swirl-vortex: WebGL heat-haze shader transition between two captured placeholder scenes",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "transition",
+  "quality": "mixed: fixed showcase scaffold, Google Fonts",
+  "aspectFlex": "16:9-only",
+  "port": "skip: recipe reference only"
+ },
+ {
+  "name": "thread-message-stack",
+  "type": "block",
+  "mechanism": "iMessage-style rows pop in with back.out while prior rows shift up by measured heights; slow background drift; conversation data lives in an embedded JSON block, not variables",
+  "variables": [
+   "(source-owned JSON: messages, stagger, hold)"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:chat conversation story beat",
+  "quality": "mixed: fixed 1920x1080, data not variable-driven",
+  "aspectFlex": "16:9-only",
+  "port": "P1: client-conversation storytelling; needs variable-izing on port"
+ },
+ {
+  "name": "three-orbiting-cards",
+  "type": "component",
+  "mechanism": "Three.js orbit scene exposing render(progress) adapter (no rAF loop); host tween drives progress",
+  "variables": [],
+  "scrubSafe": "conditional: needs host tween; module-scripted demo",
+  "selfContained": false,
+  "fit": "unfit:decorative 3D orbit",
+  "quality": "mixed: hardcoded size, CDN three.js",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "ticker-takeover",
+  "type": "component",
+  "mechanism": "Vertical reel accelerates (power4.in) then decelerates through option words, locks final word with accent flash, promotes it to a full-frame headline",
+  "variables": [
+   "options",
+   "final_word",
+   "accent"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:slot-machine word lock reveal",
+  "quality": "clean",
+  "aspectFlex": "responsive",
+  "port": "P0: high-energy hook/payoff reveal beat for shorts"
+ },
+ {
+  "name": "tiktok-follow",
+  "type": "block",
+  "mechanism": "TikTok-branded follow pill slides in, button press + spring, Follow-to-Following swap",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:platform-branded CTA; yt-lower-third family covers this",
+  "quality": "mixed: HeyGen hardcode; assets/avatar.jpg missing; Google Font",
+  "aspectFlex": "9:16-ok",
+  "port": "skip"
+ },
+ {
+  "name": "tilt-card",
+  "type": "component",
+  "mechanism": "3D tilt card with corner glow drift via host recipe",
+  "variables": [
+   "eyebrow",
+   "headline",
+   "glow",
+   "accent"
+  ],
+  "scrubSafe": "conditional: host-driven fragment",
+  "selfContained": true,
+  "fit": "unfit:decorative hover-parallax card",
+  "quality": "clean",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "titlecard-calm",
+  "type": "component",
+  "mechanism": "Mono kicker then large headline fade up; near-imperceptible drift on hold; fade-up exit",
+  "variables": [
+   "headline",
+   "kicker"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:section-marker (calm variant)",
+  "quality": "clean",
+  "aspectFlex": "responsive",
+  "port": "P2: titlecard-lockup is the stronger sibling"
+ },
+ {
+  "name": "titlecard-lockup",
+  "type": "component",
+  "mechanism": "Kicker fades, wordmark makes ONE settle move (scale .96 to 1), hairline rule draws via measured dash, mono label fades; dead-still hold; char-count font fit",
+  "variables": [
+   "wordmark",
+   "label",
+   "kicker",
+   "rule",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:section-marker (long-form chapter breather)",
+  "quality": "clean: contrast-safe ink derivation",
+  "aspectFlex": "responsive",
+  "port": "P1: refined chapter card; stillness-as-confidence"
+ },
+ {
+  "name": "toggle-flip",
+  "type": "component",
+  "mechanism": "Oversized UI toggle: anticipation press-compress, knob travel back.out(1.9) + track color-mix crossfade via one --tf-mix custom prop, glow breathing on hold, hf:sfx event",
+  "variables": [
+   "direction",
+   "label",
+   "size"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:setting on/off demonstration",
+  "quality": "clean: heavily documented mount contract",
+  "aspectFlex": "responsive",
+  "port": "P0: ads-guidance doctrine demands toggle visuals; this is exactly that cutaway"
+ },
+ {
+  "name": "top-down-letters",
+  "type": "component",
+  "mechanism": "Per-character spans drop from above in staircase stagger via custom props from host recipe",
+  "variables": [
+   "text",
+   "distance",
+   "tone"
+  ],
+  "scrubSafe": "conditional: host-driven fragment",
+  "selfContained": true,
+  "fit": "upgrade:text-element entrance variant",
+  "quality": "clean: tiny",
+  "aspectFlex": "responsive",
+  "port": "P2"
+ },
+ {
+  "name": "touch-indicator",
+  "type": "component",
+  "mechanism": "Tap/swipe fingertip contact circle with 60fps frame-quantized physics, built-in contact ripple + root pulse; self-driving registered timeline",
+  "variables": [
+   "gesture",
+   "polarity",
+   "targetX",
+   "targetY"
+  ],
+  "scrubSafe": true,
+  "selfContained": "conditional: no gsap script tag - assumes host provides GSAP global",
+  "fit": "new:mobile gesture actor (pairs with toggle-flip)",
+  "quality": "clean: spec-driven",
+  "aspectFlex": "responsive",
+  "port": "P2"
+ },
+ {
+  "name": "tracing-beam",
+  "type": "component",
+  "mechanism": "Glowing dash window (dasharray segment) travels an SVG path; three step cards brighten/lift on arrival then dim; glow via feGaussianBlur filter",
+  "variables": [
+   "labels",
+   "accent"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:nateherk-pipeline (traveling attention beam)",
+  "quality": "clean",
+  "aspectFlex": "responsive",
+  "port": "P1: 3-step process with guided attention"
+ },
+ {
+  "name": "tracking-in",
+  "type": "component",
+  "mechanism": "Letter-spacing reveal: class on arbitrary host elements; host tweens one tracking custom prop + opacity",
+  "variables": [
+   "tracking",
+   "rise",
+   "tone"
+  ],
+  "scrubSafe": "conditional: host-driven fragment",
+  "selfContained": true,
+  "fit": "upgrade:text-element entrance (premium tracking reveal)",
+  "quality": "clean: tiny",
+  "aspectFlex": "responsive",
+  "port": "P2"
+ },
+ {
+  "name": "transitions-3d",
+  "type": "block",
+  "mechanism": "Showcase reel (title card + demos + outro) on one paused GSAP timeline over placeholder scenes; registered under key 'main'; techniques: 3D card flip (rotationY swap with backface logic)",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "transition",
+  "quality": "mixed: demo scaffold, fixed 1920x1080, not mountable",
+  "aspectFlex": "16:9-only",
+  "port": "skip: mine recipes for graphic-to-graphic seams; footage cuts stay ffmpeg-side"
+ },
+ {
+  "name": "transitions-blur",
+  "type": "block",
+  "mechanism": "Showcase reel (title card + demos + outro) on one paused GSAP timeline over placeholder scenes; registered under key 'main'; techniques: blur-through, directional blur, calm blur-through (filter tweens)",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "transition",
+  "quality": "mixed: demo scaffold, fixed 1920x1080, not mountable",
+  "aspectFlex": "16:9-only",
+  "port": "skip: mine recipes for graphic-to-graphic seams; footage cuts stay ffmpeg-side"
+ },
+ {
+  "name": "transitions-cover",
+  "type": "block",
+  "mechanism": "Showcase reel (title card + demos + outro) on one paused GSAP timeline over placeholder scenes; registered under key 'main'; techniques: cover/uncover slide moves",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "transition",
+  "quality": "mixed: demo scaffold, fixed 1920x1080, not mountable",
+  "aspectFlex": "16:9-only",
+  "port": "skip: mine recipes for graphic-to-graphic seams; footage cuts stay ffmpeg-side"
+ },
+ {
+  "name": "transitions-destruction",
+  "type": "block",
+  "mechanism": "Showcase reel (title card + demos + outro) on one paused GSAP timeline over placeholder scenes; registered under key 'main'; techniques: canvas-2d page burn: deterministic sin-fold noise edge + radial fire glow drawn from progress",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "transition",
+  "quality": "mixed: demo scaffold, fixed 1920x1080, not mountable",
+  "aspectFlex": "16:9-only",
+  "port": "skip: mine recipes for graphic-to-graphic seams; footage cuts stay ffmpeg-side"
+ },
+ {
+  "name": "transitions-dissolve",
+  "type": "block",
+  "mechanism": "Showcase reel (title card + demos + outro) on one paused GSAP timeline over placeholder scenes; registered under key 'main'; techniques: crossfade, blur crossfade, focus pull, color dip",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "transition",
+  "quality": "mixed: demo scaffold, fixed 1920x1080, not mountable",
+  "aspectFlex": "16:9-only",
+  "port": "skip: mine recipes for graphic-to-graphic seams; footage cuts stay ffmpeg-side"
+ },
+ {
+  "name": "transitions-distortion",
+  "type": "block",
+  "mechanism": "Showcase reel (title card + demos + outro) on one paused GSAP timeline over placeholder scenes; registered under key 'main'; techniques: glitch, chromatic aberration, ripple via CSS filter/transform",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "transition",
+  "quality": "mixed: demo scaffold, fixed 1920x1080, not mountable",
+  "aspectFlex": "16:9-only",
+  "port": "skip: mine recipes for graphic-to-graphic seams; footage cuts stay ffmpeg-side"
+ },
+ {
+  "name": "transitions-grid",
+  "type": "block",
+  "mechanism": "Showcase reel (title card + demos + outro) on one paused GSAP timeline over placeholder scenes; registered under key 'main'; techniques: grid tile dissolve",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "transition",
+  "quality": "mixed: demo scaffold, fixed 1920x1080, not mountable",
+  "aspectFlex": "16:9-only",
+  "port": "skip: mine recipes for graphic-to-graphic seams; footage cuts stay ffmpeg-side"
+ },
+ {
+  "name": "transitions-light",
+  "type": "block",
+  "mechanism": "Showcase reel (title card + demos + outro) on one paused GSAP timeline over placeholder scenes; registered under key 'main'; techniques: light-leak gradients + white flash overlays",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "transition",
+  "quality": "mixed: demo scaffold, fixed 1920x1080, not mountable",
+  "aspectFlex": "16:9-only",
+  "port": "skip: mine recipes for graphic-to-graphic seams; footage cuts stay ffmpeg-side"
+ },
+ {
+  "name": "transitions-mechanical",
+  "type": "block",
+  "mechanism": "Showcase reel (title card + demos + outro) on one paused GSAP timeline over placeholder scenes; registered under key 'main'; techniques: shutter and clock wipe via clip-path",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "transition",
+  "quality": "mixed: demo scaffold, fixed 1920x1080, not mountable",
+  "aspectFlex": "16:9-only",
+  "port": "skip: mine recipes for graphic-to-graphic seams; footage cuts stay ffmpeg-side"
+ },
+ {
+  "name": "transitions-other",
+  "type": "block",
+  "mechanism": "Showcase reel (title card + demos + outro) on one paused GSAP timeline over placeholder scenes; registered under key 'main'; techniques: flash cut, gravity drop, morph circle",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "transition",
+  "quality": "mixed: demo scaffold, fixed 1920x1080, not mountable",
+  "aspectFlex": "16:9-only",
+  "port": "skip: mine recipes for graphic-to-graphic seams; footage cuts stay ffmpeg-side"
+ },
+ {
+  "name": "transitions-push",
+  "type": "block",
+  "mechanism": "Showcase reel (title card + demos + outro) on one paused GSAP timeline over placeholder scenes; registered under key 'main'; techniques: push slide, vertical push, elastic push, squeeze",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "transition",
+  "quality": "mixed: demo scaffold, fixed 1920x1080, not mountable",
+  "aspectFlex": "16:9-only",
+  "port": "skip: mine recipes for graphic-to-graphic seams; footage cuts stay ffmpeg-side"
+ },
+ {
+  "name": "transitions-radial",
+  "type": "block",
+  "mechanism": "Showcase reel (title card + demos + outro) on one paused GSAP timeline over placeholder scenes; registered under key 'main'; techniques: circle iris, diamond iris, diagonal split via clip-path",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "transition",
+  "quality": "mixed: demo scaffold, fixed 1920x1080, not mountable",
+  "aspectFlex": "16:9-only",
+  "port": "skip: mine recipes for graphic-to-graphic seams; footage cuts stay ffmpeg-side"
+ },
+ {
+  "name": "transitions-scale",
+  "type": "block",
+  "mechanism": "Showcase reel (title card + demos + outro) on one paused GSAP timeline over placeholder scenes; registered under key 'main'; techniques: zoom through, zoom out",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "transition",
+  "quality": "mixed: demo scaffold, fixed 1920x1080, not mountable",
+  "aspectFlex": "16:9-only",
+  "port": "skip: mine recipes for graphic-to-graphic seams; footage cuts stay ffmpeg-side"
+ },
+ {
+  "name": "trust-strip",
+  "type": "component",
+  "mechanism": "Wide-tracked mono wordmarks fade in opacity-only, left-to-right stagger with optional per-mark cues; dead-still hold",
+  "variables": [
+   "marks",
+   "tone",
+   "accent",
+   "cues",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:logo/tool trust row",
+  "quality": "clean",
+  "aspectFlex": "responsive",
+  "port": "P1: 'tools I used' / social-proof strip"
+ },
+ {
+  "name": "type-match-cut",
+  "type": "component",
+  "mechanism": "Headline splits into two halves that part vertically while a hardcoded skeleton editor panel grows from center to full frame; words arc offscreen on exit",
+  "variables": [
+   "text",
+   "accent"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "transition",
+  "quality": "clean: panel content is a fixed mock",
+  "aspectFlex": "responsive",
+  "port": "P2: headline-to-panel match cut; needs a content slot to matter"
+ },
+ {
+  "name": "typed-prompt",
+  "type": "component",
+  "mechanism": "Human-cadence chunked typing (seeded LCG chunking) behind deterministic blinking caret, optional backspace-and-retype correction; prompt shell styled by tokens",
+  "variables": [
+   "text",
+   "prompt_glyph",
+   "cadence",
+   "caret",
+   "cues",
+   "correction",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:AI prompt typing beat",
+  "quality": "clean",
+  "aspectFlex": "responsive",
+  "port": "P0: 'here is the prompt I use' is a core beat of AI-automation content"
+ },
+ {
+  "name": "typewriter",
+  "type": "component",
+  "mechanism": "max-width progress reveal + caret blink custom props via host recipe (steps ease)",
+  "variables": [
+   "text",
+   "tone",
+   "caret"
+  ],
+  "scrubSafe": "conditional: host-driven fragment",
+  "selfContained": true,
+  "fit": "unfit:superseded by typed-prompt",
+  "quality": "clean: tiny",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "typing-indicator",
+  "type": "component",
+  "mechanism": "iMessage three-dot bubble with tail dots, em-scaled to one size custom prop; host recipe drives pop/bounce",
+  "variables": [
+   "size",
+   "tone (via hf-ui tokens)"
+  ],
+  "scrubSafe": "conditional: host-driven fragment",
+  "selfContained": true,
+  "fit": "new:chat typing beat (pairs with thread-message-stack)",
+  "quality": "mixed: hf-ui token boilerplate dwarfs content",
+  "aspectFlex": "responsive",
+  "port": "P2"
+ },
+ {
+  "name": "ui-3d-reveal",
+  "type": "block",
+  "mechanism": "13s fixed reel: Figma-logo stroke-draw intro, hand-built Figma-app DOM mock, 3D perspective reveal choreography",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:design-tool showcase with third-party branding (Figma logo, HeyGen)",
+  "quality": "mixed: 100KB monolith, Google Fonts",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "ui-focus-zoom",
+  "type": "component",
+  "mechanism": "Single world-wrapper camera transform (T = -offset*S servo law) zooms/pans to an anchored region with cover-clamped pan; integer-sine micro-drift ends at exactly zero; document-level screen SLOT (img/muted video/HTML) with token skeleton fallback",
+  "variables": [
+   "anchor_x",
+   "anchor_y",
+   "zoom",
+   "zoom_at",
+   "halo",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:screenshot camera punch-in",
+  "quality": "clean: exemplary camera-servo law",
+  "aspectFlex": "responsive",
+  "port": "P0: zoom-into-a-screenshot-region is a constant need for tutorial cutaways"
+ },
+ {
+  "name": "us-map",
+  "type": "block",
+  "mechanism": "d3 geoAlbersUsa choropleth from topojson with staggered state reveals, value labels, gradient legend; RUNTIME FETCH of us-atlas JSON from CDN",
+  "variables": [],
+  "scrubSafe": "conditional: timeline registers only after network fetch resolves",
+  "selfContained": false,
+  "fit": "new:US choropleth data viz",
+  "quality": "clean code, network-bound render",
+  "aspectFlex": "16:9-only",
+  "port": "P2: vendor the topojson before any port"
+ },
+ {
+  "name": "us-map-bubble",
+  "type": "block",
+  "mechanism": "Same base map plus proportional city bubbles, value callouts, connection lines; runtime CDN fetch",
+  "variables": [],
+  "scrubSafe": "conditional: fetch-gated registration",
+  "selfContained": false,
+  "fit": "new:US bubble map",
+  "quality": "clean",
+  "aspectFlex": "16:9-only",
+  "port": "P2"
+ },
+ {
+  "name": "us-map-flow",
+  "type": "block",
+  "mechanism": "Animated origin-destination arcs between projected cities; d3.json CDN fetch; dot-fade fired from onComplete as a WALLCLOCK gsap.to outside the timeline",
+  "variables": [],
+  "scrubSafe": "conditional: onComplete wallclock tween breaks reverse seeks; network load",
+  "selfContained": false,
+  "fit": "new:flow/connection map",
+  "quality": "mixed: seek-unsafe side effect",
+  "aspectFlex": "16:9-only",
+  "port": "P2: fix the onComplete before use"
+ },
+ {
+  "name": "us-map-hex",
+  "type": "block",
+  "mechanism": "Hardcoded hex-grid state tiles + data values + abbreviation labels; GSAP wave reveal; NO network fetch",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:US hex tile map",
+  "quality": "clean: data embedded",
+  "aspectFlex": "16:9-only",
+  "port": "P2: only fonts external; easiest map to port"
+ },
+ {
+  "name": "variable-axis-type",
+  "type": "component",
+  "mechanism": "Single variable-font axis (wght/wdth) morph via font-variation-settings tween in fixed lock box",
+  "variables": [
+   "text",
+   "axis",
+   "fromValue",
+   "toValue"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:variable-weight emphasis beat",
+  "quality": "clean",
+  "aspectFlex": "responsive",
+  "port": "P2: Google-Fonts Roboto Flex runtime dependency"
+ },
+ {
+  "name": "variable-font-flex",
+  "type": "component",
+  "mechanism": "Per-character wght/wdth axis painter as pure function of tl.time() with inverse font-size compensation (ink swells, layout holds); pinned Fontsource woff2",
+  "variables": [
+   "text",
+   "axis",
+   "stagger",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:weight-carve word landing",
+  "quality": "clean: painter pattern",
+  "aspectFlex": "responsive",
+  "port": "P2: vendor Roboto Flex locally to port"
+ },
+ {
+  "name": "vector-editor-rig",
+  "type": "component",
+  "mechanism": "Dark design-tool chrome with live bezier pen path draw, sequential anchors, diamond handles, selection frame",
+  "variables": [
+   "tool",
+   "pathLabel"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:design-tool product demo",
+  "quality": "clean: large",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "velocity-throw-snap",
+  "type": "component",
+  "mechanism": "Card rail whips past on decaying velocity curve then overshoots and snaps hero card to center; rail position CSS-var-owned (no pixel caching)",
+  "variables": [
+   "hero_index",
+   "accent",
+   "card_label_prefix"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:whip-snap selection rail",
+  "quality": "clean",
+  "aspectFlex": "responsive",
+  "port": "P2: cards are placeholder skeletons"
+ },
+ {
+  "name": "vfx-anamorphic-flare",
+  "type": "block",
+  "mechanism": "Canvas point field where each bright point draws a measured horizontal anamorphic streak; rendered from tl.time() in onUpdate",
+  "variables": [
+   "(getVariables-driven)"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:cinematic flare background",
+  "quality": "mixed: canvas px stage",
+  "aspectFlex": "16:9-only",
+  "port": "P2: intro/outro dressing only"
+ },
+ {
+  "name": "vfx-iphone-device",
+  "type": "block",
+  "mechanism": "Three.js GLTF iPhone 15 / MacBook models with HTML-in-canvas screens, camera choreography, 360 turntable; GLTF+DRACO fetched from CDNs; rAF-deferred timeline registration",
+  "variables": [],
+  "scrubSafe": "conditional: network models + rAF-deferred registration",
+  "selfContained": false,
+  "fit": "unfit:device showcase, heavy network",
+  "quality": "mixed: 30KB, many CDNs",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "vfx-liquid-background",
+  "type": "block",
+  "mechanism": "Three.js subdivided-plane vertex-displacement liquid under DOM panels rasterized to textures at mount (setTimeout); driver tween renders from time",
+  "variables": [],
+  "scrubSafe": "conditional: async texture capture at mount",
+  "selfContained": false,
+  "fit": "unfit:decorative background",
+  "quality": "mixed: 44KB",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "vfx-liquid-glass",
+  "type": "block",
+  "mechanism": "Three.js refraction glass over captured backdrop; renderScene(tl.time()); async setTimeout capture; REGISTERS under key 'liquid-glass' not file name",
+  "variables": [],
+  "scrubSafe": "conditional: async capture",
+  "selfContained": false,
+  "fit": "unfit:decorative",
+  "quality": "mixed",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "vfx-magnetic",
+  "type": "block",
+  "mechanism": "WebGL magnetic-cursor distortion shader; onUpdate render; setTimeout init; registers as 'magnetic-cursor'",
+  "variables": [],
+  "scrubSafe": "conditional: async init",
+  "selfContained": false,
+  "fit": "unfit:cursor-effect demo",
+  "quality": "mixed",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "vfx-portal",
+  "type": "block",
+  "mechanism": "Three.js portal transition scene; driver onUpdate; async init; registers as 'portal-transition'",
+  "variables": [],
+  "scrubSafe": "conditional: async init",
+  "selfContained": false,
+  "fit": "transition",
+  "quality": "mixed",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "vfx-shatter",
+  "type": "block",
+  "mechanism": "Three.js Voronoi glass shatter: seeded mulberry32 (seed 42) generates ~200 cells; driver tween renders each frame; registers as 'glass-shatter'",
+  "variables": [],
+  "scrubSafe": "conditional: async init; geometry itself seeded-deterministic",
+  "selfContained": false,
+  "fit": "transition",
+  "quality": "mixed: 38KB, three.js + fonts",
+  "aspectFlex": "16:9-only",
+  "port": "P2: dramatic seam for rare payoff moments"
+ },
+ {
+  "name": "vfx-text-cursor",
+  "type": "block",
+  "mechanism": "Raw-WebGL shader post-processing over text: cursor glow, chromatic shadow rays, directional light; every tween drives render via onUpdate",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:dramatic shader title",
+  "quality": "mixed: 35KB, black-stage look off-brand",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "vignette",
+  "type": "component",
+  "mechanism": "Pure-CSS radial-gradient overlay; host tweens color/size custom props",
+  "variables": [
+   "--vignette-color",
+   "--vignette-size",
+   "--vignette-edge",
+   "--vignette-shape"
+  ],
+  "scrubSafe": "conditional: host-driven fragment",
+  "selfContained": true,
+  "fit": "new:vignette pass for cutaway frames",
+  "quality": "clean: tiny",
+  "aspectFlex": "responsive",
+  "port": "P2"
+ },
+ {
+  "name": "vox-annotate",
+  "type": "component",
+  "mechanism": "Keyword in a held sentence gets hand-drawn marker (highlight/circle/underline/scribble via measured dash) while a thin connector draws up to a mono callout label - one choreographed gesture",
+  "variables": [
+   "text",
+   "keyword",
+   "note",
+   "style",
+   "draw_at",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:underline-circle (adds connector + callout + 4 marker styles)",
+  "quality": "clean",
+  "aspectFlex": "responsive",
+  "port": "P0: Vox-style annotate is a signature explainer move; direct brand fit"
+ },
+ {
+  "name": "vpn-youtube-spot",
+  "type": "block",
+  "mechanism": "Apple-style app install spot: phone mock choreography with an <audio> sfx element (assets/vpn-sfx.wav absent from mirror)",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:product-ad reel",
+  "quality": "mixed: 985-line monolith, missing asset",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "weight-wave",
+  "type": "block",
+  "mechanism": "Per-character wght+slnt variable-font wave painted from one driver tween's onUpdate as pure function of progress; Recursive subset font VENDORED LOCALLY in assets/fonts (present in mirror)",
+  "variables": [
+   "(CONFIG-driven text)"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:kinetic weight-wave headline",
+  "quality": "clean: self-aware font pinning",
+  "aspectFlex": "16:9-only (transparent overlay root)",
+  "port": "P1: punchy hook-word treatment; local font already vendored"
+ },
+ {
+  "name": "whip-pan",
+  "type": "block",
+  "mechanism": "Blueprint showcase scaffold: WebGL whip-pan directional-blur shader between two captured placeholder scenes; registers as 'main'",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "transition",
+  "quality": "mixed: showcase scaffold, Google Fonts",
+  "aspectFlex": "16:9-only",
+  "port": "skip: whip-pan-cut is the usable sibling"
+ },
+ {
+  "name": "whip-pan-cut",
+  "type": "component",
+  "mechanism": "ONE strip carries scenes A+B (B docked one frame-width beyond A); single power3.inOut tween gives exact velocity match at the seam; directional feGaussianBlur capped 16px peaks at mid-whip via onUpdate proxy seeded at setup; before/after slots take img/video/HTML; hf:sfx at peak",
+  "variables": [
+   "direction",
+   "whip_at",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "transition",
+  "quality": "clean: exemplary velocity-match construction",
+  "aspectFlex": "responsive",
+  "port": "P1: graphics-bridge between two full-frame cutaway scenes with real slots"
+ },
+ {
+  "name": "whiteboard-ink",
+  "type": "component",
+  "mechanism": "Multi-stroke SVG sketch draws sequentially (measured dash per stroke) while a pen nib rides getPointAtLength with lifted hops between strokes; strokes SLOT accepts custom paths; 3 presets + caption",
+  "variables": [
+   "sketch",
+   "caption",
+   "pen",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:whiteboard-list/map family (drawn-sketch beat with pen actor)",
+  "quality": "clean",
+  "aspectFlex": "responsive",
+  "port": "P0: brand-native whiteboard mechanism; custom stroke slot makes it general"
+ },
+ {
+  "name": "wordmark-tiles",
+  "type": "component",
+  "mechanism": "Wordmark starts as seeded-LCG noise tiles; spatially modulated wave swaps each tile for its correctly clipped glyph fragment",
+  "variables": [
+   "text",
+   "columns",
+   "waveStagger"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:broadcast tile wordmark reveal",
+  "quality": "clean",
+  "aspectFlex": "responsive",
+  "port": "P2: premium but niche"
+ },
+ {
+  "name": "world-map",
+  "type": "block",
+  "mechanism": "d3 Natural Earth world choropleth with country-by-country reveal + rotating globe inset; d3.json CDN fetch of world-atlas",
+  "variables": [],
+  "scrubSafe": "conditional: fetch-gated registration",
+  "selfContained": false,
+  "fit": "new:world choropleth",
+  "quality": "clean",
+  "aspectFlex": "16:9-only",
+  "port": "P2: vendor data first"
+ },
+ {
+  "name": "x-follow-card",
+  "type": "component",
+  "mechanism": "Static X follow-card skeleton markup+CSS; no variables, no timeline, no recipe beyond a comment",
+  "variables": [],
+  "scrubSafe": "conditional: nothing animated in-file",
+  "selfContained": true,
+  "fit": "unfit:static skeleton; x-post supersedes",
+  "quality": "wonky: hardcoded, inert",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "x-post",
+  "type": "block",
+  "mechanism": "X/Twitter post card overlay on transparent root: card entrance, engagement metrics animate; inline SVG avatar placeholder; CONFIG-driven",
+  "variables": [
+   "(CONFIG-driven)"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:tweet citation overlay",
+  "quality": "mixed: fixed 1920x1080, Google Fonts Inter",
+  "aspectFlex": "16:9-only",
+  "port": "P1: citing posts is a real talking-head beat; swap font local + variable-ize"
+ },
+ {
+  "name": "yt-camera-move",
+  "type": "component",
+  "mechanism": "Copyable global helpers ytCameraMove/ytCameraReset/ytDefocusPulse: zoom+slide+3D tilt/pan on any wrapper (perspective preset) plus masked backdrop-blur edge-defocus pulse",
+  "variables": [
+   "(helper opts: zoom, slideX/Y, tilt, pan, roll, dur, ease)"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:camera moves for graphic cutaways (ui-focus-zoom's little sibling)",
+  "quality": "clean",
+  "aspectFlex": "responsive",
+  "port": "P1: edge-defocus pulse is the stealable trick"
+ },
+ {
+  "name": "yt-circle-pointer",
+  "type": "component",
+  "mechanism": "Helpers: hand-feel annotation ellipse draws on around a target (measured dash) + countdown chip with per-tick scale pulse driven by tween-state ceil",
+  "variables": [
+   "(helper opts + CSS positioning)"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:underline-circle as footage overlay + countdown chip",
+  "quality": "clean",
+  "aspectFlex": "responsive",
+  "port": "P1: on-footage annotation ring + countdown are creator staples"
+ },
+ {
+  "name": "yt-comment-card",
+  "type": "block",
+  "mechanism": "YouTube comment cards type on OVER footage (transparent root): avatar pop (image or initials chip), username/time, per-character typewriter, likes row; overlay vs light schemes; CONFIG-driven",
+  "variables": [
+   "(CONFIG: comments[], scheme, x/y, typeCharDelay, scanlines)"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:audience comment overlay",
+  "quality": "mixed: CONFIG not variables, fixed 1920x1080",
+  "aspectFlex": "16:9-only",
+  "port": "P0: 'a viewer asked...' overlay beat; port to variables"
+ },
+ {
+  "name": "yt-feather-highlight",
+  "type": "component",
+  "mechanism": "Dim layer with feathered ellipse hole via CSS mask on custom props; helpers fade in, GLIDE the spotlight between targets, fade out",
+  "variables": [
+   "(helper opts: x, y, rx, ry, dim)"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:footage spotlight dim overlay",
+  "quality": "clean: tiny",
+  "aspectFlex": "responsive",
+  "port": "P0: direct-attention spotlight over screen recordings; we have no equivalent"
+ },
+ {
+  "name": "yt-lcd-background",
+  "type": "block",
+  "mechanism": "Textured paper board: scanlines, optional pixel grid, STATIC feTurbulence grain (inline data URI), slow drift, blur-focus display text + chromatic-fringe title",
+  "variables": [
+   "(yt token vars)"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:textured board takeover background",
+  "quality": "clean: token-overridable family",
+  "aspectFlex": "16:9-only",
+  "port": "P1: paper texture matches cream/graph-paper brand"
+ },
+ {
+  "name": "yt-logo-intro",
+  "type": "block",
+  "mechanism": "Logo stamp pops on a lined board, kicker line gives way to title with accent arrow chip; seeded sine line distortion (no randomness)",
+  "variables": [
+   "(yt tokens)"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:channel logo intro sting",
+  "quality": "clean",
+  "aspectFlex": "16:9-only",
+  "port": "P2"
+ },
+ {
+  "name": "yt-lower-third",
+  "type": "block",
+  "mechanism": "White pill lower-third with avatar image + channel info + subscribe animation; DM Sans Google Font; assets/avatar.jpg missing from mirror",
+  "variables": [],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:redundant with glass-lower-third; missing asset",
+  "quality": "mixed",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "yt-prism-title",
+  "type": "block",
+  "mechanism": "Title with blur-focus entrance; red/blue chromatic fringe copies settle wide-to-resting then breathe; perspective bow; slow scale drift; transparent overlay root",
+  "variables": [
+   "(CONFIG: title, fontSize, color, prism, bow, drift)"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:chromatic hook title overlay",
+  "quality": "clean: CONFIG-driven",
+  "aspectFlex": "16:9-only",
+  "port": "P1: high-energy shorts hook title; variable-ize on port"
+ },
+ {
+  "name": "yt-screen-warp",
+  "type": "component",
+  "mechanism": "Two copyable CSS classes: 3D perspective warp wrapper + screen-fx overlay (sheen, scanlines, pixel grid, inset vignette) with on/off helpers",
+  "variables": [
+   "(helper on/off)"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:physical-display dressing for screenshots",
+  "quality": "clean: tiny",
+  "aspectFlex": "responsive",
+  "port": "P1: makes screen-recording cutaways read as a monitor"
+ },
+ {
+  "name": "yt-vertical-fill",
+  "type": "block",
+  "mechanism": "Portrait media fills 16:9 via blurred-scaled background + side fills (mirror/copy modes) + grid texture + scrim + foreground contrast lift",
+  "variables": [
+   "(yt tokens; media via images in block)"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:portrait-in-widescreen frame",
+  "quality": "clean",
+  "aspectFlex": "16:9-only",
+  "port": "P2: ffmpeg covers footage case; useful for portrait screenshots"
+ },
+ {
+  "name": "zoom-through-transition",
+  "type": "component",
+  "mechanism": "Scene A pushes back with scaled blur while scene B clip-path wipes in with sheen sweep + RGB fringe, all custom-prop driven on the registered timeline; scenes are label placeholders (no slots)",
+  "variables": [
+   "from-label",
+   "to-label",
+   "depth",
+   "accent"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "transition",
+  "quality": "clean",
+  "aspectFlex": "responsive",
+  "port": "P2: needs content slots to be usable"
+ }
+]

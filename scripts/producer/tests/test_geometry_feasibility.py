@@ -21,6 +21,7 @@ from planner import geometry_feasibility as gf
 from planner import geometry_proxy as gproxy
 from planner.geometry_proxy import punch_scale_at
 from planner import occupancy as occ
+from planner import delivery_canvas as dc
 
 
 def _plan(**over) -> dict:
@@ -61,6 +62,11 @@ class SharedOccupancyTests(unittest.TestCase):
         self.assertEqual((x0, x1), (0.0, 1080.0))
         _, y0s, _, y1s = occ.caption_band_rect((1080, 1920), 200)
         self.assertEqual((y0s, y1s), (950, 1140))
+        x0, y0, x1, y1 = occ.caption_band_rect((3840, 2160))
+        self.assertEqual((x0, y0, x1, y1),
+                         (0.0, 1720.0, 3840.0, 1960.0))
+        _, y0s, _, y1s = occ.caption_band_rect((3840, 2160), 200)
+        self.assertEqual((y0s, y1s), (1320.0, 1560.0))
 
     def test_build_map_marks_the_caption_band_occupied(self) -> None:
         face = (400.0, 300.0, 280.0, 300.0)
@@ -139,6 +145,19 @@ class CompositionMathTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             cs.proxy_profile(full, 1.5)
 
+    def test_native_longform_canvas_comes_from_first_cut_source(self) -> None:
+        plan = _plan(target={"mode": "longform", "scope": "produced"},
+                     reframe={"strategy": "none"})
+        manifest = {"sources": [{"id": "raw-1",
+                                 "resolution": [3840, 2160],
+                                 "rotation": 0}]}
+        self.assertEqual(dc.resolve_delivery_canvas(plan, manifest),
+                         (3840, 2160))
+        manifest["sources"][0]["resolution"] = [2160, 3840]
+        manifest["sources"][0]["rotation"] = 90
+        self.assertEqual(dc.resolve_delivery_canvas(plan, manifest),
+                         (3840, 2160))
+
 
 class LintVerdictTests(unittest.TestCase):
     """WARN-with-evidence / SKIP-with-evidence through the real chooser."""
@@ -149,7 +168,9 @@ class LintVerdictTests(unittest.TestCase):
                                return_value={"path": "c.mov", "fmt": "mov",
                                              "kind": "chip-row",
                                              "cached": True, "key": "k"}), \
-             mock.patch.object(gf, "_content_bbox", return_value=content):
+             mock.patch.object(gf, "_content_bbox", return_value=content), \
+             mock.patch.object(gf, "_clip_dims",
+                               return_value=run.canvas):
             gf.check_window(run, "graphicsTrack[0] chip-row", entry, geom)
 
     def test_tight_face_fires_warn_with_anatomy_evidence(self) -> None:
@@ -187,6 +208,10 @@ class LintVerdictTests(unittest.TestCase):
         self.assertIn("strategy",
                       gf.applicability_skip(_plan(reframe={"strategy": "center"})))
         self.assertIsNone(gf.applicability_skip(_plan()))
+        long_plan = _plan(
+            target={"mode": "longform", "scope": "produced"},
+            reframe={"strategy": "none"})
+        self.assertIsNone(gf.applicability_skip(long_plan))
 
     def test_broll_and_title_card_overlap_refuse_per_entry(self) -> None:
         plan = _plan(brollTrack=[{"outStart": 5.0, "outEnd": 6.0,
@@ -227,13 +252,15 @@ class LintVerdictTests(unittest.TestCase):
                                    return_value=crops), \
                  mock.patch.object(gf.gproxy, "observe_window",
                                    return_value=((630.0, 500.0, 650.0, 700.0),
-                                                 400.0)), \
+                                                 400.0, (1080, 1920))), \
                  mock.patch.object(gf, "render_entry",
                                    return_value={"path": "c.mov", "fmt": "mov",
                                                  "kind": "chip-row",
                                                  "cached": True, "key": "k"}), \
                  mock.patch.object(gf, "_content_bbox",
-                                   return_value=_BIG_CONTENT):
+                                   return_value=_BIG_CONTENT), \
+                 mock.patch.object(gf, "_clip_dims",
+                                   return_value=(1080, 1920)):
                 gf.lint_plan(run, tmp, tmp)
             self.assertEqual(run.metrics["checked"], 1)
             self.assertEqual(run.metrics["warned"], 1)

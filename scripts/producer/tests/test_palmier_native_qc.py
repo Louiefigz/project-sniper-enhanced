@@ -243,12 +243,20 @@ class AuditLifecycleTests(unittest.TestCase):
     def test_native_audit_artifact_and_hash_match_returned_evidence(self):
         with tempfile.TemporaryDirectory() as tmp:
             found = snapshot("project-1", NativeClient().timelines["head"])
-            receipt = {"outDir": tmp, "export": {"hash": "e" * 64},
+            receipt = {"outDir": tmp, "export": {
+                           "hash": "e" * 64, "path": "candidate.mp4"},
                        "authority": {"inputDigest": "i" * 64}}
             checks = [{"name": "render", "status": "pass",
                        "measured": "ok", "detail": ""}]
+            parity_path = os.path.join(tmp, "palmier.editable-parity.json")
+            with open(parity_path, "w", encoding="utf-8") as handle:
+                handle.write("{}\n")
+            parity = {"verdict": "pass", "blockedMetricIds": [],
+                      "digest": "p" * 64}
             with patch("palmier.native_qc_audit._export_checks",
-                       return_value=(checks, [])):
+                       return_value=(checks, [])), \
+                    patch("palmier.native_qc_audit.run_parity",
+                          return_value=parity):
                 audit = run_native_audit(tmp, receipt, found)
             self.assertEqual(audit["status"], "pass")
             self.assertEqual(file_sha256(audit["auditPath"]), audit["auditHash"])

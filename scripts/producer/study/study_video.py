@@ -35,7 +35,8 @@ from study.study_audio import profile_audio  # noqa: E402
 from study.study_cuts import compute_pacing, detect_cuts  # noqa: E402
 from study.study_report import build_fingerprint, render_report  # noqa: E402
 from study.study_states import analyze_states  # noqa: E402
-from study.study_transcribe import transcribe_profile  # noqa: E402
+from study.study_transcribe import (transcribe_profile, add_asr_arguments,  # noqa: E402
+                                    invocation_from_options, use_asr_invocation)
 
 
 def _emit(status: str, **fields) -> None:
@@ -104,7 +105,8 @@ def main() -> int:
     parser.add_argument("--fps", type=float, default=2.0,
                         help="frame sampling rate for state detection (default 2)")
     parser.add_argument("--transcribe", action="store_true",
-                        help="also transcribe (wpm + hook text); needs DEEPGRAM_API_KEY")
+                        help="also transcribe locally (wpm + hook text); no paid fallback")
+    add_asr_arguments(parser)
     parser.add_argument("--scdet-threshold", type=float, default=10.0,
                         help="scdet scene-cut score gate 0-100 (default 10)")
     parser.add_argument("--dedup-threshold", type=int, default=6,
@@ -115,8 +117,9 @@ def main() -> int:
         _emit("error", error=f"not a file: {args.video}")
         return 1
     try:
-        study(args.video, args.out_dir, args.fps, args.transcribe,
-              args.scdet_threshold, args.dedup_threshold)
+        with use_asr_invocation(invocation_from_options(args)):
+            study(args.video, args.out_dir, args.fps, args.transcribe,
+                  args.scdet_threshold, args.dedup_threshold)
     except (OSError, RuntimeError, ValueError) as exc:
         _emit("error", error=str(exc))
         return 1

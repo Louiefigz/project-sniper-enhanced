@@ -6,10 +6,8 @@ import {
   requireFreshAuthority,
   verifiedAuthorityHash,
 } from "@/lib/server/auto-edit-authority";
-import { autoEditAuthoritySnapshot } from "@/lib/server/auto-edit-authority-snapshot";
 import {
   checkpointReached,
-  fileSha256,
   type AutoEditJob,
   type CheckpointUpdate,
 } from "@/lib/server/auto-edit-job-store";
@@ -20,27 +18,18 @@ import {
   readApproval,
   seedQcRoundFromPriorCandidate,
 } from "@/lib/server/auto-edit-quality-artifacts";
-import {
-  runAuthoring,
-  type AuthoringSessionMode,
-  type AuthoringStage,
-} from "./authoring";
-import { runProducerRevision } from "./brain-review-runner";
 import { routeGeometryFailure } from "./geometry-replan-stage";
 import {
   NO_LEGAL_REGION_TOKEN,
   noLegalRegionEvidence,
   type GeometryReplanState,
 } from "@/lib/producer/geometry-replan";
-import { runAssemble, runBaseGuard } from "./chain";
 import {
   publishApprovedMirror,
   qualityRoundWithRenderCheckpoint,
 } from "./pipeline-palmier-publish";
-import { runPlanningReviewLoop } from "./planning-loop";
-import { runQualityReviewRound } from "./quality-loop";
 import { MAX_QC_RENDER_ROUNDS } from "./round-policy";
-import { AutoEditError, type Send } from "./stream";
+import { AutoEditError } from "./stream";
 import {
   currentPlanRefitReceipt,
   planRefitEvent,
@@ -49,66 +38,17 @@ import { restoreAutoEditDoctrine } from "@/lib/server/auto-edit-doctrine";
 import { restoreAutoEditPipeline } from "@/lib/server/auto-edit-pipeline-authority";
 import { timedStage } from "@/lib/server/stage-timing";
 import { runAuthorStage } from "./authoring-stage";
-import { markAuthoringSessionEstablished } from "./authoring-session-state";
-import { publishApprovedPalmierMirror, publishPalmierWorkingCheckpoint } from "./palmier-checkpoints";
 import { brainModel, brainProvider, brainProviderLabel } from "../../_lib/ai-provider";
-import { runPalmierPrimaryAutoEdit } from "./palmier-primary";
-import { approvePrevisualCut, validatePrevisualCut, verifyApprovedCut } from "./cut-approval";
 import { bindTemplateUsageForJob } from "./template-usage-stage";
-import { runCutReviewLoop } from "./cut-review-loop";
-import { verifyCutReviewApproval } from "./cut-review-approval";
-import type { PipelineRuntime } from "./pipeline-types";
+import {
+  DEFAULT_PIPELINE_DEPENDENCIES,
+  type PipelineDependencies,
+} from "./pipeline-dependencies";
+import type { PipelineOutcome, PipelineRuntime } from "./pipeline-types";
+import { bindAutoEditDeliveryController } from "./delivery-controller";
+import { assertGuidedDelivery } from "./guided-cut-boundary";
 export type { PipelineIo, PipelineRuntime } from "./pipeline-types";
-
-export interface PipelineDependencies {
-  exists: typeof existsSync;
-  hashFile: typeof fileSha256;
-  author: (
-    ctx: AutoEditJob["ctx"],
-    send: Send,
-    stage: AuthoringStage,
-    sessionMode: AuthoringSessionMode,
-  ) => ReturnType<typeof runAuthoring>;
-  validateCut: typeof validatePrevisualCut;
-  reviewCut: typeof runCutReviewLoop;
-  verifyReviewCut: typeof verifyCutReviewApproval;
-  approveCut: typeof approvePrevisualCut;
-  verifyCut: typeof verifyApprovedCut;
-  bindSession: typeof markAuthoringSessionEstablished;
-  planning: typeof runPlanningReviewLoop;
-  revise: typeof runProducerRevision;
-  baseGuard: typeof runBaseGuard;
-  assemble: typeof runAssemble;
-  quality: typeof runQualityReviewRound;
-  authority: typeof autoEditAuthoritySnapshot;
-  checkpoint: typeof publishPalmierWorkingCheckpoint;
-  approvedMirror: typeof publishApprovedPalmierMirror;
-  palmierPrimary: typeof runPalmierPrimaryAutoEdit;
-}
-
-const DEFAULT_DEPS: PipelineDependencies = {
-  exists: existsSync,
-  hashFile: fileSha256,
-  author: (ctx, send, stage, sessionMode) => runAuthoring(
-    ctx, send, {}, { stage, sessionMode },
-  ),
-  validateCut: validatePrevisualCut,
-  reviewCut: runCutReviewLoop,
-  verifyReviewCut: verifyCutReviewApproval,
-  approveCut: approvePrevisualCut,
-  verifyCut: verifyApprovedCut,
-  bindSession: markAuthoringSessionEstablished,
-  planning: runPlanningReviewLoop,
-  revise: runProducerRevision,
-  baseGuard: runBaseGuard,
-  assemble: runAssemble,
-  quality: runQualityReviewRound,
-  authority: autoEditAuthoritySnapshot,
-  checkpoint: publishPalmierWorkingCheckpoint,
-  approvedMirror: publishApprovedPalmierMirror,
-  palmierPrimary: runPalmierPrimaryAutoEdit,
-};
-
+export type { PipelineDependencies } from "./pipeline-dependencies";
 function advance(run: PipelineRuntime, update: CheckpointUpdate): void {
   run.job = run.io.advance(update);
 }
@@ -172,6 +112,10 @@ function approvedOutputReusable(run: PipelineRuntime, deps: PipelineDependencies
     && approval.manifestHash === authority.manifestHash
     && approval.authorityDigest === authority.digest
     && approval.finalHash === deps.hashFile(finalPath)
+    && deps.approvedRevisionReady(
+      ctx.dir, ctx.planPath, ctx.manifestPath, approval.finalHash)
+    && deps.renderGraphReady(
+      ctx.dir, ctx.planPath, ctx.manifestPath, approval.finalHash)
     && verifiedAuthorityHash(finalPath, planContentHash(ctx.planPath), deps, authority.digest)
       === approval.finalHash;
 }
@@ -180,6 +124,36 @@ function candidateRound(job: AutoEditJob): number {
   if ((job.checkpoint === "rendering" || checkpointReached(job.checkpoint, "rendered"))
       && job.qcRound) return job.qcRound;
   return (job.qcRound ?? 0) + 1;
+}
+
+function initializeRenderedAuthority(
+  run: PipelineRuntime,
+  deps: PipelineDependencies,
+): void {
+  const { ctx } = run.job;
+  const candidatePath = run.job.candidatePath;
+  const expectedCandidateHash = run.job.candidateHash;
+  const expectedPlanHash = run.job.renderedPlanHash;
+  const expectedManifestHash = run.job.renderedManifestHash;
+  if (!candidatePath || !expectedCandidateHash
+      || !expectedPlanHash || !expectedManifestHash) {
+    throw new AutoEditError(
+      "rendered checkpoint lacks producer authority initialization facts");
+  }
+  const outcome = deps.initializeAuthority({
+    producerDir: ctx.dir,
+    planPath: ctx.planPath,
+    manifestPath: ctx.manifestPath,
+    candidatePath,
+    expectedCandidateHash,
+    expectedPlanHash,
+    expectedManifestHash,
+  });
+  run.io.send({
+    event: "producer_revision_authority",
+    status: outcome.status,
+    revisionHash: outcome.revisionHash,
+  });
 }
 
 function previousProof(candidate: string): Pick<Stats, "ino" | "mtimeMs"> | null {
@@ -266,49 +240,52 @@ async function renderStage(run: PipelineRuntime, deps: PipelineDependencies): Pr
   return false;
 }
 
-export async function runAutoEditPipeline(
-  run: PipelineRuntime,
-  dependencies: Partial<PipelineDependencies> = {},
-): Promise<void> {
-  const deps = { ...DEFAULT_DEPS, ...dependencies };
+export async function runAutoEditPipeline(run: PipelineRuntime,
+  dependencies: Partial<PipelineDependencies> = {}): Promise<PipelineOutcome> {
+  assertGuidedDelivery(run.job);
+  const delivery = bindAutoEditDeliveryController(run, { ...DEFAULT_PIPELINE_DEPENDENCIES, ...dependencies });
+  const deps = delivery.dependencies;
+  deps.reconciliationReady(run.job.ctx.dir);
   if (run.job.ctx.doctrine) restoreAutoEditDoctrine(run.job.ctx.doctrine);
   if (run.job.ctx.pipeline) restoreAutoEditPipeline(run.job.ctx.pipeline);
   const provider = brainProvider();
   run.io.send({
     event: "start", phase: run.job.phase, scope: run.job.ctx.scope,
-    manifestPath: run.job.ctx.manifestPath, planSnapshots: run.job.snapshots,
-    resumeFrom: run.job.checkpoint, provider,
-    model: brainModel(provider), brain: brainProviderLabel(provider), workbench: "Palmier",
-  });
+    manifestPath: run.job.ctx.manifestPath, planSnapshots: run.job.snapshots, provider,
+    resumeFrom: run.job.checkpoint,
+    model: brainModel(provider), brain: brainProviderLabel(provider),
+    workbench: delivery.policy === "mp4-only" ? "MP4" : "Palmier" });
   const refit = currentPlanRefitReceipt(run.job.ctx.dir, run.job.ctx.planPath);
   if (refit) run.io.send(planRefitEvent(refit, "reused"));
-  if (await deps.palmierPrimary(run)) return;
+  if (await deps.palmierPrimary(run)) {
+    delivery.finish();
+    return { status: "completed" };
+  }
   const usage = bindTemplateUsageForJob(run.job);
   run.job = usage.job;
   const { history } = usage;
-  run.io.send({
-    event: "template_usage_history", projectCount: history.projectCount,
-    overusedKinds: history.overusedKinds, digest: history.digest,
-  });
-  await timedStage(run.job.ctx.dir, "authoring", () => runAuthorStage(run, deps));
-  // Typed NoLegalRegion render failures route ONCE back into planning with
-  // the geometry evidence as a critique row (contract v3 A2); everything
-  // else — and a second geometry failure — stays terminal.
+  run.io.send({ event: "template_usage_history", projectCount: history.projectCount,
+    overusedKinds: history.overusedKinds, digest: history.digest });
+  const authored = await timedStage(run.job.ctx.dir, "authoring", () => runAuthorStage(run, deps));
+  if (authored.status === "awaiting_cut_approval") return authored;
   const geometry: GeometryReplanState = { attempts: 0 };
   while (true) {
-    await deps.planning(run);
+    await deps.planning(run, { checkpoint: deps.checkpoint });
     validationStage(run, deps);
     try {
       if (await renderStage(run, deps)) {
         await publishApprovedMirror(run, deps);
-        return;
+        delivery.finish();
+        return { status: "completed" };
       }
+      initializeRenderedAuthority(run, deps);
       const result = await timedStage(
         run.job.ctx.dir, "qc_round", () => qualityRoundWithRenderCheckpoint(run, deps),
       );
       if (result.status === "approved") {
         await publishApprovedMirror(run, deps);
-        return;
+        delivery.finish();
+        return { status: "completed" };
       }
     } catch (error) {
       await routeGeometryFailure(run, deps, geometry, error);

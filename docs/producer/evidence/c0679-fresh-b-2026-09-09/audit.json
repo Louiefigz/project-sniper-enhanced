@@ -1,0 +1,522 @@
+{
+  "schemaVersion": 1,
+  "kind": "external-selected-evidence-audit",
+  "auditedAt": "2026-09-10T00:05:29.566229+00:00",
+  "archive": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-fresh-native-b-2026-09-09",
+  "archiveManifestSha256": "d83b8ff08a1175679a6fdfa60b64203643f54c0e32771f9fc152ce9b667357db",
+  "archiveFileCount": 400,
+  "archiveDeclaredBytes": 2469972749,
+  "wholeArchiveMediaRehashed": false,
+  "auditScope": "Verified selected metadata bytes against sealed manifest; derived values from these receipts. No render, listening, or media rehash in this audit.",
+  "benchmark": {
+    "status": "file-qc-passed-playback-failed",
+    "goalComplete": false,
+    "clockResetAfterFailures": false,
+    "startedAt": "2026-09-09T21:26:48.341117+00:00",
+    "fileChecksElapsedSeconds": 6547.548936250154,
+    "firstPlaybackElapsedSeconds": 7240.6527415001765,
+    "sealedElapsedSeconds": 7737.5362402081955,
+    "guardedPhaseCount": 23,
+    "guardedPhaseSeconds": 3264.463909374783
+  },
+  "outputSha256": "2b2b512eafecea3ef65768a676a78e76bf43bf07c09b0ab5ebad5a7e720846ee",
+  "fileChecks": {
+    "status": "objective-file-checks-pass-awaiting-playback",
+    "input": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/render/native-master.mp4",
+    "output": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/render/delivery-master.mp4",
+    "humanListening": false,
+    "freshDonor": {
+      "status": "pass",
+      "failedWindows": 0,
+      "sha256": "3892fae8fe9562f55304f024389ca2eb6a572948a8d4b7eddf05de95c0fbeef3"
+    },
+    "losslessAssembly": {
+      "status": "pass",
+      "pictureSliceSha256": "0ea796dd858f46591cbae2083204754a2e79fdaa661c1aa9a032c3fcefa458cd",
+      "aacPacketsPreserved": 30815,
+      "additionalPictureEncodes": 0,
+      "additionalAudioEncodes": 0,
+      "outputSha256": "2b2b512eafecea3ef65768a676a78e76bf43bf07c09b0ab5ebad5a7e720846ee"
+    },
+    "container": {
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+          "profile": "High",
+          "codec_type": "video",
+          "codec_tag_string": "avc1",
+          "codec_tag": "0x31637661",
+          "width": 1920,
+          "height": 1080,
+          "coded_width": 1920,
+          "coded_height": 1080,
+          "has_b_frames": 0,
+          "sample_aspect_ratio": "1:1",
+          "display_aspect_ratio": "16:9",
+          "pix_fmt": "yuv420p",
+          "level": 50,
+          "color_range": "tv",
+          "color_space": "bt709",
+          "color_transfer": "iec61966-2-1",
+          "color_primaries": "bt709",
+          "chroma_location": "left",
+          "field_order": "progressive",
+          "refs": 1,
+          "is_avc": "true",
+          "nal_length_size": "4",
+          "id": "0x1",
+          "r_frame_rate": "24000/1001",
+          "avg_frame_rate": "24000/1001",
+          "time_base": "1/24000",
+          "start_pts": 0,
+          "start_time": "0.000000",
+          "duration_ts": 15776761,
+          "duration": "657.365042",
+          "bit_rate": "5517835",
+          "bits_per_raw_sample": "8",
+          "nb_frames": "15761",
+          "extradata_size": 49,
+          "disposition": {
+            "default": 1,
+            "dub": 0,
+            "original": 0,
+            "comment": 0,
+            "lyrics": 0,
+            "karaoke": 0,
+            "forced": 0,
+            "hearing_impaired": 0,
+            "visual_impaired": 0,
+            "clean_effects": 0,
+            "attached_pic": 0,
+            "timed_thumbnails": 0,
+            "non_diegetic": 0,
+            "captions": 0,
+            "descriptions": 0,
+            "metadata": 0,
+            "dependent": 0,
+            "still_image": 0,
+            "multilayer": 0
+          },
+          "tags": {
+            "language": "und",
+            "handler_name": "VideoHandler",
+            "vendor_id": "[0][0][0][0]",
+            "encoder": "Lavc62.11.100 libx264"
+          }
+        },
+        {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_long_name": "AAC (Advanced Audio Coding)",
+          "profile": "LC",
+          "codec_type": "audio",
+          "codec_tag_string": "mp4a",
+          "codec_tag": "0x6134706d",
+          "sample_fmt": "fltp",
+          "sample_rate": "48000",
+          "channels": 2,
+          "channel_layout": "stereo",
+          "bits_per_sample": 0,
+          "initial_padding": 0,
+          "id": "0x2",
+          "r_frame_rate": "0/0",
+          "avg_frame_rate": "0/0",
+          "time_base": "1/48000",
+          "start_pts": 0,
+          "start_time": "0.000000",
+          "duration_ts": 31553522,
+          "duration": "657.365042",
+          "bit_rate": "252426",
+          "nb_frames": "30815",
+          "extradata_size": 5,
+          "disposition": {
+            "default": 1,
+            "dub": 0,
+            "original": 0,
+            "comment": 0,
+            "lyrics": 0,
+            "karaoke": 0,
+            "forced": 0,
+            "hearing_impaired": 0,
+            "visual_impaired": 0,
+            "clean_effects": 0,
+            "attached_pic": 0,
+            "timed_thumbnails": 0,
+            "non_diegetic": 0,
+            "captions": 0,
+            "descriptions": 0,
+            "metadata": 0,
+            "dependent": 0,
+            "still_image": 0,
+            "multilayer": 0
+          },
+          "tags": {
+            "language": "und",
+            "handler_name": "SoundHandler",
+            "vendor_id": "[0][0][0][0]"
+          }
+        }
+      ],
+      "format": {
+        "filename": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/render/delivery-master.mp4",
+        "nb_streams": 2,
+        "nb_programs": 0,
+        "nb_stream_groups": 0,
+        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+        "format_long_name": "QuickTime / MOV",
+        "start_time": "0.000000",
+        "duration": "657.365042",
+        "size": "474477794",
+        "bit_rate": "5774299",
+        "probe_score": 100,
+        "tags": {
+          "major_brand": "isom",
+          "minor_version": "512",
+          "compatible_brands": "isomiso2avc1mp41",
+          "encoder": "Lavf62.3.100"
+        }
+      }
+    },
+    "videoClock": {
+      "status": "pass",
+      "frames": 15761,
+      "duration": "15776761/24000",
+      "timeBase": "1/24000",
+      "startPts": 0,
+      "allPacketPtsChecked": true
+    },
+    "audioClock": {
+      "status": "pass",
+      "samples": 31553522,
+      "firstPacket": {
+        "pts": -1024,
+        "dts": -1024,
+        "duration": 1024,
+        "side_data_list": [
+          {
+            "side_data_type": "Skip Samples",
+            "skip_samples": 1024,
+            "discard_padding": 0,
+            "skip_reason": 0,
+            "discard_reason": 0
+          }
+        ]
+      },
+      "lastPacket": {
+        "pts": 31552512,
+        "dts": 31552512,
+        "duration": 1010
+      },
+      "packetCount": 30815
+    },
+    "decode": {
+      "status": "pass",
+      "wholeDecodeWithXerror": true,
+      "visuals": [
+        {
+          "panel": "panel-00",
+          "frame": 26
+        },
+        {
+          "panel": "panel-02",
+          "frame": 250
+        },
+        {
+          "panel": "panel-08",
+          "frame": 784
+        },
+        {
+          "panel": "panel-13",
+          "frame": 1342
+        },
+        {
+          "panel": "panel-18",
+          "frame": 2437
+        },
+        {
+          "panel": "panel-29",
+          "frame": 5810
+        },
+        {
+          "panel": "panel-35",
+          "frame": 8424
+        },
+        {
+          "panel": "panel-37",
+          "frame": 9840
+        },
+        {
+          "panel": "panel-42",
+          "frame": 11741
+        },
+        {
+          "panel": "panel-44",
+          "frame": 12713
+        },
+        {
+          "panel": "panel-48",
+          "frame": 14350
+        },
+        {
+          "panel": "panel-52",
+          "frame": 15512
+        }
+      ],
+      "interpretation": "Declared input metadata to full-range sRGB; not yet a fidelity comparison"
+    },
+    "motionScreen": {
+      "status": "pass",
+      "scanFrames": 1315,
+      "samplingFps": 2,
+      "exactDuplicateRunSeconds": 0.0,
+      "maximumAllowedDuplicateRunSecondsExclusive": 2.5,
+      "blackFrameIndices": [],
+      "minimumAdjacentMeanDifference": 0.08590277777777777,
+      "scope": "160x90 whole-composition screening; moving graphics can conceal a frozen presenter"
+    },
+    "audioMeasurements": {
+      "status": "pass",
+      "sourceAlignedSnrDb": 34.296585012186995,
+      "decoderPaddingSamples": 14,
+      "loudness": {
+        "input_i": "-16.16",
+        "input_tp": "-1.09",
+        "input_lra": "5.50",
+        "input_thresh": "-26.93",
+        "output_i": "-16.10",
+        "output_tp": "-1.50",
+        "output_lra": "5.40",
+        "output_thresh": "-26.84",
+        "normalization_type": "dynamic",
+        "target_offset": "0.10"
+      },
+      "localSignalPassed": true,
+      "failedWindowCount": 0,
+      "thresholds": {
+        "globalSnrDb": 25,
+        "targetLufs": -16,
+        "lufsTolerance": 0.5,
+        "maximumTruePeakDb": -1
+      },
+      "humanListening": false,
+      "globalSnrAloneQualifiesContinuity": false
+    },
+    "nativeColor": {
+      "status": "pass",
+      "frames": [
+        {
+          "frame": 26,
+          "panel": "panel-00",
+          "wholeFrame": {
+            "mae": 1.2366909400720165,
+            "mse": 3.211780317644033,
+            "psnrDb": 43.06334528525824,
+            "identical": false,
+            "maximumAbsoluteError": 23.0,
+            "passed": true
+          },
+          "presenterRegion": {
+            "mae": 1.35281536573439,
+            "mse": 3.590287899138851,
+            "psnrDb": 42.57951085550282,
+            "identical": false,
+            "maximumAbsoluteError": 23.0,
+            "passed": true
+          },
+          "decoded": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/visual-01.png",
+          "decodedSha256": "f952d95c99ec90e71ac2cdcea51ed48b7ab7c277f417532cd427f135520607f2",
+          "passed": true
+        },
+        {
+          "frame": 1342,
+          "panel": "panel-13",
+          "wholeFrame": {
+            "mae": 0.8240412808641975,
+            "mse": 1.8195730452674896,
+            "psnrDb": 45.53110866199934,
+            "identical": false,
+            "maximumAbsoluteError": 31.0,
+            "passed": true
+          },
+          "presenterRegion": {
+            "mae": 1.80052608311229,
+            "mse": 6.410950486295314,
+            "psnrDb": 40.0615793815853,
+            "identical": false,
+            "maximumAbsoluteError": 25.0,
+            "passed": true
+          },
+          "decoded": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/visual-04.png",
+          "decodedSha256": "b0c48592a945541671758193befe46ab981eafbdd24e054fee96410322b2cf58",
+          "passed": true
+        },
+        {
+          "frame": 14350,
+          "panel": "panel-48",
+          "wholeFrame": {
+            "mae": 1.0388659014917696,
+            "mse": 2.6306926761831275,
+            "psnrDb": 43.93010245140097,
+            "identical": false,
+            "maximumAbsoluteError": 32.0,
+            "passed": true
+          },
+          "presenterRegion": {
+            "mae": 1.5409126169138305,
+            "mse": 4.414134459795868,
+            "psnrDb": 41.68234802713325,
+            "identical": false,
+            "maximumAbsoluteError": 22.0,
+            "passed": true
+          },
+          "decoded": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/visual-11.png",
+          "decodedSha256": "85191d3524f8d536e616ee6927c9ee83d2e3f27231bcd280967515a077099112",
+          "passed": true
+        }
+      ],
+      "inputColorOverrideUsed": false,
+      "thresholdsUnchanged": true
+    }
+  },
+  "playback": {
+    "first": {
+      "status": "failed",
+      "humanListening": false,
+      "browserAudioOutput": "Puppeteer headless default --mute-audio; element is unmuted for decode/clock checks",
+      "scope": "Whole output decode/presentation/clock behavior, not audible listening or semantic quality",
+      "videoCoveragePassed": false
+    },
+    "firstFinal": {
+      "t": 657.365042,
+      "duration": 657.365042,
+      "ended": true,
+      "muted": false,
+      "volume": 1,
+      "width": 1920,
+      "height": 1080,
+      "dropped": 4,
+      "corrupted": 0,
+      "total": 15761
+    },
+    "firstPresented": {
+      "callbacks": 15756,
+      "lastMediaTime": 657.323333,
+      "presentedFrames": 15757,
+      "backwards": 0,
+      "maximumMediaGap": 0.12512500000001125
+    },
+    "repeat": {
+      "status": "pass",
+      "humanListening": false,
+      "browserAudioOutput": "Puppeteer headless default --mute-audio; element is unmuted for decode/clock checks",
+      "scope": "Whole output decode/presentation/clock behavior, not audible listening or semantic quality",
+      "videoCoveragePassed": true
+    },
+    "repeatFinal": {
+      "t": 657.365042,
+      "duration": 657.365042,
+      "ended": true,
+      "muted": false,
+      "volume": 1,
+      "width": 1920,
+      "height": 1080,
+      "dropped": 0,
+      "corrupted": 0,
+      "total": 15761
+    },
+    "repeatPresented": {
+      "callbacks": 15760,
+      "lastMediaTime": 657.323333,
+      "presentedFrames": 15761,
+      "backwards": 0,
+      "maximumMediaGap": 0.0417090000000826
+    },
+    "repeatElapsedSeconds": 8456.596600583056,
+    "sameOutputShaVerified": true,
+    "commonAdditionalPinsUnchanged": 75,
+    "commonAdditionalPinDifferences": [],
+    "firstFailureReplaced": false
+  },
+  "nativeRenderResources": {
+    "samples": 204,
+    "peakOwnedGiB": 2.1351633071899414,
+    "peakSingleGiB": 0.9599609375,
+    "kernelPressureLevels": [
+      1
+    ],
+    "swapBytesMin": 8073636741,
+    "swapBytesMax": 8073636741,
+    "minimumDiskFreeGiB": 27.835235595703125,
+    "minimumUnusedPhysicalBytes": 82837504,
+    "samplesWithWarnings": 184,
+    "footprintSumsVerified": true
+  },
+  "openRequirements": [
+    "Human listening",
+    "Full creative review/approval",
+    "Studio audio usability",
+    "Saved editable project revision and full re-export",
+    "Project asset and SDK runtime dependency closure",
+    "Reliable quality-complete delivery within 120 minutes"
+  ],
+  "files": [
+    {
+      "path": "sealed/delivery-qc-v2/native-qc.json",
+      "sourcePath": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-fresh-native-b-2026-09-09/delivery-qc-v2/native-qc.json",
+      "sha256": "4bcf7caaa751f77834766b7abd9c6b26d39f1b375882bc05b4f9cb5dfb2c5a23",
+      "bytes": 10024,
+      "verifiedAgainstSealedManifest": true
+    },
+    {
+      "path": "sealed/delivery-v1-playback.json",
+      "sourcePath": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-fresh-native-b-2026-09-09/delivery-v1-playback.json",
+      "sha256": "6d2b729ff8d60d2b385df84ec9668c6cdafa81e94e8bf300c92e637e6303cff8",
+      "bytes": 1571097,
+      "verifiedAgainstSealedManifest": true
+    },
+    {
+      "path": "sealed/delivery-playback-v1.render.json",
+      "sourcePath": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-fresh-native-b-2026-09-09/delivery-playback-v1.render.json",
+      "sha256": "d82606d2872702b721c385139bc8b41032c0976469bf3b4fdb31fddb51fae79b",
+      "bytes": 86707,
+      "verifiedAgainstSealedManifest": true
+    },
+    {
+      "path": "sealed/delivery-output-qc-v2.render.json",
+      "sourcePath": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-fresh-native-b-2026-09-09/delivery-output-qc-v2.render.json",
+      "sha256": "7a99cdf1c61ee27ef405c44bbfffbbea0f9ea444f91d0fd8372b706b0b6c4d14",
+      "bytes": 43632,
+      "verifiedAgainstSealedManifest": true
+    },
+    {
+      "path": "sealed/native-export-v1.render.json",
+      "sourcePath": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-fresh-native-b-2026-09-09/native-export-v1.render.json",
+      "sha256": "7702d9e5c63005f3c969ce9f6966b062783a1c1f671f9790ebcb3cc84a8de022",
+      "bytes": 145481,
+      "verifiedAgainstSealedManifest": true
+    },
+    {
+      "path": "sealed/native-export-v1.resources.jsonl",
+      "sourcePath": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-fresh-native-b-2026-09-09/native-export-v1.resources.jsonl",
+      "sha256": "d9ee01bcd635f2278bea046d6ef2c735588a659c8c38fa95407f6373e1bd5153",
+      "bytes": 342863,
+      "verifiedAgainstSealedManifest": true
+    },
+    {
+      "path": "post-seal/delivery-playback-v2-repeat.render.json",
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-playback-v2-repeat.render.json",
+      "sha256": "5c5e766445781b265ddf4db9893e17a3c697649e0efc6e836b3edfa34e5621f5",
+      "bytes": 86743,
+      "verifiedAgainstSealedManifest": false
+    },
+    {
+      "path": "post-seal/delivery-v2-repeat-playback.json",
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-v2-repeat-playback.json",
+      "sha256": "23d77c00d1473280f32a509eaabfc76f91a21ff0578d9ac1f310af8aaf10955b",
+      "bytes": 1571356,
+      "verifiedAgainstSealedManifest": false
+    }
+  ]
+}

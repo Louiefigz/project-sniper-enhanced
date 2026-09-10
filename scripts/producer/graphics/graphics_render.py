@@ -4,23 +4,27 @@ import hashlib
 import json
 import os
 import re
-import subprocess
+import subprocess  # compatibility patch surface shared with invocation module
 import sys
 import tempfile
 from dataclasses import dataclass
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # run-by-path: producer pkg root on sys.path
 from fingerprints import json_canon
 from graphics.asset_proof import AssetProofRequest, prove_rendered_asset
+from graphics.comp_capabilities import measured_fade_class
 from graphics.composition_transform import set_root_duration
-from graphics.template_visual_contract import HOLD_TO_CUT_KINDS
+from graphics.frame_quantization import (
+    hyperframes_duration,
+    placement_frame_span,
+    quantized_window_end,
+)
+from graphics.hyperframes_invocation import RenderInvocation, render_composition
 from graphics.pip_hole import entry_has_hole
 from graphics.render_cache import CacheRequest, materialize
-from graphics.render_tools import (
-    _PINNED_TOOL_ENV,
-    live_tools_identity,
-    resolve_tools,
-)
+from graphics.render_rate import normalize_render_rate
+from graphics.render_tools import _PINNED_TOOL_ENV, live_tools_identity
 from headless.container_io import CompositionInput, SealedInput, create_snapshot
+from headless.source_closure import discover_root_sources
 from headless.runtime_receipt import bind_runtime_receipt
 from headless.container_renderer import (
     RenderRequest as ContainerRenderRequest,
@@ -34,18 +38,20 @@ from graphics.template_contract import (
 )
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PIPELINE_ROOT = os.environ.get(
-    "SNIPER_PIPELINE_ROOT",
-    os.path.abspath(os.path.join(SCRIPT_DIR, "..", "..", "..")))
+    "SNIPER_PIPELINE_ROOT", os.path.abspath(
+        os.path.join(SCRIPT_DIR, "..", "..", "..")))
 RUNTIME_ROOT = os.environ.get("SNIPER_RUNTIME_REPO_ROOT", PIPELINE_ROOT)
 MOTION_DIR = os.path.join(PIPELINE_ROOT, "templates", "motion")
 COMPOSITIONS_DIR = os.path.join(MOTION_DIR, "compositions")
 TOKENS_CSS = os.path.join(MOTION_DIR, "tokens.css")
 MOTION_TOKENS_JS = os.path.join(MOTION_DIR, "motion-tokens.js")
 GSAP_CORE = os.path.join(MOTION_DIR, "vendor", "gsap", "gsap.min.js")
-NODE_USER_PRELOAD = os.path.join(os.path.dirname(SCRIPT_DIR), "headless",
-                                 "node_isolated_user.cjs")
+NODE_USER_PRELOAD = os.path.join(
+    os.path.dirname(SCRIPT_DIR), "headless", "node_isolated_user.cjs")
 DEFAULT_CACHE_DIR = os.path.join(MOTION_DIR, "renders", "cache")
 _LOCAL_GSAP_SRC = "/vendor/gsap/gsap.min.js"
+_CONTENT_ARGS = ("kind", "spec", "duration", "comp_html", "fps")
+_RENDER_ARGS = ("temp_comp_rel", "fmt", "spec", "out_path", "fps")
 
 
 def hyperframes_bin(runtime_root: str) -> str:
@@ -55,39 +61,6 @@ def hyperframes_bin(runtime_root: str) -> str:
 
 
 HYPERFRAMES_BIN = hyperframes_bin(RUNTIME_ROOT)
-
-def _render_environment(runtime_dir: str, tools: dict[str, str]) -> dict[str, str]:
-    """Build a secret-free environment rooted in attempt-owned directories."""
-    dirs = {name: os.path.join(runtime_dir, name)
-            for name in ("user", "tmp", "cache", "config", "data", "state",
-                         "fonts", "extract", "heygen")}
-    for path in dirs.values():
-        os.mkdir(path, mode=0o700)
-    env: dict[str, str] = {}
-    path_dirs = [os.path.dirname(tools[name]) for name in sorted(tools)]
-    env.update({
-        "PATH": os.pathsep.join(dict.fromkeys(path_dirs + ["/usr/bin", "/bin"])),
-        "TMPDIR": dirs["tmp"], "TMP": dirs["tmp"], "TEMP": dirs["tmp"],
-        "XDG_CACHE_HOME": dirs["cache"],
-        "XDG_CONFIG_HOME": dirs["config"], "XDG_DATA_HOME": dirs["data"],
-        "XDG_STATE_HOME": dirs["state"], "HEYGEN_CONFIG_DIR": dirs["heygen"],
-        "PUPPETEER_CACHE_DIR": dirs["cache"],
-        "SNIPER_ISOLATED_USER_DIR": dirs["user"],
-        "NODE_OPTIONS": f"--require={NODE_USER_PRELOAD}",
-        "HYPERFRAMES_BROWSER_PATH": tools["browser"],
-        "PRODUCER_HEADLESS_SHELL_PATH": tools["browser"],
-        "HYPERFRAMES_FFMPEG_PATH": tools["ffmpeg"],
-        "HYPERFRAMES_FFPROBE_PATH": tools["ffprobe"],
-        "HYPERFRAMES_FONT_CACHE_DIR": dirs["fonts"],
-        "HYPERFRAMES_EXTRACT_CACHE_DIR": dirs["extract"],
-        "DO_NOT_TRACK": "1", "HYPERFRAMES_NO_AUTO_INSTALL": "1",
-        "HYPERFRAMES_NO_TELEMETRY": "1",
-        "HYPERFRAMES_NO_UPDATE_CHECK": "1", "HYPERFRAMES_SKIP_SKILLS": "1",
-        "LANG": "C.UTF-8", "LC_ALL": "C.UTF-8", "LC_CTYPE": "C.UTF-8",
-        "TZ": "UTC", "PRODUCER_LOW_MEMORY_MODE": "false", "NO_COLOR": "1",
-        "NO_PROXY": "127.0.0.1,localhost,::1",
-    })
-    return env
 
 _ALPHA = ("mov", "mov")
 _FORMAT_BY_ANCHOR = {
@@ -108,17 +81,19 @@ def format_for(kind: str, anchor: str, spec: dict | None = None) -> tuple[str, s
 
 
 def timeline_padded_entry(entry: dict, fps: float) -> dict:
-    """Extend render media enough to cover its rounded timeline frame span."""
-    if fps <= 0:
-        raise ValueError("timeline fps must be positive")
+    """Quantize render media to its exact rounded timeline frame span.
+
+    The compatibility name remains because Palmier callers already import it;
+    unlike the former implementation this can shorten or extend by <1 frame.
+    """
     start, end = float(entry["outStart"]), float(entry["outEnd"])
-    frame_span = round(end * fps) - round(start * fps)
-    required = frame_span / fps
-    if required <= end - start:
+    frame_span = placement_frame_span(start, end, fps)
+    quantized_end = quantized_window_end(start, frame_span, fps)
+    if quantized_end == end:
         return entry
-    padded = dict(entry)
-    padded["outEnd"] = start + required
-    return padded
+    quantized = dict(entry)
+    quantized["outEnd"] = quantized_end
+    return quantized
 
 
 def comp_path(kind: str) -> str:
@@ -129,24 +104,58 @@ def comp_path(kind: str) -> str:
     return path
 
 
-_set_root_duration = set_root_duration
+def _bind_compat_call(
+    arguments: tuple[object, ...],
+    keywords: dict[str, object],
+    names: tuple[str, ...],
+    defaults: dict[str, object],
+) -> dict[str, object]:
+    """Bind the former explicit signature behind a low-arity adapter."""
+    if len(arguments) > len(names):
+        raise TypeError("too many positional arguments")
+    unexpected = set(keywords) - set(names)
+    if unexpected:
+        name = sorted(unexpected)[0]
+        raise TypeError(f"unexpected keyword argument {name!r}")
+    bound = dict(zip(names, arguments))
+    for name, value in keywords.items():
+        if name in bound:
+            raise TypeError(f"{name} received multiple values")
+        bound[name] = value
+    missing = [name for name in names
+               if name not in bound and name not in defaults]
+    if missing:
+        raise TypeError(f"missing required argument: {missing[0]!r}")
+    return {name: bound.get(name, defaults.get(name)) for name in names}
 
 
-def content_hash(kind: str, spec: dict, duration: float, comp_html: str) -> str:
+def content_hash(*arguments: object, **keywords: object) -> str:
     """Hash canonical intent plus every resolved template/runtime input."""
+    call = _bind_compat_call(
+        arguments, keywords, _CONTENT_ARGS, {"fps": 30})
+    kind, spec = call["kind"], call["spec"]
+    duration, comp_html, fps = (
+        call["duration"], call["comp_html"], call["fps"])
+    rate = normalize_render_rate(fps)
     h = hashlib.sha1()
-    h.update(kind.encode("utf-8"))
+    h.update(kind.encode("utf-8"))  # type: ignore[union-attr]
     h.update(json.dumps(json_canon(spec), sort_keys=True,
                         ensure_ascii=True).encode("utf-8"))
-    h.update(f"{duration:.4f}".encode("utf-8"))
-    h.update(hashlib.sha1(comp_html.encode("utf-8")).digest())
+    h.update(f"{duration:.4f}".encode("utf-8"))  # type: ignore[str-format]
+    h.update(f"fps={rate.token}".encode("ascii"))
+    h.update(hashlib.sha1(comp_html.encode("utf-8")).digest())  # type: ignore[union-attr]
     shared_files = [TOKENS_CSS, MOTION_TOKENS_JS]
     if _LOCAL_GSAP_SRC in comp_html:
         shared_files.append(GSAP_CORE)
     for shared in shared_files:
         with open(shared, "rb") as f:
             h.update(hashlib.sha1(f.read()).digest())
-    for asset in resolved_assets({"kind": kind, "spec": spec}, comp_html):
+    closure = discover_root_sources(comp_html, MOTION_DIR)
+    for relative, data in sorted(closure.items()):
+        h.update(relative.encode("utf-8"))
+        h.update(hashlib.sha1(data).digest())
+    for asset in resolved_assets(  # type: ignore[arg-type]
+            {"kind": kind, "spec": spec}, comp_html):
         with open(asset["path"], "rb") as handle:
             h.update(asset["field"].encode("utf-8"))
             h.update(hashlib.sha1(handle.read()).digest())
@@ -157,44 +166,29 @@ def content_hash(kind: str, spec: dict, duration: float, comp_html: str) -> str:
     return h.hexdigest()
 
 
-def _sealed_hash(kind: str, snapshot: SealedInput) -> str:
+def _sealed_hash(kind: str, snapshot: SealedInput, fps: object) -> str:
+    rate = normalize_render_rate(fps)
     digest = hashlib.sha1()
     digest.update(b"sealed-render-input-v1")
     digest.update(kind.encode("utf-8"))
     digest.update(snapshot.sha256.encode("ascii"))
+    digest.update(f"fps={rate.token}".encode("ascii"))
     digest.update(container_cache_identity(PIPELINE_ROOT))
     return digest.hexdigest()
 
 
-def _render_to(temp_comp_rel: str, fmt: str, spec: dict, out_path: str) -> None:
+def _render_to(*arguments: object, **keywords: object) -> None:
     """Invoke resolved HyperFrames tools with private ambient state.
 
     Live default discovers absolute tool paths (explicit env pins win per
     tool); sealed mode requires every pin — see ``graphics.render_tools``.
     """
-    cli_path = os.path.realpath(HYPERFRAMES_BIN)
-    if not os.path.isfile(cli_path):
-        raise RuntimeError("pinned HyperFrames install is missing; run npm ci in "
-                           f"{MOTION_DIR}")
-    if not os.path.isfile(NODE_USER_PRELOAD):
-        raise RuntimeError(f"Node isolation preload is missing: {NODE_USER_PRELOAD}")
-    tools = resolve_tools()
-    out_path = os.path.abspath(out_path)
-    cmd = [tools["node"], cli_path, "render", MOTION_DIR,
-           "-c", temp_comp_rel, "--format", fmt,
-           "--variables", json.dumps(spec), "-o", out_path, "--fps", "30",
-           "--quality", "high", "--workers", "1", "--no-browser-gpu",
-           "--strict", "--strict-variables", "--json"]
-    out_dir = os.path.dirname(out_path)
-    with tempfile.TemporaryDirectory(prefix=".hyperframes-", dir=out_dir) as scratch:
-        render_env = _render_environment(scratch, tools)
-        proc = subprocess.run(cmd, cwd=scratch, env=render_env, stdin=subprocess.DEVNULL,
-                              capture_output=True, text=True)
-    if proc.returncode != 0:
-        tail = "\n".join((proc.stderr or proc.stdout).strip().splitlines()[-10:])
-        raise RuntimeError(f"hyperframes render failed for {temp_comp_rel}:\n{tail}")
-    if not os.path.exists(out_path):
-        raise RuntimeError(f"hyperframes reported success but {out_path} is missing")
+    call = _bind_compat_call(arguments, keywords, _RENDER_ARGS, {"fps": 30})
+    render_composition(
+        RenderInvocation(
+            MOTION_DIR, call["temp_comp_rel"], call["fmt"], call["spec"],
+            call["out_path"], call["fps"]),  # type: ignore[arg-type]
+        HYPERFRAMES_BIN, NODE_USER_PRELOAD)
 
 
 @dataclass(frozen=True)
@@ -209,29 +203,42 @@ class _RenderWork:
     comp_html: str
     spec: dict
     snapshot: SealedInput | None
+    capability_probe: bool
+    fps: object
 
 
 def _render_candidate(work: _RenderWork, output: str) -> None:
     if work.snapshot is not None:
         render_in_container(ContainerRenderRequest(
             work.temp_rel, work.fmt, output, work.snapshot,
-            os.environ.get("SNIPER_RENDER_CONTAINER_NAME", "")))
+            os.environ.get("SNIPER_RENDER_CONTAINER_NAME", ""),
+            work.fps))
         return
     try:
         with open(work.temp_abs, "w", encoding="utf-8") as handle:
-            handle.write(_set_root_duration(work.comp_html, work.duration))
-        _render_to(work.temp_rel, work.fmt, work.spec, output)
+            handle.write(set_root_duration(work.comp_html, work.duration))
+        rate_arg = () if normalize_render_rate(work.fps).token == "30" else (work.fps,)
+        _render_to(work.temp_rel, work.fmt, work.spec, output, *rate_arg)
     finally:
         if os.path.exists(work.temp_abs):
             os.remove(work.temp_abs)
 
 
+def _terminal_clear_required(work: _RenderWork) -> bool:
+    """Use fresh measured fade physics; probes measure without pre-judging."""
+    if work.fmt != "mov" or work.capability_probe:
+        return False
+    return measured_fade_class(work.entry["kind"]) not in {
+        "hold-to-cut", "partial-fade",
+    }
+
+
 def _prove_candidate(work: _RenderWork, path: str) -> dict:
     proof = prove_rendered_asset(AssetProofRequest(
         path, work.entry, work.fmt, work.dimensions, work.duration, work.key,
+        expected_fps=normalize_render_rate(work.fps).numeric,
         comp_html=work.comp_html,
-        require_terminal_clear=(work.fmt == "mov" and
-                                work.entry.get("kind") not in HOLD_TO_CUT_KINDS),
+        require_terminal_clear=_terminal_clear_required(work),
         sealed_asset_inputs=(work.snapshot.asset_bindings
                              if work.snapshot is not None else None)))
     return bind_runtime_receipt(path, proof) if work.snapshot is not None else proof
@@ -243,19 +250,29 @@ def _materialize_work(work: _RenderWork, cache_dir: str, ext: str) -> dict:
         lambda path: _render_candidate(work, path),
         lambda path: _prove_candidate(work, path))
     return {"path": out_path, "cached": cached, "key": work.key,
-            "kind": work.entry["kind"], "fmt": work.fmt, "proof": proof}
-def render_entry(entry: dict, cache_dir: str | None = None) -> dict:
-    """Render or reuse one proved graphics-track asset."""
+            "kind": work.entry["kind"], "fmt": work.fmt,
+            "fps": normalize_render_rate(work.fps).token,
+            "proof": proof}
+def _render_entry(entry: dict, cache_dir: str | None,
+                  capability_probe: bool, fps: object) -> dict:
+    """Render through the production path with an explicit proof policy."""
     kind = entry["kind"]
     spec = entry.get("spec") or {}
     anchor = entry.get("anchor", "free-band")
-    duration = float(entry["outEnd"]) - float(entry["outStart"])
-    if duration <= 0:
+    planned_duration = float(entry["outEnd"]) - float(entry["outStart"])
+    if planned_duration <= 0:
         raise ValueError(f"{kind}: non-positive window {entry['outStart']}->{entry['outEnd']}")
+    rate = normalize_render_rate(fps)
+    quantized = timeline_padded_entry(entry, rate.numeric)
+    frame_count = placement_frame_span(
+        float(entry["outStart"]), float(entry["outEnd"]), rate.numeric)
+    duration = hyperframes_duration(frame_count, rate.numeric)
     fmt, ext = format_for(kind, anchor, spec)
     with open(comp_path(kind), encoding="utf-8") as f:
         comp_html = f.read()
     validate_entry(entry, comp_html)
+    if quantized is not entry:
+        validate_entry(quantized, comp_html)
     dimensions = composition_dimensions(comp_html)
     cache_dir = cache_dir or DEFAULT_CACHE_DIR
     os.makedirs(cache_dir, exist_ok=True)
@@ -264,15 +281,31 @@ def render_entry(entry: dict, cache_dir: str | None = None) -> dict:
                                          dir=cache_dir) as seal_dir:
             relative = os.path.join("compositions", f"{kind}.html")
             snapshot = create_snapshot(
-                PIPELINE_ROOT, CompositionInput(relative, comp_html,
-                                                duration=duration),
+                PIPELINE_ROOT, CompositionInput(
+                    relative, comp_html, render_intent={
+                        "fps": rate.token}, duration=duration),
                 spec, seal_dir)
-            key = _sealed_hash(kind, snapshot)
+            key = _sealed_hash(kind, snapshot, rate.token)
             work = _RenderWork(entry, fmt, dimensions, duration, key, relative,
-                               "", comp_html, spec, snapshot)
+                               "", comp_html, spec, snapshot, capability_probe,
+                               rate.token)
             return _materialize_work(work, cache_dir, ext)
-    key = content_hash(kind, spec, duration, comp_html)
+    key = content_hash(kind, spec, duration, comp_html, rate.token)
     temp_rel = os.path.join("compositions", f"_gs-{key}.html")
     work = _RenderWork(entry, fmt, dimensions, duration, key, temp_rel,
-                       os.path.join(MOTION_DIR, temp_rel), comp_html, spec, None)
+                       os.path.join(MOTION_DIR, temp_rel), comp_html, spec, None,
+                       capability_probe, rate.token)
     return _materialize_work(work, cache_dir, ext)
+
+
+def render_entry(entry: dict, cache_dir: str | None = None) -> dict:
+    """Render or reuse one production-proved graphics-track asset."""
+    return _render_entry(entry, cache_dir, False, 30)
+
+def render_entry_at_rate(entry: dict, cache_dir: str | None, fps: object) -> dict:
+    """Render production graphics at one explicitly normalized target rate."""
+    return _render_entry(entry, cache_dir, False, fps)
+
+def render_entry_for_capability_probe(entry: dict, cache_dir: str | None = None, fps: object = 30) -> dict:
+    """Render one asset while measuring, rather than assuming, fade physics."""
+    return _render_entry(entry, cache_dir, True, fps)

@@ -20,12 +20,15 @@ Two edge cases live here:
 
 from __future__ import annotations
 
+import json
 import math
 import os
 import subprocess
+from fractions import Fraction
 from typing import Optional
 
 from audio.master import measure_integrated_lufs
+from palmier.process_deadline import process_timeout
 
 # Float intermediates: a pre-norm boost of a quiet track never clips (clipping is
 # at full scale regardless of bit depth; float can exceed 1.0, the final loudnorm
@@ -52,14 +55,33 @@ def probe_duration(path: str) -> Optional[float]:
 
 
 def probe_video_duration(path: str) -> Optional[float]:
-    """First video stream duration, excluding any longer audio/container tail."""
+    """Frame-derived picture duration, never stream/container duration.
+
+    AAC priming/padding can make MP4 duration fields longer than the picture.
+    The authoritative video timeline is therefore the exact packet count
+    divided by the exact CFR rational rate (X8/X19/X20).
+    """
     cmd = ["ffprobe", "-v", "error", "-select_streams", "v:0",
-           "-show_entries", "stream=duration",
-           "-of", "default=nokey=1:noprint_wrappers=1", path]
+           "-count_packets", "-show_entries",
+           "stream=avg_frame_rate,r_frame_rate,nb_frames,nb_read_packets",
+           "-of", "json", path]
     try:
-        value = float(run(cmd).stdout.strip())
-    except ValueError:
+        proc = run(cmd)
+        stream = json.loads(proc.stdout).get("streams", [])[0]
+        frames = int(stream.get("nb_read_packets") or stream.get("nb_frames"))
+        rates = [
+            Fraction(str(stream[key]))
+            for key in ("avg_frame_rate", "r_frame_rate")
+            if stream.get(key) not in (None, "", "0/0")
+        ]
+    except (IndexError, KeyError, TypeError, ValueError, ZeroDivisionError,
+            json.JSONDecodeError):
         return None
+    if proc.returncode != 0 or frames <= 0 or not rates:
+        return None
+    if any(rate <= 0 or rate != rates[0] for rate in rates):
+        return None
+    value = float(Fraction(frames, 1) / rates[0])
     return value if math.isfinite(value) and value > 0 else None
 
 
@@ -111,15 +133,31 @@ def _seamless_period(base_wav: str, dur: float, xfade: float, out_wav: str) -> b
 def _end_fade(video_dur: float) -> tuple[float, str]:
     """(fade_out_s, afade-filter) ending exactly at the video's end (§7, M2)."""
     fade = min(FADE_OUT_S, video_dur * 0.5)
-    st = max(0.0, video_dur - fade)
-    return fade, f"afade=t=out:st={st:.3f}:d={fade:.3f}:curve=qsin"
+    end, length = round(video_dur * 48000), round(fade * 48000)
+    return fade, f"afade=t=out:ss={max(0, end - length)}:ns={length}:curve=qsin"
+
+
+def float_pcm_samples(path: str) -> int:
+    """Observe a generated float stem's exact clock, rejecting missing metadata."""
+    result = subprocess.run(["ffprobe", "-v", "error", "-show_streams", "-of", "json", path],
+        capture_output=True, text=True, check=False, timeout=process_timeout())
+    streams = json.loads(result.stdout).get("streams", [])
+    if result.returncode or len(streams) != 1:
+        raise ValueError("music float stem has no exact single-stream clock")
+    audio = streams[0]
+    samples = audio.get("duration_ts")
+    if audio.get("codec_name") != "pcm_f32le" or audio.get("sample_fmt") != "flt" \
+            or audio.get("sample_rate") != "48000" or audio.get("channels") not in {1, 2} \
+            or audio.get("time_base") != "1/48000" or type(samples) is not int or samples <= 0:
+        raise ValueError("music float stem sample clock or format is unproved")
+    return samples
 
 
 def _trim_to_video(base_wav: str, video_dur: float, out_wav: str) -> dict:
     """Too-long track: trim to the video length with an end fade-out (edge M2)."""
     fade, fade_af = _end_fade(video_dur)
     cmd = ["ffmpeg", "-y", "-hide_banner", "-nostats", "-i", base_wav,
-           "-t", f"{video_dur:.3f}", "-af", fade_af, *FLOAT_WAV, out_wav]
+           "-af", f"{AFMT},atrim=end_sample={round(video_dur * 48000)},{fade_af}", *FLOAT_WAV, out_wav]
     ok = run(cmd).returncode == 0 and os.path.exists(out_wav)
     return {"ok": ok, "mode": "trim", "xfade_s": None, "fade_out_s": round(fade, 3)}
 
@@ -134,7 +172,8 @@ def _loop_to_video(base_wav: str, base_dur: float, video_dur: float, out_wav: st
     period_dur = probe_duration(period) or (base_dur - xfade)
     loops = max(1, math.ceil(video_dur / period_dur))   # total plays
     cmd = ["ffmpeg", "-y", "-hide_banner", "-nostats", "-stream_loop", str(loops - 1),
-           "-i", period, "-t", f"{video_dur:.3f}", "-af", fade_af, *FLOAT_WAV, out_wav]
+           "-i", period, "-af", f"{AFMT},atrim=end_sample={round(video_dur * 48000)},{fade_af}",
+           *FLOAT_WAV, out_wav]
     ok = run(cmd).returncode == 0 and os.path.exists(out_wav)
     return {"ok": ok, "mode": "loop", "xfade_s": xfade, "fade_out_s": round(fade, 3),
             "period_s": round(period_dur, 3), "loops": loops}

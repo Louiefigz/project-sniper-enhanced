@@ -23,14 +23,16 @@ resolves back to it (study Rule 5):
   an optional ``ease`` ("linear" default, "smooth" = smoothstep).
 * In→out BRACKET — ``bracket: true, holdS`` — the signature move (study Rule 3):
   a punch-IN held for ``holdS`` then a punch-OUT that resolves to wide. It is TWO
-  steps from one entry: the rendered in-punch ``[outStart, outStart+holdS]`` and
+  steps from one entry: the rendered in-punch ``[outStart, outStart+holdS)`` and
   the release to baseline that follows (the overlay disabling AT ``outStart+holdS``
   IS the punch-out — the base is wide, so there is nothing to overlay after).
 
 How it renders: each distinct static (zoom, center) setting gets ONE scaled copy
 of the whole clip (scale ↑ then centre-crop back), and each ramp gets its own
 per-frame-scaled branch; every copy is overlaid on the untouched base ONLY inside
-its windows via ``overlay=enable='between(t,s,e)'``. Overlay keeps the base's
+its half-open windows via ``overlay=enable='gte(t,s)*lt(t,e)'``. The existing
+six-decimal second projections are retained; no new frame quantization is implied.
+Overlay keeps the base's
 frame count and timing exactly — so the output preserves the input frame count
 (±1), the SAME assertion for static and ramped windows alike. Video is re-encoded
 at mezzanine quality (CRF 12, same intermediate spec as cut_speed); audio is
@@ -231,7 +233,7 @@ def _static_window(i: int, w: dict, geom: tuple) -> PunchWindow:
 
 
 def _bracket_window(i: int, w: dict, geom: tuple) -> PunchWindow:
-    """Expand a bracket entry to its rendered in-punch ``[s, s+holdS]``.
+    """Expand a bracket entry to its rendered in-punch ``[s, s+holdS)``.
 
     ``zoom`` is the in-punch magnitude; the punch-out is the overlay disabling at
     ``s+holdS`` (resolve to wide). ``holdS`` defaults to two-thirds of the window.
@@ -441,7 +443,7 @@ def build_filter(width: int, height: int, windows: list[PunchWindow]) -> str:
         sw, sh, x, y = _scaled_crop(width, height, wins[0])
         parts.append(f"[s{idx}]scale={sw}:{sh},crop={width}:{height}:{x}:{y},"
                      f"setsar=1[z{idx}]")
-        enable = "+".join(f"between(t,{w.out_start:.6f},{w.out_end:.6f})"
+        enable = "+".join(f"gte(t,{w.out_start:.6f})*lt(t,{w.out_end:.6f})"
                           for w in wins)
         cur = _overlay(parts, cur, idx, enable)
         idx += 1
@@ -452,7 +454,7 @@ def build_filter(width: int, height: int, windows: list[PunchWindow]) -> str:
                      f"crop={width}:{height}:x='{xexpr}':y='{yexpr}',"
                      f"setsar=1[z{idx}]")
         cur = _overlay(parts, cur, idx,
-                       f"between(t,{w.out_start:.6f},{w.out_end:.6f})")
+                       f"gte(t,{w.out_start:.6f})*lt(t,{w.out_end:.6f})")
         idx += 1
     parts.append(f"[{cur}]format={ENCODE['pix_fmt']}[vout]")
     return ";".join(parts)

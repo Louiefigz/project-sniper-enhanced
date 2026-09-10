@@ -4,7 +4,6 @@ import {
   lstatSync,
   mkdirSync,
   readFileSync,
-  readdirSync,
   renameSync,
   rmSync,
   writeFileSync,
@@ -16,24 +15,16 @@ import type {
   PipelineAuthorityFile,
 } from "@/app/api/producer/auto-edit/stream";
 import { prepareAutoEditDoctrineContext } from "./auto-edit-doctrine";
+import { canonicalJsonSha256 } from "./auto-edit-hash";
+import {
+  assertPipelineAssetClosure,
+  capturePipelineAssets,
+  type CapturedPipelineFile,
+} from "./auto-edit-pipeline-assets";
 
 const SCHEMA_VERSION = 1 as const;
 const SHA256 = /^[0-9a-f]{64}$/;
 const LEARNING_DIR = ".sniper-learning";
-const EXTENSIONS = /\.(?:py|ts|tsx|js|json|html|css|md|svg|png|jpe?g)$/i;
-const MEDIA = /\.(?:mov|mp4|wav|mp3|pyc)$/i;
-const REQUIRED_BINARY_ASSETS = new Map([
-  ["scripts/producer/audio/models/bd.rnnn",
-    "ae3f7411e1e6a884f839a4a145c394408398f09854dbc1216ee02faafc98a17b"],
-]);
-const EXCLUDED = new Set([
-  "__pycache__", "__tests__", "node_modules", "renders", "cache", "tests", "docs",
-  "study",
-]);
-
-interface CapturedFile extends PipelineAuthorityFile {
-  bytes: Buffer;
-}
 
 interface PipelineLock {
   schemaVersion: typeof SCHEMA_VERSION;
@@ -67,18 +58,6 @@ export function validAutoEditPipelineAuthority(
     && Array.isArray(item.files);
 }
 
-function stableValue(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (!value || typeof value !== "object") return value;
-  return Object.fromEntries(Object.entries(value as Record<string, unknown>)
-    .sort(([left], [right]) => compareText(left, right))
-    .map(([key, item]) => [key, stableValue(item)]));
-}
-
-function stableHash(value: unknown): string {
-  return createHash("sha256").update(JSON.stringify(stableValue(value))).digest("hex");
-}
-
 function bytesHash(bytes: Buffer): string {
   return createHash("sha256").update(bytes).digest("hex");
 }
@@ -93,67 +72,17 @@ function repositoryRoot(): string {
   }
 }
 
-function logicalPath(root: string, filePath: string): string {
-  return path.relative(root, filePath).split(path.sep).join("/");
-}
-
-function excluded(relative: string): boolean {
-  return relative.split("/").some((part) => EXCLUDED.has(part)) || MEDIA.test(relative);
-}
-
-function walk(root: string, item: string): string[] {
-  if (!existsSync(item)) return [];
-  const relative = logicalPath(root, item);
-  if (excluded(relative)) return [];
-  const stat = lstatSync(item);
-  if (stat.isSymbolicLink()) return [];
-  if (stat.isFile()) {
-    return EXTENSIONS.test(item) || REQUIRED_BINARY_ASSETS.has(relative) ? [item] : [];
-  }
-  if (!stat.isDirectory()) return [];
-  return readdirSync(item).sort().flatMap((name) => walk(root, path.join(item, name)));
-}
-
-function sourceRoots(root: string): string[] {
-  return [
-    path.join(root, "scripts", "producer"),
-    path.join(root, "templates", "motion"),
-    path.join(root, "src", "app", "api", "producer", "auto-edit"),
-    path.join(root, "src", "app", "api", "producer", "ai-edit"),
-    path.join(root, "src", "app", "api", "producer", "live-build"),
-    path.join(root, "src", "app", "api", "producer", "palmier"),
-    path.join(root, "src", "app", "api", "_lib"),
-    path.join(root, "src", "lib", "producer"),
-    path.join(root, "src", "lib", "server"),
-    path.join(root, "package.json"),
-    path.join(root, "package-lock.json"),
-  ];
-}
-
-function captureFiles(root: string): CapturedFile[] {
-  const paths = [...new Set(sourceRoots(root).flatMap((item) => walk(root, item)))].sort();
-  const captured = paths.map((filePath) => {
-    const bytes = readFileSync(filePath);
-    return { path: logicalPath(root, filePath), hash: bytesHash(bytes), bytes };
-  });
-  const present = new Map(captured.map((row) => [row.path, row.hash]));
-  for (const [required, expectedHash] of REQUIRED_BINARY_ASSETS) {
-    const actualHash = present.get(required);
-    if (!actualHash) throw new Error(`Required Producer pipeline asset is missing: ${required}`);
-    if (actualHash !== expectedHash) {
-      throw new Error(`Required Producer pipeline asset failed verification: ${required}`);
-    }
-  }
-  return captured;
-}
-
 function safeRunId(value: string): string {
   const safe = value.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-96);
   if (!safe) throw new Error("pipeline run id is empty");
   return safe;
 }
 
-function writeTree(staging: string, files: CapturedFile[], lock: PipelineLock): void {
+function writeTree(
+  staging: string,
+  files: CapturedPipelineFile[],
+  lock: PipelineLock,
+): void {
   const filesRoot = path.join(staging, "files");
   for (const row of files) {
     const destination = path.join(filesRoot, ...row.path.split("/"));
@@ -183,11 +112,11 @@ export function captureAutoEditPipeline(
   root = repositoryRoot(),
 ): AutoEditPipelineAuthority {
   const stableRunId = safeRunId(runId);
-  const captured = captureFiles(root);
+  const captured = capturePipelineAssets(root);
   const files = captured.map(({ path: filePath, hash }) => ({ path: filePath, hash }));
   const lock: PipelineLock = {
     schemaVersion: SCHEMA_VERSION, state: "pinned", runId: stableRunId,
-    digest: stableHash(files), files,
+    digest: canonicalJsonSha256(files), files,
   };
   const runs = path.join(ctx.dir, LEARNING_DIR, "runs");
   const destination = path.join(runs, stableRunId, "pipeline");
@@ -243,8 +172,10 @@ export function restoreAutoEditPipeline(
   }
   const lock = parseLock(expected);
   const sorted = [...lock.files].sort((left, right) => compareText(left.path, right.path));
-  if (stableHash(sorted) !== lock.digest || lock.digest !== expected.digest
-      || lock.runId !== expected.runId || stableHash(expected.files) !== stableHash(sorted)) {
+  assertPipelineAssetClosure(sorted);
+  if (canonicalJsonSha256(sorted) !== lock.digest || lock.digest !== expected.digest
+      || lock.runId !== expected.runId
+      || canonicalJsonSha256(expected.files) !== canonicalJsonSha256(sorted)) {
     throw new Error("Pinned Producer pipeline authority does not match its receipt");
   }
   verifyFiles(expected, sorted);

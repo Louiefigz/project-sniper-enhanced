@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-and-selected-revision-evidence-review",
+  "createdAt": "2026-09-10T00:23:03.827618+00:00",
+  "scope": "No SDK import, source edits, browser, render, or media verification in audit task. Copies preserve production receipts; these are scoped failures, not a completed revision.",
+  "stockSdkVersion": "0.8.31",
+  "sourceLocations": {
+    "renderPreflight": 146232,
+    "runRenderLint": 146310,
+    "rootLintOptions": 82575,
+    "subcompositionLintOptions": 82606,
+    "templateRule": 85199,
+    "templateShellExtraction": 131403
+  },
+  "nativeTextEdit": {
+    "status": "native-copy-edit-save-reload-pass",
+    "changedFiles": [
+      "compositions/panel-02.html"
+    ],
+    "edited": {
+      "text": "YOU HAVE AI TOOLS.",
+      "width": 750,
+      "height": 99.828125,
+      "opacity": 1,
+      "fits": true
+    },
+    "reloaded": {
+      "text": "YOU HAVE AI TOOLS.",
+      "width": 750,
+      "height": 99.828125,
+      "opacity": 1,
+      "fits": true
+    },
+    "thumbnailRequestsDeferred": true,
+    "realmCorrectedPreview": true,
+    "fullExportPassed": false
+  },
+  "directChildFailures": {
+    "v4": {
+      "elapsedSeconds": 180.12857458298095,
+      "exitCode": -2,
+      "abortReason": "MeasurementWindowExpired: Native resource measurement window expired",
+      "renderLogError": "Composition has zero duration; template content not mounted",
+      "cleanupVerified": true,
+      "leaseCleanupVerified": true
+    },
+    "v5": {
+      "elapsedSeconds": 12.546620792010799,
+      "exitCode": 1,
+      "lintError": "standalone_composition_wrapped_in_template",
+      "cleanupVerified": true,
+      "leaseCleanupVerified": true
+    }
+  },
+  "nextRoute": "Normal isolated native index.html mounting saved child through data-composition-src; retain strict checks. Outcome pending production verification.",
+  "files": [
+    {
+      "path": "revision-child-export-v4.render.json",
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/revision-child-export-v4.render.json",
+      "bytes": 54937,
+      "sha256": "a04c32adefffb8e288442d68cd687ad0c7773e317bb1de23ed886ca491b2d03b"
+    },
+    {
+      "path": "revision-child-export-v4.render.log",
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/revision-child-export-v4.render.log",
+      "bytes": 8021,
+      "sha256": "e84f72f432f1acd3355cb9e42b95d378699b83368f95ace9720c9bfe3f96022c"
+    },
+    {
+      "path": "revision-child-export-v5.render.json",
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/revision-child-export-v5.render.json",
+      "bytes": 40789,
+      "sha256": "7b9f934868c07034c7c5c2808da642b1582c12aba4ba6b077b0674b82bc46d7d"
+    },
+    {
+      "path": "revision-child-export-v5.render.log",
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/revision-child-export-v5.render.log",
+      "bytes": 646,
+      "sha256": "e45c078d51c22e6f178e515b8e1031eb817be30f3e1c3ff810c19df488e33607"
+    },
+    {
+      "path": "studio-revision-edit-v6-result.json",
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/studio-revision-edit-v6-result.json",
+      "bytes": 19009,
+      "sha256": "86fa75fbf2973495fbf6760b7ada37a72ad463777d90e078e2cd210f82f914b0"
+    },
+    {
+      "path": "studio-revision-edit-v6.render.json",
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/studio-revision-edit-v6.render.json",
+      "bytes": 42924,
+      "sha256": "c68fc224577bee7d298da46afbb1e7f869f3b6ddf3b8dd4ea30341648e4f51db"
+    }
+  ]
+}

@@ -1,13 +1,11 @@
 import { existsSync, lstatSync, renameSync, rmSync } from "fs";
 import type { AutoEditCtx } from "@/app/api/producer/auto-edit/stream";
+import { parseGuidedWorkflowV2 } from "@/lib/producer/contracts/guided-workflow-v2";
 import { autoEditRequestKey } from "./auto-edit-hash";
 import { withAutoEditJobLock } from "./auto-edit-job-lock";
-import {
-  captureProcessIdentity,
-  durableProcessAlive,
-  durableProcessGroupAlive,
-} from "./process-liveness";
+import { captureProcessIdentity, durableProcessAlive, durableProcessGroupAlive } from "./process-liveness";
 import { activateManagedQualityPolicy } from "./auto-edit-quality-policy";
+import { assertExistingCutContext, hasGuidedBootstrap } from "./guided-project-bootstrap-contract";
 import {
   autoEditJobPath,
   readAutoEditJob,
@@ -19,8 +17,7 @@ import {
 import { freshJob, resumedJob } from "./auto-edit-job-builders";
 import {
   AUTO_EDIT_CHECKPOINTS,
-  type AutoEditCheckpoint,
-  type AutoEditJob,
+  type AutoEditCheckpoint, type AutoEditJob,
   type AutoEditJobStatus,
   type CheckpointUpdate,
   type NewAutoEditJobArgs,
@@ -84,9 +81,23 @@ function archiveSupersededJournal(jobPath: string): void {
 }
 
 export function startAutoEditJob(args: NewAutoEditJobArgs): AutoEditJob {
+  assertExistingCutContext(args.ctx);
+  if (hasGuidedBootstrap(args.ctx) && (args.resume || args.reviewSavedPlan || args.bootstrapPlanHash)) {
+    throw new StaleAutoEditWorkerError("Existing-cut review cannot resume, bootstrap authored completion or select saved-plan review");
+  }
   const jobPath = autoEditJobPath(args.ctx.dir);
   return withAutoEditJobLock(jobPath, () => {
     const current = readAutoEditJob(jobPath);
+    if (current?.ctx.workflowV2) throw new StaleAutoEditWorkerError("The v2 guided workflow requires its dedicated stage transition; ordinary Resume/fresh launch is unavailable");
+    if (args.ctx.workflowV2 !== undefined) {
+      parseGuidedWorkflowV2(args.ctx.workflowV2);
+      if (args.ctx.workflowPolicy !== "cut-first" || args.ctx.deliveryPolicy !== "mp4-only" || args.resume
+          || existsSync(jobPath)) throw new StaleAutoEditWorkerError("V2 requires an explicit new guided job; upgrading or replacing an existing journal is not authorized");
+    }
+    if (current?.status === "awaiting_cut_approval" || current?.status === "cut_accepted") throw new StaleAutoEditWorkerError(
+      "The cut is awaiting separate approval or its dedicated continuation action; ordinary Resume or fresh launch cannot accept or replace it.");
+    if (current?.cutAcceptance && !args.resume) throw new StaleAutoEditWorkerError(
+      "An accepted cut cannot be replaced by a fresh in-place job; Resume unchanged or create an explicit separate project.");
     if (args.resume && (!current || current.token !== args.resume.token || current.status === "running")) {
       throw new StaleAutoEditWorkerError("The resumable Auto Edit checkpoint changed before launch");
     }

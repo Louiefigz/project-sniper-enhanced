@@ -1,0 +1,14 @@
+✔ GET is project-bound/read-only and rejects path/query ambiguity (7.136959ms)
+✔ POST rejects cross-site and queries before body consumption (5.356916ms)
+✔ body disconnect cancels and unlocks the input stream (1.537458ms)
+✔ clean failed result releases exact leases; token replay is immutable and current-parent bound (167.998834ms)
+✔ shared project busy fails before runner or attempt writes (56.997875ms)
+✔ uncertain cleanup and changed active claim retain both ownership boundaries (174.351167ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 415.978083

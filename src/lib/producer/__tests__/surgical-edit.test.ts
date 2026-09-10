@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -38,6 +39,10 @@ assert.throws(
 assert.deepEqual(surgicalScopeFields({ lanes: ["motion"] }), [
   "punchIns", "transitions", "treatmentMap",
 ]);
+assert.deepEqual(surgicalScopeFields({ lanes: ["captions"] }), [
+  "captions", "captionsTrack", "captionCorrectionLedger", "captionStyles",
+  "captionChapters",
+]);
 assert.throws(() => parseSurgicalEditScope({ lanes: ["graphics", "graphics"] }), /unique/);
 assert.throws(
   () => assertSurgicalPlanChange(
@@ -56,6 +61,10 @@ const passReview: ProducerReview = {
   materialIssues: [],
   findings: [],
 };
+
+function planHash(text: string): string {
+  return createHash("sha256").update(text).digest("hex");
+}
 
 function fixture(): { dir: string; planPath: string; manifestPath: string; original: string } {
   const dir = mkdtempSync(path.join(os.tmpdir(), "sniper-surgical-edit-"));
@@ -94,6 +103,7 @@ async function approvedEdit(): Promise<void> {
       request: "Add a title card",
       scope: { lanes: ["graphics"] },
       originalPlanText: item.original,
+      parentPlanHash: planHash(item.original),
     }, {
       governance: async () => ({ warnings: [] }),
       critic: async () => passReview,
@@ -162,6 +172,7 @@ async function rejectedEditRollsBack(): Promise<void> {
       request: "Add a title card",
       scope: { lanes: ["graphics"] },
       originalPlanText: item.original,
+      parentPlanHash: planHash(item.original),
     }, {
       governance: async () => ({ warnings: [] }),
       critic: async () => passReview,
@@ -206,6 +217,7 @@ async function cutRefitsBeforeLint(): Promise<void> {
       request: "Remove the middle pause",
       scope: { lanes: ["cuts"] },
       originalPlanText: original,
+      parentPlanHash: planHash(original),
     }, {
       governance: async ({ planPath }) => {
         const current = JSON.parse(readFileSync(planPath, "utf8")) as { graphicsTrack: unknown[] };
@@ -259,6 +271,7 @@ async function candidatePromotesOnlyAfterReview(): Promise<void> {
       request: "Add a title card",
       scope: { lanes: ["graphics"] },
       originalPlanText: item.original,
+      parentPlanHash: planHash(item.original),
     }, {
       governance: async () => ({ warnings: [] }),
       critic: async () => {

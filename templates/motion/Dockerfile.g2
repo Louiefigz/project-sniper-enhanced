@@ -4,8 +4,8 @@ USER root
 WORKDIR /opt/sniper-motion
 
 COPY package.json package-lock.json ./
-RUN npm ci --include=optional --no-audit --no-fund \
-    && node -e 'require("esbuild"); require("sharp"); require("onnxruntime-node"); if (require("hyperframes/package.json").version !== "0.7.33") process.exit(1)' \
+RUN npm ci --include=optional --ignore-scripts --no-audit --no-fund \
+    && node -e 'require("esbuild"); require("sharp"); require("onnxruntime-node"); if (require("hyperframes/package.json").version !== "0.8.31") process.exit(1)' \
     && npm cache clean --force \
     && chmod -R a-w /opt/sniper-motion
 
@@ -18,7 +18,7 @@ RUN test "$(node --version)" = "v22.20.0" \
     && chmod -R a-w /opt/sniper-motion
 
 LABEL io.project-sniper.renderer="hyperframes" \
-      io.project-sniper.hyperframes-version="0.7.33" \
+      io.project-sniper.hyperframes-version="0.8.31" \
       io.project-sniper.render-policy="sniper-oci-render-v2" \
       io.project-sniper.node-version="22.20.0"
 

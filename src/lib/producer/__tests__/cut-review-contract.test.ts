@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import {
-  mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync,
+  mkdtempSync, readFileSync, rmSync, writeFileSync,
 } from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -8,8 +8,6 @@ import {
   runProducerReview,
   runProducerRevision,
 } from "../../../app/api/producer/auto-edit/brain-review-runner";
-import type { CutApprovalReceipt } from
-  "../../../app/api/producer/auto-edit/cut-approval";
 import {
   bindCutReviewPacket,
   buildCutReviewPacket,
@@ -27,56 +25,10 @@ import type { ProducerReview } from
 import type { AutoEditCtx } from "../../../app/api/producer/auto-edit/stream";
 import {
   autoEditAuthoritySnapshot,
-  stableAuthorityHash,
 } from "../../server/auto-edit-authority-snapshot";
 import { fileSha256 } from "../../server/auto-edit-hash";
 import { writeQualityJson } from "../../server/auto-edit-quality-artifacts";
-import { captureAutoEditDoctrine } from "../../server/auto-edit-doctrine";
-
-function fixture(root: string): AutoEditCtx {
-  const dir = path.join(root, "producer");
-  const source = path.join(root, "source");
-  mkdirSync(dir, { recursive: true });
-  mkdirSync(source, { recursive: true });
-  writeFileSync(path.join(source, "raw.transcript.json"), JSON.stringify({
-    transcript: [{
-      start: 0, end: 3, text: "This is the complete opening thought.",
-      words: [
-        { word: "This", start: 0, end: 0.4 }, { word: "is", start: 0.4, end: 0.6 },
-        { word: "the", start: 0.6, end: 0.8 }, { word: "complete", start: 0.8, end: 1.4 },
-        { word: "opening", start: 1.4, end: 2 }, { word: "thought.", start: 2, end: 2.6 },
-      ],
-    }],
-  }));
-  const manifestPath = path.join(source, "asset_manifest.json");
-  writeFileSync(manifestPath, JSON.stringify({
-    sources: [{ id: "raw", transcriptPath: "raw.transcript.json" }],
-  }));
-  const planPath = path.join(dir, "edit_plan.json");
-  writeFileSync(planPath, JSON.stringify({
-    planVersion: 1, target: { mode: "longform" },
-    cutTrack: [{ sourceId: "raw", start: 0, end: 2.6, speed: 1, rationale: "Complete thought." }],
-    cutDecisions: { schemaVersion: 1, removals: [] },
-  }));
-  const base: AutoEditCtx = {
-    dir, planPath, manifestPath, transcriptsDir: source, scope: "produced",
-    intent: { mode: "longform", lanes: {} },
-  };
-  return { ...base, doctrine: captureAutoEditDoctrine(base, "cut-contract", process.cwd()) };
-}
-
-function gate(ctx: AutoEditCtx): CutApprovalReceipt {
-  const authority = autoEditAuthoritySnapshot(ctx);
-  const plan = JSON.parse(readFileSync(ctx.planPath, "utf8"));
-  return {
-    schemaVersion: 1, stage: "previsual",
-    planHash: authority.planHash!, manifestHash: authority.manifestHash!,
-    transcriptDigest: authority.transcriptDigest,
-    cutTrackDigest: stableAuthorityHash(plan.cutTrack),
-    cutDecisionsDigest: stableAuthorityHash(plan.cutDecisions),
-    cuts: 1, seams: [], removals: [],
-  };
-}
+import { cutReviewFixture as fixture, cutReviewGate as gate } from "./_cut-review-contract-fixture";
 
 const passReview: ProducerReview = {
   schemaVersion: 1, stage: "cut", verdict: "pass",
@@ -126,6 +78,13 @@ async function testReview(ctx: AutoEditCtx): Promise<void> {
   assert.equal(packetValue.keptSpeech.fullText, "This is the complete opening thought.");
   assert.match(prompt, /a boundary "before" word is NOT kept/);
   assert.match(prompt, /forbiddenOpeningStarts/);
+  assert.match(prompt, /not a prohibition on restoration/);
+  assert.match(prompt, /source-grounded human audio\/boundary review/);
+  assert.match(prompt, /not proof of the audio actually heard/);
+  assert.match(prompt, /Do not move a boundary merely to make a quality gate pass/);
+  assert.doesNotMatch(prompt, /Never require reintroducing one of those spans/);
+  assert.doesNotMatch(prompt, /uncertainty only as a minor finding/);
+  assert.doesNotMatch(prompt, /dead air must be removed/);
   const doctrineJson = prompt.split("BEGIN_PINNED_CUT_DOCTRINE_JSON\n")[1]
     .split("\nEND_PINNED_CUT_DOCTRINE_JSON")[0];
   const labels = (JSON.parse(doctrineJson) as Array<{ label: string }>)
@@ -196,7 +155,13 @@ function testReviewApproval(ctx: AutoEditCtx): void {
     const packetPath = writeQualityJson(
       path.join(ctx.dir, ".sniper-qc", "cut-contract", "cut", `round-${round}`,
         "critic-input-test", "cut-review-packet.json"),
-      { schemaVersion: 1, stage: "cut", doctrineHash: ctx.doctrine?.doctrineHash ?? null },
+      {
+        schemaVersion: 1,
+        stage: "cut",
+        doctrineHash: ctx.doctrine?.doctrineHash ?? null,
+        request: { scope: ctx.scope, operatorIntent: ctx.intent ?? null },
+        inputAuthority: authority,
+      },
     );
     const artifactPath = writeQualityJson(
       path.join(ctx.dir, ".sniper-qc", "cut-contract", "cut", `round-${round}`, "cut-review.json"),
@@ -213,6 +178,21 @@ function testReviewApproval(ctx: AutoEditCtx): void {
   assert.equal(stored.reviews.length, 2);
   assert.equal(verifyCutReviewApproval(ctx, gate(ctx)).cutAuthorityDigest,
     stored.cutAuthorityDigest);
+  const duplicateCases: Array<[string, CleanCutReviewArtifact[]]> = [
+    ["rounds", [reviews[0], { ...reviews[1], round: reviews[0].round }]],
+    ["artifact paths", [reviews[0], { ...reviews[1], path: reviews[0].path }]],
+    ["hashes", [reviews[0], { ...reviews[1], hash: reviews[0].hash }]],
+  ];
+  for (const [label, duplicated] of duplicateCases) {
+    writeFileSync(cutReviewApprovalPath(ctx), JSON.stringify({
+      ...stored, reviews: duplicated,
+    }));
+    assert.throws(
+      () => verifyCutReviewApproval(ctx, gate(ctx)),
+      new RegExp(`requires distinct ${label}`),
+    );
+  }
+  writeFileSync(cutReviewApprovalPath(ctx), JSON.stringify(stored));
 
   const plan = JSON.parse(originalPlan);
   writeFileSync(ctx.planPath, JSON.stringify({
@@ -223,9 +203,16 @@ function testReviewApproval(ctx: AutoEditCtx): void {
   assert.doesNotThrow(() => verifyCutReviewApproval(ctx, gate(ctx)),
     "downstream visual lanes must not invalidate an unchanged approved cut");
 
+  const approvedIntent = ctx.intent;
+  ctx.intent = { ...ctx.intent, mode: "short" };
+  assert.throws(() => verifyCutReviewApproval(ctx, gate(ctx)), /current cut authority/,
+    "short/long intent drift must invalidate reviews made for another editorial contract");
+  ctx.intent = approvedIntent;
+
   const legacy = { ...stored } as Partial<typeof stored>;
   delete legacy.qualityPolicyVersion;
   delete legacy.doctrineHash;
+  delete legacy.cutIntentDigest;
   delete legacy.cutAuthorityDigest;
   writeFileSync(cutReviewApprovalPath(ctx), JSON.stringify(legacy));
   assert.doesNotThrow(() => verifyCutReviewApproval(ctx, gate(ctx)),

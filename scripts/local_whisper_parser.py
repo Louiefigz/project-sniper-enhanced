@@ -1,9 +1,16 @@
-"""Pure whisper.cpp JSON -> PROJECT SNIPER transcript shaping."""
+"""Production compatibility parser: emitted rows with uniform word subdivision.
+
+This is the explicit pre-token-parser contract, not token or acoustic alignment.
+It retains row-span inflation, a 10ms floor, and legacy punctuation/order rules.
+Strict token parsing stays experimental until uncertainty survives all consumers;
+there is no try-strict-then-fallback branch or runtime parser selection knob.
+"""
 
 from __future__ import annotations
 
 import re
 from typing import Optional
+PARSER_POLICY = "sniper-whisper-row-uniform-compatibility-v1"
 
 
 class WhisperParseError(ValueError):
@@ -11,12 +18,14 @@ class WhisperParseError(ValueError):
 
 
 def _confidence(row: dict) -> Optional[float]:
+    """Preserve historical row averaging, including any emitted control scores."""
     values = [t.get("p") for t in row.get("tokens", [])
               if isinstance(t.get("p"), (int, float))]
     return round(sum(values) / len(values), 6) if values else None
 
 
 def _row_words(row: dict, offset: float, speaker: Optional[int]) -> list[dict]:
+    """Retain row intervals, uniform subdivision and the historical 10ms floor."""
     text = " ".join(str(row.get("text", "")).split())
     if not text or re.fullmatch(r"\[[A-Z_]+\]", text):
         return []
@@ -41,6 +50,7 @@ def _row_words(row: dict, offset: float, speaker: Optional[int]) -> list[dict]:
 
 
 def _merge_punctuation(words: list[dict]) -> list[dict]:
+    """Keep the production punctuation-attachment compatibility behavior."""
     merged: list[dict] = []
     for word in words:
         if merged and re.fullmatch(r"[.,!?;:]+", word["word"]):
@@ -52,6 +62,7 @@ def _merge_punctuation(words: list[dict]) -> list[dict]:
 
 
 def _as_utterance(words: list[dict]) -> dict:
+    """Preserve production text normalization, without asserting token fidelity."""
     text = " ".join(w["word"] for w in words)
     text = re.sub(r"\s+([.,!?;:])", r"\1", text)
     return {"start": words[0]["start"], "end": words[-1]["end"],
@@ -59,6 +70,7 @@ def _as_utterance(words: list[dict]) -> dict:
 
 
 def _break_before(current: list[dict], word: dict) -> bool:
+    """Retain existing bounded speaker, gap, word-count and duration grouping."""
     previous = current[-1]
     if previous.get("speaker") != word.get("speaker"):
         return True
@@ -86,7 +98,7 @@ def shape_utterances(words: list[dict]) -> list[dict]:
 
 def parse_whisper_json(payload: dict, timeline_offset: float = 0.0,
                        speaker: Optional[int] = None) -> list[dict]:
-    """Parse whisper.cpp full JSON into the shared transcript contract."""
+    """Use the explicit legacy row contract, never a hidden token fallback."""
     rows = payload.get("transcription")
     if not isinstance(rows, list):
         raise WhisperParseError("whisper JSON has no transcription array")

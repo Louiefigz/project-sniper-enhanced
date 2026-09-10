@@ -2,6 +2,7 @@
 <html
   lang="en"
   data-composition-variables='[
+    {"id":"layout","type":"enum","label":"Native layout (caption compatibility requires measured animation proof)","default":"full-canvas","options":[{"value":"full-canvas","label":"Centered full canvas"},{"value":"caption-safe-upper-v1","label":"Upper split, at most three steps"}]},
     {"id":"eyebrow","type":"string","label":"Eyebrow (small-caps, accent)","default":"The plan"},
     {"id":"title","type":"string","label":"Big title (e.g. 3 Steps)","default":"3 Steps"},
     {"id":"num1","type":"string","label":"Step 1 chip label","default":"1"},
@@ -48,7 +49,8 @@
     <meta name="viewport" content="width=1920, height=1080" />
     <title>SNIPER · agenda-slide</title>
     <link rel="stylesheet" href="/tokens.css" />
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <link rel="stylesheet" href="/agenda-caption-layout.css" />
+    <script src="/vendor/gsap/gsap.min.js"></script>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       :root { --slate-lite: #aeb8d4; }
@@ -127,37 +129,38 @@
       data-composition-id="agenda-slide"
       data-width="1920"
       data-height="1080"
+      data-start="0"
       data-duration="5"
     >
       <div id="ag-bg"></div>
       <div id="ag-stage">
         <div id="ag-header">
-          <div id="ag-eyebrow" class="clip" data-start="0" data-duration="60" data-track-index="1"></div>
+          <div id="ag-eyebrow" class="clip" data-sniper-protected-role="eyebrow" data-start="0" data-duration="60" data-track-index="1"></div>
           <div id="ag-title-wrap">
-            <div id="ag-title" class="clip" data-start="0" data-duration="60" data-track-index="2"></div>
-            <div id="ag-underline" class="clip" data-start="0" data-duration="60" data-track-index="3"></div>
+            <div id="ag-title" class="clip" data-sniper-protected-role="title" data-start="0" data-duration="60" data-track-index="2"></div>
+            <div id="ag-underline" class="clip" data-sniper-protected-role="title-accent" data-start="0" data-duration="60" data-track-index="3"></div>
           </div>
         </div>
         <div id="ag-rows">
           <div id="ag-row-1" class="ag-row clip" data-slot="1" data-start="0" data-duration="60" data-track-index="4">
-            <span class="ag-chip"></span>
-            <span class="ag-body"><span class="ag-title-row"></span><span class="ag-sub"></span></span>
+            <span class="ag-chip" data-sniper-protected-role="step-1-marker"></span>
+            <span class="ag-body"><span class="ag-title-row" data-sniper-protected-role="step-1-title"></span><span class="ag-sub" data-sniper-protected-role="step-1-subtitle"></span></span>
           </div>
           <div id="ag-row-2" class="ag-row clip" data-slot="2" data-start="0" data-duration="60" data-track-index="5">
-            <span class="ag-chip"></span>
-            <span class="ag-body"><span class="ag-title-row"></span><span class="ag-sub"></span></span>
+            <span class="ag-chip" data-sniper-protected-role="step-2-marker"></span>
+            <span class="ag-body"><span class="ag-title-row" data-sniper-protected-role="step-2-title"></span><span class="ag-sub" data-sniper-protected-role="step-2-subtitle"></span></span>
           </div>
           <div id="ag-row-3" class="ag-row clip" data-slot="3" data-start="0" data-duration="60" data-track-index="6">
-            <span class="ag-chip"></span>
-            <span class="ag-body"><span class="ag-title-row"></span><span class="ag-sub"></span></span>
+            <span class="ag-chip" data-sniper-protected-role="step-3-marker"></span>
+            <span class="ag-body"><span class="ag-title-row" data-sniper-protected-role="step-3-title"></span><span class="ag-sub" data-sniper-protected-role="step-3-subtitle"></span></span>
           </div>
           <div id="ag-row-4" class="ag-row clip" data-slot="4" data-start="0" data-duration="60" data-track-index="7">
-            <span class="ag-chip"></span>
-            <span class="ag-body"><span class="ag-title-row"></span><span class="ag-sub"></span></span>
+            <span class="ag-chip" data-sniper-protected-role="step-4-marker"></span>
+            <span class="ag-body"><span class="ag-title-row" data-sniper-protected-role="step-4-title"></span><span class="ag-sub" data-sniper-protected-role="step-4-subtitle"></span></span>
           </div>
           <div id="ag-row-5" class="ag-row clip" data-slot="5" data-start="0" data-duration="60" data-track-index="8">
-            <span class="ag-chip"></span>
-            <span class="ag-body"><span class="ag-title-row"></span><span class="ag-sub"></span></span>
+            <span class="ag-chip" data-sniper-protected-role="step-5-marker"></span>
+            <span class="ag-body"><span class="ag-title-row" data-sniper-protected-role="step-5-title"></span><span class="ag-sub" data-sniper-protected-role="step-5-subtitle"></span></span>
           </div>
         </div>
       </div>
@@ -170,6 +173,7 @@
         const D = parseFloat(root.dataset.duration) || 5;
 
         const defaults = {
+          layout: "full-canvas",
           eyebrow: "The plan", title: "3 Steps",
           num1: "1", title1: "Pick your target", sub1: "the next 90 days",
           num2: "2", title2: "Get help", sub2: "even cheap help",
@@ -180,6 +184,10 @@
         };
         const HF = window.__hyperframes;
         const vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
+        if (!["full-canvas", "caption-safe-upper-v1"].includes(vars.layout)) {
+          throw new Error("agenda-slide: unknown native layout");
+        }
+        root.dataset.sniperLayout = vars.layout;
         document.documentElement.style.setProperty("--accent", vars.accent);
 
         // Chip 1 = accent; rows 2..5 rotate a fixed on-brand palette (as glass-rail).
@@ -206,6 +214,9 @@
           chip.style.background = CHIP_COLORS[i % CHIP_COLORS.length];
           active.push({ row: row, chip: chip });
         });
+        if (vars.layout === "caption-safe-upper-v1" && (active.length < 1 || active.length > 3)) {
+          throw new Error("agenda-slide upper split requires one to three explicit steps");
+        }
 
         window.__timelines = window.__timelines || {};
         const tl = gsap.timeline({ paused: true });

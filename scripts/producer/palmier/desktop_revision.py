@@ -5,7 +5,10 @@ import os
 from dataclasses import dataclass
 
 from fingerprints import file_sha256, plan_content_hash
-from graphics.graphics_render import render_entry, timeline_padded_entry
+from graphics.graphics_render import (
+    render_entry_at_rate as render_entry,
+    timeline_padded_entry,
+)
 from motion.recompose import requires_recompose
 from palmier.desktop_text import text_entry
 from palmier.mcp_client import PalmierError
@@ -14,6 +17,10 @@ from palmier.presenter_asset import primary_source
 from palmier.revision_diff import RevisionDiffInput, build_revision
 from palmier.revision_schema import read_revision
 from palmier.revision_schema import stable_digest, validate_revision
+from palmier.scene_binding_revision import (
+    is_scene_binding_operation,
+    prepare_scene_binding_steps,
+)
 
 MAX_PAGE_MUTATIONS = 24
 
@@ -59,8 +66,9 @@ def _render(context: DesktopRevisionContext, operation: dict) -> dict:
     if requires_recompose(row):
         raise PalmierError(
             "incremental graphic revision cannot change a presenter-recompose card")
-    rendered = render_entry(timeline_padded_entry(row, context.fps),
-                            context.cache_dir)
+    rendered = render_entry(
+        timeline_padded_entry(row, context.fps),
+        context.cache_dir, context.fps)
     rendered = fill_presenter_entry(PresenterRequest(
         context.plan, context.source, row, rendered, context.cache_dir))
     proof = rendered.get("proof")
@@ -217,8 +225,14 @@ def prepare_revision(revision: object,
     expected = value.get("nextPlanHash")
     if expected is not None and expected != plan_content_hash(context.plan):
         raise PalmierError("Palmier revision targets a different next edit plan")
-    steps: list[dict] = []
-    for operation in value["operations"]:
+    scene_ops = [row for row in value["operations"]
+                 if is_scene_binding_operation(row)]
+    if scene_ops and (len(scene_ops) != 1 or len(value["operations"]) != 1):
+        raise PalmierError(
+            "scene replacement cannot carry extra revision operations")
+    steps: list[dict] = prepare_scene_binding_steps(scene_ops[0], context) \
+        if scene_ops else []
+    for operation in ([] if scene_ops else value["operations"]):
         planner = _graphic if operation["lane"] == "graphics" else _native_text
         steps.extend(planner(operation, context))
     if not steps:

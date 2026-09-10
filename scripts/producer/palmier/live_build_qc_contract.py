@@ -7,6 +7,7 @@ import os
 import re
 
 from fingerprints import file_sha256
+from palmier.live_build_journal_contract import close_live_build_journal
 from palmier.mcp_client import PalmierError
 from palmier.quality_hash import authority_snapshot, request_key, stable_hash
 
@@ -103,7 +104,8 @@ def _planning(out_dir: str, rows: object, snapshot: dict) -> list[dict]:
 
 def _input(envelope: dict, out_dir: str) -> dict:
     ref = _object(envelope.get("liveInput"), "authority liveInput")
-    expected = {"path", "hash", "planHash", "journalHash", "lanes",
+    expected = {"path", "hash", "planHash", "journalHash",
+                "journalLifecycleDigest", "headFingerprint", "lanes",
                 "parent", "operationCount", "sessionId"}
     if set(ref) != expected:
         raise PalmierError("Palmier live QC input receipt has unknown fields")
@@ -130,16 +132,21 @@ def _input_content(value: dict, ref: dict, envelope: dict,
                      _object(value.get("journal"), "live journal"))
     plan_path = _inside(out_dir, plan.get("path"), "approved plan")
     journal_path = _inside(out_dir, journal.get("path"), "operation journal")
+    head = _sha(ref.get("headFingerprint"), "headFingerprint")
+    closed = close_live_build_journal(journal_path, head)
     lanes = controller.get("lanes")
     valid = (isinstance(text, str) and text.strip()
              and request.get("hash") == request_hash
              and request_hash == envelope.get("requestHash")
              and isinstance(lanes, list) and lanes == ref.get("lanes")
              and file_sha256(plan_path) == plan.get("hash") == ref.get("planHash")
-             and file_sha256(journal_path) == journal.get("hash")
-             == ref.get("journalHash")
-             and isinstance(journal.get("operationCount"), int)
-             and journal.get("operationCount") == ref.get("operationCount")
+             and set(journal) == set(closed)
+             and journal == closed
+             and closed["hash"] == ref.get("journalHash")
+             and closed["lifecycleDigest"]
+             == ref.get("journalLifecycleDigest")
+             and closed["headFingerprint"] == head
+             and closed["operationCount"] == ref.get("operationCount")
              and value.get("sessionId") == ref.get("sessionId")
              and _identity(_object(value.get("parent"), "live parent"))
              == _identity(_object(ref.get("parent"), "live input parent")))
@@ -147,13 +154,35 @@ def _input_content(value: dict, ref: dict, envelope: dict,
         raise PalmierError("Palmier live QC plan, journal, request, or scope changed")
     return {"request": request, "lanes": lanes, "parent": value["parent"],
             "planPath": plan_path, "journalPath": journal_path,
-            "planningReviews": value["planningReviews"]}
+            "journal": closed, "planningReviews": value["planningReviews"]}
 
 
 def authority_from_input(out_dir: str, input_path: str,
                          candidate: dict, parent: dict) -> dict:
     return authority_from_value(_json(input_path, "authority input"), out_dir,
                                 {"candidate": candidate, "parent": parent})
+
+
+def _candidate_binding(live: dict, envelope: dict,
+                       evidence: dict) -> tuple[dict, dict]:
+    parent = _object(evidence.get("parent"), "authority parent")
+    candidate = _object(evidence.get("candidate"), "authority candidate")
+    operations = _object(candidate.get("operations"), "candidate operations")
+    valid = (_identity(live["parent"]) == _identity(parent)
+             and candidate.get("requestHash") == envelope.get("requestHash")
+             and candidate.get("lanes") == live["lanes"]
+             and candidate.get("fingerprint")
+             == live["journal"]["headFingerprint"]
+             and operations.get("count") == live["journal"]["operationCount"]
+             and operations.get("journalHash") == live["journal"]["hash"]
+             and operations.get("lifecycleDigest")
+             == live["journal"]["lifecycleDigest"]
+             and operations.get("headFingerprint")
+             == live["journal"]["headFingerprint"])
+    if not valid:
+        raise PalmierError(
+            "Palmier live candidate is not bound to its approved input")
+    return parent, candidate
 
 
 def authority_from_value(value: object, out_dir: object,
@@ -170,12 +199,7 @@ def authority_from_value(value: object, out_dir: object,
     if os.path.realpath(str(ctx.get("dir"))) != os.path.realpath(out_dir):
         raise PalmierError("Palmier live QC context targets another project")
     live = _input(envelope, out_dir)
-    parent = _object(evidence.get("parent"), "authority parent")
-    candidate = _object(evidence.get("candidate"), "authority candidate")
-    if _identity(live["parent"]) != _identity(parent) \
-            or candidate.get("requestHash") != envelope.get("requestHash") \
-            or candidate.get("lanes") != live["lanes"]:
-        raise PalmierError("Palmier live candidate is not bound to its approved input")
+    parent, candidate = _candidate_binding(live, envelope, evidence)
     snapshot = authority_snapshot(ctx)
     if snapshot.get("planHash") != file_sha256(live["planPath"]):
         raise PalmierError("Palmier live plan authority changed")
@@ -186,6 +210,9 @@ def authority_from_value(value: object, out_dir: object,
                "parent": _identity(parent), "candidate": _identity(candidate),
                "planHash": snapshot["planHash"],
                "journalHash": envelope["liveInput"]["journalHash"],
+               "journalLifecycleDigest":
+               envelope["liveInput"]["journalLifecycleDigest"],
+               "headFingerprint": envelope["liveInput"]["headFingerprint"],
                "planningReviewDigests": [stable_hash(row) for row in planning],
                "authorityDigest": snapshot["digest"]}
     doctrine = _object(ctx.get("doctrine"), "pinned doctrine")

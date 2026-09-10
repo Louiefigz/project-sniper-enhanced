@@ -11,6 +11,12 @@ def main() -> int:
     os.umask(0o077)
     try:
         request = json.load(sys.stdin)
+        if isinstance(request, dict) and request.get("schemaVersion") == 2:
+            from graphics.sealed_graphics_render import render_presealed_layout
+            result = render_presealed_layout(request)
+            sys.stdout.write(json.dumps(
+                result, ensure_ascii=True, separators=(",", ":"), sort_keys=True))
+            return 0
         keys = {"attemptId", "attemptRoot", "buildDigest", "cacheDir",
                 "requestDigest", "sealPath", "sealSha256", "selectionId"}
         if not isinstance(request, dict) or set(request) != keys:

@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "coverageGate": "passed",
+  "scope": "P4 brief diversity only; individual render gates remain separate",
+  "briefs": [
+    {
+      "briefId": "fire-sparkles-split-cards",
+      "tags": ["overlay", "particles", "unit-repair", "longform"],
+      "aspect": "16:9",
+      "fps": {"numerator": 30, "denominator": 1}
+    },
+    {
+      "briefId": "exact-pixel-takeover",
+      "tags": ["takeover", "own-screen-geometry", "longform"],
+      "aspect": "16:9",
+      "fps": {"numerator": 30000, "denominator": 1001}
+    },
+    {
+      "briefId": "static-presenter-window",
+      "tags": ["presenter-hole", "mask", "longform"],
+      "aspect": "16:9",
+      "fps": {"numerator": 30, "denominator": 1}
+    },
+    {
+      "briefId": "screen-blend-callout",
+      "tags": ["blend", "overlay", "longform"],
+      "aspect": "16:9",
+      "fps": {"numerator": 24, "denominator": 1}
+    },
+    {
+      "briefId": "vertical-overflow-title",
+      "tags": ["real-copy-overflow", "short"],
+      "aspect": "9:16",
+      "fps": {"numerator": 30000, "denominator": 1001}
+    },
+    {
+      "briefId": "vertical-footage-contrast",
+      "tags": ["footage-contrast", "overlay", "short"],
+      "aspect": "9:16",
+      "fps": {"numerator": 30, "denominator": 1}
+    },
+    {
+      "briefId": "timeline-only-scene-move",
+      "tags": ["timing-move", "longform"],
+      "aspect": "16:9",
+      "fps": {"numerator": 60000, "denominator": 1001}
+    },
+    {
+      "briefId": "vertical-seeded-confetti",
+      "tags": ["particles", "short"],
+      "aspect": "9:16",
+      "fps": {"numerator": 60, "denominator": 1}
+    },
+    {
+      "briefId": "shared-mask-rejection",
+      "tags": ["mask", "unit-repair", "longform"],
+      "aspect": "16:9",
+      "fps": {"numerator": 25, "denominator": 1}
+    },
+    {
+      "briefId": "opaque-multiply-comparison",
+      "tags": ["blend", "takeover", "longform"],
+      "aspect": "16:9",
+      "fps": {"numerator": 50, "denominator": 1}
+    },
+    {
+      "briefId": "right-copy-local-repair",
+      "tags": ["unit-repair", "real-copy-overflow", "longform"],
+      "aspect": "16:9",
+      "fps": {"numerator": 24000, "denominator": 1001}
+    },
+    {
+      "briefId": "vertical-full-canvas-card",
+      "tags": ["overlay", "own-screen-geometry", "short"],
+      "aspect": "9:16",
+      "fps": {"numerator": 24, "denominator": 1}
+    }
+  ]
+}

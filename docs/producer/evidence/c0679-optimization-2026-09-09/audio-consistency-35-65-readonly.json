@@ -1,0 +1,151 @@
+{
+  "scope": "Read-only retained PCM35\u201365s and previous preview diagnostics. No audition or fix claimed.",
+  "observedAt": "2026-09-09T14:49:48.253290+00:00",
+  "format": {
+    "code": 1,
+    "channels": 2,
+    "rate": 48000,
+    "bits": 24
+  },
+  "sourceFormat": {
+    "code": 3,
+    "channels": 2,
+    "rate": 48000,
+    "bits": 32
+  },
+  "comparedSampleFrames": 1440000,
+  "maxFloatToPcm24Difference": 1.189691829495132e-07,
+  "maxChannelDifference": 0.0,
+  "clippedSampleCount": 0,
+  "blocks": [
+    {
+      "start": 35,
+      "end": 40,
+      "rmsDbfs": -16.436,
+      "samplePeakDbfs": -2.412
+    },
+    {
+      "start": 40,
+      "end": 45,
+      "rmsDbfs": -20.585,
+      "samplePeakDbfs": -2.416
+    },
+    {
+      "start": 45,
+      "end": 50,
+      "rmsDbfs": -19.483,
+      "samplePeakDbfs": -2.416
+    },
+    {
+      "start": 50,
+      "end": 55,
+      "rmsDbfs": -16.923,
+      "samplePeakDbfs": -2.407
+    },
+    {
+      "start": 55,
+      "end": 60,
+      "rmsDbfs": -19.128,
+      "samplePeakDbfs": -2.4
+    },
+    {
+      "start": 60,
+      "end": 65,
+      "rmsDbfs": -18.749,
+      "samplePeakDbfs": -2.412
+    }
+  ],
+  "belowMinus85DbfsSpansAtLeast10ms": [
+    {
+      "start": 50.196666666666665,
+      "duration": 0.02020833333333333
+    }
+  ],
+  "nearbyPictureCutSeconds": 50.216833333333334,
+  "stepAtPictureCutLinearPeak": 6.9141387939453125e-06,
+  "elapsedSeconds": 0.0731,
+  "priorPreviewEvidence": [
+    {
+      "folder": "native-presenter-qc-0MwR7h",
+      "status": "failed",
+      "sampledChecks": 143,
+      "samplesWithAudioSeeking": 0,
+      "maxAvDriftSeconds": 0.2361840000000015,
+      "otherSummary": {
+        "metrics": {
+          "samples": 129,
+          "maxAV": 0.2361840000000015,
+          "maxAudioClock": 0.278101000047684,
+          "last": {
+            "wall": 50018.200000047684,
+            "clock": 32.032,
+            "video": 31.994317,
+            "audio": 31.956708,
+            "videoPaused": true,
+            "audioPaused": true,
+            "videoSeeking": false,
+            "audioSeeking": false,
+            "drops": {}
+          }
+        }
+      },
+      "eventCounts": {
+        "presenter": {
+          "pause": 1
+        },
+        "presenter-audio": {
+          "seeking": 154,
+          "waiting": 154,
+          "pause": 5
+        }
+      },
+      "audioSeekClockRange": [
+        0.063599,
+        31.935799
+      ],
+      "meanAudioSeekIntervalMs": 208.31307189604814
+    },
+    {
+      "folder": "native-presenter-qc-CRFlxk",
+      "status": "failed",
+      "sampledChecks": 143,
+      "samplesWithAudioSeeking": 134,
+      "maxAvDriftSeconds": 2.7825369999999996,
+      "otherSummary": {
+        "metrics": {
+          "samples": 128,
+          "maxAV": 2.7825369999999996,
+          "maxAudioClock": 2.3040000001430485,
+          "last": {
+            "wall": 60110.40000009537,
+            "clock": 32.032,
+            "video": 30.106403,
+            "audio": 30.9761,
+            "videoPaused": true,
+            "audioPaused": true,
+            "videoSeeking": false,
+            "audioSeeking": false,
+            "drops": {}
+          }
+        }
+      },
+      "eventCounts": {
+        "presenter": {
+          "seeking": 3,
+          "waiting": 3,
+          "pause": 1
+        },
+        "presenter-audio": {
+          "seeking": 46,
+          "waiting": 45,
+          "pause": 1
+        }
+      },
+      "audioSeekClockRange": [
+        0,
+        30.9761
+      ],
+      "meanAudioSeekIntervalMs": 687.3088888910081
+    }
+  ]
+}

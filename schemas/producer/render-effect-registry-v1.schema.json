@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/render-effect-registry-v1.schema.json",
+  "title": "RenderEffectRegistryV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "registryId",
+    "stages",
+    "documents",
+    "discovery",
+    "effects"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "registryId": { "const": "sniper-current-render-effects-v1" },
+    "stages": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "source-authority",
+          "timeline-map",
+          "base",
+          "scene",
+          "composite",
+          "final"
+        ]
+      }
+    },
+    "documents": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["plan", "manifest"],
+      "properties": {
+        "plan": { "$ref": "#/$defs/document" },
+        "manifest": { "$ref": "#/$defs/document" }
+      }
+    },
+    "discovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entrypoints", "nonAssetManifestReads"],
+      "properties": {
+        "entrypoints": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/path" }
+        },
+        "nonAssetManifestReads": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+    "effects": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/effect" }
+    }
+  },
+  "$defs": {
+    "path": {
+      "type": "string",
+      "pattern": "^(scripts|src|docs|schemas)/"
+    },
+    "document": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["privatePrefix", "rootFields"],
+      "properties": {
+        "privatePrefix": { "const": "_" },
+        "rootFields": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "mutation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "caseId",
+        "fixture",
+        "pointer",
+        "after",
+        "expectedChangedRoots"
+      ],
+      "properties": {
+        "caseId": { "type": "string", "minLength": 3 },
+        "fixture": { "type": "string", "minLength": 3 },
+        "pointer": { "type": "string", "pattern": "^/" },
+        "after": {},
+        "expectedChangedRoots": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 3 }
+        },
+        "expectedBaseReuse": { "type": "boolean" },
+        "expectedFormats": {
+          "type": "array",
+          "prefixItems": [
+            { "enum": ["mov", "mp4"] },
+            { "enum": ["mov", "mp4"] }
+          ],
+          "items": false
+        },
+        "expectedEffectiveEnd": { "type": "number" }
+        ,
+        "expectedRejected": { "type": "boolean" }
+      }
+    },
+    "effect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "effectId",
+        "document",
+        "rootFields",
+        "patterns",
+        "classification",
+        "stageRoots",
+        "authorityEffects",
+        "readerFiles",
+        "mutations"
+      ],
+      "properties": {
+        "effectId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]+$"
+        },
+        "document": { "enum": ["plan", "manifest"] },
+        "rootFields": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "patterns": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^/" }
+        },
+        "classification": {
+          "enum": [
+            "render-affecting",
+            "render-irrelevant",
+            "authority-only",
+            "unreleased-rejected"
+          ]
+        },
+        "stageRoots": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "source-authority",
+              "timeline-map",
+              "base",
+              "scene",
+              "composite",
+              "final"
+            ]
+          }
+        },
+        "authorityEffects": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 3 }
+        },
+        "readerFiles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/path" }
+        },
+        "mutations": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/mutation" }
+        }
+      }
+    }
+  }
+}

@@ -16,16 +16,16 @@ const timeline = source("src/components/producer/editor/timeline.tsx");
 for (const [label, code] of Object.entries({ editor, stages, manual })) {
   assert.doesNotMatch(code, /\/api\/producer\/(?:assemble|render)["']/,
     `${label} must not bypass controller QC through a direct render route`);
-  assert.match(code, /launchAutoEditFromPalmier/,
-    `${label} must enter the deterministic controller through the Palmier-first launcher`);
+  assert.match(code, /launchAutoEditFromHyperframes/,
+    `${label} must enter the deterministic controller through the HyperFrames launcher`);
   assert.match(code, /reviewSavedPlan:\s*true/,
     `${label} must review the current saved plan instead of re-authoring it`);
 }
 assert.match(launcher, /\/api\/producer\/auto-edit/,
-  "the Palmier-first launcher must enter the deterministic auto-edit controller");
+  "the launcher must enter the deterministic auto-edit controller");
 
 assert.ok(
-  manual.indexOf("/api/producer/save-plan") < manual.indexOf("launchAutoEditFromPalmier({"),
+  manual.indexOf("/api/producer/save-plan") < manual.indexOf("launchAutoEditFromHyperframes({"),
   "manual JSON must be saved before its review-only controller launch",
 );
 assert.match(surface, /\["current", "unapproved"\]\.includes[\s\S]*\? editor\.paths\.videoPath : undefined/,

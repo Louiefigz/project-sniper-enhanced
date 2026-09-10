@@ -30,6 +30,15 @@ def check_audio(plan: dict, out_dur: float, rep) -> None:
     """Validate ``plan.audioEnhance`` + ``plan.audioGain`` (base-side fields)."""
     _check_enhance(plan.get("audioEnhance"), rep)
     _check_gain(plan.get("audioGain"), out_dur, rep)
+    _check_authority_mode(plan.get("audioAuthorityMode"), rep)
+
+
+def _check_authority_mode(value: object, rep) -> None:
+    if value is None:
+        return
+    if value not in {"editable-stems", "mastered-stereo"}:
+        rep.error(
+            "audioAuthorityMode must be editable-stems or mastered-stereo")
 
 
 def _check_enhance(enhance: object, rep) -> None:

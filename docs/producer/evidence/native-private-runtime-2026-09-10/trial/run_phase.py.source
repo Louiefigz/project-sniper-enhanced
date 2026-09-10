@@ -1,0 +1,72 @@
+"""Time isolated local trial phases with the existing owned-process guard."""
+from __future__ import annotations
+
+import json
+import sys
+import time
+from datetime import datetime, UTC
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+LIVE = Path('/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER')
+GUARD = Path('/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv')
+TRANSPORT = Path('/private/tmp/sniper-native-frame-transport-20260909.wsUupP')
+sys.path[:0] = [str(TRANSPORT), str(GUARD), str(LIVE / 'scripts/producer')]
+from native_bounded_config import CLI, NODE, FFMPEG, CHROME, SANDBOX, digest
+from native_render_resources import ResourcePolicy
+from qualified_native_admission import QualifiedCacheAwareRun
+
+
+def event(name: str, fields: dict) -> None:
+    """Append actual wall and monotonic timestamps without replacing history."""
+    value = {'event': name, 'utc': datetime.now(UTC).isoformat(),
+             'monotonic': time.monotonic(), **fields}
+    with (ROOT / 'events.jsonl').open('a') as handle:
+        handle.write(json.dumps(value, allow_nan=False) + '\n')
+
+
+def environment() -> dict:
+    """Pass only explicit local execution settings, never billing credentials."""
+    return {'PATH': f'{NODE.parent}:{FFMPEG}:/opt/homebrew/bin:/usr/bin:/bin',
+            'TMPDIR': str(ROOT / 'scratch'), 'LC_ALL': 'C',
+            'WHISPER_CPP_MODEL': '/Users/aaronfigueroa/.cache/hyperframes/whisper/models/ggml-small.en.bin',
+            'WHISPER_CPP_NO_GPU': '1', 'WHISPER_CPP_THREADS': '8',
+            'WHISPER_CPP_TIMEOUT_SECONDS': '900',
+            'HYPERFRAMES_BROWSER_PATH': str(CHROME),
+            'HYPERFRAMES_FFMPEG_PATH': str(FFMPEG / 'ffmpeg'),
+            'HYPERFRAMES_FFPROBE_PATH': str(FFMPEG / 'ffprobe'),
+            'HYPERFRAMES_TELEMETRY_DISABLED': '1'}
+
+
+def run(label: str, config: dict) -> bool:
+    """Use generic lifecycle fixes, never the baseline's admission or media."""
+    project = ROOT / 'guard-source'
+    project.mkdir(exist_ok=True)
+    (ROOT / 'scratch').mkdir(exist_ok=True)
+    output = ROOT / config['output']
+    admission = {'output': str(output), 'sdkSha256': digest(CLI),
+                 'sandboxSha256': digest(SANDBOX), 'freshInputAttempt': 'B'}
+    pins = {str(path): digest(path) for path in [Path(__file__),
+            ROOT / config['worker'], GUARD / 'render_native_bounded.py',
+            GUARD / 'native_owned_processes.py', TRANSPORT / 'qualified_native_admission.py']}
+    settings = {'project': project, 'cli': CLI, 'root': ROOT, 'admission': admission,
+                'environment': environment(), 'deadline': config['deadline'],
+                'policy': ResourcePolicy(maximum_owned_gib=6, maximum_process_gib=5,
+                    maximum_swap_growth_gib=1, maximum_compressor_fraction=.1),
+                'command': ['/usr/bin/sandbox-exec', '-f', str(SANDBOX),
+                    str(LIVE / '.venv/bin/python'), str(ROOT / config['worker']),
+                    *config.get('args', [])], 'additional_pins': pins,
+                'success_status': 'phase-completed-awaiting-review'}
+    event('phase-start', {'label': label, 'config': config})
+    attempt = QualifiedCacheAwareRun(label, settings=settings)
+    attempt.result.update(fullEditTwoHourTargetAlreadyMissed=False,
+                          renderOnlyTiming=False, trialStartedMonotonic=1618505.458083375)
+    passed = attempt.execute()
+    event('phase-end', {'label': label, 'passed': passed,
+                       'receipt': str(attempt.path)})
+    return passed
+
+
+if __name__ == '__main__':
+    label, config_path = sys.argv[1:]
+    raise SystemExit(0 if run(label, json.loads(Path(config_path).read_text())) else 1)

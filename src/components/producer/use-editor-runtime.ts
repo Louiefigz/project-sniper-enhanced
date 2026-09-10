@@ -77,11 +77,25 @@ interface AutoEditLaunch {
 }
 
 /**
- * The only browser-side Producer auto-edit launcher. Palmier must be visible
- * before the controller receives the job, so a failed open never starts work.
+ * Explicit compatibility launcher for a Palmier-managed workflow. New
+ * HyperFrames workflows use the MP4-only controller below.
  */
 export async function launchAutoEditFromPalmier(input: AutoEditLaunch): Promise<Response> {
   await openPalmierWorkbench(input.dir, input.mode, input.signal);
   input.signal?.throwIfAborted();
   return post("/api/producer/auto-edit", input.request, input.signal);
+}
+
+/** Launch the checked MP4 pipeline; Studio becomes available after base creation.
+ * This does not mark a preview as approved or bypass any controller review.
+ * A legacy Palmier checkpoint cannot silently resume with a different policy.
+ */
+export async function launchAutoEditFromHyperframes(input: AutoEditLaunch): Promise<Response> {
+  input.signal?.throwIfAborted();
+  if (input.request.deliveryPolicy !== undefined && input.request.deliveryPolicy !== "mp4-only") {
+    throw new Error("HyperFrames editing requires mp4-only delivery; existing Palmier runs keep their original policy.");
+  }
+  return post("/api/producer/auto-edit", {
+    ...input.request, dir: input.dir, deliveryPolicy: "mp4-only",
+  }, input.signal);
 }

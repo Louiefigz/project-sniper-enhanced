@@ -31,6 +31,7 @@ from .render_runtime import RendererRuntime
 _DIGEST = re.compile(r"[0-9a-f]{64}")
 _TOOL_LABELS = ("docker", "proof-ffmpeg", "proof-ffprobe", "python")
 _TOOL_KEYS = {"label", "path", "sha256", "sizeBytes"}
+_CURRENT_RESULT_KEYS = {"cached", "fmt", "fps", "key", "kind", "path", "proof"}
 _ASSET_KEYS = {
     "codec",
     "durationS",
@@ -226,6 +227,25 @@ def _writer_authority(
     )
 
 
+def _writer_lane(lane: object) -> dict:
+    """Verify the current transport clock before calling the frozen V1 writer.
+
+    V1 already records the measured asset FPS. The current worker additionally
+    declares an exact transport FPS; require agreement before omitting that
+    redundant field from the historical writer's input shape.
+    """
+    if type(lane) is not dict:
+        raise AdmittedGraphicRenderReceiptError("current render lane is invalid")
+    result = _exact(lane.get("result"), _CURRENT_RESULT_KEYS, "current worker result")
+    proof = result["proof"]
+    asset = _exact(proof.get("asset") if type(proof) is dict else None,
+                   _ASSET_KEYS, "current worker asset")
+    if type(result["fps"]) is not str or result["fps"] != "30" \
+            or type(asset["fps"]) not in (int, float) or asset["fps"] != 30:
+        raise AdmittedGraphicRenderReceiptError("current worker FPS differs from measured asset")
+    return {**lane, "result": {key: value for key, value in result.items() if key != "fps"}}
+
+
 def build_admitted_graphic_receipts(
     admitted: ResolvedAdmittedRender,
     expectation: GraphicRenderReceiptSetExpectationV1,
@@ -244,8 +264,9 @@ def build_admitted_graphic_receipts(
     for overlay, row, lane in zip(
         admitted.artifact.overlays, expectation.receipts, lane_results
     ):
+        writer_lane = _writer_lane(lane)
         authority = _writer_authority(expectation, row, _media(row, lane))
         receipts.append(
-            build_graphic_render_receipt_v1(authority, overlay.entry, lane)
+            build_graphic_render_receipt_v1(authority, overlay.entry, writer_lane)
         )
     return tuple(receipts)

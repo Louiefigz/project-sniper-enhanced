@@ -794,6 +794,18 @@ ENCODE = {
     "audio_channels": 2,
     "mezzanine_crf": 12,            # intermediate stages: near-lossless x264
     "mezzanine_preset": "fast",
+    # Cut-stage PARTS only (cut_speed.encode_segment / concat_parts). No
+    # B-frames, so the concat can rebuild every copied packet's timestamp from
+    # its index (packet order == presentation order); float PCM audio, so the
+    # join carries no per-part AAC priming and the mezzanine's AAC is encoded
+    # exactly once, at the concat. Measured 2026-09-06 (82-part 311.7s NTSC
+    # long-form): the concat demuxer offsets each file by its MILLISECOND
+    # container duration, so stream-copied NTSC parts (never a whole ms)
+    # accumulated ±1-tick seam gaps → avg_frame_rate 280380000/9354877 ≠
+    # 30000/1001, failing the exact CFR profile the cut-preview/opening
+    # authorities require. Other mezzanine stages keep the encoder defaults.
+    "cut_part_bframes": 0,
+    "cut_part_acodec": "pcm_f32le",
     # Graphics COMPOSITE pass only (graphics_stage._composite_pass): veryfast
     # measured 16.9s→9.4s on the 108s e2e composite with CRF 12 still governing
     # quality (output was even smaller). VideoToolbox was explicitly rejected —
@@ -833,6 +845,10 @@ DRAFT = {
 # ---------------------------------------------------------------------------
 # Audio mastering
 # ---------------------------------------------------------------------------
+# Byte-changing mastering policy, shared without importing the DSP runtime.
+MASTERING_POLICY_VERSION = 3  # v3 compensates/flushes static limiter lookahead
+AUDIO_MIX_POLICY_VERSION = 2  # v2 exact bed trim/duck clock, including the final partial block
+
 AUDIO = {
     "lufs_target": -14.0,           # satisfies YT normalization; safe IG/FB
     "true_peak_dbtp": -1.5,         # DELIVERY ceiling (audit pass line)
@@ -961,7 +977,7 @@ LINT = {
     "max_broll_inserts": 24,
 }
 
-PLATFORMS = ("tiktok", "reels", "shorts")
+PLATFORMS = ("tiktok", "reels", "shorts", "youtube")
 REFRAME_STRATEGIES = ("face", "center", "blurpad", "none")
 # plan.reframe.layout — "fill" (default; today's strategy path or the manual
 # crop override) | "split" (Opus-Clip "Layout: Split": two crops of the SAME
@@ -1218,6 +1234,11 @@ MOTION = {
     # token and ERRORs under the large-text floor. plan_lint_visual.check_contrast.
     "contrast": {
         "min_ratio": 3.0,            # WCAG large-text floor
+        # Reviewed local text/backing declarations, not a guessed footage color.
+        # Any template edit invalidates this narrow qualification until reviewed.
+        "text_plate_sources": {
+            "section-marker": "fbfbe486619a699f46e3e5cc7e2eef4b227564cc1a0dd3b6e9dbf72ad0e8d46a",
+        },
         # kind -> {spec.bg value -> bg hex}. "" = the comp's default variant.
         # Only VERIFIED tokens (sampled from the comp css) — an unknown
         # kind/variant is skipped, never guessed. Data catalog.
@@ -1249,7 +1270,10 @@ MOTION = {
     "card_form_map": {
         # numbers vs a baseline / hero-vs-comparison hierarchy (Nate #9/#11)
         "comparison": ("nateherk-bullet-bars", "nateherk-scoreboard",
-                       "nateherk-takeover", "versus-split"),
+                       "nateherk-takeover", "versus-split", "chart-story"),
+        # change over time — the trend hole ledger/scoreboard cannot draw
+        # (catalog wave B; decline-chart / mk-line-graph join when ported)
+        "trend": ("chart-story",),
         # ordered or parallel steps — pipeline tiles / steps rail (#8/#17/#18)
         "process": ("nateherk-pipeline", "nateherk-rail", "glass-rail",
                     "agenda-slide", "whiteboard-map", "list-build"),
@@ -1266,13 +1290,15 @@ MOTION = {
         # measurements vs a LIMIT — threshold tick + amber footer (#11/#12)
         "limit": ("nateherk-bullet-bars", "nateherk-scoreboard"),
         # a single hero metric / gauge (#9 boxed callout, #11 hero number)
-        "scale": ("nateherk-scoreboard", "stat-card", "widget-gauge"),
+        "scale": ("nateherk-scoreboard", "stat-card", "widget-gauge",
+                  "count-up"),
         # multi-point lists / checklists (#8/#10; LL-011 row lands apply)
         "list": ("glass-rail", "nateherk-rail", "whiteboard-list",
                  "canvas-pip-list", "agenda-slide", "list-build"),
-        # pure thesis — no data, just the sentence (#19)
+        # pure thesis — no data, just the sentence (#19); line-swap is the
+        # setup-then-subvert masked replacement beat (catalog wave B)
         "thesis": ("statement-card", "fragment-payoff", "kinetic-quote",
-                   "kinetic-quote-wide"),
+                   "kinetic-quote-wide", "line-swap"),
     },
     # Deterministic SUPPORT for the form contract (strict-scope lint ERROR,
     # plan_lint_visual.check_form_shape): a card whose spec carries >=

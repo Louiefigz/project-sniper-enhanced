@@ -18,8 +18,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from audit.audit_probe import (  # noqa: E402
     fps_from_stream, image_size, is_faststart, mean_luma,
-    measure_loudness, same_frame_rate, video_frame_count,
+    same_frame_rate, video_frame_count,
 )
+from audio.audio_mix_delivery import measure_delivery  # noqa: E402
 from compile_timeline import TimelineMap  # noqa: E402
 from producer_config import AUDIO, CANVAS, ENCODE  # noqa: E402
 
@@ -31,11 +32,6 @@ WARN = "warn"
 # failing — flags edge C9. Real settled frames sit well above; only a truly
 # black frame 0 trips it.
 COVER_MIN_MEAN_LUMA = 16.0
-# True-peak grace: ffmpeg loudnorm's linear-mode limiter provably overshoots the
-# TP target by a couple tenths of a dB, so a small overshoot WARNs (honest,
-# still ~1dB below clipping) instead of hard-failing a deliverable master; only
-# a peak approaching 0 dBFS (real inter-sample clipping risk) FAILs.
-TRUE_PEAK_HARD_CEIL_DBTP = -0.5
 # Longform is a 16:9 passthrough; allow a hair of rounding on the ratio.
 ASPECT_16_9 = 16.0 / 9.0
 ASPECT_TOLERANCE = 0.02
@@ -76,37 +72,33 @@ def check_duration(final_path: str, video: dict, tmap: TimelineMap) -> CheckResu
     return _result("duration", drift <= tol, measured, detail)
 
 
-def check_loudness(final_path: str, has_audio: bool) -> list[CheckResult]:
-    """Integrated LUFS within ±tolerance of target, and true peak at/under the
-    delivery ceiling (small overshoot WARNs — see TRUE_PEAK_HARD_CEIL_DBTP)."""
-    if not has_audio:
-        return [CheckResult("loudness_integrated", FAIL, "no audio stream",
-                            "short masters must carry dialogue")]
-    lufs, peak = measure_loudness(final_path)
+def check_loudness(final_path: str, has_audio: bool,
+                   observation: dict | None = None) -> list[CheckResult]:
+    """Require complete audio decode and the shared delivery LUFS/TP policy."""
+    observed = observation if observation is not None else measure_delivery(final_path)
+    lufs, peak = observed["integratedLufs"], observed["truePeakDbtp"]
     target, tol = AUDIO["lufs_target"], AUDIO["lufs_tolerance"]
-    lufs_ok = lufs is not None and abs(lufs - target) <= tol
+    decoded = has_audio and observed["audioDecodeSucceeded"]
+    decode_res = _result(
+        "audio_decode_complete", decoded,
+        "complete" if decoded else "failed",
+        str(observed["audioDecodeError"]) or "selected audio decoded to EOF")
+    lufs_ok = decoded and observed["lufsWithinTolerance"]
     lufs_res = _result(
         "loudness_integrated", lufs_ok,
         "unmeasured" if lufs is None else f"{lufs:.1f} LUFS",
         f"target {target} +/-{tol}")
-    return [lufs_res, _true_peak_result(peak)]
+    return [decode_res, lufs_res, _true_peak_result(peak if decoded else None)]
 
 
 def _true_peak_result(peak: Optional[float]) -> CheckResult:
-    """Grade the true peak: PASS at/under target, WARN on the small loudnorm
-    overshoot band, FAIL only when approaching clipping."""
+    """The delivery ceiling is a hard gate, never a relaxed warning band."""
     ceil = AUDIO["true_peak_dbtp"]
-    detail = f"ceiling {ceil} dBTP (hard {TRUE_PEAK_HARD_CEIL_DBTP})"
+    detail = f"ceiling {ceil} dBTP"
     if peak is None:
         return CheckResult("loudness_true_peak", FAIL, "unmeasured", detail)
     measured = f"{peak:.1f} dBTP"
-    if peak <= ceil:
-        return CheckResult("loudness_true_peak", PASS, measured, detail)
-    if peak <= TRUE_PEAK_HARD_CEIL_DBTP:
-        return CheckResult("loudness_true_peak", WARN,
-                           f"{measured} (over {ceil} target)", detail)
-    return CheckResult("loudness_true_peak", FAIL,
-                       f"{measured} (clipping risk)", detail)
+    return _result("loudness_true_peak", peak <= ceil, measured, detail)
 
 
 def _resolution_result(video: dict, mode: str) -> CheckResult:

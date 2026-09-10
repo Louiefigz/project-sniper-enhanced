@@ -9,7 +9,6 @@ login/age-gated videos) to download a single video into a target directory under
 only turns its progress into NDJSON events (the same ``--server`` stdout contract
 the other producer workers use), preserves English VTT captions, and gates the
 cookie retry. It does NOT reinvent any download logic.
-
 CLI:
     fetch_reference.py --url URL --out-dir DIR [--allow-cookies]
                        [--cookies-browser chrome]
@@ -32,8 +31,10 @@ import json
 import os
 import signal
 import shutil
+import stat
 import subprocess
 import sys
+from urllib.parse import urlsplit
 
 VIDEO_EXTS = {".mp4", ".mov", ".m4v", ".webm", ".mkv"}
 _DEBUG = os.environ.get("SNIPER_DEBUG", "1") != "0"
@@ -52,7 +53,7 @@ _AUTH_HINTS = (
     "sign in", "log in", "login", "private", "age", "confirm your age",
     "members-only", "cookie", "authenticat", "account", "not available",
 )
-
+_ALLOWED_HOSTS = ("youtube.com", "youtu.be", "instagram.com", "tiktok.com")
 
 def _emit(event: str, **fields) -> None:
     """One NDJSON event line on stdout (the --server contract)."""
@@ -88,6 +89,23 @@ def resolve_ytdlp() -> str | None:
     return None
 
 
+def validate_url(raw: str) -> str:
+    """Apply the product allowlist even when this CLI is invoked directly."""
+    try:
+        parsed = urlsplit(raw)
+        port = parsed.port
+    except ValueError as exc:
+        raise ValueError("reference URL is malformed") from exc
+    host = (parsed.hostname or "").lower().rstrip(".")
+    allowed = any(host == root or host.endswith(f".{root}") for root in _ALLOWED_HOSTS)
+    if (len(raw) > 2048 or parsed.scheme.lower() != "https"
+            or parsed.username or parsed.password
+            or not allowed or port not in (None, 80, 443)):
+        raise ValueError(
+            "reference URL must be credential-free HTTPS on an approved host")
+    return raw
+
+
 def build_argv(ytdlp: str, out_dir: str, cookies_browser: str | None) -> list[str]:
     """The yt-dlp argv (URL appended by the caller after ``--``)."""
     argv = [
@@ -96,10 +114,14 @@ def build_argv(ytdlp: str, out_dir: str, cookies_browser: str | None) -> list[st
         "--no-color",
         "--newline",              # one progress line each, not \r overwrites
         "--restrict-filenames",   # ascii-safe filenames
-        "--format", "bestvideo[height<=1080]+bestaudio/best[height<=1080]",
+        # One already-muxed download avoids handing untrusted media to a host
+        # ffmpeg process. The route performs the authoritative full decode in
+        # the networkless, nonroot admission container before registration.
+        "--format", "best[height<=1080]/best",
+        "--downloader", "native",  # fail instead of handing media to host ffmpeg
+        "--hls-prefer-native", "--fixup", "never",
         "--max-filesize", str(MAX_REFERENCE_BYTES),
         "--match-filter", f"duration <=? {int(MAX_DURATION_S)}",
-        "--remux-video", "mp4",   # normalize container so ONE .mp4 lands
         "--write-subs",            # preserve word-timed English captions for study
         "--write-auto-subs",
         "--sub-langs", "en.*,en",
@@ -162,11 +184,15 @@ def find_video(out_dir: str) -> str | None:
     """The newest video file in out_dir (the reference dir is fresh → one file)."""
     if not os.path.isdir(out_dir):
         return None
-    hits = [
-        os.path.join(out_dir, n)
-        for n in os.listdir(out_dir)
-        if os.path.splitext(n)[1].lower() in VIDEO_EXTS
-    ]
+    hits = []
+    for name in os.listdir(out_dir):
+        candidate = os.path.join(out_dir, name)
+        if os.path.splitext(name)[1].lower() not in VIDEO_EXTS:
+            continue
+        info = os.lstat(candidate)
+        if stat.S_ISLNK(info.st_mode) or not stat.S_ISREG(info.st_mode):
+            continue
+        hits.append(candidate)
     if not hits:
         return None
     return max(hits, key=os.path.getmtime)
@@ -176,40 +202,28 @@ def find_transcript(out_dir: str) -> str | None:
     """Newest English VTT downloaded beside the reference, when available."""
     if not os.path.isdir(out_dir):
         return None
-    hits = [os.path.join(out_dir, name) for name in os.listdir(out_dir)
-            if name.lower().endswith(".vtt")]
+    hits = []
+    for name in os.listdir(out_dir):
+        candidate = os.path.join(out_dir, name)
+        if not name.lower().endswith(".vtt"):
+            continue
+        info = os.lstat(candidate)
+        if (stat.S_ISLNK(info.st_mode) or not stat.S_ISREG(info.st_mode)
+                or info.st_size > 32 * 1024 ** 2):
+            raise ValueError("downloaded reference transcript is unsafe")
+        hits.append(candidate)
+        if len(hits) > 20:  # route-side copy has the same bounded fan-out
+            raise ValueError("reference downloaded too many VTT sidecars")
     return max(hits, key=os.path.getmtime) if hits else None
 
 
-def probe_duration(video: str) -> float | None:
-    """Duration from ffprobe, or None when the media cannot be verified."""
-    ffprobe = shutil.which("ffprobe")
-    if not ffprobe:
-        return None
-    try:
-        proc = subprocess.run(
-            [ffprobe, "-v", "error", "-show_entries", "format=duration",
-             "-of", "default=noprint_wrappers=1:nokey=1", video],
-            capture_output=True, text=True, timeout=30, check=False,
-        )
-    except (OSError, subprocess.SubprocessError):
-        return None
-    try:
-        return float(proc.stdout.strip()) if proc.returncode == 0 else None
-    except ValueError:
-        return None
-
-
 def validate_download(video: str) -> str | None:
-    """Return an operator-readable bound violation, else None."""
+    """Apply acquisition-only byte bounds; decode authority belongs to intake."""
     size = os.path.getsize(video)
+    if size <= 0:
+        return "reference download is empty"
     if size > MAX_REFERENCE_BYTES:
         return f"reference is {size} bytes; maximum is {MAX_REFERENCE_BYTES}"
-    duration = probe_duration(video)
-    if duration is None:
-        return "downloaded reference duration could not be verified with ffprobe"
-    if duration > MAX_DURATION_S:
-        return f"reference is {duration:.1f}s; maximum is {MAX_DURATION_S:.0f}s"
     return None
 
 
@@ -273,13 +287,11 @@ def main() -> int:
                         help="allow an auth-wall retry using browser cookies")
     args = parser.parse_args()
 
-    if not args.url.startswith("https://"):
-        _emit("error", message="url must use https")
-        return 1
     try:
-        return fetch(args.url, args.out_dir, args.cookies_browser,
+        url = validate_url(args.url)
+        return fetch(url, args.out_dir, args.cookies_browser,
                      allow_cookies=args.allow_cookies)
-    except OSError as exc:
+    except (OSError, ValueError) as exc:
         _emit("error", message=str(exc))
         return 1
 

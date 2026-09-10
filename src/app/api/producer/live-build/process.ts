@@ -1,5 +1,6 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { claudeProcessEnv } from "../../_lib/ai-provider";
+import { admitSubscriptionInvocation, type AdmittedSubscriptionInvocation } from "../../_lib/subscription-invocation";
 import {
   PROCESS_TERM_GRACE_MS,
   shouldDetachProcessGroup,
@@ -13,10 +14,16 @@ import {
 
 const CLAUDE_BIN = process.env.CLAUDE_BIN || "claude";
 const TIMEOUT_MS = 30 * 60 * 1000;
-const READ_TOOLS = new Set(["get_timeline", "get_transcript", "inspect_timeline", "inspect_media"]);
+const MUTATION_TOOLS = new Set([
+  "add_clips", "insert_clips", "split_clips", "move_clips", "remove_clips",
+  "ripple_delete_ranges", "set_clip_properties", "set_keyframes",
+  "add_texts", "update_text", "add_captions", "apply_color",
+  "apply_effect", "apply_layout", "manage_tracks", "sync_clips",
+  "remove_silence", "remove_words", "denoise_audio",
+]);
 
 export function isLiveBuildMutationTool(tool: string): boolean {
-  return !READ_TOOLS.has(tool);
+  return MUTATION_TOOLS.has(tool);
 }
 
 export interface LiveBuildProcessResult {
@@ -28,7 +35,7 @@ export interface LiveBuildProcessResult {
   result: string;
 }
 
-interface ProcessInput {
+export interface ProcessInput {
   args: string[];
   cwd: string;
   expectedSessionId: string;
@@ -59,16 +66,16 @@ function parseLine(line: string): Record<string, unknown> | null {
   } catch { return null; }
 }
 
-class ProofTracker {
+export class ProofTracker {
   private skillInvoked = false;
   private timelineRead = false;
   private finalResult = "";
-  private seen = 0;
-  private completed = 0;
-  private failed = 0;
   private firstMutationMs = 0;
   private sessionId = "";
   private tools = new Map<string, string>();
+  private mutations = new Set<string>();
+  private completed = new Set<string>();
+  private failed = new Set<string>();
 
   constructor(private input: ProcessInput, private started: number) {}
 
@@ -94,26 +101,34 @@ class ProofTracker {
   private trackOperation(event: PalmierOpEvent): void {
     if (event.event === "palmier_op" && event.tool) {
       this.tools.set(event.operationId, event.tool);
-      this.seen += isLiveBuildMutationTool(event.tool) ? 1 : 0;
+      if (isLiveBuildMutationTool(event.tool)) {
+        this.mutations.add(event.operationId);
+      }
       if (event.tool === "get_timeline") this.timelineRead = true;
       return;
     }
     const tool = this.tools.get(event.operationId);
     if (!tool || !isLiveBuildMutationTool(tool)) return;
     if (event.status === "applied") {
-      this.completed += 1;
+      this.completed.add(event.operationId);
       this.firstMutationMs ||= event.elapsedMs;
-    } else this.failed += 1;
+    } else this.failed.add(event.operationId);
   }
 
   result(): LiveBuildProcessResult {
-    if (!this.skillInvoked || !this.timelineRead || this.completed < 1
-        || this.failed > 0 || this.sessionId !== this.input.expectedSessionId) {
-      throw new Error(`Live build proof failed (skill=${this.skillInvoked}, readback=${this.timelineRead}, applied=${this.completed}, failed=${this.failed}, session=${this.sessionId || "missing"}).`);
+    const seen = this.mutations.size;
+    const completed = this.completed.size;
+    const failed = this.failed.size;
+    const exactLifecycle = completed === seen
+      && [...this.completed].every((id) => this.mutations.has(id));
+    if (!this.skillInvoked || !this.timelineRead || completed < 1
+        || failed > 0 || !exactLifecycle
+        || this.sessionId !== this.input.expectedSessionId) {
+      throw new Error(`Live build proof failed (skill=${this.skillInvoked}, readback=${this.timelineRead}, seen=${seen}, applied=${completed}, failed=${failed}, unresolved=${seen - completed}, session=${this.sessionId || "missing"}).`);
     }
     return { elapsedMs: Date.now() - this.started,
-      firstMutationMs: this.firstMutationMs, operationsSeen: this.seen,
-      operationsCompleted: this.completed, sessionId: this.sessionId,
+      firstMutationMs: this.firstMutationMs, operationsSeen: seen,
+      operationsCompleted: completed, sessionId: this.sessionId,
       result: this.finalResult };
   }
 }
@@ -127,14 +142,16 @@ class LiveProcessRunner {
   private stopError?: Error;
   private timer?: ReturnType<typeof setTimeout>;
   private forced?: ReturnType<typeof setTimeout>;
+  private timeoutMs: number;
 
   constructor(private input: ProcessInput, private resolve: Resolve,
-    private reject: Reject) {
-    this.child = trackProcessTree(spawn(CLAUDE_BIN, input.args, {
-      cwd: input.cwd, env: claudeProcessEnv(),
+    private reject: Reject, private admitted: AdmittedSubscriptionInvocation) {
+    this.timeoutMs = admitted.remainingMs();
+    this.child = trackProcessTree(spawn(admitted.bin, admitted.args, {
+      cwd: admitted.cwd, env: admitted.env,
       detached: shouldDetachProcessGroup(),
     }));
-    this.proof = new ProofTracker(input, Date.now());
+    this.proof = new ProofTracker(input, Date.now() - admitted.elapsedMs());
   }
 
   start(): void {
@@ -144,7 +161,7 @@ class LiveProcessRunner {
     });
     this.child.on("error", (error) => this.finish(this.stopError ?? error));
     this.child.on("close", (code) => this.close(code));
-    this.timer = setTimeout(() => this.stop(new Error("Palmier live build timed out.")), TIMEOUT_MS);
+    this.timer = setTimeout(() => this.stop(new Error("Palmier live build timed out.")), this.timeoutMs);
     this.input.signal?.addEventListener("abort", this.abort, { once: true });
     if (this.input.signal?.aborted) this.abort();
   }
@@ -155,18 +172,29 @@ class LiveProcessRunner {
     this.pending = lines.pop() ?? "";
     for (const line of lines) {
       const value = parseLine(line);
-      if (value) this.proof.consume(value);
+      if (value && !this.consume(value)) return;
     }
   }
 
   private close(code: number | null): void {
     const value = parseLine(this.pending);
-    if (value) this.proof.consume(value);
+    if (value && !this.consume(value)) return;
     if (this.stopError) return this.finish(this.stopError);
     if (code !== 0) return this.finish(new Error(
       `Claude live build exited ${code}: ${this.stderr || "no diagnostic output"}`,
     ));
     this.finish();
+  }
+
+  private consume(value: Record<string, unknown>): boolean {
+    try {
+      this.proof.consume(value);
+      return true;
+    } catch (reason) {
+      this.stop(
+        reason instanceof Error ? reason : new Error(String(reason)));
+      return false;
+    }
   }
 
   private finish(error?: Error): void {
@@ -194,8 +222,10 @@ class LiveProcessRunner {
 }
 
 /** Spawn the exact smoke-proved Claude session and stream direct MCP operations. */
-export function runLiveBuildProcess(input: ProcessInput): Promise<LiveBuildProcessResult> {
+export async function runLiveBuildProcess(input: ProcessInput): Promise<LiveBuildProcessResult> {
+  const admitted = await admitSubscriptionInvocation({ provider: "claude", bin: CLAUDE_BIN,
+    args: input.args, cwd: input.cwd, env: claudeProcessEnv(), timeoutMs: TIMEOUT_MS, signal: input.signal });
   return new Promise((resolve, reject) => {
-    new LiveProcessRunner(input, resolve, reject).start();
+    new LiveProcessRunner(input, resolve, reject, admitted).start();
   });
 }

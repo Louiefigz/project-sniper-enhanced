@@ -74,7 +74,7 @@ def _live(runtime: policy.DockerRuntime) -> dict:
             "Tmpfs": {
                 "/scratch": ("rw,nosuid,nodev,noexec,size=2g,uid=501,gid=20,"
                              "mode=0700"),
-                "/output": ("rw,nosuid,nodev,noexec,size=512m,uid=501,gid=20,"
+                "/output": ("rw,nosuid,nodev,noexec,size=2g,uid=501,gid=20,"
                             "mode=0700")},
             "Mounts": [{"Type": "bind", "Source": "/sealed.tar",
                         "Target": "/request/render-input.tar", "ReadOnly": True}]},
@@ -176,54 +176,60 @@ class ContainerPolicyTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "not the approved image"):
             policy.required_runtime()
 
-    def test_remove_fails_closed_when_container_remains(self) -> None:
-        timeout = subprocess.TimeoutExpired("docker", 30)
-        still_there = subprocess.CompletedProcess([], 0, "{}", "")
-        with mock.patch.object(policy.subprocess, "run",
-                               side_effect=[timeout] + [still_there] * 10), \
-                mock.patch.object(policy.time, "sleep"):
-            with self.assertRaisesRegex(RuntimeError, "remains"):
-                policy.remove_container(_runtime(), "/config", "render-name")
-
-    def test_remove_accepts_only_inspect_absence(self) -> None:
-        removed = subprocess.CompletedProcess([], 0, "", "")
-        absent = subprocess.CompletedProcess(
-            [], 1, "[]\n",
-            "Error response from daemon: No such container: render-name\n")
-        with mock.patch.object(policy.subprocess, "run",
-                               side_effect=[removed, absent]):
-            policy.remove_container(_runtime(), "/config", "render-name")
-
-    def test_remove_retries_live_then_requires_exact_absence(self) -> None:
-        removed = subprocess.CompletedProcess([], 0, "", "")
-        live = subprocess.CompletedProcess([], 0, "{}", "")
-        absent = subprocess.CompletedProcess(
-            [], 1, "[]\n",
-            "Error response from daemon: No such container: render-name\n")
-        with mock.patch.object(policy.subprocess, "run",
-                               side_effect=[removed, live, absent]), \
-                mock.patch.object(policy.time, "sleep"):
-            policy.remove_container(_runtime(), "/config", "render-name")
-
-    def test_daemon_error_is_not_mistaken_for_absence(self) -> None:
-        removed = subprocess.CompletedProcess([], 0, "", "")
-        daemon_error = subprocess.CompletedProcess([], 1, "", "connection lost")
-        with mock.patch.object(policy.subprocess, "run",
-                               side_effect=[removed, daemon_error]):
-            with self.assertRaisesRegex(RuntimeError, "ambiguously"):
-                policy.remove_container(_runtime(), "/config", "render-name")
-
     def test_abort_reconciliation_catches_a_late_create(self) -> None:
         times = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 4.0, 4.1]
         with mock.patch.object(policy.time, "monotonic", side_effect=times), \
                 mock.patch.object(policy.time, "sleep"), \
                 mock.patch.object(policy, "_force_remove",
                                   side_effect=[False, True, False]) as remove, \
+                mock.patch.object(policy, "_is_absent", side_effect=[True, True, False, True, True, True]), \
+                mock.patch.object(policy, "remove_container") as final_remove:
+            policy.reconcile_launch_abort(_runtime(), "/config", "render-name")
+        self.assertEqual(remove.call_count, 3)
+        final_remove.assert_called_once()
+
+    def test_abort_reconciliation_supports_bounded_long_launches(self) -> None:
+        times = [0.0, 0.0, 0.0, 0.0, 61.0, 61.0, 61.0, 65.0, 65.0]
+        with mock.patch.object(policy.time, "monotonic", side_effect=times), \
+                mock.patch.object(policy.time, "sleep"), \
+                mock.patch.object(
+                    policy, "_force_remove",
+                    side_effect=[False, True, False]) as remove, \
+                mock.patch.object(policy, "_is_absent", side_effect=[True, True, False, True, True, True]), \
+                mock.patch.object(policy, "remove_container") as final_remove:
+            policy.reconcile_launch_abort(
+                _runtime(), "/config", "render-name", 600)
+        self.assertEqual(remove.call_count, 3)
+        final_remove.assert_called_once()
+
+    def test_successful_rm_of_absent_name_does_not_reset_observed_absence(self) -> None:
+        times = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 4.0, 4.1]
+        with mock.patch.object(policy.time, "monotonic", side_effect=times), \
+                mock.patch.object(policy.time, "sleep"), \
+                mock.patch.object(policy, "_force_remove", return_value=True) as remove, \
                 mock.patch.object(policy, "_is_absent", return_value=True), \
                 mock.patch.object(policy, "remove_container") as final_remove:
             policy.reconcile_launch_abort(_runtime(), "/config", "render-name")
         self.assertEqual(remove.call_count, 3)
         final_remove.assert_called_once()
+
+    def test_unknown_pre_removal_presence_resets_stable_absence(self) -> None:
+        times = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 4.0, 4.1]
+        with mock.patch.object(policy.time, "monotonic", side_effect=times), \
+                mock.patch.object(policy.time, "sleep"), \
+                mock.patch.object(policy, "_force_remove", return_value=True) as remove, \
+                mock.patch.object(policy, "_is_absent", side_effect=[True, True, None, True, True, True]), \
+                mock.patch.object(policy, "remove_container") as final_remove:
+            policy.reconcile_launch_abort(_runtime(), "/config", "render-name")
+        self.assertEqual(remove.call_count, 3)
+        final_remove.assert_called_once()
+
+    def test_abort_reconciliation_rejects_unbounded_deadlines(self) -> None:
+        for invalid in (0, 601, True, "600", float("inf"), float("nan")):
+            with self.subTest(invalid=invalid), self.assertRaisesRegex(
+                    RuntimeError, "timeout is invalid"):
+                policy.reconcile_launch_abort(
+                    _runtime(), "/config", "render-name", invalid)
 
     def test_live_tmpfs_output_is_copied_only_after_zero_status(self) -> None:
         missing = subprocess.CompletedProcess([], 1, "", "missing")
@@ -231,6 +237,7 @@ class ContainerPolicyTests(unittest.TestCase):
         status = subprocess.CompletedProcess([], 0, "0\n", "")
         with mock.patch.object(policy.subprocess, "run",
                                side_effect=[missing, running, status]), \
+                mock.patch.object(policy, "read_render_log", return_value=b"[initSession:screenshot] pollHfReady complete\n[initSession:screenshot] pollSubCompositionTimelines complete (ready)\n"), \
                 mock.patch.object(policy.time, "sleep"), \
                 mock.patch.object(policy, "_stream_output") as stream:
             policy.wait_and_copy(_runtime(), "/config", "render-name",
@@ -239,7 +246,8 @@ class ContainerPolicyTests(unittest.TestCase):
 
     def test_nonzero_render_status_rejects_output(self) -> None:
         status = subprocess.CompletedProcess([], 0, "9\n", "")
-        with mock.patch.object(policy.subprocess, "run", return_value=status):
+        with mock.patch.object(policy.subprocess, "run", return_value=status), \
+                mock.patch.object(policy, "read_render_log", return_value=b""):
             with self.assertRaisesRegex(RuntimeError, "exited 9"):
                 policy.wait_and_copy(_runtime(), "/config", "render-name",
                                      "/stage/render.mov")

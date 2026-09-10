@@ -7,10 +7,11 @@ from ingest_probe import probe_media
 from palmier.desktop_element_types import (ElementObservation,
                                            RecoveryObservation)
 from palmier.desktop_ledger import clip_frames, clip_inventory
+from palmier.desktop_scene_readback import assert_scene_replacement_readback
 from palmier.desktop_state import now, read_record
 from palmier.desktop_text import observe_texts, text_add_binding
 from palmier.mcp_client import PalmierError
-_RESOURCE_OPS = {"import", "native-broll", "native-music", "native-audio-master"}
+_RESOURCE_OPS = {"import", "native-broll", "native-music"}
 def _operations(state: dict) -> list[dict]:
     value = read_record(state["operations"]["path"], "operation manifest")
     rows = value.get("steps")
@@ -53,8 +54,7 @@ def _placements(steps: list[dict]) -> list[dict]:
             rows.append(step)
         elif step.get("op") == "replace-overlay":
             rows.append(step)
-        elif step.get("op") in {
-                "native-broll", "native-music", "native-audio-master"}:
+        elif step.get("op") in {"native-broll", "native-music"}:
             rows.append(step)
     return rows
 
@@ -90,7 +90,9 @@ def _entry_binding(entry: dict, placements: list[dict], state: dict) -> dict:
             "startFrame": row["startFrame"], "endFrame": row["endFrame"],
             "trackIndex": row.get("trackIndex"),
             "transform": row.get("transform"),
-            "oldClipId": row.get("oldClipId"), "lane": row.get("lane"),
+            "oldClipId": row.get("oldClipId"),
+            "oldMediaRef": row.get("oldMediaRef"), "lane": row.get("lane"),
+            "sceneBindingId": row.get("sceneBindingId"),
             "mutationId": row.get("mutationId"),
             "sourceAnchor": row.get("sourceAnchor")}
 
@@ -186,7 +188,9 @@ def _observe_resource(state: dict, binding: dict, event: dict) -> None:
 def _matching_added(after: dict[str, dict], added: set[str], row: dict) -> list[dict]:
     return [clip for clip_id, clip in after.items() if clip_id in added
             and clip.get("mediaRef") == row["mediaRef"]
-            and clip_frames(clip) == (row["startFrame"], row["endFrame"])]
+            and clip_frames(clip) == (row["startFrame"], row["endFrame"])
+            and (row.get("trackIndex") is None
+                 or clip["_trackIndex"] == row["trackIndex"])]
 
 
 def _observe_added(state: dict, binding: dict,
@@ -197,6 +201,7 @@ def _observe_added(state: dict, binding: dict,
                        if isinstance(row.get("oldClipId"), str)}
     if removed - allowed_removed:
         raise PalmierError("Palmier placement removed an unrelated clip")
+    assert_scene_replacement_readback(binding, old, new)
     ledger = state.setdefault("elementLedger", {
         "schemaVersion": 2, "elements": {}, "tombstones": {}})
     elements = ledger.setdefault("elements", {})

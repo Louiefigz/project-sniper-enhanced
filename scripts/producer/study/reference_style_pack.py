@@ -28,6 +28,17 @@ class PackInputs:
     adjudication: str | None = None
 
 
+@dataclass(frozen=True)
+class WindowInputs:
+    """Reviewed inputs used to compile chronological grammar windows."""
+
+    worklist: dict[str, Any]
+    mechanics: dict[str, dict[str, Any]]
+    editorial: dict[str, dict[str, Any]]
+    resolved: dict[str, dict[str, str]]
+    templates: dict[str, dict[str, Any]]
+
+
 def _rows(value: dict[str, Any], key: str) -> list[dict[str, Any]]:
     rows = value.get(key)
     if not isinstance(rows, list) or not all(isinstance(row, dict) for row in rows):
@@ -140,14 +151,12 @@ def _observation(row: dict[str, Any]) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
-def _windows(worklist: dict[str, Any], mechanics: dict[str, dict[str, Any]],
-             editorial: dict[str, dict[str, Any]], resolved: dict[str, dict[str, str]],
-             templates: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+def _windows(inputs: WindowInputs) -> list[dict[str, Any]]:
     windows = []
-    for item in worklist.get("items") or []:
+    for item in inputs.worklist.get("items") or []:
         item_id = str(item["id"])
-        classification = resolved[item_id]
-        template = templates.get(item_id)
+        classification = inputs.resolved[item_id]
+        template = inputs.templates.get(item_id)
         if classification["kind"] in GRAPHIC_KINDS and template is None:
             raise ValueError(f"graphic review item has no verified template: {item_id}")
         windows.append({
@@ -157,8 +166,8 @@ def _windows(worklist: dict[str, Any], mechanics: dict[str, dict[str, Any]],
             "eventIds": item.get("eventIds", []),
             "eventTypes": item.get("eventTypes", []),
             "classification": classification,
-            "mechanics": _observation(mechanics[item_id]),
-            "editorial": _observation(editorial[item_id]),
+            "mechanics": _observation(inputs.mechanics[item_id]),
+            "editorial": _observation(inputs.editorial[item_id]),
             "template": template,
             "evidence": {"contactSheets": item.get("contactSheets", []),
                          "visualFrameCount": item.get("visualFrameCount", 0)},
@@ -179,7 +188,8 @@ def compile_style_pack(inputs: PackInputs) -> dict[str, Any]:
         raise ValueError("unclassified motion runs block a release-ready style pack")
     mechanics, editorial, resolved = _resolved_classifications(worklist, inputs)
     templates = _template_map(load_object(inputs.templates), worklist)
-    windows = _windows(worklist, mechanics, editorial, resolved, templates)
+    windows = _windows(WindowInputs(
+        worklist, mechanics, editorial, resolved, templates))
     source = worklist.get("source", {})
     review_paths = [inputs.mechanics_review, inputs.editorial_review]
     if inputs.adjudication:
@@ -187,6 +197,8 @@ def compile_style_pack(inputs: PackInputs) -> dict[str, Any]:
     return {
         "schemaVersion": 1, "kind": "reference-style-pack",
         "referenceId": worklist.get("referenceId"), "releaseReady": True,
+        "releaseClass": "reference-inspired",
+        "verifiedMimicQualified": False,
         "source": source,
         "provenance": {
             "worklistPath": os.path.abspath(inputs.worklist),

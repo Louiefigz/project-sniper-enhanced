@@ -179,13 +179,7 @@ def apply_baseline_look(src_path: str, spec: BaselineSpec, out_path: str) -> dic
     in_frames = probe_video_frames(src_path)
     crop = crop_window(in_w, in_h, spec)
     _warn_geometry(crop, spec)
-    cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-           "-i", src_path, "-map", "0:v:0", "-map", "0:a?",
-           "-vf", build_filter((in_w, in_h), spec),
-           "-c:v", "libx264", "-crf", str(ENCODE["mezzanine_crf"]),
-           "-preset", ENCODE["mezzanine_preset"], "-pix_fmt", ENCODE["pix_fmt"],
-           "-fps_mode", "passthrough", "-c:a", "copy",
-           "-movflags", "+faststart", out_path]
+    cmd = baseline_command(src_path, spec, out_path, (in_w, in_h))
     run_ff(cmd)
     out_frames = probe_video_frames(out_path)
     drift = abs(out_frames - in_frames)
@@ -198,6 +192,22 @@ def apply_baseline_look(src_path: str, spec: BaselineSpec, out_path: str) -> dic
             f"baseline-look changed frame count: in {in_frames} -> out "
             f"{out_frames} (drift {drift} > {FRAME_TOL})")
     return result
+
+
+def baseline_command(
+        src_path: str, spec: BaselineSpec, out_path: str,
+        dimensions: tuple[int, int] | None = None) -> list[str]:
+    """Return the exact deterministic ffmpeg command used by the stage."""
+    in_dims = dimensions or probe_dims(src_path)
+    return [
+        "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+        "-i", src_path, "-map", "0:v:0", "-map", "0:a?",
+        "-vf", build_filter(in_dims, spec),
+        "-c:v", "libx264", "-crf", str(ENCODE["mezzanine_crf"]),
+        "-preset", ENCODE["mezzanine_preset"], "-pix_fmt", ENCODE["pix_fmt"],
+        "-fps_mode", "passthrough", "-c:a", "copy",
+        "-movflags", "+faststart", out_path,
+    ]
 
 
 def _load_spec(spec: str) -> object:

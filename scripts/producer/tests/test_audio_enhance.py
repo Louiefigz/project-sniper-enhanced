@@ -112,6 +112,13 @@ class AudioEnhanceLintTests(unittest.TestCase):
         plan["audioEnhance"] = "voice"
         self.assert_fires(plan, "audioEnhance must be an object")
 
+    def test_audio_authority_mode_is_closed_vocabulary(self) -> None:
+        plan = good_plan()
+        plan["audioAuthorityMode"] = "mastered-stereo"
+        self.assertEqual(self._errors(plan), [])
+        plan["audioAuthorityMode"] = "stems-ish"
+        self.assert_fires(plan, "audioAuthorityMode")
+
 
 class AudioGainLintTests(unittest.TestCase):
     """audioGain windows: shape, dB bounds, output-duration bounds, overlap."""

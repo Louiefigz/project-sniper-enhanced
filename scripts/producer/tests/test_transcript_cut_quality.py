@@ -32,6 +32,27 @@ def _words(rows: list[tuple[str, float, float]]) -> list[dict]:
             for word, start, end in rows]
 
 
+class AdjacentDuplicateTests(unittest.TestCase):
+    """Stutters compare whole spoken words; a contraction after its stem is not a repeat."""
+
+    def test_contraction_after_its_stem_is_not_a_stutter(self) -> None:
+        # C0679 at 239.56 s: "...do it. It's the first link" was flagged as 'it it'
+        # because every word was expanded to its first normalized token.
+        words = _words([("do", 239.0, 239.2), ("it.", 239.56, 240.12), ("It's", 240.12, 240.3),
+                        ("the", 240.3, 240.44), ("first", 240.44, 240.67), ("link", 240.67, 240.85)])
+        report, errors = _inspect(words)
+        self.assertEqual(errors, [])
+        self.assertEqual(report["adjacentDuplicates"], [])
+
+    def test_real_repeated_function_word_is_still_a_hard_stutter(self) -> None:
+        words = _words([("or", 16.5, 16.62), ("maybe,", 16.62, 17.04), ("maybe", 17.04, 17.33),
+                        ("you're", 17.33, 17.7), ("just", 17.7, 17.94)])
+        report, errors = _inspect(words)
+        self.assertEqual(len(errors), 1, errors)
+        self.assertIn("adjacent duplicate word 'maybe'", errors[0])
+        self.assertEqual(report["adjacentDuplicates"][0]["severity"], "error")
+
+
 class HookTimingQualityTests(unittest.TestCase):
     def test_c0679_first_if_pause_fails_with_local_pace_evidence(self) -> None:
         words = _words([
@@ -41,13 +62,17 @@ class HookTimingQualityTests(unittest.TestCase):
         ])
         report, errors = _inspect(words)
         self.assertEqual(len(errors), 1, errors)
-        self.assertIn("first function word 'if' spans 2.390s", errors[0])
+        self.assertIn("kept_opening function word 'if' spans 2.390s", errors[0])
+        self.assertIn("review is required", errors[0])
         finding = report["suspiciousWordSpans"][0]
         self.assertEqual(finding["word"], "if")
         self.assertEqual(finding["duration"], 2.39)
         self.assertGreater(finding["paceRatio"], 4.0)
+        self.assertEqual(finding["reason"], "unresolved_opening_word_timing")
+        self.assertTrue(finding["reviewRequired"])
+        self.assertNotIn("must be removed", errors[0])
 
-    def test_excluded_c0679_if_is_a_forbidden_opening_start(self) -> None:
+    def test_excluded_c0679_if_requires_review_not_a_forbidden_start(self) -> None:
         words = _words([
             ("if", 11.271, 13.661), ("you", 13.661, 13.731),
             ("run", 13.731, 13.991), ("content", 14.011, 14.501),
@@ -58,12 +83,51 @@ class HookTimingQualityTests(unittest.TestCase):
         plan["cutTrack"][0]["start"] = 13.661
         report, errors, _warnings = inspect_output(
             plan, {"raw-1": source}, 0.001)
-        self.assertEqual(errors, [])
-        self.assertEqual(report["suspiciousWordSpans"], [])
-        forbidden = report["forbiddenOpeningStarts"][0]
-        self.assertEqual(forbidden["word"], "if")
-        self.assertEqual(forbidden["requiredStartAtOrAfter"], 13.661)
-        self.assertEqual(forbidden["reason"], "probable_asr_assigned_dead_air")
+        self.assertEqual(len(errors), 1)
+        self.assertIn("excluded_before_opening", errors[0])
+        self.assertEqual(report["forbiddenOpeningStarts"], [])
+        finding = report["suspiciousWordSpans"][0]
+        self.assertEqual(finding["word"], "if")
+        self.assertEqual(finding["sourceId"], "raw-1")
+        self.assertNotIn("requiredStartAtOrAfter", finding)
+        self.assertEqual(finding["reason"], "unresolved_opening_word_timing")
+
+    def test_nearest_excluded_word_is_not_hidden_by_a_small_gap(self) -> None:
+        words = _words([
+            ("If", 11.54, 13.62), ("you", 13.68, 13.85),
+            ("run", 13.85, 14.10), ("content", 14.10, 14.50),
+            ("for", 14.50, 14.69), ("clients", 14.69, 15.28),
+        ])
+        source = SourceEvidence("raw-1", 15.28, "fixture.json", words)
+        plan = _plan(words)
+        plan["cutTrack"][0]["start"] = 13.65
+        report, errors, _warnings = inspect_output(plan, {"raw-1": source}, 0.015)
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(report["suspiciousWordSpans"][0]["start"], 11.54)
+
+    def test_pace_uses_source_even_when_following_output_is_shortened(self) -> None:
+        words = _words([
+            ("If", 11.54, 13.62), ("you", 13.62, 13.85),
+            ("run", 13.85, 14.10), ("content", 14.10, 14.50),
+        ])
+        source = SourceEvidence("raw-1", 14.50, "fixture.json", words)
+        plan = _plan(words)
+        plan["cutTrack"][0]["end"] = 13.85
+        report, errors, _warnings = inspect_output(plan, {"raw-1": source}, 0.015)
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(report["suspiciousWordSpans"][0]["localMedianS"], 0.25)
+
+    def test_confidence_is_evidence_not_a_silence_or_deletion_rule(self) -> None:
+        words = _words([
+            ("If", 0.37, 8.64), ("you", 8.64, 8.85),
+            ("run", 8.85, 9.10), ("content", 9.10, 9.50),
+        ])
+        words[0]["confidence"] = 0.3575
+        report, errors = _inspect(words)
+        self.assertEqual(report["suspiciousWordSpans"][0]["confidence"], 0.3575)
+        self.assertIn("do not prove silence", errors[0])
+        words[0]["start"] = 8.44  # TEST-only ordinary timing, not repaired source.
+        self.assertEqual(_inspect(words)[1], [])
 
     def test_first_name_or_content_word_is_not_a_function_word_defect(self) -> None:
         words = _words([

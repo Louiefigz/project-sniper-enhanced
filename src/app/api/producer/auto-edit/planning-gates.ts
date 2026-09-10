@@ -1,12 +1,11 @@
-import { spawn } from "child_process";
 import path from "path";
-import { pythonInterpreter, SCRIPTS_DIR } from "../../_lib/spawn-python";
-import {
-  shouldDetachProcessGroup,
-  terminateProcessTree,
-  trackProcessTree,
-} from "../../_lib/child-process-lifecycle";
+import { SCRIPTS_DIR } from "../../_lib/spawn-python";
 import type { AutoEditIntent, AutoEditScope } from "./stream";
+import {
+  parsePlanningGateVerdict,
+  planningGateTimeoutMs,
+  spawnPlanningGate,
+} from "./planning-gate-runner";
 import {
   type GateBundleInput,
   type GateBundleOperatorIntent,
@@ -19,6 +18,11 @@ import {
 } from "./planning-gate-contract";
 
 export { PLANNING_GATE_IDS } from "./planning-gate-contract";
+export {
+  PLANNING_GATE_TIMEOUT_MS,
+  parsePlanningGateVerdict,
+  spawnPlanningGate,
+} from "./planning-gate-runner";
 export type {
   GateBundleFinding,
   GateBundleInput,
@@ -30,11 +34,11 @@ export type {
   PlanningGateId,
   PlanningGateProcessResult,
   PlanningGateRunner,
+  PlanningGateRunOptions,
   PlanningGateVerdict,
 } from "./planning-gate-contract";
 
 const PRODUCER = path.join(SCRIPTS_DIR, "producer");
-export const PLANNING_GATE_TIMEOUT_MS = 5 * 60 * 1000;
 
 /** Convert the validated job context into the explicit gate authority. */
 export function gateBundleOperatorIntent(
@@ -92,12 +96,14 @@ function operatorIntentCommand(input: GateBundleInput): PlanningGateCommand {
 /** Transcript gate command for the cut-only wall or the immutable final cut. */
 export function transcriptCutCommand(
   input: Pick<GateBundleInput, "planPath" | "transcriptsDir" | "manifestPath" | "cutApprovalPath">,
-  stage: "previsual" | "approved" = "approved",
+  stage: "previsual" | "saved-plan" | "approved" = "approved",
 ): PlanningGateCommand {
   const args = [input.planPath, input.transcriptsDir, input.manifestPath];
   if (stage === "previsual") args.push("--previsual");
-  else if (!input.cutApprovalPath) throw new Error("planning gates require cut approval receipt");
-  else args.push("--approval", input.cutApprovalPath);
+  if (stage === "approved") {
+    if (!input.cutApprovalPath) throw new Error("planning gates require cut approval receipt");
+    args.push("--approval", input.cutApprovalPath);
+  }
   return {
     gate: "transcript_cut",
     script: gateScript("transcript_cut_contract.py"),
@@ -148,102 +154,6 @@ export function planningGateCommands(input: GateBundleInput): PlanningGateComman
   return commands;
 }
 
-/** Default child-process seam. Tests inject a runner and never spawn Python. */
-export function spawnPlanningGate(
-  command: PlanningGateCommand,
-): Promise<PlanningGateProcessResult> {
-  return new Promise((resolve) => {
-    const proc = trackProcessTree(spawn(pythonInterpreter(), [command.script, ...command.args], {
-      env: { ...process.env },
-      detached: shouldDetachProcessGroup(),
-    }));
-    let stdout = "";
-    let stderr = "";
-    let settled = false;
-    const finish = (result: PlanningGateProcessResult) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      resolve(result);
-    };
-    proc.stdout.on("data", (data: Buffer) => (stdout += data.toString()));
-    proc.stderr.on("data", (data: Buffer) => {
-      stderr += data.toString();
-      process.stderr.write(data);
-    });
-    proc.on("close", (exit) => finish({ stdout, stderr, exit }));
-    proc.on("error", (error) => finish({
-      stdout,
-      stderr,
-      exit: 1,
-      spawnError: error.message,
-    }));
-    const timer = setTimeout(() => {
-      terminateProcessTree(proc);
-      finish({
-        stdout,
-        stderr,
-        exit: 124,
-        timedOut: true,
-        spawnError: `${command.gate} timed out after ${PLANNING_GATE_TIMEOUT_MS / 1000}s`,
-      });
-    }, PLANNING_GATE_TIMEOUT_MS);
-    timer.unref();
-  });
-}
-
-function isStringArray(value: unknown): value is string[] {
-  return Array.isArray(value) && value.every((item) => typeof item === "string");
-}
-
-function failedVerdict(
-  gate: PlanningGateId,
-  result: PlanningGateProcessResult,
-  reason: string,
-): PlanningGateVerdict {
-  const diagnostic = result.stderr.trim() || result.stdout.trim();
-  const errors = [reason];
-  if (diagnostic) errors.push(diagnostic.slice(-300));
-  return { gate, ok: false, errors, warnings: [], exit: result.exit ?? 1 };
-}
-
-/** Parse one gate's JSON contract and fail closed on exit/verdict disagreement. */
-export function parsePlanningGateVerdict(
-  gate: PlanningGateId,
-  result: PlanningGateProcessResult,
-): PlanningGateVerdict {
-  if (result.spawnError) return failedVerdict(gate, result, result.spawnError);
-  let value: unknown;
-  try {
-    value = JSON.parse(result.stdout.trim());
-  } catch {
-    return failedVerdict(gate, result, `${gate} produced no valid JSON verdict`);
-  }
-  if (!value || typeof value !== "object") {
-    return failedVerdict(gate, result, `${gate} verdict must be a JSON object`);
-  }
-  const raw = value as Record<string, unknown>;
-  if (typeof raw.ok !== "boolean" || !isStringArray(raw.errors) || !isStringArray(raw.warnings)) {
-    return failedVerdict(gate, result, `${gate} verdict has an invalid contract shape`);
-  }
-  const exit = result.exit ?? 1;
-  const errors = [...raw.errors];
-  if (!raw.ok && errors.length === 0) errors.push(`${gate} reported failure without diagnostics`);
-  if (raw.ok && exit !== 0) errors.push(`${gate} exited ${exit} despite reporting ok`);
-  const verdict: PlanningGateVerdict = {
-    gate,
-    ok: raw.ok && exit === 0,
-    errors,
-    warnings: [...raw.warnings],
-    exit,
-  };
-  if (typeof raw.scope === "string") verdict.scope = raw.scope;
-  if (raw.metrics && typeof raw.metrics === "object" && !Array.isArray(raw.metrics)) {
-    verdict.metrics = raw.metrics as Record<string, unknown>;
-  }
-  return verdict;
-}
-
 function requiredVerdict(
   byGate: Map<PlanningGateId, PlanningGateVerdict>,
   gate: PlanningGateId,
@@ -281,10 +191,61 @@ export function combinePlanningGateVerdicts(
     verdict[kind].map((message) => ({ gate: verdict.gate, message })));
   return {
     ok: completed.every((verdict) => verdict.ok),
+    processesStopped: completed.every((verdict) => verdict.processGroupStopped === true),
     errors: findings("errors"),
     warnings: findings("warnings"),
     gates,
   };
+}
+
+function gateBudget(timeoutMs: number | undefined): () => number {
+  const ceiling = planningGateTimeoutMs(timeoutMs);
+  const maximum = timeoutMs === undefined ? ceiling : Math.max(1, Math.floor(timeoutMs));
+  const wall = Date.now(), mono = performance.now();
+  return () => {
+    const elapsed = Math.max(Date.now() - wall, performance.now() - mono);
+    const remaining = Math.floor(maximum - elapsed);
+    if (Date.now() < wall || remaining < 1) throw new Error("Planning gate bundle deadline exceeded");
+    return remaining;
+  };
+}
+
+function gateFailure(command: PlanningGateCommand, error: unknown, stopped: boolean): PlanningGateVerdict {
+  return { gate: command.gate, ok: false, exit: 1, warnings: [],
+    errors: [String(error).slice(0, 2000)], processGroupStopped: stopped };
+}
+
+function observedGateVerdict(command: PlanningGateCommand, result: PlanningGateProcessResult, remaining: () => number): PlanningGateVerdict {
+  const verdict = parsePlanningGateVerdict(command.gate, result);
+  if (!verdict.ok) return verdict;
+  try { remaining(); return verdict; }
+  catch (error) { return gateFailure(command, error, true); }
+}
+
+/** Never return a failed wave while a sibling can still create renderer resources. */
+async function runGateWave(commands: PlanningGateCommand[], runtime: {
+  dependencies: PlanningGateDependencies; cancellation: AbortController; remaining: () => number;
+}): Promise<PlanningGateVerdict[]> {
+  const run = runtime.dependencies.run ?? spawnPlanningGate;
+  const settled = await Promise.allSettled(commands.map(async (command) => {
+    let invoked = false;
+    try {
+      const env = runtime.dependencies.env?.(command.gate), timeoutMs = runtime.remaining();
+      if (runtime.cancellation.signal.aborted) throw new Error("Planning gate bundle cancelled before spawn");
+      invoked = true;
+      const result = await run(command, { env, timeoutMs, signal: runtime.cancellation.signal });
+      if (result.processGroupStopped !== true) {
+        runtime.cancellation.abort();
+        return gateFailure(command, "Planning gate owned process-group stop is unverified", false);
+      }
+      return observedGateVerdict(command, result, runtime.remaining);
+    } catch (error) {
+      runtime.cancellation.abort();
+      return gateFailure(command, error, !invoked);
+    }
+  }));
+  return settled.map((result, index) => result.status === "fulfilled" ? result.value
+    : gateFailure(commands[index], result.reason, false));
 }
 
 /** Run the complete transcript-aware planning gate bundle before any render. */
@@ -292,27 +253,27 @@ export async function runPlanningGateBundle(
   input: GateBundleInput,
   dependencies: PlanningGateDependencies = {},
 ): Promise<GateBundleVerdict> {
-  const run = dependencies.run ?? spawnPlanningGate;
+  const remaining = gateBudget(dependencies.timeoutMs), cancellation = new AbortController();
   const commands = planningGateCommands(input);
   const preflight = commands.filter((command) =>
     command.gate === "operator_intent" || command.gate === "transcript_cut");
   const downstream = commands.filter((command) => !preflight.includes(command));
-  const preflightVerdicts = await Promise.all(preflight.map(async (command) => {
-    const result = await run(command);
-    return parsePlanningGateVerdict(command.gate, result);
-  }));
-  if (preflightVerdicts.some((verdict) => !verdict.ok)) {
-    const skipped = downstream.map((command): PlanningGateVerdict => ({
-      gate: command.gate, ok: false, errors: [], warnings: [], exit: 125,
-      scope: "skipped: transcript/cut preflight did not pass",
-    }));
-    return combinePlanningGateVerdicts([...preflightVerdicts, ...skipped]);
-  }
-  const downstreamVerdicts = await Promise.all(downstream.map(async (command) => {
-    const result = await run(command);
-    return parsePlanningGateVerdict(command.gate, result);
-  }));
-  return combinePlanningGateVerdicts([...preflightVerdicts, ...downstreamVerdicts]);
+  const cancel = () => cancellation.abort();
+  dependencies.signal?.addEventListener("abort", cancel, { once: true });
+  if (dependencies.signal?.aborted) cancel();
+  try {
+    const runtime = { dependencies, cancellation, remaining };
+    const preflightVerdicts = await runGateWave(preflight, runtime);
+    if (preflightVerdicts.some((verdict) => !verdict.ok)) {
+      const skipped = downstream.map((command): PlanningGateVerdict => ({
+        gate: command.gate, ok: false, errors: [], warnings: [], exit: 125, processGroupStopped: true,
+        scope: "skipped: transcript/cut preflight did not pass",
+      }));
+      return combinePlanningGateVerdicts([...preflightVerdicts, ...skipped]);
+    }
+    const downstreamVerdicts = await runGateWave(downstream, runtime);
+    return combinePlanningGateVerdicts([...preflightVerdicts, ...downstreamVerdicts]);
+  } finally { dependencies.signal?.removeEventListener("abort", cancel); }
 }
 
 /** One SSE payload replaces independent, easy-to-miss gate events. */

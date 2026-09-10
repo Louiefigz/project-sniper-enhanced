@@ -15,35 +15,57 @@ import { dlog } from "@/lib/debug";
 import {
   localIntakePreflight,
   ReferenceMediaError,
-  validateCopiedReference,
 } from "../../_lib/reference-intake-policy";
+import { admitReferenceMedia } from "../../_lib/reference-media-admission";
+import {
+  admitReferenceVtt,
+  type ReferenceTextAdmission,
+} from "../../_lib/reference-sidecar";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 1800;
 
 function referencesRoot(): string {
   return path.join(workspaceRoot(), "_references");
 }
 
-function nextReferenceDir(src: string): string {
-  const base = slugify(path.basename(src));
-  let dir = path.join(referencesRoot(), base);
-  for (let n = 2; fs.existsSync(dir); n++) dir = path.join(referencesRoot(), `${base}-${n}`);
-  return dir;
+function createDirectory(directory: string): boolean {
+  try {
+    fs.mkdirSync(directory);
+    return true;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "EEXIST") return false;
+    throw error;
+  }
 }
 
-function localStagingDir(): string {
+function createReferenceDir(src: string): string {
   const root = referencesRoot();
   fs.mkdirSync(root, { recursive: true });
-  return fs.mkdtempSync(path.join(root, ".incoming-local-"));
+  const base = slugify(path.basename(src));
+  for (let n = 1; ; n++) {
+    const dir = path.join(root, n === 1 ? base : `${base}-${n}`);
+    if (createDirectory(dir)) return dir;
+  }
 }
 
-function copySiblingVtts(src: string, dir: string): string[] {
+function copySiblingVtts(
+  src: string,
+  video: string,
+): ReferenceTextAdmission[] {
   const parent = path.dirname(src);
   const stem = path.parse(src).name;
   const names = fs.readdirSync(parent)
     .filter((name) => name.startsWith(stem) && name.toLowerCase().endsWith(".vtt"));
-  for (const name of names) fs.copyFileSync(path.join(parent, name), path.join(dir, name));
-  return names.map((name) => path.join(dir, name));
+  if (names.length > 20) throw new ReferenceMediaError("reference has too many VTT sidecars");
+  const destinationStem = path.parse(video).name;
+  return names.map((name) => {
+    const source = path.join(parent, name);
+    const destination = path.join(
+      path.dirname(video), `${destinationStem}${name.slice(stem.length)}`,
+    );
+    return admitReferenceVtt(source, destination);
+  });
 }
 
 export async function GET() {
@@ -54,13 +76,45 @@ export async function GET() {
   }
 }
 
+async function registerReference(
+  src: string,
+  dir: string,
+  signal: AbortSignal,
+): Promise<NextResponse> {
+  let registered = false;
+  try {
+    const pending = path.join(dir, ".sniper-admission-pending");
+    fs.writeFileSync(pending, `${new Date().toISOString()}\n`, { flag: "wx" });
+    const admission = await admitReferenceMedia(src, dir, signal);
+    const video = admission.snapshotPath;
+    const transcripts = copySiblingVtts(src, video);
+    upsertProject(dir, path.basename(src), "reference");
+    registered = true;
+    writeReferenceSource(dir, {
+      kind: "local", originalPath: src,
+      importedAt: new Date().toISOString(), transcripts, admission,
+    });
+    fs.unlinkSync(pending);
+    const id = stableReferenceId(video);
+    const reference = findReferenceById(id);
+    dlog("producer:references", "registered", { id, dir, video });
+    return NextResponse.json({ ok: true, id, dir, video, reference });
+  } catch (error) {
+    if (registered) removeProject(dir);
+    fs.rmSync(dir, { recursive: true, force: true });
+    const status = error instanceof ReferenceMediaError ? 422 : 500;
+    return NextResponse.json({ error: (error as Error).message }, { status });
+  }
+}
+
 export async function POST(req: NextRequest) {
   const body = (await req.json().catch(() => null)) as { path?: string } | null;
   const src = (body?.path || "").replace(/\/$/, "");
   if (!src || !path.isAbsolute(src)) {
     return NextResponse.json({ error: "path must be an absolute file path" }, { status: 400 });
   }
-  if (!fs.existsSync(src) || !fs.statSync(src).isFile()) {
+  if (!fs.existsSync(src) || !fs.lstatSync(src).isFile() ||
+      fs.lstatSync(src).isSymbolicLink()) {
     return NextResponse.json({ error: `not a file: ${src}` }, { status: 404 });
   }
   if (!videoExtensions().has(path.extname(src).toLowerCase())) {
@@ -74,39 +128,16 @@ export async function POST(req: NextRequest) {
   if (preflight) {
     return NextResponse.json({ error: preflight.message }, { status: preflight.status });
   }
-  const staging = localStagingDir();
-  const dir = nextReferenceDir(src);
-  let promoted = false;
-  let registered = false;
+  let dir: string;
   try {
-    const stagedVideo = path.join(staging, path.basename(src));
-    await fs.promises.copyFile(src, stagedVideo);
-    validateCopiedReference(stagedVideo);
-    copySiblingVtts(src, staging);
-    fs.renameSync(staging, dir);
-    promoted = true;
-    const video = path.join(dir, path.basename(src));
-    const transcripts = fs.readdirSync(dir)
-      .filter((name) => name.toLowerCase().endsWith(".vtt"))
-      .map((name) => path.join(dir, name));
-    upsertProject(dir, path.basename(src), "reference");
-    registered = true;
-    writeReferenceSource(dir, {
-      kind: "local",
-      originalPath: src,
-      importedAt: new Date().toISOString(),
-      transcripts,
-    });
-    const id = stableReferenceId(video);
-    const reference = findReferenceById(id);
-    dlog("producer:references", "registered", { id, dir, video });
-    return NextResponse.json({ ok: true, id, dir, video, reference });
+    dir = createReferenceDir(src);
   } catch (error) {
-    if (registered) removeProject(dir);
-    fs.rmSync(promoted ? dir : staging, { recursive: true, force: true });
-    const status = error instanceof ReferenceMediaError ? 422 : 500;
-    return NextResponse.json({ error: (error as Error).message }, { status });
+    return NextResponse.json(
+      { error: `could not allocate reference storage: ${(error as Error).message}` },
+      { status: 500 },
+    );
   }
+  return registerReference(src, dir, req.signal);
 }
 
 export async function DELETE(req: NextRequest) {

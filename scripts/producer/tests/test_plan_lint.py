@@ -1,4 +1,5 @@
 """plan_lint tests (split from selftest.py)."""
+import copy
 import unittest
 
 from _common import *  # noqa: F401,F403
@@ -17,6 +18,35 @@ class PlanLintTests(unittest.TestCase):
 
     def test_good_plan_passes_clean(self) -> None:
         self.assertEqual(self._errors(good_plan()), [])
+
+    def test_trim_short_does_not_require_a_title_card(self) -> None:
+        plan = good_plan()
+        plan["target"]["scope"] = "trim"
+        plan["titleCards"] = []
+        plan["brollTrack"] = []
+        plan["captions"]["burn"] = False
+        plan["music"] = {"enabled": False}
+        self.assertEqual(self._errors(plan), [])
+
+    def test_longform_youtube_destination_matches_starter_vocabulary(self) -> None:
+        plan = good_plan()
+        plan["target"].update({
+            "mode": "longform",
+            "scope": "trim",
+            "platforms": ["youtube"],
+            "durationTargetS": 600,
+        })
+        plan["cutTrack"] = [{
+            "sourceId": "raw-1", "start": 0.0, "end": 600.0, "speed": 1.0,
+        }]
+        plan["reframe"] = {"strategy": "none"}
+        plan["titleCards"] = []
+        plan["brollTrack"] = []
+        plan["captions"] = {"burn": False, "style": "line"}
+        plan["music"] = {"enabled": False}
+        manifest = copy.deepcopy(MANIFEST)
+        manifest["sources"][0]["duration"] = 600
+        self.assertEqual(pl.lint(plan, manifest).errors, [])
 
     def test_hook_too_many_words(self) -> None:
         plan = good_plan()

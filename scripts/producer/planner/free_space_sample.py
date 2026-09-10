@@ -12,13 +12,15 @@ venv python.
 from __future__ import annotations
 
 import os
+import math
 import statistics
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from producer_config import CANVAS, FREE_SPACE  # noqa: E402
+from producer_config import FREE_SPACE  # noqa: E402
 from planner.free_space import Grid  # noqa: E402
+from planner.verified_frame_sampling import current_frame_samples  # noqa: E402
 
 
 def busy_cells(frame, grid: Grid, cfg: dict = FREE_SPACE) -> set:
@@ -40,6 +42,17 @@ def busy_cells(frame, grid: Grid, cfg: dict = FREE_SPACE) -> set:
             if cell.size and int((cell > 0).sum()) / cell.size >= cfg["cell_edge_frac"]:
                 busy.add((r, c))
     return busy
+
+
+def _validated_hair_top(tops: list, frame_count: int, y0: int,
+                        kernel_size: int) -> float | None:
+    """Return an uncensored majority measurement, else request fallback."""
+    if len(tops) < frame_count / 2:
+        return None
+    measured = float(statistics.median(tops))
+    # A top at the search boundary is censored: motion continues above the
+    # inspected strip. The morphology kernel is the exact uncertainty radius.
+    return None if measured <= y0 + kernel_size else measured
 
 
 def measure_hair_top(frames: list, face_cx: float, face_top: float,
@@ -83,16 +96,40 @@ def measure_hair_top(frames: list, face_cx: float, face_top: float,
         rows = np.where(mask[y0:y1, x0:x1].sum(axis=1) > cfg["hair_row_min_px"])[0]
         if len(rows):
             tops.append(y0 + int(rows[0]))
-    if len(tops) < len(frames) / 2:
-        return None
-    return float(statistics.median(tops))
+    return _validated_hair_top(tops, len(frames), y0, kernel.shape[0])
+
+
+def _checked_sample(cap, timestamp: float, exact: bool):
+    """Reject a failed or neighboring-frame seek during a placement probe."""
+    import cv2
+    from motion.face_track import _read_at
+
+    frame = _read_at(cap, timestamp)
+    if not exact:
+        return frame
+    decoded = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000
+    if frame is None or not math.isfinite(decoded) or not math.isfinite(timestamp) \
+            or abs(decoded - timestamp) > 1e-7:
+        raise RuntimeError(f"placement frame seek mismatch: requested {timestamp}, decoded {decoded}")
+    return frame
+
+
+def _capture_canvas(cap) -> tuple[int, int]:
+    """Read valid decoded geometry or close the unusable capture."""
+    import cv2
+    canvas = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
+              int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+    if canvas[0] <= 0 or canvas[1] <= 0:
+        cap.release()
+        raise RuntimeError("video reports non-positive dimensions")
+    return canvas
 
 
 def sample_window(video_path: str, out_start: float, out_end: float) -> tuple:
-    """Sample the window -> (frames, median face box px | None, majority-busy set)."""
+    """Return frames, face, majority-busy cells, and decoded frame dimensions."""
     import cv2
 
-    from motion.face_track import _load_cascade, _read_at, _sample_times
+    from motion.face_track import _load_cascade, _sample_times
     from motion.visual_state import _largest_face
     from producer_config import FACE_TRACK
 
@@ -101,16 +138,24 @@ def sample_window(video_path: str, out_start: float, out_end: float) -> tuple:
     if not cap.isOpened():
         raise RuntimeError(f"cannot open video: {video_path}")
     det_cfg = {**FACE_TRACK, **cfg}
-    grid = Grid.of((CANVAS["width"], CANVAS["height"]), cfg)
+    canvas = _capture_canvas(cap)
+    selected = current_frame_samples(video_path)
+    times = selected if selected is not None else _sample_times(
+        out_start, out_end, cfg["samples_per_window"])
+    grid = Grid.of(canvas, cfg)
     frames: list = []
     boxes: list = []
     busy_counts: dict = {}
     try:
         cascade = _load_cascade()
-        for t in _sample_times(out_start, out_end, cfg["samples_per_window"]):
-            frame = _read_at(cap, t)
+        for t in times:
+            frame = _checked_sample(cap, t, selected is not None)
             if frame is None:
                 continue
+            frame_canvas = (int(frame.shape[1]), int(frame.shape[0]))
+            if frame_canvas != canvas:
+                raise RuntimeError(
+                    f"decoded frame dimensions changed: {canvas} -> {frame_canvas}")
             frames.append(frame)
             box = _largest_face(frame, cascade, det_cfg)
             if box is not None:
@@ -126,4 +171,4 @@ def sample_window(video_path: str, out_start: float, out_end: float) -> tuple:
     # (a single flicker — a passing car, a hand — shouldn't condemn a region).
     thresh = max(1, len(frames) // 2) if frames else 1
     busy = {cell for cell, n in busy_counts.items() if n >= thresh}
-    return frames, face, busy
+    return frames, face, busy, canvas

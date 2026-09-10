@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/projection-receipt-v1.schema.json",
+  "title": "ProjectionReceiptV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "canonicalPlanHash",
+    "manifestHash",
+    "sourceSnapshotSetHash",
+    "compilerHash",
+    "timelineMapHash",
+    "projectionHash",
+    "generationPath"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "canonicalPlanHash": { "$ref": "#/$defs/sha256" },
+    "manifestHash": { "$ref": "#/$defs/sha256" },
+    "sourceSnapshotSetHash": { "$ref": "#/$defs/sha256" },
+    "compilerHash": { "$ref": "#/$defs/sha256" },
+    "timelineMapHash": { "$ref": "#/$defs/sha256" },
+    "projectionHash": { "$ref": "#/$defs/sha256" },
+    "generationPath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

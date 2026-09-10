@@ -1,4 +1,5 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { TextDecoder } from "node:util";
 import {
   claudeProcessEnv,
   claudeSettings,
@@ -10,8 +11,10 @@ import {
   trackProcessTree,
 } from "../../_lib/child-process-lifecycle";
 import { derror, dlog } from "@/lib/debug";
+import { admitSubscriptionInvocation } from "../../_lib/subscription-invocation";
 import { REPO_ROOT } from "./authoring-prompt";
-import { authoringPermissionDenial, authoringStreamSessionId } from "./authoring-stream-contract";
+import { AUTHORING_OUTPUT_MAX_BYTES, authoringPermissionDenial, authoringStreamSessionId,
+  authoringTextState, failAuthoringProtocol, observeAuthoringEvent, type AuthoringBlock, type AuthoringTextState } from "./authoring-stream-contract";
 import type { AuthoringSessionMode, AuthoringStage } from "./authoring";
 import { type AutoEditCtx, type Send, lineSplitter, tailCollector } from "./stream";
 
@@ -44,6 +47,9 @@ export interface AuthoringResult {
   ms: number;
   provider: BrainProvider;
   authored: { segments: number; graphics: number } | null;
+  blocked?: AuthoringBlock | null;
+  protocolFailure?: string | null;
+  providerFailure?: string | null;
   sessionEstablished?: boolean;
 }
 
@@ -52,35 +58,41 @@ interface ProcessInput {
   send: Send;
   stage: AuthoringStage;
   started: number;
+  timeoutMs: number;
 }
 
 interface ProcessState {
+  closed: boolean;
   timedOut: boolean;
-  resultText: string;
+  text: AuthoringTextState;
   permissionFailure: string;
+  outputFailure: string;
+  outputBytes: number;
   sessionEstablished: boolean;
 }
 
-function parsedAuthored(message: string): AuthoringResult["authored"] {
-  const match = message.match(/AUTHORED ok segments=(\d+) graphics=(\d+)/);
-  return match ? { segments: Number(match[1]), graphics: Number(match[2]) } : null;
-}
-
+/** Inspect one bounded stream row and request at most one explicit outcome stop. */
 function processLine(
   input: ProcessInput,
   state: ProcessState,
   proc: ChildProcessWithoutNullStreams,
   line: string,
 ): void {
+  const alreadyStopped = Boolean(state.text.blocked || state.text.protocolFailure || state.text.providerFailure);
   try {
     const obj = JSON.parse(line) as Record<string, unknown> & { type?: string };
-    if (obj.type === "result" && typeof obj.result === "string") state.resultText = obj.result;
+    observeAuthoringEvent(state.text, "legacy", obj);
     input.send({ ...obj, event: `authoring_${obj.type || "raw"}` });
   } catch {
+    observeAuthoringEvent(state.text, "legacy", { type: "raw" });
     input.send({ event: "authoring_raw", line: line.slice(0, 2000) });
   }
   if (authoringStreamSessionId(line) === input.ctx.brainSessionId) {
     state.sessionEstablished = true;
+  }
+  if (state.text.blocked || state.text.protocolFailure || state.text.providerFailure) {
+    if (!alreadyStopped && !state.closed) terminateProcessTree(proc);
+    return;
   }
   const denial = authoringPermissionDenial(line);
   if (!denial || state.permissionFailure) return;
@@ -90,41 +102,75 @@ function processLine(
   terminateProcessTree(proc);
 }
 
+/** Preserve protocol and editor failures independently of the process exit code. */
 function completedResult(state: ProcessState, code: number | null, started: number,
   stderr: string): AuthoringResult {
   return {
-    code: state.permissionFailure ? 1 : code ?? 1,
+    code: state.permissionFailure || state.outputFailure || state.text.protocolFailure || state.text.providerFailure ? 1 : code ?? 1,
     timedOut: state.timedOut,
-    errTail: state.permissionFailure || stderr,
-    ms: Date.now() - started,
+    errTail: state.permissionFailure || state.outputFailure || state.text.protocolFailure || state.text.providerFailure || stderr,
+    ms: performance.now() - started,
     provider: "legacy",
-    authored: parsedAuthored(state.resultText),
+    authored: state.text.authored,
+    blocked: state.text.blocked,
+    protocolFailure: state.text.protocolFailure,
+    providerFailure: state.text.providerFailure,
     sessionEstablished: state.sessionEstablished,
   };
 }
 
-function bindProcess(
+/** Cap bytes before the shared line splitter or JSON parser allocates whole rows. */
+function acceptOutput(state: ProcessState, proc: ChildProcessWithoutNullStreams, data: Buffer): boolean {
+  if (state.outputFailure) return false;
+  state.outputBytes += data.length;
+  if (state.outputBytes <= AUTHORING_OUTPUT_MAX_BYTES) return true;
+  state.outputFailure = `Claude authoring exceeded its ${AUTHORING_OUTPUT_MAX_BYTES}-byte output budget`;
+  state.text.protocolFailure = state.outputFailure;
+  state.text.authored = null;
+  terminateProcessTree(proc);
+  return false;
+}
+
+/** Decode stdout incrementally, refusing invalid bytes and incomplete EOF sequences. */
+function decodeOutput(state: ProcessState, proc: ChildProcessWithoutNullStreams,
+  decoder: TextDecoder, data?: Buffer): string {
+  if (state.text.protocolFailure || state.text.providerFailure) return "";
+  try {
+    return decoder.decode(data, { stream: data !== undefined });
+  } catch {
+    failAuthoringProtocol(state.text);
+  }
+  if (!state.closed && !state.text.blocked) terminateProcessTree(proc);
+  return "";
+}
+
+/** Observe an already-owned child; this seam neither spawns nor grants provider authority. */
+export function bindClaudeAuthoringProcess(
   proc: ChildProcessWithoutNullStreams,
   input: ProcessInput,
   resolve: (result: AuthoringResult) => void,
 ): void {
   const state: ProcessState = {
-    timedOut: false, resultText: "", permissionFailure: "", sessionEstablished: false,
+    closed: false, timedOut: false, text: authoringTextState(), permissionFailure: "", outputFailure: "",
+    outputBytes: 0, sessionEstablished: false,
   };
   const stderr = tailCollector();
+  const decoder = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true });
   const lines = lineSplitter((line) => processLine(input, state, proc, line));
   const timer = setTimeout(() => {
+    if (state.outputFailure || state.text.blocked || state.text.protocolFailure || state.text.providerFailure) return;
     state.timedOut = true;
     derror("producer:auto-edit", "authoring timed out — terminating process tree", {
       dir: input.ctx.dir,
     });
     terminateProcessTree(proc);
-  }, AUTHORING_TIMEOUT_MS);
-  proc.stdout.on("data", (data: Buffer) => lines.push(data.toString()));
-  proc.stderr.on("data", (data: Buffer) => stderr.push(data.toString()));
+  }, input.timeoutMs);
+  proc.stdout.on("data", (data: Buffer) => { if (acceptOutput(state, proc, data)) lines.push(decodeOutput(state, proc, decoder, data)); });
+  proc.stderr.on("data", (data: Buffer) => { if (acceptOutput(state, proc, data)) stderr.push(data.toString()); });
   proc.on("close", (code) => {
+    state.closed = true;
     clearTimeout(timer);
-    lines.flush();
+    if (!state.outputFailure) { lines.push(decodeOutput(state, proc, decoder)); lines.flush(); }
     resolve(completedResult(state, code, input.started, stderr.get()));
   });
   proc.on("error", (error) => {
@@ -134,7 +180,7 @@ function bindProcess(
   });
 }
 
-export function runClaudeAuthoringProcess(
+export async function runClaudeAuthoringProcess(
   ctx: AutoEditCtx,
   send: Send,
   stage: AuthoringStage,
@@ -142,14 +188,17 @@ export function runClaudeAuthoringProcess(
 ): Promise<AuthoringResult> {
   const env = claudeProcessEnv();
   if (ctx.pipeline) env.SNIPER_PIPELINE_ROOT = ctx.pipeline.snapshotRoot;
-  const started = Date.now();
+  const started = performance.now();
+  const admitted = await admitSubscriptionInvocation({ provider: "claude", bin: CLAUDE_BIN,
+    args, cwd: REPO_ROOT, env, timeoutMs: AUTHORING_TIMEOUT_MS });
   const model = claudeSettings().model;
   dlog("producer:auto-edit", "spawn claude (authoring)", { dir: ctx.dir, scope: ctx.scope, model });
   send({ event: "authoring_model_selected", provider: "legacy", model });
-  const proc = trackProcessTree(spawn(CLAUDE_BIN, args, {
-    cwd: REPO_ROOT, env, detached: shouldDetachProcessGroup(),
+  const timeoutMs = admitted.remainingMs();
+  const proc = trackProcessTree(spawn(admitted.bin, admitted.args, {
+    cwd: admitted.cwd, env: admitted.env, detached: shouldDetachProcessGroup(),
   }));
-  return new Promise((resolve) => bindProcess(proc, { ctx, send, stage, started }, resolve));
+  return new Promise((resolve) => bindClaudeAuthoringProcess(proc, { ctx, send, stage, started, timeoutMs }, resolve));
 }
 
 export type { AuthoringSessionMode };

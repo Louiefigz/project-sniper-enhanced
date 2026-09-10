@@ -18,22 +18,27 @@ import os
 import sys
 from typing import Any, Optional
 
-from plan_lint_audio import check_audio, check_music_source
+from plan_lint_audio import check_audio
 from plan_lint_broll import check_focus_ops, check_slipcover
 from plan_lint_comps import check_comp_matrix
 from plan_lint_face import check_face_pack
-from plan_lint_motion import check_motion, check_word_lock
+from plan_lint_motion import check_motion
 from plan_lint_overlays import check_broll, check_title_cards
-from plan_lint_visual import check_form_shape
-from graphics.intro_semantic_contract import check_intro_graphics
-from graphics.style_profile_contract import check_style_profile
-from plan_lint_reframe import check_reframe
-from producer_config import (
-    CAPTION_STYLES,
-    LINT,
-    MODES,
-    PLATFORMS,
+from plan_lint_plan_contract import (
+    check_graphic_ids as _check_graphic_ids,
+    check_music_and_misc as _check_music_and_misc,
+    check_target as _check_target,
+    check_transcript_contracts,
 )
+from render_effect_registry import (
+    RenderEffectError,
+    validate_render_documents,
+)
+from edit.cut_repair_picture_plan_authority import (
+    PicturePlanAuthorityError,
+    validate_picture_plan_authority_for_plan,
+)
+from producer_config import LINT
 
 
 class Report:
@@ -68,40 +73,6 @@ def output_duration_s(cut_track: list[dict]) -> float:
         speed = float(r.get("speed", 1.0)) or 1.0
         total += (float(r["end"]) - float(r["start"])) / speed
     return total
-
-
-def _check_graphic_ids(plan: dict, rep: Report) -> None:
-    """Graphic ids (editor-stamped) must be unique — the editor addresses each
-    graphic by ``id``, so a collision lets two blocks masquerade as one. The
-    field is OPTIONAL (brain-authored / legacy plans carry none; the editor
-    stamps them at load), but a present id must be non-empty and unique.
-    """
-    seen: set[str] = set()
-    for i, g in enumerate(plan.get("graphicsTrack") or []):
-        gid = g.get("id")
-        if gid is None:
-            continue
-        if not isinstance(gid, str) or not gid:
-            rep.error(f"graphicsTrack[{i}]: id must be a non-empty string (got {gid!r})")
-            continue
-        if gid in seen:
-            rep.error(f"graphicsTrack[{i}]: duplicate graphic id {gid!r}")
-        seen.add(gid)
-
-
-def _check_target(plan: dict, rep: Report) -> Optional[dict]:
-    """Validate plan.target; return the mode preset or None on failure."""
-    target = plan.get("target") or {}
-    mode = target.get("mode")
-    if mode not in MODES:
-        rep.error(f"target.mode must be one of {sorted(MODES)} (got {mode!r})")
-        return None
-    for p in target.get("platforms") or []:
-        if p not in PLATFORMS:
-            rep.error(f"unknown platform {p!r} (allowed: {PLATFORMS})")
-    if not isinstance(plan.get("planVersion"), int) or plan["planVersion"] < 1:
-        rep.error("planVersion must be an integer >= 1")
-    return MODES[mode]
 
 
 def _check_pauses(rng: dict, bounds: tuple[float, float], tag: str, rep: Report) -> None:
@@ -166,34 +137,37 @@ def _check_cut_track(plan: dict, manifest: dict, preset: dict, rep: Report) -> N
             )
         speed = float(r.get("speed", 1.0))
         cap = preset["speed_cap_filler"] if r.get("filler") else preset["speed_cap"]
-        if not (LINT["speed_min"] <= speed <= LINT["speed_max"]):
+        valid_speed = LINT["speed_min"] <= speed <= LINT["speed_max"]
+        if not valid_speed:
             rep.error(f"{tag}: speed {speed} outside [{LINT['speed_min']},{LINT['speed_max']}]")
-        elif speed > cap:
+        if valid_speed and speed > cap:
             rep.error(f"{tag}: speed {speed} exceeds mode cap {cap}")
         _check_pauses(r, (start, end), tag, rep)
         _check_audio_lead(i, cuts, tag, rep)
     _check_source_overlap(cuts, rep)
 
 
-def _check_source_overlap(cuts: list[dict], rep: Report) -> None:
-    """Reject overlapping cut ranges within one source (edge X14).
+def _source_overlap_errors(
+    source_id: str, ranges: list[tuple[float, float, int]], rep: Report,
+) -> None:
+    """Report overlaps for one already-grouped source."""
+    ranges.sort()
+    for (_, e1, i1), (s2, _, i2) in zip(ranges, ranges[1:]):
+        if s2 < e1:
+            rep.error(
+                f"cutTrack[{i2}]: overlaps cutTrack[{i1}] in source "
+                f"'{source_id}' — replayed ranges drop captions (X14)")
 
-    ``remap_words`` maps each word to the EARLIEST containing segment, so a
-    replayed range would render caption-less on the repeat. Forbidden in
-    Phase 1; revisit if replays become a wanted editorial pattern.
-    """
+
+def _check_source_overlap(cuts: list[dict], rep: Report) -> None:
+    """Reject source overlaps that would drop captions from replayed ranges."""
     by_source: dict[str, list[tuple[float, float, int]]] = {}
-    for i, r in enumerate(cuts):
-        key = str(r.get("sourceId"))
-        by_source.setdefault(key, []).append(
-            (float(r.get("start", -1)), float(r.get("end", -1)), i))
+    for index, row in enumerate(cuts):
+        key = str(row.get("sourceId"))
+        by_source.setdefault(key, []).append((
+            float(row.get("start", -1)), float(row.get("end", -1)), index))
     for source_id, ranges in by_source.items():
-        ranges.sort()
-        for (_, e1, i1), (s2, _, i2) in zip(ranges, ranges[1:]):
-            if s2 < e1:
-                rep.error(
-                    f"cutTrack[{i2}]: overlaps cutTrack[{i1}] in source "
-                    f"'{source_id}' — replayed ranges drop captions (X14)")
+        _source_overlap_errors(source_id, ranges, rep)
 
 
 def _check_duration(plan: dict, preset: dict, rep: Report) -> float:
@@ -221,35 +195,6 @@ def _check_duration(plan: dict, preset: dict, rep: Report) -> float:
     return out_dur
 
 
-def _check_music_and_misc(plan: dict, manifest: dict, preset: dict, rep: Report) -> None:
-    """Music variants/asset + reframe contract + caption style + chapter order."""
-    music = plan.get("music") or {}
-    if music.get("enabled"):
-        variants = music.get("variants")
-        if variants is not None and (not set(variants)
-                                     or not set(variants) <= {"with", "without"}):
-            rep.error("music.variants must be a non-empty subset of ['with','without']")
-        check_music_source(music, manifest, rep)
-    # Reframe (strategy + fill/split layout contract): plan_lint_reframe owns it.
-    check_reframe(plan, preset, rep)
-    style = (plan.get("captions") or {}).get("style", preset["captions_style"])
-    if style not in CAPTION_STYLES:
-        rep.error(f"captions.style {style!r} not in {CAPTION_STYLES}")
-    offset = (plan.get("captions") or {}).get("bandYOffsetPx", 0)
-    if not isinstance(offset, (int, float)) or not (0 <= offset <= 400):
-        # Edge C12: shift is UP only, bounded so the band stays inside the
-        # safe area and clear of the hook-card zone.
-        rep.error("captions.bandYOffsetPx must be a number in [0, 400]")
-    chapters = plan.get("chapters")
-    mode = (plan.get("target") or {}).get("mode")
-    if chapters and mode != "longform":
-        rep.error("chapters are longform-only")
-    if chapters:
-        starts = [float(c.get("outStart", -1)) for c in chapters]
-        if starts != sorted(starts) or (starts and starts[0] < 0):
-            rep.error("chapters must have ascending non-negative outStart")
-
-
 def lint(plan: dict[str, Any], manifest: dict[str, Any],
          words_out: Optional[list] = None) -> Report:
     """Run every check; returns the populated Report.
@@ -259,6 +204,12 @@ def lint(plan: dict[str, Any], manifest: dict[str, Any],
     semantic, and word-lock contracts cannot be bypassed.
     """
     rep = Report()
+    try:
+        validate_render_documents(plan, manifest)
+        validate_picture_plan_authority_for_plan(plan)
+    except (RenderEffectError, PicturePlanAuthorityError) as exc:
+        rep.error(str(exc))
+        return rep
     preset = _check_target(plan, rep)
     if preset is None:
         return rep
@@ -289,14 +240,7 @@ def lint(plan: dict[str, Any], manifest: dict[str, Any],
     # plan_lint_comps routes gate-policy verdicts into this Report; a missing
     # matrix is a labeled SKIP, never a crash or a silent pass.
     check_comp_matrix(plan, rep)
-    check_style_profile(plan, out_dur, rep, words_out)
-    if words_out is not None:
-        check_word_lock(plan, words_out, rep)
-        # LL-015 (NATEHERK_CARDS §1.4): comparison-shaped info (≥2 numeric
-        # spec tokens + a spoken comparative marker) on a non-comparison
-        # card form WARNs — pick the form per MOTION["card_form_map"].
-        check_form_shape(plan, words_out, rep)
-        check_intro_graphics(plan, words_out, out_dur, rep)
+    check_transcript_contracts(plan, out_dur, words_out, rep)
     return rep
 
 

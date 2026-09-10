@@ -12,14 +12,20 @@ import {
 const dir = "/tmp/sniper-chain-fixture/producer";
 const manifest = "/tmp/sniper-chain-fixture/source/asset_manifest.json";
 const defaultArgs = assembleCommandArgs(dir, manifest);
-assert.equal(defaultArgs[3], path.join(dir, "final.mp4"));
+assert.ok(defaultArgs.includes("--defer-active"));
+assert.equal(
+  defaultArgs[defaultArgs.indexOf("--output") + 1],
+  path.join(dir, "final.mp4"),
+);
 
 const candidate = path.join(dir, ".sniper-qc", "round-1", "final.mp4");
 const candidateArgs = assembleCommandArgs(dir, manifest, candidate);
-assert.equal(candidateArgs[3], candidate);
-assert.deepEqual(candidateArgs.slice(-4), [
+const rendererStart = candidateArgs.indexOf("--") + 1;
+assert.equal(candidateArgs[rendererStart + 3], candidate);
+assert.deepEqual(candidateArgs.slice(-5), [
   "--fingerprint", path.join(dir, "base.fingerprint.json"),
   "--manifest", manifest,
+  "--require-source-set-admission",
 ]);
 
 async function main(): Promise<void> {
@@ -47,22 +53,15 @@ async function main(): Promise<void> {
   await typedAssembleErrorSurvivesIntoErrTail();
 }
 
-/**
- * Regression (geometry contract v3 A2): assemble.py emits its typed errors —
- * including "NoLegalRegion: {...}" — via emit() on STDOUT. runAssemble's
- * errTail must carry that typed text so the re-plan route can key on it; a
- * stderr-only tail turned every render-time NoLegalRegion into an untyped
- * terminal failure. This spawns the REAL assemble.py (no plan file, so it hits
- * the typed emit path and exits 1) instead of faking the tail.
- */
+/** The graph preflight's typed stdout failure must survive in errTail. */
 async function typedAssembleErrorSurvivesIntoErrTail(): Promise<void> {
   const tmp = mkdtempSync(path.join(os.tmpdir(), "sniper-chain-assemble-"));
   try {
     const result = await runAssemble(tmp, path.join(tmp, "asset_manifest.json"), () => {});
-    assert.equal(result.code, 1);
+    assert.equal(result.code, 2);
     assert.match(
       result.errTail, /"error"/,
-      "assemble.py's typed emit() error must land in errTail — the NoLegalRegion re-plan route reads it",
+      "the graph preflight error must land in errTail before a child can run",
     );
     assert.match(result.errTail, /edit_plan\.json/);
   } finally {

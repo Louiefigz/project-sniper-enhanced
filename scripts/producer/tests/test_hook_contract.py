@@ -103,6 +103,21 @@ class ScopeAndDirectiveGatingTests(unittest.TestCase):
         hc.check_hook_contract({"captions": {"burn": False}}, short_words, target, rep)
         self.assertTrue(any("captions" in e for e in rep.errors), rep.errors)
 
+    def test_captions_track_cannot_satisfy_short_caption_obligation(self) -> None:
+        target = {"mode": "short", "scope": "full",
+                  "lanes": {"graphics": "off", "credibility": "off",
+                            "motion": "off", "transitions": "off"}}
+        plan = {
+            "captions": {"burn": False},
+            "captionsTrack": [
+                {"outStart": 0, "outEnd": 2, "text": "This will not render"},
+            ],
+        }
+        rep = plan_lint.Report()
+        hc.check_hook_contract(plan, [_w("hi", 0.5)], target, rep)
+        self.assertTrue(any("captions" in error for error in rep.errors),
+                        rep.errors)
+
     def test_longform_never_requires_captions(self) -> None:
         # Long-form has NO on-screen captions — the obligation must not fire even
         # with the captions lane fully active and nothing authored.

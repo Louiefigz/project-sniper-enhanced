@@ -5,6 +5,8 @@ import {
   durableProcessAlive,
   validProcessIdentity,
 } from "./process-liveness";
+import { palmierSagaStateForCandidateSync } from
+  "./producer-palmier-native-commit";
 
 export const PALMIER_CANDIDATE_FILE = "palmier.timeline-candidate.json";
 export const PALMIER_NATIVE_QC_FILE = "palmier.native-qc.json";
@@ -21,7 +23,9 @@ export interface PalmierCandidateQcRun {
 type JsonObject = Record<string, unknown>;
 
 export interface PalmierCandidateQcState {
-  state: "none" | "pending" | "prepared" | "checking" | "approved" | "stale" | "rejected" | "quarantined";
+  state: "none" | "pending" | "prepared" | "checking" | "approved"
+    | "commit-recovery" | "reconciliation"
+    | "stale" | "rejected" | "quarantined";
   canRunQc: boolean;
   canPromote: boolean;
   canDiscard: boolean;
@@ -164,6 +168,8 @@ function stateDetail(state: PalmierCandidateQcState["state"]): string {
     prepared: "The exact candidate export is prepared; deterministic and visual checks remain.",
     checking: "Deterministic checks passed; both independent rendered reviews remain required.",
     approved: "The candidate passed exported deterministic, composition, and editorial QC. Promotion still performs a fresh compare-and-swap check.",
+    "commit-recovery": "Palmier selected the approved candidate, but its exact local revision commit still needs durable recovery.",
+    reconciliation: "Palmier/local commit observations conflict. Promotion is blocked pending explicit reconciliation.",
     stale: "The candidate's prior approval no longer matches its receipt or exported evidence. Review it, then discard it safely before asking for a fresh governed candidate.",
     rejected: "Candidate QC stopped safely. The rejected candidate is archived and the verified parent remains current.",
     quarantined: "The candidate failed safely. Restore and verify its preserved parent before continuing.",
@@ -181,6 +187,15 @@ export function palmierCandidateQcState(dir: string): PalmierCandidateQcState {
   }
   if (candidate.status === "qc-rejected" || candidate.status === "discarded") {
     return value("rejected", false, false, false, timelineId, run);
+  }
+  if (candidate.status === "promoted" && timelineId) {
+    const saga = palmierSagaStateForCandidateSync(dir, timelineId);
+    if (saga === "RECONCILIATION_REQUIRED" || saga === "ABORTED") {
+      return value("reconciliation", false, false, false, timelineId, run);
+    }
+    if (saga && saga !== "COMMITTED") {
+      return value("commit-recovery", false, !run.active, false, timelineId, run);
+    }
   }
   const qc = nativeQcReceipt(dir);
   const approved = currentApprovedCandidate(dir, stringValue(candidate.projectId));

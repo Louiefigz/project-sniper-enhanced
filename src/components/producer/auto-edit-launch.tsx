@@ -9,7 +9,7 @@ import { buildAutoEditRequest } from "@/lib/producer/intent-flow";
 import { streamProgressMessage } from "@/lib/producer/project-state";
 import {
   editorBrainLabel,
-  launchAutoEditFromPalmier,
+  launchAutoEditFromHyperframes,
   useEditorRuntime,
 } from "./use-editor-runtime";
 
@@ -43,12 +43,13 @@ export default function AutoEditLaunch({
     const controller = new AbortController();
     activeRef.current = controller;
     setRunning(true);
-    setStatus("Opening the Palmier workbench…");
+    setStatus("Starting the reviewed MP4 pipeline…");
     try {
-      const response = await launchAutoEditFromPalmier({
+      const request = buildAutoEditRequest(dir, intent);
+      const response = await launchAutoEditFromHyperframes({
         dir,
         mode: intent.mode,
-        request: buildAutoEditRequest(dir, intent),
+        request,
         signal: controller.signal,
       });
       setStatus(`${brain} is authoring the transcript-first cut…`);
@@ -60,7 +61,7 @@ export default function AutoEditLaunch({
         if (event.event === "error") throw new Error(String(event.message));
         const progress = streamProgressMessage(event as Record<string, unknown>);
         if (progress && mountedRef.current && activeRef.current === controller) setStatus(progress);
-      }, controller.signal, "outputs");
+      }, controller.signal, request.workflowPolicy === "cut-first" ? ["outputs", "awaiting_cut_approval"] : "outputs");
       if (!controller.signal.aborted && mountedRef.current && activeRef.current === controller) onDone();
     } catch (error) {
       if ((error as Error).name !== "AbortError" && mountedRef.current) {
@@ -81,10 +82,10 @@ export default function AutoEditLaunch({
         <div className="flex shrink-0 flex-col items-end gap-1">
           <Button onClick={run} disabled={running || !intent}>
             {running ? <Loader2 className="size-4 animate-spin" /> : null}
-            {running ? "Working…" : "Generate in Palmier →"}
+            {running ? "Working…" : "Generate video →"}
           </Button>
           <p className="text-right text-[10px] text-muted-foreground">
-            {brain} · Palmier opens first
+            {brain} · HyperFrames review · QC-approved MP4
           </p>
         </div>
       </div>

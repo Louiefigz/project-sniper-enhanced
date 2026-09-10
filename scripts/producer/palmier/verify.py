@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Structural verification for a generated Palmier shadow timeline."""
 from __future__ import annotations
 
@@ -6,13 +5,12 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
+from palmier.keyframe_readback import verify_keyframes
 from palmier.mcp_client import PalmierError
 from palmier.verify_properties import (cut_properties, verify_properties,
                                        verify_text)
 
-# Palmier may expose an adjacent source frame when 23.976 footage is conformed
-# to a 24 fps project. The executor normalizes output durations; verification
-# permits only that one source-cut frame while keeping overlays and text exact.
+# Permit one adjacent source-cut frame when 23.976 footage is conformed to 24.
 _TIMELINE_FRAME_TOLERANCE = 1
 
 
@@ -189,73 +187,6 @@ def _verify_cut_seams(expected: list[ExpectedClip], actual: dict,
         raise PalmierError("timeline verification: conformed cuts do not fill the timeline")
 
 
-def _keyframe_map(clip: dict) -> dict[str, list] | None:
-    if "keyframes" not in clip:
-        return None
-    raw = clip["keyframes"]
-    if isinstance(raw, dict):
-        result = {}
-        for prop, value in raw.items():
-            rows = value.get("rows", value.get("keyframes")) if isinstance(value, dict) else value
-            if not isinstance(rows, list):
-                raise PalmierError("timeline verification: malformed keyframe rows")
-            result[str(prop)] = rows
-        return result
-    if isinstance(raw, list):
-        result = {}
-        for entry in raw:
-            if not isinstance(entry, dict):
-                raise PalmierError("timeline verification: malformed keyframe entry")
-            prop = entry.get("property") or entry.get("name")
-            rows = entry.get("rows", entry.get("keyframes"))
-            if not isinstance(prop, str) or not isinstance(rows, list):
-                raise PalmierError("timeline verification: malformed keyframe entry")
-            result[prop] = rows
-        return result
-    raise PalmierError("timeline verification: keyframes has unknown shape")
-
-
-def _keyframe_rows_match(found: list, expected: list) -> tuple[bool, bool]:
-    """Compare geometry exactly while detecting omitted easing metadata."""
-    if found == expected:
-        return True, False
-    stripped = [row[:-1] if isinstance(row, list) and row
-                and isinstance(row[-1], str) else row for row in expected]
-    return found == stripped, found == stripped
-
-
-def _verify_keyframes(lanes: dict, executor: Any,
-                      actual: dict[str, dict]) -> dict:
-    expected: dict[str, dict[str, list]] = {}
-    for step in lanes.get("keyframes") or []:
-        clip_id = executor.cut_clip_ids[step["clip"]]
-        expected.setdefault(clip_id, {})[step["property"]] = step["rows"]
-    if not expected:
-        return {"status": "not_applicable", "expectedProperties": 0}
-    exposed = {clip_id: found for clip_id, clip in actual.items()
-               if (found := _keyframe_map(clip)) is not None}
-    if not exposed:
-        count = sum(len(properties) for properties in expected.values())
-        raise PalmierError(
-            f"timeline verification: {count} required keyframe properties "
-            "were not exposed by Palmier readback")
-    easing_omitted = False
-    for clip_id, properties in expected.items():
-        found = exposed.get(clip_id)
-        if found is None:
-            raise PalmierError(
-                f"timeline verification: keyframes missing for clip {clip_id}")
-        for prop, rows in properties.items():
-            matches, normalized = _keyframe_rows_match(found.get(prop), rows)
-            if not matches:
-                raise PalmierError(
-                    f"timeline verification: {prop} keyframes differ on {clip_id}")
-            easing_omitted = easing_omitted or normalized
-    return {"status": "verified-values" if easing_omitted else "verified",
-            "easing": "not_exposed" if easing_omitted else "verified",
-            "properties": sum(len(properties) for properties in expected.values())}
-
-
 def _proof(timeline_id: str, lanes: dict, executor: Any,
            index: dict, expected_clips: list[ExpectedClip],
            actual_ranges: dict, actual_total: int) -> dict:
@@ -276,7 +207,7 @@ def _proof(timeline_id: str, lanes: dict, executor: Any,
                      "counts": expected_counts, "timing": timing},
         "actual": {"totalFrames": actual_total, "counts": actual_counts,
                    "timing": actual_timing},
-        "keyframes": _verify_keyframes(lanes, executor, index),
+        "keyframes": verify_keyframes(lanes, executor, index),
     }
     if lanes.get("mirror"):
         entry = lanes["mirror"]["entry"]

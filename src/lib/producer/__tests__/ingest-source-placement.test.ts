@@ -48,6 +48,21 @@ async function run(): Promise<void> {
   assert.equal(progress.at(-1)?.copiedBytes, progress.at(-1)?.totalBytes);
   assert.equal(existsSync(path.join(copiedRoot, "project.json")), true);
 
+  const changedRoot = path.join(sandbox, "changed-project");
+  const changedInput = path.join(sandbox, "changed.mp4");
+  mkdirSync(changedRoot);
+  writeFileSync(changedInput, Buffer.alloc(512 * 1024, 1));
+  let mutated = false;
+  await assert.rejects(
+    prepareIngestTarget(freshTarget(changedRoot, changedInput), () => {
+      if (mutated) return;
+      mutated = true;
+      writeFileSync(changedInput, Buffer.alloc(512 * 1024, 2));
+    }, new AbortController().signal),
+    /Source file changed during copy/,
+  );
+  assert.deepEqual(readdirSync(changedRoot), []);
+
   const cancelledRoot = path.join(sandbox, "cancelled-project");
   const largeInput = path.join(sandbox, "cancel-me.mp4");
   mkdirSync(cancelledRoot);

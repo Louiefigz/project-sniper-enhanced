@@ -113,4 +113,15 @@ const segmenter = projectCardPresentation({
 assert.equal(segmenter.label, "Source clips ready");
 assert.equal(segmenter.primary, "choose_segment");
 
+for (const status of ["awaiting_cut_approval", "cut_accepted"] as const) {
+  const checkpoint = projectCardPresentation({ ...input, run: { kind: "auto_edit", status, phase: "authoring",
+    startedAt: "2026-09-06T01:01:00.000Z", updatedAt: "2026-09-06T01:02:00.000Z", events: [],
+    message: "Verifying the submitted cut and admitted source bytes" } });
+  assert.equal(checkpoint.primary, "stage");
+  assert.doesNotMatch(checkpoint.label, /Finished/);
+  assert.match(checkpoint.safe, /cannot bypass/);
+  if (status === "awaiting_cut_approval") assert.match(checkpoint.working, /Verifying/);
+  else assert.match(checkpoint.working, /not confirmed/);
+}
+
 console.log("project-card-state.test.ts: all assertions passed");

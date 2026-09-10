@@ -1,0 +1,70 @@
+FFF..........E...E..E
+======================================================================
+ERROR: test_repository_measured_baselines_are_closed (test_current_system_inventory_check.CurrentSystemInventoryCheckTests.test_repository_measured_baselines_are_closed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/test_current_system_inventory_check.py", line 271, in test_repository_measured_baselines_are_closed
+    result = validate_inventory(repo, inventory)
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_system_inventory_check.py", line 191, in validate_inventory
+    baseline_evidence = _verify_baseline(repo, inventory.get("baseline"))
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_system_inventory_check.py", line 89, in _verify_baseline
+    raise RuntimeError(
+        f"baseline evidence is not one closed trace: {relative}")
+RuntimeError: baseline evidence is not one closed trace: docs/producer/command-driven-editing/contracts/p0-current-short-baseline-v1.json
+
+======================================================================
+ERROR: test_repository_registry_is_exact_and_complete (test_external_ingress_registry.ExternalIngressRegistryTests.test_repository_registry_is_exact_and_complete)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/test_external_ingress_registry.py", line 60, in test_repository_registry_is_exact_and_complete
+    validate_external_ingress_registry(),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/external_ingress_registry.py", line 267, in validate_external_ingress_registry
+    raise ValueError("; ".join(errors))
+ValueError: sealed-archive-verification: discovered 5 occurrences, expected 4; scripts/producer/assemble.py: token '--allow-legacy-unadmitted' occurs 0, expected 1; ingress owner matches no discovered line: {'ruleId': 'legacy-admission-escape', 'path': 'scripts/producer/assemble.py', 'sourceToken': '--allow-legacy-unadmitted', 'expectedOccurrences': 1}; production-clis-default-strict: scripts/producer/assemble.py token 'if not args.allow_legacy_unadmitted:' occurs 0, expected 1; unowned external ingress occurrences: ['sealed-archive-verification:scripts/producer/headless/render_layout_contract.py:103 verify_archive_file(snapshot.path, snapshot.sha256, snapshot.manifest)', 'legacy-admission-escape:scripts/producer/assemble_arguments.py:33 policy.add_argument("--allow-legacy-unadmitted", action="store_true",']
+
+======================================================================
+ERROR: test_render_routes_broll_before_graphics (test_graphics_broll_layering.GraphicsOverBrollLayeringTests.test_render_routes_broll_before_graphics)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/test_graphics_broll_layering.py", line 119, in test_render_routes_broll_before_graphics
+    body.index("broll_stage("), body.index("graphics_track_stage("))
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^
+ValueError: substring not found
+
+======================================================================
+FAIL: test_policy_retains_exact_mounts_network_memory_and_no_pull (test_color_diagnostic.ColorDiagnosticTests.test_policy_retains_exact_mounts_network_memory_and_no_pull)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/test_color_diagnostic.py", line 145, in test_policy_retains_exact_mounts_network_memory_and_no_pull
+    self.assertEqual(command[command.index(option) + 1], value)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '4' != '1'
+- 4
++ 1
+
+
+======================================================================
+FAIL: test_retained_cross_product_is_fresh (test_comp_rate_matrix.CompRateMatrixTests.test_retained_cross_product_is_fresh)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/test_comp_rate_matrix.py", line 79, in test_retained_cross_product_is_fresh
+    self.assertEqual(issue, "")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: 'current motion source closure cannot be verified' != ''
+- current motion source closure cannot be verified
+
+
+======================================================================
+FAIL: test_frozen_catalog_covers_transitive_local_execution_imports (test_compositor_build_receipt_semantics.CompositorBuildReceiptSemanticTests.test_frozen_catalog_covers_transitive_local_execution_imports)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/test_compositor_build_receipt_semantics.py", line 66, in test_frozen_catalog_covers_transitive_local_execution_imports
+    self.assertFalse(closure - catalog)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+AssertionError: frozenset({'scripts/producer/guided_presenter_assets.py', 'scripts/producer/graphics/composite_layers.py', 'scripts/producer/guided_presenter_probe_contract.py', 'scripts/producer/graphics/template_layout_contract.py', 'scripts/producer/graphics/presenter_layout_graph.py', 'scripts/producer/guided_presenter_observation.py', 'scripts/producer/cut_preview_io.py', 'scripts/producer/guided_presenter_png.py', 'scripts/producer/opening_prefix_contract.py', 'scripts/producer/opening_prefix_graphs.py', 'scripts/producer/guided_presenter_probe_identity.py', 'scripts/producer/graphics/presenter_layout_geometry.py', 'scripts/producer/graphics/presenter_layout_contract.py', 'scripts/producer/opening_prefix_presenter.py'}) is not false
+
+----------------------------------------------------------------------
+Ran 21 tests in 3.681s
+
+FAILED (failures=3, errors=3)

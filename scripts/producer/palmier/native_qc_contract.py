@@ -244,8 +244,18 @@ def validate_export(receipt: dict) -> dict:
         raise PalmierError("Palmier candidate export path is not canonical")
     if not os.path.isfile(path) or os.path.islink(path) or file_sha256(path) != digest:
         raise PalmierError("Palmier candidate export bytes changed after QC")
-    if export.get("audioPresent") is not True:
-        raise PalmierError("Palmier candidate export has no preserved audio")
+    exact = {
+        "audioPresent": True, "audioStreamCount": 1,
+        "videoStreamCount": 1, "fullDecode": "ffmpeg-xerror-av-v1",
+    }
+    if any(export.get(key) != value for key, value in exact.items()):
+        raise PalmierError(
+            "Palmier candidate export lacks exact one-audio/full-decode proof")
+    authority = receipt.get("authority")
+    if isinstance(authority, dict) and authority.get("kind") == "desktop-build":
+        from palmier.desktop_audio_authority import validate_audio_authority_receipt
+        validate_audio_authority_receipt(
+            export.get("audioRouteAuthority"), str(authority.get("candidateFingerprint")))
     return export
 
 

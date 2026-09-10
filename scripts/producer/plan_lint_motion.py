@@ -24,6 +24,7 @@ from plan_lint_nateherk import check_nateherk_entry
 from plan_lint_smooth import check_smooth
 from plan_lint_visual import check_row_lands, check_variety, check_visual
 from planner.graphics_planner_longform import own_screen_cap, resolve_style
+from planner.graphics_anchors import valid_face_bbox
 from planner.pacing import active_retention_gaps, nonhead_share, pacing_report
 from planner.word_lock import off_boundary_s, word_boundaries
 from producer_config import (CANVAS_BY_ASPECT, MODES, MOTION, PLACEMENT_SCALE,
@@ -43,10 +44,8 @@ def _zone_for(t: float, zones: list[dict]) -> dict | None:
 
 
 def _valid_bbox(bbox: Any) -> bool:
-    """True if ``bbox`` is a 4-number ``[x, y, w, h]`` list, each in 0..1."""
-    return (isinstance(bbox, (list, tuple)) and len(bbox) == 4
-            and all(isinstance(v, (int, float)) and 0.0 <= float(v) <= 1.0
-                    for v in bbox))
+    """True for a positive, finite, in-bounds normalized xywh face box."""
+    return valid_face_bbox(bbox)
 
 
 def _resolve_face_bbox(entry: dict, zone: dict | None, global_bbox: Any) -> Any:
@@ -56,11 +55,15 @@ def _resolve_face_bbox(entry: dict, zone: dict | None, global_bbox: Any) -> Any:
     compositor reads the ENTRY-level value, so a zone/global hit is flagged as a
     warning to stamp it onto the entry.
     """
+    first_invalid = None
     for src in (entry.get("faceBBoxNorm"), (zone or {}).get("faceBBoxNorm"),
                 global_bbox):
-        if src is not None:
+        if src is None:
+            continue
+        if _valid_bbox(src):
             return src
-    return None
+        first_invalid = src if first_invalid is None else first_invalid
+    return first_invalid
 
 
 def check_treatment_map(plan: dict, out_dur: float, rep: Any) -> list[dict]:
@@ -179,7 +182,10 @@ def _check_module_lands(tag: str, g: dict, hold: float, rep: Any) -> None:
     must be finite, strictly increasing, >= the spacing floor apart, and inside
     the hold. Absent key = no build schedule = no checks (additive field)."""
     lands = (g.get("spec") or {}).get("moduleLands")
-    if lands is None:
+    # The measured catalog declares moduleLands with an exact empty-string default
+    # (comp_capabilities specDefaults); a v4 candidate carries every default key, so
+    # "" is the same authored fact as an absent key: no build schedule.
+    if lands is None or lands == "":
         return
     if not isinstance(lands, list) or not lands:
         rep.error(f"{tag}: spec.moduleLands must be a non-empty array of "
@@ -326,8 +332,9 @@ def _check_anchor_zone_legality(ident: tuple[str, str, float], g: dict,
             rep.error(f"{tag}: anchor {anchor!r} requires faceBBoxNorm (on the "
                       "entry, its zone, or a global plan key)")
         elif not _valid_bbox(bbox):
-            rep.error(f"{tag}: faceBBoxNorm must be 4 numbers in 0..1")
-        elif g.get("faceBBoxNorm") is None:
+            rep.error(f"{tag}: faceBBoxNorm must be a positive in-bounds "
+                      "normalized xywh box")
+        elif not _valid_bbox(g.get("faceBBoxNorm")):
             rep.warn(f"{tag}: faceBBoxNorm resolved from the zone/plan, not the "
                      "entry — the compositor reads it per-entry; stamp it there")
     if zone is None:

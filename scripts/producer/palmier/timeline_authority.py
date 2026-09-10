@@ -11,6 +11,8 @@ from datetime import datetime, timezone
 from typing import Any
 
 from palmier.mcp_client import PalmierError
+from palmier.timeline_readback import read_complete_timeline
+from palmier.timeline_readback_coverage import default_timeline_coverage
 
 AUTHORITY_NAME = "palmier.timeline-authority.json"
 CANONICAL_CANDIDATE_NAME = "palmier.timeline-candidate.json"
@@ -63,6 +65,11 @@ def _semantic(value: Any, root: bool = False, parent: str | None = None,
     """Normalize only known structural identities; unknown fields stay content."""
     identities = {} if identities is None else identities
     if isinstance(value, list):
+        if parent == "clips" and len(value) == 4 \
+                and isinstance(value[0], str):
+            bucket = identities.setdefault("clipId", {})
+            value = [bucket.setdefault(
+                value[0], f"clipId:{len(bucket) + 1}"), *value[1:]]
         return [_semantic(item, parent=parent, identities=identities)
                 for item in value]
     if not isinstance(value, dict):
@@ -79,32 +86,6 @@ def _semantic(value: Any, root: bool = False, parent: str | None = None,
             continue
         result[key] = _semantic(item, parent=key, identities=identities)
     return result
-
-
-def _coverage(timeline: dict) -> dict:
-    """Declare whether caption-detail readback can represent the whole edit."""
-    capped: list[dict] = []
-    for track_index, track in enumerate(timeline.get("tracks", [])):
-        if not isinstance(track, dict):
-            continue
-        groups = track.get("captionGroups") or []
-        if not isinstance(groups, list):
-            continue
-        for group_index, group in enumerate(groups):
-            if not isinstance(group, dict):
-                continue
-            count = group.get("clipCount", 0)
-            if isinstance(count, int) and not isinstance(count, bool) and count > 200:
-                capped.append({"track": track_index, "group": group_index,
-                               "clipCount": count})
-    return {
-        "scope": "mcp-readable-timeline",
-        "captionDetailRequested": True,
-        "complete": not capped,
-        "limitations": (["caption groups above Palmier's 200-row detail cap"]
-                        if capped else []),
-        "cappedCaptionGroups": capped,
-    }
 
 
 def snapshot(project_id: str, timeline: dict) -> TimelineSnapshot:
@@ -124,7 +105,19 @@ def snapshot(project_id: str, timeline: dict) -> TimelineSnapshot:
     return TimelineSnapshot(
         project_id, timeline_id, _hash(content),
         _hash(_semantic(content, root=True)), normalized,
-        _coverage(normalized))
+        default_timeline_coverage(normalized))
+
+
+def snapshot_with_coverage(project_id: str, timeline: dict,
+                           coverage: dict) -> TimelineSnapshot:
+    """Reconstruct a snapshot while preserving verified readback coverage."""
+    found = snapshot(project_id, timeline)
+    normalized = json.loads(_canonical(coverage))
+    if normalized.get("complete") is not True:
+        raise PalmierError("Palmier complete readback did not prove coverage")
+    return TimelineSnapshot(
+        found.project_id, found.timeline_id, found.fingerprint,
+        found.semantic_fingerprint, found.timeline, normalized)
 
 
 def _active_project_id(projects: dict) -> str | None:
@@ -143,8 +136,9 @@ def read_active(client: Any, expected_project_id: str) -> TimelineSnapshot:
     if active_id != expected_project_id:
         raise TimelineConflict(
             "Palmier is not showing this Sniper project's canonical project")
-    timeline = client.call_json("get_timeline", {"captionDetail": True})
-    return snapshot(active_id, timeline)
+    readback = read_complete_timeline(client)
+    return snapshot_with_coverage(
+        active_id, readback.timeline, readback.coverage)
 
 
 def authority_path(out_dir: str) -> str:
@@ -268,8 +262,7 @@ def fork_candidate(client: Any, out_dir: str, expected: dict,
         raise TimelineConflict("Palmier readback is incomplete; refusing an AI fork")
     result = client.call_json("create_timeline", {
         "name": name, "from": current.timeline_id})
-    candidate = snapshot(project_id, client.call_json(
-        "get_timeline", {"captionDetail": True}))
+    candidate = read_active(client, project_id)
     returned_id = result.get("timelineId") if isinstance(result, dict) else None
     if candidate.timeline_id == current.timeline_id or returned_id != candidate.timeline_id:
         raise PalmierError("Palmier candidate fork did not return a new active timeline")

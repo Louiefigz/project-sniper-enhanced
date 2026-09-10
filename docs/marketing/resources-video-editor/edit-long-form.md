@@ -1,6 +1,9 @@
 # Edit a long-form video
 
-For 16:9, YouTube-style videos — where **you** choose exactly how much production you want.
+For 16:9, YouTube-style videos — where **you** choose which production lanes
+to request. The underlying long-form mechanisms are locally verified, but the
+independent complete-project cohort and 90-minute end-to-end target remain
+unqualified.
 
 ## The checklist approach
 
@@ -14,11 +17,14 @@ Pick **Long (16:9)** and check the boxes for what you want done. Run the full wo
 - **Credibility** — cards that back up your claims and numbers.
 - **Music & audio cleanup** — a bed with automatic ducking, plus dialogue enhancement and a broadcast-level audio master.
 
-Leave the rest unchecked and it won't touch them.
+Unchecked lanes stay outside the requested treatment scope. A requested lane
+still has to pass its own capability, asset, authority, and QC gates.
 
 ## What you get
 
-A finished cut with breathing-room pacing, chapter markers, and a subtitle file alongside the video — ready to upload.
+When the selected lanes and final QC pass, you get an approved cut with the
+requested pacing, chapter markers, and subtitle deliverables. A failed or
+unsupported lane is reported instead of being silently omitted.
 
 ## Honest by design
 

@@ -4,7 +4,13 @@ import os from "node:os";
 import path from "node:path";
 import { prepareSavedPlanReview } from "../../../app/api/producer/auto-edit/saved-plan-request";
 import { readProjectJson } from "../../../app/api/_lib/workspace";
-import { fileSha256, startAutoEditJob } from "../../server/auto-edit-job-store";
+import {
+  autoEditJobPath,
+  failAutoEditJob,
+  fileSha256,
+  readAutoEditJob,
+  startAutoEditJob,
+} from "../../server/auto-edit-job-store";
 
 const root = mkdtempSync(path.join(os.tmpdir(), "sniper-saved-plan-review-"));
 const producer = path.join(root, "producer");
@@ -40,6 +46,7 @@ try {
   assert.equal(prepared.ctx.planPath, planPath);
   assert.equal(prepared.ctx.manifestPath, manifestPath);
   assert.equal(prepared.ctx.scope, "produced");
+  assert.equal(prepared.ctx.deliveryPolicy, "palmier-hybrid");
   assert.equal(prepared.ctx.intent?.mode, "longform");
   assert.deepEqual(prepared.ctx.intent?.lanes, { broll: "off" });
   assert.equal(prepared.ctx.intent?.brief, "Keep the proof sequence intact.");
@@ -54,9 +61,25 @@ try {
     token: "saved-plan-review",
     snapshots: 0,
     bootstrapPlanHash: prepared.bootstrapPlanHash,
+    reviewSavedPlan: true,
   });
   assert.equal(job.checkpoint, "plan_authored");
   assert.equal(job.phase, "planning_review");
+  assert.equal(job.reviewSavedPlan, true);
+  assert.equal(readAutoEditJob(autoEditJobPath(producer))?.reviewSavedPlan, true);
+  failAutoEditJob(autoEditJobPath(producer), job.token, "detached worker interrupted");
+  const resumed = startAutoEditJob({
+    ctx: prepared.ctx,
+    token: "saved-plan-review-resumed",
+    snapshots: 0,
+    resume: readAutoEditJob(autoEditJobPath(producer))!,
+  });
+  assert.equal(resumed.reviewSavedPlan, true,
+    "detached resume must retain immutable saved-plan review mode");
+  assert.equal(
+    prepareSavedPlanReview(producer, "mp4-only").ctx.deliveryPolicy,
+    "mp4-only",
+  );
 
   unlinkSync(planPath);
   assert.throws(

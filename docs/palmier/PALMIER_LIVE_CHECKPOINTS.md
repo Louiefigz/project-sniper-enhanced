@@ -1,5 +1,10 @@
 # Palmier live working checkpoints
 
+**Status: local compatibility mechanism; not connected P5 qualification.**
+The workflow below describes the production-shaped checkpoint contract and its
+failure policy. It does not prove a representative connected short/long build,
+export, repair, disconnect recovery, or manual-edit-preservation cohort.
+
 Palmier can remain open while Auto Edit runs. The safe implementation is a
 sequence of immutable timelines in one Palmier project, not repeated mutation
 of the timeline the user may be watching or editing.

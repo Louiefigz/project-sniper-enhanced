@@ -21,6 +21,42 @@ export interface ManifestSource {
   contentHash: string;
   transcriptPath: string | null;
   role: string;
+  originalPath?: string;
+  sourceSha256?: string;
+  admissionReceiptPath?: string;
+  admissionReceiptSha256?: string;
+}
+
+/** Hash-bound receipt for the immutable media snapshots admitted by ingest.py. */
+export interface SourceSetAdmissionBinding {
+  schemaVersion: 1;
+  receiptPath: string;
+  receiptSha256: string;
+  sourceSetDigest: string;
+  entryCount: number;
+}
+
+const SHA256_PATTERN = /^[0-9a-f]{64}$/;
+
+/** New `/producer/ingest` runs cannot publish a stripped admission binding. */
+export function requireSourceSetAdmission(
+  manifest: AssetManifest,
+): SourceSetAdmissionBinding {
+  const value = manifest.sourceSetAdmission;
+  if (!value || value.schemaVersion !== 1) {
+    throw new Error("ingest manifest has no source-set admission binding");
+  }
+  const expectedPath = `.sniper-source-sets/${value.receiptSha256}.json`;
+  if (
+    !SHA256_PATTERN.test(value.receiptSha256)
+    || !SHA256_PATTERN.test(value.sourceSetDigest)
+    || value.receiptPath !== expectedPath
+    || !Number.isSafeInteger(value.entryCount)
+    || value.entryCount < 0
+  ) {
+    throw new Error("ingest manifest source-set admission binding is malformed");
+  }
+  return value;
 }
 
 /**
@@ -41,6 +77,8 @@ export interface AssetManifest {
   sources: ManifestSource[];
   broll: ManifestAsset[];
   music: ManifestAsset[];
+  /** Required on new Producer ingests; absent only on legacy/test manifests. */
+  sourceSetAdmission?: SourceSetAdmissionBinding;
 }
 
 /** Availability only: manifest entries are never proof that a track is selected. */

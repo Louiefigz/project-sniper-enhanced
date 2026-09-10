@@ -14,6 +14,7 @@ assert.ok(args[0].endsWith(path.join("producer", "palmier", "draft.py")));
 assert.deepEqual(args.slice(1), [
   "/project/source/asset_manifest.json",
   "/project/producer",
+  "--require-source-set-admission",
   "--name",
   "Project title",
   "--mode",

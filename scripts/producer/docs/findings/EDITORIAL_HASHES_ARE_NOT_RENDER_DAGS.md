@@ -11,7 +11,10 @@ Those are different contracts. Approval may depend on rationale, identity, inten
 
 ## The concrete Sniper failure
 
-`scripts/producer/fingerprints.py` currently produces base, video, audio, graphics, and full render-content hashes from broad plan projections. A 2026-07-18 diagnostic showed both over-invalidation and under-invalidation:
+`scripts/producer/fingerprints.py` produced base, video, audio, graphics, and
+full render-content hashes from broad plan projections. A 2026-07-18
+diagnostic showed over-invalidation and exposed the need to audit cross-lane
+dependencies:
 
 ```text
 rationale-only punch edit:
@@ -29,11 +32,55 @@ presenterFrame false -> true:
   renderer format changed:         opaque MP4 -> alpha MOV
 ```
 
-The rationale result is wasted work: `render.py` strips `punchIns[].rationale` before the punch renderer consumes the entries, yet the generic base projection still includes it.
+The rationale result was wasted work: `render.py` strips
+`punchIns[].rationale` before the punch renderer consumes the entries, yet the
+generic base projection included it.
 
-The presenter-frame result is unsafe reuse: `graphicsTrack` is excluded from the base/video projections, but `spec.presenterFrame` changes whether a registered hole composition needs alpha. Other graphics can also affect the base indirectly: long-form rail graphics are read by `recompose_stage`, and the monolithic graphics path can rewrite caption ASS while incremental assembly composites onto captions already burned into the base.
+One correction matters: the presenter-frame result was initially
+overclassified as unsafe **base** reuse. `spec.presenterFrame` changes the
+scene from opaque MP4 to alpha MOV, so scene/composite/final must invalidate;
+the graphics-free footage base does not. Reusing that base is correct.
+
+The actual graphics-to-base dependencies were long-form rail/recompose
+geometry, which changes base footage framing, and legacy-caption suppression,
+which must remove cues before captions are burned into a graphics-free base.
+Treating all `graphicsTrack` changes as base inputs would be safe but would
+throw away the fast path; treating none of them as base inputs was incomplete.
 
 The same class of mistake appears outside the plan. The graphics cache hashes composition HTML, shared tokens, selected assets, spec, and duration, but a template can load other vendor or CDN runtime behavior. A valid dependency projection must include the actual loaded runtime closure, not only the most obvious source files.
+
+## Current closure — 2026-07-30
+
+The current compatibility renderer now implements the narrower design:
+
+- `render-effect-registry-v1.json` has 31 closed effect rows and 42 generated
+  mutations covering every released public plan/manifest root plus explicit
+  nested graphics cross-lane patterns;
+- `render_effect_discovery.py` scans the renderer import closure for new
+  literal readers, and lint/render/assemble reject unknown or unreleased
+  public roots;
+- `render_stage_roots.py` compiles domain-separated timeline, base, scene,
+  composite, final, and manifest roots into `RenderGraphV1`;
+- `graphics_base_effects.py` adds only rail/recompose and legacy-caption
+  suppression to the base projection; ordinary scene copy and
+  `presenterFrame` keep the base;
+- addressing/editorial row metadata no longer invalidates current render
+  projections.
+
+Fresh retained actual-media controls under
+`artifacts/p0-render-effect-parity-canonical-closure-v1/{short,lf14}` prove an ordinary
+graphic dirties exactly scene/composite/final, reuses source/timeline/base, and
+matches an isolated forced-full output with exact final SHA-256, FrameMD5,
+decoded PCM, and stream facts. LF-14 covers all 20,139 frames at
+`24000/1001`; the short covers 1,394 frames. Both executions bind the current
+toolchain `1c1898a4…` and registry `8f8bea83…`. Their final hashes are
+`ad7592ea…` and `b7580bae…`.
+
+This closes the current field-registry and bounded graphics/base dependency
+exits. One compatibility graph is still not the final fine-grained renderer:
+future fields remain rejected until registered, every renderer/dependency
+change stales the retained replay, and legacy ffmpeg/browser substages still
+need oracle-backed decomposition.
 
 ## Correct design
 

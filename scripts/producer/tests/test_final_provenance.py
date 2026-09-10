@@ -20,20 +20,24 @@ import fingerprints as fpr
 import render as renderer
 from audio import music_stage
 from palmier.sync import plan_content_hash as palmier_plan_hash
+from tests._final_provenance_fixture import RenderOptions
+from tests._final_provenance_fixture import plan as _plan
 
 
-def _plan() -> dict:
-    """Representative full-plan content with render-irrelevant addressing."""
-    return {
-        "planVersion": 4,
-        "_selection": {"graphicId": "g-1"},
-        "target": {"mode": "longform"},
-        "cutTrack": [{"sourceId": "raw", "start": 0.0, "end": 2.0}],
-        "graphicsTrack": [{"id": "g-1", "kind": "card",
-                           "outStart": 0.0, "outEnd": 1.0}],
-        "audioEnhance": {"preset": "voice"},
-        "music": {"enabled": False},
-    }
+def _audio_stage(name: str, order: list[str] | None):
+    def run(_ctx, video):
+        if order is not None:
+            order.append(name)
+        return video
+    return run
+
+
+def _transition_stage(order: list[str] | None):
+    def run(_ctx, video, _duration):
+        if order is not None:
+            order.append("transitions")
+        return video
+    return run
 
 
 class PlanContentHashTests(unittest.TestCase):
@@ -113,8 +117,10 @@ class StageReceiptTests(unittest.TestCase):
 class AssembleProvenanceTests(unittest.TestCase):
     def _run(self, tmp: str, fail: bool = False) -> tuple[Path, dict | None]:
         final = Path(tmp, "final.mp4")
+        base = Path(tmp, "base.mp4")
         final.write_bytes(b"prior")
-        job = asm.AssembleJob("base.mp4", _plan(), str(final), None)
+        base.write_bytes(b"base")
+        job = asm.AssembleJob(str(base), _plan(), str(final), None)
 
         def composite(_job: asm.AssembleJob) -> dict:
             if fail:
@@ -154,26 +160,31 @@ class AssembleProvenanceTests(unittest.TestCase):
 
 
 class RenderProvenanceTests(unittest.TestCase):
-    def _render(self, tmp: str, skip_graphics: bool = False,
-                fail_master: bool = False) -> Path:
+    def _render(
+        self, tmp: str, options: RenderOptions | None = None,
+    ) -> Path:
+        config = options or RenderOptions()
         plan = _plan()
         ctx = renderer.RenderCtx(plan, {}, tmp, tmp,
-                                 skip_graphics=skip_graphics)
+                                 skip_graphics=config.skip_graphics)
         final = Path(tmp, "final.mp4")
 
         def master(spec) -> dict:
-            if fail_master:
+            if config.audio_order is not None:
+                config.audio_order.append("master")
+            if config.fail_master:
                 raise RuntimeError("master failed")
             Path(spec.out).write_bytes(b"full-render-authority")
             return {"status": "done", "out": spec.out}
 
         simple = lambda _ctx, video: video
+
         patches = {
             "gate": lambda _ctx: None,
             "compile_stage": lambda _ctx: SimpleNamespace(
                 output_duration=2.0, segments=[]),
             "cut_stage": lambda _ctx: "video",
-            "channels_stage": simple,
+            "channels_stage": _audio_stage("channels", config.audio_order),
             "baseline_stage": simple,
             "reframe_stage": simple,
             "punch_stage": simple,
@@ -182,13 +193,17 @@ class RenderProvenanceTests(unittest.TestCase):
             "captions_stage": lambda *_args: None,
             "longform_sidecar_stage": lambda *_args: None,
             "graphics_track_stage": lambda _ctx, video, ass: (video, ass),
-            "enhance_stage": simple,
-            "transitions_stage": lambda _ctx, video, _duration: video,
-            "gain_stage": simple,
+            "enhance_stage": _audio_stage("enhance", config.audio_order),
+            "transitions_stage": _transition_stage(config.audio_order),
+            "gain_stage": _audio_stage("gain", config.audio_order),
             "probe_video": lambda _path: {"r_frame_rate": "24/1"},
+            "probe_video_frames": lambda _path: 48,
             "master": master,
         }
         with ExitStack() as stack:
+            stack.enter_context(patch(
+                "palmier_visual_bootstrap_authority.seal_palmier_visual_bootstrap",
+                return_value={"receiptHash": "unit-fixture", "bootstrapArtifact": {"videoFrames": 48}}))
             for name, replacement in patches.items():
                 stack.enter_context(patch.object(renderer, name, replacement))
             renderer.render(ctx, audit=False)
@@ -204,7 +219,7 @@ class RenderProvenanceTests(unittest.TestCase):
 
     def test_base_render_does_not_claim_assembled_authority(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            final = self._render(tmp, skip_graphics=True)
+            final = self._render(tmp, RenderOptions(skip_graphics=True))
             self.assertFalse(Path(str(final) + ".assembled.json").exists())
 
     def test_music_enabled_monolithic_render_cannot_claim_authority(self) -> None:
@@ -224,8 +239,37 @@ class RenderProvenanceTests(unittest.TestCase):
             sidecar = Path(tmp, "final.mp4.assembled.json")
             sidecar.write_text('{"old":true}')
             with self.assertRaisesRegex(RuntimeError, "master failed"):
-                self._render(tmp, fail_master=True)
+                self._render(tmp, RenderOptions(fail_master=True))
             self.assertFalse(sidecar.exists())
+
+    def test_dead_channel_repair_precedes_every_audio_mutation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            order: list[str] = []
+            self._render(tmp, RenderOptions(audio_order=order))
+        self.assertEqual(order, ["channels", "enhance", "transitions",
+                                 "gain", "master"])
+
+class MasterTimingContractTests(unittest.TestCase):
+    def test_fractional_rate_reaches_master_without_integer_rounding(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            ctx = renderer.RenderCtx(_plan(), {}, tmp, tmp)
+            captured = []
+
+            def master(spec):
+                captured.append(spec)
+                return {"status": "done", "out": spec.out}
+
+            with patch.object(renderer, "probe_video",
+                              return_value={"r_frame_rate": "24000/1001"}), \
+                    patch.object(renderer, "probe_video_frames",
+                                 return_value=240), \
+                    patch.object(renderer, "master", side_effect=master):
+                renderer.master_stage(ctx, "pre-master.mp4", None, 10.01)
+
+        self.assertEqual(captured[0].fps, 24)
+        self.assertEqual(captured[0].fps_exact, "24000/1001")
+        self.assertEqual(captured[0].duration, 10.01)
+        self.assertEqual(captured[0].frame_count, 240)
 
 
 if __name__ == "__main__":

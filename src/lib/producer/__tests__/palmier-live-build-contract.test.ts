@@ -3,9 +3,14 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { buildLiveBuildArgs } from "../../../app/api/producer/live-build/args";
-import { isLiveBuildMutationTool } from "../../../app/api/producer/live-build/process";
+import {
+  isLiveBuildMutationTool,
+  ProofTracker,
+} from "../../../app/api/producer/live-build/process";
 import { recordLiveBuildOperation } from "../../../app/api/producer/live-build/runner";
 import { buildLiveBuildPrompt } from "../../../app/api/producer/live-build/prompt";
+import { emptyLiveBuildJournal } from
+  "../../../app/api/producer/live-build/journal";
 import {
   liveBuildParentTimeline,
   type LiveBuildPreflight,
@@ -27,7 +32,7 @@ const allowed = args[args.indexOf("--allowedTools") + 1].split(",");
 assert.deepEqual(args.slice(args.indexOf("--resume"), args.indexOf("--resume") + 2),
   ["--resume", "session-1"]);
 assert.ok(allowed.includes("Skill(producer)"));
-assert.ok(allowed.includes("mcp__palmier-pro__import_media"));
+assert.equal(allowed.includes("mcp__palmier-pro__import_media"), false);
 assert.ok(allowed.includes("mcp__palmier-pro__add_clips"));
 assert.ok(allowed.includes("mcp__palmier-pro__add_texts"));
 assert.equal(allowed.includes("mcp__palmier-pro__new_project"), false);
@@ -36,6 +41,55 @@ assert.equal(allowed.includes("mcp__palmier-pro__export_project"), false);
 assert.equal(args.includes("--safe-mode"), false);
 assert.equal(isLiveBuildMutationTool("add_texts"), true);
 assert.equal(isLiveBuildMutationTool("get_timeline"), false);
+
+function proofTracker(
+  blocks: Array<Record<string, unknown>>,
+): ProofTracker {
+  const tracker = new ProofTracker({
+    args: [], cwd: "/tmp", expectedSessionId: "proof-session",
+    onEvent: () => {},
+  }, Date.now());
+  tracker.consume({
+    session_id: "proof-session",
+    message: { content: [{
+      type: "tool_use", id: "skill", name: "Skill",
+      input: { skill: "producer" },
+    }, {
+      type: "tool_use", id: "read",
+      name: "mcp__palmier-pro__get_timeline", input: {},
+    }, {
+      type: "tool_result", tool_use_id: "read", content: "ok",
+    }, ...blocks] },
+  });
+  return tracker;
+}
+
+const exactProof = proofTracker([{
+  type: "tool_use", id: "mutation",
+  name: "mcp__palmier-pro__add_texts", input: { entries: [] },
+}, {
+  type: "tool_result", tool_use_id: "mutation", content: "ok",
+}, {
+  type: "tool_result", tool_use_id: "mutation", content: "duplicate",
+}]).result();
+assert.deepEqual(
+  [exactProof.operationsSeen, exactProof.operationsCompleted], [1, 1]);
+assert.throws(() => proofTracker([{
+  type: "tool_use", id: "unresolved",
+  name: "mcp__palmier-pro__add_texts", input: { entries: [] },
+}]).result(), /unresolved=1/);
+assert.throws(() => proofTracker([{
+  type: "tool_use", id: "failed",
+  name: "mcp__palmier-pro__add_texts", input: { entries: [] },
+}, {
+  type: "tool_result", tool_use_id: "failed", is_error: true,
+}]).result(), /failed=1/);
+assert.throws(() => proofTracker([{
+  type: "tool_use", id: "read-only",
+  name: "mcp__palmier-pro__detect_beats", input: {},
+}, {
+  type: "tool_result", tool_use_id: "read-only", content: "ok",
+}]).result(), /applied=0/);
 
 const repairPrompt = buildLiveBuildPrompt({
   dir: "/tmp/project/producer", planPath: "/tmp/project/producer/edit_plan.json",
@@ -49,6 +103,7 @@ const repairPrompt = buildLiveBuildPrompt({
 } satisfies LiveBuildPreflight, true);
 assert.match(repairPrompt, /White frame/);
 assert.match(repairPrompt, /Repair only the failed operations or lane/);
+assert.match(repairPrompt, /import_media is intentionally unavailable/);
 
 const retained = {
   schemaVersion: 1, runId: "run", sessionId: "session", sessionEstablished: true,
@@ -83,30 +138,34 @@ try {
     candidateTimelineId: "candidate", candidateFingerprint: "d".repeat(64),
   }, false);
   assert.equal(state.status, "running");
-  appendLiveBuildJournal(dir, { event: "palmier_op", operationId: "large",
-    input: { content: "x".repeat(30_000) }, status: "applying" });
-  const journal = readLiveBuildJournal(dir);
-  assert.equal(journal.length, 1);
-  assert.match(String(journal[0].payloadHash), /^[0-9a-f]{64}$/);
-  const mutations = new Set<string>();
+  assert.throws(
+    () => appendLiveBuildJournal(dir, {
+      event: "palmier_op", operationId: "large",
+      input: { content: "x".repeat(30_000) }, status: "applying",
+    }),
+    /split the batch before mutation/,
+  );
+  assert.equal(readLiveBuildJournal(dir).length, 0);
+  const ledger = emptyLiveBuildJournal();
   state = recordLiveBuildOperation(dir, state, {
     event: "palmier_op", operationId: "ok", tool: "add_texts",
     status: "applying", elapsedMs: 10,
-  }, mutations);
+  }, ledger);
   state = recordLiveBuildOperation(dir, state, {
     event: "palmier_op_result", operationId: "ok",
     status: "applied", elapsedMs: 20,
-  }, mutations);
+  }, ledger);
   state = recordLiveBuildOperation(dir, state, {
     event: "palmier_op", operationId: "failed", tool: "add_clips",
     status: "applying", elapsedMs: 30,
-  }, mutations);
+  }, ledger);
   state = recordLiveBuildOperation(dir, state, {
     event: "palmier_op_result", operationId: "failed",
     status: "failed", elapsedMs: 40,
-  }, mutations);
+  }, ledger);
   assert.deepEqual([state.operationsSeen, state.operationsCompleted], [2, 1]);
-  assert.doesNotThrow(() => JSON.parse(readFileSync(liveBuildJournalPath(dir), "utf8")));
+  for (const row of readFileSync(liveBuildJournalPath(dir), "utf8")
+    .trim().split("\n")) assert.doesNotThrow(() => JSON.parse(row));
 } finally {
   rmSync(dir, { recursive: true, force: true });
 }

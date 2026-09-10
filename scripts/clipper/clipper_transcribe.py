@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Transcribe clips with Deepgram or fail-closed local whisper.cpp."""
+from __future__ import annotations
 
 import asyncio
 import json
@@ -11,13 +12,16 @@ import tempfile
 import time
 import wave
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from deepgram import AsyncDeepgramClient
 
 import numpy as np
-from deepgram import AsyncDeepgramClient
 
 # shared transcription modules live at scripts/ root, one level up
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from asr_policy import paid_deepgram_client, require_paid_asr, run_asr_cli  # noqa: E402
 from local_whisper import (DEEPGRAM_PROVIDER, LOCAL_PROVIDER,  # noqa: E402
                            LocalTranscribeRequest, LocalWhisperError,
                            transcribe_media, transcription_provider)
@@ -269,6 +273,7 @@ async def _transcribe_channel_deepgram(
     Returns (entries, detected_language).  All word-level speaker fields are
     set to speaker_id — diarization is disabled since we already know the speaker.
     """
+    require_paid_asr()
     dbg("clipper", "channel.enter", audio_path=audio_path, speaker_id=speaker_id, audio_offset=audio_offset)
     chunk_paths, chunk_dir = split_audio_if_needed(audio_path)
     total_chunks = len(chunk_paths)
@@ -286,6 +291,7 @@ async def _transcribe_channel_deepgram(
             dbg("clipper", "deepgram.request", model="nova-3", diarize=False,
                 speaker_id=speaker_id, chunk=idx, total=total_chunks, file=os.path.basename(chunk_path))
             _t0 = time.monotonic()
+            require_paid_asr()
             response = await client.listen.v1.media.transcribe_file(
                 request=audio_bytes,
                 model="nova-3",
@@ -359,7 +365,7 @@ async def run_stereo_transcription(video_path: str, audio_offset: float = 0.0) -
     print(json.dumps({"status": "audio_extracted", "size_mb": size_mb, "audio_offset": audio_offset}), flush=True)
 
     provider = transcription_provider()
-    client = (AsyncDeepgramClient(api_key=os.environ["DEEPGRAM_API_KEY"])
+    client = (paid_deepgram_client()
               if provider == DEEPGRAM_PROVIDER else None)
     detected_language: Optional[str] = None
 
@@ -422,7 +428,7 @@ async def run_lav_transcription(host_lav: str, guest_lav: str) -> None:
     print(json.dumps({"status": "audio_extracted", "size_mb": size_mb, "audio_offset": host_offset}), flush=True)
 
     provider = transcription_provider()
-    client = (AsyncDeepgramClient(api_key=os.environ["DEEPGRAM_API_KEY"])
+    client = (paid_deepgram_client()
               if provider == DEEPGRAM_PROVIDER else None)
     detected_language: Optional[str] = None
 
@@ -589,6 +595,7 @@ def build_transcript_entries(chunk_data: dict, offset: float) -> List[dict]:
 
 async def run_transcription(audio_path: str, audio_offset: float = 0.0) -> None:
     """Single async entry point — all Deepgram calls happen here."""
+    require_paid_asr()
     dbg("clipper", "run.enter", audio_path=audio_path, audio_offset=audio_offset)
     _, duration = get_audio_metadata(audio_path)
     chunk_paths, chunk_dir = split_audio_if_needed(audio_path)
@@ -596,7 +603,7 @@ async def run_transcription(audio_path: str, audio_offset: float = 0.0) -> None:
     offsets = get_chunk_offsets(audio_path, total_chunks) if total_chunks > 1 else [0.0]
     dbg("clipper", "run.plan", probe_duration=duration, total_chunks=total_chunks, offsets=offsets)
 
-    client = AsyncDeepgramClient(api_key=os.environ["DEEPGRAM_API_KEY"])
+    client = paid_deepgram_client()
     transcript: List[dict] = []
     detected_language: Optional[str] = None
 
@@ -624,6 +631,7 @@ async def run_transcription(audio_path: str, audio_offset: float = 0.0) -> None:
             with open(chunk_path, "rb") as f:
                 audio_bytes = f.read()
 
+            require_paid_asr()
             response = await client.listen.v1.media.transcribe_file(
                 request=audio_bytes,
                 **transcribe_kwargs,
@@ -779,4 +787,8 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(run_asr_cli(main))
+    except RuntimeError as exc:
+        print(json.dumps({"error": str(exc)}), flush=True)
+        sys.exit(1)

@@ -1,0 +1,2734 @@
+{
+  "schemaVersion": 1,
+  "kind": "fresh-input-benchmark-seal",
+  "status": "file-qc-passed-playback-failed",
+  "approved": false,
+  "goalComplete": false,
+  "sealedAt": "2026-09-09T23:35:45.889907+00:00",
+  "source": {
+    "sourcePath": "/Users/aaronfigueroa/Downloads/C0679.MP4",
+    "sourceSha256": "06c50ce8c2e9da0a954f9301b1cba0dbfeb62ecebcdd956a034eb1597a301e14",
+    "sourceBytes": 10280473262,
+    "verifiedAt": "2026-09-09T23:35:38.380248+00:00",
+    "verificationSeconds": 4.835132082924247,
+    "sourceModified": false
+  },
+  "timing": {
+    "schemaVersion": 1,
+    "freshInputAttempt": "B",
+    "startedAt": "2026-09-09T21:26:48.341117+00:00",
+    "reportedAt": "2026-09-09T23:35:45.889894+00:00",
+    "elapsedWallSeconds": 7737.5362402081955,
+    "twoHourTargetMissedAtReport": true,
+    "clockResetAfterFailures": false,
+    "phases": [
+      {
+        "receipt": "source-preparation-v1.render.json",
+        "status": "phase-completed-awaiting-review",
+        "startedAt": "2026-09-09T21:29:55.696456+00:00",
+        "completedAt": "2026-09-09T21:32:10.912542+00:00",
+        "elapsedSeconds": 135.21507120900787,
+        "abortReason": null,
+        "sourceStable": true,
+        "additionalFilesStable": true,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "media-inspection-v1.render.json",
+        "status": "failed",
+        "startedAt": "2026-09-09T21:33:25.308164+00:00",
+        "completedAt": "2026-09-09T21:33:35.571803+00:00",
+        "elapsedSeconds": 10.263559959130362,
+        "abortReason": null,
+        "sourceStable": true,
+        "additionalFilesStable": true,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "media-stills-v2.render.json",
+        "status": "failed",
+        "startedAt": "2026-09-09T21:35:28.607802+00:00",
+        "completedAt": "2026-09-09T21:35:38.318262+00:00",
+        "elapsedSeconds": 9.710385042009875,
+        "abortReason": "MissingProcessFootprint: Owned process footprint missing; resample tree",
+        "sourceStable": true,
+        "additionalFilesStable": true,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "media-stills-v3.render.json",
+        "status": "phase-completed-awaiting-review",
+        "startedAt": "2026-09-09T21:38:16.856197+00:00",
+        "completedAt": "2026-09-09T21:38:25.816346+00:00",
+        "elapsedSeconds": 8.96008020802401,
+        "abortReason": null,
+        "sourceStable": true,
+        "additionalFilesStable": true,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "aroll-preparation-v1.render.json",
+        "status": "phase-completed-awaiting-review",
+        "startedAt": "2026-09-09T21:42:45.357960+00:00",
+        "completedAt": "2026-09-09T21:50:16.545009+00:00",
+        "elapsedSeconds": 451.18644370906986,
+        "abortReason": null,
+        "sourceStable": true,
+        "additionalFilesStable": true,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "aroll-source-qc-v1.render.json",
+        "status": "failed",
+        "startedAt": "2026-09-09T22:00:10.091413+00:00",
+        "completedAt": "2026-09-09T22:00:40.339887+00:00",
+        "elapsedSeconds": 30.248559708008543,
+        "abortReason": null,
+        "sourceStable": true,
+        "additionalFilesStable": true,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "audio-mastering-v1.render.json",
+        "status": "phase-completed-awaiting-review",
+        "startedAt": "2026-09-09T22:02:31.012241+00:00",
+        "completedAt": "2026-09-09T22:03:16.087338+00:00",
+        "elapsedSeconds": 45.07522458280437,
+        "abortReason": null,
+        "sourceStable": true,
+        "additionalFilesStable": true,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "static-studio-v1.render.json",
+        "status": "failed",
+        "startedAt": "2026-09-09T22:06:10.743475+00:00",
+        "completedAt": "2026-09-09T22:06:21.506132+00:00",
+        "elapsedSeconds": 10.76268629101105,
+        "abortReason": "MissingProcessFootprint: Owned process footprint missing; resample tree",
+        "sourceStable": false,
+        "additionalFilesStable": false,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "final-audio-assets-v1.render.json",
+        "status": "failed",
+        "startedAt": "2026-09-09T22:18:22.130053+00:00",
+        "completedAt": "2026-09-09T22:18:31.624754+00:00",
+        "elapsedSeconds": 9.49474895792082,
+        "abortReason": null,
+        "sourceStable": true,
+        "additionalFilesStable": true,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "static-studio-v2.render.json",
+        "status": "failed",
+        "startedAt": "2026-09-09T22:19:18.131007+00:00",
+        "completedAt": "2026-09-09T22:19:32.204466+00:00",
+        "elapsedSeconds": 14.0735268748831,
+        "abortReason": "MissingProcessFootprint: Owned process footprint missing; resample tree",
+        "sourceStable": false,
+        "additionalFilesStable": false,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "final-audio-assets-v2.render.json",
+        "status": "phase-completed-awaiting-review",
+        "startedAt": "2026-09-09T22:21:02.031980+00:00",
+        "completedAt": "2026-09-09T22:21:56.226227+00:00",
+        "elapsedSeconds": 54.19452587491833,
+        "abortReason": null,
+        "sourceStable": true,
+        "additionalFilesStable": true,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "static-studio-v3.render.json",
+        "status": "phase-completed-awaiting-review",
+        "startedAt": "2026-09-09T22:22:24.496752+00:00",
+        "completedAt": "2026-09-09T22:22:44.866457+00:00",
+        "elapsedSeconds": 20.36980654206127,
+        "abortReason": null,
+        "sourceStable": true,
+        "additionalFilesStable": true,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "animated-stock-v1.render.json",
+        "status": "failed",
+        "startedAt": "2026-09-09T22:27:42.188119+00:00",
+        "completedAt": "2026-09-09T22:27:54.052840+00:00",
+        "elapsedSeconds": 11.864609624957666,
+        "abortReason": null,
+        "sourceStable": false,
+        "additionalFilesStable": false,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "animated-stock-v2.render.json",
+        "status": "phase-completed-awaiting-review",
+        "startedAt": "2026-09-09T22:28:37.837275+00:00",
+        "completedAt": "2026-09-09T22:30:14.933014+00:00",
+        "elapsedSeconds": 97.09587545786053,
+        "abortReason": null,
+        "sourceStable": true,
+        "additionalFilesStable": true,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "animated-stock-v3.render.json",
+        "status": "failed",
+        "startedAt": "2026-09-09T22:33:42.432849+00:00",
+        "completedAt": "2026-09-09T22:33:54.778826+00:00",
+        "elapsedSeconds": 12.345995167037472,
+        "abortReason": null,
+        "sourceStable": false,
+        "additionalFilesStable": false,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "animated-stock-v4.render.json",
+        "status": "failed",
+        "startedAt": "2026-09-09T22:40:08.008492+00:00",
+        "completedAt": "2026-09-09T22:40:20.110263+00:00",
+        "elapsedSeconds": 12.101790166925639,
+        "abortReason": null,
+        "sourceStable": false,
+        "additionalFilesStable": false,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "animated-stock-v5.render.json",
+        "status": "failed",
+        "startedAt": "2026-09-09T22:41:24.352582+00:00",
+        "completedAt": "2026-09-09T22:41:53.726909+00:00",
+        "elapsedSeconds": 29.37436995888129,
+        "abortReason": "MissingProcessFootprint: Owned process footprint missing; resample tree",
+        "sourceStable": true,
+        "additionalFilesStable": true,
+        "cleanupVerified": false,
+        "leaseCleanupVerified": null
+      },
+      {
+        "receipt": "animated-stock-v6.render.json",
+        "status": "failed",
+        "startedAt": "2026-09-09T22:43:39.864567+00:00",
+        "completedAt": "2026-09-09T22:45:26.755457+00:00",
+        "elapsedSeconds": 106.88962779100984,
+        "abortReason": "MissingProcessFootprint: Owned process footprint missing; resample tree",
+        "sourceStable": true,
+        "additionalFilesStable": true,
+        "cleanupVerified": false,
+        "leaseCleanupVerified": null
+      },
+      {
+        "receipt": "native-export-v1.render.json",
+        "status": "phase-completed-awaiting-review",
+        "startedAt": "2026-09-09T22:47:05.313554+00:00",
+        "completedAt": "2026-09-09T23:10:55.397936+00:00",
+        "elapsedSeconds": 1430.103289874969,
+        "abortReason": null,
+        "sourceStable": true,
+        "additionalFilesStable": true,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "native-references-v1.render.json",
+        "status": "phase-completed-awaiting-review",
+        "startedAt": "2026-09-09T23:11:14.683269+00:00",
+        "completedAt": "2026-09-09T23:11:27.379840+00:00",
+        "elapsedSeconds": 12.696558250114322,
+        "abortReason": null,
+        "sourceStable": true,
+        "additionalFilesStable": true,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "native-output-qc-v1.render.json",
+        "status": "failed",
+        "startedAt": "2026-09-09T23:12:07.569559+00:00",
+        "completedAt": "2026-09-09T23:12:49.409524+00:00",
+        "elapsedSeconds": 41.839927833061665,
+        "abortReason": null,
+        "sourceStable": true,
+        "additionalFilesStable": true,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "delivery-output-qc-v2.render.json",
+        "status": "phase-completed-awaiting-review",
+        "startedAt": "2026-09-09T23:15:09.237895+00:00",
+        "completedAt": "2026-09-09T23:15:54.987031+00:00",
+        "elapsedSeconds": 45.74798533320427,
+        "abortReason": null,
+        "sourceStable": true,
+        "additionalFilesStable": true,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      },
+      {
+        "receipt": "delivery-playback-v1.render.json",
+        "status": "failed",
+        "startedAt": "2026-09-09T23:16:23.270552+00:00",
+        "completedAt": "2026-09-09T23:27:28.121668+00:00",
+        "elapsedSeconds": 664.8492609579116,
+        "abortReason": null,
+        "sourceStable": true,
+        "additionalFilesStable": true,
+        "cleanupVerified": true,
+        "leaseCleanupVerified": true
+      }
+    ],
+    "sumCompletedGuardedPhaseSeconds": 3264.463909374783,
+    "remainingWallSeconds": 4473.072330833413,
+    "remainingWallScope": "Includes authoring, development, review, tools, orchestration, and elapsed time of currently running phases; not a measured human-wait category",
+    "onlyRenderTimeIsTotalEditTime": false,
+    "outputApprovalInferredFromFilePresence": false,
+    "independence": "Fresh-input trial, not blind; prior operator exposure and generic software reuse",
+    "originalSourcePreserved": true,
+    "paidApiCallsUsed": false,
+    "humanListeningApproved": false,
+    "overallGoalComplete": false
+  },
+  "files": [
+    {
+      "path": "BRIEF.md",
+      "sha256": "1e18b364bf922861db46ac4839e1cd9d50e511a456a5b73b58e4f9bc8eac2285",
+      "bytes": 2969,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/BRIEF.md"
+    },
+    {
+      "path": "EPISODE_PACKAGE_REVIEW.md",
+      "sha256": "a552d30438a2343861b78aa85b6f29545d8808682de710b7a06b0e2e57043d7c",
+      "bytes": 5623,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/EPISODE_PACKAGE_REVIEW.md"
+    },
+    {
+      "path": "HANDOFF.md",
+      "sha256": "9dde953f16c36a7aa90d6f551fee7749da242a6bea88288951c5a1c68cc5a8cb",
+      "bytes": 7097,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/HANDOFF.md"
+    },
+    {
+      "path": "HANDOFF_DRAFT.md",
+      "sha256": "2fabe1defbd8bb0dddef8dba3ca3c30017e172ede5b95f8a8f694da9be1c4422",
+      "bytes": 5435,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/HANDOFF_DRAFT.md"
+    },
+    {
+      "path": "animated-stock-config-v2.json",
+      "sha256": "2b41bc931be7f626ee4455703ab3e80d03db50873dba65ea5a7e1fbb03e55ccb",
+      "bytes": 142,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-config-v2.json"
+    },
+    {
+      "path": "animated-stock-config-v3.json",
+      "sha256": "f8b66e27360f2c7741426eb925884dec4381df88fb14db7263c6457ef8138ed9",
+      "bytes": 142,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-config-v3.json"
+    },
+    {
+      "path": "animated-stock-config-v4.json",
+      "sha256": "212da5f750c50c787293b320253c907e975cc3c2002b43e756648bc72c213676",
+      "bytes": 142,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-config-v4.json"
+    },
+    {
+      "path": "animated-stock-config-v5.json",
+      "sha256": "1be92f3b489621ca5c389dac9c3a713fd3498ce2a27545245e1413cab3c93a67",
+      "bytes": 142,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-config-v5.json"
+    },
+    {
+      "path": "animated-stock-config-v6.json",
+      "sha256": "6a184799193b45ecd5d7dbe55293f99a515899e0f00191a0a94e4d9dc42a3592",
+      "bytes": 142,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-config-v6.json"
+    },
+    {
+      "path": "animated-stock-config.json",
+      "sha256": "93704eb8cf3e8e06e8aeb7fdb8a2a85726eaff2ffe9d5d70e58f6c7956834e07",
+      "bytes": 142,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-config.json"
+    },
+    {
+      "path": "animated-stock-phase-v2.json",
+      "sha256": "23303f09d9ad1ee66375f71224027db4df326c46a5a0690834b759c9062a71b9",
+      "bytes": 475,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-phase-v2.json"
+    },
+    {
+      "path": "animated-stock-phase-v3.json",
+      "sha256": "43cd36940ee1a4252c4464ddafe66e26e689a10ba54abde14bfb13db75600367",
+      "bytes": 475,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-phase-v3.json"
+    },
+    {
+      "path": "animated-stock-phase-v4.json",
+      "sha256": "6f6d01bea8291e8085562d03338677b1aba080a39e0159a31734d5262e578124",
+      "bytes": 475,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-phase-v4.json"
+    },
+    {
+      "path": "animated-stock-phase-v5.json",
+      "sha256": "62faca180f7e7da63e7ac577d36ad387126e23bc510cb6855ff2df37f88652bb",
+      "bytes": 475,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-phase-v5.json"
+    },
+    {
+      "path": "animated-stock-phase-v6.json",
+      "sha256": "af43076c96b450e7080917d75b54ec484b1b10ec33dc1dbc48de9ade785fb92e",
+      "bytes": 475,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-phase-v6.json"
+    },
+    {
+      "path": "animated-stock-phase.json",
+      "sha256": "3e77cfe0e320072f11afc301ecdabaf114efdcd1d7ed0649890a5ae11f5509c9",
+      "bytes": 466,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-phase.json"
+    },
+    {
+      "path": "animated-stock-v1-deferred-thumbnails.jsonl",
+      "sha256": "55d073a02ff173b404489298ed8072ddfb225dcfd17e110759929915a9306b09",
+      "bytes": 12418,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v1-deferred-thumbnails.jsonl"
+    },
+    {
+      "path": "animated-stock-v1-errors.jsonl",
+      "sha256": "87c64a63d33b327990d9bbb796040797ff626fb9770d88d5710ad9b68beaa540",
+      "bytes": 50,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v1-errors.jsonl"
+    },
+    {
+      "path": "animated-stock-v1-qc.json",
+      "sha256": "a7387fd6c15cd2698dad31ef5c775eee92abcc3f92d41be756517a4e38466cf5",
+      "bytes": 2095,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v1-qc.json"
+    },
+    {
+      "path": "animated-stock-v1-requests.jsonl",
+      "sha256": "3303200a21640f1b1f62e2bd788c01d749104f1aeb16e687a0655384813ff064",
+      "bytes": 4257,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v1-requests.jsonl"
+    },
+    {
+      "path": "animated-stock-v1-served-preview.html",
+      "sha256": "d57d93a6ad928cd7647b58ad98917cf53c068e3dea4b5122298ebd997facc2d3",
+      "bytes": 1023459,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v1-served-preview.html"
+    },
+    {
+      "path": "animated-stock-v1.render.json",
+      "sha256": "5a663e982f02e5fe3e3536903adf78ffacd52fec748212547b5dfe74351aed6e",
+      "bytes": 41050,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v1.render.json"
+    },
+    {
+      "path": "animated-stock-v1.render.log",
+      "sha256": "7d129178d63ead21bb3a5e0cbab03658685af8f2f1a40c71624b5bd1f0856cf4",
+      "bytes": 2237,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v1.render.log"
+    },
+    {
+      "path": "animated-stock-v1.resources.jsonl",
+      "sha256": "dc17026594da0ab45dcb467390fa0bb6309445502d89da997dd560ddc52ebc57",
+      "bytes": 1006,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v1.resources.jsonl"
+    },
+    {
+      "path": "animated-stock-v2-deferred-thumbnails.jsonl",
+      "sha256": "5c73cd8a72432e6bf037cdf78ecfe47b420ac17d8ad155e2a82e6b454820637c",
+      "bytes": 24836,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v2-deferred-thumbnails.jsonl"
+    },
+    {
+      "path": "animated-stock-v2-errors.jsonl",
+      "sha256": "51c4d2b9e6dea7d96b0c738e23775179e1f23ac2a3a34e11d08889aaa47dd831",
+      "bytes": 100,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v2-errors.jsonl"
+    },
+    {
+      "path": "animated-stock-v2-playback.json",
+      "sha256": "def0dc4864d64f3dddde4d9c678ff846f161da7e4205bba32011b649289e32a3",
+      "bytes": 825478,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v2-playback.json"
+    },
+    {
+      "path": "animated-stock-v2-qc.json",
+      "sha256": "7f0793fd7f01bac4795ba089bcfa4475575c14628198e004563617aaeb3fd28f",
+      "bytes": 28138,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v2-qc.json"
+    },
+    {
+      "path": "animated-stock-v2-requests.jsonl",
+      "sha256": "486de841998b6feca70118951e03cabb93b4da24109df619321917bca55cf0b4",
+      "bytes": 682153,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v2-requests.jsonl"
+    },
+    {
+      "path": "animated-stock-v2-reverse.json",
+      "sha256": "daef2df8a6e338008b4729bbb9201ada3d6cf04fd1aa29a70e577a22afe8d12b",
+      "bytes": 1551,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v2-reverse.json"
+    },
+    {
+      "path": "animated-stock-v2-scenes.jsonl",
+      "sha256": "b7aead9c0122e416563142ea1eddaba349cb4de6f8ff25aefc6828d3d06b0d48",
+      "bytes": 76876,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v2-scenes.jsonl"
+    },
+    {
+      "path": "animated-stock-v2-served-preview.html",
+      "sha256": "d57d93a6ad928cd7647b58ad98917cf53c068e3dea4b5122298ebd997facc2d3",
+      "bytes": 1023459,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v2-served-preview.html"
+    },
+    {
+      "path": "animated-stock-v2.render.json",
+      "sha256": "f9f4dd9b55ff2e760de469f98696472cd4e9bac26a46a296d183a673fd7cf6c1",
+      "bytes": 48117,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v2.render.json"
+    },
+    {
+      "path": "animated-stock-v2.render.log",
+      "sha256": "3d31fcdae9896035c401a8ec5ee391ed64bbdde442617326a1d20d40d4eb4730",
+      "bytes": 554,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v2.render.log"
+    },
+    {
+      "path": "animated-stock-v2.resources.jsonl",
+      "sha256": "493f3a230a28af6cd960af48bcf61646a67df6c87049de0262bdacc102729d0e",
+      "bytes": 23493,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v2.resources.jsonl"
+    },
+    {
+      "path": "animated-stock-v3-deferred-thumbnails.jsonl",
+      "sha256": "d8d6c32b0560671c4fb6128ac81058ce8841e7e33b3a1cd33a587fb0ba3ca978",
+      "bytes": 18558,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v3-deferred-thumbnails.jsonl"
+    },
+    {
+      "path": "animated-stock-v3-iframe.html",
+      "sha256": "ead6126ac8b871a585a2eee968ce8c32a9a1f20ab62e2cf89fe2d94f9b77ff71",
+      "bytes": 1045906,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v3-iframe.html"
+    },
+    {
+      "path": "animated-stock-v3-qc.json",
+      "sha256": "6d42ba653be38f788ed12c93b585957a235846e40513178faf5a46f693276592",
+      "bytes": 1557,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v3-qc.json"
+    },
+    {
+      "path": "animated-stock-v3-requests.jsonl",
+      "sha256": "fb727b57fced7394e424f9a05469ad4ad3debfc04568063a91cd8d41e27b4a6a",
+      "bytes": 2323,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v3-requests.jsonl"
+    },
+    {
+      "path": "animated-stock-v3-served-preview.html",
+      "sha256": "daaab0dd56c69650aa468927b68b4fd7599b52231558d8fb9977403e9b0d220f",
+      "bytes": 1023787,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v3-served-preview.html"
+    },
+    {
+      "path": "animated-stock-v3.render.json",
+      "sha256": "9f7be454b1f9cc321ff88c81f465b089177c895264655223c258e042eb018422",
+      "bytes": 40945,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v3.render.json"
+    },
+    {
+      "path": "animated-stock-v3.render.log",
+      "sha256": "62de2af8100b680add5b5ccb9f6d7de6a435b6faff5fc2f7bbc6e46837fd0cba",
+      "bytes": 1917,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v3.render.log"
+    },
+    {
+      "path": "animated-stock-v3.resources.jsonl",
+      "sha256": "89b5556b52785d49241156b8730d553d4b80033a103a8bd84944735c26a20439",
+      "bytes": 1007,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v3.resources.jsonl"
+    },
+    {
+      "path": "animated-stock-v4-deferred-thumbnails.jsonl",
+      "sha256": "4ba8f4fb3223f0f4f32bed5058f163a7dfc2c5b26af2f9c3d799fa735b8cdbbb",
+      "bytes": 14218,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v4-deferred-thumbnails.jsonl"
+    },
+    {
+      "path": "animated-stock-v4-iframe.html",
+      "sha256": "ab3aec06d26b5e9b7afaff64a20631323947a2f9fa8bea1eac090fb514497570",
+      "bytes": 1046193,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v4-iframe.html"
+    },
+    {
+      "path": "animated-stock-v4-qc.json",
+      "sha256": "f398dabd58fcd988f432acf88f07146b02ce84f63811b8465864e6f388692700",
+      "bytes": 493,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v4-qc.json"
+    },
+    {
+      "path": "animated-stock-v4-requests.jsonl",
+      "sha256": "5b1e4bbdf84ef64430eb8d4b3701775e7a450d7c95e20f0d7667a68bcd5722af",
+      "bytes": 2579,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v4-requests.jsonl"
+    },
+    {
+      "path": "animated-stock-v4-scenes.jsonl",
+      "sha256": "826aa7553f90f0e81dfca787a5a52a534f24ffdf633b23eaac4ffac26c7cd09e",
+      "bytes": 12607,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v4-scenes.jsonl"
+    },
+    {
+      "path": "animated-stock-v4.render.json",
+      "sha256": "f97eef7f18fb7eb848c546a53ad69b0b7db761b14f853c0999964c7ff042095a",
+      "bytes": 41263,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v4.render.json"
+    },
+    {
+      "path": "animated-stock-v4.render.log",
+      "sha256": "49d34880e13bc33426c7d74d8aef5c3129813e16b20c9bd40589d291e0663df9",
+      "bytes": 819,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v4.render.log"
+    },
+    {
+      "path": "animated-stock-v4.resources.jsonl",
+      "sha256": "38ca98604ce5a7e8d053dc2df8a310caa06c646142236d882f49915df249c661",
+      "bytes": 952,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v4.resources.jsonl"
+    },
+    {
+      "path": "animated-stock-v5-deferred-thumbnails.jsonl",
+      "sha256": "55d073a02ff173b404489298ed8072ddfb225dcfd17e110759929915a9306b09",
+      "bytes": 12418,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v5-deferred-thumbnails.jsonl"
+    },
+    {
+      "path": "animated-stock-v5-errors.jsonl",
+      "sha256": "87c64a63d33b327990d9bbb796040797ff626fb9770d88d5710ad9b68beaa540",
+      "bytes": 50,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v5-errors.jsonl"
+    },
+    {
+      "path": "animated-stock-v5-iframe.html",
+      "sha256": "d0da710070d6be97e311e25e52effb993c569f244acaa0b14e8444b37b6459e2",
+      "bytes": 1046379,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v5-iframe.html"
+    },
+    {
+      "path": "animated-stock-v5-qc.json",
+      "sha256": "634895a8db03de10ee54097a1b5c437cf761eef52755e991498cc1231e9f5337",
+      "bytes": 1273,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v5-qc.json"
+    },
+    {
+      "path": "animated-stock-v5-requests.jsonl",
+      "sha256": "05f522ba995d56c6eb17dcf89aa3e821b26dae8a2794d0a554c1702a4eb9425e",
+      "bytes": 11423,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v5-requests.jsonl"
+    },
+    {
+      "path": "animated-stock-v5-scenes.jsonl",
+      "sha256": "331a973509b82ead76fe860de7b115a2bfd5dd05ffadf9625e1950e102802ff0",
+      "bytes": 8542,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v5-scenes.jsonl"
+    },
+    {
+      "path": "animated-stock-v5.render.json",
+      "sha256": "4293270a00cc6104936407137e79fba8f7250d28442fc88658d724bad7b9e8ec",
+      "bytes": 47083,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v5.render.json"
+    },
+    {
+      "path": "animated-stock-v5.render.log",
+      "sha256": "74d9ec3963bf7ede77aa34ee35d1252b6e54b1820e65ae52176528c602ce3278",
+      "bytes": 1646,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v5.render.log"
+    },
+    {
+      "path": "animated-stock-v5.resources.jsonl",
+      "sha256": "dab135d13c24bde07d43a8478d17f5c4b73c4b996a53bd12e79daa50b8023696",
+      "bytes": 3748,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v5.resources.jsonl"
+    },
+    {
+      "path": "animated-stock-v6-deferred-thumbnails.jsonl",
+      "sha256": "5c73cd8a72432e6bf037cdf78ecfe47b420ac17d8ad155e2a82e6b454820637c",
+      "bytes": 24836,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-deferred-thumbnails.jsonl"
+    },
+    {
+      "path": "animated-stock-v6-errors.jsonl",
+      "sha256": "51c4d2b9e6dea7d96b0c738e23775179e1f23ac2a3a34e11d08889aaa47dd831",
+      "bytes": 100,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-errors.jsonl"
+    },
+    {
+      "path": "animated-stock-v6-frames/panel-00.png",
+      "sha256": "de3366c167d5dc95bf0d09d4d4646916ca77acc8013e99768941fb162f3f451f",
+      "bytes": 663412,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-frames/panel-00.png"
+    },
+    {
+      "path": "animated-stock-v6-frames/panel-02.png",
+      "sha256": "5223aa4fc35965cfbfa534f71c1ecf141bc850735cc3ff95237daa806e45e9f9",
+      "bytes": 485376,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-frames/panel-02.png"
+    },
+    {
+      "path": "animated-stock-v6-frames/panel-08.png",
+      "sha256": "4e5840cdd9aa08ed97eb0e7c2673b6394ac9ae14f7c4a3a2f3208c4de29ec574",
+      "bytes": 515162,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-frames/panel-08.png"
+    },
+    {
+      "path": "animated-stock-v6-frames/panel-13.png",
+      "sha256": "a7f3a607bcef1e942a994999ef0da4a372cc6f0ea363cf5db5be9bd02663febd",
+      "bytes": 227898,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-frames/panel-13.png"
+    },
+    {
+      "path": "animated-stock-v6-frames/panel-18.png",
+      "sha256": "f241177734b5839c6144beba154655d05ea143107bfbfb4175c5e676316f6620",
+      "bytes": 481590,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-frames/panel-18.png"
+    },
+    {
+      "path": "animated-stock-v6-frames/panel-29.png",
+      "sha256": "8dd1be6da4d2a6e673d3d2dc291193b6156a4b8474330d7e01558d67b0fb4d0d",
+      "bytes": 227061,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-frames/panel-29.png"
+    },
+    {
+      "path": "animated-stock-v6-frames/panel-35.png",
+      "sha256": "4395bf450f62b0b546e781d25c52c94e2e4e17157d6826bb3b6c85ba54aeb049",
+      "bytes": 495099,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-frames/panel-35.png"
+    },
+    {
+      "path": "animated-stock-v6-frames/panel-37.png",
+      "sha256": "69cca2a93451e05e8292302061c109b182dcd519b5ba7a6a1a1adcf3e9937abd",
+      "bytes": 238722,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-frames/panel-37.png"
+    },
+    {
+      "path": "animated-stock-v6-frames/panel-42.png",
+      "sha256": "45f0a0203d4a982c65cc2b8b5613c28ca521a091cf6d67739f3062cbcdfc3d63",
+      "bytes": 243317,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-frames/panel-42.png"
+    },
+    {
+      "path": "animated-stock-v6-frames/panel-44.png",
+      "sha256": "c0d7ce29cea6c4704a549a425433eb7f91abb152a1dc89ff5387b7971baead82",
+      "bytes": 233432,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-frames/panel-44.png"
+    },
+    {
+      "path": "animated-stock-v6-frames/panel-48.png",
+      "sha256": "ec7cf3e70678b5f2b1b2fe94fc74c5d9f0655c7f9c07713ca56343405dd02cf3",
+      "bytes": 500297,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-frames/panel-48.png"
+    },
+    {
+      "path": "animated-stock-v6-frames/panel-52.png",
+      "sha256": "7c0ba8913d5ced3bae74897c1391691373ea34bff0d3ed4d60727a1acc00387d",
+      "bytes": 522251,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-frames/panel-52.png"
+    },
+    {
+      "path": "animated-stock-v6-iframe.html",
+      "sha256": "d0da710070d6be97e311e25e52effb993c569f244acaa0b14e8444b37b6459e2",
+      "bytes": 1046379,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-iframe.html"
+    },
+    {
+      "path": "animated-stock-v6-playback.json",
+      "sha256": "d142d36cc0de2911caa7b73fe93de941c8c9280dfb61f7f4f45870e207e29e5f",
+      "bytes": 824939,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-playback.json"
+    },
+    {
+      "path": "animated-stock-v6-qc.json",
+      "sha256": "c2ea363c1253336c811f4130a4ddfc23a98d67b0d527e2f95327d856893e75f6",
+      "bytes": 28590,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-qc.json"
+    },
+    {
+      "path": "animated-stock-v6-requests.jsonl",
+      "sha256": "c374925d3b018ee638b723583daa5ae28b24575c543f6e99d363b7ae1fecb9cb",
+      "bytes": 659387,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-requests.jsonl"
+    },
+    {
+      "path": "animated-stock-v6-reverse.json",
+      "sha256": "daef2df8a6e338008b4729bbb9201ada3d6cf04fd1aa29a70e577a22afe8d12b",
+      "bytes": 1551,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-reverse.json"
+    },
+    {
+      "path": "animated-stock-v6-scenes.jsonl",
+      "sha256": "d9619c27aa96b539992abd880a0c46621033b3d83d582bcee1a43d25574f8056",
+      "bytes": 77328,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6-scenes.jsonl"
+    },
+    {
+      "path": "animated-stock-v6.render.json",
+      "sha256": "5fd171e9f0e8079c6aa70a611a4e0677b45a16c4370b224350c5dd36e0af392d",
+      "bytes": 53359,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6.render.json"
+    },
+    {
+      "path": "animated-stock-v6.render.log",
+      "sha256": "f46e72e362becd1b53569e2bceace50f49bf45cb3bc4a0465e943daeb3b47cfe",
+      "bytes": 554,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6.render.log"
+    },
+    {
+      "path": "animated-stock-v6.resources.jsonl",
+      "sha256": "abd33d2a488868608202b85b8f93ce601e3d75b7efbcf48cc5f9801acc6aee00",
+      "bytes": 24054,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/animated-stock-v6.resources.jsonl"
+    },
+    {
+      "path": "aroll-commands.jsonl",
+      "sha256": "df8e557b1eda37657ceabab9d0ca879ec06f8eb997745c6607a78e0ca48b0c38",
+      "bytes": 11619,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/aroll-commands.jsonl"
+    },
+    {
+      "path": "aroll-phase.json",
+      "sha256": "1f178760444ca6c6f659e4b11af212a5940cd6aee3e4442981f6c883aa304e68",
+      "bytes": 90,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/aroll-phase.json"
+    },
+    {
+      "path": "aroll-preparation-v1.render.json",
+      "sha256": "5b1eeaa284fae40e7f802185451e7e2c0fd58787a497353f675566cb27be63df",
+      "bytes": 15524,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/aroll-preparation-v1.render.json"
+    },
+    {
+      "path": "aroll-preparation-v1.render.log",
+      "sha256": "005219bbc348dc214a20f109ba8d956e1ad97bc33c62dce354d6b002dfbb30ef",
+      "bytes": 462,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/aroll-preparation-v1.render.log"
+    },
+    {
+      "path": "aroll-preparation-v1.resources.jsonl",
+      "sha256": "fe98b2cf24c65a5ff460434b69d19342981068ef54c41191e6f5cce88f0203d8",
+      "bytes": 54970,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/aroll-preparation-v1.resources.jsonl"
+    },
+    {
+      "path": "aroll-preparation.json",
+      "sha256": "08baa3af2dba046706f7745add8cd0efc337b02474ae510798fb3b3caf5e0525",
+      "bytes": 692,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/aroll-preparation.json"
+    },
+    {
+      "path": "aroll-source-qc-recovered.json",
+      "sha256": "be1b6cfce3fa41762d5830a2ab79af83643d7a909e2f542ff9e918dd00ecd4a4",
+      "bytes": 4848,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/aroll-source-qc-recovered.json"
+    },
+    {
+      "path": "aroll-source-qc-v1.render.json",
+      "sha256": "aeeb52a427db884e63dd41589efd90447bd45477945069d9ae862913da6f5c57",
+      "bytes": 13695,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/aroll-source-qc-v1.render.json"
+    },
+    {
+      "path": "aroll-source-qc-v1.render.log",
+      "sha256": "b48e27f77862b3449f9c3c13c7aecb80b673e54bcff24114fc795b1783589b6f",
+      "bytes": 798,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/aroll-source-qc-v1.render.log"
+    },
+    {
+      "path": "aroll-source-qc-v1.resources.jsonl",
+      "sha256": "1123383bacd405f0afe8215bb2088b3fa2e0114979bbad2d57a1d243134f1be7",
+      "bytes": 2457,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/aroll-source-qc-v1.resources.jsonl"
+    },
+    {
+      "path": "audio-master-phase.json",
+      "sha256": "ae020a21a4c0f126fc328ed542fa619d8897699543e37a0dc7cb7efab4cc0171",
+      "bytes": 86,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/audio-master-phase.json"
+    },
+    {
+      "path": "audio-mastering-v1.render.json",
+      "sha256": "bdf39e8c123d7852ce9579c1f10a114fbcde9b8215452deebe376aaf02865d02",
+      "bytes": 13471,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/audio-mastering-v1.render.json"
+    },
+    {
+      "path": "audio-mastering-v1.render.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/audio-mastering-v1.render.log"
+    },
+    {
+      "path": "audio-mastering-v1.resources.jsonl",
+      "sha256": "9d45d246fdc27b53de1989608d1105a2e1a81d18a087f63d4531b1775756deb9",
+      "bytes": 4912,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/audio-mastering-v1.resources.jsonl"
+    },
+    {
+      "path": "audio-mastering.json",
+      "sha256": "3a0cb8f40d82a867c26cd2481eac9cff69ad5586f2b15a5c9fcf7f728368ea1c",
+      "bytes": 1030,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/audio-mastering.json"
+    },
+    {
+      "path": "build_native_project.py",
+      "sha256": "3004bd31bd0be7258c058383bbb6013906cd9637abe81615e503317f2382f7f4",
+      "bytes": 9245,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/build_native_project.py"
+    },
+    {
+      "path": "capture_native_references.mjs",
+      "sha256": "4bd866ac317ced8d72a0db96f468a022623e607645196a5ae116679e3df79af1",
+      "bytes": 6811,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/capture_native_references.mjs"
+    },
+    {
+      "path": "compare_native_color.py",
+      "sha256": "cebba0c5efb549f5a306f66407e8b3720a5d9c84624ec02ed21c99cd978fe97e",
+      "bytes": 3777,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/compare_native_color.py"
+    },
+    {
+      "path": "cut-plan.json",
+      "sha256": "0100cd4fd8ac374aa257deeec664f51d0ef93efaf251edfa6f98893aa71ddddd",
+      "bytes": 2138,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/cut-plan.json"
+    },
+    {
+      "path": "cut_math.py",
+      "sha256": "d98d1b8938b93069786401c8b48b8c20faac0ed88c3d14a66c5894c2afd14be3",
+      "bytes": 1786,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/cut_math.py"
+    },
+    {
+      "path": "cut_math_v2.py",
+      "sha256": "8766b17fb56c96f655fe3de9ad67dc1777f521e5f14e8d7474e76881d019eea3",
+      "bytes": 2560,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/cut_math_v2.py"
+    },
+    {
+      "path": "deferred-thumbnails-v3.jsonl",
+      "sha256": "e0ec64742d48f1c13f41dc0e10e2f26529d97031adf3348f74290f955dd95583",
+      "bytes": 20484,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/deferred-thumbnails-v3.jsonl"
+    },
+    {
+      "path": "delivery-output-qc-phase-v2.json",
+      "sha256": "70bca0e696febd6f4af8dd81745ebcbe20bc87cb172ca04a0df3822a5e359c1d",
+      "bytes": 474,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-output-qc-phase-v2.json"
+    },
+    {
+      "path": "delivery-output-qc-v2.render.json",
+      "sha256": "7a99cdf1c61ee27ef405c44bbfffbbea0f9ea444f91d0fd8372b706b0b6c4d14",
+      "bytes": 43632,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-output-qc-v2.render.json"
+    },
+    {
+      "path": "delivery-output-qc-v2.render.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-output-qc-v2.render.log"
+    },
+    {
+      "path": "delivery-output-qc-v2.resources.jsonl",
+      "sha256": "4c0aa27bcf292cbbfba3e4d901679758fd055d06d20a1bd71995f129cfdcb83e",
+      "bytes": 4693,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-output-qc-v2.resources.jsonl"
+    },
+    {
+      "path": "delivery-playback-config-v1.json",
+      "sha256": "17e803f6460844f1696648cceb681a4782f190fb2ccf7b6c3eaa27ad2aa6b6b3",
+      "bytes": 61,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-playback-config-v1.json"
+    },
+    {
+      "path": "delivery-playback-phase-v1.json",
+      "sha256": "9c7075deaacb7d55b59d0386ca4d6dd73bbef8d8d1c5a6906bb1c8a8e780981d",
+      "bytes": 283,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-playback-phase-v1.json"
+    },
+    {
+      "path": "delivery-playback-v1.render.json",
+      "sha256": "d82606d2872702b721c385139bc8b41032c0976469bf3b4fdb31fddb51fae79b",
+      "bytes": 86707,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-playback-v1.render.json"
+    },
+    {
+      "path": "delivery-playback-v1.render.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-playback-v1.render.log"
+    },
+    {
+      "path": "delivery-playback-v1.resources.jsonl",
+      "sha256": "d2456dfaac5410d1c3a19f8319c0b80b630eaef2334fa9aadd9d0f055b25e1c6",
+      "bytes": 147123,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-playback-v1.resources.jsonl"
+    },
+    {
+      "path": "delivery-qc-v2/donor-local.json",
+      "sha256": "d7a796aa182a3d878c4d88497a5613a8297c1d31e65091e6e6ce4175dcec9238",
+      "bytes": 1346995,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/donor-local.json"
+    },
+    {
+      "path": "delivery-qc-v2/native-audio-local.json",
+      "sha256": "d7a796aa182a3d878c4d88497a5613a8297c1d31e65091e6e6ce4175dcec9238",
+      "bytes": 1346995,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/native-audio-local.json"
+    },
+    {
+      "path": "delivery-qc-v2/native-qc.json",
+      "sha256": "4bcf7caaa751f77834766b7abd9c6b26d39f1b375882bc05b4f9cb5dfb2c5a23",
+      "bytes": 10024,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/native-qc.json"
+    },
+    {
+      "path": "delivery-qc-v2/probe-a:0.json",
+      "sha256": "1bceff35f88b3d9ecf66663264cedaa5dc2d7c58c0eb6b355b9c1ba037290eda",
+      "bytes": 2507319,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/probe-a:0.json"
+    },
+    {
+      "path": "delivery-qc-v2/probe-all.json",
+      "sha256": "107b2be71b1c0a1cd500dd28732ccbeef91e189fc3bce50c8a9f5246a6849f79",
+      "bytes": 3726,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/probe-all.json"
+    },
+    {
+      "path": "delivery-qc-v2/probe-v:0.json",
+      "sha256": "e629509331dce3347be0500ce3d570bb8329e88ca229e7d7424a599fef99d65b",
+      "bytes": 1272633,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/probe-v:0.json"
+    },
+    {
+      "path": "delivery-qc-v2/visual-01.png",
+      "sha256": "f952d95c99ec90e71ac2cdcea51ed48b7ab7c277f417532cd427f135520607f2",
+      "bytes": 1402273,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/visual-01.png"
+    },
+    {
+      "path": "delivery-qc-v2/visual-02.png",
+      "sha256": "34e6f1ebc8a1ea36224fb39a58135fe83a7b3723f6035b1099ec37b79f42022d",
+      "bytes": 964175,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/visual-02.png"
+    },
+    {
+      "path": "delivery-qc-v2/visual-03.png",
+      "sha256": "baf776aa96aa7a270bdcb2cb5ced0096209d4141062ec0b1837668d169dc6ff8",
+      "bytes": 1124701,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/visual-03.png"
+    },
+    {
+      "path": "delivery-qc-v2/visual-04.png",
+      "sha256": "b0c48592a945541671758193befe46ab981eafbdd24e054fee96410322b2cf58",
+      "bytes": 465519,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/visual-04.png"
+    },
+    {
+      "path": "delivery-qc-v2/visual-05.png",
+      "sha256": "83287cae1a89410058d648a977d71e96bf562a05ab4c80eb9ae24c92a93a499a",
+      "bytes": 1012497,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/visual-05.png"
+    },
+    {
+      "path": "delivery-qc-v2/visual-06.png",
+      "sha256": "a397938cbbf0e441cf2b1690be63804e73be47e8858df63592293014ad10d72a",
+      "bytes": 492622,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/visual-06.png"
+    },
+    {
+      "path": "delivery-qc-v2/visual-07.png",
+      "sha256": "703212388b3f9c930de34e25a8ee46fa6a318b7ddf4f58fd75f495ee87836e16",
+      "bytes": 1076035,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/visual-07.png"
+    },
+    {
+      "path": "delivery-qc-v2/visual-08.png",
+      "sha256": "83a845f367db0070bcfcdd303dbed26431b4d2ae1511e9a273a03be4f15c86ed",
+      "bytes": 486609,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/visual-08.png"
+    },
+    {
+      "path": "delivery-qc-v2/visual-09.png",
+      "sha256": "12309ef6f6a93f58a15b7bd2ef5495b86ef72fae0779f0fb227290c1c55ba52f",
+      "bytes": 541559,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/visual-09.png"
+    },
+    {
+      "path": "delivery-qc-v2/visual-10.png",
+      "sha256": "09a42a5149fa778eebc7a9e3d41b10b8cf1e163bfae427a84791e55abc8878bf",
+      "bytes": 488691,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/visual-10.png"
+    },
+    {
+      "path": "delivery-qc-v2/visual-11.png",
+      "sha256": "85191d3524f8d536e616ee6927c9ee83d2e3f27231bcd280967515a077099112",
+      "bytes": 1087970,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/visual-11.png"
+    },
+    {
+      "path": "delivery-qc-v2/visual-12.png",
+      "sha256": "be04ef52fb36b01520c11e2c7ddfebf9ed80d3cdc8d85bf53778bceff772c073",
+      "bytes": 1162202,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/visual-12.png"
+    },
+    {
+      "path": "delivery-qc-v2/visual-map.json",
+      "sha256": "2c20b2c5a0b3469a02f1d1740a4293c4f6601b8ef0aa034a22d2e81f4f2458d0",
+      "bytes": 626,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/visual-map.json"
+    },
+    {
+      "path": "delivery-v1-playback.json",
+      "sha256": "6d2b729ff8d60d2b385df84ec9668c6cdafa81e94e8bf300c92e637e6303cff8",
+      "bytes": 1571097,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-v1-playback.json"
+    },
+    {
+      "path": "events.jsonl",
+      "sha256": "edc0c51845de9942efa7774e77c0eeeed0d55792a50c68af37bb37dad6aecfa0",
+      "bytes": 21418,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/events.jsonl"
+    },
+    {
+      "path": "execution-plan.json",
+      "sha256": "185ff0840c07fb07a3d97703582be46e99a29a3a1395117d7abd37200e61233a",
+      "bytes": 5632,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/execution-plan.json"
+    },
+    {
+      "path": "export_native.cjs",
+      "sha256": "541f3d86d19538e885742284658d74a897f02f79dd33bd7c958d727b32ccc176",
+      "bytes": 1986,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/export_native.cjs"
+    },
+    {
+      "path": "final-audio-assets-v1.render.json",
+      "sha256": "151e8cae96e45a35c2969ad92bea0466cb7e96ada8e32f56ba3525e75123113c",
+      "bytes": 12163,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-audio-assets-v1.render.json"
+    },
+    {
+      "path": "final-audio-assets-v1.render.log",
+      "sha256": "d585d065686105406c33f0ac4fe06789f26c15e54ed155d09a671ac8facd9c8b",
+      "bytes": 1257,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-audio-assets-v1.render.log"
+    },
+    {
+      "path": "final-audio-assets-v1.resources.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-audio-assets-v1.resources.jsonl"
+    },
+    {
+      "path": "final-audio-assets-v2.render.json",
+      "sha256": "896a002e7ae441e6d9ea5c3817e504420281f95f8192503b8d0c7eef6804021a",
+      "bytes": 13658,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-audio-assets-v2.render.json"
+    },
+    {
+      "path": "final-audio-assets-v2.render.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-audio-assets-v2.render.log"
+    },
+    {
+      "path": "final-audio-assets-v2.resources.jsonl",
+      "sha256": "9cc73c6ea0bb3803087c87563398f09f154885ad62cd810dda70ffc3789b765b",
+      "bytes": 5756,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-audio-assets-v2.resources.jsonl"
+    },
+    {
+      "path": "final-audio-phase-v2.json",
+      "sha256": "e6d0cd83c642a57cce5d2d0ee47fc2582c24cef41170602d362c8a10d24eba5d",
+      "bytes": 102,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-audio-phase-v2.json"
+    },
+    {
+      "path": "final-audio-phase.json",
+      "sha256": "2c14b884ff2f23dbdf2777ab4a4f7939793319ba6790df07a78901a8a9536d3e",
+      "bytes": 96,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-audio-phase.json"
+    },
+    {
+      "path": "final-qc/native-audio-local.json",
+      "sha256": "200c5b5223315922bf15e53c1a2ad9c0ce2ba7d3107f068d6dc379574142cc6c",
+      "bytes": 1355918,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-qc/native-audio-local.json"
+    },
+    {
+      "path": "final-qc/native-qc.json",
+      "sha256": "9ed4141114a1209348af682d81c2e4eca5faa35cf7c5390c7e90ab15f3d01305",
+      "bytes": 6900,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-qc/native-qc.json"
+    },
+    {
+      "path": "final-qc/probe-a:0.json",
+      "sha256": "e9082d6242f5d19a2aa54280d2cb57d3fece59d34ced580f7df3ecaf386a1e15",
+      "bytes": 2507404,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-qc/probe-a:0.json"
+    },
+    {
+      "path": "final-qc/probe-all.json",
+      "sha256": "fe2f9daef9c9307eb6e1963892701e1ab209d4277a3f2e9e749f4c75639501f7",
+      "bytes": 3804,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-qc/probe-all.json"
+    },
+    {
+      "path": "final-qc/probe-v:0.json",
+      "sha256": "354969459e7c34c09fd9b722b741eb0c9e02212786001f90de834e4907cea36f",
+      "bytes": 1272711,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-qc/probe-v:0.json"
+    },
+    {
+      "path": "final-qc/visual-01.png",
+      "sha256": "4b7817d8bb763679ad3f2da0f7d9b769d55b3831cfbae20b5178c719016ccc13",
+      "bytes": 1377544,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-qc/visual-01.png"
+    },
+    {
+      "path": "final-qc/visual-02.png",
+      "sha256": "4d54bab092c96398a9cb501a1d3b33bfbd98bb1b903fa7b9cd61f3abc3883d58",
+      "bytes": 948755,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-qc/visual-02.png"
+    },
+    {
+      "path": "final-qc/visual-03.png",
+      "sha256": "a5a7aceb89cd54fed27135a1036afbc6c8bd57bd4489e1474bfcdb87237eef57",
+      "bytes": 1110157,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-qc/visual-03.png"
+    },
+    {
+      "path": "final-qc/visual-04.png",
+      "sha256": "f609e5bef3bdf770b69f95b136c69eb7e52a41657e84c8aaedf482d60d9c7939",
+      "bytes": 462659,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-qc/visual-04.png"
+    },
+    {
+      "path": "final-qc/visual-05.png",
+      "sha256": "c79bf99dae25e878a2a9cd5abdeaa0bc226eff09a00867ef3a25e48d0d2fdbc8",
+      "bytes": 994060,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-qc/visual-05.png"
+    },
+    {
+      "path": "final-qc/visual-06.png",
+      "sha256": "a9668d1c4282ce15f4bb2e35880c5d35948de6fb70fb1d5c5d75db998bc79e01",
+      "bytes": 491382,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-qc/visual-06.png"
+    },
+    {
+      "path": "final-qc/visual-07.png",
+      "sha256": "4142acd53fb18d9338604ffcf9523fad936b9a03a385ec1892deac16f910c113",
+      "bytes": 1058382,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-qc/visual-07.png"
+    },
+    {
+      "path": "final-qc/visual-08.png",
+      "sha256": "8b4f1e608f6b0c8361adce130e278219f88eba1e40baeb3ec3b7dd96f40a2e48",
+      "bytes": 486189,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-qc/visual-08.png"
+    },
+    {
+      "path": "final-qc/visual-09.png",
+      "sha256": "d1b853017d234b90f58e871e1edbb39c7883ceb5122b5e59661f495962fbeb48",
+      "bytes": 539822,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-qc/visual-09.png"
+    },
+    {
+      "path": "final-qc/visual-10.png",
+      "sha256": "557ecf82d7eba7af80ebafa9632d69d09f92d9d372cb1d0bf8362545ed9b6881",
+      "bytes": 487625,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-qc/visual-10.png"
+    },
+    {
+      "path": "final-qc/visual-11.png",
+      "sha256": "21874cea6dbc3a0c56b0be8bc9d73b09380a18e046d2d73a2688c3728edcec4d",
+      "bytes": 1071127,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-qc/visual-11.png"
+    },
+    {
+      "path": "final-qc/visual-12.png",
+      "sha256": "387263fa4f19d7fd723b04cf502103d511e54a0d8fbac73719d82ee4d69823bc",
+      "bytes": 1135695,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-qc/visual-12.png"
+    },
+    {
+      "path": "final-qc/visual-map.json",
+      "sha256": "2c20b2c5a0b3469a02f1d1740a4293c4f6601b8ef0aa034a22d2e81f4f2458d0",
+      "bytes": 626,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/final-qc/visual-map.json"
+    },
+    {
+      "path": "finish_audio_assets.py",
+      "sha256": "2181ef22bac2ba63eae08ae1da0bc59ccf23bea09e7d29141542dda441d6f37f",
+      "bytes": 5359,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/finish_audio_assets.py"
+    },
+    {
+      "path": "finish_audio_assets_v2.py",
+      "sha256": "fcf375f5e11f4d6bb9dcb37ed53cd589f73bb5e84f6a4c614a2781888a89de13",
+      "bytes": 2084,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/finish_audio_assets_v2.py"
+    },
+    {
+      "path": "finish_native_delivery.py",
+      "sha256": "ada481f9922491b37db72afc3dd3b0be4173a03b48938b8de2d1e03d98d7e0fb",
+      "bytes": 6736,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/finish_native_delivery.py"
+    },
+    {
+      "path": "fresh-audio-assets-v2.json",
+      "sha256": "1ca0f5c326094dce94927d9ff1bb2b3cbed999aa8567fcb160d09249d1e1b557",
+      "bytes": 5808,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/fresh-audio-assets-v2.json"
+    },
+    {
+      "path": "fresh-audio-assets.json",
+      "sha256": "aa694caca4b36c72d349f428e0b423b2a2d23b77805b81a47a458f26b9053dcc",
+      "bytes": 4826,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/fresh-audio-assets.json"
+    },
+    {
+      "path": "fresh-delivery-audio/narration.m4a",
+      "sha256": "3892fae8fe9562f55304f024389ca2eb6a572948a8d4b7eddf05de95c0fbeef3",
+      "bytes": 20867065,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/fresh-delivery-audio/narration.m4a"
+    },
+    {
+      "path": "inspect-phase.json",
+      "sha256": "1b1ad9f60db32717cc3e15e9d022b98c912e13edec12b1a05788da38510753e6",
+      "bytes": 88,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/inspect-phase.json"
+    },
+    {
+      "path": "inspect_media.py",
+      "sha256": "f996cd9585e4c0a5eb660c768aea8e315c86a704845ab20e6f9a1ba5151d2952",
+      "bytes": 1941,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/inspect_media.py"
+    },
+    {
+      "path": "inspect_stills_v2.py",
+      "sha256": "92bf6bf066668004ac0d9cd683ba5c2fcb3d92d4ce6ef6573812ad457dfc5c0e",
+      "bytes": 1847,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/inspect_stills_v2.py"
+    },
+    {
+      "path": "inspect_stills_v3.py",
+      "sha256": "412264db8e21d16124a2481a21bc18253973e7f536f29efec396adfce04a60ff",
+      "bytes": 1950,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/inspect_stills_v3.py"
+    },
+    {
+      "path": "master_audio.py",
+      "sha256": "5a1c14bb4a4b1681110b3e90f1ccd506b6198632e5d16c0a5193ad8ea60c99f0",
+      "bytes": 3920,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/master_audio.py"
+    },
+    {
+      "path": "media-inspection-v1.render.json",
+      "sha256": "3c74d7c5db3a4095f9c60bfac83485455470e10468e394ba380539f08852be3a",
+      "bytes": 12402,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/media-inspection-v1.render.json"
+    },
+    {
+      "path": "media-inspection-v1.render.log",
+      "sha256": "08c44fd994d9c83448a9bca4d684171a4098f55a676046e9cada30be6753834e",
+      "bytes": 397,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/media-inspection-v1.render.log"
+    },
+    {
+      "path": "media-inspection-v1.resources.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/media-inspection-v1.resources.jsonl"
+    },
+    {
+      "path": "media-inspection.json",
+      "sha256": "78c6eb672cd3f29d873f6284c7c61ff51de9e3e197226cd9bad7b20c8c3fa724",
+      "bytes": 8004,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/media-inspection.json"
+    },
+    {
+      "path": "media-stills-v2.render.json",
+      "sha256": "76ff4f6aab1ee0cd49c8e7d78e76e659f9e66db16114a00772e6e9a4e5aa09e7",
+      "bytes": 13107,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/media-stills-v2.render.json"
+    },
+    {
+      "path": "media-stills-v2.render.log",
+      "sha256": "773d4a65475dda0a2f4df12fc7662155b8003a6fe8a91aa6f9b67c13796a2efb",
+      "bytes": 1688,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/media-stills-v2.render.log"
+    },
+    {
+      "path": "media-stills-v2.resources.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/media-stills-v2.resources.jsonl"
+    },
+    {
+      "path": "media-stills-v3.render.json",
+      "sha256": "4c5cdcce34dc0231a62694584a68725f4a290648691d9c765d8976f4aeb222ea",
+      "bytes": 13053,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/media-stills-v3.render.json"
+    },
+    {
+      "path": "media-stills-v3.render.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/media-stills-v3.render.log"
+    },
+    {
+      "path": "media-stills-v3.resources.jsonl",
+      "sha256": "84fd5094c54526fe14e6055dac7cdc3ca676f4f1e2c62b6c9e48b015e1eb758e",
+      "bytes": 817,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/media-stills-v3.resources.jsonl"
+    },
+    {
+      "path": "native-color-comparison.json",
+      "sha256": "b89b673ecbd9ca317d9046dae65aa4f76327a3a9f3e7b0126286f75022c926e7",
+      "bytes": 3363,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-color-comparison.json"
+    },
+    {
+      "path": "native-export-config-v1.json",
+      "sha256": "ea4b9afb963f878b67454eefacb6e3d3bf166723d695faae0e776a00e6cb807a",
+      "bytes": 93,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-export-config-v1.json"
+    },
+    {
+      "path": "native-export-phase-v1.json",
+      "sha256": "40b2d6ade802ed1116a4a7c9134c7fb405107c39d4ad910ec6ffe562878937a8",
+      "bytes": 974,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-export-phase-v1.json"
+    },
+    {
+      "path": "native-export-v1.json",
+      "sha256": "8645edb9ff5573791072ea7120feb364ce01b6074b05ea2d150c6ccd9e6dc31e",
+      "bytes": 1135,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-export-v1.json"
+    },
+    {
+      "path": "native-export-v1.render.json",
+      "sha256": "7702d9e5c63005f3c969ce9f6966b062783a1c1f671f9790ebcb3cc84a8de022",
+      "bytes": 145481,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-export-v1.render.json"
+    },
+    {
+      "path": "native-export-v1.render.log",
+      "sha256": "ca7dbb5b4ca29129aacd6fb98fa58e3c8b7a9a7a72dc4948c19de8097de7ee97",
+      "bytes": 1792047,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-export-v1.render.log"
+    },
+    {
+      "path": "native-export-v1.resources.jsonl",
+      "sha256": "d9ee01bcd635f2278bea046d6ef2c735588a659c8c38fa95407f6373e1bd5153",
+      "bytes": 342863,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-export-v1.resources.jsonl"
+    },
+    {
+      "path": "native-output-qc-phase-v1.json",
+      "sha256": "1cef45dff741db4b4833cbe4fed5e0c0bfb9100d601d49f2f6b07657ea8c247c",
+      "bytes": 367,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-output-qc-phase-v1.json"
+    },
+    {
+      "path": "native-output-qc-v1.render.json",
+      "sha256": "e5a5c850b41b7d72e90557a461fb0a1da05d316943f36ba88ad1c5e900db8f37",
+      "bytes": 42084,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-output-qc-v1.render.json"
+    },
+    {
+      "path": "native-output-qc-v1.render.log",
+      "sha256": "a5bd40d8c09d77cd35fc7e823e8dab602d44b954a872119ba691be16ffb8e1bf",
+      "bytes": 415,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-output-qc-v1.render.log"
+    },
+    {
+      "path": "native-output-qc-v1.resources.jsonl",
+      "sha256": "3febb83753e7cae8d6953cf9ec7a95e1052f2e1a7b1e3483634bd99043ab1941",
+      "bytes": 4095,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-output-qc-v1.resources.jsonl"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-00.html",
+      "sha256": "a44daa6a0c56d2b5ea74fcfb209d630612f14c8a05de944bbfdd7b6923839b8b",
+      "bytes": 4559,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-00.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-01.html",
+      "sha256": "67cbaa6106ff42ff6cf4476c2decdbf1cc5ca4ee3fae9ada828f57b1845df30e",
+      "bytes": 4612,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-01.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-02.html",
+      "sha256": "ebae43417cb63f1d2c40a3dc782ba0217a2615c363d799675c39f737d9d15233",
+      "bytes": 4627,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-02.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-03.html",
+      "sha256": "f286bda763d0bd1c0442997f997a3dd324ea182cd180e4697a651ac2c3568d55",
+      "bytes": 4546,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-03.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-04.html",
+      "sha256": "ae85bcda977792a01efde64e599c63f3418fbc8a990075601a3ac8819db0078e",
+      "bytes": 4657,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-04.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-05.html",
+      "sha256": "de481256267eb225e9048491e4e634697fcfe2b994aa4c2e218cb940218e6037",
+      "bytes": 4578,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-05.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-06.html",
+      "sha256": "3e11818d9e9ee7f394cd07c11f08a360cee097379269208ffa760d9e6b794fe7",
+      "bytes": 4545,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-06.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-07.html",
+      "sha256": "7466136dfe8c03db62e7eaacf4291957d6a722d1dc04760746a186bff7f5aece",
+      "bytes": 4585,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-07.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-08.html",
+      "sha256": "9c64a168d3c861c7450003d7e807e3c540ab8c7af9c026f540f78e8d1e5cf984",
+      "bytes": 4611,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-08.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-09.html",
+      "sha256": "02e3509dd9cff403d4116b0f6d73341e7aa2be359e4556165f00d3dec8ef2106",
+      "bytes": 4579,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-09.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-10.html",
+      "sha256": "1f25e4975d59853dc9af4d03dfc23e5b28bed041bc4a916d8c02820171cddfae",
+      "bytes": 4675,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-10.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-11.html",
+      "sha256": "78eed2d34fe6e647cea49bfd6065d63ee7d46a7b7b44afacbad1d0e61c41c7e3",
+      "bytes": 4546,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-11.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-12.html",
+      "sha256": "b9635277d753a6d2a6a217367322dd5f8a0ad57737b6d0c393e6df95e4a22179",
+      "bytes": 4591,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-12.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-13.html",
+      "sha256": "805c93a329fe3e714b8561bd27bff85930f462b53c4c18a9bb020726edbd22fa",
+      "bytes": 4675,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-13.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-14.html",
+      "sha256": "2eaff8ebe6051b4dac42a43eeb23d78d74cb8b7df8e7b373fb4c1481377ad042",
+      "bytes": 4559,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-14.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-15.html",
+      "sha256": "5203a27472d76f4ba7b6d12ab1de508e7d13582e0df31de3f0b820f60995c41f",
+      "bytes": 4626,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-15.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-16.html",
+      "sha256": "31c6f6b9d56a8a8da174051efdf1be54110a7db9e2946cc4d85fb37e589cc803",
+      "bytes": 4689,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-16.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-17.html",
+      "sha256": "26b79b64d38b0f1fe061ab1e4b5efb1962e82ad87288bb8dbf2c2a29e936fc33",
+      "bytes": 4559,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-17.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-18.html",
+      "sha256": "539732300a36fca6e122c7f85683a1b83a199a57f20beaa2bb7b4a58d46add4d",
+      "bytes": 4551,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-18.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-19.html",
+      "sha256": "cb4a2d20d4bc035221ba28ebe161f277182baa624ea0ca11f0116dd1fcdb00de",
+      "bytes": 4676,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-19.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-20.html",
+      "sha256": "835d9b8cbb04808e4d160bb8f5b757f99f8b13ccc598bcc657ed144f3a5c13ab",
+      "bytes": 4603,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-20.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-21.html",
+      "sha256": "7ec95317afe43bbc98f251128ab09e86bc406d75008e3ce839c0675a139305d9",
+      "bytes": 4694,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-21.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-22.html",
+      "sha256": "c7ae32558ebca98dac8bc2e4a1d07a701fa8b47a57e44077e65f9d6a4bb378d9",
+      "bytes": 4632,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-22.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-23.html",
+      "sha256": "091f4ef29945b3a0567baa733695f3f7ca12f2d3f27631ab51198acdd9450ceb",
+      "bytes": 4637,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-23.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-24.html",
+      "sha256": "ec07e2b29269241e7831e0dce0214047ba4073e7faa87adc5e755c33a7c8ffc0",
+      "bytes": 4583,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-24.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-25.html",
+      "sha256": "c3de09d632afc61128b941068fadfd7820dac7e54fcb74c6c25565f9ae20c9e8",
+      "bytes": 4697,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-25.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-26.html",
+      "sha256": "5ad3ac9ec195d3f9e5500e1d2ed80e0e049cde845b60259882fdb4b064287849",
+      "bytes": 4681,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-26.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-27.html",
+      "sha256": "859d3873fd9b7891d8c9a7f97933d43b266a51c482a5c2ebbed4c98568b9e35f",
+      "bytes": 4647,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-27.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-28.html",
+      "sha256": "bc5312b21984b60436c16290dddfa8f049887bbed985cf9e44a7b21f0c0ef873",
+      "bytes": 4686,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-28.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-29.html",
+      "sha256": "b04e47b7778ac97bfa2b84663d0e99e96b344aab68bc313c50ed640c0089ee60",
+      "bytes": 4650,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-29.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-30.html",
+      "sha256": "0f238135e444b316801d3b075c6dadd3803cead06acbe5149b3953fb2cfa685b",
+      "bytes": 4754,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-30.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-31.html",
+      "sha256": "5f3925b1f113050e90bff172bd2bc4617a7a1e32a468b637d967fd6035b8c6a1",
+      "bytes": 4561,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-31.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-32.html",
+      "sha256": "5d85122db9c91889e5415cc25868f14453accf6945f8ee3c8a925be67cb599eb",
+      "bytes": 4615,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-32.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-33.html",
+      "sha256": "4017b1b64c8a16d5422b70ab9c011418298ea0af80233176c0f7b5bcce6929a4",
+      "bytes": 4716,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-33.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-34.html",
+      "sha256": "63fe81a307e65489ca4c89fc97a01a0464331e9c6c8e4edfb8dd45327c099aa4",
+      "bytes": 4569,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-34.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-35.html",
+      "sha256": "5c85395e4ded204c0fb5e4f37a79545add86526c8d0b178f26f7dded4de6425e",
+      "bytes": 4767,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-35.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-36.html",
+      "sha256": "c785f72a59142734a5c8d7dea19c19503ad1e8e4b453bb0a116c48cbdb612651",
+      "bytes": 4685,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-36.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-37.html",
+      "sha256": "d317aabc9c2a76573a0565d53ef53863cfb2bcc123410619ab2e513f3dc889d6",
+      "bytes": 4835,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-37.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-38.html",
+      "sha256": "5d145316d2c5f962c92bffed232e98149a2ec819a146f9217d3500f9648828e6",
+      "bytes": 4650,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-38.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-39.html",
+      "sha256": "481e0ba711cc489bb93c0ff529621b6ae42af655011649a85e5847c2101adc0b",
+      "bytes": 4651,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-39.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-40.html",
+      "sha256": "d4e1f2289f7230374c18902271f00cea60517926886c7a2f1e2ba03b4a4f16f8",
+      "bytes": 4617,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-40.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-41.html",
+      "sha256": "356c507448664a29d4617d556b1de478c2f51863c22938bccb9d03427faee98c",
+      "bytes": 4683,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-41.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-42.html",
+      "sha256": "35013fff7e76994c3303e459dfcdae32316dbdb1c7520fb4aee72896e4568410",
+      "bytes": 4812,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-42.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-43.html",
+      "sha256": "09a1d855cee8933202b7328caf41f42d374bc048fc5d93f21338bf816138b096",
+      "bytes": 4661,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-43.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-44.html",
+      "sha256": "22ce53d0380b329f198427020f689e0041e3c7b95210192989f4c8630605a83e",
+      "bytes": 4728,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-44.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-45.html",
+      "sha256": "0a08b07e79b0a03069623f61ba407bb46455905c62fc778723ebdd048e8bc4f0",
+      "bytes": 4558,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-45.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-46.html",
+      "sha256": "1c48341b994053d2e9ff895e58e9bf17d2337ac50948c236cc870eda1fed0c37",
+      "bytes": 4745,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-46.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-47.html",
+      "sha256": "b42a6c328dc6095ae209ae33a5ca905feeb188952be5274da760a102e71339a5",
+      "bytes": 4548,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-47.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-48.html",
+      "sha256": "066e623a03e5f7f55eb89ba327e29fee0f404251ae1ff5aabee3eb6612800bfb",
+      "bytes": 4678,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-48.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-49.html",
+      "sha256": "7c604dbb4bc4a279c19c928b68ff4d089be8debd7ebdfdd416ad9fac3b6e2642",
+      "bytes": 4684,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-49.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-50.html",
+      "sha256": "a97a2a60a3f732b7b4a5ac51fc3ade91e080167be0a09c5324dd44fa61f794ca",
+      "bytes": 4679,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-50.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-51.html",
+      "sha256": "aa5cfadb3e3deee4109793d19899662aaa1093505b680c7af7fe58870ad0797a",
+      "bytes": 4617,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-51.html"
+    },
+    {
+      "path": "native-reference-compiled/compositions/panel-52.html",
+      "sha256": "ee4e148e0f2d99ecfb7ae38dde0a58212dde4c911b1715c8149dc526d6078c17",
+      "bytes": 4645,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/compositions/panel-52.html"
+    },
+    {
+      "path": "native-reference-compiled/index.html",
+      "sha256": "2a6e766e2306f9ade59790e354642555aabfbe11052dc19a6623f28b6a431076",
+      "bytes": 5036398,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-compiled/index.html"
+    },
+    {
+      "path": "native-reference-phase-v1.json",
+      "sha256": "6ffdd7a7a3a8dd52e69b8520f5f5cfb5d1689f6524c0b93a7c702c98820780ce",
+      "bytes": 615,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-phase-v1.json"
+    },
+    {
+      "path": "native-reference-qc.json",
+      "sha256": "57c3350ac9c330b182cc9322b34a407874aae2ded5c5810ab482238df42ae0d1",
+      "bytes": 3064,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-qc.json"
+    },
+    {
+      "path": "native-references/frame_000026.jpg",
+      "sha256": "66623e4d90497fa80d22e94d5d6d23a518d06472d609b0ea6bf6e40a2c62239f",
+      "bytes": 322620,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-references/frame_000026.jpg"
+    },
+    {
+      "path": "native-references/frame_001342.jpg",
+      "sha256": "c6f1f6eb499ddcb833603c3b75af6d55d486281798ce81b6866ede90e0f7ddfe",
+      "bytes": 173189,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-references/frame_001342.jpg"
+    },
+    {
+      "path": "native-references/frame_014350.jpg",
+      "sha256": "d9597ebc4c7fb9dbe02dd0d8812eea663af2bb4ad6f04c240375cc097b609201",
+      "bytes": 286747,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-references/frame_014350.jpg"
+    },
+    {
+      "path": "native-references-v1.render.json",
+      "sha256": "c365c4564b0e47ed5281b266ce2c0dd2ccc3f090f8be666b26484d60c1d7b3ac",
+      "bytes": 39602,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-references-v1.render.json"
+    },
+    {
+      "path": "native-references-v1.render.log",
+      "sha256": "0bf29a960783c324c673ae64036d16bd44445f61cce6f7f59d3af7d66820a01c",
+      "bytes": 1077,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-references-v1.render.log"
+    },
+    {
+      "path": "native-references-v1.resources.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-references-v1.resources.jsonl"
+    },
+    {
+      "path": "native_measurement_retry.py",
+      "sha256": "e437c2a71c8e1a3a93acf8acd20fe674b3033e796649db7c63d45f46328545f6",
+      "bytes": 7939,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native_measurement_retry.py"
+    },
+    {
+      "path": "observe_final_playback.cjs",
+      "sha256": "ff87e89c2bbf80c296fdc126e29ac438564d94f260c0ffde4998c7b51abd57cd",
+      "bytes": 6990,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/observe_final_playback.cjs"
+    },
+    {
+      "path": "opening-energy.json",
+      "sha256": "7c1d112fd62abb6fd03bd189c0fc75428cf657e75f7807e7ed16b7d783f1b4ca",
+      "bytes": 43334,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/opening-energy.json"
+    },
+    {
+      "path": "panel_style.py",
+      "sha256": "6e36b9d537f797468ac700749b00859d130c2d85b40949a8e5e897a8ec1f86c4",
+      "bytes": 4195,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/panel_style.py"
+    },
+    {
+      "path": "prepare_aroll.py",
+      "sha256": "9e1e3535a4d79bf0f9e3235a2fef7229286d47f337396da3bca52ab1ce11e565",
+      "bytes": 5014,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/prepare_aroll.py"
+    },
+    {
+      "path": "prepare_aroll_v2.py",
+      "sha256": "3834e71aeef90e8b750da416ab473900e212f60806a85ac06d3cef481f64cc98",
+      "bytes": 6460,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/prepare_aroll_v2.py"
+    },
+    {
+      "path": "prepare_source.py",
+      "sha256": "59b5b43ddbfe6100605026008aa3d6b8b75bd09f604f82226ab720359f0c3e38",
+      "bytes": 2851,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/prepare_source.py"
+    },
+    {
+      "path": "project/assets/display.woff2",
+      "sha256": "2e5732c61470a890aee05ee399f6720664835efab8749dfc87d487e7882ffc44",
+      "bytes": 23116,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/display.woff2"
+    },
+    {
+      "path": "project/assets/gsap.min.js",
+      "sha256": "c174bfce53a729418d57a8ad8625e7247c793a22fef8e2851e3cfa3de9cd8280",
+      "bytes": 72779,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/gsap.min.js"
+    },
+    {
+      "path": "project/assets/mono-bold.woff2",
+      "sha256": "654a1d16c0b027ead89781bd3a4360d7f0af17a3ddf78c287d0e1843c6bca8d7",
+      "bytes": 16204,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/mono-bold.woff2"
+    },
+    {
+      "path": "project/assets/mono.woff2",
+      "sha256": "a634cb9e7783af7e66d17e1dae9c859b8748da8174641b53d68b3b05de8ebce9",
+      "bytes": 15604,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/mono.woff2"
+    },
+    {
+      "path": "project/assets/narration-browser.wav",
+      "sha256": "c86f62360d2854ffcabd4cdd21934f91bb4cf1fabbfb87f54ce28b33afc57b56",
+      "bytes": 189321234,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration-browser.wav"
+    },
+    {
+      "path": "project/assets/narration-unmastered.wav",
+      "sha256": "1a9e1cab7215c03a93d017af57ab2bfa37bdf420ff9d86cad3d52802c4aa5fea",
+      "bytes": 252428234,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration-unmastered.wav"
+    },
+    {
+      "path": "project/assets/narration.wav",
+      "sha256": "a4b8c664169887bfb6122856fc31454ab791112dcbfdcd7b6a32908b0c7ab0e1",
+      "bytes": 252428268,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration.wav"
+    },
+    {
+      "path": "project/assets/presenter.mp4",
+      "sha256": "80cd51075b575818d86c4185476cb4576bd173ba20ed4e31e5daa252df167c5d",
+      "bytes": 708667727,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/presenter.mp4"
+    },
+    {
+      "path": "project/compositions/panel-00.html",
+      "sha256": "a44daa6a0c56d2b5ea74fcfb209d630612f14c8a05de944bbfdd7b6923839b8b",
+      "bytes": 4559,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-00.html"
+    },
+    {
+      "path": "project/compositions/panel-01.html",
+      "sha256": "67cbaa6106ff42ff6cf4476c2decdbf1cc5ca4ee3fae9ada828f57b1845df30e",
+      "bytes": 4612,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-01.html"
+    },
+    {
+      "path": "project/compositions/panel-02.html",
+      "sha256": "ebae43417cb63f1d2c40a3dc782ba0217a2615c363d799675c39f737d9d15233",
+      "bytes": 4627,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-02.html"
+    },
+    {
+      "path": "project/compositions/panel-03.html",
+      "sha256": "f286bda763d0bd1c0442997f997a3dd324ea182cd180e4697a651ac2c3568d55",
+      "bytes": 4546,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-03.html"
+    },
+    {
+      "path": "project/compositions/panel-04.html",
+      "sha256": "ae85bcda977792a01efde64e599c63f3418fbc8a990075601a3ac8819db0078e",
+      "bytes": 4657,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-04.html"
+    },
+    {
+      "path": "project/compositions/panel-05.html",
+      "sha256": "de481256267eb225e9048491e4e634697fcfe2b994aa4c2e218cb940218e6037",
+      "bytes": 4578,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-05.html"
+    },
+    {
+      "path": "project/compositions/panel-06.html",
+      "sha256": "3e11818d9e9ee7f394cd07c11f08a360cee097379269208ffa760d9e6b794fe7",
+      "bytes": 4545,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-06.html"
+    },
+    {
+      "path": "project/compositions/panel-07.html",
+      "sha256": "7466136dfe8c03db62e7eaacf4291957d6a722d1dc04760746a186bff7f5aece",
+      "bytes": 4585,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-07.html"
+    },
+    {
+      "path": "project/compositions/panel-08.html",
+      "sha256": "9c64a168d3c861c7450003d7e807e3c540ab8c7af9c026f540f78e8d1e5cf984",
+      "bytes": 4611,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-08.html"
+    },
+    {
+      "path": "project/compositions/panel-09.html",
+      "sha256": "02e3509dd9cff403d4116b0f6d73341e7aa2be359e4556165f00d3dec8ef2106",
+      "bytes": 4579,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-09.html"
+    },
+    {
+      "path": "project/compositions/panel-10.html",
+      "sha256": "1f25e4975d59853dc9af4d03dfc23e5b28bed041bc4a916d8c02820171cddfae",
+      "bytes": 4675,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-10.html"
+    },
+    {
+      "path": "project/compositions/panel-11.html",
+      "sha256": "78eed2d34fe6e647cea49bfd6065d63ee7d46a7b7b44afacbad1d0e61c41c7e3",
+      "bytes": 4546,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-11.html"
+    },
+    {
+      "path": "project/compositions/panel-12.html",
+      "sha256": "b9635277d753a6d2a6a217367322dd5f8a0ad57737b6d0c393e6df95e4a22179",
+      "bytes": 4591,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-12.html"
+    },
+    {
+      "path": "project/compositions/panel-13.html",
+      "sha256": "805c93a329fe3e714b8561bd27bff85930f462b53c4c18a9bb020726edbd22fa",
+      "bytes": 4675,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-13.html"
+    },
+    {
+      "path": "project/compositions/panel-14.html",
+      "sha256": "2eaff8ebe6051b4dac42a43eeb23d78d74cb8b7df8e7b373fb4c1481377ad042",
+      "bytes": 4559,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-14.html"
+    },
+    {
+      "path": "project/compositions/panel-15.html",
+      "sha256": "5203a27472d76f4ba7b6d12ab1de508e7d13582e0df31de3f0b820f60995c41f",
+      "bytes": 4626,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-15.html"
+    },
+    {
+      "path": "project/compositions/panel-16.html",
+      "sha256": "31c6f6b9d56a8a8da174051efdf1be54110a7db9e2946cc4d85fb37e589cc803",
+      "bytes": 4689,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-16.html"
+    },
+    {
+      "path": "project/compositions/panel-17.html",
+      "sha256": "26b79b64d38b0f1fe061ab1e4b5efb1962e82ad87288bb8dbf2c2a29e936fc33",
+      "bytes": 4559,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-17.html"
+    },
+    {
+      "path": "project/compositions/panel-18.html",
+      "sha256": "539732300a36fca6e122c7f85683a1b83a199a57f20beaa2bb7b4a58d46add4d",
+      "bytes": 4551,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-18.html"
+    },
+    {
+      "path": "project/compositions/panel-19.html",
+      "sha256": "cb4a2d20d4bc035221ba28ebe161f277182baa624ea0ca11f0116dd1fcdb00de",
+      "bytes": 4676,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-19.html"
+    },
+    {
+      "path": "project/compositions/panel-20.html",
+      "sha256": "835d9b8cbb04808e4d160bb8f5b757f99f8b13ccc598bcc657ed144f3a5c13ab",
+      "bytes": 4603,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-20.html"
+    },
+    {
+      "path": "project/compositions/panel-21.html",
+      "sha256": "7ec95317afe43bbc98f251128ab09e86bc406d75008e3ce839c0675a139305d9",
+      "bytes": 4694,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-21.html"
+    },
+    {
+      "path": "project/compositions/panel-22.html",
+      "sha256": "c7ae32558ebca98dac8bc2e4a1d07a701fa8b47a57e44077e65f9d6a4bb378d9",
+      "bytes": 4632,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-22.html"
+    },
+    {
+      "path": "project/compositions/panel-23.html",
+      "sha256": "091f4ef29945b3a0567baa733695f3f7ca12f2d3f27631ab51198acdd9450ceb",
+      "bytes": 4637,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-23.html"
+    },
+    {
+      "path": "project/compositions/panel-24.html",
+      "sha256": "ec07e2b29269241e7831e0dce0214047ba4073e7faa87adc5e755c33a7c8ffc0",
+      "bytes": 4583,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-24.html"
+    },
+    {
+      "path": "project/compositions/panel-25.html",
+      "sha256": "c3de09d632afc61128b941068fadfd7820dac7e54fcb74c6c25565f9ae20c9e8",
+      "bytes": 4697,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-25.html"
+    },
+    {
+      "path": "project/compositions/panel-26.html",
+      "sha256": "5ad3ac9ec195d3f9e5500e1d2ed80e0e049cde845b60259882fdb4b064287849",
+      "bytes": 4681,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-26.html"
+    },
+    {
+      "path": "project/compositions/panel-27.html",
+      "sha256": "859d3873fd9b7891d8c9a7f97933d43b266a51c482a5c2ebbed4c98568b9e35f",
+      "bytes": 4647,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-27.html"
+    },
+    {
+      "path": "project/compositions/panel-28.html",
+      "sha256": "bc5312b21984b60436c16290dddfa8f049887bbed985cf9e44a7b21f0c0ef873",
+      "bytes": 4686,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-28.html"
+    },
+    {
+      "path": "project/compositions/panel-29.html",
+      "sha256": "b04e47b7778ac97bfa2b84663d0e99e96b344aab68bc313c50ed640c0089ee60",
+      "bytes": 4650,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-29.html"
+    },
+    {
+      "path": "project/compositions/panel-30.html",
+      "sha256": "0f238135e444b316801d3b075c6dadd3803cead06acbe5149b3953fb2cfa685b",
+      "bytes": 4754,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-30.html"
+    },
+    {
+      "path": "project/compositions/panel-31.html",
+      "sha256": "5f3925b1f113050e90bff172bd2bc4617a7a1e32a468b637d967fd6035b8c6a1",
+      "bytes": 4561,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-31.html"
+    },
+    {
+      "path": "project/compositions/panel-32.html",
+      "sha256": "5d85122db9c91889e5415cc25868f14453accf6945f8ee3c8a925be67cb599eb",
+      "bytes": 4615,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-32.html"
+    },
+    {
+      "path": "project/compositions/panel-33.html",
+      "sha256": "4017b1b64c8a16d5422b70ab9c011418298ea0af80233176c0f7b5bcce6929a4",
+      "bytes": 4716,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-33.html"
+    },
+    {
+      "path": "project/compositions/panel-34.html",
+      "sha256": "63fe81a307e65489ca4c89fc97a01a0464331e9c6c8e4edfb8dd45327c099aa4",
+      "bytes": 4569,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-34.html"
+    },
+    {
+      "path": "project/compositions/panel-35.html",
+      "sha256": "5c85395e4ded204c0fb5e4f37a79545add86526c8d0b178f26f7dded4de6425e",
+      "bytes": 4767,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-35.html"
+    },
+    {
+      "path": "project/compositions/panel-36.html",
+      "sha256": "c785f72a59142734a5c8d7dea19c19503ad1e8e4b453bb0a116c48cbdb612651",
+      "bytes": 4685,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-36.html"
+    },
+    {
+      "path": "project/compositions/panel-37.html",
+      "sha256": "d317aabc9c2a76573a0565d53ef53863cfb2bcc123410619ab2e513f3dc889d6",
+      "bytes": 4835,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-37.html"
+    },
+    {
+      "path": "project/compositions/panel-38.html",
+      "sha256": "5d145316d2c5f962c92bffed232e98149a2ec819a146f9217d3500f9648828e6",
+      "bytes": 4650,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-38.html"
+    },
+    {
+      "path": "project/compositions/panel-39.html",
+      "sha256": "481e0ba711cc489bb93c0ff529621b6ae42af655011649a85e5847c2101adc0b",
+      "bytes": 4651,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-39.html"
+    },
+    {
+      "path": "project/compositions/panel-40.html",
+      "sha256": "d4e1f2289f7230374c18902271f00cea60517926886c7a2f1e2ba03b4a4f16f8",
+      "bytes": 4617,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-40.html"
+    },
+    {
+      "path": "project/compositions/panel-41.html",
+      "sha256": "356c507448664a29d4617d556b1de478c2f51863c22938bccb9d03427faee98c",
+      "bytes": 4683,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-41.html"
+    },
+    {
+      "path": "project/compositions/panel-42.html",
+      "sha256": "35013fff7e76994c3303e459dfcdae32316dbdb1c7520fb4aee72896e4568410",
+      "bytes": 4812,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-42.html"
+    },
+    {
+      "path": "project/compositions/panel-43.html",
+      "sha256": "09a1d855cee8933202b7328caf41f42d374bc048fc5d93f21338bf816138b096",
+      "bytes": 4661,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-43.html"
+    },
+    {
+      "path": "project/compositions/panel-44.html",
+      "sha256": "22ce53d0380b329f198427020f689e0041e3c7b95210192989f4c8630605a83e",
+      "bytes": 4728,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-44.html"
+    },
+    {
+      "path": "project/compositions/panel-45.html",
+      "sha256": "0a08b07e79b0a03069623f61ba407bb46455905c62fc778723ebdd048e8bc4f0",
+      "bytes": 4558,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-45.html"
+    },
+    {
+      "path": "project/compositions/panel-46.html",
+      "sha256": "1c48341b994053d2e9ff895e58e9bf17d2337ac50948c236cc870eda1fed0c37",
+      "bytes": 4745,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-46.html"
+    },
+    {
+      "path": "project/compositions/panel-47.html",
+      "sha256": "b42a6c328dc6095ae209ae33a5ca905feeb188952be5274da760a102e71339a5",
+      "bytes": 4548,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-47.html"
+    },
+    {
+      "path": "project/compositions/panel-48.html",
+      "sha256": "066e623a03e5f7f55eb89ba327e29fee0f404251ae1ff5aabee3eb6612800bfb",
+      "bytes": 4678,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-48.html"
+    },
+    {
+      "path": "project/compositions/panel-49.html",
+      "sha256": "7c604dbb4bc4a279c19c928b68ff4d089be8debd7ebdfdd416ad9fac3b6e2642",
+      "bytes": 4684,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-49.html"
+    },
+    {
+      "path": "project/compositions/panel-50.html",
+      "sha256": "a97a2a60a3f732b7b4a5ac51fc3ade91e080167be0a09c5324dd44fa61f794ca",
+      "bytes": 4679,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-50.html"
+    },
+    {
+      "path": "project/compositions/panel-51.html",
+      "sha256": "aa5cfadb3e3deee4109793d19899662aaa1093505b680c7af7fe58870ad0797a",
+      "bytes": 4617,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-51.html"
+    },
+    {
+      "path": "project/compositions/panel-52.html",
+      "sha256": "ee4e148e0f2d99ecfb7ae38dde0a58212dde4c911b1715c8149dc526d6078c17",
+      "bytes": 4645,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-52.html"
+    },
+    {
+      "path": "project/hyperframes.json",
+      "sha256": "073afaf86f8c55d9a5c838b6357f24c1c28a91ee72d0023543fa485293b9dd53",
+      "bytes": 62,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/hyperframes.json"
+    },
+    {
+      "path": "project/index.html",
+      "sha256": "0769dae1316a2e8834767214ad189ff91e701419fab6a8f9cce22ae7f87c85e9",
+      "bytes": 28863,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/index.html"
+    },
+    {
+      "path": "project/motion.js",
+      "sha256": "5ab4a8da199405a7126c4776dbdf74fa06ca0ce0a9054acb6158c48528004d79",
+      "bytes": 12188,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/motion.js"
+    },
+    {
+      "path": "qc-aroll-phase.json",
+      "sha256": "643c095d48d4723a94e618087077f81d89602d21e37c8ddd61c603e1b6c5a48a",
+      "bytes": 82,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/qc-aroll-phase.json"
+    },
+    {
+      "path": "qc-commands.jsonl",
+      "sha256": "efd12d5dc5c7a3bd1833fda074209752d221a045833b9d1cce1e71f42499a2db",
+      "bytes": 44902,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/qc-commands.jsonl"
+    },
+    {
+      "path": "qc_aroll.py",
+      "sha256": "ecdda4159f9b05e613a76eff85169f6e252b0f932c416784a844b92f6cc23d34",
+      "bytes": 6819,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/qc_aroll.py"
+    },
+    {
+      "path": "qc_native_output.py",
+      "sha256": "2a7b4f18d79707264d442b902e44a4d1fe4e15d9cd3bc039ed4d2f8997d3eb78",
+      "bytes": 11882,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/qc_native_output.py"
+    },
+    {
+      "path": "raw-stills-v2/raw-12.png",
+      "sha256": "719fd840e055071073267cb42e5377320cdba641d16769bef55a99ed0b9773b9",
+      "bytes": 1121982,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/raw-stills-v2/raw-12.png"
+    },
+    {
+      "path": "raw-stills-v2/raw-70.png",
+      "sha256": "38dc4caccf931414c7f7212b793dcdf9fec7f652b186bd876fc385d71afbe7d1",
+      "bytes": 1056012,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/raw-stills-v2/raw-70.png"
+    },
+    {
+      "path": "raw-stills-v3/raw-160.png",
+      "sha256": "5903296ac1104992cbcf49566c1a363e46d97f15a6d49bc86cd35edd69765d4f",
+      "bytes": 1017579,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/raw-stills-v3/raw-160.png"
+    },
+    {
+      "path": "raw-stills-v3/raw-300.png",
+      "sha256": "35df352d3e7ea39a3ef054e395f442d23fb0a5b68a478f972e616161484874ec",
+      "bytes": 1081524,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/raw-stills-v3/raw-300.png"
+    },
+    {
+      "path": "raw-stills-v3/raw-450.png",
+      "sha256": "b4d6f947053d6eed12c07658b460465275d51d3bf5d7f1c2ac992f1a42ebab9a",
+      "bytes": 1112927,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/raw-stills-v3/raw-450.png"
+    },
+    {
+      "path": "raw-stills-v3/raw-590.png",
+      "sha256": "a9aa49808c52f3b146bbaad00bf3fa1c00aaf13537c1af417817380e989fde31",
+      "bytes": 1071331,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/raw-stills-v3/raw-590.png"
+    },
+    {
+      "path": "raw-stills-v3/raw-735.png",
+      "sha256": "d6403d76c157052659d63ac541f8313d3f49aee0c483cf8530934484d12959ef",
+      "bytes": 1036018,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/raw-stills-v3/raw-735.png"
+    },
+    {
+      "path": "raw-stills-v3/raw-811.png",
+      "sha256": "9d6c7a49561a81fff0d8d3e6d8b4842e7a69a4c42808412eeea799430e68d1ea",
+      "bytes": 1071886,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/raw-stills-v3/raw-811.png"
+    },
+    {
+      "path": "render/delivery-master.mp4",
+      "sha256": "2b2b512eafecea3ef65768a676a78e76bf43bf07c09b0ab5ebad5a7e720846ee",
+      "bytes": 474477794,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/render/delivery-master.mp4"
+    },
+    {
+      "path": "render/native-master.mp4",
+      "sha256": "3a3f62588856b6a9de852ce6dc4b644ff4c69c2c6c47d6c346203831a7a43cbd",
+      "bytes": 469629788,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/render/native-master.mp4"
+    },
+    {
+      "path": "run_native_phase.py",
+      "sha256": "92f6f4e5ef35869466e5b32173c642c49b195e6861e6187cdfbb7983b745388b",
+      "bytes": 2538,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_native_phase.py"
+    },
+    {
+      "path": "run_native_phase_v2.py",
+      "sha256": "f28a43b4ab721833c3a5676bb3b24e4b41bd4fbf7515e293f849778ed7e7ecc7",
+      "bytes": 3118,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_native_phase_v2.py"
+    },
+    {
+      "path": "run_native_phase_v3.py",
+      "sha256": "e49b3749786ef498717529bb6343cbb6a80869b304ba18bcfaafdf4bf4c0601f",
+      "bytes": 3884,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_native_phase_v3.py"
+    },
+    {
+      "path": "run_native_phase_v4.py",
+      "sha256": "cb169743c30156b5d7d1268b53266a219e31b510f38941d539355260b6de1c8f",
+      "bytes": 4310,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_native_phase_v4.py"
+    },
+    {
+      "path": "run_phase.py",
+      "sha256": "4f450f87d0b61970a15d2d3d060c0d0a4964ae4141a1e2a68134519b3d6379c8",
+      "bytes": 3698,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_phase.py"
+    },
+    {
+      "path": "scene-map.json",
+      "sha256": "7755256028c4cd4ae42072329c1b521605e6ae48897835c98f29d64dc1bb414b",
+      "bytes": 20598,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/scene-map.json"
+    },
+    {
+      "path": "scene-spec.json",
+      "sha256": "2f96dc4580df98f426febc411e6442359069dd95ccec1cd0a83f1fb113919746",
+      "bytes": 10347,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/scene-spec.json"
+    },
+    {
+      "path": "seal_benchmark.py",
+      "sha256": "221d2c79c4ccfe3e6648cb54afbc3846b21eb25ac5c445f9080ae79e5e7f5613",
+      "bytes": 9202,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/seal_benchmark.py"
+    },
+    {
+      "path": "source-phase.json",
+      "sha256": "2cde3faf4496ab507500500df2f6753b66f3285ff932c689468e868b2d0d49db",
+      "bytes": 91,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/source-phase.json"
+    },
+    {
+      "path": "source-preparation-v1.render.json",
+      "sha256": "487a5f561290f66ef00dc4cee9b42c27226aced4096f9bb13e654a9d54fb3cc2",
+      "bytes": 13326,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/source-preparation-v1.render.json"
+    },
+    {
+      "path": "source-preparation-v1.render.log",
+      "sha256": "92a7d419b404136aca0b4bc7b2f019f2ee0e5f61d972a5075c8afd7e67ba8657",
+      "bytes": 214,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/source-preparation-v1.render.log"
+    },
+    {
+      "path": "source-preparation-v1.resources.jsonl",
+      "sha256": "6ffe387162c14d38d2e75115f029794881bc0942a9c1719077c68daeee5bf02d",
+      "bytes": 14787,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/source-preparation-v1.resources.jsonl"
+    },
+    {
+      "path": "source-preparation.json",
+      "sha256": "1199cc005ca4c5a7f7569b33e36e86014688107bee9f8e4faf4c35fe3eacddff",
+      "bytes": 284,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/source-preparation.json"
+    },
+    {
+      "path": "source.json",
+      "sha256": "57a4914d81dc54b13a351c8b2ecacf79fb21b13b87537cae7a6dbc7720c3ea4c",
+      "bytes": 5671,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/source.json"
+    },
+    {
+      "path": "static-studio-phase-v2.json",
+      "sha256": "7b30d239a025bf0b3570ef160d9df5fd2473ee901a2c958133c6991d49793ba7",
+      "bytes": 333,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/static-studio-phase-v2.json"
+    },
+    {
+      "path": "static-studio-phase-v3.json",
+      "sha256": "339ac965b4911fab73b1f7ede0adbbbc505f738e26e2f805a6e262b3d2c34a4b",
+      "bytes": 333,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/static-studio-phase-v3.json"
+    },
+    {
+      "path": "static-studio-phase.json",
+      "sha256": "d92db1417278b18bf71c09e25c93fc832e33fee938fb3a6e6ad6be7a3a1c0f60",
+      "bytes": 157,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/static-studio-phase.json"
+    },
+    {
+      "path": "static-studio-qc-v3.json",
+      "sha256": "fe5147281fb54de4743edfc335b5d63ebfc20c6172936d0036c664988d9f6344",
+      "bytes": 197320,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/static-studio-qc-v3.json"
+    },
+    {
+      "path": "static-studio-rows-v3.jsonl",
+      "sha256": "86e7ab5b226b9cce4d1a80fb7e8e727f2e6ab7bf4a3ed30c2e303020c9e4dbbb",
+      "bytes": 108950,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/static-studio-rows-v3.jsonl"
+    },
+    {
+      "path": "static-studio-v1.render.json",
+      "sha256": "31770a5499c3d0755bc193787068882f6b6820be5c3e54fc8f2c0eae918c3708",
+      "bytes": 38823,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/static-studio-v1.render.json"
+    },
+    {
+      "path": "static-studio-v1.render.log",
+      "sha256": "d104c2ecb0cec32efee6fa2a9cadaf166ff1567ef735802966aa61af9c66f55f",
+      "bytes": 902,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/static-studio-v1.render.log"
+    },
+    {
+      "path": "static-studio-v1.resources.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/static-studio-v1.resources.jsonl"
+    },
+    {
+      "path": "static-studio-v2.render.json",
+      "sha256": "1da2c788696dea55a7304ee7e475ddf933c5ca1ec27d686581bc1996a522ed77",
+      "bytes": 44368,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/static-studio-v2.render.json"
+    },
+    {
+      "path": "static-studio-v2.render.log",
+      "sha256": "41ed8ffe2faeede09f375700dcbe5855f0637a4ab693df212525d377c9cdc433",
+      "bytes": 710,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/static-studio-v2.render.log"
+    },
+    {
+      "path": "static-studio-v2.resources.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/static-studio-v2.resources.jsonl"
+    },
+    {
+      "path": "static-studio-v3.render.json",
+      "sha256": "0ff5efbfce7d7184715a4a95b2a99d19c980826e434f34655892a3f325eb7ddc",
+      "bytes": 41142,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/static-studio-v3.render.json"
+    },
+    {
+      "path": "static-studio-v3.render.log",
+      "sha256": "c01b0c3cd8355ddfc10afaea5f832bbaa8d7dc071530fc4ea9d87ec5e204d04b",
+      "bytes": 554,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/static-studio-v3.render.log"
+    },
+    {
+      "path": "static-studio-v3.resources.jsonl",
+      "sha256": "1ae6acb3218c9b014b2ccb89ec1f3c4ff74691caedbc871794db90263c58c3c3",
+      "bytes": 2875,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/static-studio-v3.resources.jsonl"
+    },
+    {
+      "path": "stills-inspection-v3.json",
+      "sha256": "73fc45fb113747718dac5e3dfbc703c6e0f3757590d50adb16010f44d277d717",
+      "bytes": 2805,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/stills-inspection-v3.json"
+    },
+    {
+      "path": "stills-v2-phase.json",
+      "sha256": "b813fb28455657dd9b8ae0272f181d32bfb3f466aff2c3232f36a11a22d7c034",
+      "bytes": 96,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/stills-v2-phase.json"
+    },
+    {
+      "path": "stills-v3-phase.json",
+      "sha256": "a7bb7c836d3a5d709356f49a11ba9ce504bb1a39415e335240c1bcdc2d9aa402",
+      "bytes": 96,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/stills-v3-phase.json"
+    },
+    {
+      "path": "studio_animated.cjs",
+      "sha256": "ee492d7621745ba90af1556493df2533d2db71a1b896d65ff501c59cb221bf22",
+      "bytes": 5723,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/studio_animated.cjs"
+    },
+    {
+      "path": "studio_animated_v2.cjs",
+      "sha256": "d1a438d8768b650381323cecb953175b74824c3ec64b17b6931a020d22da91d0",
+      "bytes": 5856,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/studio_animated_v2.cjs"
+    },
+    {
+      "path": "studio_animated_v3.cjs",
+      "sha256": "f1fa2a580888766bee970e6994120a05d8bca32097b485872d877f361af6e6b7",
+      "bytes": 6382,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/studio_animated_v3.cjs"
+    },
+    {
+      "path": "studio_static.cjs",
+      "sha256": "a94f7ec849608ee449130d3c198847572c6bb7ba1a1f035a8cd5ef5db2702d3b",
+      "bytes": 5306,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/studio_static.cjs"
+    },
+    {
+      "path": "studio_static_v2.cjs",
+      "sha256": "34002919df42e163bd58e985cc60a4c18ab9e8cd4e10243218acf12ac44e948b",
+      "bytes": 5280,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/studio_static_v2.cjs"
+    },
+    {
+      "path": "studio_static_v3.cjs",
+      "sha256": "cbb58f52c5581f1610a0582ebecd7c6997911a4b4703426eec6f7bcfc314b62f",
+      "bytes": 6240,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/studio_static_v3.cjs"
+    },
+    {
+      "path": "studio_test_support.cjs",
+      "sha256": "bfa8668e754d657ba77d8990079d49385a60e4dba68a482494b83fac7ff62e7c",
+      "bytes": 3716,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/studio_test_support.cjs"
+    },
+    {
+      "path": "test_cut_math.py",
+      "sha256": "05adf8d92cb5fca5c6ce5fd4a0c5f4d810ebc3208436ae58763a9291b801774d",
+      "bytes": 1473,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/test_cut_math.py"
+    },
+    {
+      "path": "test_final_qc.py",
+      "sha256": "a121b03dd999760b98d9ece19e9942061997fac407335afeb2a937ae861470f5",
+      "bytes": 3799,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/test_final_qc.py"
+    },
+    {
+      "path": "test_native_exit.py",
+      "sha256": "4408d6f93dee4d890ffcc281dc36f07009fc139619f6cb44e54fedda8fe8f1c9",
+      "bytes": 3212,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/test_native_exit.py"
+    },
+    {
+      "path": "test_native_measurement_retry.py",
+      "sha256": "a2c657a61813637f5e3ac21e295908210f94651a34e94a16a195494cbf263da0",
+      "bytes": 10607,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/test_native_measurement_retry.py"
+    },
+    {
+      "path": "test_prepare_aroll_v2.py",
+      "sha256": "fda54ebf84c8ffcb7aa2a0550ad0a3672f82e0804be9cc8d1fc4c3fa048ddbfb",
+      "bytes": 10459,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/test_prepare_aroll_v2.py"
+    },
+    {
+      "path": "test_seal_benchmark.py",
+      "sha256": "16a571817c21f139f94f4d530ed02946ce3d5b56498ad56e13cba472311016f2",
+      "bytes": 5535,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/test_seal_benchmark.py"
+    },
+    {
+      "path": "timing-20260909T230013.json",
+      "sha256": "cb7bc3f1f898ca952fe31a290d6ccb5451e630fe5b98d86522905acb80a1fc23",
+      "bytes": 9034,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/timing-20260909T230013.json"
+    },
+    {
+      "path": "timing-20260909T231901.json",
+      "sha256": "c2e9df35467c9015db7b083a28b8eeebefe57e0880f2f29c2a5e8aa6d0d01d5d",
+      "bytes": 10731,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/timing-20260909T231901.json"
+    },
+    {
+      "path": "transcript.json",
+      "sha256": "c1fc71d4d3211e8ec72c690990e0d9aa789f949729150ff50308adaee11b8600",
+      "bytes": 322822,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/transcript.json"
+    },
+    {
+      "path": "trial_timing_report.py",
+      "sha256": "de515cfec41abf1e0f23e46e965f5e4699c65f5e1f8dd5e423feaf4131b25d19",
+      "bytes": 2851,
+      "sourcePath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/trial_timing_report.py"
+    },
+    {
+      "path": "evidence-dependencies/95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78/cli.js",
+      "sha256": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+      "bytes": 11039947,
+      "sourcePath": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js"
+    },
+    {
+      "path": "evidence-dependencies/7c794c4c199e1c7a311171f835ff6cde938fda419e5c66eb3b2b2e5e3cbe74c8/native_owned_processes.py",
+      "sha256": "7c794c4c199e1c7a311171f835ff6cde938fda419e5c66eb3b2b2e5e3cbe74c8",
+      "bytes": 6279,
+      "sourcePath": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native_owned_processes.py"
+    },
+    {
+      "path": "evidence-dependencies/a5cccb20c65153ca3b63567243f0127ff12d6631776c0549e8ae1132556e5cf7/render_native_bounded.py",
+      "sha256": "a5cccb20c65153ca3b63567243f0127ff12d6631776c0549e8ae1132556e5cf7",
+      "bytes": 15186,
+      "sourcePath": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/render_native_bounded.py"
+    },
+    {
+      "path": "evidence-dependencies/6d359af9c049a43402101da1b707663c285b89499109dfa687948777614b7985/cli.js",
+      "sha256": "6d359af9c049a43402101da1b707663c285b89499109dfa687948777614b7985",
+      "bytes": 11041100,
+      "sourcePath": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/hyperframes/dist/cli.js"
+    },
+    {
+      "path": "evidence-dependencies/20de6c202787a0aa47a8227e54925a1765be871a5bb8b4167032d550b2f55784/frame-source-transport.mjs",
+      "sha256": "20de6c202787a0aa47a8227e54925a1765be871a5bb8b4167032d550b2f55784",
+      "bytes": 8466,
+      "sourcePath": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/hyperframes/dist/frame-source-transport.mjs"
+    },
+    {
+      "path": "evidence-dependencies/c6f9f9b8e15360a20409842f97d8630ce7b433adc9714c55ef190036475bd740/hyperframe.runtime.iife.js",
+      "sha256": "c6f9f9b8e15360a20409842f97d8630ce7b433adc9714c55ef190036475bd740",
+      "bytes": 399125,
+      "sourcePath": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/hyperframes/dist/hyperframe.runtime.iife.js"
+    },
+    {
+      "path": "evidence-dependencies/4c8c04b2f9937154c4f1b59e6c384cd44cfcf58057dfede4e2930b150f9ae48f/native-candidate-test-library.mjs",
+      "sha256": "4c8c04b2f9937154c4f1b59e6c384cd44cfcf58057dfede4e2930b150f9ae48f",
+      "bytes": 11024020,
+      "sourcePath": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/hyperframes/dist/native-candidate-test-library.mjs"
+    },
+    {
+      "path": "evidence-dependencies/7d8e6ccf4f701acfedaf3e2f8581e52a8a31f0f73ef0dba705cf54555cf01199/qualified_native_admission.py",
+      "sha256": "7d8e6ccf4f701acfedaf3e2f8581e52a8a31f0f73ef0dba705cf54555cf01199",
+      "bytes": 6173,
+      "sourcePath": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/qualified_native_admission.py"
+    },
+    {
+      "path": "evidence-dependencies/39ecf2722699d670d6f31c29536a7e178e7400e9584ca251649b05c31dc34cc1/pcm_local_comparison.py",
+      "sha256": "39ecf2722699d670d6f31c29536a7e178e7400e9584ca251649b05c31dc34cc1",
+      "bytes": 10674,
+      "sourcePath": "/private/tmp/sniper-pcm-local-comparison-20260909.Bnxh0V/pcm_local_comparison.py"
+    },
+    {
+      "path": "evidence-dependencies/44309d0cf11391ec665221c43d73a40d81ad05009d517c4986aaff302dfee0ea/localhost-only.sb",
+      "sha256": "44309d0cf11391ec665221c43d73a40d81ad05009d517c4986aaff302dfee0ea",
+      "bytes": 236,
+      "sourcePath": "/private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/localhost-only.sb"
+    }
+  ],
+  "fileCount": 400,
+  "totalBytes": 2469972749,
+  "excluded": [
+    "original raw footage",
+    "29GB fresh native PNG cache",
+    "waveform cache",
+    "intermediate cut media",
+    "decoded QC PCM/gray derivatives",
+    "scratch browser data"
+  ],
+  "externalRetainedRoot": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp",
+  "compiledCacheLinkCopied": false,
+  "projectAssetClosureVerified": false,
+  "projectAssetScope": "Copied regular authored files; SDK dynamic dependency closure is not verified",
+  "portableSdkRuntimeIncluded": false,
+  "allTransitiveRuntimeDependenciesPinned": false,
+  "humanListening": false,
+  "zeroDropPlaybackPassed": false,
+  "laterRetriesMayReplaceFirstFailure": false
+}

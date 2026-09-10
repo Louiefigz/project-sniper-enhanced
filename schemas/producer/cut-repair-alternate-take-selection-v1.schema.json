@@ -1,0 +1,311 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/cut-repair-alternate-take-selection-v1.schema.json",
+  "title": "CutRepairAlternateTakeSelectionV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "status",
+    "preparationHash",
+    "operationHash",
+    "contextAuthorityHash",
+    "sourceSnapshotSetHash",
+    "transcriptTimingHash",
+    "retakeReportHash",
+    "candidateSet",
+    "candidateSetHash",
+    "selectionPolicy",
+    "selectionPolicyHash",
+    "selectedCandidateId",
+    "selectedCandidateHash",
+    "sourceId",
+    "sourceMediaPath",
+    "sourceMediaSha256",
+    "sourceSampleRange",
+    "sourceFrameRange",
+    "outputFrameRange",
+    "visualSpeechRegion",
+    "pictureChanged",
+    "selectionHash",
+    "receiptHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "cut-repair-alternate-take-selection" },
+    "status": { "const": "selected-pending-visual-qc" },
+    "preparationHash": { "$ref": "#/$defs/sha256" },
+    "operationHash": { "$ref": "#/$defs/sha256" },
+    "contextAuthorityHash": { "$ref": "#/$defs/sha256" },
+    "sourceSnapshotSetHash": { "$ref": "#/$defs/sha256" },
+    "transcriptTimingHash": { "$ref": "#/$defs/sha256" },
+    "retakeReportHash": { "$ref": "#/$defs/sha256" },
+    "candidateSet": { "$ref": "#/$defs/candidateSet" },
+    "candidateSetHash": { "$ref": "#/$defs/sha256" },
+    "selectionPolicy": { "$ref": "#/$defs/selectionPolicy" },
+    "selectionPolicyHash": { "$ref": "#/$defs/sha256" },
+    "selectedCandidateId": { "$ref": "#/$defs/candidateId" },
+    "selectedCandidateHash": { "$ref": "#/$defs/sha256" },
+    "sourceId": { "type": "string", "minLength": 1 },
+    "sourceMediaPath": { "type": "string", "minLength": 1 },
+    "sourceMediaSha256": { "$ref": "#/$defs/sha256" },
+    "sourceSampleRange": { "$ref": "#/$defs/sourceSampleRange" },
+    "sourceFrameRange": { "$ref": "#/$defs/sourceFrameRange" },
+    "outputFrameRange": { "$ref": "#/$defs/outputFrameRange" },
+    "visualSpeechRegion": { "$ref": "#/$defs/visualSpeechRegion" },
+    "pictureChanged": { "const": true },
+    "selectionHash": { "$ref": "#/$defs/sha256" },
+    "receiptHash": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "candidateId": {
+      "type": "string",
+      "pattern": "^take-[0-9a-f]{24}$"
+    },
+    "sourceSampleRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startSample", "endSampleExclusive", "sampleRate"],
+      "properties": {
+        "startSample": { "type": "integer", "minimum": 0 },
+        "endSampleExclusive": { "type": "integer", "minimum": 1 },
+        "sampleRate": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "sourceFrameRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "firstFrame",
+        "endFrameExclusive",
+        "fpsNumerator",
+        "fpsDenominator"
+      ],
+      "properties": {
+        "firstFrame": { "type": "integer", "minimum": 0 },
+        "endFrameExclusive": { "type": "integer", "minimum": 1 },
+        "fpsNumerator": { "type": "integer", "minimum": 1 },
+        "fpsDenominator": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "outputFrameRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["firstFrame", "endFrameExclusive"],
+      "properties": {
+        "firstFrame": { "type": "integer", "minimum": 0 },
+        "endFrameExclusive": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "visualSpeechRegion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["xPpm", "yPpm", "widthPpm", "heightPpm"],
+      "properties": {
+        "xPpm": { "type": "integer", "minimum": 0, "maximum": 999999 },
+        "yPpm": { "type": "integer", "minimum": 0, "maximum": 999999 },
+        "widthPpm": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+        "heightPpm": { "type": "integer", "minimum": 1, "maximum": 1000000 }
+      }
+    },
+    "selectionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "kind",
+        "strategy",
+        "ambiguityDisposition",
+        "operatorRequiredDisposition"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "kind": {
+          "const": "cut-repair-alternate-take-selection-policy"
+        },
+        "strategy": {
+          "const": "deterministic-retake-scan-later-take"
+        },
+        "ambiguityDisposition": { "const": "block" },
+        "operatorRequiredDisposition": { "const": "block" }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "retakeReportHash",
+        "retakePolicyHash",
+        "retakeId",
+        "utteranceIndexes"
+      ],
+      "properties": {
+        "kind": { "const": "deterministic-retake-scan-v1" },
+        "retakeReportHash": { "$ref": "#/$defs/sha256" },
+        "retakePolicyHash": { "$ref": "#/$defs/sha256" },
+        "retakeId": { "type": "integer", "minimum": 0 },
+        "utteranceIndexes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateId",
+        "candidateHash",
+        "role",
+        "sourceId",
+        "sourceMediaPath",
+        "sourceMediaSha256",
+        "transcriptTimingHash",
+        "wordIds",
+        "sourceSampleRange",
+        "sourceFrameRange",
+        "outputFrameRange",
+        "spokenTextHash",
+        "provenance"
+      ],
+      "properties": {
+        "candidateId": { "$ref": "#/$defs/candidateId" },
+        "candidateHash": { "$ref": "#/$defs/sha256" },
+        "role": { "enum": ["earlier", "later"] },
+        "sourceId": { "type": "string", "minLength": 1 },
+        "sourceMediaPath": { "type": "string", "minLength": 1 },
+        "sourceMediaSha256": { "$ref": "#/$defs/sha256" },
+        "transcriptTimingHash": { "$ref": "#/$defs/sha256" },
+        "wordIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^w-[0-9a-f]{16}$"
+          }
+        },
+        "sourceSampleRange": { "$ref": "#/$defs/sourceSampleRange" },
+        "sourceFrameRange": { "$ref": "#/$defs/sourceFrameRange" },
+        "outputFrameRange": { "$ref": "#/$defs/outputFrameRange" },
+        "spokenTextHash": { "$ref": "#/$defs/sha256" },
+        "provenance": { "$ref": "#/$defs/provenance" }
+      }
+    },
+    "candidateSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "kind",
+        "operationHash",
+        "contextAuthorityHash",
+        "sourceSnapshotSetHash",
+        "sourceId",
+        "sourceMediaPath",
+        "sourceMediaSha256",
+        "transcriptPath",
+        "transcriptSha256",
+        "transcriptTimingHash",
+        "detectorToolClosure",
+        "detectorToolClosureHash",
+        "retakePolicyHash",
+        "retakeReportHash",
+        "retakeId",
+        "candidates",
+        "candidateSetHash"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "kind": {
+          "const": "cut-repair-alternate-take-candidate-set"
+        },
+        "operationHash": { "$ref": "#/$defs/sha256" },
+        "contextAuthorityHash": { "$ref": "#/$defs/sha256" },
+        "sourceSnapshotSetHash": { "$ref": "#/$defs/sha256" },
+        "sourceId": { "type": "string", "minLength": 1 },
+        "sourceMediaPath": { "type": "string", "minLength": 1 },
+        "sourceMediaSha256": { "$ref": "#/$defs/sha256" },
+        "transcriptPath": { "type": "string", "minLength": 1 },
+        "transcriptSha256": { "$ref": "#/$defs/sha256" },
+        "transcriptTimingHash": { "$ref": "#/$defs/sha256" },
+        "detectorToolClosure": { "$ref": "#/$defs/detectorToolClosure" },
+        "detectorToolClosureHash": { "$ref": "#/$defs/sha256" },
+        "retakePolicyHash": { "$ref": "#/$defs/sha256" },
+        "retakeReportHash": { "$ref": "#/$defs/sha256" },
+        "retakeId": { "type": "integer", "minimum": 0 },
+        "candidates": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "$ref": "#/$defs/candidate" }
+        },
+        "candidateSetHash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "toolFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "path", "sha256"],
+      "properties": {
+        "role": {
+          "enum": [
+            "closure-controller",
+            "detector-authority-adapter",
+            "candidate-range-authority",
+            "operation-binding-derivation",
+            "released-selection-policy",
+            "alternate-take-value-types",
+            "candidate-qc-value-types",
+            "context-authority",
+            "cross-runtime-canonical-json",
+            "exact-timing",
+            "target-word-authority",
+            "repair-impact",
+            "repair-ranges",
+            "non-ripple-contracts",
+            "detector-entrypoint",
+            "detector-config",
+            "transcript-policy-helper",
+            "pause-scan-import",
+            "python-runtime",
+            "rapidfuzz-package",
+            "rapidfuzz-dispatch",
+            "rapidfuzz-implementation"
+          ]
+        },
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "detectorToolClosure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "kind", "scope", "files", "closureHash"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "kind": {
+          "const": "deterministic-retake-detector-tool-closure"
+        },
+        "scope": {
+          "const": "transitive-repository-choice-derivation-rapidfuzz-python-executable-not-os-stdlib-dylibs"
+        },
+        "files": {
+          "type": "array",
+          "minItems": 22,
+          "maxItems": 22,
+          "items": { "$ref": "#/$defs/toolFile" }
+        },
+        "closureHash": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}

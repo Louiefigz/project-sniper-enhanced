@@ -35,6 +35,7 @@ class RenderLaneAdversarialTests(RenderLaneFixture):
         outside.write_bytes(b"outside")
         result = {
             "cached": False,
+            "fps": "30",
             "fmt": "mov",
             "key": "a" * 64,
             "kind": "section-marker",
@@ -70,6 +71,7 @@ class RenderLaneAdversarialTests(RenderLaneFixture):
             alias.symlink_to(target.name)
             result = {
                 "cached": False,
+                "fps": "30",
                 "fmt": "mov",
                 "key": seal.key,
                 "kind": "section-marker",
@@ -109,6 +111,7 @@ class RenderLaneAdversarialTests(RenderLaneFixture):
             path.chmod(0o600)
             result = {
                 "cached": False,
+                "fps": "30",
                 "fmt": "mov",
                 "key": seal.key,
                 "kind": "section-marker",
@@ -167,6 +170,7 @@ class RenderLaneAdversarialTests(RenderLaneFixture):
                 digest = forced_digest or hashlib.sha256(media).hexdigest()
                 result = {
                     "cached": False,
+                    "fps": "30",
                     "fmt": fmt,
                     "key": seal.key,
                     "kind": kind,
@@ -198,6 +202,7 @@ class RenderLaneAdversarialTests(RenderLaneFixture):
             path.chmod(0o600)
             result = {
                 "cached": False,
+                "fps": "30",
                 "fmt": "mov",
                 "key": seal.key,
                 "kind": "section-marker",

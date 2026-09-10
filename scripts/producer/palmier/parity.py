@@ -32,7 +32,8 @@ _HANDLED = {
 # unknown lanes that block the visual mirror — the master already bakes every
 # visual choice; these are provenance only.
 _METADATA = {"target", "planVersion", "faceBBoxNorm", "treatmentMap",
-             "cutDecisions", "graphicsDecisions", "transitionRationale"}
+             "cutDecisions", "graphicsDecisions", "transitionRationale",
+             "audioAuthorityMode"}
 @dataclass(frozen=True)
 class Finding:
     """One stable, JSON-safe parity verdict for a present plan element."""

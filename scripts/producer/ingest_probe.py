@@ -20,6 +20,8 @@ from dataclasses import dataclass
 from fractions import Fraction
 from typing import Optional
 
+from palmier.process_deadline import process_timeout
+
 # ---------------------------------------------------------------------------
 # Recognised media extensions (lowercase, with dot). Shared by every scanner.
 # ---------------------------------------------------------------------------
@@ -44,7 +46,8 @@ def warn(msg: str) -> None:
 
 def run_command(cmd: list[str]) -> str:
     """Run a command, returning stripped stdout; raise on non-zero exit."""
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    result = subprocess.run(
+        cmd, capture_output=True, text=True, timeout=process_timeout())
     if result.returncode != 0:
         raise RuntimeError(result.stderr.strip() or f"{cmd[0]} failed")
     return result.stdout.strip()
@@ -63,6 +66,7 @@ class MediaProbe:
     audio_present: bool
     audio_channels: Optional[int]
     audio_sample_rate: Optional[int]
+    frame_rate: Optional[str] = None
 
 
 def ffprobe_json(path: str) -> dict:
@@ -84,6 +88,19 @@ def _parse_fraction(value: Optional[str]) -> Optional[float]:
     except (ValueError, ZeroDivisionError):
         return None
     return float(frac) if frac else None
+
+
+def _canonical_fraction(value: Optional[str]) -> Optional[str]:
+    """Canonical positive ffprobe rational, preserving its exact rate."""
+    if not value or value in ("0/0", "N/A"):
+        return None
+    try:
+        fraction = Fraction(value)
+    except (ValueError, ZeroDivisionError):
+        return None
+    if fraction <= 0:
+        return None
+    return f"{fraction.numerator}/{fraction.denominator}"
 
 
 def _first_stream(streams: list[dict], codec_type: str) -> Optional[dict]:
@@ -147,6 +164,7 @@ def probe_media(path: str) -> MediaProbe:
         audio_present=a is not None,
         audio_channels=int(a["channels"]) if a and a.get("channels") else None,
         audio_sample_rate=int(a["sample_rate"]) if a and a.get("sample_rate") else None,
+        frame_rate=_canonical_fraction(v.get("r_frame_rate")) if v else None,
     )
 
 

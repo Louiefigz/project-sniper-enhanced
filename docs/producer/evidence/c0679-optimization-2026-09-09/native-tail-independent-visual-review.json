@@ -1,0 +1,111 @@
+{
+  "reviewer": "Assess pipeline completion",
+  "reviewedAt": "2026-09-09T14:45:21.256919+00:00",
+  "scope": "11 saved native full-resolution tail frames; contacts1and3 also inspected",
+  "reviewedFrames": [
+    {
+      "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-qc-v1/frame-00-at-388s.png",
+      "sha256": "da70910238bf115d6b2dcb0588a494af607711cbb87b34076b0ad992aff78253"
+    },
+    {
+      "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-qc-v1/frame-01-at-410s.png",
+      "sha256": "8ab6a15f066062dfcd0a45b75d24605c945e4f8f20db5616b2aed63d7e2d0dcc"
+    },
+    {
+      "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-qc-v1/frame-02-at-429.8s.png",
+      "sha256": "ca5e130d25ad526ea7fe0ce644db36a4004876118b3a260be6b83de3ccbe23d6"
+    },
+    {
+      "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-qc-v1/frame-03-at-433.8s.png",
+      "sha256": "bafd74d8034c32489870cd5c7bb8f9ef9b82330956b563c480c84b67336f1e70"
+    },
+    {
+      "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-qc-v1/frame-04-at-443.6s.png",
+      "sha256": "a2fd0ee161e0e8469a9db7e622eaf662dc79840b1c9210a2daf256561c7ee577"
+    },
+    {
+      "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-qc-v1/frame-05-at-448.5s.png",
+      "sha256": "d9769c0d1bcb35d215c6504cf8ef78c3d476c13ef622f17de71e72a1591b134c"
+    },
+    {
+      "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-qc-v1/frame-06-at-459s.png",
+      "sha256": "cda475dd7dc7a439561cca4184fcf6a11ee5dc996c9b3addb66874553c258b3c"
+    },
+    {
+      "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-qc-v1/frame-07-at-478.5s.png",
+      "sha256": "0a5988330c55143142c8797b391137389ddac3707829d939d26559b31ed83e30"
+    },
+    {
+      "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-qc-v1/frame-08-at-491.3s.png",
+      "sha256": "3b54f5afe1f5cbdd88ac847c375e82b7aaf90449fce892ae34149ad1982dbe64"
+    },
+    {
+      "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-qc-v1/frame-19-at-668.6s.png",
+      "sha256": "ab4ddef1e0a48d98ddcfb5a4513d0c5bccd51556be10ca06d24a298e454c724a"
+    },
+    {
+      "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-qc-v1/frame-20-at-682.9s.png",
+      "sha256": "5dcdfb43a5d088988ac11213c2a583bf86b35572dc91aa8daab34bb6888f0696"
+    }
+  ],
+  "status": "changes-required",
+  "findings": [
+    {
+      "at": 682.9,
+      "severity": "blocking",
+      "finding": "Standing presenter has head fully outside original crop at final scene. Production acknowledged and owns source-aware native end-screen takeover repair without recutting audio.",
+      "resolved": false
+    },
+    {
+      "at": 410,
+      "severity": "framing-repair",
+      "finding": "Presenter leans left and outer hair clips against left edge. Suggested scene-specific100px-left source crop shift preserving displayed panel bounds, radius and padding; native verification required.",
+      "resolved": false
+    }
+  ],
+  "otherReviewedFrames": "Text, graphics and face/bubble clearance readable with no other blocking static finding.",
+  "continuousPlaybackQualified": false,
+  "audioListeningQualified": false,
+  "fullExportQualified": false,
+  "repairReview": {
+    "recordedAt": "2026-09-09T14:57:01.414934+00:00",
+    "scope": "Eight saved full-resolution native repair PNGs visually inspected; static framing only.",
+    "reviewedFrames": [
+      {
+        "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-framing-repair-v2/frame-00-at-404s.png",
+        "sha256": "d11429fa00e750478171cb4d9a864a1b947b382bd1c2d844bb6f07196fa9858b"
+      },
+      {
+        "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-framing-repair-v2/frame-01-at-405.2s.png",
+        "sha256": "4caf626f7af63feb74ab347d904bf06700820e5b31fded58299496644544dd93"
+      },
+      {
+        "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-framing-repair-v2/frame-02-at-410s.png",
+        "sha256": "0aeafee9269b74367112d6d967158d3e147ecba811ff508ac58ea3815f5f0af2"
+      },
+      {
+        "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-framing-repair-v2/frame-03-at-418s.png",
+        "sha256": "5f2db7b91abe8a037b647acf0312fa2ea66f219ede2144fee5d0cea3c9e620e4"
+      },
+      {
+        "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-framing-repair-v2/frame-04-at-679.3s.png",
+        "sha256": "51e8c8880fc6aa7e90cc88f3694bcb1a78bc20fb8863efa4817117c307e06c4e"
+      },
+      {
+        "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-framing-repair-v2/frame-05-at-679.7s.png",
+        "sha256": "98736052d7a959edf347dff611e07e30f9a070bb18f298a96a47c3145e93922f"
+      },
+      {
+        "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-framing-repair-v2/frame-06-at-680.1s.png",
+        "sha256": "85f30ae4ff02a0c28e491b747fc62a7400820f6af3f5e95929376b9a81645abf"
+      },
+      {
+        "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-framing-repair-v2/frame-07-at-682.9s.png",
+        "sha256": "85f30ae4ff02a0c28e491b747fc62a7400820f6af3f5e95929376b9a81645abf"
+      }
+    ],
+    "status": "static-framing-findings-resolved",
+    "outcome": "404, 405.2, 410 and 418s contain the presenter head/hair inside the inset. 679.3s has intact presenter, 679.7s shows the fade in progress, 680.1 and 682.9s show centered end-screen plate without headless torso.",
+    "limitations": "The original failed review and frame hashes are preserved. This review does not qualify continuous playback, audible consistency, or the final export."
+  }
+}

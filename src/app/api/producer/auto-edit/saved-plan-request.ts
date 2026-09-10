@@ -21,6 +21,10 @@ import {
   type AutoEditScope,
   type ResolvedReferenceStudy,
 } from "./stream";
+import {
+  DEFAULT_AUTO_EDIT_DELIVERY_POLICY,
+  type AutoEditDeliveryPolicy,
+} from "@/lib/producer/auto-edit-delivery-policy";
 
 function readReferenceDecision(study: ResolvedReferenceStudy): ReferenceDecision {
   const decisionPath = path.join(path.dirname(study.deepStudyPath), "reference.json");
@@ -74,10 +78,12 @@ export function resolveAutoEditContext(
   dir: string,
   scope: AutoEditScope,
   intent: AutoEditIntent | undefined,
+  deliveryPolicy: AutoEditDeliveryPolicy = DEFAULT_AUTO_EDIT_DELIVERY_POLICY,
 ): AutoEditCtx {
   return {
     dir,
     scope,
+    deliveryPolicy,
     intent,
     referenceStudy: resolveReferenceContext(intent),
     planPath: path.join(dir, "edit_plan.json"),
@@ -86,17 +92,24 @@ export function resolveAutoEditContext(
 }
 
 /** Review-only launches derive every creative choice from project.json. */
-export function prepareSavedPlanReview(dir: string): {
+export function prepareSavedPlanReview(
+  dir: string,
+  deliveryPolicy: AutoEditDeliveryPolicy = DEFAULT_AUTO_EDIT_DELIVERY_POLICY,
+): {
   ctx: AutoEditCtx;
   resume: false;
   bootstrapPlanHash: string;
 } {
   const stored = storedAutoEditIntent(dir);
   const requested = parseAutoEditIntent(stored as unknown as Record<string, unknown>);
-  const requestedCtx = resolveAutoEditContext(dir, stored.scope, requested);
+  const requestedCtx = resolveAutoEditContext(
+    dir, stored.scope, requested, deliveryPolicy,
+  );
   const effective = reconcileStoredIntentCapabilities(dir, stored, requestedCtx.manifestPath);
   const intent = parseAutoEditIntent(effective as unknown as Record<string, unknown>);
-  const ctx = resolveAutoEditContext(dir, effective.scope, intent);
+  const ctx = resolveAutoEditContext(
+    dir, effective.scope, intent, deliveryPolicy,
+  );
   const bootstrapPlanHash = fileSha256(ctx.planPath);
   if (!bootstrapPlanHash) throw new Error("Render updated video requires a saved edit_plan.json");
   return { ctx, resume: false, bootstrapPlanHash };

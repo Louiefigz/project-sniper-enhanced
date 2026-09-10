@@ -14,6 +14,10 @@ sys.path.insert(0, PRODUCER_ROOT)
 
 from graphics import graphics_render as gr  # noqa: E402
 from graphics import render_tools as rt  # noqa: E402
+from graphics.comp_capability_artifact import (  # noqa: E402
+    composition_paths,
+    composition_source_closure,
+)
 
 EXPECTED_GSAP_SHA256 = (
     "c174bfce53a729418d57a8ad8625e7247c793a22fef8e2851e3cfa3de9cd8280"
@@ -34,19 +38,42 @@ def _fake_executable(directory: str, name: str) -> str:
 
 
 class GraphicsRuntimeClosureTests(unittest.TestCase):
-    """The offline section-marker closure is local and content-addressed."""
+    """The production comp closure is local and content-addressed."""
 
     def setUp(self) -> None:
         rt._memo = None
 
-    def test_section_marker_uses_exact_vendored_gsap(self) -> None:
+    def test_every_comp_uses_exact_vendored_gsap(self) -> None:
+        for path in composition_paths():
+            with self.subTest(comp=os.path.basename(path)), \
+                    open(path, encoding="utf-8") as handle:
+                html = handle.read()
+                self.assertIn(
+                    '<script src="/vendor/gsap/gsap.min.js"></script>', html)
+                self.assertNotIn("cdn.jsdelivr.net/npm/gsap", html)
+                closure = composition_source_closure(html)
+                self.assertIn("vendor/gsap/gsap.min.js", closure)
+        self.assertEqual(_sha256(gr.GSAP_CORE), EXPECTED_GSAP_SHA256)
+
+    def test_section_marker_keeps_proved_terminal_fade(self) -> None:
         with open(gr.comp_path("section-marker"), encoding="utf-8") as handle:
             html = handle.read()
-        self.assertIn('/vendor/gsap/gsap.min.js', html)
-        self.assertNotIn('cdn.jsdelivr.net/npm/gsap', html)
         self.assertRegex(html, r'tl\.to\(\s*["\']#marker-stage["\']\s*,\s*\{')
         self.assertIn('D - (1 / RENDER_FPS)', html)
-        self.assertEqual(_sha256(gr.GSAP_CORE), EXPECTED_GSAP_SHA256)
+
+    def test_terminal_policy_uses_measured_fade_physics(self) -> None:
+        base = dict(entry={"kind": "synthetic"}, fmt="mov", dimensions=(1, 1),
+                    duration=1, key="k", temp_rel="", temp_abs="", comp_html="",
+                    spec={}, snapshot=None, fps=30.0)
+        probe = gr._RenderWork(**base, capability_probe=True)
+        normal = gr._RenderWork(**base, capability_probe=False)
+        self.assertFalse(gr._terminal_clear_required(probe))
+        for fade, expected in (
+                ("fades-clean", True), ("hold-to-cut", False),
+                ("partial-fade", False), (None, True)):
+            with self.subTest(fade=fade), mock.patch.object(
+                    gr, "measured_fade_class", return_value=fade):
+                self.assertEqual(gr._terminal_clear_required(normal), expected)
 
     def test_hyperframes_dependency_has_exact_integrity_lock(self) -> None:
         lock_path = os.path.join(gr.MOTION_DIR, "package-lock.json")
@@ -54,18 +81,29 @@ class GraphicsRuntimeClosureTests(unittest.TestCase):
             lock = json.load(handle)
         root = lock["packages"][""]["dependencies"]
         package = lock["packages"]["node_modules/hyperframes"]
-        self.assertEqual(root["hyperframes"], "0.7.33")
-        self.assertEqual(package["version"], "0.7.33")
+        self.assertEqual(root["hyperframes"], "0.8.31")
+        self.assertEqual(package["version"], "0.8.31")
         self.assertEqual(
             package["integrity"],
-            "sha512-nuv5V3dGxnq395T3QBHtjCPNRgrzitGWo0ZInfdeAU6aTvfB9sXtC0PBOE"
-            "TR46hhwRCJrZ8jVUUyn/apsE0hXg==",
+            "sha512-DzTDG8sms/Ot5rt/ulEkhXg5MeBMEHznvT+d/lU0dK5ggJlzSonGOZTo/"
+            "iRM5J4YRfd5htXSwXkFz9NFRiEVSQ==",
         )
 
     def test_binary_resolves_from_runtime_not_pipeline_snapshot(self) -> None:
         expected = ("/runtime/repo/templates/motion/node_modules/hyperframes/"
                     "dist/cli.js")
         self.assertEqual(gr.hyperframes_bin("/runtime/repo"), expected)
+
+    def test_image_build_includes_all_observer_modules_without_install_scripts(self) -> None:
+        with open(os.path.join(gr.MOTION_DIR, ".dockerignore"), encoding="utf-8") as handle:
+            includes = set(handle.read().splitlines())
+        observers = ("browser", "host", "launch", "loader", "patch")
+        for role in observers:
+            self.assertIn(f"!container/layout_observer_{role}.mjs", includes)
+        with open(os.path.join(gr.MOTION_DIR, "Dockerfile.g2"), encoding="utf-8") as handle:
+            dockerfile = handle.read()
+        self.assertIn("npm ci --include=optional --ignore-scripts", dockerfile)
+        self.assertIn('io.project-sniper.hyperframes-version="0.8.31"', dockerfile)
 
     def test_gsap_bytes_invalidate_section_marker_cache_key(self) -> None:
         html = ("<html data-composition-variables='[]'>"
@@ -81,12 +119,24 @@ class GraphicsRuntimeClosureTests(unittest.TestCase):
                 after = gr.content_hash("section-marker", {}, 2.5, html)
         self.assertNotEqual(before, after)
 
+    def test_any_local_dependency_invalidates_cache_key(self) -> None:
+        html = "<html data-composition-variables='[]'></html>"
+        with mock.patch.object(
+                gr, "discover_root_sources",
+                side_effect=[{"vendor/plugin.js": b"a"},
+                             {"vendor/plugin.js": b"b"}]), \
+                mock.patch.object(gr, "live_tools_identity",
+                                  return_value=b"tools"):
+            before = gr.content_hash("synthetic", {}, 2.5, html)
+            after = gr.content_hash("synthetic", {}, 2.5, html)
+        self.assertNotEqual(before, after)
+
     def test_container_image_identity_invalidates_render_cache_key(self) -> None:
         snapshot = gr.SealedInput("/sealed.tar", "a" * 64, ())
         with mock.patch.object(gr, "container_cache_identity",
                                side_effect=[b"image-a", b"image-b"]):
-            before = gr._sealed_hash("section-marker", snapshot)
-            after = gr._sealed_hash("section-marker", snapshot)
+            before = gr._sealed_hash("section-marker", snapshot, 30.0)
+            after = gr._sealed_hash("section-marker", snapshot, 30.0)
         self.assertNotEqual(before, after)
 
     def test_render_subprocess_has_pinned_tools_and_private_ambient_state(self) -> None:
@@ -114,7 +164,8 @@ class GraphicsRuntimeClosureTests(unittest.TestCase):
                     mock.patch.object(gr.subprocess, "run") as run, \
                     mock.patch.dict(gr.os.environ, paths, clear=True):
                 run.return_value = mock.Mock(returncode=0, stderr="", stdout="")
-                gr._render_to("compositions/card.html", "mp4", {}, output)
+                gr._render_to(
+                    "compositions/card.html", "mp4", {}, output, 30.0)
         command = run.call_args.args[0]
         kwargs = run.call_args.kwargs
         self.assertEqual(command[:3], [os.path.realpath(paths["SNIPER_NODE_PATH"]),

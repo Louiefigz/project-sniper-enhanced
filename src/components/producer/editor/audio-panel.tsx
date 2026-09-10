@@ -16,7 +16,7 @@ const PRESETS = [
   { id: "separate", label: "Isolate voice", hint: "Separate speech from complex background sound locally" },
 ] as const;
 
-const REBUILD_HINT = "Applied when you re-render (about 3 minutes because the dialogue audio is rebuilt).";
+const REBUILD_HINT = "Applied when you re-render. Audio processing and QC time depend on the footage and requested changes.";
 
 // A master entry is adopted when it starts at 0 and covers ≥85% of the CURRENT
 // duration — the duration GROWS when cuts are undone, so an exact-length match

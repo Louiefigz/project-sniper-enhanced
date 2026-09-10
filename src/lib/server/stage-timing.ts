@@ -1,5 +1,10 @@
 import { closeSync, openSync, writeSync } from "node:fs";
+import { randomUUID } from "node:crypto";
 import path from "node:path";
+import {
+  stageTimingContext, stageTimingWriter, timingMetadata, withStageTimingContext,
+  type StageTimingMetadata,
+} from "./stage-timing-context";
 
 /**
  * Append-only stage-timing journal (NDJSON) — the TS side of
@@ -8,9 +13,11 @@ import path from "node:path";
  * attributable afterwards (the 2026-07 sweep found 57 of 102 real-run minutes
  * dark because no stage timings existed; PLAN_TIME_GEOMETRY_CONTRACT v3 #0).
  *
- * Row: {"stage": str, "event": "start"|"end", "ts": epoch-seconds float,
- * "mono": monotonic-seconds float}. `ts` orders rows across processes; `mono`
- * measures intra-process durations immune to wall-clock steps.
+ * Legacy direct journal calls retain their row shape. timedStage adds v2
+ * run/attempt/writer/span identity, parent linkage and terminal execution
+ * status. A completed invocation is not a passed editorial/QC verdict.
+ * Never subtract monotonic timestamps across writers or sum concurrent stage
+ * costs and present the result as elapsed request time.
  *
  * The journal is pure telemetry: append failures return false and are never
  * allowed to fail the pipeline (same doctrine as preview_proxy). The file is
@@ -32,13 +39,17 @@ export function journalStageEvent(
   stage: string,
   event: StageTimingEvent,
 ): boolean {
-  const row = JSON.stringify({
+  return appendTimingRow(producerDir, {
     stage,
     event,
     ts: Date.now() / 1000,
     mono: Number(process.hrtime.bigint()) / 1e9,
   });
+}
+
+function appendTimingRow(producerDir: string, value: Record<string, unknown>): boolean {
   try {
+    const row = JSON.stringify(value);
     const descriptor = openSync(stageTimingsPath(producerDir), "a", 0o600);
     try {
       writeSync(descriptor, `${row}\n`);
@@ -59,11 +70,29 @@ export async function timedStage<T>(
   producerDir: string,
   stage: string,
   run: () => Promise<T>,
+  metadata: StageTimingMetadata = {},
 ): Promise<T> {
-  journalStageEvent(producerDir, stage, "start");
+  const began = process.hrtime.bigint();
+  const parent = stageTimingContext();
+  const spanId = randomUUID();
+  const fields = {
+    schemaVersion: 2, ...parent, ...stageTimingWriter(), spanId, stage,
+    metadata: timingMetadata(metadata),
+  };
+  appendTimingRow(producerDir, {
+    ...fields, event: "start", ts: Date.now() / 1000, mono: Number(began) / 1e9,
+  });
+  let status = "completed";
   try {
-    return await run();
+    return await withStageTimingContext({ ...parent, parentSpanId: spanId }, run);
+  } catch (error) {
+    status = error instanceof Error && error.name === "AbortError" ? "interrupted" : "failed";
+    throw error;
   } finally {
-    journalStageEvent(producerDir, stage, "end");
+    const ended = process.hrtime.bigint();
+    appendTimingRow(producerDir, {
+      ...fields, event: "end", ts: Date.now() / 1000, mono: Number(ended) / 1e9,
+      status, elapsedMs: Number(ended - began) / 1e6,
+    });
   }
 }

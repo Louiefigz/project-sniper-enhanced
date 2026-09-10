@@ -1,15 +1,19 @@
 import type { AutoEditCtx } from "@/app/api/producer/auto-edit/stream";
 import type { ProducerRunPhase } from "@/lib/producer/project-state";
 import type { ProcessIdentity } from "./process-liveness";
+import type { CutApprovalRequestV1, CutPreviewPointer } from "@/lib/producer/contracts/cut-approval-request";
+import type { HumanCutAcceptanceAttempt, HumanCutAcceptancePointer } from "@/lib/producer/contracts/human-cut-acceptance";
+import type { GuidedHandoffPointerV2 } from "@/lib/producer/contracts/guided-workflow-v2";
 
 export const AUTO_EDIT_CHECKPOINTS = [
-  "queued", "authoring", "plan_authored", "planning_review", "plan_reviewed",
+  "queued", "authoring", "cut_reviewed", "plan_authored", "planning_review", "plan_reviewed",
   "validating", "validated", "rendering", "rendered", "quality_check",
   "repairing", "complete",
 ] as const;
 
 export type AutoEditCheckpoint = (typeof AUTO_EDIT_CHECKPOINTS)[number];
-export type AutoEditJobStatus = "running" | "failed" | "interrupted" | "complete";
+export type AutoEditJobStatus = "running" | "failed" | "interrupted" | "complete" | "awaiting_cut_approval" | "cut_accepted"
+  | "awaiting_treatment_brief" | "treatment_admitted";
 
 export interface AutoEditJobEvent {
   id: number;
@@ -31,6 +35,21 @@ export interface AutoEditJob {
   message: string;
   snapshots: number;
   attempts: number;
+  /** The exact reviewed cut awaiting a separate operator acceptance transaction. */
+  cutApprovalRequest?: CutApprovalRequestV1;
+  /** Exact private preview attempt, atomically recorded when user wait begins. */
+  cutPreview?: CutPreviewPointer;
+  /** Current human-wait interval; engine verification never silently consumes it. */
+  cutApprovalWaitStartedAt?: string;
+  cutAcceptanceAttempt?: HumanCutAcceptanceAttempt;
+  /** Activates one immutable human-cut-only fact; never final-video authority. */
+  cutAcceptance?: HumanCutAcceptancePointer;
+  /** V2 cut/treatment authority; never interprets a v1 human acceptance as a new brief. */
+  guidedHandoffV2?: GuidedHandoffPointerV2;
+  /** Explicit GUI/API saved-plan review; preserves a complete plan through cut authority. */
+  reviewSavedPlan?: true;
+  /** Bootstrap-only exact process-quiescence fact; never a human acceptance. */
+  bootstrapQuiescenceHash?: string;
   requestedAt: string;
   updatedAt: string;
   workerPid?: number;
@@ -73,6 +92,7 @@ export interface NewAutoEditJobArgs {
   snapshots: number;
   resume?: AutoEditJob;
   bootstrapPlanHash?: string;
+  reviewSavedPlan?: boolean;
 }
 
 export interface CheckpointUpdate {

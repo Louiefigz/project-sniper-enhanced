@@ -9,6 +9,7 @@ from unittest import mock
 
 from _common import pl  # noqa: F401
 from _assembly_receipt_fixture import canonical
+from _current_render_build_fixture import current_receipt
 from _build_manifest_import_closure import (
     dynamic_import_calls,
     local_import_closure,
@@ -24,6 +25,8 @@ from headless.render_build import render_build_manifest_digest
 from headless.render_build_manifest_v1_contract import (
     RENDER_BUILD_V1_IMPLEMENTATION_PATHS,
 )
+from headless.render_build_manifest_v2_contract import RENDER_BUILD_V2_IMPLEMENTATION_PATHS
+from headless.render_build_receipt_v2_semantics import parse_render_build_receipt_v2
 from headless.render_build_receipt_semantics import (
     RenderBuildReceiptSchemaError,
     parse_render_build_receipt_v1,
@@ -83,19 +86,19 @@ def _live_manifest(paths: tuple[str, ...], reader: object) -> dict:
 
 
 class RenderBuildReceiptSemanticTests(unittest.TestCase):
-    def test_frozen_catalog_covers_every_local_execution_import(self) -> None:
-        catalog = frozenset(RENDER_BUILD_V1_IMPLEMENTATION_PATHS)
-        closure = local_import_closure(RENDER_BUILD_V1_IMPLEMENTATION_PATHS)
+    def test_current_v2_catalog_covers_every_local_execution_import(self) -> None:
+        catalog = frozenset(RENDER_BUILD_V2_IMPLEMENTATION_PATHS)
+        closure = local_import_closure(RENDER_BUILD_V2_IMPLEMENTATION_PATHS)
         self.assertFalse(closure - catalog)
         self.assertIn("scripts/producer/headless/render_worker.py", closure)
         self.assertFalse(dynamic_import_calls(closure))
 
-    def test_live_writer_and_frozen_parser_enforce_the_same_tool_contract(
+    def test_live_writer_and_current_v2_parser_enforce_the_same_tool_contract(
         self,
     ) -> None:
         paths = tuple(f"/opt/sniper/bin/tool-{index}" for index in range(4))
         manifest = _live_manifest(paths, lambda path: path.encode("utf-8"))
-        parsed = parse_render_build_receipt_v1(render_receipt_bytes(manifest))
+        parsed = parse_render_build_receipt_v2(current_receipt(manifest))
         self.assertEqual(parsed.manifest.document_json, canonical(manifest))
         for bad_paths, reader, message in (
             ((paths[0],) * 4, lambda path: path.encode("utf-8"), "alias"),
@@ -119,10 +122,10 @@ class RenderBuildReceiptSemanticTests(unittest.TestCase):
         self,
     ) -> None:
         raw = _receipt()
-        self.assertEqual(
+        self.assertNotEqual(
             RENDER_BUILD_V1_IMPLEMENTATION_PATHS,
             tuple(render_build._IMPLEMENTATION_FILES),
-            "current writer changes require a versioned receipt contract",
+            "historical V1 does not expand with the current V2 writer",
         )
         with mock.patch.object(
             render_build, "_IMPLEMENTATION_FILES", ("other.py",)

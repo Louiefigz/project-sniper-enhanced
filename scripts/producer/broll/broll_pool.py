@@ -7,24 +7,24 @@ nothing resolves them until the pool is cataloged (assess-pool-FIRST doctrine,
 SKILL.md). This module owns that lane, on top of ingest_scan's probe + cache
 machinery (same ``broll_catalog.json``, path+mtime keyed):
 
-* ``scan <broll_dir>``      — walk the pool; every NEW/CHANGED video gets a stable
-  id + vision fields and 3 representative frames (15%/50%/85% of duration — off
+* ``scan <broll_dir> --manifest <asset_manifest.json>`` — reverify the
+  source-set authority, reject files added after ingest, and inspect only the
+  admitted snapshots. Every NEW/CHANGED admitted video gets a stable id +
+  vision fields and 3 representative frames (15%/50%/85% of duration — off
   the fade-prone edges) in ``<broll_dir>/.frames/``; images are their own frame.
   Idempotent: unchanged records keep their vision fields; an mtime change
   re-extracts frames and resets ``cataloged`` to false (stale tags never feed
   renders). Prints NDJSON + a human UNCATALOGED table — the list a Claude
   vision pass (the BRAIN, not a paid API) reviews to fill tags/description.
-* ``annotate <broll_dir> <id> --tags .. --description ..`` — the brain writes
-  what it SAW; sets ``cataloged: true``. The tool never invents tags.
-* ``manifest <broll_dir>``  — emit the ``manifest["broll"]`` array (cataloged
-  assets only) in the shape ``plan_lint_overlays.check_broll`` (needs ``id``) and
-  ``broll_insert.resolve_assets`` (needs ``id``/``path``/``kind``) consume.
-* ``resolve <broll_dir> <proposal.json>`` — fill brollReceipts assetIds by
-  case-insensitive EXACT token match against catalog TAGS ONLY; a multi-token
-  entity needs ALL tokens. Exactly one hit resolves; zero or MANY stays
-  ``needsOperator`` untouched (feedback-no-fallbacks: no fuzzy match, no
-  popularity ranking). ``brollConcept`` rows are never auto-resolved (R24:
-  concept stock stays operator-choice).
+* ``annotate <broll_dir> <id> --manifest <asset_manifest.json> ...`` — the
+  brain writes what it SAW; sets ``cataloged: true``. The tool invents no tags.
+* ``manifest <broll_dir> --manifest <asset_manifest.json>`` — emit the
+  ``manifest["broll"]`` array (cataloged assets only) in the exact executable
+  projection downstream authority consumes.
+* ``resolve <broll_dir> <proposal.json> --manifest <asset_manifest.json>`` —
+  fill brollReceipts assetIds by case-insensitive EXACT token match against
+  catalog TAGS ONLY. A multi-token entity needs ALL tokens. Exactly one hit
+  resolves; zero or MANY stays ``needsOperator`` untouched (no fuzzy fallback).
 
 NAMING IS NEVER LOAD-BEARING: filenames and folder names seed nothing — only
 brain-confirmed tags resolve receipts (the vision catalog is source of truth).
@@ -43,20 +43,15 @@ from typing import Optional
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ingest_probe import MEDIA_EXTS, probe_media, run_command, status, warn  # noqa: E402
+from broll.pool_admission import (PoolAsset, PoolAuthority, open_pool,  # noqa: E402
+                                  proof_fields)
+from broll.pool_frames import (extract_frames, frames_current,  # noqa: E402
+                               validate_asset_id)
+from broll.pool_receipts import resolve_file, resolve_receipts  # noqa: E402
+from broll.pool_views import manifest_entries, uncataloged_table  # noqa: E402
+from ingest_probe import probe_media, run_command, status, warn  # noqa: E402
 from ingest_scan import (BROLL_CATALOG_NAME, _category_tag,  # noqa: E402
                          _load_broll_cache, _write_broll_cache, broll_fields)
-
-FRAMES_DIR_NAME = ".frames"
-# Representative sample points: off the edges, so intros/fades/outros don't
-# masquerade as the asset's content (the "settled" positions).
-FRAME_POSITIONS = (0.15, 0.50, 0.85)
-RECEIPT_PREFIX = "receipt: "
-RESOLVED_SUFFIX = " — resolved from pool"
-# The manifest["broll"] row contract: plan_lint_overlays.check_broll keys on "id";
-# broll_insert.resolve_assets keys on "id"/"path"/"kind" (and probes the file).
-MANIFEST_FIELDS = ("id", "path", "kind", "duration", "resolution",
-                   "orientation", "category", "hasSpeech", "tags", "description")
 
 
 def vision_defaults() -> dict:
@@ -69,28 +64,28 @@ def _asset_id(rel: str) -> str:
     matched against; resolution is tags-only)."""
     stem = re.sub(r"\.[A-Za-z0-9]+$", "", rel)
     slug = re.sub(r"[^a-z0-9]+", "-", stem.lower()).strip("-")
-    return slug or hashlib.sha1(rel.encode()).hexdigest()[:10]
+    if not slug:
+        return hashlib.sha1(rel.encode()).hexdigest()[:10]
+    if len(slug) <= 96:
+        return slug
+    return f"{slug[:87].rstrip('-')}-{hashlib.sha1(rel.encode()).hexdigest()[:8]}"
 
 
 def _claim_id(existing: Optional[str], rel: str, used: dict) -> str:
     """Keep a record's existing id; slug new ones; de-collide deterministically."""
-    cand = existing or _asset_id(rel)
-    if used.get(cand, rel) != rel:
-        cand = f"{cand}-{hashlib.sha1(rel.encode()).hexdigest()[:6]}"
+    cand = validate_asset_id(existing) if existing is not None else _asset_id(rel)
+    owner = used.get(cand)
+    if owner is not None and owner != rel:
+        if existing is not None:
+            raise RuntimeError("b-roll pool catalog repeats an asset id")
+        suffix = hashlib.sha1(rel.encode()).hexdigest()[:6]
+        cand = f"{cand[:89].rstrip('-')}-{suffix}"
     used[cand] = rel
     return cand
 
 
-def _pool_files(broll_dir: Path) -> list[Path]:
-    """Media files under the pool, skipping dot-dirs (``.frames`` is machinery)."""
-    return sorted(
-        p for p in broll_dir.rglob("*")
-        if p.is_file() and p.suffix.lower() in MEDIA_EXTS
-        and not any(part.startswith(".")
-                    for part in p.relative_to(broll_dir).parts))
-
-
-def _pool_record(path: Path, broll_dir: Path, fresh: Optional[dict],
+def _pool_record(asset: PoolAsset, authority: PoolAuthority,
+                 fresh: Optional[dict],
                  stale: Optional[dict]) -> tuple[Optional[dict], str]:
     """(record, how) for one pool file.
 
@@ -104,75 +99,65 @@ def _pool_record(path: Path, broll_dir: Path, fresh: Optional[dict],
         if "cataloged" not in rec:              # pre-pool record: init vision
             rec.update(vision_defaults())
         return rec, "cached"
+    original = Path(asset.original_path)
+    snapshot = Path(asset.snapshot_path)
     try:
-        probe = probe_media(str(path))
+        probe = probe_media(str(snapshot))
     except (RuntimeError, ValueError) as exc:
-        warn(f"pool probe failed, skipping {path}: {exc}")
-        status(status="pool_probe_failed", path=str(path))
+        warn(f"pool probe failed, skipping {original}: {exc}")
+        status(status="pool_probe_failed", path=str(original))
         return None, "failed"
-    rec = {**broll_fields(path, probe, _category_tag(path, broll_dir)),
-           **vision_defaults()}
+    rec = {
+        **broll_fields(
+            original, probe, _category_tag(original, authority.root)),
+        **proof_fields(asset),
+        "path": asset.snapshot_path,
+        **vision_defaults(),
+    }
     if stale is not None:
         rec.update(id=stale.get("id"), tags=stale.get("tags", []),
                    description=stale.get("description", ""))
     return rec, ("updated" if stale is not None else "new")
 
 
-def _extract_frames(path: Path, rec: dict, broll_dir: Path) -> list[str]:
-    """3 representative JPGs into ``.frames/<id>_N.jpg`` (broll-relative paths).
-
-    Images ARE their single frame. A video with unknown duration gets one
-    frame at t=0 (flagged loud — still reviewable, never silently skipped).
-    """
-    if rec["kind"] == "image":
-        return [str(path.relative_to(broll_dir))]
-    dur = rec.get("duration")
-    if not dur:
-        warn(f"no duration for {path}; extracting a single t=0 frame")
-    times = [dur * f for f in FRAME_POSITIONS] if dur else [0.0]
-    frames_dir = broll_dir / FRAMES_DIR_NAME
-    frames_dir.mkdir(exist_ok=True)
-    rels: list[str] = []
-    for n, t in enumerate(times, start=1):
-        out = frames_dir / f"{rec['id']}_{n}.jpg"
-        run_command(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-                     "-ss", f"{t:.3f}", "-i", str(path),
-                     "-frames:v", "1", "-q:v", "2", str(out)])
-        rels.append(str(out.relative_to(broll_dir)))
-    return rels
-
-
-def _frames_current(rec: dict, broll_dir: Path) -> bool:
-    """True when the record's frame files all still exist on disk."""
-    frames = rec.get("frames") or []
-    return bool(frames) and all((broll_dir / f).exists() for f in frames)
-
-
-def scan_pool(broll_dir: Path) -> list[dict]:
-    """Catalog the pool (idempotent), extracting frames for new/changed assets."""
-    cache_path = broll_dir / BROLL_CATALOG_NAME
+def _cached_by_original(cache_path: Path) -> dict[str, dict]:
     cache = _load_broll_cache(cache_path)
+    return {
+        row.get("originalPath", row["path"]): row
+        for row in cache.values()
+    }
+
+
+def scan_pool(authority: PoolAuthority) -> list[dict]:
+    """Catalog admitted snapshots; reject pool files absent from the source set."""
+    broll_dir = authority.root
+    cache_path = broll_dir / BROLL_CATALOG_NAME
+    cache = _cached_by_original(cache_path)
     used: dict = {}
     records, cache_rows = [], []
-    for path in _pool_files(broll_dir):
-        mtime = path.stat().st_mtime
-        stale = cache.get(str(path))
-        fresh = stale if (stale and stale.get("mtime") == mtime) else None
-        rec, how = _pool_record(path, broll_dir, fresh, stale)
+    for original_path, asset in sorted(authority.assets.items()):
+        original = Path(original_path)
+        stale = cache.get(original_path)
+        expected = {"path": asset.snapshot_path, **proof_fields(asset)}
+        fresh = stale if (
+            stale and all(stale.get(key) == value
+                          for key, value in expected.items())) else None
+        rec, how = _pool_record(asset, authority, fresh, stale)
         if rec is None:
             continue
-        rel = str(path.relative_to(broll_dir))
+        rel = str(original.relative_to(broll_dir))
         rec["id"] = _claim_id(rec.get("id"), rel, used)
-        if how != "cached" or not _frames_current(rec, broll_dir):
+        if how != "cached" or not frames_current(rec, broll_dir):
             try:
-                rec["frames"] = _extract_frames(path, rec, broll_dir)
+                rec["frames"] = extract_frames(
+                    Path(asset.snapshot_path), rec, broll_dir)
             except RuntimeError as exc:
-                warn(f"frame extraction failed for {path}: {exc}")
+                warn(f"frame extraction failed for {original}: {exc}")
                 rec["frames"] = []
         status(status=f"pool_{how}", id=rec["id"], path=rel,
                cataloged=rec["cataloged"], frames=len(rec["frames"]))
         records.append(rec)
-        cache_rows.append({**rec, "mtime": mtime})
+        cache_rows.append(rec)
     _write_broll_cache(cache_path, cache_rows)
     status(status="pool_scan_done", assets=len(records),
            cataloged=sum(1 for r in records if r["cataloged"]),
@@ -180,28 +165,22 @@ def scan_pool(broll_dir: Path) -> list[dict]:
     return records
 
 
-def uncataloged_table(records: list[dict], broll_dir: Path) -> list[str]:
-    """The human review queue: what the brain must LOOK at, with frame paths."""
-    rows = [r for r in records if not r.get("cataloged")]
-    if not rows:
-        return ["", "All pool assets are cataloged."]
-    lines = ["", f"UNCATALOGED ({len(rows)}) — LOOK at each asset's frames, then:",
-             "  broll_pool.py annotate <broll_dir> <id> "
-             "--tags \"tok,tok\" --description \"...\""]
-    for r in rows:
-        dur = f"{r['duration']:.1f}s" if r.get("duration") else r["kind"]
-        lines.append(f"  {r['id']:<38} {r.get('category') or '-':<20} {dur:>8}")
-        lines.extend(f"      {broll_dir / f}" for f in r.get("frames") or [])
-    return lines
+def load_catalog(authority: PoolAuthority) -> list[dict]:
+    """Load rows only when every row still matches current admission authority."""
+    cache = _cached_by_original(authority.root / BROLL_CATALOG_NAME)
+    if set(cache) != set(authority.assets):
+        raise RuntimeError("b-roll pool catalog is stale; run admitted scan")
+    rows = []
+    for original, asset in authority.assets.items():
+        row = cache[original]
+        expected = {"path": asset.snapshot_path, **proof_fields(asset)}
+        if any(row.get(key) != value for key, value in expected.items()):
+            raise RuntimeError("b-roll pool catalog disagrees with admission")
+        rows.append({k: v for k, v in row.items() if k != "mtime"})
+    return rows
 
 
-def load_catalog(broll_dir: Path) -> list[dict]:
-    """The pool catalog records (mtime stripped), ids included."""
-    cache = _load_broll_cache(broll_dir / BROLL_CATALOG_NAME)
-    return [{k: v for k, v in r.items() if k != "mtime"} for r in cache.values()]
-
-
-def annotate(broll_dir: Path, rec_id: str, tags: list[str],
+def annotate(authority: PoolAuthority, rec_id: str, tags: list[str],
              description: str) -> dict:
     """Write the brain's vision verdict for one asset; sets ``cataloged: true``.
 
@@ -213,7 +192,8 @@ def annotate(broll_dir: Path, rec_id: str, tags: list[str],
         raise ValueError("annotate needs at least one non-empty tag")
     if not description.strip():
         raise ValueError("annotate needs a description — look at the frames first")
-    cache_path = broll_dir / BROLL_CATALOG_NAME
+    load_catalog(authority)
+    cache_path = authority.root / BROLL_CATALOG_NAME
     cache = _load_broll_cache(cache_path)
     rec = next((r for r in cache.values() if r.get("id") == rec_id), None)
     if rec is None:
@@ -224,93 +204,35 @@ def annotate(broll_dir: Path, rec_id: str, tags: list[str],
     return {k: v for k, v in rec.items() if k != "mtime"}
 
 
-def manifest_entries(catalog: list[dict]) -> list[dict]:
-    """``manifest["broll"]`` rows for CATALOGED assets only (paths absolute)."""
-    return [{k: r.get(k) for k in MANIFEST_FIELDS}
-            for r in catalog if r.get("cataloged")]
-
-
-def _entity_tokens(note: str) -> frozenset:
-    """'receipt: YouTube comedy channel' -> {youtube, comedy, channel}."""
-    if not note.startswith(RECEIPT_PREFIX):
-        return frozenset()
-    raw = re.split(r"[^a-z0-9]+", note[len(RECEIPT_PREFIX):].lower())
-    return frozenset(t for t in raw if t)
-
-
-def _resolve_row(row: dict, tagged: list[tuple]) -> dict:
-    """One receipt row -> resolved copy, or the row untouched.
-
-    Tags only, ALL entity tokens required, exactly ONE hit fills assetId.
-    Zero or multiple hits stay needsOperator (no fuzzy fallback, no ranking).
-    """
-    if row.get("assetId") is not None:
-        return row
-    tokens = _entity_tokens(row.get("note") or "")
-    if not tokens:
-        return row
-    hits = [rid for rid, tags in tagged if tokens <= tags]
-    if len(hits) != 1:
-        return row
-    return {**row, "assetId": hits[0], "needsOperator": False,
-            "note": f"{row['note']}{RESOLVED_SUFFIX}"}
-
-
-def resolve_receipts(proposals: dict, catalog: list[dict]) -> dict:
-    """Fill brollReceipts assetIds from the pool (CATALOGED tags only).
-
-    Returns a new proposals dict; the input and its rows are never mutated.
-    ``brollConcept`` (R24 concept stock) passes through untouched — always
-    operator-choice.
-    """
-    tagged = [(r["id"], frozenset(t.lower() for t in r.get("tags") or []))
-              for r in catalog if r.get("cataloged")]
-    out = dict(proposals)
-    out["brollReceipts"] = [_resolve_row(row, tagged)
-                            for row in proposals.get("brollReceipts") or []]
-    return out
-
-
-def _cmd_resolve(broll_dir: Path, args: argparse.Namespace) -> int:
+def _cmd_resolve(authority: PoolAuthority, args: argparse.Namespace) -> int:
     """Resolve a proposal file in place (or to --out), NDJSON per outcome."""
-    with open(args.proposal) as f:
-        proposals = json.load(f)
-    resolved = resolve_receipts(proposals, load_catalog(broll_dir))
-    before = proposals.get("brollReceipts") or []
-    after = resolved.get("brollReceipts") or []
-    for old, new in zip(before, after):
-        if old.get("assetId") is None and new.get("assetId") is not None:
-            status(status="receipt_resolved", assetId=new["assetId"],
-                   note=old.get("note"))
-        elif new.get("assetId") is None:
-            status(status="receipt_unresolved", note=new.get("note"),
-                   needsOperator=True)
-    out_path = args.out or args.proposal
-    with open(out_path, "w") as f:
-        json.dump(resolved, f, indent=2)
-    status(status="pool_resolve_done", out=out_path,
-           resolved=sum(1 for o, n in zip(before, after)
-                        if o.get("assetId") is None and n.get("assetId")),
-           unresolved=sum(1 for n in after if n.get("assetId") is None))
+    output = Path(args.out) if args.out else None
+    resolve_file(
+        authority, Path(args.proposal), output, load_catalog(authority))
     return 0
 
 
 def _dispatch(args: argparse.Namespace) -> int:
-    broll_dir = Path(args.broll_dir).resolve()
+    # Preserve the final path component exactly enough for open_pool's lstat
+    # check to see a symlink. Path.resolve() would turn a symlinked operator
+    # root into its target before the authority boundary could reject it.
+    broll_dir = Path(os.path.abspath(args.broll_dir))
     if not broll_dir.is_dir():
         raise ValueError(f"not a directory: {broll_dir}")
+    authority = open_pool(broll_dir, Path(args.manifest))
     if args.cmd == "scan":
-        records = scan_pool(broll_dir)
+        records = scan_pool(authority)
         print("\n".join(uncataloged_table(records, broll_dir)))
         return 0
     if args.cmd == "annotate":
-        rec = annotate(broll_dir, args.id, args.tags.split(","), args.description)
+        rec = annotate(
+            authority, args.id, args.tags.split(","), args.description)
         status(status="pool_annotated", id=rec["id"], tags=rec["tags"])
         return 0
     if args.cmd == "manifest":
-        print(json.dumps(manifest_entries(load_catalog(broll_dir)), indent=2))
+        print(json.dumps(manifest_entries(load_catalog(authority)), indent=2))
         return 0
-    return _cmd_resolve(broll_dir, args)
+    return _cmd_resolve(authority, args)
 
 
 def main() -> int:
@@ -320,16 +242,20 @@ def main() -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     scan = sub.add_parser("scan", help="catalog the pool + extract frames")
     scan.add_argument("broll_dir")
+    scan.add_argument("--manifest", required=True)
     ann = sub.add_parser("annotate", help="write the brain's tags/description")
     ann.add_argument("broll_dir")
     ann.add_argument("id")
+    ann.add_argument("--manifest", required=True)
     ann.add_argument("--tags", required=True, help="comma-separated tokens")
     ann.add_argument("--description", required=True)
     man = sub.add_parser("manifest", help="emit manifest['broll'] (cataloged only)")
     man.add_argument("broll_dir")
+    man.add_argument("--manifest", required=True)
     res = sub.add_parser("resolve", help="fill receipt assetIds from the pool")
     res.add_argument("broll_dir")
     res.add_argument("proposal", help="graphics_planner proposal.json")
+    res.add_argument("--manifest", required=True)
     res.add_argument("--out", default=None,
                      help="write here instead of updating the proposal in place")
     args = ap.parse_args()

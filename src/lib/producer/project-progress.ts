@@ -2,8 +2,40 @@ import {
   boundedAutoEditProgressMessage,
   eventElapsedSuffix,
 } from "./auto-edit-progress";
+import type { ProducerRunPhase } from "./project-state";
 
 export { boundedAutoEditProgressMessage } from "./auto-edit-progress";
+
+export function runPhaseLabel(phase: ProducerRunPhase): string {
+  const labels: Record<ProducerRunPhase, string> = {
+    authoring: "Generating edit plan",
+    planning_review: "Reviewing edit plan",
+    validating: "Validating edit plan",
+    rendering: "Rendering video",
+    quality_check: "Running final QC",
+    repairing: "Repairing QC findings",
+  };
+  return labels[phase];
+}
+
+export function runPhaseRemainingLabel(phase: ProducerRunPhase): string {
+  const labels: Record<ProducerRunPhase, string> = {
+    authoring: "Next: planning reviews, deterministic gates, a candidate render, and QC.",
+    planning_review: "Next: finish the required plan reviews and gates, then render a candidate.",
+    validating: "Next: render a candidate, then run deterministic and visual QC.",
+    rendering: "Next: Audit B plus independent composition and editorial reviews.",
+    quality_check: "Next: approve and promote this candidate, or repair and render another.",
+    repairing: "Next: re-review the repaired plan, render a fresh candidate, and run QC again.",
+  };
+  return labels[phase];
+}
+
+export function elapsedRunLabel(startedAt: string, now = Date.now()): string {
+  const elapsed = Math.max(0, now - Date.parse(startedAt));
+  const minutes = Math.floor(elapsed / 60_000);
+  const seconds = Math.floor((elapsed % 60_000) / 1_000);
+  return minutes > 0 ? `${minutes}m ${seconds}s elapsed` : `${seconds}s elapsed`;
+}
 
 function palmierPrimaryProgress(
   name: string,

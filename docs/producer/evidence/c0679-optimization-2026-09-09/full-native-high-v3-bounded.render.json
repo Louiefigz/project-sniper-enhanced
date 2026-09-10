@@ -1,0 +1,343 @@
+{
+  "status": "failed",
+  "startedAt": "2026-09-09T15:47:26.123492+00:00",
+  "admission": {
+    "duration": 683.7664166666667,
+    "output": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/full-native-high-v3-bounded.mp4",
+    "sdkVersion": "0.8.31",
+    "sdkSha256": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "sandboxSha256": "44309d0cf11391ec665221c43d73a40d81ad05009d517c4986aaff302dfee0ea",
+    "cache": "/private/tmp/hyperframes-extract-cache-501/hfcache-v4-5610bca5f73df075",
+    "frameCount": 16394,
+    "sourceCacheComplete": true
+  },
+  "project": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1",
+  "output": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/full-native-high-v3-bounded.mp4",
+  "sdkVersion": "0.8.31",
+  "sourceHashesBefore": {
+    "extension-194-367.css": "a9d32e3015cbe7a31c610ed293ff21ed95c6aadaf4410a21384ce2d84fce31ae",
+    "extension-194-367.js": "8a96c69f01a5b08e87d707986209677255374455f9b85daeab9e73b2fdfb9353",
+    "extension-32-75.css": "6856455522448b2e3d5186522982379e58c7a7e663d9ba6c830b7dd8cf36e4d4",
+    "extension-32-75.js": "f2e1b9737c98bc734c8beba94d14365977862f36c625ae6f27a3862853b07f2b",
+    "extension-367-end.css": "6877c5d777f4e606ac89c3854eef9d04f0030f7718d2e74a29a01c95ead093aa",
+    "extension-367-end.js": "694ece67b6b23f30abb70f7e5104d67ac6c1f8ff7c4682534f9216645ff83c99",
+    "extension-75-194.css": "20619092f95c4dcb9b7afa88b510143789c60f12a19aa3557cee143da4752505",
+    "extension-75-194.js": "31a29d27e632eca5d91b52bd5bfcd908c9b4197a05857d9dde9cfee0e28da068",
+    "hyperframes.json": "f311a7b6cdca37251313743f24c44a5b2d7f80311af0758508fcf447443e18f2",
+    "index.html": "bc95f3ccdeaa2953d2cf1aa178d9e4ad0ba4b62a022b1a340cdb63df8c493577",
+    "motion.js": "3536dd792fc44f5efcb30366041d93b3489b38f435c5f79c084600d77cf07bb2",
+    "scene.css": "4e3b8aec22335e82cee1764dd5e9b4f1c6b47aa770161f60d879894422f6471a"
+  },
+  "fullEditTwoHourTargetAlreadyMissed": true,
+  "renderOnlyTiming": true,
+  "policy": {
+    "admission_free_percent": 25,
+    "stop_free_percent": 10,
+    "maximum_compressor_fraction": 0.25,
+    "maximum_owned_gib": 16,
+    "maximum_process_gib": 15,
+    "maximum_swap_growth_gib": 4,
+    "minimum_disk_free_gib": 10,
+    "minimum_unused_physical_gib": 6,
+    "maximum_snapshot_age_seconds": 30
+  },
+  "args": [
+    "/usr/bin/sandbox-exec",
+    "-f",
+    "/private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/localhost-only.sb",
+    "/opt/homebrew/Cellar/node/23.10.0_1/bin/node",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js",
+    "render",
+    ".",
+    "--fps",
+    "24000/1001",
+    "--quality",
+    "high",
+    "--workers",
+    "1",
+    "--low-memory-mode",
+    "--no-browser-gpu",
+    "--video-frame-format",
+    "png",
+    "--strict",
+    "--no-best-effort",
+    "--output",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/full-native-high-v3-bounded.mp4"
+  ],
+  "nativeOverrides": {
+    "PATH": "/opt/homebrew/Cellar/node/23.10.0_1/bin:/opt/homebrew/Cellar/ffmpeg/8.0_1/bin:/usr/bin:/bin",
+    "TMPDIR": "/private/tmp",
+    "LC_ALL": "C",
+    "HYPERFRAMES_BROWSER_PATH": "/Users/aaronfigueroa/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-152.0.7928.2/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+    "HYPERFRAMES_FFMPEG_PATH": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffmpeg",
+    "HYPERFRAMES_FFPROBE_PATH": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffprobe",
+    "PRODUCER_LOW_MEMORY_MODE": "true",
+    "PRODUCER_FRAME_DATA_URI_CACHE_LIMIT": "32",
+    "PRODUCER_FRAME_DATA_URI_CACHE_BYTES_MB": "64",
+    "PRODUCER_EXPERIMENTAL_FAST_CAPTURE": "false",
+    "PRODUCER_STREAMING_ENCODE_MAX_DURATION_SECONDS": "900",
+    "FFMPEG_STREAMING_TIMEOUT_MS": "5400000",
+    "HYPERFRAMES_EXTRACT_CACHE_MAX_MB": "65536"
+  },
+  "runDeadlineSeconds": 5400,
+  "supervisorSigkillProtection": false,
+  "baseline": {
+    "measured_at": 1788968846.1243079,
+    "physical_bytes": 68719476736,
+    "free_percent": 84.0,
+    "swap_used_bytes": 17516860538,
+    "compressor_bytes": 2394947584,
+    "disk_free_bytes": 67837550592,
+    "owned_footprint_bytes": 0,
+    "largest_owned_process_bytes": 0,
+    "owned_pids": [],
+    "processes": [],
+    "identity_verified": false,
+    "unused_physical_bytes": 21474836480,
+    "missing_registered_pids": [],
+    "reused_registered_pids": []
+  },
+  "logPath": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v3-bounded.render.log",
+  "pid": 67297,
+  "nativeLaunchedAt": "2026-09-09T15:47:27.663336+00:00",
+  "ownerIdentities": [
+    {
+      "pid": 67297,
+      "parent_pid": 67282,
+      "pgid": 67297,
+      "started": "Wed Sep  9 10:47:27 2026"
+    },
+    {
+      "pid": 67391,
+      "parent_pid": 67297,
+      "pgid": 67297,
+      "started": "Wed Sep  9 10:47:28 2026"
+    },
+    {
+      "pid": 67396,
+      "parent_pid": 67297,
+      "pgid": 67297,
+      "started": "Wed Sep  9 10:47:29 2026"
+    },
+    {
+      "pid": 67444,
+      "parent_pid": 67297,
+      "pgid": 67297,
+      "started": "Wed Sep  9 10:47:44 2026"
+    },
+    {
+      "pid": 67446,
+      "parent_pid": 67297,
+      "pgid": 67446,
+      "started": "Wed Sep  9 10:47:44 2026"
+    },
+    {
+      "pid": 67447,
+      "parent_pid": 67446,
+      "pgid": 67446,
+      "started": "Wed Sep  9 10:47:44 2026"
+    },
+    {
+      "pid": 67448,
+      "parent_pid": 67446,
+      "pgid": 67446,
+      "started": "Wed Sep  9 10:47:44 2026"
+    },
+    {
+      "pid": 67449,
+      "parent_pid": 67446,
+      "pgid": 67446,
+      "started": "Wed Sep  9 10:47:44 2026"
+    },
+    {
+      "pid": 67450,
+      "parent_pid": 67446,
+      "pgid": 67446,
+      "started": "Wed Sep  9 10:47:44 2026"
+    }
+  ],
+  "latestResourceSnapshot": {
+    "measured_at": 1788969044.219743,
+    "physical_bytes": 68719476736,
+    "free_percent": 84.0,
+    "swap_used_bytes": 17386763714,
+    "compressor_bytes": 2395996160,
+    "disk_free_bytes": 68744777728,
+    "owned_footprint_bytes": 7481656320,
+    "largest_owned_process_bytes": 6084886528,
+    "owned_pids": [
+      67297,
+      67444,
+      67446,
+      67447,
+      67448,
+      67449,
+      67450
+    ],
+    "processes": [
+      {
+        "pid": 67297,
+        "parent_pid": 67282,
+        "pgid": 67297,
+        "started": "Wed Sep  9 10:47:27 2026",
+        "footprint_bytes": 365953024,
+        "compressed_bytes": 0
+      },
+      {
+        "pid": 67444,
+        "parent_pid": 67297,
+        "pgid": 67297,
+        "started": "Wed Sep  9 10:47:44 2026",
+        "footprint_bytes": 902823936,
+        "compressed_bytes": 0
+      },
+      {
+        "pid": 67446,
+        "parent_pid": 67297,
+        "pgid": 67446,
+        "started": "Wed Sep  9 10:47:44 2026",
+        "footprint_bytes": 25165824,
+        "compressed_bytes": 0
+      },
+      {
+        "pid": 67447,
+        "parent_pid": 67446,
+        "pgid": 67446,
+        "started": "Wed Sep  9 10:47:44 2026",
+        "footprint_bytes": 80740352,
+        "compressed_bytes": 0
+      },
+      {
+        "pid": 67448,
+        "parent_pid": 67446,
+        "pgid": 67446,
+        "started": "Wed Sep  9 10:47:44 2026",
+        "footprint_bytes": 9503744,
+        "compressed_bytes": 0
+      },
+      {
+        "pid": 67449,
+        "parent_pid": 67446,
+        "pgid": 67446,
+        "started": "Wed Sep  9 10:47:44 2026",
+        "footprint_bytes": 12582912,
+        "compressed_bytes": 0
+      },
+      {
+        "pid": 67450,
+        "parent_pid": 67446,
+        "pgid": 67446,
+        "started": "Wed Sep  9 10:47:44 2026",
+        "footprint_bytes": 6084886528,
+        "compressed_bytes": 0
+      }
+    ],
+    "identity_verified": true,
+    "unused_physical_bytes": 6218055680,
+    "missing_registered_pids": [
+      67391,
+      67396
+    ],
+    "reused_registered_pids": []
+  },
+  "cleanup": {
+    "verified": true,
+    "survivors": [],
+    "signals": [
+      {
+        "at": 1788969046.535726,
+        "target": -67446,
+        "signal": "SIGINT",
+        "anchors": [
+          {
+            "pid": 67446,
+            "parent_pid": 67297,
+            "pgid": 67446,
+            "started": "Wed Sep  9 10:47:44 2026"
+          },
+          {
+            "pid": 67447,
+            "parent_pid": 67446,
+            "pgid": 67446,
+            "started": "Wed Sep  9 10:47:44 2026"
+          },
+          {
+            "pid": 67448,
+            "parent_pid": 67446,
+            "pgid": 67446,
+            "started": "Wed Sep  9 10:47:44 2026"
+          },
+          {
+            "pid": 67449,
+            "parent_pid": 67446,
+            "pgid": 67446,
+            "started": "Wed Sep  9 10:47:44 2026"
+          },
+          {
+            "pid": 67450,
+            "parent_pid": 67446,
+            "pgid": 67446,
+            "started": "Wed Sep  9 10:47:44 2026"
+          }
+        ],
+        "outcome": "sent"
+      },
+      {
+        "at": 1788969046.568373,
+        "target": -67297,
+        "signal": "SIGINT",
+        "anchors": [
+          {
+            "pid": 67297,
+            "parent_pid": 67282,
+            "pgid": 67297,
+            "started": "Wed Sep  9 10:47:27 2026"
+          },
+          {
+            "pid": 67444,
+            "parent_pid": 67297,
+            "pgid": 67297,
+            "started": "Wed Sep  9 10:47:44 2026"
+          }
+        ],
+        "outcome": "sent"
+      },
+      {
+        "at": 1788969047.792243,
+        "target": -67297,
+        "signal": "SIGTERM",
+        "anchors": [
+          {
+            "pid": 67444,
+            "parent_pid": 1,
+            "pgid": 67297,
+            "started": "Wed Sep  9 10:47:44 2026"
+          }
+        ],
+        "outcome": "sent"
+      }
+    ],
+    "scope": "Recorded owned identities; not an unobserved-child guarantee"
+  },
+  "exitCode": -2,
+  "elapsedSeconds": 201.8796384590678,
+  "completedAt": "2026-09-09T15:50:48.001573+00:00",
+  "abortReason": "unused physical RAM is below the reserved host margin",
+  "sourceHashesAfter": {
+    "extension-194-367.css": "a9d32e3015cbe7a31c610ed293ff21ed95c6aadaf4410a21384ce2d84fce31ae",
+    "extension-194-367.js": "8a96c69f01a5b08e87d707986209677255374455f9b85daeab9e73b2fdfb9353",
+    "extension-32-75.css": "6856455522448b2e3d5186522982379e58c7a7e663d9ba6c830b7dd8cf36e4d4",
+    "extension-32-75.js": "f2e1b9737c98bc734c8beba94d14365977862f36c625ae6f27a3862853b07f2b",
+    "extension-367-end.css": "6877c5d777f4e606ac89c3854eef9d04f0030f7718d2e74a29a01c95ead093aa",
+    "extension-367-end.js": "694ece67b6b23f30abb70f7e5104d67ac6c1f8ff7c4682534f9216645ff83c99",
+    "extension-75-194.css": "20619092f95c4dcb9b7afa88b510143789c60f12a19aa3557cee143da4752505",
+    "extension-75-194.js": "31a29d27e632eca5d91b52bd5bfcd908c9b4197a05857d9dde9cfee0e28da068",
+    "hyperframes.json": "f311a7b6cdca37251313743f24c44a5b2d7f80311af0758508fcf447443e18f2",
+    "index.html": "bc95f3ccdeaa2953d2cf1aa178d9e4ad0ba4b62a022b1a340cdb63df8c493577",
+    "motion.js": "3536dd792fc44f5efcb30366041d93b3489b38f435c5f79c084600d77cf07bb2",
+    "scene.css": "4e3b8aec22335e82cee1764dd5e9b4f1c6b47aa770161f60d879894422f6471a"
+  },
+  "sourceStable": true,
+  "sdkStable": true,
+  "sandboxStable": true
+}

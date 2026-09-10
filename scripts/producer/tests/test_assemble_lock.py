@@ -130,7 +130,10 @@ class MainLockLifecycleTests(unittest.TestCase):
         self.lock = os.path.join(d, ".assemble.lock")
 
     def _run_main(self, plan_path: str) -> tuple[int, str]:
-        argv = ["assemble.py", self.base, plan_path, self.out]
+        argv = [
+            "assemble.py", self.base, plan_path, self.out,
+            "--allow-legacy-unadmitted",
+        ]
         buf = io.StringIO()
         with mock.patch.object(sys, "argv", argv), \
                 contextlib.redirect_stdout(buf), \
@@ -162,7 +165,10 @@ class MainLockLifecycleTests(unittest.TestCase):
                 seen["pid"] = json.load(f)["pid"]
             return {"mocked": True}
 
-        argv = ["assemble.py", self.base, self.plan_path, self.out]
+        argv = [
+            "assemble.py", self.base, self.plan_path, self.out,
+            "--allow-legacy-unadmitted",
+        ]
         buf = io.StringIO()
         with mock.patch.object(asm, "assemble", new=fake_assemble), \
                 mock.patch.object(sys, "argv", argv), \

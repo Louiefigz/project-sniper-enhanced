@@ -17,6 +17,9 @@ code). See .claude/skills/producer/SKILL.md.
 
 from __future__ import annotations
 
+import copy
+from collections.abc import Iterable
+
 from producer_config import MOTION
 
 TITLE_MAX_WORDS = 5
@@ -30,23 +33,41 @@ def fill_list_spec(beat: dict, items: list[dict], title: str = "") -> dict | Non
     ``items`` = ordered ``[{"anchorIndex": int, "label": str}]`` — the beat's
     REAL steps (false-positive ordinals dropped by the brain). Each label lands
     on its anchor's spoken start (``atSec``): copy from the brain, timing from
-    code. Fewer than MIN_ITEMS valid labels → ``None`` (not a real list — the
-    beat earns nothing, clean head)."""
+    code. Oversized copy retains the original beat as ``needsCopy`` with a
+    structured rewrite request, never a truncated or merge-ready fragment.
+    Fewer than MIN_ITEMS valid labels without fit issues returns ``None``;
+    only the caller's semantic judgment can discharge a non-list beat.
+    A fitting retry retains chosen anchors/title, but does not prove meaning.
+    """
     anchors = beat.get("anchors") or []
-    spec: dict = {"title": _cap(title, TITLE_MAX_WORDS)}
+    if _retry_drops_selection(beat, items, title):
+        return {**copy.deepcopy(beat), "spec": {}, "needsCopy": True}
+    spec: dict = {"title": _copy_text(title)}
+    issues = []
     n = 0
-    for it in items:
+    for index, it in enumerate(items):
         ai = it.get("anchorIndex")
-        label = _cap(str(it.get("label", "")).strip(), LABEL_MAX_WORDS)
+        label = _copy_text(it.get("label", ""))
         if not label or not isinstance(ai, int) or not 0 <= ai < len(anchors):
             continue
+        issue = _fit_issue(it.get("label", ""), LABEL_MAX_WORDS,
+                           f"items[{index}].label", ai)
+        if issue:
+            issues.append(issue)
         n += 1
         spec[f"item{n}"] = label
         spec[f"at{n}"] = anchors[ai]["atSec"]
+    title_issue = _fit_issue(title, TITLE_MAX_WORDS, "title")
+    if title_issue and (n >= MIN_ITEMS or issues):
+        issues.insert(0, title_issue)
+    if issues:
+        return _copy_repair(beat, items, title, issues)
     if n < MIN_ITEMS:
+        if beat.get("copyRepair"):
+            return {**copy.deepcopy(beat), "spec": {}, "needsCopy": True}
         return None
     out = {k: v for k, v in beat.items()
-           if k not in ("anchors", "rawSpan", "needsCopy", "spec")}
+           if k not in ("anchors", "rawSpan", "needsCopy", "spec", "copyRepair")}
     out["spec"] = spec
     out["confidence"] = "high" if n >= 3 else "medium"
     out["reason"] = (f"{n} sequence steps → whiteboard-list cutaway "
@@ -55,7 +76,51 @@ def fill_list_spec(beat: dict, items: list[dict], title: str = "") -> dict | Non
     return out
 
 
-def fill_illustration_spec(beat: dict, asset_id: str, pool_ids,
+def _retry_drops_selection(beat: dict, items: list[dict], title: str) -> bool:
+    """Keep every originally chosen valid point, its order and any title."""
+    prior = beat.get("copyRepair")
+    if not prior:
+        return False
+    anchors = beat.get("anchors") or []
+    expected = _chosen_anchors(prior.get("originalItems", []), anchors)
+    return (expected != _chosen_anchors(items, anchors)
+            or bool(_copy_text(prior.get("originalTitle", "")))
+            and not _copy_text(title))
+
+
+def _chosen_anchors(items: list[dict], anchors: list[dict]) -> list[int]:
+    """Mirror initial valid label selection without interpreting its wording."""
+    return [item["anchorIndex"] for item in items
+            if _copy_text(item.get("label", ""))
+            and isinstance(item.get("anchorIndex"), int)
+            and 0 <= item["anchorIndex"] < len(anchors)]
+
+
+def _fit_issue(text: str, maximum: int, field: str,
+               anchor_index: int | None = None) -> dict | None:
+    """Describe a mechanical size failure without interpreting or editing copy."""
+    count = len(str(text).split())
+    if count <= maximum:
+        return None
+    issue = {"field": field, "originalText": str(text),
+             "maxWords": maximum, "actualWords": count}
+    if anchor_index is not None:
+        issue["anchorIndex"] = anchor_index
+    return issue
+
+
+def _copy_repair(beat: dict, items: list[dict], title: str,
+                 issues: list[dict]) -> dict:
+    """Detach the complete unresolved obligation and its original timing data."""
+    prior = beat.get("copyRepair") or {}
+    return {**copy.deepcopy(beat), "spec": {}, "needsCopy": True,
+            "copyRepair": {"schemaVersion": 1, "kind": "copy-needs-rewrite",
+                           "originalTitle": copy.deepcopy(prior.get("originalTitle", title)),
+                           "originalItems": copy.deepcopy(prior.get("originalItems", items)),
+                           "issues": copy.deepcopy(issues)}}
+
+
+def fill_illustration_spec(beat: dict, asset_id: str, pool_ids: Iterable[str] | None,
                            caption: str = "") -> dict | None:
     """Brain's chosen POOL illustration for a concept slot → a brollTrack row.
 
@@ -74,7 +139,7 @@ def fill_illustration_spec(beat: dict, asset_id: str, pool_ids,
     out["needsOperator"] = False
     out["confidence"] = "medium"
     if caption:
-        out["label"] = _cap(caption, LABEL_MAX_WORDS)
+        out["label"] = _copy_text(caption)
     out["reason"] = (f"concept illustration → pool asset {aid!r} "
                      "(brain-picked; full-frame b-roll)")
     return out
@@ -150,6 +215,6 @@ def fill_row_lands(entry: dict, word_indices: list[int],
     return {**entry, "spec": {**(entry.get("spec") or {}), "rowLands": lands}}
 
 
-def _cap(text: str, cap: int) -> str:
-    """Word-cap a label/title (the brain writes short; this is the backstop)."""
-    return " ".join(str(text).split()[:cap])
+def _copy_text(text: str) -> str:
+    """Normalize display whitespace without deleting any word or punctuation."""
+    return " ".join(str(text).split())

@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import type { AutoEditCtx } from "../../../app/api/producer/auto-edit/stream";
+import { audioAuditFixture } from "./audit-audio-fixture";
 import { bindAuthorityProof } from "../../server/auto-edit-authority";
 import {
   autoEditAuthoritySnapshot,
@@ -20,6 +21,7 @@ interface ApprovalFixtureArgs {
   candidate: string;
   qcRound?: number;
   planningRoundsRequired?: number;
+  audioAudit?: Record<string, unknown>;
 }
 
 function passReview(stage: "plan" | "rendered") {
@@ -70,7 +72,8 @@ export function writeApprovalFixture(args: ApprovalFixtureArgs): ApprovalRecord 
   const reportPath = path.join(candidateDir, "audit_report.md");
   writeFileSync(framePath, "approved-frame");
   writeFileSync(machinePath, JSON.stringify({
-    overall: "pass", frames: [{ path: framePath }], checks: [],
+    ...(args.audioAudit ?? audioAuditFixture(fileSha256(args.candidate)!)),
+    frames: [{ path: framePath }],
   }));
   writeFileSync(reportPath, "# pass\n");
   const evidenceContent = {

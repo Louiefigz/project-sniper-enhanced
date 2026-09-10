@@ -9,11 +9,27 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 
 from fingerprints import file_sha256
+from ingest_execution_authority import verify_execution_media_authority
 from palmier.desktop_state import DesktopStageInput
 from palmier.mcp_client import PalmierError
+from palmier.process_deadline import process_timeout
 from palmier.timeline_authority import atomic_write_record
 
 GATES_NAME = ".palmier-desktop-gates"
+
+
+def verify_desktop_media_authority(inputs: DesktopStageInput) -> None:
+    """Reject stale/unadmitted media before any Palmier connection."""
+    try:
+        with open(inputs.plan_path, encoding="utf-8") as handle:
+            plan = json.load(handle)
+        with open(inputs.manifest_path, encoding="utf-8") as handle:
+            manifest = json.load(handle)
+        verify_execution_media_authority(
+            plan, manifest, inputs.manifest_path)
+    except (OSError, json.JSONDecodeError, RuntimeError) as exc:
+        raise PalmierError(
+            f"Desktop Palmier media authority failed: {exc}") from exc
 
 
 def _command(script: str, *args: str) -> list[str]:
@@ -21,8 +37,11 @@ def _command(script: str, *args: str) -> list[str]:
     return [sys.executable, os.path.join(root, script), *args]
 
 
-def _run(name: str, command: list[str]) -> dict:
-    timeout = float(os.environ.get("SNIPER_DESKTOP_GATE_TIMEOUT_S", "300"))
+def _run(name: str, command: list[str],
+         timeout_s: float | None = None) -> dict:
+    configured = float(os.environ.get(
+        "SNIPER_DESKTOP_GATE_TIMEOUT_S", "300"))
+    timeout = timeout_s or process_timeout(configured)
     try:
         process = subprocess.run(command, capture_output=True, text=True,
                                  check=False, timeout=timeout)
@@ -42,14 +61,17 @@ def _run(name: str, command: list[str]) -> dict:
 
 
 def _parallel(commands: list[tuple[str, list[str]]]) -> list[dict]:
+    timeout = process_timeout(float(os.environ.get(
+        "SNIPER_DESKTOP_GATE_TIMEOUT_S", "300")))
     with ThreadPoolExecutor(max_workers=len(commands)) as pool:
-        futures = [pool.submit(_run, name, command)
+        futures = [pool.submit(_run, name, command, timeout)
                    for name, command in commands]
         return [future.result() for future in futures]
 
 
 def run_desktop_gates(inputs: DesktopStageInput) -> dict:
     """Persist one hash-bound gate receipt or fail without unlocking Palmier."""
+    verify_desktop_media_authority(inputs)
     transcripts = os.path.abspath(inputs.transcripts_dir or
                                    os.path.dirname(inputs.manifest_path))
     if inputs.stage == "cut":

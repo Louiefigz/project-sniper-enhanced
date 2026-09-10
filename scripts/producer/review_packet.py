@@ -257,7 +257,7 @@ def build_packet(plan_path: str, transcripts_dir: str, manifest_path: str) -> di
         "manifest": manifest_bound,
         "gates": gates,
         "gateDigest": _digest(gates),
-        "timeline": {"outputDuration": round(tmap.output_duration, 4),
+        "timeline": {"outputDuration": tmap.output_duration,
                      "segments": _segment_rows(plan, tmap)},
         # pacing._cli_report IS what `planner/pacing.py <plan>` prints —
         # reused verbatim so the packet's pacing block can never drift.

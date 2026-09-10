@@ -61,7 +61,9 @@ function useProjectMutations(
 
 export function useRecentProjects() {
   const list = useProjectList();
-  const [showAll, setShowAll] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(3);
   const mutations = useProjectMutations(list.refresh, list.setError);
-  return { ...list, ...mutations, showAll, setShowAll };
+  return { ...list, ...mutations, visibleCount,
+    showMore: () => setVisibleCount((count) => Math.min(list.projects.length, count + 5)),
+    showFewer: () => setVisibleCount(3) };
 }

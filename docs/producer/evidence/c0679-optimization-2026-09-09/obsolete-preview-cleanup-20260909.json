@@ -1,0 +1,41 @@
+{
+  "measuredAt": "2026-09-09T16:24:15.525787+00:00",
+  "scope": "Five exact obsolete preview-server identities; preserve current preview PID53236 port41058 and all user apps",
+  "processes": [
+    {
+      "pid": 27690,
+      "observed": "27690 Wed Sep  9 05:48:34 2026     /opt/homebrew/Cellar/node/23.10.0_1/bin/node /Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js preview /private/tmp/sniper-c0679-layered-studio-20260909.xl6za7/studio --port 3990 --foreground --json",
+      "verified": true,
+      "signal": "SIGTERM",
+      "remaining": "27690 Wed Sep  9 05:48:34 2026     /opt/homebrew/Cellar/node/23.10.0_1/bin/node /Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js preview /private/tmp/sniper-c0679-layered-studio-20260909.xl6za7/studio --port 3990 --foreground --json"
+    },
+    {
+      "pid": 30448,
+      "observed": "30448 Wed Sep  9 06:15:36 2026     /opt/homebrew/Cellar/node/23.10.0_1/bin/node /private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/hyperframes/dist/cli.js preview /private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/studio --port 41046 --foreground --json",
+      "verified": true,
+      "signal": "SIGTERM",
+      "remaining": "30448 Wed Sep  9 06:15:36 2026     /opt/homebrew/Cellar/node/23.10.0_1/bin/node /private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/hyperframes/dist/cli.js preview /private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/studio --port 41046 --foreground --json"
+    },
+    {
+      "pid": 35723,
+      "observed": "35723 Wed Sep  9 06:56:45 2026     /opt/homebrew/Cellar/node/23.10.0_1/bin/node /private/tmp/sniper-upgrade-build-qOKgnu/artifacts/studio-sdk/hf0.8.31-realm-preview-v1-52321b8f3d41dda4c9c7/hyperframes/dist/cli.js preview /private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/studio --port 41048 --foreground --json",
+      "verified": true,
+      "signal": "SIGTERM",
+      "remaining": "35723 Wed Sep  9 06:56:45 2026     /opt/homebrew/Cellar/node/23.10.0_1/bin/node /private/tmp/sniper-upgrade-build-qOKgnu/artifacts/studio-sdk/hf0.8.31-realm-preview-v1-52321b8f3d41dda4c9c7/hyperframes/dist/cli.js preview /private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/studio --port 41048 --foreground --json"
+    },
+    {
+      "pid": 38694,
+      "observed": "38694 Wed Sep  9 07:21:04 2026     /opt/homebrew/Cellar/node/23.10.0_1/bin/node /private/tmp/sniper-upgrade-build-qOKgnu/artifacts/studio-sdk/hf0.8.31-realm-preview-v1-52321b8f3d41dda4c9c7/hyperframes/dist/cli.js preview /private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/studio-v3 --port 41050 --foreground --json",
+      "verified": true,
+      "signal": "SIGTERM",
+      "remaining": "38694 Wed Sep  9 07:21:04 2026     /opt/homebrew/Cellar/node/23.10.0_1/bin/node /private/tmp/sniper-upgrade-build-qOKgnu/artifacts/studio-sdk/hf0.8.31-realm-preview-v1-52321b8f3d41dda4c9c7/hyperframes/dist/cli.js preview /private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/studio-v3 --port 41050 --foreground --json"
+    },
+    {
+      "pid": 49864,
+      "observed": "49864 Wed Sep  9 08:33:58 2026     /opt/homebrew/Cellar/node/23.10.0_1/bin/node /private/tmp/sniper-paired-preview-qualified-20260909.qZpqBI/hyperframes/dist/cli.js preview /private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/studio-v5-mastered --port 41057 --foreground --json",
+      "verified": true,
+      "signal": "SIGTERM",
+      "remaining": "49864 Wed Sep  9 08:33:58 2026     /opt/homebrew/Cellar/node/23.10.0_1/bin/node /private/tmp/sniper-paired-preview-qualified-20260909.qZpqBI/hyperframes/dist/cli.js preview /private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/studio-v5-mastered --port 41057 --foreground --json"
+    }
+  ]
+}

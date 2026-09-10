@@ -118,6 +118,14 @@ class FillIllustrationSpecTests(unittest.TestCase):
         self.assertIsNone(gcopy.fill_illustration_spec(
             self._beat(), "growth-illus", []))
 
+    def test_context_caption_keeps_complete_meaning_without_a_word_limit(self) -> None:
+        """Non-render context preserves every word while normalizing whitespace."""
+        caption = "  Keep the original footage\nuntil the export passes review  "
+        row = gcopy.fill_illustration_spec(
+            self._beat(), "growth-illus", ["growth-illus"], caption)
+        self.assertEqual(row["label"], " ".join(caption.split()))
+        self.assertNotIn("copyRepair", row)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/cut-repair-media-activation-v1.schema.json",
+  "title": "CutRepairMediaActivationV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "promotionActionHash",
+    "promotedRevisionHash",
+    "renderedCandidateHash",
+    "candidateSha256",
+    "graphHash",
+    "graphReceiptHash",
+    "activePointerHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "cut-repair-media-activation" },
+    "promotionActionHash": { "$ref": "#/$defs/sha256" },
+    "promotedRevisionHash": { "$ref": "#/$defs/sha256" },
+    "renderedCandidateHash": { "$ref": "#/$defs/sha256" },
+    "candidateSha256": { "$ref": "#/$defs/sha256" },
+    "graphHash": { "$ref": "#/$defs/sha256" },
+    "graphReceiptHash": { "$ref": "#/$defs/sha256" },
+    "activePointerHash": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

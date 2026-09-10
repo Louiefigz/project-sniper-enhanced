@@ -92,9 +92,14 @@ function planningProgress(name: string, event: Record<string, unknown>): string 
       : `${planning} found ${issues || "material"} issue${issues === 1 ? "" : "s"}${eventElapsedSuffix(event)} · revision and another full review remain.`;
   }
   if (name === "planning_gate_bundle") {
-    return event.ok
-      ? "Deterministic planning gates passed · fresh editor review remains."
-      : `Deterministic planning gates failed${issues ? ` with ${issues} issue${issues === 1 ? "" : "s"}` : ""} · revision and a full gate rerun remain.`;
+    if (event.ok) {
+      return "Deterministic planning gates passed · fresh editor review remains.";
+    }
+    const failure = `Deterministic planning gates failed${issues
+      ? ` with ${issues} issue${issues === 1 ? "" : "s"}` : ""}`;
+    return event.immutableSavedPlan === true
+      ? `${failure} · saved plan stays unchanged and no revision writer will run.`
+      : `${failure} · revision and a full gate rerun remain.`;
   }
   if (name === "revision_completed") {
     return `${planning} revision complete · rerunning every deterministic gate and a fresh editor review.`;

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import {
   mkdirSync,
   mkdtempSync,
@@ -16,6 +17,11 @@ import {
   beginProducerRunWithToken,
   clearProducerRun,
 } from "../producer-run-registry";
+import {
+  QC_PROMOTION_RECONCILIATION_FILE,
+  SURGICAL_RECONCILIATION_CANDIDATE_FILE,
+  SURGICAL_RECONCILIATION_FILE,
+} from "../ask-editor-reconciliation";
 
 function leaseSerializes(root: string): void {
   mkdirSync(root);
@@ -72,6 +78,53 @@ function atomicReplacement(root: string): void {
   );
 }
 
+async function reconciliationBlocksEveryWriter(root: string): Promise<void> {
+  const producerDir = path.join(root, "producer");
+  mkdirSync(producerDir);
+  const candidatePath = path.join(
+    producerDir, SURGICAL_RECONCILIATION_CANDIDATE_FILE,
+  );
+  const candidate = Buffer.from('{"candidate":true}\n');
+  writeFileSync(candidatePath, candidate);
+  writeFileSync(path.join(producerDir, SURGICAL_RECONCILIATION_FILE), JSON.stringify({
+    schemaVersion: 1,
+    status: "manual-reconciliation-required",
+    promotedChildHash: createHash("sha256").update(candidate).digest("hex"),
+    retainedCandidatePath: candidatePath,
+  }));
+  const blocked = guardProjectMutation({
+    projectRoot: root,
+    producerDir,
+    operation: "saving timeline changes",
+  });
+  assert.ok(blocked.response);
+  const body = await blocked.response.json() as Record<string, unknown>;
+  assert.equal(body.code, "PROJECT_RECONCILIATION_REQUIRED");
+  assert.equal(body.retryable, false);
+  rmSync(candidatePath);
+  rmSync(path.join(producerDir, SURGICAL_RECONCILIATION_FILE));
+  const qcReconciliation = path.join(
+    producerDir, QC_PROMOTION_RECONCILIATION_FILE);
+  writeFileSync(qcReconciliation, "{}\n");
+  const qcBlocked = guardProjectMutation({
+    projectRoot: root,
+    producerDir,
+    operation: "rendering another candidate",
+  });
+  assert.ok(qcBlocked.response);
+  const qcBody = await qcBlocked.response.json() as Record<string, unknown>;
+  assert.equal(qcBody.code, "PROJECT_RECONCILIATION_REQUIRED");
+  assert.equal(qcBody.retryable, false);
+  rmSync(qcReconciliation);
+  const clear = guardProjectMutation({
+    projectRoot: root,
+    producerDir,
+    operation: "saving timeline changes",
+  });
+  assert.ok(clear.lease);
+  clear.lease.release();
+}
+
 async function main(): Promise<void> {
   const tmp = mkdtempSync(path.join(os.tmpdir(), "sniper-project-mutation-"));
   try {
@@ -79,6 +132,9 @@ async function main(): Promise<void> {
     const runRoot = path.join(tmp, "active");
     mkdirSync(runRoot);
     await activeRunIsActionable(runRoot);
+    const reconcileRoot = path.join(tmp, "reconcile");
+    mkdirSync(reconcileRoot);
+    await reconciliationBlocksEveryWriter(reconcileRoot);
     atomicReplacement(tmp);
   } finally {
     rmSync(tmp, { recursive: true, force: true });

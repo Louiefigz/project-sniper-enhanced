@@ -12,6 +12,7 @@ from palmier.checkpoint_inputs import (                                # noqa: E
     authority_current as _authority_current,
     checkpoint_inputs as _inputs, checkpoint_label as _label,
     input_authority as _authority, read_json as _json)
+from palmier.checkpoint_asset_authority import checkpoint_assets_current  # noqa: E402
 from palmier.mcp_client import (PalmierClient, PalmierError,            # noqa: E402
                                 PalmierWaiting, emit)
 from palmier.media import MediaLibrary                                  # noqa: E402
@@ -101,10 +102,21 @@ def _superseded_checkpoint(out_dir: str, authority: Authority,
     }
 
 
-def _same_checkpoint(state: dict, authority: Authority) -> bool:
+def _same_checkpoint(state: dict, authority: Authority,
+                     capability: dict) -> bool:
     current = state.get("workingCheckpoint") or {}
+    current_assets = (current.get("capability") or {}).get(
+        "graphicsAssetAuthority")
+    next_assets = capability.get("graphicsAssetAuthority")
     return current.get("key") == authority.checkpoint_key \
+        and current_assets == next_assets \
         and current.get("readback", {}).get("timelineId") == state.get("latestTimelineId")
+
+
+def _require_assets_current(capability: dict) -> None:
+    if not checkpoint_assets_current(capability):
+        raise PalmierError(
+            "checkpoint graphics changed outside their placement receipts")
 
 
 def _workspace_state(out_dir: str) -> dict:
@@ -223,7 +235,8 @@ def publish_checkpoint(client: PalmierClient, spec: CheckpointInput) -> dict:
     if verdict.get("ok") is not True:
         return _superseded_checkpoint(
             spec.out_dir, authority, str(verdict.get("error")))
-    if _same_checkpoint(state, authority):
+    _require_assets_current(capability)
+    if _same_checkpoint(state, authority, capability):
         session.activate_generated(state["latestTimelineId"], require_human=False)
         return {"status": "checkpoint_ready", "reused": True,
                 "timelineId": state["latestTimelineId"],
@@ -238,6 +251,7 @@ def publish_checkpoint(client: PalmierClient, spec: CheckpointInput) -> dict:
         executor = _apply_all(session, lanes, bindings)
         verification, built = _verified_build(
             client, spec.out_dir, parent, session, lanes, executor)
+        _require_assets_current(capability)
         if not _authority_current(spec, authority):
             raise PalmierError("checkpoint inputs changed during Palmier build")
         result = _commit_checkpoint(

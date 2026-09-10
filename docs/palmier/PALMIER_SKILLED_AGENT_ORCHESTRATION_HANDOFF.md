@@ -33,7 +33,12 @@ The additive GUI path is now implemented and offline-verified:
 
 Verification completed: TypeScript type-check and targeted lint pass; the Next production build succeeds; focused live-build/session/QC tests pass; the full Python Producer suite passes 1,454 tests. Every TypeScript test outside two unrelated concurrent graphics-governance gates passes. Those two gates currently report four invalid catalog defaults (three too-short holds and one empty avatar identity) and a missing duration-floor instruction in the graphics-governance prompt.
 
-This is not the full Produced-video proof. Do not run it against the active external C0679 project. The next milestone remains an isolated complete first-60-seconds run covering direct imports/cuts/graphics/audio, exact export, intentional QC rejection plus scoped repair, stop/resume, and explicit promotion.
+This was not the full Produced-video proof. At the time, the next milestone was
+an isolated complete first-60-seconds run. That later run exercised substantial
+transport and mutation mechanics but failed product-quality review after
+56m48s: QC remained pending, seven captions lost karaoke timing, and the wrong
+3840×2160 canvas was accepted. It is historical falsification evidence, not
+connected P5 qualification.
 
 The remaining sections preserve the pre-implementation diagnosis and target rationale. Statements below that describe `--safe-mode` or the GUI wrapper as current are historical; the implementation update above and `PALMIER_LIVE_BUILD_SPEC.md` are normative for current state.
 

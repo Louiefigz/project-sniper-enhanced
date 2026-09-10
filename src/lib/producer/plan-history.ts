@@ -3,6 +3,7 @@
 // transitions are unit-testable and StrictMode-safe (no side effects in
 // updaters). Contract: a new mutation clears redo; a base rebuild clears both
 // (undo snapshots are only valid against the base they were taken on).
+import type { EditPlan } from "./edit-plan";
 
 export interface History<T> {
   past: T[];
@@ -34,4 +35,16 @@ export function redoStep<T>(h: History<T>, current: T): { history: History<T>; p
     history: { past: [...h.past, current], future: h.future.slice(0, -1) },
     plan: h.future[h.future.length - 1],
   };
+}
+
+/** Undo changes content, not the live saved-version compare-and-swap authority. */
+export function restorePlanContent(snapshot: EditPlan, current: EditPlan): EditPlan {
+  const version = current.planVersion;
+  if (version !== undefined && (!Number.isSafeInteger(version) || version < 0)) {
+    throw new Error("Cannot restore history without valid current plan-version authority");
+  }
+  const restored = { ...snapshot };
+  if (version === undefined) delete restored.planVersion;
+  else restored.planVersion = version;
+  return restored;
 }

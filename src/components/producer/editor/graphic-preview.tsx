@@ -16,6 +16,7 @@ import {
 import SafeZoneGuides from "./safe-zone-guides";
 import ScaleHandles from "./scale-handles";
 import { parseDims, useCompHtml, useContentOrigin } from "./use-comp-html";
+import { usePreviewHealth } from "./use-preview-health";
 
 // INSTANT GRAPHICS PREVIEW — client-preview / server-truth. While a graphic is
 // selected and the playhead sits inside its [outStart, outEnd) window (or the
@@ -127,6 +128,8 @@ export default function GraphicPreview({ graphic, currentTime, videoRef, forced,
   const durationS = Math.max(0.1, Math.round((graphic.outEnd - graphic.outStart) * 100) / 100);
   const specJson = useMemo(() => JSON.stringify(graphic.spec ?? {}), [graphic.spec]);
   const { html, err } = useCompHtml(graphic.kind, specJson, durationS, visible);
+  const health = usePreviewHealth(iframeRef, html);
+  const previewError = err || health.error;
   const box = useVideoBox(videoRef, visible);
   const dims = useMemo(() => parseDims(html), [html]);
   // Painted-content origin + unscaled bbox size (canvas px) — the point the
@@ -153,7 +156,7 @@ export default function GraphicPreview({ graphic, currentTime, videoRef, forced,
   const scaleX = box.width / dims.w;
   const scaleY = box.height / dims.h;
   const shorts = isShortsCanvas(dims);
-  const draggable = !ownScreen && !!html && !err && origin !== null;
+  const draggable = !ownScreen && !!html && health.ready && !previewError && origin !== null;
   const approx = !ownScreen && (!placed || !origin) && !gesture?.live;
   // While dragging, the overlay follows the LIVE (converted+snapped) placement.
   // A corner-grip gesture on an UNPLACED comp pins at the measured origin.
@@ -216,6 +219,7 @@ export default function GraphicPreview({ graphic, currentTime, videoRef, forced,
         draggable ? `touch-none ${gesture?.live ? "cursor-grabbing" : "cursor-grab"}` : "pointer-events-none"
       }`}
       style={{ left: box.left, top: box.top, width: box.width, height: box.height }}
+      data-preview-state={previewError ? "failed" : health.ready ? "ready" : "loading"}
       onPointerDown={down}
       onPointerMove={move}
       onPointerUp={(e) => end(e)}
@@ -224,7 +228,7 @@ export default function GraphicPreview({ graphic, currentTime, videoRef, forced,
       title={
         draggable
           ? "drag to place (Alt = no snap) · double-click = auto position"
-          : !ownScreen && html && !err
+          : !ownScreen && html && !previewError
             ? "measuring comp content…"
             : undefined
       }
@@ -235,6 +239,7 @@ export default function GraphicPreview({ graphic, currentTime, videoRef, forced,
           sandbox="allow-scripts"
           srcDoc={html}
           onLoad={() => {
+            health.requestHealth();
             requestMeasure(); // settled-frame probes; origin arrival re-seeks
             seekNow();
           }}
@@ -279,9 +284,9 @@ export default function GraphicPreview({ graphic, currentTime, videoRef, forced,
           approximate placement — drag to place, render for truth
         </span>
       )}
-      {err && (
-        <span className="pointer-events-none absolute bottom-1.5 right-1.5 rounded bg-rose-950/80 px-1.5 py-0.5 text-[10px] text-rose-300">
-          preview failed: {err}
+      {previewError && (
+        <span role="alert" className="pointer-events-none absolute bottom-1.5 right-1.5 rounded bg-rose-950/80 px-1.5 py-0.5 text-[10px] text-rose-300">
+          preview failed: {previewError}
         </span>
       )}
     </div>

@@ -269,13 +269,14 @@ def observe_window(proxy_path: str, out_start: float, out_end: float) -> tuple:
         out_end: Window end (output s).
 
     Returns:
-        ``(face_px | None, hair_top | None)`` in PROXY pixel coordinates.
+        ``(face_px | None, hair_top | None, canvas)`` in proxy pixels.
     """
     from planner.free_space_sample import measure_hair_top, sample_window
 
-    frames, face_px, _busy = sample_window(proxy_path, out_start, out_end)
+    frames, face_px, _busy, canvas = sample_window(
+        proxy_path, out_start, out_end)
     if face_px is None:
-        return None, None
+        return None, None, canvas
     hair = measure_hair_top(frames, face_px[0] + face_px[2] / 2.0,
                             face_px[1]) if frames else None
-    return face_px, hair
+    return face_px, hair, canvas

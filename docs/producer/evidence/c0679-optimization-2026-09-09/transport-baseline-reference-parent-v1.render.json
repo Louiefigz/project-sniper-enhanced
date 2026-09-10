@@ -1,0 +1,226 @@
+{
+  "status": "failed",
+  "startedAt": "2026-09-09T17:30:59.983764+00:00",
+  "admission": {
+    "entry": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/index.html",
+    "entrySha256": "bc95f3ccdeaa2953d2cf1aa178d9e4ad0ba4b62a022b1a340cdb63df8c493577",
+    "output": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/transport-baseline-reference-parent-v1.capture.json",
+    "sourceCacheFrameCount": 16394,
+    "sourceDuration": 683.7664166666667,
+    "sourceCacheComplete": true,
+    "cache": "/private/tmp/hyperframes-extract-cache-501/hfcache-v4-5610bca5f73df075",
+    "sdkVersion": "0.8.31",
+    "sandboxSha256": "44309d0cf11391ec665221c43d73a40d81ad05009d517c4986aaff302dfee0ea",
+    "chromeSha256": "3985a87c5905cf9ecd25d49638822cf071a517f5d976ef8c5e8fe2c6d5496cae",
+    "installedSdkSha256": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "mode": "sparse-baseline",
+    "sdkSha256": "8d0b8506d283c82a2dfafcec1e644c5d6f76bbb2734f24c88fa435c13d1e5c38",
+    "selectedFrameCount": 55,
+    "sourceCompositionDuration": 683.7664166666667,
+    "lastSampleTime": 31.031,
+    "contiguousSequence": false
+  },
+  "project": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1",
+  "output": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/transport-baseline-reference-parent-v1.capture.json",
+  "sdkVersion": "0.8.31",
+  "sourceHashesBefore": {
+    "extension-194-367.css": "a9d32e3015cbe7a31c610ed293ff21ed95c6aadaf4410a21384ce2d84fce31ae",
+    "extension-194-367.js": "8a96c69f01a5b08e87d707986209677255374455f9b85daeab9e73b2fdfb9353",
+    "extension-32-75.css": "6856455522448b2e3d5186522982379e58c7a7e663d9ba6c830b7dd8cf36e4d4",
+    "extension-32-75.js": "f2e1b9737c98bc734c8beba94d14365977862f36c625ae6f27a3862853b07f2b",
+    "extension-367-end.css": "6877c5d777f4e606ac89c3854eef9d04f0030f7718d2e74a29a01c95ead093aa",
+    "extension-367-end.js": "694ece67b6b23f30abb70f7e5104d67ac6c1f8ff7c4682534f9216645ff83c99",
+    "extension-75-194.css": "20619092f95c4dcb9b7afa88b510143789c60f12a19aa3557cee143da4752505",
+    "extension-75-194.js": "31a29d27e632eca5d91b52bd5bfcd908c9b4197a05857d9dde9cfee0e28da068",
+    "hyperframes.json": "f311a7b6cdca37251313743f24c44a5b2d7f80311af0758508fcf447443e18f2",
+    "index.html": "bc95f3ccdeaa2953d2cf1aa178d9e4ad0ba4b62a022b1a340cdb63df8c493577",
+    "motion.js": "3536dd792fc44f5efcb30366041d93b3489b38f435c5f79c084600d77cf07bb2",
+    "scene.css": "4e3b8aec22335e82cee1764dd5e9b4f1c6b47aa770161f60d879894422f6471a"
+  },
+  "fullEditTwoHourTargetAlreadyMissed": true,
+  "renderOnlyTiming": true,
+  "policy": {
+    "admission_free_percent": 25,
+    "stop_free_percent": 10,
+    "maximum_compressor_fraction": 0.25,
+    "maximum_owned_gib": 6,
+    "maximum_process_gib": 5,
+    "maximum_swap_growth_gib": 1,
+    "minimum_disk_free_gib": 10,
+    "minimum_unused_physical_gib": 6,
+    "maximum_snapshot_age_seconds": 30
+  },
+  "args": [
+    "/usr/bin/sandbox-exec",
+    "-f",
+    "/private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/localhost-only.sb",
+    "/opt/homebrew/Cellar/node/23.10.0_1/bin/node",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/capture-native-reference.mjs",
+    "baseline",
+    "transport-baseline-reference-parent-v1"
+  ],
+  "nativeOverrides": {
+    "PATH": "/opt/homebrew/Cellar/node/23.10.0_1/bin:/opt/homebrew/Cellar/ffmpeg/8.0_1/bin:/usr/bin:/bin",
+    "TMPDIR": "/private/tmp",
+    "LC_ALL": "C",
+    "HYPERFRAMES_BROWSER_PATH": "/Users/aaronfigueroa/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-152.0.7928.2/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+    "HYPERFRAMES_FFMPEG_PATH": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffmpeg",
+    "HYPERFRAMES_FFPROBE_PATH": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffprobe",
+    "PRODUCER_LOW_MEMORY_MODE": "true",
+    "PRODUCER_FRAME_DATA_URI_CACHE_LIMIT": "32",
+    "PRODUCER_FRAME_DATA_URI_CACHE_BYTES_MB": "64",
+    "PRODUCER_EXPERIMENTAL_FAST_CAPTURE": "false",
+    "PRODUCER_STREAMING_ENCODE_MAX_DURATION_SECONDS": "900",
+    "FFMPEG_STREAMING_TIMEOUT_MS": "5400000",
+    "HYPERFRAMES_EXTRACT_CACHE_MAX_MB": "65536"
+  },
+  "runDeadlineSeconds": 120,
+  "supervisorSigkillProtection": false,
+  "additionalFilePinsBefore": {
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/hyperframes/dist/frame-source-transport.mjs": "20de6c202787a0aa47a8227e54925a1765be871a5bb8b4167032d550b2f55784",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/test-only-transport-48frames.html": "f8ba2922bbf5c555e3f043ec900b518707a0d9b0180a99339479df71acd41832",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/fault-preload.mjs": "1cd82cbfce3cc3a6c26ca0610fb08b121b0ba24d42844b9c0a9495ab4950a051",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/CANARY_PROTOCOL.md": "5270f1fde474f184cd705d38bc68062a98f37471d2881b96538be43ad1a1f613",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/canary_progress.py": "a3748910bbd19ea6a9d9b33736ec9041ba2546989dc0a52a435ab029d54ebf78",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/run-canary.py": "248aaf8e55a8c9731c1a18c67e5eba6856eb6f25919a15e04c20f3bdbfe3b5b1",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/render_native_bounded.py": "1897b79e5d5d35066f5da535d98653aa37f6a97221bb530b8e40090f362d6905",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native_owned_processes.py": "16de8280b9558bc41c2ee5570d8be4c9b7be16c1a1a023cd5b9dfe1f42d77ba5",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/capture-native-reference.mjs": "0908088cd2554ac05d304d281452381a0318819afbe8c3e6e86d5367e4300c1a",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/hyperframes/dist/native-baseline-test-library.mjs": "8d0b8506d283c82a2dfafcec1e644c5d6f76bbb2734f24c88fa435c13d1e5c38",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-test-library-build.json": "dd18aad9e8a6be83d5822ef624004369ab32ce5a7008a691b638c84b4f37eb0b",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/run-native-reference.py": "97f3c979d3407092abcdda16632aa2ffd5fde1e5233545222cae4723c4d22529"
+  },
+  "operation": "sparse-native-pre-encode-JPEG95-reference-not-a-full-export",
+  "baseline": {
+    "measured_at": 1788975059.985416,
+    "physical_bytes": 68719476736,
+    "free_percent": 87.0,
+    "swap_used_bytes": 9404090941,
+    "compressor_bytes": 1937768448,
+    "disk_free_bytes": 75170906112,
+    "owned_footprint_bytes": 0,
+    "largest_owned_process_bytes": 0,
+    "owned_pids": [],
+    "processes": [],
+    "identity_verified": false,
+    "unused_physical_bytes": 13958643712,
+    "missing_registered_pids": [],
+    "reused_registered_pids": [],
+    "kernel_pressure_level": 1
+  },
+  "logPath": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/transport-baseline-reference-parent-v1.render.log",
+  "pid": 77322,
+  "nativeLaunchedAt": "2026-09-09T17:31:01.461623+00:00",
+  "ownerIdentities": [
+    {
+      "pid": 77322,
+      "parent_pid": 77315,
+      "pgid": 77322,
+      "started": "Wed Sep  9 12:31:01 2026"
+    }
+  ],
+  "latestResourceSnapshot": {
+    "measured_at": 1788975061.533338,
+    "physical_bytes": 68719476736,
+    "free_percent": 86.0,
+    "swap_used_bytes": 9404090941,
+    "compressor_bytes": 1937768448,
+    "disk_free_bytes": 75168788480,
+    "owned_footprint_bytes": 278921216,
+    "largest_owned_process_bytes": 278921216,
+    "owned_pids": [
+      77322
+    ],
+    "processes": [
+      {
+        "pid": 77322,
+        "parent_pid": 77315,
+        "pgid": 77322,
+        "started": "Wed Sep  9 12:31:01 2026",
+        "footprint_bytes": 278921216,
+        "compressed_bytes": 0
+      }
+    ],
+    "identity_verified": true,
+    "unused_physical_bytes": 12884901888,
+    "missing_registered_pids": [],
+    "reused_registered_pids": [],
+    "kernel_pressure_level": 1,
+    "warnings": []
+  },
+  "processExitMeasurementRetries": 1,
+  "cleanup": {
+    "verified": true,
+    "survivors": [],
+    "signals": [
+      {
+        "at": 1788975071.334375,
+        "target": -77392,
+        "signal": "SIGINT",
+        "anchors": [
+          {
+            "pid": 77392,
+            "parent_pid": 77322,
+            "pgid": 77392,
+            "started": "Wed Sep  9 12:31:11 2026"
+          }
+        ],
+        "outcome": "sent"
+      },
+      {
+        "at": 1788975071.361801,
+        "target": -77322,
+        "signal": "SIGINT",
+        "anchors": [
+          {
+            "pid": 77322,
+            "parent_pid": 77315,
+            "pgid": 77322,
+            "started": "Wed Sep  9 12:31:01 2026"
+          }
+        ],
+        "outcome": "sent"
+      }
+    ],
+    "scope": "Recorded owned identities; not an unobserved-child guarantee"
+  },
+  "exitCode": 130,
+  "leaseCleanupVerified": true,
+  "elapsedSeconds": 11.451282790862024,
+  "completedAt": "2026-09-09T17:31:11.435219+00:00",
+  "abortReason": "ResourceMeasurementError: Owned process footprint missing; resample tree",
+  "sourceHashesAfter": {
+    "extension-194-367.css": "a9d32e3015cbe7a31c610ed293ff21ed95c6aadaf4410a21384ce2d84fce31ae",
+    "extension-194-367.js": "8a96c69f01a5b08e87d707986209677255374455f9b85daeab9e73b2fdfb9353",
+    "extension-32-75.css": "6856455522448b2e3d5186522982379e58c7a7e663d9ba6c830b7dd8cf36e4d4",
+    "extension-32-75.js": "f2e1b9737c98bc734c8beba94d14365977862f36c625ae6f27a3862853b07f2b",
+    "extension-367-end.css": "6877c5d777f4e606ac89c3854eef9d04f0030f7718d2e74a29a01c95ead093aa",
+    "extension-367-end.js": "694ece67b6b23f30abb70f7e5104d67ac6c1f8ff7c4682534f9216645ff83c99",
+    "extension-75-194.css": "20619092f95c4dcb9b7afa88b510143789c60f12a19aa3557cee143da4752505",
+    "extension-75-194.js": "31a29d27e632eca5d91b52bd5bfcd908c9b4197a05857d9dde9cfee0e28da068",
+    "hyperframes.json": "f311a7b6cdca37251313743f24c44a5b2d7f80311af0758508fcf447443e18f2",
+    "index.html": "bc95f3ccdeaa2953d2cf1aa178d9e4ad0ba4b62a022b1a340cdb63df8c493577",
+    "motion.js": "3536dd792fc44f5efcb30366041d93b3489b38f435c5f79c084600d77cf07bb2",
+    "scene.css": "4e3b8aec22335e82cee1764dd5e9b4f1c6b47aa770161f60d879894422f6471a"
+  },
+  "sourceStable": true,
+  "sdkStable": true,
+  "sandboxStable": true,
+  "additionalFilePinsAfter": {
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/hyperframes/dist/frame-source-transport.mjs": "20de6c202787a0aa47a8227e54925a1765be871a5bb8b4167032d550b2f55784",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/test-only-transport-48frames.html": "f8ba2922bbf5c555e3f043ec900b518707a0d9b0180a99339479df71acd41832",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/fault-preload.mjs": "1cd82cbfce3cc3a6c26ca0610fb08b121b0ba24d42844b9c0a9495ab4950a051",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/CANARY_PROTOCOL.md": "5270f1fde474f184cd705d38bc68062a98f37471d2881b96538be43ad1a1f613",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/canary_progress.py": "a3748910bbd19ea6a9d9b33736ec9041ba2546989dc0a52a435ab029d54ebf78",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/run-canary.py": "248aaf8e55a8c9731c1a18c67e5eba6856eb6f25919a15e04c20f3bdbfe3b5b1",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/render_native_bounded.py": "1897b79e5d5d35066f5da535d98653aa37f6a97221bb530b8e40090f362d6905",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native_owned_processes.py": "16de8280b9558bc41c2ee5570d8be4c9b7be16c1a1a023cd5b9dfe1f42d77ba5",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/capture-native-reference.mjs": "0908088cd2554ac05d304d281452381a0318819afbe8c3e6e86d5367e4300c1a",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/hyperframes/dist/native-baseline-test-library.mjs": "8d0b8506d283c82a2dfafcec1e644c5d6f76bbb2734f24c88fa435c13d1e5c38",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-test-library-build.json": "dd18aad9e8a6be83d5822ef624004369ab32ce5a7008a691b638c84b4f37eb0b",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/run-native-reference.py": "97f3c979d3407092abcdda16632aa2ffd5fde1e5233545222cae4723c4d22529"
+  },
+  "additionalFilesStable": true
+}

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/cut-repair-preparation-package-v1.schema.json",
+  "title": "CutRepairPreparationPackageV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "status",
+    "idempotencyKey",
+    "targetDirectiveHash",
+    "contextAuthorityHash",
+    "contextObjectHash",
+    "analysisObjectHash",
+    "parentRevisionHash",
+    "proposedReviewAction",
+    "reviewProjectionHash",
+    "renderInvalidationStrategy",
+    "fragmentReceipt",
+    "compositeReceipt",
+    "fragmentMediaSha256",
+    "compositeMediaSha256",
+    "reviewRenderGraphReceiptHash",
+    "reviewRenderGraphCandidatePointerHash",
+    "reviewCandidateMediaSha256",
+    "reviewCandidatePath",
+    "reviewCandidateDescriptorHash",
+    "reviewCandidateDescriptorPath",
+    "previousRenderGraphHash",
+    "previousRenderGraphReceiptHash",
+    "blockingRequirements",
+    "preparedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "cut-repair-preparation-package" },
+    "status": { "const": "rendered-plan-candidate-prepared" },
+    "idempotencyKey": { "$ref": "#/$defs/uuid" },
+    "targetDirectiveHash": { "$ref": "#/$defs/sha256" },
+    "contextAuthorityHash": { "$ref": "#/$defs/sha256" },
+    "contextObjectHash": { "$ref": "#/$defs/sha256" },
+    "analysisObjectHash": { "$ref": "#/$defs/sha256" },
+    "parentRevisionHash": { "$ref": "#/$defs/sha256" },
+    "proposedReviewAction": {
+      "$ref": "cut-repair-review-action-v1.schema.json"
+    },
+    "reviewProjectionHash": { "$ref": "#/$defs/sha256" },
+    "renderInvalidationStrategy": {
+      "enum": ["dialogue-stem", "base-segment-fallback"]
+    },
+    "fragmentReceipt": { "type": "object" },
+    "compositeReceipt": { "type": "object" },
+    "fragmentMediaSha256": { "$ref": "#/$defs/sha256" },
+    "compositeMediaSha256": { "$ref": "#/$defs/sha256" },
+    "reviewRenderGraphReceiptHash": { "$ref": "#/$defs/sha256" },
+    "reviewRenderGraphCandidatePointerHash": { "$ref": "#/$defs/sha256" },
+    "reviewCandidateMediaSha256": { "$ref": "#/$defs/sha256" },
+    "reviewCandidatePath": { "type": "string", "minLength": 1 },
+    "reviewCandidateDescriptorHash": { "$ref": "#/$defs/sha256" },
+    "reviewCandidateDescriptorPath": { "type": "string", "minLength": 1 },
+    "previousRenderGraphHash": {
+      "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }]
+    },
+    "previousRenderGraphReceiptHash": {
+      "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }]
+    },
+    "blockingRequirements": {
+      "const": [
+        "alignment-qc",
+        "vad-qc",
+        "retranscription-qc",
+        "seam-qc",
+        "cut-review-staging",
+        "operator-audition",
+        "promotion-package-sealing",
+        "final-media-activation"
+      ]
+    },
+    "preparedAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    }
+  }
+}

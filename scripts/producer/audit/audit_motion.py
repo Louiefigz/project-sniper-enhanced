@@ -40,6 +40,7 @@ from PIL import Image  # noqa: E402
 from audit.audit_checks import CheckResult, FAIL, PASS, WARN  # noqa: E402
 from audit.audit_placements import check_eye_trace  # noqa: E402, F401
 from audit.audit_probe import extract_frame, run_ff  # noqa: E402
+from cut_delivery_authority import CutProof, verify_delivered_cuts  # noqa: E402
 from producer_config import TREATMENTS, TREATMENT_DEFAULT  # noqa: E402
 
 SCENE_THR = 0.3               # whole-file scene-detect sensitivity (pacing)
@@ -140,6 +141,15 @@ def _seams_manifested(final_path: str, plan: dict, work: str) -> tuple[int, int]
     return manifested, len(seams)
 
 
+def _sealed_cut_lineage(final_path: str, plan: dict) -> CutProof | None:
+    """Verified execution proof, or None when any authority link is absent."""
+    try:
+        return verify_delivered_cuts(
+            os.path.dirname(os.path.abspath(final_path)), final_path, plan)
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
 def _scene_times(final_path: str, duration: float) -> list[float]:
     """Sorted scene-change instants strictly inside ``(0, duration)``.
 
@@ -152,6 +162,41 @@ def _scene_times(final_path: str, duration: float) -> list[float]:
          "-f", "null", "-"])
     times = sorted(float(m) for m in _PTS_RE.findall(out))
     return [t for t in times if 0.0 < t < duration]
+
+
+def _zero_scene_cut_result(
+    final_path: str,
+    plan: dict,
+    declared_cuts: int,
+) -> CheckResult:
+    """Resolve a zero-scene result through seam pixels, then sealed lineage."""
+    import tempfile
+    with tempfile.TemporaryDirectory(prefix="seam-probe-") as work:
+        manifested, checked = _seams_manifested(final_path, plan, work)
+    enough = checked and manifested >= max(
+        1, int(checked * MANIFEST_MIN_FRAC))
+    if enough:
+        return CheckResult(
+            "motion_pacing", PASS,
+            f"scene-detect blind but {manifested}/{checked} seams prove a "
+            "local frame step (same-scene mining splices)",
+            "per-seam frame-pair delta confirms the declared cuts")
+    lineage = _sealed_cut_lineage(final_path, plan)
+    if lineage is not None and lineage.parts == declared_cuts + 1:
+        return CheckResult(
+            "motion_pacing", PASS,
+            f"scene-detect blind; sealed {lineage.parts}-part execution "
+            f"lineage proves {lineage.frames} exact frames through the "
+            f"{lineage.mode} delivery",
+            "compiled timeline, per-part frames, concat, base, and current "
+            "final authority all agree")
+    return CheckResult(
+        "motion_pacing", FAIL,
+        f"rendered 0 hard changes vs {declared_cuts} plan cuts and only "
+        f"{manifested}/{checked} seams show a local frame step — "
+        "declared cuts did not manifest",
+        "neither scene-detect, per-seam frame deltas, nor sealed execution "
+        "lineage proves the cuts")
 
 
 def check_pacing_rendered(final_path: str, duration: float,
@@ -186,21 +231,7 @@ def check_pacing_rendered(final_path: str, duration: float,
     rendered = len(_scene_times(final_path, duration))
     rate = rendered / duration * 60.0
     if declared_cuts >= 2 and rendered == 0:
-        import tempfile
-        with tempfile.TemporaryDirectory(prefix="seam-probe-") as work:
-            manifested, checked = _seams_manifested(final_path, plan, work)
-        if checked and manifested >= max(1, int(checked * MANIFEST_MIN_FRAC)):
-            return [CheckResult(
-                "motion_pacing", PASS,
-                f"scene-detect blind but {manifested}/{checked} seams prove a "
-                "local frame step (same-scene mining splices)",
-                "per-seam frame-pair delta confirms the declared cuts")]
-        return [CheckResult(
-            "motion_pacing", FAIL,
-            f"rendered 0 hard changes vs {declared_cuts} plan cuts and only "
-            f"{manifested}/{checked} seams show a local frame step — "
-            "declared cuts did not manifest",
-            "neither scene-detect nor per-seam frame deltas find the cuts")]
+        return [_zero_scene_cut_result(final_path, plan, declared_cuts)]
     if declared_cuts >= 2 and rendered < declared_cuts * MANIFEST_MIN_FRAC:
         return [CheckResult(
             "motion_pacing", WARN,

@@ -145,7 +145,8 @@ class ManagedFixture:
 
 class ApprovedMasterTests(unittest.TestCase):
     PROBE = SimpleNamespace(duration=2.0, fps=29.97, width=3840,
-                            height=2160, vfr=False)
+                            height=2160, vfr=False,
+                            frame_rate="30000/1001")
 
     def _approved(self, fixture: ManagedFixture):
         with patch("palmier.master.authority_snapshot",

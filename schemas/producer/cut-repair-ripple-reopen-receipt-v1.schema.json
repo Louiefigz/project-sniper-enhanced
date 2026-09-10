@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/cut-repair-ripple-reopen-receipt-v1.schema.json",
+  "title": "CutRepairRippleReopenReceiptV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "status",
+    "idempotencyKey",
+    "actionHash",
+    "expectedParentRevisionHash",
+    "childRevisionHash",
+    "originalPictureLockHash",
+    "analysisHash",
+    "impactHash",
+    "preservedPlanObjectHash",
+    "preservedPlanContentHash",
+    "preservedTimelineMapHash",
+    "preservedRenderGraphHash",
+    "preservedProjectionReceiptHash",
+    "affectedDependentIds",
+    "unchangedOutputLockedIds",
+    "recordedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "cut-repair-ripple-reopen-receipt" },
+    "status": { "const": "CUT_DRAFT_REOPENED" },
+    "idempotencyKey": { "$ref": "#/$defs/uuid" },
+    "actionHash": { "$ref": "#/$defs/sha256" },
+    "expectedParentRevisionHash": { "$ref": "#/$defs/sha256" },
+    "childRevisionHash": { "$ref": "#/$defs/sha256" },
+    "originalPictureLockHash": { "$ref": "#/$defs/sha256" },
+    "analysisHash": { "$ref": "#/$defs/sha256" },
+    "impactHash": { "$ref": "#/$defs/sha256" },
+    "preservedPlanObjectHash": { "$ref": "#/$defs/sha256" },
+    "preservedPlanContentHash": { "$ref": "#/$defs/sha256" },
+    "preservedTimelineMapHash": { "$ref": "#/$defs/sha256" },
+    "preservedRenderGraphHash": { "$ref": "#/$defs/sha256" },
+    "preservedProjectionReceiptHash": {
+      "oneOf": [
+        { "$ref": "#/$defs/sha256" },
+        { "type": "null" }
+      ]
+    },
+    "affectedDependentIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/stableId" }
+    },
+    "unchangedOutputLockedIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/stableId" }
+    },
+    "recordedAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "stableId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"
+    }
+  }
+}

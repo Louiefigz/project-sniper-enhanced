@@ -16,17 +16,13 @@ import { planContentHash } from "../../server/auto-edit-authority";
 import type { AutoEditAuthoritySnapshot } from "../../server/auto-edit-authority-snapshot";
 import { freshJob } from "../../server/auto-edit-job-builders";
 import { fileSha256 } from "../../server/auto-edit-job-store";
-import {
-  autoEditJobPath,
-  writeJobUnlocked,
-} from "../../server/auto-edit-job-persistence";
+import { autoEditJobPath, writeJobUnlocked } from
+  "../../server/auto-edit-job-persistence";
 import type { AutoEditJob, CheckpointUpdate } from "../../server/auto-edit-job-types";
-
 interface Harness {
   runtime: PipelineRuntime;
   events: Record<string, unknown>[];
 }
-
 function fixture(root: string): AutoEditCtx {
   const dir = path.join(root, "producer");
   const source = path.join(root, "source");
@@ -41,7 +37,6 @@ function fixture(root: string): AutoEditCtx {
     intent: { mode: "longform", lanes: {} },
   };
 }
-
 function authority(ctx: AutoEditCtx): AutoEditAuthoritySnapshot {
   const planHash = fileSha256(ctx.planPath) ?? null;
   const contentHash = planContentHash(ctx.planPath) ?? null;
@@ -58,7 +53,6 @@ function authority(ctx: AutoEditCtx): AutoEditAuthoritySnapshot {
     pipelineDigest: "pipeline",
   };
 }
-
 function harness(ctx: AutoEditCtx, token: string): Harness {
   const events: Record<string, unknown>[] = [];
   const runtime = {} as PipelineRuntime;
@@ -71,7 +65,6 @@ function harness(ctx: AutoEditCtx, token: string): Harness {
   runtime.io = { send: (event) => events.push(event), sendRaw: () => {}, advance: update, invalidate: update };
   return { runtime, events };
 }
-
 function timedOut(): Awaited<ReturnType<AuthoringStageDependencies["author"]>> {
   return {
     code: 1, timedOut: true, errTail: "Codex timed out after 1800s", ms: 1_800_000,
@@ -104,6 +97,8 @@ function dependencies(
       order.push("validate-cut-candidate");
       return approval();
     },
+    validateSavedCut: async () => {
+      order.push("validate-saved-cut-candidate"); return approval(); },
     reviewCut: async () => {
       order.push("review-cut");
       return {} as Awaited<ReturnType<AuthoringStageDependencies["reviewCut"]>>;
@@ -117,12 +112,22 @@ function dependencies(
       writeFileSync(cutApprovalPath(ctx), JSON.stringify(approval()));
       return approval();
     },
+    approveSavedCut: async (ctx) => {
+      order.push("approve-saved-cut");
+      writeFileSync(cutApprovalPath(ctx), JSON.stringify(approval())); return approval(); },
     verifyCut: async () => {
       order.push("verify-cut");
       return {
         gate: "transcript_cut", ok: true, errors: [], warnings: [], exit: 0,
         metrics: { receipt: { ...approval(), stage: "planning_gate" } },
       };
+    },
+    lockCut: async () => {
+      order.push("lock-cut");
+      return {
+        hash: "f".repeat(64), projectionHash: "e".repeat(64), reused: true,
+        lock: { timelineMapHash: "d".repeat(64) },
+      } as Awaited<ReturnType<AuthoringStageDependencies["lockCut"]>>;
     },
   };
 }
@@ -147,9 +152,38 @@ async function testFreshDraftRecovers(root: string): Promise<void> {
   assert.equal(runtime.job.phase, "planning_review");
   assert.equal(runtime.job.planHash, fileSha256(ctx.planPath));
   assert.ok(events.some((event) => event.event === "authoring_deadline_recovered"));
+  assert.ok(events.some((event) =>
+    event.event === "compatibility_picture_lock"
+    && event.pictureLockHash === "f".repeat(64)));
   assert.deepEqual(order, [
-    "author-cut", "review-cut", "approve-cut", "verify-cut", "author-visual",
-    "verify-cut",
+    "author-cut", "review-cut", "approve-cut", "verify-cut", "verify-review-cut",
+    "lock-cut", "author-visual", "verify-cut", "verify-review-cut", "lock-cut",
+  ]);
+}
+
+async function testFreshPathRequiresReviewProof(root: string): Promise<void> {
+  const ctx = fixture(path.join(root, "fresh-review-proof"));
+  const { runtime } = harness(ctx, "fresh-review-proof");
+  const order: string[] = [];
+  const stages: string[] = [];
+  const deps = dependencies(async (_ctx, _send, stage) => {
+    stages.push(stage);
+    writeFileSync(ctx.planPath, JSON.stringify({
+      planVersion: 2, target: { mode: "longform" }, cutTrack: [],
+    }));
+    return success();
+  }, order);
+  deps.verifyReviewCut = () => {
+    order.push("verify-review-cut");
+    throw new Error("clean review approval is not independently bound");
+  };
+  await assert.rejects(
+    runAuthorStage(runtime, deps),
+    /clean review approval is not independently bound/,
+  );
+  assert.deepEqual(stages, ["cut"], "visual authoring must stay blocked");
+  assert.deepEqual(order.slice(-4), [
+    "review-cut", "approve-cut", "verify-cut", "verify-review-cut",
   ]);
 }
 
@@ -197,6 +231,10 @@ async function testPipelineStillRequiresReview(root: string): Promise<void> {
     }),
     reviewCut: async () => ({} as Awaited<ReturnType<AuthoringStageDependencies["reviewCut"]>>),
     verifyReviewCut: () => ({} as ReturnType<AuthoringStageDependencies["verifyReviewCut"]>),
+    lockCut: async () => ({
+      hash: "f".repeat(64), projectionHash: "e".repeat(64), reused: true,
+      lock: { timelineMapHash: "d".repeat(64) },
+    } as Awaited<ReturnType<AuthoringStageDependencies["lockCut"]>>),
     checkpoint: async () => ({ status: "committed" as const }),
     planning: async (run) => {
       planningReached = true;
@@ -221,8 +259,11 @@ async function testResumeKeepsApprovedCut(root: string): Promise<void> {
     return success();
   }, order));
   assert.deepEqual(stages, ["visual"]);
+  // Verify the reused cut before visual authoring and again after it, without
+  // repeating unchanged deterministic checks at the guided boundary.
   assert.deepEqual(order, [
-    "verify-cut", "verify-review-cut", "verify-cut", "verify-cut",
+    "verify-cut", "verify-review-cut", "lock-cut",
+    "verify-cut", "verify-review-cut", "lock-cut",
   ]);
   assert.equal(runtime.job.checkpoint, "plan_authored");
 }
@@ -236,7 +277,7 @@ async function testReviewedResumeSkipsBothWriters(root: string): Promise<void> {
   await runAuthorStage(runtime, dependencies(async () => {
     throw new Error("writer must not run");
   }, order));
-  assert.deepEqual(order, ["verify-cut", "verify-review-cut"]);
+  assert.deepEqual(order, ["verify-cut", "verify-review-cut", "lock-cut"]);
   assert.ok(events.some((event) => event.event === "resume"));
 }
 
@@ -247,6 +288,7 @@ async function main(): Promise<void> {
     await rejectsUnsafeDraft(root, "unchanged", () => {});
     await rejectsUnsafeDraft(root, "malformed", (ctx) => writeFileSync(ctx.planPath, "{broken"));
     await rejectsUnsafeDraft(root, "missing", (ctx) => unlinkSync(ctx.planPath));
+    await testFreshPathRequiresReviewProof(root);
     await testPipelineStillRequiresReview(root);
     await testResumeKeepsApprovedCut(root);
     await testReviewedResumeSkipsBothWriters(root);

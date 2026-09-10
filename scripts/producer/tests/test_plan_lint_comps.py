@@ -12,8 +12,8 @@ never read: ``_common`` points the default at a guaranteed-missing path):
 * (c) hold-to-cut comps must end on a cutTrack seam / the output end / carry
   ``exitOnCut``;
 * (d) partial-fade WARNs with the measured terminal alpha;
-* missing/malformed matrix = SKIP-with-evidence (never crash/silent-pass),
-  unknown kind = WARN, unmeasured fade = SKIP;
+* artifact availability/integrity paths live in
+  ``test_comp_capability_artifact.py``;
 * the plan_lint.lint() dispatch routes FAILs into errors.
 """
 
@@ -29,9 +29,12 @@ from unittest import mock
 from _common import *  # noqa: F401,F403  (shared fixtures + sys.path setup)
 from _common import MANIFEST, good_plan
 
-import gate_policy as gpol
 import plan_lint as pl
 import plan_lint_comps as plc
+from graphics.comp_capability_artifact import (
+    build_artifact,
+    composition_kinds,
+)
 
 # Synthetic capability matrix: every fade class + both aspects + the
 # degenerate rows (static-only, renderError, canvasNote ambiguity).
@@ -42,7 +45,8 @@ _COMPS = {
     "kinetic-quote": {"canvas": [1080, 1920], "fadeClass": "fades-clean"},
     "kinetic-quote-wide": {"canvas": [1920, 1080],
                            "fadeClass": "fades-clean"},
-    "solo-wide": {"canvas": [1920, 1080], "fadeClass": "fades-clean"},
+    "agenda-slide": {"canvas": [1920, 1080],
+                     "fadeClass": "fades-clean"},
     "glass-rail": {"canvas": [1080, 1920], "fadeClass": "partial-fade",
                    "terminalAlpha": {"maxAlpha8": 180, "meanAlpha8": 12.4}},
     "statement-card": {"canvas": [1080, 1920]},          # probe mid-run
@@ -57,9 +61,28 @@ _COMPS = {
 def _write_matrix(dirpath: str, comps: dict = None) -> str:
     """Write a synthetic comp_capabilities.json; returns its path."""
     path = os.path.join(dirpath, "comp_capabilities.json")
+    rows = {
+        kind: {"canvas": [1080, 1920], "aspect": "9:16",
+               "fadeClass": "fades-clean",
+               "terminalAlpha": {"maxAlpha8": 0, "meanAlpha8": 0.0},
+               "contentBBox": [0, 0, 1079, 1919]}
+        for kind in composition_kinds()}
+    for kind, override in (comps or _COMPS).items():
+        row = dict(rows[kind])
+        canvas = list(override.get("canvas", row["canvas"]))
+        row.update(override)
+        row["aspect"] = "9:16" if canvas[1] > canvas[0] else "16:9"
+        if "fadeClass" not in override:
+            row.pop("fadeClass", None)
+            row.pop("terminalAlpha", None)
+            row.pop("contentBBox", None)
+        else:
+            row.setdefault("terminalAlpha",
+                           {"maxAlpha8": 0, "meanAlpha8": 0.0})
+            row["contentBBox"] = [0, 0, canvas[0] - 1, canvas[1] - 1]
+        rows[kind] = row
     with open(path, "w", encoding="utf-8") as handle:
-        json.dump({"schemaVersion": 1, "comps": comps or _COMPS,
-                   "digest": "synthetic"}, handle)
+        json.dump(build_artifact(rows), handle)
     return path
 
 
@@ -116,7 +139,7 @@ class OverlayAspectTests(_MatrixCase):
         self.assertEqual(self.verdicts(wide), [])
 
     def test_no_registered_sibling_named_honestly(self) -> None:
-        (v,) = self.verdicts(_plan([_entry(kind="solo-wide")]))
+        (v,) = self.verdicts(_plan([_entry(kind="agenda-slide")]))
         self.assertIn("no aspect-legal same-family comp is registered",
                       v.evidence)
 
@@ -147,8 +170,8 @@ class OwnScreenAspectTests(_MatrixCase):
         plan = _plan([_entry(kind="section-takeover", anchor="own-screen")],
                      mode="longform")
         (v,) = self.verdicts(plan)
-        self.assertEqual(v.severity, "SKIP")
-        self.assertIn("no measured fadeClass", v.evidence)
+        self.assertEqual(v.severity, "FAIL")
+        self.assertIn("fadeClass is missing", v.evidence)
 
 
 class HoldToCutTests(_MatrixCase):
@@ -196,60 +219,6 @@ class PartialFadeTests(_MatrixCase):
         self.assertIn("mean=12.4", v.evidence)
 
 
-class MatrixAvailabilityTests(unittest.TestCase):
-    """Missing/partial matrix: SKIP-with-evidence, WARN unmeasured, no crash."""
-
-    def test_missing_matrix_is_one_skip_with_evidence(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            missing = os.path.join(tmp, "comp_capabilities.json")
-            verdicts = plc.matrix_verdicts(_plan([_entry(), _entry()]),
-                                           matrix_path=missing)
-        self.assertEqual([v.severity for v in verdicts], ["SKIP"])
-        self.assertIn("matrix file missing", verdicts[0].evidence)
-        self.assertIn("2 graphicsTrack entries unchecked",
-                      verdicts[0].evidence)
-        out = gpol.to_gate_json(verdicts, {"mode": "short"})
-        self.assertTrue(out["ok"])                       # skip never blocks…
-        self.assertIn("SKIP", out["warnings"][0])        # …never silent
-
-    def test_malformed_matrix_is_skip(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            path = os.path.join(tmp, "comp_capabilities.json")
-            with open(path, "w", encoding="utf-8") as handle:
-                handle.write("{not json")
-            (v,) = plc.matrix_verdicts(_plan([_entry()]), matrix_path=path)
-            self.assertEqual(v.severity, "SKIP")
-            self.assertIn("matrix unreadable", v.evidence)
-            with open(path, "w", encoding="utf-8") as handle:
-                json.dump({"comps": {}}, handle)
-            (v,) = plc.matrix_verdicts(_plan([_entry()]), matrix_path=path)
-            self.assertIn("no comps map", v.evidence)
-
-    def test_empty_track_emits_nothing(self) -> None:
-        self.assertEqual(plc.matrix_verdicts(_plan([]), matrix_path="/nope"),
-                         [])
-
-    def test_unknown_kind_warns_unmeasured(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            matrix = _write_matrix(tmp)
-            (v,) = plc.matrix_verdicts(
-                _plan([_entry(kind="mystery-comp")]), matrix_path=matrix)
-        self.assertEqual(v.severity, "WARN")
-        self.assertIn("unmeasured comp", v.evidence)
-
-    def test_static_only_and_render_error_rows_skip_fade_rules(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            matrix = _write_matrix(tmp)
-            (static,) = plc.matrix_verdicts(
-                _plan([_entry(kind="statement-card")]), matrix_path=matrix)
-            (errored,) = plc.matrix_verdicts(
-                _plan([_entry(kind="logo-card")]), matrix_path=matrix)
-        self.assertEqual(static.severity, "SKIP")
-        self.assertIn("has not measured it yet", static.evidence)
-        self.assertEqual(errored.severity, "SKIP")
-        self.assertIn("hyperframes died", errored.evidence)
-
-
 class LintDispatchTests(unittest.TestCase):
     """plan_lint.lint() routes matrix verdicts through the policy table."""
 
@@ -279,14 +248,15 @@ class LintDispatchTests(unittest.TestCase):
         self.assertEqual(len(hits), 1, rep.errors)
         self.assertTrue(hits[0].startswith("comp_capabilities:"), hits[0])
 
-    def test_missing_matrix_is_a_lint_warning_not_an_error(self) -> None:
-        # _common points the default at a guaranteed-missing path.
-        rep = pl.lint(self._mg_plan(), MANIFEST)
-        self.assertEqual(
-            [e for e in rep.errors if "comp_capabilities" in e], [])
-        skips = [w for w in rep.warnings
-                 if w.startswith("comp_capabilities: SKIP")]
-        self.assertEqual(len(skips), 1, rep.warnings)
+    def test_missing_matrix_is_a_lint_error(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(
+                plc, "DEFAULT_MATRIX_PATH",
+                os.path.join(tmp, "comp_capabilities.json")):
+            rep = pl.lint(self._mg_plan(), MANIFEST)
+        errors = [e for e in rep.errors
+                  if e.startswith("comp_capabilities:")]
+        self.assertEqual(len(errors), 1, rep.errors)
+        self.assertIn("matrix file missing", errors[0])
 
 
 if __name__ == "__main__":

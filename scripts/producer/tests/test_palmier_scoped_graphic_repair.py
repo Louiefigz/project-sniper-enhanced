@@ -16,6 +16,7 @@ from palmier.desktop_elements import (bind_operation,
 from palmier.desktop_repair import (RepairRenderContext,
                                     build_graphic_repair,
                                     render_changed_graphics)
+from palmier.checkpoint_graphics import PlacementBakeContext
 from palmier.desktop_authority import _receipt
 from palmier.desktop_manifest import prepare_desktop_manifest
 from palmier.desktop_state import DesktopStageInput
@@ -112,8 +113,14 @@ class ScopedRepairPlanTests(unittest.TestCase):
             new["graphicsTrack"].append(json.loads(json.dumps(row)))
         rendered = {"path": "/changed.mov", "proof": {"schemaVersion": 1}}
         with patch("palmier.desktop_repair.render_entry",
-                   return_value=rendered) as call:
-            context = RepairRenderContext(24, "/cache", {})
+                   return_value=rendered) as call, patch(
+                       "palmier.desktop_repair.bake_rendered_graphic",
+                       return_value=rendered), patch(
+                       "palmier.desktop_repair.file_sha256",
+                       return_value="f" * 64):
+            context = RepairRenderContext(
+                24, "/cache", {},
+                PlacementBakeContext("/cache", 24, 1920, 1080))
             steps = render_changed_graphics(old, new, context)
         self.assertEqual(call.call_count, 1)
         self.assertEqual(call.call_args.args[0]["id"], "graphic-1")
@@ -266,6 +273,9 @@ class RepairManifestIntegrationTests(unittest.TestCase):
                 handle.write(b"source")
             with open(graphic, "wb") as handle:
                 handle.write(b"new graphic bytes")
+            with open(graphic + ".placement.json", "w",
+                      encoding="utf-8") as handle:
+                json.dump({"schemaVersion": 1}, handle)
             old_path = os.path.join(tmp, "old-plan.json")
             new_path = os.path.join(tmp, "new-plan.json")
             manifest_path = os.path.join(tmp, "manifest.json")
@@ -282,6 +292,11 @@ class RepairManifestIntegrationTests(unittest.TestCase):
                 "projectName": "demo", "projectSettings": {
                     "fps": 24, "width": 1920, "height": 1080},
                 "plan": {"path": old_path, "hash": file_sha256(old_path)},
+                "exactMasterReference": {
+                    "status": "ready", "startFrame": 0, "endFrame": 240,
+                    "hidden": True, "muted": True, "assetPath": source,
+                    "assetHash": file_sha256(source),
+                },
                 "elementLedger": _ledger(),
             }
             rendered = {"path": graphic, "cached": False, "key": "render-key",
@@ -290,7 +305,9 @@ class RepairManifestIntegrationTests(unittest.TestCase):
             inputs = DesktopStageInput(
                 tmp, tmp, new_path, manifest_path, "repair")
             with patch("palmier.desktop_repair.render_entry",
-                       return_value=rendered):
+                       return_value=rendered), patch(
+                           "palmier.desktop_repair.bake_rendered_graphic",
+                           return_value=rendered):
                 result = prepare_desktop_manifest(inputs, state)
             steps = result["content"]["steps"]
             self.assertEqual([row["op"] for row in steps],

@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import {
   appendFileSync,
   existsSync,
@@ -7,9 +7,40 @@ import {
 } from "node:fs";
 import path from "node:path";
 import { atomicWriteJsonSync } from "@/lib/server/atomic-file";
+import { syncFileAndParent } from
+  "@/lib/server/candidate-promotion-fs";
 import { retainedClaudeSessionId } from "../auto-edit/authoring-session";
 
-export type LiveBuildStatus = "running" | "interrupted" | "failed" | "qc_failed" | "complete";
+export type LiveBuildStatus =
+  "running" | "interrupted" | "failed" | "qc_failed"
+  | "reconciliation_required" | "complete";
+
+export interface LiveBuildResumeAuthority {
+  schemaVersion: 1;
+  journalHash: string;
+  headFingerprint: string;
+  verifiedOperations: Array<{
+    operationId: string;
+    tool: string;
+    inputHash: string;
+  }>;
+  resolvedNotAppliedIds: string[];
+}
+
+export interface LiveBuildReconciliation {
+  schemaVersion: 1;
+  status: "paused";
+  reason: string;
+  expectedFingerprint: string | null;
+  observedFingerprint: string | null;
+  operationIds: string[];
+  resolutionOwner: "external-operator";
+  automaticResumeAllowed: false;
+  resolutionActions: [
+    "external-adopt-visible-head",
+    "external-adopt-visible-head-and-fork-candidate",
+  ];
+}
 
 export interface LiveBuildQcFailure {
   lens?: string;
@@ -40,6 +71,8 @@ export interface LiveBuildState {
   updatedAt: string;
   error?: string;
   qcFailure?: LiveBuildQcFailure;
+  resumeAuthority?: LiveBuildResumeAuthority;
+  reconciliation?: LiveBuildReconciliation;
 }
 
 export interface NewLiveBuildState {
@@ -73,7 +106,10 @@ function validState(value: unknown): value is LiveBuildState {
     && typeof row.projectId === "string"
     && typeof row.parentTimelineId === "string"
     && typeof row.candidateTimelineId === "string"
-    && ["running", "interrupted", "failed", "qc_failed", "complete"].includes(String(row.status));
+    && [
+      "running", "interrupted", "failed", "qc_failed",
+      "reconciliation_required", "complete",
+    ].includes(String(row.status));
 }
 
 export function assertLiveBuildRequest(
@@ -133,9 +169,14 @@ function resumeState(
   if (current.status === "complete") {
     throw new Error("This approved plan already completed its retained Palmier live build.");
   }
+  if (current.status === "reconciliation_required") {
+    throw new Error(
+      "This Palmier live build requires external operator adoption or an "
+      + "external adopted-head fork; automatic resume is blocked.");
+  }
   return { ...current, status: "running",
     latestFingerprint: input.candidateFingerprint, updatedAt: now,
-    error: undefined };
+    error: undefined, reconciliation: undefined };
 }
 
 function createState(
@@ -194,27 +235,28 @@ export function patchLiveBuildState(
   return next;
 }
 
+export function restartLiveBuildSession(dir: string): LiveBuildState {
+  return patchLiveBuildState(dir, {
+    sessionId: retainedClaudeSessionId(undefined),
+    sessionEstablished: false,
+  });
+}
+
 export function appendLiveBuildJournal(
   dir: string,
   value: Record<string, unknown>,
 ): void {
   const row: Record<string, unknown> = { at: new Date().toISOString(), ...value };
   const serialized = JSON.stringify(row);
-  const bounded = Buffer.byteLength(serialized) <= 16_000 ? serialized : JSON.stringify({
-    at: row["at"],
-    event: row["event"],
-    operationId: row["operationId"],
-    tool: row["tool"],
-    lane: row["lane"],
-    summary: row["summary"],
-    status: row["status"],
-    elapsedMs: row["elapsedMs"],
-    payloadHash: createHash("sha256").update(serialized).digest("hex"),
-    truncated: true,
-  });
-  appendFileSync(liveBuildJournalPath(dir), `${bounded}\n`, {
+  if (Buffer.byteLength(serialized) > 16_000) {
+    throw new Error(
+      "Palmier live-build operation exceeds the durable journal limit; "
+      + "split the batch before mutation.");
+  }
+  appendFileSync(liveBuildJournalPath(dir), `${serialized}\n`, {
     encoding: "utf8", mode: 0o600,
   });
+  syncFileAndParent(liveBuildJournalPath(dir));
 }
 
 export function readLiveBuildJournal(dir: string, limit = 100): Record<string, unknown>[] {

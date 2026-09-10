@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/scene-authoring-packet-v1.schema.json",
+  "title": "SceneAuthoringPacketV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "attemptId",
+    "brief",
+    "sceneAuthority",
+    "brandTokens",
+    "approvedAssets",
+    "examples",
+    "constraints"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "attemptId": { "$ref": "scene-spec-v1.schema.json#/$defs/stableId" },
+    "brief": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 12000,
+      "pattern": ".*\\S.*"
+    },
+    "sceneAuthority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sceneId",
+        "timing",
+        "durationFrames",
+        "canvas",
+        "renderMode",
+        "captionPolicy",
+        "provenance"
+      ],
+      "properties": {
+        "sceneId": { "$ref": "scene-spec-v1.schema.json#/$defs/stableId" },
+        "timing": { "$ref": "scene-spec-v1.schema.json#/$defs/timing" },
+        "durationFrames": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000000
+        },
+        "canvas": { "$ref": "scene-spec-v1.schema.json#/$defs/canvas" },
+        "renderMode": {
+          "enum": ["overlay-alpha", "takeover-opaque", "presenter-hole"]
+        },
+        "captionPolicy": {
+          "enum": ["preserve", "suppress-overlap"]
+        },
+        "provenance": {
+          "$ref": "scene-spec-v1.schema.json#/$defs/provenance"
+        }
+      }
+    },
+    "brandTokens": {
+      "type": "object",
+      "maxProperties": 128,
+      "propertyNames": {
+        "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+      },
+      "additionalProperties": {
+        "$ref": "scene-spec-v1.schema.json#/$defs/scalar"
+      }
+    },
+    "approvedAssets": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["assetId", "sha256", "mime", "bundleMember"],
+        "properties": {
+          "assetId": { "$ref": "scene-spec-v1.schema.json#/$defs/stableId" },
+          "sha256": { "$ref": "scene-spec-v1.schema.json#/$defs/sha256" },
+          "mime": {
+            "enum": [
+              "image/png",
+              "image/jpeg",
+              "image/webp",
+              "image/svg+xml",
+              "audio/wav",
+              "audio/mpeg",
+              "video/mp4",
+              "video/quicktime",
+              "font/ttf",
+              "font/otf"
+            ]
+          },
+          "bundleMember": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240,
+            "pattern": "^(?!/)(?!.*//)(?!.*(?:^|/)\\.{1,2}(?:/|$))[A-Za-z0-9](?:[A-Za-z0-9._/-]*[A-Za-z0-9._-])?$"
+          }
+        }
+      }
+    },
+    "examples": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["bundleId", "bundleHash"],
+        "properties": {
+          "bundleId": { "$ref": "scene-spec-v1.schema.json#/$defs/stableId" },
+          "bundleHash": { "$ref": "scene-spec-v1.schema.json#/$defs/sha256" }
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hyperframesVersion",
+        "declaredVariables",
+        "pausedSeekableTimeline",
+        "rootDuration",
+        "deterministicSeed",
+        "vendoredRuntimeOnly",
+        "renderTimeNetwork"
+      ],
+      "properties": {
+        "hyperframesVersion": { "enum": ["0.7.33", "0.8.31"] },
+        "declaredVariables": { "const": true },
+        "pausedSeekableTimeline": { "const": true },
+        "rootDuration": { "const": true },
+        "deterministicSeed": { "const": true },
+        "vendoredRuntimeOnly": { "const": true },
+        "renderTimeNetwork": { "const": false }
+      }
+    }
+  }
+}

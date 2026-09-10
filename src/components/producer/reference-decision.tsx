@@ -13,6 +13,8 @@ import {
   type ReferenceMode,
   type ReferenceStrategy,
 } from "./reference-types";
+import { VERIFIED_MIMIC_RELEASED } from
+  "@/lib/producer/reference-qualification";
 
 interface Props {
   reference: ReferenceEntry;
@@ -77,7 +79,13 @@ function ModeChoice({ reference, draft, onPick }: {
 
 function StrategyChoice({ draft, onPick }: { draft: Draft; onPick: (value: ReferenceStrategy) => void }) {
   const options: Array<{ id: ReferenceStrategy; label: string; hint: string }> = [
-    { id: "mimic", label: "Mimic this", hint: "Mirror measured mechanics" },
+    {
+      id: "mimic",
+      label: "Reference-inspired",
+      hint: VERIFIED_MIMIC_RELEASED
+        ? "Verified mimic"
+        : "Measured guidance · verified mimic not qualified",
+    },
     { id: "extend", label: "Extend a style", hint: "Add evidence to a measured grammar" },
     { id: "new-style", label: "New style", hint: "Create a named candidate" },
   ];

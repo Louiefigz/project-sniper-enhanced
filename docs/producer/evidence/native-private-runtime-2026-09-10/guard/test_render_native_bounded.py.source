@@ -1,0 +1,180 @@
+"""Mock native-launch lifecycle failures; never start Chrome, FFmpeg or rendering."""
+from __future__ import annotations
+
+import json
+import tempfile
+import unittest
+from dataclasses import dataclass
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import render_native_bounded as bounded
+
+
+@dataclass
+class Snapshot:
+    """Minimal finite telemetry for an admitted harmless fixture."""
+
+    owned_footprint_bytes: int = 0
+    unused_physical_bytes: int = 10 * 1024 ** 3
+
+
+class LauncherLifecycleTests(unittest.TestCase):
+    """Exercise the actual supervisor while replacing only external effects."""
+
+    def setUp(self) -> None:
+        """Use private disposable receipts and refuse every real child launch."""
+        temporary = tempfile.TemporaryDirectory(prefix='sniper-launcher-test-')
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.output = self.root / 'candidate.mp4'
+        admission = {'output': str(self.output), 'sdkSha256': 'sdk', 'sandboxSha256': 'sdk'}
+        patches = {
+            'ROOT': self.root, 'PROJECT': self.root,
+            'admit': MagicMock(return_value=admission),
+            'source_hashes': MagicMock(return_value={'index.html': 'source'}),
+            'command': MagicMock(return_value=['not-a-real-render-command']),
+            'environment': MagicMock(return_value={}),
+            'digest': MagicMock(return_value='sdk'),
+            'read_snapshot': MagicMock(return_value=Snapshot()),
+            'admission_reasons': MagicMock(return_value=[]),
+        }
+        for name, value in patches.items():
+            replacement = patch.object(bounded, name, value)
+            replacement.start()
+            self.addCleanup(replacement.stop)
+        self.child = MagicMock(pid=998871, returncode=0)
+        self.child.poll.return_value = 0
+        self.registry = MagicMock()
+        self.registry.identities.return_value = []
+        self.registry.cleanup.return_value = {'verified': True, 'survivors': []}
+        self.spawn = self._patch(bounded.subprocess, 'Popen', side_effect=self._spawn)
+        self.registry_class = self._patch(bounded, 'OwnedRegistry', return_value=self.registry)
+        self.lease = MagicMock()
+        self.lease_class = self._patch(bounded, 'NativeWorkLease')
+        self.lease_class.acquire.return_value = self.lease
+        self._patch(bounded.signal, 'signal')
+        self._patch(bounded, 'print', create=True)
+        self.run = bounded.NativeRun('mock-run')
+
+    def _patch(self, target: object, name: str, **options: object) -> MagicMock:
+        """Register automatic restoration of every replaced external effect."""
+        replacement = patch.object(target, name, **options)
+        result = replacement.start()
+        self.addCleanup(replacement.stop)
+        return result
+
+    def _spawn(self, *args: object, **kwargs: object) -> MagicMock:
+        """An inert placeholder file represents native success, never a video."""
+        self.output.write_bytes(b'not actual video; output QC still required')
+        return self.child
+
+    def _receipt(self) -> dict:
+        """Read the final local measurement record after fixture execution."""
+        return json.loads((self.root / 'mock-run.render.json').read_text())
+
+    def test_success_still_requires_cleanup_and_output_qc(self) -> None:
+        """A nominal native return cannot bypass process cleanup or final QC."""
+        self.assertTrue(self.run.execute())
+        self.registry.cleanup.assert_called_once_with(self.child)
+        self.assertEqual(self._receipt()['status'], 'rendered-awaiting-output-qc')
+        self.assertFalse(self._receipt()['supervisorSigkillProtection'])
+
+    def test_failed_baseline_never_launches(self) -> None:
+        """Unreadable admission telemetry must fail before any native work."""
+        bounded.read_snapshot.side_effect = RuntimeError('telemetry unavailable')
+        self.assertFalse(self.run.execute())
+        self.spawn.assert_not_called()
+        self.assertEqual(self._receipt()['status'], 'failed')
+
+    def test_measurement_loss_after_launch_cleans_up(self) -> None:
+        """A monitoring failure routes through owned cleanup."""
+        with patch.object(self.run, 'monitor', side_effect=RuntimeError('sampler failed')):
+            self.assertFalse(self.run.execute())
+        self.registry.cleanup.assert_called_once_with(self.child)
+        self.assertIn('sampler failed', self._receipt()['abortReason'])
+
+    def test_registry_binding_failure_stops_direct_child_and_stays_unproved(self) -> None:
+        """Do not accept output when launch succeeded but ownership binding failed."""
+        self.child.poll.return_value = None
+        self.registry_class.side_effect = RuntimeError('cannot bind child')
+        self.assertFalse(self.run.execute())
+        self.child.terminate.assert_called_once()
+        self.child.wait.assert_called()
+        self.assertFalse(self._receipt()['cleanup']['verified'])
+
+    def test_already_exited_direct_child_is_not_signalled(self) -> None:
+        """An already reaped child gives no reason to signal its historical PID."""
+        self.run.child = self.child
+        self.assertEqual(self.child.poll(), 0)
+        self.run.stop_direct_child()
+        self.child.terminate.assert_not_called()
+        self.child.kill.assert_not_called()
+        self.child.wait.assert_not_called()
+
+    def test_post_launch_receipt_error_does_not_skip_cleanup(self) -> None:
+        """A full disk while recording launch cannot leave the child unmanaged."""
+        original = self.run.persist
+        calls = 0
+
+        def persist(initial: bool = False) -> None:
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise OSError('simulated full disk')
+            original(initial)
+
+        with patch.object(self.run, 'persist', side_effect=persist):
+            self.assertFalse(self.run.execute())
+        self.registry.cleanup.assert_called_once_with(self.child)
+        self.assertEqual(self._receipt()['status'], 'failed')
+
+    def test_unproved_cleanup_cannot_qualify_an_existing_output(self) -> None:
+        """File existence and exit zero do not override unproved cleanup."""
+        self.registry.cleanup.return_value = {'verified': False, 'survivors': [123]}
+        self.assertFalse(self.run.execute())
+        self.assertTrue(self.output.is_file())
+        self.assertEqual(self._receipt()['status'], 'failed')
+
+    def test_cleanup_measurement_failure_still_attempts_direct_child_stop(self) -> None:
+        """If discovery fails, at least request shutdown of our own direct child."""
+        self.child.poll.return_value = None
+        self.registry.cleanup.side_effect = RuntimeError('ps measurement unavailable')
+        with patch.object(self.run, 'monitor', side_effect=RuntimeError('sampler failed')):
+            self.assertFalse(self.run.execute())
+        self.assertTrue(self.child.terminate.called or self.child.kill.called,
+                        'Cleanup exception left the known direct child running')
+        self.assertFalse(self._receipt()['cleanup']['verified'])
+
+    def test_receipt_creation_race_never_overwrites_another_attempt(self) -> None:
+        """An exclusive initial-write failure must preserve the existing receipt."""
+        path = self.root / 'mock-run.render.json'
+        original = b'{"owner":"other invocation"}\n'
+        path.write_bytes(original)
+        self.assertFalse(self.run.execute())
+        self.spawn.assert_not_called()
+        self.assertEqual(path.read_bytes(), original)
+
+    def test_busy_heavy_lane_never_launches(self) -> None:
+        """Another job or unverified cleanup fences this invocation."""
+        self.lease_class.acquire.side_effect = RuntimeError('heavy lane busy')
+        self.assertFalse(self.run.execute())
+        self.spawn.assert_not_called()
+
+    def test_lease_is_completed_only_after_verified_cleanup(self) -> None:
+        """A nominally successful child does not bypass the durable fence."""
+        self.registry.cleanup.return_value = {'verified': False}
+        self.assertFalse(self.run.execute())
+        self.lease.complete.assert_not_called()
+        self.lease.close.assert_called_once()
+
+    def test_lease_independent_cleanup_rejection_blocks_output(self) -> None:
+        """A surviving recorded child is a failure even if registry said clean."""
+        self.lease.complete.side_effect = RuntimeError('recorded child survives')
+        self.assertFalse(self.run.execute())
+        self.assertFalse(self._receipt()['leaseCleanupVerified'])
+        self.lease.close.assert_called_once()
+
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

@@ -32,6 +32,7 @@ CLI: audio_gain.py <video_in> <gains.json> <video_out>
 from __future__ import annotations
 
 import json
+import math
 import os
 import subprocess
 import sys
@@ -87,8 +88,13 @@ def parse_windows(raw: object) -> list[GainWindow]:
         if not isinstance(item, dict):
             raise ValueError(f"gain[{i}] must be an object")
         try:
-            start, end, db = float(item["outStart"]), float(item["outEnd"]), float(item["dB"])
-        except (KeyError, TypeError, ValueError) as exc:
+            values = [item[key] for key in ("outStart", "outEnd", "dB")]
+            if any(type(value) not in (int, float) for value in values):
+                raise ValueError("window fields must be JSON numbers")
+            start, end, db = map(float, values)
+            if not all(math.isfinite(value) for value in (start, end, db)):
+                raise ValueError("window fields must be finite")
+        except (KeyError, TypeError, ValueError, OverflowError) as exc:
             raise ValueError(f"gain[{i}] needs numeric outStart/outEnd/dB: {exc}") from exc
         if end <= start:
             raise ValueError(f"gain[{i}] outEnd ({end}) must exceed outStart ({start})")

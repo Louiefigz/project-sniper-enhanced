@@ -39,7 +39,7 @@ test("TS and actual Python profile agree on manual crop and every unchanged fini
   const changes: Array<Record<string, unknown>> = [{}, { captions: {} }, { captions: { burn: 0 } }, { captions: { burn: true } },
     { target: { mode: "longform", width: 1080, height: 1920 } }, { target: { mode: "short", width: 720, height: 1280 } },
     { captionsTrack: [{}] }, { punchIns: [{}] }, { transitions: [{}] }, { baselineLook: { grade: "warm" } },
-    { audioEnhance: { preset: "voice" } }, { audioGain: [{}] }, { overlays: true }, { presenter: { animatedPip: true } },
+    { audioEnhance: { preset: "separate" } }, { audioGain: [{}] }, { overlays: true }, { presenter: { animatedPip: true } },
     { cutTrack: [{ sourceId: "TEST", start: 0, end: 1, speed: 1.1 }] },
     { cutTrack: [{ sourceId: "TEST", start: 0, end: 1, audioLeadMs: 50 }] },
     { cutTrack: [{ sourceId: "TEST", start: 0, end: 1 }, { sourceId: "other", start: 1, end: 2 }] }];

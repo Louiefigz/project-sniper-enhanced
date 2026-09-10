@@ -30,10 +30,13 @@ class PageIdentityTests(unittest.TestCase):
                 patch.object(pages, "file_sha256", side_effect=fake_hash):
             initial = pages.caption_page_compositor_identity()[1]
             for name in ("caption_page_decode.py", "caption_page_proof.py", "audit_glitch_scan.py",
-                         "process_runner.py", "process_deadline.py"):
+                         "process_runner.py"):
                 changed["path"] = name
                 self.assertNotEqual(initial, pages.caption_page_compositor_identity()[1])
                 self.assertIn(name, observed)
+        paths = pages.caption_page_implementation_paths()
+        self.assertEqual(paths["processDeadline"], paths["ownedRunner"])
+        self.assertTrue(paths["processDeadline"].endswith("headless/process_runner.py"))
 
 
     def test_held_projection_identity_matches_ordinary_compositor_and_closure(self) -> None:

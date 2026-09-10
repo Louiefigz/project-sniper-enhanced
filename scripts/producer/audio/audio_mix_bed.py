@@ -28,7 +28,7 @@ from fractions import Fraction
 from typing import Optional
 
 from audio.master import measure_integrated_lufs
-from palmier.process_deadline import process_timeout
+from headless.process_runner import process_timeout
 
 # Float intermediates: a pre-norm boost of a quiet track never clips (clipping is
 # at full scale regardless of bit depth; float can exceed 1.0, the final loudnorm

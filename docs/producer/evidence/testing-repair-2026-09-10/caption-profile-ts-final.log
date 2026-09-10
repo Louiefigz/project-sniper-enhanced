@@ -1,0 +1,14 @@
+✔ explicit caption presets select distinct native classes without changing the plan (1.833959ms)
+✔ held historical caption classes keep exact tokens without granting new screening (0.268542ms)
+✔ held classes cannot cross geometry, drop captions or use body/unknown tokens (0.33175ms)
+✔ actual Python and TS agree on every fresh, held legacy, current and refused class (26.569709ms)
+✔ TS and actual Python refuse every unqualified caption/custom/finishing field consistently (106.398542ms)
+✔ whole-program page upper bound is counted before any render (0.258208ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 139.127959

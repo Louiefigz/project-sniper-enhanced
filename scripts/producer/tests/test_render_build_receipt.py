@@ -8,7 +8,7 @@ import unittest
 from pathlib import Path
 
 from _common import pl  # noqa: F401
-from _current_render_build_fixture import current_manifest
+from _current_build_release_fixture import current_manifest
 from headless.render_build_receipt import (
     RenderBuildLocator,
     load_render_build,

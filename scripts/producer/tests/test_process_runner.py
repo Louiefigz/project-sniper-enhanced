@@ -9,6 +9,7 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from _common import pl  # noqa: F401
@@ -148,6 +149,49 @@ class ProcessRunnerTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0)
             pid = int(Path(pid_path).read_text())
             _assert_gone(self, pid, "successful child left a descendant alive")
+
+
+class SharedProcessDeadlineTests(unittest.TestCase):
+    """Connected and headless callers must consume the same nested clock."""
+
+    def test_no_context_uses_requested_positive_cap(self) -> None:
+        self.assertEqual(process_runner.process_timeout(), 300.0)
+        self.assertEqual(process_runner.process_timeout(12.5), 12.5)
+
+    def test_invalid_policy_preserves_each_public_exception_contract(self) -> None:
+        from palmier import process_deadline as legacy
+        from palmier.mcp_client import PalmierError
+        for module, error in ((process_runner, process_runner.ProcessDeadlinePolicyError), (legacy, PalmierError)):
+            with self.subTest(module=module.__name__):
+                self.invalid_policy(module, error)
+
+    def invalid_policy(self, module: object, error: type[Exception]) -> None:
+        """Both public routes reject invalid clocks before executing a child."""
+        with self.assertRaisesRegex(error, "remaining-time clock"):
+            with module.use_process_deadline(object()):
+                self.fail("invalid clock reached child")
+        with self.assertRaisesRegex(error, "must be positive"):
+            module.process_timeout(0)
+
+    def test_legacy_and_headless_contexts_share_budget_and_restore_after_error(self) -> None:
+        from palmier import process_deadline as legacy
+        outer = SimpleNamespace(remaining=lambda: 7.5)
+        inner = SimpleNamespace(remaining=lambda: 2.5)
+        for first, second in ((legacy, process_runner), (process_runner, legacy)):
+            with self.subTest(first=first.__name__), first.use_process_deadline(outer):
+                self.assertEqual(second.process_timeout(20), 7.5)
+                self.assertEqual(second.process_timeout(1), 1)
+                self.nested_failure(second, first, inner)
+                self.assertEqual(second.process_timeout(20), 7.5)
+            self.assertEqual(process_runner.process_timeout(), 300.0)
+            self.assertEqual(legacy.process_timeout(), 300.0)
+
+    def nested_failure(self, second: object, first: object, inner: object) -> None:
+        """An inner callback failure must return budget ownership to the outer scope."""
+        with self.assertRaisesRegex(RuntimeError, "child failed"):
+            with second.use_process_deadline(inner):
+                self.assertEqual(first.process_timeout(20), 2.5)
+                raise RuntimeError("child failed")
 
 
 if __name__ == "__main__":

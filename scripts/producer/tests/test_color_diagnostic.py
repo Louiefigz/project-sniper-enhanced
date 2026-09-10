@@ -141,7 +141,7 @@ class ColorDiagnosticTests(unittest.TestCase):
             "sourceSha256": "b" * 64, "samples": [{"id": "one", "sourceTime": 70}], "timeoutSeconds": 120})
         self.assertTrue(name.startswith("sniper-color-diagnostic-"))
         for option, value in (("--network", "none"), ("--pull", "never"), ("--memory", "768m"),
-                              ("--cpus", "1"), ("--entrypoint", "/usr/bin/node")):
+                              ("--cpus", "4"), ("--entrypoint", "/usr/bin/node")):
             self.assertEqual(command[command.index(option) + 1], value)
         self.assertIn("type=bind,src=/admitted/snapshot,dst=/input/media,readonly", command)
         self.assertEqual(command.count("--mount"), 2)

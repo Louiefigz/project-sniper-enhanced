@@ -83,7 +83,7 @@ test("TS and actual Python refuse every unqualified caption/custom/finishing fie
     { captionCorrectionLedger: {} }, { dialogueCaptionAuthority: {} }, { chapters: [{}] }, { captions: {} },
     { captions: { burn: 1 } }, { captions: { burn: false } }, { captions: { burn: true, bandYOffsetPx: 2 } },
     { titleCards: [{}] }, { brollTrack: [{}] }, { punchIns: [{}] }, { transitions: [{}] }, { audioGain: 2 },
-    { audioEnhance: { preset: "voice" } }, { baselineLook: { grade: "warm" } }, { overlays: true },
+    { audioEnhance: { preset: "separate" } }, { baselineLook: { grade: "warm" } }, { overlays: true },
     { target: { mode: "longform", width: 1280, height: 720 } }, { reframe: { strategy: "face" } }];
   const track = plan().captionsTrack as Record<string, unknown>;
   changes.push(...[{ schemaVersion: true }, { source: "guess" }, { defaultPolicy: "off" }, { groups: [{}] },

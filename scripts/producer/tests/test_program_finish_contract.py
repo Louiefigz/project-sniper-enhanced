@@ -45,6 +45,16 @@ class FinishingReasonTests(unittest.TestCase):
                 self.assertTrue(reason.startswith("audioGain"))
         self.assertIn("overlap", finishing_reason({**PLAIN, "audioGain": cases["overlap"]}))
 
+    def test_gain_fields_reject_coercion_nonfinite_and_overflow_before_finishing(self) -> None:
+        """Direct producer callers must reject malformed gain without relying on TS."""
+        invalid = (False, True, None, "2", "NaN", float("nan"), float("inf"), -float("inf"), 10**1000)
+        cases = [(field, value) for field in ("outStart", "outEnd", "dB") for value in invalid]
+        for field, value in cases:
+            with self.subTest(field=field, valueType=type(value).__name__):
+                plan = {**PLAIN, "audioGain": [{"outStart": 0, "outEnd": 1, "dB": 2, field: value}]}
+                self.assertIn("numeric", finishing_reason(plan))
+                self.assertRaisesRegex(RuntimeError, "numeric", finishing_request, plan, 4.0)
+
     def test_sfx_must_be_boolean_or_built_pack_name(self) -> None:
         for value in ("bang", 1, 0.5, ["click"], {"name": "click"}):
             with self.subTest(value=value):

@@ -12,7 +12,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
 
-from _current_render_build_fixture import current_manifest
+from _current_build_release_fixture import current_manifest
 from _render_lane_proof import ProofInputs, build_full_proof
 from headless import admitted_render_lane as lane_module
 from headless import render_admission_artifact as artifact_module

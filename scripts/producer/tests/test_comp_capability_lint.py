@@ -9,6 +9,7 @@ import tempfile
 import time
 import unittest
 from contextlib import ExitStack
+from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
@@ -174,9 +175,15 @@ class RootLintTests(unittest.TestCase):
     def test_actual_owned_node_hang_is_timed_out_and_reaped(self) -> None:
         """A TEST import loop exercises the existing runner's real hard deadline."""
         package = self.fake_package('while (true) {}')
-        with patch.object(lint, "_PACKAGE", package), patch.object(lint, "MAX_SECONDS", 0.1):
+        runner = lint.run_text
+        def short_child_budget(request: lint.ProcessRequest) -> subprocess.CompletedProcess:
+            """Allow real source admission before timing the intentionally hung child."""
+            return runner(replace(request, timeout_seconds=0.1))
+        with patch.object(lint, "_PACKAGE", package), \
+                patch.object(lint, "run_text", side_effect=short_child_budget) as spawned:
             with self.assertRaises(ProcessDeadlineError):
                 self.execute()
+        spawned.assert_called_once()
         self.assertFalse(json.loads((self.root / "root-lint/failure.json").read_text())["passed"])
 
     def test_final_diagnostic_callback_cannot_replace_original_input(self) -> None:

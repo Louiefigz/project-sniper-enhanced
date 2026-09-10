@@ -12,7 +12,6 @@ import captions.caption_page_decode as caption_page_decode
 import captions.caption_page_proof as caption_page_proof
 import audit.audit_glitch_scan as page_progress_parser
 import headless.process_runner as page_process_runner
-import palmier.process_deadline as page_process_deadline
 from captions.caption_page_media import (
     CaptionPageMediaContext,
     prove_caption_page,
@@ -53,7 +52,7 @@ def caption_page_implementation_paths() -> dict[str, str]:
     """One exact source map shared by ordinary and held projection identities."""
     modules = {"media": caption_page_media, "pageDecode": caption_page_decode,
                "pageProof": caption_page_proof, "progressParser": page_progress_parser,
-               "ownedRunner": page_process_runner, "processDeadline": page_process_deadline}
+               "ownedRunner": page_process_runner, "processDeadline": page_process_runner}
     return {"planner": os.path.realpath(__file__),
             **{name: os.path.realpath(module.__file__) for name, module in modules.items()}}
 

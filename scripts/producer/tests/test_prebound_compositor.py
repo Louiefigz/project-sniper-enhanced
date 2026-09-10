@@ -128,7 +128,8 @@ class PreboundCompositorTests(unittest.TestCase):
             "gui",
         )
         names = _import_closure(producer, starts)
-        self.assertFalse([name for name in names if name.startswith(forbidden)])
+        self.assertFalse([name for name in names if any(
+            name == prefix or name.startswith(prefix + ".") for prefix in forbidden)])
 
 
 if __name__ == "__main__":

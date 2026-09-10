@@ -329,7 +329,7 @@ class PipHoleGraphTests(unittest.TestCase):
              mock.patch.object(spl, "_clip_dims", return_value=(1920, 1080)), \
              mock.patch("graphics.pip_takeover.probe_dims",
                         return_value=(1920, 1080)):
-            clips, _rows = gs._render_all([entry], None, "base.mp4")
+            clips, _rows = gs._render_all(gs.GraphicsJob("base.mp4", "unused.mp4", [entry]))
         self.assertEqual(clips[0]["pipHole"]["rect"], (1344, 60, 534, 960))
         cw, ch, _, cy = clips[0]["pipHole"]["crop"]
         self.assertEqual((ch, cy), (1080, 0))

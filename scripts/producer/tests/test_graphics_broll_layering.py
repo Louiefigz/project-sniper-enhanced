@@ -1,6 +1,7 @@
 """Real-media proof that graphics stay above b-roll and below captions."""
 from __future__ import annotations
 
+import ast
 import hashlib
 import shutil
 import subprocess
@@ -113,10 +114,21 @@ def _green_graphic_over_blue(candidate: bytes, broll: bytes) -> bool:
 class GraphicsOverBrollLayeringTests(unittest.TestCase):
     def test_render_routes_broll_before_graphics(self) -> None:
         render_path = Path(__file__).parents[1] / "render.py"
-        source = render_path.read_text(encoding="utf-8")
-        body = source.split("\ndef render(", 1)[1].split("\ndef ", 1)[0]
-        self.assertLess(
-            body.index("broll_stage("), body.index("graphics_track_stage("))
+        tree = ast.parse(render_path.read_text(encoding="utf-8"))
+        body = next(node for node in tree.body
+                    if isinstance(node, ast.FunctionDef) and node.name == "render")
+        calls = [node for node in ast.walk(body) if isinstance(node, ast.Call)]
+        stages = {}
+        for call in calls:
+            name = call.func.id if isinstance(call.func, ast.Name) else None
+            if name == "source_color_stage" and len(call.args) > 1:
+                stage = call.args[1]
+                name = stage.id if isinstance(stage, ast.Name) else None
+            if name in {"broll_stage", "graphics_track_stage"}:
+                self.assertNotIn(name, stages)
+                stages[name] = call.lineno
+        self.assertEqual(set(stages), {"broll_stage", "graphics_track_stage"})
+        self.assertLess(stages["broll_stage"], stages["graphics_track_stage"])
 
     def test_real_layering_caption_audio_and_dirty_invalidation(self) -> None:
         if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):

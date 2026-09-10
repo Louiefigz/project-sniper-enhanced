@@ -1,0 +1,258 @@
+{
+  "warnings": 50,
+  "files": 25,
+  "locationsInChangedFiles": [],
+  "kind": "broad-file-pattern warnings; not compile errors",
+  "locations": [
+    {
+      "path": "src/app/api/producer/ai-edit/doctrine.ts",
+      "line": 4,
+      "column": 26
+    },
+    {
+      "path": "src/app/api/producer/ai-edit/palmier-native-authority.ts",
+      "line": 80,
+      "column": 16
+    },
+    {
+      "path": "src/lib/server/auto-edit-authority-snapshot.ts",
+      "line": 118,
+      "column": 17
+    },
+    {
+      "path": "src/lib/server/auto-edit-authority-snapshot.ts",
+      "line": 122,
+      "column": 36
+    },
+    {
+      "path": "src/lib/server/auto-edit-doctrine.ts",
+      "line": 81,
+      "column": 17
+    },
+    {
+      "path": "src/lib/server/auto-edit-pipeline-authority.ts",
+      "line": 66,
+      "column": 17
+    },
+    {
+      "path": "src/app/api/_lib/spawn-python.ts",
+      "line": 13,
+      "column": 10
+    },
+    {
+      "path": "src/app/api/producer/auto-edit/authoring-prompt.ts",
+      "line": 14,
+      "column": 39
+    },
+    {
+      "path": "src/lib/server/guided-proposal-compiler.ts",
+      "line": 48,
+      "column": 43
+    },
+    {
+      "path": "src/lib/server/guided-proposal-evidence.ts",
+      "line": 73,
+      "column": 32
+    },
+    {
+      "path": "src/lib/server/auto-edit-doctrine.ts",
+      "line": 253,
+      "column": 43
+    },
+    {
+      "path": "src/lib/server/auto-edit-authority-snapshot.ts",
+      "line": 120,
+      "column": 20
+    },
+    {
+      "path": "src/lib/server/auto-edit-doctrine.ts",
+      "line": 83,
+      "column": 20
+    },
+    {
+      "path": "src/lib/server/auto-edit-pipeline-authority.ts",
+      "line": 68,
+      "column": 20
+    },
+    {
+      "path": "src/app/api/producer/studio/import/authority.ts",
+      "line": 36,
+      "column": 64
+    },
+    {
+      "path": "src/app/api/_lib/workspace.ts",
+      "line": 213,
+      "column": 21
+    },
+    {
+      "path": "src/lib/server/producer-manifest.ts",
+      "line": 64,
+      "column": 22
+    },
+    {
+      "path": "src/lib/server/producer-manifest.ts",
+      "line": 65,
+      "column": 10
+    },
+    {
+      "path": "src/app/api/_lib/workspace.ts",
+      "line": 99,
+      "column": 17
+    },
+    {
+      "path": "src/app/api/_lib/workspace.ts",
+      "line": 98,
+      "column": 19
+    },
+    {
+      "path": "src/app/api/_lib/workspace.ts",
+      "line": 97,
+      "column": 19
+    },
+    {
+      "path": "src/app/api/producer/references/fetch/route.ts",
+      "line": 95,
+      "column": 24
+    },
+    {
+      "path": "src/app/api/producer/references/fetch/route.ts",
+      "line": 99,
+      "column": 9
+    },
+    {
+      "path": "src/app/api/producer/studio/import/authority.ts",
+      "line": 54,
+      "column": 135
+    },
+    {
+      "path": "src/lib/server/auto-edit-candidate-promotion.ts",
+      "line": 88,
+      "column": 13
+    },
+    {
+      "path": "src/lib/server/auto-edit-candidate-promotion.ts",
+      "line": 89,
+      "column": 18
+    },
+    {
+      "path": "src/app/api/producer/studio/import/authority.ts",
+      "line": 47,
+      "column": 18
+    },
+    {
+      "path": "src/app/api/_lib/spawn-python.ts",
+      "line": 54,
+      "column": 18
+    },
+    {
+      "path": "src/app/api/_lib/reference-study-files.ts",
+      "line": 36,
+      "column": 9
+    },
+    {
+      "path": "src/app/api/_lib/reference-study-files.ts",
+      "line": 14,
+      "column": 43
+    },
+    {
+      "path": "src/app/api/_lib/reference-study-files.ts",
+      "line": 35,
+      "column": 20
+    },
+    {
+      "path": "src/app/api/producer/studio/paths.ts",
+      "line": 40,
+      "column": 31
+    },
+    {
+      "path": "src/app/api/producer/studio/paths.ts",
+      "line": 39,
+      "column": 18
+    },
+    {
+      "path": "src/lib/server/auto-edit-quality-artifacts.ts",
+      "line": 155,
+      "column": 9
+    },
+    {
+      "path": "src/lib/server/auto-edit-quality-artifacts.ts",
+      "line": 154,
+      "column": 20
+    },
+    {
+      "path": "src/lib/server/auto-edit-quality-artifacts.ts",
+      "line": 155,
+      "column": 50
+    },
+    {
+      "path": "src/lib/server/guided-opening-controller-lifecycle.ts",
+      "line": 62,
+      "column": 20
+    },
+    {
+      "path": "src/lib/server/guided-source-color-cleanup-attempt-media.ts",
+      "line": 44,
+      "column": 35
+    },
+    {
+      "path": "src/lib/server/guided-source-color-cleanup-attempt-media.ts",
+      "line": 28,
+      "column": 19
+    },
+    {
+      "path": "src/lib/server/guided-source-color-prelaunch-cancel-hold.ts",
+      "line": 83,
+      "column": 26
+    },
+    {
+      "path": "src/lib/server/guided-source-color-cleanup-attempt-media.ts",
+      "line": 45,
+      "column": 57
+    },
+    {
+      "path": "src/lib/server/guided-source-color-cleanup-attempt-media.ts",
+      "line": 47,
+      "column": 35
+    },
+    {
+      "path": "src/app/api/producer/auto-edit/planning-gates.ts",
+      "line": 66,
+      "column": 10
+    },
+    {
+      "path": "src/app/api/producer/scene-review/runner.ts",
+      "line": 182,
+      "column": 9
+    },
+    {
+      "path": "src/lib/server/guided-source-color-cleanup-attempt-hold.ts",
+      "line": 58,
+      "column": 107
+    },
+    {
+      "path": "src/app/api/_lib/reference-library.ts",
+      "line": 137,
+      "column": 23
+    },
+    {
+      "path": "src/app/api/_lib/reference-library.ts",
+      "line": 137,
+      "column": 46
+    },
+    {
+      "path": "src/lib/server/guided-opening-runtime-control.ts",
+      "line": 32,
+      "column": 27
+    },
+    {
+      "path": "src/app/api/_lib/reference-library.ts",
+      "line": 217,
+      "column": 57
+    },
+    {
+      "path": "src/app/api/_lib/workspace.ts",
+      "line": 219,
+      "column": 28
+    }
+  ]
+}

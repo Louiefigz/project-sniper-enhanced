@@ -175,7 +175,7 @@ class AbsentPlacementPathTests(unittest.TestCase):
              mock.patch.object(dg, "_clip_dims",
                                side_effect=lambda name: dims[name]), \
              mock.patch.object(gs, "emit"):
-            clips, _rows = gs._render_all([_entry()], None, "base.mp4")
+            clips, _rows = gs._render_all(gs.GraphicsJob("base.mp4", "unused.mp4", [_entry()]))
         self.assertEqual(clips[0]["scaleDims"], [3840, 2160])
         self.assertEqual((clips[0]["x"], clips[0]["y"]), (0, 0))
 

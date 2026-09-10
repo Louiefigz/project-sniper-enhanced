@@ -7,6 +7,7 @@ qualified. This verifies the adapter's real media/schema seam only.
 from __future__ import annotations
 
 import contextlib
+import json
 import shutil
 import time
 import unittest
@@ -18,7 +19,7 @@ from audio import assemble_source_audio as source
 from audio.assemble_publication import copy_verified
 from cut_preview_io import digest, file_hash, write_new
 from graphics.owned_execution import GraphicsComposition, OwnedGraphicsExecution
-from guided_body_result import observe_body_media, verify_body_media_files
+from guided_body_result import _delivery, observe_body_media, verify_body_media_files
 from guided_opening_inputs import OpeningInputs
 from opening_prefix_composition import PrefixCompositionJob, compose_verified_prefix
 from opening_prefix_contract import CompositorPrefixRequest, PrefixClock, PrefixOracleRuntime, PrefixRanges
@@ -49,6 +50,34 @@ class BodyResultActualMediaTests(unittest.TestCase):
         copy_verified(Path(value.video_out), picture, proof["output"]["sha256"])
         return {**proof, "retainedPicture": {"path": str(picture),
             "sha256": file_hash(picture), "sizeBytes": picture.stat().st_size}}
+
+    def _reject_signal_drift(self, root: Path, evidence: dict, final: dict) -> None:
+        """Resealed receipt mutations still must match actual current audio samples."""
+        reference = evidence["programDeliveryReceipt"]
+        path = Path(reference["path"])
+        original = path.read_bytes()
+        mutations = (
+            lambda row: row.pop("localSignal"),
+            lambda row: row["localSignal"].update(passed=False),
+            lambda row: row["localSignal"].update(referenceSha256="0" * 64),
+            lambda row: row["localSignal"].update(candidateSha256="0" * 64),
+            lambda row: row["localSignal"].update(unexpected=True),
+            lambda row: row["localSignal"]["thresholds"].update(minimum_snr_db=0),
+            lambda row: row["localSignal"]["windows"].pop(),
+            lambda row: row["localSignal"].update(elapsedSeconds=-1),
+            lambda row: row["localSignal"].update(elapsedSeconds=True),
+        )
+        try:
+            for index, mutate in enumerate(mutations):
+                row = json.loads(original)
+                mutate(row)
+                row["receiptHash"] = digest({key: value for key, value in row.items() if key != "receiptHash"})
+                path.write_text(json.dumps(row))
+                changed = {**reference, "receiptHash": row["receiptHash"]}
+                with self.subTest(signal_mutation=index), self.assertRaisesRegex(RuntimeError, "body local signal"):
+                    _delivery(root, (changed, evidence["composition"], self.fixture.selection), final)
+        finally:
+            path.write_bytes(original)
 
     def test_actual_assembly_result_decodes_and_rebinds_full_master_qc_and_cut_support(self) -> None:
         root = self.fixture.root / "body-result-adapter"
@@ -81,6 +110,7 @@ class BodyResultActualMediaTests(unittest.TestCase):
         verify_body_media_files(root, actual)
         again = observe_body_media(root, inputs, self.fixture.selection, evidence)
         self.assertEqual(digest(again), digest(actual))
+        self._reject_signal_drift(root, evidence, actual["final"])
         cut = root / "body-candidate/cut_delivery.v1.json"
         original = cut.read_bytes()
         try:

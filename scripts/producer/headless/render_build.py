@@ -14,14 +14,18 @@ from .render_build_manifest_v1_contract import (
 )
 from .render_build_manifest_v2_contract import (
     RENDER_BUILD_V2_DIGEST_DOMAIN,
-    RENDER_BUILD_V2_IMPLEMENTATION_PATHS,
     RENDER_BUILD_V2_POLICY,
+)
+from .render_build_manifest_v3_contract import (
+    RENDER_BUILD_V3_DIGEST_DOMAIN,
+    RENDER_BUILD_V3_IMPLEMENTATION_PATHS,
+    RENDER_BUILD_V3_POLICY,
 )
 from .safe_source_files import read_stable_owned_file
 
-BUILD_POLICY = RENDER_BUILD_V2_POLICY
-BUILD_SCHEMA_VERSION = 2
-_IMPLEMENTATION_FILES = RENDER_BUILD_V2_IMPLEMENTATION_PATHS
+BUILD_POLICY = RENDER_BUILD_V3_POLICY
+BUILD_SCHEMA_VERSION = 3
+_IMPLEMENTATION_FILES = RENDER_BUILD_V3_IMPLEMENTATION_PATHS
 
 
 @dataclass(frozen=True)
@@ -143,14 +147,15 @@ def render_build_manifest(request: RenderBuildRequest) -> dict:
 def render_build_manifest_digest(manifest: dict) -> str:
     """Hash a declared version; hashing alone does not validate its contents.
 
-    Historical V1 hashing remains reproducible. Current stores/loaders require
-    the closed V2 parser separately and never admit V1 through this dispatcher.
+    Historical V1/V2 hashing remains reproducible. Current stores/loaders require
+    the closed V3 parser separately; digest dispatch never admits old execution.
     """
     if type(manifest) is not dict or type(manifest.get("schemaVersion")) is not int:
         raise RuntimeError("render build digest version is invalid")
     versions = {
         (1, RENDER_BUILD_V1_POLICY): RENDER_BUILD_V1_DIGEST_DOMAIN,
         (2, RENDER_BUILD_V2_POLICY): RENDER_BUILD_V2_DIGEST_DOMAIN,
+        (3, RENDER_BUILD_V3_POLICY): RENDER_BUILD_V3_DIGEST_DOMAIN,
     }
     domain = versions.get((manifest["schemaVersion"], manifest.get("policy")))
     if domain is None:

@@ -1,0 +1,15 @@
+test_render_all_attaches_pip_hole_fields (test_nateherk_longform.PipHoleGraphTests.test_render_all_attaches_pip_hole_fields) ... {"stage": "graphics", "status": "cached", "kind": "nateherk-takeover", "key": "k", "fmt": "mov", "anchor": "own-screen", "offset": [0, 0], "region": "full-frame", "fallback": false, "gazeDistFrac": null, "outStart": 2.0, "outEnd": 8.0}
+{"stage": "graphics", "status": "pip_hole", "kind": "nateherk-takeover", "crop": [600, 1080, 660, 0], "rect": [1344, 60, 534, 960]}
+ok
+test_render_all_wires_4k_free_band_scaling_into_clip (test_placement.AbsentPlacementPathTests.test_render_all_wires_4k_free_band_scaling_into_clip) ... ok
+test_auto_edit_authoring_prompt_reads_the_ledger (test_learning_loop.LessonWireTests.test_auto_edit_authoring_prompt_reads_the_ledger) ... ok
+test_card_form_map_is_wired_into_both_authoring_surfaces (test_learning_loop.LessonWireTests.test_card_form_map_is_wired_into_both_authoring_surfaces) ... ok
+test_skill_step_4_reads_the_ledger (test_learning_loop.LessonWireTests.test_skill_step_4_reads_the_ledger) ... ok
+test_different_media_and_tampered_candidate_preserve_target (test_promote_transcript_authority.PromoteTranscriptAuthorityTests.test_different_media_and_tampered_candidate_preserve_target) ... ok
+test_exact_admitted_media_rebinds_and_preserves_provenance (test_promote_transcript_authority.PromoteTranscriptAuthorityTests.test_exact_admitted_media_rebinds_and_preserves_provenance) ... ok
+test_failed_atomic_commit_rolls_back_to_prior_transcript (test_promote_transcript_authority.PromoteTranscriptAuthorityTests.test_failed_atomic_commit_rolls_back_to_prior_transcript) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.115s
+
+OK

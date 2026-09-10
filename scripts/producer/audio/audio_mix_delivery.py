@@ -9,7 +9,7 @@ import tempfile
 from typing import Callable
 
 from producer_config import AUDIO
-from palmier.process_deadline import process_timeout
+from headless.process_runner import process_timeout
 from fingerprint_io import file_sha256
 
 AUDIO_DELIVERY_POLICY_VERSION = 2

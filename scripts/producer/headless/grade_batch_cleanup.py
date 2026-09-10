@@ -18,7 +18,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from uuid import UUID
 
-from color.deadline import require_time, wall_budget
+from color.deadline import defer_owner_cancellation, require_time, wall_budget
 from guided_presenter_read_fingerprint import hold_read_metadata, same_read_metadata
 from headless.container_policy import (
     DockerRuntime, _ABORT_POLL_SECONDS, _ABORT_STABLE_SECONDS, _force_remove, _is_absent,
@@ -206,13 +206,10 @@ def _reconcile(state: _Cleanup) -> None:
 
 def _protected_reconcile(state: _Cleanup) -> None:
     """Defer only the existing USR1 cancellation through actual resource reconciliation."""
-    previous_mask = signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGUSR1})
-    try:
+    with defer_owner_cancellation():
         state.prepare()
         state.check()
         _reconcile(state)
-    finally:
-        signal.pthread_sigmask(signal.SIG_SETMASK, previous_mask)
 
 
 def reconcile_grade_batch(names: tuple[str, ...], context: GradeBatchCleanupContext) -> dict:

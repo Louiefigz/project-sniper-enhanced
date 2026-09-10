@@ -41,3 +41,41 @@ def wall_budget(deadline: float) -> Iterator[None]:
     finally:
         signal.setitimer(signal.ITIMER_REAL, 0)
         signal.signal(signal.SIGALRM, previous)
+
+
+def _restore_owner_handler(previous: object, pending: list[bool]) -> None:
+    """Restore the caller's disposition before replaying its deferred cancellation."""
+    try:
+        signal.signal(signal.SIGUSR1, previous)
+    finally:
+        if pending[0]:
+            signal.pthread_kill(threading.get_ident(), signal.SIGUSR1)
+
+
+def _restore_owner_cancellation(mask: set, previous: object, pending: list[bool]) -> None:
+    """Restore both controls even if an alarm interrupts a completed mutation."""
+    try:
+        signal.pthread_sigmask(signal.SIG_SETMASK, mask)
+    finally:
+        _restore_owner_handler(previous, pending)
+
+
+@contextmanager
+def defer_owner_cancellation() -> Iterator[None]:
+    """Defer USR1 across threads; restore its exact disposition and caller mask."""
+    if threading.current_thread() is not threading.main_thread():
+        raise RuntimeError("owner cancellation deferral requires the main thread")
+    previous = signal.getsignal(signal.SIGUSR1)
+    pending = [False]
+
+    def remember(_signal: int, _frame: object) -> None:
+        """Coalesce cancellation while leaving the separate ALRM deadline live."""
+        pending[0] = True
+
+    previous_mask = signal.pthread_sigmask(signal.SIG_BLOCK, set())
+    try:
+        signal.signal(signal.SIGUSR1, remember)
+        signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGUSR1})
+        yield
+    finally:
+        _restore_owner_cancellation(previous_mask, previous, pending)

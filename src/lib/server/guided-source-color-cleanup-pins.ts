@@ -195,6 +195,7 @@ export const GUIDED_SOURCE_COLOR_CLEANUP_TS_FILES = Object.freeze([
   "src/lib/server/guided-opening-controller-lifecycle.ts",
   "src/lib/server/guided-opening-controller.ts",
   "src/lib/server/guided-opening-execution.ts",
+  "src/lib/server/guided-opening-finishing.ts",
   "src/lib/server/guided-opening-launch-status.ts",
   "src/lib/server/guided-opening-launch-store.ts",
   "src/lib/server/guided-opening-launcher.ts",

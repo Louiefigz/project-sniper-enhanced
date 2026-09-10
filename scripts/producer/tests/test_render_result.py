@@ -10,8 +10,8 @@ from pathlib import Path
 from unittest import mock
 
 from _common import pl  # noqa: F401
-from _current_render_build_fixture import current_manifest
-from _render_lane_proof import ProofInputs, build_full_proof
+from _current_build_release_fixture import current_manifest
+from _render_lane_proof import IMAGE_ID, ProofInputs, build_full_proof
 from headless import render_lane
 from headless.render_lane import OverlayLaunchRequest
 from headless.overlay_seal import (OverlayPrepareRequest, OverlaySealBinding,
@@ -23,7 +23,6 @@ from headless.resource_ledger import ResourceRequest
 
 PRODUCER_DIR = Path(__file__).resolve().parents[1]
 REPO_ROOT = PRODUCER_DIR.parents[1]
-IMAGE_ID = "sha256:bc56d3860d2ec1c843f7184bcecd21137aa79fe9fe19c90a67136d3052222ba8"
 CONTAINER_NAME = "sniper-render-" + "d" * 32
 
 

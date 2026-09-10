@@ -49,7 +49,7 @@
       "roots": ["scripts/producer"],
       "suffixes": [".py"],
       "token": "verify_archive_file(",
-      "expectedOccurrenceCount": 4
+      "expectedOccurrenceCount": 5
     },
     {
       "ruleId": "legacy-admission-escape",
@@ -272,7 +272,8 @@
       "released": true,
       "entryPoints": [
         "scripts/producer/headless/container_io.py",
-        "scripts/producer/headless/overlay_source_seal.py"
+        "scripts/producer/headless/overlay_source_seal.py",
+        "scripts/producer/headless/render_layout_contract.py"
       ],
       "authorityPaths": [
         "scripts/producer/headless/sealed_archive.py",
@@ -283,7 +284,8 @@
       ],
       "testPaths": [
         "scripts/producer/tests/test_sealed_archive_adversarial.py",
-        "scripts/producer/tests/live_p0_adversarial_ingress_acceptance.py"
+        "scripts/producer/tests/live_p0_adversarial_ingress_acceptance.py",
+        "scripts/producer/tests/test_render_layout_contract.py"
       ],
       "ownership": [
         {
@@ -308,6 +310,12 @@
           "ruleId": "sealed-archive-verification",
           "path": "scripts/producer/headless/overlay_source_seal.py",
           "sourceToken": "archive = verify_archive_file(",
+          "expectedOccurrences": 1
+        },
+        {
+          "ruleId": "sealed-archive-verification",
+          "path": "scripts/producer/headless/render_layout_contract.py",
+          "sourceToken": "verify_archive_file(snapshot.path, snapshot.sha256, snapshot.manifest)",
           "expectedOccurrences": 1
         }
       ],
@@ -391,7 +399,8 @@
         "scripts/producer/palmier/desktop_cli.py"
       ],
       "authorityPaths": [
-        "scripts/producer/ingest_admission_contract.py"
+        "scripts/producer/ingest_admission_contract.py",
+        "scripts/producer/assemble_arguments.py"
       ],
       "promotionPaths": [],
       "testPaths": [
@@ -406,7 +415,7 @@
         },
         {
           "ruleId": "legacy-admission-escape",
-          "path": "scripts/producer/assemble.py",
+          "path": "scripts/producer/assemble_arguments.py",
           "sourceToken": "--allow-legacy-unadmitted",
           "expectedOccurrences": 1
         },
@@ -499,7 +508,7 @@
           "expectedOccurrences": 1
         },
         {
-          "path": "scripts/producer/assemble.py",
+          "path": "scripts/producer/assemble_arguments.py",
           "token": "if not args.allow_legacy_unadmitted:",
           "expectedOccurrences": 1
         },

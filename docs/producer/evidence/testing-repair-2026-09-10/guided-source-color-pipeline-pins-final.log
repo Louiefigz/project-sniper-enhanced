@@ -1,0 +1,27 @@
+✔ literal cleanup pins equal the full bounded current static project TS import graph (186.558542ms)
+ℹ TEST static TS import audit: 301 files in 186.001 ms; no native/package/dynamic-import qualification
+✔ static import audit distinguishes runtime project edges from type-only and external imports (0.176708ms)
+✔ fresh source capture retains the four actual TS import holes without changing exclusions (78.3485ms)
+✔ actual fresh pipeline snapshot satisfies every current V2 pin while legacy selection remains five (171.488917ms)
+ℹ TEST fresh metadata: 330 captured files, 304 V2 pins; capture 44.370 ms; current-pin check 42.952 ms
+▶ each missing explicit capture hole fails instead of silently minting a reduced fresh snapshot
+  ✔ src/app/api/producer/studio/import/files.ts (56.641375ms)
+  ✔ src/app/api/producer/studio/import/evidence.ts (57.802041ms)
+  ✔ src/app/api/producer/studio/import/model.ts (57.311416ms)
+  ✔ src/lib/debug.ts (56.3965ms)
+✔ each missing explicit capture hole fails instead of silently minting a reduced fresh snapshot (228.704042ms)
+✔ missing new cleanup or shared owner pin cannot borrow current code from outside the original snapshot (343.801833ms)
+✔ fresh capture and staged code inventory retain the actual source-only base Python closure (3677.715083ms)
+ℹ TEST Python closure 352; grade implementation 175; snapshot 690; staged 359; guard calls 733; discovery 783.429 ms; complete metadata test 3587.993 ms; no native/package/admission qualification
+✔ fresh capture retains the complete actual schema2 readback Python closure and finite holders (1229.190791ms)
+ℹ TEST read seed guided_opening_read.py: 360 Python imports; 20 explicit read/holder boundaries; 692 freshly captured files; 364 staged files; discovery 896.131 ms; total 1141.265 ms; no native, dynamic-import, old-snapshot repair or package execution qualification
+✔ fresh capture retains actual body worker/read/cleanup imports and refuses a reduced original lock (5307.66475ms)
+ℹ TEST body Python imports 429; fresh snapshot 759; total 5215.658 ms; metadata only, no native/AV qualification
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11228.960667

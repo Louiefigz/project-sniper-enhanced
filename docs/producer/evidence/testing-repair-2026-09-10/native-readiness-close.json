@@ -1,0 +1,34 @@
+{
+  "scope": "Closing read-only native admission measurement after production build; no media launched",
+  "snapshot": {
+    "measured_at": 1789058870.780805,
+    "physical_bytes": 68719476736,
+    "free_percent": 75.0,
+    "swap_used_bytes": 7074018754,
+    "compressor_bytes": 10043260928,
+    "disk_free_bytes": 94855028736,
+    "owned_footprint_bytes": 0,
+    "largest_owned_process_bytes": 0,
+    "owned_pids": [],
+    "processes": [],
+    "identity_verified": false,
+    "unused_physical_bytes": 6957301760,
+    "missing_registered_pids": [],
+    "reused_registered_pids": [],
+    "kernel_pressure_level": 1
+  },
+  "policy": {
+    "admission_free_percent": 25,
+    "stop_free_percent": 10,
+    "maximum_compressor_fraction": 0.1,
+    "maximum_owned_gib": 6,
+    "maximum_process_gib": 5,
+    "maximum_swap_growth_gib": 1,
+    "minimum_disk_free_gib": 10,
+    "minimum_unused_physical_gib": 6,
+    "maximum_snapshot_age_seconds": 30
+  },
+  "admissionReasons": [
+    "physical memory occupied by the compressor exceeds policy"
+  ]
+}

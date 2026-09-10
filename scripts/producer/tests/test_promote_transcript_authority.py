@@ -8,7 +8,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from scripts.producer.tests._ingest_admission_fixture import runner
+from _ingest_admission_fixture import runner
 from ingest_admission import admit_ingest_candidates, collect_ingest_candidates
 import promote_transcript_authority as promotion
 from transcript_source_authority import bind_result, observe_source, verify_result

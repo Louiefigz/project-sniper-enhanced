@@ -1,6 +1,7 @@
 /** Exact TEMP-only faults around the actual staging batch; no native or source admission. */
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import type { TestContext } from "node:test";
 import { SourceColorStagingRead } from "../guided-source-color-staging-hold";
@@ -36,7 +37,8 @@ export type StagingBatchFixture = ReturnType<typeof stagingBatchFixture>;
 /** Only these two literal fixture-created inert pins may be faulted, never an observed dependency path. */
 function pin(f: StagingBatchFixture, role: "first" | "last"): string {
   const root = fs.realpathSync(f.context.root), file = path.join(root, role === "first" ? FIRST : LAST);
-  assert(root.startsWith("/private/tmp/source-color-expectations-")); assert.equal(fs.realpathSync(file), file);
+  assert.equal(path.dirname(root), fs.realpathSync(os.tmpdir()));
+  assert(path.basename(root).startsWith("source-color-expectations-")); assert.equal(fs.realpathSync(file), file);
   const stat = fs.lstatSync(file); assert(stat.isFile()); assert.equal(stat.nlink, 1); assert.equal(stat.uid, process.getuid!());
   assert.equal(file, f[role]); return file;
 }

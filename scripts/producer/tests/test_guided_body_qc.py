@@ -128,10 +128,14 @@ class GuidedBodyQcTests(unittest.TestCase):
                 (root / "body-candidate/cut_delivery.v1.json").write_bytes(b"TEST changed after QC")
             work = SimpleNamespace(control=SimpleNamespace(root=root), revalidate=mutate, guard=lambda: None)
             record = {"media": media}
-            with patch("guided_body_read.read_body_graphics"), patch("guided_body_read._screen"), \
+            # This TEST-only work isolates the post-revalidation file race.
+            # Original source-color construction is exercised by its own suite.
+            with patch("guided_body_read.recheck_body_source_result") as source_check, \
+                    patch("guided_body_read.read_body_graphics"), patch("guided_body_read._screen"), \
                     patch("guided_body_read.read_body_record", return_value=record):
                 with self.assertRaisesRegex(RuntimeError, "bytes changed"):
                     _unchanged(work, record, object())
+                source_check.assert_called_once_with(record, work)
 
 
 if __name__ == "__main__":

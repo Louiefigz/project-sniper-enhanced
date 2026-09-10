@@ -8,10 +8,6 @@ import unittest
 from unittest import mock
 
 from _common import pl  # noqa: F401
-from _build_manifest_import_closure import (
-    dynamic_import_calls,
-    local_import_closure,
-)
 from _build_receipt_semantics_fixture import (
     compositor_manifest_document,
     compositor_receipt_bytes,
@@ -50,23 +46,6 @@ def _rehash(document: dict) -> bytes:
 
 
 class CompositorBuildReceiptSemanticTests(unittest.TestCase):
-    def test_frozen_catalog_covers_transitive_local_execution_imports(
-        self,
-    ) -> None:
-        entries = (
-            "scripts/producer/headless/prebound_compositor_build.py",
-            "scripts/producer/headless/prebound_compositor.py",
-            "scripts/producer/graphics/composite_core.py",
-            "scripts/producer/graphics/composite_smoothness.py",
-            "scripts/producer/headless/prebound_clips.py",
-            "scripts/producer/headless/prebound_compositor_receipt.py",
-        )
-        closure = local_import_closure(entries)
-        catalog = frozenset(COMPOSITOR_BUILD_V1_IMPLEMENTATION_PATHS)
-        self.assertFalse(closure - catalog)
-        self.assertFalse(dynamic_import_calls(closure))
-        self.assertIn("templates/motion/tokens.css", catalog)
-
     def test_exact_receipt_recomputes_frozen_source_digest(self) -> None:
         value = parse_compositor_build_receipt_v1(_receipt())
         self.assertEqual(value.build_digest, value.manifest.build_digest)
@@ -75,20 +54,6 @@ class CompositorBuildReceiptSemanticTests(unittest.TestCase):
             COMPOSITOR_BUILD_V1_IMPLEMENTATION_PATHS,
         )
         validate_compositor_build_receipt_v1(value)
-
-    def test_live_writer_and_frozen_parser_share_the_exact_v1_contract(
-        self,
-    ) -> None:
-        self.assertEqual(
-            tuple(live_build._IMPLEMENTATION_FILES),
-            COMPOSITOR_BUILD_V1_IMPLEMENTATION_PATHS,
-        )
-        parsed = parse_compositor_build_receipt_v1(
-            live_build.compositor_build_receipt_bytes()
-        )
-        self.assertEqual(
-            parsed.build_digest, live_build.compositor_build_digest()
-        )
 
     def test_historical_parser_does_not_follow_live_catalog_changes(
         self,

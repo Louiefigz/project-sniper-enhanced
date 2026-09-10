@@ -141,3 +141,55 @@ test("selected presentation and conditional presenter-hole screening agree with 
   }));
   assert.deepEqual(values.map(passes), observed);
 });
+
+test("current shared-master finishing agrees with Python for long, short and captioned metadata", () => {
+  const cases: Array<[Record<string, unknown>, boolean]> = [
+    [{ audioEnhance: { preset: "voice" } }, true], [{ audioEnhance: { preset: "voice-rnn" } }, true],
+    [{ audioEnhance: { preset: "voice-strong", rationale: "TEST cleanup" } }, true],
+    [{ audioEnhance: null, audioGain: null }, true], [{ audioGain: [] }, true],
+    [{ audioGain: [{ outStart: 0.5, outEnd: 1, dB: -12 }, { outStart: 1, outEnd: 2, dB: 12 }] }, true],
+    [{ audioEnhance: { preset: "voice" }, audioGain: [{ outStart: 1, outEnd: 2, dB: 6, rationale: "TEST lift" }] }, true],
+    [{ audioEnhance: false }, false], [{ audioEnhance: {} }, false], [{ audioEnhance: "voice" }, false],
+    [{ audioEnhance: { preset: "separate" } }, false], [{ audioEnhance: { preset: "unknown" } }, false],
+    [{ audioEnhance: { preset: "voice", extra: true } }, false], [{ audioGain: false }, false],
+    [{ audioGain: 2 }, false], [{ audioGain: {} }, false], [{ audioGain: [{}] }, false],
+    [{ audioGain: [{ outStart: 1, outEnd: 1, dB: 0 }] }, false],
+    [{ audioGain: [{ outStart: 0, outEnd: 1, dB: 13 }] }, false],
+    [{ audioGain: [{ outStart: 0, outEnd: 2, dB: 1 }, { outStart: 1, outEnd: 3, dB: 2 }] }, false],
+  ];
+  for (const field of ["outStart", "outEnd", "dB"]) {
+    for (const value of [true, false, null, "2", "NaN"]) {
+      cases.push([{ audioGain: [{ outStart: 0, outEnd: 1, dB: 2, [field]: value }] }, false]);
+    }
+  }
+  const values = [false, true].flatMap(short => [false, true].flatMap(captioned => cases.map(([patch, expected]) => {
+    const value = metadata();
+    value.plan = { ...value.plan, ...patch, target: { mode: short ? "short" : "longform",
+      width: short ? 1080 : 1920, height: short ? 1920 : 1080 }, captions: { burn: captioned },
+      ...(short ? { reframe: { layout: "fill", crop: [0, 0, 1, 1], track: false } } : {}),
+      ...(captioned ? { captionsTrack: { schemaVersion: 1, source: "kept-transcript", defaultPolicy: "line", groups: [] } } : {}) };
+    return { value, expected };
+  })));
+  const code = "import json,sys\nfrom guided_opening_frames import _profile\nfrom guided_media_profile import profile_for_plan\nout=[]\nfor p in json.load(sys.stdin):\n try:\n  _profile(p,profile_for_plan(p));out.append(True)\n except (RuntimeError,ValueError,KeyError,TypeError):out.append(False)\nprint(json.dumps(out))";
+  const actual = JSON.parse(execFileSync(path.resolve(".venv/bin/python"), ["-B", "-c", code], {
+    input: JSON.stringify(values.map(row => row.value.plan)), encoding: "utf8", timeout: 10_000,
+    env: { ...process.env, PYTHONDONTWRITEBYTECODE: "1", PYTHONPATH: path.resolve("scripts/producer") } }));
+  assert.deepEqual(actual, values.map(row => row.expected));
+  for (const [index, row] of values.entries()) {
+    const before = structuredClone(row.value);
+    assert.equal(passes(row.value), actual[index], `case ${index}`);
+    if (row.expected) assertFullProgramMediaMetadata(row.value);
+    else assert.throws(() => assertFullProgramMediaMetadata(row.value));
+    assert.deepEqual(row.value, before);
+  }
+});
+
+test("finishing preflight never coerces gain fields or admits nonfinite numbers", () => {
+  for (const invalid of [true, false, null, "2", NaN, Infinity, -Infinity]) {
+    for (const field of ["outStart", "outEnd", "dB"]) {
+      const value = metadata();
+      value.plan.audioGain = [{ outStart: 0, outEnd: 1, dB: 2, [field]: invalid }];
+      assert.throws(() => assertOpeningMediaMetadata(value), /finite numeric/);
+    }
+  }
+});

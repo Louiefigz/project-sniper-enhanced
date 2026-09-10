@@ -81,8 +81,9 @@ class PresenterBaseIdentityTests(unittest.TestCase):
                 fixture.inputs.documents["candidatePlan"]["TEST-late"] = True
 
         with patch.object(OwnedPresenterExecution, "assert_current", new=current):
-            self.assertRaisesRegex(RuntimeError, "input changed|inputs changed|metadata changed",
+            self.assertRaisesRegex(RuntimeError, "input changed|inputs changed|metadata changed|original arguments changed",
                                    PresenterBaseContext, fixture.inputs, fixture.presenter, identity)
+        self.assertTrue(changed[0])
 
     def test_final_source_callback_cannot_change_selected_observation(self) -> None:
         """Source holds do not replace the final independent presenter metadata sweep."""

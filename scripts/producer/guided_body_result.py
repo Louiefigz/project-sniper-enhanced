@@ -6,6 +6,7 @@ render, edit plans, replace media, rerun authors or create delivery approval.
 """
 from __future__ import annotations
 
+import math
 from dataclasses import asdict
 from fractions import Fraction
 from pathlib import Path
@@ -14,6 +15,7 @@ from audio.assemble_publication import require_settled
 from audio.audio_mix_delivery import measure_delivery
 from audio.audio_mix_picture import observe_picture_source, verify_picture_copy
 from audio.program_audio_clock import exact_aac_audio_clock
+from audio.program_delivery_signal import verify_program_delivery_signal
 from audio.program_master_selection import HeldMasterSelection
 from cut_delivery_authority import verify_delivered_cuts
 from cut_preview_io import bound_json, digest, file_hash
@@ -33,6 +35,19 @@ def _reference(path: Path) -> dict:
     return artifact_reference(path)
 
 
+def _delivery_signal(row: dict, selection: HeldMasterSelection, final: dict) -> dict:
+    """Replay exact decoded signal evidence; retain only the original elapsed time."""
+    retained = row.get("localSignal")
+    elapsed = retained.get("elapsedSeconds") if type(retained) is dict else None
+    if type(elapsed) not in (int, float) or not math.isfinite(elapsed) or elapsed < 0:
+        raise RuntimeError("body local signal lacks a valid original measurement time")
+    current = verify_program_delivery_signal(selection.master, final["path"])
+    expected = {**current, "elapsedSeconds": elapsed}
+    if digest(retained) != digest(expected):
+        raise RuntimeError("body local signal differs from the exact held master and final audio")
+    return expected
+
+
 def _delivery(root: Path, values: tuple, final: dict) -> dict:
     """Bind the actual retained full-master→AAC receipt to unchanged final picture."""
     reference, composition, selection = values
@@ -49,6 +64,7 @@ def _delivery(root: Path, values: tuple, final: dict) -> dict:
         "audioProgramInputHash": selection.master.receipt["audioProgramInputHash"],
         "path": composition["outputPath"], "sha256": final["sha256"], "picture": final["pictureCopy"],
         "audioClock": final["audioClock"], "delivery": final["audioDelivery"],
+        "localSignal": _delivery_signal(row, selection, final),
         "audiblePathAacEncodes": 1, "legacyPictureTransportAacStillExecuted": True, "receiptHash": expected_hash}
     closed(row, set(expected), "body actual full-program AAC delivery")
     if digest(row) != digest(expected):

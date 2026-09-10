@@ -1,0 +1,1455 @@
+Remaining official server-test modules, one child at a time; continue after failures to finish inventory.
+src/lib/server/__tests__/guided-manual-short.test.ts
+✔ manual short selects a new explicit geometry class without mutating the submitted plan (1.469792ms)
+✔ TS and actual Python profile agree on manual crop and every unchanged finishing exclusion (108.21975ms)
+✔ no unknown tracker/layout/default caption allowance or nonfinite geometry (0.197708ms)
+✔ historical invocation parser refuses new class while current dispatcher retains exact new bytes (0.873833ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 115.160375
+MODULE_EXIT 0 src/lib/server/__tests__/guided-manual-short.test.ts
+src/lib/server/__tests__/guided-media-profile-presenter.test.ts
+✔ absent presenterLayouts keeps every old fresh and held class unchanged (1.238959ms)
+✔ any present presenterLayouts refuses old fresh and held selectors without mutation (1.527708ms)
+✔ direct manual validators cannot discard present but empty presenter intent (0.158375ms)
+✔ actual Python selector and explicit held frame-profile entry reject the same property presence (103.596042ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 109.741291
+MODULE_EXIT 0 src/lib/server/__tests__/guided-media-profile-presenter.test.ts
+src/lib/server/__tests__/guided-opening-approval-media.test.ts
+✔ approval byte verification deduplicates files while checking both selected row identities (1.958709ms)
+✔ approval byte verification rejects symlinks, multiply linked files and wrong size/hash (1.39875ms)
+✔ selected FIFO rejects in a bounded child without invoking approval, a provider or decoder (542.961917ms)
+✔ descriptor observation rejects same-sized path replacement during the read (0.8785ms)
+✔ descriptor observation rejects in-place growth or truncation during the read (1.375875ms)
+✔ guard runs before opening and its exact lease/clock failure propagates (0.097416ms)
+✔ mid-read guard stops before another chunk and closes the owned descriptor (2.301666ms)
+✔ post-read guard failure cannot return a successful observation (0.599083ms)
+✔ approval helper forwards guard failures through each chunk and does not check another range (2.481791ms)
+✔ guarded and default reader results remain identical, including retained bytes (1.058375ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 559.556292
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-approval-media.test.ts
+src/lib/server/__tests__/guided-opening-approval.test.ts
+✔ approval submission is closed and every attestation must be explicitly true (0.767084ms)
+✔ the browser accepts approval only as a verified object that agrees with the flag and selection time (2.599458ms)
+✔ approval results bind the exact selection and never claim body or delivery (0.1235ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6.339375
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-approval.test.ts
+src/lib/server/__tests__/guided-opening-claim.test.ts
+✔ opening claim is closed exact ownership metadata, never absence, media or approval (2.383ms)
+✔ held runtime controls cannot select a tag/root user/path alias or claim success (0.214625ms)
+✔ durable pointer accepts ownership only after an actual draft and preserves unsupported receipt identity (0.31075ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6.175667
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-claim.test.ts
+src/lib/server/__tests__/guided-opening-cleanup-command-integration.test.ts
+✔ CLI cleanup services remain actual private-capability readers and pending-only recovery (0.524ms)
+✔ actual cleanup-status to literal wx request to CLI recovery preserves complete identity and false approval flags (10475.808708ms)
+✔ actual CLI refuses stale persisted expectedToken without refreshing it (8919.234833ms)
+✔ actual CLI refuses stale persisted expectedJournalHash without refreshing it (8484.122625ms)
+✔ actual CLI refuses stale persisted claimHash without refreshing it (8062.244583ms)
+✔ cleanup-status refuses legacy instead of manufacturing a recovery request (8077.806708ms)
+✔ cleanup-status refuses unknown instead of manufacturing a recovery request (8027.30075ms)
+✔ cleanup-status refuses malformed-prepared instead of manufacturing a recovery request (8025.646791ms)
+✔ cleanup-status rejects an actual late held media-record replacement without producing a request (8052.024917ms)
+✔ actual CLI recovery clock charges canonical reading before service entry (8102.09175ms)
+✔ actual CLI recovery clock charges request reading before service entry (7996.7315ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 84229.008791
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-cleanup-command-integration.test.ts
+src/lib/server/__tests__/guided-opening-cleanup-command.test.ts
+✔ closed recovery request preserves exact checkpoint and rejects every extra authority field (0.960292ms)
+✔ explicit recovery uses one original clock before canonicalization and request file parsing (2.562584ms)
+✔ ambiguous recovery never retries, falls back to native cleanup, refreshes a request or reports success (1.192125ms)
+✔ invalid recovery grammar/help never create a clock or touch any project (0.808333ms)
+✔ malformed recovery bytes are bounded and no-follow with no service call (1.835458ms)
+✔ request parse does not mutate or manufacture identity from the current project (0.807041ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11.12625
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-cleanup-command.test.ts
+src/lib/server/__tests__/guided-opening-cleanup-store-history.test.ts
+✔ historical store keeps genuine inner proof without exposing a new public capability (9143.763333ms)
+✔ same metadata dispatcher accepts actual current store result without changing its private identity (9375.91325ms)
+✔ copied historical/current values and prepared or legacy DTOs cannot borrow store proof (9469.36775ms)
+✔ historical wrapper retains original finalSnapshot inode after returning (9312.308709ms)
+✔ historical wrapper retains original media inode after returning (9148.977166ms)
+✔ historical wrapper retains original archive inode after returning (8943.003375ms)
+✔ historical wrapper cannot substitute its original projection or hide mutable Buffer changes (8755.405958ms)
+✔ later metadata-only check does not replay callbacks or renew an expired proof-read allowance (8919.773875ms)
+✔ historical wrapper still refuses expiry during its original thirty-second read (9187.963625ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 82261.328708
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-cleanup-store-history.test.ts
+src/lib/server/__tests__/guided-opening-cleanup.test.ts
+✔ legacy cleanup never downgrades a retained source-color request to graphics-only completion (0.568541ms)
+✔ cleanup schema is bounded exact resource metadata, never proof of actual invocation or media (1.217958ms)
+✔ every selected resource needs exact same-name absence and complete phase coverage (0.23725ms)
+✔ unarmed rows cannot hide registered names or unknown armed ledgers (0.152833ms)
+✔ schema success cannot target another held claim or omit an exact claimed order (0.258333ms)
+✔ cleanup pointer is historical resource-only metadata, never opening media or cut approval (0.162208ms)
+✔ exact resource cleanup after a forced outer stop retains claim and outcome pointers; a normal return clears them (0.190709ms)
+✔ a resolved initial observation cannot clear ownership after either final CAS observation becomes uncertain (0.1035ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6.415666
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-cleanup.test.ts
+src/lib/server/__tests__/guided-opening-command.test.ts
+✔ direct status commands never start, approve, mutate or retry media (1.640917ms)
+✔ review-files checks selected bytes once per file without approval or rendering (2.584125ms)
+✔ review-files rejects selection changes during the byte check (0.466583ms)
+✔ explicit launch keeps the exact persisted request and idempotency across retries (0.873833ms)
+✔ ambiguous launch error propagates without retry or status-as-success (0.607292ms)
+✔ explicit approval preserves one exact decision and never launches or approves the body (0.862292ms)
+✔ approval never infers missing human attestations or accepts launch/delivery authority (4.547583ms)
+✔ approval uses the same bounded no-follow request reader and never retries failure (1.071583ms)
+✔ identical approval replay acknowledges history without claiming fresh verification (0.766208ms)
+✔ request reader rejects malformed, extra authority, invalid UTF8, empty and oversized bytes (1.408375ms)
+✔ request cannot be a symlink, directory or missing file (0.575125ms)
+✔ invalid command grammar and help perform no project reads (0.520292ms)
+✔ actual local CLI help and invalid grammar work without a dev server or media (1139.249125ms)
+✔ canonical directory validation does not initialize missing personal config (0.721208ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1160.235041
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-command.test.ts
+src/lib/server/__tests__/guided-opening-completed-cleanup-command.test.ts
+✔ CLI completed status and recovery defaults are actual production implementations (0.556666ms)
+✔ completed status produces exact persisted request and actual CLI recovery finishes without native replay (11921.726041ms)
+✔ completed status private proof denies DTOs and original-file replacement after the read (7908.240083ms)
+✔ partial history cannot manufacture a status request or acquire ownership (7462.402958ms)
+✔ completed status original claim callback cannot rebaseline the current journal (7518.927708ms)
+✔ completed request parser is closed and never accepts native, approval or clock overrides (0.31025ms)
+✔ actual completed CLI refuses stale expectedToken without rewriting its request (7523.809292ms)
+✔ actual completed CLI refuses stale preparedSha256 without rewriting its request (7589.903667ms)
+✔ completed CLI creates its sole protected clock before path/request parsing and never calls pending/native fallbacks (7503.696375ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 57440.687584
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-completed-cleanup-command.test.ts
+src/lib/server/__tests__/guided-opening-contract.test.ts
+✔ opening request is closed and cannot name paths, timing, approval, renderer or source selections (1.154ms)
+✔ V3 graphics require explicit reviewed presentation; V2 stays unchanged without an executable sidecar (1.484166ms)
+✔ exact fractional frame bindings survive seconds projection and reject entry omission or presentation drift (2.378834ms)
+✔ only schema3 exact empty asset defaults mean no asset; nonempty and legacy proposals remain blocked (1.051791ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9.129958
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-contract.test.ts
+src/lib/server/__tests__/guided-opening-controller-cleanup.test.ts
+✔ controller cleanup hold reuses actual final proof without reading source media or invoking a worker (8984.326375ms)
+✔ original terminal archive identity cannot be rebaselined by a later actual cleanup read (8999.444125ms)
+✔ original terminal raw Buffer remains held across subsequent callbacks (8820.627917ms)
+✔ actual selection-shaped CAS does not replay the original current-journal hold or renew render time (8844.372583ms)
+✔ original cleanup ledger identity survives the final callback-free sweep (8851.947709ms)
+✔ late regular cleanup failure marker remains fenced (8816.666166ms)
+✔ late dangling cleanup failure marker remains fenced (8781.039041ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 62102.034416
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-controller-cleanup.test.ts
+src/lib/server/__tests__/guided-opening-controller-lifecycle.test.ts
+✔ untouched actual original preclaim lifecycle releases only its own TEMP lease (94.095167ms)
+✔ copied lifecycle metadata cannot release a live lease (72.992875ms)
+✔ same-byte original journal substitution retains the actual lease (80.9505ms)
+✔ changed original launch handle cannot authorize preclaim release (72.521292ms)
+✔ changed original activation handle cannot authorize preclaim release (70.531125ms)
+✔ changed original lease handle cannot authorize preclaim release (67.453875ms)
+✔ original noop release never reports confirmed release (73.34525ms)
+✔ original throw release never reports confirmed release (73.570041ms)
+✔ entering claim publication retains ownership even when claim throws before a return (77.546583ms)
+✔ expired original allowance before claim leaves an untouched releasable phase (81.895375ms)
+✔ claim phase and cleanup terminal cannot be fabricated or replayed (80.761459ms)
+✔ existing V2 preclaim fence cannot acquire claim or native authority through the live handle (77.618208ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 927.391
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-controller-lifecycle.test.ts
+src/lib/server/__tests__/guided-opening-controller-terminal.test.ts
+✔ same original preclaim owner releases only after actual final cleanup is authenticated (4195.391875ms)
+✔ a wrong cleanup reference cannot discharge the original live claim phase (2969.344166ms)
+✔ later verification failure does not undo already proved exact cleanup (2994.742458ms)
+✔ same-byte retirement archive replacement after terminal observation retains the original lease (2947.938208ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13110.688958
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-controller-terminal.test.ts
+src/lib/server/__tests__/guided-opening-execution.test.ts
+✔ one production sequence claims, executes, cleans, verifies and selects without approving (1.281542ms)
+✔ internal V2 metadata cannot silently execute the legacy path and drop requested source color (0.482416ms)
+✔ unproved stop never permits cleanup or media selection (0.094667ms)
+✔ a stopped failed worker still receives protected cleanup but never a readback (0.137583ms)
+✔ retained ownership or mismatched cleanup prevents verification (0.224792ms)
+✔ expired media budget cannot skip cleanup or purchase a fresh selection budget (0.08325ms)
+✔ failed readback and stale/approved selection are not reported as generation success (0.374042ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6.283
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-execution.test.ts
+src/lib/server/__tests__/guided-opening-launch-route.test.ts
+✔ local GET only reads bounded dir metadata; explicit POST records exact submission with 202 (6.515791ms)
+✔ closed query/body/local policy rejects before the mocked service is reached (5.140458ms)
+✔ a stalled streaming body reaches its exact 10-second deadline without calling the launcher (0.746375ms)
+✔ foreign project and disconnected bodies fail before launch without mutating the submitted UUID (0.360166ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 15.947959
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-launch-route.test.ts
+src/lib/server/__tests__/guided-opening-launch-store.test.ts
+✔ checkpoint singleton is exclusive even for byte-identical repeated publication (32.304625ms)
+✔ an interrupted parent with no activation/release never enters the controller handoff (65.622084ms)
+✔ malformed, wrong-project and old-controller inventories are never absent or launchable (53.150083ms)
+✔ a broken symlink or directory in place of a launch file fails closed (1.45625ms)
+✔ new activation refuses PID-only, missing boot/start and unrelated intent clocks (27.053083ms)
+✔ controller-started is a one-time fence and launch path derivation rejects traversal (20.053125ms)
+✔ missing or relative sealed tool pins fail before any launch intent is published (1.239083ms)
+✔ activation alone cannot hand off; the exact release marker unlocks only the recorded process (104.049083ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 307.823917
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-launch-store.test.ts
+src/lib/server/__tests__/guided-opening-ledger-subprocess.test.ts
+✔ actual owned worker with zero detached helpers records a complete lifecycle (42.993625ms)
+✔ actual additive cleanup wrapper records its lifecycle inside the exact private attempt (40.87075ms)
+✔ actual cleanup abrupt zero-exit is not a complete attempt lifecycle (35.858625ms)
+✔ actual owned worker propagates ledger into the detached helper lifecycle (65.957916ms)
+✔ actual abrupt zero-exit before lifecycle finish is unproved, never an empty success (35.051125ms)
+✔ actual timeout-reaped nested helper leaves complete lifecycle and exact child rows (146.490416ms)
+✔ actual outer cancellation stays a forced stop, never a normally finished lifecycle (231.400375ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 601.186292
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-ledger-subprocess.test.ts
+src/lib/server/__tests__/guided-opening-media-contract.test.ts
+✔ worker invocation has closed server-derived references and no free output, approval or source selection (1.891041ms)
+✔ worker paths are lexically canonical without claiming file or inode observation (0.119875ms)
+✔ separate media authority preserves exact fractional frame core and original clock with no approval shape (1.291834ms)
+✔ current dispatch admits explicit screened tokens but historical parser never upgrades (1.301333ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7.614334
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-media-contract.test.ts
+src/lib/server/__tests__/guided-opening-media-input.test.ts
+TEST fixture retained root: /private/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-human-cut-szF68I/test-only-cut-review-28f4d9bb
+✔ actual own-screen input closes exact14 documents under a lease without rendering or promoting (15809.617458ms)
+TEST fixture retained root: /private/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-human-cut-EkLUQ4/test-only-cut-review-77f9629d
+✔ current V5 caption request survives actual durable proposal/readiness into exact original opening documents (15764.183166ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 31576.928875
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-media-input.test.ts
+src/lib/server/__tests__/guided-opening-metadata.test.ts
+✔ known profile lanes reject before materialization and do not alter authored intent (1.866917ms)
+✔ selected free-band, inherited, presenter-hole and additional effects are unavailable (0.316583ms)
+✔ body-only presentation belongs to the body renderer, not the private opening exclusion (0.096875ms)
+✔ all-row metadata screening preserves later rows and refuses unsupported body lanes (0.48075ms)
+✔ eight selected graphics are the initial bound without deleting later exact bindings (0.102083ms)
+✔ duplicate order or identity cannot hide an unqualified later body template (0.078542ms)
+✔ TS metadata lane/default screening agrees with the actual Python profile without media (106.907416ms)
+✔ selected presentation and conditional presenter-hole screening agree with Python (101.872542ms)
+✔ current shared-master finishing agrees with Python for long, short and captioned metadata (112.534542ms)
+✔ finishing preflight never coerces gain fields or admits nonfinite numbers (0.430834ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 328.032625
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-metadata.test.ts
+src/lib/server/__tests__/guided-opening-ownership-faults.test.ts
+✔ actual ps error decoding preserves the claim: timeout, diagnostic exit, empty, malformed and multiple rows (3.087666ms)
+✔ ps no-match needs a corroborating ESRCH; permission failure and a still-live pid are not absence (1.067875ms)
+✔ thrown and malformed injected process observations remain unknown and do not stop later pid checks (1.054542ms)
+✔ ledger access failures cannot be converted to missing by existsSync, and existing empty/torn/linked ledgers reject (1.043833ms)
+✔ invalid elapsed clock fields are rejected rather than proving an older unrelated process (0.128291ms)
+✔ ledger permission and same-path read failures propagate without allowing a claimed absence (0.404083ms)
+✔ a mismatched, orphaned or out-of-order reap cannot hide an unreaped recorded process (0.886333ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10.773166
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-ownership-faults.test.ts
+src/lib/server/__tests__/guided-opening-pending-status.test.ts
+✔ current prepared cleanup displays pending retirement with no media, cleanup completion or approval (7460.020625ms)
+✔ only the actual wrapper read carries its original final metadata and observation allowance (7397.377041ms)
+✔ wrapper expiry is the one 30s proof allowance even after actual pending capture (7320.084542ms)
+✔ status charges its last journal callback to the same pending proof allowance (7319.393584ms)
+✔ status last journal callback cannot replace original pending journal bytes or inode (7443.056625ms)
+✔ status last journal callback cannot replace original pending fact bytes or inode (7293.198084ms)
+✔ status last journal callback cannot replace original pending result bytes or inode (7439.645542ms)
+✔ status last journal callback cannot replace original pending snapshot bytes or inode (7310.405375ms)
+✔ prepared proof from another current journal cannot be displayed for the original observation (7279.71625ms)
+✔ same-hash initial DTO with another claim cannot borrow actual current pending evidence (7903.230583ms)
+✔ claim callback cannot replace the first observed claim pointer while retaining its raw hash (7524.968083ms)
+✔ the complete pending reader rejects an unjoined job instead of masking current claim failure (7267.108541ms)
+✔ legacy cleanup discriminant cannot acquire a pending proof read (7398.947708ms)
+✔ final cleanup discriminant cannot acquire a pending proof read (7259.957ms)
+✔ unknown cleanup discriminant cannot acquire a pending proof read (7549.766ms)
+✔ an actual malformed or unresolved stopped attempt cannot become pending retirement (7332.867041ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 118504.989917
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-pending-status.test.ts
+src/lib/server/__tests__/guided-opening-presenter-profile.test.ts
+✔ four current token pairs parse exact metadata while every historical parser remains closed (781.949958ms)
+✔ fresh selection and actual8/2 readiness preserve full request metadata and all inputs (12.052875ms)
+✔ metadata-only cold reader reconstructs all14 original documents, with no source/pipeline/media observation claim (807.348166ms)
+✔ cold intake cannot swap, drop, rehash or downgrade original selected layout context (196.055125ms)
+✔ selected presenter metadata requires both newly captured helpers; old closure omission is not a runtime fallback (11.522458ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1812.196
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-presenter-profile.test.ts
+src/lib/server/__tests__/guided-opening-process-ledger.test.ts
+✔ worker lifecycle rejects unmatched endpoints, nested starts, skipped intents, rewound time and mutated held bytes (4.246791ms)
+✔ etime covers mm:ss, hh:mm:ss and dd-hh:mm:ss; anything else is refused (0.347792ms)
+✔ ledgers are per invocation kind; torn, foreign or relative rows are never skipped; reaped closes spawned (3.135083ms)
+✔ an intent without its spawned row is an unknown child, never an absent one (0.859791ms)
+✔ a recorded pid stays ours while alive; older or foreign process observations remain uncertain (0.887834ms)
+✔ the real ps probe sees an actual recorded child while it lives and not after it is gone (10.010959ms)
+✔ a probe that cannot observe a recorded pid reports it unknown, never absent (0.756083ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22.391917
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-process-ledger.test.ts
+src/lib/server/__tests__/guided-opening-process.test.ts
+✔ v2 normal stop requires the exact separately held completed worker ledger; missing/torn/resealed bytes never clear ownership (35.7245ms)
+✔ retained stopped-outcome parser binds exact start/claim/input/journal; this is protocol-only not a live process fixture (41.684834ms)
+✔ missing media ledger cannot turn a held stopped outcome into proved ownership or clear journal bytes (25.605291ms)
+✔ resealed intent cannot move a retained process to another journal/clock/script or invent start time (31.1675ms)
+✔ crash before durable outcome remains explicitly unresolved; a missing stop receipt never becomes empty cleanup (25.023959ms)
+✔ mutually resealed sidecars without separately journal-held actual outcome authority remain rejected (24.610208ms)
+✔ actual private worker command retains venv prefix and cv2/numpy/scipy imports instead of invoking the resolved base executable (257.25625ms)
+✔ a live pid the worker itself recorded keeps a normal return unresolved until it is gone (36.872958ms)
+✔ a forced outer stop is retained as unresolved nested ownership, never a complete or selectable outcome (70.761042ms)
+✔ actual journal CAS preserves claim bytes when the final live ownership read becomes unknown (27.654791ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 579.073125
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-process.test.ts
+src/lib/server/__tests__/guided-opening-result-v2-rounding.test.ts
+✔ eleven 2ms stages cannot fit an independently rounded 11ms total (1.4535ms)
+✔ eleven sequential rounded stages never gain more than 6ms aggregate slack (0.854458ms)
+✔ the conservative half-even rounding endpoint remains supported (0.592959ms)
+✔ unattributed elapsed time remains allowed without inventing a stage (0.219625ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6.652542
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-result-v2-rounding.test.ts
+src/lib/server/__tests__/guided-opening-result-v2.test.ts
+✔ schema2 completion is shape-only exact detached JSON; no file is read (1.414583ms)
+✔ schema2 readback requires both observation replay and base-consumption stages (0.495917ms)
+✔ legacy and source-color completion protocols never upgrade one another (0.28925ms)
+✔ completion rejects missing, extra and truthy approval fields (0.256708ms)
+✔ evidence reference cannot redirect to another directory, role, type or oversized artifact (0.346791ms)
+✔ schema2 stdout rejects duplicate decoded keys including escaped spellings (0.218042ms)
+✔ stdout has one bounded object, with no last-completion fallback (0.321666ms)
+✔ readback cannot assert color quality, grading, cleanup or a lease (0.648ms)
+✔ readback rejects omitted, reordered, failed and extra stages (1.035333ms)
+✔ readback preserves the existing25-minute cap and strictly typed measured durations (0.444833ms)
+✔ stage sum permits only independent millisecond rounding, not duplicated work budgets (0.271542ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9.255792
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-result-v2.test.ts
+src/lib/server/__tests__/guided-opening-result-version.test.ts
+✔ legacy V1 stopped process retains its unchanged schema1 byte/readback path (50.126459ms)
+✔ legacy V2 stopped process retains its unchanged schema1 byte/readback path (42.623292ms)
+✔ actual V3 source-color process cannot borrow schema1 completion (44.528083ms)
+✔ actual V3 source-color process cannot borrow schema2 completion (47.413875ms)
+✔ legacy V1 process still rejects newer completion schema2 (42.732875ms)
+✔ legacy V2 process still rejects newer completion schema2 (40.502583ms)
+✔ retained result substitution cannot route V3 through readback argv or schema1 identity validation (88.149583ms)
+✔ actual final source-color cleanup refuses readback before tools, attempt publication or native spawn (9416.826ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9776.619667
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-result-version.test.ts
+src/lib/server/__tests__/guided-opening-result.test.ts
+✔ completion schemas accept only one closed actual-protocol object; these fixtures assert no invocation or media success (1.3505ms)
+✔ readback never absorbs separate process/daemon/journal/lease authority and requires every completed stage (0.569708ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4.83175
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-result.test.ts
+src/lib/server/__tests__/guided-opening-selection.test.ts
+✔ an identical opening/context range legitimately shares core.mp4; any divergence in row or span still rejects it (0.98925ms)
+✔ selected rows are derived only from the held record with fixed private roles and exact ties-even sample clocks (0.237334ms)
+✔ descriptors carry only guarded local URLs bound to the exact selection and pass the browser contract (0.806958ms)
+✔ selection pointer requires committed cleanup; a newer claim outranks it; an unverifiable selection is unavailable (0.731042ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6.290625
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-selection.test.ts
+src/lib/server/__tests__/guided-opening-source-color-intent.test.ts
+✔ V2 intent retains the exact full declaration and raw bytes; identical publication remains exclusive (31.650041ms)
+✔ legacy intent preserves exact five-file closure and its closed V1 request parser (13.965667ms)
+✔ intent and request versions cannot cross-label source declarations or downgrade the required pins (97.700375ms)
+✔ V2 controller closure requires every exact current pin; V1 remains five (86.234625ms)
+✔ missing new pin or changed pinned bytes rejects without borrowing or mutating current code (54.062209ms)
+✔ shared submission bindings remain exact for V2 without granting source-color authority (0.951167ms)
+✔ real immutable operation history hashes the full V2 request and exact replay retains first intake (38.039834ms)
+✔ rehashing changed raw intake declarations cannot satisfy an original execution start (24.995917ms)
+✔ input and claim boundaries reject changed in-memory V2 declarations before any media document or claim write (74.617084ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 426.013083
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-source-color-intent.test.ts
+src/lib/server/__tests__/guided-opening-source-color-process.test.ts
+✔ V3 actual retained-record parser carries all request refs without pretending to read nonexistent metadata (33.526166ms)
+▶ V3 intent/outcome require V2 activation; legacy records cannot borrow its semantics
+  ✔ version 1 (111.239458ms)
+  ✔ version 2 (100.938542ms)
+  ✔ version 3 (104.1095ms)
+✔ V3 intent/outcome require V2 activation; legacy records cannot borrow its semantics (316.748375ms)
+✔ even mutually resealed V3 records cannot replace the actual retained source clauses or claim identity (119.162875ms)
+✔ legacy process cannot silently downgrade a retained V2 request or carry extra source clauses (43.564333ms)
+✔ V3 still requires exact original worker-ledger bytes and retains forced-stop ownership (45.272917ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 562.372125
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-source-color-process.test.ts
+src/lib/server/__tests__/guided-opening-status.test.ts
+✔ unqualified status never supplies ready media or claims a live process from an unfinished ownership record (0.684ms)
+✔ actual ended interval is labelled completed timing, not final or media approval (0.107875ms)
+✔ legacy/unknown workflow and an unchanged-token journal race fail status observation (0.235666ms)
+✔ a newer unresolved claim always wins over historical cleanup, without reading or selecting its old media (0.092667ms)
+✔ an unobservable recorded child keeps status unresolved (unknown is not absent) and the parser accepts it (1.415458ms)
+✔ a live recorded nested process keeps status unresolved with the exact pid, and the browser parser accepts it (0.280125ms)
+✔ a forced outer stop never advances toward cleanup selection; ownership stays explicitly unresolved (0.204417ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6.517791
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-status.test.ts
+src/lib/server/__tests__/guided-opening-v8-no-presenter.test.ts
+✔ actual no-presenter V8 stays8/2 in readiness and opening/body metadata without inventing a layout (10.73275ms)
+✔ mixed prior music/caption/crop lanes are rederived with local views and original packets unchanged (7.40825ms)
+✔ legacy no-presenter entry stays fenced; an unbound selected request cannot acquire current metadata (2.506875ms)
+✔ unidentified, downgraded, forged or nonempty V2 bindings cannot take the V1 metadata path (2.625375ms)
+✔ rehashed candidate fields and policy mutations cannot replace actual prior-lane requests (5.044667ms)
+✔ historical V7 prior-lane validation remains valid and required new helper is explicitly captured (2.032875ms)
+✔ V2 through V7 requests retain their historical closed operation fields and prior-lane checks (1.829583ms)
+✔ actual pinned opening implementation rejects missing or mutated new request-lane source (5.103916ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 41.30975
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening-v8-no-presenter.test.ts
+src/lib/server/__tests__/guided-opening.test.ts
+✔ actual stored V4 cut/proposal/readiness reaches honest unsupported preparation with durable failure, CAS and replay (22691.7385ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22694.343916
+MODULE_EXIT 0 src/lib/server/__tests__/guided-opening.test.ts
+src/lib/server/__tests__/guided-presenter-durable-input.test.ts
+﹣ selected actual V8 caption/presenter survives durable readiness and 14-document warm+cold input without rendering (0.343791ms) # SKIP
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 3.641208
+MODULE_EXIT 0 src/lib/server/__tests__/guided-presenter-durable-input.test.ts
+src/lib/server/__tests__/guided-project-author-command.test.ts
+✔ author-cut CLI transports exact request and pre-read original time without provider or acceptance flags (6.346667ms)
+✔ author-cut CLI malformed/duplicate/oversized transport and override args never dispatch (2.700083ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12.196417
+MODULE_EXIT 0 src/lib/server/__tests__/guided-project-author-command.test.ts
+src/lib/server/__tests__/guided-project-author-cut-review.test.ts
+✔ authored cut runs actual independent critic packets, permits evidenced revision, then two new clean reviews (336.056292ms)
+✔ authored source-review deferral preserves the existing one-recheck no-progress stop (206.383333ms)
+✔ authored repeated changed but unresolved cuts retain the original six-critic ceiling (305.556667ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 851.283667
+MODULE_EXIT 0 src/lib/server/__tests__/guided-project-author-cut-review.test.ts
+src/lib/server/__tests__/guided-project-author-cut-stage.test.ts
+✔ new authored seed invokes exactly cut/start, guards output before binding, then reviews and pauses (6.5225ms)
+✔ two in-process entries cannot both pass the asynchronous initial ownership check and start writers (1.60175ms)
+✔ wrong policy, replay, accepted/saved/handoff and already-started attempts cannot invoke writer (1.233916ms)
+✔ seed drift or unresolved existing child ownership fails before first provider invocation (2.947417ms)
+✔ blocked, protocol, provider and ordinary exit failure precede draft checks/binding/normalization (2.099458ms)
+✔ eligible successful and timed-out drafts must pass strict source/target/budget guard before binding (1.155041ms)
+✔ changed nonblocked timeout retains ordinary preapproval recovery and still runs all gates (1.729875ms)
+✔ even a passing draft guard cannot recover a timeout whose plan content did not change (1.639292ms)
+✔ provider returning the original empty seed cannot become an authored draft (2.727208ms)
+✔ source/ownership failure between phases or after preview forbids successful handoff (2.938833ms)
+✔ unresolved ownership after a passing previsual gate cannot reach critics or preview (1.004875ms)
+✔ gate, critic, approval, compatibility and preview failures cannot enter later phases (2.509417ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 32.213959
+MODULE_EXIT 0 src/lib/server/__tests__/guided-project-author-cut-stage.test.ts
+src/lib/server/__tests__/guided-project-author-guard.test.ts
+✔ real seed/draft guard preserves fixed intent but permits new proposed cuts and increasing versions (97.124125ms)
+✔ new draft cannot alter canvas/rate/music/lanes, reset version, add visual tracks or retime speech (84.093667ms)
+✔ seed, transcript and project brief drift reject before runtime authorization, never silently rebind (83.526167ms)
+✔ bounded transcript identity equals the legacy digest but rejects replaced oversized/linked/missing/invalid bytes (170.831917ms)
+✔ journal policy exclusivity, one-attempt and current context fences apply to authored jobs (76.337667ms)
+✔ late code-check interval cannot replace validated draft, transcript or current journal before binding (76.297916ms)
+✔ actual repository code snapshot contains authored stage/writer/deadline and missing required closure rejects (639.851791ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1231.679209
+MODULE_EXIT 0 src/lib/server/__tests__/guided-project-author-guard.test.ts
+src/lib/server/__tests__/guided-project-author-intake.test.ts
+✔ author request is closed, requires exact complete brief, and preserves supplied-candidate parser closure (3.332333ms)
+✔ explicit canvas/rate parser preserves numbers exactly and rejects unsupported rational targets (1.739708ms)
+✔ seed is precisely four unapproved fields and preserves complete intent obligations (1.606875ms)
+✔ authored intake holds real bounded transcript bytes, rejects absent, malformed and linked input (9.748583ms)
+✔ both policy fields, malformed closed facts, or missing V2 ownership cannot authorize bootstrap (2.326166ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 21.88125
+MODULE_EXIT 0 src/lib/server/__tests__/guided-project-author-intake.test.ts
+src/lib/server/__tests__/guided-project-author-lifecycle.test.ts
+✔ authored PAUSE needs actual observed scope and sealed fact; human waiting does not restart or expire preparation (129.6575ms)
+✔ cold PAUSE rejects recorded times outside original preparation even if caller adopts a new hash (106.120417ms)
+✔ authored worker verifies sources first, retains unknown failure, and never runs after expired preparation (91.780708ms)
+✔ even a completed pipeline outcome cannot deliver an authored bootstrap or emit complete (72.221625ms)
+✔ lower job mutators cannot bypass the cut-only worker completion refusal (74.794417ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 478.297041
+MODULE_EXIT 0 src/lib/server/__tests__/guided-project-author-lifecycle.test.ts
+src/lib/server/__tests__/guided-project-author-service.test.ts
+✔ new authored project retains exact saved seed, original transcript/intent/time, and no acceptance (85.610167ms)
+✔ authored guard permits mutable active cut, but rejects changed seed/manifest/intake/operation/origin (75.0735ms)
+✔ same UUID concurrency/replay never relaunches or resets preparation; cross-operation collision rejects (73.357292ms)
+▶ transcript drift during save or pin is rejected before launch, without reminting original digest
+  ✔ save (64.3865ms)
+  ✔ pin (80.951333ms)
+✔ transcript drift during save or pin is rejected before launch, without reminting original digest (145.609375ms)
+✔ deadline expiry before pin retains partial project and cannot obtain fresh retry credit (78.237917ms)
+✔ pin failure after immutable seed publication retains original bytes and refuses every replay launch (75.875292ms)
+▶ post-pin seed mutation or elapsed original budget prevents start and worker launch
+  ✔ seed (81.44725ms)
+  ✔ expired (80.228041ms)
+✔ post-pin seed mutation or elapsed original budget prevents start and worker launch (162.199708ms)
+✔ invalid/future preparation origin rejects before input observations or singleton creation (2.373125ms)
+✔ failed launch and partial singleton remain retained, unknown and never adopted (96.983125ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 801.659084
+MODULE_EXIT 0 src/lib/server/__tests__/guided-project-author-service.test.ts
+src/lib/server/__tests__/guided-project-bootstrap-authority.test.ts
+✔ quiescence requires actual scope, exact fact and journal-held hash; legacy omission is unchanged (87.219542ms)
+✔ durable late registration blocks ordinary strong pending reader and final journal CAS (119.694042ms)
+✔ current runtime context drift is rejected even though request identity deliberately excludes pins (59.095541ms)
+✔ clean failure cannot mask later unknown cleanup; immutable first evidence is preserved (86.735792ms)
+✔ generic post-child failure retains unknown, typed clean failure remains distinguishable (0.751625ms)
+✔ unknown failure persistence failure never turns missing disk marker into release permission (60.81425ms)
+✔ malformed unknown marker and symlink-like nonfile markers are blocking, never cleanup success (61.722833ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 479.218917
+MODULE_EXIT 0 src/lib/server/__tests__/guided-project-bootstrap-authority.test.ts
+src/lib/server/__tests__/guided-project-bootstrap-observer.test.ts
+✔ normal sequential stage drains reopen and final scope observes every registered group (1.828625ms)
+✔ microtask registration during settlement poisons PAUSE and observes the late group (0.561708ms)
+✔ registration after final seal synchronously revokes pause even if the group is already absent (0.337125ms)
+✔ survivor is stopped but rejected; unavailable observation stays cleanup unknown (0.523833ms)
+✔ outer group forced-stop never becomes nested cleanup proof, including wrapped failure (0.137875ms)
+✔ no ambient scope and nested scope cannot authorize a quiescence fact (0.106167ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9.968583
+MODULE_EXIT 0 src/lib/server/__tests__/guided-project-bootstrap-observer.test.ts
+src/lib/server/__tests__/guided-project-bootstrap-service.test.ts
+✔ new project saves only version increment, preserves exact original files and actual intent, never accepts (73.308875ms)
+✔ identical concurrent UUID is read-only replay; conflicting UUID and partial root never launch (67.066458ms)
+✔ stale input and mutation during save stop before start/spawn without changing originals (67.987ms)
+✔ failed or ambiguous launch retains evidence and never retries even if current input later changes (80.092ms)
+✔ policy is included in identity, closed at persistence and dispatch, and cannot resume or use saved/writer completion (63.565166ms)
+✔ exact candidate guard never fills missing intent or changes produced treatment to pass previsual gates (1.173333ms)
+✔ original and saved byte guards catch post-save mutation rather than silently resealing (63.953ms)
+✔ bootstrap music metadata is strict, effective-false, and never grants a contradictory opt-in (1.241709ms)
+✔ requested music with absent target mirror stops before new project/save/spawn and preserves inputs (1.455583ms)
+✔ fresh explicit music mirror persists with actual intent while the accepted-candidate input remains cut-only (63.474ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 487.250709
+MODULE_EXIT 0 src/lib/server/__tests__/guided-project-bootstrap-service.test.ts
+src/lib/server/__tests__/guided-project-bootstrap-stage.test.ts
+✔ existing candidate dispatch is previsual→two reviews→compatibility→qualified PAUSE, never writer or visuals (66.821459ms)
+✔ deterministic gate failure precedes every critic and preview; review issue and preview failure stop unchanged (63.968417ms)
+✔ actual review loop keeps two independent packets and refuses candidate revision on either critic issue (369.232083ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 503.046542
+MODULE_EXIT 0 src/lib/server/__tests__/guided-project-bootstrap-stage.test.ts
+src/lib/server/__tests__/guided-project-command.test.ts
+✔ CLI dispatches the exact request only and status reuses the strong read-only path (3.995ms)
+✔ CLI rejects malformed/duplicate/nonfinite/oversized/unsafe request before service or project reads (6.7695ms)
+✔ CLI help/grammar never author intent, add attestations, select providers, resume or create a project (2.455125ms)
+✔ actual command help starts with no UI server or provider and malformed invocation exits nonzero (364.4605ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 380.674042
+MODULE_EXIT 0 src/lib/server/__tests__/guided-project-command.test.ts
+src/lib/server/__tests__/guided-project-preparation-deadline.test.ts
+✔ legacy work has no preparation timer or clock observation (1.818083ms)
+✔ prelaunch time uses original wall only and has no configurable allowance (0.671208ms)
+✔ expired or invalid entry starts neither work, scheduler nor expiration callback (0.253458ms)
+✔ invalid and pre-origin wall readings reject without inventing free queue time (0.251292ms)
+✔ one scope includes queue, lease, phases and settlement without a renewed timer (0.88425ms)
+✔ stalled wall still charges monotonic time and floors the remaining child allowance (0.320792ms)
+✔ wall and monotonic rollback each poison all later phases and request shutdown once (0.427334ms)
+✔ wall-forward exhaustion fails before successful return even when timer delivery is delayed (0.255292ms)
+✔ timer requests shutdown but cannot settle or clear while the callback remains live (0.480125ms)
+✔ late ordinary errors retain deadline cause while timely ordinary errors stay unchanged (0.49925ms)
+✔ policy deletion, changed origin or different context cannot reopen the live scope (0.551208ms)
+✔ returned scope clears timer and stale callbacks cannot expire a successful pause (0.187084ms)
+✔ time consumed while arming is charged before any worker callback starts (0.181875ms)
+✔ shutdown callback failure stays unknown and cannot manufacture successful settlement (0.198041ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11.049458
+MODULE_EXIT 0 src/lib/server/__tests__/guided-project-preparation-deadline.test.ts
+src/lib/server/__tests__/guided-project-preparation-worker.test.ts
+✔ actual worker claims parent ownership before clock and keeps lease/settlement inside it (19.477916ms)
+✔ actual handoff fallback refuses authored cuts while legacy self-adoption is unchanged (6.662916ms)
+✔ actual main expiry records deadline and unknown cleanup before existing SIGTERM shutdown (6.058791ms)
+✔ retention publication failures still reach existing shutdown with no cleanup success claim (2.029458ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 37.615667
+MODULE_EXIT 0 src/lib/server/__tests__/guided-project-preparation-worker.test.ts
+src/lib/server/__tests__/guided-proposal-catalog-ownership.test.ts
+✔ V6 exact graphics-off previsual exposes zero graphics authority and binds the full original target (1.054916ms)
+✔ historical versions still require the original measured catalog (0.063541ms)
+✔ explicit V7 and V8 share only the same exact no-graphics dependency omission (0.295375ms)
+✔ auto/operator/supplied/default and malformed graphics choices cannot borrow explicit-off omission (0.10275ms)
+✔ inherited graphics or any expanded plan cannot bypass its original dependency authority (0.075041ms)
+✔ named Caleb base-kit conflict is not erased by graphics-off (0.04725ms)
+✔ actual V6 candidate compiler blocks a structurally valid graphic against omitted catalog authority (2.030958ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7.105833
+MODULE_EXIT 0 src/lib/server/__tests__/guided-proposal-catalog-ownership.test.ts
+src/lib/server/__tests__/guided-proposal-contract.test.ts
+✔ raw and retry requests are closed, bounded and contain no implicit attestation (1.050792ms)
+✔ one available transcript cannot mask another used source's missing or empty speech (0.293166ms)
+✔ mode-only destinations and malformed catalog canvases cannot admit both portrait and landscape (0.276042ms)
+✔ grade-only intent remains blocked and cannot materialize default zoom/crop/output size (0.838584ms)
+✔ clause partition cannot omit prose, split Unicode, duplicate references or hide a blocked operation (0.24925ms)
+✔ proposal covers all speech and derives opening plus actual body context without approving playback (0.929375ms)
+✔ configured compiler remains sessionless/read-only/tools-none with unchanged effort and strict response bounds (3.827542ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11.736041
+MODULE_EXIT 0 src/lib/server/__tests__/guided-proposal-contract.test.ts
+src/lib/server/__tests__/guided-proposal-history-snapshot.test.ts
+✔ historical V2 snapshot retains exact pinned bytes without asserting current runtime equivalence (4.188084ms)
+✔ historical V3 snapshot retains exact pinned bytes without asserting current runtime equivalence (3.25275ms)
+✔ historical V4 snapshot retains exact pinned bytes without asserting current runtime equivalence (3.672958ms)
+✔ historical V5 snapshot retains exact pinned bytes without asserting current runtime equivalence (2.542ms)
+✔ historical V6 snapshot retains exact pinned bytes without asserting current runtime equivalence (2.656542ms)
+✔ historical V7 snapshot retains exact pinned bytes without asserting current runtime equivalence (2.508958ms)
+✔ historical V8 snapshot retains exact pinned bytes without asserting current runtime equivalence (3.053ms)
+✔ historical snapshot rejects corrupted bytes, omitted TS, swapped metadata and linked artifacts (3.250875ms)
+✔ historical V8 support does not admit unknown/string schema versions or a substituted schema hash (3.645833ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 33.154458
+MODULE_EXIT 0 src/lib/server/__tests__/guided-proposal-history-snapshot.test.ts
+src/lib/server/__tests__/guided-proposal-music-intent.test.ts
+✔ locked target music is a strict mirror, never independent operator authority (1.187417ms)
+✔ fresh and historical V7 evidence reject context mismatch before any pipeline, catalog or media work (0.408875ms)
+✔ V7 owner intake independently rejects stale music intent before opening preparation (1.432458ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9.858916
+MODULE_EXIT 0 src/lib/server/__tests__/guided-proposal-music-intent.test.ts
+src/lib/server/__tests__/guided-proposal-presenter-frames.test.ts
+✔ each supported layout is projected from the actual anchor frames without changing its payload (3.450167ms)
+✔ source occurrences are ordered unique and use exact half-open window intersections (0.957875ms)
+✔ frame evidence refuses missing, unsorted, duplicate or out-of-range anchors and invalid rates (1.050417ms)
+✔ retained source segments must be a complete contiguous indexed partition with anchor boundaries (0.53325ms)
+✔ overlapping windows refuse last-writer-wins even when the submitted order is reversed (0.90425ms)
+✔ exact last-written-frame feasibility allows one full-layout frame and rejects an incomplete exit (0.217625ms)
+✔ 32 windows remain bounded while retaining every original index; the 33rd refuses before projection (1.544542ms)
+✔ valid normalized metadata cannot authorize a stretched or incorrectly masked target (0.224125ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12.433458
+MODULE_EXIT 0 src/lib/server/__tests__/guided-proposal-presenter-frames.test.ts
+src/lib/server/__tests__/guided-proposal-presenter.test.ts
+✔ presenter policy retains complete ordered admission metadata without paths or rights approval (2.457959ms)
+✔ every broll row needs complete bounded metadata, without excluding an invalid unselected row (0.6705ms)
+✔ motion and broll resolve from exact accepted scope and explicit directives (0.35975ms)
+✔ target scope and actual operator override maps cannot substitute equal resolved permissions (0.449667ms)
+✔ projection adds only actual windows, preserving all cuts, captions, target, audio and supplied objects (2.598959ms)
+✔ an exact policy cannot be replaced by a rehashed metadata subset or invented approval (1.327292ms)
+✔ new windows refuse off lanes, inherited layout roots, unknown assets and nonzero image offsets (2.465ms)
+✔ video offsets remain authored metadata, not a claim of decoded or aligned executable clock (0.694459ms)
+✔ no layout operations preserve inherited roots exactly, without manufacturing frames (0.6945ms)
+✔ candidate rederivation rejects changed windows, cut, target and added legacy authority despite fresh hashes (2.995292ms)
+✔ accepted cut source/count/speed and complete target must match independently held evidence (0.598458ms)
+✔ original operation indices survive chronological sorting among unrelated V8 operations (0.239042ms)
+✔ candidate target accepts only unchanged target or both exact actual-proposal graphics-style decorations (2.520375ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 25.440333
+MODULE_EXIT 0 src/lib/server/__tests__/guided-proposal-presenter.test.ts
+src/lib/server/__tests__/guided-proposal-readiness-gates.test.ts
+✔ failed deterministic gates block readiness before a single independent critic is paid (15399.705292ms)
+✔ passing deterministic gates admit both critics and report the gate as executed, not pending (16320.573583ms)
+✔ a gate bundle that exhausts the readiness budget is retained as failed, never a partial pass (12622.7015ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 44346.446708
+MODULE_EXIT 0 src/lib/server/__tests__/guided-proposal-readiness-gates.test.ts
+src/lib/server/__tests__/guided-proposal-readiness-real-gates.test.ts
+REAL GATE BUNDLE (readiness 3214ms, total 13850ms)
+operator_intent: lane 'motion' is assigned to Auto Edit but the plan authors no motion coverage
+operator_intent: lane 'graphics' is assigned to Auto Edit but the plan authors no graphics coverage
+operator_intent: lane 'transitions' is assigned to Auto Edit but the plan authors no transitions coverage
+operator_intent: lane 'broll' is assigned to Auto Edit but the plan authors no broll coverage
+REAL plan_lint ON THE SAME RETAINED CANDIDATE
+output 3.0s below mode floor 300s
+pacing: non-head visuals cover 0% of the first 3s — below the 40% envelope floor (add graphics / receipts / b-roll; the pro's first minute is ~50% dressed); produced/full cannot waive this — select trim/light explicitly for a clean/minimal treatment
+first minute exposes only 0 strong transcript beats; insufficient transcript beats for the absolute 4-graphic floor. Add deterministic transcript-bound visual obligations or stop with this explicit insufficiency; never lower the floor
+✔ REAL deterministic gate bundle blocks the default synthetic program at readiness (14107.913417ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14110.28825
+MODULE_EXIT 0 src/lib/server/__tests__/guided-proposal-readiness-real-gates.test.ts
+src/lib/server/__tests__/guided-proposal-readiness.test.ts
+✔ two independent critics create actual isolated draft objects, not an accepted head, media or legacy plan approval (16909.116083ms)
+✔ critic failure, journal race and orphan receipt retain evidence; one negative independent verdict blocks draft promotion (23639.877875ms)
+✔ readiness contract cannot hide clauses, duplicate coverage, name imaginary words, or masquerade as plan QC (0.47925ms)
+✔ readiness critic metadata is closed and uses unchanged independent effort with no session/peer/tools (0.756291ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 40553.344625
+MODULE_EXIT 0 src/lib/server/__tests__/guided-proposal-readiness.test.ts
+src/lib/server/__tests__/guided-proposal-speech.test.ts
+✔ one continuous ten-minute cut permits a1.5s graphic and60s+10s review without changing picture cuts (8.671667ms)
+✔ repeated payoff words map to every occurrence while the legacy first-match reader remains unchanged (1.604291ms)
+✔ fractional FPS and words crossing trims use exact enclosure and explicit clip flags, never silent omission (0.200042ms)
+✔ J-cut or unknown lead windows block before transcript-only evidence can omit audible pre-in-point words (0.3045ms)
+✔ punctuation under overlapping speech cannot create a clean endpoint; half-open adjacent words can (0.112583ms)
+✔ no clean endpoint in a long utterance is a retained blocker; anchor collisions/reordering never become authority (5.424917ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22.012834
+MODULE_EXIT 0 src/lib/server/__tests__/guided-proposal-speech.test.ts
+src/lib/server/__tests__/guided-proposal-timing.test.ts
+✔ actual source verification belongs to each immutable proposal/readiness execution, not merely its job token (14389.66175ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14391.979834
+MODULE_EXIT 0 src/lib/server/__tests__/guided-proposal-timing.test.ts
+src/lib/server/__tests__/guided-proposal-v4-candidate.test.ts
+✔ V4 candidate carries the exact style, graphic-decision and clean-hook receipts the renderer gates require (3.374625ms)
+✔ the deterministic Python intro gates accept the exact compiled candidate receipts (26.079958ms)
+✔ every deterministic decisionRequired beat needs exactly one grounded, covering graphic decision (2.361666ms)
+✔ a bound graphic must be on screen at the exact beat and hold the deterministic minimum (0.450667ms)
+✔ beat coverage is half-open on the frame clock: [startFrame, endFrameExclusive) (2.512667ms)
+✔ beat decisions must bind a compiled catalog graphic, never a preserve-cut or unrelated operation (0.235958ms)
+✔ intro seam coverage, face-bridge and pre-authored lanes fail closed instead of being silently fixed (0.380917ms)
+✔ V4 evidence and V4 proposals cannot be mixed with an older schema in either direction (0.298625ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 39.0635
+MODULE_EXIT 0 src/lib/server/__tests__/guided-proposal-v4-candidate.test.ts
+src/lib/server/__tests__/guided-proposal-v4-evidence.test.ts
+✔ intro seam evidence is every internal cut boundary strictly inside the long-form hook window (0.88025ms)
+✔ stored V4 evidence must carry exactly the seam and presentation fields the compile path writes (0.270958ms)
+✔ only V4 evidence receives the produced-longform decision doctrine, and it names the exact gate fields (0.465333ms)
+✔ the captured schema object selects its own registered structured-output name (0.328625ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9.063625
+MODULE_EXIT 0 src/lib/server/__tests__/guided-proposal-v4-evidence.test.ts
+src/lib/server/__tests__/guided-proposal-v5-captions.test.ts
+✔ V5 candidate keeps actual caption operation, graphic indices and all accepted cut fields (4.336334ms)
+✔ live TEST caption request keeps existing semantic/graphic indices and has its own exact clause (0.896208ms)
+✔ V5 cannot bypass full-program story/graphic obligations or clause coverage (2.413ms)
+✔ V5 requires its exact evidence version and closed captured caption preset policy (1.371042ms)
+✔ V5 schema retains every field, and the actual Python caption compiler preserves full word coverage (44.864917ms)
+✔ V5-only prompt authorizes named caption presets, and schema routing never falls back (0.853625ms)
+✔ stored V5 evidence cannot omit its caption policy or smuggle it into V4 (0.195375ms)
+✔ structured JSON schema rejects malformed caption data without depending on TS coercion (46.183166ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 104.578125
+MODULE_EXIT 0 src/lib/server/__tests__/guided-proposal-v5-captions.test.ts
+src/lib/server/__tests__/guided-proposal-v6-reframe.test.ts
+✔ V6 retains real crop/caption operation types, payloads and original indices (2.050834ms)
+✔ historical V5 dispatch remains closed while explicit V6 dispatch accepts its own contract (0.953125ms)
+✔ V6 requires exact reframe/null on every operation and rejects coercion or extra payloads (0.842ms)
+✔ exact crop coordinates reject malformed, nonfinite, out-of-frame and unsupported geometry (0.181333ms)
+✔ crop cannot fabricate a caption preset or resolve duplicate/conflicting crops (0.254417ms)
+✔ pure projection adds only exact reframe without applying captions or changing accepted inputs (1.4745ms)
+✔ accepted scope-default auto works but explicit off/operator and trim-auto never become captions (1.836791ms)
+✔ target, selected source, existing reframe and existing caption authority are never overwritten (1.184708ms)
+✔ V6 without crop remains unchanged; it is not an implicit crop or caption executor (0.220333ms)
+✔ new schema is closed, preserves old definitions and rejects malformed transport shapes (47.312375ms)
+✔ crop minimum mirrors the existing renderer and TS manual profile bounds (21.927667ms)
+✔ V6 candidate builds crop then captions then graphics, preserving original operation indices (2.911958ms)
+✔ request-derived validation rejects rehashed crop, caption preset and added authority (4.323334ms)
+✔ V6 cannot use V5 evidence or omit exact caption policy (0.47825ms)
+✔ explicit V6 prompt and schema route never infer tracking, approval or historical fallback (0.660791ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 90.025875
+MODULE_EXIT 0 src/lib/server/__tests__/guided-proposal-v6-reframe.test.ts
+src/lib/server/__tests__/guided-proposal-v7-music.test.ts
+✔ V7 keeps actual music payload, clause indices and original request without mutating inputs (1.835708ms)
+✔ V7 is explicit only: no historical parser opening or current-default activation (1.814041ms)
+✔ music fields reject coercion, arbitrary paths, downloads, variants and invented authority (0.2535ms)
+✔ every operation needs explicit music/null and music never carries unrelated instructions (0.530875ms)
+✔ duplicate and conflicting full-program beds never become last-writer-wins (0.211125ms)
+✔ V7 closed JSON schema retains historical definitions and exact required payload keys (47.745458ms)
+✔ music gap bounds match the existing plan linter without changing mixer behavior (36.001125ms)
+✔ music policy is exact bounded metadata, excludes builtins and never converts license fields to approval (0.683125ms)
+✔ pure music projection changes only the exact selected bed and retains all accepted inputs (1.34675ms)
+✔ music off, missing ownership, inherited music and unlisted assets block rather than overwrite (0.938541ms)
+✔ rehashed or transplanted music metadata is not accepted as the original evidence (0.588958ms)
+✔ actual V7 candidate keeps the music operation and exact plan projection, without claiming execution (1.669625ms)
+✔ V7 candidate refuses both music operations and no-ops against mismatched accepted intent (0.770125ms)
+✔ V7 prompt and provider schema retain explicit limitations without a real provider invocation (0.660083ms)
+✔ mixed music/crop/captions/graphics keep original indices and exact independent projections (1.931833ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 101.792041
+MODULE_EXIT 0 src/lib/server/__tests__/guided-proposal-v7-music.test.ts
+src/lib/server/__tests__/guided-proposal-v8-candidate.test.ts
+✔ actual V8 candidate retains source-bound layouts separately from graphics without changing cuts/audio (9.293084ms)
+✔ frame bindings independently rederive actual V8 indices, source identity and timing after a candidate is rehashed (5.670584ms)
+✔ changed V8 policy, accepted intent, source occurrences and missing assets block before authoring a layout (2.952459ms)
+✔ mixed layout, music, captions and catalog operations retain the actual array indices (2.757083ms)
+✔ V8 prompt and schema registration stay read-only, subscription-routed and explicitly not renderer availability (1.118792ms)
+✔ nonempty V8 cannot enter readiness or media without full original accepted/source context (1.9845ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 26.89275
+MODULE_EXIT 0 src/lib/server/__tests__/guided-proposal-v8-candidate.test.ts
+src/lib/server/__tests__/guided-proposal-v8-store.test.ts
+✔ pure V8 packet requires an explicit caption choice before readiness metadata can be returned (10.305ms)
+✔ real video bytes with TEST admission facts survive V8 store/history and the Python selected-source join (11222.795958ms)
+✔ actual V8 compile, immutable storage, cold read/history and exact replay never invoke readiness or rendering (11035.8855ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22271.916292
+MODULE_EXIT 0 src/lib/server/__tests__/guided-proposal-v8-store.test.ts
+src/lib/server/__tests__/guided-proposal.test.ts
+✔ raw request and actual pinned advisors compile one private unapproved proposal without mutating the accepted root (11860.302083ms)
+✔ expired original generation allowance stops a retry before source verification or provider work (7836.013917ms)
+✔ a provider completing after the whole-attempt ceiling keeps its result but cannot publish a proposal (8487.325625ms)
+✔ a late receipt or rollback cannot cross the final synchronous proposal commit guard (18173.631291ms)
+✔ a late provider exception cannot recover known elapsed time on the next explicit retry (8741.372541ms)
+✔ provider/CAS/lease failures retain the first raw clock and failed execution; exact explicit retry cannot become a fresh brief (19281.515666ms)
+✔ unsupported natural-language clauses remain a blocking proposal, not falsely fulfilled controls (10422.409333ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 84806.344542
+MODULE_EXIT 0 src/lib/server/__tests__/guided-proposal.test.ts
+src/lib/server/__tests__/guided-readiness-budget.test.ts
+✔ readiness checks the original phase before sources or paid critics and retains rejected admission (11482.41325ms)
+✔ late critic failure advances original high-water; retry and final receipt cannot recover expired allowance (15608.922542ms)
+✔ new readiness reopens exact budget proof; a pre-gate v1/v2 receipt is rejected, never a fresh allowance (16259.172625ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 43354.060042
+MODULE_EXIT 0 src/lib/server/__tests__/guided-readiness-budget.test.ts
+src/lib/server/__tests__/guided-runtime-capsule-owner.test.ts
+✔ fresh protocol holds independent refs, fixed inert smoke and final verification with no ambient secrets (77.044459ms)
+✔ new-only, overlap and parent symlink reject without captures or mutation (6.72ms)
+✔ actual built dependency divergence cannot pass through a self-consistent changed receipt (51.986625ms)
+✔ raw independently held pipeline evidence mutation cannot be concealed by an unchanged capsule (49.9325ms)
+✔ smoke failure still gets complete final verification/startup and never retries child (50.520708ms)
+✔ changed copied file, raw capsule or installed bytes during smoke fail final verification (174.208209ms)
+✔ cold final startup must match initial record, not merely be structurally valid (60.626791ms)
+✔ unrelated installed bytes changed by final startup fail its post-startup full byte check (57.433875ms)
+✔ one 300s original deadline charges every phase and refuses late verification work (56.545084ms)
+✔ cancelled child has no new startup allowance; unknown cleanup is not hidden by successful final bytes (103.970917ms)
+✔ forced stop and timeout with outer group absent still forbid another startup (116.640667ms)
+✔ initial and prelaunch startup unknown cleanup never permit subsequent child probes (88.478917ms)
+✔ generic startup/runner rejection cannot manufacture affirmative process cleanup (132.144792ms)
+✔ source checkout may change after independent copy without claiming it remains current (55.856916ms)
+✔ false control output cannot qualify an actual fixed command (55.904042ms)
+✔ a child throwing undefined cannot be mistaken for an absent failure (59.708875ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1202.225292
+MODULE_EXIT 0 src/lib/server/__tests__/guided-runtime-capsule-owner.test.ts
+src/lib/server/__tests__/guided-runtime-capsule-python.test.ts
+✔ exact isolated venv metadata is held separately from bundled inactive base site-packages (17.291041ms)
+✔ external or extra runtime path, cwd, global purelib and changed binary/prefix reject (13.564834ms)
+✔ external, missing-held and user customizers are never accepted (8.594875ms)
+✔ user site and non-isolated or bytecode-writing startup reject (9.293916ms)
+✔ changed config, true system site and ambiguous config reject before metadata spawn (20.482708ms)
+✔ new or initially held .pth loaders reject before spawn, including executable and path-only files (15.645042ms)
+✔ expected absent stdlib zip cannot appear before or during metadata observation (12.641125ms)
+✔ late .pth and config mutation cannot return a successful held startup record (13.532542ms)
+✔ customizer bytes and exact base-site link remain held, not just metadata paths (12.481583ms)
+✔ new customizer bytecode and user customizers reject before startup execution (14.900583ms)
+✔ one original deadline includes prechecks and metadata without resetting remaining credit (12.616583ms)
+✔ cancellation is forwarded and cancelled or unknown cleanup never admits startup (11.427292ms)
+✔ bounded metadata rejects extra rows, malformed objects, oversized output and diagnostics (9.072833ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 175.934209
+MODULE_EXIT 0 src/lib/server/__tests__/guided-runtime-capsule-python.test.ts
+src/lib/server/__tests__/guided-runtime-capsule.test.ts
+✔ streamed source copies are independent regular bytes; checkout changes do not alter cold verification (25.055417ms)
+✔ changed copied source and changed raw capsule receipt both reject (21.43575ms)
+✔ complete installed-tree bytes include non-framework/unknown package files (7.173208ms)
+✔ adding an installed file or changing a declared tool invalidates dependency authority (7.567042ms)
+✔ installed links stay exact and cannot escape to mutable source or arbitrary directories (6.351417ms)
+✔ base Python's external site-packages is a complete explicitly held tree, not an ignored link (6.266083ms)
+✔ source leaf symlinks, parent symlinks and hardlinks cannot enter copied authority (1.463ms)
+✔ source size/hash races reject and leave partial new copy retained (0.825708ms)
+✔ chunk and terminal deadline guards abort without treating elapsed time as a completed copy (4.408875ms)
+✔ extra capsule files, missing dependency links and redirected links fail cold verification (18.907417ms)
+✔ new-only builder rejects existing destination before source/dependency capture (3.385333ms)
+✔ dependency controls reject overlapping roots and unknown roles (2.997417ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 109.773166
+MODULE_EXIT 0 src/lib/server/__tests__/guided-runtime-capsule.test.ts
+src/lib/server/__tests__/guided-source-color-approval-integration.test.ts
+✔ generic under-lease approval dispatch uses actual source2 verification and retains strict status proof (18438.240583ms)
+✔ a later final status journal callback cannot replace the actual approval index unnoticed (16374.091292ms)
+✔ source2 approval status cannot borrow an equal selection DTO or another selected hash (15490.2685ms)
+✔ unsupported selection version refuses before any source requalification or approval publication (12964.786792ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 63272.3355
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-approval-integration.test.ts
+src/lib/server/__tests__/guided-source-color-approval-read.test.ts
+✔ actual persisted TEST human decision joins exact source2 selected result and approval job edge (16439.295084ms)
+✔ actual historical selected journal supports only its exact original approved edge without active-journal reads (17086.604625ms)
+✔ copied source selection and mismatched raw current observation refuse before original guard (16104.246375ms)
+✔ first original guard cannot substitute any captured approval child file with equal bytes (16801.265958ms)
+✔ final original guard cannot replace original current Buffer, raw size or callback (17555.141459ms)
+✔ later metadata rejects retained nested fact, decision, before and raw output mutations without old guard calls (16617.38375ms)
+✔ original approval fact raw bytes cannot be normalized silently to the same semantic hash (16027.149458ms)
+✔ late cancellation and recursive caller entry never publish an approval metadata handle (17382.699125ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 134019.083375
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-approval-read.test.ts
+src/lib/server/__tests__/guided-source-color-approval-wrapper.test.ts
+✔ public replay refuses a downgraded V1 approval fact for the actual source2 selection (15579.626792ms)
+✔ public source2 approval charges final timing append to its original protected allowance (14970.753042ms)
+✔ public source2 approval retains its original archive identity through timing completion (15101.85775ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 45655.312958
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-approval-wrapper.test.ts
+src/lib/server/__tests__/guided-source-color-approval.test.ts
+✔ actual schema2 selection and owned requalification commit only the explicitly submitted TEST decision (14879.918667ms)
+✔ missing explicit listening attestation refuses before requalification or approval publication (13102.783ms)
+✔ replacement of the original protected callback cannot buy a new approval allowance (14307.247208ms)
+✔ a same-byte media replacement after actual requalification cannot reach approval CAS (14615.708208ms)
+✔ a copied selection DTO cannot authorize an explicit schema2 decision (13161.166ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 70070.949125
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-approval.test.ts
+src/lib/server/__tests__/guided-source-color-body-authority-faults.test.ts
+✔ source2 body hold charges original final metadata IO before returning authority (18399.170625ms)
+✔ first body remainder callback cannot rebaseline in-place original submission values (15534.207583ms)
+✔ body admission captures original current Buffer and parsed metadata before historical callbacks (21813.62375ms)
+✔ later body assertUnchanged charges its final original verification metadata IO (17989.96675ms)
+✔ body admission cannot rebaseline its exact current or retained entry file during historical callback (21587.722625ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 95328.730375
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-body-authority-faults.test.ts
+src/lib/server/__tests__/guided-source-color-body-authority.test.ts
+✔ held body document accepts separate closed V1 and V2 data without granting held capability (1.793917ms)
+✔ held body versions never coerce or accept an outer/input mismatch (0.376166ms)
+✔ V1 cannot smuggle replay and V2 cannot omit it or add unrecognized authority (0.134541ms)
+✔ both held document versions require every closed outer input and original-opening field (0.6015ms)
+✔ V2 replay cannot name foreign original selection input execution or media-result hashes (0.347167ms)
+✔ actual source2 body authority writes only its genuine same-selection held document (17901.197292ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17907.680125
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-body-authority.test.ts
+src/lib/server/__tests__/guided-source-color-body-opening.test.ts
+✔ generic approval to actual body opening result/approval retains genuine source2 evidence only (16086.954833ms)
+✔ body evidence refuses copied selection, result and approval handles (15630.864542ms)
+✔ retained body metadata cannot lose source obligations through a changed selection discriminator (15588.645125ms)
+✔ known source selection downgrade must not invoke a supplied legacy result reader (15713.194333ms)
+✔ first body approval callback cannot replace its already-held actual approval index (15723.005083ms)
+✔ later body metadata detects exact original range replacement without replaying work callbacks (15667.738458ms)
+✔ body verifier returns actual same-owner source capability and retained verification rejects copies (16018.740875ms)
+✔ body source verifier cannot rebaseline its original lease or remaining callback before actual delegation (16404.299041ms)
+✔ historical body approval accepts only the exact approved journal, not its before-approval parent (16928.185875ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 143767.511584
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-body-opening.test.ts
+src/lib/server/__tests__/guided-source-color-cleanup-adoption-integration.test.ts
+✔ actual historical adoption reaches pending, exact retirement, final CAS and final read on one original recovery clock (9959.07775ms)
+✔ lost response after adopted first CAS is recovered by the actual pending service without replay, renewing time or leaking leases (10257.90725ms)
+✔ same original recovery expiry after adopted pending CAS prevents retirement and retains both original owners (9061.194583ms)
+✔ adopted pending proof does not survive original completion-output replacement before retirement (9247.648792ms)
+✔ final read on the same recovery clock refuses post-final-CAS expiry without undoing committed evidence (9991.61675ms)
+✔ lost-response recovery expiry inside global acquisition releases only its partial owners and retains original pending metadata (9176.086333ms)
+✔ last final-read owner callback cannot substitute original adopted output after final CAS (9720.065375ms)
+✔ final proof requires the original actual lease even after both adopted journal CAS edges committed (9702.785625ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 77127.609417
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-cleanup-adoption-integration.test.ts
+src/lib/server/__tests__/guided-source-color-cleanup-adoption.test.ts
+✔ actual completed history enters first CAS without rerunning the expired original native attempt (9517.521167ms)
+✔ DTOs and cross-scope casts cannot manufacture either private completion capability (8712.104792ms)
+✔ first remaining callback cannot rebaseline original journal (7833.556708ms)
+✔ first remaining callback cannot rebaseline original active (7998.767667ms)
+✔ first remaining callback cannot rebaseline original claim (8070.455833ms)
+✔ first remaining callback cannot rebaseline original input (8336.949875ms)
+✔ first remaining callback cannot rebaseline original prepared (8057.260041ms)
+✔ first remaining callback cannot rebaseline original output (8212.516042ms)
+✔ first remaining callback cannot replace original media activation (8321.478834ms)
+✔ first remaining callback cannot replace original media priorJournal (8181.414375ms)
+✔ first remaining callback cannot replace original media intent (8541.792ms)
+✔ first remaining callback cannot replace original media outcome (8155.895792ms)
+✔ first remaining callback cannot replace original media ledger (7852.755959ms)
+✔ unresolved sibling and missing selected attempt refuse without new native work (7585.817459ms)
+✔ workspace callback cannot replace the originally held active reservation (7478.382667ms)
+✔ claim callback cannot replace the originally held active reservation (7552.547708ms)
+✔ configured foreign workspace and forged current claim refuse (7636.920042ms)
+✔ private adoption denies subsequent clock replacement and recursive completion reentry (8280.085542ms)
+✔ actual adopted CAS guard 1 rejects expiry and retains original journal (8632.20075ms)
+✔ actual adopted CAS guard 2 rejects expiry and retains original journal (8904.875958ms)
+✔ missing actual project lease refuses historical adoption (7537.258167ms)
+✔ adopted CAS 1 rejects lost actual project lease (8995.648084ms)
+✔ adopted CAS 2 rejects lost actual project lease (9653.863083ms)
+✔ missing actual resource lease refuses historical adoption (8712.418667ms)
+✔ adopted CAS 1 rejects lost actual resource lease (10231.787917ms)
+✔ adopted CAS 2 rejects lost actual resource lease (10009.83025ms)
+✔ an after-CAS failure retains actual pending proof without native replay or failed-attempt rewrite (9710.106ms)
+✔ post-CAS metadata still rejects original completion file replacement (9160.53325ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 237887.383041

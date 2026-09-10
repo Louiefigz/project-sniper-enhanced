@@ -15,7 +15,7 @@ from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from typing import Any
-from palmier.process_deadline import use_process_deadline
+from headless.process_runner import use_process_deadline
 
 
 def _expired(_signal: int, _frame: object) -> None:

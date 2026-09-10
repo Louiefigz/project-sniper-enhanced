@@ -15,7 +15,7 @@ from cross_runtime_canonical_json import canonical_compact_json
 from edit.picture_lock_common import content_hash
 from fingerprints import file_sha256, plan_content_hash
 from ingest_execution_authority import execution_media_authority_entries
-from palmier.process_deadline import process_timeout
+from headless.process_runner import process_timeout
 from render_effect_discovery import local_python_import_closure
 from render_effect_registry import RenderEffectError, validate_root_fields
 

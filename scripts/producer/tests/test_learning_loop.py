@@ -1169,9 +1169,11 @@ class LessonWireTests(unittest.TestCase):
 
     def test_auto_edit_authoring_prompt_reads_the_ledger(self) -> None:
         ts = self._auto_prompt_source()
-        self.assertIn("scripts/producer/docs/findings/FAILURE_LEDGER.md", ts)
-        self.assertIn("Brain lessons", ts)
-        self.assertIn("MANDATORY", ts)
+        self.assertIn("...authoringReadLines(ctx, paths, usage.readLine)", ts)
+        inputs = (_REPO / "src/app/api/producer/auto-edit/authoring-prompt-inputs.ts").read_text(encoding="utf-8")
+        self.assertIn("scripts/producer/docs/findings/FAILURE_LEDGER.md", inputs)
+        self.assertIn("Brain lessons", inputs)
+        self.assertIn("MANDATORY", inputs)
 
     def test_skill_step_4_reads_the_ledger(self) -> None:
         skill = (_REPO / ".claude" / "skills" / "producer"

@@ -11,7 +11,10 @@ import stat
 import subprocess
 import sys
 import time
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass
+from typing import Any, Iterator
 
 # When the owning controller names a ledger file, every child this runner starts in its
 # own session is recorded there (spawned/reaped rows). Those sessions are outside the
@@ -248,6 +251,34 @@ def run_owned_script(arguments: list[str]) -> None:
         runpy.run_path(arguments[0], run_name="__main__")
     finally:
         _ledger_note("worker-finished", None, command)
+
+
+class ProcessDeadlinePolicyError(RuntimeError):
+    """A caller supplied an invalid shared subprocess budget policy."""
+
+
+_ACTIVE_DEADLINE: ContextVar[Any | None] = ContextVar("producer_process_deadline", default=None)
+
+
+@contextmanager
+def use_process_deadline(deadline: Any) -> Iterator[None]:
+    """Expose one caller's remaining budget to nested producer subprocesses."""
+    if not callable(getattr(deadline, "remaining", None)):
+        raise ProcessDeadlinePolicyError("subprocess deadline has no remaining-time clock")
+    token = _ACTIVE_DEADLINE.set(deadline)
+    try:
+        yield
+    finally:
+        _ACTIVE_DEADLINE.reset(token)
+
+
+def process_timeout(default_s: float = 300.0) -> float:
+    """Cap the subprocess timeout at the active budget without creating a new clock."""
+    if default_s <= 0:
+        raise ProcessDeadlinePolicyError("subprocess timeout must be positive")
+    active = _ACTIVE_DEADLINE.get()
+    remaining = active.remaining() if active is not None else float(default_s)
+    return max(0.001, min(float(default_s), float(remaining)))
 
 
 if __name__ == "__main__":

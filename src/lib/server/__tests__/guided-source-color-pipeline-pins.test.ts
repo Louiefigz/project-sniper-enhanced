@@ -65,7 +65,8 @@ test("missing new cleanup or shared owner pin cannot borrow current code from ou
   for (const name of ["src/lib/server/guided-source-color-cleanup-recovery.ts", "src/lib/server/guided-source-color-cleanup-final-read.ts",
     "src/lib/server/guided-source-color-cleanup-adoption.ts", "src/lib/server/guided-source-color-cleanup-preparation.ts",
     "src/lib/server/guided-source-color-cleanup-history.ts", "src/lib/server/guided-source-color-cleanup-history-hold.ts",
-    "src/lib/server/project-mutation-lease.ts", "src/app/api/producer/studio/import/evidence.ts"]) {
+    "src/lib/server/project-mutation-lease.ts", "src/app/api/producer/studio/import/evidence.ts",
+    "src/lib/server/guided-opening-finishing.ts"]) {
     const index = pipeline.files.findIndex(row => row.path === name); assert(index >= 0);
     const [original] = pipeline.files.splice(index, 1);
     assert.throws(() => openingControllerFiles(f.proposal, 2), /predates required/);

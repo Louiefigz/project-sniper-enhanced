@@ -9,8 +9,13 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from headless.container_io import SealedInput, verify_snapshot_archive
+from headless.container_live_policy import HYPERFRAMES_VERSION_LABEL, output_tmpfs_size
 
 _CONTAINER_NAME = "sniper-render-" + "d" * 32
+_APPROVAL = json.loads((Path(__file__).resolve().parents[1] /
+                       "headless/render_image_approval.json").read_text(encoding="utf-8"))
+IMAGE_ID = _APPROVAL["imageId"]
+_OUTPUT_QUOTA = output_tmpfs_size(_APPROVAL["labels"][HYPERFRAMES_VERSION_LABEL])
 
 
 @dataclass(frozen=True)
@@ -72,7 +77,7 @@ def _container(image_id: str, snapshot: str, container_name: str) -> dict:
         "Ulimits": [{"Name": "nofile", "Hard": 4096, "Soft": 4096}],
         "LogConfig": {"Type": "none"}, "RestartPolicy": {"Name": "no"},
         "Tmpfs": {"/scratch": "rw,nosuid,nodev,noexec,size=2g,uid=501,gid=20,mode=0700",
-                  "/output": "rw,nosuid,nodev,noexec,size=1g,uid=501,gid=20,mode=0700"},
+                  "/output": f"rw,nosuid,nodev,noexec,size={_OUTPUT_QUOTA},uid=501,gid=20,mode=0700"},
         "Mounts": [{"Type": "bind", "Source": "/sealed.tar",
                     "Target": "/request/render-input.tar", "ReadOnly": True}],
     }
@@ -84,7 +89,8 @@ def _container(image_id: str, snapshot: str, container_name: str) -> dict:
                    "WorkingDir": "/scratch", "User": "501:20",
                    "Cmd": ["render"], "Env": ["TZ=UTC",
                    f"SNIPER_INPUT_SHA256={snapshot}"], "Labels": {
-                       "io.project-sniper.render-name": container_name}},
+                       "io.project-sniper.render-name": container_name,
+                       HYPERFRAMES_VERSION_LABEL: _APPROVAL["labels"][HYPERFRAMES_VERSION_LABEL]}},
         "HostConfig": host,
         "Mounts": [{"Type": "bind", "Destination": "/request/render-input.tar",
                     "Source": "/sealed.tar", "RW": False,
@@ -106,7 +112,8 @@ def _runtime(path: Path, media_digest: str, image_id: str,
         "schemaVersion": 1, "policy": "sniper-oci-render-v2", "imageId": image_id,
         "snapshotSha256": snapshot, "snapshotManifest": manifest,
         "outputSha256": media_digest, "imageAttestation": {
-            "Id": image_id, "Config": {"Entrypoint": ["/entrypoint"]}},
+            "Id": image_id, "Config": {"Entrypoint": ["/entrypoint"],
+                                      "Labels": dict(_APPROVAL["labels"])}},
         "containerBeforeOutput": container, "containerAfterOutput": container,
         "containerRemoval": {"canonicalAbsenceProved": True},
         "activeNetworkProof": {"hostDecoyPositive": True, "container": {

@@ -11,7 +11,7 @@ from pathlib import Path
 from unittest import mock
 
 from _common import pl  # noqa: F401
-from _current_render_build_fixture import current_manifest
+from _current_build_release_fixture import current_manifest
 from headless import render_admission as admission_module
 from headless import render_admission_artifact as artifact_module
 from headless.admission_registry import (

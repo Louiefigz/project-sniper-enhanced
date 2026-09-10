@@ -8,6 +8,7 @@ import { parseCutApprovalRequest } from "@/lib/producer/contracts/cut-approval-r
 import { parseCurrentTreatmentProposal as parseTreatmentProposal } from "@/lib/producer/contracts/treatment-proposal-v8";
 import { assertGuidedMusicIntent } from "./guided-proposal-music";
 import { assertGuidedPresenterIntent } from "./guided-proposal-presenter";
+import { assertOpeningFinishingMetadata } from "./guided-opening-finishing";
 import { assertOpeningBindingContext, assertOpeningRequestLanes, type OpeningProposalContext } from "./guided-opening-request-lanes";
 import { openingProfileForContext, hasPresenterMediaRequest, assertPresenterOpeningMetadata } from "./guided-opening-profile";
 import { OPENING_DOCUMENT_NAMES, OPENING_MEDIA_SCOPE, parseCurrentOpeningMediaAuthority as parseGuidedOpeningMediaAuthority,
@@ -49,11 +50,12 @@ function pythonTruthy(value: unknown): boolean {
 function assertOpeningPlanProfile(plan: Record<string, unknown>): void {
   if (Object.hasOwn(plan, "presenterLayouts")) throw new Error("Legacy opening profile has no presenterLayouts execution owner");
   const profile = openingMediaProfileForPlan(plan);
+  assertOpeningFinishingMetadata(plan);
   const captioned = isCaptionProfile(profile);
   const target = objectValue(plan.target, "opening target"), mode = target.mode;
   if (mode !== "short" && mode !== "longform") throw new Error("Private opening target mode is unsupported");
   const unsupported = [...(captioned ? [] : ["captionsTrack"]), "titleCards", "brollTrack", "baselineLook", "punchIns",
-    "transitions", "audioEnhance", "audioGain"];
+    "transitions"];
   const active = unsupported.filter((key) => pythonTruthy(plan[key]));
   const reframe = pythonTruthy(plan.reframe) ? objectValue(plan.reframe, "opening reframe") : {};
   if (!isManualMediaProfile(profile) && (Object.keys(reframe).some((key) => key !== "strategy")

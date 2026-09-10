@@ -13,7 +13,7 @@ from collections.abc import Iterator
 from pathlib import Path
 from unittest import mock
 
-from _render_lane_proof import ProofInputs, build_full_proof
+from _render_lane_proof import IMAGE_ID, ProofInputs, build_full_proof
 from headless.overlay_seal import OverlaySealBinding, load_overlay
 from headless.overlay_seal_store import OverlaySealLocator
 from headless.overlay_source_seal import ResolvedOverlaySeal
@@ -29,7 +29,6 @@ from headless.request_artifact import store_request_artifact
 PRODUCER_DIR = Path(__file__).resolve().parents[1]
 REPO_ROOT = PRODUCER_DIR.parents[1]
 
-IMAGE_ID = "sha256:bc56d3860d2ec1c843f7184bcecd21137aa79fe9fe19c90a67136d3052222ba8"
 CONTAINER_NAME = "sniper-render-" + "d" * 32
 NEXT_CONTAINER_NAME = "sniper-render-" + "e" * 32
 

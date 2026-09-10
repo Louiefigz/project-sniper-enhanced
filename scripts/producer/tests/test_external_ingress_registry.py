@@ -62,8 +62,8 @@ class ExternalIngressRegistryTests(unittest.TestCase):
                 "status": "pass",
                 "familyCount": 10,
                 "releasedFamilyCount": 8,
-                "occurrenceCount": 25,
-                "ownerCount": 25,
+                "occurrenceCount": 26,
+                "ownerCount": 26,
                 "invariantCount": 5,
             },
         )

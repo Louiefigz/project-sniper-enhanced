@@ -1,0 +1,213 @@
+{
+  "part": "d",
+  "startedAt": "2026-09-10T16:13:30.032477+00:00",
+  "expectedModules": 41,
+  "complete": true,
+  "results": [
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-completed-recovery.test.ts",
+      "exitCode": 0,
+      "seconds": 96.855
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-media-metadata.test.ts",
+      "exitCode": 0,
+      "seconds": 142.285
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-media-process.test.ts",
+      "exitCode": 0,
+      "seconds": 106.14
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-media-stop-parity.test.ts",
+      "exitCode": 0,
+      "seconds": 0.585
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-opening-result.test.ts",
+      "exitCode": 0,
+      "seconds": 2.322
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-prelaunch-cancel.test.ts",
+      "exitCode": 0,
+      "seconds": 49.836
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-process-binding.test.ts",
+      "exitCode": 0,
+      "seconds": 58.557
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-read-transport.test.ts",
+      "exitCode": 0,
+      "seconds": 8.333
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-readback.test.ts",
+      "exitCode": 0,
+      "seconds": 234.662
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-reservation-retirement.test.ts",
+      "exitCode": 0,
+      "seconds": 225.772
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-retirement-resource.test.ts",
+      "exitCode": 0,
+      "seconds": 206.426
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-selection.test.ts",
+      "exitCode": 0,
+      "seconds": 107.098
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-staging.test.ts",
+      "exitCode": 0,
+      "seconds": 100.853
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-treatment-json.test.ts",
+      "exitCode": 0,
+      "seconds": 0.136
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-treatment-revision.test.ts",
+      "exitCode": 0,
+      "seconds": 24.508
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-v6-short-integration.test.ts",
+      "exitCode": 0,
+      "seconds": 2.418
+    },
+    {
+      "path": "src/lib/server/__tests__/human-cut-acceptance.test.ts",
+      "exitCode": 0,
+      "seconds": 61.45
+    },
+    {
+      "path": "src/lib/server/__tests__/local-request-policy.test.ts",
+      "exitCode": 0,
+      "seconds": 0.148
+    },
+    {
+      "path": "src/lib/server/__tests__/opening-handoff-clock.test.ts",
+      "exitCode": 0,
+      "seconds": 0.163
+    },
+    {
+      "path": "src/lib/server/__tests__/p2-cut-repair-private-picture-render.test.ts",
+      "exitCode": 0,
+      "seconds": 0.361
+    },
+    {
+      "path": "src/lib/server/__tests__/p2-cut-repair-revision.test.ts",
+      "exitCode": 0,
+      "seconds": 1.106
+    },
+    {
+      "path": "src/lib/server/__tests__/p2-cut-repair-surgical-parent-authority.test.ts",
+      "exitCode": 0,
+      "seconds": 0.197
+    },
+    {
+      "path": "src/lib/server/__tests__/p2-cut-repair-v2-promotion.test.ts",
+      "exitCode": 0,
+      "seconds": 106.019
+    },
+    {
+      "path": "src/lib/server/__tests__/p5-render-graph-fault-cohort.test.ts",
+      "exitCode": 0,
+      "seconds": 247.774
+    },
+    {
+      "path": "src/lib/server/__tests__/process-liveness.test.ts",
+      "exitCode": 0,
+      "seconds": 0.156
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-auto-edit-genesis-successor.test.ts",
+      "exitCode": 0,
+      "seconds": 1.965
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-manifest.test.ts",
+      "exitCode": 0,
+      "seconds": 0.145
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-palmier-saga-startup.test.ts",
+      "exitCode": 0,
+      "seconds": 1.013
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-qc-promotion-intent.test.ts",
+      "exitCode": 0,
+      "seconds": 1.84
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-revision-coverage.test.ts",
+      "exitCode": 0,
+      "seconds": 0.497
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-revision-store.test.ts",
+      "exitCode": 0,
+      "seconds": 4.149
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-shadow-fixtures.test.ts",
+      "exitCode": 0,
+      "seconds": 0.726
+    },
+    {
+      "path": "src/lib/server/__tests__/project-mutation-checkpoints.test.ts",
+      "exitCode": 0,
+      "seconds": 1.994
+    },
+    {
+      "path": "src/lib/server/__tests__/project-mutation-lease.test.ts",
+      "exitCode": 0,
+      "seconds": 0.425
+    },
+    {
+      "path": "src/lib/server/__tests__/proposal-process-bounds.test.ts",
+      "exitCode": 0,
+      "seconds": 3.304
+    },
+    {
+      "path": "src/lib/server/__tests__/readiness-render-containers.test.ts",
+      "exitCode": 0,
+      "seconds": 0.15
+    },
+    {
+      "path": "src/lib/server/__tests__/scene-review-route.test.ts",
+      "exitCode": 0,
+      "seconds": 0.267
+    },
+    {
+      "path": "src/lib/server/__tests__/stage-timing-inputs.test.ts",
+      "exitCode": 0,
+      "seconds": 0.155
+    },
+    {
+      "path": "src/lib/server/__tests__/stage-timing-propagation.test.ts",
+      "exitCode": 0,
+      "seconds": 0.215
+    },
+    {
+      "path": "src/lib/server/__tests__/stage-timing-v2.test.ts",
+      "exitCode": 0,
+      "seconds": 0.18
+    },
+    {
+      "path": "src/lib/server/__tests__/subscription-sinks.test.ts",
+      "exitCode": 0,
+      "seconds": 3.597
+    }
+  ]
+}

@@ -1,0 +1,623 @@
+Disjoint official server test partition d; one owned child at a time.
+src/lib/server/__tests__/guided-source-color-completed-recovery.test.ts
+✔ actual completed recovery acquires both owners, adopts once, commits twice, reads final evidence and releases (12247.796666ms)
+ℹ actual TEST completed recovery=3689.108ms; native/claim admission TEST leaves
+✔ stale completed preparation SHA refuses before global acquisition and releases only the newly acquired project (8663.649291ms)
+✔ an incomplete older sibling blocks completed recovery without another native attempt (8545.913042ms)
+✔ request selector mutation inside the original clock cannot adopt a new attempt (8372.010708ms)
+✔ project wait consumes the same completed-recovery allowance before global acquisition (8403.42175ms)
+✔ cold global acquisition cannot rebaseline the original completed prepared (8734.732125ms)
+✔ cold global acquisition cannot rebaseline the original completed output (8785.835958ms)
+✔ expired global acquisition does not retain a successfully released partial owner or touch the reservation (8721.734833ms)
+✔ failure after actual adopted first CAS retains pending proof and both owners, then the pending service can resume (12156.766209ms)
+✔ final evidence expiry preserves committed cleanup and unreleased ownership without a misleading success (11892.576292ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 96537.11125
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-completed-recovery.test.ts
+src/lib/server/__tests__/guided-source-color-media-metadata.test.ts
+✔ actual staging and process metadata sweeps invoke zero work/resource callbacks after original work expiry (12454.364375ms)
+✔ metadata authentication refuses spread clones, substitute context, and constructor-only readers (13278.091791ms)
+✔ captured original staging reader methods cannot be replaced beneath callback-free checks (12812.497917ms)
+✔ private process metadata keeps exact full original clauses and original callback identities (13821.953917ms)
+✔ metadata-only hold rejects same-byte replacement of original claim (14564.3265ms)
+✔ metadata-only hold rejects same-byte replacement of original input (15336.203ms)
+✔ metadata-only hold rejects same-byte replacement of original sidecar (14473.32325ms)
+✔ metadata-only hold rejects same-byte replacement of original reservation (16184.250417ms)
+✔ original staging work callback substitution remains detectable without invoking the replacement (13848.322583ms)
+✔ constructor-only staged substitute cannot reach native execution through the internal writer (15200.86875ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 141987.958292
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-media-metadata.test.ts
+src/lib/server/__tests__/guided-source-color-media-process.test.ts
+✔ actual internal V3 writer binds one TEST native return to V2 activation and actual stopped readback (14117.713834ms)
+✔ settled normal return never invokes the expired original work callback during durable publication (13431.394166ms)
+✔ truthful settled runner timeout is failed V3, not a fabricated forced stop or success (11314.164041ms)
+✔ forced outer stop remains unresolved, with original reservation retained (11230.661291ms)
+✔ unknown actual outer stop remains failed without manufacturing a completed wrapper ledger (11239.015292ms)
+✔ normal return with missing wrapper ledger never proves settlement (11205.563375ms)
+✔ normal return with unfinished wrapper ledger never proves settlement (11219.939625ms)
+✔ possible prior invocation is not replayed or inferred absent from a new call (11267.925083ms)
+✔ prelaunch original work expiry creates no process intent (10668.656625ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 105700.455791
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-media-process.test.ts
+src/lib/server/__tests__/guided-source-color-media-stop-parity.test.ts
+✔ historical V1 refuses timeout without actual forced-stop flag (29.757959ms)
+✔ historical V2 refuses timeout without actual forced-stop flag (25.129625ms)
+✔ historical V1 normal and forced outcomes retain their exact semantics (44.183417ms)
+✔ historical V2 normal and forced outcomes retain their exact semantics (50.241917ms)
+✔ V3 actual completed wrapper permits a truthful settled timeout as failure, never completion (47.118375ms)
+✔ V3 settled timeout cannot hide an unrecorded nested spawn even with a complete hash-held wrapper (39.60825ms)
+✔ V3 settled timeout still requires exact separately held ledger bytes (23.471292ms)
+✔ V3 cannot borrow legacy activation schema even with matching outcome bytes (37.291167ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 300.337834
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-media-stop-parity.test.ts
+src/lib/server/__tests__/guided-source-color-opening-result.test.ts
+✔ actual V3 result binds both raw completion and schema2 evidence without opening source-color or media files (81.720666ms)
+✔ source-color binder refuses legacy process V1 (53.1755ms)
+✔ source-color binder refuses legacy process V2 (52.287833ms)
+✔ raw result cannot be internally rehashed into mismatched schema2 identity {"schemaVersion":1} (67.736709ms)
+✔ raw result cannot be internally rehashed into mismatched schema2 identity {"status":"failed"} (74.267458ms)
+✔ raw result cannot be internally rehashed into mismatched schema2 identity {"openingApproved":true} (69.999458ms)
+✔ raw result cannot be internally rehashed into mismatched schema2 identity {"deliveryApproved":0} (65.617416ms)
+✔ raw result cannot be internally rehashed into mismatched schema2 identity {"inputPath":"/TEST-unopened/other/input.json"} (68.074083ms)
+✔ raw result cannot be internally rehashed into mismatched schema2 identity {"executionInputHash":"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"} (69.255666ms)
+✔ raw result cannot be internally rehashed into mismatched schema2 identity {"executionClaim":{"path":"/TEST-unopened/other/claim.json","sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}} (71.990875ms)
+✔ raw result cannot be internally rehashed into mismatched schema2 identity {"sourceColorEvidence":{"path":"/TEST-unopened/other/source-color-evidence.json","sha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","sizeBytes":128,"receiptHash":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"}} (69.252334ms)
+✔ completion cannot substitute the original source-color raw evidence reference (64.889583ms)
+✔ failed actual V3 outcome cannot supply a successful nested completion string (67.020125ms)
+✔ actual V3 completion itself must be schema2, independently from schema2 raw receipt (71.509958ms)
+✔ first original callback cannot replace pre-captured resultPath (49.413041ms)
+✔ first original callback cannot replace pre-captured inputPath (54.315541ms)
+✔ first original callback cannot replace pre-captured claimPath (58.032041ms)
+✔ first original callback cannot replace pre-captured intentPath (47.863ms)
+✔ first original callback cannot replace pre-captured outcomePath (56.036917ms)
+✔ first original callback cannot replace pre-captured ledgerPath (51.239125ms)
+✔ first original callback cannot replace pre-captured priorPath (48.766542ms)
+✔ original Buffer and caller object changes during the first guard reject without adopting new state (54.567ms)
+✔ actual metadata hold cannot be forged or attached to an equal held claim DTO (57.161417ms)
+✔ late returned result Buffer or completion mutation stays bound without callbacks (53.560542ms)
+✔ a returned actual completion cannot later substitute an equal-role source-color ref (51.686667ms)
+✔ late original remaining guard failure cannot be replaced by a fresh callback (52.095042ms)
+✔ last re-read callback cannot change original raw result bytes (60.875875ms)
+✔ child schema2 readback never borrows mismatched or approved evidence {"sourceColorEvidence":{"sha256":"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}} (61.239ms)
+✔ child schema2 readback never borrows mismatched or approved evidence {"schemaVersion":1} (61.012542ms)
+✔ child schema2 readback never borrows mismatched or approved evidence {"claimSha256":"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"} (61.72425ms)
+✔ child schema2 readback never borrows mismatched or approved evidence {"receiptSha256":"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"} (76.861459ms)
+✔ child schema2 readback never borrows mismatched or approved evidence {"sourceColorRecordsReplayed":false} (60.754083ms)
+✔ child schema2 readback never borrows mismatched or approved evidence {"colorQualified":true} (60.204042ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2035.31725
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-opening-result.test.ts
+src/lib/server/__tests__/guided-source-color-prelaunch-cancel.test.ts
+✔ same-live no-publication cancellation clears only its actual claim and releases resource before project (531.935292ms)
+✔ a copied token cannot perform cancellation writes and dispatch entry remains irreversible (4573.414542ms)
+✔ same-byte original journal replacement refuses before any cancellation publication (267.325917ms)
+✔ no-publication token metadata and same claim factory cannot supply cold recovery (280.031208ms)
+✔ an interrupted same-live intent retains the original claim and exact intent, then resumes without replacement (456.907125ms)
+✔ reservation original staging cancels with exact archived bytes and no invented process cleanup (4543.142167ms)
+✔ partial original staging cancels with exact archived bytes and no invented process cleanup (4609.551792ms)
+✔ full original staging cancels with exact archived bytes and no invented process cleanup (4927.541375ms)
+✔ the same token resumes after its own observed unlink without unlinking again (4662.477458ms)
+✔ same-byte archive replacement never becomes original cancellation evidence (4523.7815ms)
+✔ same-byte intent replacement never becomes original cancellation evidence (316.297083ms)
+✔ same-byte ack replacement never becomes original cancellation evidence (362.137166ms)
+✔ contradictory media-process-intent.json refuses live cancellation instead of implying absent children (317.781666ms)
+✔ contradictory media-process-result.json refuses live cancellation instead of implying absent children (348.448083ms)
+✔ contradictory owned-process-ledger.media.jsonl refuses live cancellation instead of implying absent children (310.974792ms)
+✔ a prior missing active marker is not this token's observed unlink (4162.75875ms)
+✔ a staging publisher that threw before its original inode handoff stays unresolved (4169.772584ms)
+✔ the original protected clock is not renewed across an interrupted cancellation (336.207458ms)
+✔ original callbacks cannot reenter cancellation or its consumed owner (441.854417ms)
+✔ lost original project lease refuses before unlink or claim clearing (339.648291ms)
+✔ lost original resource lease refuses before unlink or claim clearing (321.327375ms)
+✔ failure after actual CAS retains the new exact journal and resumes without repeating the CAS (439.972625ms)
+✔ final callback evidence mutation never mints a terminal release proof (443.945958ms)
+✔ failure in actual CAS guard 1 retains claim and forbids blind CAS retry (377.426958ms)
+✔ failure in actual CAS guard 2 retains claim and forbids blind CAS retry (443.187708ms)
+✔ an interrupted intent publisher with a created file cannot later recapture that file (348.949708ms)
+✔ an active marker reappearing after this token's unlink is retained, never unlinked again (4322.518375ms)
+✔ terminal registration cannot reenter through its original resource callback (469.903917ms)
+✔ actual terminal release unlinks the original resource lock before the original project lock (470.475791ms)
+✔ the final claimed-job edge preserves every unrelated semantic field and exact original snapshot bytes (443.316583ms)
+✔ final project release ack fault refuses success without blind re-release (481.2435ms)
+✔ final project release deadline fault refuses success without blind re-release (486.961792ms)
+ℹ tests 32
+ℹ suites 0
+ℹ pass 32
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 49536.850708
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-prelaunch-cancel.test.ts
+src/lib/server/__tests__/guided-source-color-process-binding.test.ts
+✔ complete V2 clauses and exact actual raw publications become immutable process references only (6885.551084ms)
+✔ changed original source clauses, request ID and prior journal never become launch transport (6665.653417ms)
+✔ first process callback cannot replace the request or edit nested clauses before capture (6697.059584ms)
+✔ same-byte replacement before process binding cannot become the original staged sidecar (6383.61875ms)
+✔ a successful hold keeps original files and complete submission live for later intent publication (6356.298792ms)
+✔ prospective execution checks are separate from valid later metadata lifetime (6380.042708ms)
+✔ last caller mutation creating an execution path is refused before handoff (6272.088041ms)
+✔ JSON copies and resource lease loss do not supply live process binding (6329.521458ms)
+✔ recorded reference is closed, path-bound, byte-bounded and grants no new fields (6339.044292ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 58313.23225
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-process-binding.test.ts
+src/lib/server/__tests__/guided-source-color-read-transport.test.ts
+✔ explicit fake invocation cannot reach runtime or remaining callbacks (1.144666ms)
+✔ explicit copy invocation cannot reach runtime or remaining callbacks (0.075292ms)
+✔ explicit null invocation cannot reach runtime or remaining callbacks (0.0545ms)
+✔ explicit false invocation cannot reach runtime or remaining callbacks (0.045917ms)
+✔ explicit invocation rejects role or argument override {"kind":"media"} (0.159666ms)
+✔ explicit invocation rejects role or argument override {"kind":"cleanup"} (0.08875ms)
+✔ explicit invocation rejects role or argument override {"extraArgs":[]} (0.048459ms)
+✔ explicit invocation rejects role or argument override {"cleanupAttemptId":"TEST"} (0.041666ms)
+✔ raw --source-color-input cannot bypass the private transport (0.239ms)
+✔ raw --source-color-input-sha256 cannot bypass the private transport (0.266125ms)
+✔ raw --source-color-reservation-archive cannot bypass the private transport (0.051708ms)
+✔ raw --source-color-reservation-archive-sha256 cannot bypass the private transport (0.039833ms)
+✔ raw --source-color-input=/TEST/not-read cannot bypass the private transport (0.0405ms)
+✔ the original remaining callback cannot introduce raw flags or change captured arguments, original present=false (2.503667ms)
+✔ the original remaining callback cannot introduce raw flags or change captured arguments, original present=true (1.331041ms)
+✔ separately genuine final cleanup and result cannot be joined across different original held claims (8020.856125ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8030.965208
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-read-transport.test.ts
+src/lib/server/__tests__/guided-source-color-readback.test.ts
+✔ actual schema2 service binds final cleanup, ordered stages and private unselected records (8494.156625ms)
+✔ actual service refuses schema1 child output and retains unselected failure (8231.392625ms)
+✔ actual service refuses evidence child output and retains unselected failure (8277.87825ms)
+✔ actual service refuses stages child output and retains unselected failure (8127.4145ms)
+✔ actual service refuses elapsed child output and retains unselected failure (8151.755959ms)
+✔ forced TEST invocation failure preserves actual stop facts without selecting media (8421.495792ms)
+✔ readiness cannot replace the original request cleanup hash before invocation (7991.353167ms)
+✔ readiness cannot replace the original remaining callback (8101.582292ms)
+✔ same-byte final archive replacement at before frontier refuses (8039.151083ms)
+✔ same-byte selected media result replacement at before frontier refuses (8106.917166ms)
+✔ same-byte final archive replacement at settled frontier refuses (8060.69525ms)
+✔ same-byte selected media result replacement at settled frontier refuses (7996.690167ms)
+✔ expired original allowance stops before the TEST spawn frontier (7891.455791ms)
+✔ last original callback cannot replace the archive after verified publication (8013.656ms)
+✔ metadata verification refuses cloned return capabilities (9943.073041ms)
+✔ readback owner preserves exact live fields without invoking remaining or native callbacks (10082.132958ms)
+✔ initial actual cleanup-store callback cannot replace the original service allowance (9868.985917ms)
+✔ final original callback cannot replace the literal inert TEST read tool (10962.029208ms)
+✔ failed held metadata records only the original generation-clock lineage (10235.64775ms)
+✔ outer final metadata cannot consume the original remaining allowance and escape (10267.1735ms)
+✔ returned result metadata cannot be altered after verification (9905.445625ms)
+✔ returned receipt metadata cannot be altered after verification (9754.893083ms)
+✔ returned output metadata cannot be altered after verification (9744.498792ms)
+✔ original inert core range replacement at settled frontier remains refused (9831.669208ms)
+✔ original inert review range replacement at final frontier remains refused (9895.461708ms)
+✔ original inert core range replacement at returned frontier remains refused (9969.050542ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 234372.406875
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-readback.test.ts
+src/lib/server/__tests__/guided-source-color-reservation-retirement.test.ts
+✔ actual pending cleanup retires only its original marker and publishes an exact new acknowledgement (8932.506333ms)
+ℹ actual TEMP retirement wall=166.502ms; native and enclosing elapsed are TEST leaves
+✔ real committed-intent absence is honest and never claims an observed earlier unlink (8861.185042ms)
+✔ existing acknowledgement recovery preserves its exact bytes and inode without replaying cleanup (9059.304208ms)
+✔ an existing acknowledgement larger than the final-fact bound is refused (8966.985584ms)
+✔ only an actual pending read and actual retirement can cross their live boundaries (9087.847208ms)
+✔ foreign active bytes are retained instead of being removed (8997.180792ms)
+✔ same-byte active substitution by the last owner callback is refused before unlink (8912.250708ms)
+✔ lost actual project lease refuses before unlink (9346.205333ms)
+✔ lost actual resource lease refuses before unlink (9236.485834ms)
+✔ the original expired allowance refuses before unlink without renewing time (9051.29ms)
+✔ a fault after unlink preserves pending evidence and recovery reports already absent (9174.269875ms)
+✔ a fault after acknowledgement preserves it for exact recovery (9465.427125ms)
+✔ post-ack ack substitution cannot become success (9325.639666ms)
+✔ post-ack archive substitution cannot become success (8899.177375ms)
+✔ post-ack media substitution cannot become success (8840.262125ms)
+✔ the original deadline still applies after the irreversible unlink (8827.793334ms)
+✔ pending metadata remains valid after intentional marker retirement, without old active guards (8908.684583ms)
+✔ retirement commit helpers retain the actual parent, allowance and live resource owner (8906.98375ms)
+✔ authenticated retained history cannot authorize a present marker unlink (8800.167083ms)
+✔ entry absence does not admit a later regular marker (9112.647125ms)
+✔ entry absence does not admit a later dangling marker (9300.071917ms)
+✔ acknowledgement replay never removes a reappearing active entry (9236.726375ms)
+✔ a marker reappearing after unlink is retained without an acknowledgement (8703.065792ms)
+✔ lost project lease after unlink cannot publish an acknowledgement (8741.765125ms)
+✔ lost resource lease after unlink cannot publish an acknowledgement (8747.671084ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 25
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 225448.563833
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-reservation-retirement.test.ts
+src/lib/server/__tests__/guided-source-color-retirement-resource.test.ts
+✔ current pending can reacquire an existing active resource without interpreting or retiring its marker (8801.486875ms)
+✔ actual committed retirement can reacquire the absent marker namespace without creating it (8890.268ms)
+▶ foreign or dangling active entries are deliberately left to the exact retirement primitive
+  ✔ foreign (8694.79125ms)
+  ✔ dangling (8664.703ms)
+✔ foreign or dangling active entries are deliberately left to the exact retirement primitive (17359.774042ms)
+✔ fresh acquisition retains its existing any-marker fence (8596.868791ms)
+✔ busy global lease remains owned by its original holder (8702.156333ms)
+✔ spread and JSON pending evidence cannot acquire resources (8579.521292ms)
+✔ actual retained-history capability is not a current-pending recovery capability (8606.562041ms)
+▶ original caller, lease method and dependency identities cannot change inside a namespace callback
+  ✔ pending (8518.106958ms)
+  ✔ project (8598.440542ms)
+  ✔ release (8598.699375ms)
+  ✔ dependency (8552.223833ms)
+✔ original caller, lease method and dependency identities cannot change inside a namespace callback (34268.282666ms)
+▶ original pending callback identity cannot be replaced or its allowance renewed
+  ✔ guard (8741.558583ms)
+  ✔ remaining (8595.373834ms)
+  ✔ expired (8396.210958ms)
+✔ original pending callback identity cannot be replaced or its allowance renewed (25733.426ms)
+▶ remaining callback after acquisition cannot release either actual lease and still return a handle
+  ✔ project (8640.503834ms)
+  ✔ resource (8490.545125ms)
+✔ remaining callback after acquisition cannot release either actual lease and still return a handle (17131.46575ms)
+▶ post-acquisition current journal drift or expiry releases only the new resource
+  ✔ journal (8449.8275ms)
+  ✔ expiry (8389.186125ms)
+✔ post-acquisition current journal drift or expiry releases only the new resource (16839.2245ms)
+✔ a supplied lease-shaped object without an actual live project lock cannot acquire resources (8416.255958ms)
+✔ failed resource guard and uncertain release retain both errors and original reservation (8548.837125ms)
+✔ missing namespace is not created and no lease acquisition is attempted (8474.442459ms)
+✔ namespace return substitution cannot redirect global ownership (8529.312459ms)
+✔ a later pending read failure does not automatically release the returned actual resource (8617.299ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 206100.883959
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-retirement-resource.test.ts
+src/lib/server/__tests__/guided-source-color-selection.test.ts
+✔ actual schema2 selection CAS retains historical proof while the old current verifier becomes stale (13913.23575ms)
+✔ source selection refuses copied verifiers or different original callback/lease before publication (9833.12725ms)
+✔ readiness callback cannot change original source result or reservation metadata before selection (9937.909833ms)
+✔ original remaining callback cannot substitute the source owner after verification (9771.45125ms)
+✔ source selection metadata never downgrades a genuine or copied handle by changing fact version (13215.768542ms)
+✔ cold first borrowed callback cannot replace retained readback output after selection (12985.454334ms)
+✔ cold and later finite source checks retain actual media metadata but never replay old callbacks (13416.266125ms)
+✔ failed readiness cannot publish selection or retroactive readback failure (10417.575833ms)
+✔ direct cold helper cannot authenticate altered fact flags against an unrelated actual publication hash (13299.465792ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 106795.551875
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-selection.test.ts
+src/lib/server/__tests__/guided-source-color-staging.test.ts
+✔ mixed all-source jobs retain exact opening, raw inventories and explicit profiles without launching (7727.060125ms)
+✔ actual Python reader accepts each staged version, profile, raw input and live parent PID (7639.456958ms)
+✔ durable reservation enumerates every name before any prospective job directory exists (7994.541917ms)
+✔ partial staging retains complete reservation, created metadata and the caller resource lease (7594.882167ms)
+✔ expired original guard makes no reservation or new job directories (239.778ms)
+✔ existing reservation is never overwritten or interpreted as proof of cleanup (7381.138458ms)
+✔ all declarations must match the actual held expectations before reservation (144.829458ms)
+✔ callback cannot replace the original guard or resource lease reference (154.423667ms)
+✔ same-byte opening claim inode replacement in the first callback is not adopted (151.178958ms)
+✔ held result rejects later raw input mutation and never releases the resource (7083.843416ms)
+✔ a dangling prospective execution entry is rejected instead of treated as absence (7717.926791ms)
+✔ staged records are exclusive; a second attempt cannot create a second set of jobs (15407.359541ms)
+✔ the last expectations callback cannot release the resource after its final lease check (7698.273833ms)
+✔ a later job callback cannot create an earlier prospective execution before staging returns (7805.438667ms)
+✔ prospective-state check is explicit and distinct from metadata lifetime after handoff (7790.813375ms)
+✔ new staging and contract pins come from the executed snapshot and remain held (7773.3675ms)
+✔ an old snapshot missing a required source-color module rejects before any reservation (274.437041ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 100589.898541
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-staging.test.ts
+src/lib/server/__tests__/guided-treatment-json.test.ts
+✔ rejects duplicate decoded keys at every object depth, including contradictory attestations (0.887333ms)
+✔ separate objects may repeat keys and delimiter-like raw intent remains exact data (0.527084ms)
+✔ rejects nonfinite numeric overflow at root, array and nested object locations (0.160208ms)
+✔ malformed grammar, trailing data, invalid escapes and controls fail closed (0.268583ms)
+✔ sixteen container levels remain valid; deeper nesting rejects before final JSON.parse (0.228042ms)
+✔ aggregate token count is bounded across keys and values, not only nested depth (9.883458ms)
+✔ byte cap rejects multi-byte overflow while full escaped raw-intent contract fits (1.045083ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 16.1595
+MODULE_EXIT 0 src/lib/server/__tests__/guided-treatment-json.test.ts
+src/lib/server/__tests__/guided-treatment-revision.test.ts
+✔ revision transport is closed, exact and never accepts an intent/cut/approval patch (141.893416ms)
+✔ metadata-only revision preserves original bytes/context/clock and supports current and ancestor replay (917.773208ms)
+✔ exact parent CAS rejects stale competitors and reused request IDs (556.476916ms)
+✔ after-reservation retains evidence; only explicit same-request reconciliation or committed replay proceeds (587.25725ms)
+✔ after-fact retains evidence; only explicit same-request reconciliation or committed replay proceeds (744.698708ms)
+✔ after-commit retains evidence; only explicit same-request reconciliation or committed replay proceeds (452.625708ms)
+✔ all opening/body records and pre-claim launch directory entries block, including unknown failures (103.042041ms)
+✔ original budget expiration and late boundary expiry cannot publish a new brief (272.0335ms)
+✔ self-consistent altered parent/invalidation receipts and damaged original bytes fail closed (494.491167ms)
+✔ only dependent unapproved pointers are invalidated and their immutable objects survive (496.447875ms)
+✔ brief history exposes active and superseded full text under the original clock (469.537375ms)
+✔ lost original pins, same-key different transport and late budget failure stay fail closed (352.546375ms)
+✔ journal-only rollback and malformed reservation cannot reactivate an earlier brief (474.504584ms)
+✔ 32 admissions remain readable; a thirty-third cannot create a reservation or reset the clock (17544.220833ms)
+✔ revision before first compile rejects missing or changed transitive executor closure without changing its parent (117.119708ms)
+✔ complete transitive closure is rechecked immediately before CAS after retained revision fact (345.812084ms)
+✔ status rejects a late reservation even when the journal and earlier brief observation stay unchanged (105.265917ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 24181.26
+MODULE_EXIT 0 src/lib/server/__tests__/guided-treatment-revision.test.ts
+src/lib/server/__tests__/guided-v6-short-integration.test.ts
+✔ V6 TEST begins with exact short/light intent and four previsual fields, never inherited geometry (1214.085667ms)
+✔ V6 TEST proposal retains separate original crop and caption clauses without graphics or a surrogate (1.644958ms)
+✔ actual graphics advisors honor initial off lanes with no media or measured capability assertion (858.3795ms)
+﹣ actual fresh V6 bootstrap to cut preview, TEST acceptance, real readiness and both14-document readers (0.131084ms) # SKIP
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 2077.587541
+MODULE_EXIT 0 src/lib/server/__tests__/guided-v6-short-integration.test.ts
+src/lib/server/__tests__/human-cut-acceptance.test.ts
+✔ real admitted cut acceptance persists before launch, replays without spawning, and fences explicit retries (9919.649916ms)
+✔ same-size silent source drift fails acceptance, records engine failure and starts a separate new human wait (7738.763417ms)
+✔ orphan immutable acceptance is inert and same-key recovery revalidates sources before journal activation (10136.770291ms)
+✔ accepted visual continuation bypasses no independent cut wall, survives visual-plan resume, and forbids recut fallback (9153.44975ms)
+✔ human attestations and immutable acceptance use closed schemas and reject forged bindings (7311.913875ms)
+✔ accepted interrupted Resume preserves the exact durable context and cannot reconcile or fresh-replace it (7698.536709ms)
+✔ verification runs without expiring launch/job locks and reobserves actual lease and exact draft before CAS (9204.471125ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 61167.74525
+MODULE_EXIT 0 src/lib/server/__tests__/human-cut-acceptance.test.ts
+src/lib/server/__tests__/local-request-policy.test.ts
+local-request-policy.test.ts: all assertions passed
+MODULE_EXIT 0 src/lib/server/__tests__/local-request-policy.test.ts
+src/lib/server/__tests__/opening-handoff-clock.test.ts
+✔ child budget preserves original admission and parent's greater measured elapsed floor (2.63125ms)
+✔ a stalled wall cannot make child startup or handoff wait free (0.310625ms)
+✔ startup, queue and controller delay can exhaust but never renew the same allocation (0.761792ms)
+✔ wall or monotonic rollback poisons the continued clock permanently (0.753333ms)
+✔ forged floors, clock origins, policy changes and extra fields cannot grant time (2.1175ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10.361167
+MODULE_EXIT 0 src/lib/server/__tests__/opening-handoff-clock.test.ts
+src/lib/server/__tests__/p2-cut-repair-private-picture-render.test.ts
+p2-cut-repair-private-picture-render tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/p2-cut-repair-private-picture-render.test.ts
+src/lib/server/__tests__/p2-cut-repair-revision.test.ts
+p2-cut-repair-revision tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/p2-cut-repair-revision.test.ts
+src/lib/server/__tests__/p2-cut-repair-surgical-parent-authority.test.ts
+p2-cut-repair-surgical-parent-authority tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/p2-cut-repair-surgical-parent-authority.test.ts
+src/lib/server/__tests__/p2-cut-repair-v2-promotion.test.ts
+p2-cut-repair-v2-promotion tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/p2-cut-repair-v2-promotion.test.ts
+src/lib/server/__tests__/p5-render-graph-fault-cohort.test.ts
+P5 local render-graph fault cohort passed: 36/36
+MODULE_EXIT 0 src/lib/server/__tests__/p5-render-graph-fault-cohort.test.ts
+src/lib/server/__tests__/process-liveness.test.ts
+process-liveness.test.ts: all assertions passed
+MODULE_EXIT 0 src/lib/server/__tests__/process-liveness.test.ts
+src/lib/server/__tests__/producer-auto-edit-genesis-successor.test.ts
+producer Auto Edit genesis successor tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/producer-auto-edit-genesis-successor.test.ts
+src/lib/server/__tests__/producer-manifest.test.ts
+producer-manifest.test.ts: all assertions passed
+MODULE_EXIT 0 src/lib/server/__tests__/producer-manifest.test.ts
+src/lib/server/__tests__/producer-palmier-saga-startup.test.ts
+producer-palmier-saga-startup tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/producer-palmier-saga-startup.test.ts
+src/lib/server/__tests__/producer-qc-promotion-intent.test.ts
+producer QC promotion durable-intent tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/producer-qc-promotion-intent.test.ts
+src/lib/server/__tests__/producer-revision-coverage.test.ts
+producer-revision-coverage tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/producer-revision-coverage.test.ts
+src/lib/server/__tests__/producer-revision-store.test.ts
+producer-revision-store tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/producer-revision-store.test.ts
+src/lib/server/__tests__/producer-shadow-fixtures.test.ts
+producer-shadow-fixtures tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/producer-shadow-fixtures.test.ts
+src/lib/server/__tests__/project-mutation-checkpoints.test.ts
+✔ direct stale save preserves v1 awaiting_cut_approval plan and journal (39.404709ms)
+✔ direct stale save preserves v1 cut_accepted plan and journal (30.280959ms)
+✔ direct stale save preserves v2 awaiting_cut_approval plan and journal (31.029792ms)
+✔ direct stale save preserves v2 awaiting_treatment_brief plan and journal (29.850291ms)
+✔ direct stale save preserves v2 treatment_admitted plan and journal (30.074459ms)
+✔ direct stale save preserves v2 failed plan and journal (28.614459ms)
+✔ direct stale save preserves v2 interrupted plan and journal (29.139458ms)
+✔ direct stale save preserves v2 complete plan and journal (28.84225ms)
+✔ exact accept-cut-and-continue admits a lease, never changes authority (42.14825ms)
+✔ exact retry-cut-continuation admits a lease, never changes authority (35.984583ms)
+✔ exact accept-cut-await-treatment admits a lease, never changes authority (39.192417ms)
+✔ exact admit-post-cut-treatment admits a lease, never changes authority (34.321083ms)
+✔ exact compile-post-cut-proposal admits a lease, never changes authority (205.797ms)
+✔ exact review-post-cut-proposal admits a lease, never changes authority (324.208417ms)
+✔ exact prepare-guided-opening admits a lease, never changes authority (34.948334ms)
+✔ exact reconcile-guided-opening admits a lease, never changes authority (35.558917ms)
+✔ exact continue-approved-opening admits a lease, never changes authority (40.518208ms)
+✔ verification fails closed for {"expectedToken":"another-token"} (44.402542ms)
+✔ verification fails closed for {"expectedJournalHash":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"} (45.456ms)
+✔ verification fails closed for {"expectedJournalHash":true} (44.413417ms)
+✔ verification fails closed for {"workflowVersion":2} (49.114791ms)
+✔ verification fails closed for {"action":"saving timeline changes"} (46.101166ms)
+✔ verification fails closed for {"expectedStatus":"cut_accepted"} (44.783834ms)
+✔ verification fails closed for {"extra":true} (49.328667ms)
+✔ operation labels and request JSON cannot supply a checkpoint bypass (50.68275ms)
+✔ a journal race with unchanged token/status invalidates the exact verification capability (29.722625ms)
+✔ direct source ingest is blocked before media preparation or source metadata mutation (26.386459ms)
+✔ an already-started editor save cannot cross a newly committed cut checkpoint (24.899542ms)
+✔ verification cannot skip a competing live lease, missing journal, or missing actual lease (76.703166ms)
+✔ present malformed or linked journals never become permission to save (46.237292ms)
+✔ the verification exemption preserves promotion and cut-repair reconciliation checks (46.224583ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1677.325667
+MODULE_EXIT 0 src/lib/server/__tests__/project-mutation-checkpoints.test.ts
+src/lib/server/__tests__/project-mutation-lease.test.ts
+project-mutation-lease.test.ts: all assertions passed
+MODULE_EXIT 0 src/lib/server/__tests__/project-mutation-lease.test.ts
+src/lib/server/__tests__/proposal-process-bounds.test.ts
+✔ codex optional byte budget rejects before accumulation and stops the exact owned child group (904.932625ms)
+✔ codex bounded Unicode split across stream chunks remains exact; omitted option preserves legacy success (802.5665ms)
+✔ legacy optional byte budget rejects before accumulation and stops the exact owned child group (718.350916ms)
+✔ legacy bounded Unicode split across stream chunks remains exact; omitted option preserves legacy success (722.008666ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3150.417583
+MODULE_EXIT 0 src/lib/server/__tests__/proposal-process-bounds.test.ts
+src/lib/server/__tests__/readiness-render-containers.test.ts
+✔ only a fully configured sealed renderer yields owned per-gate container names (1.034417ms)
+✔ reconciliation removes only this execution's exact names and fails closed when absence cannot be verified (0.292167ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4.56475
+MODULE_EXIT 0 src/lib/server/__tests__/readiness-render-containers.test.ts
+src/lib/server/__tests__/scene-review-route.test.ts
+scene-review-route.test.ts: all assertions passed
+MODULE_EXIT 0 src/lib/server/__tests__/scene-review-route.test.ts
+src/lib/server/__tests__/stage-timing-inputs.test.ts
+✔ largest measured inputs stay separate from missing inputs and overlapping duration (0.736625ms)
+✔ conflicting, private, malformed and non-integer input facts are not displayed (0.091125ms)
+✔ telemetry retains exact counts without persisting prompt or error text (0.072875ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4.24
+MODULE_EXIT 0 src/lib/server/__tests__/stage-timing-inputs.test.ts
+src/lib/server/__tests__/stage-timing-propagation.test.ts
+✔ real concurrent planning children receive their own run, attempt and current parent (29.875125ms)
+✔ Audit B preserves timing identity and its existing PYTHONPATH without running a media audit (30.61ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 62.873875
+MODULE_EXIT 0 src/lib/server/__tests__/stage-timing-propagation.test.ts
+src/lib/server/__tests__/stage-timing-v2.test.ts
+stage-timing-v2.test.ts: all assertions passed
+MODULE_EXIT 0 src/lib/server/__tests__/stage-timing-v2.test.ts
+src/lib/server/__tests__/subscription-sinks.test.ts
+✔ codex: actual execution sink refuses API auth without an inference process (386.181542ms)
+✔ claude brain: actual execution sink refuses API auth without an inference process (367.642333ms)
+✔ Claude authoring: actual execution sink refuses API auth without an inference process (409.085416ms)
+✔ native Claude: actual execution sink refuses API auth without an inference process (490.011166ms)
+✔ live MCP Claude: actual execution sink refuses API auth without an inference process (358.985125ms)
+✔ AI-edit stream: auth failure terminates, rolls back only test staging, releases once and invokes no model (520.58225ms)
+✔ Codex preflight never treats an API-key logged-in status as subscription-ready or reveals raw status (446.766125ms)
+✔ runtime GET awaits rejected unknown-version preflight instead of serializing a truthy Promise (464.053208ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3446.357959
+MODULE_EXIT 0 src/lib/server/__tests__/subscription-sinks.test.ts
+AUDIT_COMPLETE 41 modules; failures=0

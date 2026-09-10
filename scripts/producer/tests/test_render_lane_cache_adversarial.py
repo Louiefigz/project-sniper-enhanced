@@ -52,6 +52,7 @@ class RenderLaneCacheAdversarialTests(RenderLaneFixture):
             result = {
                 "cached": True,
                 "fmt": "mov",
+                "fps": "30",
                 "key": seal.key,
                 "kind": "section-marker",
                 "path": str(path),

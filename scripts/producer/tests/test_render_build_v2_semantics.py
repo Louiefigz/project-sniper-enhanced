@@ -1,4 +1,4 @@
-"""Current V2/version-separation regressions; no execution proof is fabricated."""
+"""Frozen V2/version-separation regressions; no execution proof is fabricated."""
 
 from __future__ import annotations
 
@@ -13,6 +13,7 @@ from unittest import mock
 from _common import pl  # noqa: F401
 from _build_receipt_semantics_fixture import render_manifest_document, render_receipt_bytes
 from _current_render_build_fixture import canonical, current_manifest, current_receipt
+from _current_build_release_fixture import current_manifest as release_manifest
 from headless import render_build
 from headless.render_build_manifest_v2_contract import RENDER_BUILD_V2_IMPLEMENTATION_PATHS
 from headless.render_build_manifest_v2_semantics import (
@@ -42,18 +43,16 @@ def _historical() -> bytes:
 
 
 class RenderBuildV2SemanticTests(unittest.TestCase):
-    def test_current_receipt_has_distinct_version_and_exact_guard_closure(self) -> None:
+    def test_frozen_v2_receipt_has_distinct_version_and_exact_guard_catalog(self) -> None:
         raw = current_receipt()
         parsed = parse_render_build_receipt_v2(raw)
         validate_render_build_receipt_v2(parsed)
         validate_render_build_manifest_v2(parsed.manifest)
-        self.assertEqual(encode_render_build_receipt(current_manifest()), raw)
         paths = tuple(row.path for row in parsed.manifest.implementation)
         self.assertEqual(paths, RENDER_BUILD_V2_IMPLEMENTATION_PATHS)
         self.assertEqual(len(paths), len(set(paths)))
         self.assertIn("scripts/producer/headless/render_log_guard.py", paths)
-        self.assertEqual(render_build.BUILD_SCHEMA_VERSION, 2)
-        self.assertEqual(render_build._IMPLEMENTATION_FILES, paths)
+        self.assertNotEqual(render_build._IMPLEMENTATION_FILES, paths)
         with self.assertRaises(RuntimeError):
             parse_render_build_receipt_v1(raw)
 
@@ -157,20 +156,28 @@ class RenderBuildV2SemanticTests(unittest.TestCase):
         self.assertNotEqual(changed.build_digest,
                             parse_render_build_receipt_v2(current_receipt()).build_digest)
 
-    def test_current_store_and_loader_reject_historical_v1(self) -> None:
+    def test_current_store_and_loader_reject_historical_v1_and_v2(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             attempt = Path(directory).resolve()
             attempt.chmod(0o700)
             with self.assertRaises(RuntimeError):
                 store_render_build(str(attempt), json.loads(_historical())["manifest"])
+            with self.assertRaises(RuntimeError):
+                store_render_build(str(attempt), current_manifest())
             self.assertEqual(list(attempt.iterdir()), [])
-            current = store_render_build(str(attempt), current_manifest())
+            current = store_render_build(str(attempt), release_manifest())
             historical = parse_render_build_receipt_v1(_historical())
             old_path = Path(current.path).with_name(historical.build_digest + ".json")
             old_path.write_bytes(_historical())
             old_path.chmod(0o600)
             with self.assertRaises(RuntimeError):
                 load_render_build(str(attempt), RenderBuildLocator(str(old_path), historical.build_digest))
+            previous = parse_render_build_receipt_v2(current_receipt())
+            previous_path = Path(current.path).with_name(previous.build_digest + ".json")
+            previous_path.write_bytes(previous.document_json)
+            previous_path.chmod(0o600)
+            with self.assertRaises(RuntimeError):
+                load_render_build(str(attempt), RenderBuildLocator(str(previous_path), previous.build_digest))
 
     def test_new_manifest_parser_is_pure_and_not_the_live_writer(self) -> None:
         with mock.patch.object(render_build, "render_build_manifest_digest",

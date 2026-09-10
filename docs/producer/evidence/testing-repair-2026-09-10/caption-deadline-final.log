@@ -1,0 +1,25 @@
+test_equality_requires_exact_raw_hash_channel_and_float_type (test_caption_page_draft_integration.PageAbHarnessTests.test_equality_requires_exact_raw_hash_channel_and_float_type)
+A matching-looking dictionary never hides raw-byte or float transport drift. ... ok
+test_expected_defect_requires_exact_semantic_error (test_caption_page_draft_integration.PageAbHarnessTests.test_expected_defect_requires_exact_semantic_error)
+Only the explicitly requested proof error is acceptable rejection evidence. ... ok
+test_expired_test_deadline_cannot_return_new_credit (test_caption_page_draft_integration.PageAbHarnessTests.test_expired_test_deadline_cannot_return_new_credit)
+An expired test allowance is terminal, never a positive epsilon reset. ... ok
+test_metadata_is_reread_against_held_bytes_not_a_new_hash (test_caption_page_draft_integration.PageAbHarnessTests.test_metadata_is_reread_against_held_bytes_not_a_new_hash)
+Even the TEST driver rejects metadata mutation between initial hash and read. ... ok
+test_compositor_pins_all_added_direct_proof_dependencies (test_caption_page_draft_integration.PageIdentityTests.test_compositor_pins_all_added_direct_proof_dependencies)
+Changing each added helper invalidates reuse without resealing old receipts. ... ok
+test_held_projection_identity_matches_ordinary_compositor_and_closure (test_caption_page_draft_integration.PageIdentityTests.test_held_projection_identity_matches_ordinary_compositor_and_closure)
+The same explicit implementation map drives both production read paths. ... ok
+test_blank_pages_are_omitted_but_timeline_frames_stay_absolute (test_caption_pages.CaptionPagePlanningTests.test_blank_pages_are_omitted_but_timeline_frames_stay_absolute) ... ok
+test_contract_rejects_complete_cue_shifted_to_wrong_page_time (test_caption_pages.CaptionPagePlanningTests.test_contract_rejects_complete_cue_shifted_to_wrong_page_time) ... ok
+test_invalid_frame_authorities_fail (test_caption_pages.CaptionPagePlanningTests.test_invalid_frame_authorities_fail) ... ok
+test_page_identity_is_local_to_affected_media_window (test_caption_pages.CaptionPagePlanningTests.test_page_identity_is_local_to_affected_media_window) ... ok
+test_pages_preserve_overlap_and_split_crossing_cues (test_caption_pages.CaptionPagePlanningTests.test_pages_preserve_overlap_and_split_crossing_cues) ... ok
+test_stale_tail_beyond_sealed_picture_fails_closed (test_caption_pages.CaptionPagePlanningTests.test_stale_tail_beyond_sealed_picture_fails_closed) ... ok
+test_unordered_entries_fail_instead_of_changing_z_order (test_caption_pages.CaptionPagePlanningTests.test_unordered_entries_fail_instead_of_changing_z_order) ... ok
+test_all_headless_modules_keep_gui_and_palmier_unreachable (test_headless_import_boundary.HeadlessImportBoundaryTests.test_all_headless_modules_keep_gui_and_palmier_unreachable) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.686s
+
+OK

@@ -34,7 +34,8 @@ class GradeBatchCleanupTests(unittest.TestCase):
         self.assertEqual(result["passes"], 14)
         self.assertEqual([row["containerName"] for row in result["jobs"]], list(fixture.names))
         self.assertTrue(all(row["canonicalAbsenceProved"] and row["inspections"] == 28 for row in result["jobs"]))
-        self.assertEqual(fixture.masks, [(signal.SIG_BLOCK, {signal.SIGUSR1}), (signal.SIG_SETMASK, set())])
+        self.assertEqual(fixture.masks, [(signal.SIG_BLOCK, set()), (signal.SIG_BLOCK, {signal.SIGUSR1}),
+                                         (signal.SIG_SETMASK, set())])
         self.assertFalse(any((fixture.config / leaf).exists() for leaf in ("launch-intent.json", "launch-response.json")))
 
     def test_lost_response_still_removes_every_exact_reserved_name(self) -> None:

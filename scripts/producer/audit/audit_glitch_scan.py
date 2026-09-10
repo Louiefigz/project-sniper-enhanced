@@ -34,7 +34,7 @@ import tempfile
 from dataclasses import dataclass
 from typing import Iterable, Optional
 
-from palmier.process_deadline import process_timeout
+from headless.process_runner import process_timeout
 
 MAX_LOG_BYTES = 16 * 1024 * 1024
 MAX_LUMA_FRAMES = 400_000            # ~3.7 h at 30 fps; series memory ~50 MB

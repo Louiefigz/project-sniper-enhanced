@@ -10,7 +10,6 @@ from __future__ import annotations
 import json
 import math
 import os
-import signal
 import stat
 import subprocess
 import time
@@ -18,7 +17,7 @@ import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
-from color.deadline import require_time, wall_budget
+from color.deadline import defer_owner_cancellation, require_time, wall_budget
 from color.grade_observation_profile import observation_profile, parse_request
 from cut_preview_io import digest, file_hash, read_bytes, real_directory, write_new
 from headless.container_policy import (
@@ -181,26 +180,29 @@ def _execute(source: str, request: dict, directory: Path, evidence: dict) -> Non
     _execute_with_launch(source, request, directory, (evidence, name, None))
 
 
+def _remove_owned_grade(context: tuple, evidence: dict, deadline: float) -> None:
+    """Require positive exact-container absence before recording successful cleanup."""
+    with wall_budget(deadline):
+        runtime, directory, name, reference = context
+        if reference == name:
+            reconcile_launch_abort(runtime, str(directory), name)
+        removal = remove_container(runtime, str(directory), reference)
+        evidence["removal"] = removal
+        evidence["cleanupVerified"] = removal.get("canonicalAbsenceProved") is True
+        if not evidence["cleanupVerified"]:
+            raise RuntimeError("grade observation owned container absence is unproved")
+
 def _cleanup(context: tuple, evidence: dict) -> None:
     """Keep cleanup timing even when exact daemon-owned removal fails."""
-    runtime, directory, name, reference = context
     started = time.monotonic()
     # The owning server independently cancels work with USR1. Defer that one
     # signal until exact daemon cleanup finishes; ALRM still bounds cleanup.
-    previous_mask = signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGUSR1})
-    try:
-        with wall_budget(started + 90):
-            if reference == name:
-                reconcile_launch_abort(runtime, str(directory), name)
-            removal = remove_container(runtime, str(directory), reference)
-            evidence["removal"] = removal
-            evidence["cleanupVerified"] = removal.get("canonicalAbsenceProved") is True
-            if not evidence["cleanupVerified"]:
-                raise RuntimeError("grade observation owned container absence is unproved")
-    finally:
-        evidence["cleanupBudgetSeconds"] = 90
-        evidence["cleanupMs"] = round((time.monotonic() - started) * 1000)
-        signal.pthread_sigmask(signal.SIG_SETMASK, previous_mask)
+    with defer_owner_cancellation():
+        try:
+            _remove_owned_grade(context, evidence, started + 90)
+        finally:
+            evidence["cleanupBudgetSeconds"] = 90
+            evidence["cleanupMs"] = round((time.monotonic() - started) * 1000)
 
 
 def _publish_execution(evidence: dict, artifact_dir: Path, context: tuple) -> None:

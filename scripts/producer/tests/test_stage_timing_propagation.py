@@ -74,7 +74,7 @@ class TimingPropagationTests(unittest.TestCase):
         command = (sys.executable, "-c", CHILD, PRODUCER, str(self.root), str(leaf))
         with stage_span(str(self.root), "graph_parent"):
             with contextlib.redirect_stdout(io.StringIO()):
-                code, events = graph_cli._run_child(SimpleNamespace(command=command))
+                code, events = graph_cli._run_child(SimpleNamespace(command=command, phase="render"))
         self.assertEqual(code, 0)
         self.assertEqual(events, [{"status": "stage_done", "stage": "probe"}])
         starts = {row["stage"]: row for row in self.read_rows() if row["event"] == "start"}
@@ -101,7 +101,8 @@ class TimingPropagationTests(unittest.TestCase):
         command = spawn.call_args.args[0]
         self.assertEqual(command[0], sys.executable)
         self.assertTrue(command[1].endswith("render.py"))
-        self.assertEqual(command[-3:], ["--skip-graphics", "--approval-dir", str(self.root)])
+        self.assertEqual(command[-5:], ["--skip-graphics", "--approval-dir", str(self.root),
+                                        "--audio-clock-policy", "legacy-v1"])
         self.assertEqual(spawn.call_args.kwargs["stderr"], subprocess.DEVNULL)
         self.assert_environment(spawn.call_args.kwargs["env"], parent)
 

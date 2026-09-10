@@ -11,15 +11,20 @@ from typing import Callable
 
 from .compositor_build_manifest_v1_contract import (
     COMPOSITOR_BUILD_V1_DIGEST_DOMAIN,
-    COMPOSITOR_BUILD_V1_IMPLEMENTATION_PATHS,
     COMPOSITOR_BUILD_V1_POLICY,
 )
+from .compositor_build_manifest_v2_contract import (
+    COMPOSITOR_BUILD_V2_IMPLEMENTATION_PATHS,
+    COMPOSITOR_BUILD_V2_POLICY,
+)
+from .compositor_build_manifest_v2_semantics import parse_compositor_build_manifest_v2
 from .quality_pass_contract import ArtifactRefV1
 from .safe_source_files import PinnedSourceRoot
 
-BUILD_POLICY = COMPOSITOR_BUILD_V1_POLICY
+BUILD_POLICY = COMPOSITOR_BUILD_V2_POLICY
+BUILD_SCHEMA_VERSION = 2
 _DIGEST_DOMAIN = COMPOSITOR_BUILD_V1_DIGEST_DOMAIN
-_IMPLEMENTATION_FILES = COMPOSITOR_BUILD_V1_IMPLEMENTATION_PATHS
+_IMPLEMENTATION_FILES = COMPOSITOR_BUILD_V2_IMPLEMENTATION_PATHS
 
 
 class PreboundCompositorBuildError(RuntimeError):
@@ -59,7 +64,7 @@ def _implementation_rows(root: str) -> list[dict]:
 
 
 def compositor_build_manifest() -> dict:
-    """Capture frozen V1 source rows from the loaded release root."""
+    """Capture the current V2 source rows from the loaded release root."""
     rows = _implementation_rows(_LOADED_ROOT)
     if rows != list(_LOADED_IMPLEMENTATION) or rows != _implementation_rows(
         _LOADED_ROOT
@@ -68,14 +73,14 @@ def compositor_build_manifest() -> dict:
             "compositor source closure changed while hashing"
         )
     return {
-        "schemaVersion": 1,
+        "schemaVersion": BUILD_SCHEMA_VERSION,
         "policy": BUILD_POLICY,
         "implementation": rows,
     }
 
 
-def compositor_build_manifest_digest(manifest: dict) -> str:
-    """Reproduce the legacy build digest from closed manifest source rows."""
+def _legacy_manifest_digest(manifest: dict) -> str:
+    """Reproduce historical V1 row hashing without changing its byte identity."""
     rows = manifest.get("implementation") if type(manifest) is dict else None
     if type(rows) is not list:
         raise PreboundCompositorBuildError(
@@ -105,11 +110,25 @@ def compositor_build_manifest_digest(manifest: dict) -> str:
     return digest.hexdigest()
 
 
+def compositor_build_manifest_digest(manifest: dict) -> str:
+    """Keep historical V1 hashing explicit; current V2 binds canonical metadata."""
+    if type(manifest) is not dict or type(manifest.get("schemaVersion")) is not int:
+        raise PreboundCompositorBuildError("compositor build digest version is invalid")
+    version = manifest["schemaVersion"], manifest.get("policy")
+    if version == (1, COMPOSITOR_BUILD_V1_POLICY):
+        return _legacy_manifest_digest(manifest)
+    if version != (2, COMPOSITOR_BUILD_V2_POLICY):
+        raise PreboundCompositorBuildError("compositor build digest version is unsupported")
+    raw = json.dumps(manifest, ensure_ascii=True, separators=(",", ":"),
+                     sort_keys=True, allow_nan=False).encode("ascii")
+    return parse_compositor_build_manifest_v2(raw).build_digest
+
+
 def compositor_build_receipt_bytes() -> bytes:
-    """Return the canonical retained compositor build receipt V1 wire bytes."""
+    """Return canonical current V2 bytes, never mislabeled as a V1 archive."""
     manifest = compositor_build_manifest()
     document = {
-        "schemaVersion": 1,
+        "schemaVersion": BUILD_SCHEMA_VERSION,
         "buildDigest": compositor_build_manifest_digest(manifest),
         "manifest": manifest,
     }

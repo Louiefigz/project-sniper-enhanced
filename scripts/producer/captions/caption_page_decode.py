@@ -16,7 +16,7 @@ from typing import Iterator
 
 from captions.caption_page_proof import MAX_LOG_BYTES, MAX_PROGRESS_BYTES, page_alpha, page_frame_md5, page_progress
 from headless.process_runner import ProcessRequest, run_text
-from palmier.process_deadline import process_timeout
+from headless.process_runner import process_timeout
 
 
 def _run(command: list[str], directory: str,

@@ -17,6 +17,32 @@ P5-blocked.
 
 ## Choose the workflow
 
+- **Research for a close functional match:** study complete narrative coverage,
+  align spoken/caption cues with the visuals, inspect important motion windows,
+  and map the storytelling jobs to inspected HyperFrames catalog sources. Prefer
+  reuse, configuration and composition before bounded custom work. State which
+  frames/audio were actually reviewed, timing confidence and unverified candidate
+  behavior. This delivers research/planning guidance, not a compiled style pack;
+  it does not invoke the replica builds or compilation steps below. If exact
+  motion or word-lock claims are needed, obtain the corresponding frame/audio
+  evidence before making them. Do not turn a small sample into global cadence
+  constants. Use this mode when the operator prioritizes close catalog matches.
+  Save selected actual creator frames with timestamped context sequences and
+  paired story/layout/type/timing notes. Follow the existing
+  [Shorts visual library](../../../docs/studies/shorts-visual-playbook/README.md):
+  retain source URL/time/hash, a stable reference ID, what was visually reviewed,
+  the exact inspected candidate source and any adaptation gap. Keep observed
+  behavior separate from proposed improvements. The Producer must open selected
+  images during planning and compare the same targets during native preview QA;
+  a prose description is not a substitute for looking at the reference.
+  Use [Format foundations](../../../docs/studies/shorts-visual-playbook/FORMAT_FOUNDATIONS.md)
+  to extract the message, viewing need, format choice, actual framing, meaningful
+  development and exit condition. Compare a complete case with a plausible
+  alternative, including within one creator's work. Transfer the function and
+  hierarchy to the new source; keep observed behavior, inferred purpose and
+  proposed improvements distinct. A split needs readable content and deliberate
+  presenter framing as well as two pane jobs. Include counterexamples and
+  limitations rather than treating every reference decision as a quality target.
 - **Learn only:** reference → meticulous study → evidence-bound templates →
   study pack.
 - **Apply existing:** study pack + new source → reference-inspired Producer

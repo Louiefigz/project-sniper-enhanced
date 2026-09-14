@@ -15,6 +15,7 @@ const ANCHORS = ["package.json", "package-lock.json", "tsconfig.json", "next.con
   "templates/motion/vendor/gsap/gsap.min.js", "templates/motion/compositions/TEST-card.html",
   "assets/fonts/TEST.ttf", "assets/models/TEST.onnx", "assets/music/TEST.mp3", "assets/sfx/TEST.wav",
   "src/app/api/producer/auto-edit/TEST.ts", "src/app/api/producer/ai-edit/TEST.ts",
+  "src/app/api/producer/native-short/TEST.ts",
   "src/app/api/producer/live-build/TEST.ts", "src/app/api/producer/palmier/TEST.ts", "src/app/api/_lib/TEST.ts",
   "src/lib/producer/TEST.ts", "src/lib/server/TEST.ts"];
 const LEGACY_CONTROLLERS = ["guided-opening-launch-store", "guided-opening-launcher", "guided-opening-controller",

@@ -45,9 +45,11 @@ assert.match(card, /projectCardPresentation/,
   "continue-card guidance must come from the unified project state presentation");
 assert.match(palmier, /status\.palmier\.detail/,
   "opening Palmier must expose the state model's authority explanation");
-assert.match(details, /runActive \|\| rescanning/,
-  "asset rescan must be disabled while a background job owns the inputs");
-assert.match(details, /Stop & keep checkpoint before adding or rescanning/);
+assert.match(details, /const blocked = status\.run\?\.status === "running" \|\| isGuidedCheckpoint\(status\.run\)/,
+  "asset rescan must retain both running-job and accepted-checkpoint ownership");
+assert.match(details, /disabled=\{blocked \|\| rescanning \|\| !status\.sourceDir\}/,
+  "asset rescan must be disabled while another operation owns the inputs");
+assert.match(details, /Add supporting media before accepting the cut, or use a new project\./);
 assert.match(details, /Technical progress log/);
 assert.match(details, /eventTimestamp\(item\.at\)/,
   "technical progress events must display their recorded timestamps");

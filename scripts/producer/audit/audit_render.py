@@ -138,6 +138,7 @@ def _deterministic_checks(p: Probed) -> tuple[list[CheckResult], float]:
     """The measurement checks plus the output duration used for frame planning."""
     checks: list[CheckResult] = []
     plan = _load_json(os.path.join(p.out_dir, "edit_plan.json")) or {}
+    plan.pop("audioReviewSections", None)
     tmap_data = _load_json(os.path.join(p.out_dir, "timeline_map.json"))
     if tmap_data is None:
         checks.append(CheckResult("timeline_map_present", FAIL, "missing",
@@ -147,6 +148,10 @@ def _deterministic_checks(p: Probed) -> tuple[list[CheckResult], float]:
         tmap = TimelineMap.from_dict(tmap_data)
         checks.append(check_duration(p.final, p.video, tmap))
         duration = tmap.output_duration
+        plan["audioReviewSections"] = [
+            {"start": segment.out_start, "end": segment.out_end,
+             "label": f"picture cut {segment.index}: {segment.source_id}"}
+            for segment in tmap.segments]
     audio_present = has_audio_stream(p.audio)
     p.audio_delivery = measure_delivery(p.final)
     checks.extend(check_loudness(p.final, audio_present, p.audio_delivery))
@@ -161,11 +166,8 @@ def _deterministic_checks(p: Probed) -> tuple[list[CheckResult], float]:
                   for g in plan.get("graphicsTrack") or []
                   if g.get("anchor") == "own-screen"]
     checks.extend(check_glitch_screens(p.final, duration, own_screen))
-    # Deterministic motion-quality backstop (produced plans only): literal
-    # render-integrity failures fail here; ambiguous cut-rate shortfalls remain
-    # warnings that the controller treats as material temporal-review evidence.
-    # the render-side mirror of the upstream pacing/motion planner — did the
-    # engaging stack actually render (paced, alive, eased)? See audit_motion.
+    # Motion integrity fails here; ambiguous cut-rate shortfalls remain review
+    # warnings. This mirrors the upstream pacing planner; see audit_motion.
     checks.extend(check_pacing_rendered(p.final, duration, plan, p.mode))
     checks.extend(check_presence(p.final, plan, p.out_dir))
     checks.extend(check_smoothness(p.final, plan))

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { isGuidedCheckpoint } from "@/lib/producer/guided-checkpoint-state";
 import { projectPhaseCopy } from "@/lib/producer/project-state";
 import { eventTimestamp, plainRunFailureMessage } from "@/lib/producer/run-status-copy";
 import type { IntentCapabilityDecision } from "@/lib/producer/intent-capabilities";
@@ -89,12 +90,7 @@ export function ProjectDetails({ status }: { status: ProjectStatus }) {
   );
 }
 
-export function CutawayDecision({
-  decision,
-  status,
-  onRevealSource,
-  onIngested,
-}: {
+export function CutawayDecision({ decision, status, onRevealSource, onIngested }: {
   decision: IntentCapabilityDecision;
   status: ProjectStatus;
   onRevealSource: () => void;
@@ -102,12 +98,12 @@ export function CutawayDecision({
 }) {
   const [rescanning, setRescanning] = useState(false);
   const [error, setError] = useState("");
-  const runActive = status.run?.status === "running";
+  const blocked = status.run?.status === "running" || isGuidedCheckpoint(status.run);
   const rescan = () => {
-    if (!status.sourceDir || runActive) return;
+    if (!status.sourceDir || blocked) return;
     setRescanning(true);
     setError("");
-    ingestInto(status.sourceDir, status.projectRoot, onIngested)
+    ingestInto(status.sourceDir, status.projectRoot, onIngested, { reuseTranscripts: true })
       .catch((reason) => setError(reason instanceof Error ? reason.message : "Could not rescan media"))
       .finally(() => setRescanning(false));
   };
@@ -122,14 +118,10 @@ export function CutawayDecision({
         <Button type="button" variant="outline" size="xs" disabled={!status.sourceDir} onClick={onRevealSource}>
           Open source folder
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="xs"
-          disabled={runActive || rescanning || !status.sourceDir}
-          title={runActive ? "Stop and keep the current checkpoint before rescanning source assets" : undefined}
-          onClick={rescan}
-        >
+        <Button type="button" variant="outline" size="xs"
+          disabled={blocked || rescanning || !status.sourceDir}
+          title={blocked ? "Add or rescan supporting media before accepting the cut, or use a new project" : undefined}
+          onClick={rescan}>
           {rescanning ? <Loader2 className="size-3 animate-spin" /> : null}
           Rescan after adding
         </Button>
@@ -138,10 +130,10 @@ export function CutawayDecision({
         </Button>
       </div>
       <p className="mt-1.5 text-[10px] text-muted-foreground">
-        {runActive
-          ? "This job is using the current asset list. Stop & keep checkpoint before adding or rescanning cutaways; then resume the edit."
+        {blocked
+          ? "This project is using a fixed asset list. Add supporting media before accepting the cut, or use a new project."
           : <>
-              To add your own, place video or image files in a <span className="font-mono">broll/</span> folder inside the source folder, then rescan.
+              To add your own, place video or image files in a <span className="font-mono">broll/</span> folder inside the source folder, then rescan. This keeps the current transcript; prepare a new Short brief afterward.
             </>}
       </p>
       {error && <p role="alert" className="mt-1 text-destructive">{error}</p>}

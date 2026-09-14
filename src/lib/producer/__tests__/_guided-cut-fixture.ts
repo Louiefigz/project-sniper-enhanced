@@ -27,14 +27,17 @@ function authoredMediaFixture(root: string): AutoEditCtx {
     intent: project.intent, workflowPolicy: "cut-first", deliveryPolicy: "mp4-only" };
 }
 
-function mediaFixture(root: string, reuseAuthored = false, graphicsOff = false): AutoEditCtx {
+function mediaFixture(root: string, reuseAuthored = false, graphicsOff = false, nativeShort = false): AutoEditCtx {
+  if (reuseAuthored && nativeShort) throw new Error("TEST native Short must be authored before capture");
   if (reuseAuthored && graphicsOff) throw new Error("TEST explicit graphics-off may not retrofit an authored program");
   if (reuseAuthored) return authoredMediaFixture(root);
   const dir = path.join(root, "producer"), source = path.join(root, "source");
   mkdirSync(dir, { recursive: true });
   mkdirSync(source, { recursive: true });
-  const lanes = graphicsOff ? { graphics: "off" as const } : {};
-  const intent = { mode: "longform" as const, scope: "produced" as const, lanes, music: false };
+  const lanes = nativeShort ? { captions: "auto" as const, graphics: "auto" as const, motion: "auto" as const }
+    : graphicsOff ? { graphics: "off" as const } : {};
+  const mode = nativeShort ? "short" as const : "longform" as const;
+  const intent = { mode, scope: "produced" as const, lanes, music: false };
   writeFileSync(path.join(root, "project.json"), JSON.stringify({ origin: "upload", intent }));
   const transcript = path.join(source, "raw.transcript.json");
   writeFileSync(transcript, JSON.stringify({ transcript: [{
@@ -50,7 +53,8 @@ function mediaFixture(root: string, reuseAuthored = false, graphicsOff = false):
     transcriptPath: path.basename(transcript) }] }));
   const planPath = path.join(dir, "edit_plan.json");
   writeFileSync(planPath, JSON.stringify({ planVersion: 1,
-    target: { mode: "longform", scope: "produced", width: 1920, height: 1080, fps: 30, ...(graphicsOff ? { lanes } : {}) },
+    target: { mode, scope: "produced", width: nativeShort ? 1080 : 1920, height: nativeShort ? 1920 : 1080, fps: 30,
+      ...(graphicsOff || nativeShort ? { lanes } : {}) },
     cutTrack: [{ sourceId: "raw-1", start: 0, end: 3, speed: 1, rationale: "Keep the complete opening thought." }],
     cutDecisions: { schemaVersion: 1, removals: [] },
   }));
@@ -59,8 +63,8 @@ function mediaFixture(root: string, reuseAuthored = false, graphicsOff = false):
 }
 
 /** Actual cut gates/review artifacts/projection; model calls and preview rendering are synthetic. */
-export function guidedFixture(root: string, workflowV2?: GuidedWorkflowV2, options: { reuseAuthored?: boolean; graphicsOff?: boolean } = {}) {
-  const ctx = mediaFixture(root, options.reuseAuthored ?? false, options.graphicsOff ?? false);
+export function guidedFixture(root: string, workflowV2?: GuidedWorkflowV2, options: { reuseAuthored?: boolean; graphicsOff?: boolean; nativeShort?: boolean } = {}) {
+  const ctx = mediaFixture(root, options.reuseAuthored ?? false, options.graphicsOff ?? false, options.nativeShort ?? false);
   if (workflowV2) ctx.workflowV2 = parseGuidedWorkflowV2(workflowV2);
   const job = startAutoEditJob({ ctx, token: "guided-job", snapshots: 0 });
   const jobPath = autoEditJobPath(ctx.dir);

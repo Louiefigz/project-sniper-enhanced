@@ -16,6 +16,7 @@ const REQUIRED = [READINESS_SCHEMA_PATH, "src/lib/producer/contracts/proposal-re
 
 /** Only captured implementation is eligible; an old proposal never borrows today's reviewer. */
 export function proposalReadinessAuthority(proposal: ReviewedProposalInput) {
+  if (proposal.result.proposal.schemaVersion === 9 || proposal.result.proposal.schemaVersion === 10) throw new Error("Native Shorts require native audiovisual review; legacy readiness is unavailable");
   const cut = { ...proposal, receipt: proposal.cutReceipt }, source = proposalCompilerAuthority(cut, { version: proposal.evidence.schemaVersion >= 3 ? proposal.evidence.schemaVersion : 2 });
   const required = hasPresenterMediaRequest(proposal.result.proposal, proposal.result.candidate ?? {})
     ? [...REQUIRED, ...PRESENTER_OPENING_PROFILE_FILES] : REQUIRED;
@@ -29,6 +30,7 @@ export function proposalReadinessAuthority(proposal: ReviewedProposalInput) {
 
 /** Full raw intent/occurrences remain bound. This is neither the legacy packet nor a passed plan gate. */
 export function buildProposalReadinessPacket(proposal: ReviewedProposalInput) {
+  if (proposal.result.proposal.schemaVersion === 9 || proposal.result.proposal.schemaVersion === 10) throw new Error("Native Shorts require native audiovisual review; legacy readiness is unavailable");
   const presenter = hasPresenterMediaRequest(proposal.result.proposal, proposal.result.candidate ?? {});
   if (!presenter) assertNoPresenterOpening({ proposal: proposal.result.proposal, candidate: proposal.result.candidate,
     evidence: proposal.evidence, bindings: proposal.result.executionBindings });

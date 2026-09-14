@@ -19,11 +19,15 @@ import { withStageTimingContext } from "./stage-timing-context";
 import { startProposalDeadline, type DeadlineClocks } from "./generation-deadline";
 import { startGuardedProposalDeadline } from "./generation-clock-watermark";
 import { CURRENT_TREATMENT_PROPOSAL_VERSION } from "@/lib/producer/contracts/treatment-proposal-v5";
+import { nativeReferenceImages, type NativeReferenceSelection } from "./guided-native-references";
+import type { DirectorBrain } from "./native-director-store";
 
 interface Dependencies {
   verifySources: typeof verifyCutPreviewSources; brain: typeof runProposalBrain;
   /** Internal qualification seam only; request transport does not select schemas or relax checks. */
-  proposalVersion?: 4 | 5 | 6 | 7 | 8;
+  proposalVersion?: 4 | 5 | 6 | 7 | 8 | 9 | 10;
+  nativeReferences?: NativeReferenceSelection[];
+  directorBrain?: DirectorBrain;
   fault?: (point: "after-brain" | "after-receipt" | "after-commit") => void;
   budgetClocks?: DeadlineClocks;
 }
@@ -81,7 +85,7 @@ async function compileUnderLease(input: { cut: RawAdmission; submission: Compile
     const receipt = proposalReceipt({ cut, submission, operation, proof });
     const proposalHash = writeGuidedObject(dir, receipt); deps.fault?.("after-receipt");
     commitProposal({ cut: current, guard: () => { guard(); budget!.remainingMs(); },
-      proposalHash, createdAt: receipt.createdAt, blocked: candidate.blocked });
+      proposalHash, createdAt: receipt.createdAt, blocked: candidate.blocked, pendingAssets: candidate.pendingAssets });
     finishGuidedOperation(operation, { state: "unapproved-proposal", proposalHash, generationStartedAt: cut.generationStartedAt,
       budget: budgetObservation(budget) });
     deps.fault?.("after-commit"); return { ...readGuidedTreatmentProposal(dir), replayed: false };
@@ -96,20 +100,23 @@ async function compileUnderLease(input: { cut: RawAdmission; submission: Compile
 async function compileCandidate(input: { cut: RawAdmission; operation: Operation; budget: ProposalBudget; deps: Dependencies }) {
   const { cut, operation, budget, deps } = input, dir = cut.job.ctx.dir;
   budget.remainingMs();
-  const options = { version: deps.proposalVersion ?? CURRENT_TREATMENT_PROPOSAL_VERSION };
-  const evidence = await timedStage(dir, "proposal_input_preparation", () => prepareProposalEvidence(cut, operation.execution, budget.remainingMs, options));
+  const options = { version: deps.proposalVersion ?? CURRENT_TREATMENT_PROPOSAL_VERSION,
+    nativeReferences: deps.nativeReferences, directorBrain: deps.directorBrain };
   const authority = await timedStage(dir, "proposal_ts_closure_before", async () => proposalCompilerAuthority(cut, options));
+  const evidence = await timedStage(dir, "proposal_input_preparation", () => prepareProposalEvidence(cut, operation.execution, budget.remainingMs, options));
   const prompt = buildProposalPrompt(cut.submission.rawIntent, evidence);
   const evidenceHash = retained(dir, operation.execution, "evidence.json", evidence);
   const compilerAuthorityHash = retained(dir, operation.execution, "compiler-authority.json", authority);
   const compiler = await timedStage(dir, "proposal_creative_compiler", () => deps.brain({ prompt, ctx: cut.job.ctx,
-    cwd: operation.execution, timeoutMs: budget.remainingMs(), schema: authority.schema }));
+    cwd: operation.execution, timeoutMs: budget.remainingMs(), schema: authority.schema,
+    ...(evidence.nativeReferences ? { imagePaths: nativeReferenceImages(operation.execution, evidence.nativeReferences) } : {}) }));
   const compilerResultHash = retained(dir, operation.execution, "compiler-result.json", compiler); deps.fault?.("after-brain");
   budget.remainingMs();
   const result = buildTreatmentCandidate({ cut, rawIntent: cut.submission.rawIntent, evidence, output: compiler.output });
   const candidateResultHash = retained(dir, operation.execution, "candidate-result.json", result);
   if (result.candidate) createHumanCutIndex(path.join(operation.execution, "candidate-plan.json"), result.candidate);
-  return { blocked: result.blockers.length > 0, proof: { evidenceHash, compilerAuthorityHash, compilerResultHash, candidateResultHash } };
+  return { blocked: result.blockers.length > 0, pendingAssets: result.pendingRequirements?.length ?? 0,
+    proof: { evidenceHash, compilerAuthorityHash, compilerResultHash, candidateResultHash } };
 }
 
 function budgetObservation(budget: ProposalBudget | undefined) {
@@ -127,12 +134,14 @@ function proposalReceipt(input: { cut: RawAdmission; submission: CompileSubmissi
     ...proof, createdAt: new Date().toISOString(), independentReview: "not-run", executable: false };
 }
 
-function commitProposal(input: { cut: RawAdmission; guard: () => void; proposalHash: string; createdAt: string; blocked: boolean }) {
+function commitProposal(input: { cut: RawAdmission; guard: () => void; proposalHash: string; createdAt: string; blocked: boolean; pendingAssets: number }) {
   const { cut, guard, proposalHash, createdAt } = input, job = cut.job;
   return commitGuidedJob({ beforeHash: cut.sha256, guard, job: { ...job, updatedAt: createdAt,
     guidedHandoffV2: { ...cut.pointer, treatmentProposalHash: proposalHash },
     message: input.blocked ? "Treatment proposal retained with blocking clauses; no video generation is authorized."
+      : input.pendingAssets ? `Native proposal retained with ${input.pendingAssets} pending supplied-asset requirements; local visual decisions are required before publication.`
       : "Full-program proposal retained, unapproved; opening/audio/visual review and body generation are not connected.",
     nextEventId: job.nextEventId + 1, events: [...job.events, { id: job.nextEventId, at: createdAt,
-      payload: { event: "treatment_proposal_retained", proposalHash, blocked: input.blocked, executable: false, independentReview: "not-run" } }].slice(-256) } });
+      payload: { event: "treatment_proposal_retained", proposalHash, blocked: input.blocked, executable: false, independentReview: "not-run",
+        ...(input.pendingAssets ? { pendingAssetCount: input.pendingAssets } : {}) } }].slice(-256) } });
 }

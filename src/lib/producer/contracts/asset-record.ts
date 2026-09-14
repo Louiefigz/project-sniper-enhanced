@@ -192,7 +192,11 @@ function parseProvenance(
 }
 
 /** Parse one immutable AssetRecordV1; byte and current-rights admission is downstream. */
-export function parseAssetRecordV1(value: unknown): AssetRecordV1 {
+export function parseAssetRecordV1(value: unknown, options: { maxSizeBytes?: number } = {}): AssetRecordV1 {
+  const maximumBytes = options.maxSizeBytes ?? 1024 ** 3;
+  if (!Number.isSafeInteger(maximumBytes) || maximumBytes < 1 || maximumBytes > 64 * 1024 ** 3) {
+    throw new Error("asset maximum byte size must be bounded by 64 GiB");
+  }
   const record = objectValue(value, "AssetRecordV1");
   const keys = [
     "schemaVersion", "assetId", "sha256", "sizeBytes", "mime", "origin",
@@ -211,7 +215,7 @@ export function parseAssetRecordV1(value: unknown): AssetRecordV1 {
     schemaVersion: 1,
     assetId: sceneStableId(record.assetId, "asset.assetId"),
     sha256: sha256(record.sha256, "asset.sha256"),
-    sizeBytes: sceneInteger(record.sizeBytes, "asset.sizeBytes", 1, 1024 ** 3),
+    sizeBytes: sceneInteger(record.sizeBytes, "asset.sizeBytes", 1, maximumBytes),
     mime: enumValue(record.mime, ASSET_MIMES, "asset.mime"),
     origin,
     acquiredAt: timestamp(record.acquiredAt, "asset.acquiredAt"),

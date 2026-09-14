@@ -235,5 +235,5 @@ export function renderShortLongRouteMatrixMarkdown(
       + "entrypoint and every route path to exist.",
     "",
   ];
-  return `${lines.join("\n")}\n`;
+  return lines.join("\n");
 }

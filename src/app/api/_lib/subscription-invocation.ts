@@ -47,9 +47,10 @@ export async function admitSubscriptionInvocation(input: SubscriptionInvocation)
   const capture = (argv: string[]) => captureSubscriptionStatus({ bin, args: argv, cwd, env,
     timeoutMs: Math.min(10_000, remainingMs()), signal });
   const version = await capture(["--version"]);
-  if (version.stdout.trim() !== SUBSCRIPTION_VERSIONS[provider] || version.stderr.trim()) {
+  if (version.stdout.trim() !== SUBSCRIPTION_VERSIONS[provider]) {
     throw new Error("Subscription CLI version is not qualified for this authentication policy");
   }
+  if (version.stderr.trim()) throw new Error("Subscription CLI version check emitted unexpected diagnostics; verify local runtime access before inference");
   const status = await capture(subscriptionStatusArgs(provider));
   assertSubscriptionStatus(provider, status);
   remainingMs();

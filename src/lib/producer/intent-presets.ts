@@ -6,6 +6,7 @@
 // activates a lane the scope includes. The tsx test parses edit_scope.py so the
 // mirror cannot drift silently.
 import type { AudioEnhance } from "./edit-plan";
+import { parseShortDirection } from "./short-direction";
 
 // edit_scope.py: LANES — the engagement lanes the operator can scope/override.
 // The base cut (trim + reframe) is ALWAYS on and is not a lane.
@@ -74,6 +75,8 @@ export interface ProjectIntent {
   excerpt?: boolean;
   /** Plain-language creative direction supplied by the operator. */
   brief?: string;
+  /** Requested native visual treatment; automatic choice when selected. */
+  shortDirection?: import("./short-direction").ShortDirectionRequest;
   /** Per-lane overrides vs the scope default (edit_scope target.lanes). */
   lanes: Partial<Record<Lane, LaneDirective>>;
   pace?: Pace;
@@ -258,6 +261,7 @@ export function validateIntent(v: unknown): ProjectIntent {
     }
     intent.brief = brief;
   }
+  if (o.shortDirection !== undefined) intent.shortDirection = parseShortDirection(o.shortDirection, o.mode);
   if (o.pace !== undefined) {
     if (!(PACES as readonly string[]).includes(o.pace as string)) {
       throw new Error(`intent.pace must be one of: ${PACES.join(", ")}`);

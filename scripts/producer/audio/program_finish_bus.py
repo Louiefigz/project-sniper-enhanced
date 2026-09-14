@@ -14,12 +14,12 @@ audio or delivers media.
 """
 from __future__ import annotations
 
-import array
-import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
+from audio.dialogue_cleanup import (DialogueSource, ENVELOPE_FRAME, TAIL_GUARD_SAMPLES,
+    cleanup_model_binding, measure_chain_latency, render_clean_dialogue)
 from audio.audio_gain import RAMP_S
 from audio.audio_gain import build_filter as gain_filter
 from audio.audio_mix_bed import AFMT
@@ -30,15 +30,8 @@ from audio.render_audio_authority import run_audio
 from audio.render_audio_bus import SourceAudioBus
 from cut_preview_io import file_hash
 
-PROBE_SECONDS = 2
-IMPULSE_SAMPLE = 48_000         # the probe click sits one second in
-MAX_LATENCY_SAMPLES = 48_000    # a chain delaying more than one second is not cleanup
-MIN_PROBE_PEAK = 0.05           # the click must survive the chain to be located
-ENVELOPE_FRAME = 256            # gain envelope evaluation cadence (5.3 ms)
-TAIL_GUARD_SAMPLES = 4800       # 100 ms of extra input padding past the measured delay
 ORDER = "cleanup->gain->sfx->music->master"
 DETECTOR_KEY = "finished-dialogue-without-sfx"
-_MODEL_RE = re.compile(r"arnndn=m=([^,:]+)")
 _RECORD_KEYS = {"policyVersion", "order", "settings", "detectorKey", "cleanup", "gain", "sfx",
                 "dialogue", "program"}
 
@@ -54,54 +47,11 @@ class FinishedProgram:
     receipt: dict
 
 
-def measure_chain_latency(ffmpeg: str, chain: str) -> int:
-    """Locate a unit click after the exact chain; reject a lost click or moved clock."""
-    total = PROBE_SECONDS * 48_000
-    click = f"if(eq(n,{IMPULSE_SAMPLE}),0.9,0)"
-    raw = run_audio([ffmpeg, "-nostdin", "-v", "error", "-xerror", "-f", "lavfi", "-i",
-        f"aevalsrc='{click}|{click}':s=48000:d={PROBE_SECONDS}",
-        "-af", f"{chain},{AFMT}", "-c:a", "pcm_f32le", "-f", "f32le", "-"])
-    samples = array.array("f")
-    samples.frombytes(raw)
-    if len(samples) != 2 * total:
-        raise RuntimeError("cleanup chain changed the probe sample count; it cannot keep the program clock")
-    left = [abs(samples[2 * index]) for index in range(total)]
-    peak = max(range(total), key=left.__getitem__)
-    lag = peak - IMPULSE_SAMPLE
-    if left[peak] < MIN_PROBE_PEAK or not 0 <= lag <= MAX_LATENCY_SAMPLES:
-        raise RuntimeError("cleanup chain latency could not be established "
-                           f"(peak {left[peak]:.3f} at {lag:+d} samples)")
-    return lag
-
-
-def _dialogue_filter(request: FinishRequest, latency: int, samples: int) -> str:
-    """Cleanup, delay removal, then the existing trapezoid gain windows at the bus clock.
-
-    The chain input is padded by the measured delay plus a guard so the filter
-    also emits the processed final ``latency`` samples instead of leaving that
-    tail silent, and no end-of-input block handling touches the program range."""
-    parts = []
-    if request.enhance_chain:
-        parts.append(f"apad=pad_len={latency + TAIL_GUARD_SAMPLES}")
-        parts.append(request.enhance_chain)
-        parts.append(f"atrim=start_sample={latency},asetpts=N/SR/TB")
-    parts.append(AFMT)
-    if request.gain:
-        parts.append(f"asetnsamples=n={ENVELOPE_FRAME}:p=0,{gain_filter(list(request.gain))}")
-    parts.append(f"apad=whole_len={samples},atrim=end_sample={samples},asetpts=N/SR/TB")
-    return ",".join(parts)
-
-
 def _render_dialogue(bus: SourceAudioBus, request: FinishRequest, directory: Path) -> tuple[str, int]:
-    """Finished dialogue stem with the measured cleanup delay removed."""
-    ffmpeg = bus.admission.tools["ffmpeg"]["path"]
-    latency = measure_chain_latency(ffmpeg, request.enhance_chain) if request.enhance_chain else 0
-    target = directory / "dialogue-finished.wav"
-    run_audio([ffmpeg, "-nostdin", "-v", "error", "-xerror", "-err_detect", "explode", "-n",
-        "-i", bus.path, "-map", "0:a:0", "-af", _dialogue_filter(request, latency, bus.samples),
-        "-ac", "2", "-c:a", "pcm_f32le", str(target)])
-    float_audio_clock(str(target), bus)
-    return str(target), latency
+    """Use the shared normalized-float processor with this proved source bus."""
+    tools = bus.admission.tools
+    source = DialogueSource(bus.path, bus.samples, tools["ffmpeg"]["path"], tools["ffprobe"]["path"])
+    return render_clean_dialogue(source, request, directory)
 
 
 def _sfx_sources(request: FinishRequest, directory: Path) -> dict[str, dict]:
@@ -156,15 +106,6 @@ def _render_program(bus: SourceAudioBus, context: tuple, directory: Path) -> str
     return str(target)
 
 
-def _model_binding(chain: str | None) -> dict | None:
-    """Bind the vendored RNNoise model bytes when the chain consumes one."""
-    match = _MODEL_RE.search(chain or "")
-    if match is None:
-        return None
-    path = Path(match.group(1))
-    return {"path": str(path), "sha256": file_hash(path)}
-
-
 def _receipt(request: FinishRequest, context: tuple, media: tuple[str, str]) -> dict:
     """Retain settings, consumed assets, measured delay and exact output identities."""
     latency, model, sources = context
@@ -188,7 +129,7 @@ def render_finishing(bus: SourceAudioBus, plan: dict, directory: Path) -> Finish
     request = finishing_request(plan, bus.samples / 48_000)
     if request is None:
         return None
-    model = _model_binding(request.enhance_chain)
+    model = cleanup_model_binding(request.enhance_chain)
     sources = _sfx_sources(request, directory)
     dialogue, latency = ((bus.path, 0) if not (request.enhance_chain or request.gain)
                          else _render_dialogue(bus, request, directory))

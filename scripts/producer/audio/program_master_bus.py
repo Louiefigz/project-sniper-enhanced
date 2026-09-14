@@ -1,19 +1,18 @@
 """One retained, measured full-program float master for delivery and excerpts."""
 from __future__ import annotations
 
-import math
 import tempfile
 from dataclasses import dataclass
-from functools import partial
 from pathlib import Path
 
-from audio.audio_mix_delivery import AUDIO_DELIVERY_POLICY_VERSION, _observe_final_audio, measure_delivery
-from audio.master import MASTERING_POLICY_VERSION, build_pass2_afilter
+from audio.audio_mix_delivery import AUDIO_DELIVERY_POLICY_VERSION, measure_delivery
+from audio.master import MASTERING_POLICY_VERSION
+from audio.float_master import FloatMasterInput, render_float_master
 from audio.music_stage import resolve_music_track
 from audio.program_audio_clock import float_audio_clock
 from audio.program_finish_bus import assert_finishing_stable, finishing_identity, verify_finishing
 from audio.program_mix_bus import ProgramMix, build_program_mix
-from audio.render_audio_authority import (SOURCE_FLOAT_POLICY_V2, audio_policy_reason, run_audio,
+from audio.render_audio_authority import (SOURCE_FLOAT_POLICY_V2, audio_policy_reason,
                                           seal_audio_record)
 from audio.render_audio_bus import SourceAudioBus, verify_source_bus
 from cut_preview_io import bound_json, digest, file_hash
@@ -28,16 +27,6 @@ class ProgramMaster:
     directory: str
     receipt: dict
     source_bus: SourceAudioBus
-
-
-def _measured_chain(path: str, samples: int, chain: str) -> float | None:
-    """Use the shared strict decoder on the same exact full float program sum."""
-    measured, code, error = _observe_final_audio(path,
-        f"{chain},aresample=48000,atrim=end_sample={samples},asetpts=PTS-STARTPTS")
-    if code or measured is None:
-        raise RuntimeError("whole-program mastering dry run failed: " + error)
-    integrated = float(measured["input_i"])
-    return integrated if math.isfinite(integrated) else None
 
 
 def _mix_stable(mix: ProgramMix, bus: SourceAudioBus) -> None:
@@ -69,14 +58,9 @@ def audio_program_input_hash(bus: SourceAudioBus, mix: ProgramMix) -> str:
 def _render_master(bus: SourceAudioBus, mix: ProgramMix, directory: Path) -> tuple[Path, str, str | None]:
     """Reuse shared mastering dispatch; materialize float once, with no AAC here."""
     float_audio_clock(mix.path, bus)
-    chain, note = build_pass2_afilter(mix.path, None, mix.measured,
-                                     partial(_measured_chain, mix.path, bus.samples))
-    chain += f",aresample=48000,atrim=end_sample={bus.samples},asetpts=PTS-STARTPTS"
-    path = directory / "program-master.wav"
-    run_audio([bus.admission.tools["ffmpeg"]["path"], "-nostdin", "-v", "error",
-        "-xerror", "-err_detect", "explode", "-n", "-i", mix.path, "-map", "0:a:0",
-        "-af", chain, "-c:a", "pcm_f32le", str(path)])
-    return path, chain, note
+    source = FloatMasterInput(mix.path, bus.samples, mix.measured,
+                              bus.admission.tools["ffmpeg"]["path"])
+    return render_float_master(source, directory)
 
 
 def build_program_master(bus: SourceAudioBus, plan: dict) -> ProgramMaster:

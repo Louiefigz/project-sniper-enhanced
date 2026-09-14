@@ -260,7 +260,7 @@ function segmentBoundaries(
 }
 
 export function packetSpeechEvidence(
-  ctx: AutoEditCtx,
+  ctx: Pick<AutoEditCtx, "transcriptsDir">,
   manifestValue: unknown,
   segments: PacketCutSegment[],
 ): PacketSpeechEvidence {

@@ -51,6 +51,19 @@ rebuilt stages and actual timings, and retain the prior approved version.
 
 ## Visual storytelling — produced/full plans and creative revisions
 
+For native Shorts, use the shared [request and execution workflow](../../../docs/producer/NATIVE_SHORTS_WORKFLOW.md).
+For brand, product, website or repository mentions, proactively consider a real
+page walkthrough using the [web B-roll workflow](../../../docs/producer/WEB_BROLL_WORKFLOW.md).
+Verify the official identity, choose a speech-relevant scroll/reveal, preserve
+the real branding, inspect the encoded phone-size result and admit the frozen
+recording with its capture receipts. Reuse the user's public-browsing authorization.
+Preserve a named or described Short request; if selection is automatic, choose
+from inspected footage and references. Scout supporting shots in the supplied
+footage, including outside the dialogue cut. Prepare the source-bound strategy
+before `native-short.ts build`, then run `native_short_export.py` and inspect the
+result. The local brief handoff invokes no provider; respect the current user's
+model/media permissions and record the review method actually performed.
+
 Apply this to authored visual treatment in shorts and longs. Preserve trim/light
 scope, disabled or operator-owned lanes, accepted cuts and copy-only revision
 boundaries. Existing jobs retain their pinned doctrine; apply new creative
@@ -72,6 +85,121 @@ appears now, the evidence or change that develops the idea, and its source-backe
 payoff. Shorts need a self-contained answer before the CTA; a long explanation
 can build a diagram, focus on a part, then return to the completed overview.
 Use continuity and callbacks where helpful without forcing one permanent canvas.
+
+**Choose edit intensity separately from layout.** An authentic treatment can
+use several crops, real locations and an occasional proof insert while keeping
+graphics restrained. A produced explanation can hold one readable demonstration
+through several actions. Choose from the retained story, source performance and
+available evidence; creator names are references, not whole-video presets.
+Preserve expression, gestures and useful pauses when they carry the lesson.
+
+**Open the saved creator references during planning.** Use
+[the Shorts visual library](../../../docs/studies/shorts-visual-playbook/README.md)
+to find the relevant Nate Herk, Caleb Ralston or Lewis Mudrich treatment. Open
+the chosen full-frame image and timestamped sequence with an image-viewing tool,
+then read the paired description. Reading a description or catalog source does
+not count as viewing the reference. Record its stable ID/version, image paths,
+story fit and deliberate adaptations in the existing storyboard/review notes.
+For produced Shorts, use the linked complete Nate cases and directing guide:
+inspect the setup, development and payoff, plus at least one alternative example
+of the main story job. Record why each picture supports its speech, the actual
+attention target, why a move or hold is useful, and what persists across shots.
+Distinguish a scene cut, internal information change, object animation and camera
+move. Inspect individual full frames before reading small labels across an atlas.
+Keep those same targets for native Studio QA: compare the actual entrance,
+readable state and exit, including type hierarchy, face/hand clearance and the
+new spoken cues. Use the original local video when exact motion/audio is needed;
+sampled strips alone cannot establish easing or word-lock. This is an agent
+workflow requirement, not a claim that automatic reference retrieval is coded.
+
+**Native prebuild strategy is required, including technical samples shown as
+creative examples.** Write or revise the actual BRIEF and scene plan before
+assembling HTML. Use [format foundations](../../../docs/studies/shorts-visual-playbook/FORMAT_FOUNDATIONS.md)
+to connect the message to the viewing need, format, framing, development and exit;
+adapt the reference's function rather than replicating its font or pixels.
+Establish viewer/problem/promise/payoff; compare reference
+images and actual source footage; name each beat's attention target, whole-shot
+layout, source crop, caption/title hierarchy and lifetime, and reason to hold or
+change view. For split screen, justify both panes and simultaneous viewing, with
+deliberate subject/detail sizing and an exit condition. A reference's internal
+animation does not justify copying or inventing its surrounding composition.
+Have a fresh independent strategy critic inspect the current plan and those
+images before dependent assembly. Resolve material issues internally under the
+existing authorization; this is not another user approval round. A STORYBOARD
+generated after HTML, reference IDs alone, or a valid timing schema does not
+complete this stage. Do not let an unsupported crop/layout become a contain
+fallback or a two-template menu dictate the story. See the concrete
+[long-form reuse audit](../../../docs/producer/NATIVE_PREBUILD_STRATEGY_2026-09-10.md).
+
+**Reuse catalog mechanisms before building.** For the requested close functional
+match, prefer reuse, then configuration, then composition of existing items.
+Record the specific missing relationship, state change or integration capability
+before custom work; change only that boundary. A different font, color or exact
+reference appearance does not justify rewriting working motion. Inspect actual
+source inputs, portrait geometry and timing: some catalog items are fixed demo
+compositions. Template reuse lowers risk but still needs candidate verification.
+
+**Use the Script Director's template flow before native scene planning.** Reuse
+the [Director Shorts lane](../../../../youtube-automation/.claude/skills/script-director/SKILL.md)
+and its canonical format library, unified hook anchors, R/T reference and training
+banks, and formula/slot/disqualification index. The native backend now runs
+`stageNativeDirector` from `src/lib/server/native-director-store.ts` during V9
+input preparation, before the scene worker: viewer/payoff/awareness → format
+alternatives → one template and rejected alternatives → 2–3 fills of that same
+template with exact source/slot bindings → quote-or-fail condition audit → a
+separate critic invocation. Missing source libraries, unresolved IDs, absent
+slots, invented recorded words, failed selected conditions or a rejected/stale
+critique stop this path. Store the actual plan and its library provenance;
+reference IDs added after drafting are not retrieval. Use existing source material
+and delegated decisions; do not repeat an interview already completed here.
+The implementation reads the RAG libraries through `SNIPER_RAG_ROOT` (or the
+monorepo sibling), freezes them per attempt, and reuses those bytes for cold reads.
+The main UI's legacy proposal default is unchanged; this is the native backend
+stage, not a claim that a generated hook has passed visual or audience testing.
+
+**Give opening text a job and a lifetime.** Derive the hook from the retained
+lesson and the selected Director template; pair it with actual recorded opening
+audio and a first visual that opens the same question. Record its attention
+reason, when it is readable and its removal cue. A supported reversal, viewer
+problem or outcome can earn attention; a topic label alone does not. Keep it only
+while it adds needed context. Clear it when redundant, answered or obstructing
+the next evidence. Separate hook and caption layers, with one coherent type
+hierarchy; verify loaded fonts, phone-size contrast and visibility at the actual
+opening time. Hidden/blurred catalog entrances need adjustment when immediate
+legibility is required. Do not identify a reference's exact font from appearance.
+YouTube publishing-title formulas remain a separate packaging resource when that
+field is requested; do not substitute their character budget for concise screen
+copy or describe three different layouts as a comparison of hook styles.
+
+**Resolve Shorts production choices during planning.** Before full assembly,
+record the following in the existing scene plan/review notes, within the lanes
+the operator requested:
+
+- The source-supported lesson and payoff, written/spoken/visual opening, and
+  exact retained speech cues the visual developments will follow.
+- Each beat's visible object, action and result; presenter/full visual/split
+  choice and reason; action duration, readable hold and continuity into the
+  next beat. Show a described operation rather than merely naming its steps.
+- How the beat will be made: identified source footage, a specific website/demo
+  capture, or an authored HyperFrames scene. Inspect the actual catalog source
+  and name usable components plus required custom work. A search result or
+  component name alone does not establish the complete scene's feasibility.
+- Required assets and their availability, portrait crop/readability, runtime
+  and editable-project compatibility, and any unresolved execution constraint.
+  Obtain and inspect required material before assembling dependent scenes.
+
+The director owns these choices at the start, including whether generation is
+needed; do not defer the engine or asset decision until after a full render.
+Resolve an uncertain mechanism with the smallest relevant native Studio preview
+before building the whole short. Reuse existing verified mechanisms; this is
+not a requirement for an extra render of every scene. Continue independent
+planning/acquisition while a dependency is unresolved, but do not mark the plan
+production-ready or substitute unrelated B-roll or a label list to conceal it.
+Preserve existing spending/generation authorization boundaries. This checkpoint
+does not introduce another user permission round. Keep the native project and
+assets reusable; revisions rebuild affected dependencies, with final encoding
+and playback verification when required. Planning prevents avoidable rebuilds;
+it does not replace final visual/audio QA or guarantee no iteration.
 
 Choose the information form AND the whole shot composition for each beat:
 
@@ -104,11 +232,13 @@ hierarchy, image treatment, graphic anatomy, reveal and presenter placement.
 headings mentally removed. Repeating the same notebook sheet, box entrance and
 text build is still repetitive despite different titles, colors or template IDs.
 Repair unnecessary repetition across the whole video, including the middle and
-ending. An evolving explanation may intentionally hold its composition. Aaron's
-first-minute brief calls for purposeful activity about every 2–4 seconds; a
-reveal, highlight or demonstration can supply it without a new card each time.
-The body follows the lesson with graphics throughout where useful and room for
-natural delivery. Review actual scene changes and audio before claiming success.
+ending. An evolving explanation may intentionally hold its composition. For
+Aaron's faster produced treatment, review purposeful activity about every 2–4
+seconds; a reveal, highlight or demonstration can supply it without a new card.
+This is not a forced cadence for authentic delivery or a maximum shot duration.
+Choose each change from the next spoken development and allow the action, result
+and reading to finish. Caption updates alone do not fulfill a missing visual
+explanation. Review actual scene changes and audio before claiming success.
 
 This guidance distills the completed 14-skill student-kit audit, particularly
 `short-form-edit`, `video-storytelling` and `hyperframes-video-beats`. Provenance
@@ -118,6 +248,10 @@ existing whole catalog for suitable mechanisms and keep current-runtime
 compatibility authoritative. Extend our motion cards; import neither the kit's
 older runtime nor its fixed layouts, mandatory extra renders or duplicate editor.
 The legacy short-form scaffold is not the new shorts workflow.
+
+For source examples of restrained versus produced Shorts and catalog fit, read
+`docs/studies/SHORTS_STYLE_SELECTION_2026-09-10.md` when choosing that treatment.
+Its references support planning; they do not qualify a production template.
 
 **Explicit native-project routing:** when the operator has selected the native
 HyperFrames composition route, use that project's approved native direction and
@@ -1109,13 +1243,15 @@ numbers are in `docs/studies/MOTION_GRAMMAR_STUDY.md`.
 
 ## Companion skill
 `producer-study` — when the operator provides reference videos (or raw+edited
-pairs): the full study→rules→templates→bake-in loop. Invoke it before
-building anything from examples.
+pairs): choose source-bound research/catalog mapping or the requested
+study→rules→templates→bake-in loop. Study before building from examples;
+research alone does not require new templates or code constants.
 
-`reference-editor` — the strict URL/local-reference study layer. It runs
-source-cadence frame study, two independent full-window visual reviews,
-adjudication, template proof, and style-pack compilation before invoking this
-skill for reference-inspired plan guidance. Verified mimic is not released
+`reference-editor` — URL/local-reference research or strict study-pack creation.
+Close functional match research and inspected catalog mappings can inform
+Producer planning directly, with their stated evidence limits. Strict pack
+creation retains source-cadence study, two independent full-window reviews,
+adjudication, template proof and compilation. Verified mimic is not released
 (P6 0/7), and Palmier application remains an isolated P5-blocked experiment.
 
 ## House rules (non-negotiable)

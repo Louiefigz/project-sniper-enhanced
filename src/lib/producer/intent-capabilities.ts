@@ -2,6 +2,7 @@ import {
   resolveLanes,
   type ProjectIntent,
 } from "./intent-presets";
+import { shortMediaPolicy } from "./short-direction";
 import type { AssetManifest, ManifestAsset } from "./types";
 
 export const INTENT_CAPABILITY_CODES = {
@@ -71,6 +72,7 @@ function resolvedDecision(
 /**
  * Reconcile asset-dependent lane obligations without mutating operator intent.
  * Explicit off/operator decisions and available assets pass through unchanged.
+ * Native Short scouting may use the admitted source before separate B-roll exists.
  */
 export function reconcileIntentCapabilities(
   intent: ProjectIntent,
@@ -79,7 +81,9 @@ export function reconcileIntentCapabilities(
   const requestedIntent = copyIntent(intent);
   const eligibleAssets = eligibleBrollAssets(manifest).length;
   const broll = resolveLanes(intent.scope, intent.lanes).broll;
-  if (broll !== "auto" || eligibleAssets > 0) {
+  const nativeScouting = intent.mode === "short" && intent.shortDirection
+    && shortMediaPolicy(intent.shortDirection).placement === "auto";
+  if (broll !== "auto" || eligibleAssets > 0 || nativeScouting) {
     return { ok: true, requestedIntent, resolvedIntent: copyIntent(intent), decisions: [] };
   }
   const decision = resolvedDecision(intent, eligibleAssets);

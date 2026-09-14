@@ -8,12 +8,14 @@ as a substitute. Limits are conservative policy, not a qualified SDK memory cap.
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import logging
 import math
 import re
 import shutil
 import subprocess
+import sys
 import time
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
@@ -22,8 +24,9 @@ from typing import Mapping
 from native_render_processes import (
     ProcessFootprint, ProcessIdentity, ProcessRequest, ResourceMeasurementError,
     identity_matches, parse_size, process_table, read_identities,
-    reconcile_process_request, select_processes,
+    reconcile_process_request, select_processes, process_selection,
 )
+from native_render_measurements import parse_direct
 
 GIB = 1024 ** 3
 LOGGER = logging.getLogger(__name__)
@@ -37,6 +40,30 @@ SAFE_NATIVE_ENV = {
     "PRODUCER_FRAME_DATA_URI_CACHE_BYTES_MB": "64",
     "PRODUCER_EXPERIMENTAL_FAST_CAPTURE": "false",
 }
+
+
+class ResourceCommandTimeout(ResourceMeasurementError):
+    """Retain a bounded command timeout without accepting its partial reading."""
+
+    def __init__(self, command: list[str], error: subprocess.TimeoutExpired) -> None:
+        """Keep the exact command, timeout and partial bytes for the owner receipt."""
+        self.identities: tuple[ProcessIdentity, ...] = ()
+        partial = (error.stdout, error.stderr)
+        encoded = [base64.b64encode(value.encode() if isinstance(value, str) else value or b'')
+                   .decode('ascii') for value in partial]
+        self.evidence = {'reason': 'resource-command-timeout', 'command': list(command),
+                         'timeoutSeconds': error.timeout,
+                         'stdoutBase64': encoded[0], 'stderrBase64': encoded[1]}
+        super().__init__(f'Native resource command timed out: {command[0]}')
+
+    def retain_readings(self, raw: dict[str, str], request: ProcessRequest) -> None:
+        """Keep prior actual reads and observed ownership, never a partial snapshot."""
+        self.evidence['completedReadings'] = dict(raw)
+        if 'ps' not in raw:
+            return
+        observed = reconcile_process_request(raw['ps'], raw['ps'], request)
+        self.identities = observed.remembered
+        self.evidence['identities'] = [asdict(row) for row in self.identities]
 
 
 @dataclass(frozen=True)
@@ -58,6 +85,7 @@ class ResourceSnapshot:
     missing_registered_pids: tuple[int, ...]
     reused_registered_pids: tuple[int, ...]
     kernel_pressure_level: int
+    memory_sampler: str = 'macos-top-v1'
 
 
 @dataclass(frozen=True)
@@ -106,24 +134,36 @@ def _kernel_pressure(sysctl: str) -> int:
 def parse_snapshot(raw: Mapping[str, str], request: ProcessRequest,
                    disk_free_bytes: int) -> ResourceSnapshot:
     """Parse complete system output and one explicitly owned process tree."""
-    if not {"sysctl", "pressure", "top", "ps"} <= raw.keys():
+    if not {"sysctl", "pressure", "ps"} <= raw.keys():
         raise ResourceMeasurementError("Required resource measurement output is missing")
     physical = int(_match(r"hw.memsize:\s*(\d+)", raw["sysctl"])[1])
     swap = float(_match(r"used\s*=\s*([\d.]+)M", raw["sysctl"])[1])
     free = float(_match(r"System-wide memory free percentage:\s*([\d.]+)%", raw["pressure"])[1])
-    compressor = parse_size(_match(r"([\d.]+[BKMGT])\s+compressor", raw["top"])[1])
+    memory = _memory_values(raw, request)
     if physical <= 0 or not 0 <= free <= 100 or disk_free_bytes < 0:
         raise ResourceMeasurementError("Invalid system capacity measurement")
-    selected = select_processes(raw["ps"], raw["top"], request)
+    if 'direct' in raw and memory['compressor'] + memory['unused'] > physical:
+        raise ResourceMeasurementError('Direct host memory counters exceed measured physical capacity')
+    selected = memory['selection']
     processes = selected["processes"]
-    unused = parse_size(_match(r"([\d.]+[BKMGT])\s+unused", raw["top"])[1])
     kernel_pressure = _kernel_pressure(raw["sysctl"])
     footprints = [process.footprint_bytes for process in processes]
     return ResourceSnapshot(time.time(), physical, free, int(swap * 1024 ** 2),
-                            compressor, disk_free_bytes, sum(footprints),
+                            memory['compressor'], disk_free_bytes, sum(footprints),
                             max(footprints, default=0), tuple(x.pid for x in processes), processes,
-                            selected["verified"], unused, selected["missing"], selected["reused"],
-                            kernel_pressure)
+                            selected["verified"], memory['unused'], selected["missing"], selected["reused"],
+                            kernel_pressure, memory['sampler'])
+
+
+def _memory_values(raw: Mapping[str, str], request: ProcessRequest) -> dict:
+    """Read either explicit historical top evidence or the current direct payload."""
+    if ('top' in raw) == ('direct' in raw):
+        raise ResourceMeasurementError('Exactly one explicit memory sampler payload is required')
+    if 'direct' in raw:
+        return parse_direct(raw['direct'], raw['ps'], request)
+    return {'compressor': parse_size(_match(r'([\d.]+[BKMGT])\s+compressor', raw['top'])[1]),
+        'unused': parse_size(_match(r'([\d.]+[BKMGT])\s+unused', raw['top'])[1]),
+        'selection': select_processes(raw['ps'], raw['top'], request), 'sampler': 'macos-top-v1'}
 
 
 def _read_command(args: list[str]) -> str:
@@ -131,6 +171,9 @@ def _read_command(args: list[str]) -> str:
     try:
         return subprocess.run(args, capture_output=True, text=True, check=True,
                               timeout=3).stdout
+    except subprocess.TimeoutExpired as error:
+        LOGGER.error("Native resource measurement timed out for %s: %s", args[0], error)
+        raise ResourceCommandTimeout(args, error) from error
     except (OSError, subprocess.SubprocessError) as error:
         LOGGER.error("Native resource measurement failed for %s: %s", args[0], error)
         raise ResourceMeasurementError(f"Cannot measure native resources: {args[0]}") from error
@@ -144,10 +187,18 @@ def read_snapshot(directory: Path, request: ProcessRequest = ProcessRequest()) -
                    "kern.memorystatus_vm_pressure_level"],
         "pressure": ["/usr/bin/memory_pressure", "-Q"],
         "ps": ["/bin/ps", "-axo", "pid=,ppid=,pgid=,lstart="],
-        "top": ["/usr/bin/top", "-l", "1", "-n", "10000", "-stats", "pid,mem,cmprs"],
     }
-    raw = {name: _read_command(args) for name, args in commands.items()}
-    after = _read_command(commands["ps"])
+    raw = {}
+    try:
+        for name, args in commands.items():
+            raw[name] = _read_command(args)
+        pids = sorted(process_selection(raw['ps'], request)['owned'])
+        raw['direct'] = _read_command([sys.executable, str(Path(__file__).with_name('native_render_macos.py')),
+                                      *map(str, pids)])
+        after = _read_command(commands["ps"])
+    except ResourceCommandTimeout as error:
+        error.retain_readings(raw, request)
+        raise
     request = reconcile_process_request(raw["ps"], after, request)
     raw["ps"] = after
     snapshot = parse_snapshot(raw, request, shutil.disk_usage(directory).free)

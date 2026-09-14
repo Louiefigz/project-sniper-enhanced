@@ -24,9 +24,12 @@ import type { ProposalEvidence } from "./guided-proposal-evidence";
 import { readGuidedExecution, type guidedOperation } from "./guided-cut-v2-store";
 import { observeHumanCutJob } from "./human-cut-acceptance-store";
 import type { ProjectMutationLease } from "./project-mutation-lease";
+import type { TreatmentProposalV9 } from "@/lib/producer/contracts/treatment-proposal-v9";
+import type { TreatmentProposalV10 } from "@/lib/producer/contracts/treatment-proposal-v10";
 
 /** New media preparation metadata is separate from the immutable unavailable-only record. */
 export function openingMediaAuthority(proposal: OpeningReadiness, heldProfile?: unknown) {
+  if (proposal.result.proposal.schemaVersion === 9 || proposal.result.proposal.schemaVersion === 10) throw new Error("Native Shorts require their own project executor; legacy opening is unavailable");
   const profile = openingProfileForContext({ accepted: objectValue(proposal.plan?.value, "original accepted plan"), candidate: proposal.result.candidate!, manifest: objectValue(proposal.manifest?.value, "original manifest"),
     proposal: proposal.result.proposal, evidence: proposal.evidence, bindings: proposal.result.executionBindings }, heldProfile);
   if (proposal.result.proposal.schemaVersion >= 7) assertGuidedMusicIntent(proposal.plan.value, proposal.job.ctx.intent);
@@ -80,13 +83,21 @@ function openingEntryHasHole(entry: Record<string, unknown>): boolean {
   return pythonTruthy(spec.presenterFrame);
 }
 
-interface MediaMetadata extends Partial<OpeningProposalContext> {
+interface MediaMetadata extends Partial<Omit<OpeningProposalContext, "proposal">> {
   plan: Record<string, unknown>; bindings: GuidedFrameBindings | null; reviewEndFrame: number;
+  proposal?: OpeningProposalContext["proposal"] | TreatmentProposalV9 | TreatmentProposalV10;
   accepted?: Record<string, unknown>; manifest?: Record<string, unknown>;
+}
+
+function assertLegacyMetadata(input: MediaMetadata): asserts input is MediaMetadata & Partial<OpeningProposalContext> {
+  if (input.proposal?.schemaVersion === 9 || input.proposal?.schemaVersion === 10 || input.plan.executionRoute === "native-short-v1" || input.plan.nativeDirection) {
+    throw new Error("Native Shorts cannot execute through the legacy opening/body renderer");
+  }
 }
 
 /** Shared profile screening. All-row mode never silently drops a later presentation. */
 function assertMediaMetadata(input: MediaMetadata, allPresentations: boolean): asserts input is MediaMetadata & { bindings: GuidedFrameBindings } {
+  assertLegacyMetadata(input);
   if (hasPresenterMediaRequest(input.proposal, input.plan)) { assertPresenterOpeningMetadata(input, allPresentations); return; }
   assertOpeningPlanProfile(input.plan);
   const bindings = input.bindings, track = input.plan.graphicsTrack ?? [];

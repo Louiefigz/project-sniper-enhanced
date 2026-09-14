@@ -19,7 +19,7 @@ from ingest_admission_contract import (
     source_set_document,
     verify_source_set_binding,
 )
-from ingest_probe import AUDIO_EXTS, MEDIA_EXTS
+from ingest_probe import AUDIO_EXTS, MEDIA_EXTS, reject_unsupported_ingest_media
 
 
 @dataclass(frozen=True)
@@ -125,6 +125,7 @@ def _candidate(path: Path, lane: str) -> IngressCandidate:
     info = os.lstat(absolute)
     if stat.S_ISLNK(info.st_mode) or not stat.S_ISREG(info.st_mode):
         raise RuntimeError(f"{lane} ingress must be a regular non-symlink file: {absolute}")
+    reject_unsupported_ingest_media(absolute)
     return IngressCandidate(absolute, lane)
 
 
@@ -176,6 +177,7 @@ def _admit_one(
     manifest_dir: Path,
     runner: Callable[[str, str], dict],
 ) -> AdmittedMedia:
+    reject_unsupported_ingest_media(candidate.original_path)
     store = manifest_dir / STORE_NAME
     receipt = runner(str(candidate.original_path), str(store))
     path, sha256, size, kind = receipt_snapshot(receipt, store)

@@ -30,6 +30,15 @@ assert.match(fileScript, /choose file/);
 assert.match(fileScript, /public\.movie/);
 assert.match(fileScript, /public\.audio/);
 
+const supporting = pickerOptions({ kind: "file", purpose: "supporting" });
+assert.equal(supporting.purpose, "supporting");
+const supportingScript = pickerAppleScript(supporting);
+assert.match(supportingScript, /public\.png/); assert.match(supportingScript, /public\.jpeg/);
+assert.match(supportingScript, /webp/); assert.match(supportingScript, /public\.mpeg-4/);
+assert.doesNotMatch(supportingScript, /public\.audio|svg/);
+assert.throws(() => pickerOptions({ kind: "folder", purpose: "supporting" }), /purpose/);
+assert.throws(() => pickerOptions({ purpose: "anything" }), /purpose/);
+
 assert.equal(normalizePickedPath("/Users/test/Media/\n"), "/Users/test/Media");
 assert.equal(normalizePickedPath("/\n"), "/");
 assert.equal(normalizePickedPath("  \n"), "");

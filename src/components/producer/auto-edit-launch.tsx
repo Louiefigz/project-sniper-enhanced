@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { NativeShortLaunch } from "./native-short-launch";
 import { readEventStream } from "@/lib/producer/sse";
 import { intentBadge, type ProjectIntent } from "@/lib/producer/intent-presets";
 import { buildAutoEditRequest } from "@/lib/producer/intent-flow";
@@ -13,7 +14,12 @@ import {
   useEditorRuntime,
 } from "./use-editor-runtime";
 
-export default function AutoEditLaunch({
+export default function AutoEditLaunch(props: { dir: string; intent?: ProjectIntent; onDone: () => void }) {
+  if (props.intent?.mode === "short" && props.intent.shortDirection) return <NativeShortLaunch dir={props.dir} intent={props.intent} />;
+  return <LegacyAutoEditLaunch {...props} />;
+}
+
+function LegacyAutoEditLaunch({
   dir,
   intent,
   onDone,

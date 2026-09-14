@@ -25,15 +25,13 @@ from scipy import signal  # noqa: E402
 
 from audit.audit_checks import CheckResult, FAIL, PASS, WARN  # noqa: E402
 from audit.audit_probe import ffprobe_json, first_stream  # noqa: E402
+from audit.dialogue_consistency import check_dialogue_consistency  # noqa: E402
 from palmier.process_deadline import process_timeout  # noqa: E402
 
 SAMPLE_RATE = 8000
 HUM_SAMPLE_RATE = 1000
 SYNC_START_TOLERANCE_S = 0.080
 SYNC_END_TOLERANCE_S = 0.120
-BALANCE_FAIL_DB = 12.0
-DEAD_CHANNEL_DBFS = -52.0
-ACTIVE_CHANNEL_DBFS = -35.0
 HUM_RANGE_HZ = (40.0, 240.0)
 HUM_PROMINENCE_DB = 14.0
 HUM_FRAME_PROMINENCE_DB = 10.0
@@ -123,34 +121,14 @@ def _amp_db(value: float) -> float:
 
 
 def _channel_result(samples: np.ndarray) -> CheckResult:
-    """Detect one dead or consistently much quieter speech-band channel."""
-    sos = signal.butter(4, [120.0, 3400.0], "bandpass", fs=SAMPLE_RATE,
-                        output="sos")
-    filtered = signal.sosfilt(sos, samples, axis=0)
-    frame = SAMPLE_RATE // 2
-    count = len(filtered) // frame
-    if count < 1:
-        return CheckResult("audio_channel_balance", WARN, "clip too short", "")
-    windows = filtered[:count * frame].reshape(count, frame, 2)
-    rms = np.sqrt(np.mean(np.square(windows), axis=1) + 1e-24)
-    max_db = 20.0 * np.log10(np.max(rms, axis=1) + 1e-12)
-    active = max_db >= max(-48.0, float(np.max(max_db)) - 25.0)
-    if not np.any(active):
-        return CheckResult("audio_channel_balance", FAIL, "no active dialogue", "")
-    levels = np.sqrt(np.mean(np.square(rms[active]), axis=0))
-    left_db, right_db = _amp_db(levels[0]), _amp_db(levels[1])
-    deltas = 20.0 * np.log10((rms[active, 0] + 1e-12) /
-                             (rms[active, 1] + 1e-12))
-    delta = float(np.median(deltas))
-    direction = max(float(np.mean(deltas > 0)), float(np.mean(deltas < 0)))
-    dead = (min(left_db, right_db) < DEAD_CHANNEL_DBFS
-            and max(left_db, right_db) > ACTIVE_CHANNEL_DBFS)
-    severe = abs(delta) > BALANCE_FAIL_DB and direction >= 0.80
-    measured = (f"L {left_db:.1f} / R {right_db:.1f} dBFS; "
-                f"median delta {delta:+.1f} dB, direction {direction:.0%}")
-    detail = f"fail if dead or >{BALANCE_FAIL_DB:.0f} dB consistently"
-    return CheckResult("audio_channel_balance", FAIL if dead or severe else PASS,
-                       measured, detail)
+    """Compatibility summary for callers predating interval channel checks."""
+    rows = check_dialogue_consistency(samples, {})
+    faults = [row for row in rows if row.name.startswith("audio_channel_interval_")]
+    result = rows[0]
+    if faults:
+        return CheckResult(result.name, FAIL, result.measured + "; " + faults[0].measured,
+                           result.detail + "; local channel fault")
+    return result
 
 
 def _local_floor(magnitudes: np.ndarray, frequencies: np.ndarray,
@@ -282,6 +260,9 @@ def check_audio_quality(final_path: str, plan: dict) -> list[CheckResult]:
         results.append(CheckResult("audio_quality_decode", FAIL,
                                    "no decodable audio", ""))
         return results
-    results.extend([_channel_result(samples), _hum_result(samples),
-                    _ending_result(samples, plan)])
+    dialogue = check_dialogue_consistency(samples, plan)
+    results.extend(dialogue)
+    if not isinstance(plan, dict) or any(row.name == "audio_dialogue_samples" for row in dialogue):
+        return results
+    results.extend([_hum_result(samples), _ending_result(samples, plan)])
     return results

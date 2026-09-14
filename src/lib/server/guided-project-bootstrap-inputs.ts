@@ -45,6 +45,7 @@ export function authoredCutSeed(request: GuidedProjectAuthorCutRequest): Record<
     ...(intent.music !== undefined ? { music: intent.music } : {}),
     ...(intent.excerpt !== undefined ? { excerpt: intent.excerpt } : {}),
     ...(intent.pace !== undefined ? { pace: intent.pace } : {}),
+    ...(intent.shortDirection ? { shortDirection: intent.shortDirection } : {}),
     ...(intent.style !== undefined ? { style: intent.style } : {}) };
   return { planVersion: 1, target, cutTrack: [], cutDecisions: { schemaVersion: 1, removals: [] } };
 }

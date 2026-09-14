@@ -23,6 +23,7 @@ function starterTarget(intent: ProjectIntent, durationTargetS: number) {
     ...(Object.keys(intent.lanes).length ? { lanes: intent.lanes } : {}),
     ...(intent.pace ? { pace: intent.pace } : {}),
     ...(intent.style ? { style: intent.style } : {}),
+    ...(intent.shortDirection ? { shortDirection: intent.shortDirection } : {}),
     ...(intent.reference ? {
       referenceId: intent.reference.id,
       referenceStrategy: intent.reference.strategy,
@@ -78,6 +79,7 @@ export function buildAutoEditRequest(
   if (intent.brief) body.brief = intent.brief;
   if (intent.pace) body.pace = intent.pace;
   if (intent.style) body.style = intent.style;
+  if (intent.shortDirection) body.shortDirection = { ...intent.shortDirection };
   if (intent.reference) body.reference = { ...intent.reference };
   if (intent.music !== undefined) body.music = intent.music;
   if (intent.audioEnhance) body.audioEnhance = intent.audioEnhance;

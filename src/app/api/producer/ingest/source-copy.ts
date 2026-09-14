@@ -67,7 +67,7 @@ export async function copyStableSource(
 ): Promise<void> {
   await mkdir(path.dirname(destination), { recursive: true });
   const descriptor = openSync(
-    entry.source, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0),
+    entry.source, constants.O_RDONLY | constants.O_NONBLOCK | (constants.O_NOFOLLOW ?? 0),
   );
   try {
     if (!sameIdentity(fstatSync(descriptor, { bigint: true }), entry.identity)) {
@@ -76,7 +76,10 @@ export async function copyStableSource(
     const reader = createReadStream(
       entry.source, { fd: descriptor, autoClose: false },
     );
-    reader.on("data", (chunk) => onChunk(Buffer.byteLength(chunk)));
+    reader.on("data", (chunk) => {
+      try { onChunk(Buffer.byteLength(chunk)); }
+      catch (error) { reader.destroy(error instanceof Error ? error : new Error(String(error))); }
+    });
     await pipeline(
       reader, createWriteStream(destination, { flags: "wx" }), { signal },
     );

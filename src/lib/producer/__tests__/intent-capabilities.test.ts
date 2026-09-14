@@ -4,7 +4,8 @@ import {
   eligibleBrollAssets,
   reconcileIntentCapabilities,
 } from "../intent-capabilities";
-import type { ProjectIntent } from "../intent-presets";
+import { resolveLanes, type ProjectIntent } from "../intent-presets";
+import type { ShortDirectionRequest } from "../short-direction";
 import type { AssetManifest } from "../types";
 
 const manifest = (broll: AssetManifest["broll"]): Pick<AssetManifest, "broll"> => ({ broll });
@@ -15,6 +16,57 @@ const produced: ProjectIntent = {
   lanes: {},
   preset: "longform-produced",
 };
+
+const nativeShort: ProjectIntent = {
+  ...produced, mode: "short", preset: "produced-short",
+  shortDirection: { selection: "auto", supportingVideo: "source-first" },
+};
+
+function assertScoutingPreserved(shortDirection: ShortDirectionRequest): void {
+  const intent = { ...nativeShort, shortDirection }, before = structuredClone(intent);
+  const result = reconcileIntentCapabilities(intent, manifest([]));
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.requestedIntent, before);
+  assert.deepEqual(result.resolvedIntent, before);
+  assert.deepEqual(result.decisions, []);
+  assert.deepEqual(intent, before, "scouting must not mutate source policy or request");
+}
+
+// Source footage itself can contain useful cutaways, including provided-only jobs.
+assertScoutingPreserved(nativeShort.shortDirection!);
+for (const sources of ["provided-only", "local-only", "public-web"] as const) {
+  assertScoutingPreserved({ selection: "auto", supportingVideo: "source-first",
+    mediaPolicy: { placement: "auto", sources } });
+  assertScoutingPreserved({ selection: "requested", request: "Show the actual website",
+    supportingVideo: "source-first", mediaPolicy: { placement: "auto", sources } });
+}
+
+for (const broll of ["off", "operator"] as const) {
+  const intent = { ...nativeShort, lanes: { broll } };
+  const result = reconcileIntentCapabilities(intent, manifest([]));
+  assert.deepEqual(result.resolvedIntent, intent);
+  assert.deepEqual(result.decisions, []);
+}
+
+for (const shortDirection of [
+  { selection: "auto", supportingVideo: "off" },
+  { selection: "auto", supportingVideo: "source-first",
+    mediaPolicy: { placement: "off", sources: "public-web" } },
+] satisfies ShortDirectionRequest[]) {
+  const intent = { ...nativeShort, shortDirection };
+  const result = reconcileIntentCapabilities(intent, manifest([]));
+  assert.equal(result.resolvedIntent?.lanes.broll, "off");
+  assert.deepEqual(result.resolvedIntent?.shortDirection, shortDirection);
+  assert.equal(result.decisions[0].code, INTENT_CAPABILITY_CODES.BROLL_UNAVAILABLE_RESOLVED);
+}
+
+for (const scope of ["trim", "light"] as const) {
+  const intent = { ...nativeShort, scope, lanes: { broll: "auto" as const } };
+  const result = reconcileIntentCapabilities(intent, manifest([]));
+  assert.deepEqual(result.resolvedIntent, intent, "scouting cannot activate a scope-disabled lane");
+  assert.equal(resolveLanes(result.resolvedIntent!.scope, result.resolvedIntent!.lanes).broll, "off");
+  assert.deepEqual(result.decisions, []);
+}
 
 {
   const before = structuredClone(produced);

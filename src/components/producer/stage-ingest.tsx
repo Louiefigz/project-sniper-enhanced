@@ -24,13 +24,15 @@ export async function ingestInto(
   inputPath: string,
   projectRoot: string | null,
   onIngested?: (payload: IngestedPayload) => void,
-  onEvent: (event: Record<string, unknown>) => void = () => {},
+  options: ((event: Record<string, unknown>) => void) | { reuseTranscripts: true } = () => {},
 ): Promise<void> {
+  const onEvent = typeof options === "function" ? options : () => {};
   dlog("producer:stage-action", "ingest", { inputPath, projectRoot });
   const response = await fetch("/api/producer/ingest", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(projectRoot ? { inputPath, projectRoot } : { inputPath }),
+    body: JSON.stringify({ inputPath, ...(projectRoot ? { projectRoot } : {}),
+      ...(typeof options !== "function" ? { reuseTranscripts: options.reuseTranscripts } : {}) }),
   });
   await readEventStream(response, (event) => {
     onEvent(event as Record<string, unknown>);

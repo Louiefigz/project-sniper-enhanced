@@ -36,7 +36,7 @@ export function proposalRelativeFrame(input: { time: number; origin: number; fra
 }
 
 /** Shared legacy parser reads each transcript once; its first-match mapping is NOT used as the actual cut. */
-export function readProposalSourceSpeech(ctx: AutoEditCtx, manifest: Record<string, unknown>, segments: PacketCutSegment[]) {
+export function readProposalSourceSpeech(ctx: Pick<AutoEditCtx, "transcriptsDir">, manifest: Record<string, unknown>, segments: PacketCutSegment[]) {
   const used = new Set(segments.map((segment) => segment.sourceId));
   if (!Array.isArray(manifest.sources)) throw new Error("Proposal manifest has no source inventory");
   const coverage = manifest.sources.flatMap((value) => {
@@ -76,27 +76,40 @@ function occurrence(input: ProposalSpeechInput, word: PacketKeptWord, segment: P
     sourceEnd: word.sourceOriginalEnd, sourceId: segment.sourceId };
 }
 
-function firstOverlappingWord(words: PacketKeptWord[], start: number) {
-  let low = 0, high = words.length;
+function firstOverlappingWord(maximumEnds: number[], start: number) {
+  let low = 0, high = maximumEnds.length;
   while (low < high) {
     const middle = Math.floor((low + high) / 2);
-    if (words[middle].sourceOriginalEnd <= start) low = middle + 1; else high = middle;
+    if (maximumEnds[middle] <= start) low = middle + 1; else high = middle;
   }
   return low;
 }
 
+/** Prefix endpoints make trim lookup safe even when discarded speech has nested word spans. */
+function indexedSourceWords(words: PacketKeptWord[]) {
+  let maximumEnd = 0;
+  const maximumEnds = words.map((word, index) => {
+    if (index > 0 && word.sourceStart < words[index - 1].sourceStart) {
+      throw new Error("Out-of-order transcript word starts need explicit normalization before proposal compilation");
+    }
+    maximumEnd = Math.max(maximumEnd, word.sourceOriginalEnd);
+    return maximumEnd;
+  });
+  return { words, maximumEnds };
+}
+
 function expandOccurrences(input: ProposalSpeechInput, bySource: Map<string, PacketKeptWord[]>) {
   const mapped: Array<NonNullable<ReturnType<typeof occurrence>>> = [];
-  for (const words of bySource.values()) {
-    if (words.some((word, index) => index > 0 && (word.sourceStart < words[index - 1].sourceStart || word.sourceOriginalEnd < words[index - 1].sourceOriginalEnd))) {
-      throw new Error("Overlapping out-of-order transcript word endpoints need explicit normalization before proposal compilation");
-    }
-  }
+  const indexed = new Map([...bySource].map(([sourceId, words]) => [sourceId, indexedSourceWords(words)]));
   for (const segment of input.segments) {
-    const words = bySource.get(segment.sourceId) ?? [];
-    for (let index = firstOverlappingWord(words, segment.sourceStart); index < words.length && words[index].sourceStart < segment.sourceEnd; index += 1) {
+    const { words, maximumEnds } = indexed.get(segment.sourceId) ?? { words: [], maximumEnds: [] };
+    let previousEnd = 0;
+    for (let index = firstOverlappingWord(maximumEnds, segment.sourceStart); index < words.length && words[index].sourceStart < segment.sourceEnd; index += 1) {
       const value = occurrence(input, words[index], segment, index);
-      if (value) mapped.push(value);
+      if (!value) continue;
+      if (value.sourceEnd < previousEnd) throw new Error("Retained out-of-order transcript word endpoints need explicit normalization before proposal compilation");
+      previousEnd = value.sourceEnd;
+      mapped.push(value);
       if (mapped.length > 30_000) throw new Error("Proposal retained occurrences exceed the bounded 30000-word program");
     }
   }

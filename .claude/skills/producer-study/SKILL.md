@@ -7,7 +7,49 @@ description: "STUDY reference videos (shorts or long-form) and extract their gra
 
 The proven loop (ran end-to-end 2026-07-05/06 on the operator's IG shorts +
 "Replaced 5 Content Tools" pair; produced R1–R13, 21 templates, the zoom
-engine, and the retake brain). Follow it verbatim; every step's tool exists.
+engine, and the retake brain). Choose the study deliverable before entering the
+build phases; the operator's current scope governs which phases apply.
+
+## Research and close functional matches
+
+For a request to understand references and plan with existing HyperFrames
+catalog items, produce source-bound findings and a capability mapping first.
+Inspect complete narrative coverage, word/visual relationships and relevant
+motion sequences; record the actual sampling and transcript limits. This does
+not automatically require replicas, template builds or changes to code constants.
+Keep edit intensity separate from layout, and measure readable/performance holds
+as well as cuts. Creator-specific timings are evidence, not universal limits.
+
+Prefer reuse → configure → compose existing → bounded custom for an evidenced
+gap. Search the current HyperFrames registry and inspect the candidate source;
+do not restrict native projects to the legacy local template list. A close
+functional match can retain the lesson and visual action without exact typography
+or animation. If a requested build needs a missing capability, follow Phase 4
+for that work. Compile no verified style pack from a sampled editorial study;
+the reference-editor qualification requirements remain authoritative for packs.
+
+For reusable planning evidence, preserve actual creator full frames and sampled
+before/after sequences beside their detailed descriptions. Use
+[the Shorts visual library](../../../docs/studies/shorts-visual-playbook/README.md)
+for the current examples and stable IDs. Include the story job, spoken/caption
+cue, visual anatomy, typography, timing confidence, when to use/avoid, candidate
+source and specific adaptation. Record actual visual inspection separately from
+code inspection. Never label a proposed catalog adaptation as a verified replica.
+Use the library's complete Nate cases for produced-story examples, preserving
+the setup and payoff around individual treatments. Compare multiple examples of
+each directing decision. Resolve selected images to source frame indices/PTS and
+keep individual full frames beside strips; adjacent atlas text is not one image.
+Count cases, directing beats and source frames separately from unique templates.
+
+Start cross-case direction with [Format foundations](../../../docs/studies/shorts-visual-playbook/FORMAT_FOUNDATIONS.md)
+and the [expanded Caleb/Lewis cases](../../../docs/studies/shorts-visual-playbook/authentic-expansion/README.md).
+Study message → viewing need → format → actual crop/pane geometry → development
+and readable hold → exit condition. Compare plausible alternatives, including
+different formats used by the same creator. Record why a split's two jobs need
+simultaneous views and how both remain legible; useful pane jobs alone do not
+qualify their framing. Teach transferable relationships and information timing,
+with source limitations and counterexamples. Do not promote creator names,
+reference timestamps, exact typography or a rejected format into universal presets.
 
 ## Inputs the operator may give
 - One or more finished reference videos (any aspect) — STYLE study
@@ -48,7 +90,8 @@ evidence: timestamps, quoted words, measured values). Contradictions with
 existing doctrine get an operator-visible callout, never silently resolved.
 
 ## Phase 4 — Template specs → build
-For each NEW graphic type: write a spec (canvas, variables incl. atN land
+For each required graphic that cannot be served by catalog reuse/configuration
+or composition, document the gap and write a spec (canvas, variables incl. atN land
 times, build order, tokens — swap reference brand for the Project Sniper accent
 #054BC9, keep STRUCTURE) and dispatch a builder agent pointed at:
 - the reference frames (exact sheet paths)

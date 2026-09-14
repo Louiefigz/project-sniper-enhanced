@@ -1,5 +1,14 @@
 # CLAUDE.md — PRODUCER (`scripts/producer/`)
 
+September 11 native Shorts entry points: `native-short.ts` prepares local request
+packets, builds explicit native strategies and cold-checks projects.
+`studio/native_short_export.py` owns local export, shared dialogue delivery and
+native/encoded picture checks. It delegates to `native_run.py` with the existing
+work lease and resource/ownership utilities. Runtime patches and file transport
+live in `studio/runtime/`; generated `.sniper-native-runtime` caches are excluded
+from code snapshots. See `docs/producer/NATIVE_SHORTS_WORKFLOW.md` and the
+September 11 integration report for the measured three-case scope and limitations.
+
 September 9 native-work resource rule: use `studio/managed_preview.py open`
 for authored HyperFrames projects, or the existing Studio open command which
 now delegates to it. It reuses one current preview across draft folders and

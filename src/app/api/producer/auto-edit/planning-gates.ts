@@ -54,6 +54,7 @@ export function gateBundleOperatorIntent(
     lanes: intent.lanes,
     ...(intent.excerpt !== undefined ? { excerpt: intent.excerpt } : {}),
     ...(intent.brief ? { brief: intent.brief } : {}),
+    ...(intent.shortDirection ? { shortDirection: intent.shortDirection } : {}),
     ...(intent.pace ? { pace: intent.pace } : {}),
     ...(intent.style ? { style: intent.style } : {}),
     ...(intent.reference ? { reference: intent.reference } : {}),

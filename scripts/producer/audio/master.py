@@ -7,13 +7,11 @@ encode pass that (optionally) burns the ASS caption track, then measures the
 result and reports it. Encoding follows ``producer_config.ENCODE`` (H.264 High,
 CFR, closed GOP, CABAC, faststart) and ``producer_config.AUDIO`` (AAC 256k /
 48k stereo, EBU R128 to -14 LUFS / -1.5 dBTP).
-
 Loudness is TWO-PASS: pass 1 measures with ``loudnorm=...:print_format=json``
 (parsed from stderr), pass 2 applies the measured values with ``linear=true``
 inside the final encode — linear normalization needs the measured stats to hit
 the target without dynamic pumping. A cheap third ``ebur128`` pass verifies the
 integrated LUFS landed within ``AUDIO.lufs_tolerance`` (+/-1 LU) and reports it.
-
 Two source pathologies are handled up front (C16, quiet Sony-mic footage):
 a DEAD stereo channel (mic recorded to one channel; the other at noise floor)
 is dual-mono'd via ``pan`` before measurement and encode, and sources where
@@ -28,19 +26,20 @@ CLI: master.py <in.mp4> <out.mp4> [--ass captions.ass] [--fps 30] [--cover cover
 from __future__ import annotations
 
 import json
-import math
 import os
 import re
 import subprocess
 import sys
-from dataclasses import dataclass
-from typing import Callable, Optional, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from guided_source_color_consumption import SourceColorPictureConsumption
+from functools import partial
+from typing import Callable, Optional
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # run-by-path: producer pkg root on sys.path
 from producer_config import AUDIO, ENCODE
+from audio.master_picture_options import (MasterSpec, _filter_quote, _subtitles_filter,
+                                          _video_opts, inter_available)
+from audio.mastering_filter import (MasterFilterInput, STATIC_MIN_I, STATIC_TRIM_TOL_LU,
+                                    build_master_filter, with_prefix as _with_prefix)
+from audio.mastering_profile import LEGACY_MASTERING_PROFILE
 from producer_config import MASTERING_POLICY_VERSION as MASTERING_POLICY_VERSION
 
 _JSON_RE = re.compile(r"\{[^{}]*\}", re.S)
@@ -54,48 +53,11 @@ CAP_FONT = "Inter"   # documented caption default; captions.py owns the real sty
 # delivery plays in one ear — detect and dual-mono instead.
 DEAD_CH_FLOOR_DB = -50.0    # channel peak below this = dead (noise floor)
 DEAD_CH_DELTA_DB = 25.0     # live channel must beat the dead one by this much
-STATIC_MIN_I = -50.0        # below this the "speech" is room tone → dynamic
-STATIC_TRIM_TOL_LU = 0.10   # stop trimming the static gain within this of target
-STATIC_MAX_TRIMS = 2        # measured trim iterations (each ≈ one audio scan)
-
-
-@dataclass
-class MasterSpec:
-    """One master render (kept to <=4 constructor args via a dataclass)."""
-
-    src: str
-    out: str
-    ass: Optional[str] = None
-    fps: int = 30
-    # Exact rational frame rate (e.g. "24000/1001"). When set it is passed to
-    # -r verbatim so an NTSC-fractional source is NOT retimed to the integer
-    # rate — rounding 23.976 -> 24 duplicated ~1 frame/42s and slid every
-    # downstream frame-indexed event off its seam (v2 intro, 2026-07-06).
-    # ``fps`` (int) stays for GOP size / bitrate-table lookups only.
-    fps_exact: Optional[str] = None
-    cover: Optional[str] = None
-    # Picture-derived duration clamp (+half frame in _encode). Callers should
-    # derive this from frame_count / exact rational FPS, never from an MP4
-    # stream/container duration that may include AAC tail padding (X9/X19).
-    duration: Optional[float] = None
-    # Pre-master picture packet count. When present, the final encode is
-    # explicitly capped to this many video frames so CFR can never manufacture
-    # frames from an AAC-padded or timestamp-inflated tail.
-    frame_count: Optional[int] = None
-    picture_consumption: SourceColorPictureConsumption | None = None  # Never a CLI/JSON field.
+STATIC_MAX_TRIMS = LEGACY_MASTERING_PROFILE.maximum_static_dry_runs
 
 
 def _run(cmd: list[str]) -> subprocess.CompletedProcess:
     return subprocess.run(cmd, capture_output=True, text=True)
-
-
-def _finite(value: object) -> Optional[float]:
-    """Parse a loudnorm stat to a finite float, or None (silent/degenerate)."""
-    try:
-        num = float(value)  # type: ignore[arg-type]
-    except (TypeError, ValueError):
-        return None
-    return num if math.isfinite(num) else None
 
 
 def has_audio(path: str) -> bool:
@@ -126,11 +88,6 @@ def measure_loudness(src: str, prefix: Optional[str] = None) -> Optional[dict]:
     return None
 
 
-def _with_prefix(prefix: Optional[str], afilter: str) -> str:
-    """Prepend an optional filter (dual-mono pan) to a filtergraph chain."""
-    return f"{prefix},{afilter}" if prefix else afilter
-
-
 def _channel_peaks(src: str) -> list[float]:
     """Per-channel sample peak (dBFS) via astats; the trailing Overall value
     is dropped. Empty list when unparseable (no audio / odd layout)."""
@@ -159,201 +116,32 @@ def dead_channel_prefix(src: str) -> tuple[Optional[str], Optional[str]]:
     return None, None
 
 
-def _parse_stats(measured: Optional[dict]) -> Optional[dict]:
-    """Pass-1 JSON → loudnorm ``measured_*`` kwargs, or None if any is
-    non-finite (silent/degenerate input)."""
-    if measured is None:
-        return None
-    stats = {
-        "measured_I": _finite(measured.get("input_i")),
-        "measured_TP": _finite(measured.get("input_tp")),
-        "measured_LRA": _finite(measured.get("input_lra")),
-        "measured_thresh": _finite(measured.get("input_thresh")),
-        "offset": _finite(measured.get("target_offset")),
-    }
-    return None if any(v is None for v in stats.values()) else stats
-
-
-def _linear_eligible(stats: dict) -> bool:
-    """Mirror ffmpeg af_loudnorm's SILENT linear→dynamic fallback conditions.
-
-    loudnorm only honors ``linear=true`` when (a) no measured stat is a sentinel
-    (TP 99 / thresh -70 / LRA 0 / I 0) AND (b) the one-shot gain would keep the
-    true peak under the TP param AND (c) measured LRA fits the LRA param.
-    Otherwise it degrades to dynamic mode without saying so — C16: a quiet mic
-    needs +18 dB, projected TP lands above -2.0, dynamic mode then undershoots
-    I (-15.6) and crushes LRA (2.7). Pre-checking here routes those sources to
-    the static-gain path instead of letting loudnorm degrade silently."""
-    if not _loudnorm_stats_in_range(stats):
-        return False
-    projected_tp = stats["measured_TP"] + (AUDIO["lufs_target"] - stats["measured_I"])
-    sentinel = (stats["measured_thresh"] <= -70.0 or stats["measured_TP"] >= 99.0
-                or stats["measured_LRA"] == 0.0 or stats["measured_I"] == 0.0)
-    return (not sentinel and projected_tp <= AUDIO["loudnorm_tp_param"]
-            and stats["measured_LRA"] <= AUDIO["lra"])
-
-
-def _loudnorm_stats_in_range(stats: dict) -> bool:
-    """Finite float headroom may exceed loudnorm's measured-option domains."""
-    bounds = {
-        "measured_I": (-99, 0), "measured_TP": (-99, 99),
-        "measured_LRA": (0, 99), "measured_thresh": (-99, 0),
-        "offset": (-99, 99),
-    }
-    return all(low <= stats[key] <= high for key, (low, high) in bounds.items())
-
-
-def _tp_limiter() -> str:
-    """True-peak-style limiter at the loudnorm TP param.
-
-    ``alimiter`` is sample-peak; oversampling to 192k first (exactly what
-    loudnorm does internally) makes sample peak ≈ true peak. The output
-    ``-ar 48000`` downsamples afterwards. ``level=false`` is required —
-    alimiter's default auto-level would re-normalize to full scale."""
-    limit = 10.0 ** (AUDIO["loudnorm_tp_param"] / 20.0)
-    return (f"aresample=192000,alimiter=limit={limit:.6f}"
-            f":attack=5:release=100:level=false:latency=true")
-
-
-def _static_chain(prefix: Optional[str], gain_db: float) -> str:
-    """volume + true-peak limiter chain (LRA-preserving master path)."""
-    return _with_prefix(prefix, f"volume={gain_db:.2f}dB,{_tp_limiter()}")
-
-
 def _measure_chain_lufs(src: str, chain: str) -> Optional[float]:
-    """Integrated LUFS of ``src`` played through ``chain`` (dry run, no encode)."""
+    """Integrated LUFS of the exact supplied source/filter (dry run, no encode)."""
     cmd = ["ffmpeg", "-hide_banner", "-nostats", "-i", src, "-map", "0:a:0",
            "-af", f"{chain},ebur128=peak=true", "-f", "null", "-"]
     found = _LUFS_RE.findall(_run(cmd).stderr)
     return float(found[-1]) if found else None
 
 
-def _static_gain_filter(src: str, prefix: Optional[str],
-                        measured_i: float,
-                        measure_chain: Optional[Callable[[str], Optional[float]]] = None,
-                        ) -> tuple[str, float]:
-    """Static gain to target + TP limiter, trimmed against a measured dry run.
-
-    Gain starts at ``target - measured_I``; because the limiter shaves the
-    loudest transients, the result can land slightly under target, so up to
-    ``STATIC_MAX_TRIMS`` dry-run measurements adjust the gain by the residual.
-    A single fixed gain never pumps, so LRA passes through intact."""
-    gain = AUDIO["lufs_target"] - measured_i
-    chain = _static_chain(prefix, gain)
-    for _ in range(STATIC_MAX_TRIMS):
-        got = (measure_chain(chain) if measure_chain is not None
-               else _measure_chain_lufs(src, chain))
-        if got is None or abs(AUDIO["lufs_target"] - got) <= STATIC_TRIM_TOL_LU:
-            break
-        gain += AUDIO["lufs_target"] - got
-        chain = _static_chain(prefix, gain)
-    return chain, round(gain, 2)
-
-
-def _audio_filter(src: str, prefix: Optional[str],
-                  measured: Optional[dict],
+def _audio_filter(src: str, prefix: Optional[str], measured: Optional[dict],
                   measure_chain: Optional[Callable[[str], Optional[float]]] = None,
                   ) -> tuple[str, Optional[str]]:
-    """Build the pass-2 audio filter. Returns (filter, note); note is None on
-    the default linear path, otherwise a warning line for the report.
-
-    linear  — loudnorm linear=true with measured stats (preserves dynamics)
-    static  — volume + TP limiter when loudnorm would silently go dynamic
-              (quiet/high-crest source, or LRA beyond the param — C16)
-    dynamic — single-pass loudnorm for degenerate audio (non-finite stats or
-              room-tone-only programs quieter than ``STATIC_MIN_I``)"""
-    base = (f"loudnorm=I={AUDIO['lufs_target']}:TP={AUDIO['loudnorm_tp_param']}"
-            f":LRA={AUDIO['lra']}")
-    stats = _parse_stats(measured)
-    if stats is None or stats["measured_I"] < STATIC_MIN_I:
-        return (_with_prefix(prefix, f"{base}:print_format=summary"),
-                "loudnorm fell back to dynamic (input stats non-finite or "
-                "near-silent; e.g. synthetic audio)")
-    if _linear_eligible(stats):
-        part = ":".join(f"{k}={v}" for k, v in stats.items())
-        return (_with_prefix(prefix, f"{base}:{part}:linear=true"
-                             ":print_format=summary"), None)
-    chain, gain = _static_gain_filter(src, prefix, stats["measured_I"], measure_chain)
-    projected_tp = stats["measured_TP"] + (AUDIO["lufs_target"] - stats["measured_I"])
-    return chain, (f"loudnorm linear ineligible (stats/range or projected TP "
-                   f"{projected_tp:+.1f}; ceiling {AUDIO['loudnorm_tp_param']}) — static "
-                   f"gain {gain:+.1f} dB + true-peak limiter (LRA preserved)")
+    """Keep the existing default mastering contract over the shared DSP builder."""
+    callback = measure_chain if measure_chain is not None else partial(_measure_chain_lufs, src)
+    return build_master_filter(MasterFilterInput(prefix, measured, callback))
 
 
-def build_pass2_afilter(src: str, prefix: Optional[str],
-                        measured: Optional[dict],
+def build_pass2_afilter(src: str, prefix: Optional[str], measured: Optional[dict],
                         measure_chain: Optional[Callable[[str], Optional[float]]] = None,
                         ) -> tuple[str, Optional[str]]:
-    """PUBLIC seam over the pass-2 audio-filter builder (linear / static /
-    dynamic dispatch — see ``_audio_filter``). Exists so an audio-only
-    re-master (audio/base_audio.py) reuses the exact mastering intelligence
-    instead of duplicating it. A mix caller supplies ``measure_chain`` to measure
-    that exact in-memory sum on static-gain dry runs, not just its dialogue leg.
-    Returns (filter, warning|None).
-    """
+    """Reuse default linear/static/dynamic mastering and an optional exact-mix measurement."""
     return _audio_filter(src, prefix, measured, measure_chain)
 
 
-def _video_opts(fps: int, fps_exact: Optional[str] = None) -> list[str]:
-    """H.264 High, CFR, closed GOP (2*fps), CABAC, target bitrate, faststart."""
-    gop = 2 * fps
-    rate = ENCODE["bitrate_by_fps"].get(fps, ENCODE["bitrate_by_fps"][30])
-    bufsize = f"{int(str(rate).rstrip('M')) * 2}M"
-    return [
-        "-c:v", ENCODE["vcodec"], "-profile:v", ENCODE["profile"],
-        "-pix_fmt", ENCODE["pix_fmt"],
-        "-b:v", rate, "-maxrate", rate, "-bufsize", bufsize,
-        "-g", str(gop), "-keyint_min", str(gop), "-sc_threshold", "0",
-        "-flags", "+cgop", "-bf", str(ENCODE["bframes"]),
-        "-coder", "1" if ENCODE["coder"] == "cabac" else "0",
-        "-r", fps_exact or str(fps), "-fps_mode", "cfr",
-        "-movflags", ENCODE["movflags"],
-    ]
-
-
-def _filter_quote(path: str) -> str:
-    """Escape a path for a single-quoted ffmpeg filtergraph token.
-
-    Inside single quotes ffmpeg honors NO backslash escapes, so a literal
-    quote uses the close-reopen idiom ('…'\\''…') — the previous
-    backslash-escaping produced a premature quote-close (review finding).
-    """
-    return path.replace("'", "'\\''")
-
-
-def _subtitles_filter(ass_path: str) -> str:
-    """`subtitles` (libass) filter with fontsdir fallback, path-escaped for the
-    filtergraph. libass resolves the Inter font via fontconfig; if Inter is
-    absent it substitutes a system sans (the caller warns)."""
-    esc = _filter_quote(ass_path)
-    fonts = os.environ.get("PRODUCER_FONTS_DIR")
-    if fonts and os.path.isdir(fonts):
-        return f"subtitles=filename='{esc}':fontsdir='{_filter_quote(fonts)}'"
-    return f"subtitles=filename='{esc}'"
-
-
 def _inter_available() -> bool:
-    """True if Inter is reachable — repo fontsdir first, then system fonts.
-
-    A vendored ``PRODUCER_FONTS_DIR`` containing Inter*.ttf satisfies libass
-    via the subtitles filter's fontsdir, so it must count (the fc-list check
-    alone false-positives the warning). Word-boundary match on fc-list so
-    'Painter'/'Winter' don't read as hits."""
-    fonts_dir = os.environ.get("PRODUCER_FONTS_DIR")
-    if fonts_dir and os.path.isdir(fonts_dir):
-        try:
-            if any(f.lower().startswith("inter") and f.lower().endswith(".ttf")
-                   for f in os.listdir(fonts_dir)):
-                return True
-        except OSError:
-            pass
-    try:
-        listing = _run(["fc-list"])
-    except (OSError, ValueError):
-        return True   # cannot check → do not cry wolf
-    if listing.returncode != 0:
-        return True
-    return re.search(r"(?i)\binter\b", listing.stdout) is not None
+    """Preserve the existing injectable command seam for the extracted font check."""
+    return inter_available(_run)
 
 
 def measure_integrated_lufs(path: str) -> Optional[float]:

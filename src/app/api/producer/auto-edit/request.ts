@@ -134,7 +134,7 @@ function acceptedResumeRequest(dir: string, body: Record<string, unknown>): Prep
   const observed = observeHumanCutJob(dir), job = observed.job;
   activeHumanCutAcceptance(job);
   const allowed = ["dir", "resume", "scope", "deliveryPolicy", "workflowPolicy", "mode", "excerpt",
-    "lanes", "brief", "pace", "style", "reference", "music", "audioEnhance"];
+    "lanes", "brief", "shortDirection", "pace", "style", "reference", "music", "audioEnhance"];
   if (body.resume !== true || !["failed", "interrupted"].includes(job.status)
       || Object.keys(body).some((key) => !allowed.includes(key))
       || body.scope !== job.ctx.scope || body.deliveryPolicy !== job.ctx.deliveryPolicy

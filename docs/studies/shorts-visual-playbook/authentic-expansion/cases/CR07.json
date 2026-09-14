@@ -1,0 +1,812 @@
+{
+  "id": "CR07",
+  "creator": "caleb",
+  "reel": "DdB2yRaDz0M",
+  "title": "Build a relationship diagram, then return to conviction",
+  "message": "A customer's problem plus your distinct solution generates an idea; different angles turn it into content.",
+  "arc": "Problem node \u2192 add solution \u2192 create idea \u2192 branch into angles \u2192 relabel as content \u2192 return to the person for qualification and application.",
+  "foundation": "The upper pane externalizes a relationship the viewer would otherwise have to hold in memory. The lower pane preserves the speaker's gestures as he assembles it. The split ends when the task changes from understanding the mechanism to hearing a qualification.",
+  "execution": "Build only the relationship currently named. Keep the original idea visible as branches arrive. Fit the speaker deliberately so gestures remain legible; do not contain an entire landscape frame at tiny scale. Keep captions separate from node labels. Hold the finished relationship before returning to a full presenter view.",
+  "avoid": "Do not select this format for a personal judgment with no relationship to diagram. Do not copy six branches unless the new explanation supports six. The final claimed 25 ideas is not a demonstrated multiplication in the graphic. This is a collaborative podcast post, not evidence of a universal Caleb editing preset.",
+  "typography": "Black node labels on yellow circles, white speech captions above a thin yellow separator, black textured diagram background. Transfer the label/caption distinction and visual hierarchy, not the palette or exact font.",
+  "catalog": [
+    "constellation-hub",
+    "flowchart-vertical",
+    "native-stacked-media"
+  ],
+  "alternates": [
+    "CR04",
+    "N07-B22",
+    "N03-B06"
+  ],
+  "bursts": [
+    3.85,
+    10.85,
+    16.75,
+    18.2
+  ],
+  "beats": [
+    {
+      "id": "CR07-B01",
+      "start": 0,
+      "end": 4,
+      "message_paraphrase": "The ideal customer's painful problem.",
+      "observed_visual": "One labeled yellow node develops above the interview; the speaker holds a hand shape below.",
+      "viewing_need_interpretation": "Establish one concept before asking the viewer to understand a combination.",
+      "transition_condition": "Add the next operand at the spoken addition cue.",
+      "source_frames": [
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000012.jpg",
+          "sha256": "126c842b8cea290e2d27e2c2a82aa09645ff061677c075078c2536008889cea5",
+          "requested_time": 0.5,
+          "source_pts": 0.500501,
+          "frame_index": 12,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000036.jpg",
+          "sha256": "d8f547cbd90a5d156af25eaa74790a0a782516405105662c79b853d48a805198",
+          "requested_time": 1.5,
+          "source_pts": 1.501502,
+          "frame_index": 36,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000084.jpg",
+          "sha256": "ac2c6d052eac88bdb4f4df426710321ba24d3af656ed328b7bc8b9afcb3e5285",
+          "requested_time": 3.5,
+          "source_pts": 3.503504,
+          "frame_index": 84,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/authentic-expansion/sequences/CR07-B01.jpg",
+        "sha256": "ebce288be30bfa64f19c2bb4d77fa206a04e0dce778a5d1d88cc14cd79aa38fa"
+      }
+    },
+    {
+      "id": "CR07-B02",
+      "start": 4,
+      "end": 7,
+      "message_paraphrase": "Add your unique solution.",
+      "observed_visual": "The original node shifts left; a plus sign and second node appear in the same upper field.",
+      "viewing_need_interpretation": "Simultaneous visibility makes the relationship inspectable and preserves the first term.",
+      "transition_condition": "Resolve the combination into its result while retaining enough cause to understand it.",
+      "source_frames": [
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000108.jpg",
+          "sha256": "d7d1ba7da849348a2294f5b38a5f9dd7105b2c797cd18d3057006668d41fee8a",
+          "requested_time": 4.5,
+          "source_pts": 4.504505,
+          "frame_index": 108,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000132.jpg",
+          "sha256": "d291a4487444f23b18f6afa98ecdbb32af96c163a32338121692dd0b900ee526",
+          "requested_time": 5.5,
+          "source_pts": 5.505506,
+          "frame_index": 132,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000156.jpg",
+          "sha256": "71a2ab173b2097db1463bf6464a5bc754951f77dbaae1e33c370a4e9379adbd0",
+          "requested_time": 6.5,
+          "source_pts": 6.506507,
+          "frame_index": 156,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/authentic-expansion/sequences/CR07-B02.jpg",
+        "sha256": "575d40f5a42d918d3ccb496d8378f3eb1584ec4741687d6ecbb7ff23a5834597"
+      }
+    },
+    {
+      "id": "CR07-B03",
+      "start": 7,
+      "end": 10.5,
+      "message_paraphrase": "The combination produces an idea.",
+      "observed_visual": "An arrow and larger idea node appear below the original pair, then the input pair clears.",
+      "viewing_need_interpretation": "A staged result shows how the new object relates to the previous two.",
+      "transition_condition": "Once the origin is understood, keep the idea and use the space for its next relationship.",
+      "source_frames": [
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000180.jpg",
+          "sha256": "bf488d71e71a825fbae15effd433411ab21237f1882fd59dad1e8a3aaac3fe03",
+          "requested_time": 7.5,
+          "source_pts": 7.507508,
+          "frame_index": 180,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000204.jpg",
+          "sha256": "fd23585f018166f79d705fff835d2fed62c88171376147dfc57452dfae327e94",
+          "requested_time": 8.5,
+          "source_pts": 8.508509,
+          "frame_index": 204,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000252.jpg",
+          "sha256": "e73a508e7c71575dc72db857085147cc015d756a983a11c5c70f463f8a6006e7",
+          "requested_time": 10.5,
+          "source_pts": 10.510511,
+          "frame_index": 252,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/authentic-expansion/sequences/CR07-B03.jpg",
+        "sha256": "8f4d8c18bcd25e1cd2c5eed1707aff8470bc1c629dbe73437724d467753bf318"
+      }
+    },
+    {
+      "id": "CR07-B04",
+      "start": 10.5,
+      "end": 17,
+      "message_paraphrase": "An idea can have several angles.",
+      "observed_visual": "The idea remains central while linked angle nodes build around it; the speaker's gestures continue below.",
+      "viewing_need_interpretation": "The same idea now becomes a hub. Preserving identity avoids presenting this as an unrelated diagram.",
+      "transition_condition": "Change the labels only when explaining what those angles become.",
+      "source_frames": [
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000276.jpg",
+          "sha256": "7a32dc75048653bcb583650d8c58bba9ac80747ec050e4a22a7f6c894c6d4614",
+          "requested_time": 11.5,
+          "source_pts": 11.511512,
+          "frame_index": 276,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000312.jpg",
+          "sha256": "aa8032f085e780d8b43d0004e7b4e8b2c0a4ebad2a858a4315f1a8181af6cde2",
+          "requested_time": 13,
+          "source_pts": 13.013013,
+          "frame_index": 312,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000384.jpg",
+          "sha256": "d34f6bd9965e176bafdc8e5778b48c19f0b3d0e6558a717585413f3e5e67b121",
+          "requested_time": 16,
+          "source_pts": 16.016016,
+          "frame_index": 384,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/authentic-expansion/sequences/CR07-B04.jpg",
+        "sha256": "ac7be35601c3f37de23767da469bcce03c9fc4e4af18f2ed96356ea232a99971"
+      }
+    },
+    {
+      "id": "CR07-B05",
+      "start": 17,
+      "end": 18.6,
+      "message_paraphrase": "Those angles become pieces of content.",
+      "observed_visual": "Angle labels change to content labels without replacing the network; the complete diagram briefly holds.",
+      "viewing_need_interpretation": "The label change completes the mechanism with minimum reorientation.",
+      "transition_condition": "End the split when the speaker begins the qualification, after the result is readable.",
+      "source_frames": [
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000415.jpg",
+          "sha256": "a81cc6e643b73f2dbb250ff345584fe3dbf039dad2aa895f2e4eb66fe3af0f41",
+          "requested_time": 17.3,
+          "source_pts": 17.308976,
+          "frame_index": 415,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000432.jpg",
+          "sha256": "b0aca354d95be37c73011644758a8ef0de4f853a0d0c38ce65e99ef01cb61875",
+          "requested_time": 18,
+          "source_pts": 18.018018,
+          "frame_index": 432,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/authentic-expansion/sequences/CR07-B05.jpg",
+        "sha256": "453d3e9ce96f0accaa215dd95e7834972a2d8d3e79f73510ddef939863650734"
+      }
+    },
+    {
+      "id": "CR07-B06",
+      "start": 18.6,
+      "end": 29.5,
+      "message_paraphrase": "Distinct does not mean inventing unsupported advice.",
+      "observed_visual": "The diagram disappears and a close portrait of the speaker takes over, intercut with the listener.",
+      "viewing_need_interpretation": "Expression and nuance are now the useful information; the graph has finished its job.",
+      "transition_condition": "Keep the person as the argument becomes an actionable application.",
+      "source_frames": [
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000448.jpg",
+          "sha256": "f384bc6335d74af97d15e125ca73b1f38625c4af41d16494a32f3e29f2ce8f58",
+          "requested_time": 18.7,
+          "source_pts": 18.685352,
+          "frame_index": 448,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000503.jpg",
+          "sha256": "7c70edea3fd936f3e178b93c901d800439efc0867c00e8900481e474efe4c595",
+          "requested_time": 21,
+          "source_pts": 20.979313,
+          "frame_index": 503,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000623.jpg",
+          "sha256": "bf78f74b6eb852f6a8a34c88648f611644f77e3663615f6b9d229942189c65cb",
+          "requested_time": 26,
+          "source_pts": 25.984318,
+          "frame_index": 623,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/authentic-expansion/sequences/CR07-B06.jpg",
+        "sha256": "27eddd0241c09fafa4cbcd079a3fb944d05c5fcc991d974d6c5c60349a0b365b"
+      }
+    },
+    {
+      "id": "CR07-B07",
+      "start": 29.5,
+      "end": 39.509,
+      "message_paraphrase": "Repeat the process across several real customer problems.",
+      "observed_visual": "Full presenter angles carry the closing advice and the claimed quantity of ideas.",
+      "viewing_need_interpretation": "The conclusion asks the viewer to apply the method. A further diagram would need to show a real worked example, not decorate the number.",
+      "transition_condition": "End after the application is complete; do not present the claimed output count as experimentally proven.",
+      "source_frames": [
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000755.jpg",
+          "sha256": "8c7fd4e1741ae37327e72649645762dc6bb3c87d49ad81a94f8f8f6bfc65d5bc",
+          "requested_time": 31.5,
+          "source_pts": 31.489823,
+          "frame_index": 755,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000880.jpg",
+          "sha256": "f6e74cf419ef16504429cd35bd8014b15fb4eeb19333bea41e53c51ef95d9abb",
+          "requested_time": 36.7,
+          "source_pts": 36.70337,
+          "frame_index": 880,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000935.jpg",
+          "sha256": "d4f5ea54c62e10d434dd1f0b4ca623c025d2a1d76a2479592296dc71e7b2e612",
+          "requested_time": 39,
+          "source_pts": 38.997331,
+          "frame_index": 935,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/authentic-expansion/sequences/CR07-B07.jpg",
+        "sha256": "08fadd3491e64b64f593de426f44f976126e7ab5294a440b2c4ad4ba2bf2eeff"
+      }
+    }
+  ],
+  "version": "2026-09-10.3",
+  "source_url": "https://www.instagram.com/reel/DdB2yRaDz0M/",
+  "source_video": {
+    "path": "artifacts/shorts-authentic-expansion-2026-09-10/caleb/DdB2yRaDz0M/17933518224393664-review.mp4",
+    "sha256": "02a27ed78ed752ce6b07196f4c40f250a44a55b4ddf0790d7bc7c1ead022bd39"
+  },
+  "duration": 39.509,
+  "acquisition": {
+    "path": "artifacts/shorts-authentic-expansion-2026-09-10/caleb/DdB2yRaDz0M/acquisition.json",
+    "sha256": "7b576709b5e9edefa2efdad6b2990e371904d33ea54989d4fbef132cc196cff3"
+  },
+  "coverage_sheets": [
+    {
+      "path": "artifacts/shorts-authentic-expansion-2026-09-10/caleb/DdB2yRaDz0M/coverage/01.jpg",
+      "sha256": "27746c39d7c34ba288965182f9006cc2bae55df04b973d33dc94e886c4dddafb"
+    },
+    {
+      "path": "artifacts/shorts-authentic-expansion-2026-09-10/caleb/DdB2yRaDz0M/coverage/02.jpg",
+      "sha256": "43e745b5ed81edbb25f93d0eb019745a4750766070fc21d831de6b4a22842327"
+    },
+    {
+      "path": "artifacts/shorts-authentic-expansion-2026-09-10/caleb/DdB2yRaDz0M/coverage/03.jpg",
+      "sha256": "e3b6b9945457d030e5e8b4ecdde589145c6b319720b27d7148f030b3fab39aec"
+    },
+    {
+      "path": "artifacts/shorts-authentic-expansion-2026-09-10/caleb/DdB2yRaDz0M/coverage/04.jpg",
+      "sha256": "db72c0398992624241d9a7c98e9bc56fa7175e3cb7f3d5abf87170e5bcffb0fd"
+    },
+    {
+      "path": "artifacts/shorts-authentic-expansion-2026-09-10/caleb/DdB2yRaDz0M/coverage/05.jpg",
+      "sha256": "c83a82f845b0431968d86ddfdcc478fb5ce0e963cf6427f3b6b5e02843804912"
+    },
+    {
+      "path": "artifacts/shorts-authentic-expansion-2026-09-10/caleb/DdB2yRaDz0M/coverage/06.jpg",
+      "sha256": "952778c44c695111641b62a912bfb665afe41de5116d4722a4c6f33e9ada9c76"
+    },
+    {
+      "path": "artifacts/shorts-authentic-expansion-2026-09-10/caleb/DdB2yRaDz0M/coverage/07.jpg",
+      "sha256": "c1870e3ffdd2379cd8cabae6a4d5409362d3c5412c99287969770e8250dfb30d"
+    }
+  ],
+  "coverage_sample_count": 79,
+  "motion_bursts": [
+    {
+      "source_frames": [
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000092.jpg",
+          "sha256": "26f469fd2aa622f5ccf4f2414560216473e5a226cddfb371544dd0c0e113b723",
+          "requested_time": 3.85,
+          "source_pts": 3.837171,
+          "frame_index": 92,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000094.jpg",
+          "sha256": "57fc18c0eb48d977a4e480e278772bb7d6f00563a222ab5e2fcda5a1dd471bf6",
+          "requested_time": 3.93,
+          "source_pts": 3.920587,
+          "frame_index": 94,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000096.jpg",
+          "sha256": "6fa4ee7bdaafe998b7ee469917f708cd840317957f6c57584f2e018f59c5fcc8",
+          "requested_time": 4.01,
+          "source_pts": 4.004004,
+          "frame_index": 96,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000098.jpg",
+          "sha256": "ee93311b0dcecf4f7c055c084df1c4539b896424f093ec89561b7577c3f8066f",
+          "requested_time": 4.09,
+          "source_pts": 4.087421,
+          "frame_index": 98,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000100.jpg",
+          "sha256": "3adcad3f1672b2d57ed735402172e58a40ccbc6b937175e29ce4f2627596064b",
+          "requested_time": 4.17,
+          "source_pts": 4.170838,
+          "frame_index": 100,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000102.jpg",
+          "sha256": "6ba5fe35896a4e0cc817cb1f2d6f7ac6cb5be70a00697a5efa4c53ab5894ef2e",
+          "requested_time": 4.25,
+          "source_pts": 4.254254,
+          "frame_index": 102,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000104.jpg",
+          "sha256": "fdb3f34792470339124588e57a7237783449751e209596b0a41a9c2f1d26cb25",
+          "requested_time": 4.33,
+          "source_pts": 4.337671,
+          "frame_index": 104,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000106.jpg",
+          "sha256": "8195a2fc5bd9ebdd649b9e51f889c74495a2acd088a3fff6df95b966c0714c59",
+          "requested_time": 4.41,
+          "source_pts": 4.421088,
+          "frame_index": 106,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/authentic-expansion/sequences/CR07-motion-01.jpg",
+        "sha256": "ea9de862303e013a2986050549b20bea6a9f728087c6b1999720b441a64e8658"
+      }
+    },
+    {
+      "source_frames": [
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000260.jpg",
+          "sha256": "095f7590286fa5827dd1ea555ab02ccfb3f587139409cc701eb1bde60f868b69",
+          "requested_time": 10.85,
+          "source_pts": 10.844178,
+          "frame_index": 260,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000262.jpg",
+          "sha256": "18f9dce9c451bc3e5502ae18eef1198ffce4ee8e0cdd286aef8ef3a67e7774ca",
+          "requested_time": 10.93,
+          "source_pts": 10.927594,
+          "frame_index": 262,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000264.jpg",
+          "sha256": "76a6189aba55a54e464ae1fde322ff1f604e2d5107cbd41121882be76124cd70",
+          "requested_time": 11.01,
+          "source_pts": 11.011011,
+          "frame_index": 264,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000266.jpg",
+          "sha256": "c17396c5f318c94d6064d9470405fab07762381784c66559bdbf8eb06dd8e5e2",
+          "requested_time": 11.09,
+          "source_pts": 11.094428,
+          "frame_index": 266,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000268.jpg",
+          "sha256": "46d018fa35e1ad69b0bbf619ab466c1661a8d4fc66a9a2f47868b3782c2708a7",
+          "requested_time": 11.17,
+          "source_pts": 11.177845,
+          "frame_index": 268,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000270.jpg",
+          "sha256": "56ac8fb08c12f92d06c31987e105c7d10089c6a2e0976600890eb58caf600136",
+          "requested_time": 11.25,
+          "source_pts": 11.261261,
+          "frame_index": 270,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000272.jpg",
+          "sha256": "0328588b38df0aaee7f5149e7b5497d7691f4d53e15874416532fe98a0734d28",
+          "requested_time": 11.33,
+          "source_pts": 11.344678,
+          "frame_index": 272,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000274.jpg",
+          "sha256": "c887a9e0891554132fefa7fb2e4eff5c78d9eeda8035cd75c9ce40911fea8dda",
+          "requested_time": 11.41,
+          "source_pts": 11.428095,
+          "frame_index": 274,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/authentic-expansion/sequences/CR07-motion-02.jpg",
+        "sha256": "18f2a6859706af3036b4d096e0dfff1a4574e4d436cb4d2a51a46160d643ad3d"
+      }
+    },
+    {
+      "source_frames": [
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000402.jpg",
+          "sha256": "d7b673d2479a29d4b435f6b2fc53e03c09500245607664c07356bdac129f2b05",
+          "requested_time": 16.75,
+          "source_pts": 16.766767,
+          "frame_index": 402,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000404.jpg",
+          "sha256": "3665f52662788d669e2bad257b7779f8d79b01243cbc2672ca12243cc2eb369c",
+          "requested_time": 16.83,
+          "source_pts": 16.850184,
+          "frame_index": 404,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000405.jpg",
+          "sha256": "1e6a936c9657f1f56ebc98def2db42d9425c0c01d352208f061b90cf3f3ced71",
+          "requested_time": 16.91,
+          "source_pts": 16.891892,
+          "frame_index": 405,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000407.jpg",
+          "sha256": "ab69da1a69751aa2183a38276c4a9921671ac0dd750c4ee6d6bf621145a9ae0e",
+          "requested_time": 16.99,
+          "source_pts": 16.975309,
+          "frame_index": 407,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000409.jpg",
+          "sha256": "100125e6aa62235bfc3895973b4972c773781204e9490f34fd77b9c14938b339",
+          "requested_time": 17.07,
+          "source_pts": 17.058725,
+          "frame_index": 409,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000411.jpg",
+          "sha256": "65207926e1069fdceab02775d9e5041e70f0afd1ebd6c3ae10d4817589e54935",
+          "requested_time": 17.15,
+          "source_pts": 17.142142,
+          "frame_index": 411,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000413.jpg",
+          "sha256": "8b79128d3292a6ee6e7fb9548dc395eb79092d23b0df60e04216c29ee963e746",
+          "requested_time": 17.23,
+          "source_pts": 17.225559,
+          "frame_index": 413,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000415.jpg",
+          "sha256": "a81cc6e643b73f2dbb250ff345584fe3dbf039dad2aa895f2e4eb66fe3af0f41",
+          "requested_time": 17.31,
+          "source_pts": 17.308976,
+          "frame_index": 415,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/authentic-expansion/sequences/CR07-motion-03.jpg",
+        "sha256": "d990ceeabbc446b1dd4590dbc6dd566d6af32ff068e01577090f7f1b51514c8c"
+      }
+    },
+    {
+      "source_frames": [
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000436.jpg",
+          "sha256": "f4bf84fe842a32cf1943260184847262d4f7a546d8dca0c0d96fa07f6f7e0a87",
+          "requested_time": 18.2,
+          "source_pts": 18.184852,
+          "frame_index": 436,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000438.jpg",
+          "sha256": "43bd708b8550a6cef2f2dfb64260fdae83d5238a3bc101b2bf6afa82a28f58fe",
+          "requested_time": 18.28,
+          "source_pts": 18.268268,
+          "frame_index": 438,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000440.jpg",
+          "sha256": "83b148f4bc799e43a8d1c9732c7ecc0a63ea9a70ecf40f165e07580243e8d319",
+          "requested_time": 18.36,
+          "source_pts": 18.351685,
+          "frame_index": 440,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000442.jpg",
+          "sha256": "bdd7db2faf735aef90042a15ba6ba9d9e3865d7fcdd06e4f7cc57add12ab42de",
+          "requested_time": 18.44,
+          "source_pts": 18.435102,
+          "frame_index": 442,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000444.jpg",
+          "sha256": "c4598d490438820a8e14b2238b644381cebc439ece340b6a8e27d918a07b57f2",
+          "requested_time": 18.52,
+          "source_pts": 18.518519,
+          "frame_index": 444,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000446.jpg",
+          "sha256": "7e8f9f0392b408a6a89ac5f646dd9b0dba7edd43d74a0c89de00153c9127faf2",
+          "requested_time": 18.6,
+          "source_pts": 18.601935,
+          "frame_index": 446,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000448.jpg",
+          "sha256": "f384bc6335d74af97d15e125ca73b1f38625c4af41d16494a32f3e29f2ce8f58",
+          "requested_time": 18.68,
+          "source_pts": 18.685352,
+          "frame_index": 448,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000450.jpg",
+          "sha256": "6e637f04867641a23646dc30aa9ef41dc4388c7fc40b1e7614d110e743e3ed24",
+          "requested_time": 18.76,
+          "source_pts": 18.768769,
+          "frame_index": 450,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/authentic-expansion/sequences/CR07-motion-04.jpg",
+        "sha256": "a966288d18912632d885790a318ab7083bb7a46d9e10e640613cdc79822bfa5c"
+      }
+    }
+  ],
+  "transcript": null,
+  "review_limits": "All chronological 2 fps contact sheets were visually inspected, spanning the complete source. Overview labels are resampling estimates; selected full frames carry exact decoded frame indices and source PTS. Editorial beat boundaries remain approximate. Selected motion bursts refine only their stated windows. No audio audition, uninterrupted realtime playback, exact font identification, independently verified business claims, retention causality or rendered adaptation is claimed. Reasons are editorial interpretations, not known editor intent. Local ASR failed the tiny-word-rate timing gate; use visible captions.",
+  "review": {
+    "chronological_sheets_visually_inspected": true,
+    "chronological_sample_fps": 2,
+    "motion_burst_count_visually_inspected": 4,
+    "all_saved_frames_individually_reviewed": false,
+    "individual_original_resolution_frames_reviewed": [
+      {
+        "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000312.jpg",
+        "sha256": "aa8032f085e780d8b43d0004e7b4e8b2c0a4ebad2a858a4315f1a8181af6cde2"
+      },
+      {
+        "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR07/f000448.jpg",
+        "sha256": "f384bc6335d74af97d15e125ca73b1f38625c4af41d16494a32f3e29f2ce8f58"
+      }
+    ],
+    "individual_frame_scope": "Representative spot checks supplement all chronological sheets and listed motion bursts.",
+    "audio_auditioned": false,
+    "uninterrupted_realtime_playback": false,
+    "adaptation_render_qualified": false
+  },
+  "native_motion_findings": [
+    "The plus develops across the inspected 3.837\u20134.421s burst instead of arriving as a complete symbol in its first frame.",
+    "The idea holds through 11.261s; branch growth begins in the 11.345\u201311.428s samples. The 13.013s full frame shows the settled branching relationship; the short burst alone does not cover all branch development.",
+    "Angle labels begin changing around 16.975s; overlapping outgoing/incoming labels remain in the 17.309s sample. The later 18.185s sample shows content labels.",
+    "The split remains at 18.435s; pane geometry changes at 18.519s; the 18.602s sample is a full portrait. The next caption begins the qualification. This is a bounded visual transition, not an audio-verified phonetic cue."
+  ],
+  "catalog_label_policy": "native-* labels describe shared implementation responsibilities, not registry IDs; hosted candidates and source-inspection limits are recorded in CATALOG_MAP.md."
+}

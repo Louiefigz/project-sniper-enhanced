@@ -9,60 +9,24 @@ import { parseCurrentTreatmentProposal as parseTreatmentProposal, proposalV8Vali
   type CurrentTreatmentProposal as TreatmentProposal } from "@/lib/producer/contracts/treatment-proposal-v8";
 import type { ProposalEvidence } from "./guided-proposal-evidence";
 import type { AcceptedGuidedCut } from "./guided-raw-treatment-store";
-import { proposalRelativeFrame } from "./guided-proposal-speech";
+import { assertProposalAnchors, fullProposalProgram, proposalOpeningRange, UnavailableOpeningRange } from "./guided-proposal-frame-ranges";
+export { assertProposalAnchors, proposalOpeningRange } from "./guided-proposal-frame-ranges";
 import { buildLongformPlan, type LongformPlan } from "./guided-proposal-longform";
 import { buildGuidedFrameBindings, type GuidedFrameBindings } from "./guided-proposal-bindings";
 import { applyGuidedCaptionOperations, guidedCaptionPolicy } from "./guided-proposal-captions";
 import { applyGuidedReframeOperations } from "./guided-proposal-reframe";
 import { applyGuidedMusicOperations, assertGuidedMusicIntent } from "./guided-proposal-music";
 import { applyGuidedPresenterOperations, assertGuidedPresenterIntent } from "./guided-proposal-presenter";
+import type { TreatmentProposalV9 } from "@/lib/producer/contracts/treatment-proposal-v9";
+import type { TreatmentProposalV10 } from "@/lib/producer/contracts/treatment-proposal-v10";
+import type { NativeAssetRequirement } from "./guided-native-supporting";
+import { buildNativeTreatmentCandidate } from "./guided-native-candidate";
 
 export interface ProposalBlocker { clauseIndex: number | null; reason: string }
-class UnavailableOpeningRange extends Error {}
 export interface TreatmentCandidateResult {
-  proposal: TreatmentProposal; blockers: ProposalBlocker[]; candidate: Record<string, unknown> | null;
+  proposal: TreatmentProposal | TreatmentProposalV9 | TreatmentProposalV10; blockers: ProposalBlocker[]; candidate: Record<string, unknown> | null;
   range: ReturnType<typeof proposalOpeningRange> | null; executionBindings?: GuidedFrameBindings;
-}
-
-/** Controller anchor table must be collision-free, complete and ordered before any provider reference is used. */
-export function assertProposalAnchors(evidence: ProposalEvidence): void {
-  const anchors = new Set(evidence.anchors);
-  if (!Array.isArray(evidence.anchors) || evidence.anchors.length < 2 || evidence.anchors.length > 60_002
-      || evidence.anchors[0] !== 0 || evidence.anchors.at(-1) !== evidence.totalFrames
-      || evidence.anchors.some((frame, index) => !Number.isSafeInteger(frame) || frame < 0
-        || index > 0 && frame <= evidence.anchors[index - 1]) || !Array.isArray(evidence.cleanEnds)
-      || evidence.cleanEnds.some((frame, index) => !anchors.has(frame) || index > 0 && frame <= evidence.cleanEnds[index - 1])) {
-    throw new Error("Proposal frame anchors are incomplete, duplicate, unsorted or ungrounded");
-  }
-}
-
-function fullProgram(proposal: TreatmentProposal, evidence: ProposalEvidence): void {
-  let next = 0;
-  for (const [index, beat] of proposal.beats.entries()) {
-    if (beat.startAnchor !== next || beat.endAnchorExclusive <= next || beat.endAnchorExclusive >= evidence.anchors.length
-        || beat.supportsBeatIndices.some((id) => id === index || !proposal.beats[id])) throw new Error("Proposal story does not cover the exact complete program");
-    next = beat.endAnchorExclusive;
-  }
-  if (next !== evidence.anchors.length - 1 || proposal.beats[0]?.purpose !== "opening") throw new Error("Proposal lacks a full-program story outline");
-}
-
-/** First-minute review window is independent of creative intro duration and existing cut/beat lengths. */
-export function proposalOpeningRange(proposal: TreatmentProposal, evidence: ProposalEvidence) {
-  const end = proposal.openingEndAnchor, context = proposal.continuityEndAnchor;
-  if (end === null || context === null || end > context || context >= evidence.anchors.length) throw new Error("Proposal lacks a real opening/body continuity range");
-  const endFrame = evidence.anchors[end], contextEnd = evidence.anchors[context];
-  const frame = (time: number, edge: "start" | "end") => proposalRelativeFrame({ time, origin: 0, frameRate: evidence.frameRate, edge });
-  const firstMinute = Math.min(evidence.totalFrames, frame(60, "end")), maximum = Math.min(evidence.totalFrames, frame(75, "start"));
-  if (endFrame < firstMinute || endFrame > maximum || endFrame !== evidence.totalFrames && !evidence.cleanEnds.includes(endFrame)) {
-    throw new UnavailableOpeningRange("Opening review needs a transcript-grounded clean endpoint within60–75 seconds (or the entire shorter program); no whole-video expansion");
-  }
-  if (contextEnd < Math.min(evidence.totalFrames, endFrame + frame(5, "end")) || contextEnd > Math.min(evidence.totalFrames, endFrame + frame(15, "start"))) {
-    throw new UnavailableOpeningRange("Opening review continuity must cover5–15 seconds beyond the core or the remaining tail, independent of body beat length");
-  }
-  return { schemaVersion: 1, frameRate: evidence.frameRate, totalFrames: evidence.totalFrames,
-    approval: { startFrame: 0, endFrameExclusive: endFrame }, review: { startFrame: 0, endFrameExclusive: contextEnd },
-    timelineMapHash: evidence.timelineMapHash, audioScope: "requires-shared-full-program-master" as const,
-    executable: false as const };
+  pendingRequirements?: NativeAssetRequirement[];
 }
 
 function graphicCandidate(operation: TreatmentProposal["operations"][number], proposal: TreatmentProposal, evidence: ProposalEvidence) {
@@ -170,6 +134,7 @@ function presenterCandidate(input: { cut: AcceptedGuidedCut; plan: Record<string
 
 /** Candidate materialization only; no render readiness, fulfilled clause, or active plan is minted. */
 export function buildTreatmentCandidate(input: { cut: AcceptedGuidedCut; rawIntent: string; evidence: ProposalEvidence; output: unknown }): TreatmentCandidateResult {
+  if (input.evidence.schemaVersion === 9 || input.evidence.schemaVersion === 10) return buildNativeTreatmentCandidate({ ...input, plan: input.cut.plan.value });
   const proposal = parseTreatmentProposal(input.output); assertProposalClauseCoverage(proposal, input.rawIntent);
   const required = input.evidence.schemaVersion;
   if (proposal.schemaVersion !== required) throw new Error("Proposal schema must match its exact versioned evidence; no presentation upgrade");
@@ -177,7 +142,7 @@ export function buildTreatmentCandidate(input: { cut: AcceptedGuidedCut; rawInte
   const blockers: ProposalBlocker[] = proposal.clauses.flatMap((clause, clauseIndex) => clause.disposition === "supported"
     ? [] : [{ clauseIndex, reason: `${clause.disposition}: ${clause.rationale}` }]);
   if (blockers.length && !proposal.beats.length) return { proposal, blockers, candidate: null, range: null };
-  fullProgram(proposal, input.evidence);
+  fullProposalProgram(proposal, input.evidence);
   let range: ReturnType<typeof proposalOpeningRange>;
   try { range = proposalOpeningRange(proposal, input.evidence); }
   catch (error) {

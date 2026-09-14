@@ -10,6 +10,7 @@ import { StageActionButton, type IngestedPayload } from "./stage-actions";
 import { CutawayDecision, ProjectDetails, SegmentRows } from "./project-card-details";
 import ProjectPalmierButton, { ProjectCandidateQcButton } from "./project-palmier-button";
 import type { ProjectStatus } from "./use-project-status";
+import { SupportingMediaControl } from "./supporting-media-control";
 export interface Listing {
   dir: string;
   title: string;
@@ -284,6 +285,7 @@ export default function ProjectCard({ p, status, statusError, onOpen, onRemove, 
       {p.exists && status && <CardBody status={status} openable={openable} expanded={expanded}
         palmierMessage={palmierMessage} onExpanded={() => setExpanded((value) => !value)}
         onRevealSource={() => void revealSource()} onIngested={onIngested} />}
+      {p.exists && status && <SupportingMediaControl status={status} onIngested={onIngested} />}
     </li>
   );
 }

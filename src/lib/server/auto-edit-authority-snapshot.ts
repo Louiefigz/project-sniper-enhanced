@@ -128,7 +128,7 @@ function excludedPipelinePath(relative: string): boolean {
   const parts = relative.split(path.sep);
   return parts.some((part) => [
     "__pycache__", "__tests__", "node_modules", "renders", "cache", "tests", "docs",
-    "study",
+    "study", "artifacts", ".sniper-native-runtime",
   ].includes(part)) || /\.(?:mov|mp4|wav|mp3|pyc)$/i.test(relative);
 }
 

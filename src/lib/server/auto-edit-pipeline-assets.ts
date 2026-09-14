@@ -16,6 +16,7 @@ const ASSET_EXTENSIONS = /\.(?:otf|ttf|onnx|wav|mp3)$/i;
 const NEVER_CAPTURE = /\.(?:mov|mp4|pyc)$/i;
 const EXCLUDED_PARTS = new Set([
   "__pycache__", "__tests__", "node_modules", "renders", "cache", "tests", "study",
+  "artifacts", ".sniper-native-runtime",
 ]);
 const EXCLUDED_PREFIXES = ["scripts/producer/docs/"];
 
@@ -59,6 +60,7 @@ const SOURCE_PATHS = [
   "assets/music",
   "assets/sfx",
   "src/app/api/producer/auto-edit",
+  "src/app/api/producer/native-short",
   "src/app/api/producer/ai-edit",
   "src/app/api/producer/live-build",
   "src/app/api/producer/palmier",

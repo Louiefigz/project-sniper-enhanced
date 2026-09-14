@@ -10,8 +10,11 @@ import { timedStage } from "./stage-timing";
 import { buildProposalEvidence, pinnedProposalFile } from "./guided-proposal-evidence";
 import { canonicalJsonSha256 } from "./auto-edit-hash";
 import type { AcceptedGuidedCut } from "./guided-raw-treatment-store";
+import { readRawTreatmentClock } from "./guided-raw-treatment-store";
 import { generationChildTimeout } from "./generation-attempt-clock";
 import { CURRENT_TREATMENT_PROPOSAL_VERSION } from "@/lib/producer/contracts/treatment-proposal-v5";
+import { stageNativeReferences, readNativeReferences, type NativeReferenceSelection } from "./guided-native-references";
+import { stageNativeDirector, readNativeDirector, type DirectorBrain } from "./native-director-store";
 
 function transcriptFile(root: string, requested: string): string {
   if (requested.split(/[\\/]/u).includes("..")) throw new Error("Proposal transcript traversal is forbidden");
@@ -82,11 +85,21 @@ function plannerAdvicePlan(cut: AcceptedGuidedCut, directory: string, advice: Re
 
 /** Isolated copies + existing actual advisors, never graphics rendering or active-plan mutation. */
 export async function prepareProposalEvidence(cut: AcceptedGuidedCut, execution: string, remainingMs: () => number,
-  options: { version: 4 | 5 | 6 | 7 | 8 } = { version: CURRENT_TREATMENT_PROPOSAL_VERSION }) {
+  options: { version: 4 | 5 | 6 | 7 | 8 | 9 | 10; nativeReferences?: NativeReferenceSelection[]; directorBrain?: DirectorBrain } = { version: CURRENT_TREATMENT_PROPOSAL_VERSION }) {
   remainingMs();
   if (!cut.job.ctx.pipeline) throw new Error("Proposal requires captured pipeline authority");
   restoreAutoEditPipeline(cut.job.ctx.pipeline);
   const directory = humanCutDirectory(execution, "candidate-inputs"), staged = stageTranscripts(cut, directory, "stage");
+  if (options.version === 9 || options.version === 10) {
+    const nativeReferences = stageNativeReferences(directory, options.nativeReferences ?? []);
+    const graphicsAdvice = { nativeShorts: true, route: "native-short-v1", nativeDirectorVersion: 1,
+      ...(options.version === 10 ? { nativeSupportingVersion: 1 } : {}) };
+    createHumanCutIndex(path.join(directory, "graphics-advice.json"), graphicsAdvice);
+    const evidence = await buildProposalEvidence(cut, { ...staged, graphicsAdvice, nativeReferences }, options);
+    const nativeDirector = await stageNativeDirector({ directory, evidence, rawIntent: readRawTreatmentClock(cut).submission.rawIntent,
+      remainingMs, brain: options.directorBrain });
+    return { ...evidence, nativeDirector };
+  }
   const graphicsAdvice = await advice(cut, directory, staged.ctx.transcriptsDir, remainingMs);
   return buildProposalEvidence(cut, { ...staged, graphicsAdvice }, options);
 }
@@ -95,6 +108,8 @@ export async function prepareProposalEvidence(cut: AcceptedGuidedCut, execution:
 export function readProposalInputs(cut: AcceptedGuidedCut, execution: string) {
   const directory = path.join(execution, "candidate-inputs"), staged = stageTranscripts(cut, directory, "observe");
   const graphicsAdvice = readCutPreviewObject(path.join(directory, "graphics-advice.json")).value;
+  if (graphicsAdvice.nativeShorts === true) return { ...staged, graphicsAdvice, nativeReferences: readNativeReferences(directory),
+    ...(graphicsAdvice.nativeDirectorVersion === 1 ? { nativeDirector: readNativeDirector(directory) } : {}) };
   plannerAdvicePlan(cut, directory, objectValue(graphicsAdvice["graphics_style_advisor.py"], "style advice"), "observe");
   return { ...staged, graphicsAdvice };
 }

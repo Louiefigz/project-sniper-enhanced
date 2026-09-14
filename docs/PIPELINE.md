@@ -103,6 +103,13 @@ answered choices or change scope merely to waive a gate. Vocabulary source of tr
 
 ### Shorts (9:16) — pick a style
 
+For current native Shorts, follow the [request and execution workflow](producer/NATIVE_SHORTS_WORKFLOW.md).
+The user can describe a treatment or ask the agent to choose from the footage
+and reference library. Strategy and source-first supporting-footage scouting
+precede assembly. The optional app prepares the same local brief as the CLI;
+the conversational agent owns editorial decisions. Export uses the shared
+native canvas, monitored runtime and long-form audio/timing utilities.
+
 For shorts extracted from long footage, use Producer's
 [long-form to finished shorts workflow](producer/PRODUCER_README.md#long-form-to-finished-shorts):
 compare source-bound standalone moments, trim only the selected ranges, then

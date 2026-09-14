@@ -14,7 +14,8 @@ QUALITY_VERSION = 1
 _PIPELINE_EXTENSIONS = (".py", ".ts", ".tsx", ".js", ".json", ".html",
                         ".css", ".md", ".svg", ".png", ".jpg", ".jpeg")
 _EXCLUDED_PARTS = {"__pycache__", "__tests__", "node_modules", "renders",
-                   "cache", "tests", "docs", "study"}
+                   "cache", "tests", "docs", "study", "artifacts",
+                   ".sniper-native-runtime"}
 _EXCLUDED_MEDIA = (".mov", ".mp4", ".wav", ".mp3", ".pyc")
 
 

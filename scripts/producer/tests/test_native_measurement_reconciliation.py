@@ -10,21 +10,22 @@ from native_render_resources import (
     GIB, ProcessIdentity, ProcessRequest, ResourceMeasurementError, ResourceSnapshot,
     read_snapshot, stop_reasons,
 )
-from test_native_render_resources import IDENTITY, REQUEST, START, raw_sample
+from test_native_render_resources import IDENTITY, REQUEST, START, raw_sample, direct_sample
 
 
 class MeasurementReconciliationTests(unittest.TestCase):
-    """Use exact synthetic ps/top ordering; never launch a media process."""
+    """Use exact synthetic identity/footprint ordering; never launch a media process."""
 
     def sample(self, raw: dict, after: str | BaseException,
                request: ProcessRequest = REQUEST) -> ResourceSnapshot:
         """Return one bracketed sample with the real parsing and selection code."""
-        outputs = [raw[name] for name in ("sysctl", "pressure", "ps", "top")]
+        raw = direct_sample(raw)
+        outputs = [raw[name] for name in ("sysctl", "pressure", "ps", "direct")]
         with patch("native_render_resources._read_command", side_effect=outputs + [after]):
             return read_snapshot(Path("/private/tmp"), request)
 
     def test_confirmed_child_exit_does_not_require_a_missing_footprint(self) -> None:
-        """A child absent after top has no current footprint to substitute."""
+        """A child absent after the footprint read has no current footprint to substitute."""
         raw = raw_sample()
         raw["top"] = raw["top"].replace("101 1G 512M\n", "")
         after = raw["ps"].replace(f"101 100 101 {START}\n", "")
@@ -35,7 +36,7 @@ class MeasurementReconciliationTests(unittest.TestCase):
         self.assertTrue(snapshot.identity_verified)
 
     def test_live_missing_process_still_fails_with_exact_identity(self) -> None:
-        """A missing top row cannot be interpreted as an exited live process."""
+        """A missing direct row cannot be interpreted as an exited live process."""
         raw = raw_sample()
         raw["top"] = raw["top"].replace("101 1G 512M\n", "")
         with self.assertRaises(MissingProcessFootprint) as caught:
@@ -53,7 +54,7 @@ class MeasurementReconciliationTests(unittest.TestCase):
         self.assertEqual(caught.exception.reason, "identity-not-stable-across-footprint-read")
 
     def test_new_identity_is_not_trusted_even_when_top_has_its_pid(self) -> None:
-        """A PID-only top row cannot bind a process missing from the first ps."""
+        """A PID-only footprint row cannot bind a process missing from the first ps."""
         raw = raw_sample()
         raw["top"] += "102 3G 0B\n"
         after = raw["ps"] + f"102 100 102 {START}\n"
@@ -63,7 +64,7 @@ class MeasurementReconciliationTests(unittest.TestCase):
                          [{"pid": 102, "started": START, "pgid": 102}])
 
     def test_reused_unrelated_pid_cannot_supply_new_child_memory(self) -> None:
-        """Top's old unrelated PID row must not be charged as a new child's memory."""
+        """An old unrelated PID row must not be charged as a new child's memory."""
         raw = raw_sample()
         after = raw["ps"].replace(f"500 1 500 {START}", "500 100 500 later start")
         with self.assertRaises(MissingProcessFootprint) as caught:
@@ -109,7 +110,7 @@ class MeasurementReconciliationTests(unittest.TestCase):
         self.assertEqual(snapshot.owned_footprint_bytes, GIB)
 
     def test_unknown_after_table_is_not_a_confirmed_exit(self) -> None:
-        """Missing, malformed and denied post-top reads all fail closed."""
+        """Missing, malformed and denied post-footprint reads all fail closed."""
         for after in ("", "100 bad row\n", PermissionError("denied")):
             with self.subTest(after=after):
                 with self.assertRaises((ResourceMeasurementError, PermissionError)):

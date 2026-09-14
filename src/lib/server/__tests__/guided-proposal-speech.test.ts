@@ -82,6 +82,19 @@ test("J-cut or unknown lead windows block before transcript-only evidence can om
   }
 });
 
+test("discarded nested word endpoints cannot block a clean trim or hide a word crossing its in-point", () => {
+  const words = speech([{ word: "discarded", start: 0, end: 2 }, { word: "nested", start: 1, end: 1.5 },
+    { word: "Kept.", start: 3, end: 4 }]);
+  const input = (start: number, end: number) => ({ segments: packetCutSegments({ cutTrack: [{ sourceId: "s", start, end }] }),
+    partitions: [{ index: 0, sourceId: "s", startFrame: 0, endFrameExclusive: 30, text: "" }], frameRate: "30/1", totalFrames: 30 });
+  assert.deepEqual(mapProposalOccurrences(input(3, 4), words).occurrences, [[0, 0, 2, 0, 30, "Kept.", 0]]);
+  assert.deepEqual(mapProposalOccurrences(input(1.75, 2.75), words).occurrences, [[0, 0, 0, 0, 8, "discarded", 1]]);
+  assert.throws(() => mapProposalOccurrences(input(1, 2), words), /Retained out-of-order transcript word endpoints/);
+  assert.throws(() => mapProposalOccurrences(input(3, 4), speech([
+    { word: "late", start: 1, end: 2 }, { word: "early", start: 0, end: 0.5 }, { word: "Kept.", start: 3, end: 4 },
+  ])), /Out-of-order transcript word starts/);
+});
+
 test("punctuation under overlapping speech cannot create a clean endpoint; half-open adjacent words can", () => {
   const overlapping = program([{ word: "Done.", start: 0, end: 1 }, { word: "still speaking.", start: 0.5, end: 1.5 }]);
   assert.deepEqual(overlapping.evidence.cleanEnds, [45]);

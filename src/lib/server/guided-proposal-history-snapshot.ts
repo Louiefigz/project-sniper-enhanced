@@ -49,7 +49,7 @@ function validateCompilerSnapshot(compiler: Record<string, unknown>, held: {
   if (selectedBytes !== compiler.totalBytes) throw new Error("Historical compiler byte count differs from actual pinned files");
   if ([...held.hashes.keys()].some((name) => /^src\/.*\.tsx?$/u.test(name) && !selected.has(name))) throw new Error("Historical compiler omitted captured TS source");
   const schema = objectValue(compiler.schema, "historical compiler schema"), version = objectValue(objectValue(schema.properties, "schema properties").schemaVersion, "schema version").const;
-  if (typeof version !== "number" || ![2, 3, 4, 5, 6, 7, 8].includes(version)) throw new Error("Unsupported historical proposal schema");
+  if (typeof version !== "number" || ![2, 3, 4, 5, 6, 7, 8, 9, 10].includes(version)) throw new Error("Unsupported historical proposal schema");
   const schemaName = `schemas/producer/treatment-proposal-v${version}.schema.json`;
   const observed = readCutPreviewObject(path.join(held.pipeline.snapshotRoot, schemaName));
   if (!selected.has(schemaName) || held.hashes.get(schemaName) !== compiler.schemaHash || observed.sha256 !== compiler.schemaHash

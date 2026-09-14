@@ -3,6 +3,9 @@ import { canonicalProducerDir } from "@/app/api/producer/auto-edit/request";
 import { readCutPreviewObject } from "@/app/api/producer/auto-edit/cut-preview-receipt";
 import { parseTreatmentCompileSubmissionV1 } from "@/lib/producer/contracts/raw-treatment-v1";
 import { parseCurrentTreatmentProposal as parseTreatmentProposal } from "@/lib/producer/contracts/treatment-proposal-v8";
+import { parseTreatmentProposalV9 } from "@/lib/producer/contracts/treatment-proposal-v9";
+import { parseTreatmentProposalV10 } from "@/lib/producer/contracts/treatment-proposal-v10";
+import { nativeProposalPreparationAllowed } from "./guided-native-supporting";
 import { assertProposalClauseCoverage } from "@/lib/producer/contracts/treatment-proposal-v2";
 import { exactKeys, objectValue, sha256 } from "@/lib/producer/contracts/validation";
 import { canonicalJsonSha256 } from "./auto-edit-hash";
@@ -77,13 +80,17 @@ export function readHistoricalGuidedProposal(value: unknown, admissionHash?: str
   if (!["codex", "legacy"].includes(String(compiler.provider)) || typeof compiler.model !== "string" || !compiler.model
       || typeof compiler.effort !== "string" || !compiler.effort || typeof compiler.elapsedMs !== "number"
       || !Number.isFinite(compiler.elapsedMs) || compiler.elapsedMs < 0 || compiler.elapsedMs > 600_000) throw new Error("Historical compiler metadata is malformed");
-  const proposal = parseTreatmentProposal(compiler.output); assertProposalClauseCoverage(proposal, raw.rawIntent);
+  const proposal = evidence.schemaVersion === 10 ? parseTreatmentProposalV10(compiler.output)
+    : evidence.schemaVersion === 9 ? parseTreatmentProposalV9(compiler.output) : parseTreatmentProposal(compiler.output);
+  assertProposalClauseCoverage(proposal, raw.rawIntent);
   if (evidence.schemaVersion !== proposal.schemaVersion || evidence.pipelineHash !== canonicalJsonSha256(history.job.ctx.pipeline)
       || evidence.cutDecisionHash !== history.pointer.cutDecisionHash || evidence.parentRevisionHash !== history.pointer.pictureLockedRevisionHash
       || canonicalJsonSha256(result.proposal) !== canonicalJsonSha256(proposal) || !Array.isArray(result.blockers)) throw new Error("Historical proposal/evidence object relationships changed");
   if (result.candidate !== null) {
     const candidate = objectValue(result.candidate, "historical candidate"), file = readCutPreviewObject(path.join(history.root, "candidate-plan.json"));
     if (canonicalJsonSha256(file.value) !== canonicalJsonSha256(candidate)) throw new Error("Historical candidate plan bytes changed");
+    if (proposal.schemaVersion === 10 && !nativeProposalPreparationAllowed({ ...result, proposal, candidate,
+      blockers: result.blockers } as Parameters<typeof nativeProposalPreparationAllowed>[0])) throw new Error("Historical native pending requirements changed");
   }
   if (row.schemaVersion === 2) {
     historyObject(history, "budget-admission.json", row.budgetAdmissionHash);
@@ -95,5 +102,6 @@ export function readHistoricalGuidedProposal(value: unknown, admissionHash?: str
     currentExecutionAuthority: false as const, sourceCurrentness: "not-observed", readinessCurrentness: "not-revalidated",
     proposalHash: history.pointer.treatmentProposalHash, proposalVersion: proposal.schemaVersion, summary: proposal.summary,
     rawIntent: raw.rawIntent, clauses: proposal.clauses, storedBlockers: result.blockers, createdAt: row.createdAt,
+    ...(proposal.schemaVersion === 10 ? { storedPendingRequirements: result.pendingRequirements ?? [] } : {}),
     generationStartedAt: row.generationStartedAt, snapshotIntegrity: snapshot };
 }

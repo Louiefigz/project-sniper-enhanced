@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import unittest
+import json
+import re
 from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
@@ -33,6 +35,25 @@ def raw_sample() -> dict[str, str]:
         "top": "PhysMem: 30G used (4G wired, 2G compressor), 34G unused.\nPID MEM CMPRS\n100 2G 1G\n101 1G 512M\n500 20G 10G\n",
         "ps": f"100 1 100 {START}\n101 100 101 {START}\n500 1 500 {START}\n",
     }
+
+
+def direct_sample(raw: dict[str, str] | None = None) -> dict[str, str]:
+    """Replay existing identity-turnover fixtures through the explicit live schema."""
+    from native_render_macos import COMPRESSED_UNAVAILABLE, SAMPLER
+    from native_render_processes import parse_size
+    result = dict(raw or raw_sample())
+    top = result.pop('top')
+    processes = [{'pid': int(pid), 'status': 'measured', 'footprintBytes': parse_size(mem),
+        'processStartAbstime': 123456 + int(pid), 'processStartAbstimeBefore': 123456 + int(pid),
+        'processExitAbstime': 0, 'compressedBytes': None, 'compressedStatus': COMPRESSED_UNAVAILABLE,
+        'footprintSource': 'proc_pid_rusage:RUSAGE_INFO_V0:ri_phys_footprint'}
+        for pid, mem, _ in re.findall(r'(?m)^\s*(\d+)\s+(\S+)\s+(\S+)\s*$', top)]
+    result['direct'] = json.dumps({'schemaVersion': 1, 'status': 'measured', 'sampler': SAMPLER,
+        'elapsedSeconds': .0001, 'host': {'pageSizeBytes': 16384, 'pageSizeSource': 'vm_kernel_page_size',
+        'returnedIntegerCount': 38, 'compressorBytes': 2 * GIB, 'unusedPhysicalBytes': 34 * GIB,
+        'raw': {'compressor_page_count': 2 * GIB // 16384, 'free_count': 34 * GIB // 16384,
+                'speculative_count': 100}}, 'processes': processes})
+    return result
 
 
 class NativeRenderResourceTests(unittest.TestCase):

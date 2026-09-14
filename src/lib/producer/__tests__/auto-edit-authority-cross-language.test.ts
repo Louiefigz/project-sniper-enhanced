@@ -92,6 +92,7 @@ function pipelineFiles(repo: string): string {
   write(repo, "assets/music/test.mp3", "music");
   write(repo, "assets/sfx/test.wav", "sfx");
   write(repo, "src/app/api/producer/auto-edit/example.ts", "export const value = 1;\n");
+  write(repo, "src/app/api/producer/native-short/example.ts", "export const short = 1;\n");
   write(repo, "src/app/api/producer/ai-edit/native.ts", "export const native = 1;\n");
   write(repo, "src/app/api/producer/live-build/live.ts", "export const live = 1;\n");
   write(repo, "src/app/api/producer/palmier/qc.ts", "export const qc = 1;\n");

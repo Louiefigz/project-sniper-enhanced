@@ -61,7 +61,12 @@ for (const { checkpoint, palmier, final, candidateActive } of cases) {
     const accepted = checkpoint === "cut_accepted";
     assert.deepEqual(buttonLabels(html), ["Synthetic checkpoint fixture", "Rename",
       accepted ? "Continue accepted cut" : "Review cut", "Close cut review",
-      accepted ? "Open accepted-cut continuation" : "Open cut review", "View details"]);
+      accepted ? "Open accepted-cut continuation" : "Open cut review", "View details",
+      "Add supporting image or video"]);
+    const supporting = [...html.matchAll(/<button\b([^>]*)>(.*?)<\/button>/g)]
+      .find((match) => match[2].includes("Add supporting image or video"));
+    assert.match(supporting![1], /\bdisabled=""/,
+      "supporting media must remain disabled at either cut checkpoint");
     assert.match(html, /<dialog[^>]*aria-label="Review cut checkpoint"/);
     assert.doesNotMatch(html, /<video|type="checkbox"|Accept cut and continue/);
     assert.doesNotMatch(html, /Historical cutaway resolution|Palmier edit approved|>Finished</);

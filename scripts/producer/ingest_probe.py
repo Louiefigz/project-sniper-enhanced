@@ -14,10 +14,12 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import stat
 import subprocess
 import sys
 from dataclasses import dataclass
 from fractions import Fraction
+from pathlib import Path
 from typing import Optional
 
 from palmier.process_deadline import process_timeout
@@ -28,10 +30,46 @@ from palmier.process_deadline import process_timeout
 VIDEO_EXTS = {".mp4", ".mov", ".webm", ".mkv", ".avi", ".m4v", ".mpg", ".mpeg"}
 AUDIO_EXTS = {".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".opus", ".wma", ".aiff"}
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".tiff", ".tif"}
-MEDIA_EXTS = VIDEO_EXTS | AUDIO_EXTS | IMAGE_EXTS
+# Discover these inputs so they receive an explicit rejection, never silent omission.
+UNSUPPORTED_DOCUMENT_EXTS = {".svg", ".svgz"}
+MEDIA_EXTS = VIDEO_EXTS | AUDIO_EXTS | IMAGE_EXTS | UNSUPPORTED_DOCUMENT_EXTS
 
 HASH_HEAD_BYTES = 8 * 1024 * 1024   # first 8MB feeds the content hash
 _VFR_TOLERANCE = 0.01               # fps delta below this reads as CFR jitter
+
+
+def _document_prefix(prefix: bytes) -> bool:
+    """Reject document-shaped text; a BOM alone may also be an MPEG header."""
+    encodings = ((b"\xff\xfe\x00\x00", "utf-32-le"), (b"\x00\x00\xfe\xff", "utf-32-be"),
+                 (b"\xff\xfe", "utf-16-le"), (b"\xfe\xff", "utf-16-be"))
+    for marker, encoding in encodings:
+        if prefix.startswith(marker):
+            text = prefix[len(marker):].decode(encoding, errors="replace").lstrip()
+            return not text or text.startswith("<")
+    stripped = prefix.removeprefix(b"\xef\xbb\xbf").lstrip()
+    return not stripped or stripped.startswith(b"<") or prefix.startswith(b"\x1f\x8b")
+
+
+def reject_unsupported_ingest_media(path: str | Path, media_kind: str | None = None) -> None:
+    """Reject vector documents without decoding, sanitizing or granting native admission.
+
+    A bounded prefix also catches XML/SVG or gzip documents renamed as raster media
+    and opaque ``.media`` snapshots. This is a rejection gate, not an SVG parser.
+    """
+    file = Path(path)
+    unsupported = file.suffix.lower() in UNSUPPORTED_DOCUMENT_EXTS or media_kind == "svg"
+    if not unsupported:
+        descriptor = os.open(file, os.O_RDONLY | os.O_NONBLOCK)
+        with os.fdopen(descriptor, "rb") as handle:
+            if not stat.S_ISREG(os.fstat(handle.fileno()).st_mode):
+                raise RuntimeError(f"Supplied-media ingest needs a regular file: {file}")
+            prefix = handle.read(1024)
+        unsupported = _document_prefix(prefix)
+    if unsupported:
+        raise RuntimeError(
+            f"SVG/SVGZ or XML/compressed document is unsupported by supplied-media ingest: {file}. "
+            "Provide a PNG, JPEG or WebP derivative through its own sandbox admission; "
+            "the original document was not sanitized or admitted for native use.")
 
 
 def status(**fields) -> None:
@@ -147,6 +185,7 @@ def _fps_and_vfr(stream: dict) -> tuple[Optional[float], bool]:
 
 def probe_media(path: str) -> MediaProbe:
     """Probe one media file into a ``MediaProbe`` (single ffprobe call)."""
+    reject_unsupported_ingest_media(path)
     data = ffprobe_json(path)
     streams = data.get("streams", [])
     v = _first_stream(streams, "video")

@@ -1,5 +1,5 @@
 import { spawn, type ChildProcess } from "child_process";
-import { existsSync, mkdirSync, readFileSync } from "fs";
+import { mkdirSync, readFileSync } from "fs";
 import path from "path";
 import { NextRequest } from "next/server";
 import {
@@ -7,12 +7,16 @@ import {
   terminateProcessTree,
   trackProcessTree,
 } from "../../_lib/child-process-lifecycle";
-import { guardProjectMutation, mutationProjectRoot } from "../../_lib/project-mutation";
+import { guardProjectMutation } from "../../_lib/project-mutation";
 import { pythonInterpreter, SCRIPTS_DIR } from "../../_lib/spawn-python";
+import { cutPreviewLeaseGuard } from "../auto-edit/cut-preview-lease";
+import type { ProjectMutationLease } from "@/lib/server/project-mutation-lease";
 import { workspaceRoot } from "../../_lib/workspace";
 import { derror, dlog } from "@/lib/debug";
 import { reconcileIntentCapabilities } from "@/lib/producer/intent-capabilities";
-import { validateIntent, type ProjectIntent } from "@/lib/producer/intent-presets";
+import type { ProjectIntent } from "@/lib/producer/intent-presets";
+import { ingestArguments, json, parseRequest, type IngestRequest } from "./request";
+import { assertIngestInputAuthority, assertSameIngestAuthority, existingIngestAuthority, type MutationAuthority } from "./authority";
 import { requireSourceSetAdmission, type AssetManifest } from "@/lib/producer/types";
 import {
   discardFreshIngestTarget,
@@ -34,15 +38,10 @@ const SSE_HEADERS = {
   "X-Accel-Buffering": "no",
 };
 
-interface IngestRequest {
-  inputPath: string;
-  outDir?: string;
-  projectRoot?: string;
-  noTranscribe: boolean;
-  intent?: ProjectIntent;
-}
 interface LeasedTarget {
   target: IngestTarget;
+  authority: MutationAuthority;
+  guard: () => void;
   release: () => void;
 }
 interface LiveIngest {
@@ -61,43 +60,10 @@ interface StreamContext {
   live: LiveIngest;
   controller: ReadableStreamDefaultController<Uint8Array>;
 }
-function json(value: unknown, status: number): Response {
-  return new Response(JSON.stringify(value), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-}
-
-async function parseRequest(req: NextRequest): Promise<IngestRequest | Response> {
-  const body = await req.json() as Record<string, unknown>;
-  if (typeof body.inputPath !== "string" || !body.inputPath) {
-    return json({ error: "No input path provided" }, 400);
-  }
-  if (!existsSync(body.inputPath)) {
-    return json({ error: `Input not found: ${body.inputPath}` }, 404);
-  }
-  let intent: ProjectIntent | undefined;
-  try {
-    if (body.intent != null) intent = validateIntent(body.intent);
-  } catch (error) {
-    return json({ error: `bad intent: ${(error as Error).message}` }, 400);
-  }
-  return {
-    inputPath: body.inputPath,
-    outDir: typeof body.outDir === "string" ? body.outDir : undefined,
-    projectRoot: typeof body.projectRoot === "string" ? body.projectRoot : undefined,
-    noTranscribe: body.noTranscribe === true,
-    intent,
-  };
-}
 
 function initialMutationPath(request: IngestRequest): { root: string; producerDir: string } {
-  if (request.projectRoot) {
-    return { root: request.projectRoot, producerDir: path.join(request.projectRoot, "producer") };
-  }
-  if (request.outDir) {
-    return { root: mutationProjectRoot(request.outDir), producerDir: request.outDir };
-  }
+  const existing = existingIngestAuthority(request);
+  if (existing) return existing;
   const root = workspaceRoot();
   mkdirSync(root, { recursive: true });
   return { root, producerDir: root };
@@ -118,16 +84,20 @@ function resolveLeasedTarget(request: IngestRequest): LeasedTarget | Response {
     allocation.lease.release();
     return json({ error: (error as Error).message }, 422);
   }
-  if (!target.fresh || !target.projectRoot) return { target, release: allocation.lease.release };
-  const project = guardProjectMutation({
-    projectRoot: target.projectRoot,
-    producerDir: target.outDir,
-    operation: "placing and preparing this project's media",
-  });
-  allocation.lease.release();
-  if (!project.response) return { target, release: project.lease.release };
+  if (!target.fresh || !target.projectRoot) return leaseTarget(target, initial, allocation.lease);
+  let project: ReturnType<typeof guardProjectMutation>;
+  try {
+    project = guardProjectMutation({ projectRoot: target.projectRoot, producerDir: target.outDir,
+      operation: "placing and preparing this project's media" });
+  } finally { allocation.lease.release(); }
+  if (!project.response) return leaseTarget(target, { root: target.projectRoot, producerDir: target.outDir }, project.lease);
   discardFreshIngestTarget(target);
   return project.response;
+}
+
+function leaseTarget(target: IngestTarget, authority: MutationAuthority, lease: ProjectMutationLease): LeasedTarget {
+  try { return { target, authority, guard: cutPreviewLeaseGuard(authority.root, lease), release: lease.release }; }
+  catch (error) { lease.release(); discardFreshIngestTarget(target); throw error; }
 }
 
 function createEmitter(controller: StreamContext["controller"]): Emitter {
@@ -229,6 +199,16 @@ function emitManifest(target: IngestTarget, intent: ProjectIntent | undefined, e
   return true;
 }
 
+function verifyPreparedTarget(leased: LeasedTarget, request: IngestRequest): void {
+  leased.guard();
+  const target = leased.target;
+  const current = target.fresh ? existingIngestAuthority({ projectRoot: target.projectRoot! }) : existingIngestAuthority(request);
+  assertSameIngestAuthority(current, leased.authority);
+  // Fresh copies belong to the new project; referenced folders still retain their original owner.
+  assertIngestInputAuthority({ inputPath: target.ingestInput,
+    ...(target.projectRoot ? { projectRoot: target.projectRoot } : { outDir: target.outDir }) });
+}
+
 async function runStream(context: StreamContext): Promise<void> {
   const { request, leased, live, controller } = context;
   const emit = createEmitter(controller);
@@ -248,9 +228,9 @@ async function runStream(context: StreamContext): Promise<void> {
       percent: 100,
     });
     if (live.cancelled) return;
+    verifyPreparedTarget(leased, request);
     const manifestPath = path.join(prepared.target.manifestDir, MANIFEST_NAME);
-    const args = [SCRIPT_PATH, prepared.target.ingestInput, "--out", manifestPath];
-    if (request.noTranscribe) args.push("--no-transcribe");
+    const args = ingestArguments({ script: SCRIPT_PATH, inputPath: prepared.target.ingestInput, manifestPath, request });
     dlog("producer:ingest", "spawn ingest.py", { args: args.slice(1), outDir: prepared.target.outDir });
     const result = await runIngestProcess(args, emit, live);
     if (live.cancelled) return;
@@ -258,6 +238,7 @@ async function runStream(context: StreamContext): Promise<void> {
       emit.event({ event: "error", message: `ingest exited with code ${result.code}. ${result.stderr.slice(-500)}` });
       return;
     }
+    verifyPreparedTarget(leased, request);
     emitManifest(prepared.target, request.intent, emit);
     live.committed = true;
   } catch (error) {
@@ -279,7 +260,9 @@ export async function POST(req: NextRequest) {
     return json({ error: `Invalid request: ${(error as Error).message}` }, 400);
   }
   if (parsed instanceof Response) return parsed;
-  const leased = resolveLeasedTarget(parsed);
+  let leased: LeasedTarget | Response;
+  try { leased = resolveLeasedTarget(parsed); }
+  catch (error) { return json({ error: (error as Error).message }, 422); }
   if (leased instanceof Response) return leased;
   const live: LiveIngest = {
     aborter: new AbortController(),

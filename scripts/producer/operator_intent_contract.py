@@ -28,7 +28,7 @@ from producer_config import HOOK_CONTRACT_WINDOW_S
 
 
 _IDENTITY_FIELDS = ("mode", "scope")
-_OPTIONAL_TARGET_FIELDS = ("pace", "style", "excerpt")
+_OPTIONAL_TARGET_FIELDS = ("pace", "style", "excerpt", "shortDirection")
 _REFERENCE_FIELDS = ("referenceId", "referenceStrategy")
 _CREDIBILITY_WORDS = ("credibility", "authority", "receipt", "proof")
 

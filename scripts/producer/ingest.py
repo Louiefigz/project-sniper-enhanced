@@ -47,6 +47,8 @@ from ingest_admission import (admit_ingest_candidates, collect_ingest_candidates
                               verify_source_set_binding)
 from ingest_admitted_scan import catalog_admitted_broll, scan_admitted_music
 from ingest_admitted_sources import SourceBuildContext, build_admitted_sources
+from ingest_retained_inventory import (RetainedIngest, include_retained_ingress,
+                                       merge_retained_lane, retained_primary_files)
 from ingest_probe import (
     MEDIA_EXTS,
     status,
@@ -187,15 +189,19 @@ def _transcribe_source(path: Path, source_id: str, ctx: TranscribeCtx) -> Option
     return out_path.name
 
 
-def build_manifest(input_path: Path, manifest_dir: Path, no_transcribe: bool) -> dict:
+def build_manifest(input_path: Path, manifest_dir: Path, no_transcribe: bool,
+                   retained: RetainedIngest | None = None) -> dict:
     """Classify inputs, build sources + b-roll + music into the manifest dict."""
     provider = LOCAL_PROVIDER if no_transcribe else transcription_provider()
     key = load_deepgram_key(PROJECT_ROOT) if provider == DEEPGRAM_PROVIDER else None
     if not no_transcribe and provider == DEEPGRAM_PROVIDER and key is None:
         raise RuntimeError("Explicit paid Deepgram invocation requires DEEPGRAM_API_KEY")
     inputs = classify_inputs(input_path)
+    if retained is not None:
+        inputs.raw_files = retained_primary_files(retained)
     candidates = collect_ingest_candidates(
         inputs.raw_files, inputs.broll_dir, inputs.music_dir)
+    candidates = include_retained_ingress(candidates, retained)
     admission = admit_ingest_candidates(candidates, manifest_dir)
     verify_source_set_binding(
         {"sourceSetAdmission": admission.binding}, manifest_dir)
@@ -219,6 +225,9 @@ def build_manifest(input_path: Path, manifest_dir: Path, no_transcribe: bool) ->
     # own tracks so plan.music.assetId resolves out of the box (additive; ids
     # continue the music-N sequence — see ingest_scan.scan_builtin_music).
     music += scan_builtin_music(PROJECT_ROOT / "assets" / "music", music)
+    if retained is not None:
+        broll = merge_retained_lane(broll, retained.manifest["broll"], admission.media_by_original, "broll")
+        music = merge_retained_lane(music, retained.manifest["music"], admission.media_by_original, "music")
     return {
         "generatedAt": datetime.now(timezone.utc).isoformat(),
         "input": str(input_path),
@@ -233,8 +242,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Build a PRODUCER asset_manifest.json")
     parser.add_argument("input_path", help="media file or directory of footage")
     parser.add_argument("--out", default=None, help="manifest output path")
-    parser.add_argument("--no-transcribe", action="store_true",
+    transcription = parser.add_mutually_exclusive_group()
+    transcription.add_argument("--no-transcribe", action="store_true",
                         help="skip transcription (transcriptPath: null)")
+    transcription.add_argument("--reuse-transcripts", action="store_true",
+                               help="rescan media retaining verified unchanged transcripts; no ASR calls")
     add_asr_arguments(parser)
     args = parser.parse_args()
 
@@ -251,7 +263,11 @@ def main() -> None:
 
     try:
         with use_asr_invocation(invocation_from_options(args)):
-            manifest = build_manifest(input_path, out_path.parent, args.no_transcribe)
+            if args.reuse_transcripts:
+                from ingest_transcript_reuse import rescan_with_transcripts
+                manifest = rescan_with_transcripts(input_path, out_path, build_manifest)
+            else:
+                manifest = build_manifest(input_path, out_path.parent, args.no_transcribe)
     except (OSError, RuntimeError, ValueError) as exc:
         fail(str(exc))
 

@@ -49,8 +49,11 @@ class ExactRateProbeTest(unittest.TestCase):
                 },
             ],
         }
-        with patch("ingest_probe.ffprobe_json", return_value=payload):
-            result = probe_media("fixture.mp4")
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "fixture.mp4"
+            source.write_bytes(b"TEST ONLY media identity")
+            with patch("ingest_probe.ffprobe_json", return_value=payload):
+                result = probe_media(str(source))
         self.assertEqual(result.frame_rate, "30000/1001")
 
 

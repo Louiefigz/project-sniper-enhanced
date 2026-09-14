@@ -90,5 +90,7 @@ broll/*
 # multi-gigabyte evidence stores. Keep their authored findings in docs, but
 # never commit rendered media, downloaded references, or extracted frames.
 /artifacts/
+/templates/motion/.sniper-native-runtime/
 /scripts/producer/artifacts/
 /docs/studies/gpt-5-6-sol-benchmark-2026-07-15/
+/docs/studies/shorts-visual-playbook/**/*.jpg

@@ -22,6 +22,14 @@ test("reusable Codex admission requires controlled argv, not caller-provided mod
   assert.throws(() => codexSubscriptionArgs(args.filter((a) => a !== "--ignore-user-config")));
 });
 
+test("native reference attachments pass the subscription grammar without permitting provider overrides", () => {
+  const args = buildCodexArgs({ sandbox: "read-only", timeoutMs: 2000,
+    imagePaths: ["/private/tmp/sniper-reference-test.png"] });
+  assert.deepEqual(codexSubscriptionArgs(args), args);
+  assert.throws(() => codexSubscriptionArgs([...args.slice(0, -1), "-c", 'model_provider="other"', "-"]));
+  assert.throws(() => codexSubscriptionArgs([...args.slice(0, -1), "--image"]), /Missing/);
+});
+
 test("Claude rejects API, cloud, managed Console key, unknown entitlement and conflicting restriction", () => {
   assertClaudeSubscription(JSON.stringify(CLAUDE_STATUS));
   for (const patch of [{ loggedIn: false }, { apiProvider: "bedrock" }, { authMethod: "api_key" },

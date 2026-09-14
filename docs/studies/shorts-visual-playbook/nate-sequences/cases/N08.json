@@ -1,0 +1,2685 @@
+{
+  "id": "N08",
+  "corpus_index": 8,
+  "title": "Huge ChatGPT Update You Need to See!",
+  "source_url": "https://www.youtube.com/shorts/c1TWmKILaeM",
+  "video_path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/corpus/08-c1TWmKILaeM/source-visual-current.mp4",
+  "duration": 58.533333,
+  "source_sha256": "81633f8d359b40f088b310742c036d26e2bd9a5f8771dcfe1b7c463b129bf8c9",
+  "lesson": "The reference distinguishes question answering, developer work and longer project execution, then illustrates a morning chief-of-staff use case with multiple inputs and priority categories.",
+  "opening": "Typed ChatGPT name over presenter → chat screen with red X → OpenAI identity → presentation being edited. The sequence makes a category-change claim and quickly supplies an artifact example.",
+  "story_arc": "Category reversal → three app roles → connected apps and device access → chief-of-staff topology → scheduled input review → asserted morning plan and priority categories → manual/automated contrast → additional execution examples → download CTA.",
+  "payoff": "Several visible work artifacts support the broad execution category. The chief-of-staff example stops at status and abstract priority labels; its actual morning plan is not revealed. Shopping, product analytics and generic desk footage sometimes lose the specific spoken example.",
+  "selection_reason": "Provides a long fast sequence with role comparisons, source-input cards, real branch/output/return topology, same-scene annotation and a meaningful several-second explanatory hold. It also exposes where activity substitutes for proof.",
+  "reviewed_evidence": [
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/08-c1TWmKILaeM/research-1080p/context_p001.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/08-c1TWmKILaeM/research-1080p/context_p002.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/08-c1TWmKILaeM/research-1080p/context_p003.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/08-c1TWmKILaeM/research-1080p/context_p004.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/08-c1TWmKILaeM/research-1080p/context_p005.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/08-c1TWmKILaeM/research-1080p/context_p006.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/08-c1TWmKILaeM/research-1080p/transcript.md",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/reviews/mechanics/08/review.json",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/reviews/editorial/08.json",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N08/strip_13.20-15.90.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N08/strip_27.70-29.95.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N08/strip_30.70-32.70.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N08/strip_35.30-37.80.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/browser-device-stage/browser-device-stage.html",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/flowchart-vertical/flowchart-vertical.html",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/per-word-rise/per-word-rise.html",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/screen-flow-carousel/screen-flow-carousel.html",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/ui-focus-zoom/ui-focus-zoom.html"
+  ],
+  "review_limits": "All six chronological 0.5s context sheets were opened through the final frame, plus four selected 6fps strips. Full-duration sampled visual coverage, not every-frame review or audio listening. Machine transcript supplies approximate speech alignment. Claims about OpenAI features, availability and counts are recorded as reference claims and not independently verified. Still strips support observed change but not exact easing. Catalog sources supply partial mechanisms, not ready replicas.",
+  "beats": [
+    {
+      "id": "N08-B01",
+      "start": 0,
+      "end": 0.8,
+      "spoken_idea": "ChatGPT has changed category.",
+      "visible": "Blank white upper panel begins typing ChatGPT in black sans lettering; presenter is below.",
+      "change": "Opening split.",
+      "view": "split",
+      "picture_function": "orientation",
+      "why_this_picture": "The app identity sets the subject before the category reversal.",
+      "camera_observation": "Text builds inside a stable white upper panel; no camera move.",
+      "camera_reason": "Attention is directed by the isolated word.",
+      "pacing_reason": "The brief empty-to-name reveal anticipates the following correction.",
+      "handoff": "The name hands off to a familiar chat interface.",
+      "catalog_candidates": [
+        "per-word-rise"
+      ],
+      "implementation_note": "Text and cue inputs can provide a close short-name reveal, though the inspected rise treatment is not an exact typing effect.",
+      "transfer": "Name an unfamiliar or newly redefined tool before contrasting its roles.",
+      "caution": "The opening empty white area provides little visual information before the name arrives.",
+      "sample_times": [
+        0.0,
+        0.5
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 0.0,
+          "source_pts": 0.0,
+          "frame_index": 0,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000000.jpg",
+          "sha256": "21c7cfecbf0d11d9236a2593c38597ef484ee6670fceb8e5306d4fae85aee8d2",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 0.5,
+          "source_pts": 0.5,
+          "frame_index": 30,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000030.jpg",
+          "sha256": "276a25decc5d5bb8da21e7b9bcd3491fb91020b7270215ada87de050c9f9806f",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B01.jpg",
+        "sha256": "900b1d3b09fde88878833cf9c4425040fb286c3a4211cb0e6370dd1b99f1d375",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B02",
+      "start": 0.8,
+      "end": 1.8,
+      "spoken_idea": "It is no longer only a chatbot.",
+      "visible": "Dark chat response fills the upper half and a red X overlays it; presenter stays below.",
+      "change": "White name is replaced with chat and red X.",
+      "view": "split",
+      "picture_function": "emphasis",
+      "why_this_picture": "The X rejects the old chatbot-only framing.",
+      "camera_observation": "Graphic overlay over a chat capture, not an anchored camera move.",
+      "camera_reason": "The X becomes the salient symbol.",
+      "pacing_reason": "One familiar screen plus one strong mark can be parsed quickly.",
+      "handoff": "A full OpenAI identity card names the organization behind the change.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Use a negation mark only when viewers can tell exactly what is being rejected.",
+      "caution": "Without the words this could suggest the product is broken; the spoken restriction to chatbot-only matters.",
+      "sample_times": [
+        1.0,
+        1.5
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 1.0,
+          "source_pts": 1.0,
+          "frame_index": 60,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000060.jpg",
+          "sha256": "1ff59be2a8ab3d6968bf7f58bf21bef817f34767a4d61f0e0c42d19cef5f8061",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 1.5,
+          "source_pts": 1.5,
+          "frame_index": 90,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000090.jpg",
+          "sha256": "59c4a0c1d9b8dca2f0be300adbced53761c9c634b277475a3675653b20483684",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B02.jpg",
+        "sha256": "d86255ff7de8dd2b75024d9c79a19329b4bd5b8663dd8a561899a032ca1f12b9",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B03",
+      "start": 1.8,
+      "end": 2.35,
+      "spoken_idea": "OpenAI is making a larger product shift.",
+      "visible": "Full white card presents the OpenAI wordmark.",
+      "change": "Split chat cuts to full identity card.",
+      "view": "full visual",
+      "picture_function": "orientation",
+      "why_this_picture": "The publisher is named before showing the new work category.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "A brief clean card breaks the dense interface texture.",
+      "handoff": "Wordmark yields to an actual work artifact.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Use identity cards as orientation, not as substitutes for demonstration.",
+      "caution": "No additional mismatch observed at the sampled resolution.",
+      "sample_times": [
+        2.0
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 2.0,
+          "source_pts": 2.0,
+          "frame_index": 120,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000120.jpg",
+          "sha256": "5c0a8e01abaaad49aa1578feb7f8d9ea3fc46dd276a783112457d42e090b9082",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B03.jpg",
+        "sha256": "cf7debec57fdb85eccb079a0f8608d2db7c804a63cf29a68166e76eb3aa138d9",
+        "dimensions": [
+          300,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B04",
+      "start": 2.35,
+      "end": 4.35,
+      "spoken_idea": "The reference describes an AI operating system.",
+      "visible": "Split desktop capture shows a presentation being edited; a Sales projections view gives way to another chart/plan view; presenter remains below.",
+      "change": "Identity card cuts to desktop work capture.",
+      "view": "split",
+      "picture_function": "demonstration",
+      "why_this_picture": "An editable slide artifact gives substance to work beyond conversation.",
+      "camera_observation": "Changes occur within the presentation capture; contextual samples do not distinguish all app playback from edit-time motion.",
+      "camera_reason": "The artifact, rather than a decorative app logo, gives the category claim a concrete example.",
+      "pacing_reason": "The UI keeps changing while the category claim is explained; the slide content itself is not taught.",
+      "handoff": "Presenter returns to enumerate the parts of the desktop app.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Place a real presentation-workflow recording in the screen slot; reframe for phone legibility.",
+      "transfer": "Show an actual output early when making a broad product claim.",
+      "caution": "A short presentation montage does not establish the full operating-system comparison.",
+      "sample_times": [
+        2.5,
+        4.0
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 2.5,
+          "source_pts": 2.5,
+          "frame_index": 150,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000150.jpg",
+          "sha256": "975c422b0ca31c0768102b981f76ce83864dbee32ae74baecc1522d2e143d3c5",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 4.0,
+          "source_pts": 4.0,
+          "frame_index": 240,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000240.jpg",
+          "sha256": "abf023044846e9a84aa7205aeece6b45d305f15e8742688e590b7699ca1cf1be",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B04.jpg",
+        "sha256": "5905324327405a58c753366c9043c230c0912837b5ccc8fbfcdfd3a7d699c139",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B05",
+      "start": 4.35,
+      "end": 5,
+      "spoken_idea": "For the first time the pieces are together.",
+      "visible": "Full presenter introduces the enumeration.",
+      "change": "Desktop split cuts to face.",
+      "view": "full presenter",
+      "picture_function": "orientation",
+      "why_this_picture": "The face provides the connective explanation between example and list.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "A brief bridge prevents a run of unrelated app cards.",
+      "handoff": "The first two app identities appear next.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Use a short verbal bridge before a product map.",
+      "caution": "No additional mismatch observed at the sampled resolution.",
+      "sample_times": [
+        4.5
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 4.5,
+          "source_pts": 4.5,
+          "frame_index": 270,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000270.jpg",
+          "sha256": "2a5c8accc62c85f2de0939f45b4de57b31415107a8df5941d4aff9e3eae118ca",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B05.jpg",
+        "sha256": "652f995621b81d5c4f5a62f366d976f1a46d15a945ee2651267e98cd093892a8",
+        "dimensions": [
+          300,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B06",
+      "start": 5,
+      "end": 6.4,
+      "spoken_idea": "Chat and Codex are two parts.",
+      "visible": "ChatGPT icon moves into a teal upper panel; Codex icon joins it over the presenter.",
+      "change": "Full presenter becomes two-icon split.",
+      "view": "split",
+      "picture_function": "orientation",
+      "why_this_picture": "Two recognizable marks establish the first two categories.",
+      "camera_observation": "Icon entrance/addition inside the upper panel; not evidence of a camera zoom.",
+      "camera_reason": "The added icon expands the set while preserving the first one.",
+      "pacing_reason": "Adding the second mark is new information within the same layout.",
+      "handoff": "The third name receives a full-screen reveal.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Reveal equivalent participants in the spoken order.",
+      "caution": "No additional mismatch observed at the sampled resolution.",
+      "sample_times": [
+        5.0,
+        6.0
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 5.0,
+          "source_pts": 5.0,
+          "frame_index": 300,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000300.jpg",
+          "sha256": "ebdfec4ef9c972478e814347059ca45fdf2a32cbfd3f05d8ef3424aae63fd5eb",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 6.0,
+          "source_pts": 6.0,
+          "frame_index": 360,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000360.jpg",
+          "sha256": "e8ed57b236f8315599913d75e36b3bd786c47a8a84b53045e9690107a6d8fe35",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B06.jpg",
+        "sha256": "430697c9de52ea4ec493b8eb1d8c2ad49dd62ef2f1781032a62097fa712eb06f",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B07",
+      "start": 6.4,
+      "end": 7.85,
+      "spoken_idea": "The new part is ChatGPT Work.",
+      "visible": "Full white frame reveals the ChatGPT Work name and mark.",
+      "change": "Two-icon split cuts to full new-product card.",
+      "view": "full visual",
+      "picture_function": "orientation",
+      "why_this_picture": "The unfamiliar addition receives more visual priority than the familiar pair.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "The name holds long enough to be read before the relationship is explained.",
+      "handoff": "Presenter returns to say they are connected.",
+      "catalog_candidates": [
+        "per-word-rise"
+      ],
+      "implementation_note": "Use text/cue-controlled short-title reveal; exact brand mark must be a supplied asset.",
+      "transfer": "Give the new term a distinct but brief identity beat.",
+      "caution": "No additional mismatch observed at the sampled resolution.",
+      "sample_times": [
+        6.5,
+        7.5
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 6.5,
+          "source_pts": 6.5,
+          "frame_index": 390,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000390.jpg",
+          "sha256": "20b26423b62601173545be570bdd90ab9427b97c8cc7b9ba6bc0becdd5b995c6",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 7.5,
+          "source_pts": 7.5,
+          "frame_index": 450,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000450.jpg",
+          "sha256": "3b507d92c2f12964d14b890548ca3d5fcfdd6836ef9bb44350a2a7cf8ebb65db",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B07.jpg",
+        "sha256": "c025a71e3824575104fadef2434877359a51fb4224c9a683de0402a169286ff3",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B08",
+      "start": 7.85,
+      "end": 9.85,
+      "spoken_idea": "All three live in one connected desktop app.",
+      "visible": "Full presenter holds while describing the relationship.",
+      "change": "Product card cuts to presenter.",
+      "view": "full presenter",
+      "picture_function": "orientation",
+      "why_this_picture": "The face carries synthesis instead of piling on more names.",
+      "camera_observation": "Full-head hold; any subtle scale drift is not established as a semantic zoom.",
+      "camera_reason": "No individual screen control is being discussed.",
+      "pacing_reason": "A roughly two-second human hold gives the relationship time to land.",
+      "handoff": "Next begins a role-by-role comparison.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Pause visual enumeration to state the relationship between the members.",
+      "caution": "No additional mismatch observed at the sampled resolution.",
+      "sample_times": [
+        8.0,
+        9.5
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 8.0,
+          "source_pts": 8.0,
+          "frame_index": 480,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000480.jpg",
+          "sha256": "86908f146be7fe16caa066284a8fb67818bb2754eb3033caab4174613162053a",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 9.5,
+          "source_pts": 9.5,
+          "frame_index": 570,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000570.jpg",
+          "sha256": "fbc30492fa27be5621d6d1bc551b3f15bf2a6c70b05c0ff224a2e4d91d4e3fe0",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B08.jpg",
+        "sha256": "da751c25e9365d9fff1b5be163f2fef7010e56c8ee28c6ea7f7692ef86cb84cb",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B09",
+      "start": 9.85,
+      "end": 11.2,
+      "spoken_idea": "Chat is for asking questions.",
+      "visible": "Full white canvas isolates a prompt input containing a customer-feedback/mobile-release request.",
+      "change": "Face cuts to isolated prompt.",
+      "view": "full visual",
+      "picture_function": "demonstration",
+      "why_this_picture": "A question-like input exemplifies the conversational role.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "The input is short and centered, so the role can be understood without a complete answer.",
+      "handoff": "The next dark execution panel contrasts the developer role.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Use an owned prompt capture in a restrained screen wrapper; avoid adding unnecessary chrome.",
+      "transfer": "Use one concrete action to define each role in a comparison.",
+      "caution": "No additional mismatch observed at the sampled resolution.",
+      "sample_times": [
+        10.0,
+        11.0
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 10.0,
+          "source_pts": 10.0,
+          "frame_index": 600,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000600.jpg",
+          "sha256": "59a2c50cbf696bf85f30404f229540f42c8b2e3b5bc6a82a91e41c671fa5f2e2",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 11.0,
+          "source_pts": 11.0,
+          "frame_index": 660,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000660.jpg",
+          "sha256": "e210a8b855a667de407c138f260fb6599630bd91f6e3490e527c3ae77b14b0a1",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B09.jpg",
+        "sha256": "78d2c04e4bc6d2ae5479d448753851b9b15cf342bb4e9fcf60e587ecdb89620b",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B10",
+      "start": 11.2,
+      "end": 12.24,
+      "spoken_idea": "Codex serves developers.",
+      "visible": "Dark code/execution blocks sit on a white full frame.",
+      "change": "Question input is replaced by code/execution capture.",
+      "view": "full visual",
+      "picture_function": "orientation",
+      "why_this_picture": "Code text distinguishes the developer category from ordinary questions.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "The flash is recognition-level, not enough time to understand the code.",
+      "handoff": "ChatGPT Work title follows as the third role.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Use a category cue for a high-level comparison, then demonstrate if teaching operation.",
+      "caution": "This is role illustration, not proof of code correctness or a programming tutorial.",
+      "sample_times": [
+        11.5,
+        12.0
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 11.5,
+          "source_pts": 11.5,
+          "frame_index": 690,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000690.jpg",
+          "sha256": "ad861e2aef3f9c9d13c6e0b42d8d0abfacb15bdb86cc7f8dc68f6ae70ba6a581",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 12.0,
+          "source_pts": 12.0,
+          "frame_index": 720,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000720.jpg",
+          "sha256": "3ddc0ee4ce3369b6d6dafec708875b0053443d5c79fd96df671d3f61c38fdc1d",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B10.jpg",
+        "sha256": "60576074803e827ca96e152c466efafe1fb45cbc668dcbc882087e28cf978f97",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B11",
+      "start": 12.24,
+      "end": 13.15,
+      "spoken_idea": "Work handles projects for the user.",
+      "visible": "ChatGPT Work title occupies the upper half; presenter is below.",
+      "change": "Full code card cuts to title/presenter split.",
+      "view": "split",
+      "picture_function": "orientation",
+      "why_this_picture": "The product label remains attached to the role about to be demonstrated.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "A brief naming beat avoids ambiguity before task cards begin.",
+      "handoff": "Gmail connection becomes the first concrete work surface.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Attach the product name to the role before showing examples.",
+      "caution": "No additional mismatch observed at the sampled resolution.",
+      "sample_times": [
+        12.5,
+        13.0
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 12.5,
+          "source_pts": 12.5,
+          "frame_index": 750,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000750.jpg",
+          "sha256": "a0a3a3d7b85a294b03514db00cbb7e7d026cdf44b7fe44d44c301c1ce869e9c1",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 13.0,
+          "source_pts": 13.0,
+          "frame_index": 780,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000780.jpg",
+          "sha256": "090ab42e4cd34a2cc38e422fa6a74a2e18751bb4d058d8f33dee47a531c2157b",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B11.jpg",
+        "sha256": "acaa7d881aeee32e34192f484c993e73478d11b8c0bccf81cb9509960249f627",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B12",
+      "start": 13.15,
+      "end": 13.63,
+      "spoken_idea": "It gets things done using connected information.",
+      "visible": "Full blue field contains a rounded Connecting to Gmail card with Gmail logo and an email-review status bubble.",
+      "change": "Title split cuts to a full connected-app card.",
+      "view": "full visual",
+      "picture_function": "demonstration",
+      "why_this_picture": "Email retrieval is a plausible input to a longer task.",
+      "camera_observation": "6fps strip shows text/status growth inside a stable card, not a zoom.",
+      "camera_reason": "The named email connection is the salient new object.",
+      "pacing_reason": "The small status action is seen briefly, then replaced by a produced artifact.",
+      "handoff": "Information access hands off to presentation creation, though causal continuity is not proven.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "A screen slot can stage a real connection capture. Preserve status wording and avoid inventing a successful connection.",
+      "transfer": "Pair an input source with the resulting work when you can show the same task.",
+      "caution": "This is a shown status example, not independent confirmation that the later deck used these emails.",
+      "sample_times": [
+        13.2,
+        13.367,
+        13.533
+      ],
+      "time_confidence": "Approximate boundary refined with 6fps strip, about ±0.17s; no source-frame cut precision.",
+      "source_frames": [
+        {
+          "requested_time": 13.2,
+          "source_pts": 13.2,
+          "frame_index": 792,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000792.jpg",
+          "sha256": "6f0e6a054cb8c677a22de5e8b3f4bc808b41169429b5111973652d03db882605",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 13.367,
+          "source_pts": 13.366667,
+          "frame_index": 802,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000802.jpg",
+          "sha256": "81d34cc7ea26dbd5c4fa0928106afdb5e2d3ab25021e5e8ddd0f8684354cebee",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 13.533,
+          "source_pts": 13.533333,
+          "frame_index": 812,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000812.jpg",
+          "sha256": "0c8b39f3c9a59b3bab99380f2074a181fcadd3f3a1a1f10f243de75d8abfd201",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B12.jpg",
+        "sha256": "300f73b0407a28c8eb241385279fc043368551dc2ed325f4e6169ef5e59c1e7d",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B13",
+      "start": 13.63,
+      "end": 14.16,
+      "spoken_idea": "Work produces a longer project.",
+      "visible": "Presentation card replaces Gmail; its cover is about AgTech and global food security, with a crop-field photo.",
+      "change": "Connection card swaps to deck cover.",
+      "view": "full visual",
+      "picture_function": "demonstration",
+      "why_this_picture": "A named, designed deck is a tangible output beyond a chat answer.",
+      "camera_observation": "Card content replacement; no zoom into the crop photograph.",
+      "camera_reason": "The picture demonstrates a deliverable category, not agricultural evidence.",
+      "pacing_reason": "Cover recognition introduces the artifact before the next pages.",
+      "handoff": "The same deck stays while its internal pages change.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Use an actual deck capture with the slot or optional second screen; content must come from the demonstrated project.",
+      "transfer": "Establish the artifact identity before showing its parts.",
+      "caution": "No additional mismatch observed at the sampled resolution.",
+      "sample_times": [
+        13.7,
+        13.867,
+        14.033
+      ],
+      "time_confidence": "Approximate boundary refined with 6fps strip, about ±0.17s; no source-frame cut precision.",
+      "source_frames": [
+        {
+          "requested_time": 13.7,
+          "source_pts": 13.7,
+          "frame_index": 822,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000822.jpg",
+          "sha256": "52192f2e4c04898aeb9a8f74fb600ac2689cccd4a89c286d4ada80979679cecd",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 13.867,
+          "source_pts": 13.866667,
+          "frame_index": 832,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000832.jpg",
+          "sha256": "008d1b448f88db319b276bc784802d15bde0d6cc44d2960d613c7e31497218bd",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 14.033,
+          "source_pts": 14.033333,
+          "frame_index": 842,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000842.jpg",
+          "sha256": "bfa6ce0a0cf06e02cc7e8023f05b1358501c056226cfdd1207f980cdde1861cb",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B13.jpg",
+        "sha256": "74017caabf216b5fdda791c94088228d5dc480f7c05edbf67cde31ee5ea8f99d",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B14",
+      "start": 14.16,
+      "end": 14.82,
+      "spoken_idea": "The project contains developed content.",
+      "visible": "The same deck card shows Global Food Security Challenges; blue and green bars grow beside text.",
+      "change": "Cover becomes an interior chart page.",
+      "view": "full visual",
+      "picture_function": "demonstration",
+      "why_this_picture": "A structured explanatory page suggests development beyond a cover.",
+      "camera_observation": "6fps samples show chart elements growing within the captured slide; the outer card is retained.",
+      "camera_reason": "Attention shifts from artifact identity to its content structure.",
+      "pacing_reason": "Brief chart growth supplies internal progress without replacing the outer card.",
+      "handoff": "The deck advances to a solutions page.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Replay the real slide output; a fresh chart block would be illustrative rather than evidence of the generated deck.",
+      "transfer": "Show a representative interior page when a deliverable’s completeness matters.",
+      "caution": "The reel does not teach or validate the chart data.",
+      "sample_times": [
+        14.2,
+        14.367,
+        14.7
+      ],
+      "time_confidence": "Approximate boundary refined with 6fps strip, about ±0.17s; no source-frame cut precision.",
+      "source_frames": [
+        {
+          "requested_time": 14.2,
+          "source_pts": 14.2,
+          "frame_index": 852,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000852.jpg",
+          "sha256": "91d3180147e88f0a40702020babf260d55305ab90d40aa02c1cae0b50c07729d",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 14.367,
+          "source_pts": 14.366667,
+          "frame_index": 862,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000862.jpg",
+          "sha256": "cc69cc77734658f0583705790fb12c9b860f914c7fda73d34a8b9b7ccf8bbd7d",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 14.7,
+          "source_pts": 14.7,
+          "frame_index": 882,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000882.jpg",
+          "sha256": "fbc45ee51dcd0e1c0db1771c0c4858202f94ac9a0964cdb560956bf5cd70b474",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B14.jpg",
+        "sha256": "a552532b127299cf7b059d991f57505545bc43f97066fcdd19c1c2004cb92572",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B15",
+      "start": 14.82,
+      "end": 15.85,
+      "spoken_idea": "It can continue through project work.",
+      "visible": "AgTech Solutions page appears in the same card; three blue content columns build and fill.",
+      "change": "Chart page advances to three-column solutions.",
+      "view": "full visual",
+      "picture_function": "demonstration",
+      "why_this_picture": "A second interior layout reinforces that there are several organized sections.",
+      "camera_observation": "Content columns populate; no anchored camera movement is demonstrated.",
+      "camera_reason": "The changing information form is the reason to keep looking.",
+      "pacing_reason": "Hold through the three-column appearance rather than cutting on each word.",
+      "handoff": "Next the source lists apps that can feed this work.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Keep the original deck identity across the sequence; catalog wrapper motion should not distract from page content.",
+      "transfer": "Use repeated artifact framing to show a multi-part result efficiently.",
+      "caution": "Three page examples do not establish task duration or project reliability.",
+      "sample_times": [
+        14.867,
+        15.2,
+        15.7
+      ],
+      "time_confidence": "Approximate boundary refined with 6fps strip, about ±0.17s; no source-frame cut precision.",
+      "source_frames": [
+        {
+          "requested_time": 14.867,
+          "source_pts": 14.866667,
+          "frame_index": 892,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000892.jpg",
+          "sha256": "709013af2c3ed350c424f9869ac4d4a1b42a58b7cadea42820de614b14a9005a",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 15.2,
+          "source_pts": 15.2,
+          "frame_index": 912,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000912.jpg",
+          "sha256": "60111ec61165b967ae528970fa3b90e6ceb7999458c48b1cf6f2ce1cd03538c3",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 15.7,
+          "source_pts": 15.7,
+          "frame_index": 942,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000942.jpg",
+          "sha256": "83ca51a507115d99f6c217eadf29b42daa4c9cecbe4e4ad43e5c9cba222905e7",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B15.jpg",
+        "sha256": "432aed85592814efb5439dd613d81930fe3dc605983292dcadca3336ba16c447",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B16",
+      "start": 15.85,
+      "end": 17.9,
+      "spoken_idea": "It works inside the apps already used.",
+      "visible": "Upper white panel cycles Gmail searching suppliers, Slack analyzing supplier history, Excel reviewing scorecards and Notion reading project notes; presenter remains below.",
+      "change": "Full deck becomes a succession of app/status cards in the upper split.",
+      "view": "split",
+      "picture_function": "orientation",
+      "why_this_picture": "Each status pairs an app with its specific information role: email search, team history, scorecards, project notes.",
+      "camera_observation": "Sequential app/status replacements within the same split; no demonstrated camera zoom.",
+      "camera_reason": "The changing app-action pair is the new attention target.",
+      "pacing_reason": "One stable panel makes four fast replacements comprehensible; captions are not additional template events.",
+      "handoff": "Presenter pivots from integrations to device availability.",
+      "catalog_candidates": [
+        "screen-flow-carousel"
+      ],
+      "implementation_note": "The inspected carousel can sequence related screen assets using captions/cues, but its rail motion differs from these compact status swaps.",
+      "transfer": "Show named app plus relevant action, rather than a logo list with no function.",
+      "caution": "The examples do not independently verify every integration or a single continuous task.",
+      "sample_times": [
+        16.0,
+        17.5
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 16.0,
+          "source_pts": 16.0,
+          "frame_index": 960,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f000960.jpg",
+          "sha256": "8cb9cfde0bde6d8a9e84fa34da80cb1e163a14b88200d59179dca73218a24d63",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 17.5,
+          "source_pts": 17.5,
+          "frame_index": 1050,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001050.jpg",
+          "sha256": "713a87a313c01e6d980d30a24979c8f4bb6888cc54cd24b9b6dd378af78061bf",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B16.jpg",
+        "sha256": "7c40656880dece7653290d353fa22654dc065f625ea9e2473eba848e8beab328",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B17",
+      "start": 17.9,
+      "end": 18.3,
+      "spoken_idea": "There is an additional benefit.",
+      "visible": "Full presenter briefly returns.",
+      "change": "App/status split cuts to presenter.",
+      "view": "full presenter",
+      "picture_function": "orientation",
+      "why_this_picture": "The face marks the change from app connections to access across devices.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "A short bridge resets the category.",
+      "handoff": "Phone-use footage begins the device pair.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Signal a new dimension of a product explanation before switching imagery.",
+      "caution": "No additional mismatch observed at the sampled resolution.",
+      "sample_times": [
+        18.0
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 18.0,
+          "source_pts": 18.0,
+          "frame_index": 1080,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001080.jpg",
+          "sha256": "e0242e5728e63572b5098fd2a83e3c8c7643484c1a618ef2db0000090194eade",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B17.jpg",
+        "sha256": "d0cc243c4188245a8d48802e3f6f0bace10665ec91f7356cf30b5f827499f8d4",
+        "dimensions": [
+          300,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B18",
+      "start": 18.3,
+      "end": 20.3,
+      "spoken_idea": "The workflow is available on mobile.",
+      "visible": "Outdoor phone user fills the frame; a green check appears over the shot.",
+      "change": "Presenter cuts to phone-user B-roll.",
+      "view": "full visual",
+      "picture_function": "analogy",
+      "why_this_picture": "Phone use illustrates portability; the check endorses the claimed availability.",
+      "camera_observation": "Same phone shot plus check overlay; no UI-specific zoom is visible.",
+      "camera_reason": "The device itself is the attention target.",
+      "pacing_reason": "The shot holds while mobile is named; the check adds emphasis rather than a new operation.",
+      "handoff": "Laptop work follows to form a device contrast.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Use device-life footage for context, and real screens for operational proof.",
+      "caution": "The phone display does not show the discussed workflow or prove synchronization.",
+      "sample_times": [
+        18.5,
+        20.0
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 18.5,
+          "source_pts": 18.5,
+          "frame_index": 1110,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001110.jpg",
+          "sha256": "1e259e468ed0abf397f64e24f2f31c96ef74c06bd23d782181541ae92353f957",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 20.0,
+          "source_pts": 20.0,
+          "frame_index": 1200,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001200.jpg",
+          "sha256": "cf68adc5b4624e0b9bbdb8b87acd56fccf417a8614735942c1a290a9f38ee2b8",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B18.jpg",
+        "sha256": "b3ad495711ed63f9e0a82122dd2a0bf308e9d4cfee2b23119233c5818d35e510",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B19",
+      "start": 20.3,
+      "end": 22.8,
+      "spoken_idea": "Work can continue across devices.",
+      "visible": "Laptop user replaces the phone scene; a green color wash develops.",
+      "change": "Phone scene cuts to laptop B-roll.",
+      "view": "full visual",
+      "picture_function": "analogy",
+      "why_this_picture": "A second device completes the portability illustration.",
+      "camera_observation": "New shot and green overlay, not a demonstrated zoom or same-session handoff.",
+      "camera_reason": "Device contrast is semantic; the green wash is decorative emphasis.",
+      "pacing_reason": "The two-shot device pairing carries one claim, with color adding promotional emphasis.",
+      "handoff": "Presenter moves from access to the cloud browser.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Retain a task object across real device screens if synchronization is the lesson.",
+      "caution": "No matching task state is visible across phone and laptop.",
+      "sample_times": [
+        20.5,
+        22.5
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 20.5,
+          "source_pts": 20.5,
+          "frame_index": 1230,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001230.jpg",
+          "sha256": "2acb6f1921cb8b2c21d0dfc4e7f98971e5a00519c34f75ae80d19c46b290fde9",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 22.5,
+          "source_pts": 22.5,
+          "frame_index": 1350,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001350.jpg",
+          "sha256": "dc8f684d85a40e5e9be4da51f4b6bf417e30e42239e6c8ae11021ceb1e696f42",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B19.jpg",
+        "sha256": "ade7803cc7b36485f6fccba87993d4b648c744ddabdd71e30d49537e76fdb60d",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B20",
+      "start": 22.8,
+      "end": 23.7,
+      "spoken_idea": "It includes a cloud browser.",
+      "visible": "Full presenter names the browser capability.",
+      "change": "Laptop B-roll cuts to presenter.",
+      "view": "full presenter",
+      "picture_function": "orientation",
+      "why_this_picture": "The face supplies a new feature claim before the plugin inventory.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "Brief statement avoids another anonymous computer screen.",
+      "handoff": "Plugin list provides the next concrete scope cue.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Use the speaker where a capability is named but no relevant action is shown.",
+      "caution": "Cloud-browser behavior is not shown in this beat.",
+      "sample_times": [
+        23.0,
+        23.5
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 23.0,
+          "source_pts": 23.0,
+          "frame_index": 1380,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001380.jpg",
+          "sha256": "e125860caabb5e837e75151ae41dc9db0dce8d13d4e9e0af037f68776cbf8201",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 23.5,
+          "source_pts": 23.5,
+          "frame_index": 1410,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001410.jpg",
+          "sha256": "3a04864ce14ee4c53f824de5f9b3235ffd4f3e98bbfbd6b64ad3aeeb2965c585",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B20.jpg",
+        "sha256": "46b6470764baf75a17e2f8051d092de6102b08176fc1adc60abcbc7037d29a34",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B21",
+      "start": 23.7,
+      "end": 25.3,
+      "spoken_idea": "There are many plugins.",
+      "visible": "Full white plugin catalog scrolls through named services.",
+      "change": "Face cuts to plugin-list capture.",
+      "view": "full visual",
+      "picture_function": "orientation",
+      "why_this_picture": "A real list shows the integration category and some examples.",
+      "camera_observation": "Vertical list movement; not a zoom into an individual plugin.",
+      "camera_reason": "Breadth rather than one exact choice is the target.",
+      "pacing_reason": "Scrolling reveals breadth while the spoken count lands.",
+      "handoff": "Presenter introduces the case where no native plugin exists.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Stage a current owned catalog capture; the slot does not supply integration availability.",
+      "transfer": "Use a catalog capture to illustrate breadth without fabricating a numerical counter.",
+      "caution": "This review does not count or verify the reference’s 100-plus claim.",
+      "sample_times": [
+        24.0,
+        25.0
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 24.0,
+          "source_pts": 24.0,
+          "frame_index": 1440,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001440.jpg",
+          "sha256": "953ac526fa4adc307ae3e8d2554582302426b9948b341d9cc589193fe7d8bcee",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 25.0,
+          "source_pts": 25.0,
+          "frame_index": 1500,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001500.jpg",
+          "sha256": "cef78aad153c8e870399f3def3ca81ffff2e994f08cc4b5c1313acd980d6342c",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B21.jpg",
+        "sha256": "c0939437e567d530f9a62b1dca1e7208a05351b737fc71066d48765413efcb78",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B22",
+      "start": 25.3,
+      "end": 26.3,
+      "spoken_idea": "A native plugin may be absent.",
+      "visible": "Full presenter sets up the exception.",
+      "change": "Catalog cuts to face.",
+      "view": "full presenter",
+      "picture_function": "orientation",
+      "why_this_picture": "A direct conditional statement clarifies that the next capability is a fallback.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "A short pause in screenshots makes the condition intelligible.",
+      "handoff": "Computer-user footage follows the fallback claim.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Keep conditions audible and visible before showing a fallback.",
+      "caution": "No additional mismatch observed at the sampled resolution.",
+      "sample_times": [
+        25.5,
+        26.0
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 25.5,
+          "source_pts": 25.5,
+          "frame_index": 1530,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001530.jpg",
+          "sha256": "edd4d8137ea2090b061d47a904ce111a4f5d60abbc5ccd1bfffeb8e65a70daa5",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 26.0,
+          "source_pts": 26.0,
+          "frame_index": 1560,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001560.jpg",
+          "sha256": "32d2ab02a4f314fff4c2e600de024cebc4f808bf31fc9ef746dda1de499e44e3",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B22.jpg",
+        "sha256": "3155ff8d8e2a057102a40891b522f47d75abb208162fb553adc5eb0cc6e9410f",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B23",
+      "start": 26.3,
+      "end": 27.8,
+      "spoken_idea": "Computer use can handle that situation.",
+      "visible": "Side-profile worker looks at a desktop monitor; blurred copies fill the portrait top and bottom.",
+      "change": "Face cuts to landscape B-roll with blurred fill.",
+      "view": "full visual",
+      "picture_function": "weak-match",
+      "why_this_picture": "The scene depicts a human at a computer, not the agent performing the fallback.",
+      "camera_observation": "Landscape scene is fitted in portrait; no demonstrated agent cursor path or camera focus.",
+      "camera_reason": "No visible control corresponds to the spoken fallback.",
+      "pacing_reason": "A brief work insert maintains activity but adds little operational evidence.",
+      "handoff": "The chief-of-staff diagram shifts to the speaker’s own example.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Replace generic desk footage with the exact agent action when teaching computer use.",
+      "caution": "Do not describe this as a recorded agent computer-use demonstration.",
+      "sample_times": [
+        26.5,
+        27.5
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 26.5,
+          "source_pts": 26.5,
+          "frame_index": 1590,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001590.jpg",
+          "sha256": "cb3acf4f872e3f062c57c04a15b204b77aa17b1b976179f5df3634ec12be3d91",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 27.5,
+          "source_pts": 27.5,
+          "frame_index": 1650,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001650.jpg",
+          "sha256": "e2665bd30b7d27108acb0dea56df1279dec58a61a4cae4b45e77d08762d537a4",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B23.jpg",
+        "sha256": "13dcccba69c53f62bbe9672854e0c6cf145bcfb66175dfd5854f4f8bd5ac1cfd",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B24",
+      "start": 27.8,
+      "end": 29.45,
+      "spoken_idea": "The speaker built an AI chief of staff.",
+      "visible": "Upper diagram has Chief of Staff at top; it delegates to Research, Planning and Execution; each leads to an Output circle; lower lines rejoin and return up the left to the chief. Presenter is below.",
+      "change": "Computer B-roll cuts to diagram/presenter split.",
+      "view": "split",
+      "picture_function": "orientation",
+      "why_this_picture": "The branch→work→outputs→return topology explains delegation and aggregation, which a logo hub would omit.",
+      "camera_observation": "6fps strip shows a brief modest whole-card settling/enlargement then hold; no branch-specific focus or sequential traversal is established.",
+      "camera_reason": "The full process is favored as one unit; this is not a zoom into one subagent.",
+      "pacing_reason": "The complete diagram holds for about 1.6s; little time is available to read all small labels.",
+      "handoff": "The following morning example grounds this architecture in a routine.",
+      "catalog_candidates": [
+        "flowchart-vertical"
+      ],
+      "implementation_note": "Inspected flowchart-vertical provides authored nodes/connectors as partial source inspiration, not an exposed branch-return preset. Preserve this specific topology with supplied SVG/layout data; a constellation hub is insufficient.",
+      "transfer": "Preserve the actual direction and return relationships when illustrating orchestration.",
+      "caution": "A diagram explains the claimed design but does not prove the workflow ran. Small return-path labels need a longer or closer treatment in our lesson.",
+      "sample_times": [
+        27.867,
+        28.367,
+        29.033,
+        29.367
+      ],
+      "time_confidence": "Approximate boundary refined with 6fps strip, about ±0.17s; no source-frame cut precision.",
+      "source_frames": [
+        {
+          "requested_time": 27.867,
+          "source_pts": 27.866667,
+          "frame_index": 1672,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001672.jpg",
+          "sha256": "01da74f187ea58abcabbe66b0b2d04c95b64a4fcc0b68463de5b9f201e90bae3",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 28.367,
+          "source_pts": 28.366667,
+          "frame_index": 1702,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001702.jpg",
+          "sha256": "5c409a0ed18533d5f514fbe82f070041190e45a472a44a6d32b7a6a405dc078f",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 29.033,
+          "source_pts": 29.033333,
+          "frame_index": 1742,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001742.jpg",
+          "sha256": "7f1fb79ddabe353c0992503d1e8b6fe6dc29be22ddc33496f1fb57400849cc1d",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 29.367,
+          "source_pts": 29.366667,
+          "frame_index": 1762,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001762.jpg",
+          "sha256": "a6bfc873b2cb8fa80f7ae69bfcfcfcffcc6c21a8799e5e361288e5eb1871446b",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B24.jpg",
+        "sha256": "56c2726591fc50a2562b571eb3ba5ecafda163c7a6d1e0565f8d95db791ab3cd",
+        "dimensions": [
+          1224,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B25",
+      "start": 29.45,
+      "end": 30.7,
+      "spoken_idea": "Every morning at six, the workflow runs.",
+      "visible": "Full presenter gives the time and recurring setup.",
+      "change": "Diagram cuts to presenter.",
+      "view": "full presenter",
+      "picture_function": "orientation",
+      "why_this_picture": "A specific routine turns the architecture into an understandable use case.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "The face holds while the time cue is established.",
+      "handoff": "A task table becomes the first source of information.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Ground an abstract architecture in a concrete trigger and outcome.",
+      "caution": "No additional mismatch observed at the sampled resolution.",
+      "sample_times": [
+        29.533,
+        30,
+        30.5
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 29.533,
+          "source_pts": 29.533333,
+          "frame_index": 1772,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001772.jpg",
+          "sha256": "625e32b262bda13356d562ed937833962f875d6b5fded359f6c1abd0d4daad69",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 30,
+          "source_pts": 30.0,
+          "frame_index": 1800,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001800.jpg",
+          "sha256": "1abf36b3a4896b8d8dd440ac00bf5d3e1329d9414ddad73d6f04858e9b5d985b",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 30.5,
+          "source_pts": 30.5,
+          "frame_index": 1830,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001830.jpg",
+          "sha256": "5badade2cbf09f67dd13547450083d9978f3732abe152e4654386887a6628e42",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B25.jpg",
+        "sha256": "bffc8154b7007eb09fbc6071d468bf605e65581f554bdbbaebe643662e528d0f",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B26",
+      "start": 30.7,
+      "end": 31.75,
+      "spoken_idea": "The workflow reviews tasks.",
+      "visible": "Angled white table occupies the upper half; columns and rows move across the crop while the presenter speaks below.",
+      "change": "Presenter becomes split with a perspective table.",
+      "view": "split",
+      "picture_function": "orientation",
+      "why_this_picture": "The table gives the review something concrete to inspect before the service is named.",
+      "camera_observation": "6fps strip shows perspective/lateral movement across the table and changing crop; this is not a stationary anchored zoom to one task row.",
+      "camera_reason": "The broad table is emphasized; no specific task is singled out, so the motion is partly presentational.",
+      "pacing_reason": "Continuous movement renews the view of the same source, rather than adding a new task every frame.",
+      "handoff": "A ClickUp badge anchors this moving table to the named task source.",
+      "catalog_candidates": [
+        "ui-focus-zoom"
+      ],
+      "implementation_note": "A bounded focus block can show a chosen task region, but this perspective pan is not an exact match. Native crop/pan of owned task evidence is simpler if no focus target is intended.",
+      "transfer": "Move across a wide source only when revealing relevant columns or context.",
+      "caution": "The source table’s actual identity and task contents are not established by the later badge.",
+      "sample_times": [
+        30.7,
+        31.033,
+        31.533
+      ],
+      "time_confidence": "Approximate boundary refined with 6fps strip, about ±0.17s; no source-frame cut precision.",
+      "source_frames": [
+        {
+          "requested_time": 30.7,
+          "source_pts": 30.7,
+          "frame_index": 1842,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001842.jpg",
+          "sha256": "cbc654d530603536d134ba3804e8b543da58d18a7f6a1c9e3da7771540d09a56",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 31.033,
+          "source_pts": 31.033333,
+          "frame_index": 1862,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001862.jpg",
+          "sha256": "4e9a09551508a07086b83798f91bd9f394b5be1fe3dac77533d94ace39966551",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 31.533,
+          "source_pts": 31.533333,
+          "frame_index": 1892,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001892.jpg",
+          "sha256": "fc574127bbf7e7455d6828589cf2e2825b848ee517f349531dc6d29fcd7df563",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B26.jpg",
+        "sha256": "a6b6d33301e17d87fd36da9ae46e12f503abf451c5bfec99b865ef767295341d",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B27",
+      "start": 31.75,
+      "end": 32.7,
+      "spoken_idea": "Those tasks are described as ClickUp tasks.",
+      "visible": "ClickUp badge overlays the continuing table in the upper half; presenter stays below.",
+      "change": "Badge is added over the retained table.",
+      "view": "split",
+      "picture_function": "orientation",
+      "why_this_picture": "The service label resolves the identity that the previous moving table left unclear.",
+      "camera_observation": "Table motion continues behind a fixed central badge; no new focus move.",
+      "camera_reason": "The badge becomes the primary recognition target.",
+      "pacing_reason": "A logo hold allows recognition while the task category finishes.",
+      "handoff": "The next full screen names another input category, project ideas.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Place identity on the source at the moment it is named.",
+      "caution": "An overlaid logo alone does not prove that the pictured table is native ClickUp or from the claimed run.",
+      "sample_times": [
+        31.867,
+        32.2,
+        32.533
+      ],
+      "time_confidence": "Approximate boundary refined with 6fps strip, about ±0.17s; no source-frame cut precision.",
+      "source_frames": [
+        {
+          "requested_time": 31.867,
+          "source_pts": 31.866667,
+          "frame_index": 1912,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001912.jpg",
+          "sha256": "8beb21f9965d679156c4e68285d921f89dbc034ab4c02633e120d28e7c7fe83f",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 32.2,
+          "source_pts": 32.2,
+          "frame_index": 1932,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001932.jpg",
+          "sha256": "549b91ed16a295f34f358a4bdc23c1a82f58bbe1e831505c0a0c8a0f35f5b94f",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 32.533,
+          "source_pts": 32.533333,
+          "frame_index": 1952,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001952.jpg",
+          "sha256": "313ea0b0f5d972b9c89af2eba7159a336cbd12700e55c2f010e9bbb8da11e37d",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B27.jpg",
+        "sha256": "4ea1f019a847567f0d3bcde63a68155bb39f655c43db6a730ae43586338b5c67",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B28",
+      "start": 32.7,
+      "end": 33.15,
+      "spoken_idea": "The routine also reviews project ideas.",
+      "visible": "Full dashboard shows a portable USB blender product and a sales graph.",
+      "change": "Task split cuts to full product dashboard.",
+      "view": "full visual",
+      "picture_function": "weak-match",
+      "why_this_picture": "It offers a concrete project-like object, but resembles product analytics more than an idea list.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "A very short category flash permits little reading.",
+      "handoff": "Slack history becomes the next input.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Choose the actual project-idea surface when naming it, rather than a loosely related dashboard.",
+      "caution": "No visible evidence connects this product dashboard to the speaker’s project ideas.",
+      "sample_times": [
+        33
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 33,
+          "source_pts": 33.0,
+          "frame_index": 1980,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f001980.jpg",
+          "sha256": "6114be5cc438e4360c817e6ab12fe012c270e4eaae94a7676868543259a5c8d8",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B28.jpg",
+        "sha256": "a69a1cce95161f21a4a7a40b8db6282b1d6f610f6c88da68505202e23ff16176",
+        "dimensions": [
+          300,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B29",
+      "start": 33.15,
+      "end": 34.1,
+      "spoken_idea": "Team chat supplies more context.",
+      "visible": "Full purple Slack workspace shows a channel and an AI channel-summary panel.",
+      "change": "Product dashboard cuts to Slack capture.",
+      "view": "full visual",
+      "picture_function": "demonstration",
+      "why_this_picture": "The channel and summary directly fit the team-discussion input.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "A short scan shows both source and condensed form; the content is not fully readable.",
+      "handoff": "A calendar becomes the last input category.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Use an owned, privacy-safe team-chat capture with the actual relevant summary.",
+      "transfer": "Show a summary beside its source when the mechanism is information digestion.",
+      "caution": "The reel does not connect this sample to an observed scheduled run.",
+      "sample_times": [
+        33.5,
+        34.0
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 33.5,
+          "source_pts": 33.5,
+          "frame_index": 2010,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002010.jpg",
+          "sha256": "95df2669040742bd1402c63cb164e8106c12acbf111d4309e0898c525811d389",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 34.0,
+          "source_pts": 34.0,
+          "frame_index": 2040,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002040.jpg",
+          "sha256": "d5c38697272ed9295f8a5c3e3cb6b7370678bf8b99e7f83d2b1aa47eb389d3ed",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B29.jpg",
+        "sha256": "21749aec153f4cde3ed684e770ef2d273f981fe2d0f2f1352f78ed291e425631",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B30",
+      "start": 34.1,
+      "end": 34.85,
+      "spoken_idea": "The routine checks the calendar too.",
+      "visible": "Full weekly calendar displays colored appointment blocks.",
+      "change": "Slack capture cuts to weekly calendar.",
+      "view": "full visual",
+      "picture_function": "orientation",
+      "why_this_picture": "Time blocks are the information needed to prioritize a day.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "One recognizable week view completes the input list.",
+      "handoff": "The next shot depicts the user asleep while work proceeds.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "End an input montage with the source that constrains the eventual plan.",
+      "caution": "Specific conflicts or priorities are not identified.",
+      "sample_times": [
+        34.5
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 34.5,
+          "source_pts": 34.5,
+          "frame_index": 2070,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002070.jpg",
+          "sha256": "3d4e073daaaa2f5fa8778648c766c46557cdaea15e1f057fdef398fa7b7d63b0",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B30.jpg",
+        "sha256": "a4e39690343d82f2ff8f885a3c5dbd45003e04651be75fb22c758a25448f7cd1",
+        "dimensions": [
+          300,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B31",
+      "start": 34.85,
+      "end": 35.7,
+      "spoken_idea": "The work happens before the speaker wakes.",
+      "visible": "Creator reclines asleep beside a large monitor showing automation-running status.",
+      "change": "Calendar cuts to sleeping-worker scene.",
+      "view": "full visual",
+      "picture_function": "analogy",
+      "why_this_picture": "Sleeping human beside an active work screen illustrates asynchronous benefit.",
+      "camera_observation": "Same staged work scene holds; no evidence of a real elapsed overnight process.",
+      "camera_reason": "The sleeping person and active monitor are the two visual poles.",
+      "pacing_reason": "The scene establishes the before-waking contrast before annotation appears.",
+      "handoff": "The same monitor becomes the target of the game-plan annotation.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Use a human-state contrast to communicate when automation helps.",
+      "caution": "The staged scene/status is not an audit trail of a completed workflow.",
+      "sample_times": [
+        35,
+        35.3,
+        35.633
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 35,
+          "source_pts": 35.0,
+          "frame_index": 2100,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002100.jpg",
+          "sha256": "2665612c75d002f76acc68f2ae7b0e3539a084be58d647f0f0d6359bdca7f107",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 35.3,
+          "source_pts": 35.3,
+          "frame_index": 2118,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002118.jpg",
+          "sha256": "6416622db69291d4dae78a101b7d89012e9d7dc874a8d1d9603d053618abd485",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 35.633,
+          "source_pts": 35.633333,
+          "frame_index": 2138,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002138.jpg",
+          "sha256": "ef6a81c84fe2344e66c6267e76a9bcf3c5bdda14f6db05329c6dcb23d5cc3cf9",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B31.jpg",
+        "sha256": "3b07ec923b97449e44caed0e691162790b12acb38d3a47f42e6a4bc01f7d4481",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B32",
+      "start": 35.7,
+      "end": 37.4,
+      "spoken_idea": "A game plan is ready by wake-up.",
+      "visible": "Game Plan Ready text appears above the same sleeping-worker scene; a white curved arrow draws toward the monitor.",
+      "change": "Text and arrow are added over the retained scene.",
+      "view": "full visual",
+      "picture_function": "emphasis",
+      "why_this_picture": "The arrow directs attention to the supposed output location at the exact payoff phrase.",
+      "camera_observation": "6fps strip shows annotation entrance and a short arrow drawing toward the monitor; no zoom into a readable plan.",
+      "camera_reason": "The monitor is explicitly selected as the result location.",
+      "pacing_reason": "Retaining the scene allows one new annotation to carry the change; it holds after the arrow resolves.",
+      "handoff": "Three abstract priority labels follow instead of the actual plan.",
+      "catalog_candidates": [
+        "per-word-rise"
+      ],
+      "implementation_note": "The inspected title block can reveal the short payoff label. An owned arrow overlay is still required; it cannot manufacture a missing result screen.",
+      "transfer": "Annotate the existing payoff object when it is visible; if it is not, show it before claiming delivery.",
+      "caution": "The monitor shows status, not the promised readable morning plan. The annotation asserts readiness rather than demonstrating the plan.",
+      "sample_times": [
+        35.8,
+        36.133,
+        36.8,
+        37.3
+      ],
+      "time_confidence": "Approximate boundary refined with 6fps strip, about ±0.17s; no source-frame cut precision.",
+      "source_frames": [
+        {
+          "requested_time": 35.8,
+          "source_pts": 35.8,
+          "frame_index": 2148,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002148.jpg",
+          "sha256": "d159d1cdf646beacb0a7d4c9e9c1a4a2c4ad059000870afaaf33c6fdb6759b89",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 36.133,
+          "source_pts": 36.133333,
+          "frame_index": 2168,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002168.jpg",
+          "sha256": "16d05baabdc8f80559f0bd53ddcbce73c3e6a7a16924101914784deb4308ad12",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 36.8,
+          "source_pts": 36.8,
+          "frame_index": 2208,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002208.jpg",
+          "sha256": "b855577f1727936a5ad1f15d477d79bd148b0458dee46db2fb8b07e421ddff04",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 37.3,
+          "source_pts": 37.3,
+          "frame_index": 2238,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002238.jpg",
+          "sha256": "7884d1c410d8cdd24d3e49605b7cb72e0906a13bc5199dab423f241abd1c1558",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B32.jpg",
+        "sha256": "bfb8ef1ff91673bb053e8469d306cae1fea3a01524bbfd1cb88396168bb589ca",
+        "dimensions": [
+          1224,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B33",
+      "start": 37.4,
+      "end": 40.2,
+      "spoken_idea": "The plan separates attention needed, blocked items and things that can wait.",
+      "visible": "Three glossy labels build on a dark teal field: My Attention, What’s Blocked, What Can Wait.",
+      "change": "Sleeping scene is replaced by a full three-label graphic.",
+      "view": "full visual",
+      "picture_function": "orientation",
+      "why_this_picture": "These are the promised output categories, arranged as one readable priority set.",
+      "camera_observation": "Sequential label reveals in one field; no demonstrated camera move between labels.",
+      "camera_reason": "Each new label receives attention while the earlier categories remain available.",
+      "pacing_reason": "Accumulate each category with its spoken clause, then retain prior labels; this is one graphic with three information additions.",
+      "handoff": "Presenter states the practical consequence for focus.",
+      "catalog_candidates": [
+        "per-word-rise"
+      ],
+      "implementation_note": "Use short text instances with landing cues in a supplied three-row layout; the block does not provide this exact glossy treatment.",
+      "transfer": "Use cumulative categories when explaining the criteria of an output.",
+      "caution": "Categories are not the actual tasks or decisions from a generated game plan.",
+      "sample_times": [
+        37.633,
+        38.5,
+        39.5,
+        40
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "overview_sample_time": 40.0,
+      "source_frames": [
+        {
+          "requested_time": 37.633,
+          "source_pts": 37.633333,
+          "frame_index": 2258,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002258.jpg",
+          "sha256": "d7db44ac2babbb5dc0eb346fbb8506c83fbcf14fce48d60079475bda4b2c2102",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 38.5,
+          "source_pts": 38.5,
+          "frame_index": 2310,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002310.jpg",
+          "sha256": "f82e91b578e564bc3ac9982a67f8db054f30c57d9c4e7cc6effd31203c3033a4",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 39.5,
+          "source_pts": 39.5,
+          "frame_index": 2370,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002370.jpg",
+          "sha256": "ccc7e5ccfabc3e65413b678f8b5f533513f9fb944073e60ce7bf3ec259a62426",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 40,
+          "source_pts": 40.0,
+          "frame_index": 2400,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002400.jpg",
+          "sha256": "2a3eaf8a34cac9094625b937917dbba08633e873590ad020f758fc9970c5a896",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B33.jpg",
+        "sha256": "4a71c479a99a6208b2290b198b86ed5c6d3751b70d79b32714314e543dbe7a5a",
+        "dimensions": [
+          1224,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B34",
+      "start": 40.2,
+      "end": 42.2,
+      "spoken_idea": "The user knows where to focus today.",
+      "visible": "Full presenter explains the benefit.",
+      "change": "Priority graphic cuts to face.",
+      "view": "full presenter",
+      "picture_function": "orientation",
+      "why_this_picture": "The person turns the category list into a practical consequence.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "A two-second hold lets the payoff sentence finish without another competing panel.",
+      "handoff": "Manual-work B-roll begins the before/after contrast.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Give the explanation of a diagram’s consequence its own calm beat.",
+      "caution": "No additional mismatch observed at the sampled resolution.",
+      "sample_times": [
+        40.5,
+        42.0
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 40.5,
+          "source_pts": 40.5,
+          "frame_index": 2430,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002430.jpg",
+          "sha256": "b5f60db2fac651e01c493269af092f198904e23832ae9b4fa8083a8ec7e1b45a",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 42.0,
+          "source_pts": 42.0,
+          "frame_index": 2520,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002520.jpg",
+          "sha256": "6a3e2a21dabda45338c103b1f7cd34663e2944c49a68e63811c5a67b68408ba2",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B34.jpg",
+        "sha256": "1fa93e3b1250794f826cc734d3de07229699eccfbc53cd16eb80689eab684881",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B35",
+      "start": 42.2,
+      "end": 44.2,
+      "spoken_idea": "Previously the information had to be assembled manually.",
+      "visible": "Office worker types at a laptop.",
+      "change": "Presenter cuts to office B-roll.",
+      "view": "full visual",
+      "picture_function": "analogy",
+      "why_this_picture": "Typing portrays the manual work that automation is meant to reduce.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "A sustained work action carries the cost statement.",
+      "handoff": "Presenter names the five-app fragmentation.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Use actual manual-work footage when contrasting a workflow, ideally with the named steps.",
+      "caution": "No actual five-app assembly or measured effort is shown.",
+      "sample_times": [
+        42.5,
+        44.0
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 42.5,
+          "source_pts": 42.5,
+          "frame_index": 2550,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002550.jpg",
+          "sha256": "cd1ec7648ea13643320930ad94e40f15e0ac11e523fbc4616c4a8696d56e8c8f",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 44.0,
+          "source_pts": 44.0,
+          "frame_index": 2640,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002640.jpg",
+          "sha256": "72f30a765b431eabb41ef8c42fec60c285b22f4a5a418722b844ee4b57e97c4d",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B35.jpg",
+        "sha256": "93ca4d5a80ed62bcb11dfd944bca44d9d07ed6d82181ef7292930dd6beb6597e",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B36",
+      "start": 44.2,
+      "end": 45.3,
+      "spoken_idea": "That meant piecing together five apps.",
+      "visible": "Full presenter makes the fragmented-work comparison.",
+      "change": "Office B-roll cuts to presenter.",
+      "view": "full presenter",
+      "picture_function": "orientation",
+      "why_this_picture": "The direct statement clarifies what the generic work shot was meant to represent.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "A short bridge completes the before condition.",
+      "handoff": "The next browser image is offered as the one-workflow contrast.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "State the comparison plainly before showing the proposed replacement.",
+      "caution": "No additional mismatch observed at the sampled resolution.",
+      "sample_times": [
+        44.5,
+        45.0
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 44.5,
+          "source_pts": 44.5,
+          "frame_index": 2670,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002670.jpg",
+          "sha256": "9f235c80012fdd47f0968c5165b7e2cfb1d14151e3ed9227ddeb7d85b7f3e2a3",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 45.0,
+          "source_pts": 45.0,
+          "frame_index": 2700,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002700.jpg",
+          "sha256": "49ecaac40ddaefa409f299320fb43d43ba57a43a2a3e1ffa6a18842008219089",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B36.jpg",
+        "sha256": "1dece31d84b9f786cef7c62eeb6afa52180ade600a15a4bf07e5424f7f955e96",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B37",
+      "start": 45.3,
+      "end": 46.85,
+      "spoken_idea": "Now one workflow handles it.",
+      "visible": "Upper browser capture searches shopping sites for men’s tuxedos; presenter remains below.",
+      "change": "Presenter becomes split shopping browser.",
+      "view": "split",
+      "picture_function": "weak-match",
+      "why_this_picture": "A single executing browser is concrete, but it is not the morning plan built from the listed inputs.",
+      "camera_observation": "Browser navigation/content changes inside the panel; no meaningful focus zoom is established.",
+      "camera_reason": "Attention follows execution activity, but the task identity has changed.",
+      "pacing_reason": "Screen activity supplies motion at the contrast, without proving continuity.",
+      "handoff": "Thinking-person footage follows as a metaphor for organizing information.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Reuse the screen staging with the actual morning workflow, not this unrelated shopping capture.",
+      "transfer": "For a before/after claim, retain the same task across both halves.",
+      "caution": "The shopping task breaks the same-example continuity at the claimed payoff.",
+      "sample_times": [
+        45.5,
+        46.5
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 45.5,
+          "source_pts": 45.5,
+          "frame_index": 2730,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002730.jpg",
+          "sha256": "8b7e62ec74cb19bd4c1686c803c193c2dd73fabbaa3cdf5428d607241b6e3d8f",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 46.5,
+          "source_pts": 46.5,
+          "frame_index": 2790,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002790.jpg",
+          "sha256": "50114a8dd91c9c72e5974a4200a13c1b60260748d97eca350b1ec8161790416f",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B37.jpg",
+        "sha256": "58d52b782a84b88c742d0e7bd81d25652396196c1b09db283a178605a973cbb6",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B38",
+      "start": 46.85,
+      "end": 48.85,
+      "spoken_idea": "The system moves beyond organizing information.",
+      "visible": "Thoughtful man touches his chin in front of bookshelves.",
+      "change": "Shopping split cuts to thinking-person B-roll.",
+      "view": "full visual",
+      "picture_function": "analogy",
+      "why_this_picture": "The thinking pose loosely represents cognitive organization.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "The simple human scene is a texture change before a more concrete output.",
+      "handoff": "Supplier spreadsheet becomes the example of execution.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Use a thinking metaphor sparingly; replace it with an actual organized artifact when clarity matters.",
+      "caution": "The pose contains no information structure or performed action.",
+      "sample_times": [
+        47.0,
+        48.5
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 47.0,
+          "source_pts": 47.0,
+          "frame_index": 2820,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002820.jpg",
+          "sha256": "166f6524011ba62a667227632f971e3330c9e321de9f036f3e4ce7ef31e0fb50",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 48.5,
+          "source_pts": 48.5,
+          "frame_index": 2910,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002910.jpg",
+          "sha256": "a017918d7738e0a32d4eaa6c5cb93158305654843d00373846904acbafc43cbe",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B38.jpg",
+        "sha256": "586f961b225be5e21be5d2c6420f16f005d5e406963a4867c6b830806320b0e6",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B39",
+      "start": 48.85,
+      "end": 50.8,
+      "spoken_idea": "It begins executing work.",
+      "visible": "Split desktop chat displays a populated supplier spreadsheet beside the conversation, with yellow/black table formatting.",
+      "change": "Thinking B-roll cuts to chat plus supplier sheet.",
+      "view": "split",
+      "picture_function": "demonstration",
+      "why_this_picture": "A visible work artifact is more specific evidence of execution than the preceding thinking metaphor.",
+      "camera_observation": "The output surface appears within the upper desktop panel; no anchored cell-level zoom is established.",
+      "camera_reason": "The table as a deliverable is the target, not an individual supplier row.",
+      "pacing_reason": "The side-by-side request/result relationship gets enough time to be recognized.",
+      "handoff": "Presenter summarizes the broader change.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Use an owned capture with the relevant conversation and resulting spreadsheet; prioritize legibility over unnecessary wrapper effects.",
+      "transfer": "Show the produced artifact when the claim changes from thinking to doing.",
+      "caution": "This is another task example, not a demonstrated continuation of the morning chief-of-staff workflow.",
+      "sample_times": [
+        49.0,
+        50.5
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 49.0,
+          "source_pts": 49.0,
+          "frame_index": 2940,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f002940.jpg",
+          "sha256": "dcd4bbd70449e4813b3d9f177df51b11413211acc3924cef2c101d059d7b5227",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 50.5,
+          "source_pts": 50.5,
+          "frame_index": 3030,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f003030.jpg",
+          "sha256": "1efdaecbc097ea0480c299629cc8badb80860534445c05b0b4aa7bcf50be419f",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B39.jpg",
+        "sha256": "1cfa9c10cfcb6afd3cc332d7cb564b3c2dda62fbdf5a4b0d9a80c00b6015a88e",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B40",
+      "start": 50.8,
+      "end": 51.7,
+      "spoken_idea": "This is the larger shift.",
+      "visible": "Full presenter gives the interpretive statement.",
+      "change": "Spreadsheet split cuts to presenter.",
+      "view": "full presenter",
+      "picture_function": "orientation",
+      "why_this_picture": "The face makes clear that the category judgment is the speaker’s conclusion.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "A short reset separates result montage from final synthesis.",
+      "handoff": "A phone request provides one more example of getting work done.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Return to the speaker before a concluding generalization.",
+      "caution": "No additional mismatch observed at the sampled resolution.",
+      "sample_times": [
+        51.0,
+        51.5
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 51.0,
+          "source_pts": 51.0,
+          "frame_index": 3060,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f003060.jpg",
+          "sha256": "e5590a1c43e2e076c9e586701d48946511c4378d7da0489763d8c56544e93b67",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 51.5,
+          "source_pts": 51.5,
+          "frame_index": 3090,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f003090.jpg",
+          "sha256": "86cb2713ba06aae6867cd4a0eae56839a05a69e19a9eedf7eece628b5ad48d8f",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B40.jpg",
+        "sha256": "165a20e57056423aa8d7243513a958a6fd8fcf4495b991e9ad50abcb718f37bf",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B41",
+      "start": 51.7,
+      "end": 53.85,
+      "spoken_idea": "The point is work getting done, not just conversation.",
+      "visible": "Phone-shaped upper capture shows a request to share a deck with the team, followed by a response reporting sharing/scheduling; presenter is below.",
+      "change": "Presenter becomes phone/work split.",
+      "view": "split",
+      "picture_function": "demonstration",
+      "why_this_picture": "The request names an external action and the response states completion, illustrating the action-oriented interface.",
+      "camera_observation": "Phone screen content progresses from request to response; the phone framing itself is stable.",
+      "camera_reason": "Attention stays on the action wording and response.",
+      "pacing_reason": "Request and acknowledgment form a short local before/after.",
+      "handoff": "Desktop code and deck views broaden the examples before CTA.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "The inspected block has phone chrome and real-content slots; use actual request/response footage with appropriate timing.",
+      "transfer": "Show the action request and acknowledgment together, and separate acknowledgment from independently verified effect.",
+      "caution": "A response saying something was shared does not independently verify delivery to Slack or another recipient.",
+      "sample_times": [
+        52.0,
+        53.5
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 52.0,
+          "source_pts": 52.0,
+          "frame_index": 3120,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f003120.jpg",
+          "sha256": "02fd7460dd55704a1449b6a51d2f923df421a052e56c237f903637047d7d19d1",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 53.5,
+          "source_pts": 53.5,
+          "frame_index": 3210,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f003210.jpg",
+          "sha256": "40b393065fe14ee19a5e12a5d651a6537cbc4ab4f9c78fd53305365a9d215559",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B41.jpg",
+        "sha256": "d3b4aeb205bdbfff5b9d012854d49022104db6c18f4583e04825e8ff34f99935",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B42",
+      "start": 53.85,
+      "end": 54.85,
+      "spoken_idea": "Work includes execution in the desktop environment.",
+      "visible": "Full white frame holds a desktop code/chat execution capture.",
+      "change": "Phone split cuts to full desktop code screen.",
+      "view": "full visual",
+      "picture_function": "orientation",
+      "why_this_picture": "The code surface revisits one product role during the final synthesis.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "A quick recognition beat keeps the conclusion moving.",
+      "handoff": "The presentation output returns next, echoing the opening.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Recall earlier evidence in a closing montage only when the viewer can identify its role.",
+      "caution": "Small code text is not readable enough to assess the operation.",
+      "sample_times": [
+        54.0,
+        54.5
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 54.0,
+          "source_pts": 54.0,
+          "frame_index": 3240,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f003240.jpg",
+          "sha256": "55d934f03fba0f91fb57bfc0bcad01db6299cca2606fd130cfa1cffa5691619c",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 54.5,
+          "source_pts": 54.5,
+          "frame_index": 3270,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f003270.jpg",
+          "sha256": "77842b49092088949788ddc3ed699d9493a2a382374110d205053835773086fe",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B42.jpg",
+        "sha256": "efe3030921ae872160b64cc114cee8828abf03b4d4f021acaf86503e8f0b35d1",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B43",
+      "start": 54.85,
+      "end": 55.85,
+      "spoken_idea": "Projects yield usable artifacts.",
+      "visible": "Full white presentation-work view shows the deck being updated.",
+      "change": "Code view switches to presentation output.",
+      "view": "full visual",
+      "picture_function": "demonstration",
+      "why_this_picture": "Returning to the deck echoes the opening example and gives the category claim an artifact-shaped ending.",
+      "camera_observation": "Contextual samples establish a cut/image replacement; they do not establish a continuous zoom.",
+      "camera_reason": "The new picture receives attention as its subject enters the explanation; no finer camera intention is established.",
+      "pacing_reason": "One final output glimpse precedes the verbal CTA.",
+      "handoff": "Presenter takes over for the download instruction.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Reuse the same demonstrated project capture when possible; preserve identity across the opening/closing return.",
+      "transfer": "Return to a recognizable result at the end of a feature tour.",
+      "caution": "The chief-of-staff morning plan itself still has not been shown.",
+      "sample_times": [
+        55.0,
+        55.5
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 55.0,
+          "source_pts": 55.0,
+          "frame_index": 3300,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f003300.jpg",
+          "sha256": "23a80f1ced31c6a9b0479888bed4c363a5bab45fdc9b10557ffefaad005ab149",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 55.5,
+          "source_pts": 55.5,
+          "frame_index": 3330,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f003330.jpg",
+          "sha256": "592141fbbcc4312dfce7a2ca236175a576fa53bba54534441d5728500456712a",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B43.jpg",
+        "sha256": "5c876329f5feb5b31242ebba2c35cebcb5bf76249788cca31b5a515b1ee4939a",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "id": "N08-B44",
+      "start": 55.85,
+      "end": 58.533333,
+      "spoken_idea": "Download the desktop app and inspect it yourself.",
+      "visible": "Full presenter closes with short captions; no new explanatory graphic appears.",
+      "change": "Presentation output cuts to full presenter.",
+      "view": "full presenter",
+      "picture_function": "orientation",
+      "why_this_picture": "The speaker owns the invitation after the product montage.",
+      "camera_observation": "Full-head closing hold with caption changes; no further directing mechanism.",
+      "camera_reason": "No additional object needs focus.",
+      "pacing_reason": "Stable face through the complete CTA avoids starting another unfinished example.",
+      "handoff": "Playable ending closes on the invitation.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an owned source capture or footage with native layout/cut/crop and timed captions. Catalog staging does not provide the depicted content or prove its claims.",
+      "transfer": "Finish a product overview after the lesson and next step are both clear.",
+      "caution": "This case records reference claims; it does not verify current availability or recommend a product version.",
+      "sample_times": [
+        56.0,
+        58.5
+      ],
+      "time_confidence": "Approximate ±0.5s boundary from complete chronological 0.5s sheets; machine transcript alignment was not auditioned.",
+      "source_frames": [
+        {
+          "requested_time": 56.0,
+          "source_pts": 56.0,
+          "frame_index": 3360,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f003360.jpg",
+          "sha256": "bd16180a4bb2ebd03f2a116c343585f723acbf0f28bababf1e533198a505f9f5",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 58.5,
+          "source_pts": 58.5,
+          "frame_index": 3510,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N08/f003510.jpg",
+          "sha256": "ce663b7aba56bd4ccd165ed108e5e68a42ba4769e3a5de0359f8634ec36edb4d",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N08-B44.jpg",
+        "sha256": "8cbdac702c6d8acdf374e899b3e955f860faafda045e7fba080af348d23d715e",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    }
+  ],
+  "overview_pages": [
+    "docs/studies/shorts-visual-playbook/nate-sequences/overviews/N08-01.jpg",
+    "docs/studies/shorts-visual-playbook/nate-sequences/overviews/N08-02.jpg",
+    "docs/studies/shorts-visual-playbook/nate-sequences/overviews/N08-03.jpg"
+  ],
+  "version": "2026-09-10.2",
+  "source_dimensions": [
+    1080,
+    1920
+  ],
+  "catalog_sources": {
+    "per-word-rise": {
+      "path": "artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/per-word-rise/per-word-rise.html",
+      "sha256": "e093265396dba184e2b451eb8154d7bbf3d80a49edd33d3a84d6676702a190f7",
+      "status": "source-inspected candidate; adapted scene not render-qualified"
+    },
+    "browser-device-stage": {
+      "path": "artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/browser-device-stage/browser-device-stage.html",
+      "sha256": "59b20814d38bf58ec1c6c7727ed954e89e9f38a7392eddf6d266ce586bad6764",
+      "status": "source-inspected candidate; adapted scene not render-qualified"
+    },
+    "screen-flow-carousel": {
+      "path": "artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/screen-flow-carousel/screen-flow-carousel.html",
+      "sha256": "db49f679a66fb4505e07d395bff8188ae568fbfac36a50c94f1e58fcd925e11a",
+      "status": "source-inspected candidate; adapted scene not render-qualified"
+    },
+    "flowchart-vertical": {
+      "path": "artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/flowchart-vertical/flowchart-vertical.html",
+      "sha256": "35b54ecdd282e83beb464276483dc633c64a7e47138447b2b5642df463cfc548",
+      "status": "source-inspected candidate; adapted scene not render-qualified"
+    },
+    "ui-focus-zoom": {
+      "path": "artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/ui-focus-zoom/ui-focus-zoom.html",
+      "sha256": "137fca93541c222f37026c8636111a1fe0d79e459546f25050d04c35638d9981",
+      "status": "source-inspected candidate; adapted scene not render-qualified"
+    }
+  }
+}

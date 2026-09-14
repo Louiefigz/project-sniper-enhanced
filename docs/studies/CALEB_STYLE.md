@@ -1,5 +1,12 @@
 # CALEB_STYLE.md — the caleb SIMPLE-CUTS grammar (3-reel granular synthesis)
 
+**September 10 scope note:** the measurements below describe this specific July
+cohort. They are not a creator-wide prohibition on reframes, inserts or framework
+cards. A different three-reel sample includes those choices; see
+[Shorts style selection](SHORTS_STYLE_SELECTION_2026-09-10.md). Preserve the
+historical measurements and pinned jobs; choose new treatments from the actual
+source and brief rather than imposing these cohort rules universally.
+
 **Creator:** caleb (reference corpus `~/ProjectSniper/_references/caleb/`) —
 podcast-clip + selfie shorts; the on-screen brand promise is "BUILD A BRAND
 THAT STANDS OUT".

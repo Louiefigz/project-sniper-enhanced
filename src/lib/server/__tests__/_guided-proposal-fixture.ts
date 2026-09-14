@@ -17,15 +17,19 @@ import { buildProposalReadinessPrompt } from "../guided-proposal-review-packet";
 import type { ProposalReadinessBrainInput } from "../guided-proposal-review-brain";
 import type { ProposalBrainInput } from "../guided-proposal-compiler";
 import { guidedProposalOutput } from "./_readiness-gate-stub";
+import type { NativeReferenceSelection } from "../guided-native-references";
+import { nativeDirectorTestBrain } from "./_native-director-fixture";
+import type { DirectorBrain } from "../native-director-store";
 
 /** Real synthetic bytes/pinned advisors; admission decode/image facts and every creative/critic reply are TEST stubs. */
 export async function createGuidedProposalFixture(options: { workspace?: string; rawIntent?: string; output?: (input: ProposalBrainInput) => unknown;
   sourceCanvas?: "160x90" | "1920x1080"; retainFailure?: boolean; program?: SyntheticProgram; captionIntent?: "auto";
-  proposalVersion?: 4 | 5 | 6 | 7 | 8; graphicsOff?: boolean; presentationAsset?: "admitted-silent-video" } = {}) {
+  proposalVersion?: 4 | 5 | 6 | 7 | 8 | 9 | 10; graphicsOff?: boolean; presentationAsset?: "admitted-silent-video";
+  nativeReferences?: NativeReferenceSelection[]; directorBrain?: DirectorBrain } = {}) {
   const workflow = parseGuidedWorkflowV2({ schemaVersion: 2, mode: "guided", afterCut: "treatment-then-intro", approvalPolicy: "explicit-human" });
   const fixture = await createHumanCutFixture({ workflowV2: workflow, workspace: options.workspace, sourceCanvas: options.sourceCanvas,
     program: options.program, captionIntent: options.captionIntent, graphicsOff: options.graphicsOff,
-    presentationAsset: options.presentationAsset });
+    presentationAsset: options.presentationAsset, nativeShort: options.proposalVersion === 9 || options.proposalVersion === 10 });
   if (options.retainFailure) process.stderr.write(`TEST fixture retained root: ${fixture.root}\n`);
   try {
     const { attestation: _old, ...base } = fixture.submission; void _old;
@@ -39,7 +43,9 @@ export async function createGuidedProposalFixture(options: { workspace?: string;
     const admitted = readRawTreatmentAdmission(fixture.ctx.dir);
     const submission = parseTreatmentCompileSubmissionV1({ schemaVersion: 1, operation: "compile-post-cut-proposal", idempotencyKey: randomUUID(),
       expectedToken: admitted.job.token, expectedJournalHash: admitted.sha256, treatmentAdmissionHash: admitted.pointer.treatmentAdmissionHash });
-    await compileGuidedTreatmentProposal({ dir: fixture.ctx.dir, submission }, { proposalVersion: options.proposalVersion, brain: async (input) => {
+    await compileGuidedTreatmentProposal({ dir: fixture.ctx.dir, submission }, { proposalVersion: options.proposalVersion,
+      nativeReferences: options.nativeReferences,
+      ...(options.proposalVersion === 9 || options.proposalVersion === 10 ? { directorBrain: options.directorBrain ?? nativeDirectorTestBrain } : {}), brain: async (input) => {
       return { output: options.output ? options.output(input) : guidedProposalOutput(input, rawIntent),
       provider: "codex", model: "TEST-ONLY-provider", effort: "xhigh", elapsedMs: 1, promptHash: canonicalJsonSha256(input.prompt) };
     } });

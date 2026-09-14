@@ -59,6 +59,7 @@ function unsupported(proposal: OpeningReadiness, bindings: ReturnType<typeof ass
 /** Derive exact input from observed objects; caller cannot supply paths, timing, target or a media approval. */
 export function buildOpeningAuthority(proposal: OpeningReadiness) {
   const result = proposal.result;
+  if (result.proposal.schemaVersion === 9 || result.proposal.schemaVersion === 10) throw new Error("Native Shorts have no legacy opening authority");
   if (!proposal.draftRevision || proposal.readiness.verdict !== "clean" || !result.candidate || !result.range || result.blockers.length) throw new Error("Opening needs an actual clean isolated TREATMENT_DRAFT");
   let bindings: ReturnType<typeof assertGuidedFrameBindings> | null = null;
   if (result.proposal.schemaVersion !== 2) {

@@ -4,7 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from ingest_admission import AdmittedMedia
-from ingest_probe import AUDIO_EXTS, MEDIA_EXTS, probe_media, status
+from ingest_probe import AUDIO_EXTS, MEDIA_EXTS, probe_media, reject_unsupported_ingest_media, status
 from ingest_scan import (
     BROLL_CATALOG_NAME,
     _category_tag,
@@ -52,6 +52,8 @@ def _catalog_row(
     media: AdmittedMedia,
     cached: dict | None,
 ) -> tuple[dict, dict]:
+    reject_unsupported_ingest_media(original, media.media_kind)
+    reject_unsupported_ingest_media(media.snapshot_path, media.media_kind)
     probe = probe_media(media.snapshot_path)
     manifest = broll_fields(original, probe, _category_tag(original, broll_dir))
     vision = cached or {}
@@ -76,6 +78,9 @@ def catalog_admitted_broll(
 ) -> list[dict]:
     """Build b-roll manifest rows whose executable path is the snapshot."""
     fields = list(extra)
+    for row in fields:
+        reject_unsupported_ingest_media(row.get("originalPath", row["path"]))
+        reject_unsupported_ingest_media(row["path"])
     if broll_dir and broll_dir.is_dir():
         cache_path = broll_dir / BROLL_CATALOG_NAME
         cached = _load_broll_cache(cache_path)

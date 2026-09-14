@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOf": "2026-09-08",
+  "asOf": "2026-09-14",
   "completeness": "complete",
   "phaseExit": "passed",
   "routeRoot": "src/app/api/producer",
@@ -112,9 +112,10 @@
       "routes": [
         "src/app/api/producer/ingest/route.ts",
         "src/app/api/producer/pick-file/route.ts",
+        "src/app/api/producer/supporting-media/route.ts",
         "src/app/api/producer/transcript-authority/route.ts"
       ],
-      "role": "Select, snapshot, admit, and inventory source media, including guarded exact-media transcript-authority promotion.",
+      "role": "Select, snapshot, admit, and inventory source and supporting image/video media, including guarded exact-media transcript-authority promotion.",
       "modePolicy": "form-neutral",
       "short": {
         "status": "released",
@@ -279,129 +280,197 @@
     },
     {
       "groupId": "hyperframes-studio-review",
-      "routes": ["src/app/api/producer/studio/route.ts", "src/app/api/producer/studio/import/route.ts"],
+      "routes": [
+        "src/app/api/producer/studio/route.ts",
+        "src/app/api/producer/studio/import/route.ts"
+      ],
       "role": "Inspect/open a parent-bound HyperFrames projection or explicitly preview/apply supported Studio edits to a draft, never approve delivery.",
       "modePolicy": "form-neutral",
       "short": {
         "status": "unqualified",
         "behavior": "Provides guarded status/open/reuse for short-form graphics timing and copy review.",
-        "blockers": ["Short-form real-player qualification, safe sync, audiovisual comparison and spatial preview/export parity remain open."]
+        "blockers": [
+          "Short-form real-player qualification, safe sync, audiovisual comparison and spatial preview/export parity remain open."
+        ]
       },
       "longform": {
         "status": "unqualified",
         "behavior": "A 12-second synthetic 1080p project plays in the actual embedded Studio UI; the projection is not an approved final.",
-        "blockers": ["Creator-footage long-form qualification, safe sync, source-mutation regression and final render parity remain open."]
+        "blockers": [
+          "Creator-footage long-form qualification, safe sync, source-mutation regression and final render parity remain open."
+        ]
       },
       "incrementalBoundary": "Reuses a current projection without overwriting pending edits; draft import requires exact original/current/proposal authority and the project lease. It cannot render or replace a final master.",
       "palmierBoundary": "No Palmier launch or delivery adapter is needed for this review surface; legacy project migration remains explicitly guarded."
     },
     {
       "groupId": "guided-cut-review",
-      "routes": ["src/app/api/producer/cut-review/route.ts", "src/app/api/producer/cut-review/video/route.ts"],
+      "routes": [
+        "src/app/api/producer/cut-review/route.ts",
+        "src/app/api/producer/cut-review/video/route.ts"
+      ],
       "role": "Read the exact paused cut-review descriptor and stream its receipt-bound private media without accepting or rendering anything.",
       "modePolicy": "form-neutral",
       "short": {
         "status": "unqualified",
         "behavior": "Private cut-only preview readback requires the exact waiting job, review request, source-set receipt and rendered media identity.",
-        "blockers": ["Actual short-form review UI, explicit acceptance/continuation and preview/final audio parity remain open."]
+        "blockers": [
+          "Actual short-form review UI, explicit acceptance/continuation and preview/final audio parity remain open."
+        ]
       },
       "longform": {
         "status": "unqualified",
         "behavior": "Same private preview contract; range streaming hashes and serves one checked file descriptor and never accepts a caller-selected media path.",
-        "blockers": ["Creator-footage long-form playback, approval/brief handoff, complete audiovisual comparison and measured throughput remain open."]
+        "blockers": [
+          "Creator-footage long-form playback, approval/brief handoff, complete audiovisual comparison and measured throughput remain open."
+        ]
       },
       "incrementalBoundary": "Read-only exact cut artifact, not graphics, final crop, grade, mix or delivery approval. Earlier pointerless checkpoints cannot be accepted.",
       "palmierBoundary": "Explicit MP4 cut-first jobs only; no Palmier operation is invoked."
     },
     {
       "groupId": "guided-cut-acceptance",
-      "routes": ["src/app/api/producer/cut-review/accept/route.ts", "src/app/api/producer/cut-review/decision/route.ts"],
+      "routes": [
+        "src/app/api/producer/cut-review/accept/route.ts",
+        "src/app/api/producer/cut-review/decision/route.ts"
+      ],
       "role": "Explicit exact-preview human acceptance, historical accepted-cut readback and separately requested continuation retry.",
       "modePolicy": "form-neutral",
       "short": {
         "status": "unqualified",
         "behavior": "Requires four explicit human attestations, exact paused preview identities and fresh admitted source-byte verification; records an immutable cut-only decision before worker handoff.",
-        "blockers": ["Actual short-form human acceptance UI qualification, changed post-cut treatment handoff and full audiovisual quality comparison remain open."]
+        "blockers": [
+          "Actual short-form human acceptance UI qualification, changed post-cut treatment handoff and full audiovisual quality comparison remain open."
+        ]
       },
       "longform": {
         "status": "unqualified",
         "behavior": "The same exact-v1 decision continues the previously bound brief; replay cannot spawn another worker and pending continuation requires explicit retry.",
-        "blockers": ["Creator-footage long-form audition and human review, intro checkpoint, new treatment authority and end-to-end throughput remain unproved."]
+        "blockers": [
+          "Creator-footage long-form audition and human review, intro checkpoint, new treatment authority and end-to-end throughput remain unproved."
+        ]
       },
       "incrementalBoundary": "Acceptance is scoped only to the unchanged cut. It cannot change the brief, regenerate the story, bypass final QC, or turn a worker completion into delivery approval.",
       "palmierBoundary": "Explicit MP4 cut-first jobs only; no legacy delivery-policy migration."
     },
     {
       "groupId": "guided-opening-launch",
-      "routes": ["src/app/api/producer/guided-opening/launch/route.ts"],
+      "routes": [
+        "src/app/api/producer/guided-opening/launch/route.ts"
+      ],
       "role": "Inspect launch eligibility or explicitly request one detached, journal-bound opening controller; never infer liveness or retry authority from a recorded request.",
       "modePolicy": "mode-aware",
       "short": {
         "status": "unqualified",
         "behavior": "Local GET reads launch metadata; explicit POST requires the accepted cut, clean treatment readiness, exact submission, project lease and original remaining generation budget. Unsupported requested lanes are refused rather than omitted.",
-        "blockers": ["Representative short-form creator-footage, audiovisual quality and end-to-end latency qualification remain open; public source-color V2 media execution remains explicitly fenced."]
+        "blockers": [
+          "Representative short-form creator-footage, audiovisual quality and end-to-end latency qualification remain open; public source-color V2 media execution remains explicitly fenced."
+        ]
       },
       "longform": {
         "status": "unqualified",
         "behavior": "The same one-shot controller can execute the admitted opening and transition-context profile, reconcile owned resources, requalify and select private review media. A recorded launch is not proof of a running worker; uncertain or failed launches cannot automatically restart.",
-        "blockers": ["Retained synthetic long-form mechanics do not qualify creator footage, complete-body generation, delivery or the two-hour target; public source-color V2 media execution remains explicitly fenced."]
+        "blockers": [
+          "Retained synthetic long-form mechanics do not qualify creator footage, complete-body generation, delivery or the two-hour target; public source-color V2 media execution remains explicitly fenced."
+        ]
       },
       "incrementalBoundary": "Bound to the exact existing cut, treatment and journal; the detached handoff carries the original clock. Launch does not itself approve the opening, generate the full body or approve delivery.",
       "palmierBoundary": "Private guided MP4 opening only; no Palmier mutation or delivery-policy migration."
     },
     {
       "groupId": "guided-opening-review",
-      "routes": ["src/app/api/producer/guided-opening/media/route.ts", "src/app/api/producer/guided-opening/status/route.ts"],
+      "routes": [
+        "src/app/api/producer/guided-opening/media/route.ts",
+        "src/app/api/producer/guided-opening/status/route.ts"
+      ],
       "role": "Observe current opening ownership and selected evidence, or stream an exact selected private core/review artifact without generation or approval.",
       "modePolicy": "form-neutral",
       "short": {
         "status": "unqualified",
         "behavior": "Local read-only status preserves unresolved-claim priority and reports last-qualified selection, not fresh source requalification. Playback requires exact current selection/range/media hashes and hashes the entire selected artifact through the same descriptor it serves.",
-        "blockers": ["Representative short-form playback, word-timed visual placement and creator audiovisual review remain unqualified; metadata and streaming tests are not subjective quality approval."]
+        "blockers": [
+          "Representative short-form playback, word-timed visual placement and creator audiovisual review remain unqualified; metadata and streaming tests are not subjective quality approval."
+        ]
       },
       "longform": {
         "status": "unqualified",
         "behavior": "The same exact private core/context readback rejects stale or unbound media without accepting an arbitrary path. Status and seeks do not launch generation, clear ownership, renew the original generation budget or approve anything.",
-        "blockers": ["Creator-footage long-form opening/body continuity, listening and final-composite comparison remain open; retained synthetic playback does not qualify complete-output quality or throughput."]
+        "blockers": [
+          "Creator-footage long-form opening/body continuity, listening and final-composite comparison remain open; retained synthetic playback does not qualify complete-output quality or throughput."
+        ]
       },
       "incrementalBoundary": "Read-only evidence and selected-media access. Current unresolved ownership blocks selection; cheap status does not substitute for the strong read-only child required at selection and approval.",
       "palmierBoundary": "No Palmier operation; the returned private MP4 range is not delivery authority."
     },
     {
       "groupId": "guided-opening-approval",
-      "routes": ["src/app/api/producer/guided-opening/approve/route.ts"],
+      "routes": [
+        "src/app/api/producer/guided-opening/approve/route.ts"
+      ],
       "role": "Record an explicit local human opening-only decision after exact-selection requalification, preserving separate body and delivery gates.",
       "modePolicy": "form-neutral",
       "short": {
         "status": "unqualified",
         "behavior": "A bounded same-origin submission must contain all explicit human attestations and exact selected identities. Under the project lease, current source/pipeline/output requalification precedes the immutable opening-only approval; no render is launched.",
-        "blockers": ["Actual creator short-form human review and audiovisual qualification remain open; synthetic attestations and automated readback do not constitute human acceptance or delivery approval."]
+        "blockers": [
+          "Actual creator short-form human review and audiovisual qualification remain open; synthetic attestations and automated readback do not constitute human acceptance or delivery approval."
+        ]
       },
       "longform": {
         "status": "unqualified",
         "behavior": "The same guarded approval binds the actual current selection and its versioned retained proof. Approval uses a separate bounded read-only allowance, not a renewed generation budget, and always leaves bodyGenerated and deliveryApproved false.",
-        "blockers": ["Creator-footage long-form listening, opening-to-body continuity and full-output qualification remain open; source-color proof handling does not release the fenced native execution workflow."]
+        "blockers": [
+          "Creator-footage long-form listening, opening-to-body continuity and full-output qualification remain open; source-color proof handling does not release the fenced native execution workflow."
+        ]
       },
       "incrementalBoundary": "Only an exact reviewed opening may be approved. This endpoint cannot change the cut or treatment, generate the body, release unresolved ownership, or turn worker completion into human approval.",
       "palmierBoundary": "No Palmier mutation or delivery approval; those remain separate explicit workflows."
     },
     {
       "groupId": "private-color-diagnostic",
-      "routes": ["src/app/api/producer/color-diagnostic/route.ts"],
+      "routes": [
+        "src/app/api/producer/color-diagnostic/route.ts"
+      ],
       "role": "Read bounded source context or explicitly run an owned, private source-color diagnostic and inspect its project-bound status.",
       "modePolicy": "form-neutral",
       "short": {
         "status": "unqualified",
         "behavior": "Samples retained source/lighting groups under explicit unknown-by-default profile and transform history; no plan or grade is applied.",
-        "blockers": ["Synthetic Color UI/API lifecycle has been exercised; creator footage, grading schema, operator image comparison and browser/final color parity remain unqualified."]
+        "blockers": [
+          "Synthetic Color UI/API lifecycle has been exercised; creator footage, grading schema, operator image comparison and browser/final color parity remain unqualified."
+        ]
       },
       "longform": {
         "status": "unqualified",
         "behavior": "Private diagnostics cover late retained intervals within a declared sample budget; omissions and intentional lighting remain visible.",
-        "blockers": ["Whole-source hashing cost on representative long-form media, operator recovery from uncertain cleanup and meaningful audiovisual color comparison remain unproved."]
+        "blockers": [
+          "Whole-source hashing cost on representative long-form media, operator recovery from uncertain cleanup and meaningful audiovisual color comparison remain unproved."
+        ]
       },
       "incrementalBoundary": "New private evidence only, exact plan/manifest parents and admitted source bytes. Unreviewed luma screening is not applicable to a plan, not a grade, and never delivery approval.",
       "palmierBoundary": "No Palmier operation or delivery-policy change; the existing project mutation boundary remains required."
+    },
+    {
+      "groupId": "native-short-preparation",
+      "routes": [
+        "src/app/api/producer/native-short/route.ts"
+      ],
+      "role": "Prepare a local agent-assisted Short request from the stored project intent and admitted source evidence.",
+      "modePolicy": "mode-aware",
+      "short": {
+        "status": "released",
+        "behavior": "Prepares the bounded local request packet and style/media direction. The route invokes no model and performs no render or publication.",
+        "blockers": []
+      },
+      "longform": {
+        "status": "unsupported",
+        "behavior": "This preparation endpoint requires short intent; long-form projects retain their existing preparation and editing routes.",
+        "blockers": [
+          "Native Short request preparation is not a long-form entrypoint."
+        ]
+      },
+      "incrementalBoundary": "New request evidence only; changed input or supporting media requires a fresh brief. Native execution, music integration, editorial review, and final delivery are separate from this preparation route.",
+      "palmierBoundary": "No Palmier operation or delivery authority is created."
     }
   ],
   "workflows": [
@@ -673,7 +742,9 @@
       "src/lib/producer/__tests__/ingest-source-placement.test.ts",
       "src/lib/producer/__tests__/native-media-picker.test.ts",
       "src/lib/server/__tests__/producer-transcript-authority-route.test.ts",
-      "scripts/producer/tests/test_promote_transcript_authority.py"
+      "scripts/producer/tests/test_promote_transcript_authority.py",
+      "src/lib/server/__tests__/supporting-media-intake.test.ts",
+      "src/lib/server/__tests__/ingest-target-authority.test.ts"
     ],
     "project-registry": [
       "src/lib/producer/__tests__/project-state.test.ts",
@@ -783,6 +854,11 @@
     "full-build-performance": [
       "scripts/producer/tests/test_baseline_trace.py",
       "docs/producer/command-driven-editing/contracts/p0-current-lf14-baseline-v1.json"
+    ],
+    "native-short-preparation": [
+      "src/lib/server/__tests__/native-short-app-preparation.test.ts",
+      "src/lib/server/__tests__/native-short-request.test.ts",
+      "docs/producer/NATIVE_SHORTS_WORKFLOW.md"
     ]
   }
 }

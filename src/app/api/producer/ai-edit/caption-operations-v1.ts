@@ -6,7 +6,7 @@ import type {
   EditPlan,
 } from "@/lib/producer/edit-plan";
 import { bindCaptionCorrectionHash } from "./caption-ledger-hash-v1";
-import { captionTextWithinLimit } from "./caption-text-contract-v1";
+import { captionDisplayTextWithinLimit, captionTextWithinLimit } from "./caption-text-contract-v1";
 
 const WORD_ID = /^w-[0-9a-f]{16}$/u;
 const STYLE_ID = /^[a-z][a-z0-9._-]{0,63}$/u;
@@ -170,7 +170,7 @@ function correction(value: unknown) {
     { pattern: WORD_ID });
   const displayTokens = strings(row.displayTokens, "displayTokens",
     { unique: false, maximum: 256 });
-  if (displayTokens.some((item) => !captionTextWithinLimit(item, 256) || /[\\\r\n\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/u.test(item))) throw new Error("displayTokens contain invalid text or caption control characters");
+  if (displayTokens.some((item) => !captionDisplayTextWithinLimit(item, 256))) throw new Error("displayTokens contain invalid text or caption control characters");
   if (row.timingPolicy !== undefined
       && row.timingPolicy !== "proportional-codepoints") {
     throw new Error("caption correction timingPolicy is unsupported");

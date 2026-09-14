@@ -1,0 +1,356 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Unapproved native Shorts supplied-raster planning proposal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "summary",
+    "clauses",
+    "beats",
+    "operations",
+    "openingEndAnchor",
+    "continuityEndAnchor",
+    "audioPolicy",
+    "colorPolicy"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 10
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "clauses": {
+      "type": "array",
+      "maxItems": 128,
+      "items": {
+        "$ref": "#/$defs/clause"
+      }
+    },
+    "beats": {
+      "type": "array",
+      "maxItems": 128,
+      "items": {
+        "$ref": "#/$defs/beat"
+      }
+    },
+    "operations": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "$ref": "#/$defs/operation"
+      }
+    },
+    "openingEndAnchor": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 60001
+    },
+    "continuityEndAnchor": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 60001
+    },
+    "audioPolicy": {
+      "const": "preserve-full-program"
+    },
+    "colorPolicy": {
+      "const": "preserve"
+    }
+  },
+  "$defs": {
+    "indices": {
+      "type": "array",
+      "maxItems": 128,
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 127
+      }
+    },
+    "clause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start",
+        "end",
+        "quote",
+        "disposition",
+        "rationale",
+        "operationIndices"
+      ],
+      "properties": {
+        "start": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20000
+        },
+        "end": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20000
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 20000
+        },
+        "disposition": {
+          "enum": [
+            "supported",
+            "ambiguous",
+            "unsupported",
+            "cut-affecting"
+          ]
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "operationIndices": {
+          "$ref": "#/$defs/indices"
+        }
+      }
+    },
+    "beat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "startAnchor",
+        "endAnchorExclusive",
+        "purpose",
+        "summary",
+        "supportsBeatIndices"
+      ],
+      "properties": {
+        "startAnchor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 60001
+        },
+        "endAnchorExclusive": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60001
+        },
+        "purpose": {
+          "enum": [
+            "opening",
+            "body",
+            "closing"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "supportsBeatIndices": {
+          "$ref": "#/$defs/indices"
+        }
+      }
+    },
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "clauseIndex",
+        "beatIndex",
+        "scene"
+      ],
+      "properties": {
+        "type": {
+          "const": "native-scene"
+        },
+        "clauseIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 127
+        },
+        "beatIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 127
+        },
+        "scene": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "startAnchor",
+            "endAnchorExclusive",
+            "mechanism",
+            "view",
+            "question",
+            "object",
+            "quote",
+            "occurrenceIds",
+            "referenceIds",
+            "referenceReason",
+            "requiredAssetIds",
+            "before",
+            "steps",
+            "result",
+            "readingHoldFrames",
+            "rationale"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "pattern": "^(?!native-short$)(?!(?:source-cut-|dialogue-cut-|caption-|word-))[a-z][a-z0-9-]{0,63}$"
+            },
+            "startAnchor": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 60001
+            },
+            "endAnchorExclusive": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 60001
+            },
+            "mechanism": {
+              "enum": [
+                "presenter-hold",
+                "message-reveal",
+                "supporting-asset"
+              ]
+            },
+            "view": {
+              "enum": [
+                "presenter",
+                "presenter-illustration",
+                "presenter-supporting"
+              ]
+            },
+            "question": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "object": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            "quote": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "occurrenceIds": {
+              "type": "array",
+              "maxItems": 128,
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 29999
+              }
+            },
+            "referenceIds": {
+              "type": "array",
+              "maxItems": 8,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              }
+            },
+            "referenceReason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "requiredAssetIds": {
+              "type": "array",
+              "maxItems": 8,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              },
+              "uniqueItems": true
+            },
+            "before": {
+              "type": "array",
+              "maxItems": 3,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              }
+            },
+            "steps": {
+              "type": "array",
+              "maxItems": 3,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "anchor",
+                  "occurrenceId",
+                  "text",
+                  "transitionFrames"
+                ],
+                "properties": {
+                  "anchor": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 60001
+                  },
+                  "occurrenceId": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 29999
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 160
+                  },
+                  "transitionFrames": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 60
+                  }
+                }
+              }
+            },
+            "result": {
+              "type": "array",
+              "maxItems": 3,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              }
+            },
+            "readingHoldFrames": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1800
+            },
+            "rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          }
+        }
+      }
+    }
+  }
+}

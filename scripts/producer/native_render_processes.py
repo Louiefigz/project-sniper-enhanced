@@ -38,14 +38,19 @@ class MissingProcessFootprint(ResourceMeasurementError):
 
 @dataclass(frozen=True)
 class ProcessFootprint:
-    """Live identity and memory; MEM already includes the compressed footprint."""
+    """Inclusive memory; rusage start/exit evidence binds one sample, not later runs."""
 
     pid: int
     parent_pid: int
     pgid: int
     started: str
     footprint_bytes: int
-    compressed_bytes: int
+    compressed_bytes: int | None
+    memory_sampler: str = 'macos-top-v1'
+    compressed_status: str = 'measured'
+    process_start_abstime: int | None = None
+    process_start_abstime_before: int | None = None
+    process_exit_abstime: int | None = None
 
 
 @dataclass(frozen=True)
@@ -145,19 +150,32 @@ def reconcile_process_request(before_text: str, after_text: str,
 
 def select_processes(ps_text: str, top: str, request: ProcessRequest) -> dict:
     """Include remembered detached children even after their parent exits."""
+    owned = process_selection(ps_text, request)['owned']
+    rows = re.findall(r"(?m)^\s*(\d+)\s+(\S+)\s+(\S+)\s*$", top)
+    found = {int(pid): {'footprint_bytes': parse_size(mem), 'compressed_bytes': parse_size(compressed)}
+             for pid, mem, compressed in rows if int(pid) in owned}
+    return select_footprints(ps_text, found, request)
+
+
+def process_selection(ps_text: str, request: ProcessRequest) -> dict:
+    """Share authority selection between historical top rows and direct API readings."""
     table = process_table(ps_text)
     anchors, missing, reused, verified = _anchors(table, request)
     owned = _descendants(table, anchors)
-    rows = re.findall(r"(?m)^\s*(\d+)\s+(\S+)\s+(\S+)\s*$", top)
-    found = {int(pid): (parse_size(mem), parse_size(compressed)) for pid, mem, compressed in rows
-             if int(pid) in owned}
-    if set(found) != owned:
+    return {'table': table, 'owned': owned, 'missing': tuple(missing), 'reused': tuple(reused),
+            'verified': verified and not reused}
+
+
+def select_footprints(ps_text: str, found: dict[int, dict], request: ProcessRequest) -> dict:
+    """Require every live owned reading while excluding unrelated or recycled PIDs."""
+    selection = process_selection(ps_text, request)
+    table, owned = selection['table'], selection['owned']
+    if not owned <= found.keys():
         identities = tuple(ProcessIdentity(pid, table[pid][2], table[pid][1])
                            for pid in sorted(owned - set(found)))
         raise MissingProcessFootprint(identities)
-    processes = tuple(ProcessFootprint(pid, *table[pid], *found[pid]) for pid in sorted(owned))
-    return {"processes": processes, "missing": tuple(missing), "reused": tuple(reused),
-            "verified": verified and not reused}
+    processes = tuple(ProcessFootprint(pid, *table[pid], **found[pid]) for pid in sorted(owned))
+    return selection | {'processes': processes}
 
 
 def read_identities(path: Path) -> tuple[ProcessIdentity, ...]:

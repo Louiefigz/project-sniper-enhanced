@@ -9,7 +9,7 @@ import { observeHistoricalProposalSnapshot } from "../guided-proposal-history-sn
 import type { AutoEditPipelineAuthority } from "@/app/api/producer/auto-edit/stream";
 
 /** Synthetic immutable metadata only; no executed compiler, review, media or approval claim. */
-function snapshotFixture(version: 2 | 3 | 4 | 5 | 6 | 7 | 8) {
+function snapshotFixture(version: 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10) {
   const root = realpathSync(mkdtempSync(path.join(os.tmpdir(), "sniper-history-snapshot-")));
   const schemaName = `schemas/producer/treatment-proposal-v${version}.schema.json`;
   const source = Buffer.from("// TEST ONLY historical captured TypeScript, never executed.\n");
@@ -30,7 +30,7 @@ function snapshotFixture(version: 2 | 3 | 4 | 5 | 6 | 7 | 8) {
     cleanup: () => rmSync(root, { recursive: true, force: true }) };
 }
 
-for (const version of [2, 3, 4, 5, 6, 7, 8] as const) {
+for (const version of [2, 3, 4, 5, 6, 7, 8, 9, 10] as const) {
   test(`historical V${version} snapshot retains exact pinned bytes without asserting current runtime equivalence`, () => {
     const fixture = snapshotFixture(version);
     try {
@@ -63,10 +63,10 @@ test("historical snapshot rejects corrupted bytes, omitted TS, swapped metadata 
   } finally { fixture.cleanup(); }
 });
 
-test("historical V8 support does not admit unknown/string schema versions or a substituted schema hash", () => {
-  const fixture = snapshotFixture(8);
+test("historical V9 support does not admit unknown/string schema versions or a substituted schema hash", () => {
+  const fixture = snapshotFixture(9);
   try {
-    for (const version of [0, 1, 9, 99, "7", "8", null]) {
+    for (const version of [0, 1, 11, 99, "7", "8", "9", "10", null]) {
       const compiler = structuredClone(fixture.compiler);
       (compiler.schema.properties as Record<string, Record<string, unknown>>).schemaVersion.const = version;
       assert.throws(() => observeHistoricalProposalSnapshot(fixture.pipeline, compiler), /Unsupported historical proposal schema/);

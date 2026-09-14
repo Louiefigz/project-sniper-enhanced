@@ -5,6 +5,7 @@ import json
 import subprocess
 import tempfile
 import time
+from dataclasses import dataclass
 from pathlib import Path
 
 from scipy.io import wavfile
@@ -16,6 +17,15 @@ from cut_preview_io import MAX_JSON, MAX_MEDIA, file_hash
 
 MAXIMUM_DECODER_PADDING = 1023
 WAV_HEADER_ALLOWANCE = 65536
+
+
+@dataclass(frozen=True)
+class FloatDeliveryReference:
+    """Explicit intended float bytes and sample clock; no synthetic program authority."""
+
+    path: str
+    samples: int
+    ffmpeg: str
 
 
 class ProgramDeliverySignalError(RuntimeError):
@@ -74,10 +84,18 @@ def verify_program_delivery_signal(master: ProgramMaster, candidate: str,
     The caller retains the separate AAC packet/clock gate. Quiet-only references
     can pass quiet error checks, with activeEvidenceAvailable explicitly false.
     """
+    reference = FloatDeliveryReference(master.path, master.source_bus.samples,
+                                      master.source_bus.admission.tools["ffmpeg"]["path"])
+    return verify_float_delivery_signal(reference, candidate, maximum_media_bytes)
+
+
+def verify_float_delivery_signal(master: FloatDeliveryReference, candidate: str,
+                                 maximum_media_bytes: int = MAX_MEDIA) -> dict:
+    """Share bounded, hash-bound codec QC across native and ordinary float masters."""
     started = time.monotonic()
     evidence = {"status": "incomplete", "passed": False, "humanListeningApproved": False}
     try:
-        config = PCMComparisonConfig(master.source_bus.samples, 48000, MAXIMUM_DECODER_PADDING)
+        config = PCMComparisonConfig(master.samples, 48000, MAXIMUM_DECODER_PADDING)
         maximum_decode = (config.expected_samples + config.maximum_decoder_padding) * 8 + WAV_HEADER_ALLOWANCE
         if type(maximum_media_bytes) is not int or maximum_media_bytes <= 0 or maximum_decode > maximum_media_bytes:
             raise ValueError("delivery PCM decode exceeds the explicit media byte budget")
@@ -87,7 +105,7 @@ def verify_program_delivery_signal(master: ProgramMaster, candidate: str,
         evidence.update(before, maximumDecodeBytes=maximum_decode)
         with tempfile.TemporaryDirectory(prefix=".program-signal-", dir=encoded.parent) as scratch:
             decoded = _decode(candidate, Path(scratch),
-                              (master.source_bus.admission.tools["ffmpeg"]["path"], maximum_decode))
+                              (master.ffmpeg, maximum_decode))
             evidence.update(_compare(reference, decoded, config))
         stable = (file_hash(reference, maximum_media_bytes) == before["referenceSha256"]
                   and file_hash(encoded, maximum_media_bytes) == before["candidateSha256"])

@@ -1,0 +1,14 @@
+{
+  "version": "2026-09-10.3",
+  "checked_at_utc": "2026-09-11T00:26:08.610793+00:00",
+  "status": "pass",
+  "counts": {
+    "hash_bound_files": 342,
+    "frame_index_pts_checks": 213,
+    "image_dimensions_checks": 216,
+    "local_links_checked": 264
+  },
+  "errors": [],
+  "scope": "Mechanical artifact integrity; not visual/audio/render qualification.",
+  "verifier": "artifacts/shorts-authentic-expansion-2026-09-10/verify_library.py"
+}

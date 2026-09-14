@@ -16,6 +16,7 @@ import {
   type Style,
 } from "@/lib/producer/intent-presets";
 import type { AudioEnhance } from "@/lib/producer/edit-plan";
+import { parseShortDirection, type ShortDirectionRequest } from "@/lib/producer/short-direction";
 import type { TemplateUsageAuthority } from "@/lib/server/template-usage-history";
 import type { GuidedWorkflowV2 } from "@/lib/producer/contracts/guided-workflow-v2";
 import type { AuthoredCutPolicy, ExistingCutCandidatePolicy } from "@/lib/server/guided-project-bootstrap-contract";
@@ -32,6 +33,7 @@ export interface AutoEditIntent {
   mode?: Mode;
   excerpt?: boolean;
   brief?: string;
+  shortDirection?: ShortDirectionRequest;
   pace?: Pace;
   /** Measured style grammar — the prompt tells the brain to READ its doc. */
   style?: Style;
@@ -137,6 +139,7 @@ export function parseAutoEditIntent(body: Record<string, unknown>): AutoEditInte
     audioEnhance: parseAudioEnhance(body),
   };
   out.excerpt = parseExcerpt(body, out.mode);
+  out.shortDirection = parseShortDirection(body.shortDirection, out.mode);
   if (body.lanes !== undefined) out.lanes = validateLaneOverrides(body.lanes);
   parseReference(body, out);
   for (const key of Object.keys(out) as Array<keyof AutoEditIntent>) {

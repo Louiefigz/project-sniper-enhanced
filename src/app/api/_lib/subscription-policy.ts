@@ -17,7 +17,7 @@ const CLAUDE_STATUS_KEYS = new Set(["loggedIn", "authMethod", "apiProvider", "fo
   "subscriptionType", "analyticsDisabled", "email", "orgId", "orgName"]);
 const CODEX_FIXED_CONFIG = ['forced_login_method="chatgpt"', 'model_provider="openai"',
   'web_search="disabled"', "features.apps=false", "features.hooks=false", "features.multi_agent=false"];
-const CODEX_VALUE_FLAGS = new Set(["--ask-for-approval", "--disable", "--model", "--sandbox", "--add-dir", "--output-schema"]);
+const CODEX_VALUE_FLAGS = new Set(["--ask-for-approval", "--disable", "--model", "--sandbox", "--add-dir", "--output-schema", "--image"]);
 const CODEX_SWITCHES = new Set(["exec", "--skip-git-repo-check", "--ignore-user-config", "--ignore-rules",
   "--ephemeral", "--strict-config", "--json", "-"]);
 

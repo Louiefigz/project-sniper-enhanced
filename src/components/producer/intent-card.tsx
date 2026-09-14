@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { Check, ChevronDown, ChevronRight, X } from "lucide-react";
+import { ShortDirectionControl } from "./short-direction-control";
+import { AUTOMATIC_SHORT_DIRECTION, shortDirectionForStyle } from "@/lib/producer/short-direction";
 import {
   INTENT_PRESETS,
   LANES,
@@ -188,7 +190,8 @@ export default function IntentCard({
       ...value,
       mode,
       // pacing_<pace> profiles + style grammars are shorts-measured only.
-      ...(mode === "longform" ? { pace: undefined, style: undefined } : {}),
+      ...(mode === "longform" ? { pace: undefined, style: undefined, shortDirection: undefined } : {}),
+      ...(mode === "short" ? { shortDirection: value.shortDirection ?? AUTOMATIC_SHORT_DIRECTION } : {}),
       preset: keepPreset ? value.preset : "custom",
     });
     onFormatConfirmed?.();
@@ -198,7 +201,10 @@ export default function IntentCard({
   // Presets replace intent. Music never carries across a preset choice and no
   // style may enable it implicitly; only the checkbox below can opt in.
   const applyPreset = (p: IntentPreset) => {
-    onChange(presetToIntent(p, value.mode));
+    const next = presetToIntent(p, value.mode);
+    onChange({ ...next, ...(next.mode === "short"
+      ? { shortDirection: p.style ? shortDirectionForStyle(PRESET_COPY[p.id]?.label ?? p.label, value.shortDirection)
+        : value.shortDirection ?? AUTOMATIC_SHORT_DIRECTION } : {}) });
     onStyleConfirmed?.();
     if (p.mode !== null) onFormatConfirmed?.();
   };
@@ -232,6 +238,13 @@ export default function IntentCard({
       <p className="mt-3 text-sm text-muted-foreground">
         {preset ? PRESET_COPY[preset.id]?.summary ?? preset.label : "A custom mix of editing features."}
       </p>
+
+      {value.mode === "short" && <ShortDirectionControl value={value.shortDirection} disabled={disabled}
+        onChange={(shortDirection) => {
+          onChange({ ...value, shortDirection, style: undefined, pace: undefined,
+            preset: value.style ? "custom" : value.preset });
+          onStyleConfirmed?.();
+        }} />}
 
       <label className="mt-3 flex items-start gap-2 rounded-md border border-border bg-background/30 p-3 text-sm text-foreground">
         <input

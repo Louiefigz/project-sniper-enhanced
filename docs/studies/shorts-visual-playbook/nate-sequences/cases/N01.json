@@ -1,0 +1,2302 @@
+{
+  "id": "N01",
+  "corpus_index": 1,
+  "title": "Claude Can Now Plan Your Whole Day by Location",
+  "source_url": "https://www.youtube.com/shorts/iW-yLZjbFjo",
+  "video_path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/corpus/01-iW-yLZjbFjo/source-visual.mp4",
+  "duration": 44.516667,
+  "lesson": "A location-aware day planner should reason about specific stops, distances, routes and ordering instead of offering an unconnected list; the visual presentation should make those relationships inspectable.",
+  "opening": "The spoken novelty is Claude gaining location awareness through MapQuest MCP. Familiar logos identify the combination, then route alternatives provide a visible preview of its promise. It is a capability reveal, not a separate contrarian title card.",
+  "story_arc": "Name the integration → preview route output → unpack nearby/distance/time/traffic with matching capability visuals → establish one-day New York scenario → display a cumulative prompt → reject random recommendations → illustrate places, routes, ordering and a five-minute trip → show destination experience → broaden to other agents → offer access and keyword CTA.",
+  "payoff": "The viewer sees how spatial relationships can make a day plan useful and sees the shape of relevant inputs/results. A single continuous executed New York itinerary is not demonstrated: city/rendition changes and generic stop lists leave that proof unclosed.",
+  "selection_reason": "A complete example of the same split host supporting many distinct informational jobs, a justified 4.5-second input hold, UI-detail enlargement, destination B-roll, and a digit-plus-unit incentive. It also exposes the risk of visually plausible but task-inconsistent map assets.",
+  "reviewed_evidence": [
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/01-iW-yLZjbFjo/research-1080p/transcript.md",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/01-iW-yLZjbFjo/research-1080p/coverage.json",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/reviews/mechanics/01/review.md",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/01-iW-yLZjbFjo/research-1080p/context_p001.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/01-iW-yLZjbFjo/research-1080p/context_p002.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/01-iW-yLZjbFjo/research-1080p/context_p003.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/01-iW-yLZjbFjo/research-1080p/context_p004.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/01-iW-yLZjbFjo/research-1080p/context_p005.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N01/w_01.45_02.90/strip_01.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N01/w_03.60_04.70/strip_01.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N01/w_15.70_17.80/strip_01.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N01/w_15.70_17.80/strip_02.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N01/w_23.10_26.00/strip_01.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N01/w_23.10_26.00/strip_02.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N01/w_32.90_34.90/strip_01.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N01/w_32.90_34.90/strip_02.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N01/w_42.90_44.51/strip_01.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N01/w_42.90_44.51/strip_02.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/item-details.md",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/browser-device-stage/browser-device-stage.html",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/number-pop-in/number-pop-in.html",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/ui-focus-zoom/ui-focus-zoom.html",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/yt-camera-move/yt-camera-move.html"
+  ],
+  "review_limits": "Viewed all 5 chronological 0.5-second context pages (90 samples including final frame) plus 90 framing samples on 10 extra strips. Original machine-caption grouping supplies spoken ideas; no audio audition or phonetic verification. Caption final word overruns video; source was not padded or retimed. Strip timestamps are ffmpeg eight-fps resampling estimates, not source-frame measurements. Continuous motion, exact typography, easing, generation provenance and product claims are not independently verified. Catalog source inspection supports possible mechanisms only; no rendered match or ready replica is claimed.",
+  "beats": [
+    {
+      "spoken_idea": "Claude is one half of a location-aware assistant combination.",
+      "visible": "Orange Claude star on a pale upper panel; smiling narrator and microphone below.",
+      "change": "Opening brand-and-person split.",
+      "view": "split",
+      "picture_function": "orientation",
+      "why_this_picture": "Recognition names the assistant while the face supplies a personal introduction; the mark itself does not explain the promised improvement.",
+      "camera_observation": "Fixed split; logo is centered; no tracked target established.",
+      "camera_reason": "Reserve distinct spaces for mechanism name and human introduction.",
+      "pacing_reason": "Half-second recognition beat; brevity is justified only for a familiar logo.",
+      "handoff": "Same lower presenter remains when partner logo replaces Claude.",
+      "catalog_candidates": [],
+      "implementation_note": "Reuse an authorized logo image and native two-region host.",
+      "transfer": "Introduce a recognizable existing tool before naming its new capability.",
+      "caution": "This is a brand cue, not a curiosity headline or proof.",
+      "sample_times": [
+        0.0
+      ],
+      "start": 0,
+      "end": 0.5,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B01",
+      "source_frames": [
+        {
+          "requested_time": 0.0,
+          "source_pts": 0.0,
+          "frame_index": 0,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000000.jpg",
+          "sha256": "ed6ef8568a5907c36332761a27135495f792b9aa72a25e746b8c8ef5f805f676",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B01.jpg",
+        "sha256": "3b493631e2e1ec24384174fdd0530fe6342c53e826c2bc948fcf26df62670211",
+        "dimensions": [
+          300,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "MapQuest supplies the added location capability.",
+      "visible": "MapQuest wordmark replaces the upper Claude mark; lower presenter is retained.",
+      "change": "Upper asset swap on the partner's name.",
+      "view": "split",
+      "picture_function": "orientation",
+      "why_this_picture": "The named partner gets a readable branded object, completing the verbal pairing without another explanatory list.",
+      "camera_observation": "Upper content replacement; same split coordinates.",
+      "camera_reason": "Direct attention to the newly named partner.",
+      "pacing_reason": "Recognition continues; changing the logo renews information, not the entire layout.",
+      "handoff": "MCP suffix appears on this same wordmark next.",
+      "catalog_candidates": [],
+      "implementation_note": "Native asset replacement is sufficient; do not add a generic animated card.",
+      "transfer": "Name two systems only when their relationship matters to the lesson.",
+      "caution": "The visual does not itself show the integration working.",
+      "sample_times": [
+        0.5
+      ],
+      "start": 0.5,
+      "end": 1,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B02",
+      "source_frames": [
+        {
+          "requested_time": 0.5,
+          "source_pts": 0.5,
+          "frame_index": 30,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000030.jpg",
+          "sha256": "82147acc8d5c667737655b16f5fc62949dedd6562a11ad460528dec51fbe2a40",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B02.jpg",
+        "sha256": "5226a9aa15755527443fda348eeaedfe9750f4cedd85259bf51bb469df09c06e",
+        "dimensions": [
+          300,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "The connection uses an MCP integration.",
+      "visible": "MapQuest wordmark plus green MCP suffix above presenter.",
+      "change": "A suffix extends the existing partner identity.",
+      "view": "split",
+      "picture_function": "orientation",
+      "why_this_picture": "The suffix specifies the integration class rather than introducing a third unrelated picture.",
+      "camera_observation": "Stable framing; text addition at the wordmark's right.",
+      "camera_reason": "Keep the relationship visually adjacent.",
+      "pacing_reason": "Brief completion of the combination; the next image must answer what it enables.",
+      "handoff": "Branding gives way to a full map result.",
+      "catalog_candidates": [],
+      "implementation_note": "Reuse the logo plus native editable suffix text.",
+      "transfer": "Qualify a named mechanism with the minimum added text.",
+      "caution": "MCP is not explained here and may be opaque to a nontechnical audience.",
+      "sample_times": [
+        1.0
+      ],
+      "start": 1,
+      "end": 1.483,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B03",
+      "source_frames": [
+        {
+          "requested_time": 1.0,
+          "source_pts": 1.0,
+          "frame_index": 60,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000060.jpg",
+          "sha256": "76fcb47fd9af5f11e986bda5fc7d21c3adbcba0dbc5729e60607bbb755ec6eb3",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B03.jpg",
+        "sha256": "fc67a7d7275cab401232ab9ba9f0aa7227c26fe3e08354a8b6e498c3d22c65ec",
+        "dimensions": [
+          300,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "The AI gains awareness of real locations.",
+      "visible": "San Francisco street map in a wide horizontal band on pale green/white; no presenter.",
+      "change": "Full map replaces split branding.",
+      "view": "full visual",
+      "picture_function": "orientation",
+      "why_this_picture": "Geographic streets and water translate the abstract phrase location awareness into spatial context.",
+      "camera_observation": "Sampled 1.45–2.075 strip shows a blurred entrance resolving and the map shifting down/settling; not a face zoom.",
+      "camera_reason": "Establish the coordinate space before route choices appear.",
+      "pacing_reason": "A short clear-map setup makes the next route strokes intelligible.",
+      "handoff": "Same map is retained as route lines and timing badges populate it.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Supply an actual map capture in a simple native stage; extra browser chrome is optional and may add clutter.",
+      "transfer": "Establish the spatial field before drawing a relation over it.",
+      "caution": "Map is San Francisco; it is not evidence of the later New York itinerary.",
+      "sample_times": [
+        1.7,
+        1.95
+      ],
+      "start": 1.483,
+      "end": 2.1,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B04",
+      "source_frames": [
+        {
+          "requested_time": 1.7,
+          "source_pts": 1.7,
+          "frame_index": 102,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000102.jpg",
+          "sha256": "a445d63bd91bb45472f6bb29ecd9b535ab924d20d3df697ad13702bbdaa7f344",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 1.95,
+          "source_pts": 1.95,
+          "frame_index": 117,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000117.jpg",
+          "sha256": "d8b9ca9dbe0e03eb4d75e212b0a3de88d9d2a1056a440f42f2d361cf06c2b4c8",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B04.jpg",
+        "sha256": "e9ac1274671425b507525921e73df374e66b2d21b7fda49db0fd4dd5acc3ede5",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Location awareness includes useful route alternatives.",
+      "visible": "A blue fastest route with 41-minute/21.7-mile badge, then other duration/distance labels on the same map.",
+      "change": "Routes and result badges accumulate on the established map.",
+      "view": "full visual",
+      "picture_function": "demonstration",
+      "why_this_picture": "A visible path plus quantified travel time demonstrates the kind of answer location context can provide.",
+      "camera_observation": "Same map band; route strokes and labels develop while framing settles.",
+      "camera_reason": "The blue route is the selected option; other badges establish comparison.",
+      "pacing_reason": "More than one second is needed to register selected versus alternative routes; internal additions provide renewal.",
+      "handoff": "Cut back to the presenter to unpack this capability.",
+      "catalog_candidates": [],
+      "implementation_note": "Use captured map states or data-bound annotations; do not invent numeric results.",
+      "transfer": "Show the shape of a result before enumerating its capabilities.",
+      "caution": "Numbers are visible source claims; their accuracy and connection to the later itinerary were not verified.",
+      "sample_times": [
+        2.2,
+        2.7,
+        3.0,
+        3.5
+      ],
+      "start": 2.1,
+      "end": 3.65,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B05",
+      "source_frames": [
+        {
+          "requested_time": 2.2,
+          "source_pts": 2.2,
+          "frame_index": 132,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000132.jpg",
+          "sha256": "0b8ac850f4a6c3e17c9c013765ade81448e72b4389c1ac125875be543be9ea0a",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 2.7,
+          "source_pts": 2.7,
+          "frame_index": 162,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000162.jpg",
+          "sha256": "e226b3a32ca772bc6a83e0bfff64929a5924e47bbb8a0d8381e8d19a9bd24c40",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 3.0,
+          "source_pts": 3.0,
+          "frame_index": 180,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000180.jpg",
+          "sha256": "613a16686ae28d079f2bd500e5291347c35c31f60dfbd457636f00583a6c8a9c",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 3.5,
+          "source_pts": 3.5,
+          "frame_index": 210,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000210.jpg",
+          "sha256": "ad2d3c95903cd76a2a1e9e16500d49b36499645f9109bee96360dcb4e398aa55",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B05.jpg",
+        "sha256": "ad9df7b0e750dddbc4b181f13119a8e7d314f10ea3e7ceea0d07eeb19044958b",
+        "dimensions": [
+          1224,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "This means the assistant can understand nearby places.",
+      "visible": "Full presenter and microphone; short white caption plus teal serif emphasis.",
+      "change": "Presenter takes the complete portrait after the map.",
+      "view": "full presenter",
+      "picture_function": "orientation",
+      "why_this_picture": "A brief human explanation turns the preview into a list of concrete capabilities without keeping small map data behind every word.",
+      "camera_observation": "Framing strip shows a medium-close return with mild progressive enlargement/background-edge movement; no new external target.",
+      "camera_reason": "Emphasize the explanation; the crop adds intimacy rather than factual information.",
+      "pacing_reason": "About a second bridges promise to examples; expression and caption rhythm carry the hold.",
+      "handoff": "Upper coffee-search UI appears; presenter shrinks into the lower region.",
+      "catalog_candidates": [
+        "yt-camera-move"
+      ],
+      "implementation_note": "Native crop is enough; camera helper can animate an intentional wrapper push, but supplies no head tracking.",
+      "transfer": "Use a presenter reset when switching from result preview to explanation.",
+      "caution": "Do not call the crop movement an evidence reveal.",
+      "sample_times": [
+        3.85,
+        4.225,
+        4.6
+      ],
+      "start": 3.65,
+      "end": 4.7,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B06",
+      "source_frames": [
+        {
+          "requested_time": 3.85,
+          "source_pts": 3.85,
+          "frame_index": 231,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000231.jpg",
+          "sha256": "544cfa051d3995cc1ee3deab8dc918572806525fe67c1da334516f26894cb444",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 4.225,
+          "source_pts": 4.216667,
+          "frame_index": 253,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000253.jpg",
+          "sha256": "36703310b7a1ea9533523d8f3681048a411e25811875f2efd54fceb65b64426d",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 4.6,
+          "source_pts": 4.6,
+          "frame_index": 276,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000276.jpg",
+          "sha256": "cf7a45b8e3c0af3aa8d59fa48ee03ef5caa5025309bb893b718797fce53211d8",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B06.jpg",
+        "sha256": "1ad9bf5fc79e2d8d86f4e261645be173eeaabf31aade27135826c9338109c71e",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "It can find what is nearby.",
+      "visible": "Coffee Shop Finder sidebar, place entries and location pins above the presenter.",
+      "change": "Split returns with a search-result panel.",
+      "view": "split",
+      "picture_function": "demonstration",
+      "why_this_picture": "Coffee is a recognizable nearby need; list entries and pins connect a search category to locations.",
+      "camera_observation": "A new UI crop occupies the upper half; lower face stays readable.",
+      "camera_reason": "Direct the eye to nearby options while keeping the narrator's continuity.",
+      "pacing_reason": "A rapid category example; there is insufficient time to read every establishment.",
+      "handoff": "Next panel replaces the search list with paths between stops.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Fill the source-inspected screen slot with a real search capture, crop to relevant results.",
+      "transfer": "Pair a claimed search capability with recognizable result objects.",
+      "caution": "Not a verified run of the narrated prompt.",
+      "sample_times": [
+        5.0
+      ],
+      "start": 4.7,
+      "end": 5.4,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B07",
+      "source_frames": [
+        {
+          "requested_time": 5.0,
+          "source_pts": 5.0,
+          "frame_index": 300,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000300.jpg",
+          "sha256": "802babd0317039f86003b52347d43a1ed2d14147a49e50fd702d3a3702620323",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B07.jpg",
+        "sha256": "e949a5ce36864ef42de882744329c520f1fdae6a57d18d16b7411c4a380e1f58",
+        "dimensions": [
+          300,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "It can understand how far apart places are.",
+      "visible": "Street map with a cyan multi-stop route and discrete endpoint markers.",
+      "change": "Upper search UI changes to a route close-up.",
+      "view": "split",
+      "picture_function": "demonstration",
+      "why_this_picture": "Connected stops make distance a relationship between places rather than an isolated number.",
+      "camera_observation": "Cut to a closer map source; context samples do not establish a continuous zoom from the coffee screen.",
+      "camera_reason": "Favor connecting geometry over an unreadable broad overview.",
+      "pacing_reason": "Around one second communicates relation shape, not detailed navigation.",
+      "handoff": "The next phone view turns distance into travel guidance.",
+      "catalog_candidates": [
+        "ui-focus-zoom"
+      ],
+      "implementation_note": "Use a real route capture; anchored focus may enlarge the route only when endpoints remain visible.",
+      "transfer": "Show two endpoints and their link for distance/time relationships.",
+      "caution": "A generic country map or pin by itself would lose the relationship.",
+      "sample_times": [
+        5.5,
+        6.0
+      ],
+      "start": 5.4,
+      "end": 6.433,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B08",
+      "source_frames": [
+        {
+          "requested_time": 5.5,
+          "source_pts": 5.5,
+          "frame_index": 330,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000330.jpg",
+          "sha256": "883075c436ebd3675aa009647d0883044717737ab00d88c18cef3588e497c461",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 6.0,
+          "source_pts": 6.0,
+          "frame_index": 360,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000360.jpg",
+          "sha256": "61d7a10feb4d724b61a3812a193d8097586a69f60831853e4ff9dca2458c85eb",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B08.jpg",
+        "sha256": "46e44c37719e759ad5d612cb785b4f8db06bbb5db5a99e7b51af017ce48256d6",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "It can estimate travel between places.",
+      "visible": "Tilted phone navigation screen with a Kirkwood Pl N turn banner and short-distance cue.",
+      "change": "Phone navigation replaces flat map in the upper region.",
+      "view": "split",
+      "picture_function": "orientation",
+      "why_this_picture": "The recognizable turn card introduces the navigation context before its trip duration is shown.",
+      "camera_observation": "Cut to a tilted device graphic; no verified continuous camera transition.",
+      "camera_reason": "Make this a usable travel interface, not only a map picture.",
+      "pacing_reason": "Very short visual bridge; the route banner is an affordance cue rather than a reading task.",
+      "handoff": "Phone directions list follows within the same visual family.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Use phone chrome and supplied navigation media only if the framing improves recognition.",
+      "transfer": "Bridge from a spatial relation to a practical action interface.",
+      "caution": "The depicted street is not bound to the narrated New York day.",
+      "sample_times": [
+        6.5
+      ],
+      "start": 6.433,
+      "end": 6.95,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B09",
+      "source_frames": [
+        {
+          "requested_time": 6.5,
+          "source_pts": 6.5,
+          "frame_index": 390,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000390.jpg",
+          "sha256": "4e9332a60207ac89d991d008e795f3b3fdf26c850dce5bb12ffa9ff03886b185",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B09.jpg",
+        "sha256": "30a64bdab90f3e922d0d3e67c3656f99a7e1bdf617c708150614104692058507",
+        "dimensions": [
+          300,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "It can estimate how long the trip takes.",
+      "visible": "Phone directions list and a prominent 11-minute, 2.1-mile result card.",
+      "change": "Navigation banner becomes a route-summary list.",
+      "view": "split",
+      "picture_function": "demonstration",
+      "why_this_picture": "A large duration makes the time claim concrete; turn-by-turn details remain supporting context.",
+      "camera_observation": "Stable phone staging; changed UI state, not a demonstrated zoom.",
+      "camera_reason": "The 11-minute card is the meaningful reading target.",
+      "pacing_reason": "Subsecond hold is suitable for one large duration but not all directions.",
+      "handoff": "An alternate-route phone view follows for traffic.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Preserve a true duration card and route context; crop unrelated turn details if needed.",
+      "transfer": "Choose the actual outcome field for a numerical claim.",
+      "caution": "Do not label this as proof of the five-minute breakfast example.",
+      "sample_times": [
+        7.0,
+        7.5
+      ],
+      "start": 6.95,
+      "end": 7.733,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B10",
+      "source_frames": [
+        {
+          "requested_time": 7.0,
+          "source_pts": 7.0,
+          "frame_index": 420,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000420.jpg",
+          "sha256": "25a1cbb30b0615e9ff78e88b07e18d72fa2ae5053f28d03df62399005aa11f98",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 7.5,
+          "source_pts": 7.5,
+          "frame_index": 450,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000450.jpg",
+          "sha256": "de24260007fb5c6a925139ead2b2063baed95414f4c63dabe4e6c95c82271148",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B10.jpg",
+        "sha256": "742d2a3ae3d8e722215df0d6d42a84ca1e394fd8bcee31f72663ed08f24d79cb",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Traffic can alter the route choice.",
+      "visible": "Phone map with alternative paths and 21-/25-minute badges on a green backdrop.",
+      "change": "Another phone rises/replaces the directions list, with a brief blurred movement.",
+      "view": "split",
+      "picture_function": "demonstration",
+      "why_this_picture": "Alternative times imply a choice between routes, matching the added traffic constraint.",
+      "camera_observation": "Context shows vertical entry/blur then a held phone map; exact motion curve is unmeasured.",
+      "camera_reason": "Settle on the competing duration badges.",
+      "pacing_reason": "The longer phone hold lets the viewer compare two values before the scenario begins.",
+      "handoff": "Full presenter clears the product montage.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Actual route options are the asset; the catalog only supplies device framing.",
+      "transfer": "When a condition changes a decision, show at least two options and the selected criterion.",
+      "caution": "Traffic causation is narrated; screenshots alone do not establish its calculation.",
+      "sample_times": [
+        8.0,
+        8.5
+      ],
+      "start": 7.733,
+      "end": 9,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B11",
+      "source_frames": [
+        {
+          "requested_time": 8.0,
+          "source_pts": 8.0,
+          "frame_index": 480,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000480.jpg",
+          "sha256": "87fddda7eb23965af74aa213e427c418ee2ad9559050e09d6aad2b8adcdd7770",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 8.5,
+          "source_pts": 8.5,
+          "frame_index": 510,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000510.jpg",
+          "sha256": "1cdcb91633b6029c0b9a3d5162840d85c33d0a663ad0adba008befb38ae43459",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B11.jpg",
+        "sha256": "0cc33029f5b054e558e8c335d6e3dcc1dfcc50c6f8ce16f6d9312a6fe33ba826",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Here is a specific day-planning example.",
+      "visible": "Full presenter, hands together, short setup caption.",
+      "change": "Full face replaces split phone proof.",
+      "view": "full presenter",
+      "picture_function": "orientation",
+      "why_this_picture": "The personal transition tells the viewer to stop reading capabilities and enter a scenario.",
+      "camera_observation": "Direct cut to a medium portrait.",
+      "camera_reason": "Restore human context before the location establishing shot.",
+      "pacing_reason": "Less than a second is a punctuation beat, with no complex visual to read.",
+      "handoff": "New York street footage provides the scenario's place.",
+      "catalog_candidates": [],
+      "implementation_note": "Reuse source performance with a plain cut.",
+      "transfer": "Reset before moving from general capability to one example.",
+      "caution": "None observed beyond timing approximation.",
+      "sample_times": [
+        9.0,
+        9.5
+      ],
+      "start": 9,
+      "end": 9.767,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B12",
+      "source_frames": [
+        {
+          "requested_time": 9.0,
+          "source_pts": 9.0,
+          "frame_index": 540,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000540.jpg",
+          "sha256": "1f2299ef4171633da2865a263aaad0c0332c08470f43022e8de5bafb30892e50",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 9.5,
+          "source_pts": 9.5,
+          "frame_index": 570,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000570.jpg",
+          "sha256": "d387812eb97ec48314695a0e58a76925a49199fb00caa4652dddd3b3311124a6",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B12.jpg",
+        "sha256": "98b79074afb45e00313e8df864d2f2fc62b0d4d6825420a6960cea273322a72b",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Imagine spending one day in New York.",
+      "visible": "Full-height Times Square street footage with signs, buildings, traffic and pedestrians.",
+      "change": "Real-world location replaces the presenter.",
+      "view": "full visual",
+      "picture_function": "orientation",
+      "why_this_picture": "The familiar environment makes the hypothetical day tangible and relevant before entering the prompt.",
+      "camera_observation": "Moving street footage holds; movement is source camera/traffic, not established digital zoom.",
+      "camera_reason": "Let the viewer inhabit the scenario briefly.",
+      "pacing_reason": "About 1.5 seconds supplies recognition; pedestrians and camera motion renew attention naturally.",
+      "handoff": "Cut from the city to the instruction that plans time in it.",
+      "catalog_candidates": [],
+      "implementation_note": "Reuse licensed location footage or the user's actual city footage; native full-frame media is sufficient.",
+      "transfer": "Use one place-establishing asset when the location changes the problem.",
+      "caution": "The footage establishes setting, not evidence the trip was executed.",
+      "sample_times": [
+        10.0,
+        10.5,
+        11.0
+      ],
+      "start": 9.767,
+      "end": 11.267,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B13",
+      "source_frames": [
+        {
+          "requested_time": 10.0,
+          "source_pts": 10.0,
+          "frame_index": 600,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000600.jpg",
+          "sha256": "d8932316f0618f353c72bf27461b46c8d49946dab88c4cc91bc9acef4af82d49",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 10.5,
+          "source_pts": 10.5,
+          "frame_index": 630,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000630.jpg",
+          "sha256": "a5d9bc70f26a4c48201a3805a0c84c36d93a018051e48a30a3074514da2b8331",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 11.0,
+          "source_pts": 11.0,
+          "frame_index": 660,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000660.jpg",
+          "sha256": "9dc0f0c9f5e75aef6616e8bd4dab589f4cd106f884c9ddd8e970c6cdc4cc573d",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B13.jpg",
+        "sha256": "f38346eecdde2425acc121d626578bfa1cee7f290ec750c2eb704fc1851e5c45",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Ask for breakfast, a workspace, three worthwhile sights and dinner.",
+      "visible": "Claude input on a dark full frame types one accumulating multi-part day request.",
+      "change": "UI input replaces street footage; no narrator remains.",
+      "view": "full visual",
+      "picture_function": "demonstration",
+      "why_this_picture": "Showing the actual instruction makes the test inspectable and preserves the relationship between all requested stops.",
+      "camera_observation": "Fixed input framing throughout 4.5 seconds; the information grows by typing.",
+      "camera_reason": "Keep the complete prompt in one place instead of restarting attention for each noun.",
+      "pacing_reason": "The hold earns its length because text accumulates at the rate of the enumerated requirements; it is one developing view.",
+      "handoff": "Complete request is retained in memory when the narrator contrasts random recommendations with route planning.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Capture the real input or build a clearly illustrative editable input using exact task text; enlarge it for phone reading.",
+      "transfer": "Show a concrete input before evaluating the output.",
+      "caution": "Typing here is presentation, not proof of submission or successful execution; every character is not a new beat.",
+      "sample_times": [
+        11.5,
+        12.5,
+        13.5,
+        14.5,
+        15.5
+      ],
+      "start": 11.267,
+      "end": 15.767,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B14",
+      "source_frames": [
+        {
+          "requested_time": 11.5,
+          "source_pts": 11.5,
+          "frame_index": 690,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000690.jpg",
+          "sha256": "4133165c9146f4f3a5c666dfa607d9aaabda44a8f6b6365ab5d6b98b3c52e174",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 12.5,
+          "source_pts": 12.5,
+          "frame_index": 750,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000750.jpg",
+          "sha256": "264f751df0e36ce35ffe087cb46356f34dd7ee0c266155a2a560715020a1cd18",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 13.5,
+          "source_pts": 13.5,
+          "frame_index": 810,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000810.jpg",
+          "sha256": "4b1aff873639a814ed12f95c2e5a861edc3748d4384f36051855e4c385a06b00",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 14.5,
+          "source_pts": 14.5,
+          "frame_index": 870,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000870.jpg",
+          "sha256": "523bbc1383dd8e6b11caa5e3cc93193bbb47aa3d9212efa5a07d8a07a5a96e75",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 15.5,
+          "source_pts": 15.5,
+          "frame_index": 930,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000930.jpg",
+          "sha256": "fe4cdb24ff1820e306807a6e4238d8750e7f5622a56c300639f6d1f6d85761c0",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B14.jpg",
+        "sha256": "677adec0b866d33c85282536a30953f214b9879658a2214f71f0d864f4411813",
+        "dimensions": [
+          1532,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Six disconnected recommendations would not solve the day.",
+      "visible": "Presenter fills the frame; red contrast words then white/teal phrase about six random recommendations.",
+      "change": "Prompt clears; a closer human objection replaces it.",
+      "view": "full presenter",
+      "picture_function": "emphasis",
+      "why_this_picture": "The face carries the judgment about why a naive answer is insufficient; no unrelated illustration competes with that distinction.",
+      "camera_observation": "Sampled strips show successive tighter presenter framings within the same shot family; no new object is exposed.",
+      "camera_reason": "Emphasize the objection and keep attention on the speaker's evaluation.",
+      "pacing_reason": "Two seconds lets the contrast land before the alternative mechanism; cropping and phrase emphasis renew attention.",
+      "handoff": "Green MapQuest brand transition names the proposed better mechanism.",
+      "catalog_candidates": [
+        "yt-camera-move"
+      ],
+      "implementation_note": "Use native cuts/crops or a restrained wrapper push; do not claim automatic tracking.",
+      "transfer": "Give a key misconception a brief human beat when expression helps.",
+      "caution": "Tighter framing adds emphasis, not evidence that a random baseline was tested.",
+      "sample_times": [
+        15.95,
+        16.575,
+        17.2,
+        17.7
+      ],
+      "start": 15.767,
+      "end": 17.833,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B15",
+      "source_frames": [
+        {
+          "requested_time": 15.95,
+          "source_pts": 15.95,
+          "frame_index": 957,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000957.jpg",
+          "sha256": "c0b686254765cd68c73448b8551d66d30d02cf941e6ba762c8f48e91ce4268f9",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 16.575,
+          "source_pts": 16.566667,
+          "frame_index": 994,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f000994.jpg",
+          "sha256": "6e687bb8f8523853d44372b4605fd4b581d6c43e61dfe65753aeb83c18e9ef6c",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 17.2,
+          "source_pts": 17.2,
+          "frame_index": 1032,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001032.jpg",
+          "sha256": "03b6a43bba3d8a336e9709aa2eb072c58f33974331faa4a9267eedf6d0dc3e1d",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 17.7,
+          "source_pts": 17.7,
+          "frame_index": 1062,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001062.jpg",
+          "sha256": "b57db28386a45db941b1920d43b6399aa05695fd7a9e011a02995efead1bad97",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B15.jpg",
+        "sha256": "a8c92c1dab3460a754c43e798c337b899e67a9c9cc0f3d1f6dad31bc87bfecaf",
+        "dimensions": [
+          1224,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "MapQuest can supply the actual places.",
+      "visible": "Layered stepped green fields converge behind a white MapQuest logo.",
+      "change": "Full graphic brand transition replaces the face.",
+      "view": "full visual",
+      "picture_function": "orientation",
+      "why_this_picture": "Naming the service prepares the ensuing map outputs; the expanding geometry mostly brands and bridges the sequence.",
+      "camera_observation": "Graphic layers change size; no factual target is revealed.",
+      "camera_reason": "Brand recall and transition energy; geometry has no clear spatial-planning meaning.",
+      "pacing_reason": "One-second punctuation before the location results.",
+      "handoff": "Green brand yields to actual pin-bearing map imagery.",
+      "catalog_candidates": [],
+      "implementation_note": "Reuse an authorized brand animation if available, or simple logo media; no need to custombuild decorative stepped fields.",
+      "transfer": "Use a short mechanism reminder when the tool name must be remembered.",
+      "caution": "Decorative movement should not be mistaken for a route-building demonstration.",
+      "sample_times": [
+        18.0,
+        18.5
+      ],
+      "start": 17.833,
+      "end": 18.917,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B16",
+      "source_frames": [
+        {
+          "requested_time": 18.0,
+          "source_pts": 18.0,
+          "frame_index": 1080,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001080.jpg",
+          "sha256": "393c69f352324f567a2f463198fdae9fc668f8b0a39184e9024d93eb653d0000",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 18.5,
+          "source_pts": 18.5,
+          "frame_index": 1110,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001110.jpg",
+          "sha256": "cba426078fdaac3c4684cce86d097188acd9fe7d170bd42b93971891f611be2c",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B16.jpg",
+        "sha256": "34d4849efe2ebca087b598cd54be5a8347067d732d496d31e396b2a539f4ae5d",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Find actual places, not just generic suggestions.",
+      "visible": "Map with named stores and food/place pins above presenter.",
+      "change": "Map evidence returns in the recurring split chassis.",
+      "view": "split",
+      "picture_function": "demonstration",
+      "why_this_picture": "Individual place pins convert the word places into addressable objects.",
+      "camera_observation": "New map image; position drifts slightly between samples; no exact zoom assertion.",
+      "camera_reason": "Point at concrete locations while the presenter narrates the action.",
+      "pacing_reason": "Roughly one second makes the category of returned objects clear.",
+      "handoff": "Pins are followed by a connecting route on a different map source.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Supply real result pins for the same task wherever possible.",
+      "transfer": "Show the actual entities a system operates on.",
+      "caution": "This map sequence is not a continuous verified New York route.",
+      "sample_times": [
+        19.0,
+        19.5,
+        20.0
+      ],
+      "start": 18.917,
+      "end": 20.083,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B17",
+      "source_frames": [
+        {
+          "requested_time": 19.0,
+          "source_pts": 19.0,
+          "frame_index": 1140,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001140.jpg",
+          "sha256": "b491a4f377d6d2b53c26c17e2f6efcdf8646890737180a3f2f8574d2db64b5fb",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 19.5,
+          "source_pts": 19.5,
+          "frame_index": 1170,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001170.jpg",
+          "sha256": "3699863d04e812424860be9829f7ff92193a0f14b5124d722d641af46bb830d9",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 20.0,
+          "source_pts": 20.0,
+          "frame_index": 1200,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001200.jpg",
+          "sha256": "41c0ecff3b33dbab8ed61635e4dab1c20c17d11120fd31a02b5b7bb00eeb2c1a",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B17.jpg",
+        "sha256": "0c7fc688bd06de4a9be64af30a32442a01ed21a380d227a212d2bcbb4f2b40bb",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Calculate the routes between those places.",
+      "visible": "Satellite map, cyan path, endpoint A and a prominent 20-minute badge.",
+      "change": "Pin map becomes a routed satellite view.",
+      "view": "split",
+      "picture_function": "demonstration",
+      "why_this_picture": "The path connects places and the badge names travel cost; these are the specific relations the narration introduces.",
+      "camera_observation": "Source change to a closer satellite route; no observed same-map camera journey.",
+      "camera_reason": "Make the connection and time cost the upper-panel focus.",
+      "pacing_reason": "A brief hold makes one connection readable before order is discussed.",
+      "handoff": "A street map with multiple dots follows to suggest ordering.",
+      "catalog_candidates": [
+        "ui-focus-zoom"
+      ],
+      "implementation_note": "Anchor a real route capture at its endpoints/result badge; preserve labels needed to understand the cost.",
+      "transfer": "Turn object lists into relationships when explaining a process.",
+      "caution": "Different location/rendition; a route preview does not validate the narrator's whole plan.",
+      "sample_times": [
+        20.5,
+        21.0
+      ],
+      "start": 20.083,
+      "end": 21.333,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B18",
+      "source_frames": [
+        {
+          "requested_time": 20.5,
+          "source_pts": 20.5,
+          "frame_index": 1230,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001230.jpg",
+          "sha256": "a3bb3dab5f6179cf5c9fdf682e03736669289a9b2b3c0d4639c8f6d07d74c9c9",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 21.0,
+          "source_pts": 21.0,
+          "frame_index": 1260,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001260.jpg",
+          "sha256": "e87c139a46430a96c9b8ad4e16412ac9acfc9ae3167b434e42e9880219ebc752",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B18.jpg",
+        "sha256": "99efa1de822e2febbc6a756e0de6dab1fcc7f1dc31383022f1329de223a1edf1",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Arrange stops in a sensible order.",
+      "visible": "A San Francisco street map resolves from blur; blue markers progressively populate it above the presenter.",
+      "change": "Satellite path gives way to the broader distribution of stops.",
+      "view": "split",
+      "picture_function": "weak-match",
+      "why_this_picture": "The distribution suggests spatial planning, but unordered dots alone do not show an optimized visit sequence.",
+      "camera_observation": "Map settles from soft focus and dots appear; no visible numbered ordering is established.",
+      "camera_reason": "Broaden attention from one route to the set of possible stops.",
+      "pacing_reason": "Marker accumulation creates internal renewal during the almost-two-second explanation.",
+      "handoff": "Presenter returns to specify the user's current location as a condition.",
+      "catalog_candidates": [],
+      "implementation_note": "Reuse a true ordered route/result capture if the lesson claims optimization; plain markers are insufficient.",
+      "transfer": "Use a wide view when the viewer must understand a whole set before a decision.",
+      "caution": "Clear mismatch: the image implies location inventory more strongly than smartest order.",
+      "sample_times": [
+        21.5,
+        22.0,
+        22.5,
+        23.0
+      ],
+      "start": 21.333,
+      "end": 23.117,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B19",
+      "source_frames": [
+        {
+          "requested_time": 21.5,
+          "source_pts": 21.5,
+          "frame_index": 1290,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001290.jpg",
+          "sha256": "379c9a66da0a279e9216eb71edda4318afb669e1f01fb4914594fa31577e28e5",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 22.0,
+          "source_pts": 22.0,
+          "frame_index": 1320,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001320.jpg",
+          "sha256": "c6db7d2458728173018e3621badb76b33e753f2e8b2a5b4e699eade5a3c4fcb4",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 22.5,
+          "source_pts": 22.5,
+          "frame_index": 1350,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001350.jpg",
+          "sha256": "a99614998a57d091f43730613063bd8e8365818b92cd566a38d1083b07d6e341",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 23.0,
+          "source_pts": 23.0,
+          "frame_index": 1380,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001380.jpg",
+          "sha256": "2549c0ffd4e7c6b6eb07532fcebd09bc41a01402f27421932485fa8f8bed9104",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B19.jpg",
+        "sha256": "20d19b27debf352bc9d84456d867597095aaf1fd72197cf7f7ae979e7109bbf9",
+        "dimensions": [
+          1224,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "The plan should start from where I am now.",
+      "visible": "Full presenter emphasizes the personal starting condition.",
+      "change": "Map clears to face; later crop is tighter.",
+      "view": "full presenter",
+      "picture_function": "emphasis",
+      "why_this_picture": "The first-person condition is easy to follow through the narrator before returning to a concrete route.",
+      "camera_observation": "Strip shows medium framing followed by tighter framing around 23.6 seconds; no external target.",
+      "camera_reason": "Stress personalization; this is an emphasis crop.",
+      "pacing_reason": "Just over one second provides a clean condition before the breakfast result.",
+      "handoff": "Cut to map endpoints and directions card.",
+      "catalog_candidates": [
+        "yt-camera-move"
+      ],
+      "implementation_note": "Use an intentional native reframe on the phrase, with face-safe crop.",
+      "transfer": "Highlight a changed condition before showing its effect.",
+      "caution": "No live user-location detection is shown.",
+      "sample_times": [
+        23.225,
+        23.6,
+        24.225
+      ],
+      "start": 23.117,
+      "end": 24.333,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B20",
+      "source_frames": [
+        {
+          "requested_time": 23.225,
+          "source_pts": 23.233333,
+          "frame_index": 1394,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001394.jpg",
+          "sha256": "9703e9cda78608cd0834aeb39f1b48da2030fe6073373c6db4d0bcb531f2b98e",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 23.6,
+          "source_pts": 23.6,
+          "frame_index": 1416,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001416.jpg",
+          "sha256": "989a90c77fcbcfeb3a23976ae5726926ac77b9bf99349cd461b550dd9303886f",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 24.225,
+          "source_pts": 24.233333,
+          "frame_index": 1454,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001454.jpg",
+          "sha256": "0e53b48a8009a65a29c25b5bf62368c919b7a1633c78b2108577a3b3cb12a820",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B20.jpg",
+        "sha256": "2d05b7f3f9cd585d9544166a3c4b12af7b0297bb89c0a7cf40fbc1d074821aba",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Breakfast can be close to the current starting point.",
+      "visible": "Angled street map with A/B markers, yellow route and initially small dark directions card above it.",
+      "change": "Full map replaces presenter; route geometry is established first.",
+      "view": "full visual",
+      "picture_function": "demonstration",
+      "why_this_picture": "The endpoints orient the viewer before the short trip duration becomes the dominant reading target.",
+      "camera_observation": "In sampled strip the directions card enters small then enlarges quickly against the map.",
+      "camera_reason": "Establish route context so the subsequent number is not floating without referent.",
+      "pacing_reason": "A quarter-second establishment is very brief; its only job is recognizing map plus endpoints.",
+      "handoff": "The same card becomes the focus while route context remains behind it.",
+      "catalog_candidates": [],
+      "implementation_note": "Use one source route and its matching result card; native media can preserve their relationship.",
+      "transfer": "Show the whole object before enlarging its decisive detail.",
+      "caution": "Card addresses and visible map labels are not demonstrably the same itinerary; exact motion start is approximate.",
+      "sample_times": [
+        24.35,
+        24.475
+      ],
+      "start": 24.333,
+      "end": 24.6,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B21",
+      "source_frames": [
+        {
+          "requested_time": 24.35,
+          "source_pts": 24.35,
+          "frame_index": 1461,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001461.jpg",
+          "sha256": "72b3f3ab2302136e019147711402d60180839735401278627047908820d55d42",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 24.475,
+          "source_pts": 24.483333,
+          "frame_index": 1469,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001469.jpg",
+          "sha256": "3709dc82c45964096ac05bae36fdc1d5ce10e6c7b8b730512abf53636504d898",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B21.jpg",
+        "sha256": "ac62684936475ccb8c8743ae0534435d826dace93a18e293d6bab2e833ce18be",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "The breakfast trip could be a five-minute walk.",
+      "visible": "Dark directions card grows large, showing 5 min; map endpoints and yellow path remain behind/below it.",
+      "change": "Focus changes from the route field to its result card.",
+      "view": "full visual",
+      "picture_function": "demonstration",
+      "why_this_picture": "The five-minute field is the exact kind of output the sentence asks the viewer to notice.",
+      "camera_observation": "24.6–25.1 samples show card enlargement, with some map drift; this is not simply one uniform whole-screen zoom.",
+      "camera_reason": "Make the duration legible while retaining enough map to bind it to a trip.",
+      "pacing_reason": "After the fast enlargement, the card holds for the duration phrase and walk-away payoff.",
+      "handoff": "An ordered-stop list replaces the single-trip result.",
+      "catalog_candidates": [
+        "ui-focus-zoom"
+      ],
+      "implementation_note": "Reuse actual map/card assets; focus helper is a mechanism candidate, but independently growing a card requires host-layer placement/adaptation.",
+      "transfer": "Enlarge the decision-relevant result when a full view makes it too small.",
+      "caution": "The montage is illustrative; the visible card and map do not verify the narrated walk or exact addresses.",
+      "sample_times": [
+        24.725,
+        25.1,
+        25.475,
+        25.85
+      ],
+      "start": 24.6,
+      "end": 26,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B22",
+      "source_frames": [
+        {
+          "requested_time": 24.725,
+          "source_pts": 24.733333,
+          "frame_index": 1484,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001484.jpg",
+          "sha256": "c808b2931ddb0c354ea171e0fd79927880b7f9c9026a5e41baafafa5b972f346",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 25.1,
+          "source_pts": 25.1,
+          "frame_index": 1506,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001506.jpg",
+          "sha256": "24cd282418458d9ee7e5eac90346f4e692b30b90d50e2e487f89d515a341ee34",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 25.475,
+          "source_pts": 25.483333,
+          "frame_index": 1529,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001529.jpg",
+          "sha256": "2933a1f5d193c2b77110d148b7b8a7c557bc5fd6988f4f113bb0455ef6263a3f",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 25.85,
+          "source_pts": 25.85,
+          "frame_index": 1551,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001551.jpg",
+          "sha256": "99425e56e499bf4d1b3dbbb174acd452d36834ed4bbe0b42bb44f612b579a437",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B22.jpg",
+        "sha256": "146cedff7cea3621fde6244d12c6b85e92e5c76e62e1875c0c67ade58a1bb55f",
+        "dimensions": [
+          1224,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Find the closest worthwhile stop after breakfast.",
+      "visible": "Directions list with A/B/C and later stops; blue fastest/time-saved tags appear on a pale background.",
+      "change": "Single map route changes to a stop-sequence list.",
+      "view": "full visual",
+      "picture_function": "weak-match",
+      "why_this_picture": "The list connects route planning to ordering multiple stops, but does not visibly identify a breakfast-to-sight relationship.",
+      "camera_observation": "List content enters and settles; a second comparison-like list position is visible during entry, then one list is dominant.",
+      "camera_reason": "Focus on stop order and savings rather than geography.",
+      "pacing_reason": "Two seconds allows rows and savings badges to accumulate; it remains one sequence graphic.",
+      "handoff": "Mobile route alternatives then show the next travel leg.",
+      "catalog_candidates": [],
+      "implementation_note": "Prefer the user's actual ordered stops with truthful place names and travel times; do not force a before/after wipe when no baseline is shown.",
+      "transfer": "Use a sequence list when ordering, rather than spatial shape, is the information.",
+      "caution": "Generic address rows and savings tags do not prove nearest sightseeing choice.",
+      "sample_times": [
+        26.0,
+        26.5,
+        27.0,
+        27.5,
+        28.0
+      ],
+      "start": 26,
+      "end": 28.15,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B23",
+      "source_frames": [
+        {
+          "requested_time": 26.0,
+          "source_pts": 26.0,
+          "frame_index": 1560,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001560.jpg",
+          "sha256": "95dbd41a174c8eb465076213d2a79a1bf3cbd9ccbd870e99932354b1328a207e",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 26.5,
+          "source_pts": 26.5,
+          "frame_index": 1590,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001590.jpg",
+          "sha256": "cff4547ca878ec7e7964a122da5a0931ff62320135e19f7a3166ce47b8dddef5",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 27.0,
+          "source_pts": 27.0,
+          "frame_index": 1620,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001620.jpg",
+          "sha256": "80aa1926c9bf471aa6d94297e485e393060bd38899c2eaa06705baad449c3f77",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 27.5,
+          "source_pts": 27.5,
+          "frame_index": 1650,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001650.jpg",
+          "sha256": "624c261ea7343d40a7227b0a0ed71495194c3b0759c1164ee86b97fd956f5140",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 28.0,
+          "source_pts": 28.0,
+          "frame_index": 1680,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001680.jpg",
+          "sha256": "ec2dec44211b4d9a69500763dd74ddfc4c9a2cae94fd99894d319e167759b673",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B23.jpg",
+        "sha256": "3cd7d356b66dba44f43df5d1262beb7e65b5997501c784c4e3befb65fb643893",
+        "dimensions": [
+          1532,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Choose the fastest route across town.",
+      "visible": "Dark mobile map above route selector; current location, destination and Route 1/Route 2 cards; a 2-minute option is highlighted.",
+      "change": "Stop list changes to an actionable mobile route screen.",
+      "view": "full visual",
+      "picture_function": "demonstration",
+      "why_this_picture": "Competing route cards and a selected duration give the choice an observable output.",
+      "camera_observation": "Route imagery changes internally and the selected path/result appears; no face or split distracts.",
+      "camera_reason": "Keep the chosen route and its cost readable.",
+      "pacing_reason": "The result develops over roughly 1.75 seconds; route line and badge supply renewal.",
+      "handoff": "Full presenter supplies the sentence's destination conclusion.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Use a real route-option capture with the selection intact.",
+      "transfer": "Show both the available choice and the selected outcome.",
+      "caution": "The displayed Chattanooga-area screen is not New York; two-minute result is a capability illustration.",
+      "sample_times": [
+        28.5,
+        29.0,
+        29.5
+      ],
+      "start": 28.15,
+      "end": 29.9,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B24",
+      "source_frames": [
+        {
+          "requested_time": 28.5,
+          "source_pts": 28.5,
+          "frame_index": 1710,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001710.jpg",
+          "sha256": "a63274b17622b9a6c5a497226f82d9801972d6358fd3897f6ded284a84d944ee",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 29.0,
+          "source_pts": 29.0,
+          "frame_index": 1740,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001740.jpg",
+          "sha256": "898a8a99a9afe5d9bd0ed351f40acf1531b21c819319af196307dfdc50879584",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 29.5,
+          "source_pts": 29.5,
+          "frame_index": 1770,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001770.jpg",
+          "sha256": "f0a0f2640562295cf61e63112e99a9a842af1681bd5107f2f37650ec4393465c",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B24.jpg",
+        "sha256": "6cc6a76e78bbe820faa193e2b262211cf21a64b2d93eaf887362eca837d6cca7",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Finish the day at a location that makes sense.",
+      "visible": "Full presenter delivers the end-of-day conclusion.",
+      "change": "Mobile result clears to human narration.",
+      "view": "full presenter",
+      "picture_function": "orientation",
+      "why_this_picture": "The speaker connects the discrete route examples to the intended whole-day benefit.",
+      "camera_observation": "Direct return to medium-close portrait.",
+      "camera_reason": "Recenter the human outcome after dense UI.",
+      "pacing_reason": "A one-second bridge prepares an experiential payoff image.",
+      "handoff": "Pedestrian street footage visualizes arriving and spending time.",
+      "catalog_candidates": [],
+      "implementation_note": "Native presenter cut; no graphic required.",
+      "transfer": "Restate the consequence after a sequence of technical steps.",
+      "caution": "No completed day itinerary is displayed here.",
+      "sample_times": [
+        30.0,
+        30.5
+      ],
+      "start": 29.9,
+      "end": 30.967,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B25",
+      "source_frames": [
+        {
+          "requested_time": 30.0,
+          "source_pts": 30.0,
+          "frame_index": 1800,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001800.jpg",
+          "sha256": "25bfe63268065e4b0e53ff4cfe4f2c8fddaf4454e1582efc948bc51b58abd3a5",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 30.5,
+          "source_pts": 30.5,
+          "frame_index": 1830,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001830.jpg",
+          "sha256": "4ffe689489a667513985afbac67b0d02461fb8f9907b8b1254a040a3bf9c0245",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B25.jpg",
+        "sha256": "13a51a194d0172f4fcedea3f99daefb9f2bca116496f7015f49501f98d635ec8",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "The final destination fits where the day ends.",
+      "visible": "Walking footage on a crowded pedestrian shopping street, buildings and storefronts converging into depth.",
+      "change": "Full-height lived environment replaces face.",
+      "view": "full visual",
+      "picture_function": "orientation",
+      "why_this_picture": "The street gives an experiential sense of being at the destination, rather than another abstract planning panel.",
+      "camera_observation": "Forward-moving source footage; no evidence of a separate digital focus move.",
+      "camera_reason": "Keep attention in the destination environment.",
+      "pacing_reason": "Two seconds lets forward travel and pedestrians carry the hold naturally.",
+      "handoff": "Presenter returns to broaden the lesson beyond travel.",
+      "catalog_candidates": [],
+      "implementation_note": "Reuse appropriate real destination footage; native full-frame media.",
+      "transfer": "Show the lived consequence after a process delivers a result.",
+      "caution": "Exact city and connection to the planned dinner are not authenticated.",
+      "sample_times": [
+        31.0,
+        31.5,
+        32.0,
+        32.5
+      ],
+      "start": 30.967,
+      "end": 32.933,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B26",
+      "source_frames": [
+        {
+          "requested_time": 31.0,
+          "source_pts": 31.0,
+          "frame_index": 1860,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001860.jpg",
+          "sha256": "d766cff9fe07926b8c57ad0d6383077f8447b954574a8b511377992f773639e4",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 31.5,
+          "source_pts": 31.5,
+          "frame_index": 1890,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001890.jpg",
+          "sha256": "2a57650879570ecf812b94f6e1a3568c81437ee163027176e2a7327f9262d04c",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 32.0,
+          "source_pts": 32.0,
+          "frame_index": 1920,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001920.jpg",
+          "sha256": "f0eed2f12e33973c3b0d65d94a069dff6ada8775027abe928d4a3d7995a26d86",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 32.5,
+          "source_pts": 32.5,
+          "frame_index": 1950,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001950.jpg",
+          "sha256": "b263a9044807ef4a9458f774158181384515ed3a5fedee81f11c860849b297b4",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B26.jpg",
+        "sha256": "dc08d07ab0f1feac77c9df94b06300be8116412ef6041de0fa38f03a00dab40a",
+        "dimensions": [
+          1224,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Travel is only one use of location-aware agents.",
+      "visible": "Presenter returns medium and then tighter, with one-example caption emphasis.",
+      "change": "Human explanation replaces street payoff.",
+      "view": "full presenter",
+      "picture_function": "emphasis",
+      "why_this_picture": "The presenter generalizes from the example; another random industry image would introduce an unsupported new story.",
+      "camera_observation": "Strip shows successive tighter framings around 33.4/33.9 seconds; no external target is revealed.",
+      "camera_reason": "Emphasize the widening claim, not a new fact in the frame.",
+      "pacing_reason": "Nearly two seconds allows the generalization; face performance and crop changes renew attention.",
+      "handoff": "Brand plus connector suffix restates the enabling mechanism.",
+      "catalog_candidates": [
+        "yt-camera-move"
+      ],
+      "implementation_note": "Use native crop changes deliberately; helper is optional wrapper motion only.",
+      "transfer": "Broaden a lesson after the concrete example has landed.",
+      "caution": "Do not interpret closer face framing as a demonstrated second use case.",
+      "sample_times": [
+        33.15,
+        33.65,
+        34.15,
+        34.775
+      ],
+      "start": 32.933,
+      "end": 34.867,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B27",
+      "source_frames": [
+        {
+          "requested_time": 33.15,
+          "source_pts": 33.15,
+          "frame_index": 1989,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f001989.jpg",
+          "sha256": "191948eb4bc319728f4b82d71beb3c3c868f2e619f4fd3ce438774abbf7fb0f4",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 33.65,
+          "source_pts": 33.65,
+          "frame_index": 2019,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002019.jpg",
+          "sha256": "b6baf2a6be2715bf8ed1a7d1f12ab1e6b9f6f9bae29e25e44a7979e2458b5ab6",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 34.15,
+          "source_pts": 34.15,
+          "frame_index": 2049,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002049.jpg",
+          "sha256": "fc950120dedb725c0356f4e36118f460a6b18946dc5e73f14a81c1ad1b569c19",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 34.775,
+          "source_pts": 34.766667,
+          "frame_index": 2086,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002086.jpg",
+          "sha256": "49afb3697aab045c6d61ad90037d3332d51b7fd89804b58498fb17a4dbb684ec",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B27.jpg",
+        "sha256": "ff834fbc1663566385b25be64dd53052439540cb847aa0bb7ca21e05d4f7d024",
+        "dimensions": [
+          1224,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "The same MapQuest MCP can support other agents.",
+      "visible": "Full pale stage with MapQuest logo; green MCP suffix resolves beside it.",
+      "change": "Brand recall replaces presenter.",
+      "view": "full visual",
+      "picture_function": "orientation",
+      "why_this_picture": "Repeating the exact integration name ties the broader claim back to the opening.",
+      "camera_observation": "Wordmark holds while suffix appears/resolves; no semantic camera target.",
+      "camera_reason": "Recall the mechanism after the travel example.",
+      "pacing_reason": "The suffix is the only new information; roughly 1.3 seconds is enough for recognition.",
+      "handoff": "A coding task screen gives the agent-building context.",
+      "catalog_candidates": [],
+      "implementation_note": "Reuse wordmark and native text reveal; source media or plain typography suffices.",
+      "transfer": "Repeat an enabling mechanism at the transition from example to application.",
+      "caution": "Brand reminder is not an implementation demonstration.",
+      "sample_times": [
+        35.0,
+        35.5,
+        36.0
+      ],
+      "start": 34.867,
+      "end": 36.167,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B28",
+      "source_frames": [
+        {
+          "requested_time": 35.0,
+          "source_pts": 35.0,
+          "frame_index": 2100,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002100.jpg",
+          "sha256": "a985992806c0a80baa954cc826b4decfb64633aeeb3da6198e637ee5cebac076",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 35.5,
+          "source_pts": 35.5,
+          "frame_index": 2130,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002130.jpg",
+          "sha256": "ed8e2f93c55dc336e9c943ce7868d87595a31e39ebbdf5cb8a1d79539848a761",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 36.0,
+          "source_pts": 36.0,
+          "frame_index": 2160,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002160.jpg",
+          "sha256": "a7a1f8c5cd7a8d42d2aaff69b7dea2a2dbc91ef1394460d16e4c2223aea77e71",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B28.jpg",
+        "sha256": "3a4bd278c4978acc4ba2adffa59f06e299e52d9bf696b2825df66c9a62484cf2",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Build an AI agent that needs location awareness.",
+      "visible": "Dark task/code-assistant pane above the presenter; file-writing/checklist activity visible.",
+      "change": "Split returns with developer-context media.",
+      "view": "split",
+      "picture_function": "weak-match",
+      "why_this_picture": "It cues agent construction, but the visible task concerns a web build and does not establish location execution.",
+      "camera_observation": "Cut to a cropped task pane; source text is small and the hold is short.",
+      "camera_reason": "Locate the general developer context.",
+      "pacing_reason": "This is a category cue under one second, not enough to inspect code behavior.",
+      "handoff": "Map pins replace code to restore the actual location capability.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Prefer an actual location-agent request/tool result; host the supplied capture in the source-inspected screen slot.",
+      "transfer": "Use developer UI only when its visible action matches the specific claim.",
+      "caution": "Code-like imagery alone is not proof of an agent's claimed ability.",
+      "sample_times": [
+        36.5
+      ],
+      "start": 36.167,
+      "end": 36.983,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B29",
+      "source_frames": [
+        {
+          "requested_time": 36.5,
+          "source_pts": 36.5,
+          "frame_index": 2190,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002190.jpg",
+          "sha256": "33d49381a5765d9c7e512488ed8673b55f142405c1fd54840068ca866c553d8a",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B29.jpg",
+        "sha256": "1a95613ce3df9d11df54c62ab9d16d03d7cd8ebe4d14eb9dc34e80650e76a0ef",
+        "dimensions": [
+          300,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "The agent must understand location.",
+      "visible": "Stylized street map with red pins above the narrator.",
+      "change": "Developer screen changes to spatial markers.",
+      "view": "split",
+      "picture_function": "orientation",
+      "why_this_picture": "Pins reconnect the broad agent-building claim to location entities.",
+      "camera_observation": "Map/pin image drifts slightly; no demonstrated route or focus target change.",
+      "camera_reason": "Restore the topic's visual referent.",
+      "pacing_reason": "About 1.3 seconds supports recognition; it does not deliver another workflow.",
+      "handoff": "Presenter returns for the offer.",
+      "catalog_candidates": [],
+      "implementation_note": "Plain map media or data-grounded pins; do not substitute a generic workflow card.",
+      "transfer": "Re-anchor an abstract capability in its concrete objects.",
+      "caution": "Pins show positions, not understanding or successful execution.",
+      "sample_times": [
+        37.0,
+        37.5,
+        38.0
+      ],
+      "start": 36.983,
+      "end": 38.3,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B30",
+      "source_frames": [
+        {
+          "requested_time": 37.0,
+          "source_pts": 37.0,
+          "frame_index": 2220,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002220.jpg",
+          "sha256": "15fbf4a06438ab0c1f04f0c5f8992c725a5e907033b1e167021333db8318eaa2",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 37.5,
+          "source_pts": 37.5,
+          "frame_index": 2250,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002250.jpg",
+          "sha256": "1423523b9500d239320230040dc72ef7bd07eee0e91b4d36955413ab18bc10b7",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 38.0,
+          "source_pts": 38.0,
+          "frame_index": 2280,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002280.jpg",
+          "sha256": "022817a4b691d295a41811c16f66168411083d5304d14c17c2476cffe9e71d2c",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B30.jpg",
+        "sha256": "2ae5cb2022d7cc26b9a4f3e01af2b7ba42232da93034b6dc358351bd16396ba5",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "There are many possible uses; try it.",
+      "visible": "Full presenter and concise caption.",
+      "change": "Split map clears.",
+      "view": "full presenter",
+      "picture_function": "emphasis",
+      "why_this_picture": "The face owns the recommendation after the examples, marking a change from explanation to offer.",
+      "camera_observation": "Direct medium-close return.",
+      "camera_reason": "Clear technical detail before a single incentive.",
+      "pacing_reason": "Less than one second is a brief persuasion bridge.",
+      "handoff": "Green brand panel reserves space for the offer quantity.",
+      "catalog_candidates": [],
+      "implementation_note": "Native presenter media.",
+      "transfer": "Mark the handoff from educational payoff to optional action.",
+      "caution": "Broad possibilities are asserted, not all demonstrated.",
+      "sample_times": [
+        38.5,
+        39.0
+      ],
+      "start": 38.3,
+      "end": 39.267,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B31",
+      "source_frames": [
+        {
+          "requested_time": 38.5,
+          "source_pts": 38.5,
+          "frame_index": 2310,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002310.jpg",
+          "sha256": "6251f67b0a7ee3de3e5b22b348564b613ac0f8128ec83beda6b79aab202afdb7",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 39.0,
+          "source_pts": 39.0,
+          "frame_index": 2340,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002340.jpg",
+          "sha256": "a4e4989f2b08edb3ad2eb718e984eb7704f90cc0189cead134217d33fdfba969",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B31.jpg",
+        "sha256": "ddb8ac6038fc8442c4c69ba154d925068de5283aea31069a6fecf24835e1cc88",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "MapQuest is offering a starting allowance.",
+      "visible": "MapQuest logo on green grid above presenter, initially without the allowance figure.",
+      "change": "Split brand/offer stage replaces full face.",
+      "view": "split",
+      "picture_function": "orientation",
+      "why_this_picture": "An uncluttered branded field sets up which provider the offer belongs to.",
+      "camera_observation": "Fixed split and centered wordmark.",
+      "camera_reason": "Prepare a stable area for the numerical incentive.",
+      "pacing_reason": "The logo holds before quantity arrives; this is a preparatory beat, not a new lesson.",
+      "handoff": "Digits and unit occupy the same upper panel.",
+      "catalog_candidates": [],
+      "implementation_note": "Reuse logo with native background; grid is optional decoration.",
+      "transfer": "Establish offer ownership before presenting a number.",
+      "caution": "Do not reuse historic offers without verification.",
+      "sample_times": [
+        39.5,
+        40.0
+      ],
+      "start": 39.267,
+      "end": 40.5,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B32",
+      "source_frames": [
+        {
+          "requested_time": 39.5,
+          "source_pts": 39.5,
+          "frame_index": 2370,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002370.jpg",
+          "sha256": "11e4cd453a8cdc209934de575d662153fa34f90c8de33770723ff4d18266d508",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 40.0,
+          "source_pts": 40.0,
+          "frame_index": 2400,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002400.jpg",
+          "sha256": "40b877c0569bc5b70974f2a4f74151c5ffad024c28a02c0ce86d25b952577dc3",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B32.jpg",
+        "sha256": "2fec2bf9bb9fac3d34b8fb73ffdb342ba699f4c994db6fa3502bb46f0d796a56",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "The source offers 50,000 free transactions to begin.",
+      "visible": "White 50,000 builds digit by digit; Free transactions appears below it; logo remains above.",
+      "change": "Quantity and its unit are added to the held offer panel.",
+      "view": "split",
+      "picture_function": "emphasis",
+      "why_this_picture": "The number plus unit makes scale and meaning legible; digits alone would be ambiguous.",
+      "camera_observation": "Sequential digit reveal and typed descriptor, not a count-up through numerical values.",
+      "camera_reason": "Focus on the starting allowance and its unit.",
+      "pacing_reason": "Around 2.45 seconds includes reveal and a final complete readable state.",
+      "handoff": "Full presenter and keyword replace the incentive panel.",
+      "catalog_candidates": [
+        "number-pop-in"
+      ],
+      "implementation_note": "Reuse digit-pop mechanism with actual value/unit; descriptor placement needs native host text. This is not the count-up component's numerical interpolation.",
+      "transfer": "Make one relevant incentive or result value readable with its unit.",
+      "caution": "Historical source offer, not a current recommendation or validated entitlement.",
+      "sample_times": [
+        40.5,
+        41.0,
+        41.5,
+        42.0,
+        42.5
+      ],
+      "start": 40.5,
+      "end": 42.95,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B33",
+      "source_frames": [
+        {
+          "requested_time": 40.5,
+          "source_pts": 40.5,
+          "frame_index": 2430,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002430.jpg",
+          "sha256": "06264e34b758276e5fb912639cda7c0c9f687e1d9a6e4127f256177082d3d912",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 41.0,
+          "source_pts": 41.0,
+          "frame_index": 2460,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002460.jpg",
+          "sha256": "df4941d6908e1b1238c5ef39c7a1690c07783bf215c7cfbf823b9a467ad862cc",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 41.5,
+          "source_pts": 41.5,
+          "frame_index": 2490,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002490.jpg",
+          "sha256": "116d6b648ec7b362d6624cef8553711d473f80752d2b27ac741c810a291445cf",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 42.0,
+          "source_pts": 42.0,
+          "frame_index": 2520,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002520.jpg",
+          "sha256": "54ec591d03aef328e6cd9b731707891c1b762fdfbb0874ed42e0921acf035aba",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 42.5,
+          "source_pts": 42.5,
+          "frame_index": 2550,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002550.jpg",
+          "sha256": "ae0387c6f5b23941a13ca3029230c81edfe806487cddb11f4810f3eb54b60601",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B33.jpg",
+        "sha256": "8473800d8398351fa1d70ea30515aa2f15ec7ad807291ac251eaf3bacf55a972",
+        "dimensions": [
+          1532,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Comment Atlas to receive the resource.",
+      "visible": "Full presenter; teal Atlas keyword then final send-it-over phrase.",
+      "change": "Offer split clears to a direct face CTA.",
+      "view": "full presenter",
+      "picture_function": "emphasis",
+      "why_this_picture": "One visible keyword removes uncertainty about the requested action.",
+      "camera_observation": "Strip confirms face return by about 43.025; progressively tighter framing/closer crop by 43.4; target remains speaker.",
+      "camera_reason": "Emphasize the action without additional objects.",
+      "pacing_reason": "Final 1.57 seconds supports one action; no separate end card interrupts it.",
+      "handoff": "Clip ends on the presenter; no demonstrated delivery of the resource.",
+      "catalog_candidates": [
+        "yt-camera-move"
+      ],
+      "implementation_note": "Use a single caption layer and intentional face crop; avoid duplicated labels.",
+      "transfer": "End with a concrete action after showing the relevant benefit.",
+      "caution": "Original VTT final word extends past the source duration; no timing was fabricated to accommodate it.",
+      "sample_times": [
+        43.025,
+        43.525,
+        44.275,
+        44.5
+      ],
+      "start": 42.95,
+      "end": 44.516667,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N01-B34",
+      "source_frames": [
+        {
+          "requested_time": 43.025,
+          "source_pts": 43.016667,
+          "frame_index": 2581,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002581.jpg",
+          "sha256": "06d714e2f26277eb462e35c91908c6dd3932dde3d683cf42de34b98daa5be281",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 43.525,
+          "source_pts": 43.516667,
+          "frame_index": 2611,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002611.jpg",
+          "sha256": "0ef661a3328fbf2dde22f33daadb417bf34f179ce9372f579da437615d5b3c37",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 44.275,
+          "source_pts": 44.266667,
+          "frame_index": 2656,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002656.jpg",
+          "sha256": "f213245788d1ac493d7c325fe60433ee7c64633428fc942a345230b5d0f8bbc4",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 44.5,
+          "source_pts": 44.5,
+          "frame_index": 2670,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N01/f002670.jpg",
+          "sha256": "5ee9e2360edb9a88cdb8a27c41b732e85a4735795d4fe2c78eaf654ad64234b6",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N01-B34.jpg",
+        "sha256": "bcf139dcb5de4f48894c3c6d5459f61c8a88f53c716739aff39094fc612d42e0",
+        "dimensions": [
+          1224,
+          576
+        ]
+      }
+    }
+  ],
+  "overview_pages": [
+    "docs/studies/shorts-visual-playbook/nate-sequences/overviews/N01-01.jpg",
+    "docs/studies/shorts-visual-playbook/nate-sequences/overviews/N01-02.jpg",
+    "docs/studies/shorts-visual-playbook/nate-sequences/overviews/N01-03.jpg"
+  ],
+  "version": "2026-09-10.2",
+  "source_sha256": "d58e0fd46bc131731120393e415a268384919aba47edd4f393b50884added467",
+  "source_dimensions": [
+    1080,
+    1920
+  ],
+  "catalog_sources": {
+    "browser-device-stage": {
+      "path": "artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/browser-device-stage/browser-device-stage.html",
+      "sha256": "59b20814d38bf58ec1c6c7727ed954e89e9f38a7392eddf6d266ce586bad6764",
+      "status": "source-inspected candidate; adapted scene not render-qualified"
+    },
+    "yt-camera-move": {
+      "path": "artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/yt-camera-move/yt-camera-move.html",
+      "sha256": "f58d4c2fc7165cf49a701f55f80fcd88eccab5c582cf8c2ae00259523810d58a",
+      "status": "source-inspected candidate; adapted scene not render-qualified"
+    },
+    "ui-focus-zoom": {
+      "path": "artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/ui-focus-zoom/ui-focus-zoom.html",
+      "sha256": "137fca93541c222f37026c8636111a1fe0d79e459546f25050d04c35638d9981",
+      "status": "source-inspected candidate; adapted scene not render-qualified"
+    },
+    "number-pop-in": {
+      "path": "artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/number-pop-in/number-pop-in.html",
+      "sha256": "25bb2a0a3e2dc9a067cfb016d7d8a971b70774652a0a4dca200c9173a1fc4e48",
+      "status": "source-inspected candidate; adapted scene not render-qualified"
+    }
+  }
+}

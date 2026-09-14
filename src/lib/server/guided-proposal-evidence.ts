@@ -10,6 +10,7 @@ import { canonicalJsonSha256 } from "./auto-edit-hash";
 import { restoreAutoEditDoctrine, doctrinePromptPath } from "./auto-edit-doctrine";
 import { stageTimingEnv } from "./stage-timing-context";
 import type { AcceptedGuidedCut } from "./guided-raw-treatment-store";
+import { readRawTreatmentClock } from "./guided-raw-treatment-store";
 import type { AutoEditCtx, AutoEditPipelineAuthority } from "@/app/api/producer/auto-edit/stream";
 import { readGuidedObject } from "./guided-cut-v2-store";
 import { assertProposalAudioWindows, readProposalSourceSpeech, mapProposalOccurrences, type ProposalWordOccurrence } from "./guided-proposal-speech";
@@ -17,6 +18,9 @@ import { GUIDED_CAPTION_CONFIG_FILES, guidedCaptionPolicy } from "./guided-propo
 import { CURRENT_TREATMENT_PROPOSAL_VERSION } from "@/lib/producer/contracts/treatment-proposal-v5";
 import { assertGuidedMusicIntent, guidedMusicPolicy, type GuidedMusicPolicy } from "./guided-proposal-music";
 import { assertGuidedPresenterIntent, guidedPresenterPolicy, type GuidedPresenterPolicy } from "./guided-proposal-presenter";
+import type { NativeReference } from "./guided-native-references";
+import { assertDirectorSource, type NativeDirectorRecord } from "./native-director-store";
+import { buildNativeSupportingPolicy, type NativeSupportingPolicy } from "./guided-native-supporting";
 
 export interface ProposalSegment {
   index: number; sourceId: string; startFrame: number; endFrameExclusive: number; text: string;
@@ -25,7 +29,7 @@ export interface ProposalCatalogEntry { kind: string; canvas: number[]; defaults
 /** One internal output cut boundary inside the long-form hook window; the renderer decides it by outTime. */
 export interface ProposalIntroSeam { seamIndex: number; outTime: number; startFrame: number }
 export interface ProposalEvidence {
-  schemaVersion: 2 | 3 | 4 | 5 | 6 | 7 | 8; cutDecisionHash: string; parentRevisionHash: string; timelineMapHash: string;
+  schemaVersion: 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10; cutDecisionHash: string; parentRevisionHash: string; timelineMapHash: string;
   frameRate: string; totalFrames: number; target: Record<string, unknown>; segments: ProposalSegment[];
   catalog: ProposalCatalogEntry[]; catalogHash: string; graphicsAdvice: Record<string, unknown>;
   doctrine: Array<{ name: string; sha256: string; content: string }>; pipelineHash: string;
@@ -37,6 +41,9 @@ export interface ProposalEvidence {
   captionPolicy?: ReturnType<typeof guidedCaptionPolicy>;
   musicPolicy?: GuidedMusicPolicy;
   presenterPolicy?: GuidedPresenterPolicy;
+  nativeReferences?: NativeReference[];
+  nativeDirector?: NativeDirectorRecord;
+  nativeSupportingPolicy?: NativeSupportingPolicy;
 }
 
 function captionEvidence(cut: AcceptedGuidedCut) {
@@ -140,6 +147,11 @@ async function catalogEvidence(cut: AcceptedGuidedCut) {
 
 /** Exact V6–V8 graphics-off previsual owns no generated catalog work or capability claim. */
 export function omittedProposalCatalog(version: number, plan: Record<string, unknown>) {
+  // V9 is an internal mechanism proof. Native catalog eligibility belongs to the primary
+  // HyperFrames registry, never this legacy local catalog or these two development mechanisms.
+  if (version === 9 || version === 10) return { catalog: [] as ProposalCatalogEntry[], catalogHash: canonicalJsonSha256({
+    schemaVersion: 1, route: "native-short-v1", mechanisms: ["presenter-hold", "message-reveal", ...(version === 10 ? ["supporting-asset"] : [])],
+    scope: "bounded-development-mechanisms-not-qualified-catalog" }) };
   if (version !== 6 && version !== 7 && version !== 8) return null;
   const target = objectValue(plan.target, "accepted catalog target"), lanes = target.lanes;
   if (!lanes || typeof lanes !== "object" || Array.isArray(lanes)
@@ -176,16 +188,20 @@ export function selectProposalCatalog(rows: Record<string, unknown>, target: Rec
 
 /** Reproduce exact stored packet data without Python or snapshot restoration; no fresh visual-quality claim. */
 export function assertStoredProposalEvidence(cut: AcceptedGuidedCut, evidence: ProposalEvidence,
-  staged: { ctx: AutoEditCtx; manifest: Record<string, unknown>; graphicsAdvice: Record<string, unknown> }) {
-  if (evidence.schemaVersion >= 7) assertGuidedMusicIntent(cut.plan.value, cut.job.ctx.intent);
+  staged: { ctx: AutoEditCtx; manifest: Record<string, unknown>; graphicsAdvice: Record<string, unknown>; nativeReferences?: NativeReference[]; nativeDirector?: NativeDirectorRecord }) {
+  const legacy = evidence.schemaVersion !== 9 && evidence.schemaVersion !== 10;
+  if (legacy && evidence.schemaVersion >= 7) assertGuidedMusicIntent(cut.plan.value, cut.job.ctx.intent);
   if (evidence.schemaVersion === 8) assertGuidedPresenterIntent(cut.plan.value, cut.job.ctx.intent);
   const keys = ["schemaVersion", "cutDecisionHash", "parentRevisionHash", "timelineMapHash", "frameRate", "totalFrames", "target",
     "segments", "catalog", "catalogHash", "graphicsAdvice", "doctrine", "pipelineHash", "scope",
     "occurrences", "anchors", "cleanEnds", "wordTupleFields", "wordTimingScope"];
-  if (evidence.schemaVersion >= 3) keys.push("presentationPolicy");
-  if (evidence.schemaVersion >= 4) keys.push("introSeams", "hookWindowS");
-  if (evidence.schemaVersion >= 5) keys.push("captionPolicy");
-  if (evidence.schemaVersion >= 7) keys.push("musicPolicy");
+  if (legacy && evidence.schemaVersion >= 3) keys.push("presentationPolicy");
+  if (legacy && evidence.schemaVersion >= 4) keys.push("introSeams", "hookWindowS");
+  if (legacy && evidence.schemaVersion >= 5) keys.push("captionPolicy");
+  if (legacy && evidence.schemaVersion >= 7) keys.push("musicPolicy");
+  if (!legacy) keys.push("nativeReferences");
+  if (evidence.schemaVersion === 10) keys.push("nativeSupportingPolicy");
+  if (!legacy && staged.graphicsAdvice.nativeDirectorVersion === 1) keys.push("nativeDirector");
   if (evidence.schemaVersion === 8) keys.push("presenterPolicy");
   exactKeys(evidence as unknown as Record<string, unknown>, keys, keys, "proposal evidence");
   const doctrine = [".claude/skills/producer/SKILL.md", "docs/PIPELINE.md"].map((name) => {
@@ -194,26 +210,35 @@ export function assertStoredProposalEvidence(cut: AcceptedGuidedCut, evidence: P
     return { name, sha256: observed.sha256, content: new TextDecoder("utf-8", { fatal: true }).decode(observed.bytes) };
   });
   const target = proposalTargetProfile(cut);
-  if (![2, 3, 4, 5, 6, 7, 8].includes(evidence.schemaVersion)) throw new Error("Unsupported proposal evidence version");
+  if (![2, 3, 4, 5, 6, 7, 8, 9, 10].includes(evidence.schemaVersion)) throw new Error("Unsupported proposal evidence version");
   const speech = speechSegments(cut, staged);
   const expected = { schemaVersion: evidence.schemaVersion, cutDecisionHash: cut.pointer.cutDecisionHash, parentRevisionHash: cut.pointer.pictureLockedRevisionHash,
     timelineMapHash: cut.request.timelineMapHash, frameRate: cut.receipt.profile.fps, totalFrames: cut.receipt.media.videoFrames,
     target, ...speech, ...storedCatalogEvidence(cut, evidence.schemaVersion, target),
     graphicsAdvice: staged.graphicsAdvice, doctrine, pipelineHash: canonicalJsonSha256(cut.job.ctx.pipeline),
     scope: "full-program-proposal-evidence-not-render-or-quality-approval",
-    ...(evidence.schemaVersion >= 3 ? { presentationPolicy: PROPOSAL_PRESENTATION_POLICY } : {}),
-    ...(evidence.schemaVersion >= 4 ? { introSeams: proposalIntroSeams(speech.segments, cut.receipt.profile.fps), hookWindowS: PROPOSAL_HOOK_WINDOW_S } : {}),
-    ...(evidence.schemaVersion >= 5 ? { captionPolicy: captionEvidence(cut) } : {}),
-    ...(evidence.schemaVersion >= 7 ? { musicPolicy: guidedMusicPolicy(cut.plan.value, staged.manifest) } : {}),
+    ...(!legacy ? { nativeReferences: staged.nativeReferences } : {}),
+    ...(evidence.schemaVersion === 10 ? { nativeSupportingPolicy: supportingEvidence(cut, target) } : {}),
+    ...(!legacy && staged.graphicsAdvice.nativeDirectorVersion === 1 ? { nativeDirector: staged.nativeDirector } : {}),
+    ...(legacy && evidence.schemaVersion >= 3 ? { presentationPolicy: PROPOSAL_PRESENTATION_POLICY } : {}),
+    ...(legacy && evidence.schemaVersion >= 4 ? { introSeams: proposalIntroSeams(speech.segments, cut.receipt.profile.fps), hookWindowS: PROPOSAL_HOOK_WINDOW_S } : {}),
+    ...(legacy && evidence.schemaVersion >= 5 ? { captionPolicy: captionEvidence(cut) } : {}),
+    ...(legacy && evidence.schemaVersion >= 7 ? { musicPolicy: guidedMusicPolicy(cut.plan.value, staged.manifest) } : {}),
     ...(evidence.schemaVersion === 8 ? { presenterPolicy: guidedPresenterPolicy(cut.plan.value, staged.manifest) } : {}) };
   if (canonicalJsonSha256(expected) !== canonicalJsonSha256(evidence)) throw new Error("Stored proposal evidence differs from accepted speech, catalog, target or doctrine");
+  if (!legacy && staged.graphicsAdvice.nativeDirectorVersion === 1) {
+    if (!staged.nativeDirector) throw new Error("Native source has no Director strategy");
+    assertDirectorSource(staged.nativeDirector, readRawTreatmentClock(cut).submission.rawIntent, evidence);
+  }
 }
 
 /** Exact full-program text/cut/catalog input, with no raw-media egress or file-writing brain tools. */
 export async function buildProposalEvidence(cut: AcceptedGuidedCut,
-  staged: { ctx: AutoEditCtx; manifest: Record<string, unknown>; graphicsAdvice: Record<string, unknown> },
-  options: { version: 4 | 5 | 6 | 7 | 8 } = { version: CURRENT_TREATMENT_PROPOSAL_VERSION }): Promise<ProposalEvidence> {
-  if (options.version >= 7) assertGuidedMusicIntent(cut.plan.value, cut.job.ctx.intent);
+  staged: { ctx: AutoEditCtx; manifest: Record<string, unknown>; graphicsAdvice: Record<string, unknown>; nativeReferences?: NativeReference[] },
+  options: { version: 4 | 5 | 6 | 7 | 8 | 9 | 10 } = { version: CURRENT_TREATMENT_PROPOSAL_VERSION }): Promise<ProposalEvidence> {
+  const legacy = options.version !== 9 && options.version !== 10;
+  if (!legacy && !staged.nativeReferences?.length) throw new Error("Native proposal requires frozen reference images");
+  if (legacy && options.version >= 7) assertGuidedMusicIntent(cut.plan.value, cut.job.ctx.intent);
   if (options.version === 8) assertGuidedPresenterIntent(cut.plan.value, cut.job.ctx.intent);
   if (!cut.job.ctx.pipeline) throw new Error("Proposal has no pinned pipeline");
   const speech = speechSegments(cut, staged);
@@ -222,9 +247,16 @@ export async function buildProposalEvidence(cut: AcceptedGuidedCut,
     timelineMapHash: cut.request.timelineMapHash, frameRate: cut.receipt.profile.fps, totalFrames: cut.receipt.media.videoFrames,
     target: proposalTargetProfile(cut), ...speech, ...measured, graphicsAdvice: staged.graphicsAdvice,
     doctrine: pinnedDoctrine(cut), pipelineHash: canonicalJsonSha256(cut.job.ctx.pipeline),
-    scope: "full-program-proposal-evidence-not-render-or-quality-approval", presentationPolicy: PROPOSAL_PRESENTATION_POLICY,
-    introSeams: proposalIntroSeams(speech.segments, cut.receipt.profile.fps), hookWindowS: PROPOSAL_HOOK_WINDOW_S,
-    ...(options.version >= 5 ? { captionPolicy: captionEvidence(cut) } : {}),
-    ...(options.version >= 7 ? { musicPolicy: guidedMusicPolicy(cut.plan.value, staged.manifest) } : {}),
+    scope: "full-program-proposal-evidence-not-render-or-quality-approval",
+    ...(!legacy ? { nativeReferences: staged.nativeReferences } : { presentationPolicy: PROPOSAL_PRESENTATION_POLICY,
+      introSeams: proposalIntroSeams(speech.segments, cut.receipt.profile.fps), hookWindowS: PROPOSAL_HOOK_WINDOW_S }),
+    ...(options.version === 10 ? { nativeSupportingPolicy: supportingEvidence(cut, proposalTargetProfile(cut)) } : {}),
+    ...(legacy && options.version >= 5 ? { captionPolicy: captionEvidence(cut) } : {}),
+    ...(legacy && options.version >= 7 ? { musicPolicy: guidedMusicPolicy(cut.plan.value, staged.manifest) } : {}),
     ...(options.version === 8 ? { presenterPolicy: guidedPresenterPolicy(cut.plan.value, staged.manifest) } : {}) };
+}
+
+function supportingEvidence(cut: AcceptedGuidedCut, target: Record<string, unknown>): NativeSupportingPolicy {
+  return buildNativeSupportingPolicy({ manifestPath: cut.job.ctx.manifestPath, manifest: cut.manifest.value,
+    intent: cut.job.ctx.intent, target });
 }

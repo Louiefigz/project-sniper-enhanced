@@ -30,6 +30,10 @@ export type CodexSchema =
   | "producer-treatment-proposal-v6"
   | "producer-treatment-proposal-v7"
   | "producer-treatment-proposal-v8"
+  | "producer-treatment-proposal-v9"
+  | "producer-treatment-proposal-v10"
+  | "producer-native-director"
+  | "producer-native-director-review"
   | "producer-proposal-readiness";
 
 export interface CodexRunOptions {
@@ -41,6 +45,8 @@ export interface CodexRunOptions {
   cwd?: string;
   schema?: CodexSchema;
   addDirs?: string[];
+  /** Explicit controller-owned frozen image attachments, separate from filesystem tool access. */
+  imagePaths?: string[];
   /** Remove every local/external inspection tool for evidence embedded in the prompt. */
   tools?: "default" | "none";
   onEvent?: (event: Record<string, unknown>) => void;
@@ -69,6 +75,10 @@ const SCHEMAS: Record<CodexSchema, string> = {
   "producer-treatment-proposal-v6": "../producer/treatment-proposal-v6.schema.json",
   "producer-treatment-proposal-v7": "../producer/treatment-proposal-v7.schema.json",
   "producer-treatment-proposal-v8": "../producer/treatment-proposal-v8.schema.json",
+  "producer-treatment-proposal-v9": "../producer/treatment-proposal-v9.schema.json",
+  "producer-treatment-proposal-v10": "../producer/treatment-proposal-v10.schema.json",
+  "producer-native-director": "../producer/native-director-v1.schema.json",
+  "producer-native-director-review": "../producer/native-director-review-v1.schema.json",
   "producer-proposal-readiness": "../producer/proposal-readiness-v1.schema.json",
 };
 
@@ -118,6 +128,11 @@ export function buildCodexArgs(options: Omit<CodexRunOptions, "prompt" | "onEven
     "--json",
   ];
   for (const dir of options.addDirs ?? []) args.push("--add-dir", dir);
+  if ((options.imagePaths?.length ?? 0) > 12) throw new Error("Codex image attachments exceed the native evidence bound");
+  for (const image of options.imagePaths ?? []) {
+    if (!path.isAbsolute(image) || image.includes("\0")) throw new Error("Codex image attachments need absolute controller-owned paths");
+    args.push("--image", image);
+  }
   if (options.schema) {
     args.push("--output-schema", path.join(process.cwd(), "schemas", "codex", SCHEMAS[options.schema]));
   }

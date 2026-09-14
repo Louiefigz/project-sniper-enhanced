@@ -24,3 +24,9 @@ export function captionTextWithinLimit(
     && Boolean(trimCaptionText(value))
     && captionCodePointLength(value) <= maximum;
 }
+
+/** Shared display-token limits exclude caption escapes and directional controls. */
+export function captionDisplayTextWithinLimit(value: unknown, maximum: number): value is string {
+  return captionTextWithinLimit(value, maximum)
+    && !/[\\\r\n\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069]/u.test(value);
+}

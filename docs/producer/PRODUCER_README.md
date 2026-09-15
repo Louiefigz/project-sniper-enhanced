@@ -51,13 +51,21 @@ Three choices frame every job — an **input**, an **output**, and a **treatment
 level**. Say it in plain language; I infer the rest and ask only when it's
 genuinely unclear.
 
+**First, choose the edit itself:** “segment this,” “clean this up” (with or
+without segmentation), or “assemble standalone Shorts.” If that choice is
+unclear, the editor asks once and keeps the answer for revisions. See
+[edit scope and examples](SHORTS_JOURNEY_SELECTION_PLAYBOOK.md#establish-the-edit-the-user-wants).
+A podcast excerpt can preserve the original exchange while using a good opening
+and natural ending. Nonlinear payoff-first assembly applies when that kind of
+Short is wanted. Choose graphics and visual treatment separately.
+
 **What you give me (input):** raw footage — one file or a folder of them — OR a
 finished long-form you want shorts pulled out of.
 
 **What you want back (output):**
 - a **long-form** cut (16:9 + chapters + captions sidecar)
 - a **short**, or several — 9:16 vertical
-- **clips from a long recording** — I segment it into standalone pieces, and can
+- **clips from a long recording** — I extract the requested sections, and can
   then turn any of them (or the best N) into finished shorts
 
 **How much treatment (the key choice):**
@@ -89,7 +97,9 @@ finished long-form you want shorts pulled out of.
 Useful modifiers, all optional:
 - **Treatment**: "just clean it up" (edit only) vs "produce it" (full stack —
   the default). "Keep it alive but no graphics" for the in-between.
-- **Duration**: "target ~30s" / "keep it under 60s" (default 15–40s for shorts)
+- **Duration**: "target ~30s" / "keep it under 60s" / "up to 90s". Choose the
+  shortest complete explanation within the current brief; Aaron's standing
+  produced-clip allowance is up to 90s, not an automatic target.
 - **Music vibe**: "energetic", "chill", "no music" — or say nothing and I'll
   recommend one from the content's mood. Music is off unless you approve it;
   multiple mix variants render only when requested.
@@ -97,13 +107,18 @@ Useful modifiers, all optional:
   safe-for-all-three (TikTok/Reels/Shorts).
 - **Plan review**: "show me the plan first" (default) or "just render it"
   (audits still run and I'll flag anything ugly).
-- **Hook**: "use the hook about the $12k ad spend" — otherwise I derive it from
-  the footage's strongest payoff, grounded in the Hormozi 121 swipe file.
+- **Hook**: "use the hook about the $12k ad spend" — otherwise I choose a strong,
+  truthful opening within the agreed edit. Standalone story selection works
+  back from the payoff; a fixed excerpt's framing stays faithful to that section.
 - **Reference video**: ask the editor to study one for measured pacing/layout
   guidance. Treat the result as reference-inspired; verified mimic remains P6
   **0/7**, so an exact style match or complete replication is not promised.
 
 ## Long-form to finished shorts
+
+This section covers standalone Short assembly. For segmentation or cleanup of
+requested sections, use the agreed edit scope and preserve the conversation;
+the source-wide rebuilding method below is not automatic.
 
 Use Producer for the whole repurposing job: source review → candidate selection
 → precise cut → vertical visual storytelling → Studio review and final export.
@@ -113,6 +128,14 @@ boundaries, not ranked short candidates, and no dedicated batch-ranking endpoint
 is claimed. Follow the selected execution route's current capabilities and gates.
 
 ### Find a moment that works for a new viewer
+
+For conversations, work sessions and journey updates, use the
+[journey selection playbook](SHORTS_JOURNEY_SELECTION_PLAYBOOK.md) before ranking.
+Select the complete assembled message across the recording: its goal, context,
+reasoning and payoff can come from different timestamps. A specific current
+experiment and its reason can resolve a journey episode before results exist.
+Plan supporting examples and temporary presenter/detail layouts at the moments
+where seeing the board, relationship or evidence improves understanding.
 
 Reuse the admitted source manifest and its matching word-timed transcript, or
 ingest/transcribe locally once. Read the complete source before selecting; for

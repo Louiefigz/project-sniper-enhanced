@@ -49,8 +49,28 @@ speech, framing and any claims before choosing to display the asset. See
 
 ## Before assembly
 
+First establish whether the user wants an excerpt, cleanup/segmentation, or a
+standalone story assembled from the recording. Follow the
+[edit-scope guidance](SHORTS_JOURNEY_SELECTION_PLAYBOOK.md#establish-the-edit-the-user-wants)
+and ask once if the request and saved brief leave this unclear. The story
+assembly guidance below applies to standalone Shorts; a requested podcast
+section keeps its agreed boundaries and order, with cleanup only as requested.
+Good hooks must match the retained material in either case. Visual intensity
+does not establish permission to restructure the speech. Use the execution
+route that supports the requested edit; this guidance adds no runtime modes
+and does not bypass native admission or Director contracts.
+
+For a conversation or journey recording, first apply the
+[journey selection and assembly playbook](SHORTS_JOURNEY_SELECTION_PLAYBOOK.md).
+Its source-wide paper edit can connect distant passages into one story. Lessons,
+realizations, decisions, progress and current experiments with a reason can all
+supply a payoff; a completed business result is not required. Select visuals
+for important explanatory moments, including a temporary presenter/board split
+when simultaneous viewing helps. This is editorial guidance, not a new automatic
+ranking feature or a claim that export checks assess narrative quality.
+
 1. Read the actual transcript and inspect source footage and individual library
-   frames. Select a self-contained lesson with a supported payoff. For a Nate
+   frames. Select a self-contained message with a supported payoff. For a Nate
    treatment, inspect setup, development and payoff plus a contrasting example.
    Establish the whole-Short rhythm from the retained script and actual delivery
    before assigning shot lengths; follow the pacing step below.
@@ -551,11 +571,75 @@ The explicit
 `--unused-ram-advisory` option requires the operator's low-unused-RAM exception;
 it retains owned-tree, per-process, pressure, swap and cleanup checks.
 
-The exporter uses one supervised local process tree, a pinned adapted SDK,
-file-backed source frames, one render worker, shared exact frame/sample timing,
-float mastering and AAC verification. It checks actual native captures at word
+The exporter runs three sequential supervised owners: media generation, native
+reference capture, and encoded-picture/full-decode verification. Each retains
+the existing 600-second owner budget, shared heavy-work lease, continuous
+resource controls and mandatory cleanup. Only one owner runs at a time. The
+streaming capture CLI runs directly under its capture owner, preserving the
+original single-session forward/reverse sequence without the old generic
+180-second subprocess wrapper. Batch capture retains its phased coordinator.
+The pinned adapted SDK, file-backed source frames, one render worker, shared
+exact frame/sample timing, float mastering and AAC verification remain. It
+checks actual native captures at word
 and scene boundaries, reverse seeks, title/caption state, encoded-picture
 comparisons and full audio/video decode. Failed attempts remain on disk.
+
+`delivery.json` is the final result for the whole export invocation, with
+preparation time, per-owner elapsed time, all failure states and reuse status.
+`pipeline.render.json` now describes the media owner only and can report
+`native-short-rendered-awaiting-qc`; that is never final delivery approval.
+Only `delivery.json` status `native-short-checked-for-review` qualifies the
+technical handoff after capture, encoded checks and every owner's cleanup pass.
+Editorial authoring time belongs to the separate continuous production clock.
+
+### Resume verification without repeating media generation
+
+The default command runs all three stages. To explicitly stop after media
+generation, use `--render-only`. A successful media owner publishes an immutable
+`render-stage.json` binding the original request, project/source/tool/code pins,
+owner completion/cleanup, picture, final MP4, audio receipt and media result.
+After a later verification failure, start a fresh verification attempt:
+
+```sh
+.venv/bin/python scripts/producer/studio/native_short_export.py /absolute/project /absolute/new-verification --verify-from /absolute/original-export/render-stage.json
+```
+
+This preserves the sealed route/cache/audio policy, copies the exact final MP4
+and repeats current native/encoded verification with no picture or audio encode.
+Do not combine it with render/donor/cache overrides. Use a new directory outside
+the project and original attempt. Changed dependencies, linked/substituted files,
+incomplete media/audio/color proof or unverified owner cleanup reject before
+verification. A collection of MP4s or partial receipts is not a reusable stage.
+Historical failures without a stage seal remain failures; never backfill them.
+If new code or source changes invalidate a seal, produce a separate authorized
+candidate through the normal path; do not silently rerender during verification.
+
+Keep the default streaming render route unless measured project evidence
+justifies explicit cached batches. Repeated browser startup can dominate short
+timelines; additional agent processes do not accelerate that capture loop.
+
+Batch-mode reference/seek QC runs sequential phases when a verified retained
+forward inventory is available. The original point planner still defines every
+occurrence; each child handles at most 48 complete fresh-session groups, with
+the same reverse seed, source payload, typography, scene-state and disposal
+checks. The parent retains each child receipt's returned digest and verifies
+the schedule, receipts and source/code pins between phases. Only a complete,
+ordered, byte-verified aggregate can publish `native-frames.json`; encoded
+picture comparisons and full A/V decoding still follow. No failed attempt's
+partial JPEG directory counts as a completed phase. Each child retains the
+180-second timeout inside their single 600-second capture owner and
+unchanged memory/worker limits. The streaming route keeps its original capture
+path. Valid batch projects with one-frame session capacity or no retained forward
+evidence also keep full replay; invalid evidence fails instead of selecting a
+fallback. Repeated cache admission retains stable source identity independently
+of observed extraction timings. Eligible phases share one actual compilation
+from their current run: its complete result, mutated render configuration and
+compiled files are preserved and hash-bound to the parent. Every phase checks
+the full project/dependency inventory and copied compiler files before and after
+capture. This avoids repeated advisory keyframe scans without changing source
+admission or any capture check. No prior run's compiler result is adopted.
+See `docs/findings/NATIVE_QC_SESSION_COUNT.md` for the motivating case and
+verification scope.
 
 Live resource collection uses public macOS physical-footprint and host VM
 counters through the shared owner. The bounded retry and original deadline,

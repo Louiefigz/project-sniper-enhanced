@@ -30,9 +30,44 @@ class NativeRunConfig:
     compressor_admission: Literal['fixed', 'short-headroom'] = 'fixed'
 
     def __post_init__(self) -> None:
-        """Allow only the existing fixed or explicitly selected Short allowance."""
+        """Reject invalid metadata before any owner can acquire or launch heavy work."""
         if self.compressor_admission not in {'fixed', 'short-headroom'}:
             raise ValueError('Unknown native compressor admission policy')
+        self.validate_admission()
+        object.__setattr__(self, 'admission', dict(self.admission))
+
+    def validate_admission(self) -> None:
+        """Recheck caller metadata and executable pins at each admission boundary."""
+        if not isinstance(self.admission, dict):
+            raise ValueError('Native admission must be a metadata mapping')
+        _validate_output(self.admission.get('output'))
+        for name, path in (('sdkSha256', self.cli), ('sandboxSha256', self.sandbox)):
+            expected = self.admission.get(name)
+            if not isinstance(expected, str) or len(expected) != 64 \
+                    or any(character not in '0123456789abcdef' for character in expected):
+                raise ValueError(f'Native admission {name} must be a lowercase hexadecimal SHA-256 digest')
+            try:
+                actual = digest(path)
+            except OSError as error:
+                raise ValueError(f'Native admission {name} file is unreadable: {path}') from error
+            if actual != expected:
+                raise ValueError(f'Native admission {name} does not match the current file: {path}')
+
+
+def _validate_output(value: object) -> None:
+    """Require an explicit file destination without restricting shared output formats."""
+    if not isinstance(value, str) or not value.strip() or '\x00' in value or value.endswith('/'):
+        raise ValueError('Native admission output must be a nonblank absolute file path')
+    output = Path(value)
+    if not output.is_absolute():
+        raise ValueError('Native admission output must be an absolute file path')
+    try:
+        if not output.parent.is_dir():
+            raise ValueError('Native admission output requires an existing parent directory')
+        if output.is_symlink() or (output.exists() and not output.is_file()):
+            raise ValueError('Native admission output must be a regular file destination, not a directory or symlink')
+    except OSError as error:
+        raise ValueError('Native admission output path cannot be inspected') from error
 
 
 def policy_for_baseline(settings: NativeRunConfig, baseline: ResourceSnapshot) -> ResourcePolicy:

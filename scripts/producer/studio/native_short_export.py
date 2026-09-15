@@ -5,18 +5,21 @@ import argparse
 import json
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from native_render_resources import ResourcePolicy
 from audio.mastering_profile import MASTERING_PROFILE_IDENTITIES, NATIVE_SHORT_MASTERING_PROFILE
 from audio.dialogue_cleanup import cleanup_model_binding
 from audio.native_audio_finishing import native_finishing_request
-from studio.native_run import NativeRun
-from studio.native_run_config import NativeRunConfig, local_environment
+from cut_preview_io import real_directory, write_new
+from studio.native_run_config import local_environment
 from studio.native_runtime import REPO, digest, install_runtime
 from studio.native_short_delivery import clock
+from studio.native_short_pipeline import NativeShortPipeline
+from studio.native_short_resume import prepare_reverification
+from studio.native_run import utc
 
 
 def assert_admitted_pins(project: Path, plan: dict, manifest: dict, pins: dict) -> None:
@@ -89,8 +92,7 @@ def prepare(args: argparse.Namespace) -> tuple[dict, dict]:
     """Require the same shared project reader used by local assembly before heavy work."""
     cache_mode = source_cache_mode(args)
     project, output = args.project.resolve(strict=True), args.output.absolute()
-    if output.is_relative_to(project) or not output.parent.is_dir():
-        raise ValueError('Export needs a new directory outside the project with an existing parent')
+    validate_options(args, project, output)
     tools, environment = local_environment()
     subprocess.run([tools['node'], '--import', 'tsx', str(REPO / 'scripts/producer/native-short.ts'),
                     'check', str(project)], cwd=REPO, env=environment, check=True, timeout=60)
@@ -101,25 +103,47 @@ def prepare(args: argparse.Namespace) -> tuple[dict, dict]:
     runtime = install_runtime()
     cache = args.cache.resolve() if args.cache else runtime.parent / 'frame-cache'
     cache.mkdir(parents=True, exist_ok=True)
-    output.mkdir(mode=0o700)
-    donor = args.audio_donor.resolve(strict=True) if args.audio_donor else None
     pins = input_pins(project, runtime, tools)
-    if donor:
-        pins[str(donor)] = digest(donor)
-    picture_donor = args.picture_donor.resolve(strict=True) if args.picture_donor else None
-    if picture_donor:
-        if not args.cached_native_batches:
-            raise ValueError('Picture reuse requires the explicit cached native batch route')
-        from studio.native_short_picture_reuse import picture_reuse_pins
-        pins.update(picture_reuse_pins(project, picture_donor))
     request = {'schemaVersion': 1, 'project': str(project), 'output': str(output),
                'runtime': str(runtime), 'cache': str(cache), 'tools': tools,
                'captureMode': 'cached-native-batches' if args.cached_native_batches else 'sdk-streaming',
                'sourceCacheMode': cache_mode,
                'audioProfile': args.audio_profile,
-               'pictureDonor': str(picture_donor) if picture_donor else None,
-               'pins': pins, 'audioDonor': str(donor) if donor else None}
+               'pictureDonor': None, 'pins': pins, 'audioDonor': None}
+    if getattr(args, 'verify_from', None):
+        request = prepare_reverification(request, args.verify_from.absolute())
+    else:
+        add_donors(args, request)
+    output.mkdir(mode=0o700)
     return request, environment
+
+
+def validate_options(args: argparse.Namespace, project: Path, output: Path) -> None:
+    """Reject incompatible recovery options and unsafe destinations before expensive work."""
+    real_directory(output.parent)
+    if output.exists() or output.is_symlink() or output.is_relative_to(project) \
+            or project.is_relative_to(output):
+        raise ValueError('Export needs a new directory outside the authored project')
+    if getattr(args, 'verify_from', None) and any((args.cache, args.audio_donor,
+            args.picture_donor, args.cached_native_batches, args.acquire_source_cache,
+            args.audio_profile != NATIVE_SHORT_MASTERING_PROFILE.identity,
+            getattr(args, 'render_only', False))):
+        raise ValueError('--verify-from preserves the sealed route, cache and audio policy; omit render options')
+    if args.picture_donor and not args.cached_native_batches:
+        raise ValueError('Picture reuse requires the explicit cached native batch route')
+
+
+def add_donors(args: argparse.Namespace, request: dict) -> None:
+    """Reuse the existing independently qualified picture and AAC donor contracts."""
+    if args.audio_donor:
+        donor = args.audio_donor.resolve(strict=True)
+        request['audioDonor'] = str(donor)
+        request['pins'][str(donor)] = digest(donor)
+    if args.picture_donor:
+        from studio.native_short_picture_reuse import picture_reuse_pins
+        donor = args.picture_donor.resolve(strict=True)
+        request['pictureDonor'] = str(donor)
+        request['pins'].update(picture_reuse_pins(Path(request['project']), donor))
 
 
 def source_cache_mode(args: argparse.Namespace) -> str:
@@ -132,21 +156,14 @@ def source_cache_mode(args: argparse.Namespace) -> str:
 
 
 def execute(args: argparse.Namespace) -> bool:
-    """Supervise the complete local render, mastering, capture and final decode tree."""
+    """Separate reusable media generation from independently owned complete verification."""
+    invocation = (time.monotonic(), utc())
     request, environment = prepare(args)
-    project, output, runtime = (Path(request[key]) for key in ('project', 'output', 'runtime'))
+    output = Path(request['output'])
     request_file = output / 'export-request.json'
-    request_file.write_text(json.dumps(request, indent=2))
-    sandbox = Path(__file__).with_name('native_localhost_only.sb')
-    cli = runtime / 'dist/cli.js'
-    policy = ResourcePolicy(maximum_owned_gib=4, maximum_process_gib=3, maximum_swap_growth_gib=1)
-    command = ['/usr/bin/sandbox-exec', '-f', str(sandbox), sys.executable,
-               str(Path(__file__).with_name('native_short_worker.py')), str(request_file)]
-    settings = NativeRunConfig(project, output, cli, command, environment,
-        {'output': str(output / 'review.mp4'), 'sdkSha256': digest(cli), 'sandboxSha256': digest(sandbox)},
-        sandbox=sandbox, policy=policy, compressor_admission='short-headroom', additional_pins={**request['pins'], str(request_file): digest(request_file)},
-        success_status='native-short-checked-for-review', unused_ram_advisory=args.unused_ram_advisory)
-    return NativeRun('pipeline', settings).execute()
+    write_new(request_file, request)
+    pipeline = NativeShortPipeline(request, environment, args.unused_ram_advisory)
+    return pipeline.execute(args.render_only, invocation)
 
 
 def main() -> None:
@@ -155,6 +172,11 @@ def main() -> None:
     parser.add_argument('project', type=Path)
     parser.add_argument('output', type=Path)
     parser.add_argument('--cache', type=Path)
+    stage = parser.add_mutually_exclusive_group()
+    stage.add_argument('--render-only', action='store_true',
+                       help='Seal completed media for later verification; does not qualify delivery')
+    stage.add_argument('--verify-from', type=Path,
+                       help='Verify a sealed render-stage.json in a new directory without re-encoding')
     parser.add_argument('--audio-donor', type=Path)
     parser.add_argument('--audio-profile', choices=MASTERING_PROFILE_IDENTITIES, default=NATIVE_SHORT_MASTERING_PROFILE.identity,
                         help='Explicit delivery profile; audio reuse also requires the current recorded AAC encoding policy')

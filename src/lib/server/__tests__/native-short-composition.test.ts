@@ -26,6 +26,25 @@ test("portrait and split crops fill their panes while preserving source/audio an
   assert.equal((buildNativeCanvas(split).match(/<audio /gu) ?? []).length, 1);
 });
 
+test("serialized media timing ends on the authored frame instead of drifting past the composition", () => {
+  const input = fixture(); input.totalFrames = 828;
+  input.cuts = [{ start: 10, end: 36.44, speed: 1 }, { start: 60, end: 66.68, speed: 1 }];
+  input.segments = [{ startFrame: 0, endFrameExclusive: 661 }, { startFrame: 661, endFrameExclusive: 828 }];
+  input.pictureViews[0].endFrame = 828; input.captionViews[0].endFrame = 828;
+  input.occurrences.push([2, 1, 0, 661, 828, "End.", 0]); input.captionGroups.push([2]);
+  const original = structuredClone(input), html = buildNativeCanvas(input);
+  assert.ok(26.44 + 6.68 > 33.12, "This reproduces the decimal-addition boundary failure");
+  for (const id of ["dialogue-1", "source-1-0"]) {
+    const element = new RegExp(`<[^>]+id="${id}"[^>]+>`, "u").exec(html)?.[0] ?? "";
+    const start = Number(/data-start="([^"]+)"/u.exec(element)?.[1]);
+    const duration = Number(/data-duration="([^"]+)"/u.exec(element)?.[1]);
+    assert.equal(start, 26.44); assert.equal(start + duration, 33.12);
+    assert.equal(Math.round(duration * 25), 167);
+  }
+  assert.deepEqual(input, original, "Authoring must preserve source cuts and word-frame evidence");
+  assert.ok(html.includes(nativeVisualExit("source-crop-1-0", 828, "25/1")));
+});
+
 test("invalid crops, source clocks, omitted captions and malformed style never silently fall back", () => {
   const changes: Array<[(input: NativeCanvasInput) => void, RegExp]> = [
     [(input) => { input.pictureViews[0].crop[2] = 900; }, /stretch or contain/],

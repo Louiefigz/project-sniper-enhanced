@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sniper · Clip review</title>
+  <link rel="stylesheet" href="review.css">
+</head>
+<body>
+  <header>
+    <div class="eyebrow">Sniper · clip review</div>
+    <h1 id="heading">The Shorts inside this conversation</h1>
+    <p id="intro">Loading the source-grounded shortlist…</p>
+  </header>
+  <main>
+    <aside id="player" aria-label="Selection player" tabindex="-1">
+      <video id="video" controls preload="metadata" playsinline aria-label="Source video"></video>
+      <div class="player-meta">
+        <div id="media-kind" class="eyebrow" style="color:#537361">Original footage · selection preview</div>
+        <h2 id="now-title">Choose an idea to review</h2>
+        <div id="status" class="status" role="status" aria-live="polite">Ready to review</div>
+        <div id="quote" class="quote">Play a selection to preview its proposed passages in order. These are rough editorial selections with source audio.</div>
+        <p id="speaker-note" class="small" hidden></p>
+        <div class="player-controls">
+          <button id="resume" class="primary" hidden>Resume selection</button>
+          <button id="stop">Stop selection</button>
+          <button id="reload-video">Reload video</button>
+        </div>
+        <p class="small"><a id="notes-link" href="SHORTLIST.md" target="_blank">Full editorial notes</a> · <a id="transcript-link" href="transcript-timed.txt" target="_blank">Timed transcript</a></p>
+      </div>
+    </aside>
+    <section aria-label="Candidate clips">
+      <div class="filter" id="filters"></div>
+      <div class="group-count" id="count"></div>
+      <div id="cards"></div>
+    </section>
+  </main>
+  <script type="module" src="review.mjs"></script>
+</body>
+</html>

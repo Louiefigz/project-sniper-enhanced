@@ -48,8 +48,12 @@ const geometry = ([x, y, width, height]: NativeBox) => `left:${x}px;top:${y}px;w
 function seconds(frame: number, frameRate: string): number {
   const [num, den] = frameRate.split("/").map(Number); return frame * den / num;
 }
-function timing(row: NativeWindow, input: NativeCanvasInput): string {
-  return `data-start="${seconds(row.startFrame, input.frameRate)}" data-duration="${seconds(row.endFrame - row.startFrame, input.frameRate)}"`;
+function timing(row: NativeWindow, input: NativeCanvasInput, alignMediaEnd = false): string {
+  const start = seconds(row.startFrame, input.frameRate), end = seconds(row.endFrame, input.frameRate);
+  const duration = seconds(row.endFrame - row.startFrame, input.frameRate);
+  // Keep prior serialization except when a terminal media element would overrun its exact frame clock.
+  const alignedDuration = alignMediaEnd && row.endFrame === input.totalFrames && start + duration > end ? end - start : duration;
+  return `data-start="${start}" data-duration="${alignedDuration}"`;
 }
 
 /**
@@ -156,13 +160,13 @@ function footage(input: NativeCanvasInput): string {
     window(span, input);
     if (cut.speed !== 1 || ![cut.start, cut.end].every(Number.isFinite) || cut.start < 0 || cut.end <= cut.start
         || Math.abs(seconds(span.endFrame - span.startFrame, input.frameRate) - (cut.end - cut.start)) > seconds(1, input.frameRate)) throw new Error("Native source cut must preserve a valid speed-1 interval");
-    const audio = `<audio ${identity(`dialogue-${index}`)} class="clip" src="${input.sourceFile}" ${timing(span, input)} data-media-start="${cut.start}" data-track-index="10" data-volume="1"></audio>`;
+    const audio = `<audio ${identity(`dialogue-${index}`)} class="clip" src="${input.sourceFile}" ${timing(span, input, true)} data-media-start="${cut.start}" data-track-index="10" data-volume="1"></audio>`;
     const video = input.pictureViews.map((view, number) => {
       const startFrame = Math.max(span.startFrame, view.startFrame), endFrame = Math.min(span.endFrame, view.endFrame);
       if (endFrame <= startFrame) return "";
       const [x, y, width] = view.crop, scale = view.box[2] / width;
       return `<div ${identity(`source-crop-${index}-${number}`)} class="crop" style="${geometry(view.box)}">`
-        + `<video ${identity(`source-${index}-${number}`)} class="clip" src="${input.sourceFile}" ${timing({ startFrame, endFrame }, input)} data-media-start="${cut.start + seconds(startFrame - span.startFrame, input.frameRate)}" data-track-index="0" muted playsinline style="position:absolute;left:${-x * scale}px;top:${-y * scale}px;width:${input.sourceSize.w * scale}px;height:${input.sourceSize.h * scale}px;max-width:none"></video></div>`;
+        + `<video ${identity(`source-${index}-${number}`)} class="clip" src="${input.sourceFile}" ${timing({ startFrame, endFrame }, input, true)} data-media-start="${cut.start + seconds(startFrame - span.startFrame, input.frameRate)}" data-track-index="0" muted playsinline style="position:absolute;left:${-x * scale}px;top:${-y * scale}px;width:${input.sourceSize.w * scale}px;height:${input.sourceSize.h * scale}px;max-width:none"></video></div>`;
     }).join("");
     return audio + video;
   }).join("\n");

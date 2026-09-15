@@ -41,6 +41,10 @@ P7/P8-qualified.
 
 ## Product at a glance
 
+For reviewing candidate Shorts before editing, reuse the approved
+[clip-review layout](templates/clip-review/README.md): source playback, assembled
+passages, priority filters, speaker attribution, and editorial notes.
+
 - **🎬 SEGMENTER** — transcribe one long recording, identify topic/guest
   boundaries, adjust them, and export separate single- or multicam MP4 clips.
 - **✂️ CLIPPER** — remove filler, false starts, repetition, and dead air at

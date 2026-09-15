@@ -6,8 +6,8 @@ import os
 import shutil
 from pathlib import Path
 
-from studio.native_run_config import source_hashes
 from studio.native_runtime import digest
+from studio.native_stage_evidence import require, verify_pins, verify_supervised_inputs
 
 STUDIO = Path(__file__).resolve().parent
 PICTURE_CODE = ('native_short_batched_render.mjs', 'native_short_capture_context.mjs',
@@ -21,12 +21,6 @@ MODE = 'cached-native-batches'
 MAX_RECEIPT_BYTES = 32 * 1024 * 1024
 
 
-def require(value: bool, message: str) -> None:
-    """Reject incomplete evidence without relying on optimizable assertions."""
-    if not value:
-        raise ValueError(f'Native picture reuse: {message}')
-
-
 def read_record(file: Path) -> dict:
     """Bound receipt parsing before loading untrusted local JSON."""
     require(file.is_file() and not file.is_symlink(), f'not a regular receipt: {file}')
@@ -37,14 +31,6 @@ def read_record(file: Path) -> dict:
     value = json.loads(content)
     require(isinstance(value, dict), f'receipt must be an object: {file}')
     return value
-
-
-def verify_pins(pins: dict[str, str]) -> None:
-    """Rehash the actual files; recorded labels never establish current identity."""
-    for filename, expected in pins.items():
-        require(isinstance(expected, str) and len(expected) == 64,
-                f'missing SHA256 pin: {filename}')
-        require(digest(Path(filename)) == expected, f'changed input: {filename}')
 
 
 def project_dependencies(project: Path) -> dict[str, str]:
@@ -88,24 +74,9 @@ def picture_dependencies(project: Path, previous: dict) -> dict[str, str]:
 
 def verify_supervision(project: Path, donor: Path, previous: dict, pipeline: dict) -> None:
     """Require complete before/after pin evidence and independently completed cleanup."""
-    require(previous.get('project') == str(project) and previous.get('output') == str(donor),
-            'donor request belongs to a different project or output')
-    require(previous.get('captureMode') == MODE and pipeline.get('project') == str(project),
+    require(previous.get('captureMode') == MODE,
             'donor is not the same native batch project')
-    for key in ('sourceStable', 'sdkStable', 'sandboxStable', 'additionalFilesStable', 'leaseCleanupVerified'):
-        require(pipeline.get(key) is True, f'donor supervision did not verify {key}')
-    cleanup = pipeline.get('cleanup', {})
-    require(cleanup.get('verified') is True and cleanup.get('survivors') == [],
-            'donor owned cleanup is incomplete')
-    before, after = pipeline.get('additionalFilePinsBefore', {}), pipeline.get('additionalFilePinsAfter', {})
-    require(bool(before) and before == after, 'donor additional before/after pins disagree')
-    require(all(before.get(key) == value for key, value in previous['pins'].items()),
-            'donor request pins were not supervised')
-    require(before.get(str(donor / 'export-request.json')) == digest(donor / 'export-request.json'),
-            'donor request changed after supervision')
-    sources = pipeline.get('sourceHashesBefore', {})
-    require(bool(sources) and sources == pipeline.get('sourceHashesAfter') == source_hashes(project),
-            'current authored project differs from supervised sources')
+    verify_supervised_inputs(project, donor / 'export-request.json', previous, pipeline)
 
 
 def verify_inventory(donor: Path, receipt: dict, canvas: dict) -> dict[str, str]:

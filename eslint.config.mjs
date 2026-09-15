@@ -19,6 +19,8 @@ const eslintConfig = defineConfig([
     ".agents/**",
     ".claude/worktrees/**",
     ".venv/**",
+    // Installed native SDK copies and frame caches are generated dependencies.
+    "**/.sniper-native-runtime/**",
     "templates/motion/vendor/**",
     "vendor/hyperframes-skills/**",
     // Frozen gate-run evidence trees (vendored gsap copies, captured project

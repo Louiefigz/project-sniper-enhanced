@@ -17,6 +17,7 @@ from studio.native_runtime import digest
 from studio.native_owned_processes import OwnedRegistry
 from studio.native_measurement_retry import MeasurementWindow
 from studio.native_run_config import NativeRunConfig, policy_for_baseline, source_hashes
+from studio.native_run_lifecycle import NativeSignalHandlers, finalize_attempt
 
 from native_render_processes import ProcessIdentity, ProcessRequest, ResourceMeasurementError
 from native_render_resources import admission_reasons, resource_warnings, stop_reasons
@@ -33,7 +34,7 @@ def owner_file_pins() -> dict[str, str]:
     studio = Path(__file__).resolve().parent
     files = [studio / name for name in (
         'native_run.py', 'native_owned_processes.py', 'native_measurement_retry.py',
-        'native_run_config.py', 'native_runtime.py')]
+        'native_run_config.py', 'native_run_lifecycle.py', 'native_runtime.py')]
     files += list(studio.parent.glob('native_render_*.py'))
     files += [studio.parent / name for name in (
         'native_work_lease.py', 'headless/durable_files.py')]
@@ -45,9 +46,10 @@ class NativeRun:
 
     def __init__(self, label: str, settings: NativeRunConfig) -> None:
         """Prepare an admitted, still-unstarted attempt and closed limits."""
+        settings.validate_admission()
         self.label, self.settings = label, settings
         self.project, self.cli, self.root = settings.project, settings.cli, settings.root
-        self.admission, self.native_env = settings.admission, settings.environment
+        self.admission, self.native_env = dict(settings.admission), settings.environment
         self.deadline, self.policy = settings.deadline, settings.policy
         self.path = self.root / f'{label}.render.json'
         self.started = time.monotonic()
@@ -55,6 +57,7 @@ class NativeRun:
         self.log, self.samples = None, None
         self.receipt_owned = False
         self.lease, self.lease_identities = None, None
+        self.signal_handlers = NativeSignalHandlers(self.request_abort)
         self.owner_pins = owner_file_pins()
         self.additional_pins = {**self.owner_pins, **settings.additional_pins}
         self.success_status = settings.success_status
@@ -82,11 +85,13 @@ class NativeRun:
 
     def prepare(self) -> None:
         """Own evidence and require bounded fresh telemetry before any child exists."""
+        self.settings.validate_admission()
+        if self.settings.admission != self.admission:
+            raise ValueError('Native admission changed after owner preparation')
         self.persist(initial=True)
         if any(digest(Path(path)) != expected for path, expected in self.additional_pins.items()):
             raise RuntimeError('Prepared native input or supervision code changed before launch')
-        for value in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
-            signal.signal(value, self.request_abort)
+        self.signal_handlers.install()
         self.lease = NativeWorkLease.acquire('heavy', str(self.project))
         self.baseline = self.measure_resources(ProcessRequest())
         self.policy = policy_for_baseline(self.settings, self.baseline)
@@ -270,17 +275,7 @@ class NativeRun:
             self.abort_reason = self.abort_reason or f'{type(error).__name__}: {error}'
         finally:
             try:
-                self.cleanup()
-            except Exception as error:
-                self.result['cleanup'] = {'verified': False, 'error': str(error)}
-                self.abort_reason = self.abort_reason or f'Cleanup failed: {error}'
-                try:
-                    self.stop_direct_child()
-                except Exception as direct_error:
-                    self.result['cleanup']['directChildError'] = str(direct_error)
-            self.release_lease()
-            for handle in (self.log, self.samples):
-                if handle is not None:
-                    handle.close()
-            self.finish()
-        return self.result['status'] == self.success_status
+                finalize_attempt(self)
+            finally:
+                self.signal_handlers.restore()
+        return self.result['status'] == self.success_status and not self.abort_reason

@@ -9,6 +9,16 @@ live in `studio/runtime/`; generated `.sniper-native-runtime` caches are exclude
 from code snapshots. See `docs/producer/NATIVE_SHORTS_WORKFLOW.md` and the
 September 11 integration report for the measured three-case scope and limitations.
 
+September 15 export recovery: `native_short_pipeline.py` coordinates sequential
+render, native-capture and encoded-verification owners. Each retains the existing
+600-second owner limit and shared heavy lane. `native_short_resume.py` admits an
+exact completed render for a fresh `--verify-from .../render-stage.json` attempt;
+`native_stage_evidence.py` supplies reusable hash-bound stage/cleanup evidence for
+native adapters. Final export status is `delivery.json`; a sealed render alone
+is still awaiting QC. The generic `native_run_lifecycle.py` restores owned signal
+handlers between stages. Reuse shared audio, exact clocks, resource ownership and
+these evidence helpers; keep format-specific picture checks in their adapters.
+
 September 9 native-work resource rule: use `studio/managed_preview.py open`
 for authored HyperFrames projects, or the existing Studio open command which
 now delegates to it. It reuses one current preview across draft folders and

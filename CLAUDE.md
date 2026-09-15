@@ -32,6 +32,15 @@ The SEGMENTER/CLIPPER/FRAME.IO flows are independent (no automated handoff). The
 
 User-facing setup + the easiest way to run it: `README.md`. More references/docs: `docs/README.md`.
 
+**Aaron's produced-clip preference (September 15, 2026):** allow up to 90 seconds
+unless the current brief specifies otherwise; keep enough context, audience
+relevance and reasoning to complete the idea. Important explanations need real
+images/scrolling footage, board details or developed HyperFrames illustrations,
+not only presenter footage and keyword captions. Full hook-template selection
+and actual speech/caption fidelity still matter. Read the persistent preference
+in `docs/producer/SHORTS_JOURNEY_SELECTION_PLAYBOOK.md` before selecting or
+revising his produced clips; preserve segment-only and disabled-graphics scope.
+
 **Skills layout.** The only active Project Sniper skills are `producer`,
 `clipper`, `segmenter`, `reference-editor`, and `producer-study`.
 `.claude/skills/<name>/SKILL.md` is the canonical Claude Code doctrine;

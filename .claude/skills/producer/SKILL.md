@@ -26,6 +26,21 @@ in **Visual storytelling** below. Operator manual: `docs/producer/PRODUCER_READM
 The safe publishing paths are the exact audited MP4 and its approved one-clip
 flat mirror. The complete short/long product is not yet P7/P8-qualified.
 
+## Establish editorial scope before selecting or reshaping footage
+
+Use the [edit-scope guidance](../../../docs/producer/SHORTS_JOURNEY_SELECTION_PLAYBOOK.md#establish-the-edit-the-user-wants):
+segment/extract, clean up (optionally segment), or build a standalone Short.
+For a new request, ask which is wanted when the request and accepted brief do
+not already establish it. Reuse the answer for revisions. A short duration,
+podcast source or produced visual treatment does not by itself authorize
+nonlinear restructuring. Choose strong openings and natural endings within the
+requested scope; preserve exact requested ranges and conversational meaning.
+Segment-only work preserves the interior; cleanup permits concise internal
+trims. Payoff-first assembly across distant passages belongs to the standalone
+story assignment. Record the choice in the existing brief, separately from
+graphics intensity and runtime scope. This governs the selection/cleanup
+defaults below; it does not add software modes or waive execution gates.
+
 ## Existing-project revisions — scope before the new-edit workflow
 
 For feedback on an existing edit, inspect its current plan, admitted manifest,
@@ -79,10 +94,33 @@ them to satisfy a presenter hold. The editor owns those decisions. This is
 Aaron's channel brief, not a rule for unrelated faceless, product-only or
 differently briefed videos.
 
+**Journey selection and visual development:** for Aaron's journey recordings,
+read [the journey Shorts playbook](../../../docs/producer/SHORTS_JOURNEY_SELECTION_PLAYBOOK.md)
+before ranking or revising candidates. Assemble a complete message across the
+whole transcript when standalone story assembly is requested; a current
+experiment and its reason, a decision, progress or
+a realization can be the payoff. At important moments, proactively consider a
+readable board/example/diagram alongside the presenter, including a temporary
+top/bottom split. Match each visual and cut to the explanation, then return to
+performance where useful; authenticity does not imply an all-talking-head edit.
+
+**Aaron's September 15 correction is a standing editing preference:** produced
+clips may run up to **90 seconds** unless his current brief says otherwise.
+Choose the shortest complete explanation for a new viewer; 20–30 seconds is not
+an achievement when context, relevance or reasoning was removed. Important
+actions need visual development: relevant pictures, real scrolling footage,
+board details or a truthful HyperFrames illustration. A static whiteboard
+presenter plus captions and keyword panels does not fulfill that request.
+See the playbook's [persistent preference](../../../docs/producer/SHORTS_JOURNEY_SELECTION_PLAYBOOK.md#aarons-standing-produced-clip-preference-september-15-2026)
+for concrete selection and review criteria. Preserve segment-only and
+graphics-disabled scope. Do not hand known damaged speech to the user as a
+listening note after rendering.
+
 Before choosing templates, read the kept speech and inspect available footage.
 In the existing scene plan/review notes, connect the viewer's question, what
 appears now, the evidence or change that develops the idea, and its source-backed
-payoff. Shorts need a self-contained answer before the CTA; a long explanation
+payoff. A standalone story Short needs a matching resolution before the CTA;
+a requested excerpt needs faithful framing and sensible boundaries. A long explanation
 can build a diagram, focus on a part, then return to the completed overview.
 Use continuity and callbacks where helpful without forcing one permanent canvas.
 
@@ -475,7 +513,8 @@ and cannot be described as range-local caption edits.
 ## What you produce — INPUT × OUTPUT × TREATMENT LEVEL
 
 Every job is three choices; read them off the request, ask only what's genuinely
-ambiguous.
+ambiguous. First establish the editorial scope above; these output/treatment
+choices do not determine how freely the source may be rearranged.
 
 - **INPUT** — **raw footage** (1..N files or a project folder), or **a finished
   long-form** to mine shorts from.
@@ -544,10 +583,19 @@ needed).
 
 ### Long-form source to finished shorts
 
+This section covers selecting and building standalone Shorts. For requested
+sections or cleanup-and-segment work, follow the established editorial scope
+above; preserve the chosen conversation instead of imposing this assembly pass.
+
 For repurposing requests, read **Long-form to finished shorts** in
 `docs/producer/PRODUCER_README.md` before selecting material. Use the pinned copy
 when running under a doctrine snapshot. Producer owns selection through delivery;
 Segmenter is optional and Clipper is not a mandatory intermediate export.
+For conversations and journey footage, also use the linked
+`docs/producer/SHORTS_JOURNEY_SELECTION_PLAYBOOK.md`: search for the story's
+context, reasoning and payoff across distant passages before rejecting a
+candidate. Judge the assembled message and its truthful joins, not whether a
+single uninterrupted section already contains the complete Short.
 Rank source-bound candidates by cold-viewer clarity, hook/payoff, useful evidence,
 context cost and portrait feasibility; retain the rationale in existing review
 notes. Inspect actual shortlisted footage, deduplicate overlapping ideas, then
@@ -624,13 +672,18 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
    it once the cutTrack exists rather than reasoning over raw triggers by hand.)
 3. **Author `edit_plan.json`** (schema: PRODUCER_PLAN.md §2.2, mode presets in
    `scripts/producer/producer_config.py`):
+   - Honor the established editorial scope: segment-only keeps the interior,
+     with no automatic filler removal or speed change. Apply the cleanup and
+     story-selection defaults below only to work that requests those edits.
    - Set `target.treatment` (default `produced`). For **clean-cut**, author ONLY
      `cutTrack` + `reframe` + `captions` and leave `graphicsTrack`/`punchIns`/
      `transitions`/`treatmentMap` empty — then skip 2.5/3.5 and go straight to
      the gate.
-   - Select moments with **standalone hook + payoff** (shorts) — never
-     time-compress a whole segment. Apply the self-containedness test
-     (edge C3: no unresolved "like I said earlier").
+   - For standalone Short selection, choose **hook + matching payoff**; apply
+     the self-containedness test (edge C3: no unresolved "like I said earlier").
+     For requested excerpts, choose clear boundaries and truthful hook framing
+     within the authorized range. Do not time-compress a whole segment to force
+     a different deliverable or add distant passages without that scope.
    - EDGE CHECK every range: the final word must not be a dangling
      conjunction/connector (and, so, but, or, because, then…) — pull the edge
      back one word (C15, operator-caught). Same check on range OPENERS.

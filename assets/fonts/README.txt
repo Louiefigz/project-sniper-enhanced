@@ -1,7 +1,8 @@
 OFL-licensed Inter v4.1 from github.com/rsms/inter
 OFL-licensed ChunkFive Regular (Meredith Mandel, The League of Moveable Type,
-github.com/theleagueof/chunk) — the Cooper-Black-class display serif embedded
-in templates/motion/tokens.css as --font-serif-display (PUNCH_STYLE.md G1).
+github.com/theleagueof/chunk) — the display face currently embedded in
+templates/motion/tokens.css for the --font-serif-display token (the Punch
+display-face role, PUNCH_STYLE.md §5.1, §10 G1).
 License: fonts/ChunkFive-OFL.markdown (SIL OFL 1.1).
 OFL-licensed Caveat Bold (Pablo Impallari, Google Fonts, SIL OFL 1.1) — the
 handwritten annotation face embedded in templates/motion/tokens.css as

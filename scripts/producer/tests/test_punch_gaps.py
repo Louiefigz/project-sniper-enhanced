@@ -1,4 +1,4 @@
-"""Punch reproduction-gap tests (G1-G5, G17 + music assets — PUNCH_STYLE.md).
+"""Punch implementation-item tests (G1-G5, G17 + music assets — PUNCH_STYLE.md §10).
 
 Covers: the WHISPER caption preset (G2), exit-on-cut clamp math + lint (G4),
 the blur+desat takeover base vocabulary + filter graph (G5), the style-aware

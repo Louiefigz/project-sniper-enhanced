@@ -179,7 +179,7 @@ class CheckPacingTests(unittest.TestCase):
         self.assertEqual(rep2.warnings, [])                 # on-style → silent
 
     def _graphics_carried_short(self) -> dict:
-        # An slideware-grammar short (docs/studies/SLIDEWARE_STYLE.md): dense graphics
+        # A slideware-style short (docs/studies/SLIDEWARE_STYLE.md §9): dense graphics
         # (~29 changes/min, max gap 3s) on a single uncut take, but the hook
         # is only ~1.42x denser than the body — the hook lives in the
         # graphics layer, not in cut density (§2 AH3).

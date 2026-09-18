@@ -511,8 +511,8 @@ def _semantic_zooms(windows: list[dict], plan: dict, rep: Any) -> list[dict]:
 
 def _punch_zoom_max(plan: dict, mode: str) -> float:
     """Style-aware punch ceiling (G17). A pace profile may carry
-    ``punch_zoom_max`` (``pacing_punch``: 1.45 — the measured C5 step band
-    tops out at x1.44, DaG @17.0, PUNCH_STYLE.md §2/§10 G17); every other
+    ``punch_zoom_max`` (``pacing_punch``: 1.45 — PUNCH_STYLE.md §2 C5 /
+    §10 G17: a tight framing must read as a new shot); every other
     pace keeps the doctrine default ``MOTION['punch_in']['zoom_max']``."""
     profile = _pacing_profile(plan.get("target") or {}, mode) or {}
     return float(profile.get("punch_zoom_max", MOTION["punch_in"]["zoom_max"]))
@@ -913,14 +913,15 @@ def _pacing_profile(target: dict, mode: str) -> dict | None:
     ``target.pace`` names a tempo profile, mapped to the mode's
     ``pacing_<pace>`` dict (dashes -> underscores): ``"talking-head"`` is the
     slow continuous-take profile (a yapping single-speaker short paces like
-    long-form, not a fast produced reel); ``"punch"`` is the locked-tripod
-    punch-cut profile (scripts/producer/docs/findings/PUNCH_STYLE.md — ~17
-    visible cuts/min, 12s still ceiling, states-driven cadence); ``"restrained"``
-    is the SIMPLE-CUTS restraint pole (docs/studies/RESTRAINED_STYLE.md — 0-cut reels are
-    on-style, retention carried by verbatim caption churn, floors
-    effectively off); ``"slideware"`` is the takeover-alternation profile
-    (docs/studies/SLIDEWARE_STYLE.md — cuts are section punctuation, zero punch-ins,
-    graphics-carried cadence with a relaxed hook front-load). An
+    long-form, not a fast produced short); ``"punch"`` is the locked-camera
+    punch-cut profile (scripts/producer/docs/findings/PUNCH_STYLE.md — hard
+    cuts between framings, 14/min floor, 12s still ceiling, text-layer
+    cadence); ``"restrained"`` is the restraint profile
+    (docs/studies/RESTRAINED_STYLE.md — a single uncut take is on-style, plain
+    captions carry the pace, floors effectively off); ``"slideware"`` is the
+    slide-section profile (docs/studies/SLIDEWARE_STYLE.md — cuts are section
+    punctuation, zero punch-ins, graphics-carried cadence with a relaxed hook
+    front-load). An
     absent/unknown pace uses the mode's default fast
     floor (unchanged legacy behavior). Pace is a separate axis from treatment:
     a talking-head short is still produced (has graphics), just slow."""

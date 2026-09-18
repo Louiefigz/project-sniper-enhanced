@@ -37,7 +37,8 @@ def _overlaps(span: tuple[float, float], spans: list[tuple[float, float]]) -> bo
 
 
 def _short_hook_required(target: dict, rep: Any) -> bool:
-    """Respect graphics ownership while preserving an explicit Restrained base kit."""
+    """Respect graphics ownership; a named Restrained style keeps its frame-one
+    thesis card (docs/studies/RESTRAINED_STYLE.md §1 H1)."""
     if target.get("mode") != "short":
         return False
     owned = lane_required(target, "graphics")

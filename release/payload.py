@@ -174,8 +174,9 @@ def write_payload(root: Path, stage: Path, report: StageReport) -> None:
     if not PAYLOAD.exists():
         raise StagingError("release/payload_files is missing")
     for path in sorted(PAYLOAD.rglob("*")):
-        if not path.is_file() or path.name == ".DS_Store":
-            continue
+        if not path.is_file() or path.name == ".DS_Store" or "__pycache__" in path.parts \
+                or path.suffix == ".pyc":
+            continue  # byte caches from running the payload's own Python locally never ship
         relative = path.relative_to(PAYLOAD).as_posix()
         target = stage / relative
         target.parent.mkdir(parents=True, exist_ok=True)

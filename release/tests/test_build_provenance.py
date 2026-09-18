@@ -105,5 +105,25 @@ class BuildProvenance(unittest.TestCase):
         self.assertEqual(self._leftovers(), [])
 
 
+class PayloadCopy(unittest.TestCase):
+    """What write_payload copies from release/payload_files."""
+
+    def test_byte_caches_from_local_runs_never_ship(self) -> None:
+        base = Path(tempfile.mkdtemp(prefix="sniper-payload-"))
+        self.addCleanup(shutil.rmtree, base, ignore_errors=True)
+        source = base / "payload_files"
+        (source / "install/lib/__pycache__").mkdir(parents=True)
+        (source / "install/sniper_doctor.py").write_text("print('doctor')\n")
+        (source / "install/lib/__pycache__/doctor_setup.cpython-314.pyc").write_bytes(b"\x00")
+        (source / "install/stray.pyc").write_bytes(b"\x00")
+        stage = base / "stage"
+        stage.mkdir()
+        report = StageReport()
+        with mock.patch.object(payload, "PAYLOAD", source), mock.patch.object(payload, "_lock_lines"):
+            payload.write_payload(base, stage, report)
+        self.assertEqual(sorted(report.files), ["install/sniper_doctor.py"])
+        self.assertFalse(list(stage.rglob("*.pyc")))
+
+
 if __name__ == "__main__":
     unittest.main()

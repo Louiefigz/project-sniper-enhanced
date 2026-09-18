@@ -152,7 +152,9 @@ def _decoder_timeout(root: Path) -> Path:
         raise RuntimeError("4K timeout fixture has no repeatable P slice")
     repeated.write_bytes(
         b"".join(value for _kind, value in units[:-1])
-        + units[-1][1] * 60_000)  # well past the 90 s decode ceiling even on a fast Mac
+        # 600,000 skip-coded 4K frames: ~10x the 90 s ceiling at the fastest decode seen
+        # (60,000 finished inside it on an idle Mac); under the 2,000,000-frame ceiling.
+        + units[-1][1] * 600_000)
     _ffmpeg("-r", "1000", "-i", str(repeated), "-c", "copy", str(target))
     return target
 

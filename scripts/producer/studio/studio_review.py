@@ -9,6 +9,7 @@ CLI::
     studio_review.py context <producer_dir> [--context-fields selection,lint]
     studio_review.py sync    <producer_dir> [--apply] [--assemble]
                              [--manifest M]
+    studio_review.py rebuild <producer_dir> [--manifest M]
     studio_review.py propose-text <package.json> --help
 
 The manual-control loop after a render: ``open`` generates/refreshes
@@ -210,8 +211,27 @@ def cmd_sync(paths: ProducerPaths, apply: bool = False,
         return subprocess.run(_assemble_args(paths, resolved), check=False,
                               env=timing_environment()).returncode
     print("plan updated — complete required reviews and renew stale receipts, then rebuild:")
-    print("  " + shlex.join(_assemble_args(paths, resolved)))
+    print("  " + shlex.join(_rebuild_command(paths, resolved)))
     return 0
+
+
+def _rebuild_command(paths: ProducerPaths, manifest: str | None) -> list[str]:
+    """The rebuild command to show: the package wrapper when running under it.
+
+    ``install/studio.command`` sets SNIPER_STUDIO_COMMAND so a buyer is told to
+    rebuild through the same wrapper (the install's settings), not by running the
+    environment's Python directly.
+    """
+    wrapper = os.environ.get("SNIPER_STUDIO_COMMAND", "").strip()
+    if not wrapper:
+        return _assemble_args(paths, manifest)
+    return [wrapper, "rebuild", paths.root] + (["--manifest", manifest] if manifest else [])
+
+
+def cmd_rebuild(paths: ProducerPaths, manifest: str | None = None) -> int:
+    """Rebuild the video from the synced plan: the same assemble run sync prints."""
+    return subprocess.run(_assemble_args(paths, resolve_manifest(paths, manifest)), check=False,
+                          env=timing_environment()).returncode
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -220,9 +240,11 @@ def _parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
     add_text_proposal_arguments(sub.add_parser(
         "propose-text", help="SDK text proposal only; never apply, approve or render"))
-    for name in ("open", "stop", "status", "context", "sync"):
+    for name in ("open", "stop", "status", "context", "sync", "rebuild"):
         cmd = sub.add_parser(name)
         cmd.add_argument("producer_dir")
+    sub.choices["rebuild"].add_argument("--manifest", default=None,
+                                        help="asset_manifest.json override, as for sync")
     sub.choices["open"].add_argument("--force", action="store_true",
                                      help="discard unsynced Studio edits")
     sub.choices["context"].add_argument("--context-fields", default=None,
@@ -258,6 +280,8 @@ def main(argv: list[str] | None = None) -> int:
             return cmd_status(paths)
         if args.command == "context":
             return cmd_context(paths, fields=args.context_fields)
+        if args.command == "rebuild":
+            return cmd_rebuild(paths, manifest=args.manifest)
         return cmd_sync(paths, apply=args.apply, assemble=args.assemble,
                         manifest=args.manifest)
     except (StudioServerError, StudioProjectError) as exc:

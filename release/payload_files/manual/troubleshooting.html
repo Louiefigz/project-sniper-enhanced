@@ -20,35 +20,55 @@ render would actually use, and prints each one. It marks a line <code>FAIL</code
 for something that has to work, <code>GATED</code> for an optional feature that is not
 installed, and <code>INFO</code> for something worth knowing. If every required line
 passes, the install is fine and the problem is in the edit, not the setup.</p>
-<p>In this candidate one line always fails: <code>media admission sandbox</code>. Producer
-admits footage inside a sandbox this package does not provide yet, so no Producer edit can
-start. It is listed in <code>PENDING-OWNER-DECISIONS.txt</code>.</p>
+<p>The <code>media admission (real sample)</code> line runs a generated sample clip through
+the same admission step your footage goes through. If it fails, Producer cannot start an edit,
+and the line says why. What this candidate does and does not do yet is listed in
+<code>PENDING-OWNER-DECISIONS.txt</code>.</p>
 
 <h2>The errors you are most likely to hit</h2>
 <table>
 <tr><th>What you see</th><th>What it means</th><th>What to do</th></tr>
-<tr><td>Editor brain: not signed in yet</td><td>Your provider login expired, or you never
+<tr><td><code>editor brain (codex)  not-signed-in-or-not-subscription</code> (or <code>claude</code>)</td><td>Your provider login expired, or you never
 signed in with this package's CLI.</td><td>Run <code>install/sign-in.command</code>. It signs in to this package's own settings.</td></tr>
-<tr><td>This release admits only '…'; this CLI reports '…'</td><td>The CLI version does
-not match. Usually an auto-update.</td><td>Run <code>install/install.command</code> again
+<tr><td><code>wrong-version — reinstall the pinned CLI</code></td><td>The CLI in this folder
+does not report the exact version this release admits.</td><td>Run <code>install/install.command</code> again
 — it reinstalls the exact pinned version into this package.</td></tr>
-<tr><td>no cached chrome-headless-shell found</td><td>The rendering browser is missing.
-Sniper never downloads one mid-render on purpose.</td><td>Run the installer again; step 4
-downloads it.</td></tr>
-<tr><td>local Whisper model not found</td><td>The speech model is missing or was moved.</td>
-<td>Run the installer again; step 5 re-downloads it and checks its checksum.</td></tr>
-<tr><td>Port 3000 is already in use by …</td><td>Something else holds the port. The
+<tr><td><code>Sniper cannot be installed, repaired or switched while it is in use.</code> followed by
+<code>In use by: …</code></td><td>The app, an editor window, a running edit or render, or the
+doctor is using this folder. The line names each one.</td><td>Stop the app
+(<code>install/stop.command</code>), close the editor window, let edits finish, then run it again.
+Nothing was changed.</td></tr>
+<tr><td><code>Node … or newer is required; …</code></td><td>The Node on your PATH is missing or too
+old, or its path contains a space.</td><td>Install Node 24 LTS from nodejs.org. If you use nvm, fnm or
+volta, run the installer from Terminal.</td></tr>
+<tr><td><code>The Node this install was set up with cannot be used: …</code></td><td>The Node the
+installer recorded was removed or upgraded (for example by <code>brew upgrade</code>).</td><td>Run
+<code>install/install.command</code> again; it sets up with the Node you have now.</td></tr>
+<tr><td><code>tesseract is required for reference study …</code> or <code>Reference study reads on-screen
+text with the tesseract program, which is not installed</code></td><td>Studying a reference needs the
+tesseract program.</td><td><code>brew install tesseract</code></td></tr>
+<tr><td><code>yt-dlp is not installed (not found on PATH). Install it: brew install yt-dlp</code></td>
+<td>Adding a reference from a link needs yt-dlp.</td><td><code>brew install yt-dlp</code></td></tr>
+<tr><td><code>This install's editor brain is codex. An editor window on claude would disagree …</code></td>
+<td>You asked the editor window for the provider this install does not use.</td><td>Switch the whole
+install: <code>install/stop.command</code>, then <code>install/use-provider.command claude</code>.</td></tr>
+<tr><td><code>no cached chrome-headless-shell found</code></td><td>The rendering browser is missing.
+Sniper never downloads one mid-render on purpose.</td><td>Run the installer again; step 5/10
+downloads it and checks its SHA-256.</td></tr>
+<tr><td><code>WHISPER_CPP_MODEL does not exist: …</code></td><td>The speech model is missing or was moved.</td>
+<td>Run the installer again; step 6/10 re-downloads it and checks its checksum.</td></tr>
+<tr><td><code>Port 3000 is already in use by: …</code></td><td>Something else holds the port. The
 message names it.</td><td>Quit that program, or start on another port:
 <code>SNIPER_PORT=3100 install/start.command</code></td></tr>
-<tr><td>The install folder path contains , ' : or \</td><td>Those characters break the
+<tr><td><code>The folder path contains one of  ,  '  :  \ …</code></td><td>Those characters break the
 audio-cleanup filter, which embeds this folder's path.</td><td>Move the folder somewhere
-without them. Spaces and accented letters are fine.</td></tr>
+without them. Spaces, accents, <code>$</code> and quotes are fine.</td></tr>
 <tr><td>A render stops and reports a problem</td><td>Working as designed. Sniper stops
 rather than shipping something it could not check.</td><td>Read the message: it names
 the lane and the reason. Most are a request to pick a style or confirm a choice.</td></tr>
 <tr><td>Not enough disk space</td><td>A long render needs tens of GB of temporary space.</td>
-<td><code>install/clean-caches.command</code> shows what can be freed and how big it is,
-and never touches your footage, plans, finals or unsynced edits.</td></tr>
+<td>Stop the app, then <code>install/clean-caches.command</code> shows what can be freed and how
+big it is, and never touches your footage, plans, finals or unsynced edits.</td></tr>
 </table>
 
 <h2>What to realistically expect</h2>

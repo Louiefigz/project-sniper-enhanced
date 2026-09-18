@@ -33,26 +33,28 @@ playback.</p>
 <h2>2. Open the editable project</h2>
 <p>The graphics layer is a real editable project, not a flattened picture. This is the
 manual-control surface:</p>
-<pre><code>cd app
-.venv/bin/python3 scripts/producer/studio/studio_review.py open ~/ProjectSniper/&lt;project&gt;/producer</code></pre>
+<pre><code>install/studio.command open ~/ProjectSniper/&lt;project&gt;/producer</code></pre>
 <p>That builds the review project from the edit plan plus the graphics-free video, and
 opens it in HyperFrames Studio in your browser. You move panels, change timing, adjust
-what a card says.</p>
+what a card says. Always go through <code>install/studio.command</code>: it runs Studio with
+this install's own settings (its Node, browser and ffmpeg, and none of the API keys in your
+shell), which running the Python environment directly would skip.</p>
 <div class="note">
 <p>Studio is a <strong>review and control</strong> surface. It previews; it does not
 render your deliverable. Your footage is never re-encoded in a browser.</p>
 </div>
 
 <h3>Folding your Studio edits back in</h3>
-<pre><code>.venv/bin/python3 scripts/producer/studio/studio_review.py sync ~/ProjectSniper/&lt;project&gt;/producer --apply</code></pre>
+<pre><code>install/studio.command sync ~/ProjectSniper/&lt;project&gt;/producer --apply</code></pre>
 <p>This writes your changes into the edit plan, after checking them and taking a backup.
-It then <strong>prints the exact rebuild command</strong> to run. Run that command to
-rebuild the video; only the stages your change invalidated are redone.</p>
+It then <strong>prints the exact rebuild command</strong> to run, which is:</p>
+<pre><code>install/studio.command rebuild ~/ProjectSniper/&lt;project&gt;/producer</code></pre>
+<p>Run it to rebuild the video; only the stages your change invalidated are redone.</p>
 <pre><code># see where the lane currently is and what to do next
-.venv/bin/python3 scripts/producer/studio/studio_review.py status ~/ProjectSniper/&lt;project&gt;/producer
+install/studio.command status ~/ProjectSniper/&lt;project&gt;/producer
 
 # shut the preview server down when you are finished
-.venv/bin/python3 scripts/producer/studio/studio_review.py stop ~/ProjectSniper/&lt;project&gt;/producer</code></pre>
+install/studio.command stop ~/ProjectSniper/&lt;project&gt;/producer</code></pre>
 <div class="warn">
 <p><strong>Two things to know.</strong> First, syncing is not approval — after your
 graphics change, the checks and reviews run again before the result counts as finished.

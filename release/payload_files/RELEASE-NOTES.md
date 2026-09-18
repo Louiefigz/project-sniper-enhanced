@@ -1,5 +1,29 @@
 # Release notes
 
+## 0.1.0-rc4 — release candidate, not for sale (installer and configuration)
+
+- **One provider everywhere.** `editor.command` refuses a provider other than the one
+  the install uses, and passes the same model settings to the editor window as the app
+  uses. Switch the whole install with `use-provider.command` (app stopped).
+- **Settings stored literally.** `runtime/sniper.env` is data, never run as shell, so
+  folder names with `$`, quotes, backticks or accents read back exactly. Only a comma,
+  apostrophe, colon or backslash in the install folder is refused (audio-cleanup limit).
+- **One Node.** The minimum Node (22.13) is derived from the dependencies. The installer
+  records the exact Node it checked; the app, doctor, CLIs and renders all use it, also
+  when started from Finder (nvm, fnm and volta work when you install from Terminal).
+- **Every download checked.** Python packages install with `--require-hashes`; the two
+  CLIs from a reviewed lockfile with `npm ci`; the rendering browser against a SHA-256
+  recorded at build time.
+- **Reruns repair.** Each step re-verifies the files it produced; anything missing,
+  partial or changed is redone without manual cleanup.
+- **One thing at a time.** The installer, provider switch, cache cleaning and uninstall
+  wait for the app, editor windows, the doctor and renders to finish, using a real lock.
+- **Truthful uninstall.** A failed stop or sign-out stops the removal and says so; your
+  settings and export-recovery history are kept.
+- **Studio through `install/studio.command`**, with this install's settings.
+- The doctor checks tesseract and yt-dlp (reference features) and runs a real media
+  admission sample instead of checking for Docker.
+
 ## 0.1.0-rc3 — release candidate, not for sale
 
 ### Product changes
@@ -38,7 +62,7 @@
 - Uninstall signs out the logins made for Sniper before removing files.
 
 ### Known limits
-- Not qualified for sale. See `PENDING-OWNER-DECISIONS.txt` and `RELEASE.json`.
+- Not qualified for sale. See `PENDING-OWNER-DECISIONS.txt`.
 - No sample clip is included.
 - The `separate` audio preset needs Demucs, which is not installed.
 

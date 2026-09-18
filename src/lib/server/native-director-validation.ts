@@ -1,9 +1,11 @@
 /** Prove source/selection bindings; semantic quality remains a separate critic judgment. */
-import { DIRECTOR_CONDITIONS, parseNativeDirectorPlan, type DirectorQuote, type NativeDirectorPlan } from "@/lib/producer/contracts/native-director-v1";
+import { CURRENT_DIRECTOR_PLAN_VERSION, directorCriteria, parseNativeDirectorPlan, type DirectorAudit, type DirectorQuote,
+  type NativeDirectorPlan, type NativeDirectorPlanV2 } from "@/lib/producer/contracts/native-director-v2";
 import type { ProposalEvidence } from "./guided-proposal-evidence";
 import { templateSlots, type DirectorCatalog } from "./native-director-library";
 
 export type DirectorInput = Pick<ProposalEvidence, "frameRate" | "totalFrames" | "occurrences" | "target" | "timelineMapHash"> & { rawIntent: string };
+/** Sniper design parameter: the longest written opening code accepts (resources/director/README.md, glanceReadable). */
 export const MAX_DIRECTOR_HOOK_WORDS = 12;
 
 export function directorInput(rawIntent: string, evidence: ProposalEvidence): DirectorInput {
@@ -40,27 +42,39 @@ function selectedTemplate(plan: NativeDirectorPlan, catalog: DirectorCatalog, in
 }
 
 function auditFills(plan: NativeDirectorPlan): void {
-  const seen = new Set<string>();
+  const seen = new Set<string>(), criteria = directorCriteria(plan);
   for (const fill of plan.fills) {
     const text = fill.writtenHook.trim(), words = text.split(/\s+/u);
     if (words.length > MAX_DIRECTOR_HOOK_WORDS || text.split("\n").length > 2 || seen.has(words.join(" ").toLowerCase())) throw new Error(`Director fills require distinct concise screen hooks (at most ${MAX_DIRECTOR_HOOK_WORDS} words/two lines)`);
     seen.add(words.join(" ").toLowerCase());
     const surfaces = { written: text, spoken: plan.spokenOpening.quote, visual: plan.visual.firstPicture };
-    for (const key of DIRECTOR_CONDITIONS) {
-      const item = fill.audit[key];
-      if (!surfaces[item.surface].includes(item.quote)) throw new Error(`Director ${key} audit cites absent opening evidence`);
+    const audit = fill.audit as Record<string, DirectorAudit>;
+    for (const key of criteria) {
+      if (!surfaces[audit[key].surface].includes(audit[key].quote)) throw new Error(`Director ${key} audit cites absent opening evidence`);
     }
   }
-  if (DIRECTOR_CONDITIONS.some((key) => !plan.fills[plan.chosenFill].audit[key].pass)) throw new Error("Selected Director hook failed its condition audit");
+  const chosen = plan.fills[plan.chosenFill].audit as Record<string, DirectorAudit>;
+  if (criteria.some((key) => !chosen[key].pass)) throw new Error("Selected Director hook failed its criteria audit");
 }
 
-/** No source/default fallback: a failed selection prevents dependent native planning. */
-export function validateDirectorPlan(value: unknown, catalog: DirectorCatalog, input: DirectorInput): NativeDirectorPlan {
-  const plan = parseNativeDirectorPlan(value), formats = [plan.format, ...plan.format.alternatives];
+function checkedPlan(plan: NativeDirectorPlan, catalog: DirectorCatalog, input: DirectorInput): NativeDirectorPlan {
+  const formats = [plan.format, ...plan.format.alternatives];
   if (formats.some((row) => !catalog.formats.some((format) => format.id === row.id))
       || new Set(formats.map((row) => row.id)).size !== formats.length) throw new Error("Director format choices must resolve and be different");
   sourceQuote(plan.payoff, input); sourceQuote(plan.spokenOpening, input);
   if (plan.spokenOpening.occurrenceIds[0] !== 0) throw new Error("Director cannot replace the recorded first words with a stronger invented opener");
   if (plan.visual.exitFrame < 1 || plan.visual.exitFrame > input.totalFrames) throw new Error("Director hook lifetime exceeds the retained Short");
   selectedTemplate(plan, catalog, input); auditFills(plan); return plan;
+}
+
+/** A new decision: plan v2 only. No source/default fallback; a failed selection prevents dependent native planning. */
+export function validateDirectorPlan(value: unknown, catalog: DirectorCatalog, input: DirectorInput): NativeDirectorPlanV2 {
+  const plan = parseNativeDirectorPlan(value);
+  if (plan.schemaVersion !== CURRENT_DIRECTOR_PLAN_VERSION) throw new Error("New Director decisions must use plan schema v2 and its opening criteria");
+  return checkedPlan(plan, catalog, input) as NativeDirectorPlanV2;
+}
+
+/** A retained decision (v1 or v2) re-checked against its own frozen library with the same bindings and audit rules. */
+export function validateStoredDirectorPlan(value: unknown, catalog: DirectorCatalog, input: DirectorInput): NativeDirectorPlan {
+  return checkedPlan(parseNativeDirectorPlan(value), catalog, input);
 }

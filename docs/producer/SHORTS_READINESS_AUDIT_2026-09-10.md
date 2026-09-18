@@ -50,7 +50,7 @@ sample is a mechanism proof, not delivery of those three Shorts.
 
 | Area | Present state | What that establishes |
 | --- | --- | --- |
-| Reference library | 12 case JSON files, 367 directing beats, 991 unique referenced frames; all frame paths exist | Evidence is ready to use. This audit opened N26-B06/N27-B16 sequences and A05's full frame; it did not audition source audio or inspect every frame. |
+| Reference library | 12 case JSON files, 367 directing beats, 991 unique referenced frames; all frame paths exist | Evidence is ready to use. This audit opened two sequence cases and one entry frame from that third-party study library (withdrawn from the product on 2026-09-18); it did not audition source audio or inspect every frame. |
 | HyperFrames catalog (primary) | Existing discovery, inspected sources and the long-form native catalog workflow are available | Reuse this path for Shorts. Inspect actual item inputs and compose/adapt them for the story and portrait frame. The new V9 executor is not yet connected to general catalog selection/binding. |
 | Native directing contract | V9 scenes carry speech occurrences, questions, before/action/result, reading holds, reference evidence and element IDs | These fields survive candidate compilation and storage/readback. The supported mechanisms are currently presenter-hold and message-reveal. |
 | Reference delivery to worker | Selected Nate case/beat data and hashed individual images are staged; images enter Codex through explicit image arguments | Actual image transport exists for explicitly selected Nate evidence. Semantic search and authentic-reference selection are not implemented here. |
@@ -103,8 +103,9 @@ alone do not establish a runtime improvement.
    central connection, not optional expansion of a local Sniper catalog.
 4. **Portrait views and authentic evidence:** the current presenter uses a
    contained 1080 × 660 region. This is not the requested full-frame portrait
-   opening or continuous face tracking. Reference staging currently accepts
-   Nate IDs only, so A05 is not yet selectable through that interface.
+   opening or continuous face tracking. Reference staging then accepted only
+   sequence-case IDs, so single entries were not selectable through that
+   interface (the third-party study cases were withdrawn from the product on 2026-09-18).
 5. **Native review and edits:** establish native audiovisual review, edit
    persistence/reload and completion ownership. Legacy readiness/opening/body
    paths correctly reject V9 instead of granting inappropriate approval.

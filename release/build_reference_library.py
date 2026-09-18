@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Render and write the packaged reference library from its original spec.
 
-    python3 -m release.build_reference_library [--out resources/references]
+    python3 -m release.build_reference_library      # same as: python3 -m release.reference_library_writer
+
+Rewrites `resources/references/` completely (see `release/reference_library_writer.py`).
 
 Every frame comes from a Project Sniper motion template rendered by the pinned
 HyperFrames CLI with copy from `release/reference_library_spec.py`. Each frame's
@@ -111,3 +113,8 @@ def frame_records(frames_dir: Path, stem: str, pngs: list[Path], times: tuple[fl
                      "dimensions": _dimensions(target), "requested_time": when,
                      "render": {**provenance, "time_s": when}})
     return rows
+
+
+if __name__ == "__main__":
+    from release.reference_library_writer import build  # noqa: PLC0415 - the writer imports this module
+    print(json.dumps(build(), indent=2))

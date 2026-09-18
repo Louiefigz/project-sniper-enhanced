@@ -39,8 +39,8 @@ const V9_FILES = ["src/lib/producer/contracts/treatment-proposal-v9.ts", "src/li
   "src/lib/server/guided-native-project.ts", "src/lib/server/guided-native-project-store.ts", "src/lib/server/guided-native-captions.ts",
   "scripts/producer/studio/native_caption_groups.py", "scripts/producer/captions/captions_whisper.py",
   "scripts/producer/captions/captions_minimal.py", "scripts/producer/captions/captions_ass.py", "scripts/producer/producer_config.py"];
-const DIRECTOR_FILES = ["schemas/producer/native-director-v1.schema.json", "schemas/producer/native-director-review-v1.schema.json",
-  "src/lib/producer/contracts/native-director-v1.ts", "src/lib/server/native-director-library.ts",
+const DIRECTOR_FILES = ["schemas/producer/native-director-v2.schema.json", "schemas/producer/native-director-review-v1.schema.json",
+  "src/lib/producer/contracts/native-director-v1.ts", "src/lib/producer/contracts/native-director-v2.ts", "src/lib/server/native-director-library.ts",
   "src/lib/server/native-director-validation.ts", "src/lib/server/native-director-prompt.ts", "src/lib/server/native-director-store.ts"];
 const V10_FILES = [...V9_FILES, "src/lib/producer/contracts/treatment-proposal-v10.ts", "src/lib/server/guided-native-supporting.ts"];
 

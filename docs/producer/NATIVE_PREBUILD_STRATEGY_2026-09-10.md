@@ -38,8 +38,8 @@ It does not express an overall audience/promise, alternative treatment selection
 source crop, caption hierarchy, two-pane purpose, or a strategy-critic verdict.
 The writer fixes footage to a 1080 × 660 contain box and captions to y=1460.
 Thus reference IDs and valid timing could pass while the picture was wrong.
-N26-B05 demonstrates a full-screen taxi analogy; transferring its persistent
-container does not justify a presenter-plus-message split.
+A reference that develops a full-screen analogy inside a persistent container does
+not, by that container alone, justify a presenter-plus-message split.
 
 ## Shared planning sequence
 

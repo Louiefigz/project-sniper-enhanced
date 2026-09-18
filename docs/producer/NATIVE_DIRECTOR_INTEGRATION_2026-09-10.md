@@ -21,8 +21,9 @@ implementation, prepares the retained source clock and references, then calls
 The author records the viewer, problem, awareness, actual payoff, chosen format
 and alternatives, one hook anchor/reference and rejected alternatives, grounded
 slot mappings, and two or three fills of the same selected template. Every fill
-has a literal-evidence audit for knowledge gap, belief, novelty, relevance and
-clarity. The recorded spoken opening must start at retained occurrence zero.
+had a literal-evidence audit against the condition set then in force, which was
+withdrawn on 2026-09-18 with its library; current decisions use Director plan v2
+and the six opening criteria in `resources/director/README.md`. The recorded spoken opening must start at retained occurrence zero.
 Source selection and audio are preserved; typography cannot invent spoken words.
 
 A separate, sessionless critic invocation reviews the decision before the scene

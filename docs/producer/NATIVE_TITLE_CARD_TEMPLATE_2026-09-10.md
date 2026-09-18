@@ -1,7 +1,7 @@
 # Local native title-card template
 
-The project now has a local path from the canonical Script Director hook library
-to an actual backed title card. It does not launch a model or require an external
+The project has a local path from the packaged Director library to an actual
+backed title card. It does not launch a model or require an external
 Director call. Aaron requested local-only work on September 10; do not treat
 later styling feedback as permission to send transcripts or references externally.
 
@@ -16,10 +16,13 @@ later styling feedback as permission to send transcripts or references externall
   selects a real anchor, fills named slots locally, rejects missing/unknown slots
   and retains formula, category, slot values and library hash. Literal filling
   supports quoted formulas. Other editorial formula shapes are explicitly refused,
-  not guessed. The canonical how-to obstacle clause may be omitted.
+  not guessed. The one optional clause, ` (in [timeframe])` in `steps-toward-goal`,
+  may be omitted.
 - [`native-title-card.ts`](../../src/lib/server/native-title-card.ts) renders
   immediately visible, centered lines with close-fitting opaque backing in the
-  upper portrait region. Available pairs are white/black, white/red and red/white.
+  upper portrait region. Available pairs are `ink-on-paper`, `paper-on-ink` and
+  `white-on-slate`: neutral, at least 11:1 by the WCAG 2 contrast formula, with the
+  rationale in the module header (chosen 2026-09-18).
   It enforces contrast ≥ 4.5, readable size bounds, an upper placement and an exact
   frame lifetime. Line breaks must preserve the selected hook's words.
 - [`native-short-composition.ts`](../../src/lib/server/native-short-composition.ts)
@@ -30,13 +33,13 @@ later styling feedback as permission to send transcripts or references externall
 
 ```typescript
 const copy = fillLocalHookTemplate(loadDirectorCatalog(), {
-  anchor: "value-how-to",
-  slots: { outcome: "earn trust with a follow-up" },
+  anchor: "steps-toward-goal",
+  slots: { count: "Two", goal: "a follow-up that earns trust" },
 });
 const titleCard = {
   copy,
-  lines: ["How to earn trust", "with a follow-up"],
-  palette: "white-on-red" as const,
+  lines: ["Two steps to a follow-up", "that earns trust"],
+  palette: "white-on-slate" as const,
   top: 110,
   fontSize: 76,
   endFrame: 98,
@@ -66,7 +69,7 @@ without inventing a canonical hook anchor or library hash for the text.
 
 For example, the September 15 revision uses “POV: You commented SKILL for an Ai
 video editor”. Its layout reuses the backed upper title card. Its copy is the
-user's POV framing; it is not a fill of the old `proof-stat-shock` formula.
+user's POV framing; it is not a fill of any Director anchor.
 Copy provenance and visual-template reuse are separate decisions. Preserve the
 original speech, cuts, captions and title lifetime during a copy-only revision,
 then verify the rebuilt title's actual readability and promise against the clip.
@@ -75,28 +78,28 @@ Aaron's subsequent review accepted the offer storytelling/B-roll and rejected
 mechanism-led hooks. The current revision uses “Use this offer formula to get
 more buyers”; members uses “Who else wants $1K/mo in their first 30 days?”.
 See [template compliance versus hook strength](../findings/TEMPLATE_COMPLIANCE_IS_NOT_A_STRONG_HOOK.md).
-The Director's relevance audit now distinguishes viewer benefit from mechanism
-and asks what creates a reason to watch. Local filling remains a copy operation,
-not automatic editorial or audience approval.
+The Director's `viewerStake` criterion distinguishes the viewer's goal from the
+speaker's mechanism and asks what gives the viewer a reason to watch. Local
+filling remains a copy operation, not automatic editorial or audience approval.
 
-## References reopened for this change
+## Layout decisions for this change
 
-Actual full frames and sequences were reopened, not only their descriptions:
+The layout was decided on the owner's footage and an operator-supplied screenshot
+showing a large backed upper promise over a distinct centered torso caption, which
+was a direct operator preference for this revision. Third-party reference frames
+consulted at the time were withdrawn from the product on 2026-09-18 and are not
+cited here. The decisions that remain:
 
-| Reference | Observed relationship | Consequence for these cuts |
-| --- | --- | --- |
-| A02 target and 0–8.6s strip | Opaque red title above the head; smaller centered torso captions; title clears for the closer explanation | Keep title and speech as two independent layers. Prefer the user's upper backed-card treatment. |
-| A01 target | White text on an opaque black lower card; close face occupies the upper frame | Black backing is supported, but its lower placement is a different composition and does not justify the current displaced captions. |
-| A05 target and 2–30s strip | Short sentence-case phrases stay centered while the person moves | Preserve horizontal reading position; do not push captions sideways to accommodate a title. These samples are plain captions, not proof of karaoke timing. |
-| A06 target and 14.3–17s strip | A full-frame formula builds its terms, then returns to the person | Give the formula one clear information job and the worked example another. |
-| CR07 f180 and B02/B03 sequences | A relationship grows above the close speaker; speech captions sit just above the midpoint divider, apart from diagram labels | Preserve example 3's accepted split/gesture relationship; raise captions toward the divider and reserve their space. |
-| User's supplied screenshot | Large backed upper promise; distinct centered torso caption | Direct operator preference for this revision. Do not copy its five-item promise into footage containing one lesson. |
+- Title and speech are two independent layers: the title sits above the head and
+  clears for the closer explanation; captions stay centered near torso height.
+- Keep captions at a stable horizontal reading position; never push them sideways
+  to make room for a title.
+- A full-frame formula or diagram has one information job and the worked example
+  another.
+- Do not copy a screenshot's multi-item promise into footage that holds one lesson.
 
-The canonical hook library was read separately from the visual reference library.
-`value-how-to` gives the component example its source-supported action/outcome
-structure. `value-formula` is relevant to the offer explanation; `value-unsexy`
-would require the promised count of actual items and is not a fit merely because
-the screenshot uses that wording. Color choice does not determine hook structure.
+Hook structure is chosen from the Director library separately from these visual
+decisions; colour choice does not determine hook structure.
 
 ## Retained corrections for the three edits
 

@@ -1,10 +1,18 @@
-/** Backed upper title cards adapted from inspected A02 and the operator's reference. */
+/** Backed upper title card: short lines on an opaque backing so the opening reads over any footage. */
 import { assertHookLineBreaks, type NativeTitleCopy } from "./native-hook-template";
 
+/**
+ * Sniper's neutral title pairs (chosen 2026-09-18). Two polarities let the card oppose the
+ * footage behind it: dark ink on warm paper over dark or busy shots, paper on near-black over
+ * bright ones. Slate is a desaturated cool mid-dark that separates from skin tones and warm
+ * interiors without reading as a brand accent. Off-white and near-black soften the largest
+ * light and dark areas. Every pair is at least 11:1 by the WCAG 2 contrast formula below
+ * (computed from these hex values, not measured on screens); render still enforces 4.5:1.
+ */
 export const NATIVE_TITLE_PALETTES = {
-  "white-on-black": { ink: "#ffffff", backing: "#111111" },
-  "white-on-red": { ink: "#ffffff", backing: "#b81732" },
-  "red-on-white": { ink: "#b81732", backing: "#ffffff" },
+  "ink-on-paper": { ink: "#1d1f24", backing: "#f6f4ef" },
+  "paper-on-ink": { ink: "#f6f4ef", backing: "#1d1f24" },
+  "white-on-slate": { ink: "#ffffff", backing: "#2e3a4b" },
 } as const;
 export interface NativeTitleCard {
   copy: NativeTitleCopy;

@@ -47,7 +47,7 @@ test("prepare is idempotent, carries whole-source search and makes no provider c
     assert.ok(result.handoff.includes(packet.editorialInstructions));
     assert.match(packet.editorialInstructions, /VISUAL EXPLANATION — shared directing standard v1/);
     assert.match(packet.editorialInstructions, /SHORT FORMAT ADAPTATION/);
-    assert.match(packet.editorialInstructions, /CR07 develops problem/);
+    assert.match(packet.editorialInstructions, /SQ01 states a claim/);
     const pacingStage = packet.stages.indexOf("map-script-and-delivery-pacing");
     assert.ok(pacingStage > packet.stages.indexOf("select-retained-passage"));
     const representationStage = packet.stages.indexOf("choose-visual-representation");

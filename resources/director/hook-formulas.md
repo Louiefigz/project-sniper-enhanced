@@ -1,100 +1,155 @@
-# Reference formulas
+# Director slot formulas
 
-The slot structure behind each reference opening. `formula` is what the Director adapts;
-`disqualify-if` is when the opening must not be used.
+The formula index turns a reference or training example into exact slots. When the
+Director selects an example that has a formula here, it must bind **every slot of
+that formula** to contiguous retained words; an example without a formula uses the
+named anchor's slots instead. `disqualify-if` names the source condition under
+which the example must not be chosen, however close the topic looks.
 
-### R001 · hidden real reason
-- formula: "The real reason [result] fails isn't [assumed cause], it's [actual cause]."
-- disqualify-if: the source does not state the actual cause
+Authored for Project Sniper on 2026-09-18 (see `README.md`). Every ID below has a
+matching entry in `hook-references.md` or a training file.
 
-### R002 · one change, one result
-- formula: "One thing changed in how I [activity], and [result]."
-- disqualify-if: the change is not named in the retained words
+### R501 · Habit with its consequence
+- anchor: `situation-if-you`
+- formula: "If you [habit], [consequence]"
+- disqualify-if: the consequence is the Director's inference rather than the speaker's words, or the target viewer does not have the habit.
 
-### R003 · the skipped part
-- formula: "Everyone [does task]. Almost nobody [does overlooked part]."
-- disqualify-if: the overlooked part is not the Short's payoff
+### R502 · Audience named by its symptom
+- anchor: `situation-for-anyone-whose`
+- formula: "For anyone whose [thing] [symptom]"
+- disqualify-if: the symptom is not described in the retained cut, or the audience can only be named by job title.
 
-### R004 · why-does question
-- formula: "Why does [recurring problem] always [happen]?"
-- disqualify-if: the Short does not answer the question
+### R503 · A check before an action
+- anchor: `situation-before-you`
+- formula: "Before you [action], check [thing] for [sign]"
+- disqualify-if: the recording names no concrete sign to look for.
 
-### R005 · what-if reversal
-- formula: "What if [assumed strength] was [actual weakness]?"
-- disqualify-if: the source does not argue the reversal
+### R504 · Why an everyday observation happens
+- anchor: `gap-cause-behind`
+- formula: "Why do [things] [observation] first?"
+- disqualify-if: the recording states the observation but not its cause, or the order ("first") is not part of what the speaker describes.
 
-### R006 · stop and replace
-- formula: "Stop [common habit]. [Replacement habit]."
-- disqualify-if: no replacement is given
+### R505 · A controlled change with a visible result
+- anchor: `gap-what-happens-when`
+- formula: "What happens when you [change] on [condition]?"
+- disqualify-if: the result of the change is neither shown in the footage nor stated by the speaker.
 
-### R007 · narrow overrated
-- formula: "[Popular approach] is overrated for [narrow audience]."
-- disqualify-if: the audience is not narrowed
+### R506 · A quantity the viewer has dismissed
+- anchor: `gap-how-much`
+- formula: "How much [resource] does [small thing] waste?"
+- disqualify-if: the recording contains no quantity with a unit, or the quantity depends on a measurement the speaker did not make.
 
-### R008 · did the opposite
-- formula: "I did the opposite of [usual advice] and [result]."
-- disqualify-if: the result is not the speaker's own
+### R507 · One missing element
+- anchor: `gap-what-is-missing`
+- formula: "What is missing from your [artifact]?"
+- disqualify-if: the speaker names more than one missing element, or the viewer would not own the artifact.
 
-### R009 · specific situation call-out
-- formula: "If you [specific repeated situation], watch this."
-- disqualify-if: the situation is generic
+### R508 · Counted steps to a named goal
+- anchor: `steps-toward-goal`
+- formula: "[count] steps to [goal]"
+- disqualify-if: the steps are not counted in the recording, or the goal is an outcome the speaker does not show or state.
 
-### R010 · audience call-out with a cost
-- formula: "[Audience]: this one is for you, and it takes [time cost]."
-- disqualify-if: the time cost is not supported by the Short
+### R509 · An order with a reason
+- anchor: `steps-order-matters`
+- formula: "[first step] before you [second step]"
+- disqualify-if: the speaker does not explain why the order matters.
 
-### R011 · not your fault
-- formula: "If [symptom] keeps happening, it's not you. It's [cause]."
-- disqualify-if: the cause is not in the source
+### R510 · A bounded checklist
+- anchor: `steps-checks-before`
+- formula: "[count] checks before you [action]"
+- disqualify-if: fewer than two checks survive in the retained cut.
 
-### R012 · confession with a cost
-- formula: "I got [thing] wrong for [time period], and it cost me [cost]."
-- disqualify-if: the time period or cost is invented
+### R511 · A small amount that adds up
+- anchor: `number-adds-up`
+- formula: "[small amount] a [period] is [total] a [longer period]"
+- disqualify-if: the total is not spoken, the units change between the two amounts, or the speaker hedged ("about") and the hedge would be lost.
 
-### R013 · audience doubt question
-- formula: "[Audience]: Do you ever wonder why [frustrating pattern]?"
-- disqualify-if: the Short does not explain the pattern
+### R512 · A familiar number decoded
+- anchor: `number-here-is-what`
+- formula: "[number] [term]: here is what that means"
+- disqualify-if: the recording does not explain what the number measures.
 
-### R014 · specific result
-- formula: "[Number] [unit] in [time period], from [single cause]."
-- disqualify-if: the number is not stated in the source
+### R513 · Actual against expected
+- anchor: `number-took-not`
+- formula: "It took [actual], not [expected]"
+- disqualify-if: either figure is missing from the speech.
 
-### R015 · from-to change
-- formula: "From [before state] to [after state], with [constant]."
-- disqualify-if: either state is unevidenced
+### R514 · A recognisable mistake
+- anchor: `mistake-you-might-be`
+- formula: "You might be [mistake]"
+- disqualify-if: the retained cut gives no fix.
 
-### R016 · how-to with obstacle
-- formula: "How to [outcome], even if [obstacle]."
-- disqualify-if: the Short does not deliver the outcome
+### R515 · A mistake with a stated cost
+- anchor: `mistake-can-cost`
+- formula: "[mistake] can cost you [cost]"
+- disqualify-if: the cost is not stated by the speaker.
 
-### R017 · two-part formula
-- formula: "The formula is simple: [part one] plus [part two]."
-- disqualify-if: either part is missing from the Short
+### R516 · Looks right, then fails
+- anchor: `mistake-looks-right`
+- formula: "[thing] look [state], then [problem]"
+- disqualify-if: the recording does not explain why the problem appears.
 
-### R018 · common mistake
-- formula: "The mistake almost everyone makes with [situation] is [mistake]."
-- disqualify-if: the mistake is not shown or explained
+### R517 · A requirement removed
+- anchor: `assumption-no-need`
+- formula: "You don't need [requirement] for [goal]"
+- disqualify-if: the speaker does not name or show the alternative.
 
-### R019 · prerequisite warning
-- formula: "Don't [action] until you've [prerequisite]."
-- disqualify-if: the prerequisite is vague
+### R518 · A rule that is only partly right
+- anchor: `assumption-half-true`
+- formula: "[rule]? Only half true"
+- disqualify-if: the speaker does not say which part of the rule holds.
 
-### R020 · it-depends comparison
-- formula: "[Option A] or [option B]? It depends on [deciding factor]."
-- disqualify-if: the deciding factor is not explained
+### R519 · Quantity is not the fix
+- anchor: `assumption-more-wont`
+- formula: "More [thing] won't fix [problem]"
+- disqualify-if: the speaker does not name what does fix the problem.
 
-### R021 · familiar moment
-- formula: "You know when [familiar moment]?"
-- disqualify-if: the moment is a generic mood
+### R520 · Two options, one job
+- anchor: `compare-two-options`
+- formula: "[first option] or [second option] for [purpose]?"
+- disqualify-if: fewer than two comparison points are spoken.
 
-### R022 · used to, now
-- formula: "I used to [old habit]. Now I [new habit]."
-- disqualify-if: the change is not the lesson
+### R521 · The same thing done two ways
+- anchor: `compare-same-task`
+- formula: "Same [thing], two [variants]"
+- disqualify-if: only one version is in the recording.
 
-### R023 · do this first
-- formula: "Before you [action], do this one [check]."
-- disqualify-if: the check is not shown
+### R522 · One day with a concrete detail
+- anchor: `moment-the-day`
+- formula: "The day [event]"
+- disqualify-if: the event has no concrete detail in the recording.
 
-### R024 · stop and start
-- formula: "Stop [old action]. Start [new action]."
-- disqualify-if: either half is missing
+### R523 · A first-person observation
+- anchor: `moment-i-noticed`
+- formula: "I noticed [observation] when I [action]"
+- disqualify-if: the observation is not the speaker's own.
+
+### R524 · A term answered plainly
+- anchor: `define-what-means`
+- formula: "What [term] actually means"
+- disqualify-if: the recording uses the term without defining it.
+
+### R525 · A hidden setting located
+- anchor: `result-where-to-find`
+- formula: "Where to find [setting] in [place]"
+- disqualify-if: the setting is not visible and legible in the screen recording.
+
+### T701 · Symptom with its usual cause
+- anchor: `situation-if-you`
+- formula: "If your [thing] comes out [symptom], it's usually [cause]"
+- disqualify-if: the speaker names no cause, or names several without saying which is usual.
+
+### T704 · Daily amount against a yearly total
+- anchor: `number-adds-up`
+- formula: "[daily amount] a day is [yearly total] a year"
+- disqualify-if: the yearly total is not spoken by the speaker.
+
+### T707 · Two tools for one job
+- anchor: `compare-two-options`
+- formula: "[first option] or [second option] for [job]?"
+- disqualify-if: the speaker does not say which option wins for that job.
+
+### T710 · A term against its misreading
+- anchor: `define-is-not`
+- formula: "A [term] isn't [misreading]"
+- disqualify-if: the misreading is not stated in the recording.

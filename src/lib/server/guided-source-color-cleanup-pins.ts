@@ -99,6 +99,7 @@ export const GUIDED_SOURCE_COLOR_CLEANUP_TS_FILES = Object.freeze([
   "src/lib/producer/contracts/guided-workflow-v2.ts",
   "src/lib/producer/contracts/human-cut-acceptance.ts",
   "src/lib/producer/contracts/native-director-v1.ts",
+  "src/lib/producer/contracts/native-director-v2.ts",
   "src/lib/producer/contracts/palmier-commit-saga.ts",
   "src/lib/producer/contracts/palmier-cut-repair-disposition.ts",
   "src/lib/producer/contracts/palmier-saga-bridge.ts",

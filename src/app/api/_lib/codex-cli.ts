@@ -33,7 +33,7 @@ export type CodexSchema =
   | "producer-treatment-proposal-v8"
   | "producer-treatment-proposal-v9"
   | "producer-treatment-proposal-v10"
-  | "producer-native-director"
+  | "producer-native-director-v2"
   | "producer-native-director-review"
   | "producer-proposal-readiness";
 
@@ -80,7 +80,7 @@ const SCHEMAS: Record<CodexSchema, string> = {
   "producer-treatment-proposal-v8": "../producer/treatment-proposal-v8.schema.json",
   "producer-treatment-proposal-v9": "../producer/treatment-proposal-v9.schema.json",
   "producer-treatment-proposal-v10": "../producer/treatment-proposal-v10.schema.json",
-  "producer-native-director": "../producer/native-director-v1.schema.json",
+  "producer-native-director-v2": "../producer/native-director-v2.schema.json",
   "producer-native-director-review": "../producer/native-director-review-v1.schema.json",
   "producer-proposal-readiness": "../producer/proposal-readiness-v1.schema.json",
 };

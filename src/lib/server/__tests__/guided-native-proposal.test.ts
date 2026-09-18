@@ -38,7 +38,7 @@ function output(input: ProposalBrainInput): TreatmentProposalV9 {
     operations: [{ type: "native-scene", clauseIndex: 0, beatIndex: 0, scene: { id: "explain", startAnchor: 0, endAnchorExclusive: last,
       mechanism: "message-reveal", view: "presenter-illustration", question: "Can this be clearer?", object: "Original illustrative message exchange",
       quote: evidence.occurrences.map((row) => row[5]).join(" "), occurrenceIds: evidence.occurrences.map((row) => row[0]),
-      referenceIds: ["N26-B05"], referenceReason: "TEST persistent container while the explanatory object develops; reference pixels are not reused.",
+      referenceIds: ["SQ01-B02"], referenceReason: "TEST persistent container while the explanatory object develops; reference pixels are not reused.",
       requiredAssetIds: [], before: ["This"], steps: [{ anchor: evidence.anchors.indexOf(word[3]), occurrenceId: word[0], text: "Clearer", transitionFrames: 4 }],
       result: ["This", "Clearer"], readingHoldFrames: 30, rationale: "TEST develops in place, preserving context through the result hold." } }],
     openingEndAnchor: last, continuityEndAnchor: last, audioPolicy: "preserve-full-program", colorPolicy: "preserve" });
@@ -56,7 +56,7 @@ test("native direction reaches the worker, immutable store, cold reader and expl
   const deadline = performance.now() + 180_000;
   const remainingMs = () => Math.max(1, Math.floor(deadline - performance.now()));
   const fixture = await createGuidedProposalFixture({ proposalVersion: 9, rawIntent: RAW, output,
-    nativeReferences: [{ caseId: "N26", beatId: "N26-B05" }] });
+    nativeReferences: [{ caseId: "SQ01", beatId: "SQ01-B02" }] });
   try {
     const held = readGuidedTreatmentProposal(fixture.ctx.dir);
     assert.deepEqual(held.result.blockers, []); assert.ok(held.result.candidate);
@@ -109,7 +109,7 @@ test("image attachments are explicit CLI arguments without granting tools", () =
 test("Director rejection prevents the native scene worker from being called", { timeout: 180_000 }, async () => {
   let sceneCalls = 0;
   await assert.rejects(createGuidedProposalFixture({ proposalVersion: 9, rawIntent: RAW,
-    nativeReferences: [{ caseId: "N26", beatId: "N26-B05" }],
+    nativeReferences: [{ caseId: "SQ01", beatId: "SQ01-B02" }],
     output: (input) => { sceneCalls++; return output(input); },
     directorBrain: async (input) => {
       const result = await nativeDirectorTestBrain(input);
@@ -179,7 +179,7 @@ test("native worker validates the exact attachment set before a provider call", 
   try {
     process.env.SNIPER_BRAIN_PROVIDER = "codex";
     const inputs = path.join(directory, "candidate-inputs"); mkdirSync(inputs);
-    const references = stageNativeReferences(inputs, [{ caseId: "N26", beatId: "N26-B05" }]);
+    const references = stageNativeReferences(inputs, [{ caseId: "SQ01", beatId: "SQ01-B02" }]);
     const fixture = policyFixture(), evidence = { ...fixture.evidence, nativeReferences: references };
     const input: ProposalBrainInput = { cwd: directory, ctx: {} as ProposalBrainInput["ctx"], timeoutMs: 1000,
       prompt: buildProposalPrompt("Hold", evidence), imagePaths: nativeReferenceImages(directory, references),
@@ -191,7 +191,7 @@ test("native worker validates the exact attachment set before a provider call", 
     } };
     await runProposalBrain(input, deps); assert.equal(calls, 1);
     await assert.rejects(runProposalBrain({ ...input, imagePaths: input.imagePaths!.slice(1) }, deps), /frozen prompt evidence/);
-    await assert.rejects(runProposalBrain({ ...input, prompt: input.prompt.replace('"N26-B05"', '"N26-B09"') }, deps), /frozen prompt evidence/);
+    await assert.rejects(runProposalBrain({ ...input, prompt: input.prompt.replace('"SQ01-B02"', '"SQ01-B03"') }, deps), /frozen prompt evidence/);
     process.env.SNIPER_BRAIN_PROVIDER = "legacy";
     await assert.rejects(runProposalBrain(input, deps), /no text-only fallback/);
     assert.equal(calls, 1, "Substitution and unsupported providers must fail before dispatch");

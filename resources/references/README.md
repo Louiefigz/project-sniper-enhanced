@@ -1,16 +1,21 @@
-# Reference library (packaged, original)
+# Reference library
 
-Worked examples of editing mechanisms — how a list builds, how a comparison holds a fixed
-goal, how emphasis lands after reading — each illustrated by frames rendered from Project
-Sniper's own motion templates.
+Original reference cases for planning the visuals of Shorts and long-form videos.
+Authored for Project Sniper on 2026-09-18 and rendered from Sniper's own motion
+templates by `release/reference_library_writer.py` from
+`release/reference_library_spec.py`. Every topic, line and number in the cases is
+an illustration written for this library; no case reproduces a third-party video,
+person or course. Every frame records the template, variables and time that
+rendered it, so the library can be regenerated and audited.
 
-**Provenance.** Written and rendered for Project Sniper on 2026-09-17 by
-`release/reference_library_writer.py` from `release/reference_library_spec.py`. Every frame
-records the composition, the variables and the time that produced it. No third-party
-footage, screenshot, brand, likeness or creator name appears anywhere in this library.
-Earlier development builds used a research library built from other creators' videos;
-that library is not part of this product.
+- `shorts/FORMAT_FOUNDATIONS.md` — start here: viewing needs, cases and contrasts.
+- `shorts/sequences/` — SQ cases: several beats of one idea (`manifest.json`,
+  `cases/`, `frames/`, `CATALOG_MAP.md`, `DIRECTING_GUIDE.md`).
+- `shorts/expansion/` — DV cases: one composition developing across beats
+  (`manifest.json`, `cases/`, `frames/`, `catalog-sources.json`, `CATALOG_MAP.md`).
+- `shorts/entries/` and `shorts/manifest.json` — ME entries, one mechanism each.
+- `longform/` — LG cases for 16:9 work.
 
-**Scope.** These are references, not qualified templates or benchmarks. A reference shows a
-mechanism working with illustrative copy; it does not show that a finished Short using it
-performs well.
+References show a mechanism. They are not production assets, qualified templates
+or benchmarks of finished videos. Frames are re-rendered when the templates'
+design changes, so their colours and type follow the current templates.

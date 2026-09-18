@@ -74,7 +74,7 @@ test("writer rejects extra canonical metadata on user-supplied copy before stagi
   const f = fixture();
   try {
     const copy = createUserTitleCopy("POV: Your exact supplied title");
-    f.input.canvas.titleCard!.copy = Object.assign(copy, { anchor: "value-how-to" });
+    f.input.canvas.titleCard!.copy = Object.assign(copy, { anchor: "steps-toward-goal" });
     f.input.canvas.titleCard!.lines = [copy.text];
     refreshNativePrebuildReviewFixture(f.input);
     const destination = path.join(f.directory, "forged-title");

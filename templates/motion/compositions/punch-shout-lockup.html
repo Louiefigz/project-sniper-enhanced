@@ -2,72 +2,68 @@
 <html
   lang="en"
   data-composition-variables='[
-    {"id":"kicker","type":"string","label":"Kicker (small white sans lead-in, ~1.8%H)","default":""},
-    {"id":"payload","type":"string","label":"Payload (GIANT lemon chunky serif, 4.5-6%H)","default":""},
-    {"id":"coword","type":"string","label":"Co-word (heavy white grotesque, ~4%H)","default":""},
-    {"id":"kicker2","type":"string","label":"Trailing kicker (small white sans; empty = none)","default":""},
-    {"id":"build","type":"enum","label":"Build","default":"pop","options":[{"value":"pop","label":"Pop (all tokens at once, <=2f)"},{"value":"append","label":"Word-append (rows stagger by appendS)"}]},
+    {"id":"kicker","type":"string","label":"Kicker (small mono label on an ink tab, above the payload)","default":""},
+    {"id":"payload","type":"string","label":"Payload (large display word in the accent colour on an ink plate, 4.5-6%H)","default":""},
+    {"id":"coword","type":"string","label":"Co-word (bold white display line with an accent underline, ~4%H)","default":""},
+    {"id":"kicker2","type":"string","label":"Trailing kicker (small mono label; empty = none)","default":""},
+    {"id":"build","type":"enum","label":"Build","default":"pop","options":[{"value":"pop","label":"Pop (all rows at once, <=2f)"},{"value":"append","label":"Word-append (rows stagger by appendS)"}]},
     {"id":"splitText","type":"boolean","label":"SplitText per-WORD reveal (rows split into words; each word pops <=2f)","default":false},
     {"id":"atS","type":"number","label":"Lockup pop time (s, window-relative)","default":0,"min":0,"max":30,"step":0.05,"unit":"s"},
-    {"id":"appendS","type":"number","label":"Append stagger per row (s; measured 0.08-0.42/word)","default":0.15,"min":0.08,"max":0.42,"step":0.01,"unit":"s"},
+    {"id":"appendS","type":"number","label":"Append stagger per row (s; 0.08-0.42)","default":0.15,"min":0.08,"max":0.42,"step":0.01,"unit":"s"},
     {"id":"slotY","type":"number","label":"Block center y (normalized; headroom band 0.115-0.27)","default":0.19,"min":0.115,"max":0.27,"step":0.005},
     {"id":"slotX","type":"number","label":"Block center x (normalized; headroom-left 0.17-0.38, center 0.43-0.65)","default":0.3,"min":0.1,"max":0.9,"step":0.01},
-    {"id":"payloadPctH","type":"number","label":"Payload FONT size (%% of frame height; measured ink 4.5-6 — see header note on case)","default":5,"min":4.5,"max":6,"step":0.1},
-    {"id":"accent","type":"color","label":"Lemon (ONE per reel; measured family #F2D24B-#F5E960)","default":"#F5E960"}
+    {"id":"payloadPctH","type":"number","label":"Payload FONT size (%% of frame height, 4.5-6 — see header note)","default":5,"min":4.5,"max":6,"step":0.1},
+    {"id":"accent","type":"color","label":"Payload accent (default: Sniper signal amber --lemon)","default":"#FDA933"}
   ]'
 >
   <!--
-    PROJECT SNIPER · Motion template: PUNCH-SHOUT-LOCKUP (punch pack, G1/G3)
-    Reference: the two-tone keyword staircase / "shout" layer —
-    scripts/producer/docs/findings/PUNCH_STYLE.md §5.4 E1 [6/6 HIGH]: lemon
-    chunky-serif payload 4.5-6%H + heavy WHITE grotesque co-word ~4%H + small
-    white kicker ~1.8%H, staircase-arranged in the keyword band y0.115-0.27
-    (§5.2 — never over the face). Word-append build at 0.08-0.42s/word (§4
-    CAP4); pop-in <=2 frames, NO fade (§5.3); measured example DVg 12.9s
-    "You are / Creating / Content / for your niche".
-    Transparent 1080x1920 overlay -> render `--format mov` (ProRes 4444).
+    PROJECT SNIPER · Motion template: PUNCH-SHOUT-LOCKUP (short-form punch pack)
+    A keyword lockup for the headroom band above a presenter: up to four rows —
+    a small kicker, a large accent payload, a bold co-word and an optional
+    trailing kicker — that pop on the spoken words. Transparent 1080x1920
+    overlay -> render `--format mov` (ProRes 4444).
 
-    HIS STRUCTURE, OUR TOKENS: serif = tokens.css --font-serif-display
-    (ChunkFive, OFL — the Cooper/Recoleta/Chunk-Five class named by the
-    evidence); lemon = --lemon (#F5E960, DVg-measured; granular.json
-    styleTokens: stroke black 4-6px + soft drop shadow). Co-word = house
-    Inter at weight 800 + 4px stroke (granular displaySans: "heavy grotesque,
-    #FFFFFF, black 4px stroke"). NOTE: tokens.css embeds Inter 400/700 only,
-    so the 800 resolves to synthesized-bold 700 — the heaviest weight
-    available offline (G1 caveat; swap in a true 800/900 cut when vendored).
+    SNIPER DESIGN ("tally tag" lockup, tokens.css):
+      - One flush-left column; every row shares the same left edge so the eye
+        drops straight down the lockup.
+      - Payload = --font-display (Bricolage Grotesque 800) in --lemon (Sniper
+        signal amber) on its own ink plate. The plate, not an outline, carries
+        legibility: its contrast never depends on the footage behind it
+        (amber on the plate ink 9.3:1).
+      - Kickers = --eyebrow-font (IBM Plex Mono 600) caps on a small ink tab.
+      - Co-word = display face 800 in white with a soft shadow and a 6px accent
+        underline that ties it to the payload colour.
+      - Rows stay inside the headroom band y0.115-0.27 so the lockup never sits
+        over the face; slotX/slotY place the block's center.
 
     CONTRACT for the PRODUCER compositing stage:
       - IN = pop <=2 FRAMES per token via /motion-tokens.js (alpha SNAPS on,
         scale settles 0.94->1 inside the 2-frame budget). build "pop" lands
         every set token at atS; build "append" staggers rows kicker ->
-        payload -> coword -> kicker2 by appendS (word-append, CAP4).
+        payload -> coword -> kicker2 by appendS (0.08-0.42s per row).
         Word-lock the LOCKUP by placing the entry's outStart on the spoken
         payload word; word-lock rows with appendS.
       - OUT = NONE. The comp holds to D; the compositor clears it ON the
         window end / cut ("exitOnCut": true pairs the window end to the next
-        cut seam — §5.3 THE EXIT LAW). NEVER a fade.
+        cut seam). NEVER a fade.
       - Replace-chain (~0.9s cadence) = author back-to-back windowed entries.
       - EMPTY-DEFAULTS LAW (G21): kicker/payload/coword/kicker2 default EMPTY
-        — unset renders NOTHING; demo content only when ALL are unset.
-      - splitText:true (OPT-IN, default false = byte-identical classic path):
+        — unset renders NOTHING; the preview sample shows only when ALL are
+        unset.
+      - splitText:true (OPT-IN, default false = the classic per-row path):
         each row is split into WORDS via GSAP SplitText (vendored
         /vendor/gsap/SplitText.min.js, 3.14.2 — see ../PROVENANCE.md) and
         every WORD pops individually. build "append" staggers word i at
-        atS + i*appendS across the whole lockup in reading order (the TRUE
-        measured word-append: "You are / Creating / Content / for your
-        niche" landed word by word, CAP4 0.08-0.42s/word); build "pop" lands
-        all words together at atS. Each word's pop stays under the <=2-FRAME
-        law (M.popIn — alpha SNAPS, scale settles 0.94->1 in <=2f). Rows keep
-        their staircase styling (stroke/shadow inherit onto the word divs).
+        atS + i*appendS across the whole lockup in reading order; build "pop"
+        lands all words together at atS. Each word's pop stays under the
+        <=2-FRAME law (M.popIn). A row's plate/tab switches on with its first
+        word, so an empty plate never shows ahead of its text.
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
         rewrites it per window; --variables never sets it — stat-card note).
-      - PAYLOAD CASE vs the measured 4.5-6%H (2026-07-10 repro finding):
-        payloadPctH sets the CSS FONT-size, but the granular studies measured
-        INK height on pixels. ChunkFive ink spans ~0.70em for cap-only words
-        ("REAL", "Generic") and ~0.90em with a descender ("Creating",
-        "Extremely" — measured x5.8%H at pctH 6). Author Title-Case payloads
-        with descenders where the beat allows (that IS the measured punch
-        casing); a descender-less word maxes out ~4.2%H ink at pctH 6.
+      - PAYLOAD SIZE: payloadPctH sets the CSS FONT-size as a percent of the
+        1920px frame height. Visible ink height is smaller than the font size
+        and grows with descenders (g, p, y); judge fit on the render, not on
+        the number.
   -->
   <head>
     <meta charset="UTF-8" />
@@ -90,8 +86,7 @@
 
       /* .stage OWNS the centering transform; GSAP animates only the rows.
          width hugs the CONTENT (max-content) so translate(-50%,-50%) centers
-         the visible block at the slot — a fixed width pushed the left-aligned
-         staircase off the frame edge (caught on the first render pass). */
+         the visible block at the slot. */
       #jsl-stage {
         position: absolute;
         left: 324px;                     /* slotX * 1080 (script overrides) */
@@ -101,48 +96,54 @@
         max-width: 880px;
         display: flex;
         flex-direction: column;
-        align-items: flex-start;         /* staircase = left-ragged block */
+        align-items: flex-start;         /* one shared left edge */
+        gap: 10px;
       }
 
-      /* Kicker: small white regular sans ~1.8%H (granular DVg leadIn). */
+      /* Kicker: mono caps on a small ink tab. */
       .jsl-kicker {
-        font-size: 35px;                 /* 1.8%H of 1920 */
-        font-weight: 500;
-        line-height: 1.25;
-        color: #FDFBFC;
-        text-shadow: 0 3px 12px rgba(0, 0, 0, 0.55);
-        will-change: opacity, transform;
-      }
-
-      /* Payload: GIANT lemon chunky serif, black 4-6px stroke + soft drop
-         (granular DVg displaySerif). paint-order keeps the stroke BEHIND the
-         fill so the heavy outline never eats the glyph. */
-      .jsl-payload {
-        font-family: var(--font-serif-display);
-        font-weight: 400;                /* ChunkFive is single-weight heavy */
-        line-height: 1.02;
-        color: var(--lemon);
-        -webkit-text-stroke: 6px #000;
-        paint-order: stroke fill;
-        text-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
-        margin-left: 28px;               /* staircase step */
-        will-change: opacity, transform;
-      }
-
-      /* Co-word: heavy white grotesque ~4%H, black 4px stroke (displaySans). */
-      .jsl-coword {
-        font-size: 77px;                 /* 4%H of 1920 */
-        font-weight: 800;                /* falls back to synthesized 700 (see header) */
-        line-height: 1.05;
+        font-family: var(--eyebrow-font);
+        font-size: 32px;
+        font-weight: 600;
+        line-height: 1.1;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
         color: #FFFFFF;
-        -webkit-text-stroke: 4px #000;
-        paint-order: stroke fill;
-        text-shadow: 0 5px 18px rgba(0, 0, 0, 0.5);
-        margin-left: 68px;               /* staircase step */
+        background: rgba(19, 23, 32, 0.84);   /* --rail-cream-ink @84% */
+        border-radius: 6px;
+        padding: 8px 14px 7px;
         will-change: opacity, transform;
       }
 
-      .jsl-kicker.trail { margin-left: 104px; margin-top: 6px; }
+      /* Payload: display grotesque in the accent on its own ink plate. */
+      .jsl-payload {
+        font-family: var(--font-display);
+        font-weight: 800;
+        line-height: 1.0;
+        letter-spacing: -0.02em;
+        color: var(--lemon);
+        background: rgba(19, 23, 32, 0.92);
+        border-radius: 0.14em;
+        padding: 0.06em 0.22em 0.12em;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        will-change: opacity, transform;
+      }
+
+      /* Co-word: white display line with an accent underline. */
+      .jsl-coword {
+        font-family: var(--font-display);
+        font-size: 77px;                 /* 4%H of 1920 */
+        font-weight: 800;
+        line-height: 1.02;
+        letter-spacing: -0.015em;
+        color: #FFFFFF;
+        text-shadow: 0 4px 18px rgba(0, 0, 0, 0.6), 0 1px 3px rgba(0, 0, 0, 0.5);
+        border-bottom: 6px solid var(--lemon);
+        padding: 0 0.04em 4px;
+        will-change: opacity, transform;
+      }
+
+      .jsl-kicker.trail { margin-top: 4px; }
     </style>
   </head>
   <body>
@@ -173,11 +174,11 @@
         const defaults = {
           kicker: "", payload: "", coword: "", kicker2: "",
           build: "pop", splitText: false, atS: 0, appendS: 0.15,
-          slotY: 0.19, slotX: 0.3, payloadPctH: 5, accent: "#F5E960",
+          slotY: 0.19, slotX: 0.3, payloadPctH: 5, accent: "#FDA933",
         };
-        // PREVIEW-ONLY demo (the DVg 12.9s measured lockup; only when ALL unset).
-        const SAMPLE = { kicker: "You are", payload: "Creating",
-                         coword: "Content", kicker2: "for your niche",
+        // PREVIEW-ONLY demo (original Sniper copy; only when ALL are unset).
+        const SAMPLE = { kicker: "Before you post", payload: "Trim",
+                         coword: "the intro", kicker2: "to one sentence",
                          build: "append" };
         const HF = window.__hyperframes;
         let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
@@ -192,12 +193,12 @@
           const v = isFinite(Number(raw)) ? Number(raw) : fallback;
           return Math.max(lo, Math.min(hi, v));
         };
-        // Keyword band y0.115-0.27 (§5.2) — never over the face.
+        // Headroom band y0.115-0.27 — the lockup never sits over the face.
         const slotY = clamp(vars.slotY, 0.115, 0.27, 0.19);
         const slotX = clamp(vars.slotX, 0.1, 0.9, 0.3);
-        const pctH = clamp(vars.payloadPctH, 4.5, 6, 5);       // E1 payload band
+        const pctH = clamp(vars.payloadPctH, 4.5, 6, 5);       // payload size band
         const atS = clamp(vars.atS, 0, Math.max(0, D - 0.1), 0);
-        const appendS = clamp(vars.appendS, 0.08, 0.42, 0.15); // CAP4 band
+        const appendS = clamp(vars.appendS, 0.08, 0.42, 0.15); // append stagger band
 
         const stage = document.getElementById("jsl-stage");
         stage.style.left = Math.round(slotX * 1080) + "px";
@@ -221,23 +222,24 @@
 
         // splitText:true (OPT-IN) — rows split into WORDS via SplitText
         // (vendored 3.14.2); pop unit becomes the WORD. Default false keeps
-        // the classic per-ROW path below byte-identical.
+        // the classic per-ROW path below.
         const splitWords = vars.splitText === true || String(vars.splitText) === "true";
 
         if (!splitWords) {
-          // IN = pop <=2f per row (motion-tokens G4); "append" staggers rows by
-          // appendS (word-append build, CAP4), "pop" lands them together at atS.
+          // IN = pop <=2f per row (motion-tokens); "append" staggers rows by
+          // appendS, "pop" lands them together at atS.
           rows.forEach(function (el, i) {
             tl.set(el, { autoAlpha: 0 }, 0);
             const at = String(vars.build) === "append" ? atS + i * appendS : atS;
             M.popIn(tl, el, Math.min(at, Math.max(0, D - 0.1)));
           });
         } else {
-          // Per-WORD staged reveal: SplitText wraps each word (staircase row
-          // styling — stroke/shadow/line-height — inherits onto the word divs).
-          // "append" = word i pops at atS + i*appendS in reading order (the
-          // TRUE measured word-append cadence, CAP4); "pop" = all words at atS.
-          // Every pop stays under the <=2f law (M.popIn: alpha SNAP + settle).
+          // Per-WORD staged reveal: SplitText wraps each word (font, colour
+          // and shadow inherit onto the word divs; the plate/tab stays on the
+          // row). "append" = word i pops at atS + i*appendS in reading order;
+          // "pop" = all words at atS. Every pop stays under the <=2f law
+          // (M.popIn: alpha SNAP + settle). A row switches on with its FIRST
+          // word so its plate never shows empty.
           if (typeof SplitText === "undefined") {
             throw new Error("punch-shout-lockup: splitText:true but " +
               "/vendor/gsap/SplitText.min.js did not load");
@@ -246,13 +248,20 @@
           const words = [];
           rows.forEach(function (el) {
             new SplitText(el, { type: "words" }).words.forEach(function (w) {
-              words.push(w);
+              words.push({ el: w, row: el });
             });
           });
+          const rowOn = [];
           words.forEach(function (w, i) {
-            tl.set(w, { autoAlpha: 0 }, 0);
+            tl.set(w.el, { autoAlpha: 0 }, 0);
             const at = String(vars.build) === "append" ? atS + i * appendS : atS;
-            M.popIn(tl, w, Math.min(at, Math.max(0, D - 0.1)));
+            const when = Math.min(at, Math.max(0, D - 0.1));
+            if (rowOn.indexOf(w.row) < 0) {
+              rowOn.push(w.row);
+              tl.set(w.row, { autoAlpha: 0 }, 0);
+              tl.set(w.row, { autoAlpha: 1 }, when);
+            }
+            M.popIn(tl, w.el, when);
           });
         }
 
@@ -260,7 +269,7 @@
         tl.set({}, {}, Math.max(0, D - 0.01));
 
         // No self exit — OUT is the compositor clearing the window (pair with
-        // "exitOnCut": true so the end IS the next cut). NEVER a fade (§5.3).
+        // "exitOnCut": true so the end IS the next cut). NEVER a fade.
         tl.seek(0);
         window.__timelines["punch-shout-lockup"] = tl;
       })();

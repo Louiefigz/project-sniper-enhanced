@@ -27,12 +27,12 @@ class ModuleLaneTokensTests(unittest.TestCase):
 
     def test_tokens_css_carries_the_lane(self) -> None:
         css = (_MOTION / "tokens.css").read_text(encoding="utf-8")
-        for tok in ("--accent-result: #c6f542",     # lime = hero/results
-                    "--accent-process: #35b6d9",    # cyan = process/status
-                    "--accent-compare: #9aa0a6",    # gray = comparison
-                    "--rail-cream: #f0f0e6",        # T-B light field
-                    "--rail-cream-ink: #1a1a1a",
-                    "--module-canvas: #0c1014"):  # dark takeover canvas
+        for tok in ("--accent-result: #CC7200",     # amber = hero/results
+                    "--accent-process: #447BE4",    # blue = process/status
+                    "--accent-compare: #7C8088",    # graphite = comparison
+                    "--rail-cream: #F1F4F6",        # light paper field
+                    "--rail-cream-ink: #131720",
+                    "--module-canvas: #121721"):  # dark takeover canvas
             self.assertIn(tok, css)
         self.assertIn("--pop-in-dur", css)          # punch twin untouched
 
@@ -80,8 +80,8 @@ class ModuleTakeoverCompTests(unittest.TestCase):
         self.html = (_COMPS / "module-takeover.html").read_text(encoding="utf-8")
 
     def test_canvas_and_grid(self) -> None:
-        self.assertIn("var(--module-canvas, #0c1014)", self.html)
-        self.assertIn("repeating-linear-gradient", self.html)
+        self.assertIn("var(--module-canvas, #121721)", self.html)
+        self.assertIn("radial-gradient(circle at 1px 1px", self.html)  # dot field
 
     def test_hole_geometry_matches_the_pip_hole_registry(self) -> None:
         # The comp masks the canvas out of this rect + draws the ring at it;
@@ -102,9 +102,9 @@ class ModuleTakeoverCompTests(unittest.TestCase):
         self.assertIn("mask-image", self.html)
 
     def test_dual_semantic_accents(self) -> None:
-        self.assertIn("var(--accent-result, #c6f542)", self.html)
-        self.assertIn("var(--accent-process, #35b6d9)", self.html)
-        self.assertIn("var(--accent-compare, #9aa0a6)", self.html)
+        self.assertIn("var(--accent-result, #CC7200)", self.html)
+        self.assertIn("var(--accent-process, #447BE4)", self.html)
+        self.assertIn("var(--accent-compare, #7C8088)", self.html)
 
     def test_in_card_payoff_constants(self) -> None:
         # Rank 7-8: hero 0.4s power2.out / comparison 0.8s power1.out /

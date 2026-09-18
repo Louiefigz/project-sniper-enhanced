@@ -126,9 +126,9 @@ changed. A browser window asks you to authorise with the subscription you alread
   any Claude login you already have. <code>install/uninstall.command</code> signs it out.</li>
 </ul>
 <p>Sniper accepts only a subscription login for the editor. An API-key login is refused on
-purpose, so Producer edits never bill per call. (Frame Review, and Segmenter and Clipper on
-the Claude route, use an Anthropic API key only if you add one yourself; see the
-requirements on the start page.) To switch subscription later: stop the app
+purpose, so no edit bills per call. (Only the optional Text Review uses an Anthropic API
+key, and only if you add one yourself and tick its opt-in; see the requirements on the start
+page.) To switch subscription later: stop the app
 (<code>install/stop.command</code>), run <code>install/use-provider.command claude</code>
 (or <code>codex</code>), then sign in again. The switch applies to the whole install at once: the
 app, the editor window (<code>install/editor.command</code>) and every edit. Asking the editor

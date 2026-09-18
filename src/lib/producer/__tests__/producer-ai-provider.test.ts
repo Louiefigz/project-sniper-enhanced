@@ -254,7 +254,7 @@ assert.equal(cutAllowed.includes("Glob"), false);
 assert.equal(cutAllowed.includes("Grep"), false);
 assert.equal(cutArgs.includes("--safe-mode"), false);
 assert.equal(cutArgs.includes("--tools"), false);
-assert.ok(cutAllowed.split(",").includes("Skill(producer)"));
+assert.ok(!cutAllowed.split(",").includes("Skill(producer)"), "skills never load with no setting sources");
 assert.equal(cutArgs[cutArgs.indexOf("--permission-mode") + 1], "dontAsk");
 const retained = { ...ctx, brainSessionId: "session-123" };
 const firstTurn = claudeArgs(retained, "cut", "start");

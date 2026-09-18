@@ -82,7 +82,7 @@ function intentSteps(ctx: AutoEditCtx): string[] {
   if (selectedStyle) {
     const styleDoc = doctrinePromptPath(ctx, STYLE_DOCS[selectedStyle]);
     out.push(
-      `   Operator intent: known style "${selectedStyle}" — READ ${styleDoc} BEFORE authoring any track, and follow its measured restraint rules over generic scope heuristics.`,
+      `   Operator intent: known style "${selectedStyle}" — READ ${styleDoc} BEFORE authoring any track, and follow its restraint rules over generic scope heuristics.`,
     );
   }
   if (intent.reference) out.push(referenceStrategyInstruction(ctx));

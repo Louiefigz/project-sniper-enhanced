@@ -26,7 +26,7 @@ INCLUDE: tuple[tuple[str, str], ...] = (
     ("components.json", "shadcn component config"),
 
     # --- Python engine ------------------------------------------------------
-    ("scripts", "Producer engine, Segmenter, Clipper, Frame Review, supervisor"),
+    ("scripts", "Producer engine, Segmenter, Clipper, Text Review, supervisor"),
     ("requirements.txt", "declared floors (the installer uses the lock beside it)"),
     ("schemas", "Codex output schemas and the reference-profile schema"),
 

@@ -40,8 +40,9 @@ export PATH
 unset CLAUDE_SECURESTORAGE_CONFIG_DIR
 # Sniper runs on subscriptions. A key or cloud-billing switch exported in your
 # shell must never be billed by accident. A key you deliberately put in
-# runtime/sniper.local.env or app/.env.local is still read (Frame Review, and
-# Segmenter/Clipper on the Claude route, which call the paid API).
+# runtime/sniper.local.env or app/.env.local is still read, by Text Review only:
+# the one optional paid feature, which calls Anthropic's API after an opt-in per
+# run. Segmenter and Clipper use your subscription like everything else.
 unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN CLAUDE_CODE_OAUTH_TOKEN OPENAI_API_KEY \
       ANTHROPIC_BASE_URL CLAUDE_CODE_USE_BEDROCK CLAUDE_CODE_USE_VERTEX
 

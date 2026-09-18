@@ -208,9 +208,8 @@ OVERRIDES = Path(__file__).resolve().parent / "payload_overrides"
 def apply_overrides(stage: Path, report: StageReport) -> None:
     """Replace staged files that must be self-contained in the package.
 
-    The repository's own `AGENTS.md` links to a parent repository that a buyer
-    never receives. The packaged copy replaces it with a complete standalone
-    instruction chain.
+    Nothing is overridden at present (the root `AGENTS.md` is the packaged
+    contract); the mechanism returns when `payload_overrides/` is absent.
 
     Args:
         stage: Staging tree, after `write_payload` has moved the product to app/.

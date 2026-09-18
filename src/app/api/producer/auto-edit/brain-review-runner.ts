@@ -85,7 +85,10 @@ async function runCodexRevision(
     reasoning: spec.reasoning,
     cwd: ctx.dir,
     schema: "producer-revision",
-    addDirs: spec.readDirs,
+    // Codex reads everywhere under workspace-write, and --add-dir would make a folder
+    // WRITABLE (the app, the source footage). The revision writes only the plan and
+    // scratch under its working folder, so it gets no extra folders.
+    addDirs: [],
   });
   const receipt = validateRevisionReceipt(parseRevisionReceipt(result.message), review);
   return { provider: "codex", ms: result.ms, receipt };

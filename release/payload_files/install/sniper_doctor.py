@@ -175,7 +175,8 @@ def check_optional() -> None:
     demucs = (APP / "scripts/producer/audio/.demucs-venv/bin/python3").exists()
     record("PASS" if demucs else "GATED", "audio preset: separate",
            "available" if demucs else "not installed (needs Demucs); voice, voice-strong, voice-rnn work")
-    record("GATED", "Frame Review", "needs your own paid Anthropic API key — not part of this purchase")
+    record("GATED", "Text Review", "optional; your own paid Anthropic API key and an opt-in per run — "
+           "not part of this purchase")
     record("GATED", "Palmier Pro mirror", "optional separate app; not configured in this package")
 
 

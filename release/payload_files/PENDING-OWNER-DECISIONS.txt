@@ -33,7 +33,8 @@ STILL OPEN — each blocks release
      stated to buyers.
   4. HOW FOOTAGE IS ADMITTED: Sniper admits every media file inside a network-less
      Docker sandbox with one approved image, and this package ships no way to provide
-     it. As built, this candidate cannot start an edit. install/doctor.command reports
+     it. As built, this candidate cannot start a Producer edit (Segmenter and Clipper do
+     not use this step). install/doctor.command reports
      it as "media admission sandbox". The options are in DECISION-SANDBOX-RUNTIME.md
      beside the release.
   5. CREATOR-DERIVED EDITING DOCTRINE: the saved styles (Restrained, Punch, Slideware)

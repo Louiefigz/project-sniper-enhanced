@@ -52,3 +52,33 @@ STILL TO BE SETTLED BEFORE THIS CAN BE SOLD
 - The effect of a refund on the licence grant.
 - A support route and a response commitment, and the support-specific terms.
 - Governing law and jurisdiction.
+
+PROPOSED WORDING FOR OWNER REVIEW (rc4) — NOT IN FORCE, NOT LEGAL ADVICE
+-----------------------------------------------------------------------
+Each bracket is an input only the owner can supply. Nothing here has been reviewed
+by a lawyer.
+
+A. EDITABLE PROJECTS YOU DELIVER TO A CLIENT (resolves a conflict with 2a)
+   2a forbids giving away any file inside Project Sniper. An editable Studio
+   project made with Sniper contains copies of Sniper's motion templates and
+   third-party runtime files. Proposed:
+   "You may give a client the videos you make and, if you choose, the editable
+   project for a video you made for them, so they can view or adjust that video.
+   The templates inside that project may be used only as part of that project. You
+   may not distribute them separately or as a template collection. Third-party files
+   in the project (listed in THIRD-PARTY-NOTICES.md) remain under their own licences."
+   PENDING: whether GSAP files may be passed to a client at all depends on the
+   publisher's answer (PENDING-OWNER-DECISIONS item 4). Until then, delivering the
+   rendered video alone is the safe default.
+
+B. REFUNDS AND THE LICENCE (choose one)
+   B1 "If you receive a refund, this licence ends and you must delete Project Sniper."
+   B2 "A refund does not end this licence for the copy you downloaded."
+
+C. SUPPORT
+   "Support: [contact route]. We aim to reply within [response time]. Support covers
+   installing and running the version you bought; it does not include new features,
+   later versions or editing your videos."
+
+D. GOVERNING LAW
+   "This licence is governed by the laws of [jurisdiction]."

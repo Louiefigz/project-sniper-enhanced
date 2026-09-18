@@ -1,6 +1,50 @@
 # Release notes
 
-## 0.1.0-rc4 — release candidate, not for sale (installer and configuration)
+## 0.1.0-rc4 — release candidate, not for sale
+
+### Footage admission without Docker
+- **Every media file is checked on your Mac, in a macOS sandbox.** Before any edit
+  reads a file, Sniper copies it into the project and fully decodes it with your
+  ffmpeg inside a sandbox. That sandbox has no network, cannot write files, cannot
+  start other programs, reads only that one file and the decoder's own libraries,
+  and cannot see other processes. A memory and CPU watchdog stops a runaway decode.
+  Docker is no longer needed.
+- `install/doctor.command` admits a generated sample on your Mac and confirms the
+  sandbox refuses a network connection and another file's contents, and stops a
+  decode above its memory limit.
+
+### What leaves your Mac
+- Segmenter and Clipper now use your Codex or Claude subscription, like Producer. The
+  API-key route and the Anthropic SDK are gone.
+- The visual review of a rendered edit sends still frames, with that reviewer's tools
+  switched off. The provider CLI runs in a sandbox that hides your project folder
+  except those frames.
+- Text Review is the only feature that uses an API key. It needs your own Anthropic key
+  and an opt-in for each run. Deepgram transcription needs explicit approval for each
+  run. Setup can save a Deepgram key, and saving it approves nothing.
+
+### Guided setup
+- Double-click `install/setup.command`. It connects Deepgram (optional, hidden prompt),
+  signs in to your subscription, runs the doctor and opens the editor window.
+  Prerequisites (Node, Python, ffmpeg, whisper-cpp, tesseract, yt-dlp) are still
+  installed beforehand.
+- Signing in, signing out and the editor window use only Sniper's own Claude settings,
+  never your personal `~/.claude` settings or CLAUDE.md files.
+
+### Original material
+- The three saved styles and the editing doctrine are rewritten as Sniper's own
+  specifications:
+  - styles: Restrained, Punch and Slideware;
+  - doctrine: module cards, editcraft, short-form and reference-style rules.
+  Rule IDs and behaviour are unchanged.
+- The Director library (formats, anchors, openings, training pairs) and the reference
+  library are original. Old saved Director records still read; a full cold check of
+  them does not pass.
+- The motion templates use Sniper's own palette and type.
+- `THIRD-PARTY-NOTICES.md` lists what actually ships.
+- The HyperFrames catalog's fonts, textures and media are no longer shipped.
+
+## 0.1.0-rc4 (installer and configuration)
 
 - **One provider everywhere.** `editor.command` refuses a provider other than the one
   the install uses, and passes the same model settings to the editor window as the app

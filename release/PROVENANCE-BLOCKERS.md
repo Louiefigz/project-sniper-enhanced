@@ -1,5 +1,16 @@
 # Provenance blockers — what cannot ship, and why
 
+> **rc4 status (2026-09-18).** B1 and B7 are resolved: original reference and Director
+> libraries are packaged, with provenance rows in `evidence/libraries/`. The creator-derived
+> style and editing doctrine is re-authored as original material (`evidence/doctrine-a/`,
+> `evidence/doctrine-b/`). The motion templates use an original palette and type
+> (`evidence/design/`). The ChunkFive font and the HyperFrames catalog media are withheld.
+> Still open:
+> - **GSAP**, moved out of "What IS cleared" below;
+> - the **OpenAI mark** in three icon files;
+> - the owner's confirmation for studies built from the owner's own footage and hired
+>   editors' cuts (see the rc4 report).
+
 Recorded 2026-09-17 against the isolated release source. Each row is a component the
 buyer package currently withholds or must not carry, with the evidence and the exact
 work that would clear it. Nothing here is "deleted": the material stays in the
@@ -159,7 +170,12 @@ to point it at.
 | Component | Licence | Evidence |
 |---|---|---|
 | `vendor/hyperframes-catalog/` (index, lock, compositions) | Apache-2.0 | `heygen-com/hyperframes` LICENSE fetched 2026-09-17, HTTP 200, 10,763 bytes, kept at `licenses/Apache-2.0-hyperframes.txt`; the npm package from the same repository declares `"license": "Apache-2.0"` |
-| GSAP 3.14.2 core + SplitText + DrawSVG | GSAP standard "no charge", commercial use permitted since 3.13 | `templates/motion/PROVENANCE.md`, per-file `@license` headers, verbatim upstream README |
-| Inter, ChunkFive, Caveat | SIL OFL 1.1 | `assets/fonts/README.txt`, `assets/fonts/ChunkFive-OFL.markdown`, catalog `inter-LICENSE.txt` |
+| Inter, Caveat (ChunkFive withheld) | SIL OFL 1.1 | `assets/fonts/Inter-OFL.txt`, `assets/fonts/Caveat-OFL.txt`, `assets/fonts/README.txt` |
+
+**Not cleared (rc4):** GSAP 3.14.2 core + SplitText + DrawSVG are under the GSAP Standard
+License (Webflow), which permits commercial use. Its competing-tool restriction and the
+scope of redistribution in a paid download are NOT CLEARED. See
+`evidence/design/GSAP_DETERMINATION.md`; a clarification request is drafted for the owner
+and has not been sent.
 | `bd.rnnn` RNNoise model | upstream states the models are not subject to copyright | `scripts/producer/audio/models/PROVENANCE.md` + verbatim upstream README, SHA-256 recorded |
 | `assets/sfx/*.wav` | recorded in `assets/sfx/PROVENANCE.md` | that file ships with them |

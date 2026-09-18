@@ -1,0 +1,52 @@
+{
+  "scope": "Current npm supervisor/skills/SDK and production build; separate generated build directory",
+  "distDir": ".next-testing-repair-20260910",
+  "results": [
+    {
+      "name": "npm-supervisor-final",
+      "command": [
+        "node",
+        "scripts/tests/next_supervisor.test.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 0.122
+    },
+    {
+      "name": "npm-skills-final",
+      "command": [
+        "node",
+        "scripts/tests/skill_surface.test.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 0.034
+    },
+    {
+      "name": "npm-sdk-final",
+      "command": [
+        "npm",
+        "run",
+        "test:sdk"
+      ],
+      "exitCode": 0,
+      "seconds": 1.429
+    },
+    {
+      "name": "build-final",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "seconds": 31.685
+    }
+  ],
+  "originalConfigRestored": {
+    "tsconfig.json": true,
+    "next-env.d.ts": true
+  },
+  "originalConfigSha256": {
+    "tsconfig.json": "dc242417e9f5a313b94a443df86aad38a4e7f1201482e7863c5f10f7d81b3c01",
+    "next-env.d.ts": "dea5b7ce2450051996e1a7739537f1bf5620b3d5a2a67844658a75bcdb67dda0"
+  }
+}

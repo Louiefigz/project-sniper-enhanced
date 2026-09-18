@@ -1,0 +1,46 @@
+{
+  "model": {"type": "small"},
+  "result": {"language": "en"},
+  "transcription": [
+    {
+      "offsets": {"from": 0, "to": 100},
+      "text": "",
+      "tokens": [{"text": "[_BEG_]", "p": 0.99}]
+    },
+    {
+      "offsets": {"from": 100, "to": 300},
+      "text": " Hello",
+      "tokens": [{"text": " Hello", "p": 0.9}]
+    },
+    {
+      "offsets": {"from": 300, "to": 350},
+      "text": ",",
+      "tokens": [{"text": ",", "p": 0.8}]
+    },
+    {
+      "offsets": {"from": 350, "to": 700},
+      "text": " world.",
+      "tokens": [{"text": " world", "p": 0.7}, {"text": ".", "p": 0.5}]
+    },
+    {
+      "offsets": {"from": 1700, "to": 1900},
+      "text": " Next",
+      "tokens": [{"text": " Next", "p": 0.95}]
+    },
+    {
+      "offsets": {"from": 1900, "to": 2300},
+      "text": " two words",
+      "tokens": [{"text": " two", "p": 0.85}, {"text": " words", "p": 0.75}]
+    },
+    {
+      "offsets": {"from": 2300, "to": 2500},
+      "text": " final?",
+      "tokens": [{"text": " final", "p": 0.9}, {"text": "?", "p": 0.7}]
+    },
+    {
+      "offsets": {"from": 2500, "to": 2600},
+      "text": "[BLANK_AUDIO]",
+      "tokens": [{"text": "[BLANK_AUDIO]", "p": 0.1}]
+    }
+  ]
+}

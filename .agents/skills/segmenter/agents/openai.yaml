@@ -1,0 +1,4 @@
+interface:
+  display_name: "Segmenter"
+  short_description: "Split a long recording into useful clips"
+  default_prompt: "Use $segmenter to divide this recording into standalone topic or guest clips."

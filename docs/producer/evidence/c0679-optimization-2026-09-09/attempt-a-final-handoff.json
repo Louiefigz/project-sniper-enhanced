@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-09-09T21:36:18.432874+00:00",
+  "attempt": "A",
+  "status": "baseline-handoff-finalized-with-explicit-unresolved-studio-and-perceptual-limitations",
+  "scope": "External handoff only; the saved Attempt A package is unchanged. This is not an all-checks-pass or user-approval declaration.",
+  "package": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-native-hyperframes-2026-09-09",
+  "packageManifestSha256": "1cc0c92dfc15530afb57c2f6d33caf62061a6034d648e43b69d2d64069c5f7c5",
+  "runtimeManifestSha256": "8a668d99fbf9cc4af344022edade544728d5c873b28a629dc5ddc8ed113970f4",
+  "packageFiles": 8614,
+  "output": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-native-hyperframes-2026-09-09/output/C0679-native.mp4",
+  "outputSha256": "eef61c5a2a410d869c79c13c6fb9ba69f52690377d0a99c3fbd53db3ffa50181",
+  "outputBytes": 875427947,
+  "verification": {
+    "originalCopyAllFileHashesVerified": true,
+    "currentArchiveManifestAndRuntimeDigestsRechecked": true,
+    "outputSizeRechecked": true,
+    "largeOutputNotRehashedDuringConcurrentFreshTrial": true,
+    "existingExternalEvidenceFilesHashVerified": 88,
+    "precedingExternalEvidenceManifestSha256": "1be9a5a3a1f6abf6e6409df115f80efd2eff257ac1c64f3c257b2a39c83c4afc",
+    "immutableArchiveWritten": false
+  },
+  "outputQualification": {
+    "wholeOutputObjectivePassed": true,
+    "supplementalAuthorityPassed": true,
+    "completeCorrectedMp4PlaybackPassed": true,
+    "reportedDroppedFrames": 0,
+    "frameCallbacks": 16393,
+    "maximumCallbackGapMs": 83.5,
+    "combinedBrowserReview": "fail-retained-strict-color-threshold",
+    "strictColorFailure": {
+      "frame": 653,
+      "psnrDb": 39.4668,
+      "minimumPsnrDb": 40,
+      "characterization": "Controlled comparison and limited still review found no material visible loss; original numerical failure is retained."
+    },
+    "humanListeningApproved": false,
+    "userCreativeApproved": false
+  },
+  "studioQualification": {
+    "passed": false,
+    "observedSeconds": 65,
+    "audioSeekingEvents": 668,
+    "audioWaitingEvents": 668,
+    "timingSubchecksPassed": true,
+    "startupIssue": "MotionPathPlugin CDN loading rejected",
+    "eventSemanticsReview": {
+      "source": "Independent reviewer task 01a07e12-f920-7613-b712-af46de3dcabc and production owner task 01a0753f-8b94-7461-804d-831c621658ce reported read-only review",
+      "finding": "The observation used one initial seek and one Play click, with no media setters during observation. Repeated seeks were real player events; transient readyState 1 was observed.",
+      "candidateCause": "Stock player synchronization can repeatedly seek active audio after sustained drift. This is a source lead, not a proven complete root cause.",
+      "audibleEffectObserved": false
+    },
+    "workingPreview": "http://127.0.0.1:41058/#project/native-presenter-v1",
+    "previewRestartedOrStoppedByHandoff": false
+  },
+  "memoryQualification": {
+    "scope": "The measured complete native V8 render, not total machine use or a guarantee for every workload",
+    "fullNativeRenderSeconds": 1541.357450749958,
+    "resourceSamples": 221,
+    "peakOwnedGiB": 2.2144784927,
+    "allObservedKernelPressureNormal": true,
+    "observedNewSwapGiB": 0,
+    "trackedCleanupAndLeaseVerified": true,
+    "userApplicationClosuresCredited": false
+  },
+  "remainingLimitations": [
+    "Strict browser color comparison failed at frame653 (39.4668dB vs40dB); controlled comparison and two-still agent review found no material visible loss. Failure remains retained.",
+    "The frozen baseline command supports unchanged soundtrack/governing source and CSS-scoped revisions; arbitrary HTML/JS/audio requalification is not implemented.",
+    "The frozen baseline still reserves cold extraction disk on every run. Warm-cache helpers are separate and not yet qualified.",
+    "Managed preview open may replace an existing registered preview; do not use it blindly while preserving41058.",
+    "A valid managed preview .studio-server.json currently enters the frozen governing-source closure. A narrow validated-record fix passes42 offline tests in separate preparation, not in this baseline.",
+    "The prior 65-second native Studio receipt remains telemetry-failed due to a startup Event error; only its timing and audio-disruption subchecks passed.",
+    "Current Studio audio seek/wait defect is confirmed as player behavior; smooth-audio Studio handoff remains unqualified.",
+    "Actual saved-path re-export was held and is untested. No generic warm-cache or preview-record draft is adopted into the saved archive."
+  ],
+  "timing": {
+    "attemptAMetTwoHourTarget": false,
+    "renderOnlyTimeIsNotFullEditTime": true,
+    "freshBStartReportedByProductionUtc": "2026-09-09T21:26:48.341117+00:00",
+    "freshBStartReportedMonotonic": 1618505.458083375,
+    "freshBClockRestartedByThisTask": false,
+    "freshBOutputsInspectedOrModifiedByThisTask": false
+  },
+  "ownership": {
+    "productionOwner": "01a0753f-8b94-7461-804d-831c621658ce",
+    "baselineOwner": "01a0863a-c43e-78f0-b227-54ea2c5c6e0d",
+    "remainingAction": "Production owns fresh B and any Studio repair. Keep A immutable and perform comparison only after B is sealed. Generic repairs discovered during B count in its elapsed time."
+  },
+  "evidence": [
+    {
+      "file": "full-native-high-v8-url.render.json",
+      "bytes": 29571,
+      "sha256": "bb21bdc7a1a0a2050d7b8073474c23a79951e8715013a3bd31f0605d3a73697f"
+    },
+    {
+      "file": "full-native-high-v8-url.resources.jsonl",
+      "bytes": 620645,
+      "sha256": "0acd02e60a08748ca71a8702ead68c4612fdba746c9a50abbec3f4cfc6898594"
+    },
+    {
+      "file": "full-native-high-v10-authority-v1.authority.json",
+      "bytes": 2014,
+      "sha256": "8a63c34cff20a6d450bb8d367d9f660dccb4c062f6963cbb9c00875601cedb2c"
+    },
+    {
+      "file": "full-native-high-v10-lossless-av-color.assembly-qc.json",
+      "bytes": 45726,
+      "sha256": "1ccb62f4729286552d6d279f612f4a7f02c32cdff981ac2094c125ff8ea629d6"
+    },
+    {
+      "file": "corrected-browser-whole-v2.browser-review.json",
+      "bytes": 5949,
+      "sha256": "43110fb7f95eecd1d5122a1b5c1eefac8add67f5446b097b6b7b291bb09dc74e"
+    },
+    {
+      "file": "corrected-browser-whole-v2.render.json",
+      "bytes": 2518752,
+      "sha256": "21f4cad6deba017836f600e2cdb914d5a9b97921b86fc1aca6f6835e51b058c9"
+    },
+    {
+      "file": "current-studio-full-source-v1.browser.json",
+      "bytes": 987215,
+      "sha256": "99e52ea28d5d1eaab6b42c8862efc3f1225bc35024e1aaf30c5fdecbbe35d643"
+    },
+    {
+      "file": "current-studio-full-source-v1.render.json",
+      "bytes": 2519164,
+      "sha256": "3e3ddc521f6a418e609c8087bce229671ec4ea137e01f2865a23c86ea70e2f71"
+    }
+  ]
+}

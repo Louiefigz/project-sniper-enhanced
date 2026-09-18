@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-07-29",
+  "phaseExit": "blocked",
+  "rows": [
+    {
+      "surface": "graphics-comp-catalog",
+      "numerator": "24000",
+      "denominator": "1001",
+      "status": "measured-released",
+      "evidence": [
+        "docs/producer/command-driven-editing/contracts/hyperframes-rate-matrix-v1.json",
+        "scripts/producer/graphics/comp_rate_artifact.py",
+        "scripts/producer/tests/test_comp_rate_matrix.py"
+      ],
+      "limits": "46 registered compositions x 4 decoded frames; real browser and full media decode, exact source/tool/row-bound receipt; not a full-duration, full-path, performance, or Palmier qualification"
+    },
+    {
+      "surface": "graphics-comp-catalog",
+      "numerator": "24",
+      "denominator": "1",
+      "status": "measured-released",
+      "evidence": [
+        "docs/producer/command-driven-editing/contracts/hyperframes-rate-matrix-v1.json",
+        "scripts/producer/graphics/comp_rate_artifact.py",
+        "scripts/producer/tests/test_comp_rate_matrix.py"
+      ],
+      "limits": "46 registered compositions x 4 decoded frames; real browser and full media decode, exact source/tool/row-bound receipt; not a full-duration, full-path, performance, or Palmier qualification"
+    },
+    {
+      "surface": "graphics-comp-catalog",
+      "numerator": "25",
+      "denominator": "1",
+      "status": "measured-released",
+      "evidence": [
+        "docs/producer/command-driven-editing/contracts/hyperframes-rate-matrix-v1.json",
+        "scripts/producer/graphics/comp_rate_artifact.py",
+        "scripts/producer/tests/test_comp_rate_matrix.py"
+      ],
+      "limits": "46 registered compositions x 4 decoded frames; real browser and full media decode, exact source/tool/row-bound receipt; not a full-duration, full-path, performance, or Palmier qualification"
+    },
+    {
+      "surface": "graphics-comp-catalog",
+      "numerator": "30000",
+      "denominator": "1001",
+      "status": "measured-released",
+      "evidence": [
+        "docs/producer/command-driven-editing/contracts/hyperframes-rate-matrix-v1.json",
+        "scripts/producer/graphics/comp_rate_artifact.py",
+        "scripts/producer/tests/test_comp_rate_matrix.py"
+      ],
+      "limits": "46 registered compositions x 4 decoded frames; real browser and full media decode, exact source/tool/row-bound receipt; not a full-duration, full-path, performance, or Palmier qualification"
+    },
+    {
+      "surface": "graphics-comp-catalog",
+      "numerator": "30",
+      "denominator": "1",
+      "status": "measured-released",
+      "evidence": [
+        "docs/producer/command-driven-editing/contracts/hyperframes-rate-matrix-v1.json",
+        "scripts/producer/graphics/comp_rate_artifact.py",
+        "scripts/producer/tests/test_comp_rate_matrix.py"
+      ],
+      "limits": "46 registered compositions x 4 decoded frames; real browser and full media decode, exact source/tool/row-bound receipt; not a full-duration, full-path, performance, or Palmier qualification"
+    },
+    {
+      "surface": "graphics-comp-catalog",
+      "numerator": "50",
+      "denominator": "1",
+      "status": "measured-released",
+      "evidence": [
+        "docs/producer/command-driven-editing/contracts/hyperframes-rate-matrix-v1.json",
+        "scripts/producer/graphics/comp_rate_artifact.py",
+        "scripts/producer/tests/test_comp_rate_matrix.py"
+      ],
+      "limits": "46 registered compositions x 4 decoded frames; real browser and full media decode, exact source/tool/row-bound receipt; not a full-duration, full-path, performance, or Palmier qualification"
+    },
+    {
+      "surface": "graphics-comp-catalog",
+      "numerator": "60000",
+      "denominator": "1001",
+      "status": "measured-released",
+      "evidence": [
+        "docs/producer/command-driven-editing/contracts/hyperframes-rate-matrix-v1.json",
+        "scripts/producer/graphics/comp_rate_artifact.py",
+        "scripts/producer/tests/test_comp_rate_matrix.py"
+      ],
+      "limits": "46 registered compositions x 4 decoded frames; real browser and full media decode, exact source/tool/row-bound receipt; not a full-duration, full-path, performance, or Palmier qualification"
+    },
+    {
+      "surface": "graphics-comp-catalog",
+      "numerator": "60",
+      "denominator": "1",
+      "status": "measured-released",
+      "evidence": [
+        "docs/producer/command-driven-editing/contracts/hyperframes-rate-matrix-v1.json",
+        "scripts/producer/graphics/comp_rate_artifact.py",
+        "scripts/producer/tests/test_comp_rate_matrix.py"
+      ],
+      "limits": "46 registered compositions x 4 decoded frames; real browser and full media decode, exact source/tool/row-bound receipt; not a full-duration, full-path, performance, or Palmier qualification"
+    },
+    {
+      "surface": "producer-master",
+      "numerator": "30000",
+      "denominator": "1001",
+      "status": "implemented-unqualified",
+      "evidence": [
+        "scripts/producer/render.py preserves exact source rate at master"
+      ],
+      "limits": "no retained complete short/long phase-exit fixture at this rational rate"
+    },
+    {
+      "surface": "producer-master",
+      "numerator": "30",
+      "denominator": "1",
+      "status": "implemented-unqualified",
+      "evidence": [
+        "scripts/producer/audio/master.py",
+        "scripts/producer/tests/test_audio_mix_render.py"
+      ],
+      "limits": "component tests exist; current full-path release matrix remains incomplete"
+    },
+    {
+      "surface": "producer-master",
+      "numerator": "60",
+      "denominator": "1",
+      "status": "implemented-unqualified",
+      "evidence": [
+        "scripts/producer/producer_config.py bitrate table"
+      ],
+      "limits": "configuration is not end-to-end release evidence"
+    },
+    {
+      "surface": "palmier-native",
+      "numerator": "30000",
+      "denominator": "1001",
+      "status": "unsupported",
+      "evidence": [
+        "scripts/producer/palmier/translate.py"
+      ],
+      "limits": "current native translator rounds fractional source FPS to an integer timeline"
+    }
+  ]
+}

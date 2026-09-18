@@ -1,0 +1,66 @@
+{
+  "approvedImageId": "sha256:bc56d3860d2ec1c843f7184bcecd21137aa79fe9fe19c90a67136d3052222ba8",
+  "cases": [
+    {
+      "admissionReceiptPublished": false,
+      "caseId": "malformed-codec",
+      "containerCleanupProved": true,
+      "error": "external-media decode rejected: Decoder (codec none) not found for input stream #0:0\n",
+      "inputSha256": "c56d313afe5dc703f87130532e0d74f984f6215b4e4aabe7b36d034ca5b1ad5f",
+      "status": "rejected"
+    },
+    {
+      "admissionReceiptPublished": false,
+      "caseId": "huge-dimensions",
+      "containerCleanupProved": true,
+      "error": "external-media decode rejected: DIMENSION_LIMIT",
+      "inputSha256": "c1a746ef14c00fd142c474142245c735180e8d56bd174867ea9dcfd40e19c231",
+      "status": "rejected"
+    },
+    {
+      "admissionReceiptPublished": false,
+      "caseId": "huge-frame-count",
+      "containerCleanupProved": true,
+      "error": "external-media decode rejected: FRAME_LIMIT",
+      "inputSha256": "0584beb86d0a2066651e5510f3188fc85cce3ba2e136c479f7deecdbdb5c1f62",
+      "status": "rejected"
+    },
+    {
+      "admissionReceiptPublished": false,
+      "caseId": "truncated-stream",
+      "containerCleanupProved": true,
+      "error": "external-media decode rejected: [mov,mp4,m4a,3gp,3g2,mj2 @ 0xaaaaeb9c5b30] moov atom not found\n/input/media: Invalid data found when processing input\n",
+      "inputSha256": "22838d0adff1e28bf508f8f7dc4c924ae35f313a8a191ace8cfde37d7dfd6eb0",
+      "status": "rejected"
+    },
+    {
+      "admissionReceiptPublished": false,
+      "caseId": "decoder-timeout",
+      "containerCleanupProved": true,
+      "error": "external-media decode rejected: ETIMEDOUT",
+      "inputSha256": "6c5487c9b0849077cb0b65c6ee2bb1dfd0ecc89ed357248ac7fe7bd5e62afa1f",
+      "status": "rejected"
+    },
+    {
+      "admissionReceiptPublished": false,
+      "caseId": "archive-bomb",
+      "containerCleanupProved": true,
+      "error": "sealed render manifest closure is invalid",
+      "inputSha256": "aba3a1549379a3efce58d22bb4c04c464ce5c66f4ac65bf9e18e0403973e5c6a",
+      "status": "rejected"
+    }
+  ],
+  "generatedAt": "2026-07-30T07:57:22.545590+00:00",
+  "kind": "p0-adversarial-ingress-acceptance",
+  "passed": true,
+  "schemaVersion": 1,
+  "sourceClosure": {
+    "scripts/producer/headless/container_policy.py": "4756dec73b7e55ff248afe7c5ce1ea6e21a3bfebab517d6dcf356087acecfac4",
+    "scripts/producer/headless/external_media_probe.py": "9a6cacac128cc7ec7efad1cbdd315b34aa68814db0c8a955e8439df2a9b112b3",
+    "scripts/producer/headless/external_media_probe_policy.py": "558c52d933b2678ba6b916e275a8020fef66e7427d42736739ee4748b9a14f9a",
+    "scripts/producer/headless/external_media_snapshot.py": "55fce21c029f341c334974c6e109feb31f7c31be48a74368f05ca394084b6887",
+    "scripts/producer/headless/render_image_approval.json": "6b2ca0dcacef6df3d0f2e443cbf6aa91ad5ea44d27cc0d4a1dd48881f6ae9d4f",
+    "scripts/producer/headless/sealed_archive.py": "3896610aa65f3dad589779bdf599ac1e8a1a0de19e5ef78b8fc01740879dc78f",
+    "scripts/producer/tests/live_p0_adversarial_ingress_acceptance.py": "45e6d75d0df14b809d5d4abe5b582a338dd78846f7045ad343dc4589530b17b4"
+  }
+}

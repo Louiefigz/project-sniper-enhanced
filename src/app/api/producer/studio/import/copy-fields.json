@@ -1,0 +1,6 @@
+{
+ "text-element": ["text"],
+ "statement-card": ["text"],
+ "kinetic-quote-wide": ["words", "emphasisWords"],
+ "hw-callout-circle": ["label"]
+}

@@ -1,0 +1,324 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"text","type":"string","label":"Line of display text (the emphasis word must appear in it)","default":"The hook does the heavy lifting"},
+    {"id":"emphasisWord","type":"string","label":"Emphasis word/phrase (first case-insensitive whole-word match gets the marker)","default":"hook"},
+    {"id":"style","type":"enum","label":"Marker style","default":"highlight","options":[{"value":"highlight","label":"Highlight"},{"value":"circle","label":"Circle"},{"value":"underline","label":"Underline"},{"value":"scribble","label":"Scribble"}]},
+    {"id":"drawAt","type":"number","label":"Marker draw cue (s)","default":0.9,"min":0,"max":30,"step":0.05,"unit":"s"},
+    {"id":"accent","type":"color","label":"Marker ink color","default":"#054BC9"},
+    {"id":"exit","type":"enum","label":"Exit","default":"hold","options":[{"value":"hold","label":"Hold to end (compositor owns the seam)"},{"value":"fade","label":"Fade 0.45s"},{"value":"up","label":"Rise + fade 0.45s"}]}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · Motion template: MARKER-HIGHLIGHT (catalog port wave A —
+    hand-drawn family; upstream: vendor/hyperframes-catalog/compositions/
+    components/marker-highlight.html, HeyGen demo copy stripped, colors
+    retargeted to tokens.css).
+    Trigger it serves: cue-timed emphasis on ONE word inside a spoken line —
+    the line settles on a cream paper panel, then a single hand-drawn marker
+    stroke (highlight/circle/underline/scribble) draws over the emphasized
+    word exactly when the speaker hits it. Strictly-more-capable sibling of
+    underline-circle (which annotates a screen REGION; this one carries its
+    own line). Transparent 1080x1920 overlay -> render with `--format mov`
+    (ProRes 4444) for alpha.
+
+    CONTRACT for the PRODUCER compositing stage:
+      - text / emphasisWord / style / drawAt / accent / exit are
+        `data-composition-variables`. The first case-insensitive WORD-
+        BOUNDARY match of emphasisWord inside text receives the marker (a
+        mid-word hit marks the wrong ink); template_hw_contract REJECTS a
+        plan whose emphasisWord is empty or has no whole-word match
+        (the marker IS the graphic — a silent no-marker render is a defect),
+        and this file throws on a non-empty unmatched word (defense in depth).
+      - drawAt is seconds relative to the overlay's outStart — set it to the
+        transcript time of the emphasized word. It is clamped so stroke +
+        settle pop always complete before any exit begins.
+      - MECHANISM (kept from upstream): the marker paths are authored in a
+        fixed viewBox with the hand-wobble baked into the control points
+        (never randomized), then anisotropically stretched over the word box
+        via preserveAspectRatio="none" — the stretch of the dashed stroke IS
+        the marker-nib ink weight. The draw is a getTotalLength dash tween on
+        the stroke-dashoffset ATTRIBUTE (house scrub law #6). The ink holds
+        opacity 0 until the exact draw frame (a round cap otherwise paints a
+        resting dot at the path start).
+      - ENVELOPE (house law #7): fixed IN (0.55s line rise) + DRAW (0.6s) +
+        optional OUT (0.45s, exit fade/up only); only the HOLD is elastic;
+        when D is shorter than the fixed phases they compress together.
+        Default exit is "hold" — THE EXIT LAW: the compositor owns the seam.
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (see stat-card
+        note); set it per render, comfortably past drawAt.
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>SNIPER · marker-highlight</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="/vendor/gsap/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: var(--canvas-w);
+        height: var(--canvas-h);
+        overflow: hidden;
+        background: transparent;          /* alpha overlay — only the panel paints */
+        font-family: var(--font);
+      }
+      #mh-root { position: relative; width: var(--canvas-w); height: var(--canvas-h); }
+
+      /* .stage OWNS the centering transform (visual center x, free-band center)
+         so GSAP can rise/fade the panel without clobbering the centering. */
+      .stage {
+        position: absolute;
+        left: var(--visual-center-x);
+        top: 855px;
+        transform: translate(-50%, -50%);
+        display: flex;
+        justify-content: center;
+      }
+      /* Cream paper panel — the hand-drawn family's field (rail-cream tokens). */
+      #mh-panel {
+        max-width: var(--safe-width);
+        background: var(--rail-cream);
+        border-radius: var(--card-radius);
+        padding: 44px 56px;
+        box-shadow: var(--card-shadow);
+        will-change: transform, opacity;
+      }
+      #mh-text {
+        text-align: center;
+        font-weight: 600;
+        line-height: 1.16;
+        letter-spacing: -0.02em;
+        color: var(--rail-cream-ink);
+        text-wrap: balance;
+      }
+      .mh-em {
+        position: relative;
+        display: inline-block;
+        white-space: nowrap;              /* the emphasized phrase never wraps internally */
+        will-change: transform;
+      }
+      .mh-em-text { position: relative; z-index: 1; }
+      .mh-mark { position: absolute; overflow: visible; }
+
+      /* Per-style marker box around the emphasized word. Explicit width/height
+         (svg is a replaced element: inset-stretching would fall back to its
+         intrinsic viewBox ratio); preserveAspectRatio="none" then stretches
+         the authored path (and its stroke) into the box — exactly the
+         marker-nib distortion we want on a dashed path. */
+      .mh-em[data-marker-style="highlight"] .mh-mark {
+        left: -3%; top: 14%; width: 106%; height: 76%; z-index: 0;
+      }
+      .mh-em[data-marker-style="underline"] .mh-mark {
+        left: -2%; bottom: -14%; width: 105%; height: 22%; z-index: 2;
+      }
+      .mh-em[data-marker-style="circle"] .mh-mark {
+        left: -13%; top: -26%; width: 126%; height: 152%; z-index: 2;
+      }
+      .mh-em[data-marker-style="scribble"] .mh-mark {
+        left: -2%; top: 12%; width: 104%; height: 76%; z-index: 2;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="mh-root"
+      data-composition-id="marker-highlight"
+      data-width="1080"
+      data-height="1920"
+      data-start="0"
+      data-duration="3.5"
+    >
+      <div class="stage">
+        <div id="mh-panel" class="clip" data-start="0" data-duration="60" data-track-index="1">
+          <p id="mh-text"></p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("mh-root");
+        // Single source of truth for render length: the root data-duration attr.
+        const D = parseFloat(root.dataset.duration) || 3.5;
+
+        const defaults = {
+          text: "The hook does the heavy lifting", emphasisWord: "hook",
+          style: "highlight", drawAt: 0.9, accent: "#054BC9", exit: "hold",
+        };
+        const HF = window.__hyperframes;
+        const vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
+
+        const text = String(vars.text == null ? "" : vars.text).trim().replace(/\s+/g, " ");
+        const emphasis = String(vars.emphasisWord == null ? "" : vars.emphasisWord)
+          .trim().replace(/\s+/g, " ");
+        const exit = vars.exit === "fade" || vars.exit === "up" ? vars.exit : "hold";
+
+        // Hand-drawn stroke library (upstream mechanism, kept verbatim): paths
+        // authored in a fixed viewBox, wobble baked into the control points —
+        // never randomized — then stretched into the word box.
+        const markerStyles = {
+          highlight: {
+            viewBox: "0 0 100 40",
+            d: "M 3 24 C 22 20.5, 47 25.5, 68 22.5 C 79 21, 90 23, 97 21.5",
+            strokeWidth: 26, opacity: 0.5,
+          },
+          circle: {
+            viewBox: "0 0 100 40",
+            d: "M 22 7 C 58 1, 95 8, 97 20 C 99 31, 74 38, 44 37 C 16 36, 2 29, 3 19 C 4 10, 22 4, 52 4.5",
+            strokeWidth: 2.8, opacity: 1,
+          },
+          underline: {
+            viewBox: "0 0 100 12",
+            d: "M 2 7 C 20 4.5, 46 8.5, 66 6 C 80 4.5, 92 7.5, 98 5.5",
+            strokeWidth: 4.5, opacity: 1,
+          },
+          scribble: {
+            viewBox: "0 0 100 40",
+            d: "M 6 13 C 34 9.5, 66 11, 94 9 C 60 15, 26 16, 7 20 C 36 18, 68 21, 93 18 C 62 25, 28 27, 8 29",
+            strokeWidth: 5, opacity: 0.65,
+          },
+        };
+        const styleName = Object.prototype.hasOwnProperty.call(markerStyles, vars.style)
+          ? vars.style : "highlight";
+        const marker = markerStyles[styleName];
+
+        // First case-insensitive WORD-BOUNDARY match: a bare indexOf marks
+        // the wrong ink ("art" first hits inside "Start" — review F3). The
+        // chars around the match must be absent or non-alphanumeric; the
+        // same arithmetic template_hw_contract.word_boundary_match runs
+        // plan-side.
+        function boundaryIndexOf(haystack, needle) {
+          const low = haystack.toLowerCase();
+          const n = needle.toLowerCase();
+          const wordChar = /[\p{L}\p{N}]/u;
+          let i = low.indexOf(n);
+          while (i >= 0) {
+            const beforeOk = i === 0 || !wordChar.test(low[i - 1]);
+            const end = i + n.length;
+            const afterOk = end >= low.length || !wordChar.test(low[end]);
+            if (beforeOk && afterOk) return i;
+            i = low.indexOf(n, i + 1);
+          }
+          return -1;
+        }
+
+        // Split text around that match — textContent nodes only, never
+        // innerHTML. An empty emphasis renders a plain line (preview
+        // convenience); a non-empty UNMATCHED one throws —
+        // template_hw_contract rejects it plan-side, this is defense in depth.
+        const textEl = document.getElementById("mh-text");
+        const matchIndex = emphasis.length > 0
+          ? boundaryIndexOf(text, emphasis) : -1;
+        if (emphasis.length > 0 && matchIndex < 0) {
+          throw new Error("marker-highlight: emphasisWord '" + emphasis +
+            "' does not appear in text '" + text + "' as a whole word");
+        }
+        let emEl = null;
+        let pathEl = null;
+        if (matchIndex >= 0) {
+          const before = text.slice(0, matchIndex);
+          const matched = text.slice(matchIndex, matchIndex + emphasis.length);
+          const after = text.slice(matchIndex + emphasis.length);
+          if (before) textEl.appendChild(document.createTextNode(before));
+
+          emEl = document.createElement("span");
+          emEl.className = "mh-em";
+          emEl.setAttribute("data-marker-style", styleName);
+
+          const svgNS = "http://www.w3.org/2000/svg";
+          const svg = document.createElementNS(svgNS, "svg");
+          svg.setAttribute("class", "mh-mark");
+          svg.setAttribute("viewBox", marker.viewBox);
+          svg.setAttribute("preserveAspectRatio", "none");
+          svg.setAttribute("aria-hidden", "true");
+          pathEl = document.createElementNS(svgNS, "path");
+          pathEl.setAttribute("d", marker.d);
+          pathEl.setAttribute("fill", "none");
+          pathEl.setAttribute("stroke", vars.accent);
+          pathEl.setAttribute("stroke-width", String(marker.strokeWidth));
+          pathEl.setAttribute("stroke-linecap", "round");
+          pathEl.setAttribute("stroke-linejoin", "round");
+          svg.appendChild(pathEl);
+
+          const emText = document.createElement("span");
+          emText.className = "mh-em-text";
+          emText.textContent = matched;
+
+          emEl.appendChild(svg);
+          emEl.appendChild(emText);
+          textEl.appendChild(emEl);
+          if (after) textEl.appendChild(document.createTextNode(after));
+        } else {
+          textEl.textContent = text;
+        }
+
+        // Deterministic character-count fit (upstream formula rescaled from
+        // container-query units to the 870px safe-width panel): the line may
+        // wrap, the emphasized phrase never wraps internally.
+        const characters = Math.max(1, Array.from(text).length);
+        const fitted = Math.max(38, Math.min(84, Math.round(1610 / characters)));
+        textEl.style.fontSize = fitted + "px";
+
+        // ENVELOPE: fixed phases; HOLD is the only elastic span (house law #7).
+        const IN_BASE = 0.55, DRAW_BASE = 0.6, POP_BASE = 0.32;
+        const OUT_BASE = exit === "hold" ? 0 : 0.45;
+        const totalBase = IN_BASE + DRAW_BASE + OUT_BASE;
+        const scale = D < totalBase ? D / totalBase : 1;
+        const IN = IN_BASE * scale, DRAW = DRAW_BASE * scale;
+        const POP = POP_BASE * scale, OUT = OUT_BASE * scale;
+        const OUT_START = D - OUT;
+
+        const drawAtRaw = Number(vars.drawAt);
+        let drawAt = isFinite(drawAtRaw) ? Math.max(0, drawAtRaw) : 0.9;
+        // The stroke and its settle pop always land before any exit.
+        drawAt = Math.min(drawAt, Math.max(0, OUT_START - (DRAW + POP)));
+
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // IN: the panel rises into place (both endpoints explicit).
+        tl.fromTo("#mh-panel", { opacity: 0, y: 60 },
+          { opacity: 1, y: 0, duration: IN, ease: "power3.out" }, 0);
+
+        // DRAW: dash reveal from the measured length, driven on the
+        // stroke-dashoffset ATTRIBUTE (house scrub law #6 — never the CSS
+        // property, never pathLength).
+        if (pathEl) {
+          const length = pathEl.getTotalLength();
+          pathEl.setAttribute("stroke-dasharray", String(length));
+          // Hidden until the cue: at dashoffset == length the round cap still
+          // paints a dot at the path start, so the ink is opacity 0 until the
+          // exact frame the draw begins.
+          pathEl.setAttribute("stroke-dashoffset", String(length));
+          gsap.set(pathEl, { opacity: 0 });
+          tl.set(pathEl, { opacity: marker.opacity }, drawAt);
+          tl.fromTo(pathEl,
+            { attr: { "stroke-dashoffset": length } },
+            { attr: { "stroke-dashoffset": 0 }, duration: DRAW,
+              ease: "power2.inOut", immediateRender: false },
+            drawAt);
+          // Settle pop on the emphasized word as the ink lands (finite yoyo).
+          tl.fromTo(emEl, { scale: 1 },
+            { scale: 1.045, duration: POP / 2, ease: "power1.out", yoyo: true, repeat: 1 },
+            drawAt + DRAW * 0.7);
+        }
+
+        // HOLD: completely still.
+
+        // OUT: optional departure; "hold" (default) leaves the seam to the
+        // compositor / exitOnCut (THE EXIT LAW).
+        if (exit === "fade") {
+          tl.to("#mh-panel", { opacity: 0, duration: OUT, ease: "power2.in" }, OUT_START);
+        } else if (exit === "up") {
+          tl.to("#mh-panel", { opacity: 0, y: -80, duration: OUT, ease: "power2.in" }, OUT_START);
+        }
+
+        tl.seek(0);
+        window.__timelines["marker-highlight"] = tl;
+      })();
+    </script>
+  </body>
+</html>

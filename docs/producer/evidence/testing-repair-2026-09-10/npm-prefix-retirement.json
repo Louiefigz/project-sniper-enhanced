@@ -1,0 +1,38 @@
+{
+  "scope": "Only owned test coordinators; no test child or user process is signalled",
+  "originalRequiredPrefixCount": 12,
+  "parts": {
+    "a": {
+      "pid": 61554,
+      "initialIdentity": "Thu Sep 10 10:58:29 2026     Ss   /opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /private/tmp/sniper-npm-partition-20260910.py a",
+      "stopped": true,
+      "retired": true,
+      "recordedModulesAtStop": 12,
+      "stoppedAtUtc": "2026-09-10T16:26:24.497248+00:00",
+      "inFlightChildren": [
+        {
+          "pid": 34466,
+          "state": "R",
+          "command": "node --import tsx src/lib/server/__tests__/guided-source-color-completed-recovery-faults.test.ts"
+        }
+      ],
+      "retiredAtUtc": "2026-09-10T16:28:16.204144+00:00"
+    },
+    "b": {
+      "pid": 46362,
+      "initialIdentity": "Thu Sep 10 10:57:46 2026     Ss   /opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /private/tmp/sniper-npm-partition-20260910.py b",
+      "stopped": true,
+      "retired": true,
+      "recordedModulesAtStop": 12,
+      "stoppedAtUtc": "2026-09-10T16:19:08.422406+00:00",
+      "inFlightChildren": [
+        {
+          "pid": 63888,
+          "state": "R",
+          "command": "node --import tsx src/lib/server/__tests__/guided-source-color-completed-recovery.test.ts"
+        }
+      ],
+      "retiredAtUtc": "2026-09-10T16:20:31.191222+00:00"
+    }
+  }
+}

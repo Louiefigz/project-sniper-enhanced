@@ -1,0 +1,290 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"start","type":"number","label":"First value shown by the count","default":0,"step":1},
+    {"id":"end","type":"number","label":"Final value where the count lands (verbatim from transcript)","default":100,"step":1},
+    {"id":"prefix","type":"string","label":"Text before the value (e.g. $; explicit blank = none)","default":""},
+    {"id":"suffix","type":"string","label":"Text after the value (e.g. %; explicit blank = none)","default":"%"},
+    {"id":"accent","type":"color","label":"Count color","default":"#054BC9"},
+    {"id":"exit","type":"enum","label":"Exit","default":"hold","options":[{"value":"hold","label":"Hold to end (compositor owns the seam)"},{"value":"fade","label":"Fade 0.45s"},{"value":"up","label":"Rise + fade 0.45s"}]}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · Motion template: COUNT-UP (catalog port wave B —
+    data/evidence family; upstream: vendor/hyperframes-catalog/compositions/
+    components/count-up.html, contract-token palette retargeted to the house
+    white card; the stat-card upgrade counter).
+    Trigger it serves: ONE hero number that should be FELT arriving — the
+    value accelerates from start, decelerates into the exact final integer,
+    and lands with one restrained scale pulse. Sibling of stat-card (which
+    carries a label + eyebrow anatomy); count-up is the bare hero figure on
+    the house card. Prefix/suffix stay fixed; tabular numerals stop the line
+    shifting as digits change.
+
+    CANVAS CHOICE (wave-B doctrine): 9:16 1080x1920 — the stat-card lane.
+    Hero-metric beats on long-form already have scoreboard/stat forms; the
+    shorts data beat is where the counter earns its build. Upstream is
+    container-responsive; a 16:9 sibling is a mechanical re-lane if earned.
+    Transparent canvas -> white house card -> alpha overlay: render with
+    `--format mov` (ProRes 4444) on overlay anchors.
+
+    CONTRACT for the PRODUCER compositing stage:
+      - start / end / prefix / suffix / accent / exit are
+        `data-composition-variables`. template_catalog_contract REJECTS a
+        plan whose end is missing/non-finite/non-integer, equal to start
+        after rounding (a zero-motion counter is a static stat — use
+        stat-card), or outside +-1e9 (a readable figure, not scientific
+        notation). suffix's non-empty default makes it a required override
+        by design: the plan states the unit explicitly. claims_contract
+        gates start/end as their PAINTED affix forms — a prefix/suffix-
+        declaring spec has its numeric leaves composed ("250%") and checked
+        against the spoken window like any card string (review F2).
+      - MECHANISM (kept from upstream): every displayed integer is a
+        PRECOMPUTED text-at-time row — the eased count is sampled once,
+        synchronously, into frameRows and applied via tl.set at exact frame
+        times (house scrub law #5; no update callbacks, so reverse and
+        repeated seeks show identical values). Landing pulse is two explicit
+        half tweens; hold drift is one finite yoyo pair (house law #7).
+      - Deliberately NOT kept from upstream: the `glow` boolean (text-shadow
+        bloom is meaningless on the opaque house card) and the green/blue/
+        violet accent enum (house accents are a single color variable,
+        default #054BC9 — wave A precedent).
+      - ENVELOPE: fixed IN 2.05s (arrival + count + pulse) + optional OUT
+        0.45s; only HOLD is elastic (drift, then 0.25s stillness). Default
+        exit "hold" — THE EXIT LAW: the compositor owns the seam.
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (stat-card
+        note); graphics_render rewrites it per window.
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>SNIPER · count-up</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="/vendor/gsap/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: var(--canvas-w);
+        height: var(--canvas-h);
+        overflow: hidden;
+        background: transparent;          /* alpha overlay — only the card paints */
+        font-family: var(--font);
+      }
+      #cu-root { position: relative; width: var(--canvas-w); height: var(--canvas-h); }
+
+      /* .stage OWNS the centering transform (visual center x, free band) so
+         GSAP can rise/scale/fade the card without clobbering the centering. */
+      .stage {
+        position: absolute;
+        left: var(--visual-center-x);
+        top: 855px;
+        transform: translate(-50%, -50%);
+        display: flex;
+        justify-content: center;
+      }
+      #cu-card {
+        background: var(--card-bg);
+        border-radius: var(--card-radius);
+        padding: 52px 64px;
+        box-shadow: var(--card-shadow);
+        max-width: var(--safe-width);
+        will-change: transform, opacity;
+      }
+      #cu-lockup {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        overflow: hidden;
+        font-size: var(--cu-font-size, 160px);
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: "tnum" 1;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.045em;
+        text-align: center;
+        white-space: nowrap;
+      }
+      .cu-affix {
+        position: relative;
+        flex: 0 0 auto;
+        color: var(--ink-soft);
+        font-size: 0.55em;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+      /* Affix gaps are font-relative (em of the affix), never layout
+         spacing tokens, so the lockup scales with the figure. */
+      .cu-prefix { margin-right: 0.14em; }
+      .cu-suffix { margin-left: 0.14em; }
+      .cu-affix:empty { display: none; }
+      .cu-value { display: inline-block; min-width: 1ch; }
+    </style>
+  </head>
+  <body>
+    <div
+      id="cu-root"
+      data-composition-id="count-up"
+      data-width="1080"
+      data-height="1920"
+      data-start="0"
+      data-duration="3"
+    >
+      <div class="stage">
+        <div id="cu-card" class="clip" data-start="0" data-duration="60" data-track-index="1">
+          <div id="cu-lockup" role="img">
+            <span class="cu-affix cu-prefix" aria-hidden="true"></span>
+            <span class="cu-value" aria-hidden="true"></span>
+            <span class="cu-affix cu-suffix" aria-hidden="true"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        var root = document.getElementById("cu-root");
+        var card = document.getElementById("cu-card");
+        var lockup = document.getElementById("cu-lockup");
+        var valueElement = root.querySelector(".cu-value");
+        var prefixElement = root.querySelector(".cu-prefix");
+        var suffixElement = root.querySelector(".cu-suffix");
+        var D = Math.max(0.001, parseFloat(root.dataset.duration) || 3);
+
+        var defaults = {
+          start: 0, end: 100, prefix: "", suffix: "%",
+          accent: "#054BC9", exit: "hold",
+        };
+        var HF = window.__hyperframes;
+        var vars = Object.assign({}, defaults,
+          HF && HF.getVariables ? HF.getVariables() : {});
+
+        var start = Number(vars.start);
+        var end = Number(vars.end);
+        if (!Number.isFinite(start)) start = 0;
+        if (!Number.isFinite(end)) {
+          throw new Error("count-up: spec.end must be a finite number; got '" +
+            vars.end + "'");
+        }
+        var prefix = vars.prefix == null ? "" : String(vars.prefix);
+        var suffix = vars.suffix == null ? "%" : String(vars.suffix);
+        var accent = String(vars.accent || "#054BC9");
+        var exit = vars.exit === "fade" || vars.exit === "up" ? vars.exit : "hold";
+
+        function formatValue(value) {
+          return Math.round(value).toLocaleString("en-US");
+        }
+
+        prefixElement.textContent = prefix;
+        suffixElement.textContent = suffix;
+
+        // Optical trim (upstream, kept): flex baseline alignment is metric,
+        // not optical. At 0.55em a lone currency glyph hugs the baseline and
+        // a lone math-axis glyph (+, ~) sits below the figures' visual
+        // middle. Lift both onto the figures' optical center; full-height
+        // strings (%, letters, digits) stay on the shared baseline.
+        function affixLift(text) {
+          if (/^[$€£¥₹₩]$/.test(text)) return "-0.31em";
+          if (/^[+−±×=~<>-]+$/.test(text)) return "-0.36em";
+          return "";
+        }
+        prefixElement.style.top = affixLift(prefix);
+        suffixElement.style.top = affixLift(suffix);
+        valueElement.style.color = accent;
+
+        // Deterministic character-count fit against the longer end state,
+        // px against the 870px safe-width card (upstream's cqw formula
+        // rescaled; the card, not the canvas, is the fit basis).
+        var startText = prefix + formatValue(start) + suffix;
+        var endText = prefix + formatValue(end) + suffix;
+        var characterCount = Math.max(
+          Array.from(startText).length, Array.from(endText).length, 1);
+        var fitted = Math.max(72, Math.min(190, Math.round(1560 / characterCount)));
+        root.style.setProperty("--cu-font-size", fitted + "px");
+        lockup.setAttribute("aria-label", endText);
+
+        // ENVELOPE (house law #7): fixed IN/OUT, elastic HOLD, never
+        // timeScaled; phases compress together when D is short.
+        var IN_BASE = 2.05;
+        var OUT_BASE = exit === "hold" ? 0 : 0.45;
+        var COUNT_BASE = 1.72;
+        var PULSE_HALF_BASE = 0.165;
+        var ARRIVAL_BASE = 0.38;
+        var STILLNESS = 0.25;
+        var FPS = 30;
+        var totalBase = Math.max(0.001, IN_BASE + OUT_BASE);
+        var scale = D < totalBase ? D / totalBase : 1;
+        var IN = IN_BASE * scale;
+        var OUT = OUT_BASE * scale;
+        var COUNT = COUNT_BASE * scale;
+        var PULSE_HALF = PULSE_HALF_BASE * scale;
+        var ARRIVAL = ARRIVAL_BASE * scale;
+        var HOLD = Math.max(0, D - (IN + OUT));
+        var HOLD_START = IN;
+        var OUT_START = IN + HOLD;
+
+        // PRECOMPUTED text-at-time table (house scrub law #5): the eased
+        // count is sampled once, synchronously; tl.set applies each row at
+        // its exact frame time, so any seek order shows the same digits.
+        var lastFrame = Math.max(1, Math.round(COUNT * FPS));
+        var countEase = gsap.parseEase("sine.inOut");
+        var frameRows = [];
+        for (var frame = 0; frame <= lastFrame; frame += 1) {
+          frameRows.push(formatValue(start + (end - start) *
+            countEase(frame / lastFrame)));
+        }
+
+        // Initial state (house law #1: gsap.set for state, fromTo for the
+        // move — both endpoints explicit so no tween ever laz-captures a
+        // mutated start value).
+        gsap.set(card, { opacity: 0, y: 42, scale: 0.98,
+                         transformOrigin: "50% 58%" });
+        valueElement.textContent = frameRows[0];
+
+        window.__timelines = window.__timelines || {};
+        var tl = gsap.timeline({ paused: true });
+
+        // IN: one settle (rise + soft scale + fade).
+        tl.fromTo(card, { opacity: 0 },
+          { opacity: 1, duration: ARRIVAL, ease: "power2.out",
+            immediateRender: false }, 0);
+        tl.fromTo(card, { y: 42, scale: 0.98, transformOrigin: "50% 58%" },
+          { y: 0, scale: 1, duration: ARRIVAL, ease: "power3.out",
+            immediateRender: false }, 0);
+
+        frameRows.forEach(function (row, frameIndex) {
+          tl.set(valueElement, { textContent: row },
+            COUNT * (frameIndex / lastFrame));
+        });
+
+        // Landing pulse: two explicit half tweens, restrained.
+        tl.to(card, { scale: 1.07, duration: PULSE_HALF, ease: "power3.out" }, COUNT);
+        tl.to(card, { scale: 1, duration: PULSE_HALF, ease: "power2.out" },
+          COUNT + PULSE_HALF);
+
+        // HOLD: one finite yoyo drift, then stillness.
+        var driftDuration = Math.max(0, HOLD - STILLNESS);
+        if (driftDuration > 0) {
+          tl.to(card, {
+            y: -10, duration: driftDuration / 2,
+            ease: "sine.inOut", yoyo: true, repeat: 1,
+          }, HOLD_START);
+        }
+
+        // OUT: optional departure; "hold" (default) leaves the seam to the
+        // compositor / exitOnCut (THE EXIT LAW).
+        if (exit === "up") {
+          tl.to(card, { y: -42, duration: OUT, ease: "power2.in" }, OUT_START);
+          tl.to(card, { opacity: 0, scale: 0.985, duration: OUT,
+                        ease: "power2.in" }, OUT_START);
+        } else if (exit === "fade") {
+          tl.to(card, { opacity: 0, duration: OUT, ease: "power2.in" }, OUT_START);
+        }
+
+        tl.seek(0);
+        window.__timelines["count-up"] = tl;
+      })();
+    </script>
+  </body>
+</html>

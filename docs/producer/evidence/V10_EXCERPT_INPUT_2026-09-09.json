@@ -1,0 +1,125 @@
+{
+  "status": "mirror-only-supervised-real-excerpt-input-passed-not-audio-render",
+  "at": "2026-09-09",
+  "originalPackage": "/private/tmp/sniper-v10-excerpt-input-review-20260909.64DV9j/README.md",
+  "rootFollowup": {
+    "sharedWorker": "Existing local_asr_worker verified group helper reused only in the named TEST route; original source and admission algorithms retained",
+    "purePython": {
+      "passed": 27,
+      "wallSeconds": 4.95
+    },
+    "tsCohort": {
+      "passed": 40,
+      "skipped": 1,
+      "wallSeconds": 7.69
+    },
+    "finalProcessFaults": {
+      "passed": 2,
+      "wallSeconds": 7.48,
+      "workspaces": [
+        "/private/tmp/sniper-source-owner-qKOe42",
+        "/private/tmp/sniper-source-owner-5cPGZ6"
+      ]
+    },
+    "retainedFailures": [
+      {
+        "toolChunk": "715ca8",
+        "result": "Actual named source leaf incorrectly received60s instead of original2s",
+        "wallSeconds": 1.05
+      },
+      {
+        "toolChunk": "561e76",
+        "result": "TEST temp path lacked canonical resolve",
+        "wallSeconds": 3.93
+      },
+      {
+        "toolChunk": "3f06ea",
+        "result": "Two new process TESTs failed: mutable argv was read after fixture dispatch"
+      },
+      {
+        "path": "/private/tmp/sniper-source-owner-1ABiYy/failed.json",
+        "result": "TEST harness argv capture error; no source leaf started",
+        "wallSeconds": 5.23
+      },
+      {
+        "toolChunk": "f16703",
+        "result": "TEST child env required NODE_ENV",
+        "wallSeconds": 8.72
+      }
+    ]
+  },
+  "native": {
+    "path": "/private/tmp/sniper-v10-excerpt-native-20260909.oSGT95/result.json",
+    "passed": 1,
+    "wallSeconds": 30.066523584,
+    "testSeconds": 28.936999042,
+    "workspace": "/private/tmp/sniper-v10-input-TZlvGl",
+    "originalCallerCapMs": 600000,
+    "originalSourceCapMs": 60000,
+    "sourceUnchangedAtExit": true,
+    "postCheck": {
+      "containers": [
+        {
+          "name": "sniper-media-probe-1daf42e0a931434d86e4bef667ad85b3",
+          "absent": true
+        },
+        {
+          "name": "sniper-render-81e7a5c59db195c7765e7a1e2bbb43b4",
+          "absent": true
+        },
+        {
+          "name": "sniper-render-1bb344ccd03b4fb22484fb49dbaf276f",
+          "absent": true
+        },
+        {
+          "name": "sniper-render-d743d083fe27e190939b322527937135",
+          "absent": true
+        },
+        {
+          "name": "sniper-render-eabea9adbf5f15b7d26e6897e379fd23",
+          "absent": true
+        },
+        {
+          "name": "sniper-render-8c0f352311db1eb6cf217210b321ca91",
+          "absent": true
+        },
+        {
+          "name": "sniper-render-e10d22124cf80bbe2401ff73ce77166e",
+          "absent": true
+        },
+        {
+          "name": "sniper-render-3a98d39e83d43e4f5043672e8534f591",
+          "absent": true
+        },
+        {
+          "name": "sniper-render-2c4b345d990f8cd2510f9d5a72dc6192",
+          "absent": true
+        },
+        {
+          "name": "sniper-render-d96e7f2db7b23c3d54791d6628afbfd4",
+          "absent": true
+        }
+      ],
+      "processes": [],
+      "mutationLocks": [
+        {
+          "path": "/private/tmp/sniper-v10-input-TZlvGl/test-only-cut-review-2e5b6393/.sniper-project-mutation.lock",
+          "absent": true
+        },
+        {
+          "path": "/private/tmp/sniper-v10-input-TZlvGl/test-only-cut-review-2e5b6393/producer/.sniper-project-mutation.lock",
+          "absent": true
+        }
+      ],
+      "gatesOk": true,
+      "cleanup": "verified-absence"
+    }
+  },
+  "limitations": [
+    "Seeded non-speech sixteen-second TEST source with actual sandbox admission; no real creator footage or ASR.",
+    "Actual four-field cut, TEST acceptance, real deterministic readiness and14-document TS/Python read passed; no gate waiver.",
+    "No DSP/opening/body rendered in this input-only run; no full-longform/two-hour qualification.",
+    "Source admission container identity now recorded before launch. Its automatic outer-death cleanup remains unqualified; this diagnostic was manually supervised and exact resources checked absent.",
+    "Source-pinned failed and successful prior workspaces remain untouched. Subsequent TEST helper changes require a new source/cut capture."
+  ]
+}

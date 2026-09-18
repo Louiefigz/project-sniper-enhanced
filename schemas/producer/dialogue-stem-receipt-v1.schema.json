@@ -1,0 +1,292 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/dialogue-stem-receipt-v1.schema.json",
+  "title": "DialogueStemRenderReceiptV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "admissionStatus",
+    "dialogueMapHash",
+    "dialogueTrackHash",
+    "sourceSnapshotSetHash",
+    "pictureTimelineMapHash",
+    "clock",
+    "sourceProofs",
+    "entries",
+    "output",
+    "tools",
+    "policies",
+    "receiptHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "dialogue-stem-render-receipt" },
+    "admissionStatus": { "const": "private-unpromoted" },
+    "dialogueMapHash": { "$ref": "#/$defs/sha256" },
+    "dialogueTrackHash": { "$ref": "#/$defs/sha256" },
+    "sourceSnapshotSetHash": { "$ref": "#/$defs/sha256" },
+    "pictureTimelineMapHash": { "$ref": "#/$defs/sha256" },
+    "clock": { "$ref": "#/$defs/clock" },
+    "sourceProofs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/sourceProof" }
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/entry" }
+    },
+    "output": { "$ref": "#/$defs/output" },
+    "tools": { "$ref": "#/$defs/tools" },
+    "policies": { "$ref": "#/$defs/policies" },
+    "receiptHash": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "stableId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"
+    },
+    "safeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "positiveSafeInteger": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "signedSafeInteger": {
+      "type": "integer",
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sampleRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startSample", "endSampleExclusive"],
+      "properties": {
+        "startSample": { "$ref": "#/$defs/safeInteger" },
+        "endSampleExclusive": { "$ref": "#/$defs/positiveSafeInteger" }
+      }
+    },
+    "clock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fps",
+        "sampleRate",
+        "totalFrames",
+        "totalSamples",
+        "terminalSampleFormula"
+      ],
+      "properties": {
+        "fps": { "$ref": "positive-rational-v1.schema.json" },
+        "sampleRate": { "$ref": "#/$defs/positiveSafeInteger" },
+        "totalFrames": { "$ref": "#/$defs/positiveSafeInteger" },
+        "totalSamples": { "$ref": "#/$defs/positiveSafeInteger" },
+        "terminalSampleFormula": {
+          "const": "B(F)=floor(F*S*q/p)"
+        }
+      }
+    },
+    "sourceProof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceId",
+        "path",
+        "sha256",
+        "audioStreamIndex",
+        "sourceSampleRate",
+        "sourceChannels",
+        "sourceChannelLayout",
+        "sourceCodec",
+        "channelNormalization",
+        "decodedSamples",
+        "decodedPcmSha256",
+        "normalizedDecodedSamples",
+        "normalizedPcmSha256"
+      ],
+      "properties": {
+        "sourceId": { "$ref": "#/$defs/stableId" },
+        "path": { "$ref": "#/$defs/path" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "audioStreamIndex": { "$ref": "#/$defs/safeInteger" },
+        "sourceSampleRate": { "$ref": "#/$defs/positiveSafeInteger" },
+        "sourceChannels": { "$ref": "#/$defs/positiveSafeInteger" },
+        "sourceChannelLayout": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceCodec": {
+          "type": "string",
+          "minLength": 1
+        },
+        "channelNormalization": {
+          "$ref": "channel-normalization-receipt-v1.schema.json"
+        },
+        "decodedSamples": { "$ref": "#/$defs/positiveSafeInteger" },
+        "decodedPcmSha256": { "$ref": "#/$defs/sha256" },
+        "normalizedDecodedSamples": {
+          "$ref": "#/$defs/positiveSafeInteger"
+        },
+        "normalizedPcmSha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dialogueSegmentId",
+        "cutSegmentId",
+        "elementVersion",
+        "sourceId",
+        "sourceSampleRate",
+        "sourceSampleRange",
+        "normalizedSourceSampleRange",
+        "outputSampleRange",
+        "requestedSpeed",
+        "effectiveSpeed",
+        "role",
+        "tempoToken",
+        "preReconcileSamples",
+        "reconciliationSamples"
+      ],
+      "properties": {
+        "dialogueSegmentId": { "$ref": "#/$defs/stableId" },
+        "cutSegmentId": { "$ref": "#/$defs/stableId" },
+        "elementVersion": { "$ref": "#/$defs/positiveSafeInteger" },
+        "sourceId": { "$ref": "#/$defs/stableId" },
+        "sourceSampleRate": { "$ref": "#/$defs/positiveSafeInteger" },
+        "sourceSampleRange": { "$ref": "#/$defs/sampleRange" },
+        "normalizedSourceSampleRange": { "$ref": "#/$defs/sampleRange" },
+        "outputSampleRange": { "$ref": "#/$defs/sampleRange" },
+        "requestedSpeed": {
+          "$ref": "positive-rational-v1.schema.json"
+        },
+        "effectiveSpeed": {
+          "$ref": "positive-rational-v1.schema.json"
+        },
+        "role": {
+          "enum": ["primary", "j-cut-handle", "l-cut-handle"]
+        },
+        "tempoToken": {
+          "type": "string",
+          "pattern": "^(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$"
+        },
+        "preReconcileSamples": {
+          "$ref": "#/$defs/positiveSafeInteger"
+        },
+        "reconciliationSamples": {
+          "$ref": "#/$defs/signedSafeInteger"
+        },
+        "seamSample": { "$ref": "#/$defs/safeInteger" },
+        "coveredByCutSegmentId": { "$ref": "#/$defs/stableId" }
+      },
+      "oneOf": [
+        {
+          "properties": { "role": { "const": "primary" } },
+          "allOf": [
+            { "not": { "required": ["seamSample"] } },
+            { "not": { "required": ["coveredByCutSegmentId"] } }
+          ]
+        },
+        {
+          "properties": { "role": { "const": "j-cut-handle" } },
+          "required": ["seamSample", "coveredByCutSegmentId"]
+        },
+        {
+          "properties": { "role": { "const": "l-cut-handle" } },
+          "required": ["seamSample", "coveredByCutSegmentId"]
+        }
+      ]
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fileName",
+        "sha256",
+        "codec",
+        "sampleFormat",
+        "sampleRate",
+        "channels",
+        "channelLayout",
+        "decodedSamples"
+      ],
+      "properties": {
+        "fileName": { "const": "dialogue-stem.wav" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "codec": { "const": "pcm_s32le" },
+        "sampleFormat": { "const": "s32" },
+        "sampleRate": { "$ref": "#/$defs/positiveSafeInteger" },
+        "channels": { "const": 1 },
+        "channelLayout": { "const": "mono" },
+        "decodedSamples": { "$ref": "#/$defs/positiveSafeInteger" }
+      }
+    },
+    "tools": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ffmpegPath",
+        "ffmpegSha256",
+        "ffprobePath",
+        "ffprobeSha256",
+        "retimeFilter"
+      ],
+      "properties": {
+        "ffmpegPath": { "$ref": "#/$defs/path" },
+        "ffmpegSha256": { "$ref": "#/$defs/sha256" },
+        "ffprobePath": { "$ref": "#/$defs/path" },
+        "ffprobeSha256": { "$ref": "#/$defs/sha256" },
+        "retimeFilter": { "const": "rubberband" }
+      }
+    },
+    "policies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceIndexing",
+        "downmix",
+        "retime",
+        "retimeReconciliation",
+        "overlapMix",
+        "publication"
+      ],
+      "properties": {
+        "sourceIndexing": {
+          "const": "decoded-contiguous-native-samples"
+        },
+        "downmix": {
+          "const": "content-bound-dead-channel-repair-before-mono-downmix"
+        },
+        "retime": {
+          "const": "pitch-preserving-rubberband-from-exact-rational"
+        },
+        "retimeReconciliation": {
+          "const": "bounded-tail-pad-or-trim"
+        },
+        "overlapMix": {
+          "const": "linear-sum-no-normalize-saturating-pcm-s32"
+        },
+        "publication": {
+          "const": "atomic-no-replace-read-only-generation"
+        }
+      }
+    }
+  }
+}

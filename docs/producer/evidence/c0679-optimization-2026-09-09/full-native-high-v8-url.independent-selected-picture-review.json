@@ -1,0 +1,100 @@
+{
+  "reviewedAt": "2026-09-09T18:56:27.442393+00:00",
+  "reviewer": "Assess pipeline completion",
+  "status": "selected-encoded-picture-checks-passed",
+  "source": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/full-native-high-v8-url.mp4",
+  "sourceIndexSha256": "9f383e6f482b83bb366be95bb9d0e165a83720a07e59ee36a76a8216b4cfcdba",
+  "reviewedFrames": [
+    {
+      "requestedSeconds": 410.0,
+      "frame": 9831,
+      "actualPtsSeconds": 410.03462499999995,
+      "reference": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-framing-repair-v2/frame-02-at-410s.png",
+      "outputFrame": "frame-056.png",
+      "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v8-url.visual-review/frame-056.png",
+      "sha256": "e65a3764fc8ddaccc5caeaf7813992734671142f2df61381afc083643f7c3e9a",
+      "finding": "Presenter hair and face are contained inside the left padded rounded inset; the previous left-edge hair crop is absent. Right-side information remains legible."
+    },
+    {
+      "requestedSeconds": 443.6,
+      "frame": 10636,
+      "actualPtsSeconds": 443.6098333333333,
+      "reference": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-qc-v1/frame-04-at-443.6s.png",
+      "outputFrame": "frame-060.png",
+      "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v8-url.visual-review/frame-060.png",
+      "sha256": "bdc46e1b280ac843f699436d69d83bd0f97169cc0089479052f8f1e77fd267e5",
+      "finding": "Circular lower-right presenter face is contained and clear of the partially revealed prompt graphic; blue number10 is legible."
+    },
+    {
+      "requestedSeconds": 491.3,
+      "frame": 11780,
+      "actualPtsSeconds": 491.32416666666666,
+      "reference": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-qc-v1/frame-08-at-491.3s.png",
+      "outputFrame": "frame-064.png",
+      "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v8-url.visual-review/frame-064.png",
+      "sha256": "f687974eab8d8c56fc7ce7f56a0bb9394349c417a1c4791d941ba090b80f6431",
+      "finding": "Right padded rounded presenter inset is contained; eight numbered information tiles on the left are readable and clear of the presenter."
+    },
+    {
+      "requestedSeconds": 668.6,
+      "frame": 16031,
+      "actualPtsSeconds": 668.6262916666666,
+      "reference": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-qc-v1/frame-19-at-668.6s.png",
+      "outputFrame": "frame-077.png",
+      "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v8-url.visual-review/frame-077.png",
+      "sha256": "faf1bc531ac573a5320188ba9bdb522a458000ca5e1083fd958c32816ebd9fa4",
+      "finding": "Full studio presenter has intact head/hair and room for the gesture; lower-left YOUR VOICE + A SYSTEM overlay is clear of the face."
+    },
+    {
+      "requestedSeconds": 679.3,
+      "frame": 16287,
+      "actualPtsSeconds": 679.3036249999999,
+      "reference": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-framing-repair-v2/frame-04-at-679.3s.png",
+      "outputFrame": "frame-078.png",
+      "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v8-url.visual-review/frame-078.png",
+      "sha256": "8bf148fde9b885e3150e3413a31431f871fbb8d7830ebe5ecf35925e94b8eff9",
+      "finding": "Left padded rounded presenter inset remains intact before the ending transition; right content-strategy endplate is visible."
+    },
+    {
+      "requestedSeconds": 679.7,
+      "frame": 16297,
+      "actualPtsSeconds": 679.7207083333333,
+      "reference": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-framing-repair-v2/frame-05-at-679.7s.png",
+      "outputFrame": "frame-079.png",
+      "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v8-url.visual-review/frame-079.png",
+      "sha256": "84f22290d247cbec7934279c87c88ed8c31c665e32d55af0109a686bd81242ec",
+      "finding": "Presenter fades while still contained and the endplate moves toward center; this static sample shows the expected intermediate state."
+    },
+    {
+      "requestedSeconds": 680.1,
+      "frame": 16307,
+      "actualPtsSeconds": 680.1377916666667,
+      "reference": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-framing-repair-v2/frame-06-at-680.1s.png",
+      "outputFrame": "frame-080.png",
+      "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v8-url.visual-review/frame-080.png",
+      "sha256": "ae71aafede382411fe9c702364049c12f67b10e9868939b04f7fc06b9cd749e9",
+      "finding": "Centered content-strategy endplate is visible; no standing/headless torso remains."
+    },
+    {
+      "requestedSeconds": 682.9,
+      "frame": 16374,
+      "actualPtsSeconds": 682.93225,
+      "reference": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-tail-framing-repair-v2/frame-07-at-682.9s.png",
+      "outputFrame": "frame-081.png",
+      "path": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v8-url.visual-review/frame-081.png",
+      "sha256": "14161e2a1461af06a598ca1daf5ec18e1f3f342ab517e0283b4798402e6dd61c",
+      "finding": "Centered endplate persists at the tail without a cropped presenter or stray graphics."
+    }
+  ],
+  "manuallyViewedFrames": 8,
+  "method": "Each actual PNG extracted from the complete native MP4 was directly viewed with view_image at full source dimensions.",
+  "framingFindingsResolved": [
+    "410s hair containment",
+    "outro handoff before standing head leaves crop"
+  ],
+  "scope": "Eight actual encoded static frames only; not all83 frames, continuous motion, audio approval or final package qualification.",
+  "wholeOutputQualified": false,
+  "audioFailureRemainsOpen": true,
+  "humanApprovalClaimed": false,
+  "videoBitstreamPreservationRequiredForAudioRepairCarryover": true
+}

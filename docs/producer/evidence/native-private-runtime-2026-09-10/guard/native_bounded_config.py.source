@@ -1,0 +1,95 @@
+"""Closed paths and unchanged full-quality settings for one native recovery."""
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+import shutil
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+LIVE = Path('/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER')
+PROJECT = ROOT / 'native-presenter-v1'
+NODE = Path('/opt/homebrew/Cellar/node/23.10.0_1/bin/node')
+FFMPEG = Path('/opt/homebrew/Cellar/ffmpeg/8.0_1/bin')
+CLI = LIVE / 'templates/motion/node_modules/hyperframes/dist/cli.js'
+CHROME = Path('/Users/aaronfigueroa/.cache/hyperframes/chrome/chrome-headless-shell/'
+              'mac_arm-152.0.7928.2/chrome-headless-shell-mac-arm64/chrome-headless-shell')
+SANDBOX = Path('/private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/localhost-only.sb')
+CACHE = Path('/private/tmp/hyperframes-extract-cache-501/hfcache-v4-5610bca5f73df075')
+FRAME_COUNT = 16394
+DURATION = FRAME_COUNT * 1001 / 24000
+
+
+def digest(path: Path) -> str:
+    """Hash an actual file with bounded memory."""
+    with path.open('rb') as handle:
+        return hashlib.file_digest(handle, 'sha256').hexdigest()
+
+
+def source_hashes(project: Path = PROJECT) -> dict[str, str]:
+    """Bind the same native composition inputs as the retained full attempts."""
+    names = ('index.html', 'motion.js', 'scene.css', 'hyperframes.json')
+    paths = [path for path in project.iterdir() if path.name in names
+             or re.fullmatch(r'extension-.*\.(js|css)', path.name)]
+    return {path.name: digest(path) for path in sorted(paths)}
+
+
+def admit(label: str, browser_budget: bool = False) -> dict:
+    """Refuse an existing run, incomplete source, changed SDK or missing cache."""
+    if not re.fullmatch(r'[a-z0-9-]+', label):
+        raise ValueError('Invalid attempt label')
+    output = PROJECT / 'renders' / f'{label}.mp4'
+    targets = [output, *(ROOT / f'{label}.{suffix}' for suffix in
+                        ('render.json', 'render.log', 'resources.jsonl', 'browser-launches.jsonl'))]
+    if any(path.exists() for path in targets):
+        raise RuntimeError('Attempt label already exists; failed work is retained')
+    html = (PROJECT / 'index.html').read_text()
+    root = re.search(r'<div\b[^>]*\bid="native-root"[^>]*>', html)
+    duration = re.search(r'data-duration="([^"]+)"', root[0]) if root else None
+    if duration is None or abs(float(duration[1]) - DURATION) > .00001:
+        raise RuntimeError('Complete native timeline is not integrated')
+    if 'extension-367-end.js' not in html:
+        raise RuntimeError('Final native section is missing')
+    if not (CACHE / '.hf-complete').is_file() or len(list(CACHE.glob('*.png'))) != FRAME_COUNT:
+        raise RuntimeError('Recovery must reuse all retained lossless source frames')
+    version = json.loads((CLI.parent.parent / 'package.json').read_text())['version']
+    if version != '0.8.31':
+        raise RuntimeError('Installed SDK changed; inspect and qualify before rendering')
+    if shutil.disk_usage(PROJECT).free < 10 * 1024 ** 3:
+        raise RuntimeError('Insufficient output and OS-swap headroom')
+    browser = ROOT / 'chrome-headless-shell-bounded.py' if browser_budget else CHROME
+    return {'duration': DURATION, 'output': str(output), 'sdkVersion': version,
+            'sdkSha256': digest(CLI), 'sandboxSha256': digest(SANDBOX),
+            'cache': str(CACHE), 'frameCount': FRAME_COUNT, 'sourceCacheComplete': True,
+            'browserLaunchPath': str(browser), 'browserLaunchSha256': digest(browser),
+            'chromeSha256': digest(CHROME), 'browserBudgetAdapter': browser_budget}
+
+
+def environment(browser_budget: bool = False, label: str = '') -> dict[str, str]:
+    """No billing credentials, inherited render flags or nonlocal network access."""
+    browser = ROOT / 'chrome-headless-shell-bounded.py' if browser_budget else CHROME
+    values = {
+        'PATH': f'{NODE.parent}:{FFMPEG}:/usr/bin:/bin', 'TMPDIR': '/private/tmp',
+        'LC_ALL': 'C', 'HYPERFRAMES_BROWSER_PATH': str(browser),
+        'HYPERFRAMES_FFMPEG_PATH': str(FFMPEG / 'ffmpeg'),
+        'HYPERFRAMES_FFPROBE_PATH': str(FFMPEG / 'ffprobe'),
+        'PRODUCER_LOW_MEMORY_MODE': 'true',
+        'PRODUCER_FRAME_DATA_URI_CACHE_LIMIT': '32',
+        'PRODUCER_FRAME_DATA_URI_CACHE_BYTES_MB': '64',
+        'PRODUCER_EXPERIMENTAL_FAST_CAPTURE': 'false',
+        'PRODUCER_STREAMING_ENCODE_MAX_DURATION_SECONDS': '900',
+        'FFMPEG_STREAMING_TIMEOUT_MS': '5400000',
+        'HYPERFRAMES_EXTRACT_CACHE_MAX_MB': '65536',
+    }
+    if browser_budget:
+        values['SNIPER_BROWSER_LAUNCH_LOG'] = str(ROOT / f'{label}.browser-launches.jsonl')
+    return values
+
+
+def command(output: str) -> list[str]:
+    """Only supported native CLI settings; no custom encoder or source mutation."""
+    return ['/usr/bin/sandbox-exec', '-f', str(SANDBOX), str(NODE), str(CLI),
+            'render', '.', '--fps', '24000/1001', '--quality', 'high', '--workers', '1',
+            '--low-memory-mode', '--no-browser-gpu', '--video-frame-format', 'png',
+            '--strict', '--no-best-effort', '--output', output]

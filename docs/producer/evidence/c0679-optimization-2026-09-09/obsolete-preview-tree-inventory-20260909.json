@@ -1,0 +1,337 @@
+[
+  {
+    "identity": {
+      "pid": 29265,
+      "pgid": 29265,
+      "started": "Wed Sep  9 06:04:04 2026",
+      "command": "/opt/homebrew/Cellar/node/23.10.0_1/bin/node /private/tmp/sniper-studio-realm-audio-candidate-20260909.ABcz7H/hyperframes/dist/cli.js preview /private/tmp/sniper-studio-realm-audio-candidate-20260909.ABcz7H/studio --port 41045 --foreground --json"
+    },
+    "processes": [
+      {
+        "pid": 29265,
+        "pgid": 29265,
+        "started": "Wed Sep  9 06:04:04 2026"
+      },
+      {
+        "pid": 29425,
+        "pgid": 29425,
+        "started": "Wed Sep  9 06:05:37 2026"
+      },
+      {
+        "pid": 29427,
+        "pgid": 29425,
+        "started": "Wed Sep  9 06:05:37 2026"
+      },
+      {
+        "pid": 29428,
+        "pgid": 29425,
+        "started": "Wed Sep  9 06:05:37 2026"
+      },
+      {
+        "pid": 29429,
+        "pgid": 29425,
+        "started": "Wed Sep  9 06:05:37 2026"
+      },
+      {
+        "pid": 29416,
+        "pgid": 29265,
+        "started": "Wed Sep  9 06:05:37 2026"
+      }
+    ]
+  },
+  {
+    "identity": {
+      "pid": 32518,
+      "pgid": 32518,
+      "started": "Wed Sep  9 06:32:18 2026",
+      "command": "/opt/homebrew/Cellar/node/23.10.0_1/bin/node /private/tmp/sniper-upgrade-build-qOKgnu/templates/motion/node_modules/hyperframes/dist/cli.js preview /var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/studio-player-view-j2ild093/studio-gate --port 41000 --foreground --no-open"
+    },
+    "processes": [
+      {
+        "pid": 32518,
+        "pgid": 32518,
+        "started": "Wed Sep  9 06:32:18 2026"
+      },
+      {
+        "pid": 32674,
+        "pgid": 32674,
+        "started": "Wed Sep  9 06:32:27 2026"
+      },
+      {
+        "pid": 32658,
+        "pgid": 32518,
+        "started": "Wed Sep  9 06:32:20 2026"
+      },
+      {
+        "pid": 32675,
+        "pgid": 32674,
+        "started": "Wed Sep  9 06:32:27 2026"
+      },
+      {
+        "pid": 32676,
+        "pgid": 32674,
+        "started": "Wed Sep  9 06:32:27 2026"
+      },
+      {
+        "pid": 32677,
+        "pgid": 32674,
+        "started": "Wed Sep  9 06:32:27 2026"
+      }
+    ]
+  },
+  {
+    "identity": {
+      "pid": 32888,
+      "pgid": 32888,
+      "started": "Wed Sep  9 06:33:06 2026",
+      "command": "/opt/homebrew/Cellar/node/23.10.0_1/bin/node /private/tmp/sniper-upgrade-build-qOKgnu/templates/motion/node_modules/hyperframes/dist/cli.js preview /private/tmp/sniper-studio-preview-deployment-20260909.glyHQv/studio --port 41047 --foreground --json"
+    },
+    "processes": [
+      {
+        "pid": 32888,
+        "pgid": 32888,
+        "started": "Wed Sep  9 06:33:06 2026"
+      }
+    ]
+  },
+  {
+    "identity": {
+      "pid": 37059,
+      "pgid": 37059,
+      "started": "Wed Sep  9 07:06:05 2026",
+      "command": "/opt/homebrew/Cellar/node/23.10.0_1/bin/node /private/tmp/sniper-upgrade-build-qOKgnu/artifacts/studio-sdk/hf0.8.31-realm-preview-v1-52321b8f3d41dda4c9c7/hyperframes/dist/cli.js preview /private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/studio-v2 --port 41049 --foreground --json"
+    },
+    "processes": [
+      {
+        "pid": 37059,
+        "pgid": 37059,
+        "started": "Wed Sep  9 07:06:05 2026"
+      },
+      {
+        "pid": 37157,
+        "pgid": 37157,
+        "started": "Wed Sep  9 07:06:45 2026"
+      },
+      {
+        "pid": 37158,
+        "pgid": 37157,
+        "started": "Wed Sep  9 07:06:45 2026"
+      },
+      {
+        "pid": 37159,
+        "pgid": 37157,
+        "started": "Wed Sep  9 07:06:45 2026"
+      },
+      {
+        "pid": 37160,
+        "pgid": 37157,
+        "started": "Wed Sep  9 07:06:45 2026"
+      },
+      {
+        "pid": 37147,
+        "pgid": 37059,
+        "started": "Wed Sep  9 07:06:44 2026"
+      }
+    ]
+  },
+  {
+    "identity": {
+      "pid": 40310,
+      "pgid": 40310,
+      "started": "Wed Sep  9 07:34:34 2026",
+      "command": "/opt/homebrew/Cellar/node/23.10.0_1/bin/node /private/tmp/sniper-upgrade-build-qOKgnu/artifacts/studio-sdk/hf0.8.31-realm-preview-v1-52321b8f3d41dda4c9c7/hyperframes/dist/cli.js preview /private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/studio-layout-proof --port 41051 --foreground --json"
+    },
+    "processes": [
+      {
+        "pid": 40310,
+        "pgid": 40310,
+        "started": "Wed Sep  9 07:34:34 2026"
+      },
+      {
+        "pid": 40370,
+        "pgid": 40310,
+        "started": "Wed Sep  9 07:34:36 2026"
+      },
+      {
+        "pid": 40379,
+        "pgid": 40379,
+        "started": "Wed Sep  9 07:34:37 2026"
+      },
+      {
+        "pid": 40380,
+        "pgid": 40379,
+        "started": "Wed Sep  9 07:34:37 2026"
+      },
+      {
+        "pid": 40381,
+        "pgid": 40379,
+        "started": "Wed Sep  9 07:34:37 2026"
+      },
+      {
+        "pid": 40382,
+        "pgid": 40379,
+        "started": "Wed Sep  9 07:34:37 2026"
+      }
+    ]
+  },
+  {
+    "identity": {
+      "pid": 40321,
+      "pgid": 40321,
+      "started": "Wed Sep  9 07:34:35 2026",
+      "command": "/opt/homebrew/Cellar/node/23.10.0_1/bin/node /private/tmp/sniper-stream-clock-candidate-20260909.eMkFyD/hyperframes/dist/cli.js preview /private/tmp/sniper-stream-clock-candidate-20260909.eMkFyD/studio --port 41052 --foreground --json"
+    },
+    "processes": [
+      {
+        "pid": 40321,
+        "pgid": 40321,
+        "started": "Wed Sep  9 07:34:35 2026"
+      },
+      {
+        "pid": 40593,
+        "pgid": 40321,
+        "started": "Wed Sep  9 07:35:56 2026"
+      },
+      {
+        "pid": 40603,
+        "pgid": 40603,
+        "started": "Wed Sep  9 07:35:57 2026"
+      },
+      {
+        "pid": 40604,
+        "pgid": 40603,
+        "started": "Wed Sep  9 07:35:57 2026"
+      },
+      {
+        "pid": 40605,
+        "pgid": 40603,
+        "started": "Wed Sep  9 07:35:57 2026"
+      },
+      {
+        "pid": 40606,
+        "pgid": 40603,
+        "started": "Wed Sep  9 07:35:57 2026"
+      }
+    ]
+  },
+  {
+    "identity": {
+      "pid": 43661,
+      "pgid": 43661,
+      "started": "Wed Sep  9 07:47:07 2026",
+      "command": "/opt/homebrew/Cellar/node/23.10.0_1/bin/node /private/tmp/sniper-video-follower-candidate-20260909.W6ryEE/hyperframes/dist/cli.js preview /private/tmp/sniper-video-follower-candidate-20260909.W6ryEE/studio --port 41054 --foreground --json"
+    },
+    "processes": [
+      {
+        "pid": 43661,
+        "pgid": 43661,
+        "started": "Wed Sep  9 07:47:07 2026"
+      },
+      {
+        "pid": 43808,
+        "pgid": 43661,
+        "started": "Wed Sep  9 07:48:12 2026"
+      },
+      {
+        "pid": 43821,
+        "pgid": 43818,
+        "started": "Wed Sep  9 07:48:13 2026"
+      },
+      {
+        "pid": 43818,
+        "pgid": 43818,
+        "started": "Wed Sep  9 07:48:13 2026"
+      },
+      {
+        "pid": 43819,
+        "pgid": 43818,
+        "started": "Wed Sep  9 07:48:13 2026"
+      },
+      {
+        "pid": 43820,
+        "pgid": 43818,
+        "started": "Wed Sep  9 07:48:13 2026"
+      }
+    ]
+  },
+  {
+    "identity": {
+      "pid": 45386,
+      "pgid": 45386,
+      "started": "Wed Sep  9 08:00:23 2026",
+      "command": "/opt/homebrew/Cellar/node/23.10.0_1/bin/node /private/tmp/sniper-paired-rate-candidate-20260909.CWhenU/hyperframes/dist/cli.js preview /private/tmp/sniper-paired-rate-candidate-20260909.CWhenU/studio --port 41055 --foreground --json"
+    },
+    "processes": [
+      {
+        "pid": 45386,
+        "pgid": 45386,
+        "started": "Wed Sep  9 08:00:23 2026"
+      },
+      {
+        "pid": 45536,
+        "pgid": 45534,
+        "started": "Wed Sep  9 08:01:06 2026"
+      },
+      {
+        "pid": 45537,
+        "pgid": 45534,
+        "started": "Wed Sep  9 08:01:06 2026"
+      },
+      {
+        "pid": 45524,
+        "pgid": 45386,
+        "started": "Wed Sep  9 08:01:05 2026"
+      },
+      {
+        "pid": 45534,
+        "pgid": 45534,
+        "started": "Wed Sep  9 08:01:06 2026"
+      },
+      {
+        "pid": 45535,
+        "pgid": 45534,
+        "started": "Wed Sep  9 08:01:06 2026"
+      }
+    ]
+  },
+  {
+    "identity": {
+      "pid": 46368,
+      "pgid": 46368,
+      "started": "Wed Sep  9 08:07:32 2026",
+      "command": "/opt/homebrew/Cellar/node/23.10.0_1/bin/node /private/tmp/sniper-paired-preview-qualified-20260909.qZpqBI/hyperframes/dist/cli.js preview /private/tmp/sniper-paired-preview-qualified-20260909.qZpqBI/studio --port 41056 --foreground --json"
+    },
+    "processes": [
+      {
+        "pid": 46368,
+        "pgid": 46368,
+        "started": "Wed Sep  9 08:07:32 2026"
+      },
+      {
+        "pid": 46584,
+        "pgid": 46584,
+        "started": "Wed Sep  9 08:08:19 2026"
+      },
+      {
+        "pid": 46585,
+        "pgid": 46584,
+        "started": "Wed Sep  9 08:08:19 2026"
+      },
+      {
+        "pid": 46586,
+        "pgid": 46584,
+        "started": "Wed Sep  9 08:08:19 2026"
+      },
+      {
+        "pid": 46587,
+        "pgid": 46584,
+        "started": "Wed Sep  9 08:08:19 2026"
+      },
+      {
+        "pid": 46574,
+        "pgid": 46368,
+        "started": "Wed Sep  9 08:08:18 2026"
+      }
+    ]
+  }
+]

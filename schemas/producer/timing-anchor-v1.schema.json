@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/timing-anchor-v1.schema.json",
+  "title": "TimingAnchorV1",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "frame", "timelineMapHash"],
+      "properties": {
+        "type": { "const": "timeline-frame" },
+        "frame": { "$ref": "#/$defs/frame" },
+        "timelineMapHash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "startWordId", "endWordId"],
+      "properties": {
+        "type": { "const": "transcript-range" },
+        "startWordId": { "$ref": "#/$defs/stableId" },
+        "endWordId": { "$ref": "#/$defs/stableId" },
+        "offsetFrames": { "type": "integer" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "segmentId",
+        "elementVersion",
+        "basis",
+        "offsetFrames",
+        "timelineMapHash"
+      ],
+      "properties": {
+        "type": { "const": "cut-segment" },
+        "segmentId": { "$ref": "#/$defs/stableId" },
+        "elementVersion": { "type": "integer", "minimum": 1 },
+        "basis": { "const": "output-frame" },
+        "offsetFrames": { "type": "integer" },
+        "timelineMapHash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "beatId"],
+      "properties": {
+        "type": { "const": "semantic-beat" },
+        "beatId": { "$ref": "#/$defs/stableId" },
+        "offsetFrames": { "type": "integer" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "sourceId", "sourceFrame"],
+      "properties": {
+        "type": { "const": "source-time" },
+        "sourceId": { "$ref": "#/$defs/stableId" },
+        "sourceFrame": { "$ref": "#/$defs/frame" },
+        "sourceSample": { "$ref": "#/$defs/frame" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "sectionId"],
+      "properties": {
+        "type": { "const": "section" },
+        "sectionId": { "$ref": "#/$defs/stableId" },
+        "offsetFrames": { "type": "integer" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "cueId", "beatIndex"],
+      "properties": {
+        "type": { "const": "music-beat" },
+        "cueId": { "$ref": "#/$defs/stableId" },
+        "beatIndex": { "$ref": "#/$defs/frame" },
+        "offsetSamples": { "type": "integer" }
+      }
+    }
+  ],
+  "$defs": {
+    "frame": { "type": "integer", "minimum": 0 },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "stableId": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]+$"
+    }
+  }
+}

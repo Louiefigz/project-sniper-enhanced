@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/positive-rational-v1.schema.json",
+  "title": "PositiveRationalV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["numerator", "denominator"],
+  "properties": {
+    "numerator": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*$"
+    },
+    "denominator": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*$"
+    }
+  }
+}

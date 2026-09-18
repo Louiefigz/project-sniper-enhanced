@@ -1,0 +1,46 @@
+{
+  "name": "project-sniper-enhanced",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/infra/next_supervisor.mjs dev",
+    "dev:local": "node scripts/infra/next_supervisor.mjs dev --local",
+    "build": "next build",
+    "start": "node scripts/infra/next_supervisor.mjs start",
+    "start:local": "node scripts/infra/next_supervisor.mjs start --local",
+    "lint": "eslint",
+    "test": "node scripts/tests/next_supervisor.test.mjs && node scripts/tests/skill_surface.test.mjs && npm run test:sdk && npm run test:native && (for f in src/lib/clipper/__tests__/*.test.ts src/lib/producer/__tests__/*.test.ts src/lib/segmenter/__tests__/*.test.ts src/lib/server/__tests__/*.test.ts; do echo \"$f\"; node --import tsx \"$f\" || exit 1; done) && echo 'all tests passed'",
+    "test:sdk": "node --test scripts/tests/sdk_scene_variable_proposal.test.mjs",
+    "test:native": "node --test --test-concurrency=1 --test-timeout=120000 scripts/tests/native*.test.mjs scripts/tests/source_cache_alias.test.mjs",
+    "test:clip-review": "node --test scripts/tests/clip_review_playback.test.mjs",
+    "test:supervisor": "node scripts/tests/next_supervisor.test.mjs",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
+    "@hyperframes/lint": "0.8.31",
+    "@hyperframes/parsers": "0.8.31",
+    "@hyperframes/sdk": "0.8.31",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.575.0",
+    "next": "16.1.6",
+    "radix-ui": "^1.4.3",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "shadcn": "^3.8.5",
+    "tailwind-merge": "^3.5.0",
+    "tw-animate-css": "^1.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "tailwindcss": "^4.2.1",
+    "tsx": "^4.23.0",
+    "typescript": "^5"
+  }
+}

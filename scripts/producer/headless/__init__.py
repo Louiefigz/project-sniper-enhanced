@@ -1,0 +1,1 @@
+"""Headless execution authority primitives."""

@@ -1,0 +1,62 @@
+{
+  "status": "diagnostic-observation-complete",
+  "startedAt": "2026-09-09T17:24:05.929Z",
+  "surface": "stock-studio",
+  "url": "http://127.0.0.1:41058/#project/native-presenter-v1",
+  "errors": [
+    {
+      "message": "Event: Event",
+      "name": "Event",
+      "stack": "Event: Event",
+      "wall": 1287
+    }
+  ],
+  "badResponses": [],
+  "scope": "Playback telemetry, not listening or full-video approval",
+  "browserPid": 76923,
+  "startupIssues": [
+    {
+      "url": "http://127.0.0.1:41058/#project/native-presenter-v1",
+      "issues": []
+    },
+    {
+      "url": "http://127.0.0.1:41058/api/projects/native-presenter-v1/preview",
+      "issues": [
+        {
+          "type": "error",
+          "wall": 766.9000000953674,
+          "reasonType": "Event",
+          "message": "[object Event]",
+          "reasonEvent": "error",
+          "targetType": "HTMLScriptElement",
+          "targetTag": "SCRIPT",
+          "targetUrl": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/MotionPathPlugin.min.js",
+          "file": "http://127.0.0.1:41058/api/projects/native-presenter-v1/preview"
+        },
+        {
+          "type": "error",
+          "wall": 768.9000000953674,
+          "reasonType": "Event",
+          "message": "[object Event]",
+          "reasonEvent": "error",
+          "targetType": "HTMLScriptElement",
+          "targetTag": "SCRIPT",
+          "targetUrl": "https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/MotionPathPlugin.min.js",
+          "file": "http://127.0.0.1:41058/api/projects/native-presenter-v1/preview"
+        },
+        {
+          "type": "unhandledrejection",
+          "wall": 769,
+          "reasonType": "Event",
+          "message": "[object Event]",
+          "reasonEvent": "error",
+          "targetType": "HTMLScriptElement",
+          "targetTag": "SCRIPT",
+          "targetUrl": "https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/MotionPathPlugin.min.js",
+          "file": "http://127.0.0.1:41058/api/projects/native-presenter-v1/preview"
+        }
+      ]
+    }
+  ],
+  "elapsedSeconds": 3.191
+}

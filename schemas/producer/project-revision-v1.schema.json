@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/project-revision-v1.schema.json",
+  "title": "ProjectRevisionV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "parentRevisionHash",
+    "planContentHash",
+    "manifestHash",
+    "sourceSnapshotSetHash",
+    "transcriptTimingHash",
+    "timelineMapHash",
+    "canvasProfileHash",
+    "destinationProfileHashes",
+    "pictureLockHash",
+    "workflowState",
+    "requestLedgerHash",
+    "renderGraphHash",
+    "projectionReceiptHash",
+    "authoritativeSidecars"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "parentRevisionHash": {
+      "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }]
+    },
+    "planContentHash": { "$ref": "#/$defs/sha256" },
+    "manifestHash": { "$ref": "#/$defs/sha256" },
+    "sourceSnapshotSetHash": { "$ref": "#/$defs/sha256" },
+    "transcriptTimingHash": { "$ref": "#/$defs/sha256" },
+    "timelineMapHash": { "$ref": "#/$defs/sha256" },
+    "canvasProfileHash": { "$ref": "#/$defs/sha256" },
+    "destinationProfileHashes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/sha256" }
+    },
+    "pictureLockHash": {
+      "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }]
+    },
+    "workflowState": {
+      "enum": [
+        "INGESTED",
+        "CUT_DRAFT",
+        "CUT_REVIEW",
+        "PICTURE_LOCKED",
+        "TREATMENT_DRAFT",
+        "TREATMENT_REVIEW",
+        "READY_TO_FINALIZE",
+        "QC_APPROVED"
+      ]
+    },
+    "requestLedgerHash": { "$ref": "#/$defs/sha256" },
+    "renderGraphHash": { "$ref": "#/$defs/sha256" },
+    "projectionReceiptHash": {
+      "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }]
+    },
+    "authoritativeSidecars": {
+      "type": "object",
+      "propertyNames": {
+        "minLength": 3,
+        "maxLength": 128,
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]+$"
+      },
+      "additionalProperties": { "$ref": "#/$defs/sha256" }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

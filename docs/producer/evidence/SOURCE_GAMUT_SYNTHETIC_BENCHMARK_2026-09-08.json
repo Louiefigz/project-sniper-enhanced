@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "kind": "TEST-synthetic-source-gamut-benchmark-before-after",
+  "scope": "memory-reduction-hash-framing-only-not-native-gamut-or-two-hour-proof",
+  "measurementsDate": "2026-09-08",
+  "benchmarkCommand": "env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=scripts/producer:scripts/producer/tests /usr/bin/time -p .venv/bin/python -B scripts/producer/tests/benchmark_source_gamut_reducer.py",
+  "workingDirectory": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER",
+  "rawOutputEncoding": "stdoutUtf8 is the entire original one-line JSON output plus final newline; JSON string escaping is storage only.",
+  "baselineProvenance": "Copied verbatim from the previously retained successful tool output; baseline was not rerun or reconstructed from summary metrics.",
+  "afterProvenance": "Captured verbatim from the separately authorized successful post-optimization tool output.",
+  "limitations": [
+    "One measurement before and one after; not a statistical performance guarantee.",
+    "Same script, 512x512 geometry, 128 frames, chunks and 384 MiB per case; matching actual original/joined record digests.",
+    "Each engineering measurement used its own original 30-second synthetic cap; no video deadline was renewed.",
+    "64 MiB rotating immutable ring is not claimed to exceed every machine cache.",
+    "RSS is process high-water, not instantaneous or isolated per-case peak.",
+    "No source payload reads, media/native process, Docker, decode, transform, pipe transport, provider or downloads.",
+    "C0679 figures are arithmetic-only payload extrapolation; no native qualification, 1200-second phase qualification or two-hour completion proof."
+  ],
+  "nativeExecutionProved": false,
+  "gamutQualified": false,
+  "transformApplicable": false,
+  "gradeApplicable": false,
+  "deliveryApproved": false,
+  "twoHourProof": false,
+  "before": {
+    "label": "before-all-finite-optimization",
+    "processTimingSeconds": {
+      "real": 2.33,
+      "user": 2.18,
+      "sys": 0.05
+    },
+    "stdoutUtf8": "{\"cases\": [{\"acceptedPayloadBytes\": 402653184, \"bytesPerSecond\": 333161141.976028, \"case\": \"hot-64KiB\", \"chunkBytes\": 65536, \"completedFrames\": 128, \"elapsedSeconds\": 1.208583875093609, \"joinedRecordsSha256\": \"141b5fcd2ad84fbe4e7cb3e7d257c6b7ff250dd0004de2f8e5cfa063b9c69d5b\", \"originalRecordsSha256\": \"b648365cec3087c23a51dd0288c2e5a034f33d9b24efe5beaedb366f61cd2de7\", \"pushCalls\": 6144, \"residentPayloadBytes\": 65536, \"resultFlags\": {\"deliveryApproved\": false, \"gamutQualified\": false, \"gradeApplicable\": false, \"nativeExecutionProved\": false, \"transformApplicable\": false}, \"resultScope\": \"supplied-framed-float-bytes-not-native-or-gamut-qualification\", \"rssHighWaterAfterBytes\": 48381952, \"rssHighWaterBeforeBytes\": 48381952, \"sampleRangeValid\": true, \"samplesPerSecond\": 83290285.494007, \"setupElapsedSeconds\": 0.015776291955262423, \"status\": \"complete\"}, {\"acceptedPayloadBytes\": 402653184, \"bytesPerSecond\": 979997545.5894222, \"case\": \"hot-1MiB\", \"chunkBytes\": 1048576, \"completedFrames\": 128, \"elapsedSeconds\": 0.41087162494659424, \"joinedRecordsSha256\": \"141b5fcd2ad84fbe4e7cb3e7d257c6b7ff250dd0004de2f8e5cfa063b9c69d5b\", \"originalRecordsSha256\": \"b648365cec3087c23a51dd0288c2e5a034f33d9b24efe5beaedb366f61cd2de7\", \"pushCalls\": 384, \"residentPayloadBytes\": 1048576, \"resultFlags\": {\"deliveryApproved\": false, \"gamutQualified\": false, \"gradeApplicable\": false, \"nativeExecutionProved\": false, \"transformApplicable\": false}, \"resultScope\": \"supplied-framed-float-bytes-not-native-or-gamut-qualification\", \"rssHighWaterAfterBytes\": 52215808, \"rssHighWaterBeforeBytes\": 48381952, \"sampleRangeValid\": true, \"samplesPerSecond\": 244999386.39735556, \"setupElapsedSeconds\": 0.007539542159065604, \"status\": \"complete\"}, {\"acceptedPayloadBytes\": 402653184, \"bytesPerSecond\": 989271553.3554577, \"case\": \"rotating-64MiB-at-1MiB\", \"chunkBytes\": 1048576, \"completedFrames\": 128, \"elapsedSeconds\": 0.40701987501233816, \"joinedRecordsSha256\": \"1bc18535304cc679afb7e3b8de25c459ee28d3f7f25f244c5631b35e7b4b14ba\", \"originalRecordsSha256\": \"b648365cec3087c23a51dd0288c2e5a034f33d9b24efe5beaedb366f61cd2de7\", \"pushCalls\": 384, \"residentPayloadBytes\": 67108864, \"resultFlags\": {\"deliveryApproved\": false, \"gamutQualified\": false, \"gradeApplicable\": false, \"nativeExecutionProved\": false, \"transformApplicable\": false}, \"resultScope\": \"supplied-framed-float-bytes-not-native-or-gamut-qualification\", \"rssHighWaterAfterBytes\": 121520128, \"rssHighWaterBeforeBytes\": 52215808, \"sampleRangeValid\": true, \"samplesPerSecond\": 247317888.33886442, \"setupElapsedSeconds\": 0.013428667094558477, \"status\": \"complete\"}], \"deliveryApproved\": false, \"framesPerCase\": 128, \"gamutQualified\": false, \"geometry\": [512, 512], \"importSetupSeconds\": 0.20484641706570983, \"kind\": \"TEST-synthetic-framed-float-reducer-benchmark\", \"maximumPayloadBytesPerCase\": 402653184, \"nativeExecutionProved\": false, \"numpyVersion\": \"2.5.1\", \"originalBudgetSeconds\": 30, \"projection\": {\"floatPayloadBytes\": 1991054131200, \"frames\": 20004, \"includesDecodeTransformPipeOrWholeWorkflow\": false, \"minimumTransportBytesPerSecondFor1200Seconds\": 1659211776.0, \"pixelCount\": 165921177600, \"reducerOnlySecondsAtMeasuredRates\": {\"hot-1MiB\": 2031.6929773558516, \"hot-64KiB\": 5976.2495691747345, \"rotating-64MiB-at-1MiB\": 2012.6467039779413}, \"source\": \"C0679-retained-dimensions-arithmetic-no-source-read\"}, \"pythonVersion\": \"3.14.4\", \"rssMeaning\": \"process-high-water-not-current-RSS-or-per-case-peak\", \"schemaVersion\": 1, \"scope\": \"memory-reduction-hash-framing-not-native-or-two-hour-proof\", \"status\": \"complete\", \"totalElapsedSeconds\": 2.270987917203456, \"transformApplicable\": false}\n"
+  },
+  "after": {
+    "label": "after-all-finite-optimization",
+    "processTimingSeconds": {
+      "real": 1.99,
+      "user": 1.87,
+      "sys": 0.04
+    },
+    "stdoutUtf8": "{\"cases\": [{\"acceptedPayloadBytes\": 402653184, \"bytesPerSecond\": 374637451.80128014, \"case\": \"hot-64KiB\", \"chunkBytes\": 65536, \"completedFrames\": 128, \"elapsedSeconds\": 1.0747809170279652, \"joinedRecordsSha256\": \"141b5fcd2ad84fbe4e7cb3e7d257c6b7ff250dd0004de2f8e5cfa063b9c69d5b\", \"originalRecordsSha256\": \"b648365cec3087c23a51dd0288c2e5a034f33d9b24efe5beaedb366f61cd2de7\", \"pushCalls\": 6144, \"residentPayloadBytes\": 65536, \"resultFlags\": {\"deliveryApproved\": false, \"gamutQualified\": false, \"gradeApplicable\": false, \"nativeExecutionProved\": false, \"transformApplicable\": false}, \"resultScope\": \"supplied-framed-float-bytes-not-native-or-gamut-qualification\", \"rssHighWaterAfterBytes\": 48463872, \"rssHighWaterBeforeBytes\": 48463872, \"sampleRangeValid\": true, \"samplesPerSecond\": 93659362.95032004, \"setupElapsedSeconds\": 0.009315792005509138, \"status\": \"complete\"}, {\"acceptedPayloadBytes\": 402653184, \"bytesPerSecond\": 1261794651.968125, \"case\": \"hot-1MiB\", \"chunkBytes\": 1048576, \"completedFrames\": 128, \"elapsedSeconds\": 0.31911149993538857, \"joinedRecordsSha256\": \"141b5fcd2ad84fbe4e7cb3e7d257c6b7ff250dd0004de2f8e5cfa063b9c69d5b\", \"originalRecordsSha256\": \"b648365cec3087c23a51dd0288c2e5a034f33d9b24efe5beaedb366f61cd2de7\", \"pushCalls\": 384, \"residentPayloadBytes\": 1048576, \"resultFlags\": {\"deliveryApproved\": false, \"gamutQualified\": false, \"gradeApplicable\": false, \"nativeExecutionProved\": false, \"transformApplicable\": false}, \"resultScope\": \"supplied-framed-float-bytes-not-native-or-gamut-qualification\", \"rssHighWaterAfterBytes\": 49725440, \"rssHighWaterBeforeBytes\": 48463872, \"sampleRangeValid\": true, \"samplesPerSecond\": 315448662.9920313, \"setupElapsedSeconds\": 0.007496166974306107, \"status\": \"complete\"}, {\"acceptedPayloadBytes\": 402653184, \"bytesPerSecond\": 1248473454.5779083, \"case\": \"rotating-64MiB-at-1MiB\", \"chunkBytes\": 1048576, \"completedFrames\": 128, \"elapsedSeconds\": 0.3225164159666747, \"joinedRecordsSha256\": \"1bc18535304cc679afb7e3b8de25c459ee28d3f7f25f244c5631b35e7b4b14ba\", \"originalRecordsSha256\": \"b648365cec3087c23a51dd0288c2e5a034f33d9b24efe5beaedb366f61cd2de7\", \"pushCalls\": 384, \"residentPayloadBytes\": 67108864, \"resultFlags\": {\"deliveryApproved\": false, \"gamutQualified\": false, \"gradeApplicable\": false, \"nativeExecutionProved\": false, \"transformApplicable\": false}, \"resultScope\": \"supplied-framed-float-bytes-not-native-or-gamut-qualification\", \"rssHighWaterAfterBytes\": 117161984, \"rssHighWaterBeforeBytes\": 49725440, \"sampleRangeValid\": true, \"samplesPerSecond\": 312118363.64447707, \"setupElapsedSeconds\": 0.012399582890793681, \"status\": \"complete\"}], \"deliveryApproved\": false, \"framesPerCase\": 128, \"gamutQualified\": false, \"geometry\": [512, 512], \"importSetupSeconds\": 0.1846111249178648, \"kind\": \"TEST-synthetic-framed-float-reducer-benchmark\", \"maximumPayloadBytesPerCase\": 402653184, \"nativeExecutionProved\": false, \"numpyVersion\": \"2.5.1\", \"originalBudgetSeconds\": 30, \"projection\": {\"floatPayloadBytes\": 1991054131200, \"frames\": 20004, \"includesDecodeTransformPipeOrWholeWorkflow\": false, \"minimumTransportBytesPerSecondFor1200Seconds\": 1659211776.0, \"pixelCount\": 165921177600, \"reducerOnlySecondsAtMeasuredRates\": {\"hot-1MiB\": 1577.9541687662004, \"hot-64KiB\": 5314.6158282544575, \"rotating-64MiB-at-1MiB\": 1594.7909215844306}, \"source\": \"C0679-retained-dimensions-arithmetic-no-source-read\"}, \"pythonVersion\": \"3.14.4\", \"rssMeaning\": \"process-high-water-not-current-RSS-or-per-case-peak\", \"schemaVersion\": 1, \"scope\": \"memory-reduction-hash-framing-not-native-or-two-hour-proof\", \"status\": \"complete\", \"totalElapsedSeconds\": 1.9329357091337442, \"transformApplicable\": false}\n"
+  },
+  "comparison": [
+    {
+      "case": "hot-64KiB",
+      "beforeBytesPerSecond": 333161141.976028,
+      "afterBytesPerSecond": 374637451.80128014,
+      "throughputRatio": 1.124493239455388,
+      "beforeRssHighWaterBytes": 48381952,
+      "afterRssHighWaterBytes": 48463872,
+      "beforeC0679ReducerOnlySeconds": 5976.2495691747345,
+      "afterC0679ReducerOnlySeconds": 5314.6158282544575,
+      "afterReducerOnlySecondsBeyond1200": 4114.6158282544575
+    },
+    {
+      "case": "hot-1MiB",
+      "beforeBytesPerSecond": 979997545.5894222,
+      "afterBytesPerSecond": 1261794651.968125,
+      "throughputRatio": 1.2875487878994791,
+      "beforeRssHighWaterBytes": 52215808,
+      "afterRssHighWaterBytes": 49725440,
+      "beforeC0679ReducerOnlySeconds": 2031.6929773558516,
+      "afterC0679ReducerOnlySeconds": 1577.9541687662004,
+      "afterReducerOnlySecondsBeyond1200": 377.9541687662004
+    },
+    {
+      "case": "rotating-64MiB-at-1MiB",
+      "beforeBytesPerSecond": 989271553.3554577,
+      "afterBytesPerSecond": 1248473454.5779083,
+      "throughputRatio": 1.262012892560468,
+      "beforeRssHighWaterBytes": 121520128,
+      "afterRssHighWaterBytes": 117161984,
+      "beforeC0679ReducerOnlySeconds": 2012.6467039779413,
+      "afterC0679ReducerOnlySeconds": 1594.7909215844306,
+      "afterReducerOnlySecondsBeyond1200": 394.79092158443063
+    }
+  ]
+}

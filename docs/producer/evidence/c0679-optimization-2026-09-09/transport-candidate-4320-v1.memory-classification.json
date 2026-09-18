@@ -1,0 +1,280 @@
+{
+  "status": "pass",
+  "label": "transport-candidate-4320-v1",
+  "memory": {
+    "status": "pass",
+    "windows": [
+      {
+        "bounds": [
+          2321,
+          3320
+        ],
+        "count": 13,
+        "span": 919.0,
+        "maximumGap": 80.0,
+        "coveragePassed": true,
+        "medianMiB": 2086.4853515625,
+        "samples": [
+          {
+            "low": 2340,
+            "high": 2356,
+            "frame": 2348.0,
+            "footprintMiB": 2111.3916015625
+          },
+          {
+            "low": 2414,
+            "high": 2431,
+            "frame": 2422.5,
+            "footprintMiB": 2142.4853515625
+          },
+          {
+            "low": 2491,
+            "high": 2509,
+            "frame": 2500.0,
+            "footprintMiB": 2047.4853515625
+          },
+          {
+            "low": 2570,
+            "high": 2588,
+            "frame": 2579.0,
+            "footprintMiB": 2070.4853515625
+          },
+          {
+            "low": 2649,
+            "high": 2666,
+            "frame": 2657.5,
+            "footprintMiB": 2092.4853515625
+          },
+          {
+            "low": 2722,
+            "high": 2739,
+            "frame": 2730.5,
+            "footprintMiB": 2080.4853515625
+          },
+          {
+            "low": 2796,
+            "high": 2813,
+            "frame": 2804.5,
+            "footprintMiB": 2113.4853515625
+          },
+          {
+            "low": 2869,
+            "high": 2886,
+            "frame": 2877.5,
+            "footprintMiB": 2118.4853515625
+          },
+          {
+            "low": 2944,
+            "high": 2960,
+            "frame": 2952.0,
+            "footprintMiB": 2086.4853515625
+          },
+          {
+            "low": 3020,
+            "high": 3037,
+            "frame": 3028.5,
+            "footprintMiB": 2073.4853515625
+          },
+          {
+            "low": 3099,
+            "high": 3117,
+            "frame": 3108.0,
+            "footprintMiB": 2082.5009765625
+          },
+          {
+            "low": 3179,
+            "high": 3197,
+            "frame": 3188.0,
+            "footprintMiB": 2070.4853515625
+          },
+          {
+            "low": 3258,
+            "high": 3276,
+            "frame": 3267.0,
+            "footprintMiB": 2110.4853515625
+          }
+        ]
+      },
+      {
+        "bounds": [
+          3321,
+          4320
+        ],
+        "count": 13,
+        "span": 915.5,
+        "maximumGap": 80.0,
+        "coveragePassed": true,
+        "medianMiB": 2084.4853515625,
+        "samples": [
+          {
+            "low": 3331,
+            "high": 3348,
+            "frame": 3339.5,
+            "footprintMiB": 2084.4853515625
+          },
+          {
+            "low": 3405,
+            "high": 3421,
+            "frame": 3413.0,
+            "footprintMiB": 2102.4853515625
+          },
+          {
+            "low": 3479,
+            "high": 3495,
+            "frame": 3487.0,
+            "footprintMiB": 2096.5166015625
+          },
+          {
+            "low": 3552,
+            "high": 3569,
+            "frame": 3560.5,
+            "footprintMiB": 2072.5009765625
+          },
+          {
+            "low": 3626,
+            "high": 3642,
+            "frame": 3634.0,
+            "footprintMiB": 2087.5009765625
+          },
+          {
+            "low": 3699,
+            "high": 3715,
+            "frame": 3707.0,
+            "footprintMiB": 2088.5478515625
+          },
+          {
+            "low": 3773,
+            "high": 3787,
+            "frame": 3780.0,
+            "footprintMiB": 2114.5478515625
+          },
+          {
+            "low": 3849,
+            "high": 3866,
+            "frame": 3857.5,
+            "footprintMiB": 2050.5478515625
+          },
+          {
+            "low": 3928,
+            "high": 3946,
+            "frame": 3937.0,
+            "footprintMiB": 2055.5478515625
+          },
+          {
+            "low": 4008,
+            "high": 4025,
+            "frame": 4016.5,
+            "footprintMiB": 2051.5791015625
+          },
+          {
+            "low": 4087,
+            "high": 4105,
+            "frame": 4096.0,
+            "footprintMiB": 2080.5791015625
+          },
+          {
+            "low": 4167,
+            "high": 4185,
+            "frame": 4176.0,
+            "footprintMiB": 2092.5791015625
+          },
+          {
+            "low": 4246,
+            "high": 4264,
+            "frame": 4255.0,
+            "footprintMiB": 2055.6259765625
+          }
+        ]
+      }
+    ],
+    "rejected": [
+      {
+        "reason": "not-capture-active",
+        "bounds": [
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "not-capture-active",
+        "bounds": [
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "not-capture-active",
+        "bounds": [
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "not-capture-active",
+        "bounds": [
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "not-capture-active",
+        "bounds": [
+          0,
+          0
+        ]
+      },
+      {
+        "reason": "not-capture-active",
+        "bounds": [
+          4320,
+          4320
+        ]
+      }
+    ],
+    "latestActiveFrameMidpoint": 4255.0,
+    "coveragePassed": true,
+    "coordinate": "midpoint of before/after observed completed-frame bounds",
+    "medianIncreaseMiB": -2.0,
+    "fittedSlopeMiBPerFrame": -0.015597733747068934
+  },
+  "transport": {
+    "passed": true,
+    "terminal": {
+      "event": "close",
+      "atUnixMs": 1788976606413,
+      "registrations": 4320,
+      "requests": 4320,
+      "completed": 4320,
+      "head": 0,
+      "rejected": 0,
+      "errors": 0,
+      "aborted": 0,
+      "peakStreams": 1,
+      "peakSourceDescriptors": 1,
+      "bytes": 10553378339,
+      "base64Fallbacks": 0,
+      "entries": 0,
+      "activeStreams": 0,
+      "activeSourceDescriptors": 0,
+      "closed": true,
+      "failed": false,
+      "mode": "same-origin-url"
+    },
+    "repeatedOrProbeRequests": 0,
+    "descriptorScope": "Source file descriptors only, not all Chrome or Node descriptors"
+  },
+  "renderSucceeded": true,
+  "pinsAndCleanupPassed": true,
+  "pairedPixelGatePassed": true,
+  "elapsedSeconds": 428.9966739169322,
+  "fullOutputQualified": false,
+  "fullExportReady": false,
+  "visualReviewRequired": true,
+  "inputHashes": {
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/transport-candidate-4320-v1.render.json": "95f1848b63075c39774b077b423758a82184d11ca3984bae261b1f159b450b07",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/transport-candidate-4320-v1.resources.jsonl": "7a48d5c6693772f2d10c11c643e6b97f619147ccdbb2293ba7449d7ea9fb6fca",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/transport-candidate-4320-v1.render.log": "2a9635c6443a3ada4c88543684cd600274481aac00c9566a6cfb88b0c1356eee",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-paired-v1.parity.json": "9dd1b2147911d61c912a30ed73c16737e5d94768d6d340532bff77b188b30afc",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/native-reference-paired-v1.render.json": "392073d45792595618ca648d374733e72483d66c2bd401dc3759604743865f11"
+  }
+}

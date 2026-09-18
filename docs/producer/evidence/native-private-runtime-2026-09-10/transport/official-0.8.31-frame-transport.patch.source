@@ -1,0 +1,112 @@
+diff --git a/dist/cli.js b/dist/cli.js
+index e7f4e68..11ef8ee 100755
+--- a/dist/cli.js
++++ b/dist/cli.js
+@@ -66401,11 +66401,11 @@ async function ensureRenderFrameSiblings(page) {
+     RENDER_FRAME_ID_SUFFIX
+   );
+ }
+-async function injectVideoFramesBatch(page, updates) {
++async function injectVideoFramesBatch(page, updates, strictFrameDecode = false) {
+   if (updates.length === 0) return [];
+   return await page.evaluate(
+     // fallow-ignore-next-line complexity
+-    async (items, visualProperties, colorGradingSourceHiddenAttr) => {
++    async (items, visualProperties, colorGradingSourceHiddenAttr, strictDecode) => {
+       const injectedIds = [];
+       const pendingDecodes = [];
+       const replacementLayoutProperties = /* @__PURE__ */ new Set([
+@@ -66481,9 +66481,11 @@ async function injectVideoFramesBatch(page, updates) {
+         img.decoding = "sync";
+         if (img.getAttribute("src") !== item.dataUri) {
+           img.src = item.dataUri;
+-          pendingDecodes.push(
+-            img.decode().catch(() => void 0).then(() => void 0)
+-          );
++          pendingDecodes.push(strictDecode ? img.decode().then(() => {
++            if (!img.complete || img.naturalWidth <= 0 || img.naturalHeight <= 0) {
++              throw new Error(`Native frame image failed to decode: ${item.videoId}`);
++            }
++          }) : img.decode().catch(() => void 0).then(() => void 0));
+         }
+         img.style.opacity = String(computedOpacity);
+         img.style.visibility = "visible";
+@@ -66504,7 +66506,8 @@ async function injectVideoFramesBatch(page, updates) {
+     // so the id the readers look up has exactly one definition.
+     updates.map((update2) => ({ ...update2, frameId: renderFrameIdForRenderId(update2.videoId) })),
+     [...MEDIA_VISUAL_STYLE_PROPERTIES],
+-    COLOR_GRADING_SOURCE_HIDDEN_ATTR
++    COLOR_GRADING_SOURCE_HIDDEN_ATTR,
++    strictFrameDecode
+   );
+ }
+ async function syncVideoFrameVisibility(page, activeVideoIds) {
+@@ -89282,7 +89285,8 @@ function createVideoFrameInjector(frameLookup, config) {
+       const injectedIds = new Set(
+         await injectVideoFramesBatch(
+           page,
+-          updates.map((u) => ({ videoId: u.videoId, dataUri: u.dataUri }))
++          updates.map((u) => ({ videoId: u.videoId, dataUri: u.dataUri })),
++          config?.strictFrameDecode === true
+         )
+       );
+       for (const update2 of updates) {
+@@ -117309,6 +117313,7 @@ function openRegularFile(filePath) {
+     if (!accepted) closeSync7(fd);
+   }
+ }
++import { NativeFrameTransport, FRAME_PREFIX } from './frame-source-transport.mjs';
+ function createFileServer2(options) {
+   const { projectDir, compiledDir, port = 0, stripEmbeddedRuntime = true } = options;
+   const preHeadScripts = [
+@@ -117319,6 +117324,12 @@ function createFileServer2(options) {
+   const headScripts = options.headScripts ?? [getVerifiedHyperframeRuntimeSource()];
+   const bodyScripts = options.bodyScripts ?? [buildRenderModeScript(options.fps), HF_BRIDGE_SCRIPT];
+   const app = new Hono3();
++  const frameTransport = process.env.SNIPER_NATIVE_FRAME_TRANSPORT === 'url-v1'
++    ? new NativeFrameTransport() : null;
++  if (frameTransport) {
++    app.all('/__sniper_native_frame', (c3) => frameTransport.reject(404));
++    app.all(FRAME_PREFIX + '*', (c3) => frameTransport.handle(c3.req.raw));
++  }
+   app.get("/*", async (c3) => {
+     let requestPath = c3.req.path;
+     if (requestPath === "/") requestPath = "/index.html";
+@@ -117403,10 +117414,12 @@ function createFileServer2(options) {
+       resolve80({
+         url: `http://localhost:${info.port}`,
+         port: info.port,
++        frameTransport,
+         addPreHeadScript: (script) => {
+           preHeadScripts.push(script);
+         },
+         close: () => {
++          frameTransport?.close();
+           for (const socket of connections) socket.destroy();
+           connections.clear();
+           server.close();
+@@ -131733,9 +131746,15 @@ async function executeRenderPipeline(input2) {
+       // sample frame indices from this so they land inside the drained range.
+       compositionDurationSeconds: job.duration
+     });
++    const frameTransport = activeFileServer.frameTransport;
++    if (frameTransport) {
++      frameTransport.configure(extractionResult.extracted.map((video) => video.outputDir));
++      frameTransport.report('configured');
++    }
+     const createRenderVideoFrameInjector = () => createVideoFrameInjector(frameLookup, {
+       frameDataUriCacheLimit: cfg.frameDataUriCacheLimit,
+-      frameDataUriCacheBytesLimitMb: cfg.frameDataUriCacheBytesLimitMb
++      frameDataUriCacheBytesLimitMb: cfg.frameDataUriCacheBytesLimitMb,
++      ...(frameTransport ? { frameSrcResolver: (path) => frameTransport.resolve(path), strictFrameDecode: true } : {})
+     });
+     let captureCalibration;
+     const htmlInCanvasDetected = compiled.renderModeHints.reasons.some(
+@@ -132516,6 +132535,7 @@ async function executeRenderPipeline(input2) {
+       await closeCaptureSession(remainingProbeSession);
+       probeSession = null;
+     }
++    frameTransport?.assertHealthy();
+     if (frameLookup) frameLookup.cleanup();
+     closeFileServerSafely(fileServer, "renderOrchestrator", log2);
+     fileServer = null;

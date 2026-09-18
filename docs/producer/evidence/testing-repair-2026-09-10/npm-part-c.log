@@ -1,0 +1,985 @@
+Disjoint official server test partition c; one owned child at a time.
+src/lib/server/__tests__/guided-source-color-completed-recovery-faults.test.ts
+✔ failed global acquisition with actual no-op release retains both locks and reports AggregateError (8878.742166ms)
+✔ awaited actual project acquisition cannot adopt stale raw-prepared (8393.963084ms)
+✔ awaited actual project acquisition cannot adopt stale journal (8470.349833ms)
+✔ awaited actual project acquisition cannot adopt stale selector (8401.474417ms)
+✔ actual current claim reader cannot substitute claim under the original requested journal (8524.483333ms)
+✔ actual current claim reader cannot substitute job under the original requested journal (8560.444417ms)
+✔ last original clock callback after releases cannot conceal changed request (12291.616792ms)
+✔ last original clock callback after releases cannot conceal changed output (12041.489375ms)
+✔ actual final timing append cannot conceal request after completed recovery releases (11944.752833ms)
+✔ actual final timing append cannot conceal output after completed recovery releases (11949.934916ms)
+✔ actual final timing append cannot conceal expiry after completed recovery releases (11582.179833ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 111054.7385
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-completed-recovery-faults.test.ts
+src/lib/server/__tests__/guided-source-color-expectations.test.ts
+✔ metadata-only expectations preserve first-kept order, explicit mixed profiles and original raw parents (99.591916ms)
+✔ input path must be the same exact caller-provided original raw input (6.255292ms)
+✔ missing or extra explicit declarations reject before any original callback (11.480458ms)
+✔ candidate cut mutation and omitted profile are not silently repaired (11.1005ms)
+✔ declaredFrames true rejects without count inference (73.708375ms)
+✔ declaredFrames "48" rejects without count inference (74.26625ms)
+✔ declaredFrames 0 rejects without count inference (76.215792ms)
+✔ declaredFrames -1 rejects without count inference (72.86725ms)
+✔ declaredFrames 48.5 rejects without count inference (75.43925ms)
+✔ declaredFrames 24001 rejects without count inference (74.950166ms)
+✔ declaredFrames null rejects without count inference (72.502875ms)
+✔ missing declared frames cannot be reconstructed from duration or exact manifest rate (75.26175ms)
+✔ rehashed admission snapshot substitution still fails the source-set and manifest joins (72.653375ms)
+✔ rehashed wrong source lane is not accepted as a kept source (72.830166ms)
+✔ source bytes and snapshot paths must match every original metadata occurrence (143.715584ms)
+✔ duplicate manifest IDs fail before metadata reads (5.457542ms)
+✔ VFR and missing exact source rate are not inferred from other metadata (5.845292ms)
+✔ malformed source rate "48/2" rejects before callbacks (4.766917ms)
+✔ malformed source rate "0/1" rejects before callbacks (4.6845ms)
+✔ malformed source rate "24.0" rejects before callbacks (5.181709ms)
+✔ malformed source rate "9007199254740992/1" rejects before callbacks (4.8595ms)
+✔ malformed source rate "24/0" rejects before callbacks (6.026125ms)
+✔ malformed source rate false rejects before callbacks (4.782541ms)
+✔ malformed source rate "120/1" rejects before callbacks (4.935833ms)
+✔ malformed source rate "1/2" rejects before callbacks (5.039875ms)
+✔ malformed source rate "9007199254740991/9007199254740989" rejects before callbacks (4.788ms)
+✔ existing exact integral rate strings remain metadata-compatible without normalization writes (77.36375ms)
+✔ typed profile metadata rejects width="1920" (73.368583ms)
+✔ typed profile metadata rejects width=3842 (72.29325ms)
+✔ typed profile metadata rejects height=2162 (78.382459ms)
+✔ typed profile metadata rejects height=1079 (72.559417ms)
+✔ typed profile metadata rejects audioStreams=true (75.031542ms)
+✔ typed profile metadata rejects streamCount=1 (72.429917ms)
+✔ typed profile metadata rejects durationSeconds="2" (73.545ms)
+✔ V2 exact full-source pixel boundary is permitted as an expectation only (76.318208ms)
+✔ V1 existing aggregate pixel limit rejects before any job creation (76.667ms)
+✔ existing six-hour exact source boundary at 21600 frames/1 fps (80.334208ms)
+✔ existing six-hour exact source boundary at 21601 frames/1 fps (75.626041ms)
+✔ declared lighting coverage must end at the retained admission expectation (75.712042ms)
+✔ first callback cannot rebaseline the input, selected request or source metadata (5.769791ms)
+✔ all receipt and parent refs are captured before the first callback (7.972375ms)
+✔ changed original file bytes reject even when mutation occurred before the projector holds stats (69.740583ms)
+✔ unchanged original raw values cannot be silently replaced by edited in-memory documents (52.365417ms)
+✔ original observer sha256 must equal its same-pass raw document reference (14.896417ms)
+✔ original observer sizeBytes must equal its same-pass raw document reference (12.94325ms)
+✔ late assertCurrent catches receipt mutation and typed context drift (164.424125ms)
+✔ the final original callback and its failure remain mandatory without retries (163.176708ms)
+✔ returned data is detached/frozen and cannot replace the original callback (79.717625ms)
+✔ symlink and hardlink receipt aliases reject before callbacks (14.653834ms)
+✔ the TEST fault helper refuses any external or aliased mutation target (35.716167ms)
+ℹ tests 50
+ℹ suites 0
+ℹ pass 50
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2681.414958
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-expectations.test.ts
+src/lib/server/__tests__/guided-source-color-media-process-faults.test.ts
+✔ original request mutation in first work callback refuses before native dispatch (13061.352667ms)
+✔ caller cannot replace original remaining callback in first resource callback (13078.006792ms)
+✔ final resource callback cannot release the actual project after its last assertion (14505.271958ms)
+✔ settled callback replacement of claim cannot publish an activated success (16010.090083ms)
+✔ settled callback replacement of input cannot publish an activated success (15051.841333ms)
+✔ settled callback replacement of sidecar cannot publish an activated success (15200.697458ms)
+✔ settled callback replacement of reservation cannot publish an activated success (15102.194125ms)
+✔ settled callback replacement of intent cannot publish an activated success (14117.967375ms)
+✔ settled callback replacement of journal cannot publish an activated success (15394.164667ms)
+✔ actual original inert tool bytes changed after settled return reject before outcome publication (13435.432708ms)
+✔ actual original inert tool bytes changed before dispatch refuse without native invocation (12144.430458ms)
+✔ actual returned native output cannot mutate in a later original resource callback (11044.325333ms)
+✔ actual claim reader cannot return equal hash but substituted runtime metadata (11320.01325ms)
+✔ final claim callback cannot replace the held outcome (11200.267208ms)
+✔ final claim callback cannot replace the held ledger (11216.450667ms)
+✔ first settled resource callback cannot erase an original unrecorded nested spawn before ledger capture (10976.997333ms)
+✔ readiness callback cannot create premature ledger before native dispatch (10793.891834ms)
+✔ readiness callback cannot create premature result before native dispatch (10950.479958ms)
+✔ actual invoker pre-spawn remaining callback refuses premature ledger (11291.070166ms)
+✔ actual invoker pre-spawn remaining callback refuses premature result (11246.952666ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 257147.07525
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-media-process-faults.test.ts
+src/lib/server/__tests__/guided-source-color-media-runner-frontier.test.ts
+✔ absent hooks preserve actual owned-runner arguments and normal return (1.442667ms)
+✔ pre-spawn hook is after the actual ancestor callback and charges its cost against the shorter captured scope (0.892375ms)
+✔ slow pre-spawn metadata cannot refund the original ancestor timeout or reach the fake native leaf (0.365625ms)
+✔ settled hook failures preserve real outer stop facts and output rather than imply no-start (0.273458ms)
+✔ actual settled metadata hook precedes expired ancestor enforcement without skipping it (0.398958ms)
+✔ settled nonzero exit keeps its actual error facts when its metadata hook also fails (0.229ms)
+✔ ancestor mutation after invoker remainder samples cannot create a ledger and still reach native spawn (11560.02075ms)
+✔ post-settlement ancestor callback cannot erase an original nested intent before the writer holds its ledger (10876.650167ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22443.671709
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-media-runner-frontier.test.ts
+src/lib/server/__tests__/guided-source-color-metadata-snapshot.test.ts
+✔ actual raw object observation keeps Buffer type, exact bytes and repeated references (2.054625ms)
+✔ typed private data retains numeric distinctions, cycles and container identity (0.391667ms)
+✔ unsupported functions and prototype conversion never silently become a metadata baseline (0.216041ms)
+✔ cold resource recovery accepts actual observed Buffer then rejects in-place raw mutation (6897.505417ms)
+✔ first recovery callback cannot rebaseline observed raw Buffer before acquisition (6798.673791ms)
+✔ same-byte Uint8Array cannot replace the original observed Buffer type (6844.6285ms)
+✔ writer first callback catches mutable raw Buffer bytes without freezing the caller (6648.902917ms)
+✔ actual writer and historical reader preserve raw evidence through the final callback (6495.421125ms)
+✔ archive historical metadata retains its original observed bytes after successful read (6493.570417ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 40190.529917
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-metadata-snapshot.test.ts
+src/lib/server/__tests__/guided-source-color-pipeline-pins.test.ts
+✖ literal cleanup pins equal the full bounded current static project TS import graph (188.347459ms)
+✔ static import audit distinguishes runtime project edges from type-only and external imports (0.314417ms)
+✔ fresh source capture retains the four actual TS import holes without changing exclusions (68.318333ms)
+✔ actual fresh pipeline snapshot satisfies every current V2 pin while legacy selection remains five (155.66875ms)
+ℹ TEST fresh metadata: 329 captured files, 303 V2 pins; capture 37.543 ms; current-pin check 42.114 ms
+▶ each missing explicit capture hole fails instead of silently minting a reduced fresh snapshot
+  ✔ src/app/api/producer/studio/import/files.ts (53.84025ms)
+  ✔ src/app/api/producer/studio/import/evidence.ts (51.387583ms)
+  ✔ src/app/api/producer/studio/import/model.ts (53.146208ms)
+  ✔ src/lib/debug.ts (52.780542ms)
+✔ each missing explicit capture hole fails instead of silently minting a reduced fresh snapshot (211.725458ms)
+✔ missing new cleanup or shared owner pin cannot borrow current code from outside the original snapshot (320.363ms)
+✔ fresh capture and staged code inventory retain the actual source-only base Python closure (3387.1485ms)
+ℹ TEST Python closure 352; grade implementation 175; snapshot 689; staged 359; guard calls 733; discovery 837.434 ms; complete metadata test 3302.385 ms; no native/package/admission qualification
+✔ fresh capture retains the complete actual schema2 readback Python closure and finite holders (1143.302333ms)
+ℹ TEST read seed guided_opening_read.py: 360 Python imports; 20 explicit read/holder boundaries; 691 freshly captured files; 364 staged files; discovery 798.588 ms; total 1050.103 ms; no native, dynamic-import, old-snapshot repair or package execution qualification
+✔ fresh capture retains actual body worker/read/cleanup imports and refuses a reduced original lock (4291.958ms)
+ℹ TEST body Python imports 429; fresh snapshot 758; total 4200.621 ms; metadata only, no native/AV qualification
+ℹ tests 13
+ℹ suites 0
+ℹ pass 12
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9770.904208
+
+✖ failing tests:
+
+test at src/lib/server/__tests__/guided-source-color-pipeline-pins.test.ts:2:1813
+✖ literal cleanup pins equal the full bounded current static project TS import graph (188.347459ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  ... Skipped lines
+  
+    [
+      'scripts/producer/guided-body.ts',
+      'scripts/producer/guided-opening.ts',
+      'src/app/api/_lib/ai-provider.ts',
+      'src/app/api/_lib/audit-gate.ts',
+  ...
+      'src/lib/server/guided-opening-execution.ts',
+  -   'src/lib/server/guided-opening-finishing.ts',
+      'src/lib/server/guided-opening-launch-status.ts',
+      'src/lib/server/guided-opening-launch-store.ts',
+      'src/lib/server/guided-opening-launcher.ts',
+      'src/lib/server/guided-opening-media-input.ts',
+      'src/lib/server/guided-opening-process-activation.ts',
+  
+      at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/guided-source-color-pipeline-pins.test.ts:18:10)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.start (node:internal/test_runner/test:944:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:297:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [Array],
+    expected: [Array],
+    operator: 'deepStrictEqual'
+  }
+MODULE_EXIT 1 src/lib/server/__tests__/guided-source-color-pipeline-pins.test.ts
+src/lib/server/__tests__/guided-source-color-prelaunch-owner.test.ts
+✔ actual original owner retains ordered successful staging references without granting dispatch (4188.752542ms)
+✔ owner DTOs and reusing the same actual claim are refused (255.9795ms)
+✔ a copied controller cannot establish a live owner (252.4335ms)
+✔ a copied claim cannot establish a live owner (246.728791ms)
+✔ a copied projectLease cannot establish a live owner (292.368459ms)
+✔ first work callback failure preserves a known staging phase and no invented reservation (308.345042ms)
+✔ the original reservation is retained before its first post-publication work callback (3767.874334ms)
+✔ a later job publication remains retained when its post-write guard throws (3851.488459ms)
+✔ cancel entry from an original staging callback stops the outer stage before publication (268.104583ms)
+✔ dispatch entry is irreversible even when the original work callback then expires (4137.395583ms)
+✔ dispatch guards cannot reenter cancel or dispatch transitions (4184.257ms)
+✔ copied staging and a second staging entry cannot advance the owner (4129.555583ms)
+✔ original claim identity precedes the first work callback (271.711125ms)
+✔ original input identity precedes the first work callback (282.648375ms)
+✔ original journal identity precedes the first work callback (305.345709ms)
+✔ same-byte reservation replacement cannot rebaseline retained publication metadata (4225.82875ms)
+✔ first work callback cannot substitute the original project lease (257.490542ms)
+✔ final owner callback cannot release the resource and return a usable cancel-entry result (262.045334ms)
+✔ final resource callback cannot release the original project lease and accept cancel entry (259.65975ms)
+✔ detached metadata cannot change original publications or impersonate cancellation completion (4156.838916ms)
+✔ a retained internal reader alias cannot clear the original file inventory (271.625542ms)
+✔ owned staged metadata remains usable by the actual existing process binder before and after dispatch entry (4272.806541ms)
+✔ a retained reader alias cannot recapture an original file after same-byte replacement (306.883541ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 40760.962584
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-prelaunch-owner.test.ts
+src/lib/server/__tests__/guided-source-color-read-integration.test.ts
+✔ actual SAME-held final cleanup and result create an exact metadata-only cold invocation (8084.98525ms)
+✔ actual transport retains its original raw result Buffer after the hold returns (7949.895ms)
+✔ actual transport refuses same-byte replacement of the final reservation archive (7912.482916ms)
+✔ genuine read transport cannot select its differently pinned media worker before any child (7912.087041ms)
+✔ genuine read refuses a different interpreter with its matching inert file hash (7856.718291ms)
+✔ genuine read refuses extra tool keys (7909.67975ms)
+✔ genuine transport reaches only the exact pinned read argv with no Docker environment using a pid-less TEST child (7868.207542ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 55497.992792
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-read-integration.test.ts
+src/lib/server/__tests__/guided-source-color-readback-history.test.ts
+✔ actual service records join genuine historical cleanup and same-held result without granting selection (8388.650125ms)
+✔ actual current pre-selection cleanup is also accepted only with its own actual same-held result (8278.201ms)
+✔ copied cleanup/result and independently genuine wrong-held result refuse before the caller guard (8200.252666ms)
+✔ schema1, malformed role and changed exact references refuse before guard (8192.344083ms)
+✔ first original guard cannot replace later start bytes with an equal-byte inode (8980.908417ms)
+✔ first original guard cannot replace later output bytes with an equal-byte inode (9434.329458ms)
+✔ first original guard cannot replace later verified bytes with an equal-byte inode (10193.482125ms)
+✔ final original guard cannot mutate reference fields after all record reads (10876.176292ms)
+✔ late cancellation and recursive reads cannot publish a metadata handle (10864.219666ms)
+✔ later checks keep original file and input identities without calling old guards or sampling a clock (10341.0295ms)
+✔ later input reference and callback replacements do not rebaseline a held proof (9964.660417ms)
+✔ mixed record versions and raw hash substitutions never inherit schema2 proof (10476.9365ms)
+✔ actual raw reference cannot hide altered source, archive, tools or false flags (9950.750417ms)
+✔ closed verified record rejects changed approval flags with its forged matching raw hash (9896.849792ms)
+✔ selection timestamp cannot predate verified record and output cannot upgrade the child result (10004.903125ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 144049.302667
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-readback-history.test.ts
+src/lib/server/__tests__/guided-source-color-reservation-archive.test.ts
+✔ writer copies exact original literal bytes into only its existing private attempt (7873.24475ms)
+✔ historical read never opens or stats current active.json, sidecar, jobs, claim or input (7784.906667ms)
+✔ reader also succeeds when the active reservation is absent (7877.624375ms)
+✔ writer cannot execute a forged JSON or duck-typed hold callback (7782.044541ms)
+▶ same attempt replay and any preexisting entry remain new-only fences
+  ✔ same-bytes (7918.285292ms)
+  ✔ different-bytes (7810.407084ms)
+  ✔ dangling-link (7766.410417ms)
+  ✔ directory (8047.856458ms)
+✔ same attempt replay and any preexisting entry remain new-only fences (31543.496459ms)
+✔ no missing attempt directory is created and aliased attempt paths reject (7863.500667ms)
+✔ explicit archive path, raw hash, raw size, attempt and closed ref cannot be substituted (8127.953375ms)
+✔ historical process reference closes original namespace before opening archive bytes (8310.9535ms)
+▶ first writer callback cannot rebaseline original metadata or actual archive parent
+  ✔ claim (8201.900834ms)
+  ✔ callback (8069.165125ms)
+  ✔ parent (8059.333583ms)
+✔ first writer callback cannot rebaseline original metadata or actual archive parent (24330.746792ms)
+✔ post-publication failure retains exact archive and original active record without selecting success (8133.07775ms)
+✔ original budget expiry after publication retains failure and all raw evidence (8241.147334ms)
+▶ historical first callback cannot adopt replacement file or original claim/ref objects
+  ✔ file (7978.061833ms)
+  ✔ claim (7850.294125ms)
+  ✔ reference (7748.504583ms)
+  ✔ callback (7913.061625ms)
+✔ historical first callback cannot adopt replacement file or original claim/ref objects (31490.294458ms)
+✔ last historical observation callback mutation cannot escape as a valid report (7839.793583ms)
+▶ raw byte corruption, hard links and late file mutation reject
+  ✔ bytes (7840.394833ms)
+  ✔ hardlink (7909.470166ms)
+  ✔ late (7719.87475ms)
+✔ raw byte corruption, hard links and late file mutation reject (23470.054584ms)
+✔ all invalid remaining values refuse historical read without renewing a clock (8705.778ms)
+✔ invalid original allowance refuses publication before any archive is written (8390.175417ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 207777.367792
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-reservation-archive.test.ts
+src/lib/server/__tests__/guided-source-color-resource-recovery.test.ts
+✔ production default is the actual stopped reader, never a serialized settlement flag (0.487334ms)
+✔ cold acquisition holds full reservation and rereads original stopped evidence on every check (7770.323ms)
+✔ busy original resource is retained and no foreign lease is released (7614.177417ms)
+✔ fresh acquisition still refuses the same valid active reservation without changing it (7637.253667ms)
+▶ actual reader refusal or unresolved V3 evidence fails before lease acquisition
+  ✔ reader (7656.320958ms)
+  ✔ forced (7618.751417ms)
+  ✔ version (7543.746208ms)
+  ✔ reference (7426.099041ms)
+  ✔ nested (7495.371875ms)
+  ✔ outcome (7412.732334ms)
+✔ actual reader refusal or unresolved V3 evidence fails before lease acquisition (45154.054166ms)
+▶ original context and raw files cannot be adopted after the first project callback
+  ✔ claim (7482.650084ms)
+  ✔ request (7541.791917ms)
+  ✔ stop (7542.523875ms)
+  ✔ callback (7473.951959ms)
+  ✔ file (7444.397459ms)
+✔ original context and raw files cannot be adopted after the first project callback (37485.708417ms)
+✔ post-acquisition stopped drift releases only the new lease and retains all active bytes (7513.659875ms)
+▶ acquisition callback cannot rebaseline original caller metadata or replace reservation
+  ✔ metadata (7502.558791ms)
+  ✔ file (7517.692291ms)
+✔ acquisition callback cannot rebaseline original caller metadata or replace reservation (15020.498042ms)
+✔ later assertion failures retain the handed-out resource and never retire the marker (7523.118625ms)
+✔ final stopped-reader callback substitution is caught by the original raw-file hold (7705.095ms)
+✔ invalid or expired original allowance never acquires a resource (7542.865583ms)
+✔ recovery never creates a missing global namespace (7469.921291ms)
+✔ resource namespace substitution and unsafe permissions reject before acquisition (7436.402416ms)
+✔ acquisition exception is not retried and never releases somebody else's lease (7294.25775ms)
+✔ returned check rejects loss of the original acquired lease without releasing its replacement (7414.373583ms)
+▶ last original remaining callback cannot release the acquired lease after its final check
+  ✔ current (7328.958417ms)
+  ✔ metadata (7343.301041ms)
+  ✔ copy (7469.198125ms)
+✔ last original remaining callback cannot release the acquired lease after its final check (22141.754208ms)
+✔ failed guard construction and uncertain release preserve both original errors (7460.881583ms)
+✔ failed acquisition cannot treat a void no-op release as verified ownership release (7410.573416ms)
+✔ failed acquisition uses the release method captured before guard callbacks (7382.44325ms)
+✔ failed acquisition reports unknown post-release lock observation as retained uncertainty (7368.644667ms)
+✔ failed original acquired-lock capture never invents a verified release (7487.782958ms)
+ℹ tests 37
+ℹ suites 0
+ℹ pass 37
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 239845.969625
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-resource-recovery.test.ts
+src/lib/server/__tests__/guided-source-color-selection-faults.test.ts
+✔ first original selection callback cannot replace a later actual range inode (10137.428708ms)
+✔ archive change immediately after actual selection CAS rejects without undoing or fabricating failure (13027.774375ms)
+✔ actual CAS tail consumes the original remainder without calling a new work budget (12914.211791ms)
+✔ current cold final journal IO remains inside its one entry allowance (13288.664042ms)
+✔ historical wrapper retains its genuine private inner proof and refuses equal DTO copies (13379.329083ms)
+✔ reentry with the old actual verifier after selection never rewrites the original selection index (13063.282458ms)
+✔ direct cold selection rejects malformed hash and foreign directory before resolving publication IO (13634.606834ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 89449.7305
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-selection-faults.test.ts
+src/lib/server/__tests__/guided-source-color-staging-batch.test.ts
+✖ no hooks: early original callback cannot replace first prospective pin (328.299875ms)
+✖ no hooks: early original callback cannot replace last prospective pin (289.065542ms)
+✖ no hooks: end original callback cannot replace first prospective pin (7139.705542ms)
+✖ no hooks: end original callback cannot replace last prospective pin (7239.907709ms)
+✖ no hooks: shared parent replacement refuses before publication (300.585125ms)
+✖ no hooks: earlier hashed pin cannot change during a later read (302.305541ms)
+✖ no hooks: restoring earlier pin bytes cannot rebaseline original metadata (290.48675ms)
+✔ no hooks: middle original expiry preserves its exact error (3851.439958ms)
+✔ no hooks: end original expiry preserves its exact error (7130.386459ms)
+✔ no hooks: caught publish reentry poisons the batch (303.650125ms)
+✔ no hooks: caught batch reentry poisons the batch (299.7565ms)
+✔ no hooks: caught cancellation reentry poisons the batch (303.268ms)
+✔ no hooks: caught read reentry poisons the batch (302.471625ms)
+✔ no hooks: caught directory reentry poisons the batch (303.908917ms)
+✔ no hooks: caught code reentry poisons the batch (297.586583ms)
+✖ live hooks: early original callback cannot replace first prospective pin (365.683375ms)
+✖ live hooks: early original callback cannot replace last prospective pin (348.481041ms)
+✖ live hooks: end original callback cannot replace first prospective pin (3780.852458ms)
+✖ live hooks: end original callback cannot replace last prospective pin (3752.707792ms)
+✖ live hooks: shared parent replacement refuses before publication (361.479459ms)
+✖ live hooks: earlier hashed pin cannot change during a later read (359.363834ms)
+✖ live hooks: restoring earlier pin bytes cannot rebaseline original metadata (381.956959ms)
+✔ live hooks: middle original expiry preserves its exact error (2128.114667ms)
+✔ live hooks: end original expiry preserves its exact error (3757.91925ms)
+✔ live hooks: caught publish reentry poisons the batch (364.956958ms)
+✔ live hooks: caught batch reentry poisons the batch (366.492042ms)
+✔ live hooks: caught cancellation reentry poisons the batch (365.241167ms)
+✔ live hooks: caught read reentry poisons the batch (368.496584ms)
+✔ live hooks: caught directory reentry poisons the batch (370.446125ms)
+✔ live hooks: caught code reentry poisons the batch (392.73025ms)
+✔ actual cancellation entry at middle stops the live batch (2103.689042ms)
+✔ actual cancellation entry at end stops the live batch (3783.499666ms)
+✖ all pin/parent captures precede first callback and final metadata checks retain completed pins (9420.257708ms)
+✔ batch API rejects empty, duplicate and oversized inventories before guard callbacks (149.817ms)
+✔ no hooks: actual prepublication batch pin metadata is linear (10335.114959ms)
+ℹ TEST 303 prospective pins: 2424 actual pin stats; 2426 original work callback calls; no native work
+✔ live hooks: actual prepublication batch pin metadata is linear (8070.909209ms)
+ℹ TEST 303 prospective pins: 3636 actual pin stats; 2426 original work callback calls; no native work
+ℹ tests 36
+ℹ suites 0
+ℹ pass 21
+ℹ fail 15
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 80017.596958
+
+✖ failing tests:
+
+test at src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:2:1501
+✖ no hooks: early original callback cannot replace first prospective pin (328.299875ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /pin changed|metadata changed|identity changed/. Input:
+  
+  'AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n' +
+    '\n' +
+    '  fs.realpathSync(directory)\n'
+  
+      at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:16:14)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.start (node:internal/test_runner/test:944:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:297:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [AssertionError],
+    expected: /pin changed|metadata changed|identity changed/,
+    operator: 'throws'
+  }
+
+test at src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:2:1501
+✖ no hooks: early original callback cannot replace last prospective pin (289.065542ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /pin changed|metadata changed|identity changed/. Input:
+  
+  'AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n' +
+    '\n' +
+    '  fs.realpathSync(directory)\n'
+  
+      at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:16:14)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:297:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [AssertionError],
+    expected: /pin changed|metadata changed|identity changed/,
+    operator: 'throws'
+  }
+
+test at src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:2:1501
+✖ no hooks: end original callback cannot replace first prospective pin (7139.705542ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /pin changed|metadata changed|identity changed/. Input:
+  
+  'AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n' +
+    '\n' +
+    '  fs.realpathSync(directory)\n'
+  
+      at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:16:14)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [AssertionError],
+    expected: /pin changed|metadata changed|identity changed/,
+    operator: 'throws'
+  }
+
+test at src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:2:1501
+✖ no hooks: end original callback cannot replace last prospective pin (7239.907709ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /pin changed|metadata changed|identity changed/. Input:
+  
+  'AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n' +
+    '\n' +
+    '  fs.realpathSync(directory)\n'
+  
+      at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:16:14)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [AssertionError],
+    expected: /pin changed|metadata changed|identity changed/,
+    operator: 'throws'
+  }
+
+test at src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:2:1992
+✖ no hooks: shared parent replacement refuses before publication (300.585125ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /parent changed|directory changed|pin changed/. Input:
+  
+  'AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n' +
+    '\n' +
+    '  fs.realpathSync(directory)\n'
+  
+      at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:21:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [AssertionError],
+    expected: /parent changed|directory changed|pin changed/,
+    operator: 'throws'
+  }
+
+test at src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:2:2463
+✖ no hooks: earlier hashed pin cannot change during a later read (302.305541ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /pin changed|metadata changed/. Input:
+  
+  'AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n' +
+    '\n' +
+    '  fs.realpathSync(directory)\n'
+  
+      at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:25:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [AssertionError],
+    expected: /pin changed|metadata changed/,
+    operator: 'throws'
+  }
+
+test at src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:2:2923
+✖ no hooks: restoring earlier pin bytes cannot rebaseline original metadata (290.48675ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /pin changed|metadata changed/. Input:
+  
+  'AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n' +
+    '\n' +
+    '  fs.realpathSync(directory)\n'
+  
+      at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:29:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [AssertionError],
+    expected: /pin changed|metadata changed/,
+    operator: 'throws'
+  }
+
+test at src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:2:1501
+✖ live hooks: early original callback cannot replace first prospective pin (365.683375ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /pin changed|metadata changed|identity changed/. Input:
+  
+  'AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n' +
+    '\n' +
+    '  fs.realpathSync(directory)\n'
+  
+      at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:16:14)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [AssertionError],
+    expected: /pin changed|metadata changed|identity changed/,
+    operator: 'throws'
+  }
+
+test at src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:2:1501
+✖ live hooks: early original callback cannot replace last prospective pin (348.481041ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /pin changed|metadata changed|identity changed/. Input:
+  
+  'AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n' +
+    '\n' +
+    '  fs.realpathSync(directory)\n'
+  
+      at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:16:14)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [AssertionError],
+    expected: /pin changed|metadata changed|identity changed/,
+    operator: 'throws'
+  }
+
+test at src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:2:1501
+✖ live hooks: end original callback cannot replace first prospective pin (3780.852458ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /pin changed|metadata changed|identity changed/. Input:
+  
+  'AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n' +
+    '\n' +
+    '  fs.realpathSync(directory)\n'
+  
+      at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:16:14)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [AssertionError],
+    expected: /pin changed|metadata changed|identity changed/,
+    operator: 'throws'
+  }
+
+test at src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:2:1501
+✖ live hooks: end original callback cannot replace last prospective pin (3752.707792ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /pin changed|metadata changed|identity changed/. Input:
+  
+  'AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n' +
+    '\n' +
+    '  fs.realpathSync(directory)\n'
+  
+      at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:16:14)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [AssertionError],
+    expected: /pin changed|metadata changed|identity changed/,
+    operator: 'throws'
+  }
+
+test at src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:2:1992
+✖ live hooks: shared parent replacement refuses before publication (361.479459ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /parent changed|directory changed|pin changed/. Input:
+  
+  'AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n' +
+    '\n' +
+    '  fs.realpathSync(directory)\n'
+  
+      at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:21:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [AssertionError],
+    expected: /parent changed|directory changed|pin changed/,
+    operator: 'throws'
+  }
+
+test at src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:2:2463
+✖ live hooks: earlier hashed pin cannot change during a later read (359.363834ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /pin changed|metadata changed/. Input:
+  
+  'AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n' +
+    '\n' +
+    '  fs.realpathSync(directory)\n'
+  
+      at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:25:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [AssertionError],
+    expected: /pin changed|metadata changed/,
+    operator: 'throws'
+  }
+
+test at src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:2:2923
+✖ live hooks: restoring earlier pin bytes cannot rebaseline original metadata (381.956959ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /pin changed|metadata changed/. Input:
+  
+  'AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n' +
+    '\n' +
+    '  fs.realpathSync(directory)\n'
+  
+      at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:29:12)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [AssertionError],
+    expected: /pin changed|metadata changed/,
+    operator: 'throws'
+  }
+
+test at src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:2:5920
+✖ all pin/parent captures precede first callback and final metadata checks retain completed pins (9420.257708ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    fs.realpathSync(directory)
+  
+      at pin (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/_guided-source-color-staging-batch-fixture.ts:39:3)
+      at replaceBatchPin (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/_guided-source-color-staging-batch-fixture.ts:45:16)
+      at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/guided-source-color-staging-batch.test.ts:73:3)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  }
+MODULE_EXIT 1 src/lib/server/__tests__/guided-source-color-staging-batch.test.ts
+src/lib/server/__tests__/guided-treatment-command.test.ts
+✔ accept-cut dispatches only its exact closed submission, preserving UUID and replay (3.3295ms)
+✔ admit dispatches only its exact closed submission, preserving UUID and replay (1.199708ms)
+✔ revise dispatches only its exact closed submission, preserving UUID and replay (0.945292ms)
+✔ reconcile-revision dispatches only its exact closed submission, preserving UUID and replay (0.907125ms)
+✔ compile dispatches only its exact closed submission, preserving UUID and replay (1.154291ms)
+✔ review dispatches only its exact closed submission, preserving UUID and replay (0.787334ms)
+✔ cut command rejects missing, false or fabricated-type attestations without service dispatch (4.558666ms)
+✔ all operations reject cross-operation, extra authority and malformed identity fields (5.766917ms)
+✔ raw intent stays data and supports the existing maximum even with escaped JSON units (2.576458ms)
+✔ bounded transport rejects empty, malformed, extra NDJSON, invalid UTF8 and oversize before project reads (1.23625ms)
+✔ ambiguous attestation and bounded JSON failures never read a project or invoke a service (1.184209ms)
+✔ request rejects symlink, hardlink, directory, missing file and FIFO without blocking (4.80275ms)
+✔ service errors are not retried, turned into status success or used to refresh request fields (0.82475ms)
+✔ help and invalid grammar do not resolve projects or dispatch services (0.420833ms)
+✔ pending status exposes only held bindings, no UUID, human attestations or inferred acceptance (0.443625ms)
+✔ each later status uses its existing strong reader without inferring opening eligibility (0.563ms)
+✔ blocked proposal/readiness expose no action and corrupt highest stage never falls back (0.346042ms)
+✔ status rejects initial/strong/final journal mismatches instead of publishing mixed bindings (0.347125ms)
+✔ accepted cut cannot project an intake action from an inconsistent later status (0.314583ms)
+✔ pending revision status exposes exact recovery identity without an old-brief compile/readiness action (0.370167ms)
+✔ actual CLI help and grammar failures need no server, provider or project (1228.590708ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1265.143792
+MODULE_EXIT 0 src/lib/server/__tests__/guided-treatment-command.test.ts
+src/lib/server/__tests__/guided-treatment-revision-integration.test.ts
+﹣ fresh cut retains original clock/cut and compiles the new brief with both historical proposals readable (0.466542ms) # SKIP
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 3.1745
+MODULE_EXIT 0 src/lib/server/__tests__/guided-treatment-revision-integration.test.ts
+src/lib/server/__tests__/guided-treatment-v2.test.ts
+✔ v2 opt-in and decisions are closed and cannot enter the public v1 path (5754.144791ms)
+✔ actual v2 cut creates real unapproved V2 revision objects, then admits but never executes a new brief (8791.575ms)
+✔ v2 source/cut drift blocks admission and preserves the immutable initial generation clock on retry (9033.939125ms)
+✔ orphan v2 genesis/activation replay uses the same cut decision and cannot replace it with a competing decision (11680.516458ms)
+✔ unsupported/unresolved/cut clauses stay blocked with their complete intake preserved (9948.296458ms)
+✔ accepted parent fails closed when required graph/projection/ledger/source objects disappear or change (9911.746917ms)
+✔ resealed cross-cut/future clocks and invalid execution paths cannot reset or forge admission evidence (10599.545ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 65724.285417
+MODULE_EXIT 0 src/lib/server/__tests__/guided-treatment-v2.test.ts
+src/lib/server/__tests__/guided-v6-short-live.test.ts
+✔ short TEST metadata guard holds exact fresh intake, original bytes and only four previsual fields (80.595666ms)
+✔ short TEST guards reject changed original, saved, manifest, transcript, marker and intake bytes (81.213959ms)
+✔ short TEST marker is closed and a live unknown marker blocks before any decision (74.665ms)
+✔ short TEST inputs cannot switch to symlink aliases or a public final (92.970208ms)
+✔ shared TEST synthetic guard rejects before reading approval data, writing attestations or invoking any CLI (0.504166ms)
+✔ short full-media entry is inert without exact opt-in and setup clock is not replenished (0.998875ms)
+✔ graphics-off short requires actual not-applicable caption screen without upgrading it to quality (1.125625ms)
+﹣ actual fresh V6 short opening, explicit TEST decision, full body/AuditB and no-work replay (0.127417ms) # SKIP
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 345.24475
+MODULE_EXIT 0 src/lib/server/__tests__/guided-v6-short-live.test.ts
+src/lib/server/__tests__/local-proxy.test.ts
+local-proxy.test.ts: all assertions passed
+MODULE_EXIT 0 src/lib/server/__tests__/local-proxy.test.ts
+src/lib/server/__tests__/opening-deadline.test.ts
+✔ opening preserves all body assets and quality allowances without credit for unproved work (1.519292ms)
+✔ metadata reads and lease waiting spend the captured attempt before its original clock is known (0.464708ms)
+✔ exhaustion before binding, clock rollback and malformed clocks cannot start the renderer (0.225166ms)
+✔ proof binds this execution's receipt time, preserves prep elapsed, and rejects late publication (1.988875ms)
+✔ cross-stage and failed opening retries retain the same durable high-water clock (46.966209ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 58.136875
+MODULE_EXIT 0 src/lib/server/__tests__/opening-deadline.test.ts
+src/lib/server/__tests__/p2-cut-repair-preparation-store.test.ts
+p2-cut-repair-preparation-store tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/p2-cut-repair-preparation-store.test.ts
+src/lib/server/__tests__/p2-cut-repair-private-render.test.ts
+p2-cut-repair-private-render tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/p2-cut-repair-private-render.test.ts
+src/lib/server/__tests__/p2-cut-repair-ripple-reopen.test.ts
+p2-cut-repair-ripple-reopen tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/p2-cut-repair-ripple-reopen.test.ts
+src/lib/server/__tests__/p2-cut-repair-two-step.test.ts
+p2-cut-repair-two-step tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/p2-cut-repair-two-step.test.ts
+src/lib/server/__tests__/p2-cut-repair-visual-evidence.test.ts
+p2-cut-repair-visual-evidence tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/p2-cut-repair-visual-evidence.test.ts
+src/lib/server/__tests__/planning-gate-cancellation.test.ts
+✔ actual planning timeout waits for owned parent and grandchild absence (638.4195ms)
+✔ actual planning cancellation waits for owned parent and grandchild absence (637.36375ms)
+✔ pre-cancelled planning call never spawns; clean nonzero preserves complete JSON diagnostic and exit code (25.098375ms)
+✔ unknown signal permission is not absence, and output overflow still proves owned child stopped (88.688209ms)
+✔ thrown runner cancels siblings but bundle waits for their final stop observation (48.534125ms)
+✔ preflight consumes the same decreasing budget and expired/cancelled waves never spawn downstream (124.389917ms)
+✔ cleanup finally runs after known stopped failure, never after unknown stop or unstructured exception (0.581375ms)
+✔ actual timed-out gate siblings are absent before configured reconciliation begins (638.032833ms)
+✔ schema1 historical gate bundles cannot qualify current readiness; stopped metadata cannot disagree (0.361625ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2204.370584
+MODULE_EXIT 0 src/lib/server/__tests__/planning-gate-cancellation.test.ts
+src/lib/server/__tests__/producer-authority-files-stability.test.ts
+producer authority stable-read tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/producer-authority-files-stability.test.ts
+src/lib/server/__tests__/producer-auto-edit-genesis.test.ts
+producer Auto Edit genesis tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/producer-auto-edit-genesis.test.ts
+src/lib/server/__tests__/producer-palmier-native-commit.test.ts
+producer-palmier-native-commit tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/producer-palmier-native-commit.test.ts
+src/lib/server/__tests__/producer-palmier-saga.test.ts
+producer-palmier-saga tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/producer-palmier-saga.test.ts
+src/lib/server/__tests__/producer-qc-promotion.test.ts
+producer QC promotion tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/producer-qc-promotion.test.ts
+src/lib/server/__tests__/producer-revision-shadow.test.ts
+producer-revision-shadow tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/producer-revision-shadow.test.ts
+src/lib/server/__tests__/producer-revision-v2-authority.test.ts
+producer-revision-v2-authority tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/producer-revision-v2-authority.test.ts
+src/lib/server/__tests__/producer-transcript-authority-route.test.ts
+producer transcript authority route tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/producer-transcript-authority-route.test.ts
+src/lib/server/__tests__/project-mutation-lease-adversarial.test.ts
+project mutation lease adversarial tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/project-mutation-lease-adversarial.test.ts
+src/lib/server/__tests__/project-palmier-state.test.ts
+project-palmier-state.test.ts: all assertions passed
+MODULE_EXIT 0 src/lib/server/__tests__/project-palmier-state.test.ts
+src/lib/server/__tests__/proposal-readiness-deadline.test.ts
+✔ advisor and source-verification children inherit the parent's remaining time without changing legacy defaults (0.614291ms)
+✔ readiness consumes the original proposal phase, preserving the same 80-minute required finish (1.097416ms)
+✔ late readiness cannot purchase another local deadline or spend required downstream reserve (0.510959ms)
+✔ both critics, source revalidation and final persistence share one wall/monotonic ceiling (0.152375ms)
+✔ receipt proof cannot relabel compile timing, erase elapsed time, expand policy or commit at the deadline (2.094208ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7.9855
+MODULE_EXIT 0 src/lib/server/__tests__/proposal-readiness-deadline.test.ts
+src/lib/server/__tests__/render-graph-promotion-process-crash.test.ts
+render graph promotion process-crash recovery tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/render-graph-promotion-process-crash.test.ts
+src/lib/server/__tests__/stage-timing-fallback.test.ts
+✔ a standalone source helper obtains job identity without changing ambient context or environment (0.879333ms)
+✔ concurrent proposal/readiness executions keep their own UUID and parent instead of the shared job fence (0.335292ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4.289958
+MODULE_EXIT 0 src/lib/server/__tests__/stage-timing-fallback.test.ts
+src/lib/server/__tests__/stage-timing-private-activity.test.ts
+✔ failed private activity after journal CAS is visible without inventing a new job wall clock (5.61025ms)
+✔ unclosed private activity is not declared stopped or confirmed running (0.269792ms)
+✔ foreign, duplicate, future and wall-clock inconsistent activity cannot extend the observed window (0.210375ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9.612917
+MODULE_EXIT 0 src/lib/server/__tests__/stage-timing-private-activity.test.ts
+src/lib/server/__tests__/stage-timing-summary.test.ts
+stage-timing-summary tests passed
+MODULE_EXIT 0 src/lib/server/__tests__/stage-timing-summary.test.ts
+src/lib/server/__tests__/stage-timing.test.ts
+stage-timing.test.ts: all assertions passed
+MODULE_EXIT 0 src/lib/server/__tests__/stage-timing.test.ts
+AUDIT_COMPLETE 41 modules; failures=2

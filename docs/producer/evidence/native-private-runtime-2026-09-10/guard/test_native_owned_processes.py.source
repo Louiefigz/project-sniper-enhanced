@@ -1,0 +1,245 @@
+"""Bounded ownership regressions using idle Python processes, never media jobs."""
+from __future__ import annotations
+
+import os
+import selectors
+import signal
+import subprocess
+import sys
+import time
+import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
+
+import native_owned_processes as owned
+
+LEAF = """
+import signal, time
+signal.signal(signal.SIGINT, signal.SIG_IGN)
+signal.signal(signal.SIGTERM, signal.SIG_IGN)
+print('ready', flush=True)
+time.sleep(25)
+"""
+PARENT = f"""
+import subprocess, sys
+leaf = subprocess.Popen([sys.executable, '-u', '-c', {LEAF!r}],
+    start_new_session=True, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+    stderr=subprocess.DEVNULL, text=True)
+assert leaf.stdout.readline().strip() == 'ready'
+print(leaf.pid, flush=True)
+sys.stdin.readline()
+"""
+IDLE = "import time; print('ready', flush=True); time.sleep(25)"
+
+
+def ready_line(child: subprocess.Popen) -> str:
+    """Bound readiness so a broken fixture cannot hang the test runner."""
+    with selectors.DefaultSelector() as selector:
+        selector.register(child.stdout, selectors.EVENT_READ)
+        if not selector.select(3):
+            raise RuntimeError('Fixture did not become ready within three seconds')
+    return child.stdout.readline().strip()
+
+
+def start_idle(code: str) -> subprocess.Popen:
+    """Start one owned group with short-lived, harmless Python work."""
+    return subprocess.Popen([sys.executable, '-u', '-c', code],
+        start_new_session=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL, text=True)
+
+
+class RegistryLogicTests(unittest.TestCase):
+    """Exercise identity and observation failures without sending real signals."""
+
+    def setUp(self) -> None:
+        """Give each case an explicit newly spawned leader observation."""
+        self.root = owned.OwnedProcess(990001, os.getpid(), 990001, 'start-a')
+        with patch.object(owned, 'read_processes', return_value={self.root.pid: self.root}):
+            self.registry = owned.OwnedRegistry(self.root.pid)
+
+    def test_reused_detached_pid_is_not_signalled(self) -> None:
+        """A PID alone cannot retain authority after its observed start changes."""
+        leaf = owned.OwnedProcess(990002, self.root.pid, 990002, 'start-b')
+        self.registry.live({self.root.pid: self.root, leaf.pid: leaf})
+        replacement = owned.OwnedProcess(leaf.pid, 1, leaf.pid, 'start-c')
+        table = {self.root.pid: self.root, replacement.pid: replacement}
+        with patch.object(owned, 'read_processes', return_value=table):
+            with patch.object(owned.os, 'kill') as kill:
+                self.registry.signal_owned(signal.SIGTERM)
+        self.assertTrue(kill.called)
+        self.assertNotIn(-leaf.pid, [call.args[0] for call in kill.call_args_list])
+        self.assertNotIn(leaf.pid, [call.args[0] for call in kill.call_args_list])
+
+    def test_failed_measurement_never_reports_verified_cleanup(self) -> None:
+        """An unreadable process table must raise before any cleanup claim."""
+        error = subprocess.CalledProcessError(1, ['/bin/ps'])
+        with (patch.object(owned, 'read_processes', side_effect=error),
+              patch.object(owned.os, 'kill') as kill):
+            with self.assertRaises(subprocess.CalledProcessError):
+                self.registry.cleanup(SimpleNamespace())
+        kill.assert_not_called()
+
+    def test_sampler_discovered_orphan_is_retained_for_cleanup(self) -> None:
+        leaf = owned.OwnedProcess(990002, 1, 990002, 'observed-before-reparenting')
+        self.registry.remember_measured((leaf,))
+        self.assertIn(leaf.pid, self.registry.live({leaf.pid: leaf}))
+        self.assertIn(leaf.pgid, self.registry.groups)
+
+    def test_sampler_identity_conflict_cannot_overwrite_history(self) -> None:
+        replacement = owned.OwnedProcess(self.root.pid, 1, self.root.pid, 'new-start')
+        with self.assertRaises(RuntimeError):
+            self.registry.remember_measured((replacement,))
+        self.assertEqual(self.registry.known[self.root.pid], self.root)
+
+    def test_signal_permission_failure_is_not_absence(self) -> None:
+        """A denied signal leaves cleanup unproved."""
+        with (patch.object(owned, 'read_processes', return_value={self.root.pid: self.root}),
+              patch.object(owned.os, 'kill', side_effect=PermissionError('denied'))):
+            with self.assertRaises(PermissionError):
+                self.registry.signal_owned(signal.SIGTERM)
+
+    def test_partially_malformed_process_table_is_rejected(self) -> None:
+        """One valid row must not conceal a lost descendant row."""
+        output = ' 123 1 123 Wed Sep  9 10:30:00 2026\nmalformed descendant row\n'
+        result = SimpleNamespace(stdout=output)
+        with patch.object(owned.subprocess, 'run', return_value=result):
+            with self.assertRaises(RuntimeError):
+                owned.read_processes()
+
+    def test_empty_process_table_is_rejected(self) -> None:
+        """No rows cannot be evidence that owned work has stopped."""
+        with patch.object(owned.subprocess, 'run', return_value=SimpleNamespace(stdout='')):
+            with self.assertRaises(RuntimeError):
+                owned.read_processes()
+
+    def test_duplicate_pid_rows_are_rejected(self) -> None:
+        """Conflicting identity rows cannot silently overwrite one another."""
+        output = (' 123 1 123 Wed Sep  9 10:30:00 2026\n'
+                  ' 123 2 456 Wed Sep  9 10:30:01 2026\n')
+        with patch.object(owned.subprocess, 'run', return_value=SimpleNamespace(stdout=output)):
+            with self.assertRaises(RuntimeError):
+                owned.read_processes()
+
+    def test_root_must_be_our_new_group_leader(self) -> None:
+        """Do not adopt an unrelated process as a render root."""
+        foreign = owned.OwnedProcess(990003, 1, 990003, 'start-foreign')
+        with patch.object(owned, 'read_processes', return_value={foreign.pid: foreign}):
+            with self.assertRaises(RuntimeError):
+                owned.OwnedRegistry(foreign.pid)
+
+
+@unittest.skipUnless(sys.platform == 'darwin', 'These are macOS process-table regressions')
+class LiveRegistryTests(unittest.TestCase):
+    """Prove actual cleanup with separate idle groups and a surviving bystander."""
+
+    def setUp(self) -> None:
+        """Retain exact fixture ownership for cleanup even when assertions fail."""
+        self.children: list[subprocess.Popen] = []
+        self.detached: list[owned.OwnedProcess] = []
+
+    def tearDown(self) -> None:
+        """Kill only identity-verified fixture groups and reap direct children."""
+        for row in self.detached:
+            self._finish_detached(row)
+        for child in self.children:
+            self._finish_child(child)
+
+    def _finish_detached(self, row: owned.OwnedProcess) -> None:
+        """Retain no detached fixture after the test, including failed assertions."""
+        current = owned.read_processes().get(row.pid)
+        if current is None or current.started != row.started or current.pgid != row.pid:
+            return
+        try:
+            os.kill(-row.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        deadline = time.monotonic() + 3
+        while time.monotonic() < deadline:
+            current = owned.read_processes().get(row.pid)
+            if current is None or current.started != row.started:
+                return
+            time.sleep(.05)
+        self.fail(f'Owned detached fixture {row.pid} survived final cleanup')
+
+    def _finish_child(self, child: subprocess.Popen) -> None:
+        """Direct-child handles keep fixture cleanup scoped to our own launches."""
+        if child.poll() is None:
+            child.kill()
+        child.wait(timeout=3)
+        for stream in (child.stdin, child.stdout):
+            if stream is not None:
+                stream.close()
+
+    def _start(self, code: str) -> subprocess.Popen:
+        """Register cleanup ownership immediately after a successful launch."""
+        child = start_idle(code)
+        self.children.append(child)
+        return child
+
+    def _family(self) -> tuple[subprocess.Popen, owned.OwnedProcess]:
+        """Start a parent and a detached grandchild that ignores INT and TERM."""
+        parent = self._start(PARENT)
+        pid = int(ready_line(parent))
+        row = owned.read_processes()[pid]
+        self.detached.append(row)
+        self.assertEqual(row.parent_pid, parent.pid)
+        self.assertEqual(row.pgid, row.pid)
+        return parent, row
+
+    def _assert_identity_gone(self, row: owned.OwnedProcess) -> None:
+        """Check the observed identity, rather than assuming a signal succeeded."""
+        current = owned.read_processes().get(row.pid)
+        self.assertTrue(current is None or current.started != row.started)
+
+    def test_idle_root_cleanup_reaps_child(self) -> None:
+        """A normal group exits and the direct-child handle is actually reaped."""
+        child = self._start(IDLE)
+        self.assertEqual(ready_line(child), 'ready')
+        registry = owned.OwnedRegistry(child.pid)
+        result = registry.cleanup(child)
+        self.assertTrue(result['verified'], result)
+        self.assertIsNotNone(child.poll())
+
+    def test_detached_term_resistant_child_and_unrelated_survivor(self) -> None:
+        """Escalate for our detached leaf while preserving an unrelated idle group."""
+        unrelated = self._start(IDLE)
+        self.assertEqual(ready_line(unrelated), 'ready')
+        parent, leaf = self._family()
+        registry = owned.OwnedRegistry(parent.pid)
+        self.assertIn(leaf.pid, registry.live())
+        result = registry.cleanup(parent)
+        self.assertTrue(result['verified'], result)
+        self._assert_identity_gone(leaf)
+        self.assertIsNone(unrelated.poll())
+        sent = [(row['target'], row['signal']) for row in result['signals']]
+        self.assertIn((-leaf.pid, 'SIGKILL'), sent)
+        self.assertNotIn(-unrelated.pid, [row['target'] for row in result['signals']])
+
+    def test_known_detached_child_remains_owned_after_parent_exit(self) -> None:
+        """Retained ownership survives the real parent exiting before cleanup."""
+        parent, leaf = self._family()
+        registry = owned.OwnedRegistry(parent.pid)
+        self.assertIn(leaf.pid, registry.live())
+        parent.stdin.write('exit\n')
+        parent.stdin.flush()
+        self.assertEqual(parent.wait(timeout=3), 0)
+        self.assertIn(leaf.pid, registry.live())
+        result = registry.cleanup(parent)
+        self.assertTrue(result['verified'], result)
+        self._assert_identity_gone(leaf)
+
+    def test_exit_before_descendant_discovery_cannot_claim_complete_cleanup(self) -> None:
+        """A previously unobserved detached child makes overall cleanup unproved."""
+        parent, leaf = self._family()
+        registry = owned.OwnedRegistry(parent.pid)
+        parent.stdin.write('exit\n')
+        parent.stdin.flush()
+        self.assertEqual(parent.wait(timeout=3), 0)
+        result = registry.cleanup(parent)
+        current = owned.read_processes().get(leaf.pid)
+        survives = current is not None and current.started == leaf.started
+        self.assertFalse(result['verified'] and survives, result)
+
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

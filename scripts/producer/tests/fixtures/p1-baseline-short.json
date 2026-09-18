@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "fixtureId": "p1-shadow-short",
+  "evidenceClass": "synthetic-harness-validation",
+  "mode": "short",
+  "durationFrames": 1800,
+  "fps": { "numerator": "30", "denominator": "1" },
+  "outputPaths": ["p1-shadow-short.output.json"]
+}

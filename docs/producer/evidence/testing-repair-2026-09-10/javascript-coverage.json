@@ -1,0 +1,4630 @@
+{
+  "kind": "aggregate-official-javascript-test-file-coverage",
+  "observedAtUtc": "2026-09-10T16:48:37.904108+00:00",
+  "singleFreshFullRun": false,
+  "scope": "Earlier checkpoint fail-fast prefixes plus explicit continuation exits and final focused repairs; not a full current-source rerun.",
+  "officialTypeScriptModules": 447,
+  "modulesWithLatestPass": 447,
+  "missingModules": [],
+  "latestFailedModules": [],
+  "inventoryComplete": true,
+  "prefixChecks": {
+    "nextSupervisor": "passed in checkpoint npm-test.log and npm-supervisor-final.log",
+    "skillSurface": "passed in checkpoint npm-test.log and npm-skills-final.log",
+    "sdkSceneVariableProposal": "14 passed in checkpoint npm-test.log and npm-sdk-final.log"
+  },
+  "coordinatorNotes": [
+    "Continuation stopped at caption profile failure; final focused repair passed six tests.",
+    "Serial audit tail recorded 83 passing modules, then was deliberately retired with exit 143 after its child exited.",
+    "The unrecorded adoption child passed its assertions but was rerun in partition A to retain its process exit.",
+    "A/B started as disjoint partitions; their first 12 files were retained as prefixes and C/D took their disjoint remaining 41-file tails.",
+    "A/B coordinators were paused only after 12 recorded modules, then retired only after the in-flight child finished. Its duplicate report is not counted as a new unique pass.",
+    "C/D retain each module process exit; each runs one child at a time. At most four test children ran during the overlap."
+  ],
+  "runs": [
+    {
+      "file": "npm-test.log",
+      "passedBeforeLast": 219,
+      "unprovenLastModule": "src/lib/server/__tests__/color-diagnostic-api.test.ts"
+    },
+    {
+      "file": "npm-resume.log",
+      "passedBeforeLast": 24,
+      "unprovenLastModule": "src/lib/server/__tests__/guided-body-controller-sources.test.ts"
+    },
+    {
+      "file": "npm-continuation.log",
+      "recordedModules": 14,
+      "failedModules": [
+        "src/lib/server/__tests__/guided-caption-profile.test.ts"
+      ]
+    },
+    {
+      "file": "npm-audit-tail.log",
+      "recordedModules": 83,
+      "failedModules": []
+    },
+    {
+      "file": "npm-part-a.log",
+      "recordedModules": 12,
+      "failedModules": []
+    },
+    {
+      "file": "npm-part-b.log",
+      "recordedModules": 12,
+      "failedModules": []
+    },
+    {
+      "file": "npm-part-c.log",
+      "recordedModules": 41,
+      "failedModules": [
+        "src/lib/server/__tests__/guided-source-color-pipeline-pins.test.ts",
+        "src/lib/server/__tests__/guided-source-color-staging-batch.test.ts"
+      ]
+    },
+    {
+      "file": "npm-part-d.log",
+      "recordedModules": 41,
+      "failedModules": []
+    }
+  ],
+  "partitions": {
+    "a": {
+      "expectedModules": 53,
+      "recordedModules": 12,
+      "complete": false
+    },
+    "b": {
+      "expectedModules": 53,
+      "recordedModules": 12,
+      "complete": false
+    },
+    "c": {
+      "expectedModules": 41,
+      "recordedModules": 41,
+      "complete": true
+    },
+    "d": {
+      "expectedModules": 41,
+      "recordedModules": 41,
+      "complete": true
+    }
+  },
+  "prefixRetirement": {
+    "scope": "Only owned test coordinators; no test child or user process is signalled",
+    "originalRequiredPrefixCount": 12,
+    "parts": {
+      "a": {
+        "pid": 61554,
+        "initialIdentity": "Thu Sep 10 10:58:29 2026     Ss   /opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /private/tmp/sniper-npm-partition-20260910.py a",
+        "stopped": true,
+        "retired": true,
+        "recordedModulesAtStop": 12,
+        "stoppedAtUtc": "2026-09-10T16:26:24.497248+00:00",
+        "inFlightChildren": [
+          {
+            "pid": 34466,
+            "state": "R",
+            "command": "node --import tsx src/lib/server/__tests__/guided-source-color-completed-recovery-faults.test.ts"
+          }
+        ],
+        "retiredAtUtc": "2026-09-10T16:28:16.204144+00:00"
+      },
+      "b": {
+        "pid": 46362,
+        "initialIdentity": "Thu Sep 10 10:57:46 2026     Ss   /opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/Resources/Python.app/Contents/MacOS/Python /private/tmp/sniper-npm-partition-20260910.py b",
+        "stopped": true,
+        "retired": true,
+        "recordedModulesAtStop": 12,
+        "stoppedAtUtc": "2026-09-10T16:19:08.422406+00:00",
+        "inFlightChildren": [
+          {
+            "pid": 63888,
+            "state": "R",
+            "command": "node --import tsx src/lib/server/__tests__/guided-source-color-completed-recovery.test.ts"
+          }
+        ],
+        "retiredAtUtc": "2026-09-10T16:20:31.191222+00:00"
+      }
+    }
+  },
+  "modules": [
+    {
+      "path": "src/lib/clipper/__tests__/media-contract.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/ai-edit-authority-invalidation.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/ask-edit-authority-cas.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/ask-edit-authority-races.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/ask-edit-cut-repair-route.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/ask-edit-preview-invalidation.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/ask-edit-refit-rollback.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/ask-edit-stream-cancellation.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/audit-audio-policy.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/audit-gate-contract.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/authored-cut-seed-prompt.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/authoring-blocked.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/auto-edit-authoring-recovery.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/auto-edit-authority-cross-language.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/auto-edit-authority-policy.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/auto-edit-chain.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/auto-edit-cut-candidate-resume.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/auto-edit-doctrine-runtime.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/auto-edit-graph-promotion-failure.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/auto-edit-job-store.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/auto-edit-mp4-only-delivery.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/auto-edit-pipeline-resume.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/auto-edit-planning-loop.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/auto-edit-quality-artifacts.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/auto-edit-quality-loop.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/auto-edit-review-concurrency.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/auto-edit-round-policy.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/auto-edit-worker-launcher.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/brain-review.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/brief-contract.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/brief-intent-conflict.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/caption-chapters-v1.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/caption-operations-v1.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/caption-schema-parity-v1.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/caption-word-index-v1.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/claude-model-contract.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/codex-cli.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/color-diagnostic-client.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/color-diagnostic-flow.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/compatibility-picture-lock-integration.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/compatibility-picture-lock.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/compatibility-timeline-projection.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/comps-catalog-coverage.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/continue-project-copy.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/cut-acceptance-client.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/cut-acceptance-request.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/cut-acceptance-response.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/cut-accepted-status-client.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/cut-approval.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/cut-authoring-brief.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/cut-checkpoint-card.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/cut-pending-decision.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/cut-preview.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/cut-restore-speech-v1.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/cut-review-brief.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/cut-review-client.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/cut-review-contract.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/cut-review-loop.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/cut-review-media.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/cut-review-state.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/cut-revision-prompt.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/cut-track.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/deferred-request-v1.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/dialogue-authority-v1.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/dialogue-caption-timing-v1.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/edit-plan.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/editor-artifact-consistency.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/editor-external-run-lock.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/editor-preview-authority.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/geometry-replan.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/graphic-ids.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/graphics-governance-prompt.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/gui-render-authority.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/guided-body-media-v2.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/guided-body-result-v2.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/guided-body-source-color-replay.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/guided-cut-launch.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/guided-cut-pause.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/guided-opening-cleanup-v2.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/guided-opening-client.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/guided-opening-launch-client.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/guided-presenter-profile.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/guided-presenter-workload.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/guided-preview-boundary.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/guided-source-color-cleanup-facts.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/guided-source-color-request.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/guided-sse.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/guided-treatment-ui-state.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/hyperframes-launch.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/ingest-source-placement.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/intent-capabilities.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/intent-capability-persistence.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/intent-flow.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/intent-presets.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/intent-status-projection.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/manifest-music.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/mp4-launch-authority.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/native-media-picker.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/operator-intent-authority.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/p0-legacy-regression-gates.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/p0-machine-contracts.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/p2-cut-repair-alternate-take-prepare-wiring.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/p2-cut-repair-alternate-take-runner.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/p2-cut-repair-approval-authority.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/p2-cut-repair-approval-sealer.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/p2-cut-repair-execute-admission.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/p2-cut-repair-package-replay.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/p2-cut-repair-picture-plan-authority.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/p2-cut-repair-review-approve-orchestration.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/p2-cut-repair-route-policy.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/p2-cut-repair-route-runner.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/p2-cut-repair-speed-parity.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/p2-row10-integrated-lifecycle.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/p2-transition-schema-parity.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/palmier-candidate-qc-runner.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/palmier-candidate-qc.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/palmier-canonical-ai-guard.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/palmier-draft-runner.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/palmier-launch-contract.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/palmier-live-build-contract.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/palmier-live-build-reconciliation.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/palmier-native-plan-hash-cross-runtime.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/palmier-native-runner.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/palmier-native-stream.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/palmier-open-handoff.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/palmier-ownership.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/palmier-parity.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/palmier-primary-auto-edit-contract.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/palmier-qc-approval.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/palmier-view-target.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/palmier-working-checkpoints.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/placement-geometry.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/plan-history-version.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/plan-refit-hash-cross-runtime.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/plan-refit-provenance.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/plan-refit-transaction.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/plan-review-packet.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/planning-gates.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/polling-control.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/presenter-layout-v1.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/preview-health.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/preview-stale-reload.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/producer-ai-provider.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/producer-contracts-v1.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/producer-run-registry.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/producer-schema-enum-parity.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/producer-schema-parity.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/producer-stream-navigation.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/project-card-state.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/project-mutation-routes.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/project-state.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/projects-client.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/recent-project-pagination.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/reference-admission-verifier.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/reference-decision.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/reference-fetch-policy.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/reference-frame-policy.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/reference-intake-policy.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/reference-intent.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/reference-library.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/reference-profile.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/reference-provenance.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/reference-qualification.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/reference-review-context.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/reference-selection-flow.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/reference-sidecar.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/reference-study-files.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/render-graph-executor-v1.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/render-graph-v1.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/resume-delivery-policy.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/review-batch-triage.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/review-stage-telemetry.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/run-status-copy.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/save-plan-transaction.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/saved-plan-planning-immutability.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/saved-plan-review.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/scene-authoring-packet-v1.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/scene-package-contract-v1.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/section-marker-insert.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/set-graphic-text-v1.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/short-long-route-matrix.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/sse-contract.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/studio-import-client.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/studio-review-client.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/subscription-admission.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/subscription-policy.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/subscription-status-cleanup.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/surgical-edit-critic.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/surgical-edit.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/template-usage-approval.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/template-usage-history.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/template-usage-stage.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/timeline-scale.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/timing-anchor-migration-matrix.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/transcript-route.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/treatment-operation-v1.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/treatment-proposal-v4.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/treatment-proposal-v5.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/treatment-proposal-v8.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/typed-compatibility-edit.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/typed-compatibility-finalize.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/warnings.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/producer/__tests__/workspace-isolation.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/segmenter/__tests__/file-browser-helpers.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/ask-editor-reconciliation.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/auto-edit-authority.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/auto-edit-heartbeat.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/auto-edit-promotion-process-crash.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/auto-edit-qc-seed.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/auto-edit-stop.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/auto-edit-worker-mutation-lease.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/bounded-json-body.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/caller-process-deadline.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/caller-process-owned.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/candidate-promotion-crash-recovery.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/candidate-promotion-durability-adversarial.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/candidate-promotion-recovery-adversarial.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/canonical-json-cross-runtime.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/child-process-lifecycle.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-test.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/color-diagnostic-api.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/color-diagnostic-retry.log",
+          "result": "passed",
+          "basis": "six tests, zero failures; retry command exited zero"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/color-diagnostic-projection.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/content-addressed-json.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/current-render-graph-authority.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/current-render-graph-command.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/explicit-venv-selector.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/generation-checkpoint-clock.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/generation-clock-history.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/generation-clock-watermark-v2.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/generation-clock-watermark.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/generation-deadline.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/grade-observation-inventory.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/grade-observation-process.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/grade-observation-resource.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/grade-observation-service.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/grade-observation-v2-finalization.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/grade-observation-v2-live-harness.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-activation.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-authority.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-claim.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-cleanup-control.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-command.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-controller-handoff-faults.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-controller-handoff.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-controller-source-faults.test.ts",
+      "observations": [
+        {
+          "log": "../repository-checkpoint-2026-09-10/npm-resume.log",
+          "result": "passed",
+          "basis": "followed by next module in fail-fast command"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-controller-sources.test.ts",
+      "observations": [
+        {
+          "log": "npm-continuation.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-deadline.test.ts",
+      "observations": [
+        {
+          "log": "npm-continuation.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-lifecycle.test.ts",
+      "observations": [
+        {
+          "log": "npm-continuation.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-live-driver.test.ts",
+      "observations": [
+        {
+          "log": "npm-continuation.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-media-input-admission.test.ts",
+      "observations": [
+        {
+          "log": "npm-continuation.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-media-input-v2.test.ts",
+      "observations": [
+        {
+          "log": "npm-continuation.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-readback-clock.test.ts",
+      "observations": [
+        {
+          "log": "npm-continuation.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-readback-record-tail.test.ts",
+      "observations": [
+        {
+          "log": "npm-continuation.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-reference-projection.test.ts",
+      "observations": [
+        {
+          "log": "npm-continuation.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-result-v2.test.ts",
+      "observations": [
+        {
+          "log": "npm-continuation.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-source-color-readback-tail.test.ts",
+      "observations": [
+        {
+          "log": "npm-continuation.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-source-color-replay.test.ts",
+      "observations": [
+        {
+          "log": "npm-continuation.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-body-source-color-result-faults.test.ts",
+      "observations": [
+        {
+          "log": "npm-continuation.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-caption-profile.test.ts",
+      "observations": [
+        {
+          "log": "npm-continuation.log",
+          "exitCode": 1,
+          "result": "failed"
+        },
+        {
+          "log": "caption-profile-ts-final.log",
+          "result": "passed",
+          "basis": "6 tests, zero failures; final targeted command exited zero"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-manual-short.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        },
+        {
+          "log": "manual-short-ts-final.log",
+          "result": "passed",
+          "basis": "4 tests, zero failures; final targeted command exited zero"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-media-profile-presenter.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-approval-media.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-approval.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-claim.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-cleanup-command-integration.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-cleanup-command.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-cleanup-store-history.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-cleanup.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-command.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-completed-cleanup-command.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-contract.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-controller-cleanup.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-controller-lifecycle.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-controller-terminal.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-execution.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-launch-route.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-launch-store.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-ledger-subprocess.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-media-contract.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-media-input.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-metadata.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        },
+        {
+          "log": "opening-metadata-ts-final.log",
+          "result": "passed",
+          "basis": "10 tests, zero failures; final targeted command exited zero"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-ownership-faults.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-pending-status.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-presenter-profile.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-process-ledger.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-process.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-result-v2-rounding.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-result-v2.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-result-version.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-result.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-selection.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-source-color-intent.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-source-color-process.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-status.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-v8-no-presenter.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-presenter-durable-input.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-author-command.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-author-cut-review.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-author-cut-stage.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-author-guard.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-author-intake.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-author-lifecycle.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-author-service.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-bootstrap-authority.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-bootstrap-observer.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-bootstrap-service.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-bootstrap-stage.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-command.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-preparation-deadline.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-preparation-worker.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-catalog-ownership.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-contract.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-history-snapshot.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-music-intent.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-presenter-frames.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-presenter.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-readiness-gates.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-readiness-real-gates.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-readiness.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-speech.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-timing.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-v4-candidate.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-v4-evidence.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-v5-captions.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-v6-reframe.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-v7-music.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-v8-candidate.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-v8-store.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-readiness-budget.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-runtime-capsule-owner.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-runtime-capsule-python.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-runtime-capsule.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-approval-integration.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-approval-read.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-approval-wrapper.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-approval.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-body-authority-faults.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-body-authority.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-body-opening.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-adoption-integration.test.ts",
+      "observations": [
+        {
+          "log": "npm-audit-tail.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-adoption.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-a.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-attempt-media.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-b.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-attempt-read-faults.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-a.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-attempt-read.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-b.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-attempt.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-a.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-cold-import.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-b.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-final-commit.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-a.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-final-read-route.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-b.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-final-read.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-a.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-history.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-b.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-hold.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-a.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-pending-commit.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-b.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-pending-history.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-a.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-pending-hold.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-b.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-pending-read.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-a.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-preparation.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-b.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-process-pins.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-a.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-process.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-b.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-recovery-faults.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-a.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-recovery-route.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-b.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-recovery-timing.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-a.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-recovery.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-b.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-retired-job.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-a.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-workflow.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-b.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-completed-recovery-faults.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-completed-recovery.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-expectations.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-media-metadata.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-media-process-faults.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-media-process.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-media-runner-frontier.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-media-stop-parity.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-metadata-snapshot.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-opening-result.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-pipeline-pins.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 1,
+          "result": "failed"
+        },
+        {
+          "log": "guided-source-color-pipeline-pins-final.log",
+          "exitCode": 0,
+          "result": "passed",
+          "seconds": 11.676
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-prelaunch-cancel.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-prelaunch-owner.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-process-binding.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-read-integration.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-read-transport.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-readback-history.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-readback.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-reservation-archive.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-reservation-retirement.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-resource-recovery.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-retirement-resource.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-selection-faults.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-selection.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-staging-batch.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 1,
+          "result": "failed"
+        },
+        {
+          "log": "guided-source-color-staging-batch-final.log",
+          "exitCode": 0,
+          "result": "passed",
+          "seconds": 120.302
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-staging.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-treatment-command.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-treatment-json.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-treatment-revision-integration.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-treatment-revision.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-treatment-v2.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-v6-short-integration.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-v6-short-live.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/human-cut-acceptance.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/local-proxy.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/local-request-policy.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/opening-deadline.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/opening-handoff-clock.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/p2-cut-repair-preparation-store.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/p2-cut-repair-private-picture-render.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/p2-cut-repair-private-render.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/p2-cut-repair-revision.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/p2-cut-repair-ripple-reopen.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/p2-cut-repair-surgical-parent-authority.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/p2-cut-repair-two-step.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/p2-cut-repair-v2-promotion.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/p2-cut-repair-visual-evidence.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/p5-render-graph-fault-cohort.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/planning-gate-cancellation.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/process-liveness.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-authority-files-stability.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-auto-edit-genesis-successor.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-auto-edit-genesis.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-manifest.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-palmier-native-commit.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-palmier-saga-startup.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-palmier-saga.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-qc-promotion-intent.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-qc-promotion.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-revision-coverage.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-revision-shadow.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-revision-store.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-revision-v2-authority.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-shadow-fixtures.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/producer-transcript-authority-route.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/project-mutation-checkpoints.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/project-mutation-lease-adversarial.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/project-mutation-lease.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/project-palmier-state.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/proposal-process-bounds.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/proposal-readiness-deadline.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/readiness-render-containers.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/render-graph-promotion-process-crash.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/scene-review-route.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/stage-timing-fallback.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/stage-timing-inputs.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/stage-timing-private-activity.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/stage-timing-propagation.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/stage-timing-summary.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/stage-timing-v2.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/stage-timing.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-c.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/server/__tests__/subscription-sinks.test.ts",
+      "observations": [
+        {
+          "log": "npm-part-d.log",
+          "exitCode": 0,
+          "result": "passed"
+        }
+      ]
+    }
+  ]
+}

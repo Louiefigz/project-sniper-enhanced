@@ -1,0 +1,1550 @@
+[
+ {
+  "name": "micro-transitions",
+  "type": "component",
+  "mechanism": "Six UI micro-animations (badge pop, dropdown, modal, tab, tooltip, check draw) all derived from one --hf-micro-progress CSS custom property the host tweens",
+  "variables": [
+   "badge",
+   "tooltip",
+   "tone",
+   "travel"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:product-UI demo pack, not talking-head vocabulary",
+  "quality": "clean \u2014 pure CSS-var derivation, tidy",
+  "aspectFlex": "responsive",
+  "port": "skip \u2014 app-UI showcase has no home in talking-head grammar"
+ },
+ {
+  "name": "mk-background",
+  "type": "block",
+  "mechanism": "Two oversized radial-gradient blobs drift via yoyo sine tweens inside an animatable rounded-rect card mask (full-bleed to floating card and back)",
+  "variables": [
+   "scheme",
+   "blob1/blob2 x,y,r,opacity",
+   "bar x,y,w,h,roundness",
+   "frostBlur"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:glass-takeover-bg",
+  "quality": "clean \u2014 token-driven, documented transform-not-layout rationale",
+  "aspectFlex": "16:9-only",
+  "port": "P2 \u2014 pleasant cutaway backdrop but off-brand Apple look; retokenizable"
+ },
+ {
+  "name": "mk-callout-highlight",
+  "type": "block",
+  "mechanism": "Sentence split into word spans; one scalar tweened 0..1 with onUpdate render interpolating each word faint-to-full ink, sweeping emphasis word-by-word to follow speech",
+  "variables": [
+   "text",
+   "fontSize",
+   "maxWidth",
+   "x/y",
+   "sweep.start/end",
+   "scheme"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:speech-synced word emphasis sweep",
+  "quality": "clean \u2014 small, state-proxy render pattern",
+  "aspectFlex": "responsive",
+  "port": "P0 \u2014 speech-follow emphasis overlay we lack; tiny, deterministic, brandable"
+ },
+ {
+  "name": "mk-clone-wall-transition",
+  "type": "block",
+  "mechanism": "Tiled repeated-word wall covers frame; outgoing-frame card shrinks onto it, a difference-blend paper rect sweeps to invert ink/paper, wall fades revealing the cut beneath",
+  "variables": [
+   "word",
+   "fontSize",
+   "spreadX/Y",
+   "brickOffset",
+   "card.src",
+   "driftX"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "transition",
+  "quality": "clean \u2014 documented overlay-transition model with kill times",
+  "aspectFlex": "16:9-only",
+  "port": "P1 \u2014 distinctive branded full-frame stinger alternative to stinger-wipe"
+ },
+ {
+  "name": "mk-emphasis-type",
+  "type": "component",
+  "mechanism": "Oversized low-contrast uppercase word drifts slowly behind content via helper fns that append fade+drift tweens to the host timeline",
+  "variables": [
+   "word text",
+   "drift",
+   "hold"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:ghost background word texture",
+  "quality": "clean \u2014 tiny helper-pair snippet",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 decorative depth layer for takeover cutaways, low urgency"
+ },
+ {
+  "name": "mk-line-graph",
+  "type": "block",
+  "mechanism": "SVG 1-2 series line chart: strokeDasharray draw-on per path, dots back.out pop riding the draw front, value labels, x-labels, legend; scale computed from data",
+  "variables": [
+   "series[name,color,values]",
+   "xLabels",
+   "showValues",
+   "area rect"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:animated line chart",
+  "quality": "clean \u2014 measured getTotalLength, collision-aware labels",
+  "aspectFlex": "16:9-only",
+  "port": "P0 \u2014 trend/data beats have no line-chart form in our catalog; clean draw-on"
+ },
+ {
+  "name": "mk-placeholder-grid",
+  "type": "block",
+  "mechanism": "Computes 2up/3up/4up/3x2/1+2 card rects, staggered scale/rise entrance per cell, ken-burns settle of media inside rounded masks, gradient wells when empty",
+  "variables": [
+   "layout",
+   "margin",
+   "gap",
+   "radius",
+   "cells[src,insideScale]",
+   "stagger"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:multi-image cutaway grid",
+  "quality": "clean \u2014 compact layout math",
+  "aspectFlex": "16:9-only",
+  "port": "P1 \u2014 screenshot/still grid cutaway we lack; needs asset wiring"
+ },
+ {
+  "name": "mk-progress-stat",
+  "type": "block",
+  "mechanism": "Count-up numeral via proxy-object tween with onUpdate, plus thin track scaleX fill on the same ease; label+caption group auto-centered",
+  "variables": [
+   "value",
+   "suffix",
+   "label",
+   "caption",
+   "max",
+   "trackWidth",
+   "x/y",
+   "scheme"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:stat-card",
+  "quality": "clean \u2014 small, tabular-nums",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 stat-card already covers this beat; count-up+track is minor delta"
+ },
+ {
+  "name": "mk-specs-list",
+  "type": "block",
+  "mechanism": "Label/value rows staggered slide-in from left with accent underline scaleX sweep per row; optional left scrim for footage overlay",
+  "variables": [
+   "rows[label,value]",
+   "underline",
+   "lineWidth",
+   "scrim",
+   "x",
+   "rowGap",
+   "stagger",
+   "scheme"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:whiteboard-list",
+  "quality": "clean \u2014 brittle hand-summed column height math",
+  "aspectFlex": "responsive",
+  "port": "P1 \u2014 elegant overlay list variant with footage scrim baked in"
+ },
+ {
+  "name": "mk-usage-arc",
+  "type": "component",
+  "mechanism": "Circular hairline gauge: strokeDasharray arc draw to value plus % count-up via proxy tween, exposed as mkArcIn/mkArcOut helpers reading circle radius",
+  "variables": [
+   "value 0..1",
+   "target selector"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:widget-gauge",
+  "quality": "clean \u2014 radius-derived circumference, resizes safely",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 widget-gauge exists; this is a thinner-styled variant"
+ },
+ {
+  "name": "modal-morph",
+  "type": "component",
+  "mechanism": "FLIP shared-element grow: card and panel layouts measured once at mount, then every frame derived purely from tl.time() via an inert anchor tween; container rect lerped as transform-only with counter-scaled keyed children",
+  "variables": [
+   "from_scale",
+   "expand_at",
+   "register",
+   "accent",
+   "exit",
+   "slot template"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:card-to-panel shared-element morph",
+  "quality": "clean \u2014 exemplary pure-f(t) FLIP, heavy but documented",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 mechanism is gold (statement-card growing into takeover) but content is wireframe furniture; big port"
+ },
+ {
+  "name": "morph-swap",
+  "type": "component",
+  "mechanism": "Two stacked slotted panels at one shared center; A hands off to B via condense (shrink-fade through same silhouette, back.out incoming) or reshape (scaleX/scaleY silhouette morph), transforms only",
+  "variables": [
+   "swap_at",
+   "register",
+   "accent",
+   "exit",
+   "slots a/b"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:A-to-B content swap morph",
+  "quality": "clean \u2014 explicit endpoint sets, immediateRender:false discipline",
+  "aspectFlex": "responsive",
+  "port": "P1 \u2014 before/after and old-way/new-way beats need exactly this swap inside a cutaway"
+ },
+ {
+  "name": "morph-text",
+  "type": "component",
+  "mechanism": "Gooey text morph: SVG feColorMatrix alpha-threshold filter over two stacked phrases with reciprocal blur+opacity crossfade, all derived from one proxy tween via applyMorph(t) with modulo word cycling",
+  "variables": [
+   "word list <li>",
+   "data-morph-speed",
+   "data-morph-pause"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:kinetic-quote",
+  "quality": "mixed \u2014 clean core but prefers-reduced-motion branch returns before registering the timeline",
+  "aspectFlex": "16:9-only",
+  "port": "P1 \u2014 distinctive phrase-cycling hook device; needs the reduced-motion guard removed and brand fonts"
+ },
+ {
+  "name": "motion-blur",
+  "type": "component",
+  "mechanism": "Utility: injects a tracking tween whose onUpdate differentiates each target's gsap x/y between rendered frames and drives per-target SVG ghost-offset + Gaussian filters (velocity-proportional trail)",
+  "variables": [
+   "blurScale",
+   "blurMax",
+   "stretchScale",
+   "stretchMax",
+   "axis"
+  ],
+  "scrubSafe": "conditional: blur derived from delta vs previously rendered frame \u2014 order-dependent under arbitrary seeks (resets on backward, wrong for one frame after a jump)",
+  "selfContained": true,
+  "fit": "new:velocity-driven motion blur",
+  "quality": "clean \u2014 careful filter construction, documented constraints",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 punchy for whip movements but violates strict scrub-safety; only safe for sequential rendering"
+ },
+ {
+  "name": "multi-device-splay",
+  "type": "component",
+  "mechanism": "Phone/tablet/desktop CSS device mockups fan from a center stack with back.out cascade and rotation, subtle float during hold, joint recede exit",
+  "variables": [
+   "accent"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:product-demo device showcase with skeleton UI",
+  "quality": "clean \u2014 large but tidy device CSS",
+  "aspectFlex": "responsive",
+  "port": "skip \u2014 app-across-devices prop has no talking-head use"
+ },
+ {
+  "name": "multiplayer-cursors",
+  "type": "component",
+  "mechanism": "Labeled SVG cursor chips reveal at authored waypoints, converge on a focus ring, then run finite computed yoyo drift legs that exactly fill the hold window",
+  "variables": [
+   "cursorCount",
+   "labels"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:collaboration product prop",
+  "quality": "clean \u2014 waypoint tables, envelope discipline",
+  "aspectFlex": "responsive",
+  "port": "skip \u2014 proves live-collab UX, not our content"
+ },
+ {
+  "name": "native-notification-pop",
+  "type": "component",
+  "mechanism": "Closed-form underdamped spring y(t)=-off*e^(-zwt)(cos+..sin) sampled by a linear driver tween \u2014 banner drop is a pure function of time; iOS/macOS chrome geometry, backdrop-filter glass, slot scene beneath",
+  "variables": [
+   "title",
+   "body",
+   "app_label",
+   "os",
+   "at",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:OS notification banner beat",
+  "quality": "clean \u2014 best-documented spring math in the slice",
+  "aspectFlex": "responsive",
+  "port": "P0 \u2014 'then the message arrives' is core talking-head grammar; typed vars, pure f(t), easy rebrand"
+ },
+ {
+  "name": "news-ticker",
+  "type": "block",
+  "mechanism": "Breaking-news lower-third: shell rise, clip-path headline wipe, linear ticker track scroll, finite pulsing live dot, skewed flash sweeps; transparent above the band",
+  "variables": [
+   "none \u2014 content hardcoded in markup"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:breaking-news lower-third gag",
+  "quality": "mixed \u2014 rich styling but zero variables, baked copy",
+  "aspectFlex": "16:9-only",
+  "port": "P1 \u2014 instantly readable emphasis device; needs variable wiring before use"
+ },
+ {
+  "name": "north-korea-locked-down",
+  "type": "block",
+  "mechanism": "Documentary map move: camera div scale/pan zoom into a map image with saturate/contrast ramp, corner brackets, two hand-drawn SVG circles stroke-draw, label pop, red multiply wash + scanlines",
+  "variables": [
+   "none \u2014 coords and copy hardcoded, needs assets/korea-map.png"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:whiteboard-map",
+  "quality": "mixed \u2014 great grammar, fully baked to one subject and asset",
+  "aspectFlex": "16:9-only",
+  "port": "P1 \u2014 the zoom+scribble-circle+label pattern generalizes; port the treatment, not the file"
+ },
+ {
+  "name": "notes-reveal",
+  "type": "block",
+  "mechanism": "9:16 iPhone Notes recreation: per-character reveals and caret positions set at baked measured frame times, five measured per-frame scroll curves, fonts.ready timeline rebuild, crossfade to a marker-pen card scene",
+  "variables": [
+   "titleL1/L2",
+   "cardTop",
+   "check labels/values"
+  ],
+  "scrubSafe": true,
+  "selfContained": "true (local woff2) except gsap CDN",
+  "fit": "new:notes-app hook scene",
+  "quality": "wonky \u2014 50KB of baked per-char span tables; body text not retextable via variables",
+  "aspectFlex": "9:16-ok",
+  "port": "skip \u2014 notes-typing is the parameterized version of this same idea"
+ },
+ {
+  "name": "notes-typing",
+  "type": "component",
+  "mechanism": "Parameterized notes-app scene: pipe-separated lines split to char spans revealed on a cycled measured keystroke-gap table, caret set to each char's measured right edge, finite blink, fonts.ready rebuild",
+  "variables": [
+   "title",
+   "lines",
+   "speed"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:typed-confession hook scene",
+  "quality": "clean \u2014 cq-relative, retextable, deterministic schedule",
+  "aspectFlex": "9:16-ok",
+  "port": "P0 \u2014 proven shorts hook format (typing confession), fully variable-driven and scrub-safe"
+ },
+ {
+  "name": "notification-cascade",
+  "type": "block",
+  "mechanism": "9:16 promo sequence: photo backdrop push-in, four glass banners arrive on 2s pitch with expo.out restacks, group exit, brand end card fade; every timing measured from a reference",
+  "variables": [
+   "notifTitle",
+   "message1-4",
+   "appName",
+   "end-card copy",
+   "brandLogo"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:complete branded promo with baked photo/logo assets",
+  "quality": "mixed \u2014 measured timings but asset-bound ad scaffold",
+  "aspectFlex": "9:16-ok",
+  "port": "skip \u2014 notification-pileup gives the same beat token-driven"
+ },
+ {
+  "name": "notification-pileup",
+  "type": "component",
+  "mechanism": "Notification cards land on top with exponentially decaying arrival gaps, pushing the stack down per-card; finite sine breathing fills the hold; count/speed/badges variables, token palette",
+  "variables": [
+   "count",
+   "speed",
+   "showBadges"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:overload/interruption story beat",
+  "quality": "clean \u2014 computed arrival table shared by anim and sfx cues",
+  "aspectFlex": "responsive",
+  "port": "P1 \u2014 'the pings never stop' beat for talking-head narratives, ready to retheme"
+ },
+ {
+  "name": "notification-stack",
+  "type": "component",
+  "mechanism": "1-5 token cards drop into the top slot on cue times while earlier cards shift down; a chosen focus card then grows/brightens as the rest dim by depth; every change is a non-overlapping absolute-time fromTo",
+  "variables": [
+   "titles",
+   "bodies",
+   "expand",
+   "cues",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:cue-synced arriving list",
+  "quality": "clean \u2014 best seek-safety discipline in the slice, px-derived cqh tweens",
+  "aspectFlex": "responsive",
+  "port": "P0 \u2014 arrivals can be cued to spoken beats; transparent bg allows overlay or cutaway use"
+ },
+ {
+  "name": "number-pop-in",
+  "type": "component",
+  "mechanism": "Number split to per-char spans; host tween drives shared CSS custom props (y offset, scale, blur) with stagger for a char-by-char pop entrance",
+  "variables": [
+   "value",
+   "unit",
+   "lift",
+   "tone"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:stat-card",
+  "quality": "clean \u2014 tiny snippet plus timeline recipe",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 nice numeral entrance but stat-card already owns this beat"
+ },
+ {
+  "name": "number-wheel",
+  "type": "component",
+  "mechanism": "Odometer counter: builds a digit strip per numeral (0..9 revolutions + landing digit), host tweens each strip's y to a per-strip --hf-number-target-y",
+  "variables": [
+   "data-value",
+   "spin",
+   "spacing",
+   "tone"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:stat-card",
+  "quality": "clean \u2014 idempotent build guard, em-based",
+  "aspectFlex": "responsive",
+  "port": "P1 \u2014 odometer roll is a visibly better count-up than text swapping; drop-in for stat numbers"
+ },
+ {
+  "name": "nyc-paris-flight",
+  "type": "block",
+  "mechanism": "Travel-map sequence: map image push-in, triple stroke-dash route draw (glow/path/thread), plane rides CSS offset-path with offsetDistance tween and finite pulse, tick pops, destination doodle circles, ARRIVED badge, white flash out",
+  "variables": [
+   "none \u2014 route coords, pins, copy all hardcoded; needs map png + sfx wav"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:whiteboard-map",
+  "quality": "mixed \u2014 rich grammar, fully baked to one route and asset",
+  "aspectFlex": "16:9-only",
+  "port": "P2 \u2014 port the route-draw + traveler pattern via offset-path-traveler instead"
+ },
+ {
+  "name": "offset-path-traveler",
+  "type": "component",
+  "mechanism": "Chip follows an authored SVG path: one progress scalar tweened, onUpdate samples getPointAtLength for position and tangent rotation; dashed guide path; transparent background",
+  "variables": [
+   "path",
+   "traveler_label",
+   "accent"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:whiteboard-connector",
+  "quality": "clean \u2014 defensive path fallback, scale-aware tangent",
+  "aspectFlex": "responsive",
+  "port": "P1 \u2014 animate a labeled traveler along any connector/process path; small and reusable"
+ },
+ {
+  "name": "onboarding-stepper-flow",
+  "type": "component",
+  "mechanism": "Static onboarding stepper UI markup (step dots + card + button) with a suggested three-tween entrance recipe in a comment",
+  "variables": [
+   "none"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:onboarding UI scaffold",
+  "quality": "clean \u2014 but it is just markup",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "ordered-dither-pass",
+  "type": "component",
+  "mechanism": "Bayer-matrix ordered dithering: slot content rasterized once via SVG foreignObject to a reduced buffer, then every frame rewrites one ImageData purely from (source, Bayer table, animated amount) \u2014 noise-to-clean or clean-to-noise",
+  "variables": [
+   "matrix",
+   "direction",
+   "levels",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:pixel dither reveal",
+  "quality": "clean \u2014 rigorous determinism engineering, namespace-aware snapshot",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 striking retro reveal for stills/screenshots but off the cream/ink brand; glitch-hit adjacent"
+ },
+ {
+  "name": "organic-light-leak-overlay",
+  "type": "block",
+  "mechanism": "Three blurred radial/linear gradient layers in screen blend drift and swell via opacity + transform tweens \u2014 a film light leak that covers a cut",
+  "variables": [
+   "none"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "transition",
+  "quality": "clean \u2014 tiny, self-explanatory",
+  "aspectFlex": "responsive",
+  "port": "P1 \u2014 warm alpha-overlay stinger alternative for softer footage seams"
+ },
+ {
+  "name": "oscilloscope-trace",
+  "type": "block",
+  "mechanism": "Canvas CRT scope: phosphor tail recomputed each frame by evaluating the beam curve backwards in time (no feedback buffer), velocity-dependent brightness, property-setter driver so repaint fires under suppressed-event seeks",
+  "variables": [
+   "waveform",
+   "frequency",
+   "amplitude",
+   "persistenceMs",
+   "phosphorColor",
+   "sweepRate",
+   "dataSeries"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:CRT waveform display",
+  "quality": "clean \u2014 physically grounded, superbly documented",
+  "aspectFlex": "16:9-only",
+  "port": "skip \u2014 beautiful but no talking-head beat calls for a bench scope"
+ },
+ {
+  "name": "outline-draw",
+  "type": "component",
+  "mechanism": "Conic-gradient sector clipped to a rounded border ring via double mask-composite:exclude; a registered @property scalar tween draws the outline clockwise leaving a truly transparent center",
+  "variables": [
+   "progress",
+   "thickness",
+   "radius"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:underline-circle",
+  "quality": "clean \u2014 one mechanic, seam-feathered closure",
+  "aspectFlex": "responsive",
+  "port": "P1 \u2014 rounded-rect 'circle the thing' highlight over footage or another comp"
+ },
+ {
+  "name": "oversized-cursor",
+  "type": "component",
+  "mechanism": "Giant pointer glides in off-screen tip-anchored (xPercent -21/-14), taps a target that ignites via a --oc-ignite color-mix ramp with ripple, drifts aside, exits off-screen; px math from one mount measure",
+  "variables": [
+   "cursor_variant",
+   "target_x",
+   "target_y",
+   "click_label",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:click-actor pointer",
+  "quality": "clean \u2014 tip-targeting invariants documented",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 useful when narrating an action ('you just click...'), otherwise product-demo flavored"
+ },
+ {
+  "name": "overwhelm-surround",
+  "type": "component",
+  "mechanism": "Task/ping chips fly inward from every edge at evenly distributed angles with index-derived deterministic banding and accelerating arrival times, freezing at peak density around a calm center label",
+  "variables": [
+   "count",
+   "centerLabel",
+   "intensity"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:overload pressure beat",
+  "quality": "clean \u2014 zero randomness, intensity-scaled geometry",
+  "aspectFlex": "responsive",
+  "port": "P1 \u2014 strong 'everything wants your attention' cutaway for talking-head narrative"
+ },
+ {
+  "name": "page-slide",
+  "type": "component",
+  "mechanism": "Two labeled UI pages inside a rounded frame; recipe slides the incoming page over the outgoing with parallax push-back of the old page",
+  "variables": [
+   "label_a",
+   "label_b",
+   "accent",
+   "corner"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:app page-transition prop",
+  "quality": "clean \u2014 snippet + recipe",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "pan-stations",
+  "type": "component",
+  "mechanism": "Camera pans a wide row of labeled station cards by stepping a --ps-pan-index custom prop that a calc() transform consumes; complete dwell+pan segments scheduled only while they fit the hold",
+  "variables": [
+   "stationCount",
+   "labels",
+   "dwell"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:sequential station tour",
+  "quality": "clean \u2014 custom-prop camera, deterministic scheduling",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 step-by-step tour beat, but station interiors are skeleton placeholder UI"
+ },
+ {
+  "name": "panel-reveal",
+  "type": "component",
+  "mechanism": "Accordion card whose body max-height/opacity/padding all derive from one --hf-panel-open custom prop the host tweens",
+  "variables": [
+   "title",
+   "width",
+   "tone",
+   "reveal"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:UI accordion prop",
+  "quality": "clean \u2014 single-scalar design",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "parallax-device-dive",
+  "type": "component",
+  "mechanism": "CSS phone mockup rises, then camera dives through the screen: phone scales 6.4x while header/hero/stats layers separate at different rates and re-settle as a full-frame UI",
+  "variables": [
+   "accent",
+   "app_title"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:device product-demo prop",
+  "quality": "clean \u2014 big baked dashboard UI",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "parallax-unzoom",
+  "type": "component",
+  "mechanism": "Reverse of parallax-zoom: focus card scales down from full frame while siblings parallax inward to form the grid, driven by one --pu-progress custom prop",
+  "variables": [
+   "--pu-focus-scale",
+   "--pu-sibling-push",
+   "--pu-sibling-fade",
+   "data-pu-row/col/focus"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:one-to-grid reveal move",
+  "quality": "clean \u2014 mirror twin of parallax-zoom",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 take with parallax-zoom as a pair"
+ },
+ {
+  "name": "parallax-zoom",
+  "type": "component",
+  "mechanism": "Grid wrapper: one --pz-progress custom prop scales the focal card up to fill the frame while siblings translate outward along their grid vector and fade; content-agnostic",
+  "variables": [
+   "--pz-focus-scale",
+   "--pz-sibling-push",
+   "--pz-sibling-fade",
+   "data-pz-row/col/focus"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:grid-to-one zoom move",
+  "quality": "clean \u2014 tiny, content-agnostic mechanic",
+  "aspectFlex": "responsive",
+  "port": "P1 \u2014 'zoom into the one that matters' with our own cards; pure CSS-var mechanic"
+ },
+ {
+  "name": "particle-image-reveal",
+  "type": "component",
+  "mechanism": "Seeded-LCG particle table built once at mount; anchor-tween onUpdate clears and redraws the whole canvas field each frame as pure f(t) while the slotted image clip-path wipes (ltr or iris) along the particle front",
+  "variables": [
+   "density",
+   "direction",
+   "accent",
+   "exit",
+   "slot template"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:particle image reveal",
+  "quality": "clean \u2014 reference-grade canvas determinism",
+  "aspectFlex": "responsive",
+  "port": "P1 \u2014 flashy reveal for screenshots/stills in cutaways; slot takes any content"
+ },
+ {
+  "name": "particle-text-dissolve",
+  "type": "component",
+  "mechanism": "Text rastered offscreen once, getImageData lit cells become seeded particle targets; canvas repainted per frame as pure f(t) while the crisp DOM line clip-wipes with the same front (assemble-in or dissolve-out)",
+  "variables": [
+   "text",
+   "direction",
+   "density",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:kinetic-quote",
+  "quality": "clean \u2014 same determinism law as its donor",
+  "aspectFlex": "responsive",
+  "port": "P1 \u2014 dramatic hook-word entrance/exit; fully text-driven"
+ },
+ {
+  "name": "per-word-crossfade",
+  "type": "component",
+  "mechanism": "Line split to word spans; host tween drives shared y/scale/blur custom props with stagger for a soft per-word entrance",
+  "variables": [
+   "text",
+   "drift",
+   "blur",
+   "tone"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:text-element",
+  "quality": "clean \u2014 minimal snippet",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 entrance flavor text-element could absorb"
+ },
+ {
+  "name": "per-word-rise",
+  "type": "component",
+  "mechanism": "Words or chars rise with blur-to-sharp settle on a custom C1-continuous landing ease; per-unit landing times can be cue-driven (comma-separated seconds) to sync with speech; fitted font sizing",
+  "variables": [
+   "text",
+   "split",
+   "cues",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:kinetic-quote",
+  "quality": "clean \u2014 documented ease math, cue clamping",
+  "aspectFlex": "responsive",
+  "port": "P0 \u2014 cue-synced word landings are exactly what VO-timed hook text needs"
+ },
+ {
+  "name": "perspective-marquee",
+  "type": "component",
+  "mechanism": "Tilted (rotateX) pill strip laid down twice; host tweens one x custom prop scaled by a reach factor for a perspective conveyor roll",
+  "variables": [
+   "tilt",
+   "travel",
+   "tone",
+   "words"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:topic ticker strip",
+  "quality": "clean \u2014 escapes HTML in labels",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 decorative chapter/topic strip, low urgency"
+ },
+ {
+  "name": "physical-exit",
+  "type": "component",
+  "mechanism": "One labeled card leaves the frame with momentum: toss (two-tween arc over apex), drop (gravity power2.in with rotation), or slide (skew/stretch at peak lateral speed); never fades",
+  "variables": [
+   "mode",
+   "text",
+   "accent"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:physical card dismiss",
+  "quality": "clean \u2014 compact, three tuned exits",
+  "aspectFlex": "responsive",
+  "port": "P1 \u2014 'throw that idea away' gag lands perfectly in talking-head edits"
+ },
+ {
+  "name": "press-ripple",
+  "type": "component",
+  "mechanism": "Cursor decel-arrives from off-stage, target and cursor compress in lockstep, data-state flips to pressed (color-mix fill), two ink ripple rings expand, cursor exits; slot target, px transforms measured once",
+  "variables": [
+   "label",
+   "target_x/y",
+   "press_at",
+   "cursor",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:button-press CTA beat",
+  "quality": "clean \u2014 accent-shadow workaround documented",
+  "aspectFlex": "responsive",
+  "port": "P1 \u2014 a 'Subscribe' press with ripple is a stock end-screen beat we lack"
+ },
+ {
+  "name": "pull-back-reveal",
+  "type": "component",
+  "mechanism": "World starts at scale 2.2 tight on a stat chip, holds, whip pull-back (power4.out) reveals headline plus two support cards, drift settle, breathing ground shadow",
+  "variables": [
+   "detail_text",
+   "headline",
+   "accent"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:stat-card",
+  "quality": "mixed \u2014 support-card values (94%, 48) are baked",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 the tight-then-reveal camera move is the value; content needs opening up"
+ },
+ {
+  "name": "pull-to-refresh",
+  "type": "component",
+  "mechanism": "Scripted mobile pull gesture: registered @property progress drives a nonlinear rubber-band resistance curve, threshold arm, spinner handoff (arrow/dots/ring), finite loading cycles, exact snap-back",
+  "variables": [
+   "pullDistance",
+   "spinnerStyle"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:mobile gesture product demo",
+  "quality": "clean \u2014 gesture-physics provenance documented",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "push-in",
+  "type": "component",
+  "mechanism": "Full-stage slow camera push on a centered headline: eased IN then continuous linear creep across the hold to a fixed final scale, radial vignette",
+  "variables": [
+   "text",
+   "intensity"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:statement-card",
+  "quality": "clean \u2014 minimal",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 statement-card plus our eased-creep doctrine already covers this"
+ },
+ {
+  "name": "rack-focus",
+  "type": "block",
+  "mechanism": "Canvas focus pull with physical bokeh: BokehShader2 circle-of-confusion formula, regular-polygon aperture sprites per light, cat's-eye corner clipping, seeded PRNG night scene, focal distance a closed form of t",
+  "variables": [
+   "nearfocus",
+   "farfocus",
+   "focallength",
+   "aperture",
+   "blades",
+   "catseye",
+   "pull timing/ease",
+   "bokeh",
+   "backdrop"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:carries its own night scene; no talking-head beat",
+  "quality": "clean \u2014 physically grounded, superb docs",
+  "aspectFlex": "16:9-only",
+  "port": "skip \u2014 gorgeous tech demo, wrong catalog"
+ },
+ {
+  "name": "radial-surround",
+  "type": "component",
+  "mechanism": "Labeled hairline chips assemble on an elliptical ring around a slot-able center (cos/sin positions baked once), cue-driven entrances, optional inward convergence with edge vignette; center never moves",
+  "variables": [
+   "center_label",
+   "chips",
+   "close_in",
+   "cues",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:hub-and-spoke surround",
+  "quality": "clean \u2014 same cue discipline as notification-stack",
+  "aspectFlex": "responsive",
+  "port": "P1 \u2014 'you, surrounded by X' setup beat; transparent bg, cue-syncable to VO"
+ },
+ {
+  "name": "reddit-post",
+  "type": "block",
+  "mechanism": "Reddit post card slides up, upvote press-in with elastic release, arrow and count flip orange with the count text swapped in an onStart callback, card slides out",
+  "variables": [
+   "none \u2014 copy edited by prompt in markup"
+  ],
+  "scrubSafe": "conditional: vote-count textContent swapped via onStart \u2014 not undone on reverse seeks, so frames before the press can show the post-press count",
+  "selfContained": false,
+  "fit": "new:social-proof post beat",
+  "quality": "mixed \u2014 convincing chrome but no variables and a seek-order bug",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 'this blew up' beat is real; needs variable wiring and a set-based count swap"
+ },
+ {
+  "name": "rgb-glitch-text",
+  "type": "component",
+  "mechanism": "Three stacked text copies (red ghost, cyan ghost, solid) offset by custom props; recipe drives steps(1) yoyo jitter for the chromatic tear",
+  "variables": [
+   "text",
+   "intensity",
+   "tone"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:glitch-hit",
+  "quality": "clean \u2014 tiny",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 glitch-hit already owns this beat; keep as text-only variant"
+ },
+ {
+  "name": "ridged-burn",
+  "type": "block",
+  "mechanism": "WebGL shader-transition spec sheet: two DOM scenes hand-rasterized to canvas then GL textures, a ridged-noise burn fragment shader mixes A-to-B via a u_progress uniform driven from timeline onUpdate; blueprint chrome with a prompt panel",
+  "variables": [
+   "none \u2014 showcase page"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:shader spec-sheet demo; registers timeline as 'main' not its catalog name",
+  "quality": "mixed \u2014 clever capture pipeline, but a demo card in a 14-part series",
+  "aspectFlex": "16:9-only",
+  "port": "skip \u2014 our compositor cannot feed footage frames into a WebGL comp; shader is reference only"
+ },
+ {
+  "name": "ripple-waves",
+  "type": "block",
+  "mechanism": "Same WebGL spec-sheet scaffold: exponential-sine radial ripple shader displaces both scene textures in opposite phases, mixed by u_progress from timeline onUpdate; pure f(t)",
+  "variables": [
+   "none \u2014 showcase page"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:shader spec-sheet demo; also registers as 'main'",
+  "quality": "mixed \u2014 same scaffold as ridged-burn (05/14)",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "rubber-band-bumper",
+  "type": "component",
+  "mechanism": "Outgoing full-frame panel pulled opposite its exit in five decreasing beats that visibly load two accent tension bands, still threshold hold, then overshooting release past the edge as the incoming panel settles",
+  "variables": [
+   "direction",
+   "accent"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "transition",
+  "quality": "clean \u2014 anticipation physics well staged",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 fun panel-to-panel bumper; our seams are footage cuts, limited slots for it"
+ },
+ {
+  "name": "scan-band",
+  "type": "component",
+  "mechanism": "Wordmark with a diagonal clip-path band containing three RGB-split clones; one custom-prop sweep drives the band across once, leaving the clean wordmark",
+  "variables": [
+   "wordmark",
+   "band_angle"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:glitch-hit",
+  "quality": "clean \u2014 tidy clip-path math",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 subtler one-sweep glitch variant"
+ },
+ {
+  "name": "scramble-reveal",
+  "type": "component",
+  "mechanism": "Target string starts as deterministic wrong glyphs from a fixed-seed LCG frameTable built before timeline registration; timeline .set rows lock characters left to right; terminal or clean shell",
+  "variables": [
+   "text",
+   "accent",
+   "style",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:text-element",
+  "quality": "clean \u2014 precomputed table, zero runtime randomness",
+  "aspectFlex": "responsive",
+  "port": "P1 \u2014 techy decrypt reveal that fits AI-automation content; transparent-bg clean mode"
+ },
+ {
+  "name": "screen-flow-carousel",
+  "type": "component",
+  "mechanism": "2-5 slotted screens on a rail; the numeric --sfc-pos custom prop advances one screen per cue with a velocity-throw catch (fast translate, long-tail decel), neighbors scale/dim, captions swap",
+  "variables": [
+   "screens",
+   "captions",
+   "cues",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:screenshot tour carousel",
+  "quality": "clean \u2014 slot architecture, cue clamping",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 useful when a video walks several app screens; slots take real screenshots"
+ },
+ {
+  "name": "scroll-camera-story",
+  "type": "component",
+  "mechanism": "Tall authored world scrolls past the camera: one cam.t scalar plus a single applyCamera() writer derives four parallax depth-layer transforms; cue-driven section arrivals; integer sine drift cycles ending exactly at zero",
+  "variables": [
+   "sections",
+   "travel",
+   "cues",
+   "accent",
+   "exit",
+   "sections slot"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:multi-section camera pass",
+  "quality": "clean \u2014 camera-servo law, banked cq-tween trap",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 elegant but heavyweight; simpler sequencing already exists via section takeovers"
+ },
+ {
+  "name": "scroll-feed",
+  "type": "component",
+  "mechanism": "Self-scrolling skeleton feed: distinct thumb flicks (power3 decay + read pause), seamless one-cycle recycle, two low-opacity trailing copies as motion blur, all card variety from index arithmetic",
+  "variables": [
+   "speed",
+   "card_count",
+   "cues",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:doomscroll story beat",
+  "quality": "clean \u2014 loop-compatible first/last frames",
+  "aspectFlex": "responsive",
+  "port": "P1 \u2014 the doomscroll metaphor recurs constantly in attention/social content"
+ },
+ {
+  "name": "sdf-iris",
+  "type": "block",
+  "mechanism": "Third WebGL spec-sheet in the same blueprint series: SDF iris shader transition between two captured scene textures driven by u_progress",
+  "variables": [
+   "none \u2014 showcase page"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:shader spec-sheet demo; registers as 'main'",
+  "quality": "mixed \u2014 same scaffold (bp series)",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "segmentation-flood",
+  "type": "component",
+  "mechanism": "Machine-vision read of a slotted subject: translucent masks flood region rows in time-quantized 2-3 frame steps from a seeded table, corner brackets + mono label chips land per region, deterministic 2-frame HUD flicker from frame index",
+  "variables": [
+   "regions",
+   "flood_at",
+   "flicker",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:AI-vision annotation overlay",
+  "quality": "clean \u2014 canvas determinism law, quantized rows",
+  "aspectFlex": "responsive",
+  "port": "P1 \u2014 'the AI sees this' over a screenshot is on-brand for automation content"
+ },
+ {
+  "name": "separator",
+  "type": "component",
+  "mechanism": "Single rule (horizontal/vertical) whose fill wipes along a progress custom prop; ships a full hf-ui token sheet many times its own size",
+  "variables": [
+   "orientation",
+   "thickness",
+   "tone"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:trivial rule our comps already draw",
+  "quality": "clean \u2014 but 90% token boilerplate",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "settings-toggle-flow",
+  "type": "component",
+  "mechanism": "Static settings card markup (three rows with CSS toggle switches) plus a three-tween entrance recipe comment",
+  "variables": [
+   "none"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:app-settings prop",
+  "quality": "clean \u2014 markup only",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "share-sheet-carousel",
+  "type": "block",
+  "mechanism": "9:16 iOS share-sheet recreation: blurred slide background, measured frame-sampled spring card entry, four-image carousel, accept/decline buttons, brand strip; image assets required",
+  "variables": [
+   "shareTitle",
+   "senderName",
+   "itemLabel",
+   "stripText",
+   "accept/declineLabel",
+   "slideImage1-4",
+   "brandLogo"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:branded mobile-ad scaffold with baked asset set",
+  "quality": "mixed \u2014 measured motion, heavy asset dependency",
+  "aspectFlex": "9:16-ok",
+  "port": "skip"
+ },
+ {
+  "name": "shared-axis-y",
+  "type": "component",
+  "mechanism": "Word spans travel in along Y via shared custom props (direction sign x reach factor); host stagger recipe",
+  "variables": [
+   "direction",
+   "distance",
+   "tone"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:text-element",
+  "quality": "clean \u2014 minimal",
+  "aspectFlex": "responsive",
+  "port": "skip \u2014 redundant with per-word-rise/crossfade"
+ },
+ {
+  "name": "shared-axis-z",
+  "type": "component",
+  "mechanism": "Word spans swell in/out along Z via a scale custom prop with depth factor; same snippet family as shared-axis-y",
+  "variables": [
+   "direction",
+   "depth",
+   "tone"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:text-element",
+  "quality": "clean \u2014 minimal",
+  "aspectFlex": "responsive",
+  "port": "skip \u2014 redundant"
+ },
+ {
+  "name": "sheet-spring-up",
+  "type": "component",
+  "mechanism": "Bottom sheet arrives on a frame-sampled real spring table (overshoot 192px, settle 0.72s) played verbatim from the integration recipe; hf-ui token sheet",
+  "variables": [
+   "width",
+   "radius",
+   "tone"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:mobile bottom-sheet prop",
+  "quality": "clean \u2014 measured spring table is nice reference",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "shimmer-sweep",
+  "type": "component",
+  "mechanism": "Auto-injected overlay mask per target: an angled gradient highlight band whose position custom prop the host sweeps across, overlay blend",
+  "variables": [
+   "--shimmer-color/width/angle"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:light-pass polish utility",
+  "quality": "clean \u2014 60 lines",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 cheap shine for titles/badges; nice-to-have"
+ },
+ {
+  "name": "signup-flow",
+  "type": "component",
+  "mechanism": "Static signup card markup (social button, fields, submit) plus an entrance recipe comment",
+  "variables": [
+   "none"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:signup UI prop",
+  "quality": "clean \u2014 markup only",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "simulated-cursor",
+  "type": "component",
+  "mechanism": "Pointer SVG positioned by --hf-cursor-x/y custom props with a click ring pulse the host scales/fades; size/tone/pulse variables scale ring geometry with the tip anchored",
+  "variables": [
+   "size",
+   "tone",
+   "pulse"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:pointer utility",
+  "quality": "clean \u2014 careful tip anchoring",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 lighter alternative to oversized-cursor when a comp needs a click beat"
+ },
+ {
+  "name": "skeleton-reveal",
+  "type": "component",
+  "mechanism": "Loading-skeleton gradient card cross-fades to revealed name/detail content; host sweeps background-position then swaps opacities",
+  "variables": [
+   "name",
+   "detail",
+   "tone"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:loading-state UI prop",
+  "quality": "clean \u2014 small",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "slack-notification-ad",
+  "type": "block",
+  "mechanism": "9:16 sequence of eleven variable Slack notifications piling up over a backdrop, closing on a brand payoff notification with logo; local Inter woff2 stand-in fonts",
+  "variables": [
+   "request1-11 Title/Text",
+   "payoffTitle/Text/Icon"
+  ],
+  "scrubSafe": true,
+  "selfContained": "false \u2014 gsap CDN + local font/logo assets",
+  "fit": "new:client-request pileup story",
+  "quality": "mixed \u2014 fully parameterized but shaped as a brand ad",
+  "aspectFlex": "9:16-ok",
+  "port": "P2 \u2014 'requests keep coming' is on-ICP for agency content; needs de-branding and asset swap"
+ },
+ {
+  "name": "slit-scan-reveal",
+  "type": "component",
+  "mechanism": "Canvas slit-scan: each row/column slice clips and redraws the whole subject at t minus a per-slice offset from a seeded jitter table; closed-form pos(t) subject; resolve cue collapses offsets to zero",
+  "variables": [
+   "axis",
+   "spread",
+   "resolve_at",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:time-smear reveal",
+  "quality": "clean \u2014 canvas determinism law",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 striking, but the subject is a baked abstract mark, not a slot"
+ },
+ {
+  "name": "slot-machine-roll",
+  "type": "component",
+  "mechanism": "One reel column per character; each reel holds 0-then-target rows and the host tweens a single one-row offset scaled by size/direction custom props",
+  "variables": [
+   "result",
+   "direction",
+   "size",
+   "tone"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:stat-card",
+  "quality": "clean \u2014 exact one-row landing math",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 playful numeral/code reveal, narrow use"
+ },
+ {
+  "name": "social-proof-card",
+  "type": "component",
+  "mechanism": "Closing app-store card: wordmark, five stars, proof line, three feature icons, CTA capsule built in a quiet stagger and held; measured from reference ad footage",
+  "variables": [
+   "brand",
+   "proof",
+   "cta",
+   "f1-f3"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:outro proof card",
+  "quality": "clean \u2014 composed scene, token palette",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 end-card material; logo-card/avatar-bio-card partly cover this"
+ },
+ {
+  "name": "soft-blob-touch",
+  "type": "component",
+  "mechanism": "Granular canvas orb (layered radial gradients + seeded grain table) idles, deforms toward a scripted touch dot via an interruptible spring whose redirect preserves analytically computed cut velocity, then recovers",
+  "variables": [
+   "touch_x/y",
+   "touch_at",
+   "grain",
+   "accent",
+   "exit"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:AI-orb material beat",
+  "quality": "clean \u2014 best interruptible-spring math in the slice",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 beautiful 'the AI' character but decorative for talking-head"
+ },
+ {
+  "name": "soft-blur-in",
+  "type": "component",
+  "mechanism": "Utility class: elements start offset and blurred via root-level custom props; host tween drives opacity/y/blur to rest with stagger",
+  "variables": [
+   "distance",
+   "direction",
+   "blur"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "new:blur-rise entrance utility",
+  "quality": "clean \u2014 70 lines",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 our comps already own their entrances"
+ },
+ {
+  "name": "spain-map",
+  "type": "block",
+  "mechanism": "d3 + topojson choropleth of Spanish regions with staged region/label reveals; fetches the topojson from a URL at runtime",
+  "variables": [
+   "none exposed"
+  ],
+  "scrubSafe": true,
+  "selfContained": "false \u2014 d3/topojson CDNs AND a runtime data fetch",
+  "fit": "unfit:content-specific chart with network dependency",
+  "quality": "mixed \u2014 competent d3 but not render-hermetic",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "spiral-galaxy",
+  "type": "block",
+  "mechanism": "three.js point-cloud galaxy: per-star attributes from a seeded mulberry32 PRNG, timeline-driven rotation, halo overlay reading a color variable",
+  "variables": [
+   "stars",
+   "arms",
+   "rate",
+   "glow",
+   "size",
+   "core",
+   "rim"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:cosmic decorative background",
+  "quality": "clean \u2014 seeded, variable-documented",
+  "aspectFlex": "16:9-only",
+  "port": "skip"
+ },
+ {
+  "name": "split-flap-board",
+  "type": "block",
+  "mechanism": "Airport split-flap board: per-cell 3D half-flap leaves cycle a drum alphabet to the target character with per-cell stagger; text, alphabet order, flip timing and cell count are variables",
+  "variables": [
+   "boardText",
+   "flapAlphabet",
+   "flipDuration",
+   "cellStagger",
+   "cellCount"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:split-flap text reveal",
+  "quality": "clean \u2014 mechanical flap illusion well built",
+  "aspectFlex": "16:9-only",
+  "port": "P1 \u2014 characterful title/number reveal with strong audio-cue potential"
+ },
+ {
+  "name": "split-tilt-cards",
+  "type": "component",
+  "mechanism": "Two slotted cards arrive from opposite wings with mirrored 3D rotateY book-open tilts under one shared perspective; pill badges spring-pop at inner edges; phase-opposed idle floats as explicit whole cycles",
+  "variables": [
+   "label_a/b",
+   "badge_a/b",
+   "accent",
+   "exit",
+   "slots card-a/b"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:versus-split",
+  "quality": "clean \u2014 signature move with documented sync points",
+  "aspectFlex": "responsive",
+  "port": "P0 \u2014 direct versus-split upgrade: slots for real content, 3D tilt, badge pops"
+ },
+ {
+  "name": "spotify-card",
+  "type": "block",
+  "mechanism": "9:16 glassmorphic music-player card recreation (blur+saturate backdrop, specular highlight, progress/controls) animated in",
+  "variables": [
+   "none seen \u2014 markup-edited"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "unfit:music-player content prop",
+  "quality": "clean \u2014 polished glass CSS",
+  "aspectFlex": "9:16-ok",
+  "port": "skip"
+ },
+ {
+  "name": "spotlight-card",
+  "type": "component",
+  "mechanism": "Dark showcase card: drifting three-point mesh gradient, a screen-blend cursor spotlight, and particle burst all driven by custom props from the host recipe",
+  "variables": [
+   "none \u2014 CSS vars only"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:component-showcase card",
+  "quality": "clean \u2014 recipe crams logic into a comment",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "spring-pop",
+  "type": "component",
+  "mechanism": "Single badge entrance: scale 0.9/opacity 0 to rest through back.out(overshoot), fixed 0.6s IN then dead-still hold; overshoot and start scale are variables",
+  "variables": [
+   "overshoot",
+   "fromScale",
+   "text"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "upgrade:icon-badge",
+  "quality": "clean \u2014 one mechanic, one job",
+  "aspectFlex": "responsive",
+  "port": "P2 \u2014 entrance flavor our badges can absorb"
+ },
+ {
+  "name": "spring-stack-shuffle",
+  "type": "component",
+  "mechanism": "3-5 slotted cards reshuffle on cues: back card throws over the top with mass; mid-flight cues redirect via analytic segment cut (value from ease, velocity from finite difference) into a Hermite ease matching the cut slope \u2014 all compiled to explicit fromTo segments",
+  "variables": [
+   "cards",
+   "cues",
+   "accent",
+   "exit",
+   "slots card-1..5"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:cue-driven card cycling",
+  "quality": "clean \u2014 the most sophisticated deterministic spring work here",
+  "aspectFlex": "responsive",
+  "port": "P1 \u2014 cycle examples/screenshots to VO cues with real physics"
+ },
+ {
+  "name": "stagger-cascade",
+  "type": "component",
+  "mechanism": "Responsive grid of plain tiles enters in DOM order with an evenly spaced stagger along a chosen axis; stagger step scales only when the envelope compresses",
+  "variables": [
+   "itemCount",
+   "stagger",
+   "direction"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:group cascade entrance",
+  "quality": "clean \u2014 census-derived timing",
+  "aspectFlex": "responsive",
+  "port": "skip \u2014 contentless tiles; our list comps own their cascades"
+ },
+ {
+  "name": "stagger-lattice",
+  "type": "component",
+  "mechanism": "8x5 lattice of cells whose y/scale/opacity ride shared custom props for wave-style host-driven staggers; showcase card shell",
+  "variables": [
+   "none \u2014 CSS vars"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "unfit:motion showcase card",
+  "quality": "clean \u2014 markup heavy",
+  "aspectFlex": "responsive",
+  "port": "skip"
+ },
+ {
+  "name": "staggered-fade-up",
+  "type": "component",
+  "mechanism": "Words split to spans; direction/distance write axis custom props consumed by a shared transform; host stagger recipe drives offset/scale/blur",
+  "variables": [
+   "direction",
+   "distance",
+   "tone",
+   "words"
+  ],
+  "scrubSafe": true,
+  "selfContained": true,
+  "fit": "upgrade:text-element",
+  "quality": "clean \u2014 minimal",
+  "aspectFlex": "responsive",
+  "port": "skip \u2014 redundant with per-word-rise"
+ },
+ {
+  "name": "star-rating-fill",
+  "type": "component",
+  "mechanism": "Token-colored star layer clipped over a muted copy; one left-to-right clip-path sweep resolves at a fractional rating with synchronized count-up and per-star pops riding the sweep",
+  "variables": [
+   "rating",
+   "starCount",
+   "showValue"
+  ],
+  "scrubSafe": true,
+  "selfContained": false,
+  "fit": "new:star-rating proof",
+  "quality": "clean \u2014 fractional clip as the seek handle",
+  "aspectFlex": "responsive",
+  "port": "P1 \u2014 'rated 4.8' credibility beat; transparent bg, tiny"
+ }
+]

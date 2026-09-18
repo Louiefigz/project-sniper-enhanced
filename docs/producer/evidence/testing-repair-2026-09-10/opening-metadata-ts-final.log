@@ -1,0 +1,18 @@
+✔ known profile lanes reject before materialization and do not alter authored intent (1.732792ms)
+✔ selected free-band, inherited, presenter-hole and additional effects are unavailable (0.290083ms)
+✔ body-only presentation belongs to the body renderer, not the private opening exclusion (0.096042ms)
+✔ all-row metadata screening preserves later rows and refuses unsupported body lanes (0.464041ms)
+✔ eight selected graphics are the initial bound without deleting later exact bindings (0.097833ms)
+✔ duplicate order or identity cannot hide an unqualified later body template (0.082625ms)
+✔ TS metadata lane/default screening agrees with the actual Python profile without media (107.20075ms)
+✔ selected presentation and conditional presenter-hole screening agree with Python (100.381083ms)
+✔ current shared-master finishing agrees with Python for long, short and captioned metadata (113.385583ms)
+✔ finishing preflight never coerces gain fields or admits nonfinite numbers (0.406958ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 347.925792

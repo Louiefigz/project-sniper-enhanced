@@ -1,0 +1,26 @@
+
+> project-sniper-enhanced@0.1.0 test:sdk
+> node --test scripts/tests/sdk_scene_variable_proposal.test.mjs
+
+✔ closed/bounded JSON and factory accessors refuse without opening or evaluating getters (2.74375ms)
+✔ project-installed default SDK → actual validated Python treatment handler changes only the authorized unit (139.152041ms)
+✔ new captured 0.8.31 bundle uses default SDK without relabeling the original 0.7.33 bundle (248.628209ms)
+✔ stale, shared, wrong raw binding and no-op inputs refuse before SDK callbacks (67.169667ms)
+✔ declared Unicode copy remains complete, never truncated (68.174375ms)
+✔ headless SDK parsing never executes supplied inline scripts or external scripts (67.956666ms)
+✔ static root geometry and exact frame duration are bound, including NTSC rational rates (69.599541ms)
+✔ patch whitelist refuses extra paths and differently typed values (64.208ms)
+✔ reopen/inverse serialization refuses code changes, including normalization-dropped code (65.953792ms)
+✔ reopened timing and every unaffected declaration must remain exact (70.399333ms)
+✔ readback and disposal failures retain both errors and attempt both session disposals (67.265375ms)
+✔ successful readback still refuses disposal failure or late caller/factory substitution (72.687042ms)
+✔ first SDK callback cannot rebaseline original supplied input (65.888291ms)
+✔ late getter substitution refuses without executing the substituted getter (68.688875ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1273.317625

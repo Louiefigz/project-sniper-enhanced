@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/scene-package-v1.schema.json",
+  "title": "ScenePackageV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "scene",
+    "publicationContext",
+    "assets",
+    "readability"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "scene": { "$ref": "scene-spec-v1.schema.json" },
+    "publicationContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["use", "platform", "evaluatedAt"],
+      "properties": {
+        "use": {
+          "enum": ["editorial", "commercial", "thumbnail", "cover", "loop"]
+        },
+        "platform": {
+          "enum": [
+            "youtube",
+            "instagram",
+            "linkedin",
+            "tiktok",
+            "facebook",
+            "local-review"
+          ]
+        },
+        "evaluatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["record", "blobPath", "bundleMember"],
+        "properties": {
+          "record": { "$ref": "asset-record-v1.schema.json" },
+          "blobPath": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "pattern": "^/"
+          },
+          "bundleMember": {
+            "oneOf": [
+              { "type": "null" },
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 240,
+                "pattern": "^(?!/)(?!.*//)(?!.*(?:^|/)\\.{1,2}(?:/|$))[A-Za-z0-9](?:[A-Za-z0-9._/-]*[A-Za-z0-9._-])?$"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "readability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "sourceSha256", "receipt"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "sourceSha256": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          ]
+        },
+        "receipt": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "scene-readability-receipt-v1.schema.json" }
+          ]
+        }
+      }
+    }
+  }
+}

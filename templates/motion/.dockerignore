@@ -1,0 +1,12 @@
+*
+!Dockerfile.g2
+!package.json
+!package-lock.json
+!container/
+!container/render-entrypoint.sh
+!container/node_isolated_user.cjs
+!container/layout_observer_browser.mjs
+!container/layout_observer_host.mjs
+!container/layout_observer_launch.mjs
+!container/layout_observer_loader.mjs
+!container/layout_observer_patch.mjs

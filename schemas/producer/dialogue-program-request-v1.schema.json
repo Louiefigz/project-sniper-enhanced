@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/dialogue-program-request-v1.schema.json",
+  "title": "DialogueProgramRenderRequestV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "executionMode",
+    "authority",
+    "sources",
+    "auxiliaryStems",
+    "expectedAuxiliaryCounts",
+    "dialogueGenerationDir",
+    "programGenerationDir",
+    "tools"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "exact-dialogue-program-render" },
+    "executionMode": {
+      "enum": ["incremental", "forced-full"]
+    },
+    "authority": { "$ref": "#/$defs/authority" },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/source" }
+    },
+    "auxiliaryStems": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/auxiliaryStem" }
+    },
+    "expectedAuxiliaryCounts": {
+      "$ref": "#/$defs/expectedCounts"
+    },
+    "dialogueGenerationDir": { "$ref": "#/$defs/path" },
+    "programGenerationDir": { "$ref": "#/$defs/path" },
+    "tools": { "$ref": "#/$defs/tools" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "stableId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"
+    },
+    "safeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trackPath",
+        "trackFileSha256",
+        "dialogueTrackHash",
+        "mapPath",
+        "mapFileSha256",
+        "dialogueMapHash"
+      ],
+      "properties": {
+        "trackPath": { "$ref": "#/$defs/path" },
+        "trackFileSha256": { "$ref": "#/$defs/sha256" },
+        "dialogueTrackHash": { "$ref": "#/$defs/sha256" },
+        "mapPath": { "$ref": "#/$defs/path" },
+        "mapFileSha256": { "$ref": "#/$defs/sha256" },
+        "dialogueMapHash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceId",
+        "path",
+        "sha256",
+        "audioStreamIndex"
+      ],
+      "properties": {
+        "sourceId": { "$ref": "#/$defs/stableId" },
+        "path": { "$ref": "#/$defs/path" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "audioStreamIndex": { "$ref": "#/$defs/safeInteger" }
+      }
+    },
+    "auxiliaryStem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stemId",
+        "role",
+        "path",
+        "sha256",
+        "audioStreamIndex"
+      ],
+      "properties": {
+        "stemId": { "$ref": "#/$defs/stableId" },
+        "role": {
+          "enum": ["room-tone", "music", "sfx"]
+        },
+        "path": { "$ref": "#/$defs/path" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "audioStreamIndex": { "$ref": "#/$defs/safeInteger" }
+      }
+    },
+    "expectedCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["room-tone", "music", "sfx"],
+      "properties": {
+        "room-tone": { "$ref": "#/$defs/safeInteger" },
+        "music": { "$ref": "#/$defs/safeInteger" },
+        "sfx": { "$ref": "#/$defs/safeInteger" }
+      }
+    },
+    "tools": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ffmpegPath",
+        "ffmpegSha256",
+        "ffprobePath",
+        "ffprobeSha256"
+      ],
+      "properties": {
+        "ffmpegPath": { "$ref": "#/$defs/path" },
+        "ffmpegSha256": { "$ref": "#/$defs/sha256" },
+        "ffprobePath": { "$ref": "#/$defs/path" },
+        "ffprobeSha256": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}

@@ -1,0 +1,71 @@
+#!/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/.venv/bin/python
+"""Exec the same cached Chrome with a smaller compositor-resource allowance.
+
+This is a browser-launch adapter, not a renderer or a total-process memory cap.
+The stock SDK, native composition, encoder, source frames and quality settings
+remain untouched. Preserve every other argument, including debugging pipe FDs,
+user-data-dir, color profile, screenshot mode and browser safety/runtime flags.
+
+Chromium documents force-gpu-mem-available-mb as its cc GPU-resource allowance:
+https://chromium.googlesource.com/chromium/src.git/+/refs/heads/main/third_party/blink/common/switches.cc
+The host watchdog remains mandatory. Actual pixels/performance need verification.
+"""
+from __future__ import annotations
+
+import json
+import os
+import re
+import stat
+import sys
+import time
+from pathlib import Path
+
+from native_bounded_config import CHROME, ROOT, digest
+
+BUDGET_FLAG = '--force-gpu-mem-available-mb='
+
+
+def effective_arguments(arguments: list[str]) -> list[str]:
+    """Replace exactly the inspected stock allowance; never duplicate flags."""
+    if arguments == ['--version']:
+        return arguments.copy()
+    budgets = [argument for argument in arguments if argument.startswith(BUDGET_FLAG)]
+    if budgets != [BUDGET_FLAG + '16384']:
+        raise RuntimeError('Expected exactly one inspected 16384MiB SDK GPU allowance')
+    if '--force-gpu-mem-available-mb' in arguments:
+        raise RuntimeError('Unexpected separate GPU-budget argument')
+    return [BUDGET_FLAG + '1024' if argument.startswith(BUDGET_FLAG) else argument
+            for argument in arguments]
+
+
+def record_launch(arguments: list[str]) -> None:
+    """Append effective argv before exec, outside CDP/stdout; fail on unsafe log."""
+    path = Path(os.environ.get('SNIPER_BROWSER_LAUNCH_LOG', ''))
+    if path.parent.resolve() != ROOT or not re.fullmatch(r'[a-z0-9-]+\.browser-launches\.jsonl', path.name):
+        raise RuntimeError('A dedicated local launch-evidence path is required')
+    flags = os.O_WRONLY | os.O_APPEND | os.O_NOFOLLOW | os.O_NONBLOCK
+    descriptor = os.open(path, flags)
+    try:
+        info = os.fstat(descriptor)
+        if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or info.st_nlink != 1:
+            raise RuntimeError('Launch evidence is not one owned regular file')
+        row = {'at': time.time(), 'pid': os.getpid(), 'pgid': os.getpgrp(),
+               'chromePath': str(CHROME), 'chromeSha256': digest(CHROME),
+               'launcherSha256': digest(Path(__file__)), 'effectiveArgv': [str(CHROME), *arguments]}
+        data = (json.dumps(row) + '\n').encode()
+        if os.write(descriptor, data) != len(data):
+            raise RuntimeError('Launch evidence write was incomplete')
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def main() -> None:
+    """Preserve the native PID/PGID, cwd, environment, stdio and inherited FDs."""
+    arguments = effective_arguments(sys.argv[1:])
+    record_launch(arguments)
+    os.execv(str(CHROME), [str(CHROME), *arguments])
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,145 @@
+{
+  "observedAt": "2026-09-09T14:58:53.327590+00:00",
+  "elapsedSeconds": 0.03678708313964307,
+  "scope": "Read-only two-second windows centered on all nine actual picture joins; PCM24 narration versus retained float master.",
+  "limitations": "No listening, LUFS, export or preview qualification. RMS includes speech/pauses and does not establish gain inconsistency. Quiet spans already in master are not newly introduced by native conversion.",
+  "rows": [
+    {
+      "joinAfterPart": 0,
+      "pictureJoinSeconds": 3.3366666666666664,
+      "nominalTranscriptJoinSeconds": 3.32825,
+      "sampleStepLinear": 2.7418136596679688e-06,
+      "sampleStepDbfs": -111.2392412850795,
+      "rmsBefore1sDbfs": -17.1757,
+      "rmsAfter1sDbfs": -17.7839,
+      "quietSpansBelowMinus85Dbfs": [],
+      "maxPcm24VsFloatDifference": 1.1894735507667065e-07,
+      "clippedSamples": 0,
+      "maxChannelDifference": 0.0
+    },
+    {
+      "joinAfterPart": 1,
+      "pictureJoinSeconds": 50.216833333333334,
+      "nominalTranscriptJoinSeconds": 50.18825,
+      "sampleStepLinear": 6.9141387939453125e-06,
+      "sampleStepDbfs": -103.2052381341726,
+      "rmsBefore1sDbfs": -20.2948,
+      "rmsAfter1sDbfs": -15.4358,
+      "quietSpansBelowMinus85Dbfs": [
+        {
+          "startSeconds": 50.196666666666665,
+          "durationMs": 20.208333333333332
+        }
+      ],
+      "maxPcm24VsFloatDifference": 1.1891825124621391e-07,
+      "clippedSamples": 0,
+      "maxChannelDifference": 0.0
+    },
+    {
+      "joinAfterPart": 2,
+      "pictureJoinSeconds": 91.466375,
+      "nominalTranscriptJoinSeconds": 91.44825,
+      "sampleStepLinear": 5.125999450683594e-06,
+      "sampleStepDbfs": -105.80442889383961,
+      "rmsBefore1sDbfs": -21.2875,
+      "rmsAfter1sDbfs": -15.4936,
+      "quietSpansBelowMinus85Dbfs": [],
+      "maxPcm24VsFloatDifference": 1.1891825124621391e-07,
+      "clippedSamples": 0,
+      "maxChannelDifference": 0.0
+    },
+    {
+      "joinAfterPart": 3,
+      "pictureJoinSeconds": 172.38054166666666,
+      "nominalTranscriptJoinSeconds": 172.36825,
+      "sampleStepLinear": 5.960464477539062e-07,
+      "sampleStepDbfs": -124.49439791871097,
+      "rmsBefore1sDbfs": -19.6522,
+      "rmsAfter1sDbfs": -40.942,
+      "quietSpansBelowMinus85Dbfs": [],
+      "maxPcm24VsFloatDifference": 1.1891825124621391e-07,
+      "clippedSamples": 0,
+      "maxChannelDifference": 0.0
+    },
+    {
+      "joinAfterPart": 4,
+      "pictureJoinSeconds": 193.86033333333333,
+      "nominalTranscriptJoinSeconds": 193.80825,
+      "sampleStepLinear": 1.1920928955078125e-07,
+      "sampleStepDbfs": -138.47379800543135,
+      "rmsBefore1sDbfs": -35.7398,
+      "rmsAfter1sDbfs": -18.6911,
+      "quietSpansBelowMinus85Dbfs": [
+        {
+          "startSeconds": 193.82054166666666,
+          "durationMs": 40.0
+        }
+      ],
+      "maxPcm24VsFloatDifference": 1.1896190699189901e-07,
+      "clippedSamples": 0,
+      "maxChannelDifference": 0.0
+    },
+    {
+      "joinAfterPart": 5,
+      "pictureJoinSeconds": 222.80591666666666,
+      "nominalTranscriptJoinSeconds": 222.72825,
+      "sampleStepLinear": 5.364418029785156e-06,
+      "sampleStepDbfs": -105.40954772992448,
+      "rmsBefore1sDbfs": -21.12,
+      "rmsAfter1sDbfs": -15.1681,
+      "quietSpansBelowMinus85Dbfs": [
+        {
+          "startSeconds": 222.77995833333333,
+          "durationMs": 25.979166666666668
+        }
+      ],
+      "maxPcm24VsFloatDifference": 1.1894735507667065e-07,
+      "clippedSamples": 0,
+      "maxChannelDifference": 0.0
+    },
+    {
+      "joinAfterPart": 6,
+      "pictureJoinSeconds": 455.91379166666667,
+      "nominalTranscriptJoinSeconds": 455.82825,
+      "sampleStepLinear": 5.9604644775390625e-06,
+      "sampleStepDbfs": -104.49439791871097,
+      "rmsBefore1sDbfs": -27.5177,
+      "rmsAfter1sDbfs": -16.1586,
+      "quietSpansBelowMinus85Dbfs": [],
+      "maxPcm24VsFloatDifference": 1.1894242135657151e-07,
+      "clippedSamples": 0,
+      "maxChannelDifference": 0.0
+    },
+    {
+      "joinAfterPart": 7,
+      "pictureJoinSeconds": 471.095625,
+      "nominalTranscriptJoinSeconds": 471.04825,
+      "sampleStepLinear": 1.9311904907226562e-05,
+      "sampleStepDbfs": -94.28349771457873,
+      "rmsBefore1sDbfs": -42.658,
+      "rmsAfter1sDbfs": -15.0972,
+      "quietSpansBelowMinus85Dbfs": [],
+      "maxPcm24VsFloatDifference": 1.1891825124621391e-07,
+      "clippedSamples": 0,
+      "maxChannelDifference": 0.0
+    },
+    {
+      "joinAfterPart": 8,
+      "pictureJoinSeconds": 611.485875,
+      "nominalTranscriptJoinSeconds": 611.42825,
+      "sampleStepLinear": 1.0728836059570312e-06,
+      "sampleStepDbfs": -119.38894781664486,
+      "rmsBefore1sDbfs": -30.8461,
+      "rmsAfter1sDbfs": -14.2688,
+      "quietSpansBelowMinus85Dbfs": [
+        {
+          "startSeconds": 611.475625,
+          "durationMs": 10.270833333333334
+        }
+      ],
+      "maxPcm24VsFloatDifference": 1.1891825124621391e-07,
+      "clippedSamples": 0,
+      "maxChannelDifference": 0.0
+    }
+  ]
+}

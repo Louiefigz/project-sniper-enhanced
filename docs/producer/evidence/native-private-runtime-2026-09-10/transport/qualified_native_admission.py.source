@@ -1,0 +1,124 @@
+"""Explicit full-only admission experiment for the proven native frame transport.
+
+File-backed pages are not guaranteed immediately reclaimable bytes. This combines
+independent conservative observations, never sums overlapping VM categories, and
+retains continuous render caps. It is not the default six-GiB unused admission.
+"""
+from __future__ import annotations
+
+import re
+import subprocess
+import time
+from dataclasses import asdict
+from contextlib import contextmanager
+
+import render_native_bounded as bounded
+from native_render_resources import ResourceMeasurementError, admission_reasons, read_snapshot
+from render_native_bounded import NativeRun
+
+GIB = 1024 ** 3
+MIB = 1024 ** 2
+UNUSED_WARNING = 'unused physical RAM is below the reserved host margin'
+
+
+def cache_aware_reasons(snapshot, policy) -> tuple:
+    """Only the exact literal-unused advisory changes; every other refusal stays."""
+    return tuple(reason for reason in admission_reasons(snapshot, policy) if reason != UNUSED_WARNING)
+
+
+@contextmanager
+def full_only_admission_scope():
+    """Temporarily adapt this single-run process, never shared source/defaults.
+
+    The native supervisor has no admission callback. Its in-process dependency
+    is restored immediately after prepare; the heavy lease permits only one
+    such run. Runtime stop_reasons and all measurements remain untouched.
+    """
+    original = bounded.admission_reasons
+    bounded.admission_reasons = cache_aware_reasons
+    try:
+        yield
+    finally:
+        bounded.admission_reasons = original
+
+
+def file_backed_bytes(text: str) -> int:
+    """Use one measured category, not inactive+file-backed+purgeable overlap."""
+    page = re.search(r'page size of (\d+) bytes', text)
+    count = re.search(r'(?m)^File-backed pages:\s*(\d+)\.', text)
+    if page is None or count is None:
+        raise ResourceMeasurementError('Missing actual file-backed VM category')
+    size = int(page[1])
+    if size not in [4096, 16384]:
+        raise ResourceMeasurementError('Unrecognized VM page size')
+    return int(count[1]) * size
+
+
+def read_file_backed() -> dict:
+    """One bounded read-only OS measurement with no allocation or purge."""
+    result = subprocess.run(['/usr/bin/vm_stat'], capture_output=True, text=True,
+                            check=True, timeout=3)
+    return {'fileBackedBytes': file_backed_bytes(result.stdout), 'vmStatRaw': result.stdout}
+
+
+def admission_issues(rows: list[dict], now: float) -> list[str]:
+    """Require three fresh complete readings and a stable, low pressure baseline."""
+    if len(rows) != 3:
+        return ['Exactly three admission observations are required']
+    failures = []
+    for row in rows:
+        sample = row['snapshot']
+        if not 0 <= now - sample['measured_at'] <= 15:
+            failures.append('Admission observation is stale or future-dated')
+        if sample['kernel_pressure_level'] != 1 or sample['free_percent'] < 50:
+            failures.append('Normal pressure and high coarse headroom required')
+        if sample['unused_physical_bytes'] < 0 or row['fileBackedBytes'] < 8 * GIB:
+            failures.append('Valid unused observation and eight-GiB file-backed category required')
+        if sample['disk_free_bytes'] < 10 * GIB:
+            failures.append('Disk headroom below unchanged ten-GiB requirement')
+        if sample['compressor_bytes'] > sample['physical_bytes'] * .1:
+            failures.append('Compressor exceeds stricter ten-percent admission policy')
+    for previous, current in zip(rows, rows[1:]):
+        before, after = previous['snapshot'], current['snapshot']
+        if not 1.5 <= after['measured_at'] - before['measured_at'] <= 4:
+            failures.append('Admission measurements must be distinct and spaced about2–3seconds')
+        if after['swap_used_bytes'] > before['swap_used_bytes']:
+            failures.append('Swap grew between consecutive admission observations')
+        if after['compressor_bytes'] - before['compressor_bytes'] > 16 * MIB:
+            failures.append('Compressor grew more than16MiB between consecutive observations')
+    if max(row['snapshot']['compressor_bytes'] for row in rows) - rows[0]['snapshot']['compressor_bytes'] > 16 * MIB:
+        failures.append('Compressor grew more than16MiB over the whole admission window')
+    return sorted(set(failures))
+
+
+class QualifiedCacheAwareRun(NativeRun):
+    """Hold the existing heavy lease during additional full-only admission."""
+
+    def prepare(self) -> None:
+        """A failed cache-aware reading stays a no-launch receipt, not a fallback."""
+        with full_only_admission_scope():
+            super().prepare()
+        snapshots = [self.baseline]
+        rows = [{'snapshot': asdict(self.baseline), **read_file_backed()}]
+        for _ in range(2):
+            time.sleep(1)
+            snapshots.append(read_snapshot(self.project))
+            rows.append({'snapshot': asdict(snapshots[-1]), **read_file_backed()})
+        failures = admission_issues(rows, time.time())
+        self.result['qualifiedCacheAwareAdmission'] = {
+            'status': 'refused' if failures else 'admitted', 'observations': rows,
+            'policyName': 'qualified-native-cache-aware-unused-advisory-v1',
+            'failures': failures, 'scope': 'Explicit full-only experiment after actual4320-frame qualification',
+            'guaranteedReclaimableBytesClaimed': False,
+            'unchangedRenderCapsGiB': {'ownedTree': 6, 'oneProcess': 5, 'newSwap': 1},
+            'literalUnusedIsAdvisory': True, 'unusedAdvisoryThresholdGiB': 6,
+            'fileBackedCategoryMinimumGiB': 8,
+            'coarseHeadroomMinimumPercent': 50, 'compressorMaximumPhysicalFraction': .1,
+            'maximumAdmissionCompressorGrowthMiB': 16, 'maximumObservationAgeSeconds': 15}
+        if not failures:
+            self.baseline = snapshots[-1]
+            self.result['baseline'] = asdict(self.baseline)
+            self.result['qualifiedCacheAwareAdmission']['growthBaselineSwapBytes'] = self.baseline.swap_used_bytes
+        self.persist()
+        if failures:
+            raise RuntimeError('Qualified cache-aware admission refused: ' + '; '.join(failures))

@@ -1,0 +1,2053 @@
+{
+  "status": "phase-completed-awaiting-review",
+  "startedAt": "2026-09-09T23:36:37.976742+00:00",
+  "admission": {
+    "output": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-v2-repeat-playback.json",
+    "freshInputAttempt": "B",
+    "sdkSha256": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "sandboxSha256": "44309d0cf11391ec665221c43d73a40d81ad05009d517c4986aaff302dfee0ea"
+  },
+  "project": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project",
+  "output": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-v2-repeat-playback.json",
+  "sdkVersion": "0.8.31",
+  "sourceHashesBefore": {
+    "hyperframes.json": "073afaf86f8c55d9a5c838b6357f24c1c28a91ee72d0023543fa485293b9dd53",
+    "index.html": "0769dae1316a2e8834767214ad189ff91e701419fab6a8f9cce22ae7f87c85e9",
+    "motion.js": "5ab4a8da199405a7126c4776dbdf74fa06ca0ce0a9054acb6158c48528004d79"
+  },
+  "fullEditTwoHourTargetAlreadyMissed": true,
+  "renderOnlyTiming": false,
+  "policy": {
+    "admission_free_percent": 25,
+    "stop_free_percent": 10,
+    "maximum_compressor_fraction": 0.1,
+    "maximum_owned_gib": 6,
+    "maximum_process_gib": 5,
+    "maximum_swap_growth_gib": 1,
+    "minimum_disk_free_gib": 10,
+    "minimum_unused_physical_gib": 6,
+    "maximum_snapshot_age_seconds": 30
+  },
+  "args": [
+    "/usr/bin/sandbox-exec",
+    "-f",
+    "/private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/localhost-only.sb",
+    "/opt/homebrew/Cellar/node/23.10.0_1/bin/node",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/observe_final_playback.cjs",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-playback-config-v2.json"
+  ],
+  "nativeOverrides": {
+    "PATH": "/opt/homebrew/Cellar/node/23.10.0_1/bin:/opt/homebrew/Cellar/ffmpeg/8.0_1/bin:/opt/homebrew/bin:/usr/bin:/bin",
+    "TMPDIR": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/scratch",
+    "LC_ALL": "C",
+    "WHISPER_CPP_MODEL": "/Users/aaronfigueroa/.cache/hyperframes/whisper/models/ggml-small.en.bin",
+    "WHISPER_CPP_NO_GPU": "1",
+    "WHISPER_CPP_THREADS": "8",
+    "WHISPER_CPP_TIMEOUT_SECONDS": "900",
+    "HYPERFRAMES_BROWSER_PATH": "/Users/aaronfigueroa/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-152.0.7928.2/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+    "HYPERFRAMES_FFMPEG_PATH": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffmpeg",
+    "HYPERFRAMES_FFPROBE_PATH": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffprobe",
+    "HYPERFRAMES_TELEMETRY_DISABLED": "1"
+  },
+  "runDeadlineSeconds": 750,
+  "supervisorSigkillProtection": false,
+  "additionalFilePinsBefore": {
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/hyperframes.json": "073afaf86f8c55d9a5c838b6357f24c1c28a91ee72d0023543fa485293b9dd53",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/index.html": "0769dae1316a2e8834767214ad189ff91e701419fab6a8f9cce22ae7f87c85e9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/motion.js": "5ab4a8da199405a7126c4776dbdf74fa06ca0ce0a9054acb6158c48528004d79",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-29.html": "b04e47b7778ac97bfa2b84663d0e99e96b344aab68bc313c50ed640c0089ee60",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-52.html": "ee4e148e0f2d99ecfb7ae38dde0a58212dde4c911b1715c8149dc526d6078c17",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-05.html": "de481256267eb225e9048491e4e634697fcfe2b994aa4c2e218cb940218e6037",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-13.html": "805c93a329fe3e714b8561bd27bff85930f462b53c4c18a9bb020726edbd22fa",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-44.html": "22ce53d0380b329f198427020f689e0041e3c7b95210192989f4c8630605a83e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-33.html": "4017b1b64c8a16d5422b70ab9c011418298ea0af80233176c0f7b5bcce6929a4",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-25.html": "c3de09d632afc61128b941068fadfd7820dac7e54fcb74c6c25565f9ae20c9e8",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-09.html": "02e3509dd9cff403d4116b0f6d73341e7aa2be359e4556165f00d3dec8ef2106",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-48.html": "066e623a03e5f7f55eb89ba327e29fee0f404251ae1ff5aabee3eb6612800bfb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-49.html": "7c604dbb4bc4a279c19c928b68ff4d089be8debd7ebdfdd416ad9fac3b6e2642",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-08.html": "9c64a168d3c861c7450003d7e807e3c540ab8c7af9c026f540f78e8d1e5cf984",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-24.html": "ec07e2b29269241e7831e0dce0214047ba4073e7faa87adc5e755c33a7c8ffc0",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-32.html": "5d85122db9c91889e5415cc25868f14453accf6945f8ee3c8a925be67cb599eb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-45.html": "0a08b07e79b0a03069623f61ba407bb46455905c62fc778723ebdd048e8bc4f0",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-12.html": "b9635277d753a6d2a6a217367322dd5f8a0ad57737b6d0c393e6df95e4a22179",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-04.html": "ae85bcda977792a01efde64e599c63f3418fbc8a990075601a3ac8819db0078e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-28.html": "bc5312b21984b60436c16290dddfa8f049887bbed985cf9e44a7b21f0c0ef873",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-35.html": "5c85395e4ded204c0fb5e4f37a79545add86526c8d0b178f26f7dded4de6425e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-23.html": "091f4ef29945b3a0567baa733695f3f7ca12f2d3f27631ab51198acdd9450ceb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-19.html": "cb4a2d20d4bc035221ba28ebe161f277182baa624ea0ca11f0116dd1fcdb00de",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-39.html": "481e0ba711cc489bb93c0ff529621b6ae42af655011649a85e5847c2101adc0b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-03.html": "f286bda763d0bd1c0442997f997a3dd324ea182cd180e4697a651ac2c3568d55",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-15.html": "5203a27472d76f4ba7b6d12ab1de508e7d13582e0df31de3f0b820f60995c41f",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-42.html": "35013fff7e76994c3303e459dfcdae32316dbdb1c7520fb4aee72896e4568410",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-43.html": "09a1d855cee8933202b7328caf41f42d374bc048fc5d93f21338bf816138b096",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-14.html": "2eaff8ebe6051b4dac42a43eeb23d78d74cb8b7df8e7b373fb4c1481377ad042",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-02.html": "ebae43417cb63f1d2c40a3dc782ba0217a2615c363d799675c39f737d9d15233",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-38.html": "5d145316d2c5f962c92bffed232e98149a2ec819a146f9217d3500f9648828e6",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-18.html": "539732300a36fca6e122c7f85683a1b83a199a57f20beaa2bb7b4a58d46add4d",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-22.html": "c7ae32558ebca98dac8bc2e4a1d07a701fa8b47a57e44077e65f9d6a4bb378d9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-34.html": "63fe81a307e65489ca4c89fc97a01a0464331e9c6c8e4edfb8dd45327c099aa4",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-21.html": "7ec95317afe43bbc98f251128ab09e86bc406d75008e3ce839c0675a139305d9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-37.html": "d317aabc9c2a76573a0565d53ef53863cfb2bcc123410619ab2e513f3dc889d6",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-40.html": "d4e1f2289f7230374c18902271f00cea60517926886c7a2f1e2ba03b4a4f16f8",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-17.html": "26b79b64d38b0f1fe061ab1e4b5efb1962e82ad87288bb8dbf2c2a29e936fc33",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-01.html": "67cbaa6106ff42ff6cf4476c2decdbf1cc5ca4ee3fae9ada828f57b1845df30e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-00.html": "a44daa6a0c56d2b5ea74fcfb209d630612f14c8a05de944bbfdd7b6923839b8b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-16.html": "31c6f6b9d56a8a8da174051efdf1be54110a7db9e2946cc4d85fb37e589cc803",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-41.html": "356c507448664a29d4617d556b1de478c2f51863c22938bccb9d03427faee98c",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-36.html": "c785f72a59142734a5c8d7dea19c19503ad1e8e4b453bb0a116c48cbdb612651",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-20.html": "835d9b8cbb04808e4d160bb8f5b757f99f8b13ccc598bcc657ed144f3a5c13ab",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-46.html": "1c48341b994053d2e9ff895e58e9bf17d2337ac50948c236cc870eda1fed0c37",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-11.html": "78eed2d34fe6e647cea49bfd6065d63ee7d46a7b7b44afacbad1d0e61c41c7e3",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-07.html": "7466136dfe8c03db62e7eaacf4291957d6a722d1dc04760746a186bff7f5aece",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-50.html": "a97a2a60a3f732b7b4a5ac51fc3ade91e080167be0a09c5324dd44fa61f794ca",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-27.html": "859d3873fd9b7891d8c9a7f97933d43b266a51c482a5c2ebbed4c98568b9e35f",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-31.html": "5f3925b1f113050e90bff172bd2bc4617a7a1e32a468b637d967fd6035b8c6a1",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-30.html": "0f238135e444b316801d3b075c6dadd3803cead06acbe5149b3953fb2cfa685b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-26.html": "5ad3ac9ec195d3f9e5500e1d2ed80e0e049cde845b60259882fdb4b064287849",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-51.html": "aa5cfadb3e3deee4109793d19899662aaa1093505b680c7af7fe58870ad0797a",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-06.html": "3e11818d9e9ee7f394cd07c11f08a360cee097379269208ffa760d9e6b794fe7",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-10.html": "1f25e4975d59853dc9af4d03dfc23e5b28bed041bc4a916d8c02820171cddfae",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-47.html": "b42a6c328dc6095ae209ae33a5ca905feeb188952be5274da760a102e71339a5",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/presenter.mp4": "80cd51075b575818d86c4185476cb4576bd173ba20ed4e31e5daa252df167c5d",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/gsap.min.js": "c174bfce53a729418d57a8ad8625e7247c793a22fef8e2851e3cfa3de9cd8280",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration-unmastered.wav": "1a9e1cab7215c03a93d017af57ab2bfa37bdf420ff9d86cad3d52802c4aa5fea",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/mono.woff2": "a634cb9e7783af7e66d17e1dae9c859b8748da8174641b53d68b3b05de8ebce9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/mono-bold.woff2": "654a1d16c0b027ead89781bd3a4360d7f0af17a3ddf78c287d0e1843c6bca8d7",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/display.woff2": "2e5732c61470a890aee05ee399f6720664835efab8749dfc87d487e7882ffc44",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration.wav": "a4b8c664169887bfb6122856fc31454ab791112dcbfdcd7b6a32908b0c7ab0e1",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration-browser.wav": "c86f62360d2854ffcabd4cdd21934f91bb4cf1fabbfb87f54ce28b33afc57b56",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_native_phase_v4.py": "cb169743c30156b5d7d1268b53266a219e31b510f38941d539355260b6de1c8f",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_phase.py": "4f450f87d0b61970a15d2d3d060c0d0a4964ae4141a1e2a68134519b3d6379c8",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "/private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/localhost-only.sb": "44309d0cf11391ec665221c43d73a40d81ad05009d517c4986aaff302dfee0ea",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/render_native_bounded.py": "a5cccb20c65153ca3b63567243f0127ff12d6631776c0549e8ae1132556e5cf7",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native_owned_processes.py": "7c794c4c199e1c7a311171f835ff6cde938fda419e5c66eb3b2b2e5e3cbe74c8",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/qualified_native_admission.py": "7d8e6ccf4f701acfedaf3e2f8581e52a8a31f0f73ef0dba705cf54555cf01199",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/observe_final_playback.cjs": "ff87e89c2bbf80c296fdc126e29ac438564d94f260c0ffde4998c7b51abd57cd",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native_measurement_retry.py": "e437c2a71c8e1a3a93acf8acd20fe674b3033e796649db7c63d45f46328545f6",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/execution-plan.json": "185ff0840c07fb07a3d97703582be46e99a29a3a1395117d7abd37200e61233a",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-playback-config-v2.json": "35141736633bfd518bbae0573b90a7ea8190520540a70c2fe1dd1195cb5540fb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/render/delivery-master.mp4": "2b2b512eafecea3ef65768a676a78e76bf43bf07c09b0ab5ebad5a7e720846ee"
+  },
+  "trialStartedMonotonic": 1618505.458083375,
+  "admissionReuseScope": "Generic resource-policy software only; no prior edit media/cache/creative inputs",
+  "baseline": {
+    "measured_at": 1788997003.216898,
+    "physical_bytes": 68719476736,
+    "free_percent": 84.0,
+    "swap_used_bytes": 8048470917,
+    "compressor_bytes": 3935305728,
+    "disk_free_bytes": 26390589440,
+    "owned_footprint_bytes": 0,
+    "largest_owned_process_bytes": 0,
+    "owned_pids": [],
+    "processes": [],
+    "identity_verified": false,
+    "unused_physical_bytes": 357564416,
+    "missing_registered_pids": [],
+    "reused_registered_pids": [],
+    "kernel_pressure_level": 1
+  },
+  "logPath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-playback-v2-repeat.render.log",
+  "qualifiedCacheAwareAdmission": {
+    "status": "admitted",
+    "observations": [
+      {
+        "snapshot": {
+          "measured_at": 1788996997.977814,
+          "physical_bytes": 68719476736,
+          "free_percent": 83.0,
+          "swap_used_bytes": 8048470917,
+          "compressor_bytes": 3935305728,
+          "disk_free_bytes": 26390802432,
+          "owned_footprint_bytes": 0,
+          "largest_owned_process_bytes": 0,
+          "owned_pids": [],
+          "processes": [],
+          "identity_verified": false,
+          "unused_physical_bytes": 590348288,
+          "missing_registered_pids": [],
+          "reused_registered_pids": [],
+          "kernel_pressure_level": 1
+        },
+        "fileBackedBytes": 25922125824,
+        "vmStatRaw": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                    32301.\nPages active:                                1706037.\nPages inactive:                              1714209.\nPages speculative:                              4693.\nPages throttled:                                   0.\nPages wired down:                             439733.\nPages purgeable:                               36554.\n\"Translation faults\":                    21620468314.\nPages copy-on-write:                       669314982.\nPages zero filled:                       18819543428.\nPages reactivated:                        1710432587.\nPages purged:                              576666625.\nFile-backed pages:                           1582161.\nAnonymous pages:                             1842778.\nPages stored in compressor:                  2189114.\nPages occupied by compressor:                 240209.\nDecompressions:                           1754659079.\nCompressions:                             1882687065.\nPageins:                                   262049221.\nPageouts:                                    4017307.\nSwapins:                                    10797032.\nSwapouts:                                   16314855.\n"
+      },
+      {
+        "snapshot": {
+          "measured_at": 1788997000.589717,
+          "physical_bytes": 68719476736,
+          "free_percent": 83.0,
+          "swap_used_bytes": 8048470917,
+          "compressor_bytes": 3935305728,
+          "disk_free_bytes": 26390667264,
+          "owned_footprint_bytes": 0,
+          "largest_owned_process_bytes": 0,
+          "owned_pids": [],
+          "processes": [],
+          "identity_verified": false,
+          "unused_physical_bytes": 584056832,
+          "missing_registered_pids": [],
+          "reused_registered_pids": [],
+          "kernel_pressure_level": 1
+        },
+        "fileBackedBytes": 25922224128,
+        "vmStatRaw": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                    31592.\nPages active:                                1709149.\nPages inactive:                              1712703.\nPages speculative:                              4696.\nPages throttled:                                   0.\nPages wired down:                             438546.\nPages purgeable:                               35534.\n\"Translation faults\":                    21620500299.\nPages copy-on-write:                       669316379.\nPages zero filled:                       18819568271.\nPages reactivated:                        1710432689.\nPages purged:                              576666625.\nFile-backed pages:                           1582167.\nAnonymous pages:                             1844381.\nPages stored in compressor:                  2189108.\nPages occupied by compressor:                 240209.\nDecompressions:                           1754659085.\nCompressions:                             1882687065.\nPageins:                                   262049227.\nPageouts:                                    4017307.\nSwapins:                                    10797032.\nSwapouts:                                   16314855.\n"
+      },
+      {
+        "snapshot": {
+          "measured_at": 1788997003.216898,
+          "physical_bytes": 68719476736,
+          "free_percent": 84.0,
+          "swap_used_bytes": 8048470917,
+          "compressor_bytes": 3935305728,
+          "disk_free_bytes": 26390589440,
+          "owned_footprint_bytes": 0,
+          "largest_owned_process_bytes": 0,
+          "owned_pids": [],
+          "processes": [],
+          "identity_verified": false,
+          "unused_physical_bytes": 357564416,
+          "missing_registered_pids": [],
+          "reused_registered_pids": [],
+          "kernel_pressure_level": 1
+        },
+        "fileBackedBytes": 25922699264,
+        "vmStatRaw": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                    17970.\nPages active:                                1719955.\nPages inactive:                              1715382.\nPages speculative:                              4724.\nPages throttled:                                   0.\nPages wired down:                             439014.\nPages purgeable:                               50069.\n\"Translation faults\":                    21620520462.\nPages copy-on-write:                       669317778.\nPages zero filled:                       18819611897.\nPages reactivated:                        1710432692.\nPages purged:                              576666625.\nFile-backed pages:                           1582196.\nAnonymous pages:                             1857865.\nPages stored in compressor:                  2189065.\nPages occupied by compressor:                 240204.\nDecompressions:                           1754659128.\nCompressions:                             1882687065.\nPageins:                                   262049233.\nPageouts:                                    4017307.\nSwapins:                                    10797032.\nSwapouts:                                   16314855.\n"
+      }
+    ],
+    "policyName": "qualified-native-cache-aware-unused-advisory-v1",
+    "failures": [],
+    "scope": "Explicit full-only experiment after actual4320-frame qualification",
+    "guaranteedReclaimableBytesClaimed": false,
+    "unchangedRenderCapsGiB": {
+      "ownedTree": 6,
+      "oneProcess": 5,
+      "newSwap": 1
+    },
+    "literalUnusedIsAdvisory": true,
+    "unusedAdvisoryThresholdGiB": 6,
+    "fileBackedCategoryMinimumGiB": 8,
+    "coarseHeadroomMinimumPercent": 50,
+    "compressorMaximumPhysicalFraction": 0.1,
+    "maximumAdmissionCompressorGrowthMiB": 16,
+    "maximumObservationAgeSeconds": 15,
+    "growthBaselineSwapBytes": 8048470917
+  },
+  "pid": 30244,
+  "nativeLaunchedAt": "2026-09-09T23:36:44.880795+00:00",
+  "ownerIdentities": [
+    {
+      "pid": 30244,
+      "parent_pid": 30220,
+      "pgid": 30244,
+      "started": "Wed Sep  9 18:36:44 2026"
+    },
+    {
+      "pid": 30253,
+      "parent_pid": 30244,
+      "pgid": 30253,
+      "started": "Wed Sep  9 18:36:45 2026"
+    },
+    {
+      "pid": 30254,
+      "parent_pid": 30253,
+      "pgid": 30253,
+      "started": "Wed Sep  9 18:36:45 2026"
+    },
+    {
+      "pid": 30255,
+      "parent_pid": 30253,
+      "pgid": 30253,
+      "started": "Wed Sep  9 18:36:45 2026"
+    },
+    {
+      "pid": 30256,
+      "parent_pid": 30253,
+      "pgid": 30253,
+      "started": "Wed Sep  9 18:36:45 2026"
+    },
+    {
+      "pid": 30257,
+      "parent_pid": 30253,
+      "pgid": 30253,
+      "started": "Wed Sep  9 18:36:45 2026"
+    },
+    {
+      "pid": 30258,
+      "parent_pid": 30253,
+      "pgid": 30253,
+      "started": "Wed Sep  9 18:36:45 2026"
+    }
+  ],
+  "measurementRetryWindows": [
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626302.071541541,
+      "deadlineMonotonic": 1626320.071541541,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "missing-footprint",
+          "elapsedSeconds": 1.6172102089039981,
+          "errorType": "MissingProcessFootprint",
+          "evidence": {
+            "reason": "identity-not-stable-across-footprint-read",
+            "identities": [
+              {
+                "pid": 30253,
+                "started": "Wed Sep  9 18:36:45 2026",
+                "pgid": 30253
+              },
+              {
+                "pid": 30254,
+                "started": "Wed Sep  9 18:36:45 2026",
+                "pgid": 30253
+              },
+              {
+                "pid": 30255,
+                "started": "Wed Sep  9 18:36:45 2026",
+                "pgid": 30253
+              },
+              {
+                "pid": 30256,
+                "started": "Wed Sep  9 18:36:45 2026",
+                "pgid": 30253
+              },
+              {
+                "pid": 30257,
+                "started": "Wed Sep  9 18:36:45 2026",
+                "pgid": 30253
+              },
+              {
+                "pid": 30258,
+                "started": "Wed Sep  9 18:36:45 2026",
+                "pgid": 30253
+              }
+            ]
+          }
+        },
+        {
+          "sample": 2,
+          "status": "measured",
+          "elapsedSeconds": 3.3009418749716133
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 3.3009622918907553
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626310.738920541,
+      "deadlineMonotonic": 1626328.738920541,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.675020334077999
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6750452499836683
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626317.76728525,
+      "deadlineMonotonic": 1626335.76728525,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6464857910759747
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6465052501298487
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626324.772799541,
+      "deadlineMonotonic": 1626342.772799541,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6426803339272738
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6427070419304073
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626331.773505708,
+      "deadlineMonotonic": 1626349.773505708,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6502756669651717
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6502947080880404
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626338.78592375,
+      "deadlineMonotonic": 1626356.78592375,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6721986250486225
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6722173751331866
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626345.800715166,
+      "deadlineMonotonic": 1626363.800715166,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6422380001749843
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6422568340785801
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626352.820998583,
+      "deadlineMonotonic": 1626370.820998583,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6248101671226323
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6248294580727816
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626359.814295416,
+      "deadlineMonotonic": 1626377.814295416,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5866485000588
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5866670000832528
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626366.749439291,
+      "deadlineMonotonic": 1626384.749439291,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5753382919356227
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5753579169977456
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626373.692028708,
+      "deadlineMonotonic": 1626391.692028708,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6278443329501897
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.627864332869649
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626380.693358625,
+      "deadlineMonotonic": 1626398.693358625,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.652335457969457
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6523557079490274
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626387.749894416,
+      "deadlineMonotonic": 1626405.749894416,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6329950001090765
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6330154170282185
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626394.76180125,
+      "deadlineMonotonic": 1626412.76180125,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.63982033287175
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6398475000169128
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626401.743897875,
+      "deadlineMonotonic": 1626419.743897875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.623447374906391
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6234644998330623
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626408.707528791,
+      "deadlineMonotonic": 1626426.707528791,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6163282091729343
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6163482090923935
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626415.689645375,
+      "deadlineMonotonic": 1626433.689645375,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.629822500050068
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6298438750673085
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626422.672028583,
+      "deadlineMonotonic": 1626440.672028583,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.657214374979958
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6572368750348687
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626429.671849041,
+      "deadlineMonotonic": 1626447.671849041,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6221379588823766
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6221631669905037
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626436.649119166,
+      "deadlineMonotonic": 1626454.649119166,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6152492091059685
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6152666250709444
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626443.612423625,
+      "deadlineMonotonic": 1626461.612423625,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6615304159931839
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6615510829724371
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626450.644588875,
+      "deadlineMonotonic": 1626468.644588875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6551617910154164
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6551852500997484
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626457.661602291,
+      "deadlineMonotonic": 1626475.661602291,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.659509708872065
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6595278750173748
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626464.691874625,
+      "deadlineMonotonic": 1626482.691874625,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.656485249986872
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6565056249964982
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626471.694605875,
+      "deadlineMonotonic": 1626489.694605875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6533903749659657
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6534122079610825
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626478.700093875,
+      "deadlineMonotonic": 1626496.700093875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6830144161358476
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6830421250779182
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626485.747166291,
+      "deadlineMonotonic": 1626503.747166291,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6628155838698149
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6628428339026868
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626492.78287325,
+      "deadlineMonotonic": 1626510.78287325,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.629063915926963
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6290834159590304
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626499.760339125,
+      "deadlineMonotonic": 1626517.760339125,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6547672909218818
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.65478929085657
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626506.776663833,
+      "deadlineMonotonic": 1626524.776663833,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6388909579254687
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.638916458003223
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626513.788393916,
+      "deadlineMonotonic": 1626531.788393916,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5944877499714494
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.594523083884269
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626520.731593875,
+      "deadlineMonotonic": 1626538.731593875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6394207910634577
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6394453749526292
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626527.733318333,
+      "deadlineMonotonic": 1626545.733318333,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6327373329550028
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.632754832971841
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626534.75082525,
+      "deadlineMonotonic": 1626552.75082525,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6435360829345882
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6435540828388184
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626541.799982583,
+      "deadlineMonotonic": 1626559.799982583,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6377202500589192
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.637744375038892
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626548.839714875,
+      "deadlineMonotonic": 1626566.839714875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6324128329288214
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6324309159535915
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626555.841615,
+      "deadlineMonotonic": 1626573.841615,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6475460410583764
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6475691660307348
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626562.861427541,
+      "deadlineMonotonic": 1626580.861427541,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6440520000178367
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6440746251028031
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626569.870486458,
+      "deadlineMonotonic": 1626587.870486458,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6422941668424755
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6423158750403672
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626576.873629875,
+      "deadlineMonotonic": 1626594.873629875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6379432079847902
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.637962541077286
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626583.86388925,
+      "deadlineMonotonic": 1626601.86388925,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5997795411385596
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5998028749600053
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626590.812727458,
+      "deadlineMonotonic": 1626608.812727458,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5987593329045922
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5987778748385608
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626597.794444666,
+      "deadlineMonotonic": 1626615.794444666,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6598027918953449
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6598274169955403
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626604.819728166,
+      "deadlineMonotonic": 1626622.819728166,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6219883339945227
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6220089169219136
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626611.794387875,
+      "deadlineMonotonic": 1626629.794387875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6237416251096874
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.623768708202988
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626618.757573125,
+      "deadlineMonotonic": 1626636.757573125,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6375027080066502
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6375204580835998
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626625.797097291,
+      "deadlineMonotonic": 1626643.797097291,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.645626291865483
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6456487919203937
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626632.795876958,
+      "deadlineMonotonic": 1626650.795876958,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.585792833007872
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5858105421066284
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626639.763532291,
+      "deadlineMonotonic": 1626657.763532291,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6518123340792954
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6518357500899583
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626646.806708458,
+      "deadlineMonotonic": 1626664.806708458,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6412807498127222
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6413001669570804
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626653.817687333,
+      "deadlineMonotonic": 1626671.817687333,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6519031249918044
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.651930624851957
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626660.837626208,
+      "deadlineMonotonic": 1626678.837626208,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6393163749016821
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6393342500086874
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626667.837616333,
+      "deadlineMonotonic": 1626685.837616333,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.620925083057955
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6209482499398291
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626674.819142875,
+      "deadlineMonotonic": 1626692.819142875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6480349579360336
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.648052749922499
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626681.869728333,
+      "deadlineMonotonic": 1626699.869728333,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6425617919303477
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6425848328508437
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626688.882346833,
+      "deadlineMonotonic": 1626706.882346833,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6543391251470894
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6543586251791567
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626695.906748208,
+      "deadlineMonotonic": 1626713.906748208,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6585701669100672
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6586098331026733
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626702.940070958,
+      "deadlineMonotonic": 1626720.940070958,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6484832498244941
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6485037920065224
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626709.9773645,
+      "deadlineMonotonic": 1626727.9773645,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.625449749873951
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6254665409214795
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626716.98375075,
+      "deadlineMonotonic": 1626734.98375075,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6240876249503344
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.624108707997948
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626724.007851375,
+      "deadlineMonotonic": 1626742.007851375,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6031075408682227
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6031262499745935
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626730.970824833,
+      "deadlineMonotonic": 1626748.970824833,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.656230374937877
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.656256082933396
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626737.982424375,
+      "deadlineMonotonic": 1626755.982424375,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.634543666150421
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6345672910101712
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626744.991283541,
+      "deadlineMonotonic": 1626762.991283541,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6685819998383522
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6686042088549584
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626752.038128541,
+      "deadlineMonotonic": 1626770.038128541,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6516332919709384
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6516499589197338
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626759.068525166,
+      "deadlineMonotonic": 1626777.068525166,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.636744708986953
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6367653750348836
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626766.0702995,
+      "deadlineMonotonic": 1626784.0702995,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6363449161872268
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6363633330911398
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626773.0473425,
+      "deadlineMonotonic": 1626791.0473425,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6471590411383659
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6471845409832895
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626780.055935291,
+      "deadlineMonotonic": 1626798.055935291,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6489300839602947
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6489471669774503
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626787.076145041,
+      "deadlineMonotonic": 1626805.076145041,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6252798750065267
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6253038339782506
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626794.060145,
+      "deadlineMonotonic": 1626812.060145,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6460546660237014
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6460714160930365
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626801.08922325,
+      "deadlineMonotonic": 1626819.08922325,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6655120409559458
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6655348329804838
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626808.118909791,
+      "deadlineMonotonic": 1626826.118909791,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6364978339988738
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6365198749117553
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626815.116187166,
+      "deadlineMonotonic": 1626833.116187166,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.639129500137642
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6391491671092808
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626822.126620666,
+      "deadlineMonotonic": 1626840.126620666,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.650201584212482
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.650221292162314
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626829.135555166,
+      "deadlineMonotonic": 1626847.135555166,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6226998749189079
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.622720249928534
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626836.150680291,
+      "deadlineMonotonic": 1626854.150680291,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6544957500882447
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6545160000678152
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626843.180309083,
+      "deadlineMonotonic": 1626861.180309083,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6470956669654697
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6471144168172032
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626850.1784875,
+      "deadlineMonotonic": 1626868.1784875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6438285000622272
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6438465830869973
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626857.1784195,
+      "deadlineMonotonic": 1626875.1784195,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6017037911806256
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.601728750159964
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626864.129248166,
+      "deadlineMonotonic": 1626882.129248166,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5944622089155018
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5944815420079976
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626871.073902416,
+      "deadlineMonotonic": 1626889.073902416,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.647558458847925
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.647577416850254
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626878.087256166,
+      "deadlineMonotonic": 1626896.087256166,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6524937921203673
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.652519459137693
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626885.117190541,
+      "deadlineMonotonic": 1626903.117190541,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6396091668866575
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6396280420012772
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626892.116248416,
+      "deadlineMonotonic": 1626910.116248416,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6510039998684078
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6510216249153018
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626899.1256505,
+      "deadlineMonotonic": 1626917.1256505,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6516461251303554
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6516709581483155
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626906.136439666,
+      "deadlineMonotonic": 1626924.136439666,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6507955840788782
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6508176249917597
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626913.152614458,
+      "deadlineMonotonic": 1626931.152614458,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.643204707885161
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6432236249092966
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626920.15650275,
+      "deadlineMonotonic": 1626938.15650275,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.651005000108853
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6510304580442607
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626927.167618333,
+      "deadlineMonotonic": 1626945.167618333,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.65091733308509
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6509363329969347
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626934.195483833,
+      "deadlineMonotonic": 1626952.195483833,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6480083749629557
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6480341670103371
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626941.20188225,
+      "deadlineMonotonic": 1626959.20188225,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.643814666196704
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.643834208138287
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626948.20207325,
+      "deadlineMonotonic": 1626966.20207325,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6464284579269588
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6464567079674453
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1626955.211133541,
+      "deadlineMonotonic": 1626973.211133541,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6641019589733332
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.66412258381024
+    }
+  ],
+  "measurementFailureEvidence": [
+    {
+      "reason": "identity-not-stable-across-footprint-read",
+      "identities": [
+        {
+          "pid": 30253,
+          "started": "Wed Sep  9 18:36:45 2026",
+          "pgid": 30253
+        },
+        {
+          "pid": 30254,
+          "started": "Wed Sep  9 18:36:45 2026",
+          "pgid": 30253
+        },
+        {
+          "pid": 30255,
+          "started": "Wed Sep  9 18:36:45 2026",
+          "pgid": 30253
+        },
+        {
+          "pid": 30256,
+          "started": "Wed Sep  9 18:36:45 2026",
+          "pgid": 30253
+        },
+        {
+          "pid": 30257,
+          "started": "Wed Sep  9 18:36:45 2026",
+          "pgid": 30253
+        },
+        {
+          "pid": 30258,
+          "started": "Wed Sep  9 18:36:45 2026",
+          "pgid": 30253
+        }
+      ]
+    }
+  ],
+  "processExitMeasurementRetries": 1,
+  "latestResourceSnapshot": {
+    "measured_at": 1788997658.129407,
+    "physical_bytes": 68719476736,
+    "free_percent": 84.0,
+    "swap_used_bytes": 8048470917,
+    "compressor_bytes": 3891265536,
+    "disk_free_bytes": 26334679040,
+    "owned_footprint_bytes": 217221120,
+    "largest_owned_process_bytes": 103809024,
+    "owned_pids": [
+      30244,
+      30253,
+      30254,
+      30255,
+      30256,
+      30257,
+      30258
+    ],
+    "processes": [
+      {
+        "pid": 30244,
+        "parent_pid": 30220,
+        "pgid": 30244,
+        "started": "Wed Sep  9 18:36:44 2026",
+        "footprint_bytes": 30408704,
+        "compressed_bytes": 0
+      },
+      {
+        "pid": 30253,
+        "parent_pid": 30244,
+        "pgid": 30253,
+        "started": "Wed Sep  9 18:36:45 2026",
+        "footprint_bytes": 15728640,
+        "compressed_bytes": 0
+      },
+      {
+        "pid": 30254,
+        "parent_pid": 30253,
+        "pgid": 30253,
+        "started": "Wed Sep  9 18:36:45 2026",
+        "footprint_bytes": 38797312,
+        "compressed_bytes": 0
+      },
+      {
+        "pid": 30255,
+        "parent_pid": 30253,
+        "pgid": 30253,
+        "started": "Wed Sep  9 18:36:45 2026",
+        "footprint_bytes": 6046720,
+        "compressed_bytes": 0
+      },
+      {
+        "pid": 30256,
+        "parent_pid": 30253,
+        "pgid": 30253,
+        "started": "Wed Sep  9 18:36:45 2026",
+        "footprint_bytes": 12582912,
+        "compressed_bytes": 0
+      },
+      {
+        "pid": 30257,
+        "parent_pid": 30253,
+        "pgid": 30253,
+        "started": "Wed Sep  9 18:36:45 2026",
+        "footprint_bytes": 103809024,
+        "compressed_bytes": 0
+      },
+      {
+        "pid": 30258,
+        "parent_pid": 30253,
+        "pgid": 30253,
+        "started": "Wed Sep  9 18:36:45 2026",
+        "footprint_bytes": 9847808,
+        "compressed_bytes": 0
+      }
+    ],
+    "identity_verified": true,
+    "unused_physical_bytes": 818937856,
+    "missing_registered_pids": [],
+    "reused_registered_pids": [],
+    "kernel_pressure_level": 1,
+    "warnings": [
+      "unused physical RAM is below the reserved host margin"
+    ]
+  },
+  "cleanup": {
+    "verified": true,
+    "survivors": [],
+    "signals": [],
+    "scope": "Recorded owned identities; not an unobserved-child guarantee"
+  },
+  "exitCode": 0,
+  "leaseCleanupVerified": true,
+  "elapsedSeconds": 666.1517880829051,
+  "completedAt": "2026-09-09T23:47:44.151182+00:00",
+  "abortReason": null,
+  "sourceHashesAfter": {
+    "hyperframes.json": "073afaf86f8c55d9a5c838b6357f24c1c28a91ee72d0023543fa485293b9dd53",
+    "index.html": "0769dae1316a2e8834767214ad189ff91e701419fab6a8f9cce22ae7f87c85e9",
+    "motion.js": "5ab4a8da199405a7126c4776dbdf74fa06ca0ce0a9054acb6158c48528004d79"
+  },
+  "sourceStable": true,
+  "sdkStable": true,
+  "sandboxStable": true,
+  "additionalFilePinsAfter": {
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/hyperframes.json": "073afaf86f8c55d9a5c838b6357f24c1c28a91ee72d0023543fa485293b9dd53",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/index.html": "0769dae1316a2e8834767214ad189ff91e701419fab6a8f9cce22ae7f87c85e9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/motion.js": "5ab4a8da199405a7126c4776dbdf74fa06ca0ce0a9054acb6158c48528004d79",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-29.html": "b04e47b7778ac97bfa2b84663d0e99e96b344aab68bc313c50ed640c0089ee60",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-52.html": "ee4e148e0f2d99ecfb7ae38dde0a58212dde4c911b1715c8149dc526d6078c17",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-05.html": "de481256267eb225e9048491e4e634697fcfe2b994aa4c2e218cb940218e6037",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-13.html": "805c93a329fe3e714b8561bd27bff85930f462b53c4c18a9bb020726edbd22fa",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-44.html": "22ce53d0380b329f198427020f689e0041e3c7b95210192989f4c8630605a83e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-33.html": "4017b1b64c8a16d5422b70ab9c011418298ea0af80233176c0f7b5bcce6929a4",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-25.html": "c3de09d632afc61128b941068fadfd7820dac7e54fcb74c6c25565f9ae20c9e8",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-09.html": "02e3509dd9cff403d4116b0f6d73341e7aa2be359e4556165f00d3dec8ef2106",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-48.html": "066e623a03e5f7f55eb89ba327e29fee0f404251ae1ff5aabee3eb6612800bfb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-49.html": "7c604dbb4bc4a279c19c928b68ff4d089be8debd7ebdfdd416ad9fac3b6e2642",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-08.html": "9c64a168d3c861c7450003d7e807e3c540ab8c7af9c026f540f78e8d1e5cf984",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-24.html": "ec07e2b29269241e7831e0dce0214047ba4073e7faa87adc5e755c33a7c8ffc0",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-32.html": "5d85122db9c91889e5415cc25868f14453accf6945f8ee3c8a925be67cb599eb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-45.html": "0a08b07e79b0a03069623f61ba407bb46455905c62fc778723ebdd048e8bc4f0",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-12.html": "b9635277d753a6d2a6a217367322dd5f8a0ad57737b6d0c393e6df95e4a22179",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-04.html": "ae85bcda977792a01efde64e599c63f3418fbc8a990075601a3ac8819db0078e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-28.html": "bc5312b21984b60436c16290dddfa8f049887bbed985cf9e44a7b21f0c0ef873",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-35.html": "5c85395e4ded204c0fb5e4f37a79545add86526c8d0b178f26f7dded4de6425e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-23.html": "091f4ef29945b3a0567baa733695f3f7ca12f2d3f27631ab51198acdd9450ceb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-19.html": "cb4a2d20d4bc035221ba28ebe161f277182baa624ea0ca11f0116dd1fcdb00de",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-39.html": "481e0ba711cc489bb93c0ff529621b6ae42af655011649a85e5847c2101adc0b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-03.html": "f286bda763d0bd1c0442997f997a3dd324ea182cd180e4697a651ac2c3568d55",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-15.html": "5203a27472d76f4ba7b6d12ab1de508e7d13582e0df31de3f0b820f60995c41f",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-42.html": "35013fff7e76994c3303e459dfcdae32316dbdb1c7520fb4aee72896e4568410",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-43.html": "09a1d855cee8933202b7328caf41f42d374bc048fc5d93f21338bf816138b096",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-14.html": "2eaff8ebe6051b4dac42a43eeb23d78d74cb8b7df8e7b373fb4c1481377ad042",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-02.html": "ebae43417cb63f1d2c40a3dc782ba0217a2615c363d799675c39f737d9d15233",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-38.html": "5d145316d2c5f962c92bffed232e98149a2ec819a146f9217d3500f9648828e6",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-18.html": "539732300a36fca6e122c7f85683a1b83a199a57f20beaa2bb7b4a58d46add4d",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-22.html": "c7ae32558ebca98dac8bc2e4a1d07a701fa8b47a57e44077e65f9d6a4bb378d9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-34.html": "63fe81a307e65489ca4c89fc97a01a0464331e9c6c8e4edfb8dd45327c099aa4",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-21.html": "7ec95317afe43bbc98f251128ab09e86bc406d75008e3ce839c0675a139305d9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-37.html": "d317aabc9c2a76573a0565d53ef53863cfb2bcc123410619ab2e513f3dc889d6",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-40.html": "d4e1f2289f7230374c18902271f00cea60517926886c7a2f1e2ba03b4a4f16f8",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-17.html": "26b79b64d38b0f1fe061ab1e4b5efb1962e82ad87288bb8dbf2c2a29e936fc33",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-01.html": "67cbaa6106ff42ff6cf4476c2decdbf1cc5ca4ee3fae9ada828f57b1845df30e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-00.html": "a44daa6a0c56d2b5ea74fcfb209d630612f14c8a05de944bbfdd7b6923839b8b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-16.html": "31c6f6b9d56a8a8da174051efdf1be54110a7db9e2946cc4d85fb37e589cc803",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-41.html": "356c507448664a29d4617d556b1de478c2f51863c22938bccb9d03427faee98c",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-36.html": "c785f72a59142734a5c8d7dea19c19503ad1e8e4b453bb0a116c48cbdb612651",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-20.html": "835d9b8cbb04808e4d160bb8f5b757f99f8b13ccc598bcc657ed144f3a5c13ab",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-46.html": "1c48341b994053d2e9ff895e58e9bf17d2337ac50948c236cc870eda1fed0c37",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-11.html": "78eed2d34fe6e647cea49bfd6065d63ee7d46a7b7b44afacbad1d0e61c41c7e3",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-07.html": "7466136dfe8c03db62e7eaacf4291957d6a722d1dc04760746a186bff7f5aece",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-50.html": "a97a2a60a3f732b7b4a5ac51fc3ade91e080167be0a09c5324dd44fa61f794ca",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-27.html": "859d3873fd9b7891d8c9a7f97933d43b266a51c482a5c2ebbed4c98568b9e35f",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-31.html": "5f3925b1f113050e90bff172bd2bc4617a7a1e32a468b637d967fd6035b8c6a1",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-30.html": "0f238135e444b316801d3b075c6dadd3803cead06acbe5149b3953fb2cfa685b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-26.html": "5ad3ac9ec195d3f9e5500e1d2ed80e0e049cde845b60259882fdb4b064287849",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-51.html": "aa5cfadb3e3deee4109793d19899662aaa1093505b680c7af7fe58870ad0797a",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-06.html": "3e11818d9e9ee7f394cd07c11f08a360cee097379269208ffa760d9e6b794fe7",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-10.html": "1f25e4975d59853dc9af4d03dfc23e5b28bed041bc4a916d8c02820171cddfae",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-47.html": "b42a6c328dc6095ae209ae33a5ca905feeb188952be5274da760a102e71339a5",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/presenter.mp4": "80cd51075b575818d86c4185476cb4576bd173ba20ed4e31e5daa252df167c5d",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/gsap.min.js": "c174bfce53a729418d57a8ad8625e7247c793a22fef8e2851e3cfa3de9cd8280",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration-unmastered.wav": "1a9e1cab7215c03a93d017af57ab2bfa37bdf420ff9d86cad3d52802c4aa5fea",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/mono.woff2": "a634cb9e7783af7e66d17e1dae9c859b8748da8174641b53d68b3b05de8ebce9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/mono-bold.woff2": "654a1d16c0b027ead89781bd3a4360d7f0af17a3ddf78c287d0e1843c6bca8d7",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/display.woff2": "2e5732c61470a890aee05ee399f6720664835efab8749dfc87d487e7882ffc44",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration.wav": "a4b8c664169887bfb6122856fc31454ab791112dcbfdcd7b6a32908b0c7ab0e1",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration-browser.wav": "c86f62360d2854ffcabd4cdd21934f91bb4cf1fabbfb87f54ce28b33afc57b56",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_native_phase_v4.py": "cb169743c30156b5d7d1268b53266a219e31b510f38941d539355260b6de1c8f",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_phase.py": "4f450f87d0b61970a15d2d3d060c0d0a4964ae4141a1e2a68134519b3d6379c8",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "/private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/localhost-only.sb": "44309d0cf11391ec665221c43d73a40d81ad05009d517c4986aaff302dfee0ea",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/render_native_bounded.py": "a5cccb20c65153ca3b63567243f0127ff12d6631776c0549e8ae1132556e5cf7",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native_owned_processes.py": "7c794c4c199e1c7a311171f835ff6cde938fda419e5c66eb3b2b2e5e3cbe74c8",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/qualified_native_admission.py": "7d8e6ccf4f701acfedaf3e2f8581e52a8a31f0f73ef0dba705cf54555cf01199",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/observe_final_playback.cjs": "ff87e89c2bbf80c296fdc126e29ac438564d94f260c0ffde4998c7b51abd57cd",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native_measurement_retry.py": "e437c2a71c8e1a3a93acf8acd20fe674b3033e796649db7c63d45f46328545f6",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/execution-plan.json": "185ff0840c07fb07a3d97703582be46e99a29a3a1395117d7abd37200e61233a",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-playback-config-v2.json": "35141736633bfd518bbae0573b90a7ea8190520540a70c2fe1dd1195cb5540fb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/render/delivery-master.mp4": "2b2b512eafecea3ef65768a676a78e76bf43bf07c09b0ab5ebad5a7e720846ee"
+  },
+  "additionalFilesStable": true,
+  "outputBytes": 1571356,
+  "trialElapsedSecondsAtPhaseEnd": 8456.596600583056
+}

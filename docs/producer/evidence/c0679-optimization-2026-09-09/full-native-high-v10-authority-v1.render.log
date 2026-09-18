@@ -1,0 +1,3 @@
+{"phase": "sourceAuthority", "passed": true, "elapsedSeconds": 2.3420900418423116, "error": null}
+{"phase": "observedPacketFacts", "passed": true, "elapsedSeconds": 6.427529416047037, "error": null}
+{"status": "supplemental-authority-pass", "elapsedSeconds": 11.910188667010516}

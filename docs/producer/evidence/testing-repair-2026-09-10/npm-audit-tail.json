@@ -1,0 +1,422 @@
+{
+  "startedAt": "2026-09-10T15:27:42.550992+00:00",
+  "complete": false,
+  "expectedModules": 189,
+  "results": [
+    {
+      "path": "src/lib/server/__tests__/guided-manual-short.test.ts",
+      "exitCode": 0,
+      "seconds": 0.321
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-media-profile-presenter.test.ts",
+      "exitCode": 0,
+      "seconds": 0.253
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-approval-media.test.ts",
+      "exitCode": 0,
+      "seconds": 0.863
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-approval.test.ts",
+      "exitCode": 0,
+      "seconds": 0.288
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-claim.test.ts",
+      "exitCode": 0,
+      "seconds": 0.16
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-cleanup-command-integration.test.ts",
+      "exitCode": 0,
+      "seconds": 84.597
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-cleanup-command.test.ts",
+      "exitCode": 0,
+      "seconds": 0.286
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-cleanup-store-history.test.ts",
+      "exitCode": 0,
+      "seconds": 82.573
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-cleanup.test.ts",
+      "exitCode": 0,
+      "seconds": 0.273
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-command.test.ts",
+      "exitCode": 0,
+      "seconds": 1.433
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-completed-cleanup-command.test.ts",
+      "exitCode": 0,
+      "seconds": 57.777
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-contract.test.ts",
+      "exitCode": 0,
+      "seconds": 0.162
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-controller-cleanup.test.ts",
+      "exitCode": 0,
+      "seconds": 127.084
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-controller-lifecycle.test.ts",
+      "exitCode": 0,
+      "seconds": 1.219
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-controller-terminal.test.ts",
+      "exitCode": 0,
+      "seconds": 13.407
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-execution.test.ts",
+      "exitCode": 0,
+      "seconds": 0.256
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-launch-route.test.ts",
+      "exitCode": 0,
+      "seconds": 0.337
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-launch-store.test.ts",
+      "exitCode": 0,
+      "seconds": 0.575
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-ledger-subprocess.test.ts",
+      "exitCode": 0,
+      "seconds": 0.871
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-media-contract.test.ts",
+      "exitCode": 0,
+      "seconds": 0.162
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-media-input.test.ts",
+      "exitCode": 0,
+      "seconds": 31.907
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-metadata.test.ts",
+      "exitCode": 0,
+      "seconds": 0.508
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-ownership-faults.test.ts",
+      "exitCode": 0,
+      "seconds": 0.274
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-pending-status.test.ts",
+      "exitCode": 0,
+      "seconds": 118.816
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-presenter-profile.test.ts",
+      "exitCode": 0,
+      "seconds": 2.034
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-process-ledger.test.ts",
+      "exitCode": 0,
+      "seconds": 0.143
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-process.test.ts",
+      "exitCode": 0,
+      "seconds": 0.862
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-result-v2-rounding.test.ts",
+      "exitCode": 0,
+      "seconds": 0.16
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-result-v2.test.ts",
+      "exitCode": 0,
+      "seconds": 0.139
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-result-version.test.ts",
+      "exitCode": 0,
+      "seconds": 10.071
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-result.test.ts",
+      "exitCode": 0,
+      "seconds": 0.138
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-selection.test.ts",
+      "exitCode": 0,
+      "seconds": 0.289
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-source-color-intent.test.ts",
+      "exitCode": 0,
+      "seconds": 0.682
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-source-color-process.test.ts",
+      "exitCode": 0,
+      "seconds": 0.871
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-status.test.ts",
+      "exitCode": 0,
+      "seconds": 0.296
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening-v8-no-presenter.test.ts",
+      "exitCode": 0,
+      "seconds": 0.267
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-opening.test.ts",
+      "exitCode": 0,
+      "seconds": 23.059
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-presenter-durable-input.test.ts",
+      "exitCode": 0,
+      "seconds": 0.323
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-author-command.test.ts",
+      "exitCode": 0,
+      "seconds": 0.233
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-author-cut-review.test.ts",
+      "exitCode": 0,
+      "seconds": 1.104
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-author-cut-stage.test.ts",
+      "exitCode": 0,
+      "seconds": 0.284
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-author-guard.test.ts",
+      "exitCode": 0,
+      "seconds": 1.441
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-author-intake.test.ts",
+      "exitCode": 0,
+      "seconds": 0.222
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-author-lifecycle.test.ts",
+      "exitCode": 0,
+      "seconds": 0.689
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-author-service.test.ts",
+      "exitCode": 0,
+      "seconds": 1.004
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-bootstrap-authority.test.ts",
+      "exitCode": 0,
+      "seconds": 0.671
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-bootstrap-observer.test.ts",
+      "exitCode": 0,
+      "seconds": 0.173
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-bootstrap-service.test.ts",
+      "exitCode": 0,
+      "seconds": 0.683
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-bootstrap-stage.test.ts",
+      "exitCode": 0,
+      "seconds": 0.726
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-command.test.ts",
+      "exitCode": 0,
+      "seconds": 0.563
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-preparation-deadline.test.ts",
+      "exitCode": 0,
+      "seconds": 0.157
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-project-preparation-worker.test.ts",
+      "exitCode": 0,
+      "seconds": 0.358
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-catalog-ownership.test.ts",
+      "exitCode": 0,
+      "seconds": 0.312
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-contract.test.ts",
+      "exitCode": 0,
+      "seconds": 0.211
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-history-snapshot.test.ts",
+      "exitCode": 0,
+      "seconds": 0.171
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-music-intent.test.ts",
+      "exitCode": 0,
+      "seconds": 0.215
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-presenter-frames.test.ts",
+      "exitCode": 0,
+      "seconds": 0.158
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-presenter.test.ts",
+      "exitCode": 0,
+      "seconds": 0.174
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-readiness-gates.test.ts",
+      "exitCode": 0,
+      "seconds": 44.662
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-readiness-real-gates.test.ts",
+      "exitCode": 0,
+      "seconds": 14.42
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-readiness.test.ts",
+      "exitCode": 0,
+      "seconds": 40.87
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-speech.test.ts",
+      "exitCode": 0,
+      "seconds": 0.174
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-timing.test.ts",
+      "exitCode": 0,
+      "seconds": 14.7
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-v4-candidate.test.ts",
+      "exitCode": 0,
+      "seconds": 0.215
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-v4-evidence.test.ts",
+      "exitCode": 0,
+      "seconds": 0.208
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-v5-captions.test.ts",
+      "exitCode": 0,
+      "seconds": 0.285
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-v6-reframe.test.ts",
+      "exitCode": 0,
+      "seconds": 0.269
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-v7-music.test.ts",
+      "exitCode": 0,
+      "seconds": 0.307
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-v8-candidate.test.ts",
+      "exitCode": 0,
+      "seconds": 0.239
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal-v8-store.test.ts",
+      "exitCode": 0,
+      "seconds": 22.58
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-proposal.test.ts",
+      "exitCode": 0,
+      "seconds": 85.117
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-readiness-budget.test.ts",
+      "exitCode": 0,
+      "seconds": 43.669
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-runtime-capsule-owner.test.ts",
+      "exitCode": 0,
+      "seconds": 1.5
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-runtime-capsule-python.test.ts",
+      "exitCode": 0,
+      "seconds": 0.299
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-runtime-capsule.test.ts",
+      "exitCode": 0,
+      "seconds": 0.402
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-approval-integration.test.ts",
+      "exitCode": 0,
+      "seconds": 63.611
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-approval-read.test.ts",
+      "exitCode": 0,
+      "seconds": 134.373
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-approval-wrapper.test.ts",
+      "exitCode": 0,
+      "seconds": 45.969
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-approval.test.ts",
+      "exitCode": 0,
+      "seconds": 70.363
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-body-authority-faults.test.ts",
+      "exitCode": 0,
+      "seconds": 95.664
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-body-authority.test.ts",
+      "exitCode": 0,
+      "seconds": 18.209
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-body-opening.test.ts",
+      "exitCode": 0,
+      "seconds": 144.1
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-adoption-integration.test.ts",
+      "exitCode": 0,
+      "seconds": 77.412
+    }
+  ]
+}

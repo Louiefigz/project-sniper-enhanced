@@ -1,0 +1,530 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-07-31",
+  "completeness": "partial",
+  "phaseExit": "blocked",
+  "capabilities": [
+    {
+      "capabilityId": "registered-offline-motion",
+      "status": "released",
+      "codeEvidence": [
+        "scripts/producer/graphics/graphics_render.py",
+        "templates/motion/comp_capabilities.json"
+      ],
+      "uiEvidence": [
+        "registered comp selection only"
+      ],
+      "skillEvidence": [
+        ".claude/skills/producer/SKILL.md"
+      ],
+      "docsEvidence": [
+        "scripts/producer/docs/findings/COMP_CAPABILITIES_ARE_MEASURED_DATA.md"
+      ],
+      "blockingGates": []
+    },
+    {
+      "capabilityId": "set-graphic-text-v1",
+      "status": "compatibility",
+      "codeEvidence": [
+        "src/lib/producer/set-graphic-text-v1.ts",
+        "src/app/api/producer/ai-edit/typed-compatibility-edit.ts",
+        "src/app/api/producer/ai-edit/finalize.ts",
+        "src/lib/server/producer-revision-shadow.ts",
+        "src/lib/server/__tests__/producer-shadow-fixtures.test.ts"
+      ],
+      "uiEvidence": [
+        "Ask Editor natural-language compatibility route"
+      ],
+      "skillEvidence": [],
+      "docsEvidence": [
+        "docs/producer/command-driven-editing/09_IMPLEMENTATION_MAP_AND_NEXT_STEPS.md"
+      ],
+      "blockingGates": [
+        "canonical reader migration from mutable edit_plan.json to revision projections",
+        "retained-media render parity for the live request path",
+        "additional typed actions remain closed until their own lane gates pass"
+      ]
+    },
+    {
+      "capabilityId": "first-class-revision-authority",
+      "status": "compatibility",
+      "codeEvidence": [
+        "src/lib/server/producer-revision-store.ts",
+        "src/lib/server/producer-revision-shadow.ts",
+        "src/lib/server/producer-revision-recovery.ts",
+        "src/lib/server/producer-palmier-saga.ts",
+        "src/lib/server/__tests__/producer-revision-coverage.test.ts",
+        "src/lib/server/__tests__/producer-revision-shadow.test.ts",
+        "src/lib/server/__tests__/producer-palmier-saga.test.ts",
+        "src/lib/producer/__tests__/producer-schema-parity.test.ts"
+      ],
+      "uiEvidence": [
+        "Ask Editor SetGraphicTextV1 shadow publication after guarded live promotion"
+      ],
+      "skillEvidence": [],
+      "docsEvidence": [
+        "docs/producer/command-driven-editing/02_AUTHORITY_COMMANDS_AND_TIMING.md"
+      ],
+      "blockingGates": [
+        "all-reader and writer migration",
+        "live Palmier adapter and startup reconciliation against a connected workspace",
+        "canonical authority flip after retained-media shadow parity",
+        "atomically owner-verifiable stale mutation-lease recovery"
+      ]
+    },
+    {
+      "capabilityId": "minimum-render-graph-v1",
+      "status": "compatibility",
+      "codeEvidence": [
+        "src/lib/producer/contracts/render-graph.ts",
+        "src/lib/producer/contracts/render-graph-executor.ts",
+        "src/lib/producer/__tests__/render-graph-v1.test.ts",
+        "src/lib/producer/__tests__/render-graph-executor-v1.test.ts",
+        "scripts/producer/current_render_graph_cli.py",
+        "scripts/producer/current_render_graph_store.py",
+        "scripts/producer/current_render_graph_candidate.py",
+        "scripts/producer/tests/test_current_render_graph_candidate.py",
+        "scripts/producer/tests/live_current_render_graph_qc_acceptance.py",
+        "src/lib/server/current-render-graph-command.ts",
+        "src/lib/server/current-render-graph-candidate.ts",
+        "src/app/api/producer/auto-edit/chain.ts",
+        "src/app/api/producer/auto-edit/quality-loop.ts",
+        "src/app/api/producer/auto-edit/pipeline.ts",
+        "src/lib/producer/__tests__/auto-edit-graph-promotion-failure.test.ts"
+      ],
+      "uiEvidence": [
+        "/producer/render and /producer/assemble controller routes wrap the current renderer stages",
+        "/producer/auto-edit stages private graph candidates and activates only exact QC-promoted media"
+      ],
+      "skillEvidence": [],
+      "docsEvidence": [
+        "docs/producer/command-driven-editing/05_RENDER_PALMIER_AND_QC.md",
+        "docs/producer/command-driven-editing/09_IMPLEMENTATION_MAP_AND_NEXT_STEPS.md",
+        "artifacts/p1-auto-edit-qc-gated-graph-20260729-rerun2/qc-gated-graph-candidate/qc-gated-oracle.json"
+      ],
+      "blockingGates": [
+        "finer legacy ffmpeg/browser substage and dirty-window graph scheduling beyond monolithic wrappers",
+        "canonical revision and all-reader/writer migration before the graph becomes project authority"
+      ]
+    },
+    {
+      "capabilityId": "external-media-sandbox-admission",
+      "status": "compatibility",
+      "codeEvidence": [
+        "scripts/producer/headless/external_media_snapshot.py",
+        "scripts/producer/headless/external_media_probe_policy.py",
+        "scripts/producer/headless/external_media_probe.py",
+        "scripts/producer/ingest_admission.py",
+        "scripts/producer/ingest_admission_contract.py",
+        "scripts/producer/ingest_admitted_sources.py",
+        "scripts/producer/ingest_admitted_scan.py",
+        "scripts/producer/ingest.py",
+        "scripts/producer/broll/pool_admission.py",
+        "scripts/producer/broll/broll_pool.py",
+        "src/app/api/_lib/reference-media-admission.ts",
+        "src/app/api/_lib/reference-admission-verifier.ts",
+        "scripts/producer/tests/test_external_media_probe.py",
+        "scripts/producer/tests/live_external_media_probe_acceptance.py",
+        "scripts/producer/tests/test_ingest_admission.py",
+        "scripts/producer/tests/live_ingest_admission_acceptance.py",
+        "scripts/producer/tests/test_broll_pool_admission.py",
+        "src/lib/producer/__tests__/reference-admission-verifier.test.ts"
+      ],
+      "uiEvidence": [
+        "/producer ingest response requires an exact sourceSetAdmission binding"
+      ],
+      "skillEvidence": [],
+      "docsEvidence": [
+        "docs/producer/command-driven-editing/07_IMPLEMENTATION_ROADMAP.md",
+        "scripts/producer/docs/findings/INGEST_ADMISSION_IS_NOT_ALL_INGRESS_ADMISSION.md"
+      ],
+      "blockingGates": [
+        "legacy direct CLI calls without --require-source-set-admission and any direct music.path compatibility seam must migrate or fail closed universally",
+        "Palmier live-build imports, reference text sidecars, and generated assets outside the governed scene-package lane need their own complete admission and downstream rehash contracts",
+        "final promotion must reverify the exact bound source-set receipt, and descriptor-to-subprocess consumers still need a closed verify-to-open handoff"
+      ]
+    },
+    {
+      "capabilityId": "range-karaoke-captions",
+      "status": "released",
+      "codeEvidence": [
+        "scripts/producer/captions/caption_contract.py",
+        "scripts/producer/captions/caption_compile.py",
+        "scripts/producer/captions/caption_outputs.py",
+        "scripts/producer/captions/caption_operations.py",
+        "scripts/producer/captions/caption_shards.py",
+        "scripts/producer/captions/caption_shard_media.py",
+        "scripts/producer/captions/caption_shard_composite.py",
+        "scripts/producer/captions/caption_shard_contract.py",
+        "scripts/producer/captions/caption_render.py",
+        "scripts/producer/captions/caption_assemble.py",
+        "scripts/producer/captions/caption_repair_revalidation.py",
+        "scripts/producer/tests/test_caption_shards.py",
+        "scripts/producer/tests/test_current_render_caption_graph.py",
+        "scripts/producer/tests/fixtures/p3-caption-shard-traces.json",
+        "src/app/api/producer/ai-edit/caption-operations-v1.ts",
+        "src/app/api/producer/ai-edit/caption-word-index-v1.ts",
+        "src/app/api/producer/ai-edit/caption-chapters-v1.ts",
+        "src/lib/producer/__tests__/caption-schema-parity-v1.test.ts",
+        "scripts/producer/current_render_graph_build.py",
+        "scripts/producer/render.py",
+        "scripts/producer/assemble.py"
+      ],
+      "uiEvidence": [
+        "Ask Editor phrase resolver stages a stable-word caption index",
+        "Retained dirty/full caption traces use real ffmpeg over synthetic lavfi media; they are not creator-footage or full-project evidence"
+      ],
+      "skillEvidence": [
+        ".claude/skills/producer/SKILL.md"
+      ],
+      "docsEvidence": [
+        "docs/producer/command-driven-editing/03_CUTS_CAPTIONS_AND_AUDIO.md",
+        "docs/producer/command-driven-editing/07_IMPLEMENTATION_ROADMAP.md"
+      ],
+      "blockingGates": []
+    },
+    {
+      "capabilityId": "project-scoped-custom-motion",
+      "status": "released",
+      "codeEvidence": [
+        "scripts/producer/graphics/scene_contract.py",
+        "scripts/producer/graphics/scene_bundle.py",
+        "scripts/producer/graphics/scene_authoring_stage.py",
+        "scripts/producer/graphics/scene_package_contract.py",
+        "scripts/producer/graphics/scene_package_assets.py",
+        "scripts/producer/graphics/scene_package_render.py",
+        "scripts/producer/graphics/scene_package_cli.py",
+        "scripts/producer/graphics/scene_executor.py",
+        "scripts/producer/graphics/hyperframes_invocation.py",
+        "scripts/producer/headless/container_renderer.py",
+        "scripts/producer/graphics/scene_oracle.py",
+        "scripts/producer/graphics/readability_gate.py",
+        "scripts/producer/graphics/asset_governance.py",
+        "scripts/producer/graphics/deliverables.py",
+        "scripts/producer/planner/treatment_operations.py",
+        "scripts/producer/planner/creative_proposer.py",
+        "scripts/producer/palmier/scene_bindings.py",
+        "scripts/producer/palmier/scene_binding_reader.py",
+        "scripts/producer/tests/test_scene_package.py",
+        "scripts/producer/tests/test_scene_authoring_stage.py",
+        "scripts/producer/tests/test_treatment_operations.py",
+        "scripts/producer/tests/live_p4_scene_acceptance.py",
+        "scripts/producer/tests/live_scene_package_cli_acceptance.py"
+      ],
+      "uiEvidence": [
+        "No Ask Editor UI route is included; the released operator surface is the direct Codex/Claude Code scene_package_cli workflow",
+        "Direct local CLI rendering strips secrets and lints bundle network use but does not prove OS-level network denial; that proof is conditional on the governed SNIPER_RENDER_IMAGE_ID OCI path"
+      ],
+      "skillEvidence": [
+        ".claude/skills/producer/SKILL.md"
+      ],
+      "docsEvidence": [
+        "docs/producer/command-driven-editing/00_CURRENT_SYSTEM_INVENTORY.md",
+        "docs/producer/command-driven-editing/07_IMPLEMENTATION_ROADMAP.md"
+      ],
+      "blockingGates": []
+    },
+    {
+      "capabilityId": "scene-unit-private-review",
+      "status": "compatibility",
+      "codeEvidence": [
+        "scripts/producer/graphics/scene_review_repair_cli.py",
+        "scripts/producer/graphics/scene_review_repair.py",
+        "scripts/producer/graphics/scene_review_media.py",
+        "scripts/producer/graphics/scene_review_project.py",
+        "src/app/api/producer/scene-review/route.ts",
+        "src/app/api/producer/scene-review/request.ts",
+        "src/app/api/producer/scene-review/runner.ts",
+        "src/app/api/producer/scene-review/process.ts",
+        "scripts/producer/tests/test_scene_review_repair.py",
+        "scripts/producer/tests/test_p5_review_repair_artifact.py",
+        "scripts/producer/tests/live_p5_review_repair_acceptance.py",
+        "src/lib/server/__tests__/scene-review-route.test.ts",
+        "docs/producer/command-driven-editing/contracts/p5-one-unit-review-repair-v1.json"
+      ],
+      "uiEvidence": [
+        "The local /api/producer/scene-review application route confines every input, including both closed project-authority manifests, to one canonical Producer project; it holds the shared project mutation lease, publishes create-once private review media/receipts, requires exact project fanout, and supports idempotent replay",
+        "The route remains a private review surface: it does not mutate the active project head or a connected Palmier timeline"
+      ],
+      "skillEvidence": [
+        ".claude/skills/producer/SKILL.md"
+      ],
+      "docsEvidence": [
+        "docs/producer/command-driven-editing/17_P5_EXIT_AUDIT.md"
+      ],
+      "blockingGates": [
+        "qualify connected one-clip Palmier replacement and readback"
+      ]
+    },
+    {
+      "capabilityId": "reference-inspired-editing",
+      "status": "released",
+      "codeEvidence": [
+        "src/lib/producer/reference-qualification.ts",
+        "src/app/api/producer/auto-edit/authoring-prompt.ts",
+        "src/app/api/producer/references/study/route.ts",
+        "scripts/producer/study/reference_style_pack.py",
+        "scripts/producer/reference_style_pack_lint.py"
+      ],
+      "uiEvidence": [
+        "The legacy mimic strategy is visibly labeled Reference-inspired and discloses that verified mimic is not qualified"
+      ],
+      "skillEvidence": [
+        ".claude/skills/producer/SKILL.md"
+      ],
+      "docsEvidence": [
+        "docs/producer/command-driven-editing/04_MOTION_ASSETS_AND_REFERENCES.md",
+        "docs/producer/command-driven-editing/18_P6_EXIT_AUDIT.md"
+      ],
+      "blockingGates": []
+    },
+    {
+      "capabilityId": "verified-reference-mimic",
+      "status": "unqualified",
+      "codeEvidence": [
+        "src/lib/producer/reference-qualification.ts",
+        "scripts/producer/study/reference_style_pack.py",
+        "scripts/producer/reference_style_pack_lint.py"
+      ],
+      "uiEvidence": [
+        "Verified mimic is explicitly disclosed as not qualified"
+      ],
+      "skillEvidence": [
+        ".claude/skills/producer/SKILL.md"
+      ],
+      "docsEvidence": [
+        "docs/producer/command-driven-editing/18_P6_EXIT_AUDIT.md"
+      ],
+      "blockingGates": [
+        "three materially different approved packs with explicit waiver coverage",
+        "retained reviewer-disagreement adjudication evidence",
+        "proved-scene closure for every realized mechanic",
+        "itemized unsupported-mechanic disclosure before execution",
+        "rights evidence for every reference-derived identity asset",
+        "unseen-footage frozen-tolerance and three-reviewer no-regression evidence",
+        "separate onboarding and approved-pack editing-time receipts"
+      ]
+    },
+    {
+      "capabilityId": "ask-editor-project-custom-motion",
+      "status": "unsupported",
+      "codeEvidence": [
+        "scripts/producer/graphics/scene_package_cli.py"
+      ],
+      "uiEvidence": [
+        "No Ask Editor custom-motion route is released"
+      ],
+      "skillEvidence": [
+        ".claude/skills/producer/SKILL.md"
+      ],
+      "docsEvidence": [
+        "docs/producer/command-driven-editing/07_IMPLEMENTATION_ROADMAP.md"
+      ],
+      "blockingGates": [
+        "a typed Ask Editor operation, revision-authority integration, and retained end-to-end UI render proof must pass before this direct CLI capability is exposed in the UI"
+      ]
+    },
+    {
+      "capabilityId": "continuous-subject-reframe",
+      "status": "unsupported",
+      "codeEvidence": [
+        "scripts/producer/plan_lint.py",
+        "src/lib/producer/edit-plan.ts"
+      ],
+      "uiEvidence": [],
+      "skillEvidence": [
+        ".claude/skills/producer/SKILL.md"
+      ],
+      "docsEvidence": [
+        "docs/producer/command-driven-editing/00_CURRENT_SYSTEM_INVENTORY.md",
+        "docs/producer/command-driven-editing/07_IMPLEMENTATION_ROADMAP.md"
+      ],
+      "blockingGates": [
+        "no-face, multiple-face, face-exit, occlusion, screen-share, shot-boundary, fast-motion, safe-zone, canvas/FPS, and manual-override fixtures must all pass"
+      ]
+    },
+    {
+      "capabilityId": "animated-pip",
+      "status": "unsupported",
+      "codeEvidence": [
+        "scripts/producer/graphics/pip_takeover.py",
+        "scripts/producer/plan_lint_motion.py"
+      ],
+      "uiEvidence": [],
+      "skillEvidence": [
+        ".claude/skills/producer/SKILL.md"
+      ],
+      "docsEvidence": [
+        "docs/producer/command-driven-editing/00_CURRENT_SYSTEM_INVENTORY.md",
+        "docs/producer/command-driven-editing/07_IMPLEMENTATION_ROADMAP.md"
+      ],
+      "blockingGates": [
+        "the unwired renderer path and the same face, screen-share, boundary, motion, canvas/FPS, and override fixture matrix must pass before needsPip is accepted"
+      ]
+    },
+    {
+    "capabilityId": "non-ripple-word-repair",
+      "status": "unqualified",
+      "codeEvidence": [
+      "scripts/producer/edit/cut_repair.py",
+      "scripts/producer/edit/cut_repair_selection.py",
+      "scripts/producer/edit/cut_repair_route.py",
+      "scripts/producer/edit/cut_repair_route_target.py",
+      "scripts/producer/edit/cut_repair_route_cli.py",
+      "scripts/producer/edit/cut_repair_context_sources.py",
+      "scripts/producer/edit/cut_repair_context_timeline.py",
+      "scripts/producer/edit/cut_repair_context_materialize.py",
+      "scripts/producer/edit/cut_repair_promotion_gate.py",
+      "scripts/producer/edit/cut_repair_candidate_qc.py",
+      "scripts/producer/edit/cut_repair_candidate_qc_bundle.py",
+      "scripts/producer/edit/cut_repair_candidate_qc_contract.py",
+      "scripts/producer/edit/cut_repair_candidate_qc_media.py",
+      "scripts/producer/edit/cut_repair_candidate_qc_waveform.py",
+      "scripts/producer/tests/test_p2_cut_repair_candidate_qc.py",
+      "scripts/local_whisper.py",
+        "scripts/producer/edit/exact_timing.py",
+        "scripts/producer/edit/target_resolver.py",
+        "scripts/producer/edit/non_ripple.py",
+        "scripts/producer/edit/repair_impact.py",
+      "scripts/producer/edit/repair_fragment_contracts.py",
+      "scripts/producer/edit/repair_fragment_media.py",
+      "scripts/producer/edit/repair_fragment.py",
+      "scripts/producer/edit/repair_composite_media.py",
+      "scripts/producer/edit/repair_composite.py",
+      "scripts/producer/edit/cut_repair_execution.py",
+      "scripts/producer/captions/caption_repair_revalidation.py",
+      "scripts/producer/edit/picture_lock.py",
+      "scripts/producer/palmier/cut_repair_projection.py",
+      "scripts/producer/tests/test_p2_terminal_composite.py",
+      "scripts/producer/tests/test_p2_cut_repair_context_materialize.py",
+      "scripts/producer/tests/test_p2_cut_repair_promotion_gate.py",
+      "scripts/producer/tests/test_local_whisper.py",
+      "scripts/producer/tests/test_caption_repair_revalidation.py",
+      "src/lib/producer/contracts/cut-restore-speech-v1.ts",
+        "src/lib/server/producer-cut-repair-bindings.ts",
+      "src/lib/server/producer-cut-repair-artifacts.ts",
+      "src/lib/server/producer-cut-repair-artifact-verification.ts",
+      "src/lib/server/producer-cut-repair-promotion-evidence.ts",
+      "src/lib/server/cut-repair-review-store.ts",
+      "src/lib/server/cut-repair-promotion-store.ts",
+      "src/lib/server/cut-repair-transition-store.ts",
+      "src/lib/server/cut-repair-transition-reconciliation.ts",
+      "src/lib/producer/contracts/cut-repair-review-transition.ts",
+      "src/lib/producer/contracts/cut-repair-promotion-transition.ts",
+      "src/lib/producer/contracts/cut-repair-transition-receipt.ts",
+        "src/lib/server/content-addressed-file.ts",
+        "src/lib/server/producer-revision-materialize.ts",
+      "src/app/api/producer/ai-edit/cut-repair-route-policy.ts",
+      "src/app/api/producer/ai-edit/cut-repair-route-runner.ts",
+      "src/app/api/producer/ai-edit/cut-repair-execute-runner.ts",
+      "src/app/api/producer/ai-edit/cut-repair-candidate-qc-runner.ts",
+      "src/lib/server/__tests__/p2-cut-repair-two-step.test.ts",
+      "src/lib/producer/__tests__/p2-cut-repair-route-runner.test.ts"
+      ],
+      "uiEvidence": [
+        "Ask Editor executes the governed analyze → prepare → review → approve → execute lifecycle for explicit structured cut.restoreSpeech requests; free-form repair remains fail-closed"
+      ],
+      "skillEvidence": [],
+    "docsEvidence": [
+      "docs/producer/command-driven-editing/03_CUTS_CAPTIONS_AND_AUDIO.md",
+      "docs/producer/command-driven-editing/16_P2_EXIT_AUDIT.md",
+      "scripts/producer/docs/findings/DIRTY_FRAGMENT_PROOF_IS_NOT_PROGRAM_CLOCK_PROOF.md",
+      "scripts/producer/docs/findings/QC_RECEIPT_HASH_IS_NOT_QC_PROOF.md"
+    ],
+      "blockingGates": [
+      "free-form natural-language compilation beyond the explicit structured analysis directive",
+      "creator-speech qualification and operator audition; the retained controlled-media gate proves caller-ROI source A/V timing, not face or mouth discovery, phoneme alignment, semantic audibility, or perceptual lip sync",
+      "general layered picture repair while captions, graphics, b-roll, title cards, transitions, reframe or punch-ins, music, gain, and enhancement remain populated; the released picture terminal deliberately fails closed on those lanes",
+      "picture-changing repair outside the admitted 30 fps, 48 kHz, single-source, speed-1, zero-residual terminal-silence-reclaim subset",
+        "native Palmier sample-exact L/J and dialogue readback plus connected Palmier qualification; exact delivery remains baked"
+      ]
+    },
+    {
+      "capabilityId": "hybrid-editable-palmier",
+      "status": "unsupported",
+      "codeEvidence": [
+        "scripts/producer/palmier/native_qc_export.py",
+        "scripts/producer/palmier/desktop_audio_declaration.py",
+        "scripts/producer/palmier/desktop_audio_authority.py",
+        "scripts/producer/palmier/desktop_audio_master_contract.py",
+        "scripts/producer/palmier/desktop_audio_master_media.py",
+        "scripts/producer/palmier/desktop_audio_master_plan.py",
+        "scripts/producer/palmier/desktop_audio_master_binding.py",
+        "scripts/producer/palmier/desktop_audio_master_readback.py",
+        "scripts/producer/palmier/desktop_audio_master_route.py",
+        "scripts/producer/palmier/desktop_audio_master_guard.py",
+        "scripts/producer/palmier/desktop_audio_routes.py",
+        "scripts/producer/palmier/desktop_bound_operations.py",
+        "scripts/producer/palmier/desktop_manifest.py",
+        "scripts/producer/palmier/desktop_hook.py",
+        "scripts/producer/palmier/desktop_quality.py",
+        "scripts/producer/palmier/desktop_exact_master_plan.py",
+        "scripts/producer/palmier/desktop_exact_master_contract.py",
+        "scripts/producer/palmier/desktop_exact_master_binding.py",
+        "scripts/producer/palmier/desktop_exact_master_readback.py",
+        "scripts/producer/palmier/editable_parity_contract.py",
+        "scripts/producer/palmier/editable_parity_measure.py",
+        "scripts/producer/palmier/scene_binding_revision.py",
+        "scripts/producer/palmier/desktop_scene_readback.py",
+        "scripts/producer/palmier/desktop_operation_snapshot.py",
+        "src/app/api/producer/live-build/journal-model.ts",
+        "src/app/api/producer/live-build/journal.ts",
+        "src/app/api/producer/live-build/reconciliation.ts",
+        "scripts/producer/palmier/live_build_journal_contract.py",
+        "scripts/producer/tests/test_palmier_native_export_decode.py",
+        "scripts/producer/tests/test_palmier_desktop_audio_authority.py",
+        "scripts/producer/tests/test_palmier_desktop_audio_master_media.py",
+        "scripts/producer/tests/test_palmier_desktop_audio_master_manifest.py",
+        "scripts/producer/tests/test_palmier_desktop_audio_master_route.py",
+        "scripts/producer/tests/test_palmier_exact_master_reference.py",
+        "scripts/producer/tests/test_palmier_exact_master_desktop.py",
+        "scripts/producer/tests/test_palmier_editable_parity.py",
+        "scripts/producer/tests/test_scene_binding_revision.py",
+        "scripts/producer/tests/test_scene_binding_desktop_executor.py",
+        "scripts/producer/tests/test_palmier_desktop_operation_snapshot.py",
+        "src/lib/producer/__tests__/palmier-live-build-reconciliation.test.ts"
+      ],
+      "uiEvidence": [
+        "Exact-mirror controls only; hybrid editable delivery is not exposed as a released UI product"
+      ],
+      "skillEvidence": [],
+      "docsEvidence": [
+        "docs/palmier/PALMIER_CANONICAL_IMPLEMENTATION_STATE.md",
+        "docs/producer/command-driven-editing/05_RENDER_PALMIER_AND_QC.md",
+        "docs/producer/command-driven-editing/12_SHORT_LONG_EXECUTABLE_MATRIX.md",
+        "docs/producer/command-driven-editing/17_P5_EXIT_AUDIT.md"
+      ],
+      "blockingGates": [
+        "connected representative short and long exports from the exact bound timeline with complete ledger disposition and zero unexplained mutations",
+        "complete paged long-form readback with a bounded timeout",
+        "editable-stems audio authority remains blocked until Palmier exposes stable role/output-bus readback",
+        "connected passing audio-route authority for exactly one audible editable-stems or mastered-stereo route; one output audio stream is insufficient",
+        "connected hidden exact-master add/disable mutation and complete readback",
+        "connected strict full-stream picture, timing, and audio parity at required rational frame rates with frame/sample authority and explicit approximation approvals",
+        "connected one-scene replacement proving every unrelated clip remains exact",
+        "connected disconnect-at-each-boundary recovery plus preservation or explicit invalidation of a real manual edit"
+      ]
+    },
+    {
+      "capabilityId": "ninety-minute-lf-14-a",
+      "status": "unqualified",
+      "codeEvidence": [
+        "scripts/producer/baseline_trace.py",
+        "scripts/producer/tests/fixtures/p1-baseline-short.json",
+        "scripts/producer/tests/fixtures/p1-baseline-lf14.json",
+        "retained cached graphics and audio fast paths only"
+      ],
+      "uiEvidence": [],
+      "skillEvidence": [],
+      "docsEvidence": [
+        "docs/producer/command-driven-editing/08_PERFORMANCE_AND_TESTING.md",
+        "docs/producer/command-driven-editing/contracts/p0-current-short-baseline-v1.json",
+        "docs/producer/command-driven-editing/contracts/p0-current-lf14-baseline-v1.json"
+      ],
+      "blockingGates": [
+        "directional pilot",
+        "untouched confirmation"
+      ]
+    }
+  ]
+}

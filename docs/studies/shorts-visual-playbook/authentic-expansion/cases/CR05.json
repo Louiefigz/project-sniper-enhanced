@@ -1,0 +1,122 @@
+{
+  "id": "CR05",
+  "creator": "caleb",
+  "reel": "DGoNZ7OxBUy",
+  "title": "A reading card over quiet personal footage",
+  "message": "A career developed through a sequence of roles over many years.",
+  "arc": "A complete career chronology stays on screen over one quiet seated laptop shot.",
+  "foundation": "This is a text-led reading format, not a montage or a spoken teaching template. Motion supplies a human backdrop while the stable text does the informational work.",
+  "execution": "Maintain a quiet background and stable reading order. For a new narrated Short, select only the milestones that support the claim, enlarge them and reveal by the relevant speech. This source's dense card is a useful boundary case, not the preferred text density.",
+  "avoid": "Do not compress a full resume into a spoken Short or assume the viewer can read the entire card on one pass. A human background does not verify career claims; the dates and accomplishments remain the creator's statements.",
+  "typography": "Small left-aligned white sans-serif paragraphs with dates leading each entry. The type spans much of the portrait and sometimes crosses the person; no exact font or reading-speed qualification.",
+  "catalog": [
+    "native-media",
+    "native-text"
+  ],
+  "alternates": [
+    "LM05",
+    "CR06"
+  ],
+  "bursts": [],
+  "beats": [
+    {
+      "id": "CR05-B01",
+      "start": 0,
+      "end": 15.022,
+      "message_paraphrase": "Career milestones from early filming to leading a media team.",
+      "observed_visual": "The whole dated text list remains visible while a seated person shifts subtly and uses a laptop.",
+      "viewing_need_interpretation": "A stable card lets a motivated viewer scan or pause; the background supports identity rather than illustrating every line.",
+      "transition_condition": "A new format is needed only if the viewer now needs an example or narrated explanation, not because several seconds passed.",
+      "source_frames": [
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR05/f000012.jpg",
+          "sha256": "083f408caf9d551afdf9f08aca6cec846d864cb320118b64d054bfd9ccd4cbcb",
+          "requested_time": 0.5,
+          "source_pts": 0.500501,
+          "frame_index": 12,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR05/f000180.jpg",
+          "sha256": "04c9cd42c219d740040192afd4ba1f2df52f31c155ed3f564b6bea1f916c89e1",
+          "requested_time": 7.5,
+          "source_pts": 7.507508,
+          "frame_index": 180,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR05/f000348.jpg",
+          "sha256": "300cca3a1cce299b7d5d5fe952227f9cb328ebf0888b17179e17bdf564f29074",
+          "requested_time": 14.5,
+          "source_pts": 14.514515,
+          "frame_index": 348,
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/authentic-expansion/sequences/CR05-B01.jpg",
+        "sha256": "1ebb775d0c66ed0bb86838923f4fd3b8d1f7ff5b0c5fe9594e3b42faaa5ec0e0"
+      }
+    }
+  ],
+  "version": "2026-09-10.3",
+  "source_url": "https://www.instagram.com/reel/DGoNZ7OxBUy/",
+  "source_video": {
+    "path": "artifacts/shorts-authentic-expansion-2026-09-10/caleb/DGoNZ7OxBUy/1171044840572300-review.mp4",
+    "sha256": "3c587891ad63c59d46d2138656a71add567d1239e42c6ce4e05f3ee8a7501b86"
+  },
+  "duration": 15.022,
+  "acquisition": {
+    "path": "artifacts/shorts-authentic-expansion-2026-09-10/caleb/DGoNZ7OxBUy/acquisition.json",
+    "sha256": "6f174b75407ec8449b470ad4a4fc75af95b22ecd0cf4972aac6883f1535b828b"
+  },
+  "coverage_sheets": [
+    {
+      "path": "artifacts/shorts-authentic-expansion-2026-09-10/caleb/DGoNZ7OxBUy/coverage/01.jpg",
+      "sha256": "0011eb2f735868b0478162e2604b103514d47289a1d63f24525f7b48024f8796"
+    },
+    {
+      "path": "artifacts/shorts-authentic-expansion-2026-09-10/caleb/DGoNZ7OxBUy/coverage/02.jpg",
+      "sha256": "e093b4f7d7874510179c219cc79c57a17119ae3cfcffd41651b51176d12c3d69"
+    },
+    {
+      "path": "artifacts/shorts-authentic-expansion-2026-09-10/caleb/DGoNZ7OxBUy/coverage/03.jpg",
+      "sha256": "35376764017f817c8c3c8b5fb1c8c30611f67e7844523e476b77edb2f0f621f9"
+    }
+  ],
+  "coverage_sample_count": 30,
+  "motion_bursts": [],
+  "transcript": null,
+  "review_limits": "All chronological 2 fps contact sheets were visually inspected, spanning the complete source. Overview labels are resampling estimates; selected full frames carry exact decoded frame indices and source PTS. Editorial beat boundaries remain approximate. Selected motion bursts refine only their stated windows. No audio audition, uninterrupted realtime playback, exact font identification, independently verified business claims, retention causality or rendered adaptation is claimed. Reasons are editorial interpretations, not known editor intent. Text-led source was not submitted to ASR; use visible text.",
+  "review": {
+    "chronological_sheets_visually_inspected": true,
+    "chronological_sample_fps": 2,
+    "motion_burst_count_visually_inspected": 0,
+    "all_saved_frames_individually_reviewed": false,
+    "individual_original_resolution_frames_reviewed": [
+      {
+        "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR05/f000012.jpg",
+        "sha256": "083f408caf9d551afdf9f08aca6cec846d864cb320118b64d054bfd9ccd4cbcb"
+      },
+      {
+        "path": "docs/studies/shorts-visual-playbook/authentic-expansion/frames/CR05/f000348.jpg",
+        "sha256": "300cca3a1cce299b7d5d5fe952227f9cb328ebf0888b17179e17bdf564f29074"
+      }
+    ],
+    "individual_frame_scope": "Representative spot checks supplement all chronological sheets and listed motion bursts.",
+    "audio_auditioned": false,
+    "uninterrupted_realtime_playback": false,
+    "adaptation_render_qualified": false
+  },
+  "native_motion_findings": [],
+  "catalog_label_policy": "native-* labels describe shared implementation responsibilities, not registry IDs; hosted candidates and source-inspection limits are recorded in CATALOG_MAP.md."
+}

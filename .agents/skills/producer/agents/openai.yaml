@@ -1,0 +1,4 @@
+interface:
+  display_name: "Producer"
+  short_description: "Produce or revise shorts and long-form video"
+  default_prompt: "Use $producer to produce or revise this video with the requested scope and destination."

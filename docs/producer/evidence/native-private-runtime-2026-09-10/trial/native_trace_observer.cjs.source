@@ -1,0 +1,57 @@
+/** Parse complete native trace lines from both output streams independently. */
+'use strict';
+
+function createTraceObserver(options) {
+  const buffers={stdout:'',stderr:''};
+  const evidence={cache:null,compilation:null,failure:null,events:0};
+
+  function fail(message) {
+    if(evidence.failure)return;
+    evidence.failure=message;
+    options.onFailure(message);
+  }
+
+  function inspect(line) {
+    if(!line.includes('[Render:trace]'))return;
+    try {
+      const start=line.indexOf('{');
+      if(start<0)throw Error('Missing JSON trace payload');
+      const value=JSON.parse(line.slice(start));
+      evidence.events++;
+      if(value.compositionHash) {
+        if(!/^[a-f0-9]{16,64}$/.test(value.compositionHash)
+          ||!options.compiledSha256.startsWith(value.compositionHash))
+          throw Error('Native compilation differs from captured reference');
+        evidence.compilation=value.compositionHash;
+      }
+      if(value.message==='frames resolved') {
+        if(evidence.cache)throw Error('Ambiguous duplicate native cache event');
+        if(value.cacheHits!==1||value.cacheMisses!==0)
+          throw Error('Verified same-picture cache was not reused');
+        evidence.cache=value;
+      }
+    } catch(error) {fail(String(error.message||error));}
+  }
+
+  function feed(stream,chunk) {
+    if(!Object.hasOwn(buffers,stream))throw Error('Unknown native output stream');
+    buffers[stream]+=chunk.toString();
+    const lines=buffers[stream].split('\n');
+    buffers[stream]=lines.pop();
+    for(const line of lines)inspect(line);
+  }
+
+  function finish() {
+    for(const stream of Object.keys(buffers)) {
+      if(buffers[stream])inspect(buffers[stream]);
+      buffers[stream]='';
+    }
+    if(!evidence.compilation)fail('No native compilation trace evidence');
+    if(!evidence.cache)fail('No native cache-hit evidence on either output stream');
+    return {...evidence};
+  }
+
+  return {feed,finish};
+}
+
+module.exports={createTraceObserver};

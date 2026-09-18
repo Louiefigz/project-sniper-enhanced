@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "kind": "p3-caption-dirty-full-retained-traces",
+  "traces": [
+    {
+      "mode": "short",
+      "fps": {
+        "numerator": "30000",
+        "denominator": "1001"
+      },
+      "coldRendered": 2,
+      "incrementalCacheHits": 1,
+      "incrementalRendered": 1,
+      "forcedRendered": 2,
+      "dirtyCueNodes": 1,
+      "baseUnchanged": true,
+      "audioUnchanged": true,
+      "dirtyMatchesForcedFull": true,
+      "unchangedShardReused": true,
+      "changedShardRebuilt": true
+    },
+    {
+      "mode": "longform",
+      "fps": {
+        "numerator": "24000",
+        "denominator": "1001"
+      },
+      "coldRendered": 2,
+      "incrementalCacheHits": 1,
+      "incrementalRendered": 1,
+      "forcedRendered": 2,
+      "dirtyCueNodes": 1,
+      "baseUnchanged": true,
+      "audioUnchanged": true,
+      "dirtyMatchesForcedFull": true,
+      "unchangedShardReused": true,
+      "changedShardRebuilt": true
+    }
+  ],
+  "phaseDemo": {
+    "mode": "short",
+    "coldRendered": 4,
+    "incrementalCacheHits": 2,
+    "incrementalRendered": 2,
+    "forcedRendered": 4,
+    "dirtyCueNodes": [
+      "cue-ac99d7021c365830",
+      "cue-d63bbffb8c2fb2fb"
+    ],
+    "dirtyContentNodes": [
+      "cue-ac99d7021c365830",
+      "cue-d63bbffb8c2fb2fb"
+    ],
+    "unchangedCueNodes": [
+      "cue-88abe55d0b563912",
+      "cue-cb634c1fa9a8665b"
+    ],
+    "unchangedShardsReused": true,
+    "changedShardsRebuilt": true,
+    "baseUnchanged": true,
+    "audioUnchanged": true,
+    "dirtyMatchesForcedFull": true
+  }
+}

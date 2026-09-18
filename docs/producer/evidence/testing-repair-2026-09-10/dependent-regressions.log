@@ -1,0 +1,317 @@
+test_blank_pages_are_omitted_but_timeline_frames_stay_absolute (test_caption_pages.CaptionPagePlanningTests.test_blank_pages_are_omitted_but_timeline_frames_stay_absolute) ... ok
+test_contract_rejects_complete_cue_shifted_to_wrong_page_time (test_caption_pages.CaptionPagePlanningTests.test_contract_rejects_complete_cue_shifted_to_wrong_page_time) ... ok
+test_invalid_frame_authorities_fail (test_caption_pages.CaptionPagePlanningTests.test_invalid_frame_authorities_fail) ... ok
+test_page_identity_is_local_to_affected_media_window (test_caption_pages.CaptionPagePlanningTests.test_page_identity_is_local_to_affected_media_window) ... ok
+test_pages_preserve_overlap_and_split_crossing_cues (test_caption_pages.CaptionPagePlanningTests.test_pages_preserve_overlap_and_split_crossing_cues) ... ok
+test_stale_tail_beyond_sealed_picture_fails_closed (test_caption_pages.CaptionPagePlanningTests.test_stale_tail_beyond_sealed_picture_fails_closed) ... ok
+test_unordered_entries_fail_instead_of_changing_z_order (test_caption_pages.CaptionPagePlanningTests.test_unordered_entries_fail_instead_of_changing_z_order) ... ok
+test_bad_metadata_never_starts_decoder (test_caption_page_decode.CaptionPageDecodeTests.test_bad_metadata_never_starts_decoder)
+Malformed, nonzero, foreign-stream and diagnostic probe results cannot qualify. ... ok
+test_deadline_and_output_limit_errors_never_fallback (test_caption_page_decode.CaptionPageDecodeTests.test_deadline_and_output_limit_errors_never_fallback)
+Existing owned-runner failure is terminal; no additional decode is attempted. ... ok
+test_final_guard_after_all_proof_parsing_rejects_expiry (test_caption_page_decode.CaptionPageDecodeTests.test_final_guard_after_all_proof_parsing_rejects_expiry)
+A successful process and valid channels cannot publish after the original expiry. ... ok
+test_metadata_probe_then_exactly_one_bounded_decode (test_caption_page_decode.CaptionPageDecodeTests.test_metadata_probe_then_exactly_one_bounded_decode)
+No-count probe and one split decode retain the expected proof shape. ... ok
+test_original_remainder_decreases_across_probe_decode_and_parse (test_caption_page_decode.CaptionPageDecodeTests.test_original_remainder_decreases_across_probe_decode_and_parse)
+The adapter consumes the caller deadline instead of renewing each command. ... ok
+test_partial_or_mixed_decode_channels_never_return_proof (test_caption_page_decode.CaptionPageDecodeTests.test_partial_or_mixed_decode_channels_never_return_proof)
+A normal process return cannot rescue absent frames or mixed error text. ... ok
+test_progress_bytes_growth_during_read_is_rejected (test_caption_page_decode.CaptionPageDecodeTests.test_progress_bytes_growth_during_read_is_rejected)
+The final fstat comparison rejects mutation after the first size check. ... ok
+test_progress_fd_requires_bounded_single_link_real_bytes (test_caption_page_decode.CaptionPageDecodeTests.test_progress_fd_requires_bounded_single_link_real_bytes)
+Empty, oversized and hardlinked progress cannot claim terminal completion. ... ok
+test_progress_held_name_cannot_be_swapped_for_symlink (test_caption_page_decode.CaptionPageDecodeTests.test_progress_held_name_cannot_be_swapped_for_symlink)
+The held descriptor is not enough when the named output has changed. ... ok
+retained native caption page proof: /private/tmp/sniper-page-proof-regression-7y0ebw3o
+test_actual_child_deadline_never_returns_proof (test_caption_page_native_proof.NativePageProofTests.test_actual_child_deadline_never_returns_proof)
+A real spawned probe times out under original credit and is group-reaped. ... ok
+test_actual_defects_reject_without_positive_proof (test_caption_page_native_proof.NativePageProofTests.test_actual_defects_reject_without_positive_proof)
+Truncation, late packet damage, missing last frame, empty alpha and stale facts reject. ... ok
+test_integer_ntsc_single_frame_and_transparent_gaps (test_caption_page_native_proof.NativePageProofTests.test_integer_ntsc_single_frame_and_transparent_gaps)
+Public proof and every raw hash/alpha byte equal the original algorithm. ... ok
+test_equality_requires_exact_raw_hash_channel_and_float_type (test_caption_page_draft_integration.PageAbHarnessTests.test_equality_requires_exact_raw_hash_channel_and_float_type)
+A matching-looking dictionary never hides raw-byte or float transport drift. ... ok
+test_expected_defect_requires_exact_semantic_error (test_caption_page_draft_integration.PageAbHarnessTests.test_expected_defect_requires_exact_semantic_error)
+Only the explicitly requested proof error is acceptable rejection evidence. ... ok
+test_expired_test_deadline_cannot_return_new_credit (test_caption_page_draft_integration.PageAbHarnessTests.test_expired_test_deadline_cannot_return_new_credit)
+An expired test allowance is terminal, never a positive epsilon reset. ... ok
+test_metadata_is_reread_against_held_bytes_not_a_new_hash (test_caption_page_draft_integration.PageAbHarnessTests.test_metadata_is_reread_against_held_bytes_not_a_new_hash)
+Even the TEST driver rejects metadata mutation between initial hash and read. ... ok
+test_compositor_pins_all_added_direct_proof_dependencies (test_caption_page_draft_integration.PageIdentityTests.test_compositor_pins_all_added_direct_proof_dependencies)
+Changing each added helper invalidates reuse without resealing old receipts. ... FAIL
+test_held_projection_identity_matches_ordinary_compositor_and_closure (test_caption_page_draft_integration.PageIdentityTests.test_held_projection_identity_matches_ordinary_compositor_and_closure)
+The same explicit implementation map drives both production read paths. ... ok
+test_declared_stream_duration_cannot_override_picture_timeline (test_audio_mix_render.AudioMixAuthorityTests.test_declared_stream_duration_cannot_override_picture_timeline) ... ok
+test_non_cfr_rate_evidence_fails_closed (test_audio_mix_render.AudioMixAuthorityTests.test_non_cfr_rate_evidence_fails_closed) ... ok
+test_dialogue_mix_cannot_disable_sidechain_ducking (test_audio_mix_render.AudioMixDurationTests.test_dialogue_mix_cannot_disable_sidechain_ducking) ... ok
+test_four_part_aac_padding_cannot_extend_picture_or_round_ntsc (test_audio_mix_render.AudioMixDurationTests.test_four_part_aac_padding_cannot_extend_picture_or_round_ntsc) ... {"stage": "cut_speed", "status": "profile", "width": 320, "height": 180, "fps": "24000/1001", "pix_fmt": "yuv420p"}
+{"stage": "cut_speed", "status": "segment", "index": 0, "sourceId": "raw", "out_len": 0.2}
+{"stage": "cut_speed", "status": "segment", "index": 1, "sourceId": "raw", "out_len": 0.2}
+{"stage": "cut_speed", "status": "segment", "index": 2, "sourceId": "raw", "out_len": 0.2}
+{"stage": "cut_speed", "status": "segment", "index": 3, "sourceId": "raw", "out_len": 0.2}
+{"stage": "cut_speed", "status": "concat", "parts": 4}
+{"stage": "cut_speed", "status": "done", "videoDuration": 0.7925, "containerDuration": 0.7925, "expectedDuration": 0.8, "videoFrames": 19, "driftFrames": 0.181, "toleranceFrames": 3.0, "segments": 4, "channelNormalizationReceipts": [{"sourcePath": "/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/audio-aac-tail-bos6qwta/source.mp4", "receipt": {"schemaVersion": 1, "kind": "channel-normalization-receipt", "source": {"path": "/private/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/audio-aac-tail-bos6qwta/source.mp4", "sha256": "f15e2f4f0a3f72839eb2d16cbc0166dd6ee897271d484fac80ba545e97c63bba", "sizeBytes": 163116, "selector": "a:0", "selectedStreamIndex": 1}, "stream": {"codec": "aac", "sampleRate": 48000, "channels": 1, "channelLayout": "mono", "peakDbfs": ["-14.575409"]}, "decision": {"status": "mono-duplicated", "deadChannel": null, "liveChannel": null, "floorDb": -50, "minimumDeltaDb": 25, "stereoFilter": "pan=stereo|c0=c0|c1=c0", "monoFilter": "anull"}, "tools": {"ffmpegPath": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffmpeg", "ffmpegSha256": "d94d8e7af675f813e0a0faf036ff936d334ceb18daaec3a10a355679994e0311", "ffprobePath": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffprobe", "ffprobeSha256": "96f53c2099a3f59fc20efb424dd36d5510373f735cf9af50479c2f4d458695af", "peakFilter": "astats=metadata=0:reset=0"}, "receiptHash": "3ff7bc55ab0f91131baa0bd70f8ff89bacb1c74b5f40e22bd0df79cb9b2d8aee"}}]}
+{"status": "stage_done", "stage": "master", "out": "/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/audio-aac-tail-bos6qwta/final.mp4", "lufs_measured": -13.9, "lufs_within_tolerance": true}
+ok
+test_mix_trims_audio_to_video_stream_not_container (test_audio_mix_render.AudioMixDurationTests.test_mix_trims_audio_to_video_stream_not_container) ... {"event": "bed_prep", "ok": true, "measured_lufs": -22.7, "target_lufs": -30.0, "gain_db": -7.3}
+{"event": "bed_fit", "ok": true, "mode": "loop", "xfade_s": 0.4, "fade_out_s": 1.0, "period_s": 0.6, "loops": 4}
+{"event": "duck", "ok": true}
+{"event": "duck_depth", "measured": false, "reason": "no silence gap detected in dialogue"}
+{"event": "mix_master", "ok": true, "linear": false}
+ok
+test_all_illegal_measured_option_ranges_leave_the_linear_path (test_audio_mix_master_dispatch.SharedMasterDispatchTests.test_all_illegal_measured_option_ranges_leave_the_linear_path) ... ok
+test_delivery_requires_both_measured_loudness_and_true_peak (test_audio_mix_master_dispatch.SharedMasterDispatchTests.test_delivery_requires_both_measured_loudness_and_true_peak) ... ok
+test_failed_decode_cannot_qualify_plausible_partial_loudness_statistics (test_audio_mix_master_dispatch.SharedMasterDispatchTests.test_failed_decode_cannot_qualify_plausible_partial_loudness_statistics) ... ok
+test_high_lra_uses_static_gain_even_when_peak_allows_linear_gain (test_audio_mix_master_dispatch.SharedMasterDispatchTests.test_high_lra_uses_static_gain_even_when_peak_allows_linear_gain) ... ok
+test_legal_linear_program_needs_no_static_dry_run (test_audio_mix_master_dispatch.SharedMasterDispatchTests.test_legal_linear_program_needs_no_static_dry_run) ... ok
+test_mix_callback_keeps_bed_sum_float_until_measurement (test_audio_mix_master_dispatch.SharedMasterDispatchTests.test_mix_callback_keeps_bed_sum_float_until_measurement) ... ok
+test_nonconvergent_measurement_has_a_strict_iteration_budget (test_audio_mix_master_dispatch.SharedMasterDispatchTests.test_nonconvergent_measurement_has_a_strict_iteration_budget) ... ok
+test_positive_i_with_nonzero_lra_cannot_enter_illegal_linear_filter (test_audio_mix_master_dispatch.SharedMasterDispatchTests.test_positive_i_with_nonzero_lra_cannot_enter_illegal_linear_filter) ... ok
+test_quiet_high_crest_gain_trim_measures_callback_not_dialogue_alone (test_audio_mix_master_dispatch.SharedMasterDispatchTests.test_quiet_high_crest_gain_trim_measures_callback_not_dialogue_alone) ... ok
+test_static_measurement_failure_does_not_trigger_unbounded_retries (test_audio_mix_master_dispatch.SharedMasterDispatchTests.test_static_measurement_failure_does_not_trigger_unbounded_retries) ... ok
+test_exhausted_high_crest_master_is_retained_unapproved_not_published (test_audio_mix_master_dispatch.SharedMasterMediaTests.test_exhausted_high_crest_master_is_retained_unapproved_not_published)
+Two bounded trims do not qualify this input; preserve prior output. ... ok
+test_high_lra_program_retains_its_quiet_loud_relationship (test_audio_mix_master_dispatch.SharedMasterMediaTests.test_high_lra_program_retains_its_quiet_loud_relationship) ... ok
+test_integer_pts_exposes_submicrosecond_difference (test_audio_mix_without_media.PacketClockUnitTests.test_integer_pts_exposes_submicrosecond_difference) ... ok
+test_actual_two_variant_music_job_returns_two_qualified_aac_outputs (test_audio_mix_without_media.WithoutDeliveryMediaTests.test_actual_two_variant_music_job_returns_two_qualified_aac_outputs) ... ok
+test_changed_source_preserves_existing_output_and_is_not_published (test_audio_mix_without_media.WithoutDeliveryMediaTests.test_changed_source_preserves_existing_output_and_is_not_published) ... ok
+test_corrupt_tail_cannot_qualify_from_partial_loudness_statistics (test_audio_mix_without_media.WithoutDeliveryMediaTests.test_corrupt_tail_cannot_qualify_from_partial_loudness_statistics) ... ok
+test_dead_channel_repair_encodes_aac_but_copies_original_picture_pts (test_audio_mix_without_media.WithoutDeliveryMediaTests.test_dead_channel_repair_encodes_aac_but_copies_original_picture_pts) ... ok
+test_float_and_non_delivery_rate_sources_encode_qualified_aac (test_audio_mix_without_media.WithoutDeliveryMediaTests.test_float_and_non_delivery_rate_sources_encode_qualified_aac) ... ok
+test_qualified_original_aac_is_packet_and_decoded_sample_identical (test_audio_mix_without_media.WithoutDeliveryMediaTests.test_qualified_original_aac_is_packet_and_decoded_sample_identical) ... ok
+test_silent_aac_is_not_mislabeled_as_a_qualified_delivery (test_audio_mix_without_media.WithoutDeliveryMediaTests.test_silent_aac_is_not_mislabeled_as_a_qualified_delivery)
+-inf peaks are harmless headroom, but not proof of target loudness. ... ok
+test_mutation_during_measurement_preserves_final_and_its_sidecar (test_audio_candidate_identity.AudioCandidateIdentityTests.test_mutation_during_measurement_preserves_final_and_its_sidecar) ... ok
+test_stable_candidate_records_the_actual_measured_hash (test_audio_candidate_identity.AudioCandidateIdentityTests.test_stable_candidate_records_the_actual_measured_hash) ... ok
+test_invalid_budgets_and_nested_wall_timer_are_rejected (test_opening_execution_clock.OpeningExecutionClockTests.test_invalid_budgets_and_nested_wall_timer_are_rejected) ... ok
+test_no_phase_renews_the_original_budget (test_opening_execution_clock.OpeningExecutionClockTests.test_no_phase_renews_the_original_budget) ... ok
+test_post_operation_time_check_cannot_return_late_success (test_opening_execution_clock.OpeningExecutionClockTests.test_post_operation_time_check_cannot_return_late_success) ... ok
+test_real_blocking_work_is_interrupted_and_timer_disarmed (test_opening_execution_clock.OpeningExecutionClockTests.test_real_blocking_work_is_interrupted_and_timer_disarmed) ... ok
+test_clock_appends_are_allowed_but_original_history_is_not_rewritten (test_guided_opening_lifetime.OpeningLifetimeTest.test_clock_appends_are_allowed_but_original_history_is_not_rewritten)
+Normal phase telemetry appends; original entry events remain immutable. ... ok
+test_each_original_dependency_change_rejects (test_guided_opening_lifetime.OpeningLifetimeTest.test_each_original_dependency_change_rejects)
+Code, template, tool, original source and control drift remain distinct. ... ok
+test_final_original_clock_expiry_rejects (test_guided_opening_lifetime.OpeningLifetimeTest.test_final_original_clock_expiry_rejects)
+Neither constructor time nor a later guard gets a replacement allowance. ... ok
+test_initial_source_mutation_is_not_rebaselined (test_guided_opening_lifetime.OpeningLifetimeTest.test_initial_source_mutation_is_not_rebaselined)
+A new holder cannot adopt a snapshot changed after initial admission. ... ok
+test_last_source_check_cannot_mutate_metadata_into_success (test_guided_opening_lifetime.OpeningLifetimeTest.test_last_source_check_cannot_mutate_metadata_into_success)
+The final source observer is closed against entry metadata and original time. ... ok
+test_original_directory_identity_survives_inode_preserving_move (test_guided_opening_lifetime.OpeningLifetimeTest.test_original_directory_identity_survives_inode_preserving_move)
+Moving a file into a replacement directory cannot keep its old ancestry. ... ok
+test_original_metadata_and_clock_are_not_replaceable (test_guided_opening_lifetime.OpeningLifetimeTest.test_original_metadata_and_clock_are_not_replaceable)
+Equal-looking copies, method override and scalar mutation cannot renew work. ... ok
+test_repeated_guards_do_not_hash_sources_or_tools (test_guided_opening_lifetime.OpeningLifetimeTest.test_repeated_guards_do_not_hash_sources_or_tools)
+Initial source capture is reused;100 actual guards have no file-hash calls. ... ok
+test_constructor_captures_original_input_before_first_owner_callback (test_guided_presenter_base_identity.PresenterBaseIdentityTests.test_constructor_captures_original_input_before_first_owner_callback)
+A callback cannot mutate unrelated candidate fields then adopt a new baseline. ... ok
+test_final_bookkeeping_expiry_uses_the_same_original_cutoff (test_guided_presenter_base_identity.PresenterBaseIdentityTests.test_final_bookkeeping_expiry_uses_the_same_original_cutoff)
+A final pure comparison cannot publish success after consuming remaining time. ... ok
+test_final_source_callback_cannot_change_selected_observation (test_guided_presenter_base_identity.PresenterBaseIdentityTests.test_final_source_callback_cannot_change_selected_observation)
+Source holds do not replace the final independent presenter metadata sweep. ... ok
+test_guard_never_rebaselines_original_command_inputs (test_guided_presenter_base_identity.PresenterBaseIdentityTests.test_guard_never_rebaselines_original_command_inputs)
+Even equal plan replacement or late path/numeric changes fail before encode. ... ok
+test_internal_positive_reaches_existing_audio_and_preparation_gates_only (test_guided_presenter_base_identity.PresenterBaseIdentityTests.test_internal_positive_reaches_existing_audio_and_preparation_gates_only)
+Genuine all-used identity removes only its own prerequisite, not other gates. ... ok
+test_original_clock_replacement_and_same_clock_expiry_refuse (test_guided_presenter_base_identity.PresenterBaseIdentityTests.test_original_clock_replacement_and_same_clock_expiry_refuse)
+Equal seconds do not replace the actual clock; final source time may not renew. ... ok
+test_original_inputs_and_false_evidence_flags_cannot_be_replaced (test_guided_presenter_base_identity.PresenterBaseIdentityTests.test_original_inputs_and_false_evidence_flags_cannot_be_replaced)
+Type-compatible data copies and modified claims cannot acquire live source color. ... ok
+test_default_refuses_large_input_before_master_or_output_work (test_program_delivery_budget.ProgramDeliveryBudgetTests.test_default_refuses_large_input_before_master_or_output_work)
+A sparse fixture proves the default boundary without reading gigabytes. ... ok
+test_explicit_limit_reaches_source_candidate_and_receipt (test_program_delivery_budget.ProgramDeliveryBudgetTests.test_explicit_limit_reaches_source_candidate_and_receipt)
+The opted-in budget flows through every bounded artifact read. ... ok
+test_failed_signal_keeps_prior_output_and_records_failure (test_program_delivery_budget.ProgramDeliveryBudgetTests.test_failed_signal_keeps_prior_output_and_records_failure)
+Local continuity failure prevents the existing atomic promotion. ... ok
+test_invalid_limits_fail_before_execution (test_program_delivery_budget.ProgramDeliveryBudgetTests.test_invalid_limits_fail_before_execution)
+No accidental unlimited, fractional, or boolean budget. ... ok
+test_oversized_candidate_preserves_prior_output (test_program_delivery_budget.ProgramDeliveryBudgetTests.test_oversized_candidate_preserves_prior_output)
+AAC growth past the picture budget must fail before publication. ... ok
+test_post_comparison_mutation_cannot_become_new_baseline (test_program_delivery_budget.ProgramDeliveryBudgetTests.test_post_comparison_mutation_cannot_become_new_baseline)
+A changed candidate is rejected before another quality pass or replace. ... ok
+test_unbound_legacy_renderer_keeps_existing_contract (test_program_delivery_budget.ProgramDeliveryBudgetTests.test_unbound_legacy_renderer_keeps_existing_contract)
+Callers without optional comparison identity retain the loudness gate. ... ok
+test_changed_later_job_rejects_before_any_native_work (test_source_color_execution.SourceColorExecutionTests.test_changed_later_job_rejects_before_any_native_work)
+All prepared jobs stay checked, including a second source not yet observed. ... ok
+test_completed_data_does_not_reacquire_transient_launch_guards (test_source_color_execution.SourceColorExecutionTests.test_completed_data_does_not_reacquire_transient_launch_guards)
+Later evidence checks use persistent project/source/tool ownership only. ... ok
+test_completed_data_still_expires_at_original_overall_time (test_source_color_execution.SourceColorExecutionTests.test_completed_data_still_expires_at_original_overall_time)
+Completion is not an indefinitely reusable authority or a new source capture. ... ok
+test_completed_json_cannot_construct_a_live_batch (test_source_color_execution.SourceColorExecutionTests.test_completed_json_cannot_construct_a_live_batch)
+There is no record, deadline or callback constructor for completed evidence. ... ok
+test_duplicate_execution_does_not_launch_any_source_again (test_source_color_execution.SourceColorExecutionTests.test_duplicate_execution_does_not_launch_any_source_again)
+New-only original job publications fail before repeat decoder dispatch. ... ok
+test_expired_entry_performs_no_native_work (test_source_color_execution.SourceColorExecutionTests.test_expired_entry_performs_no_native_work)
+The original overall time, not source count, controls batch eligibility. ... ok
+test_final_timing_measurement_cannot_adopt_a_replacement_origin (test_source_color_execution.SourceColorExecutionTests.test_final_timing_measurement_cannot_adopt_a_replacement_origin)
+The original completion binding is held before final validation callbacks. ... ok
+test_final_timing_measurement_cannot_rebaseline_observation_mutation (test_source_color_execution.SourceColorExecutionTests.test_final_timing_measurement_cannot_rebaseline_observation_mutation)
+Only the elapsed scalar may change; original result metadata is not recaptured. ... ok
+test_final_timing_measurement_keeps_original_overall_cutoff (test_source_color_execution.SourceColorExecutionTests.test_final_timing_measurement_keeps_original_overall_cutoff)
+A final completion-check delay does not create time for a successful timestamp. ... ok
+test_first_source_phase_can_expire_during_second_without_renewal (test_source_color_execution.SourceColorExecutionTests.test_first_source_phase_can_expire_during_second_without_renewal)
+Immediate sealing retains completed data while another original source is observed. ... ok
+test_first_source_unknown_cleanup_stops_before_second_launch (test_source_color_execution.SourceColorExecutionTests.test_first_source_unknown_cleanup_stops_before_second_launch)
+No retry, second job or shared resource release is implied by a failure report. ... ok
+test_last_callback_cannot_change_an_earlier_source_evidence_file (test_source_color_execution.SourceColorExecutionTests.test_last_callback_cannot_change_an_earlier_source_evidence_file)
+A callback-free final file sweep covers every completed source's publications. ... ok
+test_last_callback_cannot_modify_earlier_observation (test_source_color_execution.SourceColorExecutionTests.test_last_callback_cannot_modify_earlier_observation)
+One final non-callback metadata check covers all previously read observations. ... ok
+test_last_source_clock_expiry_never_publishes_batch_success (test_source_color_execution.SourceColorExecutionTests.test_last_source_clock_expiry_never_publishes_batch_success)
+Time consumed by actual worker setup and publication remains in the same phase. ... ok
+test_no_new_outer_timer_wraps_the_native_cleanup_phase (test_source_color_execution.SourceColorExecutionTests.test_no_new_outer_timer_wraps_the_native_cleanup_phase)
+The existing per-source policy alone owns work and protected cleanup timers. ... ok
+test_same_original_sources_order_and_actual_observations_are_returned (test_source_color_execution.SourceColorExecutionTests.test_same_original_sources_order_and_actual_observations_are_returned)
+No typed observation is reconstructed from result JSON or a different source. ... ok
+test_second_source_failure_retains_first_timing_but_no_partial_result (test_source_color_execution.SourceColorExecutionTests.test_second_source_failure_retains_first_timing_but_no_partial_result)
+A clean earlier source does not make an incomplete batch successful. ... ok
+test_timing_or_source_context_clone_cannot_become_completed_current (test_source_color_execution.SourceColorExecutionTests.test_timing_or_source_context_clone_cannot_become_completed_current)
+The result holds actual timing rows and original typed source contexts. ... ok
+test_total_elapsed_includes_completed_data_validation (test_source_color_execution.SourceColorExecutionTests.test_total_elapsed_includes_completed_data_validation)
+Final held-result checks must not disappear from the batch's elapsed timing. ... ok
+test_actual_runtime_must_match_original_four_claim_controls_before_read (test_source_color_cleanup.SourceColorCleanupTests.test_actual_runtime_must_match_original_four_claim_controls_before_read)
+A typed different daemon/image cannot be passed to the cleanup coordinator. ... ok
+test_changed_reserved_bytes_after_prepare_fail_before_any_daemon_inspection (test_source_color_cleanup.SourceColorCleanupTests.test_changed_reserved_bytes_after_prepare_fail_before_any_daemon_inspection)
+The full originally held planned set is not refreshed after caller graphics checks. ... ok
+test_clock_method_substitution_is_not_a_protected_phase (test_source_color_cleanup.SourceColorCleanupTests.test_clock_method_substitution_is_not_a_protected_phase)
+An actual class name alone cannot replace the original timer-bearing methods. ... ok
+test_context_and_original_clock_replacements_cannot_gain_another_allowance (test_source_color_cleanup.SourceColorCleanupTests.test_context_and_original_clock_replacements_cannot_gain_another_allowance)
+Post-prepare context drift rejects before native work and records failed time. ... ok
+test_expired_original_clock_does_not_launch_coordinator_work (test_source_color_cleanup.SourceColorCleanupTests.test_expired_original_clock_does_not_launch_coordinator_work)
+Preparation plus caller work spends the same protected end before reconciliation. ... ok
+test_final_callback_runtime_drift_and_repeat_reconcile_are_refused (test_source_color_cleanup.SourceColorCleanupTests.test_final_callback_runtime_drift_and_repeat_reconcile_are_refused)
+Successful absence never allows refreshing actual controls or starting twice. ... ok
+test_final_original_callback_cannot_mutate_actual_batch_return (test_source_color_cleanup.SourceColorCleanupTests.test_final_original_callback_cannot_mutate_actual_batch_return)
+Bind actual coordinator metadata before final reservation phase callbacks. ... ok
+test_final_reservation_file_change_cannot_follow_successful_grade_absence (test_source_color_cleanup.SourceColorCleanupTests.test_final_reservation_file_change_cannot_follow_successful_grade_absence)
+Last guarded metadata mutation fails, rather than returning old-name cleanup. ... ok
+test_initial_three_file_captures_precede_first_original_callback (test_source_color_cleanup.SourceColorCleanupTests.test_initial_three_file_captures_precede_first_original_callback)
+First callback remains inside original read phase after all original identities. ... ok
+test_oversized_cleanup_allowance_is_not_used_even_for_preparation (test_source_color_cleanup.SourceColorCleanupTests.test_oversized_cleanup_allowance_is_not_used_even_for_preparation)
+The adapter cannot use a wider work clock before the coordinator's own cap. ... ok
+test_partial_staging_split_uses_real_coordinator_and_grade_absence_last (test_source_color_cleanup.SourceColorCleanupTests.test_partial_staging_split_uses_real_coordinator_and_grade_absence_last)
+No sidecar/jobs or process settlement are invented by the adapter. ... ok
+test_prepared_execution_fields_cannot_be_replaced_independently_of_context (test_source_color_cleanup.SourceColorCleanupTests.test_prepared_execution_fields_cannot_be_replaced_independently_of_context)
+The retained daemon, callback and cutoff are bound before their invocation. ... ok
+test_private_config_identity_remains_original_between_prepare_and_reconcile (test_source_color_cleanup.SourceColorCleanupTests.test_private_config_identity_remains_original_between_prepare_and_reconcile)
+An explicit TEST config mode change cannot become a new cleanup baseline. ... ok
+test_unknown_daemon_failure_retains_real_partial_diagnostics_and_timing (test_source_color_cleanup.SourceColorCleanupTests.test_unknown_daemon_failure_retains_real_partial_diagnostics_and_timing)
+The original coordinator error is not normalized to a successful empty batch. ... ok
+test_actual_claim_final_document_cannot_rebaseline_original_claim (test_source_color_read_entry_faults.ColdReadEntryFaultTests.test_actual_claim_final_document_cannot_rebaseline_original_claim)
+Original RED accepted this changed mtime/ctime in the later scope constructor. ... ok
+test_actual_claim_final_document_cannot_rebaseline_original_input (test_source_color_read_entry_faults.ColdReadEntryFaultTests.test_actual_claim_final_document_cannot_rebaseline_original_input)
+The input read at claim entry remains the exact original through admission. ... ok
+test_changed_early_authority_rejects_before_any_source_admission (test_source_color_read_entry_faults.ColdReadEntryFaultTests.test_changed_early_authority_rejects_before_any_source_admission)
+Permanent RED: changed SHA reached read_current_inputs before late refusal. ... ok
+test_claim_callback_cannot_rebaseline_already_read_media_result (test_source_color_read_entry_faults.ColdReadEntryFaultTests.test_claim_callback_cannot_rebaseline_already_read_media_result)
+The first verified raw completion stays held during the next metadata phase. ... ok
+test_claim_callback_cannot_rebaseline_fixed_evidence_sibling (test_source_color_read_entry_faults.ColdReadEntryFaultTests.test_claim_callback_cannot_rebaseline_fixed_evidence_sibling)
+The expected new evidence path is held even before receipt projection uses it. ... ok
+test_claim_callback_cannot_rebaseline_original_archive (test_source_color_read_entry_faults.ColdReadEntryFaultTests.test_claim_callback_cannot_rebaseline_original_archive)
+The archived reservation is held without opening today's active marker. ... ok
+test_claim_callback_cannot_rebaseline_original_sidecar (test_source_color_read_entry_faults.ColdReadEntryFaultTests.test_claim_callback_cannot_rebaseline_original_sidecar)
+A not-yet-parsed independently supplied sidecar still has its original inode. ... ok
+test_copied_entry_fields_do_not_create_registered_initial_evidence (test_source_color_read_entry_faults.ColdReadEntryFaultTests.test_copied_entry_fields_do_not_create_registered_initial_evidence)
+Neither a DTO nor dataclass copy can become an original-entry capability. ... ok
+test_equal_replacement_clock_is_not_the_original_entry_clock (test_source_color_read_entry_faults.ColdReadEntryFaultTests.test_equal_replacement_clock_is_not_the_original_entry_clock)
+A newly constructed equal clock cannot acquire an existing entry's lifetime. ... ok
+test_original_entry_cutoff_cannot_be_extended_before_scope_admission (test_source_color_read_entry_faults.ColdReadEntryFaultTests.test_original_entry_cutoff_cannot_be_extended_before_scope_admission)
+Permanent RED: entry and later actual scope silently adopted the longer end. ... ok
+test_custom_remaining_or_unbound_body_clock_cannot_enter (test_source_color_body_read_clock.BodyReadClockTests.test_custom_remaining_or_unbound_body_clock_cannot_enter)
+No caller-provided clock callback bypasses the original class implementation. ... ok
+test_original_clock_cannot_be_substituted_or_extended (test_source_color_body_read_clock.BodyReadClockTests.test_original_clock_cannot_be_substituted_or_extended)
+Matching fields in another clock and a changed cutoff both reject. ... ok
+test_original_opening_clock_remains_unchanged (test_source_color_body_read_clock.BodyReadClockTests.test_original_opening_clock_remains_unchanged)
+Legacy opening reads keep their separate monotonic-only contract. ... ok
+test_real_scope_borrows_original_body_clock_and_observation_replay (test_source_color_body_read_clock.BodyReadClockTests.test_real_scope_borrows_original_body_clock_and_observation_replay)
+Actual bounded observation replay adds no clock and grants no consumption proof. ... ok
+test_wall_bound_cannot_expand_and_watermark_cannot_move_back (test_source_color_body_read_clock.BodyReadClockTests.test_wall_bound_cannot_expand_and_watermark_cannot_move_back)
+Moving either side of the original body wall interval cannot buy time. ... ok
+test_wall_expiry_rejects_while_monotonic_budget_remains (test_source_color_body_read_clock.BodyReadClockTests.test_wall_expiry_rejects_while_monotonic_budget_remains)
+The old base-class remaining call would incorrectly allow this read. ... ok
+test_actual_clock_and_same_guard_cross_the_adapter_with_no_nested_observation_alarm (test_source_color_media_invocation.SourceColorMediaInvocationTests.test_actual_clock_and_same_guard_cross_the_adapter_with_no_nested_observation_alarm)
+Only orchestration is under test; no mocked leaf grants any original-owner authority. ... ok
+test_all_or_none_exact_transport (test_source_color_media_invocation.SourceColorMediaInvocationTests.test_all_or_none_exact_transport)
+Do not infer sidecars, declarations or a fallback from partial flags. ... ok
+test_direct_malformed_call_refuses_before_clock_directory_or_claim (test_source_color_media_invocation.SourceColorMediaInvocationTests.test_direct_malformed_call_refuses_before_clock_directory_or_claim)
+A JSON DTO cannot skip the direct-call optional transport check. ... ok
+test_main_explicit_transport_passes_one_typed_fourth_argument (test_source_color_media_invocation.SourceColorMediaInvocationTests.test_main_explicit_transport_passes_one_typed_fourth_argument)
+No declarations or authority values are synthesized in the CLI. ... ok
+test_main_legacy_dispatch_preserves_three_argument_call (test_source_color_media_invocation.SourceColorMediaInvocationTests.test_main_legacy_dispatch_preserves_three_argument_call)
+Absent source flags preserve the preexisting direct entry signature. ... ok
+test_main_partial_flags_fail_without_run (test_source_color_media_invocation.SourceColorMediaInvocationTests.test_main_partial_flags_fail_without_run)
+Actual CLI grammar cannot execute a legacy fallback for partial source color. ... ok
+test_path_and_hash_normalization_are_not_silent (test_source_color_media_invocation.SourceColorMediaInvocationTests.test_path_and_hash_normalization_are_not_silent)
+Reject caller aliases before constructing Path or touching a directory. ... ok
+test_source_observation_failure_never_attempts_base_or_legacy_fallback (test_source_color_media_invocation.SourceColorMediaInvocationTests.test_source_observation_failure_never_attempts_base_or_legacy_fallback)
+Existing source errors propagate; partial all-source work is not usable media. ... ok
+test_unsupported_source_plan_refuses_before_lifetime_or_observation (test_source_color_media_invocation.SourceColorMediaInvocationTests.test_unsupported_source_plan_refuses_before_lifetime_or_observation)
+Reject unsupported work before spending the existing decode allowance. ... ok
+test_command_is_strict_selected_video_passthrough_without_seek_or_scale (test_audit_glitch_scan.GlitchScanFaultTests.test_command_is_strict_selected_video_passthrough_without_seek_or_scale) ... ok
+test_decoded_length_must_match_the_audited_duration (test_audit_glitch_scan.GlitchScanFaultTests.test_decoded_length_must_match_the_audited_duration) ... ok
+test_equal_printed_pts_time_with_increasing_pts_is_the_precision_limit (test_audit_glitch_scan.GlitchScanFaultTests.test_equal_printed_pts_time_with_increasing_pts_is_the_precision_limit) ... ok
+test_filter_escape_covers_option_and_graph_levels_including_apostrophes (test_audit_glitch_scan.GlitchScanFaultTests.test_filter_escape_covers_option_and_graph_levels_including_apostrophes) ... ok
+test_luma_frame_class_ceiling_is_explicit (test_audit_glitch_scan.GlitchScanFaultTests.test_luma_frame_class_ceiling_is_explicit) ... ok
+test_luma_streams_from_a_private_sink_never_the_progress_pipe (test_audit_glitch_scan.GlitchScanFaultTests.test_luma_streams_from_a_private_sink_never_the_progress_pipe) ... ok
+test_missing_duplicate_unpaired_or_malformed_luma_rejects (test_audit_glitch_scan.GlitchScanFaultTests.test_missing_duplicate_unpaired_or_malformed_luma_rejects) ... ok
+test_missing_zero_or_conflicting_decode_completion_is_rejected (test_audit_glitch_scan.GlitchScanFaultTests.test_missing_zero_or_conflicting_decode_completion_is_rejected) ... ok
+test_nonzero_empty_and_partial_output_fail_all_detectors (test_audit_glitch_scan.GlitchScanFaultTests.test_nonzero_empty_and_partial_output_fail_all_detectors) ... ok
+test_scan_budget_scales_with_media_length_and_respects_run_deadline (test_audit_glitch_scan.GlitchScanFaultTests.test_scan_budget_scales_with_media_length_and_respects_run_deadline) ... ok
+test_timeout_os_and_unicode_errors_become_unmeasured_rows (test_audit_glitch_scan.GlitchScanFaultTests.test_timeout_os_and_unicode_errors_become_unmeasured_rows) ... ok
+test_torn_progress_line_in_sink_position_cannot_pass (test_audit_glitch_scan.GlitchScanFaultTests.test_torn_progress_line_in_sink_position_cannot_pass) ... ok
+test_black_head_tail_body_and_declared_slack_keep_verdicts (test_audit_glitch_scan.GlitchVerdictTests.test_black_head_tail_body_and_declared_slack_keep_verdicts) ... ok
+test_colorized_detector_lines_are_stripped_and_declared_never_ignored (test_audit_glitch_scan.GlitchVerdictTests.test_colorized_detector_lines_are_stripped_and_declared_never_ignored) ... ok
+test_completed_freeze_and_flash_thresholds_preserve_semantics (test_audit_glitch_scan.GlitchVerdictTests.test_completed_freeze_and_flash_thresholds_preserve_semantics) ... ok
+test_freeze_end_tolerates_only_ffmpeg_six_decimal_rounding (test_audit_glitch_scan.GlitchVerdictTests.test_freeze_end_tolerates_only_ffmpeg_six_decimal_rounding) ... ok
+test_invalid_duration_fails_before_decoder (test_audit_glitch_scan.GlitchVerdictTests.test_invalid_duration_fails_before_decoder) ... ok
+test_malformed_black_and_freeze_events_fail (test_audit_glitch_scan.GlitchVerdictTests.test_malformed_black_and_freeze_events_fail) ... ok
+test_only_detector_prefixed_lines_are_events (test_audit_glitch_scan.GlitchVerdictTests.test_only_detector_prefixed_lines_are_events) ... ok
+test_scan_process_environment_forbids_color (test_audit_glitch_scan.GlitchVerdictTests.test_scan_process_environment_forbids_color) ... ok
+test_terminal_freeze_cannot_disappear_or_get_an_invented_allowed_end (test_audit_glitch_scan.GlitchVerdictTests.test_terminal_freeze_cannot_disappear_or_get_an_invented_allowed_end) ... ok
+test_terminal_freeze_reports_earlier_closed_spans_too (test_audit_glitch_scan.GlitchVerdictTests.test_terminal_freeze_reports_earlier_closed_spans_too) ... ok
+test_terminal_progress_block_alone_defines_the_decode (test_audit_glitch_scan.GlitchVerdictTests.test_terminal_progress_block_alone_defines_the_decode) ... ok
+test_broll_focus_ops_fail_before_the_live_worklist (test_palmier_alpha_readback.AlphaReadbackTests.test_broll_focus_ops_fail_before_the_live_worklist) ... ok
+test_caption_pages_reject_deletion_media_window_and_duplicate_ids (test_palmier_alpha_readback.AlphaReadbackTests.test_caption_pages_reject_deletion_media_window_and_duplicate_ids) ... ok
+test_manifest_and_final_readback_match_production_z_order (test_palmier_alpha_readback.AlphaReadbackTests.test_manifest_and_final_readback_match_production_z_order) ... ok
+test_title_and_graphics_require_live_unique_dedicated_clips (test_palmier_alpha_readback.AlphaReadbackTests.test_title_and_graphics_require_live_unique_dedicated_clips) ... ok
+test_changed_scan_count_fails_before_registry_can_go_stale (test_external_ingress_registry.ExternalIngressRegistryTests.test_changed_scan_count_fails_before_registry_can_go_stale) ... ok
+test_one_discovery_cannot_have_two_overlapping_owners (test_external_ingress_registry.ExternalIngressRegistryTests.test_one_discovery_cannot_have_two_overlapping_owners) ... ok
+test_removed_authority_token_fails (test_external_ingress_registry.ExternalIngressRegistryTests.test_removed_authority_token_fails) ... ok
+test_repository_registry_is_exact_and_complete (test_external_ingress_registry.ExternalIngressRegistryTests.test_repository_registry_is_exact_and_complete) ... ok
+test_unowned_discovered_occurrence_fails (test_external_ingress_registry.ExternalIngressRegistryTests.test_unowned_discovered_occurrence_fails) ... ok
+test_real_layering_caption_audio_and_dirty_invalidation (test_graphics_broll_layering.GraphicsOverBrollLayeringTests.test_real_layering_caption_audio_and_dirty_invalidation) ... ok
+test_render_routes_broll_before_graphics (test_graphics_broll_layering.GraphicsOverBrollLayeringTests.test_render_routes_broll_before_graphics) ... ok
+test_changed_parent_discards_suggestions_not_human_edits (test_color_diagnostic.ColorDiagnosticTests.test_changed_parent_discards_suggestions_not_human_edits) ... ok
+test_failed_worker_keeps_timing_and_has_no_proposal (test_color_diagnostic.ColorDiagnosticTests.test_failed_worker_keeps_timing_and_has_no_proposal) ... ok
+test_final_revalidation_over_budget_discards_success_and_suggestions (test_color_diagnostic.ColorDiagnosticTests.test_final_revalidation_over_budget_discards_success_and_suggestions) ... ok
+test_legacy_admission_failure_is_retained_without_running_worker (test_color_diagnostic.ColorDiagnosticTests.test_legacy_admission_failure_is_retained_without_running_worker) ... ok
+test_new_only_artifacts_and_no_canonical_grade_or_approval_writes (test_color_diagnostic.ColorDiagnosticTests.test_new_only_artifacts_and_no_canonical_grade_or_approval_writes) ... ok
+test_policy_retains_exact_mounts_network_memory_and_no_pull (test_color_diagnostic.ColorDiagnosticTests.test_policy_retains_exact_mounts_network_memory_and_no_pull) ... ok
+test_private_store_symlink_is_refused (test_color_diagnostic.ColorDiagnosticTests.test_private_store_symlink_is_refused) ... ok
+test_source_identity_and_duplicate_sample_closure_fail (test_color_diagnostic.ColorDiagnosticTests.test_source_identity_and_duplicate_sample_closure_fail) ... ok
+test_unknown_profile_and_partial_failures_do_not_suggest (test_color_diagnostic.ColorDiagnosticTests.test_unknown_profile_and_partial_failures_do_not_suggest) ... ok
+test_existing_all_row_and_frame_planner_shape_is_required (test_guided_body_qc.GuidedBodyQcTests.test_existing_all_row_and_frame_planner_shape_is_required) ... ok
+test_final_source_recheck_racing_cut_support_cannot_return_verified (test_guided_body_qc.GuidedBodyQcTests.test_final_source_recheck_racing_cut_support_cannot_return_verified) ... ok
+test_missing_duplicate_failed_check_or_forged_counts_reject (test_guided_body_qc.GuidedBodyQcTests.test_missing_duplicate_failed_check_or_forged_counts_reject) ... ok
+test_missing_required_support_or_added_optional_file_reject (test_guided_body_qc.GuidedBodyQcTests.test_missing_required_support_or_added_optional_file_reject) ... ok
+test_missing_shifted_foreign_or_reordered_frame_reject (test_guided_body_qc.GuidedBodyQcTests.test_missing_shifted_foreign_or_reordered_frame_reject) ... ok
+test_own_screen_accent_skip_matches_actual_audit_not_a_new_required_check (test_guided_body_qc.GuidedBodyQcTests.test_own_screen_accent_skip_matches_actual_audit_not_a_new_required_check) ... ok
+test_warnings_are_preserved_not_promoted_to_clean_pass (test_guided_body_qc.GuidedBodyQcTests.test_warnings_are_preserved_not_promoted_to_clean_pass) ... ok
+test_whole_body_graphics_need_every_presence_and_declared_contrast (test_guided_body_qc.GuidedBodyQcTests.test_whole_body_graphics_need_every_presence_and_declared_contrast) ... ok
+
+======================================================================
+FAIL: test_compositor_pins_all_added_direct_proof_dependencies (test_caption_page_draft_integration.PageIdentityTests.test_compositor_pins_all_added_direct_proof_dependencies)
+Changing each added helper invalidates reuse without resealing old receipts.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/test_caption_page_draft_integration.py", line 35, in test_compositor_pins_all_added_direct_proof_dependencies
+    self.assertNotEqual(initial, pages.caption_page_compositor_identity()[1])
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '537c5f3c40d1a3c8b9ccedbd7232772263be44af5d2bf8c85337a1beecdbdbfd' == '537c5f3c40d1a3c8b9ccedbd7232772263be44af5d2bf8c85337a1beecdbdbfd'
+
+----------------------------------------------------------------------
+Ran 187 tests in 166.367s
+
+FAILED (failures=1)
+TEST opening lifetime100 guards: 34.502ms; no new byte hashes

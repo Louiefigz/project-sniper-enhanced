@@ -1,0 +1,66 @@
+{
+  "node": "v23.10.0",
+  "sourceCommit": "b1afdb1dcbcad39dd27638ea699f132fe44ce6df",
+  "scope": "Text-only validator counterexamples; no media, browser, network or installed dependencies",
+  "cases": [
+    {
+      "name": "valid_control",
+      "shouldPass": true,
+      "actualPass": true,
+      "errors": []
+    },
+    {
+      "name": "missing_program_duration",
+      "shouldPass": false,
+      "actualPass": true,
+      "errors": []
+    },
+    {
+      "name": "missing_scene_end",
+      "shouldPass": false,
+      "actualPass": true,
+      "errors": []
+    },
+    {
+      "name": "fabricated_anchor_phrase",
+      "shouldPass": false,
+      "actualPass": true,
+      "errors": []
+    },
+    {
+      "name": "unquantized_scene_end",
+      "shouldPass": false,
+      "actualPass": true,
+      "errors": []
+    },
+    {
+      "name": "changed_word_end_source_mapping",
+      "shouldPass": false,
+      "actualPass": true,
+      "errors": []
+    },
+    {
+      "name": "missing_caption_word",
+      "shouldPass": false,
+      "actualPass": false,
+      "errors": [
+        "Caption word count 0 != retained word count 1",
+        "Caption 0 missing or different"
+      ]
+    },
+    {
+      "name": "shifted_caption_word",
+      "shouldPass": false,
+      "actualPass": false,
+      "errors": [
+        "Caption 0 timing differs from transcript"
+      ]
+    },
+    {
+      "name": "footage_infinite_end",
+      "shouldPass": false,
+      "actualPass": true,
+      "errors": []
+    }
+  ]
+}

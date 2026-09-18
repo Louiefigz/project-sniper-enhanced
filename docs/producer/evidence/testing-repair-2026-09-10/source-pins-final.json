@@ -1,0 +1,12 @@
+[
+  {
+    "module": "guided-source-color-pipeline-pins",
+    "exitCode": 0,
+    "seconds": 11.676
+  },
+  {
+    "module": "guided-source-color-staging-batch",
+    "exitCode": 0,
+    "seconds": 120.302
+  }
+]

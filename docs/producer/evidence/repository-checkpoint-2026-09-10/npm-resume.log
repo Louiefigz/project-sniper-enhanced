@@ -1,0 +1,362 @@
+src/lib/server/__tests__/color-diagnostic-projection.test.ts
+✔ result is source/context/cut-bound and strips private filesystem paths (7.631167ms)
+✔ re-sealed unknown lighting proposal, changed source SHA and duplicate source groups are rejected (5.715083ms)
+✔ cleanup aggregation is sticky across an uncertain first source then a successful second (32.859416ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 53.040708
+src/lib/server/__tests__/content-addressed-json.test.ts
+content-addressed JSON tests passed
+src/lib/server/__tests__/current-render-graph-authority.test.ts
+current render graph authority tests passed
+src/lib/server/__tests__/current-render-graph-command.test.ts
+current-render-graph-command tests passed
+src/lib/server/__tests__/explicit-venv-selector.test.ts
+✔ explicit canonical installed venv preserves invocation path rather than resolving out of the environment (6.124042ms)
+✔ explicit root rejects relative, normalized aliases, trailing separators and controls (2.744708ms)
+✔ whole-venv and bin symlink aliases remain forbidden (7.08275ms)
+✔ missing or nonregular interpreter/config cannot select ambient Python (3.263583ms)
+✔ nonexecutable interpreter is rejected before a worker is attempted (2.080375ms)
+✔ empty, oversized and multiply linked configs are rejected (1.852125ms)
+✔ explicit environment selection is strict and default behavior stays unchanged when absent (1.213083ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 33.233708
+src/lib/server/__tests__/generation-checkpoint-clock.test.ts
+✔ both original clock kinds keep no-argument sampling unchanged (2.466333ms)
+✔ both clock kinds charge persistence after wall-dominated elapsed and never refund its floor (0.641834ms)
+✔ stalled wall charges original monotonic work and postwrite rollback poisons both kinds (0.437542ms)
+✔ failed persistence still charges its wall-dominated monotonic cost without a new wall sample (0.404ms)
+✔ an actually observed rollback during failed persistence permanently poisons both clocks (0.427833ms)
+✔ original wall and monotonic functions cannot be replaced before or inside a checkpoint (0.526583ms)
+✔ expiry during persistence never introduces an unretained second wall sample (16.713ms)
+✔ successful checkpoint retains every sampled wall and charges postwrite time without resampling (14.945459ms)
+✔ final publication failure retains the sampled wall without a second sample or renewed clock (14.36425ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 59.439
+src/lib/server/__tests__/generation-clock-history.test.ts
+✔ legacy observations remain byte-identical while one execution advances one fresh-read watermark (172.857125ms)
+✔ equal global time on a different execution retains its own record (23.825708ms)
+✔ every read detects changed bytes instead of borrowing a cached history (12.052833ms)
+✔ same-byte inode replacement is not adopted by the original held history (14.37375ms)
+✔ unknown files, links and oversized history bytes reject (1.66875ms)
+✔ noncanonical raw JSON, bad watermark digest, mixed schema/name and foreign origin reject (3.939583ms)
+✔ exactly512 legacy facts remain fenced rather than migrated, reset or deleted (123.476416ms)
+✔ 512 total entries permits only the already-present execution watermark to advance (297.78525ms)
+✔ stale histories cannot publish over a newer observation or unseen execution (17.779709ms)
+✔ a lost prepublication lease removes only its own temp and preserves original records (8.798708ms)
+✔ postpublication guard failure retains advanced durable bytes and never restores older time (32.839167ms)
+✔ one file sync and one directory sync persist each successful publication (23.047041ms)
+✔ file sync failure preserves old bytes and cleans only the unpublished owned temp (1.678208ms)
+✔ directory sync failure retains the advanced target without claiming successful persistence (17.438917ms)
+✔ the prepublication callback cannot mutate original records or caller value unnoticed (11.575375ms)
+✔ postpublication callback substitution is detected without deleting the changed target (10.979625ms)
+✔ temporary path substitution never authorizes deleting a different inode (5.874666ms)
+✔ callers cannot ignore arbitrary history entries or reconstruct live read authority (0.686791ms)
+✔ uncertain temporary cleanup retains even a falsy original callback failure (6.4685ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 792.487292
+src/lib/server/__tests__/generation-clock-watermark-v2.test.ts
+✔ 2415 increasing checks persist one latest execution watermark without capacity exhaustion (27426.5ms)
+ℹ {"scope":"TEST durable scheduling only; inert lease callback","checks":2415,"elapsedMs":27412.3415}
+✔ legacy immutable bytes survive mixed-history writes and both formats contribute high-water (28.648458ms)
+✔ same timestamp is a no-op only for its own execution after fresh validation (24.459584ms)
+✔ expired and failed-attempt observations still prevent a fresh caller recovering time (24.883416ms)
+✔ a real acquired project lease is required to remain live during the write (62.848416ms)
+✔ the original input cannot be rebaselined by the first caller guard (0.542875ms)
+✔ a last-guard concurrent newer watermark is retained rather than overwritten by stale input (19.152333ms)
+✔ same-byte inode replacement during the last guard cannot become the original history (18.406583ms)
+✔ a saturated legacy folder remains fenced with every historical byte retained (8718.976625ms)
+✔ links and unknown history entries fail even at an unchanged timestamp (16.889083ms)
+✔ persistence time is charged before returning the original remaining allowance (12.416833ms)
+✔ expiry during a final persistence guard cannot return its stale positive remainder (12.329833ms)
+✔ persistence callbacks cannot swap the original remaining-time function (11.588708ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 36382.131292
+src/lib/server/__tests__/generation-clock-watermark.test.ts
+✔ a fresh process or new attempt ID cannot recover time by moving the wall clock backwards (28.285041ms)
+✔ observations are immutable, clock-bound, lease-guarded and reject poisoned or linked history (13.725875ms)
+✔ an expired attempt's later wall observation survives and is never converted to fresh allowance (25.605209ms)
+✔ a healthy-lease failure outcome advances durable high-water even when no remaining check follows (25.28975ms)
+✔ switching from compiler to readiness cannot reset the original request observation history (26.009333ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 121.995333
+src/lib/server/__tests__/generation-deadline.test.ts
+✔ proposal reserve is the declared remaining clean work, not a throughput prediction (1.443792ms)
+✔ retries retain original request budget and require enough room for a whole existing attempt ceiling (0.172541ms)
+✔ preparation and result checking consume the same ten-minute attempt as the provider (0.498625ms)
+✔ either wall or monotonic elapsed prevents clock/suspend undercount; rollback poisons the attempt (0.159416ms)
+✔ denied attempts and malformed/unavailable clocks cannot be used to spawn paid work (0.306958ms)
+✔ stored budget proof binds original clock, execution, whole-attempt elapsed and exact declared policy (2.851625ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8.90225
+src/lib/server/__tests__/grade-observation-inventory.test.ts
+✔ opening callback and original standalone deadline use identical files and raw hashes (5.332125ms)
+✔ an expired original callback rejects before any inventory lookup or discovery (2.22425ms)
+✔ time consumed by final code hashing remains subject to the same final callback (3.844583ms)
+✔ callbacks are neither retried nor replaced when original ownership or time fails (2.415625ms)
+✔ callback inventory preserves missing required helper rejection (2.619875ms)
+✔ callback inventory preserves canonical source ancestry rejection (3.208958ms)
+✔ the existing standalone expired bigint still fails before inventory IO (2.10525ms)
+✔ each new inventory reads current bytes instead of adopting a stale cross-call cache (3.744083ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 28.750166
+src/lib/server/__tests__/grade-observation-process.test.ts
+✔ missing exact process identity settles even if child never closes, without handshake or kill (1.422667ms)
+✔ original remaining work and cleanup reserve are independent timers, not a fresh lifecycle (0.778792ms)
+✔ late complete output is rejected even when child claims clean completion (0.285792ms)
+✔ lifecycle ceiling settles an unresponsive child with lost identity and retains uncertainty (0.171292ms)
+✔ oversize stdout invalidates before retaining bytes and ignores all later output (0.703625ms)
+✔ private stderr is terminal-safe and byte-bounded without changing failure or cleanup state (0.414791ms)
+✔ identity loss at handshake never authorizes a decoder launch (0.159083ms)
+✔ successful live return is selectable only before original work deadline (0.123ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11.764
+src/lib/server/__tests__/grade-observation-resource.test.ts
+✔ returns the actual global lease and live guard without acquiring a project lease or creating a clock (41.999375ms)
+✔ contention keeps the other exact lease and active bytes untouched (66.245125ms)
+✔ occupied malformed active record rejects and releases only the newly acquired resource lease (26.685875ms)
+✔ dangling active marker rejects without following, removing or replacing its exact link (30.750459ms)
+✔ active directory marker also fences work and preserves its exact identity (27.026458ms)
+✔ guard construction failure releases the acquired lease and propagates the original error (20.550625ms)
+✔ final live guard failure cannot escape as a valid acquired resource (32.130417ms)
+✔ active inspection EACCES releases the new lease without treating uncertainty as absence (27.151084ms)
+✔ default no-follow marker inspection propagates EACCES rather than returning absent (0.880167ms)
+✔ unsafe private resource fails before acquiring any lease (0.969083ms)
+✔ workspace resolution failure never acquires or releases a resource (0.548125ms)
+✔ underlying acquisition exception is not retried and no foreign release is attempted (0.513875ms)
+✔ retained live guard rejects a later replacement lease instead of adopting its identity (85.507ms)
+✔ cleanup remains caller-owned after success; releasing a lease does not delete active evidence (70.075417ms)
+✔ release failure retains both errors without claiming cleanup or swallowing the original failure (20.573791ms)
+✔ current source inventory explicitly holds the extracted shared helper bytes (3.362125ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 463.535333
+src/lib/server/__tests__/grade-observation-service.test.ts
+✔ clock translation is conservative across unrelated epochs and never refreshes the admitted budget (0.531917ms)
+✔ request has no path/hash/receipt override and bounded declaration input (2.073375ms)
+✔ clean failure is private, releases both exact leases, and never writes canonical media or plans (556.270541ms)
+✔ uncertain daemon cleanup retains project and shared resource ownership (352.554542ms)
+✔ changed active claim cannot be silently cleared or followed by lease release (312.101791ms)
+✔ an existing sampled-color resource lease blocks full-source work (77.333458ms)
+✔ expiry during persistence leaves only nonselectable candidate evidence, never durable complete (12.396792ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1317.432125
+src/lib/server/__tests__/grade-observation-v2-finalization.test.ts
+✔ normal failed worker retains source failure but can release exact live-proved cleanup (56.988ms)
+✔ valid finalization releases matching claim but keeps stored result candidate-only (45.536541ms)
+✔ expired work may use separate bounded cleanup credit without success credit (52.30325ms)
+✔ tool proof or final lease failure preserves the shared fence (42.752459ms)
+✔ post-verification parent failure permits cleanup only, never success (55.673166ms)
+✔ mutation during last claim read cannot return successful finalization (42.202625ms)
+✔ expiry during last claim read retains claim despite earlier valid work checks (42.988208ms)
+✔ missing proof, nonnormal exit and ambiguous group absence retain ownership (42.221333ms)
+✔ changed input/result/claim/candidate bytes cannot finalize success (170.5575ms)
+✔ cleanup-only metadata deadline also cannot be extended by a last read (55.611125ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 615.126833
+src/lib/server/__tests__/grade-observation-v2-live-harness.test.ts
+✔ TEST invocation always supplies explicit V2 profile and the live held input SHA (0.736458ms)
+✔ actual owner input has current parent hashes and explicit unknown camera/history; no inherited V1 (2.407833ms)
+✔ creator directories and unmarked ordinary metadata cannot enter opt-in fixture owner (1.611458ms)
+✔ normal exit, exact live receipt, group absence and cleanup are independently mandatory (0.182209ms)
+✔ whole original frame clock and transfer cannot be upgraded from self-consistent wrong result (3.661792ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11.683083
+src/lib/server/__tests__/guided-body-activation.test.ts
+✔ body execution documents are closed, complete all-row metadata and distinct from non-executable admission (2.382708ms)
+✔ activation cannot replace original references, runtime, input SHA, ids or all-row orders (0.206167ms)
+✔ actual durable admission hands off the same live lease and budget once; replay never executes a callback (515.932917ms)
+✔ failed handoff is revoked and cannot reconstruct an activation; original admission result survives (493.596125ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1016.192375
+src/lib/server/__tests__/guided-body-authority.test.ts
+✔ a later body-only always-hole card rejects before the expensive verifier without narrowing opening-only acceptance (12.426709ms)
+✔ malformed full-body coverage also rejects before verification; supported later cards remain usable (11.58775ms)
+✔ full body graph workload refuses unsupported native-pixel cost before an expensive verifier (3.596375ms)
+✔ body request is closed, exact and contains no client authority or runtime controls (2.145209ms)
+✔ held body input uses current verification and immutable exact references without launching or releasing caller lease (7.805667ms)
+✔ 55minute body hold reaches the actual opening runner with one bounded integer verifier deadline (44.321042ms)
+✔ a resealed approval cannot replace selected bytes, claim, cleanup, result or original clock (22.527625ms)
+✔ a resealed decision cannot authorize different exact media or before journal (8.765542ms)
+✔ the exact current post-approval journal must reconstruct from the retained before snapshot (9.945625ms)
+✔ unknown, reordered, failed or rehashed approval verification cannot become body authority (38.709042ms)
+✔ missing private approval/readback or failure markers block before invoking current media verification (9.805917ms)
+✔ stale requests, replaced leases, exhausted budgets and unavailable readiness fail before media (11.748209ms)
+✔ an actual verifier failure, different result or changed pinned tools returns no held input (9.892958ms)
+✔ post-verification lease/journal/receipt failure and later assertion never grant usable continuation (12.727208ms)
+✔ held full-program reuse cannot select another plan, base, AAC transport or out-of-root master (13.046625ms)
+✔ the initial budget callback cannot replace the body caller's original lease or remainder (2.822375ms)
+✔ a replacement caller remainder after verification cannot authorize a body hold (2.825583ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 229.30525
+src/lib/server/__tests__/guided-body-claim.test.ts
+✔ actual durable body claim is non-executable, preserves approval, and exact replay does no hold or new execution (502.978166ms)
+✔ pending body claim fences ordinary and typed checkpoint mutations after admission lease release (587.749125ms)
+✔ arbitrary descendant, changed approved snapshot and re-sealed held input cannot pass body lineage (501.217917ms)
+✔ failed verification retains an immutable attempt and cannot silently start a fresh replay (225.660791ms)
+✔ lost response after actual claim CAS leaves fence and same request can read it without spawning (505.019334ms)
+✔ body claim parser rejects executable flags, missing fields and a changed original clock (520.164167ms)
+✔ a re-sealed claim edge cannot turn a changed approved journal into human approval (528.197333ms)
+✔ wrong and transplanted historical snapshots reject before opening proof is consumed (528.531417ms)
+✔ stale token and post-hold expiry cannot create a body claim or recover consumed time (322.775625ms)
+✔ a re-sealed body-only clock cannot depart from the actually approved opening origin (537.55075ms)
+✔ expiry immediately after a valid CAS budget observation is caught after the receipt reads (434.662ms)
+✔ an invalid original clock after operation creation retains a failed result and never retries as fresh (104.860709ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5304.769958
+src/lib/server/__tests__/guided-body-cleanup-control.test.ts
+✔ known recovery controls survive media/provenance deletion, without granting full cleanup or selection (712.028208ms)
+✔ cleanup requires exact private activation/input/outcome and known journal ancestry, not resealed or transplanted metadata (692.397459ms)
+✔ cleanup refuses changed exact runtime and pinned code/lock; old code is never silently replaced (645.454958ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2053.0895
+src/lib/server/__tests__/guided-body-command.test.ts
+✔ body status/replay/candidate replies are closed and never conflate metadata with approval (1.920292ms)
+✔ actual stdout envelopes reject extra rows, false cleanup, missing coverage and approval flags (0.61575ms)
+✔ CLI status never runs, requests are bounded/no-follow, and paid/runtime/approval extras cannot reach services (5.184416ms)
+✔ CLI conflict is an exact typed error, never a generic failure/import/timeout lookalike (0.128834ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10.858292
+src/lib/server/__tests__/guided-body-controller-handoff-faults.test.ts
+✔ actual activation tail cannot spend a smaller original post-CAS remainder against the old source cutoff (58791.574042ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 58795.369208
+src/lib/server/__tests__/guided-body-controller-handoff.test.ts
+✔ source2 writer binds actual return values and rejects copied or changed invocation (52454.599417ms)
+✔ source2 writer refuses a missing original budget before guard or publication (47068.032208ms)
+✔ actual post-CAS activation retains code checks; status and copies do not mint live handoff (45507.83425ms)
+✔ source2 current code changing after writer blocks activation CAS and preserves private evidence (47656.579083ms)
+✔ source2 code mutation at actual activation CAS cannot return successful live handoff (46642.257333ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 239336.610375
+src/lib/server/__tests__/guided-body-controller-source-faults.test.ts
+✔ original caller identity is captured before the first clock or lineage metadata callback (32951.940209ms)
+✔ original code metadata remains usable after actual activation CAS without reviving stale admission (40091.44475ms)
+✔ final source canonical-path IO cannot hide a same-byte original snapshot replacement (32061.490333ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 105109.185375
+src/lib/server/__tests__/guided-body-controller-sources.test.ts

@@ -1,0 +1,2003 @@
+{
+  "id": "N03",
+  "corpus_index": 3,
+  "title": "This AI Cloned Me in 15 Seconds",
+  "source_url": "https://www.youtube.com/shorts/rhv61m8n3Nc",
+  "video_path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/corpus/03-rhv61m8n3Nc/source-visual-current.mp4",
+  "duration": 37.8,
+  "lesson": "A short identity source can be reused as concrete output variations: preserve the same person while changing outfit or setting, compare variants for reuse, and show the specific constraint solved by studio-looking content while away.",
+  "opening": "The spoken hook claims this AI cloned the creator in fifteen seconds. A face mesh, scan line and obscured logo turn the claim into an identity-capture puzzle; the later HeyGen reveal names the mechanism. The scan is a visual metaphor and the actual input/output comparison must carry the demonstration.",
+  "story_arc": "Identity hook/metaphorical scan → explanatory narrator → actual short source excerpt → name tool → compare narrator with claimed twin → isolate outfit then background changes → show new speaking output and avoided camera step → explain successful-content variations → show three versions → explain travel constraint with two-setting comparison → give output face space for fidelity claim → broaden to two different creator examples → brand/keyword CTA.",
+  "payoff": "Viewers can see the same-person continuity across different clothing/settings and understand why reuse or away-from-studio production is useful. Actual generation time, source lineage, voice fidelity, hook-test outcomes and realism are not independently verified by this sampled visual study.",
+  "selection_reason": "The strongest identity/state-continuity example in this assignment: a nearly four-second simultaneous comparison, widening wardrobe/background reveals, three output bands, a travel-versus-studio contrast, literal avoided-camera B-roll and a held close face for detail evaluation.",
+  "reviewed_evidence": [
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/03-rhv61m8n3Nc/research-1080p/transcript.md",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/03-rhv61m8n3Nc/research-1080p/coverage.json",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/reviews/mechanics/03/review.md",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/03-rhv61m8n3Nc/research-1080p/context_p001.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/03-rhv61m8n3Nc/research-1080p/context_p002.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/03-rhv61m8n3Nc/research-1080p/context_p003.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/analysis-prep/03-rhv61m8n3Nc/research-1080p/context_p004.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N03/w_02.10_03.00/strip_01.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N03/w_09.95_12.00/strip_01.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N03/w_09.95_12.00/strip_02.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N03/w_16.45_18.00/strip_01.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N03/w_28.80_31.80/strip_01.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N03/w_28.80_31.80/strip_02.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N03/w_32.45_34.45/strip_01.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N03/w_32.45_34.45/strip_02.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N03/w_35.10_37.00/strip_01.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N03/w_35.10_37.00/strip_02.jpg",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/item-details.md",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/browser-device-stage/browser-device-stage.html",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/comparison-split/comparison-split.html",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/screen-flow-carousel/screen-flow-carousel.html",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/yt-camera-move/yt-camera-move.html",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/shorts-visual-playbook-2026-09-10/expansion/inspection/N03/opening_00.10.jpg"
+  ],
+  "review_limits": "Viewed all 4 chronological 0.5-second context pages (77 samples including final frame) plus 90 framing samples on 10 extra strips. Original machine-caption grouping supplies spoken ideas; no audio audition or phonetic verification. Caption final word overruns video; source was not padded or retimed. Strip timestamps are ffmpeg eight-fps resampling estimates, not source-frame measurements. Continuous motion, exact typography, easing, generation provenance and product claims are not independently verified. Catalog source inspection supports possible mechanisms only; no rendered match or ready replica is claimed. One additional original-resolution opening frame at approximately 0.1 seconds was inspected to distinguish the face mesh, pixelated logo and arrow.",
+  "beats": [
+    {
+      "spoken_idea": "An AI has cloned the creator.",
+      "visible": "Close face covered by thin white/cyan facial mesh; pixelated logo tile below the caption with a curved arrow pointing toward it.",
+      "change": "Opens on the claimed identity subject with a computer-vision-like overlay.",
+      "view": "overlay",
+      "picture_function": "analogy",
+      "why_this_picture": "Face landmarks make identity capture imaginable; the obscured tool tile withholds its name while the later brand reveal answers which tool.",
+      "camera_observation": "Full-resolution 0.1-second frame confirms mesh points over facial features and deliberately unreadable logo; no actual tracker operation is proved.",
+      "camera_reason": "Keep the face as the object being transformed; arrow adds a secondary unresolved tool cue.",
+      "pacing_reason": "Immediate distinctive image and brief masked identity can raise a question without a separate topic title.",
+      "handoff": "Scan brackets and moving line reinforce capture on the same face.",
+      "catalog_candidates": [],
+      "implementation_note": "Reuse a suitable licensed face-scan asset only as a disclosed illustration; a generic crop helper cannot supply facial tracking or cloning.",
+      "transfer": "Make a transformation hook show the object that will change; a concealed mechanism can be revealed later.",
+      "caution": "Facial mesh is editorial metaphor, not product proof. Pixelated logo cannot be identified from this frame alone.",
+      "sample_times": [
+        0.1,
+        0.5
+      ],
+      "start": 0,
+      "end": 0.75,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B01",
+      "source_frames": [
+        {
+          "requested_time": 0.1,
+          "source_pts": 0.1,
+          "frame_index": 6,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000006.jpg",
+          "sha256": "683a9a4e09b4e90007c924aae43ded1d42e8f3dab14815a09102ce5171a6f991",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 0.5,
+          "source_pts": 0.5,
+          "frame_index": 30,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000030.jpg",
+          "sha256": "5630969a7b0c5035b8c9f09fb43cbba54a14f2e839174e06f422ac3b5f961f24",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B01.jpg",
+        "sha256": "3352b1314778a5ac2262872c883ac88e8600ba38be919ae267d2ec5db7dee52a",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "The claimed cloning took about fifteen seconds.",
+      "visible": "Cyan corner brackets surround the same face; bright scan line crosses downward; mesh remains and brief duration caption appears.",
+      "change": "Capture cue becomes animated across the existing identity image.",
+      "view": "overlay",
+      "picture_function": "analogy",
+      "why_this_picture": "The moving line gives the claim a capture action, focusing the viewer on the person rather than an abstract AI label.",
+      "camera_observation": "Context at 1,1.5,2 seconds places line successively near forehead/midface/lower face; no exact continuous motion/ease was measured.",
+      "camera_reason": "Trace the facial area supposedly being captured.",
+      "pacing_reason": "A roughly 1.4-second scan lets the transformation claim complete; each line position is not a new template.",
+      "handoff": "Cut to the warm-room narrator for how it worked.",
+      "catalog_candidates": [],
+      "implementation_note": "Use an existing scan treatment only if it serves the specific identity/capture idea; it cannot replace real source and generated output.",
+      "transfer": "A simple action over the relevant object can make an invisible process understandable.",
+      "caution": "The visible duration is a source claim; stills do not verify generation time.",
+      "sample_times": [
+        1.0,
+        1.5,
+        2.0
+      ],
+      "start": 0.75,
+      "end": 2.15,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B02",
+      "source_frames": [
+        {
+          "requested_time": 1.0,
+          "source_pts": 1.0,
+          "frame_index": 60,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000060.jpg",
+          "sha256": "b145b6349dac3d5020a2d9d6277c4352278c84a34088f75ee09039e8cf44e87b",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 1.5,
+          "source_pts": 1.5,
+          "frame_index": 90,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000090.jpg",
+          "sha256": "75cbd660892e86318b41185c468214225115138211d842c5e21f4905e93e62b3",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 2.0,
+          "source_pts": 2.0,
+          "frame_index": 120,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000120.jpg",
+          "sha256": "52868ca37bce6e76e95161dbf9808b8d006b07acef961c835a778d8e3b2b61e9",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B02.jpg",
+        "sha256": "2baa972e3e2b28cd5b4e3c507bbfa6d9a7b80a55db8077c3710dd91feb14b9c5",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Here is how the cloning was done.",
+      "visible": "Narrator in a pale blue shirt at a laptop in a warm lamp-lit room.",
+      "change": "The face-scan image cuts to a different recording circumstance.",
+      "view": "full presenter",
+      "picture_function": "orientation",
+      "why_this_picture": "The warmer working scene establishes the explanatory narrator who will remain the comparison reference.",
+      "camera_observation": "Narrow strip shows this warm-room shot before the source recording appears around 2.6.",
+      "camera_reason": "Reset from hook metaphor to explanation.",
+      "pacing_reason": "A short transition phrase needs a clean human beat, not additional graphics.",
+      "handoff": "Plain studio source recording follows as the input.",
+      "catalog_candidates": [],
+      "implementation_note": "Use the actual explaining performance and native cut.",
+      "transfer": "Separate the hook's visual metaphor from the actual evidence chain.",
+      "caution": "A room change alone does not verify travel or a live session.",
+      "sample_times": [
+        2.225,
+        2.475
+      ],
+      "start": 2.15,
+      "end": 2.6,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B03",
+      "source_frames": [
+        {
+          "requested_time": 2.225,
+          "source_pts": 2.216667,
+          "frame_index": 133,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000133.jpg",
+          "sha256": "56c946703eacc6396b6992bf27e7993a23390a68cf7c3262c4ec06d587d936d6",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 2.475,
+          "source_pts": 2.466667,
+          "frame_index": 148,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000148.jpg",
+          "sha256": "7dac33eb3fc1364fc88f6e467d4382a561c623c218ff3c6e5083babec7461c6d",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B03.jpg",
+        "sha256": "3ffcbfdd4fb4bf91c852a0f3f8bfdecc7c7e22c6845d24087b5d4d6424859b48",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "He records one short source video.",
+      "visible": "Creator in a dark AIS top against a simple room background, turning his head and gesturing with both hands.",
+      "change": "Warm-room narrator changes to the stated source capture.",
+      "view": "full visual",
+      "picture_function": "demonstration",
+      "why_this_picture": "Head turns and hand gestures show what the input contains; the claim's low-effort source becomes a concrete asset.",
+      "camera_observation": "Held medium portrait; movement comes from head and hands, with no demonstrated editorial zoom.",
+      "camera_reason": "Preserve face/body behavior so the later twin has something to be compared with.",
+      "pacing_reason": "Around 1.7 seconds communicates source movement without playing the full fifteen-second recording.",
+      "handoff": "Brand appears above the narrator as the transforming tool.",
+      "catalog_candidates": [],
+      "implementation_note": "Keep the actual original source recording and generation lineage; native footage is central, not a motion template.",
+      "transfer": "Show the input before the transformation or output.",
+      "caution": "This excerpt does not verify total recording length or generation provenance.",
+      "sample_times": [
+        2.725,
+        3.0,
+        3.5,
+        4.0
+      ],
+      "start": 2.6,
+      "end": 4.317,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B04",
+      "source_frames": [
+        {
+          "requested_time": 2.725,
+          "source_pts": 2.716667,
+          "frame_index": 163,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000163.jpg",
+          "sha256": "117ec61994982be256f1e1e89bf97edbf23993380629c3bd6abfe43ca95ec36d",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 3.0,
+          "source_pts": 3.0,
+          "frame_index": 180,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000180.jpg",
+          "sha256": "6e94aec99496b109829b270d88827c5c1050f48e76b7b8225baa44368f48fb68",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 3.5,
+          "source_pts": 3.5,
+          "frame_index": 210,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000210.jpg",
+          "sha256": "b3a2ad337d5c9e9c984c8a83d9f644338826bf98e4cbbd2fa55768f64e88b3ae",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 4.0,
+          "source_pts": 4.0,
+          "frame_index": 240,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000240.jpg",
+          "sha256": "290c0da064e1fa56789b6191ed6e79f06cbbc7f8a1a77c0d1040920c140578c4",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B04.jpg",
+        "sha256": "f44be5293c6ad1549f55c7d998277bb01cd7bb49a51b6070a29850d3369ea8fd",
+        "dimensions": [
+          1224,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "HeyGen turns that source into a twin.",
+      "visible": "Colorful faceted mark animates into HeyGen wordmark on white above the warm-room narrator.",
+      "change": "Split tool/narrator replaces the source recording.",
+      "view": "split",
+      "picture_function": "orientation",
+      "why_this_picture": "The tool name resolves the opening's obscured mechanism and names the source-to-output operation.",
+      "camera_observation": "Rotating/changing logo form above a stable narrator region; motion is branding, not a face transformation.",
+      "camera_reason": "Make the mechanism's identity memorable.",
+      "pacing_reason": "About one second handles recognition before the actual comparison.",
+      "handoff": "Upper logo region is replaced by a studio output of the same person.",
+      "catalog_candidates": [],
+      "implementation_note": "Reuse authorized brand animation or static logo; native split is enough.",
+      "transfer": "Name the tool at the causal handoff between input and output.",
+      "caution": "Logo motion is not evidence of the product's internal process.",
+      "sample_times": [
+        4.5,
+        5.0
+      ],
+      "start": 4.317,
+      "end": 5.35,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B05",
+      "source_frames": [
+        {
+          "requested_time": 4.5,
+          "source_pts": 4.5,
+          "frame_index": 270,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000270.jpg",
+          "sha256": "02fba2ba6f6a3a866a4c574dd2952b510bf3b158873c7275cbeb1c2ab39f054b",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 5.0,
+          "source_pts": 5.0,
+          "frame_index": 300,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000300.jpg",
+          "sha256": "cefa260c25d3712aa218df48c305c73af1553b43a1f6526ed05956c1df162519",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B05.jpg",
+        "sha256": "a7dab8913d6f95c3837310ee67ffebd62467ac04057b5712608218d70b8733d7",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "The digital twin looks, sounds and moves like him.",
+      "visible": "Studio speaking output in dark clothing above the warm-room narrator; both faces remain visible simultaneously.",
+      "change": "Brand panel changes to claimed output, making a two-person comparison of the same identity.",
+      "view": "split",
+      "picture_function": "demonstration",
+      "why_this_picture": "Simultaneous faces let the viewer compare identity, expression and body behavior without remembering a vanished before image.",
+      "camera_observation": "Stable two-band layout for nearly four seconds; changing mouths/gestures are source performance, not repeated editorial templates.",
+      "camera_reason": "Keep both reference person and output available for comparison.",
+      "pacing_reason": "The hold is earned by perceptual comparison across looks/movement claims; replacing it every two seconds would reduce evaluation time.",
+      "handoff": "Full warm narrator returns before showing controllable variations.",
+      "catalog_candidates": [
+        "comparison-split"
+      ],
+      "implementation_note": "Inspectable two-panel mechanism is a starting point; source implementation's default wipe/content requires adaptation for simultaneous independent videos and clean labels.",
+      "transfer": "Use split when direct comparison, not mere decoration, needs both states at once.",
+      "caution": "Voice fidelity was not auditioned; generated status and identity quality are claims rather than independently authenticated facts.",
+      "sample_times": [
+        5.5,
+        6.5,
+        7.5,
+        8.5,
+        9.0
+      ],
+      "start": 5.35,
+      "end": 9.333,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B06",
+      "source_frames": [
+        {
+          "requested_time": 5.5,
+          "source_pts": 5.5,
+          "frame_index": 330,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000330.jpg",
+          "sha256": "441f7c2ad596bb475c0368a5d21bcc4e886db85221b498aa6cc11e00eded33cb",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 6.5,
+          "source_pts": 6.5,
+          "frame_index": 390,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000390.jpg",
+          "sha256": "10cb12e869f3540df8e4b6b526f7e396307f6162698af236167dd321c3872b19",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 7.5,
+          "source_pts": 7.5,
+          "frame_index": 450,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000450.jpg",
+          "sha256": "608ff1fd99300b3da802cdc4d74a9e91483192f72e4d7d7656fd845bc694bb52",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 8.5,
+          "source_pts": 8.5,
+          "frame_index": 510,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000510.jpg",
+          "sha256": "239bbdcbee47d9162e1f2fd6adc6879c1962605214aab24eb74f09612e2a417e",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 9.0,
+          "source_pts": 9.0,
+          "frame_index": 540,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000540.jpg",
+          "sha256": "abf00eb07bbc74b64e04ab769a53b2a817ef2453fbf9b2f8cb54e557cb1c258b",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B06.jpg",
+        "sha256": "99a224795960e5d9d4180cedf5ff0001a129041988ff063e8c04aaa15cd674ba",
+        "dimensions": [
+          1532,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Now he can change aspects of the output.",
+      "visible": "Warm-room narrator fills the portrait and looks toward the laptop.",
+      "change": "Two-way comparison clears to explanation.",
+      "view": "full presenter",
+      "picture_function": "orientation",
+      "why_this_picture": "The narrator sets up the next controllable attributes before each is demonstrated.",
+      "camera_observation": "Direct cut from split to larger same-room shot.",
+      "camera_reason": "Recenter the person who is choosing variations.",
+      "pacing_reason": "Brief setup prevents the next pictures feeling like an unmotivated montage.",
+      "handoff": "Grey-sweatshirt portrait provides the first changed attribute.",
+      "catalog_candidates": [],
+      "implementation_note": "Native presenter cut; no graphic necessary.",
+      "transfer": "Explain which variable changes before showing the alternate state.",
+      "caution": "None observed beyond approximate timing.",
+      "sample_times": [
+        9.5,
+        10.0
+      ],
+      "start": 9.333,
+      "end": 10.1,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B07",
+      "source_frames": [
+        {
+          "requested_time": 9.5,
+          "source_pts": 9.5,
+          "frame_index": 570,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000570.jpg",
+          "sha256": "9cd3ef431893e093137c1c1a21e59530e670f96a1cc06b5ea646e8474282c448",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 10.0,
+          "source_pts": 10.0,
+          "frame_index": 600,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000600.jpg",
+          "sha256": "fa91fec5d906fa460877ff1a058072ecf4a742e1a3c37c37f1dbfb963b8b428a",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B07.jpg",
+        "sha256": "8efb40c7fb3567dddfd1a127824b823075ea41e7fe20e2ee040e34f24e7ed9d5",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "He can change the outfit.",
+      "visible": "Same recognizable smiling face now in a grey sweatshirt in a cool grey room, microphone at the right.",
+      "change": "Different wardrobe state replaces the warm-room narrator.",
+      "view": "full visual",
+      "picture_function": "demonstration",
+      "why_this_picture": "The sweatshirt is the changed attribute; continuity of face carries identity across the cut.",
+      "camera_observation": "Strip shows a wider reveal/zoom-out across the held smiling portrait; subject configuration appears nearly frozen while more torso becomes visible.",
+      "camera_reason": "Reveal the garment rather than cropping only the face.",
+      "pacing_reason": "Less than a second is enough to register the new clothing; it is not enough to assess generated motion.",
+      "handoff": "Grey sweatshirt/face remain while the room background changes next.",
+      "catalog_candidates": [
+        "yt-camera-move"
+      ],
+      "implementation_note": "Use real authorized source/output assets with same-person continuity; helper can reframe the supplied image but cannot synthesize clothing.",
+      "transfer": "Change one attribute while retaining the identity needed for comparison.",
+      "caution": "It functions like a still-state demonstration; do not treat camera motion as proof of a moving avatar.",
+      "sample_times": [
+        10.2,
+        10.575,
+        10.825
+      ],
+      "start": 10.1,
+      "end": 10.9,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B08",
+      "source_frames": [
+        {
+          "requested_time": 10.2,
+          "source_pts": 10.2,
+          "frame_index": 612,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000612.jpg",
+          "sha256": "a4b8fddde2e83f89bd1ca7e376a7ab743118edd7f0d8850f7af8421f95ed38ff",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 10.575,
+          "source_pts": 10.566667,
+          "frame_index": 634,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000634.jpg",
+          "sha256": "13e1fa3a8f1be67da28c79f10955ada7f2c7db219492da177277c61f0f2e2755",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 10.825,
+          "source_pts": 10.816667,
+          "frame_index": 649,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000649.jpg",
+          "sha256": "3ab90bfd710117297e504ebb0d94b35cbf577a1d5a96c6a655d482915f1ec3f8",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B08.jpg",
+        "sha256": "2527c99801df26b697cd61a2b84de6288ba96d974278157bcb5f26d4f9e957d5",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "He can change the background.",
+      "visible": "Before/after handoff: the first exact source frame at 10.950 still shows the cool grey background and changed outfit; the warm shelf background is visible at 11.317 with the identity/clothing retained.",
+      "change": "The preceding wardrobe state is retained briefly, then the background changes within this approximate beat.",
+      "view": "full visual",
+      "picture_function": "demonstration",
+      "why_this_picture": "Retaining the outfit isolates the background as the new variable and makes the claim easy to see.",
+      "camera_observation": "A setting cut is observed between the selected native-PTS frames at 10.950 and 11.317; a continuous zoom is not established. The first saved image is intentionally the before-state.",
+      "camera_reason": "Reveal the changed surroundings, not an arbitrary facial emphasis.",
+      "pacing_reason": "About a second supports seeing the environment change; the pull-out provides useful context.",
+      "handoff": "A new talking output in a dark hoodie appears above the narrator.",
+      "catalog_candidates": [
+        "yt-camera-move"
+      ],
+      "implementation_note": "Obtain the actual alternative setting output; use controlled media reframe if helpful. A transition component does not generate backgrounds.",
+      "transfer": "Keep one visual constant when teaching a second controllable parameter.",
+      "caution": "Output provenance is not authenticated; exact generation method is not visible.",
+      "sample_times": [
+        10.95,
+        11.325,
+        11.825
+      ],
+      "start": 10.9,
+      "end": 11.967,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS. Derivative-frame QA refines interpretation: first sample is before the setting cut, not already the new background.",
+      "id": "N03-B09",
+      "source_frames": [
+        {
+          "requested_time": 10.95,
+          "source_pts": 10.95,
+          "frame_index": 657,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000657.jpg",
+          "sha256": "bf93a4230ba6b2cfcde5beefbbe850c9e0d8a94f90ae1735027b2b2fd53b94d7",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 11.325,
+          "source_pts": 11.316667,
+          "frame_index": 679,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000679.jpg",
+          "sha256": "9a00309a2f06835d3817388dd593afa4352e4451b87d3bfc1ed377acc1656c59",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 11.825,
+          "source_pts": 11.816667,
+          "frame_index": 709,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000709.jpg",
+          "sha256": "d5ed6217aa62d4959f3663550584fb50b408cb0388cc312f26b28700d9ac330c",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B09.jpg",
+        "sha256": "ab59b45fbeb18eac7e51a3f864751f44c6966907409fa4754aa5c1ebc9bbb96e",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "He can create entirely new videos.",
+      "visible": "Dark-hoodie speaking output in a different studio above the warm-room narrator; hands and mouth move.",
+      "change": "Full changed-background portrait becomes a two-video comparison with a new output.",
+      "view": "split",
+      "picture_function": "demonstration",
+      "why_this_picture": "A new speaking clip expands the claim beyond still appearance edits; the unchanged narrator links the output to its user.",
+      "camera_observation": "Stable horizontal split; motion is in both video panels.",
+      "camera_reason": "Keep the output's speaking behavior visible while retaining the source of explanation.",
+      "pacing_reason": "Nearly two seconds gives moving output some evaluation time.",
+      "handoff": "Full camera-rig B-roll illustrates the filming step said to be avoided.",
+      "catalog_candidates": [
+        "comparison-split"
+      ],
+      "implementation_note": "Reuse actual output and narrator media in a two-region host; adapt inspected comparison source, do not accept its default illustrative states.",
+      "transfer": "Show a moving outcome when the benefit is new moving content.",
+      "caution": "Stills cannot verify spoken content or audiovisual synchronization.",
+      "sample_times": [
+        12.0,
+        12.5,
+        13.0,
+        13.5
+      ],
+      "start": 11.967,
+      "end": 13.9,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B10",
+      "source_frames": [
+        {
+          "requested_time": 12.0,
+          "source_pts": 12.0,
+          "frame_index": 720,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000720.jpg",
+          "sha256": "de0cd66f70b0a33926d48d889c6579574191907497e394fe125274a87a32a339",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 12.5,
+          "source_pts": 12.5,
+          "frame_index": 750,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000750.jpg",
+          "sha256": "cdbb12600c6937f9488597ded5a089a2bf355e171578f7e02694d4c937a955da",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 13.0,
+          "source_pts": 13.0,
+          "frame_index": 780,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000780.jpg",
+          "sha256": "6b3d180fb1ac2176593e7fb97e5634b139f58547034802abbae5a643cbd07f95",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 13.5,
+          "source_pts": 13.5,
+          "frame_index": 810,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000810.jpg",
+          "sha256": "4ca66e2c205b4b01851c92a94b3531ad16e0b7054a51a8ca4ea76ef935241be5",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B10.jpg",
+        "sha256": "62034565759dae3e102cd1e5a0b94d403dafc053207f46cd534dec9adeab91b4",
+        "dimensions": [
+          1224,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "He does not need to pick up a camera for each new video.",
+      "visible": "Close camera mounted on a handheld gimbal; image becomes largely desaturated.",
+      "change": "Full B-roll replaces both people.",
+      "view": "full visual",
+      "picture_function": "analogy",
+      "why_this_picture": "The camera is the literal work step the claim says is avoided; desaturation visually marks it as the discarded route.",
+      "camera_observation": "Held/slow-moving source equipment shot; saturation reduction is an editorial treatment, not a zoom.",
+      "camera_reason": "Isolate the avoided tool.",
+      "pacing_reason": "One second is enough for familiar-object recognition; red without emphasis helps explain the relation.",
+      "handoff": "Narrator returns to explain when this capability is useful.",
+      "catalog_candidates": [],
+      "implementation_note": "Reuse a relevant equipment shot; native saturation/cut is sufficient and a stock list graphic would add nothing.",
+      "transfer": "Use a concrete object to visualize an avoided cost or step.",
+      "caution": "Illustrates the claim; does not prove all future filming is unnecessary.",
+      "sample_times": [
+        14.0,
+        14.5
+      ],
+      "start": 13.9,
+      "end": 14.9,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B11",
+      "source_frames": [
+        {
+          "requested_time": 14.0,
+          "source_pts": 14.0,
+          "frame_index": 840,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000840.jpg",
+          "sha256": "9fe1217e753ee1f82dd7f83cc4064a1dff362be4fcb5a2de310f0a1b5bfa8392",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 14.5,
+          "source_pts": 14.5,
+          "frame_index": 870,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000870.jpg",
+          "sha256": "25ca06ae3aac1dd3c2d189ffdec8bc5cd8092111501cd0a626677924d65f2696",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B11.jpg",
+        "sha256": "bd4ad99f9eb555f0a129f66f492fcad4ad0f505f181a2c344efee80d5eeaefff",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "The useful part is applying the capability to a real content problem.",
+      "visible": "Warm-room narrator, laptop and lamp; direct conversational pivot.",
+      "change": "Camera cutaway clears to face.",
+      "view": "full presenter",
+      "picture_function": "emphasis",
+      "why_this_picture": "The presenter shifts attention from technical novelty to practical use, preparing the viewer to judge why it matters.",
+      "camera_observation": "Held close-medium performance; no demonstrated separate camera focus move.",
+      "camera_reason": "Let the pivot and expression carry attention.",
+      "pacing_reason": "Roughly 1.6 seconds is a useful pause after examples before the first use case.",
+      "handoff": "A prior high-view Reel becomes the object to reuse.",
+      "catalog_candidates": [],
+      "implementation_note": "Preserve source performance with readable single-layer captions.",
+      "transfer": "Pause on the person when moving from capability to a use case.",
+      "caution": "The phrase useful still needs the next example to earn it.",
+      "sample_times": [
+        15.0,
+        15.5,
+        16.0
+      ],
+      "start": 14.9,
+      "end": 16.5,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B12",
+      "source_frames": [
+        {
+          "requested_time": 15.0,
+          "source_pts": 15.0,
+          "frame_index": 900,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000900.jpg",
+          "sha256": "f39513610695dbc79c3aeba5aed218f7719a1a3f55196ab9f69d11a4f2eb0d5c",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 15.5,
+          "source_pts": 15.5,
+          "frame_index": 930,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000930.jpg",
+          "sha256": "c4b421fcc312e2d6b0acc95f1d9b82eb77133c776cee0efffd5fe3e0e3197ade",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 16.0,
+          "source_pts": 16.0,
+          "frame_index": 960,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000960.jpg",
+          "sha256": "8fe03fd3368f5e5bac7798cdef162b4f5743b5e5a69e55646f28b1bff9956a63",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B12.jpg",
+        "sha256": "cba46135806ff07432a18334eda5f78f1cae7987ffc13688868a2922f9ca52d3",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Suppose one existing Reel performs well.",
+      "visible": "Portrait Reel screenshot on black with the creator, a hand/cup graphic above, and a visible 1.5m view count.",
+      "change": "Prior content asset replaces the current narrator.",
+      "view": "full visual",
+      "picture_function": "evidence",
+      "why_this_picture": "The existing clip and count make the reusable success concrete; the internal hand/cup visual is part of that clip, not a new explanation in this Short.",
+      "camera_observation": "Screenshot panel gently changes scale/position in the strip; no specific zoom isolates the view count.",
+      "camera_reason": "Identify the prior content asset with its visible performance cue.",
+      "pacing_reason": "Brief recognition supplies a reason to reuse the idea.",
+      "handoff": "A second successful-Reel example follows.",
+      "catalog_candidates": [],
+      "implementation_note": "Reuse an actual published-content screenshot with truthful count/date context; native image stage.",
+      "transfer": "Show the exact asset behind a repurposing use case.",
+      "caution": "Historical screenshot counts are not independently verified and do not prove the proposed variants will succeed.",
+      "sample_times": [
+        16.575,
+        16.95
+      ],
+      "start": 16.5,
+      "end": 17.2,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B13",
+      "source_frames": [
+        {
+          "requested_time": 16.575,
+          "source_pts": 16.566667,
+          "frame_index": 994,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f000994.jpg",
+          "sha256": "5dea9c90e4410444dc428abcb308cd00a123e16ecc5c008c850809faef7331da",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 16.95,
+          "source_pts": 16.95,
+          "frame_index": 1017,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001017.jpg",
+          "sha256": "9aec7d1e9b6a1e0d9d09216190baebdf631990d63ee1e964bb5a1d4dfad5f44b",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B13.jpg",
+        "sha256": "0a89efb97ea9e504621972c65f19dca2f9c8af61bd81fd8e89407c1a9febe416",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "A successful Reel can be the basis for more versions.",
+      "visible": "Second portrait Reel screenshot with the same creator and visible 2.3m count; simpler talking-head image.",
+      "change": "Prior-Reel example changes while the performance-use-case remains.",
+      "view": "full visual",
+      "picture_function": "evidence",
+      "why_this_picture": "Another identifiable clip broadens the example from a single lucky image; the number is attached to an actual content card.",
+      "camera_observation": "Source swap plus mild panel movement; not a continuous camera move inside the first Reel.",
+      "camera_reason": "Keep attention on reusable existing content.",
+      "pacing_reason": "Another short example reinforces the class; it does not require another full explanation.",
+      "handoff": "Avatar library presents how variants can be made.",
+      "catalog_candidates": [],
+      "implementation_note": "Use actual asset lineage; never fabricate views or imply causation from counts.",
+      "transfer": "Use a second example only when it adds useful variety or removes ambiguity.",
+      "caution": "This second card adds breadth more than a new step.",
+      "sample_times": [
+        17.325,
+        17.7
+      ],
+      "start": 17.2,
+      "end": 17.95,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B14",
+      "source_frames": [
+        {
+          "requested_time": 17.325,
+          "source_pts": 17.316667,
+          "frame_index": 1039,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001039.jpg",
+          "sha256": "291d05e5ecf67cacda82990b5141967b6c72fb18d1191ef4819ca223e7fd7f10",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 17.7,
+          "source_pts": 17.7,
+          "frame_index": 1062,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001062.jpg",
+          "sha256": "bb51f815875f968388b4f75748bd7fcab76c96251993dfc3f2b4ac8216cb8168",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B14.jpg",
+        "sha256": "65e88fd990f5c44af51c2723f740ffa89f1c35fddf0db45db77c7651bc362272",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Create three versions from that content.",
+      "visible": "My Avatars interface shows three creator portraits/cards above the warm-room narrator.",
+      "change": "Performance screenshot becomes product options in a split.",
+      "view": "split",
+      "picture_function": "demonstration",
+      "why_this_picture": "A visible set of avatar choices connects reuse of existing material to selectable variants.",
+      "camera_observation": "Stable options row with selection/cursor activity; no established camera zoom.",
+      "camera_reason": "Show multiplicity as actual available choices.",
+      "pacing_reason": "About 1.6 seconds gives the viewer time to count and recognize alternatives.",
+      "handoff": "Three output videos replace the selection UI.",
+      "catalog_candidates": [
+        "screen-flow-carousel"
+      ],
+      "implementation_note": "Reuse actual options/output assets; carousel is a related multi-screen mechanism, not a substitute for product controls or generation.",
+      "transfer": "Move from choice interface to actual chosen variants.",
+      "caution": "Avatar cards do not by themselves prove three versions of the same Reel were produced.",
+      "sample_times": [
+        18.0,
+        18.5,
+        19.0,
+        19.5
+      ],
+      "start": 17.95,
+      "end": 19.567,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B15",
+      "source_frames": [
+        {
+          "requested_time": 18.0,
+          "source_pts": 18.0,
+          "frame_index": 1080,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001080.jpg",
+          "sha256": "aa16a4981b461b289abbe1664ba6a038fd4df4381304ec1022e92836ecd105df",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 18.5,
+          "source_pts": 18.5,
+          "frame_index": 1110,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001110.jpg",
+          "sha256": "032151fcf5d9224083b84172bd99b2275cceb0b0f3e094a70d760a138ed090e0",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 19.0,
+          "source_pts": 19.0,
+          "frame_index": 1140,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001140.jpg",
+          "sha256": "a9195f92e29e5a6684b87d37d76832f464915275e536b4714fb19689b3bd347a",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 19.5,
+          "source_pts": 19.5,
+          "frame_index": 1170,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001170.jpg",
+          "sha256": "594cae922e22511395618af7826b03bf48ef10b9dd1683813a736d8d77eedcec",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B15.jpg",
+        "sha256": "00a409914b104438114ae96d0e5bdb29fa3c73c73d9453347822214716d7551a",
+        "dimensions": [
+          1224,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Test different hooks across the three versions.",
+      "visible": "Three horizontal video bands numbered 1, 2 and 3, same person in different outfits/framings, one per band.",
+      "change": "Options list becomes simultaneous output comparison.",
+      "view": "full visual",
+      "picture_function": "demonstration",
+      "why_this_picture": "Three numbered outputs make version count and difference visible at once, supporting the testing idea.",
+      "camera_observation": "Stable three-band arrangement with speaking motion; no measured zoom between bands.",
+      "camera_reason": "Let the viewer compare alternatives without remembering sequential clips.",
+      "pacing_reason": "About 1.3 seconds is enough to register three variants, not hear/evaluate all hooks.",
+      "handoff": "Warm-room narrator introduces a different use case: travel.",
+      "catalog_candidates": [],
+      "implementation_note": "Use a native three-slot host with actual output media; a two-panel comparison component is only a partial primitive and requires explicit adaptation.",
+      "transfer": "Show multiple versions together when difference/count is the point.",
+      "caution": "Three outfits are visible; which verbal hooks differ and whether tested performance improves are not verified.",
+      "sample_times": [
+        20.0,
+        20.5
+      ],
+      "start": 19.567,
+      "end": 20.85,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B16",
+      "source_frames": [
+        {
+          "requested_time": 20.0,
+          "source_pts": 20.0,
+          "frame_index": 1200,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001200.jpg",
+          "sha256": "23e8a0dae0a570822f47ca58dc2b631e261d689a08aa71ec2b842dfb00084f03",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 20.5,
+          "source_pts": 20.5,
+          "frame_index": 1230,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001230.jpg",
+          "sha256": "3017f9a88b361ca73798b1fc1f431adadaaf4d8bde44d15ef7a59fb0efb3743e",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B16.jpg",
+        "sha256": "c8edfee6c8ef4a0865f04570ccd2618e052775270b6e00b6a28de2a88eecfc8a",
+        "dimensions": [
+          608,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "He is traveling but still wants to make content.",
+      "visible": "Warm-room narrator at laptop, pale shirt, lamp and unfamiliar setting visible.",
+      "change": "Three-version comparison clears to the current circumstance.",
+      "view": "full presenter",
+      "picture_function": "orientation",
+      "why_this_picture": "The present room becomes a relevant constraint: he says he is away from the usual studio.",
+      "camera_observation": "Held conversational portrait; source body movement, no proven editorial zoom.",
+      "camera_reason": "Make the practical obstacle personal and concrete.",
+      "pacing_reason": "Around 1.65 seconds gives the scenario before its solution.",
+      "handoff": "Home-studio output appears above this same room.",
+      "catalog_candidates": [],
+      "implementation_note": "Reuse actual away-from-studio footage when that circumstance drives the lesson.",
+      "transfer": "Show the real constraint before the desired alternate state.",
+      "caution": "Travel location itself is not independently established from the room image.",
+      "sample_times": [
+        21.0,
+        21.5,
+        22.0
+      ],
+      "start": 20.85,
+      "end": 22.5,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B17",
+      "source_frames": [
+        {
+          "requested_time": 21.0,
+          "source_pts": 21.0,
+          "frame_index": 1260,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001260.jpg",
+          "sha256": "41813f14ef74a03511f32b9561401a8077c3a9fe1c3e1cb674257c48ba782ab9",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 21.5,
+          "source_pts": 21.5,
+          "frame_index": 1290,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001290.jpg",
+          "sha256": "a4d6565471287834e56aa14671e57cd8544563c4ebc828a8d8ddae62f40bdc22",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 22.0,
+          "source_pts": 22.0,
+          "frame_index": 1320,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001320.jpg",
+          "sha256": "9994aab664573b3fee61d2651e79a343c060327d1181596f6717b936196c167a",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B17.jpg",
+        "sha256": "1da5e20fe65b346c5454bdc1f618a00aef1ed56bf8c5870d209138038793867d",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Content can still appear as if filmed in the home studio.",
+      "visible": "Home-studio output with the creator in dark clothing above the warm-room narrator working at laptop.",
+      "change": "Split comparison joins actual circumstance with claimed alternate appearance.",
+      "view": "split",
+      "picture_function": "demonstration",
+      "why_this_picture": "The simultaneous different rooms make the benefit obvious: the person can be in one place while the output presents another.",
+      "camera_observation": "Stable two-panel comparison with body/face movement in both sources.",
+      "camera_reason": "Preserve both settings so the contrast remains inspectable.",
+      "pacing_reason": "The 2.7-second hold is justified by comparing identity and environment; caption changes do not require new visuals.",
+      "handoff": "Narrator returns to comment on perceived realism.",
+      "catalog_candidates": [
+        "comparison-split"
+      ],
+      "implementation_note": "Reuse paired actual context/output footage; label provenance if needed. Adapt two-panel source to the desired simultaneous portrait layout.",
+      "transfer": "Use split when two different states must coexist for the benefit to make sense.",
+      "caution": "Still sampling does not authenticate remote production or output provenance.",
+      "sample_times": [
+        22.5,
+        23.0,
+        23.5,
+        24.0,
+        24.5,
+        25.0
+      ],
+      "start": 22.5,
+      "end": 25.2,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B18",
+      "source_frames": [
+        {
+          "requested_time": 22.5,
+          "source_pts": 22.5,
+          "frame_index": 1350,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001350.jpg",
+          "sha256": "e8ece3ad4472d9f458f9c34cd88de257c39aee404809912657277c2aa036d926",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 23.0,
+          "source_pts": 23.0,
+          "frame_index": 1380,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001380.jpg",
+          "sha256": "20ecc9fd5d45a13813ed8baefe72775cfbec953b21a55c9f46c7a407218d7c42",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 23.5,
+          "source_pts": 23.5,
+          "frame_index": 1410,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001410.jpg",
+          "sha256": "b1424eefca0d0c657b761467baaebd3831c510ec988aaf6695397841546db997",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 24.0,
+          "source_pts": 24.0,
+          "frame_index": 1440,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001440.jpg",
+          "sha256": "8a27179777412d731694736282011ed97004648df7027bb2008a0d14abce2a96",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 24.5,
+          "source_pts": 24.5,
+          "frame_index": 1470,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001470.jpg",
+          "sha256": "847c3363ed566380b5654ac9226c7222185f2766da3cbaf5d9918c94bfa19e8b",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 25.0,
+          "source_pts": 25.0,
+          "frame_index": 1500,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001500.jpg",
+          "sha256": "0399918ddb3aa67cbd9581f2ea9c5fe64c47e7146a40309380b26ca3783ebf4b",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B18.jpg",
+        "sha256": "043893f301e552141744856d7b1dc15ed2a6a471a0678623395bd552f043d894",
+        "dimensions": [
+          1840,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Most viewers might not realize the result is AI.",
+      "visible": "Warm-room narrator fills the portrait; emphasis on not realizing.",
+      "change": "Comparison clears to the speaker's evaluation.",
+      "view": "full presenter",
+      "picture_function": "emphasis",
+      "why_this_picture": "The speaker frames the quality claim before showing output behavior at larger size.",
+      "camera_observation": "Direct cut to larger narrator; no distinct object-targeted zoom.",
+      "camera_reason": "Emphasize the evaluation and lead into inspection.",
+      "pacing_reason": "Around 1.6 seconds sets a quality question; the next shot must supply the object to judge.",
+      "handoff": "Product output preview provides the claimed evidence.",
+      "catalog_candidates": [],
+      "implementation_note": "Native performance and concise captions.",
+      "transfer": "State the evaluation criterion, then show evidence the viewer can inspect.",
+      "caution": "Viewer detection is a claim, not measured here; synthetic content should not be misrepresented in our own work.",
+      "sample_times": [
+        25.5,
+        26.0,
+        26.5
+      ],
+      "start": 25.2,
+      "end": 26.8,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B19",
+      "source_frames": [
+        {
+          "requested_time": 25.5,
+          "source_pts": 25.5,
+          "frame_index": 1530,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001530.jpg",
+          "sha256": "836d5a8bcbe6601a55442c41ea6fa376fa27eebab93fc96dd75a437b60f529bd",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 26.0,
+          "source_pts": 26.0,
+          "frame_index": 1560,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001560.jpg",
+          "sha256": "20988a911f99c44ae100829a43c3a09ff862f7a90edf9833d2d80ead14f922fb",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 26.5,
+          "source_pts": 26.5,
+          "frame_index": 1590,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001590.jpg",
+          "sha256": "0c4d1949b7253e1a1e453ddd1e3a25ae70494ffdbc4b1b43066b80b59be76b52",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B19.jpg",
+        "sha256": "af7d850ad9616ec73d9703b2350252a65110f255fb6ef4a168918daceb09688c",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "The output keeps his voice and expressions.",
+      "visible": "Product/video preview of the creator in the studio, with reaction/rating controls and a video-feedback prompt on a dark stage.",
+      "change": "Full product output replaces narrator.",
+      "view": "full visual",
+      "picture_function": "demonstration",
+      "why_this_picture": "An actual output preview provides a candidate object for inspecting the claimed fidelity, stronger than another abstract AI illustration.",
+      "camera_observation": "Held player crop with visible speech gestures; no large camera move before the following close-up.",
+      "camera_reason": "Let the output perform rather than cover it with unrelated graphics.",
+      "pacing_reason": "About two seconds gives some expression behavior; audio comparison would be needed for the voice claim.",
+      "handoff": "Close face view removes product chrome and increases facial detail.",
+      "catalog_candidates": [
+        "browser-device-stage"
+      ],
+      "implementation_note": "Use the authentic generated preview/media with lineage; preserve audio for evaluation when authorized.",
+      "transfer": "Give the product's actual result enough viewing time before asserting quality.",
+      "caution": "No audio was auditioned in this study, so voice fidelity is unassessed.",
+      "sample_times": [
+        27.0,
+        27.5,
+        28.0,
+        28.5
+      ],
+      "start": 26.8,
+      "end": 28.85,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B20",
+      "source_frames": [
+        {
+          "requested_time": 27.0,
+          "source_pts": 27.0,
+          "frame_index": 1620,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001620.jpg",
+          "sha256": "0552c7837dac07a82efb2f54992e0c2d6e41a0e746d0d92fb793f64f00239ac1",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 27.5,
+          "source_pts": 27.5,
+          "frame_index": 1650,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001650.jpg",
+          "sha256": "ec4a13cf9f82da14cb049836b2ba2651949013f3ed289085ac5382444b12812b",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 28.0,
+          "source_pts": 28.0,
+          "frame_index": 1680,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001680.jpg",
+          "sha256": "cfccf49e621624cf3e62512fa395f434b1112cdd8693bf5a6a0fcf8fa255570d",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 28.5,
+          "source_pts": 28.5,
+          "frame_index": 1710,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001710.jpg",
+          "sha256": "414649a471feeb86871b3ecd8b4f78475540edfb92d981ad6429b6fdb5f785dd",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B20.jpg",
+        "sha256": "73060b50662f0d215841e1038cc0a7ae92b5398b2f9771c07f8004227362698f",
+        "dimensions": [
+          1224,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "His mannerisms make the result feel like real footage.",
+      "visible": "Large studio face/output, dark quarter-zip top, shelves behind; subtle facial expressions and mouth movement.",
+      "change": "Product chrome clears to a close output portrait.",
+      "view": "full visual",
+      "picture_function": "demonstration",
+      "why_this_picture": "The face is the relevant evidence for expression and mannerism claims, so giving it the full frame is justified.",
+      "camera_observation": "Strip confirms a close held portrait through about 31.55; face moves against mostly steady shelf geometry. No definite continuous digital zoom is established from these samples.",
+      "camera_reason": "Increase inspectability by removing the surrounding player, then let the performance hold.",
+      "pacing_reason": "Nearly three seconds gives several expression states; constant new overlays would obstruct the evaluation.",
+      "handoff": "Warm-room narrator returns for the conclusion around 31.7.",
+      "catalog_candidates": [],
+      "implementation_note": "Prefer native media/crop with sufficient source resolution. Do not add an unnecessary zoom or claim the catalog generates facial fidelity.",
+      "transfer": "Full-screen the evidence when small expressive details are the evaluation target.",
+      "caution": "Stills cannot verify natural motion cadence or audiovisual realism; approximate end refines the earlier broad review boundary.",
+      "sample_times": [
+        29.05,
+        29.675,
+        30.425,
+        31.175,
+        31.55
+      ],
+      "start": 28.85,
+      "end": 31.7,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B21",
+      "source_frames": [
+        {
+          "requested_time": 29.05,
+          "source_pts": 29.05,
+          "frame_index": 1743,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001743.jpg",
+          "sha256": "dbb11d6aeb3a1b3a95a00bbd7cce9f89608973a5d219d5cb0acf98db8b90dd70",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 29.675,
+          "source_pts": 29.666667,
+          "frame_index": 1780,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001780.jpg",
+          "sha256": "b295f8f558180a8ea27bea688b5a4d2784ee81c30752128758054864f4984086",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 30.425,
+          "source_pts": 30.416667,
+          "frame_index": 1825,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001825.jpg",
+          "sha256": "7e9c33aed1e3779d64eb034ac148982198c72968f674b53c2e768626605f092d",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 31.175,
+          "source_pts": 31.166667,
+          "frame_index": 1870,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001870.jpg",
+          "sha256": "7aa08399d6b3588439cabd21adda4863320d3e45f6ccf42e82a1e2e19f07bbe1",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 31.55,
+          "source_pts": 31.55,
+          "frame_index": 1893,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001893.jpg",
+          "sha256": "2c65575b37cea673dc3c3646ed3d0692ee45c3b2316218afff38184a61fe2771",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B21.jpg",
+        "sha256": "e2182bd89b13e02f90230044cc29d938921b2944ef80270b0133001209913bf1",
+        "dimensions": [
+          1532,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "There are many other use cases.",
+      "visible": "Warm-room narrator returns, sitting at the laptop.",
+      "change": "Close output gives way to the human summarizing the idea.",
+      "view": "full presenter",
+      "picture_function": "orientation",
+      "why_this_picture": "A human synthesis signals the end of the fidelity test and start of broader examples.",
+      "camera_observation": "Direct cut back to the established narrator setting.",
+      "camera_reason": "Reestablish who is making the recommendation.",
+      "pacing_reason": "A short conclusion bridge avoids another lengthy explanation.",
+      "handoff": "A different creator-style output supplies breadth.",
+      "catalog_candidates": [],
+      "implementation_note": "Reuse source performance with a plain cut.",
+      "transfer": "Close a demonstration before changing the example subject.",
+      "caution": "General breadth still requires examples; no outcome count is shown.",
+      "sample_times": [
+        32.0
+      ],
+      "start": 31.7,
+      "end": 32.45,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B22",
+      "source_frames": [
+        {
+          "requested_time": 32.0,
+          "source_pts": 32.0,
+          "frame_index": 1920,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001920.jpg",
+          "sha256": "f9d875020d383a82ef9e9fc45b2ef87dcf73d19fe9bad468747b5c53153442b4",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B22.jpg",
+        "sha256": "d48fe1b10a312bfc987ea7af479bebf1f6fc5ab4292d6dec8079f132d301b0bb",
+        "dimensions": [
+          300,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "The tool has other creator-content use cases.",
+      "visible": "Woman in a black polka-dot dress with a large white collar, speaking in a naturally lit room; hand initially passes close to camera then moves to her hair.",
+      "change": "A new person/content style replaces the narrator.",
+      "view": "full visual",
+      "picture_function": "orientation",
+      "why_this_picture": "A different speaker and domestic creator aesthetic broaden the examples beyond the original technical presenter.",
+      "camera_observation": "Source hand-to-camera/hand-to-hair motion and a widening apparent view; exact physical versus digital camera contribution is unverified.",
+      "camera_reason": "Show a different output genre/person, with gesture providing a natural attention cue.",
+      "pacing_reason": "About 1.35 seconds offers recognizable format variety, not a new tutorial.",
+      "handoff": "A product-holding creator example follows.",
+      "catalog_candidates": [],
+      "implementation_note": "Reuse licensed, authenticated output examples if claiming generation capability; native media is sufficient.",
+      "transfer": "Broaden with a genuinely different content use case after the main proof.",
+      "caution": "Generated status is not established from stills; this is an example montage, not independent proof of universality.",
+      "sample_times": [
+        32.575,
+        33.075,
+        33.575
+      ],
+      "start": 32.45,
+      "end": 33.8,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B23",
+      "source_frames": [
+        {
+          "requested_time": 32.575,
+          "source_pts": 32.566667,
+          "frame_index": 1954,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001954.jpg",
+          "sha256": "9765976b8137fc78baa516ea755f37e12e9041affda0fef327bdec6bf7b44cdf",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 33.075,
+          "source_pts": 33.066667,
+          "frame_index": 1984,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f001984.jpg",
+          "sha256": "b2c53f32a9d6aa0af54cc06ab5bc94096a0e610754dfaaebbffa1a8a330dd78b",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 33.575,
+          "source_pts": 33.566667,
+          "frame_index": 2014,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f002014.jpg",
+          "sha256": "279b4b69d7d8a3b47f6b07365151fc8f548b9c5c5b05526d2ee4ddfe2d3c9989",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B23.jpg",
+        "sha256": "18c0019a8fe9a970225fb029910115a1913048be5984924e1cd7414f92e6013a",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Another use case is creator-style product content.",
+      "visible": "Different woman in a striped top holds a large lavender/white handled tumbler near the camera while speaking.",
+      "change": "Lifestyle talking portrait changes to a product-in-hand creator shot.",
+      "view": "full visual",
+      "picture_function": "orientation",
+      "why_this_picture": "The visible product introduces a distinct content role beyond changing faces alone.",
+      "camera_observation": "Stable close portrait; hand/product movement carries the shot.",
+      "camera_reason": "Make the product interaction the differentiating object.",
+      "pacing_reason": "About 0.6 seconds conveys the genre; it cannot demonstrate the whole ad or generation quality.",
+      "handoff": "Narrator returns to recommend trying the tool.",
+      "catalog_candidates": [],
+      "implementation_note": "Use a relevant authorized product-content example, not a random person montage.",
+      "transfer": "Pick a second example that adds a new function, such as handling a product.",
+      "caution": "The object is visible, but no product effectiveness or endorsement is established.",
+      "sample_times": [
+        33.825,
+        34.075,
+        34.325
+      ],
+      "start": 33.8,
+      "end": 34.4,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B24",
+      "source_frames": [
+        {
+          "requested_time": 33.825,
+          "source_pts": 33.816667,
+          "frame_index": 2029,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f002029.jpg",
+          "sha256": "5edfa03366967a7202365b96f902e045b6618a52fa171d4f0afd372b4ebe1bfc",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 34.075,
+          "source_pts": 34.066667,
+          "frame_index": 2044,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f002044.jpg",
+          "sha256": "0806e222eeac4bb685281db86b178e06e493de2159756f0d93ea222d8900dffa",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 34.325,
+          "source_pts": 34.316667,
+          "frame_index": 2059,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f002059.jpg",
+          "sha256": "619d6b7609e0184bca5aa8bee54b4ebdb70a0b52c6bf2ed95673c4aa8cba0b48",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B24.jpg",
+        "sha256": "7cfa9ce367dd52a8cf9b6a520ce5b55dc89bab45fcc465dae9f64cbaaf41a29c",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "He recommends trying the tool.",
+      "visible": "Warm-room narrator speaks directly, with emphasized recommendation text.",
+      "change": "Example montage clears to human persuasion.",
+      "view": "full presenter",
+      "picture_function": "emphasis",
+      "why_this_picture": "The recommendation belongs to the narrator after the demonstrations, so the face carries this judgment cleanly.",
+      "camera_observation": "Direct return and held portrait.",
+      "camera_reason": "Recenter on the request about to follow.",
+      "pacing_reason": "One second is sufficient for the recommendation; no extra visual evidence is introduced.",
+      "handoff": "Brand animation returns above him.",
+      "catalog_candidates": [],
+      "implementation_note": "Native presenter and one caption layer.",
+      "transfer": "Make the move from teaching to offer explicit.",
+      "caution": "Strong recommendation is the source's view, not an evaluated claim that everyone should use the product.",
+      "sample_times": [
+        34.5,
+        35.0,
+        35.225
+      ],
+      "start": 34.4,
+      "end": 35.4,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B25",
+      "source_frames": [
+        {
+          "requested_time": 34.5,
+          "source_pts": 34.5,
+          "frame_index": 2070,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f002070.jpg",
+          "sha256": "f576b83f367d609f6b5df35f2d0417074a29de6fb0a550b21a2aabfa10b26ce8",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 35.0,
+          "source_pts": 35.0,
+          "frame_index": 2100,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f002100.jpg",
+          "sha256": "33cba2c27cbd5ac46d605e95215121382ce05539fe46858e078deef2d678f86b",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 35.225,
+          "source_pts": 35.216667,
+          "frame_index": 2113,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f002113.jpg",
+          "sha256": "d00a7fa09f90f9f3a3f1b26f9125d3fd5c06a770fe2d143b60a58a417844f6c5",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B25.jpg",
+        "sha256": "285675e0611fd360973192ee1fcd7d4aa9c432fa6a036633cb38431eadd7b79e",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Try this tool and request the link.",
+      "visible": "Colorful faceted HeyGen mark above the narrator in the familiar split layout.",
+      "change": "Brand split replaces full-face recommendation.",
+      "view": "split",
+      "picture_function": "orientation",
+      "why_this_picture": "Repeating the earlier identity prepares the specific comment keyword and connects the offer to the demonstrated tool.",
+      "camera_observation": "Mark rotates/changes shape while narrator remains; motion is branding rather than evidence.",
+      "camera_reason": "Restore tool recognition before displaying its readable name.",
+      "pacing_reason": "Less than a second of brand motion is a bridge, not a separate lesson.",
+      "handoff": "Wordmark resolves, making the required keyword explicit.",
+      "catalog_candidates": [],
+      "implementation_note": "Reuse authorized brand media; no need to model a custom 3D logo for this functional role.",
+      "transfer": "Reuse the same mechanism identity at CTA rather than introducing a new style.",
+      "caution": "Faceted animation alone may not tell viewers how to spell the name.",
+      "sample_times": [
+        35.475,
+        35.85,
+        36.225
+      ],
+      "start": 35.4,
+      "end": 36.35,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B26",
+      "source_frames": [
+        {
+          "requested_time": 35.475,
+          "source_pts": 35.466667,
+          "frame_index": 2128,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f002128.jpg",
+          "sha256": "5bd403191f2c82d02a2abd79e83c0d9b60b00f0eafd3bf010eca935528f1d14e",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 35.85,
+          "source_pts": 35.85,
+          "frame_index": 2151,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f002151.jpg",
+          "sha256": "5e782e187c138f3519d1919033841cc011727e63b711d71442ef341acdc678c8",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 36.225,
+          "source_pts": 36.216667,
+          "frame_index": 2173,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f002173.jpg",
+          "sha256": "af82fdc143ba52d28e38a8ceb03f5aef31fbb5e7aa0f96bd5f4fa2e364a95911",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B26.jpg",
+        "sha256": "c822d07fe063758bd8d53bab5ca00036603e6269ffec2f58d523b3fa4b8efbe4",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "Comment HeyGen.",
+      "visible": "HeyGen wordmark resolves on white; keyword caption appears above the lower narrator.",
+      "change": "Abstract mark becomes readable product name within the held split.",
+      "view": "split",
+      "picture_function": "emphasis",
+      "why_this_picture": "The visible spelling resolves the action ambiguity and closes the opening's obscured-logo question.",
+      "camera_observation": "Wordmark reveal settles; no camera focus change.",
+      "camera_reason": "Make the keyword easy to remember and type.",
+      "pacing_reason": "Brief readable hold after the brand animation.",
+      "handoff": "Final narrator close-up promises delivery.",
+      "catalog_candidates": [],
+      "implementation_note": "Use the real wordmark or plain editable keyword text; maintain one coherent caption layer.",
+      "transfer": "Show the exact action keyword when spelling/identity matters.",
+      "caution": "Caption and logo duplicate the same name briefly; avoid letting redundant labels linger across subsequent beats.",
+      "sample_times": [
+        36.475,
+        36.725,
+        36.85
+      ],
+      "start": 36.35,
+      "end": 36.95,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B27",
+      "source_frames": [
+        {
+          "requested_time": 36.475,
+          "source_pts": 36.466667,
+          "frame_index": 2188,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f002188.jpg",
+          "sha256": "7f83b8ba0eb286e265ca24ed1266810931a0155d0ffe383067c26c6161f95dae",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 36.725,
+          "source_pts": 36.716667,
+          "frame_index": 2203,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f002203.jpg",
+          "sha256": "c01bca623f61c819e305c95922a7d18c9c1d9a459746e45f5f99b1a44c9fb29d",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 36.85,
+          "source_pts": 36.85,
+          "frame_index": 2211,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f002211.jpg",
+          "sha256": "504678a8c41eeecd5a6ce17a534a7e0ce2a847b7abe56cc7fbb0ce896db0fe89",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B27.jpg",
+        "sha256": "45c61ae91e06027a5ba0d73d4688f88c4ae8f452e3d76a4dfd14bd416faeb1c1",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    },
+    {
+      "spoken_idea": "He will send the resource to the commenter.",
+      "visible": "Full warm-room narrator at laptop; final send-it-over caption.",
+      "change": "Brand panel clears and the face fills the frame again.",
+      "view": "full presenter",
+      "picture_function": "emphasis",
+      "why_this_picture": "Ending on the person makes the promise a direct interaction after the product's name is clear.",
+      "camera_observation": "Direct cut; held source performance to last frame.",
+      "camera_reason": "Keep the final action simple and personal.",
+      "pacing_reason": "Last 0.85 seconds finishes the sentence without another visual demand.",
+      "handoff": "End of clip; actual resource delivery is not shown.",
+      "catalog_candidates": [],
+      "implementation_note": "Native presenter ending; no generic outro is required.",
+      "transfer": "Finish one clear action rather than adding new information at the end.",
+      "caution": "Original final caption word exceeds video duration; the source ends at 37.8 seconds and was not extended.",
+      "sample_times": [
+        37.0,
+        37.5,
+        37.783
+      ],
+      "start": 36.95,
+      "end": 37.8,
+      "time_confidence": "Approximate scene boundary from 0.5-second context and existing primary review; sampled framing strips refine selected changes to about 0.125 seconds, not exact native PTS.",
+      "id": "N03-B28",
+      "source_frames": [
+        {
+          "requested_time": 37.0,
+          "source_pts": 37.0,
+          "frame_index": 2220,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f002220.jpg",
+          "sha256": "aaf26d55ccf4f65f11523ddabf1ca226e9f2e69beccd597536fa1a7d2ea8845e",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 37.5,
+          "source_pts": 37.5,
+          "frame_index": 2250,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f002250.jpg",
+          "sha256": "977661ea7cc18eb83688247f2276561f334de43591f215b409d1ef83cc4f0988",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        },
+        {
+          "requested_time": 37.783,
+          "source_pts": 37.783333,
+          "frame_index": 2267,
+          "path": "docs/studies/shorts-visual-playbook/nate-sequences/frames/N03/f002267.jpg",
+          "sha256": "dd8ade8b037f2cae7bfd8ecf8af005b085f292e90e6c54cad78011fa90e13404",
+          "dimensions": [
+            1080,
+            1920
+          ]
+        }
+      ],
+      "sequence_image": {
+        "path": "docs/studies/shorts-visual-playbook/nate-sequences/sequences/N03-B28.jpg",
+        "sha256": "b6440bc9106101b6eec565f60c26afb9112eb2414d145b13f97a32c09b5b5956",
+        "dimensions": [
+          916,
+          576
+        ]
+      }
+    }
+  ],
+  "overview_pages": [
+    "docs/studies/shorts-visual-playbook/nate-sequences/overviews/N03-01.jpg",
+    "docs/studies/shorts-visual-playbook/nate-sequences/overviews/N03-02.jpg"
+  ],
+  "version": "2026-09-10.2",
+  "source_sha256": "b6400ba02e78c4ba51bb413517701ede2dcacab3b2e82721b3766bda8c554f9f",
+  "source_dimensions": [
+    1080,
+    1920
+  ],
+  "catalog_sources": {
+    "comparison-split": {
+      "path": "artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/comparison-split/comparison-split.html",
+      "sha256": "2637b4dd260eb9ef272fad2f3b3921fe8f282cb498b8de112ec6faa76d5ef3b8",
+      "status": "source-inspected candidate; adapted scene not render-qualified"
+    },
+    "yt-camera-move": {
+      "path": "artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/yt-camera-move/yt-camera-move.html",
+      "sha256": "f58d4c2fc7165cf49a701f55f80fcd88eccab5c582cf8c2ae00259523810d58a",
+      "status": "source-inspected candidate; adapted scene not render-qualified"
+    },
+    "screen-flow-carousel": {
+      "path": "artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/screen-flow-carousel/screen-flow-carousel.html",
+      "sha256": "db49f679a66fb4505e07d395bff8188ae568fbfac36a50c94f1e58fcd925e11a",
+      "status": "source-inspected candidate; adapted scene not render-qualified"
+    },
+    "browser-device-stage": {
+      "path": "artifacts/nate-herk-30-shorts-study-2026-09-10/catalog/sources/browser-device-stage/browser-device-stage.html",
+      "sha256": "59b20814d38bf58ec1c6c7727ed954e89e9f38a7392eddf6d266ce586bad6764",
+      "status": "source-inspected candidate; adapted scene not render-qualified"
+    }
+  }
+}

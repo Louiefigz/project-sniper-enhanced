@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "kind": "cut-repair-visual-lip-sync-policy",
+  "protocol": "deterministic-selected-source-av-offset-v1",
+  "analysisAudioRate": 16000,
+  "analysisFrameWidth": 32,
+  "analysisFrameHeight": 18,
+  "maximumSearchOffsetFrames": 6,
+  "maximumMappingOffsetFrames": 1,
+  "maximumAvOffsetFrames": 1,
+  "minimumComparedFrames": 12,
+  "minimumVisualDynamicPpm": 6000,
+  "minimumVisualScorePpm": 940000,
+  "minimumAudioScorePpm": 940000,
+  "minimumVisualPeakSeparationPpm": 2500,
+  "minimumAudioPeakSeparationPpm": 2500
+}

@@ -1,0 +1,268 @@
+src/lib/server/__tests__/guided-body-controller-sources.test.ts
+✔ genuine source2 pins current and original 0644 files once; repeated checks retain metadata without reads (32245.096292ms)
+✔ original missing source qualification refuses without input or activation publication (31914.049417ms)
+✔ original current-differs source qualification refuses without input or activation publication (31581.111209ms)
+✔ original lock-differs source qualification refuses without input or activation publication (32104.249917ms)
+✔ copied admission and original version downgrade refuse before caller callbacks (32049.218166ms)
+✔ the first monotonic sample cannot rebaseline original admission bytes or caller identity (52947.266625ms)
+✔ first original remaining callback cannot substitute a captured copy (32039.3975ms)
+✔ first original remaining callback cannot substitute a captured lock (32107.448709ms)
+✔ late original callback cannot substitute a captured source and invalidate-then-revive (33299.6645ms)
+✔ private holder copies, original callback substitution and pipeline object substitution refuse (42753.7275ms)
+✔ final source-file sweep is followed by original ancestry recheck (42529.878542ms)
+✔ recursive original caller check permanently invalidates its private holder (32256.18ms)
+✔ original 55-minute floor charges capture and callback time, honors smaller samples, and cannot regain allowance (31361.96475ms)
+✔ first callback overrun and later monotonic rollback cannot mint or recover a hold (33360.876875ms)
+✔ nonfinite, expired and above-body-ceiling original samples are rejected (32976.990542ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 525537.023333
+MODULE_EXIT 0 src/lib/server/__tests__/guided-body-controller-sources.test.ts
+src/lib/server/__tests__/guided-body-deadline.test.ts
+✔ body verifier captures one25minute ceiling and floors the actual remaining milliseconds (0.729125ms)
+✔ body verifier never enlarges a smaller initial parent remainder or ignores parent expiry (0.092458ms)
+✔ body verifier fails closed for malformed clocks, thrown parent probes and rollback (0.55475ms)
+✔ body verifier counts time consumed by parent checks, not only time between calls (0.050333ms)
+✔ body finite tail never reenters the original parent callback (0.107375ms)
+✔ body finite tail retains the earliest lower parent sample even after a larger later sample (0.129416ms)
+✔ body finite tail rollback remains poisoned when the monotonic clock recovers (0.115958ms)
+✔ body finite tail authenticates the exact original closure without invoking copies (0.083458ms)
+✔ body admission reserves all finish work inside original120, with no asset or human-wait credit (1.257917ms)
+✔ body parse-time wall and monotonic origins are consumed before binding and cannot reset (0.569791ms)
+✔ body rollback poisons attempt even if wall time subsequently recovers (0.10825ms)
+✔ retained body budget proves exact receive/start/commit and rejects expiry or opening-policy substitution (1.27ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8.896542
+MODULE_EXIT 0 src/lib/server/__tests__/guided-body-deadline.test.ts
+src/lib/server/__tests__/guided-body-lifecycle.test.ts
+✔ actual tiny body child and command observer accept only their separate bounded purposes (57.386ms)
+✔ actual outer timeout still routes exact named cleanup but cannot clear unknown local ownership (129.090916ms)
+✔ unproved outer stop blocks cleanup; absent, truncated or malformed local ledgers never prove absence (1.803542ms)
+✔ forced failure remains distinct from complete, unbounded, contradictory or unproved outcomes (0.252625ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 190.985583
+MODULE_EXIT 0 src/lib/server/__tests__/guided-body-lifecycle.test.ts
+src/lib/server/__tests__/guided-body-live-driver.test.ts
+✔ live driver defaults to help and forbids old/creator paths or weaker profiles (0.791375ms)
+✔ synthetic attestation requires exact driver-owned project and expected TEST marker (4.396958ms)
+✔ captioned TEST class authors matching initial lane ownership without altering any other program fields (0.968625ms)
+✔ CLI seam uses actual command form and retains exactly one bounded completion (2.563459ms)
+✔ malformed or extra CLI stdout fails without selecting last-match JSON (1.573542ms)
+✔ unknown launch failure retains stop uncertainty and never retries (1.17975ms)
+✔ retained files are new-only and replay inventory detects edits/new files and refuses links (1.877166ms)
+✔ body CLI observer has separate bounded cleanup headroom, never a new generation clock (0.125667ms)
+✔ body foreground observer invokes actual run form with separate process class and does not retry (1.397708ms)
+✔ TEST audit summary preserves warnings and never labels missing or failed required checks as quality (1.556709ms)
+✔ TEST replay metadata covers binary files without loading bytes and detects new attempts and links (1.471417ms)
+✔ different-request proof requires exact conflict denial and normal stopped process, not just any error (10.705416ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 32.741708
+MODULE_EXIT 0 src/lib/server/__tests__/guided-body-live-driver.test.ts
+src/lib/server/__tests__/guided-body-media-input-admission.test.ts
+✔ actual source2 body admission writes and reopens the exact original replay and seven references (33295.942375ms)
+✔ actual known source2 admission rejects copies and a tag downgrade before writer callbacks (31775.10425ms)
+✔ actual source2 writer rejects original replay mutation at its first caller callback (32413.223834ms)
+✔ copied source2 admission with both tags downgraded cannot publish legacy input (31959.784833ms)
+✔ actual source2 writer rejects last callback same-byte publication replacement and keeps evidence (33562.914334ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 163012.382333
+MODULE_EXIT 0 src/lib/server/__tests__/guided-body-media-input-admission.test.ts
+src/lib/server/__tests__/guided-body-media-input-v2.test.ts
+✔ body media V2 observes only exact seven references and bounded original replay raw bytes (6.830292ms)
+✔ body media V1 still observes its original files without reading any replay path (3.753458ms)
+✔ body media V2 rejects changed raw input or archive bytes (8.534667ms)
+✔ body media V2 rejects exact raw SHA with changed declared size (7.123667ms)
+✔ body media V2 bounds each raw reference at 8 MiB before retaining its bytes (5.281875ms)
+✔ body media V2 refuses linked original replay metadata rather than following it (2.737041ms)
+✔ body media V2 retains the first replay inode through the last raw metadata read (3.438209ms)
+✔ body media V2 refuses an authentic-looking DTO before original writer guard or publication (2.953875ms)
+✔ source2 body native fence runs before any callback, tools, directory or intent access (0.304292ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 44.550042
+MODULE_EXIT 0 src/lib/server/__tests__/guided-body-media-input-v2.test.ts
+src/lib/server/__tests__/guided-body-readback-clock.test.ts
+✔ readback's production guards retain increasing real wall stamps without recursive budget observation (173.169833ms)
+✔ the original nested callback reproduces false rollback with strictly increasing Date and actual durable files (26.721ms)
+✔ a genuinely backward wall still fails even with the corrected ownership-only observation (14.60725ms)
+✔ post-read expiry and lost ownership still block the final guards without renewed allowance (40.587459ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 258.371333
+MODULE_EXIT 0 src/lib/server/__tests__/guided-body-readback-clock.test.ts
+src/lib/server/__tests__/guided-body-readback-record-tail.test.ts
+✔ final original readback budget callback cannot replace its verified publication after actual candidate CAS (102735.123666ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 102738.499375
+MODULE_EXIT 0 src/lib/server/__tests__/guided-body-readback-record-tail.test.ts
+src/lib/server/__tests__/guided-body-reference-projection.test.ts
+✔ observed full base probe facts project to the exact same closed held reference, not a different DTO (2.149709ms)
+✔ reference projection does not turn changed full receipt bytes into the same original receipt identity (0.285709ms)
+﹣ opt-in retained failed run reference regression reads exact existing bytes and writes nothing (0.030416ms) # SKIP
+ℹ tests 3
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 4.949916
+MODULE_EXIT 0 src/lib/server/__tests__/guided-body-reference-projection.test.ts
+src/lib/server/__tests__/guided-body-result-v2.test.ts
+✔ actual source2 admission/activation/result binds raw completion and exact original replay readback (42937.764ms)
+✔ source2 result refuses a copied or downgraded admission before the stopped callback (41529.598917ms)
+✔ source2 result rejects the first stopped callback replacing its already captured result inode (46636.957791ms)
+✔ source2 retained result refuses late raw Buffer, nested projection and inode substitutions (42399.518542ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 173508.553333
+MODULE_EXIT 0 src/lib/server/__tests__/guided-body-result-v2.test.ts
+src/lib/server/__tests__/guided-body-source-color-readback-tail.test.ts
+✔ actual source2 readback candidate protocol keeps all three CASes and real result/history readers (104496.938542ms)
+✔ source2 readback cannot return success after candidate CAS exhausts its original allowance (114229.137625ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 218736.863125
+MODULE_EXIT 0 src/lib/server/__tests__/guided-body-source-color-readback-tail.test.ts
+src/lib/server/__tests__/guided-body-source-color-replay.test.ts
+✔ body source replay joins actual current cleanup through its distinct actual held object (23483.87025ms)
+✔ body source replay supports genuine explicit historical selected cleanup without a current-journal clock (20212.265959ms)
+✔ body source replay rejects copied or legacy parent handles before caller guard (17403.57425ms)
+✔ body source replay refuses another genuine complete source2 execution before caller guard (27685.566458ms)
+✔ body source replay retains original selected result and guard identities across its first callback (14158.41825ms)
+✔ body source replay rejects exact original TEMP archive replacement at its first callback (12945.241542ms)
+✔ body source replay rejects final callback raw metadata drift and preserves immutable original source references (13011.023958ms)
+✔ body source replay DTOs cannot reconstruct a capability or grant flags and retained files remain checked (12924.43925ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 141831.160208
+MODULE_EXIT 0 src/lib/server/__tests__/guided-body-source-color-replay.test.ts
+src/lib/server/__tests__/guided-body-source-color-result-faults.test.ts
+✔ source2 result retains original phase Buffer before the first input IO (41583.849084ms)
+✔ source2 result rechecks original output ancestry after its final file sweep (56091.252625ms)
+✔ source2 result holds the actual parsed raw receipt before later metadata IO (52004.125584ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 149684.233334
+MODULE_EXIT 0 src/lib/server/__tests__/guided-body-source-color-result-faults.test.ts
+src/lib/server/__tests__/guided-caption-profile.test.ts
+✔ explicit caption presets select distinct native classes without changing the plan (1.844333ms)
+✔ held historical caption classes keep exact tokens without granting new screening (0.255875ms)
+✔ held classes cannot cross geometry, drop captions or use body/unknown tokens (0.339084ms)
+✔ actual Python and TS agree on every fresh, held legacy, current and refused class (26.020666ms)
+✖ TS and actual Python refuse every unqualified caption/custom/finishing field consistently (113.064208ms)
+✔ whole-program page upper bound is counted before any render (0.227084ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 5
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 145.067333
+
+✖ failing tests:
+
+test at src/lib/server/__tests__/guided-caption-profile.test.ts:2:7042
+✖ TS and actual Python refuse every unqualified caption/custom/finishing field consistently (113.064208ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  ... Skipped lines
+  
+    [
+      true,
+      false,
+      false,
+      false,
+  ...
+      false,
+  -   true,
+      false,
+      false,
+      false,
+      false,
+      false,
+  ...
+      false,
+  +   false
+    ]
+  
+      at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/guided-caption-profile.test.ts:95:10)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [Array],
+    expected: [Array],
+    operator: 'deepStrictEqual'
+  }
+MODULE_EXIT 1 src/lib/server/__tests__/guided-caption-profile.test.ts

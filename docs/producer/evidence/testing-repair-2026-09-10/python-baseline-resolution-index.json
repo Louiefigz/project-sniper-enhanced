@@ -1,0 +1,421 @@
+{
+  "scope": "Distinct failing identities from the failed 6978-test Python baseline; focused resolution mapping, not a new full-suite result.",
+  "baselineDistinctFailures": 42,
+  "requiresNewQualificationEvidence": 8,
+  "cases": [
+    {
+      "type": "ERROR",
+      "identity": "test_comp_capability_lint.RootLintTests.test_actual_owned_node_hang_is_timed_out_and_reaped",
+      "method": "test_actual_owned_node_hang_is_timed_out_and_reaped",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "cleanup-deadline-regressions"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "ERROR",
+      "identity": "test_current_system_inventory_check.CurrentSystemInventoryCheckTests.test_repository_measured_baselines_are_closed",
+      "method": "test_repository_measured_baselines_are_closed",
+      "needsNewMeasuredEvidence": true,
+      "focusedLogsContainingCase": [],
+      "status": "requires-new-qualification-evidence"
+    },
+    {
+      "type": "ERROR",
+      "identity": "test_grade_observation_policy.GradeObservationCleanupTests.test_real_owner_signal_waits_for_exact_daemon_cleanup_then_cancels",
+      "method": "test_real_owner_signal_waits_for_exact_daemon_cleanup_then_cancels",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "cleanup-deadline-regressions",
+        "cleanup-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "ERROR",
+      "identity": "test_nateherk_longform.PipHoleGraphTests.test_render_all_attaches_pip_hole_fields",
+      "method": "test_render_all_attaches_pip_hole_fields",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "later-fixture-repairs"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "ERROR",
+      "identity": "test_placement.AbsentPlacementPathTests.test_render_all_wires_4k_free_band_scaling_into_clip",
+      "method": "test_render_all_wires_4k_free_band_scaling_into_clip",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "later-fixture-repairs"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "ERROR",
+      "identity": "unittest.loader._FailedTest.test_promote_transcript_authority",
+      "method": "test_promote_transcript_authority",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [],
+      "status": "addressed-by-focused-repair",
+      "semanticResolution": {
+        "resolution": "Corrected fixture import; all three actual transcript authority methods pass. Failed-loader identity is replaced by those real methods.",
+        "evidence": "later-fixture-repairs.log"
+      }
+    },
+    {
+      "type": "ERROR",
+      "identity": "test_render_lane.RenderLaneTests.test_artifact_a_cannot_launch_a_caller_forged_entry_b",
+      "method": "test_artifact_a_cannot_launch_a_caller_forged_entry_b",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "ERROR",
+      "identity": "test_render_lane.RenderLaneTests.test_build_drift_before_or_during_worker_blocks_success",
+      "method": "test_build_drift_before_or_during_worker_blocks_success",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "ERROR",
+      "identity": "test_render_lane.RenderLaneTests.test_cache_is_bound_to_attempt_and_revalidates_warm",
+      "method": "test_cache_is_bound_to_attempt_and_revalidates_warm",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "ERROR",
+      "identity": "test_render_lane.RenderLaneTests.test_child_environment_is_closed_and_parent_is_unchanged",
+      "method": "test_child_environment_is_closed_and_parent_is_unchanged",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "ERROR",
+      "identity": "test_render_lane.RenderLaneTests.test_tool_byte_change_changes_build_digest",
+      "method": "test_tool_byte_change_changes_build_digest",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "ERROR",
+      "identity": "test_render_lane.RenderLaneTests.test_tool_path_and_loaded_release_are_part_of_build_identity",
+      "method": "test_tool_path_and_loaded_release_are_part_of_build_identity",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "ERROR",
+      "identity": "test_render_lane_adversarial.RenderLaneAdversarialTests.test_worker_cache_directory_replacement_is_rejected",
+      "method": "test_worker_cache_directory_replacement_is_rejected",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "ERROR",
+      "identity": "test_render_lane_cache_adversarial.RenderLaneCacheAdversarialTests.test_restrictive_umask_cannot_weaken_new_cache_receipt",
+      "method": "test_restrictive_umask_cannot_weaken_new_cache_receipt",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "ERROR",
+      "identity": "test_render_lane_cache_adversarial.RenderLaneCacheAdversarialTests.test_second_launch_accepts_only_prior_removed_container_proof",
+      "method": "test_second_launch_accepts_only_prior_removed_container_proof",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "ERROR",
+      "identity": "test_render_lane_cache_adversarial.RenderLaneCacheAdversarialTests.test_symlink_and_wrong_mode_cache_fail_closed",
+      "method": "test_symlink_and_wrong_mode_cache_fail_closed",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "ERROR",
+      "identity": "test_render_lane_current_protocol.CurrentRenderProtocolTests.test_actual_shared_materializer_shape_reaches_parent_contract",
+      "method": "test_actual_shared_materializer_shape_reaches_parent_contract",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "ERROR",
+      "identity": "test_render_lane_current_protocol.CurrentRenderProtocolTests.test_current_fixed_rate_is_retained_without_changing_proved_clock",
+      "method": "test_current_fixed_rate_is_retained_without_changing_proved_clock",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "ERROR",
+      "identity": "test_render_result.RenderResultTests.test_complete_strict_result_is_accepted",
+      "method": "test_complete_strict_result_is_accepted",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [],
+      "status": "addressed-by-focused-repair",
+      "semanticResolution": {
+        "resolution": "Current build fixture; passes in the 83-test versioned build cohort.",
+        "evidence": "../../BUILD_CLOSURE_RELEASE_2026-09-10.md"
+      }
+    },
+    {
+      "type": "ERROR",
+      "identity": "test_stage_timing_propagation.TimingPropagationTests.test_graph_bridge_and_render_sibling_keep_three_process_lineage",
+      "method": "test_graph_bridge_and_render_sibling_keep_three_process_lineage",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "cleanup-deadline-regressions"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_comp_rate_matrix.CompRateMatrixTests.test_retained_cross_product_is_fresh",
+      "method": "test_retained_cross_product_is_fresh",
+      "needsNewMeasuredEvidence": true,
+      "focusedLogsContainingCase": [],
+      "status": "requires-new-qualification-evidence"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_guided_presenter_base_identity.PresenterBaseIdentityTests.test_constructor_captures_original_input_before_first_owner_callback",
+      "method": "test_constructor_captures_original_input_before_first_owner_callback",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "dependent-regressions"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_headless_import_boundary.HeadlessImportBoundaryTests.test_all_headless_modules_keep_gui_and_palmier_unreachable",
+      "method": "test_all_headless_modules_keep_gui_and_palmier_unreachable",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "cleanup-deadline-regressions",
+        "caption-deadline-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_learning_loop.LessonWireTests.test_auto_edit_authoring_prompt_reads_the_ledger",
+      "method": "test_auto_edit_authoring_prompt_reads_the_ledger",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "later-fixture-repairs"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_p0_adversarial_ingress_artifact.P0AdversarialIngressArtifactTests.test_retained_cohort_is_complete_fresh_and_fail_closed",
+      "method": "test_retained_cohort_is_complete_fresh_and_fail_closed",
+      "needsNewMeasuredEvidence": true,
+      "focusedLogsContainingCase": [],
+      "status": "requires-new-qualification-evidence"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_p0_render_effect_parity_artifact.P0RenderEffectParityArtifactTests.test_short_and_lf14_retained_evidence_is_current",
+      "method": "test_short_and_lf14_retained_evidence_is_current",
+      "needsNewMeasuredEvidence": true,
+      "focusedLogsContainingCase": [],
+      "status": "requires-new-qualification-evidence"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_p2_row1_claim_artifact.P2RowOneClaimArtifactTests.test_receipt_is_fresh_self_hashed_and_path_free",
+      "method": "test_receipt_is_fresh_self_hashed_and_path_free",
+      "needsNewMeasuredEvidence": true,
+      "focusedLogsContainingCase": [],
+      "status": "requires-new-qualification-evidence"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_p4_exit_closure_artifact.P4ExitClosureArtifactTests.test_retained_live_closure_is_fresh_complete_and_load_bearing",
+      "method": "test_retained_live_closure_is_fresh_complete_and_load_bearing",
+      "needsNewMeasuredEvidence": true,
+      "focusedLogsContainingCase": [],
+      "status": "requires-new-qualification-evidence"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_p5_compositor_artifact.P5CompositorArtifactTests.test_retained_twenty_four_overlay_proof_is_fresh",
+      "method": "test_retained_twenty_four_overlay_proof_is_fresh",
+      "needsNewMeasuredEvidence": true,
+      "focusedLogsContainingCase": [],
+      "status": "requires-new-qualification-evidence"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_p5_review_repair_artifact.P5ReviewRepairArtifactTests.test_retained_review_repair_is_fresh_and_load_bearing",
+      "method": "test_retained_review_repair_is_fresh_and_load_bearing",
+      "needsNewMeasuredEvidence": true,
+      "focusedLogsContainingCase": [],
+      "status": "requires-new-qualification-evidence"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_prebound_compositor.PreboundCompositorTests.test_transitive_entry_modules_exclude_legacy_and_gui_paths",
+      "method": "test_transitive_entry_modules_exclude_legacy_and_gui_paths",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [],
+      "status": "addressed-by-focused-repair",
+      "semanticResolution": {
+        "resolution": "Exact module/prefix dependency exclusion; passes in the three-test synthetic compositor cohort.",
+        "evidence": "../../BUILD_CLOSURE_RELEASE_2026-09-10.md"
+      }
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_render_build_receipt_semantics.RenderBuildReceiptSemanticTests.test_current_v2_catalog_covers_every_local_execution_import",
+      "method": "test_current_v2_catalog_covers_every_local_execution_import",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [],
+      "status": "addressed-by-focused-repair",
+      "semanticResolution": {
+        "resolution": "Current closure coverage moved to the new V3 release tests. V2 is now historical and its contract/fixture bytes remain frozen. Both current closure and historical identity checks pass in the 83-test cohort.",
+        "evidence": "../../BUILD_CLOSURE_RELEASE_2026-09-10.md"
+      }
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_render_lane.RenderLaneTests.test_declared_build_contains_transitive_local_import_closure",
+      "method": "test_declared_build_contains_transitive_local_import_closure",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_render_lane.RenderLaneTests.test_invalid_mode_and_image_fail_before_spawn",
+      "method": "test_invalid_mode_and_image_fail_before_spawn",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_render_lane_adversarial.RenderLaneAdversarialTests.test_self_consistent_wrong_copy_proof_is_rejected",
+      "method": "test_self_consistent_wrong_copy_proof_is_rejected",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_render_lane_adversarial.RenderLaneAdversarialTests.test_worker_result_cannot_escape_attempt_cache",
+      "method": "test_worker_result_cannot_escape_attempt_cache",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_render_lane_adversarial.RenderLaneAdversarialTests.test_worker_result_symlink_inside_cache_is_rejected",
+      "method": "test_worker_result_symlink_inside_cache_is_rejected",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_render_lane_current_protocol.CurrentRenderProtocolTests.test_claimed_rate_cannot_override_disagreeing_media_proof",
+      "method": "test_claimed_rate_cannot_override_disagreeing_media_proof",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_render_lane_current_protocol.CurrentRenderProtocolTests.test_current_protocol_does_not_implicitly_upgrade_old_missing_rate",
+      "method": "test_current_protocol_does_not_implicitly_upgrade_old_missing_rate",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_render_lane_current_protocol.CurrentRenderProtocolTests.test_current_protocol_stays_closed_to_unknown_fields",
+      "method": "test_current_protocol_stays_closed_to_unknown_fields",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_render_lane_current_protocol.CurrentRenderProtocolTests.test_noncanonical_or_unqualified_rates_are_not_admitted",
+      "method": "test_noncanonical_or_unqualified_rates_are_not_admitted",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "render-lane-final"
+      ],
+      "status": "addressed-by-focused-repair"
+    },
+    {
+      "type": "FAIL",
+      "identity": "test_stage_timing_propagation.TimingPropagationTests.test_base_rebuild_passes_parent_and_preserves_nonzero_failure",
+      "method": "test_base_rebuild_passes_parent_and_preserves_nonzero_failure",
+      "needsNewMeasuredEvidence": false,
+      "focusedLogsContainingCase": [
+        "cleanup-deadline-regressions"
+      ],
+      "status": "addressed-by-focused-repair"
+    }
+  ]
+}

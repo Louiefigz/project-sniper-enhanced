@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/cut-repair-transition-receipt-v1.schema.json",
+  "title": "CutRepairTransitionReceiptV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "status",
+    "idempotencyKey",
+    "actionHash",
+    "expectedParentRevisionHash",
+    "childRevisionHash",
+    "originalPictureLockedParentHash",
+    "operationHash",
+    "selectionPolicyHash",
+    "childPictureLockHash",
+    "recordedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "cut-repair-transition-receipt" },
+    "status": {
+      "enum": ["CUT_REVIEW_COMMITTED", "PICTURE_LOCKED_COMMITTED"]
+    },
+    "idempotencyKey": { "$ref": "#/$defs/uuid" },
+    "actionHash": { "$ref": "#/$defs/sha256" },
+    "expectedParentRevisionHash": { "$ref": "#/$defs/sha256" },
+    "childRevisionHash": { "$ref": "#/$defs/sha256" },
+    "originalPictureLockedParentHash": { "$ref": "#/$defs/sha256" },
+    "operationHash": { "$ref": "#/$defs/sha256" },
+    "selectionPolicyHash": { "$ref": "#/$defs/sha256" },
+    "childPictureLockHash": {
+      "oneOf": [
+        { "$ref": "#/$defs/sha256" },
+        { "type": "null" }
+      ]
+    },
+    "recordedAt": { "type": "string", "format": "date-time" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": { "const": "CUT_REVIEW_COMMITTED" }
+        }
+      },
+      "then": {
+        "properties": {
+          "childPictureLockHash": { "type": "null" }
+        }
+      },
+      "else": {
+        "properties": {
+          "childPictureLockHash": { "$ref": "#/$defs/sha256" }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    }
+  }
+}

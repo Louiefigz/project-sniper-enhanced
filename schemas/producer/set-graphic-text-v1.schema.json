@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/set-graphic-text-v1.schema.json",
+  "title": "SetGraphicTextV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "operation", "target", "text"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "operation": { "const": "SetGraphicTextV1" },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lane", "id"],
+      "properties": {
+        "lane": { "const": "graphicsTrack" },
+        "id": {
+          "type": "string",
+          "pattern": "^g-[0-9a-z]{8}$"
+        }
+      }
+    },
+    "text": {
+      "type": "string",
+      "maxLength": 1000,
+      "pattern": "\\S"
+    },
+    "expectedCurrentText": {
+      "type": "string",
+      "maxLength": 1000
+    }
+  }
+}

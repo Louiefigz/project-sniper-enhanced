@@ -1,0 +1,50 @@
+[
+  {
+    "path": "templates/motion/package.json",
+    "sha256": "1015d718601d3cd18a0653c775adaebadba5bcedba315d802759fc58f6f220c2"
+  },
+  {
+    "path": "templates/motion/node_modules/hyperframes/package.json",
+    "sha256": "d8cf90dc9c830116530c612ade3271d738cb4fe8eb5b7bafeec849b999236ca2"
+  },
+  {
+    "path": "templates/motion/node_modules/hyperframes/dist/skills/hyperframes/SKILL.md",
+    "sha256": "a6e5a1f0c8f65f54864530dd2c8fb7ae828bf55069188c2fa386da6696bc8d1e"
+  },
+  {
+    "path": "templates/motion/node_modules/hyperframes/dist/skills/hyperframes-cli/references/init-and-scaffold.md",
+    "sha256": "aa19617ba7778dfc61f7ed13c72d2f6f097c78cb751666c8cfdee2f4be3c5415"
+  },
+  {
+    "path": ".claude/skills/producer/SKILL.md",
+    "sha256": "222effe2a9c81e750a42f619528ab4b32875b38f8ad94fb63db6c8f87311e708"
+  },
+  {
+    "path": ".claude/skills/reference-editor/SKILL.md",
+    "sha256": "ee805c692539534ecfc5fc09f1c8f4414b604a612d2dfccd31e30536d7e54d37"
+  },
+  {
+    "path": "scripts/producer/hook_contract.py",
+    "sha256": "c5363997bff1b64af77394f7e3efc7fd5123bab0dc155de7e368012c7fe725a6"
+  },
+  {
+    "path": "scripts/producer/graphics/animation_map.py",
+    "sha256": "106d4c0b5ee0280a81c8893a33d86fdb3db59165aabd90467a5b57573f2bb3dd"
+  },
+  {
+    "path": "scripts/producer/graphics/template_text_contrast.py",
+    "sha256": "aa07ff809731a682f0d24ec239c81b12d9a6f46563f19b233e334bf66ac41b3d"
+  },
+  {
+    "path": "scripts/producer/broll/pool_admission.py",
+    "sha256": "d2cf22d87dfc1c85577a6e12fce347cfc71a97e1642b5db0893450e37132a4df"
+  },
+  {
+    "path": "scripts/producer/graphics/catalog_discovery.py",
+    "sha256": "21492a6321d69e2ddd218d248b1366ba78c0f2a1f188169443b74807e20c6f5d"
+  },
+  {
+    "path": "scripts/producer/studio/comp_transform.py",
+    "sha256": "8ba94432d16fd6c3fef041bd3e008d26166f3d3dd5d3d400873554af6bbec695"
+  }
+]

@@ -1,0 +1,15 @@
+{
+ "source": "heygen-com/hyperframes registry",
+ "cliVersion": "0.7.33",
+ "mirroredAt": "2026-08-28",
+ "itemsListed": 372,
+ "itemsInstalled": 371,
+ "knownMissing": [
+  {
+   "name": "lt-neon-border",
+   "reason": "registry-side add error: Cannot read properties of undefined (reading 'replace') \u2014 retried twice"
+  }
+ ],
+ "files": 383,
+ "boundary": "READ-ONLY REFERENCE MIRROR. Not Project Sniper capabilities. Nothing here is plannable or renderable until ported into templates/motion/compositions/ through the template contract (typed slots, brand tokens, capability probe, Studio lint). Same doctrine as vendor/hyperframes-skills."
+}

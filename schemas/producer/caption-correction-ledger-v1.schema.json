@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/caption-correction-ledger-v1.schema.json",
+  "title": "CaptionCorrectionLedgerV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "kind", "corrections"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "caption-correction-ledger" },
+    "corrections": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/correction" }
+    }
+  },
+  "$defs": {
+    "wordId": {
+      "type": "string",
+      "pattern": "^w-[0-9a-f]{16}$"
+    },
+    "correction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "correctionId",
+        "sourceWordIds",
+        "displayTokens",
+        "timingPolicy"
+      ],
+      "properties": {
+        "correctionId": {
+          "type": "string",
+          "pattern": "^cc-[0-9a-f]{16}$"
+        },
+        "sourceWordIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/wordId" }
+        },
+        "displayTokens": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "\\S"
+          }
+        },
+        "timingPolicy": {
+          "const": "proportional-codepoints"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500,
+          "pattern": "\\S"
+        }
+      }
+    }
+  }
+}

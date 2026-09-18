@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/cut-repair-promotion-action-v1.schema.json",
+  "title": "CutRepairPromotionActionV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "idempotencyKey",
+    "expectedReviewRevisionHash",
+    "reviewActionHash",
+    "operationHash",
+    "selectionPolicyHash",
+    "selectedApproval",
+    "childPictureLockHash",
+    "candidateHash",
+    "promotionEvidenceHash",
+    "requestedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "cut-repair-promotion-action" },
+    "idempotencyKey": { "$ref": "#/$defs/uuid" },
+    "expectedReviewRevisionHash": { "$ref": "#/$defs/sha256" },
+    "reviewActionHash": { "$ref": "#/$defs/sha256" },
+    "operationHash": { "$ref": "#/$defs/sha256" },
+    "selectionPolicyHash": { "$ref": "#/$defs/sha256" },
+    "selectedApproval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approver",
+        "approvalPolicyHash",
+        "approvalReceiptHash"
+      ],
+      "properties": {
+        "approver": { "enum": ["operator", "system-policy"] },
+        "approvalPolicyHash": { "$ref": "#/$defs/sha256" },
+        "approvalReceiptHash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "childPictureLockHash": { "$ref": "#/$defs/sha256" },
+    "candidateHash": { "$ref": "#/$defs/sha256" },
+    "promotionEvidenceHash": { "$ref": "#/$defs/sha256" },
+    "requestedAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    }
+  }
+}

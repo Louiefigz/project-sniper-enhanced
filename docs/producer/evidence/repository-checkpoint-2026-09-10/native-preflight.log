@@ -1,0 +1,15 @@
+Native preflight failed: Native preflight project changed during the check
+.Native preflight failed: Native preflight worker refused; see process.json
+..Native preflight failed: Native preflight file inventory exceeds its bound
+.Native preflight failed: original capability root-lint deadline expired
+.........Native preflight failed: Native preflight worker refused; see process.json
+..Native preflight failed: Native preflight refuses a linked input: /private/tmp/sniper-preflight-test-qbdo8b21/project/assets/linked.svg
+.Native preflight failed: TEST timeout
+Native preflight failed: TEST cap
+...Native preflight failed: original capability root-lint deadline expired
+...Native preflight failed: Native preflight validator or request changed before completion
+.....................
+----------------------------------------------------------------------
+Ran 43 tests in 11.400s
+
+OK

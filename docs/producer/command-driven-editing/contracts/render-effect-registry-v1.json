@@ -1,0 +1,558 @@
+{
+  "schemaVersion": 1,
+  "registryId": "sniper-current-render-effects-v1",
+  "stages": [
+    "source-authority",
+    "timeline-map",
+    "base",
+    "scene",
+    "composite",
+    "final"
+  ],
+  "documents": {
+    "plan": {
+      "privatePrefix": "_",
+      "rootFields": [
+        "audioEnhance",
+        "audioGain",
+        "audioAuthorityMode",
+        "audioReviewSections",
+        "baselineLook",
+        "brollTrack",
+        "captionChapters",
+        "captionCorrectionLedger",
+        "captionStyles",
+        "captions",
+        "captionsTrack",
+        "chapters",
+        "cutDecisions",
+        "cutRepairPicturePlanAuthority",
+        "cutTrack",
+        "dialogueCaptionAuthority",
+        "ending",
+        "faceBBoxNorm",
+        "graphicsDecisions",
+        "graphicsTrack",
+        "music",
+        "persistentText",
+        "planVersion",
+        "presenter",
+        "presenterLayouts",
+        "punchIns",
+        "reframe",
+        "target",
+        "titleCards",
+        "transitionRationale",
+        "transitions",
+        "treatmentMap"
+      ]
+    },
+    "manifest": {
+      "privatePrefix": "_",
+      "rootFields": [
+        "broll",
+        "generatedAt",
+        "input",
+        "music",
+        "sourceSetAdmission",
+        "sources"
+      ]
+    }
+  },
+  "discovery": {
+    "entrypoints": [
+      "scripts/producer/render.py",
+      "scripts/producer/assemble.py",
+      "scripts/producer/current_render_graph_build.py",
+      "scripts/producer/current_render_graph_cli.py",
+      "scripts/producer/motion/punch_in.py",
+      "scripts/producer/motion/reframe_split.py",
+      "scripts/producer/motion/face_track.py",
+      "scripts/producer/motion/reframe.py",
+      "scripts/producer/graphics/graphics_stage.py",
+      "scripts/producer/audio/audio_enhance.py",
+      "scripts/producer/audio/audio_gain.py",
+      "scripts/producer/audit/audit_render.py"
+    ],
+    "nonAssetManifestReads": {
+      "scripts/producer/captions/caption_page_contract.py": [
+        "authorityHash", "captionAuthorityHash", "compositorHash",
+        "destination", "entries", "fps", "kind", "maxPageFrames",
+        "schemaVersion", "shardManifestHash", "totalFrames"
+      ],
+      "scripts/producer/captions/caption_page_media.py": [
+        "fps"
+      ],
+      "scripts/producer/captions/caption_pages.py": [
+        "authorityHash",
+        "destination",
+        "entries",
+        "fps"
+      ],
+      "scripts/producer/captions/caption_shard_authority.py": [
+        "authorityHash",
+        "entries"
+      ],
+      "scripts/producer/captions/caption_shard_composite.py": [
+        "destination",
+        "entries",
+        "fps"
+      ],
+      "scripts/producer/captions/caption_shard_contract.py": [
+        "destination",
+        "fps"
+      ],
+      "scripts/producer/current_render_graph_build.py": [
+        "entries"
+      ],
+      "scripts/producer/guided_caption_projection_contract.py": [
+        "captionAuthorityHash", "compositorHash", "shardManifestHash"
+      ]
+    }
+  },
+  "effects": [
+    {
+      "effectId": "plan-target",
+      "document": "plan",
+      "rootFields": ["target"],
+      "patterns": ["/target/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["base", "final"],
+      "authorityEffects": ["mode, canvas, defaults, lane policy, and delivery profile"],
+      "readerFiles": ["scripts/producer/render.py", "scripts/producer/plan_lint.py"],
+      "mutations": [
+        {"caseId": "target-mode", "fixture": "short-basic", "pointer": "/target/mode", "after": "longform", "expectedChangedRoots": ["plan.base", "plan.final"], "expectedBaseReuse": false}
+      ]
+    },
+    {
+      "effectId": "plan-cut-track",
+      "document": "plan",
+      "rootFields": ["cutTrack"],
+      "patterns": ["/cutTrack/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["timeline-map", "base", "final"],
+      "authorityEffects": ["source ranges, speed, audio lead, output clock, and cut seams"],
+      "readerFiles": ["scripts/producer/compile_timeline.py", "scripts/producer/cut_speed.py"],
+      "mutations": [
+        {"caseId": "cut-end", "fixture": "short-basic", "pointer": "/cutTrack/0/end", "after": 3.5, "expectedChangedRoots": ["plan.base", "plan.final", "plan.timeline"], "expectedBaseReuse": false},
+        {"caseId": "cut-seam-drives-exit", "fixture": "exit-on-cut-active", "pointer": "/cutTrack/0/end", "after": 1.5, "expectedChangedRoots": ["plan.base", "plan.composite", "plan.final", "plan.scene.0000", "plan.timeline"], "expectedBaseReuse": false, "expectedEffectiveEnd": 1.5}
+      ]
+    },
+    {
+      "effectId": "plan-baseline-look",
+      "document": "plan",
+      "rootFields": ["baselineLook"],
+      "patterns": ["/baselineLook/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["base", "final"],
+      "authorityEffects": ["whole-picture crop and grade"],
+      "readerFiles": ["scripts/producer/render.py", "scripts/producer/motion/baseline_look.py"],
+      "mutations": [
+        {"caseId": "baseline-zoom", "fixture": "short-basic", "pointer": "/baselineLook/zoom", "after": 1.08, "expectedChangedRoots": ["plan.base", "plan.final"], "expectedBaseReuse": false}
+      ]
+    },
+    {
+      "effectId": "plan-reframe",
+      "document": "plan",
+      "rootFields": ["reframe"],
+      "patterns": ["/reframe/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["base", "final"],
+      "authorityEffects": ["fill, face, blurpad, manual crop, or split layout"],
+      "readerFiles": ["scripts/producer/render.py", "scripts/producer/plan_lint_reframe.py"],
+      "mutations": [
+        {"caseId": "reframe-strategy", "fixture": "short-basic", "pointer": "/reframe/strategy", "after": "center", "expectedChangedRoots": ["plan.base", "plan.final"], "expectedBaseReuse": false}
+      ]
+    },
+    {
+      "effectId": "plan-face-geometry",
+      "document": "plan",
+      "rootFields": ["faceBBoxNorm"],
+      "patterns": ["/faceBBoxNorm/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["base", "scene", "composite", "final"],
+      "authorityEffects": ["global measured face geometry for recomposition and unpinned face-aware graphic placement"],
+      "readerFiles": ["scripts/producer/motion/recompose.py", "scripts/producer/plan_lint_face.py", "scripts/producer/graphics/placement_context.py", "scripts/producer/graphics/exit_on_cut.py", "scripts/producer/render_stage_roots.py"],
+      "mutations": [
+        {"caseId": "face-geometry", "fixture": "longform-rail", "pointer": "/faceBBoxNorm/0", "after": 0.42, "expectedChangedRoots": ["plan.base", "plan.composite", "plan.final", "plan.scene.0000"], "expectedBaseReuse": false}
+      ]
+    },
+    {
+      "effectId": "plan-punch-ins",
+      "document": "plan",
+      "rootFields": ["punchIns"],
+      "patterns": ["/punchIns/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["base", "final"],
+      "authorityEffects": ["zoom, pan, attack, hold, and release windows"],
+      "readerFiles": ["scripts/producer/render.py", "scripts/producer/motion/punch_in.py"],
+      "mutations": [
+        {"caseId": "punch-zoom", "fixture": "short-basic", "pointer": "/punchIns/0/zoom", "after": 1.2, "expectedChangedRoots": ["plan.base", "plan.final"], "expectedBaseReuse": false}
+      ]
+    },
+    {
+      "effectId": "plan-broll",
+      "document": "plan",
+      "rootFields": ["brollTrack"],
+      "patterns": ["/brollTrack/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["base", "composite", "final"],
+      "authorityEffects": ["picture replacement plus compositor occlusion windows"],
+      "readerFiles": ["scripts/producer/render.py", "scripts/producer/broll/broll_insert.py"],
+      "mutations": [
+        {"caseId": "broll-timing", "fixture": "short-basic", "pointer": "/brollTrack/0/outEnd", "after": 2.7, "expectedChangedRoots": ["plan.base", "plan.composite", "plan.final"], "expectedBaseReuse": false}
+      ]
+    },
+    {
+      "effectId": "plan-title-cards",
+      "document": "plan",
+      "rootFields": ["titleCards"],
+      "patterns": ["/titleCards/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["base", "composite", "final"],
+      "authorityEffects": ["legacy card pixels, caption suppression, and compositor occlusion"],
+      "readerFiles": ["scripts/producer/render.py", "scripts/producer/captions/overlays.py"],
+      "mutations": [
+        {"caseId": "title-card-copy", "fixture": "short-basic", "pointer": "/titleCards/0/text", "after": "AFTER TITLE", "expectedChangedRoots": ["plan.base", "plan.composite", "plan.final"], "expectedBaseReuse": false}
+      ]
+    },
+    {
+      "effectId": "plan-graphics-scene",
+      "document": "plan",
+      "rootFields": ["graphicsTrack"],
+      "patterns": ["/graphicsTrack/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["scene", "composite", "final"],
+      "authorityEffects": ["HyperFrames intent, placement, alpha composite, and timing"],
+      "readerFiles": ["scripts/producer/graphics/graphics_render.py", "scripts/producer/graphics/graphics_stage.py"],
+      "mutations": [
+        {"caseId": "ordinary-scene-copy", "fixture": "short-basic", "pointer": "/graphicsTrack/0/spec/text", "after": "AFTER GRAPHIC", "expectedChangedRoots": ["plan.composite", "plan.final", "plan.scene.0000"], "expectedBaseReuse": true}
+      ]
+    },
+    {
+      "effectId": "plan-graphics-presenter-frame",
+      "document": "plan",
+      "rootFields": [],
+      "patterns": ["/graphicsTrack/*/kind", "/graphicsTrack/*/spec/presenterFrame"],
+      "classification": "render-affecting",
+      "stageRoots": ["scene", "composite", "final"],
+      "authorityEffects": ["opaque MP4 versus alpha MOV and live-presenter hole composition"],
+      "readerFiles": ["scripts/producer/graphics/pip_hole.py", "scripts/producer/graphics/graphics_render.py"],
+      "mutations": [
+        {"caseId": "presenter-frame-alpha", "fixture": "longform-presenter", "pointer": "/graphicsTrack/0/spec/presenterFrame", "after": true, "expectedChangedRoots": ["plan.composite", "plan.final", "plan.scene.0000"], "expectedBaseReuse": true, "expectedFormats": ["mp4", "mov"]}
+      ]
+    },
+    {
+      "effectId": "plan-graphics-recompose",
+      "document": "plan",
+      "rootFields": [],
+      "patterns": ["/graphicsTrack/*/anchor", "/graphicsTrack/*/faceBBoxNorm", "/graphicsTrack/*/kind", "/graphicsTrack/*/outEnd", "/graphicsTrack/*/outStart", "/graphicsTrack/*/recompose/**", "/graphicsTrack/*/spec/side"],
+      "classification": "render-affecting",
+      "stageRoots": ["base", "scene", "composite", "final"],
+      "authorityEffects": ["long-form rail side, measured face clearance, and synchronized base punch window"],
+      "readerFiles": ["scripts/producer/graphics_base_effects.py", "scripts/producer/motion/recompose.py"],
+      "mutations": [
+        {"caseId": "rail-side", "fixture": "longform-rail", "pointer": "/graphicsTrack/0/spec/side", "after": "right", "expectedChangedRoots": ["plan.base", "plan.composite", "plan.final", "plan.scene.0000"], "expectedBaseReuse": false},
+        {"caseId": "rail-timing", "fixture": "longform-rail", "pointer": "/graphicsTrack/0/outEnd", "after": 2.8, "expectedChangedRoots": ["plan.base", "plan.composite", "plan.final", "plan.scene.0000"], "expectedBaseReuse": false}
+      ]
+    },
+    {
+      "effectId": "plan-graphics-caption-suppression",
+      "document": "plan",
+      "rootFields": [],
+      "patterns": ["/graphicsTrack/*/anchor", "/graphicsTrack/*/outEnd", "/graphicsTrack/*/outStart", "/graphicsTrack/*/suppressCaptions"],
+      "classification": "render-affecting",
+      "stageRoots": ["base", "scene", "composite", "final"],
+      "authorityEffects": ["legacy caption cue removal before a graphics-free base encode"],
+      "readerFiles": ["scripts/producer/graphics_base_effects.py", "scripts/producer/render.py"],
+      "mutations": [
+        {"caseId": "own-screen-suppression", "fixture": "longform-suppression-anchor", "pointer": "/graphicsTrack/0/anchor", "after": "own-screen", "expectedChangedRoots": ["plan.base", "plan.composite", "plan.final", "plan.scene.0000"], "expectedBaseReuse": false},
+        {"caseId": "declared-suppression", "fixture": "longform-suppression-flag", "pointer": "/graphicsTrack/0/suppressCaptions", "after": true, "expectedChangedRoots": ["plan.base", "plan.composite", "plan.final", "plan.scene.0000"], "expectedBaseReuse": false}
+      ]
+    },
+    {
+      "effectId": "plan-graphics-exit-on-cut",
+      "document": "plan",
+      "rootFields": [],
+      "patterns": ["/cutTrack/**", "/graphicsTrack/*/exitOnCut", "/graphicsTrack/*/outEnd", "/graphicsTrack/*/outStart"],
+      "classification": "render-affecting",
+      "stageRoots": ["timeline-map", "scene", "composite", "final"],
+      "authorityEffects": ["cut-seam-derived effective scene end"],
+      "readerFiles": ["scripts/producer/graphics/exit_on_cut.py", "scripts/producer/assemble.py"],
+      "mutations": [
+        {"caseId": "exit-on-cut-clamp", "fixture": "exit-on-cut", "pointer": "/graphicsTrack/0/exitOnCut", "after": true, "expectedChangedRoots": ["plan.composite", "plan.final", "plan.scene.0000"], "expectedBaseReuse": true, "expectedEffectiveEnd": 2.0}
+      ]
+    },
+    {
+      "effectId": "plan-transitions",
+      "document": "plan",
+      "rootFields": ["transitions"],
+      "patterns": ["/transitions/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["base", "final"],
+      "authorityEffects": ["picture transition and program SFX"],
+      "readerFiles": ["scripts/producer/render.py", "scripts/producer/motion/transitions.py"],
+      "mutations": [
+        {"caseId": "transition-time", "fixture": "short-basic", "pointer": "/transitions/0/outTime", "after": 1.8, "expectedChangedRoots": ["plan.base", "plan.final"], "expectedBaseReuse": false}
+      ]
+    },
+    {
+      "effectId": "plan-audio-enhance",
+      "document": "plan",
+      "rootFields": ["audioEnhance"],
+      "patterns": ["/audioEnhance/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["base", "final"],
+      "authorityEffects": ["dialogue cleanup preset before program mix"],
+      "readerFiles": ["scripts/producer/render.py", "scripts/producer/audio/audio_enhance.py"],
+      "mutations": [
+        {"caseId": "audio-enhance", "fixture": "short-basic", "pointer": "/audioEnhance/preset", "after": "voice-strong", "expectedChangedRoots": ["plan.base", "plan.final"], "expectedBaseReuse": false}
+      ]
+    },
+    {
+      "effectId": "plan-audio-gain",
+      "document": "plan",
+      "rootFields": ["audioGain"],
+      "patterns": ["/audioGain/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["base", "final"],
+      "authorityEffects": ["per-window dialogue gain before master"],
+      "readerFiles": ["scripts/producer/render.py", "scripts/producer/audio/audio_gain.py"],
+      "mutations": [
+        {"caseId": "audio-gain", "fixture": "short-basic", "pointer": "/audioGain/0/dB", "after": -4, "expectedChangedRoots": ["plan.base", "plan.final"], "expectedBaseReuse": false}
+      ]
+    },
+    {
+      "effectId": "plan-legacy-captions",
+      "document": "plan",
+      "rootFields": ["captions"],
+      "patterns": ["/captions/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["base", "composite", "final"],
+      "authorityEffects": ["legacy ASS content/style/burn plus graphics occupancy"],
+      "readerFiles": ["scripts/producer/render.py", "scripts/producer/captions/caption_authority.py"],
+      "mutations": [
+        {"caseId": "legacy-caption-style", "fixture": "short-basic", "pointer": "/captions/style", "after": "line", "expectedChangedRoots": ["plan.base", "plan.composite", "plan.final"], "expectedBaseReuse": false}
+      ]
+    },
+    {
+      "effectId": "plan-caption-track",
+      "document": "plan",
+      "rootFields": ["captionsTrack"],
+      "patterns": ["/captionsTrack/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["composite", "final"],
+      "authorityEffects": ["first-class cue selection, karaoke mode, placement, and suppression"],
+      "readerFiles": ["scripts/producer/captions/caption_plan_pipeline.py", "scripts/producer/captions/caption_shards.py"],
+      "mutations": [
+        {"caseId": "caption-track-policy", "fixture": "explicit-caption", "pointer": "/captionsTrack/defaultPolicy", "after": "line", "expectedChangedRoots": ["plan.composite", "plan.final"], "expectedBaseReuse": true}
+      ]
+    },
+    {
+      "effectId": "plan-caption-corrections",
+      "document": "plan",
+      "rootFields": ["captionCorrectionLedger"],
+      "patterns": ["/captionCorrectionLedger/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["composite", "final"],
+      "authorityEffects": ["caption display-token correction"],
+      "readerFiles": ["scripts/producer/captions/dialogue_caption_compile.py", "scripts/producer/fingerprints.py"],
+      "mutations": [
+        {"caseId": "caption-correction", "fixture": "explicit-caption", "pointer": "/captionCorrectionLedger/corrections/0/displayTokens/0", "after": "AFTER", "expectedChangedRoots": ["plan.composite", "plan.final"], "expectedBaseReuse": true}
+      ]
+    },
+    {
+      "effectId": "plan-caption-styles",
+      "document": "plan",
+      "rootFields": ["captionStyles"],
+      "patterns": ["/captionStyles/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["composite", "final"],
+      "authorityEffects": ["first-class caption typography and color"],
+      "readerFiles": ["scripts/producer/captions/caption_plan_pipeline.py", "scripts/producer/captions/caption_compile.py"],
+      "mutations": [
+        {"caseId": "caption-style-size", "fixture": "explicit-caption", "pointer": "/captionStyles/default/fontSize", "after": 64, "expectedChangedRoots": ["plan.composite", "plan.final"], "expectedBaseReuse": true}
+      ]
+    },
+    {
+      "effectId": "plan-caption-chapters",
+      "document": "plan",
+      "rootFields": ["captionChapters"],
+      "patterns": ["/captionChapters/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["final"],
+      "authorityEffects": ["first-class long-form chapter sidecar"],
+      "readerFiles": ["scripts/producer/captions/dialogue_caption_compile.py", "scripts/producer/captions/caption_outputs.py"],
+      "mutations": [
+        {"caseId": "caption-chapter-title", "fixture": "explicit-caption", "pointer": "/captionChapters/0/title", "after": "AFTER CHAPTER", "expectedChangedRoots": ["plan.final"], "expectedBaseReuse": true}
+      ]
+    },
+    {
+      "effectId": "plan-dialogue-caption-authority",
+      "document": "plan",
+      "rootFields": ["dialogueCaptionAuthority"],
+      "patterns": ["/dialogueCaptionAuthority/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["composite", "final"],
+      "authorityEffects": ["prepared cut-repair dialogue/caption binding"],
+      "readerFiles": ["scripts/producer/captions/cut_repair_dialogue_authority.py", "scripts/producer/fingerprints.py"],
+      "mutations": [
+        {"caseId": "dialogue-caption-authority", "fixture": "explicit-caption", "pointer": "/dialogueCaptionAuthority/authorityHash", "after": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "expectedChangedRoots": ["plan.composite", "plan.final"], "expectedBaseReuse": true}
+      ]
+    },
+    {
+      "effectId": "plan-legacy-chapters",
+      "document": "plan",
+      "rootFields": ["chapters"],
+      "patterns": ["/chapters/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["final"],
+      "authorityEffects": ["legacy long-form chapter sidecar"],
+      "readerFiles": ["scripts/producer/render.py", "scripts/producer/captions/longform_outputs.py"],
+      "mutations": [
+        {"caseId": "legacy-chapter-title", "fixture": "longform-basic", "pointer": "/chapters/0/title", "after": "AFTER CHAPTER", "expectedChangedRoots": ["plan.final"], "expectedBaseReuse": true}
+      ]
+    },
+    {
+      "effectId": "plan-music",
+      "document": "plan",
+      "rootFields": ["music"],
+      "patterns": ["/music/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["final"],
+      "authorityEffects": ["assemble-time music selection, ducking, and level"],
+      "readerFiles": ["scripts/producer/audio/music_stage.py", "scripts/producer/assemble.py"],
+      "mutations": [
+        {"caseId": "music-gap", "fixture": "short-basic", "pointer": "/music/gapDb", "after": 14, "expectedChangedRoots": ["plan.final"], "expectedBaseReuse": true}
+      ]
+    },
+    {
+      "effectId": "plan-audio-review-sections",
+      "document": "plan",
+      "rootFields": ["audioReviewSections"],
+      "patterns": ["/audioReviewSections/**"],
+      "classification": "authority-only",
+      "stageRoots": [],
+      "authorityEffects": ["dialogue consistency review clock; Audit B replaces user declarations with executed timeline segments, without changing rendered media; the legacy whole-plan fingerprint conservatively invalidates base reuse if the field is persisted"],
+      "readerFiles": ["scripts/producer/audit/audit_render.py", "scripts/producer/audit/dialogue_consistency.py"],
+      "mutations": [
+        {"caseId": "audio-review-sections", "fixture": "short-basic", "pointer": "/audioReviewSections", "after": [{"start": 0, "end": 1, "label": "review section"}], "expectedChangedRoots": [], "expectedBaseReuse": false}
+      ]
+    },
+    {
+      "effectId": "plan-editorial-metadata",
+      "document": "plan",
+      "rootFields": ["audioAuthorityMode", "cutDecisions", "cutRepairPicturePlanAuthority", "ending", "graphicsDecisions", "persistentText", "planVersion", "transitionRationale", "treatmentMap"],
+      "patterns": ["/audioAuthorityMode", "/cutDecisions/**", "/cutRepairPicturePlanAuthority/**", "/ending/**", "/graphicsDecisions/**", "/persistentText/**", "/planVersion", "/transitionRationale/**", "/treatmentMap/**"],
+      "classification": "render-irrelevant",
+      "stageRoots": [],
+      "authorityEffects": ["editorial review, planning, or desktop-only metadata; never delivered pixels/audio"],
+      "readerFiles": ["scripts/producer/edit/cut_repair_picture_plan_authority.py", "scripts/producer/fingerprints.py", "scripts/producer/palmier/desktop_audio_declaration.py", "scripts/producer/docs/findings/DESKTOP_ONLY_LANES_MUST_NOT_LEAK_INTO_EDIT_PLAN.md"],
+      "mutations": [
+        {"caseId": "plan-version", "fixture": "short-basic", "pointer": "/planVersion", "after": 9, "expectedChangedRoots": [], "expectedBaseReuse": true},
+        {"caseId": "audio-authority-mode", "fixture": "short-basic", "pointer": "/audioAuthorityMode", "after": "mastered-stereo", "expectedChangedRoots": [], "expectedBaseReuse": true},
+        {"caseId": "graphics-decision", "fixture": "short-basic", "pointer": "/graphicsDecisions/0/reason", "after": "Changed editorial rationale only.", "expectedChangedRoots": [], "expectedBaseReuse": true},
+        {"caseId": "cut-decision", "fixture": "short-basic", "pointer": "/cutDecisions/review", "after": "changed", "expectedChangedRoots": [], "expectedBaseReuse": true},
+        {"caseId": "cut-repair-picture-plan-authority", "fixture": "short-basic", "pointer": "/cutRepairPicturePlanAuthority/authorityHash", "after": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "expectedChangedRoots": [], "expectedBaseReuse": true},
+        {"caseId": "ending", "fixture": "short-basic", "pointer": "/ending/ctaCaption", "after": "Changed desktop CTA", "expectedChangedRoots": [], "expectedBaseReuse": true},
+        {"caseId": "persistent-text", "fixture": "short-basic", "pointer": "/persistentText/0/text", "after": "Changed desktop title", "expectedChangedRoots": [], "expectedBaseReuse": true},
+        {"caseId": "transition-rationale", "fixture": "short-basic", "pointer": "/transitionRationale/0", "after": "Changed rationale", "expectedChangedRoots": [], "expectedBaseReuse": true},
+        {"caseId": "treatment-map", "fixture": "short-basic", "pointer": "/treatmentMap/0/treatment", "after": "changed-planning-only", "expectedChangedRoots": [], "expectedBaseReuse": true}
+      ]
+    },
+    {
+      "effectId": "plan-unreleased-presenter",
+      "document": "plan",
+      "rootFields": ["presenter"],
+      "patterns": ["/presenter/**"],
+      "classification": "unreleased-rejected",
+      "stageRoots": [],
+      "authorityEffects": ["reserved animated presenter/PIP vocabulary rejected by the current renderer"],
+      "readerFiles": ["scripts/producer/planner/advanced_motion_gate.py"],
+      "mutations": [
+        {"caseId": "unreleased-presenter", "fixture": "short-basic", "pointer": "/presenter/enabled", "after": true, "expectedChangedRoots": [], "expectedRejected": true}
+      ]
+    },
+    {
+      "effectId": "plan-unreleased-presenter-layouts",
+      "document": "plan",
+      "rootFields": ["presenterLayouts"],
+      "patterns": ["/presenterLayouts/**"],
+      "classification": "unreleased-rejected",
+      "stageRoots": [],
+      "authorityEffects": ["explicit V8 presenter layout intent; low-level graph tests do not release production execution or cache reuse"],
+      "readerFiles": ["scripts/producer/guided_presenter_assets.py", "scripts/producer/guided_presenter_execution.py", "scripts/producer/graphics/owned_execution.py"],
+      "mutations": [
+        {"caseId": "unreleased-presenter-layouts-empty", "fixture": "short-basic", "pointer": "/presenterLayouts", "after": [], "expectedChangedRoots": [], "expectedRejected": true},
+        {"caseId": "unreleased-presenter-layouts-null", "fixture": "short-basic", "pointer": "/presenterLayouts", "after": null, "expectedChangedRoots": [], "expectedRejected": true},
+        {"caseId": "unreleased-presenter-layouts-nonempty", "fixture": "short-basic", "pointer": "/presenterLayouts", "after": [{"assetId": "TEST-only-unreleased"}], "expectedChangedRoots": [], "expectedRejected": true}
+      ]
+    },
+    {
+      "effectId": "manifest-sources",
+      "document": "manifest",
+      "rootFields": ["sources"],
+      "patterns": ["/sources/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["source-authority", "base", "final"],
+      "authorityEffects": ["source identity, immutable media, transcript, stream facts, and timing profile"],
+      "readerFiles": ["scripts/producer/cut_speed.py", "scripts/producer/captions/caption_render.py"],
+      "mutations": [
+        {"caseId": "manifest-source-content", "fixture": "short-basic", "pointer": "/manifest/sources/0/contentHash", "after": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "expectedChangedRoots": ["manifest.base", "manifest.final", "manifest.source"]}
+      ]
+    },
+    {
+      "effectId": "manifest-broll",
+      "document": "manifest",
+      "rootFields": ["broll"],
+      "patterns": ["/broll/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["base", "final"],
+      "authorityEffects": ["selected b-roll asset resolution and immutable bytes"],
+      "readerFiles": ["scripts/producer/broll/broll_insert.py", "scripts/producer/plan_lint_overlays.py"],
+      "mutations": [
+        {"caseId": "manifest-broll-path", "fixture": "short-basic", "pointer": "/manifest/broll/0/path", "after": "/immutable/broll-after.mp4", "expectedChangedRoots": ["manifest.base", "manifest.final"]}
+      ]
+    },
+    {
+      "effectId": "manifest-music",
+      "document": "manifest",
+      "rootFields": ["music"],
+      "patterns": ["/music/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["final"],
+      "authorityEffects": ["assemble-time music asset resolution and immutable bytes"],
+      "readerFiles": ["scripts/producer/audio/music_stage.py", "scripts/producer/plan_lint_audio.py"],
+      "mutations": [
+        {"caseId": "manifest-music-path", "fixture": "short-basic", "pointer": "/manifest/music/0/path", "after": "/immutable/music-after.wav", "expectedChangedRoots": ["manifest.final"]}
+      ]
+    },
+    {
+      "effectId": "manifest-source-set-admission",
+      "document": "manifest",
+      "rootFields": ["sourceSetAdmission"],
+      "patterns": ["/sourceSetAdmission/**"],
+      "classification": "render-affecting",
+      "stageRoots": ["source-authority", "base", "final"],
+      "authorityEffects": ["immutable source-set admission receipt and set digest"],
+      "readerFiles": ["scripts/producer/ingest_admission_contract.py", "scripts/producer/current_render_graph_build.py"],
+      "mutations": [
+        {"caseId": "manifest-source-set", "fixture": "short-basic", "pointer": "/manifest/sourceSetAdmission/sourceSetDigest", "after": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "expectedChangedRoots": ["manifest.base", "manifest.final", "manifest.source"]}
+      ]
+    },
+    {
+      "effectId": "manifest-editorial-metadata",
+      "document": "manifest",
+      "rootFields": ["generatedAt", "input"],
+      "patterns": ["/generatedAt", "/input"],
+      "classification": "authority-only",
+      "stageRoots": [],
+      "authorityEffects": ["ingest provenance only; immutable media bindings carry render authority"],
+      "readerFiles": ["scripts/producer/ingest.py"],
+      "mutations": [
+        {"caseId": "manifest-generated-at", "fixture": "short-basic", "pointer": "/manifest/generatedAt", "after": "2026-07-30T00:00:00Z", "expectedChangedRoots": []},
+        {"caseId": "manifest-input", "fixture": "short-basic", "pointer": "/manifest/input", "after": "/different/operator/path", "expectedChangedRoots": []}
+      ]
+    }
+  ]
+}

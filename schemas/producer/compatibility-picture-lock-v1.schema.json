@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/compatibility-picture-lock-v1.schema.json",
+  "title": "CompatibilityPictureLockV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "adapterVersion",
+    "approvedCutPlanHash",
+    "planContentHash",
+    "manifestHash",
+    "transcriptDigest",
+    "cutTrackDigest",
+    "cutDecisionsDigest",
+    "cutApprovalReceiptHash",
+    "cutReviewApprovalReceiptHash",
+    "cutReviewAuthorityDigest",
+    "cutAuthorityDigest",
+    "projectionReceiptHash",
+    "timelineMapHash",
+    "qualityPolicyVersion",
+    "requiredCleanReviews"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "compatibility-picture-lock" },
+    "adapterVersion": { "const": 1 },
+    "approvedCutPlanHash": { "$ref": "#/$defs/sha256" },
+    "planContentHash": { "$ref": "#/$defs/sha256" },
+    "manifestHash": { "$ref": "#/$defs/sha256" },
+    "transcriptDigest": { "$ref": "#/$defs/sha256" },
+    "cutTrackDigest": { "$ref": "#/$defs/sha256" },
+    "cutDecisionsDigest": { "$ref": "#/$defs/sha256" },
+    "cutApprovalReceiptHash": { "$ref": "#/$defs/sha256" },
+    "cutReviewApprovalReceiptHash": { "$ref": "#/$defs/sha256" },
+    "cutReviewAuthorityDigest": { "$ref": "#/$defs/sha256" },
+    "cutAuthorityDigest": { "$ref": "#/$defs/sha256" },
+    "projectionReceiptHash": { "$ref": "#/$defs/sha256" },
+    "timelineMapHash": { "$ref": "#/$defs/sha256" },
+    "qualityPolicyVersion": { "const": 1 },
+    "requiredCleanReviews": { "const": 2 }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

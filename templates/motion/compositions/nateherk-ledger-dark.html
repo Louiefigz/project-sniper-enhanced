@@ -1,0 +1,618 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"eyebrow","type":"string","label":"Eyebrow microtext (mono caps + accent dot; empty = omit)","default":""},
+    {"id":"eyebrowAccent","type":"enum","label":"Eyebrow dot semantic accent","default":"process","options":[{"value":"process","label":"Process (cyan)"},{"value":"result","label":"Result (lime)"}]},
+    {"id":"headlineLines","type":"string","label":"Thesis headline, pipe-separated lines (2 max; line 2 in --accent-result)","default":""},
+    {"id":"explainer","type":"string","label":"1-2 line gray explainer (empty = omit)","default":""},
+    {"id":"barLabel","type":"string","label":"Ledger bar label (mono caps, form #7; empty = no bar)","default":""},
+    {"id":"barValue","type":"string","label":"Ledger bar big value","default":""},
+    {"id":"barStatus","type":"string","label":"Ledger bar live status (lime dot + mono; empty = omit)","default":""},
+    {"id":"rows","type":"string","label":"KV ledger rows, pipe-separated: key~value~TAG~accent (form #5; empty = no ledger)","default":""},
+    {"id":"grid","type":"enum","label":"Fan-out shape (form #5 chips / form #7 columns)","default":"chips","options":[{"value":"chips","label":"Numbered chip row (01 WORDS •)"},{"value":"columns","label":"Parallel-agent columns (AGENT 01 / RESEARCH, lime underline)"}]},
+    {"id":"gridItems","type":"string","label":"Fan-out items, pipe-separated: num~label (empty = no fan-out)","default":""},
+    {"id":"footChip","type":"string","label":"Source footnote chip (mono + dot, lands last; empty = omit)","default":""},
+    {"id":"footAccent","type":"enum","label":"Footnote dot accent","default":"result","options":[{"value":"result","label":"Result (lime)"},{"value":"process","label":"Process (cyan)"},{"value":"warn","label":"Warn (amber — limits/failures ONLY)"}]},
+    {"id":"moduleLands","type":"string","label":"Narration-paced lands (s, comp-relative, pipe/comma) — one per PRESENT module [head, bar, ledger, grid, foot]; empty = 0.2 + k*0.9","default":""},
+    {"id":"exit","type":"enum","label":"Exit","default":"hold","options":[{"value":"hold","label":"Hold to end (compositor owns the seam)"},{"value":"blur-recede","label":"Blur-recede 0.15s (stage only — the canvas never flashes)"}]},
+    {"id":"presenterFrame","type":"boolean","label":"Framed presenter container: mask the reserved right band into a rounded face hole + draw the card ring (compositor fills it with the speaker; forces alpha + longform own-screen)","default":false}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · LONG-FORM template: NATEHERK-LEDGER-DARK (16:9, 1920x1080)
+    Reference: docs/studies/NATEHERK_CARDS.md §1.2 forms #5 + #7 — the DARK chassis
+    config/parallel-process cards:
+      #5  session ledger + fan-out chips  15.5-25.5s  (ACTIVE CODEX SESSION;
+          ledger rows `model "gpt-5.6-sol" -> VERIFIED(lime)`; thin cyan tree
+          connectors branch to 4 numbered chips `01 WORDS •` ... `04 QA •`;
+          build: rows stagger, then chips fan out)
+      #7  parallel agent grid             32.5-45.5s  (ULTRA ORCHESTRATION /
+          ONE RUN. FOUR AGENTS.(lime); ledger bar `DEFAULT PARALLELISM 4 |
+          • COORDINATING`; connector drops to 4 equal columns AGENT 01-04
+          with lime underlines; footnote chip `• OPENAI: FOUR AGENTS IN
+          PARALLEL BY DEFAULT`; columns stagger 80-120ms after a ~900ms
+          narration wait — STUDY MG-2)
+    Full-res LOOK: "full_dark_4agents" (form #7 @ ~36s). Timing +-1 frame.
+
+    CONTRACT for the PRODUCER compositing stage:
+      - anchor "own-screen" OPAQUE takeover (render --format mp4): near-black
+        canvas (var --nateherk-canvas) + faint 96px grid on a full-bleed CHILD,
+        opaque from frame 0 (no base flash at the seam — statement-card law).
+      - NO FACE HOLE in this wave (NATEHERK_STUDY §5 item 9 precedent: "PIP
+        slot EXCLUDED ... full-frame with no face hole, entered via hard cut").
+        The content column deliberately matches nateherk-takeover's stage
+        (left 96px, width 1130px) so the right band [1344..1878] stays clear —
+        registering this kind in graphics/pip_hole.HOLE_BY_KIND later needs
+        ONLY the mask + ring (zero content reflow). Until then the right band
+        holds canvas + grid.
+      - Semantic dual accent (STUDY §3 rank 6): lime --accent-result =
+        results/VERIFIED/underlines, cyan --accent-process = process/status/
+        connectors, gray --accent-compare = comparison. Headline line 2 =
+        result lime (rank 5). Amber reserved: limits/failures ONLY.
+      - Build grammar (§1.3): eyebrow-first (EYEBROW_LEAD_S) -> in-place
+        ghost-resolve headline lines -> ledger bar / KV rows (rows stagger
+        ROW_STAGGER_S=0.25 — the T-B "+250ms" row cadence) -> fan-out items
+        sweep GRID_STAGGER_S=0.1 (MG-2 80-120ms band) after their land (the
+        ~900ms narration wait IS the moduleLands gap) -> footnote chip lands
+        LAST (§1.3 "provenance is a first-class module").
+      - moduleLands: one land per PRESENT module in order [head, bar, ledger,
+        grid, foot]. Count mismatch FAILS LOUDLY. Empty = 0.2 + k*0.9 (the
+        nateherk default cadence, mid of the measured 0.6-1.4s band).
+      - UNSET content renders NOTHING (G21); the SAMPLE (form #7) activates
+        only when EVERY content variable is unset.
+      - RENDER LENGTH is the root data-duration ATTRIBUTE (graphics_render
+        rewrites it per window; --variables never sets it).
+      - exit:"blur-recede" (T-D): the STAGE blurs+fades+recedes over the
+        final EXIT_BLUR_S; the canvas CHILD stays opaque (no base flash).
+        Default "hold" = hard-off on the cut.
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>SNIPER · nateherk-ledger-dark</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="/vendor/gsap/gsap.min.js"></script>
+    <script src="/motion-tokens.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: transparent;
+        font-family: var(--font);
+      }
+      #nld-root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+      #nld-stage-layer { position: absolute; inset: 0; will-change: transform, opacity, filter; }
+
+      /* Near-black canvas + faint 96px grid — full-bleed CHILD, opaque from
+         frame 0 (nateherk-takeover twin, unmasked: no hole this wave). */
+      #nld-canvas {
+        position: absolute; inset: 0;
+        background-color: var(--nateherk-canvas, #0c1014);
+        background-image:
+          repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 96px),
+          repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 96px);
+      }
+
+      /* FRAMED PRESENTER-CONTAINER (opt-in: spec.presenterFrame). When the
+         root carries .has-presenter, mask the canvas out of the reserved right
+         band into a rounded hole (SVG evenodd) the compositor fills with the
+         speaker's face, and draw #nld-face-slot as the card ring. Geometry is
+         copied VERBATIM from nateherk-takeover and MUST equal
+         graphics.pip_hole.HOLE_BY_KIND["nateherk-ledger-dark"] (1344,60,534,960,
+         r24). WITHOUT the class the canvas is opaque — renders exactly as before. */
+      #nld-root.has-presenter #nld-canvas {
+        -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080'><path fill='%23ffffff' fill-rule='evenodd' d='M0 0h1920v1080H0z M1368 60h486a24 24 0 0 1 24 24v912a24 24 0 0 1 -24 24h-486a24 24 0 0 1 -24 -24V84a24 24 0 0 1 24 -24z'/></svg>");
+        mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080'><path fill='%23ffffff' fill-rule='evenodd' d='M0 0h1920v1080H0z M1368 60h486a24 24 0 0 1 24 24v912a24 24 0 0 1 -24 24h-486a24 24 0 0 1 -24 -24V84a24 24 0 0 1 24 -24z'/></svg>");
+      }
+      #nld-face-slot { display: none; }
+      #nld-root.has-presenter #nld-face-slot {
+        display: block;
+        position: absolute;
+        left: 1344px; top: 60px; width: 534px; height: 960px;
+        border-radius: 24px;
+        border: 1.5px solid rgba(255, 255, 255, 0.22);
+        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+      }
+
+      /* Content column — EXACTLY nateherk-takeover's stage geometry so the
+         face-PIP band [1344..1878] stays clear for later hole registration. */
+      #nld-stage {
+        position: absolute;
+        left: 96px; top: 0; width: 1130px; height: 1080px;
+        padding: 96px 0;
+        display: flex; flex-direction: column;
+        justify-content: center;
+        gap: 40px;
+      }
+      .module { will-change: opacity; }
+
+      #nld-eyebrow {
+        display: flex; align-items: center; gap: 16px;
+        font-family: var(--eyebrow-font);
+        font-weight: 700; font-size: 34px; line-height: 1;
+        letter-spacing: 5px; text-transform: uppercase;
+        color: var(--accent-process, #35b6d9);
+      }
+      #nld-eyebrow .dot {
+        width: 13px; height: 13px; border-radius: 50%;
+        background: var(--accent-process, #35b6d9);
+        flex: 0 0 auto;
+      }
+      #nld-eyebrow.result, #nld-eyebrow.result .dot { color: var(--accent-result, #c6f542); }
+      #nld-eyebrow.result .dot { background: var(--accent-result, #c6f542); }
+
+      #nld-headline {
+        font-weight: 900;
+        font-size: 116px;
+        line-height: 1.04;
+        letter-spacing: -2px;
+        color: #ffffff;
+      }
+      #nld-headline .line { display: block; will-change: opacity; }
+      #nld-headline .l2 { color: var(--accent-result, #c6f542); }
+
+      #nld-explainer {
+        font-weight: 500; font-size: 34px; line-height: 1.35;
+        color: rgba(255, 255, 255, 0.6);
+        max-width: 900px;
+      }
+
+      /* Ledger bar (#7): one wide hairline row — label | big value | status. */
+      #nld-bar {
+        display: flex; align-items: center; gap: 28px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.02);
+        padding: 26px 32px;
+      }
+      #nld-bar-label {
+        font-family: var(--eyebrow-font);
+        font-weight: 700; font-size: 24px;
+        letter-spacing: 3px; text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.62);
+      }
+      #nld-bar-value {
+        font-weight: 800; font-size: 60px; line-height: 1;
+        letter-spacing: -1px;
+        color: #ffffff;
+      }
+      #nld-bar-status {
+        margin-left: auto;
+        display: flex; align-items: center; gap: 12px;
+        font-family: var(--eyebrow-font);
+        font-weight: 700; font-size: 23px;
+        letter-spacing: 3px; text-transform: uppercase;
+        color: var(--accent-result, #c6f542);
+      }
+      #nld-bar-status .dot {
+        width: 11px; height: 11px; border-radius: 50%;
+        background: var(--accent-result, #c6f542);
+        flex: 0 0 auto;
+      }
+
+      /* KV session ledger (#5): mono receipts in a hairline panel. */
+      #nld-ledger {
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.02);
+        padding: 10px 32px;
+      }
+      .nld-kv {
+        display: flex; align-items: center; gap: 22px;
+        padding: 20px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        will-change: opacity;
+      }
+      .nld-kv:last-child { border-bottom: none; }
+      .kv-key {
+        font-family: var(--eyebrow-font);
+        font-weight: 500; font-size: 28px;
+        color: rgba(255, 255, 255, 0.55);
+        flex: 0 0 auto;
+      }
+      .kv-value {
+        font-family: var(--eyebrow-font);
+        font-weight: 700; font-size: 31px;
+        color: #ffffff;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .kv-tag {
+        margin-left: auto; flex: 0 0 auto;
+        font-family: var(--eyebrow-font);
+        font-weight: 700; font-size: 21px;
+        letter-spacing: 3px; text-transform: uppercase;
+        color: var(--accent-process, #35b6d9);
+      }
+      .kv-tag.result { color: var(--accent-result, #c6f542); }
+      .kv-tag.warn { color: var(--accent-warn, #e8a13c); }
+      .kv-arrow { color: rgba(255, 255, 255, 0.35); margin-right: 10px; }
+
+      /* Fan-out (#5 chips / #7 columns) under a thin cyan connector tree. */
+      #nld-grid { position: relative; padding-top: 26px; }
+      #nld-grid::before {                 /* horizontal tree spine */
+        content: "";
+        position: absolute; left: 0; right: 0; top: 0;
+        height: 1px;
+        background: color-mix(in srgb, var(--accent-process, #35b6d9) 45%, transparent);
+      }
+      #nld-grid-items { display: flex; gap: 22px; }
+      #nld-grid.columns #nld-grid-items {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: 1fr;
+      }
+      .nld-item { position: relative; will-change: opacity; }
+      .nld-item::before {                 /* vertical stub down to the item */
+        content: "";
+        position: absolute; left: 50%; top: -26px;
+        width: 1px; height: 26px;
+        background: color-mix(in srgb, var(--accent-process, #35b6d9) 45%, transparent);
+      }
+      /* chips (#5): mono num + label + trailing cyan dot. */
+      .nld-item.chip {
+        display: flex; align-items: center; gap: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 9px;
+        padding: 16px 22px;
+        font-family: var(--eyebrow-font);
+        font-weight: 700; font-size: 26px;
+        letter-spacing: 3px; text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.85);
+      }
+      .nld-item.chip .num { color: rgba(255, 255, 255, 0.45); }
+      .nld-item.chip .enddot {
+        width: 9px; height: 9px; border-radius: 50%;
+        background: var(--accent-process, #35b6d9);
+        flex: 0 0 auto;
+      }
+      /* columns (#7): num / label / lime underline. */
+      .nld-item.col {
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.02);
+        padding: 22px 24px 20px;
+        display: flex; flex-direction: column; gap: 10px;
+      }
+      .nld-item.col .num {
+        font-family: var(--eyebrow-font);
+        font-weight: 700; font-size: 19px;
+        letter-spacing: 3px; text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.45);
+      }
+      .nld-item.col .label {
+        font-weight: 800; font-size: 32px; line-height: 1.05;
+        letter-spacing: -0.5px;
+        color: #ffffff;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .nld-item.col .underline {
+        margin-top: 8px;
+        height: 4px; border-radius: 2px;
+        background: var(--accent-result, #c6f542);
+      }
+
+      /* Source footnote chip (#7) — outlined, mono, lands LAST. */
+      #nld-foot {
+        align-self: flex-start;
+        display: flex; align-items: center; gap: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 8px;
+        padding: 14px 20px;
+        font-family: var(--eyebrow-font);
+        font-weight: 700; font-size: 21px;
+        letter-spacing: 3px; text-transform: uppercase;
+        color: var(--receipt-gray, rgba(255, 255, 255, 0.72));
+      }
+      #nld-foot .dot {
+        width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto;
+        background: var(--accent-result, #c6f542);
+      }
+      #nld-foot.process .dot { background: var(--accent-process, #35b6d9); }
+      #nld-foot.warn .dot { background: var(--accent-warn, #e8a13c); }
+    </style>
+  </head>
+  <body>
+    <div
+      id="nld-root"
+      data-composition-id="nateherk-ledger-dark"
+      data-width="1920"
+      data-height="1080"
+      data-start="0"
+      data-duration="10"
+    >
+      <div id="nld-canvas"></div>
+      <div id="nld-stage-layer">
+        <div id="nld-stage">
+          <div id="nld-eyebrow" class="module clip" data-start="0" data-duration="60" data-track-index="1"><span class="dot"></span><span id="nld-eyebrow-text"></span></div>
+          <div id="nld-headline" class="module clip" data-start="0" data-duration="60" data-track-index="2"></div>
+          <div id="nld-explainer" class="module clip" data-start="0" data-duration="60" data-track-index="3"></div>
+          <div id="nld-bar" class="module clip" data-start="0" data-duration="60" data-track-index="4">
+            <span id="nld-bar-label"></span><span id="nld-bar-value"></span>
+            <span id="nld-bar-status"><span class="dot"></span><span id="nld-bar-status-text"></span></span>
+          </div>
+          <div id="nld-ledger" class="module clip" data-start="0" data-duration="60" data-track-index="5"></div>
+          <div id="nld-grid" class="module clip" data-start="0" data-duration="60" data-track-index="6">
+            <div id="nld-grid-items"></div>
+          </div>
+          <div id="nld-foot" class="module clip" data-start="0" data-duration="60" data-track-index="7"><span class="dot"></span><span id="nld-foot-text"></span></div>
+        </div>
+      </div>
+      <div id="nld-face-slot"></div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("nld-root");
+        const D = parseFloat(root.dataset.duration) || 10;
+        const M = window.__motionTokens;
+
+        // Measured build constants:
+        const LINE_STAGGER_S = 0.12;   // headline per-line ramp stagger
+        const ROW_STAGGER_S = 0.25;    // ledger rows (T-B "+250ms" cadence)
+        const GRID_STAGGER_S = 0.1;    // fan-out sweep (MG-2 80-120ms band)
+        const LAND_DEFAULT_START_S = 0.2;
+        const LAND_DEFAULT_GAP_S = 0.9;   // the ~900ms narration wait (MG-2)
+
+        const ACCENTS = ["process", "result", "warn"];
+        const defaults = {
+          eyebrow: "", eyebrowAccent: "process", headlineLines: "",
+          explainer: "", barLabel: "", barValue: "", barStatus: "",
+          rows: "", grid: "chips", gridItems: "",
+          footChip: "", footAccent: "result",
+          moduleLands: "", exit: "hold", presenterFrame: false,
+        };
+        const CONTENT_KEYS = ["eyebrow", "headlineLines", "explainer",
+          "barLabel", "barValue", "barStatus", "rows", "gridItems", "footChip"];
+        // PREVIEW-ONLY demo — form #7 (32.5-45.5s, the full-res LOOK).
+        const SAMPLE = {
+          eyebrow: "ULTRA ORCHESTRATION",
+          headlineLines: "ONE RUN.|FOUR AGENTS.",
+          barLabel: "DEFAULT PARALLELISM", barValue: "4",
+          barStatus: "COORDINATING",
+          grid: "columns",
+          gridItems: "AGENT 01~RESEARCH|AGENT 02~SCRIPT|AGENT 03~PRODUCTION|AGENT 04~VERIFICATION",
+          footChip: "OPENAI: FOUR AGENTS IN PARALLEL BY DEFAULT",
+        };
+        const HF = window.__hyperframes;
+        let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
+        const isPreview = CONTENT_KEYS.every(function (k) {
+          return !(vars[k] == null ? "" : String(vars[k])).trim();
+        });
+        if (isPreview) vars = Object.assign({}, vars, SAMPLE);
+
+        // Framed presenter container: opt-in mask + ring (mirrors how the
+        // comp reads exit). The canvas mask + #nld-face-slot ring are scoped
+        // to .has-presenter; absent it the card renders opaque as before.
+        if (vars.presenterFrame === true || String(vars.presenterFrame) === "true") {
+          root.classList.add("has-presenter");
+        }
+
+        function str(k) { return (vars[k] == null ? "" : String(vars[k])).trim(); }
+        function accentOf(raw, where) {
+          const a = (raw || "").trim().toLowerCase();
+          if (!a) return "";
+          if (ACCENTS.indexOf(a) < 0) {
+            throw new Error("nateherk-ledger-dark: " + where + " accent '" + a +
+              "' not in " + ACCENTS.join("|"));
+          }
+          return a;
+        }
+
+        // ---- Fill / prune modules (unset content renders NOTHING) ----
+        const ebText = str("eyebrow");
+        const ebEl = document.getElementById("nld-eyebrow");
+        if (ebText) {
+          document.getElementById("nld-eyebrow-text").textContent = ebText;
+          if (str("eyebrowAccent") === "result") ebEl.classList.add("result");
+        } else { ebEl.remove(); }
+
+        const headEl = document.getElementById("nld-headline");
+        const heads = str("headlineLines");
+        if (heads) {
+          const lines = heads.split("|").map(function (s) { return s.trim(); });
+          if (lines.length > 2) {
+            throw new Error("nateherk-ledger-dark: headlineLines is 2 lines " +
+              "max (§1.1 thesis grammar), got " + lines.length);
+          }
+          lines.forEach(function (line, j) {
+            const el = document.createElement("span");
+            el.className = "line" + (j === 1 ? " l2" : "");
+            el.textContent = line;
+            headEl.appendChild(el);
+          });
+        } else { headEl.remove(); }
+
+        const expText = str("explainer");
+        const expEl = document.getElementById("nld-explainer");
+        if (expText) expEl.textContent = expText;
+        else expEl.remove();
+
+        const barEl = document.getElementById("nld-bar");
+        const barLabel = str("barLabel");
+        if (barLabel) {
+          document.getElementById("nld-bar-label").textContent = barLabel;
+          document.getElementById("nld-bar-value").textContent = str("barValue");
+          const bs = str("barStatus");
+          if (bs) document.getElementById("nld-bar-status-text").textContent = bs;
+          else document.getElementById("nld-bar-status").remove();
+        } else { barEl.remove(); }
+
+        // KV session ledger rows (#5): key~value~TAG[~accent].
+        const ledgerEl = document.getElementById("nld-ledger");
+        const rowsRaw = str("rows");
+        const kvEls = [];
+        if (rowsRaw) {
+          rowsRaw.split("|").forEach(function (line, i) {
+            const f = line.split("~").map(function (s) { return s.trim(); });
+            if (f.length < 2 || !f[0] || !f[1]) {
+              throw new Error("nateherk-ledger-dark: ledger row " + (i + 1) +
+                " needs key~value at least, got '" + line + "'");
+            }
+            const row = document.createElement("div");
+            row.className = "nld-kv";
+            const key = document.createElement("span");
+            key.className = "kv-key";
+            key.textContent = f[0];
+            const val = document.createElement("span");
+            val.className = "kv-value";
+            val.textContent = f[1];
+            row.appendChild(key);
+            row.appendChild(val);
+            if (f[2]) {
+              const tag = document.createElement("span");
+              tag.className = "kv-tag " +
+                (accentOf(f[3], "ledger row " + (i + 1)) || "process");
+              const arrow = document.createElement("span");
+              arrow.className = "kv-arrow";
+              arrow.textContent = "→";
+              tag.appendChild(arrow);
+              tag.appendChild(document.createTextNode(f[2]));
+              row.appendChild(tag);
+            }
+            ledgerEl.appendChild(row);
+            kvEls.push(row);
+          });
+        } else { ledgerEl.remove(); }
+
+        // Fan-out (#5 chips / #7 columns): num~label items.
+        const gridEl = document.getElementById("nld-grid");
+        const gridItemsEl = document.getElementById("nld-grid-items");
+        const gridShape = str("grid") || "chips";
+        if (gridShape !== "chips" && gridShape !== "columns") {
+          throw new Error("nateherk-ledger-dark: grid '" + gridShape +
+            "' not in chips|columns");
+        }
+        const itemsRaw = str("gridItems");
+        const itemEls = [];
+        if (itemsRaw) {
+          gridEl.classList.add(gridShape);
+          itemsRaw.split("|").forEach(function (line, i) {
+            const f = line.split("~").map(function (s) { return s.trim(); });
+            if (f.length < 2 || !f[0] || !f[1]) {
+              throw new Error("nateherk-ledger-dark: gridItems " + (i + 1) +
+                " needs num~label, got '" + line + "'");
+            }
+            const item = document.createElement("div");
+            item.className = "nld-item " + (gridShape === "chips" ? "chip" : "col");
+            const num = document.createElement("span");
+            num.className = "num";
+            num.textContent = f[0];
+            const label = document.createElement("span");
+            label.className = "label";
+            label.textContent = f[1];
+            item.appendChild(num);
+            item.appendChild(label);
+            if (gridShape === "chips") {
+              const dot = document.createElement("span");
+              dot.className = "enddot";
+              item.appendChild(dot);
+            } else {
+              const ul = document.createElement("span");
+              ul.className = "underline";
+              item.appendChild(ul);
+            }
+            gridItemsEl.appendChild(item);
+            itemEls.push(item);
+          });
+        } else { gridEl.remove(); }
+
+        const footText = str("footChip");
+        const footEl = document.getElementById("nld-foot");
+        if (footText) {
+          document.getElementById("nld-foot-text").textContent = footText;
+          const fa = accentOf(str("footAccent") || "result", "footAccent");
+          if (fa && fa !== "result") footEl.classList.add(fa);
+        } else { footEl.remove(); }
+
+        // ---- Narration-paced module lands ([head, bar, ledger, grid, foot]) ----
+        const modules = [];
+        if (ebText || heads || expText) modules.push("head");
+        if (barLabel) modules.push("bar");
+        if (kvEls.length) modules.push("ledger");
+        if (itemEls.length) modules.push("grid");
+        if (footText) modules.push("foot");
+        let lands = [];
+        const landsVar = vars.moduleLands;
+        const landsRaw = Array.isArray(landsVar)
+          ? landsVar.map(String) : String(landsVar == null ? "" : landsVar).trim()
+            ? String(landsVar).split(/[|,]/) : [];
+        if (landsRaw.length) {
+          lands = landsRaw.map(function (s) { return parseFloat(s); });
+          if (lands.length !== modules.length || lands.some(function (t) { return !isFinite(t); })) {
+            throw new Error("nateherk-ledger-dark: moduleLands needs " +
+              modules.length + " finite times for modules [" +
+              modules.join(", ") + "], got '" + landsRaw.join(",") + "'");
+          }
+        } else {
+          modules.forEach(function (_, k) {
+            lands.push(LAND_DEFAULT_START_S + k * LAND_DEFAULT_GAP_S);
+          });
+        }
+        const landOf = {};
+        modules.forEach(function (name, k) { landOf[name] = lands[k]; });
+
+        // ---- Build (eyebrow-first + in-place ghost-resolve ramps) ----
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        if (landOf.head != null) {
+          const t0 = landOf.head;
+          let headAt = t0;
+          if (ebText) {
+            M.textRamp(tl, ebEl, t0);
+            headAt = t0 + M.EYEBROW_LEAD_S;      // eyebrow leads (rank 3)
+          }
+          let lastAt = headAt;
+          if (heads) {
+            headEl.querySelectorAll(".line").forEach(function (lineEl, j) {
+              lastAt = headAt + j * LINE_STAGGER_S;
+              M.textRamp(tl, lineEl, lastAt);
+            });
+          }
+          if (expText) M.textRamp(tl, expEl, lastAt + LINE_STAGGER_S);
+        }
+
+        // Ledger bar lands as one unit (#7 — a single wide receipt).
+        if (landOf.bar != null) M.textRamp(tl, barEl, landOf.bar);
+
+        // Session ledger: panel skeleton FIRST, rows stagger +250ms apart
+        // (#5 "rows stagger, then chips fan out"; rank 2 containers-first).
+        if (landOf.ledger != null) {
+          const tL = landOf.ledger;
+          M.textRamp(tl, ledgerEl, tL);
+          kvEls.forEach(function (row, i) {
+            M.textRamp(tl, row, tL + M.SKELETON_GAP_S + i * ROW_STAGGER_S);
+          });
+        }
+
+        // Fan-out: tree connector arrives WITH the module, items sweep
+        // 100ms apart (MG-2 80-120ms after the ~900ms narration wait).
+        if (landOf.grid != null) {
+          const tG = landOf.grid;
+          M.textRamp(tl, gridEl, tG);
+          itemEls.forEach(function (el, i) {
+            M.textRamp(tl, el, tG + i * GRID_STAGGER_S);
+          });
+        }
+
+        // Footnote chip lands LAST (provenance module, §1.3).
+        if (landOf.foot != null) M.textRamp(tl, footEl, landOf.foot);
+
+        // exit:"blur-recede" (T-D): stage only — the opaque canvas never
+        // fades, so there is no base flash at the seam (statement-card law).
+        if (String(vars.exit) === "blur-recede") {
+          M.blurRecede(tl, "#nld-stage-layer", D - M.EXIT_BLUR_S);
+        }
+        // Otherwise HOLDS to the end — the compositor owns the seam.
+
+        tl.seek(0);
+        window.__timelines["nateherk-ledger-dark"] = tl;
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/cut-restore-speech-v1.schema.json",
+  "title": "CutRestoreSpeechV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "operation",
+    "target",
+    "parentPictureLockHash",
+    "parentTimelineMapHash",
+    "segment",
+    "sourceExtension",
+    "sourceSampleRate",
+    "speed",
+    "extensionFrames",
+    "preserveUnrelated",
+    "totalOutputFramesBefore",
+    "totalOutputFramesAfter",
+    "method",
+    "pictureDirtyWindows",
+    "audioDirtyWindows",
+    "audioDirtySampleRanges",
+    "extensionOutputSamples",
+    "unchangedPictureMappingRanges",
+    "revalidatedDependentIds",
+    "unchangedDependentIds"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "operation": { "const": "cut.restoreSpeech" },
+    "target": { "$ref": "#/$defs/wordRange" },
+    "parentPictureLockHash": { "$ref": "#/$defs/sha256" },
+    "parentTimelineMapHash": { "$ref": "#/$defs/sha256" },
+    "segment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["segmentId", "elementVersion", "edge"],
+      "properties": {
+        "segmentId": { "type": "string", "minLength": 1 },
+        "elementVersion": { "type": "integer", "minimum": 1 },
+        "edge": { "enum": ["start", "end"] }
+      }
+    },
+    "sourceExtension": { "$ref": "#/$defs/sampleRange" },
+    "sourceSampleRate": { "type": "integer", "minimum": 1 },
+    "sourceVideoFrameRange": { "$ref": "#/$defs/frameRange" },
+    "sourceFrameRate": {
+      "$ref": "positive-rational-v1.schema.json"
+    },
+    "speed": {
+      "$ref": "positive-rational-v1.schema.json"
+    },
+    "extensionFrames": { "type": "integer", "minimum": 1 },
+    "preserveUnrelated": { "const": true },
+    "totalOutputFramesBefore": { "type": "integer", "minimum": 1 },
+    "totalOutputFramesAfter": { "type": "integer", "minimum": 1 },
+    "method": {
+      "enum": ["audio-lj-overlap", "extend-and-reclaim-silence"]
+    },
+    "reclaimedSilence": { "$ref": "#/$defs/reclaimedSilence" },
+    "pictureDirtyWindows": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/frameRange" }
+    },
+    "audioDirtyWindows": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/frameRange" }
+    },
+    "audioDirtySampleRanges": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/sampleRange" }
+    },
+    "replacedAudioSampleRanges": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/sampleRange" }
+    },
+    "replaceableAudioEvidenceHash": { "$ref": "#/$defs/sha256" },
+    "extensionOutputSamples": { "type": "integer", "minimum": 1 },
+    "quantizationResidualSamples": { "type": "integer", "minimum": 0 },
+    "residualPolicy": { "const": "reclaimed-proved-silence" },
+    "unchangedPictureMappingRanges": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/frameRange" }
+    },
+    "revalidatedDependentIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "unchangedDependentIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "method": { "const": "extend-and-reclaim-silence" }
+        }
+      },
+      "then": {
+        "required": [
+          "reclaimedSilence",
+          "sourceVideoFrameRange",
+          "sourceFrameRate",
+          "quantizationResidualSamples",
+          "residualPolicy"
+        ]
+      },
+      "else": {
+        "allOf": [
+          { "not": { "required": ["reclaimedSilence"] } },
+          { "not": { "required": ["sourceVideoFrameRange"] } },
+          { "not": { "required": ["sourceFrameRate"] } },
+          { "not": { "required": ["quantizationResidualSamples"] } },
+          { "not": { "required": ["residualPolicy"] } }
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": { "const": "audio-lj-overlap" }
+        },
+        "required": ["method"]
+      },
+      "then": {
+        "required": [
+          "replacedAudioSampleRanges",
+          "replaceableAudioEvidenceHash"
+        ]
+      },
+      "else": {
+        "allOf": [
+          { "not": { "required": ["replacedAudioSampleRanges"] } },
+          { "not": { "required": ["replaceableAudioEvidenceHash"] } }
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "frameRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startFrame", "endFrameExclusive"],
+      "properties": {
+        "startFrame": { "type": "integer", "minimum": 0 },
+        "endFrameExclusive": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "sampleRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startSample", "endSampleExclusive"],
+      "properties": {
+        "startSample": { "type": "integer", "minimum": 0 },
+        "endSampleExclusive": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "wordRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "sourceId",
+        "wordIds",
+        "occurrence",
+        "sourceSampleRange",
+        "transcriptTimingHash"
+      ],
+      "properties": {
+        "kind": { "const": "word-range" },
+        "sourceId": { "type": "string", "minLength": 1 },
+        "wordIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^w-[0-9a-f]{16}$"
+          }
+        },
+        "occurrence": { "type": "integer", "minimum": 1 },
+        "sourceSampleRange": { "$ref": "#/$defs/sampleRange" },
+        "transcriptTimingHash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "reclaimedSilence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "silenceId",
+        "sourceSampleRange",
+        "outputFrameRange"
+      ],
+      "properties": {
+        "silenceId": { "type": "string", "minLength": 1 },
+        "sourceSampleRange": { "$ref": "#/$defs/sampleRange" },
+        "outputFrameRange": { "$ref": "#/$defs/frameRange" }
+      }
+    }
+  }
+}

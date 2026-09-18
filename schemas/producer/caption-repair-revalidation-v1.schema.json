@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/caption-repair-revalidation-v1.schema.json",
+  "title": "CaptionRepairRevalidationV1",
+  "type": "object",
+  "unevaluatedProperties": false,
+  "oneOf": [
+    { "$ref": "#/$defs/notPresent" },
+    { "$ref": "#/$defs/revalidated" }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "wordId": {
+      "type": "string",
+      "pattern": "^w-[0-9a-f]{16}$"
+    },
+    "frameWindow": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "integer", "minimum": 0 },
+        { "type": "integer", "minimum": 1 }
+      ],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "windows": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/frameWindow" }
+    },
+    "strings": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "wordIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/wordId" }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "expectedWordIds",
+        "renderedWordIds",
+        "suppressedWordIds",
+        "omittedWordIds"
+      ],
+      "properties": {
+        "expectedWordIds": { "$ref": "#/$defs/wordIds" },
+        "renderedWordIds": { "$ref": "#/$defs/wordIds" },
+        "suppressedWordIds": { "$ref": "#/$defs/wordIds" },
+        "omittedWordIds": { "$ref": "#/$defs/wordIds" }
+      }
+    },
+    "cues": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "changedCueIds",
+        "unchangedCueIds",
+        "dirtyFrameWindows",
+        "contentNodesRebuilt",
+        "contentNodesReused"
+      ],
+      "properties": {
+        "changedCueIds": { "$ref": "#/$defs/strings" },
+        "unchangedCueIds": { "$ref": "#/$defs/strings" },
+        "dirtyFrameWindows": { "$ref": "#/$defs/windows" },
+        "contentNodesRebuilt": { "$ref": "#/$defs/strings" },
+        "contentNodesReused": { "$ref": "#/$defs/strings" }
+      }
+    },
+    "chapters": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "changedChapterIds"],
+          "properties": {
+            "status": { "const": "not-present" },
+            "changedChapterIds": { "$ref": "#/$defs/strings" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "changedChapterIds",
+            "beforeHash",
+            "afterHash"
+          ],
+          "properties": {
+            "status": { "const": "revalidated" },
+            "changedChapterIds": { "$ref": "#/$defs/strings" },
+            "beforeHash": { "$ref": "#/$defs/sha256" },
+            "afterHash": { "$ref": "#/$defs/sha256" }
+          }
+        }
+      ]
+    },
+    "notPresent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "kind",
+        "operationHash",
+        "authorizedDirtyWindows",
+        "status",
+        "revalidationHash"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "kind": { "const": "caption-repair-revalidation" },
+        "operationHash": { "$ref": "#/$defs/sha256" },
+        "authorizedDirtyWindows": { "$ref": "#/$defs/windows" },
+        "status": { "const": "not-present" },
+        "revalidationHash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "revalidated": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "kind",
+        "operationHash",
+        "authorizedDirtyWindows",
+        "status",
+        "beforeCompilationHash",
+        "afterCompilationHash",
+        "cues",
+        "chapters",
+        "beforeCoverage",
+        "afterCoverage",
+        "revalidationHash"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "kind": { "const": "caption-repair-revalidation" },
+        "operationHash": { "$ref": "#/$defs/sha256" },
+        "authorizedDirtyWindows": { "$ref": "#/$defs/windows" },
+        "status": { "const": "revalidated" },
+        "beforeCompilationHash": { "$ref": "#/$defs/sha256" },
+        "afterCompilationHash": { "$ref": "#/$defs/sha256" },
+        "cues": { "$ref": "#/$defs/cues" },
+        "chapters": { "$ref": "#/$defs/chapters" },
+        "beforeCoverage": { "$ref": "#/$defs/coverage" },
+        "afterCoverage": { "$ref": "#/$defs/coverage" },
+        "revalidationHash": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}

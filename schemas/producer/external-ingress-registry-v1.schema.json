@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/external-ingress-registry-v1.schema.json",
+  "title": "ExternalIngressRegistryV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "scanRules",
+    "families",
+    "invariants"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "kind": {
+      "const": "external-ingress-registry"
+    },
+    "scanRules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/scanRule"
+      }
+    },
+    "families": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/family"
+      }
+    },
+    "invariants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/invariant"
+      }
+    }
+  },
+  "$defs": {
+    "pathList": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "scanRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ruleId",
+        "roots",
+        "suffixes",
+        "token",
+        "expectedOccurrenceCount"
+      ],
+      "properties": {
+        "ruleId": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "roots": {
+          "$ref": "#/$defs/pathList"
+        },
+        "suffixes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^\\.[a-z0-9]+$"
+          },
+          "uniqueItems": true
+        },
+        "token": {
+          "type": "string",
+          "minLength": 2
+        },
+        "expectedOccurrenceCount": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "ownership": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ruleId",
+        "path",
+        "sourceToken",
+        "expectedOccurrences"
+      ],
+      "properties": {
+        "ruleId": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceToken": {
+          "type": "string",
+          "minLength": 2
+        },
+        "expectedOccurrences": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "family": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "classification",
+        "released",
+        "entryPoints",
+        "authorityPaths",
+        "promotionPaths",
+        "testPaths",
+        "ownership",
+        "notes"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "classification": {
+          "enum": [
+            "sandbox-admitted-media",
+            "descriptor-admitted-text",
+            "sealed-archive",
+            "governed-derivative",
+            "disabled",
+            "trusted-build-input",
+            "non-production-migration"
+          ]
+        },
+        "released": {
+          "type": "boolean"
+        },
+        "entryPoints": {
+          "$ref": "#/$defs/pathList"
+        },
+        "authorityPaths": {
+          "$ref": "#/$defs/pathList"
+        },
+        "promotionPaths": {
+          "$ref": "#/$defs/pathList"
+        },
+        "testPaths": {
+          "$ref": "#/$defs/pathList"
+        },
+        "ownership": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ownership"
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "tokenCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "token",
+        "expectedOccurrences"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "token": {
+          "type": "string",
+          "minLength": 2
+        },
+        "expectedOccurrences": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "invariant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "requiredTokens",
+        "forbiddenTokens",
+        "testPaths"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "requiredTokens": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/tokenCheck"
+          }
+        },
+        "forbiddenTokens": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/tokenCheck"
+          }
+        },
+        "testPaths": {
+          "$ref": "#/$defs/pathList"
+        }
+      }
+    }
+  }
+}

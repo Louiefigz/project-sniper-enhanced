@@ -1,0 +1,68 @@
+{
+  "version": "2026-09-10.3",
+  "case_count": 8,
+  "source_count_by_creator": {
+    "caleb": 4,
+    "lewis": 4
+  },
+  "directing_beat_count": 39,
+  "coverage_sample_count": 541,
+  "cases": [
+    {
+      "id": "CR04",
+      "title": "Explain an exercise through the conversation",
+      "source_url": "https://www.instagram.com/reel/DdHPhLbxg1q/",
+      "case_path": "docs/studies/shorts-visual-playbook/authentic-expansion/cases/CR04.json"
+    },
+    {
+      "id": "CR05",
+      "title": "A reading card over quiet personal footage",
+      "source_url": "https://www.instagram.com/reel/DGoNZ7OxBUy/",
+      "case_path": "docs/studies/shorts-visual-playbook/authentic-expansion/cases/CR05.json"
+    },
+    {
+      "id": "CR06",
+      "title": "Numbered questions without leaving the interview",
+      "source_url": "https://www.instagram.com/reel/DL5_Dicy28d/",
+      "case_path": "docs/studies/shorts-visual-playbook/authentic-expansion/cases/CR06.json"
+    },
+    {
+      "id": "CR07",
+      "title": "Build a relationship diagram, then return to conviction",
+      "source_url": "https://www.instagram.com/reel/DdB2yRaDz0M/",
+      "case_path": "docs/studies/shorts-visual-playbook/authentic-expansion/cases/CR07.json"
+    },
+    {
+      "id": "LM04",
+      "title": "Physical teaching prop, chapter changes and a tangible offer",
+      "source_url": "https://www.instagram.com/reel/Dc_1B2lPn7j/",
+      "case_path": "docs/studies/shorts-visual-playbook/authentic-expansion/cases/LM04.json"
+    },
+    {
+      "id": "LM05",
+      "title": "Personal montage with a text-led narrative",
+      "source_url": "https://www.instagram.com/reel/DcZPZuJxno1/",
+      "case_path": "docs/studies/shorts-visual-playbook/authentic-expansion/cases/LM05.json"
+    },
+    {
+      "id": "LM06",
+      "title": "A workflow of artifacts above the presenter",
+      "source_url": "https://www.instagram.com/reel/DcUXjRkRTVu/",
+      "case_path": "docs/studies/shorts-visual-playbook/authentic-expansion/cases/LM06.json"
+    },
+    {
+      "id": "LM07",
+      "title": "A website argument that stays with the person",
+      "source_url": "https://www.instagram.com/reel/DcWrkGgP0h0/",
+      "case_path": "docs/studies/shorts-visual-playbook/authentic-expansion/cases/LM07.json"
+    }
+  ],
+  "total_duration_seconds": 271.249,
+  "coverage_sheet_count": 49,
+  "unique_selected_native_frame_count": 213,
+  "visually_inspected_motion_burst_count": 13,
+  "individual_original_resolution_frame_count": 12,
+  "accepted_machine_transcript_count": 5,
+  "format_guide": "docs/studies/shorts-visual-playbook/FORMAT_FOUNDATIONS.md",
+  "use": "Conditional directing reference context; not fine-tuning or rendered style qualification."
+}

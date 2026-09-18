@@ -1,0 +1,592 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"type","type":"enum","label":"Chart form (the beat&apos;s information shape picks it)","default":"bars","options":[{"value":"bars","label":"Bars (values vs values)"},{"value":"line","label":"Line (trend over time)"},{"value":"donut","label":"Donut (parts of a whole)"},{"value":"progress","label":"Progress (fills toward a bound)"}]},
+    {"id":"data","type":"string","label":"Comma-separated numbers; the chart lands EXACTLY on these values","default":"12, 28, 45, 64"},
+    {"id":"labels","type":"string","label":"Comma-separated labels, one per datum (a slot may be blank)","default":"Q1, Q2, Q3, Q4"},
+    {"id":"emphasize","type":"number","label":"Index of the accented datum (gets the value callout)","default":3,"step":1},
+    {"id":"unit","type":"string","label":"Suffix appended to every displayed value (explicit blank = none)","default":"%"},
+    {"id":"accent","type":"color","label":"Accent color (emphasized datum + callout chip)","default":"#054BC9"},
+    {"id":"exit","type":"enum","label":"Exit","default":"hold","options":[{"value":"hold","label":"Hold to end (compositor owns the seam)"},{"value":"fade","label":"Fade 0.5s"},{"value":"up","label":"Rise + fade 0.5s"}]}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · LONG-FORM template: CHART-STORY (catalog port wave B —
+    data/evidence family; upstream: vendor/hyperframes-catalog/compositions/
+    components/chart-story.html, demo tokens retargeted to tokens.css, dark
+    contract-token palette re-inked for the house white card).
+    Trigger it serves: an evidence beat whose numbers form a SHAPE the
+    ledger/scoreboard family cannot draw — a trend (line), values vs values
+    (bars), parts of a whole (donut), or fills toward a bound (progress).
+    One comp, four chart forms; the chart builds in reading order and lands
+    the EXACT supplied tokens (never re-rounded). The emphasized datum takes
+    the accent and a value callout that pops and rolls to the exact token.
+
+    CANVAS CHOICE (wave-B doctrine): 16:9 1920x1080. Evidence/data cards are
+    long-form grammar (the trend hole this fills sits next to
+    nateherk-ledger-dark/scoreboard, both 16:9); shorts pacing (~4 beats/min,
+    punch-cuts) does not hold a 3.3s chart build. The upstream is
+    container-responsive, so a 9:16 sibling is a mechanical re-lane if ever
+    earned. Transparent canvas -> white house card panel -> alpha overlay:
+    render with `--format mov` on overlay anchors (own-screen would mat the
+    alpha onto black — plan it as a panel, not a takeover).
+
+    CONTRACT for the PRODUCER compositing stage:
+      - type / data / labels / emphasize / unit / accent / exit are
+        `data-composition-variables`. template_catalog_contract REJECTS a
+        plan whose data is not 2..8 finite non-negative numbers, whose labels
+        do not pair 1:1 with data, whose emphasize is out of range, or whose
+        type is implicit (the chart form is an editorial decision). This file
+        throws on present-but-invalid data (defense in depth); fully ABSENT
+        variables render the preview sample.
+      - claims_contract applies to spec.data like any card copy: every value
+        the chart lands must be spoken in the card's window.
+      - MECHANISM (kept from upstream): the whole SVG is built synchronously
+        from the variables; every stroke draw is a getTotalLength dash tween
+        — CONVERTED from upstream's CSS strokeDasharray/strokeDashoffset
+        styles to the stroke-dashoffset ATTRIBUTE (house scrub law #6;
+        upstream drove the CSS property, the one seek-unsafe idiom here).
+        Bars/progress grow by rect GEOMETRY (attr height/y/width), never
+        scaleY, so the corner radius re-clamps every frame. The callout
+        number is a table of authored frame rows applied via tl.set (house
+        law #5) and the final row IS the raw supplied token.
+      - ENVELOPE (house law #7): fixed IN 3.3s (arrival, axis, build, labels,
+        callout) + optional OUT 0.5s; only HOLD is elastic (one finite drift,
+        then 0.3s stillness). Default exit "hold" — THE EXIT LAW.
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (stat-card note);
+        graphics_render rewrites it per window.
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>SNIPER · chart-story</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="/vendor/gsap/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: transparent;          /* alpha overlay — only the card paints */
+        font-family: var(--font);
+      }
+      #cs-root { position: relative; width: 1920px; height: 1080px; }
+
+      .stage {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        will-change: transform, opacity;
+      }
+      /* White house card — the data family's field (stat-card tokens). */
+      #cs-card {
+        width: 1280px;
+        background: var(--card-bg);
+        border-radius: var(--card-radius);
+        padding: 56px 64px;
+        box-shadow: var(--card-shadow);
+        will-change: transform, opacity;
+      }
+      #cs-card svg { display: block; width: 100%; overflow: visible; }
+      .cs-mono {
+        font-family: var(--eyebrow-font);
+        letter-spacing: 0.03em;
+      }
+      .cs-display { font-family: var(--font); font-weight: 600; letter-spacing: -0.02em; }
+    </style>
+  </head>
+  <body>
+    <div
+      id="cs-root"
+      data-composition-id="chart-story"
+      data-width="1920"
+      data-height="1080"
+      data-start="0"
+      data-duration="5"
+    >
+      <div class="stage">
+        <div id="cs-card" class="clip" data-start="0" data-duration="60" data-track-index="1"></div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        var NS = "http://www.w3.org/2000/svg";
+        var root = document.getElementById("cs-root");
+        var card = document.getElementById("cs-card");
+        var D = Math.max(0.001, parseFloat(root.dataset.duration) || 5);
+
+        var defaults = {
+          type: "bars", data: "12, 28, 45, 64", labels: "Q1, Q2, Q3, Q4",
+          emphasize: 3, unit: "%", accent: "#054BC9", exit: "hold",
+        };
+        var HF = window.__hyperframes;
+        var vars = Object.assign({}, defaults,
+          HF && HF.getVariables ? HF.getVariables() : {});
+
+        var typeOptions = { bars: 1, line: 1, donut: 1, progress: 1 };
+        var type = Object.prototype.hasOwnProperty.call(typeOptions, vars.type)
+          ? vars.type : "bars";
+        var unit = vars.unit == null ? "%" : String(vars.unit);
+        var exit = vars.exit === "fade" || vars.exit === "up" ? vars.exit : "hold";
+
+        // House ink on the white card (upstream's dark contract tokens
+        // re-inked; accent is the spec color, base series a neutral gray).
+        var accentColor = String(vars.accent || "#054BC9");
+        var inkColor = "#0B0B0C";                 /* --ink */
+        var mutedColor = "#5A5A5F";               /* --ink-soft */
+        var borderColor = "rgba(11, 11, 12, 0.26)";
+        var baseSeries = "#C7CBD4";
+        var lineSeries = "#3A3D45";
+        var trackColor = "rgba(11, 11, 12, 0.10)";
+        var chipInk = "#FFFFFF";                  /* --accent-ink */
+
+        // Values keep their raw tokens: the displayed final numbers are the
+        // exact supplied strings, never a re-rounded float. Present-but-
+        // invalid data throws (fail loud, no demo fallback under a plan).
+        var rawTokens = String(vars.data == null ? "" : vars.data).split(",")
+          .map(function (token) { return token.trim(); })
+          .filter(function (token) { return token !== ""; });
+        var tokens = rawTokens.filter(function (token) {
+          return Number.isFinite(Number(token));
+        });
+        if (rawTokens.length === 0 || tokens.length !== rawTokens.length) {
+          throw new Error("chart-story: spec.data must be comma-separated " +
+            "finite numbers; got '" + vars.data + "'");
+        }
+        var values = tokens.map(Number);
+        var n = values.length;
+
+        var labels = String(vars.labels == null ? "" : vars.labels).split(",")
+          .map(function (label) { return label.trim(); });
+        while (labels.length < n) labels.push("");
+
+        var emphasize = Math.round(Number(vars.emphasize));
+        if (!Number.isFinite(emphasize) || emphasize < 0 || emphasize > n - 1) {
+          throw new Error("chart-story: spec.emphasize " + vars.emphasize +
+            " is outside the data range [0," + (n - 1) + "]");
+        }
+
+        var displays = tokens.map(function (token) { return token + unit; });
+        var emphasizedValue = values[emphasize];
+        var emphasizedDecimals = (tokens[emphasize].split(".")[1] || "").length;
+        var maxValue = Math.max(1e-9, Math.max.apply(null, values));
+        var FPS = 30;
+
+        var svg = document.createElementNS(NS, "svg");
+        svg.setAttribute("viewBox", "0 0 1000 560");
+        svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+        svg.setAttribute("role", "img");
+        svg.setAttribute("aria-label", labels.slice(0, n).map(function (label, i) {
+          return (label ? label + " " : "") + displays[i];
+        }).join(", "));
+        card.appendChild(svg);
+
+        function make(name, attrs, parent) {
+          var node = document.createElementNS(NS, name);
+          for (var key in attrs) node.setAttribute(key, String(attrs[key]));
+          (parent || svg).appendChild(node);
+          return node;
+        }
+
+        function text(x, y, size, fill, anchor, parent) {
+          var node = make("text", {
+            x: x, y: y, "font-size": size,
+            "text-anchor": anchor || "middle", class: "cs-mono",
+          }, parent);
+          node.style.fill = fill;
+          return node;
+        }
+
+        // Dash draw setup on ATTRIBUTES (house scrub law #6): length from
+        // getTotalLength, dasharray + initial dashoffset set as attributes,
+        // the draw tweens attr:{stroke-dashoffset}. (Upstream drove the CSS
+        // property — the one seek-unsafe idiom converted in this port.)
+        function dashPrepare(node) {
+          var length = node.getTotalLength();
+          node.setAttribute("stroke-dasharray", length + " " + length);
+          node.setAttribute("stroke-dashoffset", String(length));
+          return length;
+        }
+        function dashDraw(node, duration, at, ease) {
+          var length = dashPrepare(node);
+          tl.fromTo(node,
+            { attr: { "stroke-dashoffset": length } },
+            { attr: { "stroke-dashoffset": 0 }, duration: duration,
+              ease: ease, immediateRender: false },
+            at);
+        }
+
+        // ENVELOPE (house law #7): fixed IN/OUT, elastic HOLD, never
+        // timeScaled; phases compress together when D is short.
+        var IN_BASE = 3.3;
+        var OUT_BASE = exit === "hold" ? 0 : 0.5;
+        var STILLNESS = 0.3;
+        var totalBase = IN_BASE + OUT_BASE;
+        var s = D < totalBase ? D / totalBase : 1;
+        var IN = IN_BASE * s;
+        var OUT = OUT_BASE * s;
+        var HOLD = Math.max(0, D - (IN + OUT));
+        var HOLD_START = IN;
+        var OUT_START = IN + HOLD;
+
+        var AXIS_AT = 0.15, AXIS_DUR = 0.5;
+        var BUILD_AT = 0.55, BUILD_DUR = 1.6;
+        var LABELS_AT = 0.85;
+        var CALLOUT_AT = 2.35, POP_DUR = 0.45, ROLL_DUR = 0.7;
+
+        window.__timelines = window.__timelines || {};
+        var tl = gsap.timeline({ paused: true });
+
+        // IN: the card rises into place. Initial state via gsap.set, the
+        // move a both-endpoint fromTo + immediateRender:false (house law
+        // #1) so no tween lazy-captures a mutated start value.
+        gsap.set(card, { opacity: 0, y: 26 });
+        tl.fromTo(card, { opacity: 0 },
+          { opacity: 1, duration: 0.5 * s, ease: "power2.out",
+            immediateRender: false }, 0);
+        tl.fromTo(card, { y: 26 },
+          { y: 0, duration: 0.5 * s, ease: "power3.out",
+            immediateRender: false }, 0);
+
+        function fadeIn(node, at, rise) {
+          gsap.set(node, rise ? { opacity: 0, y: 8 } : { opacity: 0 });
+          tl.fromTo(node, rise ? { opacity: 0, y: 8 } : { opacity: 0 }, rise
+            ? { opacity: 1, y: 0, duration: 0.4 * s, ease: "power2.out",
+                immediateRender: false }
+            : { opacity: 1, duration: 0.4 * s, ease: "power2.out",
+                immediateRender: false }, at * s);
+        }
+
+        function drawBaseline(x0, x1, y) {
+          var baseline = make("path", {
+            d: "M " + x0 + " " + y + " L " + x1 + " " + y,
+            fill: "none", "stroke-width": 3, "stroke-linecap": "round",
+          });
+          baseline.style.stroke = borderColor;
+          dashDraw(baseline, AXIS_DUR * s, AXIS_AT * s, "power2.inOut");
+        }
+
+        // Callout chip: pops with a smooth settle; the number is a table of
+        // authored frame rows (house law #5) landing on the exact token.
+        function makeCallout(anchorX, bottomY) {
+          var label = displays[emphasize];
+          var width = Math.max(96, Array.from(label).length * 17 + 44);
+          var height = 52;
+          var cx = Math.min(Math.max(anchorX, width / 2 + 8), 1000 - width / 2 - 8);
+          var group = make("g", {});
+          var chip = make("rect", {
+            x: cx - width / 2, y: bottomY - height,
+            width: width, height: height, rx: 12,
+          }, group);
+          chip.style.fill = accentColor;
+          var valueNode = text(cx, bottomY - height / 2 + 10, 29, chipInk,
+            "middle", group);
+          valueNode.setAttribute("font-weight", "600");
+          popAndRoll(group, valueNode, "50% 100%", false);
+        }
+
+        function popAndRoll(group, valueNode, origin, unitless) {
+          gsap.set(group, { opacity: 0, scale: 0.6, transformOrigin: origin });
+          tl.fromTo(group, { opacity: 0 },
+            { opacity: 1, duration: 0.25 * s, ease: "power2.out",
+              immediateRender: false }, CALLOUT_AT * s);
+          tl.fromTo(group, { scale: 0.6, transformOrigin: origin },
+            { scale: 1, duration: POP_DUR * s, ease: "back.out(1.7)",
+              immediateRender: false }, CALLOUT_AT * s);
+          var frames = Math.max(1, Math.round(ROLL_DUR * s * FPS));
+          var ease = gsap.parseEase("power2.out");
+          var suffix = unitless ? "" : unit;
+          for (var frame = 0; frame <= frames; frame += 1) {
+            var row = frame === frames
+              ? tokens[emphasize] + suffix
+              : (emphasizedValue * ease(frame / frames))
+                  .toFixed(emphasizedDecimals) + suffix;
+            tl.set(valueNode, { textContent: row },
+              (CALLOUT_AT + ROLL_DUR * (frame / frames)) * s);
+          }
+        }
+
+        function buildBars() {
+          var left = 80, right = 920, base = 470, top = 120;
+          var band = (right - left) / n;
+          var barWidth = Math.min(band * 0.62, 150);
+          drawBaseline(left, right, base);
+          var stagger = n > 1 ? (BUILD_DUR - 0.85) / (n - 1) : 0;
+
+          values.forEach(function (value, index) {
+            var height = Math.max((value / maxValue) * (base - top), 3);
+            var cx = left + band * (index + 0.5);
+            var at = BUILD_AT + stagger * index;
+            // Growth animates rect GEOMETRY (not scaleY) so the radius
+            // re-clamps against the current height every frame; the radius
+            // never exceeds half the bar height (sliver guard).
+            var bar = make("rect", {
+              x: cx - barWidth / 2, y: base, width: barWidth, height: 0,
+              rx: Math.min(10, barWidth * 0.18, height / 2),
+            });
+            bar.style.fill = index === emphasize ? accentColor : baseSeries;
+            tl.to(bar, {
+              attr: { height: height, y: base - height },
+              duration: 0.85 * s, ease: "power3.out",
+            }, at * s);
+
+            var axisLabel = text(cx, base + 42, 26, mutedColor);
+            axisLabel.textContent = labels[index];
+            fadeIn(axisLabel, LABELS_AT + index * 0.12, true);
+
+            if (index !== emphasize) {
+              var valueLabel = text(cx, base - height - 16, 27, inkColor);
+              valueLabel.textContent = displays[index];
+              fadeIn(valueLabel, at + 0.65, true);
+            }
+          });
+
+          var emphasizedHeight = Math.max(
+            (values[emphasize] / maxValue) * (base - top), 3);
+          makeCallout(left + band * (emphasize + 0.5),
+            base - emphasizedHeight - 20);
+        }
+
+        function buildLine() {
+          var left = 80, right = 920, base = 470, top = 120;
+          drawBaseline(left, right, base);
+
+          var points = values.map(function (value, index) {
+            return {
+              x: left + (right - left) * (n === 1 ? 0.5 : index / (n - 1)),
+              y: base - (value / maxValue) * (base - top),
+            };
+          });
+          var lineD = points.map(function (point, index) {
+            return (index === 0 ? "M " : "L ") + point.x + " " + point.y;
+          }).join(" ");
+
+          // Translucent area fill fades in after the stroke finishes.
+          var area = make("path", {
+            d: lineD + " L " + points[n - 1].x + " " + base +
+               " L " + points[0].x + " " + base + " Z",
+            stroke: "none",
+          });
+          area.style.fill = accentColor;
+          gsap.set(area, { opacity: 0 });
+          tl.fromTo(area, { opacity: 0 },
+            { opacity: 0.14, duration: 0.45 * s, ease: "power2.out",
+              immediateRender: false }, (BUILD_AT + BUILD_DUR - 0.05) * s);
+
+          var line = make("path", {
+            d: lineD, fill: "none", "stroke-width": 6,
+            "stroke-linecap": "round", "stroke-linejoin": "round",
+          });
+          line.style.stroke = lineSeries;
+          // ease "none" keeps the dash front aligned with the per-point
+          // cumulative-length timings below.
+          dashDraw(line, (BUILD_DUR - 0.1) * s, BUILD_AT * s, "none");
+
+          var cumulative = [0];
+          for (var index = 1; index < n; index += 1) {
+            cumulative.push(cumulative[index - 1] + Math.hypot(
+              points[index].x - points[index - 1].x,
+              points[index].y - points[index - 1].y));
+          }
+          var totalLength = Math.max(cumulative[n - 1], 1e-9);
+
+          points.forEach(function (point, index) {
+            var at = BUILD_AT + (BUILD_DUR - 0.1) *
+              (cumulative[index] / totalLength);
+            var dot = make("circle", {
+              cx: point.x, cy: point.y, r: index === emphasize ? 11 : 7,
+            });
+            dot.style.fill = index === emphasize ? accentColor : lineSeries;
+            gsap.set(dot, { scale: 0, transformOrigin: "50% 50%" });
+            tl.fromTo(dot, { scale: 0, transformOrigin: "50% 50%" },
+              { scale: 1, duration: 0.35 * s, ease: "back.out(2)",
+                immediateRender: false }, at * s);
+
+            var axisLabel = text(point.x, base + 42, 26, mutedColor);
+            axisLabel.textContent = labels[index];
+            fadeIn(axisLabel, LABELS_AT + index * 0.12, true);
+
+            if (index !== emphasize) {
+              var valueLabel = text(point.x, point.y - 20, 25, inkColor);
+              valueLabel.textContent = displays[index];
+              fadeIn(valueLabel, at + 0.2, true);
+            }
+          });
+
+          makeCallout(points[emphasize].x, points[emphasize].y - 24);
+        }
+
+        function polar(cx, cy, radius, degrees) {
+          var radians = ((degrees - 90) * Math.PI) / 180;
+          return { x: cx + radius * Math.cos(radians),
+                   y: cy + radius * Math.sin(radians) };
+        }
+
+        function arcPath(cx, cy, radius, startDeg, endDeg) {
+          var start = polar(cx, cy, radius, startDeg);
+          var end = polar(cx, cy, radius, endDeg);
+          var large = endDeg - startDeg > 180 ? 1 : 0;
+          return "M " + start.x + " " + start.y + " A " + radius + " " +
+            radius + " 0 " + large + " 1 " + end.x + " " + end.y;
+        }
+
+        // Non-emphasized donut segments step down a gray ladder (upstream's
+        // fg/surface mixes re-inked for the white card).
+        var donutLadder = ["#4A4D55", "#787C86", "#9DA2AC", "#BEC2CB", "#D7DAE0"];
+
+        function buildDonut() {
+          var cx = 500, cy = 252, radius = 168, strokeWidth = 54;
+          var total = Math.max(values.reduce(function (sum, value) {
+            return sum + value;
+          }, 0), 1e-9);
+
+          var track = make("circle", {
+            cx: cx, cy: cy, r: radius, fill: "none",
+            "stroke-width": strokeWidth,
+          });
+          track.style.stroke = trackColor;
+          fadeIn(track, AXIS_AT);
+
+          var gap = n > 1 ? 3 : 0;
+          var cursor = 0;
+          values.forEach(function (value, index) {
+            var share = value / total;
+            var startDeg = cursor * 360;
+            var endDeg = (cursor + share) * 360;
+            cursor += share;
+            if (endDeg - startDeg <= gap * 2 + 0.05) return;
+            var segment = make("path", {
+              d: arcPath(cx, cy, radius, startDeg + gap / 2,
+                Math.min(endDeg - gap / 2, 359.98)),
+              fill: "none", "stroke-width": strokeWidth,
+            });
+            segment.style.stroke = index === emphasize
+              ? accentColor : donutLadder[index % donutLadder.length];
+            dashDraw(segment, Math.max(BUILD_DUR * share, 0.05) * s,
+              (BUILD_AT + BUILD_DUR * (cursor - share)) * s, "none");
+          });
+
+          // Legend row beneath, reading order left to right.
+          var itemWidth = Math.min(230, 880 / n);
+          var startX = 500 - (itemWidth * n) / 2;
+          values.forEach(function (value, index) {
+            var x = startX + itemWidth * index;
+            var group = make("g", {});
+            var swatch = make("rect", {
+              x: x, y: 506, width: 20, height: 20, rx: 5,
+            }, group);
+            swatch.style.fill = index === emphasize
+              ? accentColor : donutLadder[index % donutLadder.length];
+            var entry = text(x + 32, 523, 24, mutedColor, "start", group);
+            entry.textContent = labels[index] ? labels[index] + " " : "";
+            var valueSpan = document.createElementNS(NS, "tspan");
+            valueSpan.style.fill = inkColor;
+            valueSpan.textContent = displays[index];
+            entry.appendChild(valueSpan);
+            fadeIn(group, LABELS_AT + index * 0.14, true);
+          });
+
+          // Center callout: the emphasized value rolls to the exact token.
+          var center = make("g", {});
+          var valueText = make("text", {
+            x: cx, y: cy + 14, "font-size": 84,
+            "text-anchor": "middle", class: "cs-display",
+          }, center);
+          valueText.style.fill = accentColor;
+          var numberSpan = document.createElementNS(NS, "tspan");
+          valueText.appendChild(numberSpan);
+          var unitSpan = document.createElementNS(NS, "tspan");
+          unitSpan.setAttribute("font-size", 44);
+          unitSpan.style.fill = mutedColor;
+          unitSpan.textContent = unit;
+          valueText.appendChild(unitSpan);
+          if (labels[emphasize]) {
+            var centerLabel = text(cx, cy + 62, 26, mutedColor, "middle", center);
+            centerLabel.textContent = labels[emphasize];
+          }
+          popAndRoll(center, numberSpan, "50% 50%", true);
+        }
+
+        function buildProgress() {
+          var rowHeight = Math.min(92, 440 / n);
+          var top = Math.max(90, 285 - (rowHeight * n) / 2);
+          var trackX = 300, trackWidth = 560;
+          // Percent-flavored data fills against 100; otherwise the largest
+          // value owns the full track.
+          var denominator = unit.trim() === "%" ? Math.max(100, maxValue) : maxValue;
+          var stagger = n > 1 ? (BUILD_DUR - 0.9) / (n - 1) : 0;
+
+          values.forEach(function (value, index) {
+            var cy = top + rowHeight * (index + 0.5);
+            var at = BUILD_AT + stagger * index;
+            var fraction = Math.min(Math.max(value / denominator, 0), 1);
+
+            var track = make("rect", {
+              x: trackX, y: cy - 10, width: trackWidth, height: 20, rx: 10,
+            });
+            track.style.fill = trackColor;
+            fadeIn(track, AXIS_AT + index * 0.08);
+
+            // Same sliver guard as bars: radius clamped to half the fill
+            // width and growth via rect geometry, never scaleX.
+            var fillWidth = Math.max(trackWidth * fraction, 8);
+            var fill = make("rect", {
+              x: trackX, y: cy - 10, width: 0, height: 20,
+              rx: Math.min(10, fillWidth / 2),
+            });
+            fill.style.fill = index === emphasize ? accentColor : baseSeries;
+            tl.to(fill, {
+              attr: { width: fillWidth }, duration: 0.9 * s,
+              ease: "power3.out",
+            }, at * s);
+
+            var rowLabel = text(80, cy + 9, 26, mutedColor, "start");
+            rowLabel.textContent = labels[index];
+            fadeIn(rowLabel, LABELS_AT + index * 0.12, true);
+
+            if (index !== emphasize) {
+              var valueLabel = text(884, cy + 9, 27, inkColor, "start");
+              valueLabel.textContent = displays[index];
+              fadeIn(valueLabel, at + 0.65, true);
+            }
+          });
+
+          var emphasizedFraction = Math.min(
+            Math.max(values[emphasize] / denominator, 0), 1);
+          makeCallout(trackX + trackWidth * emphasizedFraction,
+            top + rowHeight * (emphasize + 0.5) - 26);
+        }
+
+        if (type === "bars") buildBars();
+        else if (type === "line") buildLine();
+        else if (type === "donut") buildDonut();
+        else buildProgress();
+
+        // HOLD: one finite drift, authored as two explicit tweens, then
+        // stillness to the end (or to the exit).
+        var driftDuration = Math.max(0, HOLD - STILLNESS);
+        if (driftDuration > 0.1) {
+          var half = driftDuration / 2;
+          tl.to(card, { y: -5, duration: half, ease: "sine.inOut" }, HOLD_START);
+          tl.to(card, { y: 0, duration: half, ease: "sine.inOut" }, HOLD_START + half);
+        }
+
+        // OUT: optional departure; "hold" (default) leaves the seam to the
+        // compositor / exitOnCut (THE EXIT LAW).
+        if (exit === "fade") {
+          tl.to(card, { opacity: 0, duration: OUT, ease: "power2.in" }, OUT_START);
+        } else if (exit === "up") {
+          tl.to(card, { opacity: 0, y: -32, duration: OUT, ease: "power2.in" }, OUT_START);
+        }
+
+        tl.seek(0);
+        window.__timelines["chart-story"] = tl;
+      })();
+    </script>
+  </body>
+</html>

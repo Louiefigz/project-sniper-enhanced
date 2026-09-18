@@ -1,0 +1,1260 @@
+
+> project-sniper-enhanced@0.1.0 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local, .env
+- Experiments (use with caution):
+  · serverActions
+
+  Creating an optimized production build ...
+Turbopack build encountered 50 warnings:
+./src/app/api/producer/ai-edit/doctrine.ts:4:26
+The file pattern '/ROOT/' matches 25705 files in [project]/
+[0m [90m 2 |[39m [36mimport[39m type { [33mSurgicalEditLane[39m[33m,[39m [33mSurgicalEditScope[39m } [36mfrom[39m [32m"@/lib/producer/surgical-edit"[39m[33m;[39m
+ [90m 3 |[39m
+[31m[1m>[22m[39m[90m 4 |[39m [36mexport[39m [36mconst[39m [33mREPO_ROOT[39m [33m=[39m path[33m.[39mresolve(process[33m.[39mcwd())[33m;[39m
+ [90m   |[39m                          [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 5 |[39m [36mexport[39m [36mconst[39m [33mPRODUCER_SKILL[39m [33m=[39m path[33m.[39mjoin([33mREPO_ROOT[39m[33m,[39m [32m".claude"[39m[33m,[39m [32m"skills"[39m[33m,[39m [32m"producer"[39m[33m,[39m [32m"SKILL.md"[39m)[33m;[39m
+ [90m 6 |[39m [36mexport[39m [36mconst[39m [33mFAILURE_LEDGER[39m [33m=[39m path[33m.[39mjoin(
+ [90m 7 |[39m   [33mREPO_ROOT[39m[33m,[39m [32m"scripts"[39m[33m,[39m [32m"producer"[39m[33m,[39m [32m"docs"[39m[33m,[39m [32m"findings"[39m[33m,[39m [32m"FAILURE_LEDGER.md"[39m[33m,[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/producer/ai-edit/doctrine.ts
+    ./src/app/api/producer/transcript-authority/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/producer/ai-edit/doctrine.ts
+    ./src/app/api/producer/ai-edit/prompt.ts
+    ./src/app/api/producer/ai-edit/route.ts
+
+
+./src/app/api/producer/ai-edit/palmier-native-authority.ts:80:16
+The file pattern '/ROOT/' matches 25705 files in [project]/
+[0m [90m 78 |[39m
+ [90m 79 |[39m [36mfunction[39m relativeDoctrine(input[33m:[39m [33mPalmierNativePromptInput[39m)[33m:[39m string[] {
+[31m[1m>[22m[39m[90m 80 |[39m   [36mconst[39m root [33m=[39m path[33m.[39mresolve(process[33m.[39mcwd())[33m;[39m
+ [90m    |[39m                [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 81 |[39m   [36mreturn[39m doctrinePaths(input[33m.[39mscope)[33m.[39mmap((item) [33m=>[39m path[33m.[39mrelative(root[33m,[39m item))
+ [90m 82 |[39m     [33m.[39mfilter((item) [33m=>[39m item [33m&&[39m [33m![39mitem[33m.[39mstartsWith([32m".."[39m) [33m&&[39m [33m![39mpath[33m.[39misAbsolute(item))[33m;[39m
+ [90m 83 |[39m }[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/producer/ai-edit/palmier-native-authority.ts
+    ./src/app/api/producer/transcript-authority/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/producer/ai-edit/palmier-native-authority.ts
+    ./src/app/api/producer/ai-edit/palmier-native-runner.ts
+    ./src/app/api/producer/palmier/candidate-qc/repair.ts
+    ./src/app/api/producer/palmier/candidate-qc/runner.ts
+    ./src/app/api/producer/palmier/candidate-qc/route.ts
+
+
+./src/lib/server/auto-edit-authority-snapshot.ts:118:17
+The file pattern '/ROOT/' matches 25705 files in [project]/
+[0m [90m 116 |[39m
+ [90m 117 |[39m [36mfunction[39m repositoryRoot()[33m:[39m string {
+[31m[1m>[22m[39m[90m 118 |[39m   [36mlet[39m current [33m=[39m path[33m.[39mresolve(process[33m.[39mcwd())[33m;[39m
+ [90m     |[39m                 [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 119 |[39m   [36mfor[39m ([33m;[39m[33m;[39m) {
+ [90m 120 |[39m     [36mif[39m (existsSync(path[33m.[39mjoin(current[33m,[39m [32m"scripts"[39m[33m,[39m [32m"producer"[39m))) [36mreturn[39m current[33m;[39m
+ [90m 121 |[39m     [36mconst[39m parent [33m=[39m path[33m.[39mdirname(current)[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/auto-edit-authority-snapshot.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/auto-edit-authority-snapshot.ts
+    ./src/lib/server/project-status-projection.ts
+    ./src/app/api/producer/project-status/route.ts
+
+
+./src/lib/server/auto-edit-authority-snapshot.ts:122:36
+The file pattern '/ROOT/' matches 25705 files in [project]/
+[0m [90m 120 |[39m     [36mif[39m (existsSync(path[33m.[39mjoin(current[33m,[39m [32m"scripts"[39m[33m,[39m [32m"producer"[39m))) [36mreturn[39m current[33m;[39m
+ [90m 121 |[39m     [36mconst[39m parent [33m=[39m path[33m.[39mdirname(current)[33m;[39m
+[31m[1m>[22m[39m[90m 122 |[39m     [36mif[39m (parent [33m===[39m current) [36mreturn[39m path[33m.[39mresolve(process[33m.[39mcwd())[33m;[39m
+ [90m     |[39m                                    [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 123 |[39m     current [33m=[39m parent[33m;[39m
+ [90m 124 |[39m   }
+ [90m 125 |[39m }[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/auto-edit-authority-snapshot.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/auto-edit-authority-snapshot.ts
+    ./src/lib/server/project-status-projection.ts
+    ./src/app/api/producer/project-status/route.ts
+
+
+./src/lib/server/auto-edit-doctrine.ts:81:17
+The file pattern '/ROOT/' matches 25705 files in [project]/
+[0m [90m 79 |[39m
+ [90m 80 |[39m [36mfunction[39m repositoryRoot()[33m:[39m string {
+[31m[1m>[22m[39m[90m 81 |[39m   [36mlet[39m current [33m=[39m path[33m.[39mresolve(process[33m.[39mcwd())[33m;[39m
+ [90m    |[39m                 [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 82 |[39m   [36mfor[39m ([33m;[39m[33m;[39m) {
+ [90m 83 |[39m     [36mif[39m (existsSync(path[33m.[39mjoin(current[33m,[39m [32m"scripts"[39m[33m,[39m [32m"producer"[39m))) [36mreturn[39m current[33m;[39m
+ [90m 84 |[39m     [36mconst[39m parent [33m=[39m path[33m.[39mdirname(current)[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/auto-edit-doctrine.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/auto-edit-doctrine.ts
+    ./src/app/api/producer/live-build/preflight.ts
+    ./src/app/api/producer/live-build/route.ts
+
+
+./src/lib/server/auto-edit-pipeline-authority.ts:66:17
+The file pattern '/ROOT/' matches 25705 files in [project]/
+[0m [90m 64 |[39m
+ [90m 65 |[39m [36mfunction[39m repositoryRoot()[33m:[39m string {
+[31m[1m>[22m[39m[90m 66 |[39m   [36mlet[39m current [33m=[39m path[33m.[39mresolve(process[33m.[39mcwd())[33m;[39m
+ [90m    |[39m                 [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 67 |[39m   [36mfor[39m ([33m;[39m[33m;[39m) {
+ [90m 68 |[39m     [36mif[39m (existsSync(path[33m.[39mjoin(current[33m,[39m [32m"scripts"[39m[33m,[39m [32m"producer"[39m))) [36mreturn[39m current[33m;[39m
+ [90m 69 |[39m     [36mconst[39m parent [33m=[39m path[33m.[39mdirname(current)[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/auto-edit-pipeline-authority.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/auto-edit-pipeline-authority.ts
+    ./src/app/api/producer/palmier/candidate-qc/runner.ts
+    ./src/app/api/producer/palmier/candidate-qc/route.ts
+
+
+./src/app/api/_lib/spawn-python.ts:13:10
+The file pattern ('/ROOT/' <dynamic> | '/ROOT' <dynamic>) matches 51410 files in [project]/
+[0m [90m 11 |[39m
+ [90m 12 |[39m [36mfunction[39m venvPython()[33m:[39m string {
+[31m[1m>[22m[39m[90m 13 |[39m   [36mreturn[39m path[33m.[39mjoin(process[33m.[39mcwd()[33m,[39m [33m...[39m[[32m".venv"[39m[33m,[39m [32m"bin"[39m[33m,[39m [32m"python3"[39m])[33m;[39m
+ [90m    |[39m          [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 14 |[39m }
+ [90m 15 |[39m
+ [90m 16 |[39m [90m/** Explicit installed runtime for an isolated checkout; never creates a venv or falls back. */[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/_lib/spawn-python.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/_lib/spawn-python.ts
+    ./src/app/api/segmenter/transcribe/route.ts
+
+
+./src/app/api/producer/auto-edit/authoring-prompt.ts:14:39
+The file pattern ('/ROOT/' <dynamic> | '/ROOT' <dynamic>) matches 51410 files in [project]/
+[0m [90m 12 |[39m [90m// Keep this dynamic construction: Turbopack must not chase the repo .venv[39m
+ [90m 13 |[39m [90m// symlink during static analysis (the Python interpreter lives outside root).[39m
+[31m[1m>[22m[39m[90m 14 |[39m [36mexport[39m [36mconst[39m [33mREPO_ROOT[39m [33m=[39m path[33m.[39mdirname(path[33m.[39mjoin(process[33m.[39mcwd()[33m,[39m [33m...[39m[[32m"scripts"[39m]))[33m;[39m
+ [90m    |[39m                                       [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 15 |[39m [36mconst[39m [33mSCOPE_LANES[39m[33m:[39m [33mRecord[39m[33m<[39m[33mstring[39m[33m,[39m string[33m>[39m [33m=[39m {
+ [90m 16 |[39m   trim[33m:[39m [32m`trim = the clean cut ONLY. Author cutTrack + target, set captions.burn=false, and leave titleCards/graphicsTrack/punchIns/transitions/treatmentMap as EMPTY arrays. Do not run the graphics/zoom planners.`[39m[33m,[39m
+ [90m 17 |[39m   light[33m:[39m [32m`light = the clean cut + subtle aliveness motion + captions, NO graphics. After the cutTrack, run graphics_planner.py (target.scope makes it emit only the aliveness creep lane) and merge just those punchIns; graphicsTrack/transitions/treatmentMap stay empty.`[39m[33m,[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/producer/auto-edit/authoring-prompt.ts
+    ./src/app/api/producer/transcript-authority/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/producer/auto-edit/authoring-prompt.ts
+    ./src/app/api/producer/auto-edit/brain-review-settings.ts
+    ./src/app/api/producer/auto-edit/brain-review-runner.ts
+    ./src/app/api/producer/ai-edit/critic.ts
+    ./src/app/api/producer/ai-edit/finalize.ts
+    ./src/app/api/producer/ai-edit/route.ts
+
+
+./src/lib/server/guided-proposal-compiler.ts:48:43
+The file pattern ('/ROOT/' <dynamic> | '/ROOT' <dynamic>) matches 51410 files in [project]/
+[0m [90m 46 |[39m     [36mif[39m (path[33m.[39misAbsolute(item[33m.[39mpath) [33m||[39m item[33m.[39mpath[33m.[39msplit([35m/[\\/]/u[39m)[33m.[39mincludes([32m".."[39m)) [36mthrow[39m [36mnew[39m [33mError[39m([32m"Proposal source closure path is unsafe"[39m)[33m;[39m
+ [90m 47 |[39m     [36mconst[39m observed [33m=[39m observeCutPreviewFile(path[33m.[39mjoin(cut[33m.[39mjob[33m.[39mctx[33m.[39mpipeline[33m![39m[33m.[39msnapshotRoot[33m,[39m item[33m.[39mpath)[33m,[39m [35m2[39m [33m*[39m [35m1024[39m [33m*[39m [35m1024[39m)[33m;[39m
+[31m[1m>[22m[39m[90m 48 |[39m     [36mconst[39m current [33m=[39m observeCutPreviewFile(path[33m.[39mjoin(process[33m.[39mcwd()[33m,[39m item[33m.[39mpath)[33m,[39m [35m2[39m [33m*[39m [35m1024[39m [33m*[39m [35m1024[39m)[33m;[39m totalBytes [33m+=[39m current[33m.[39msizeBytes[33m;[39m
+ [90m    |[39m                                           [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 49 |[39m     [36mif[39m (totalBytes [33m>[39m [35m32[39m [33m*[39m [35m1024[39m [33m*[39m [35m1024[39m [33m||[39m observed[33m.[39msha256 [33m!==[39m item[33m.[39mhash [33m||[39m current[33m.[39msha256 [33m!==[39m item[33m.[39mhash) {
+ [90m 50 |[39m       [36mthrow[39m [36mnew[39m [33mError[39m([32m`Proposal TS source/config closure differs from its captured version or exceeds 32 MiB: ${item.path}`[39m)[33m;[39m
+ [90m 51 |[39m     }[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/guided-proposal-compiler.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/guided-proposal-compiler.ts
+    ./src/lib/server/guided-proposal-review-packet.ts
+    ./src/lib/server/guided-proposal-review-store.ts
+    ./src/lib/server/guided-opening-launcher.ts
+    ./src/app/api/producer/guided-opening/launch/route.ts
+
+
+./src/lib/server/guided-proposal-evidence.ts:73:32
+The file pattern ('/ROOT/' <dynamic> | '/ROOT' <dynamic>) matches 51410 files in [project]/
+[0m [90m 71 |[39m   [36mconst[39m observed [33m=[39m observeCutPreviewFile(file[33m,[39m [35m2[39m [33m*[39m [35m1024[39m [33m*[39m [35m1024[39m[33m,[39m [36mtrue[39m[33m,[39m options[33m.[39mguard)[33m;[39m
+ [90m 72 |[39m   [36mif[39m (observed[33m.[39msha256 [33m!==[39m row[33m.[39mhash [33m||[39m (options[33m.[39mcurrent
+[31m[1m>[22m[39m[90m 73 |[39m       [33m&&[39m observeCutPreviewFile(path[33m.[39mjoin(process[33m.[39mcwd()[33m,[39m relative)[33m,[39m [35m2[39m [33m*[39m [35m1024[39m [33m*[39m [35m1024[39m[33m,[39m [36mfalse[39m[33m,[39m options[33m.[39mguard)[33m.[39msha256 [33m!==[39m row[33m.[39mhash)) {
+ [90m    |[39m                                [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 74 |[39m     [36mthrow[39m [36mnew[39m [33mError[39m([32m`Proposal source differs from pinned implementation: ${relative}`[39m)[33m;[39m
+ [90m 75 |[39m   }
+ [90m 76 |[39m   [36mreturn[39m { file[33m,[39m [33m...[39mobserved }[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/guided-proposal-evidence.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/guided-proposal-evidence.ts
+    ./src/lib/server/guided-opening-authority.ts
+    ./src/lib/server/guided-opening-launcher.ts
+    ./src/app/api/producer/guided-opening/launch/route.ts
+
+
+./src/lib/server/auto-edit-doctrine.ts:253:43
+The file pattern ('/ROOT//' <dynamic> | <dynamic> '/' <dynamic> | 'undefined/' <dynamic> | '/ROOT/' <dynamic> | <dynamic> | 'undefined' <dynamic>) matches 128515 files in [project]/
+[0m [90m 251 |[39m
+ [90m 252 |[39m [36mexport[39m [36mfunction[39m doctrinePromptPath(ctx[33m:[39m [33mAutoEditCtx[39m[33m,[39m relative[33m:[39m string)[33m:[39m string {
+[31m[1m>[22m[39m[90m 253 |[39m   [36mreturn[39m ctx[33m.[39mdoctrine[33m?[39m[33m.[39mfiles[relative] [33m?[39m[33m?[39m path[33m.[39mjoin(repositoryRoot()[33m,[39m relative)[33m;[39m
+ [90m     |[39m                                           [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 254 |[39m }
+ [90m 255 |[39m
+ [90m 256 |[39m [36mexport[39m [36mfunction[39m doctrinePromptRoot(ctx[33m:[39m [33mAutoEditCtx[39m)[33m:[39m string {[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/auto-edit-doctrine.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/auto-edit-doctrine.ts
+    ./src/app/api/producer/live-build/preflight.ts
+    ./src/app/api/producer/live-build/route.ts
+
+
+./src/lib/server/auto-edit-authority-snapshot.ts:120:20
+The file pattern ('/ROOT//scripts/producer' | <dynamic> '/scripts/producer' | '/ROOT/scripts/producer' | <dynamic> 'scripts/producer') matches 19552 files in [project]/
+[0m [90m 118 |[39m   [36mlet[39m current [33m=[39m path[33m.[39mresolve(process[33m.[39mcwd())[33m;[39m
+ [90m 119 |[39m   [36mfor[39m ([33m;[39m[33m;[39m) {
+[31m[1m>[22m[39m[90m 120 |[39m     [36mif[39m (existsSync(path[33m.[39mjoin(current[33m,[39m [32m"scripts"[39m[33m,[39m [32m"producer"[39m))) [36mreturn[39m current[33m;[39m
+ [90m     |[39m                    [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 121 |[39m     [36mconst[39m parent [33m=[39m path[33m.[39mdirname(current)[33m;[39m
+ [90m 122 |[39m     [36mif[39m (parent [33m===[39m current) [36mreturn[39m path[33m.[39mresolve(process[33m.[39mcwd())[33m;[39m
+ [90m 123 |[39m     current [33m=[39m parent[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/auto-edit-authority-snapshot.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/auto-edit-authority-snapshot.ts
+    ./src/lib/server/project-status-projection.ts
+    ./src/app/api/producer/project-status/route.ts
+
+
+./src/lib/server/auto-edit-doctrine.ts:83:20
+The file pattern ('/ROOT//scripts/producer' | <dynamic> '/scripts/producer' | '/ROOT/scripts/producer' | <dynamic> 'scripts/producer') matches 19552 files in [project]/
+[0m [90m 81 |[39m   [36mlet[39m current [33m=[39m path[33m.[39mresolve(process[33m.[39mcwd())[33m;[39m
+ [90m 82 |[39m   [36mfor[39m ([33m;[39m[33m;[39m) {
+[31m[1m>[22m[39m[90m 83 |[39m     [36mif[39m (existsSync(path[33m.[39mjoin(current[33m,[39m [32m"scripts"[39m[33m,[39m [32m"producer"[39m))) [36mreturn[39m current[33m;[39m
+ [90m    |[39m                    [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 84 |[39m     [36mconst[39m parent [33m=[39m path[33m.[39mdirname(current)[33m;[39m
+ [90m 85 |[39m     [36mif[39m (parent [33m===[39m current) [36mthrow[39m [36mnew[39m [33mError[39m([32m"Producer repository root was not found"[39m)[33m;[39m
+ [90m 86 |[39m     current [33m=[39m parent[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/auto-edit-doctrine.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/auto-edit-doctrine.ts
+    ./src/app/api/producer/live-build/preflight.ts
+    ./src/app/api/producer/live-build/route.ts
+
+
+./src/lib/server/auto-edit-pipeline-authority.ts:68:20
+The file pattern ('/ROOT//scripts/producer' | <dynamic> '/scripts/producer' | '/ROOT/scripts/producer' | <dynamic> 'scripts/producer') matches 19552 files in [project]/
+[0m [90m 66 |[39m   [36mlet[39m current [33m=[39m path[33m.[39mresolve(process[33m.[39mcwd())[33m;[39m
+ [90m 67 |[39m   [36mfor[39m ([33m;[39m[33m;[39m) {
+[31m[1m>[22m[39m[90m 68 |[39m     [36mif[39m (existsSync(path[33m.[39mjoin(current[33m,[39m [32m"scripts"[39m[33m,[39m [32m"producer"[39m))) [36mreturn[39m current[33m;[39m
+ [90m    |[39m                    [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 69 |[39m     [36mconst[39m parent [33m=[39m path[33m.[39mdirname(current)[33m;[39m
+ [90m 70 |[39m     [36mif[39m (parent [33m===[39m current) [36mthrow[39m [36mnew[39m [33mError[39m([32m"Producer repository root was not found"[39m)[33m;[39m
+ [90m 71 |[39m     current [33m=[39m parent[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/auto-edit-pipeline-authority.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/auto-edit-pipeline-authority.ts
+    ./src/app/api/producer/palmier/candidate-qc/runner.ts
+    ./src/app/api/producer/palmier/candidate-qc/route.ts
+
+
+./src/app/api/producer/studio/import/authority.ts:36:64
+The file pattern ('/ROOT/src/app/api/producer/save-plan/transaction.ts' | '/ROOTsrc/app/api/producer/save-plan/transaction.ts' | '/ROOT/src/app/api/_lib/plan-refit-receipt.ts' | '/ROOTsrc/app/api/_lib/plan-refit-receipt.ts' | '/ROOT/src/app/api/_lib/plan-snapshots.ts' | '/ROOTsrc/app/api/_lib/plan-snapshots.ts' | '/ROOT/src/lib/server/atomic-file.ts' | '/ROOTsrc/lib/server/atomic-file.ts' | '/ROOT/src/lib/producer/graphic-ids.ts' | '/ROOTsrc/lib/producer/graphic-ids.ts' | '/ROOT/src/lib/server/template-usage-approval.ts' | '/ROOTsrc/lib/server/template-usage-approval.ts' | '/ROOT/' <dynamic> | '/ROOT' <dynamic>) matches 51410 files in [project]/
+[0m [90m 34 |[39m   files[33m.[39mpush([33m...[39m[[32m"src/app/api/producer/save-plan/transaction.ts"[39m[33m,[39m [32m"src/app/api/_lib/plan-refit-receipt.ts"[39m[33m,[39m
+ [90m 35 |[39m     [32m"src/app/api/_lib/plan-snapshots.ts"[39m[33m,[39m [32m"src/lib/server/atomic-file.ts"[39m[33m,[39m [32m"src/lib/producer/graphic-ids.ts"[39m[33m,[39m
+[31m[1m>[22m[39m[90m 36 |[39m     [32m"src/lib/server/template-usage-approval.ts"[39m][33m.[39mmap((file) [33m=>[39m path[33m.[39mjoin(process[33m.[39mcwd()[33m,[39m file)))[33m;[39m
+ [90m    |[39m                                                                [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 37 |[39m   files[33m.[39mpush([33m...[39m[[32m"review-policy.json"[39m[33m,[39m [32m"review-shell.cjs"[39m[33m,[39m [32m"review-shell-runtime.cjs"[39m[33m,[39m [32m"review-shell-ui.js"[39m[33m,[39m
+ [90m 38 |[39m     [32m"review-only.cjs"[39m[33m,[39m [32m"review-attribute-interop.cjs"[39m[33m,[39m [32m"loopback-only.cjs"[39m]
+ [90m 39 |[39m     [33m.[39mmap((file) [33m=>[39m path[33m.[39mjoin(process[33m.[39mcwd()[33m,[39m [32m"src/app/api/producer/studio"[39m[33m,[39m file)))[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/producer/studio/import/authority.ts
+    ./src/app/api/producer/transcript-authority/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/producer/studio/import/authority.ts
+    ./src/app/api/producer/studio/import/service.ts
+    ./src/app/api/producer/studio/import/route.ts
+
+
+./src/app/api/_lib/workspace.ts:213:21
+The file pattern ('null' | <dynamic> | <dynamic> '/ProjectSniper' | <dynamic> 'ProjectSniper') matches 25705 files in [project]/
+[0m [90m 211 |[39m     [36mthrow[39m [36mnew[39m [33mError[39m([32m`dir not found: ${value}`[39m)[33m;[39m
+ [90m 212 |[39m   }
+[31m[1m>[22m[39m[90m 213 |[39m   [36mconst[39m workspace [33m=[39m fs[33m.[39mrealpathSync(workspaceRoot({ initialize[33m:[39m [36mfalse[39m }))[33m;[39m
+ [90m     |[39m                     [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 214 |[39m   [36mconst[39m relative [33m=[39m path[33m.[39mrelative(workspace[33m,[39m dir)[33m;[39m
+ [90m 215 |[39m   [36mconst[39m projectRoot [33m=[39m findProjectRoot(dir)[33m;[39m
+ [90m 216 |[39m   [36mconst[39m outside [33m=[39m relative [33m===[39m [32m""[39m [33m||[39m relative[33m.[39mstartsWith([32m".."[39m)[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/_lib/workspace.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/_lib/workspace.ts
+    ./src/app/api/producer/transcript-authority/route.ts
+
+
+./src/lib/server/producer-manifest.ts:64:22
+The file pattern ('null' | <dynamic>) matches 25705 files in [project]/
+[0m [90m 62 |[39m   }
+ [90m 63 |[39m   [36mif[39m (recorded[33m.[39mpath) {
+[31m[1m>[22m[39m[90m 64 |[39m     [36mconst[39m resolved [33m=[39m path[33m.[39mresolve(recorded[33m.[39mpath)[33m;[39m
+ [90m    |[39m                      [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 65 |[39m     [36mif[39m ([33m![39mfs[33m.[39mexistsSync(resolved)) {
+ [90m 66 |[39m       [36mreturn[39m {
+ [90m 67 |[39m         path[33m:[39m [36mnull[39m[33m,[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/producer-manifest.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/producer-manifest.ts
+    ./src/app/api/producer/ai-edit/route.ts
+
+
+./src/lib/server/producer-manifest.ts:65:10
+The file pattern ('null' | <dynamic>) matches 25705 files in [project]/
+[0m [90m 63 |[39m   [36mif[39m (recorded[33m.[39mpath) {
+ [90m 64 |[39m     [36mconst[39m resolved [33m=[39m path[33m.[39mresolve(recorded[33m.[39mpath)[33m;[39m
+[31m[1m>[22m[39m[90m 65 |[39m     [36mif[39m ([33m![39mfs[33m.[39mexistsSync(resolved)) {
+ [90m    |[39m          [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 66 |[39m       [36mreturn[39m {
+ [90m 67 |[39m         path[33m:[39m [36mnull[39m[33m,[39m
+ [90m 68 |[39m         transcriptsDir[33m:[39m [36mnull[39m[33m,[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/producer-manifest.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/producer-manifest.ts
+    ./src/app/api/producer/ai-edit/route.ts
+
+
+./src/app/api/_lib/workspace.ts:99:17
+The file pattern ('null/' <dynamic> '-' <dynamic> '-2' | <dynamic> '/' <dynamic> '-' <dynamic> '-2' | 'null' <dynamic> '-' <dynamic> '-2' | <dynamic> '-' <dynamic> '-2' | 'null/project-' <dynamic> '-2' | <dynamic> '/project-' <dynamic> '-2' | 'nullproject-' <dynamic> '-2' | <dynamic> 'project-' <dynamic> '-2' | 'null/' <dynamic> '-' <dynamic> '-' <dynamic> | <dynamic> '/' <dynamic> '-' <dynamic> '-' <dynamic> | 'null' <dynamic> '-' <dynamic> '-' <dynamic> | <dynamic> '-' <dynamic> '-' <dynamic> | 'null/project-' <dynamic> '-' <dynamic> | <dynamic> '/project-' <dynamic> '-' <dynamic> | 'nullproject-' <dynamic> '-' <dynamic> | <dynamic> 'project-' <dynamic> '-' <dynamic>) matches 17694 files in [project]/
+[0m [90m  97 |[39m   [36mlet[39m candidate [33m=[39m path[33m.[39mjoin(root[33m,[39m base)[33m;[39m
+ [90m  98 |[39m   [36mfor[39m ([36mlet[39m n [33m=[39m [35m2[39m[33m;[39m fs[33m.[39mexistsSync(candidate)[33m;[39m n[33m++[39m) {
+[31m[1m>[22m[39m[90m  99 |[39m     candidate [33m=[39m path[33m.[39mjoin(root[33m,[39m [32m`${base}-${n}`[39m)[33m;[39m
+ [90m     |[39m                 [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 100 |[39m   }
+ [90m 101 |[39m   fs[33m.[39mmkdirSync(candidate[33m,[39m { recursive[33m:[39m [36mtrue[39m })[33m;[39m
+ [90m 102 |[39m   [36mreturn[39m candidate[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/_lib/workspace.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/_lib/workspace.ts
+    ./src/app/api/producer/transcript-authority/route.ts
+
+
+./src/app/api/_lib/workspace.ts:98:19
+The file pattern ('null/' <dynamic> '-' <dynamic> | <dynamic> '/' <dynamic> '-' <dynamic> | 'null' <dynamic> '-' <dynamic> | <dynamic> '-' <dynamic> | 'null/project-' <dynamic> | <dynamic> '/project-' <dynamic> | 'nullproject-' <dynamic> | <dynamic> 'project-' <dynamic> | 'null/' <dynamic> '-' <dynamic> '-2' | <dynamic> '/' <dynamic> '-' <dynamic> '-2' | 'null' <dynamic> '-' <dynamic> '-2' | <dynamic> '-' <dynamic> '-2' | 'null/project-' <dynamic> '-2' | <dynamic> '/project-' <dynamic> '-2' | 'nullproject-' <dynamic> '-2' | <dynamic> 'project-' <dynamic> '-2' | 'null/' <dynamic> '-' <dynamic> '-' <dynamic> | <dynamic> '/' <dynamic> '-' <dynamic> '-' <dynamic> | 'null' <dynamic> '-' <dynamic> '-' <dynamic> | <dynamic> '-' <dynamic> '-' <dynamic> | 'null/project-' <dynamic> '-' <dynamic> | <dynamic> '/project-' <dynamic> '-' <dynamic> | 'nullproject-' <dynamic> '-' <dynamic> | <dynamic> 'project-' <dynamic> '-' <dynamic>) matches 22341 files in [project]/
+[0m [90m  96 |[39m   [36mconst[39m base [33m=[39m [32m`${slugify(footageName)}-${dateStamp()}`[39m[33m;[39m
+ [90m  97 |[39m   [36mlet[39m candidate [33m=[39m path[33m.[39mjoin(root[33m,[39m base)[33m;[39m
+[31m[1m>[22m[39m[90m  98 |[39m   [36mfor[39m ([36mlet[39m n [33m=[39m [35m2[39m[33m;[39m fs[33m.[39mexistsSync(candidate)[33m;[39m n[33m++[39m) {
+ [90m     |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  99 |[39m     candidate [33m=[39m path[33m.[39mjoin(root[33m,[39m [32m`${base}-${n}`[39m)[33m;[39m
+ [90m 100 |[39m   }
+ [90m 101 |[39m   fs[33m.[39mmkdirSync(candidate[33m,[39m { recursive[33m:[39m [36mtrue[39m })[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/_lib/workspace.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/_lib/workspace.ts
+    ./src/app/api/producer/transcript-authority/route.ts
+
+
+./src/app/api/_lib/workspace.ts:97:19
+The file pattern ('null/' <dynamic> '-' <dynamic> | <dynamic> '/' <dynamic> '-' <dynamic> | 'null' <dynamic> '-' <dynamic> | <dynamic> '-' <dynamic> | 'null/project-' <dynamic> | <dynamic> '/project-' <dynamic> | 'nullproject-' <dynamic> | <dynamic> 'project-' <dynamic>) matches 22341 files in [project]/
+[0m [90m  95 |[39m   [36mconst[39m root [33m=[39m workspaceRoot()[33m;[39m
+ [90m  96 |[39m   [36mconst[39m base [33m=[39m [32m`${slugify(footageName)}-${dateStamp()}`[39m[33m;[39m
+[31m[1m>[22m[39m[90m  97 |[39m   [36mlet[39m candidate [33m=[39m path[33m.[39mjoin(root[33m,[39m base)[33m;[39m
+ [90m     |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m  98 |[39m   [36mfor[39m ([36mlet[39m n [33m=[39m [35m2[39m[33m;[39m fs[33m.[39mexistsSync(candidate)[33m;[39m n[33m++[39m) {
+ [90m  99 |[39m     candidate [33m=[39m path[33m.[39mjoin(root[33m,[39m [32m`${base}-${n}`[39m)[33m;[39m
+ [90m 100 |[39m   }[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/_lib/workspace.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/_lib/workspace.ts
+    ./src/app/api/producer/transcript-authority/route.ts
+
+
+./src/app/api/producer/references/fetch/route.ts:95:24
+The file pattern ('null/' <dynamic> | <dynamic> '/' <dynamic> | 'null' <dynamic> | <dynamic>) matches 51400 files in [project]/
+[0m [90m 93 |[39m     )[33m;[39m
+ [90m 94 |[39m     finalDir [33m=[39m promoteReferenceDir(provisional[33m,[39m title)[33m;[39m
+[31m[1m>[22m[39m[90m 95 |[39m     [36mconst[39m downloaded [33m=[39m path[33m.[39mjoin(finalDir[33m,[39m path[33m.[39mbasename(event[33m.[39mvideo))[33m;[39m
+ [90m    |[39m                        [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 96 |[39m     [36mconst[39m admission [33m=[39m [36mawait[39m admitReferenceMedia(downloaded[33m,[39m finalDir[33m,[39m signal)[33m;[39m
+ [90m 97 |[39m     [36mconst[39m video [33m=[39m admission[33m.[39msnapshotPath[33m;[39m
+ [90m 98 |[39m     [36mconst[39m transcript [33m=[39m rebindTranscript(event[33m.[39mtranscript[33m,[39m finalDir[33m,[39m video)[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import trace:
+  App Route:
+    ./src/app/api/producer/references/fetch/route.ts
+    ./src/app/api/producer/transcript-authority/route.ts
+
+
+./src/app/api/producer/references/fetch/route.ts:99:9
+The file pattern ('null/' <dynamic> | <dynamic> '/' <dynamic> | 'null' <dynamic> | <dynamic>) matches 51400 files in [project]/
+[0m [90m  97 |[39m     [36mconst[39m video [33m=[39m admission[33m.[39msnapshotPath[33m;[39m
+ [90m  98 |[39m     [36mconst[39m transcript [33m=[39m rebindTranscript(event[33m.[39mtranscript[33m,[39m finalDir[33m,[39m video)[33m;[39m
+[31m[1m>[22m[39m[90m  99 |[39m     [36mif[39m (path[33m.[39mresolve(downloaded) [33m!==[39m path[33m.[39mresolve(video)) fs[33m.[39munlinkSync(downloaded)[33m;[39m
+ [90m     |[39m         [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 100 |[39m     writeReferenceSource(finalDir[33m,[39m {
+ [90m 101 |[39m       kind[33m:[39m [32m"url"[39m[33m,[39m url[33m:[39m url[33m.[39mtoString()[33m,[39m allowCookies[33m,[39m
+ [90m 102 |[39m       fetchedAt[33m:[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m,[39m transcript[33m,[39m admission[33m,[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import trace:
+  App Route:
+    ./src/app/api/producer/references/fetch/route.ts
+    ./src/app/api/producer/transcript-authority/route.ts
+
+
+./src/app/api/producer/studio/import/authority.ts:54:135
+The file pattern (<dynamic> '/asset_manifest.json' | <dynamic> 'asset_manifest.json' | <dynamic> '/base_plan.json' | <dynamic> 'base_plan.json' | <dynamic> '/base.fingerprint.json' | <dynamic> 'base.fingerprint.json' | <dynamic> '/' <dynamic> | <dynamic>) matches 51400 files in [project]/
+[0m [90m 52 |[39m [36mfunction[39m projectParents(dir[33m:[39m string)[33m:[39m string {
+ [90m 53 |[39m   [36mconst[39m root [33m=[39m path[33m.[39mdirname(dir)[33m;[39m
+[31m[1m>[22m[39m[90m 54 |[39m   [36mconst[39m names [33m=[39m [path[33m.[39mjoin(root[33m,[39m [32m"project.json"[39m)[33m,[39m [33m...[39m[[32m"asset_manifest.json"[39m[33m,[39m [32m"base_plan.json"[39m[33m,[39m [32m"base.fingerprint.json"[39m][33m.[39mmap((name) [33m=>[39m path[33m.[39mjoin(dir[33m,[39m name))][33m;[39m
+ [90m    |[39m                                                                                                                                       [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 55 |[39m   [36mconst[39m manifest [33m=[39m [33mJSON[39m[33m.[39mparse(readText(path[33m.[39mjoin(dir[33m,[39m [32m"asset_manifest.json"[39m))) [36mas[39m { sources[33m?[39m[33m:[39m { transcriptPath[33m?[39m[33m:[39m unknown }[] }[33m;[39m
+ [90m 56 |[39m   [36mfor[39m ([36mconst[39m source [36mof[39m manifest[33m.[39msources [33m?[39m[33m?[39m []) {
+ [90m 57 |[39m     [36mif[39m (source[33m.[39mtranscriptPath [33m==[39m [36mnull[39m) [36mcontinue[39m[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/producer/studio/import/authority.ts
+    ./src/app/api/producer/transcript-authority/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/producer/studio/import/authority.ts
+    ./src/app/api/producer/studio/import/service.ts
+    ./src/app/api/producer/studio/import/route.ts
+
+
+./src/lib/server/auto-edit-candidate-promotion.ts:88:13
+The file pattern (<dynamic> '/audit_report.json' | <dynamic> 'audit_report.json' | <dynamic> '/audit_report.md' | <dynamic> 'audit_report.md' | <dynamic> '/graphics_placements.json' | <dynamic> 'graphics_placements.json' | <dynamic> '/audit_frames' | <dynamic> 'audit_frames' | <dynamic> '/' <dynamic> | <dynamic>) matches 51400 files in [project]/
+[0m [90m 86 |[39m     [32m"audit_frames"[39m[33m,[39m
+ [90m 87 |[39m   ][33m.[39mmap((name) [33m=>[39m ({
+[31m[1m>[22m[39m[90m 88 |[39m     source[33m:[39m path[33m.[39mjoin(candidateDir[33m,[39m name)[33m,[39m
+ [90m    |[39m             [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 89 |[39m     destination[33m:[39m path[33m.[39mjoin(producerDir[33m,[39m name)[33m,[39m
+ [90m 90 |[39m     missingSource[33m:[39m [32m"delete-destination"[39m [36mas[39m [36mconst[39m[33m,[39m
+ [90m 91 |[39m   }))[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/auto-edit-candidate-promotion.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/auto-edit-candidate-promotion.ts
+    ./src/lib/server/auto-edit-quality-artifacts.ts
+    ./src/lib/server/project-status-projection.ts
+    ./src/app/api/producer/project-status/route.ts
+
+
+./src/lib/server/auto-edit-candidate-promotion.ts:89:18
+The file pattern (<dynamic> '/audit_report.json' | <dynamic> 'audit_report.json' | <dynamic> '/audit_report.md' | <dynamic> 'audit_report.md' | <dynamic> '/graphics_placements.json' | <dynamic> 'graphics_placements.json' | <dynamic> '/audit_frames' | <dynamic> 'audit_frames' | <dynamic> '/' <dynamic> | <dynamic>) matches 51400 files in [project]/
+[0m [90m 87 |[39m   ][33m.[39mmap((name) [33m=>[39m ({
+ [90m 88 |[39m     source[33m:[39m path[33m.[39mjoin(candidateDir[33m,[39m name)[33m,[39m
+[31m[1m>[22m[39m[90m 89 |[39m     destination[33m:[39m path[33m.[39mjoin(producerDir[33m,[39m name)[33m,[39m
+ [90m    |[39m                  [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 90 |[39m     missingSource[33m:[39m [32m"delete-destination"[39m [36mas[39m [36mconst[39m[33m,[39m
+ [90m 91 |[39m   }))[33m;[39m
+ [90m 92 |[39m   [36mconst[39m topology [33m=[39m {[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/auto-edit-candidate-promotion.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/auto-edit-candidate-promotion.ts
+    ./src/lib/server/auto-edit-quality-artifacts.ts
+    ./src/lib/server/project-status-projection.ts
+    ./src/app/api/producer/project-status/route.ts
+
+
+./src/app/api/producer/studio/import/authority.ts:47:18
+The file pattern (<dynamic> '/base_final.mp4' | <dynamic> 'base_final.mp4' | <dynamic> '/studio/' <dynamic> | <dynamic> 'studio/' <dynamic> | <dynamic> '/studio' <dynamic> | <dynamic> 'studio' <dynamic> | <dynamic>) matches 25705 files in [project]/
+[0m [90m 45 |[39m [36mfunction[39m baseIdentity(dir[33m:[39m string[33m,[39m relative[33m:[39m string)[33m:[39m string[][] {
+ [90m 46 |[39m   [36mreturn[39m [path[33m.[39mjoin(dir[33m,[39m [32m"base_final.mp4"[39m)[33m,[39m path[33m.[39mjoin(dir[33m,[39m [32m"studio"[39m[33m,[39m relative)][33m.[39mmap((file) [33m=>[39m {
+[31m[1m>[22m[39m[90m 47 |[39m     [36mconst[39m stat [33m=[39m fs[33m.[39mstatSync(file[33m,[39m { bigint[33m:[39m [36mtrue[39m })[33m;[39m
+ [90m    |[39m                  [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 48 |[39m     [36mreturn[39m [file[33m,[39m stat[33m.[39mdev[33m,[39m stat[33m.[39mino[33m,[39m stat[33m.[39msize[33m,[39m stat[33m.[39mmtimeNs[33m,[39m stat[33m.[39mctimeNs][33m.[39mmap([33mString[39m)[33m;[39m
+ [90m 49 |[39m   })[33m;[39m
+ [90m 50 |[39m }[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/producer/studio/import/authority.ts
+    ./src/app/api/producer/transcript-authority/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/producer/studio/import/authority.ts
+    ./src/app/api/producer/studio/import/service.ts
+    ./src/app/api/producer/studio/import/route.ts
+
+
+./src/app/api/_lib/spawn-python.ts:54:18
+The file pattern (<dynamic> '/bin/python3' | <dynamic> 'bin/python3' | <dynamic> '/binpython3' | <dynamic> 'binpython3' | <dynamic>) matches 25705 files in [project]/
+[0m [90m 52 |[39m [36mexport[39m [36mfunction[39m spawnPython(scriptPath[33m:[39m string[33m,[39m args[33m:[39m string[])[33m:[39m [33mPromise[39m[33m<[39m[33mstring[39m[33m>[39m {
+ [90m 53 |[39m   [36mreturn[39m [36mnew[39m [33mPromise[39m((resolve[33m,[39m reject) [33m=>[39m {
+[31m[1m>[22m[39m[90m 54 |[39m     [36mconst[39m proc [33m=[39m spawn(pythonInterpreter()[33m,[39m [scriptPath[33m,[39m [33m...[39margs][33m,[39m { env[33m:[39m { [33m...[39mprocess[33m.[39menv } })[33m;[39m
+ [90m    |[39m                  [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 55 |[39m
+ [90m 56 |[39m     [36mlet[39m stdout [33m=[39m [32m""[39m[33m;[39m
+ [90m 57 |[39m     [36mlet[39m stderr [33m=[39m [32m""[39m[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/_lib/spawn-python.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/_lib/spawn-python.ts
+    ./src/app/api/segmenter/transcribe/route.ts
+
+
+./src/app/api/_lib/reference-study-files.ts:36:9
+The file pattern (<dynamic> '/deep_study.json' | <dynamic> 'deep_study.json' | <dynamic> '/fingerprint.json' | <dynamic> 'fingerprint.json' | <dynamic> '/report.md' | <dynamic> 'report.md' | <dynamic> '/style_profile.json' | <dynamic> 'style_profile.json' | <dynamic> '/reference_style_pack.json' | <dynamic> 'reference_style_pack.json' | <dynamic> '/mechanics-review.json' | <dynamic> 'mechanics-review.json' | <dynamic> '/editorial-review.json' | <dynamic> 'editorial-review.json' | <dynamic> '/adjudication-review.json' | <dynamic> 'adjudication-review.json' | <dynamic> '/template-registry.json' | <dynamic> 'template-registry.json' | <dynamic> '/reference-review' | <dynamic> 'reference-review' | <dynamic> '/frames' | <dynamic> 'frames' | <dynamic> '/states' | <dynamic> 'states' | <dynamic> '/events' | <dynamic> 'events' | <dynamic> '/' <dynamic> | <dynamic>) matches 25705 files in [project]/
+[0m [90m 34 |[39m   [36mfor[39m ([36mconst[39m name [36mof[39m [33mGENERATED[39m) {
+ [90m 35 |[39m     [36mconst[39m source [33m=[39m path[33m.[39mjoin(studyDir[33m,[39m name)[33m;[39m
+[31m[1m>[22m[39m[90m 36 |[39m     [36mif[39m (fs[33m.[39mexistsSync(source)) fs[33m.[39mrenameSync(source[33m,[39m path[33m.[39mjoin(backup[33m,[39m name))[33m;[39m
+ [90m    |[39m         [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 37 |[39m   }
+ [90m 38 |[39m   [36mreturn[39m backup[33m;[39m
+ [90m 39 |[39m }[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/_lib/reference-study-files.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/_lib/reference-study-files.ts
+    ./src/app/api/producer/references/study/route.ts
+
+
+./src/app/api/_lib/reference-study-files.ts:14:43
+The file pattern (<dynamic> '/deep_study.json' | <dynamic> 'deep_study.json' | <dynamic> '/fingerprint.json' | <dynamic> 'fingerprint.json' | <dynamic> '/report.md' | <dynamic> 'report.md' | <dynamic> '/style_profile.json' | <dynamic> 'style_profile.json' | <dynamic> '/reference_style_pack.json' | <dynamic> 'reference_style_pack.json' | <dynamic> '/mechanics-review.json' | <dynamic> 'mechanics-review.json' | <dynamic> '/editorial-review.json' | <dynamic> 'editorial-review.json' | <dynamic> '/adjudication-review.json' | <dynamic> 'adjudication-review.json' | <dynamic> '/template-registry.json' | <dynamic> 'template-registry.json' | <dynamic> '/reference-review' | <dynamic> 'reference-review' | <dynamic> '/frames' | <dynamic> 'frames' | <dynamic> '/states' | <dynamic> 'states' | <dynamic> '/events' | <dynamic> 'events' | <dynamic> '/' <dynamic> | <dynamic>) matches 51400 files in [project]/
+[0m [90m 12 |[39m     [36mreturn[39m[33m;[39m
+ [90m 13 |[39m   }
+[31m[1m>[22m[39m[90m 14 |[39m   [36mfor[39m ([36mconst[39m name [36mof[39m [33mGENERATED[39m) fs[33m.[39mrmSync(path[33m.[39mjoin(studyDir[33m,[39m name)[33m,[39m { recursive[33m:[39m [36mtrue[39m[33m,[39m force[33m:[39m [36mtrue[39m })[33m;[39m
+ [90m    |[39m                                           [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 15 |[39m   [36mfor[39m ([36mconst[39m name [36mof[39m fs[33m.[39mreaddirSync(backup)) {
+ [90m 16 |[39m     fs[33m.[39mrenameSync(path[33m.[39mjoin(backup[33m,[39m name)[33m,[39m path[33m.[39mjoin(studyDir[33m,[39m name))[33m;[39m
+ [90m 17 |[39m   }[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/_lib/reference-study-files.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/_lib/reference-study-files.ts
+    ./src/app/api/producer/references/study/route.ts
+
+
+./src/app/api/_lib/reference-study-files.ts:35:20
+The file pattern (<dynamic> '/deep_study.json' | <dynamic> 'deep_study.json' | <dynamic> '/fingerprint.json' | <dynamic> 'fingerprint.json' | <dynamic> '/report.md' | <dynamic> 'report.md' | <dynamic> '/style_profile.json' | <dynamic> 'style_profile.json' | <dynamic> '/reference_style_pack.json' | <dynamic> 'reference_style_pack.json' | <dynamic> '/mechanics-review.json' | <dynamic> 'mechanics-review.json' | <dynamic> '/editorial-review.json' | <dynamic> 'editorial-review.json' | <dynamic> '/adjudication-review.json' | <dynamic> 'adjudication-review.json' | <dynamic> '/template-registry.json' | <dynamic> 'template-registry.json' | <dynamic> '/reference-review' | <dynamic> 'reference-review' | <dynamic> '/frames' | <dynamic> 'frames' | <dynamic> '/states' | <dynamic> 'states' | <dynamic> '/events' | <dynamic> 'events' | <dynamic> '/' <dynamic> | <dynamic>) matches 51400 files in [project]/
+[0m [90m 33 |[39m   fs[33m.[39mmkdirSync(backup)[33m;[39m
+ [90m 34 |[39m   [36mfor[39m ([36mconst[39m name [36mof[39m [33mGENERATED[39m) {
+[31m[1m>[22m[39m[90m 35 |[39m     [36mconst[39m source [33m=[39m path[33m.[39mjoin(studyDir[33m,[39m name)[33m;[39m
+ [90m    |[39m                    [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 36 |[39m     [36mif[39m (fs[33m.[39mexistsSync(source)) fs[33m.[39mrenameSync(source[33m,[39m path[33m.[39mjoin(backup[33m,[39m name))[33m;[39m
+ [90m 37 |[39m   }
+ [90m 38 |[39m   [36mreturn[39m backup[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/_lib/reference-study-files.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/_lib/reference-study-files.ts
+    ./src/app/api/producer/references/study/route.ts
+
+
+./src/app/api/producer/studio/paths.ts:40:31
+The file pattern (<dynamic> '/edit_plan.json' | <dynamic> 'edit_plan.json' | <dynamic> '/base_final.mp4' | <dynamic> 'base_final.mp4' | <dynamic> '/base.fingerprint.json' | <dynamic> 'base.fingerprint.json' | <dynamic> '/base_plan.json' | <dynamic> 'base_plan.json' | <dynamic> '/' <dynamic> | <dynamic>) matches 25705 files in [project]/
+[0m [90m 38 |[39m   [36mfor[39m ([36mconst[39m name [36mof[39m [[32m"edit_plan.json"[39m[33m,[39m [32m"base_final.mp4"[39m[33m,[39m [32m"base.fingerprint.json"[39m[33m,[39m [32m"base_plan.json"[39m]) {
+ [90m 39 |[39m     [36mconst[39m file [33m=[39m path[33m.[39mjoin(dir[33m,[39m name)[33m;[39m
+[31m[1m>[22m[39m[90m 40 |[39m     [36mif[39m (regularPath(file) [33m&&[39m [33m![39mfs[33m.[39mstatSync(file)[33m.[39misFile()) {
+ [90m    |[39m                               [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 41 |[39m       [36mthrow[39m [36mnew[39m [33mStudioError[39m([32m"Studio inputs must be regular files"[39m)[33m;[39m
+ [90m 42 |[39m     }
+ [90m 43 |[39m     [36mif[39m (name[33m.[39mendsWith([32m".json"[39m)) readStudioJson(file)[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/producer/studio/paths.ts
+    ./src/app/api/producer/transcript-authority/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/producer/studio/paths.ts
+    ./src/app/api/producer/studio/import/route.ts
+
+
+./src/app/api/producer/studio/paths.ts:39:18
+The file pattern (<dynamic> '/edit_plan.json' | <dynamic> 'edit_plan.json' | <dynamic> '/base_final.mp4' | <dynamic> 'base_final.mp4' | <dynamic> '/base.fingerprint.json' | <dynamic> 'base.fingerprint.json' | <dynamic> '/base_plan.json' | <dynamic> 'base_plan.json' | <dynamic> '/' <dynamic> | <dynamic>) matches 51400 files in [project]/
+[0m [90m 37 |[39m   readStudioJson(path[33m.[39mjoin(path[33m.[39mdirname(dir)[33m,[39m [32m"project.json"[39m))[33m;[39m
+ [90m 38 |[39m   [36mfor[39m ([36mconst[39m name [36mof[39m [[32m"edit_plan.json"[39m[33m,[39m [32m"base_final.mp4"[39m[33m,[39m [32m"base.fingerprint.json"[39m[33m,[39m [32m"base_plan.json"[39m]) {
+[31m[1m>[22m[39m[90m 39 |[39m     [36mconst[39m file [33m=[39m path[33m.[39mjoin(dir[33m,[39m name)[33m;[39m
+ [90m    |[39m                  [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 40 |[39m     [36mif[39m (regularPath(file) [33m&&[39m [33m![39mfs[33m.[39mstatSync(file)[33m.[39misFile()) {
+ [90m 41 |[39m       [36mthrow[39m [36mnew[39m [33mStudioError[39m([32m"Studio inputs must be regular files"[39m)[33m;[39m
+ [90m 42 |[39m     }[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/producer/studio/paths.ts
+    ./src/app/api/producer/transcript-authority/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/producer/studio/paths.ts
+    ./src/app/api/producer/studio/import/route.ts
+
+
+./src/lib/server/auto-edit-quality-artifacts.ts:155:9
+The file pattern (<dynamic> '/edit_plan.json' | <dynamic> 'edit_plan.json' | <dynamic> '/timeline_map.json' | <dynamic> 'timeline_map.json' | <dynamic> '/cover.png' | <dynamic> 'cover.png' | <dynamic> '/render_report.json' | <dynamic> 'render_report.json' | <dynamic> '/captions.srt' | <dynamic> 'captions.srt' | <dynamic> '/' <dynamic> | <dynamic>) matches 25705 files in [project]/
+[0m [90m 153 |[39m   [36mfor[39m ([36mconst[39m name [36mof[39m names) {
+ [90m 154 |[39m     [36mconst[39m source [33m=[39m path[33m.[39mjoin(producerDir[33m,[39m name)[33m;[39m
+[31m[1m>[22m[39m[90m 155 |[39m     [36mif[39m (existsSync(source)) copyFileSync(source[33m,[39m path[33m.[39mjoin(candidateDir[33m,[39m name))[33m;[39m
+ [90m     |[39m         [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 156 |[39m   }
+ [90m 157 |[39m }
+ [90m 158 |[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/auto-edit-quality-artifacts.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/auto-edit-quality-artifacts.ts
+    ./src/lib/server/project-status-projection.ts
+    ./src/app/api/producer/project-status/route.ts
+
+
+./src/lib/server/auto-edit-quality-artifacts.ts:154:20
+The file pattern (<dynamic> '/edit_plan.json' | <dynamic> 'edit_plan.json' | <dynamic> '/timeline_map.json' | <dynamic> 'timeline_map.json' | <dynamic> '/cover.png' | <dynamic> 'cover.png' | <dynamic> '/render_report.json' | <dynamic> 'render_report.json' | <dynamic> '/captions.srt' | <dynamic> 'captions.srt' | <dynamic> '/' <dynamic> | <dynamic>) matches 51400 files in [project]/
+[0m [90m 152 |[39m   ][33m;[39m
+ [90m 153 |[39m   [36mfor[39m ([36mconst[39m name [36mof[39m names) {
+[31m[1m>[22m[39m[90m 154 |[39m     [36mconst[39m source [33m=[39m path[33m.[39mjoin(producerDir[33m,[39m name)[33m;[39m
+ [90m     |[39m                    [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 155 |[39m     [36mif[39m (existsSync(source)) copyFileSync(source[33m,[39m path[33m.[39mjoin(candidateDir[33m,[39m name))[33m;[39m
+ [90m 156 |[39m   }
+ [90m 157 |[39m }[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/auto-edit-quality-artifacts.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/auto-edit-quality-artifacts.ts
+    ./src/lib/server/project-status-projection.ts
+    ./src/app/api/producer/project-status/route.ts
+
+
+./src/lib/server/auto-edit-quality-artifacts.ts:155:50
+The file pattern (<dynamic> '/edit_plan.json' | <dynamic> 'edit_plan.json' | <dynamic> '/timeline_map.json' | <dynamic> 'timeline_map.json' | <dynamic> '/cover.png' | <dynamic> 'cover.png' | <dynamic> '/render_report.json' | <dynamic> 'render_report.json' | <dynamic> '/captions.srt' | <dynamic> 'captions.srt' | <dynamic> '/' <dynamic> | <dynamic>) matches 51400 files in [project]/
+[0m [90m 153 |[39m   [36mfor[39m ([36mconst[39m name [36mof[39m names) {
+ [90m 154 |[39m     [36mconst[39m source [33m=[39m path[33m.[39mjoin(producerDir[33m,[39m name)[33m;[39m
+[31m[1m>[22m[39m[90m 155 |[39m     [36mif[39m (existsSync(source)) copyFileSync(source[33m,[39m path[33m.[39mjoin(candidateDir[33m,[39m name))[33m;[39m
+ [90m     |[39m                                                  [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 156 |[39m   }
+ [90m 157 |[39m }
+ [90m 158 |[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/auto-edit-quality-artifacts.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/auto-edit-quality-artifacts.ts
+    ./src/lib/server/project-status-projection.ts
+    ./src/app/api/producer/project-status/route.ts
+
+
+./src/lib/server/guided-opening-controller-lifecycle.ts:62:20
+The file pattern (<dynamic> '/intent.json' | <dynamic> 'intent.json' | <dynamic> '/activation.json' | <dynamic> 'activation.json' | <dynamic> '/released.json' | <dynamic> 'released.json' | <dynamic> '/controller-started.json' | <dynamic> 'controller-started.json' | <dynamic> '/' <dynamic> | <dynamic>) matches 51400 files in [project]/
+[0m [90m 60 |[39m     [36mthis[39m[33m.[39mlock [33m=[39m { path[33m:[39m lockPath[33m,[39m dev[33m:[39m stat[33m.[39mdev[33m,[39m ino[33m:[39m stat[33m.[39mino }[33m;[39m
+ [90m 61 |[39m     [36mthis[39m[33m.[39mpublications [33m=[39m [[32m"intent.json"[39m[33m,[39m [32m"activation.json"[39m[33m,[39m [32m"released.json"[39m[33m,[39m [32m"controller-started.json"[39m][33m.[39mmap(name [33m=>[39m {
+[31m[1m>[22m[39m[90m 62 |[39m       [36mconst[39m file [33m=[39m path[33m.[39mjoin(input[33m.[39mlaunch[33m.[39mroot[33m,[39m name)[33m;[39m [36mreturn[39m capturePublication(file[33m,[39m readCutPreviewObject(file)[33m.[39msha256)[33m;[39m
+ [90m    |[39m                    [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 63 |[39m     })[33m;[39m
+ [90m 64 |[39m     [36mthis[39m[33m.[39mjournal [33m=[39m capturePublication(autoEditJobPath(dir)[33m,[39m submission[33m.[39mexpectedJournalHash)[33m;[39m
+ [90m 65 |[39m     same(observeHumanCutJob(dir)[33m.[39msha256[33m,[39m submission[33m.[39mexpectedJournalHash)[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/guided-opening-controller-lifecycle.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/guided-opening-controller-lifecycle.ts
+    ./src/lib/server/guided-source-color-prelaunch-owner.ts
+    ./src/lib/server/guided-source-color-staging.ts
+    ./src/lib/server/guided-opening-launch-store.ts
+    ./src/lib/server/guided-opening-launcher.ts
+    ./src/app/api/producer/guided-opening/launch/route.ts
+
+
+./src/lib/server/guided-source-color-cleanup-attempt-media.ts:44:35
+The file pattern (<dynamic> '/media-process-intent.json' | <dynamic> 'media-process-intent.json' | <dynamic> '/' <dynamic> | <dynamic>) matches 51400 files in [project]/
+[0m [90m 42 |[39m   [36mconst[39m prior [33m=[39m sha256(activation[33m.[39mbeforeJournalHash[33m,[39m [32m"original pre-activation journal SHA"[39m)[33m;[39m
+ [90m 43 |[39m   capture({ role[33m:[39m [32m"priorJournal"[39m[33m,[39m path[33m:[39m path[33m.[39mjoin(producer[33m,[39m [32m"human-cut-job-snapshots"[39m[33m,[39m [32m`${prior}.json`[39m)[33m,[39m sha256[33m:[39m prior })[33m;[39m
+[31m[1m>[22m[39m[90m 44 |[39m   capture({ role[33m:[39m [32m"intent"[39m[33m,[39m path[33m:[39m path[33m.[39mjoin(root[33m,[39m [33mNAMES[39m[33m.[39mintent)[33m,[39m sha256[33m:[39m sha256(activation[33m.[39mintentSha256[33m,[39m [32m"original media intent SHA"[39m) })[33m;[39m
+ [90m    |[39m                                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 45 |[39m   [36mconst[39m outcome [33m=[39m json(capture({ role[33m:[39m [32m"outcome"[39m[33m,[39m path[33m:[39m path[33m.[39mjoin(root[33m,[39m [33mNAMES[39m[33m.[39moutcome)[33m,[39m
+ [90m 46 |[39m     sha256[33m:[39m sha256(activation[33m.[39moutcomeSha256[33m,[39m [32m"original media outcome SHA"[39m) }))[33m;[39m
+ [90m 47 |[39m   capture({ role[33m:[39m [32m"ledger"[39m[33m,[39m path[33m:[39m path[33m.[39mjoin(root[33m,[39m [33mNAMES[39m[33m.[39mledger)[33m,[39m sha256[33m:[39m sha256(outcome[33m.[39mledgerSha256[33m,[39m [32m"original media ledger SHA"[39m) })[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/guided-source-color-cleanup-attempt-media.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/guided-source-color-cleanup-attempt-media.ts
+    ./src/lib/server/guided-source-color-cleanup-attempt-hold.ts
+    ./src/lib/server/guided-source-color-approval-read.ts
+    ./src/lib/server/guided-opening-approval.ts
+    ./src/app/api/producer/guided-opening/approve/route.ts
+
+
+./src/lib/server/guided-source-color-cleanup-attempt-media.ts:28:19
+The file pattern (<dynamic> '/media-process-intent.json' | <dynamic> 'media-process-intent.json' | <dynamic> '/media-process-result.json' | <dynamic> 'media-process-result.json' | <dynamic> '/owned-process-ledger.media.jsonl' | <dynamic> 'owned-process-ledger.media.jsonl' | <dynamic> '/' <dynamic> | <dynamic>) matches 51400 files in [project]/
+[0m [90m 26 |[39m     expected [33m=[39m path[33m.[39mjoin(producer[33m,[39m [32m".sniper-authority-v1/objects/receipts"[39m[33m,[39m [32m`${original}.json`[39m)[33m;[39m
+ [90m 27 |[39m   } [36melse[39m [36mif[39m (value[33m.[39mrole [33m===[39m [32m"priorJournal"[39m) expected [33m=[39m path[33m.[39mjoin(producer[33m,[39m [32m"human-cut-job-snapshots"[39m[33m,[39m [32m`${value.sha256}.json`[39m)[33m;[39m
+[31m[1m>[22m[39m[90m 28 |[39m   [36melse[39m expected [33m=[39m path[33m.[39mjoin(root[33m,[39m [33mNAMES[39m[value[33m.[39mrole])[33m;[39m
+ [90m    |[39m                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 29 |[39m   [36mif[39m (value[33m.[39mpath [33m!==[39m expected) [36mthrow[39m [36mnew[39m [33mError[39m([32m"Cleanup historical media reference namespace changed"[39m)[33m;[39m
+ [90m 30 |[39m   [36mreturn[39m value[33m.[39mrole [33m===[39m [32m"ledger"[39m [33m?[39m [35m32[39m [33m*[39m [35m1024[39m [33m*[39m [35m1024[39m [33m:[39m [35m16[39m [33m*[39m [35m1024[39m [33m*[39m [35m1024[39m[33m;[39m
+ [90m 31 |[39m }[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/guided-source-color-cleanup-attempt-media.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/guided-source-color-cleanup-attempt-media.ts
+    ./src/lib/server/guided-source-color-cleanup-attempt-hold.ts
+    ./src/lib/server/guided-source-color-approval-read.ts
+    ./src/lib/server/guided-opening-approval.ts
+    ./src/app/api/producer/guided-opening/approve/route.ts
+
+
+./src/lib/server/guided-source-color-prelaunch-cancel-hold.ts:83:26
+The file pattern (<dynamic> '/media-process-intent.json' | <dynamic> 'media-process-intent.json' | <dynamic> '/media-process-result.json' | <dynamic> 'media-process-result.json' | <dynamic> '/owned-process-ledger.media.jsonl' | <dynamic> 'owned-process-ledger.media.jsonl' | <dynamic> '/cleanup-attempts' | <dynamic> 'cleanup-attempts' | <dynamic> '/' <dynamic> | <dynamic>) matches 51400 files in [project]/
+[0m [90m 81 |[39m   [36mprivate[39m artifacts()[33m:[39m [36mvoid[39m {
+ [90m 82 |[39m     [36mfor[39m ([36mconst[39m name [36mof[39m [[32m"media-process-intent.json"[39m[33m,[39m [32m"media-process-result.json"[39m[33m,[39m [32m"owned-process-ledger.media.jsonl"[39m[33m,[39m [32m"cleanup-attempts"[39m]) {
+[31m[1m>[22m[39m[90m 83 |[39m       cancellationAbsent(path[33m.[39mjoin([36mthis[39m[33m.[39mroot[33m,[39m name))[33m;[39m
+ [90m    |[39m                          [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 84 |[39m     }
+ [90m 85 |[39m     [36mconst[39m output [33m=[39m [36mthis[39m[33m.[39mtransfer[33m.[39moriginal[33m.[39mclaim[33m.[39mclaim[33m.[39moutputRoot[33m;[39m
+ [90m 86 |[39m     [36mif[39m (present(output)) { directoryIdentity(output)[33m;[39m same(fs[33m.[39mreaddirSync(output)[33m,[39m [])[33m;[39m }[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/guided-source-color-prelaunch-cancel-hold.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/guided-source-color-prelaunch-cancel-hold.ts
+    ./src/lib/server/guided-source-color-prelaunch-cancel.ts
+    ./src/lib/server/guided-opening-controller-lifecycle.ts
+    ./src/lib/server/guided-source-color-prelaunch-owner.ts
+    ./src/lib/server/guided-source-color-staging.ts
+    ./src/lib/server/guided-opening-launch-store.ts
+    ./src/lib/server/guided-opening-launcher.ts
+    ./src/app/api/producer/guided-opening/launch/route.ts
+
+
+./src/lib/server/guided-source-color-cleanup-attempt-media.ts:45:57
+The file pattern (<dynamic> '/media-process-result.json' | <dynamic> 'media-process-result.json' | <dynamic> '/' <dynamic> | <dynamic>) matches 51400 files in [project]/
+[0m [90m 43 |[39m   capture({ role[33m:[39m [32m"priorJournal"[39m[33m,[39m path[33m:[39m path[33m.[39mjoin(producer[33m,[39m [32m"human-cut-job-snapshots"[39m[33m,[39m [32m`${prior}.json`[39m)[33m,[39m sha256[33m:[39m prior })[33m;[39m
+ [90m 44 |[39m   capture({ role[33m:[39m [32m"intent"[39m[33m,[39m path[33m:[39m path[33m.[39mjoin(root[33m,[39m [33mNAMES[39m[33m.[39mintent)[33m,[39m sha256[33m:[39m sha256(activation[33m.[39mintentSha256[33m,[39m [32m"original media intent SHA"[39m) })[33m;[39m
+[31m[1m>[22m[39m[90m 45 |[39m   [36mconst[39m outcome [33m=[39m json(capture({ role[33m:[39m [32m"outcome"[39m[33m,[39m path[33m:[39m path[33m.[39mjoin(root[33m,[39m [33mNAMES[39m[33m.[39moutcome)[33m,[39m
+ [90m    |[39m                                                         [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 46 |[39m     sha256[33m:[39m sha256(activation[33m.[39moutcomeSha256[33m,[39m [32m"original media outcome SHA"[39m) }))[33m;[39m
+ [90m 47 |[39m   capture({ role[33m:[39m [32m"ledger"[39m[33m,[39m path[33m:[39m path[33m.[39mjoin(root[33m,[39m [33mNAMES[39m[33m.[39mledger)[33m,[39m sha256[33m:[39m sha256(outcome[33m.[39mledgerSha256[33m,[39m [32m"original media ledger SHA"[39m) })[33m;[39m
+ [90m 48 |[39m   [36mconst[39m actual [33m=[39m readOpeningProcessActivation(producer[33m,[39m held)[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/guided-source-color-cleanup-attempt-media.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/guided-source-color-cleanup-attempt-media.ts
+    ./src/lib/server/guided-source-color-cleanup-attempt-hold.ts
+    ./src/lib/server/guided-source-color-approval-read.ts
+    ./src/lib/server/guided-opening-approval.ts
+    ./src/app/api/producer/guided-opening/approve/route.ts
+
+
+./src/lib/server/guided-source-color-cleanup-attempt-media.ts:47:35
+The file pattern (<dynamic> '/owned-process-ledger.media.jsonl' | <dynamic> 'owned-process-ledger.media.jsonl' | <dynamic> '/' <dynamic> | <dynamic>) matches 51400 files in [project]/
+[0m [90m 45 |[39m   [36mconst[39m outcome [33m=[39m json(capture({ role[33m:[39m [32m"outcome"[39m[33m,[39m path[33m:[39m path[33m.[39mjoin(root[33m,[39m [33mNAMES[39m[33m.[39moutcome)[33m,[39m
+ [90m 46 |[39m     sha256[33m:[39m sha256(activation[33m.[39moutcomeSha256[33m,[39m [32m"original media outcome SHA"[39m) }))[33m;[39m
+[31m[1m>[22m[39m[90m 47 |[39m   capture({ role[33m:[39m [32m"ledger"[39m[33m,[39m path[33m:[39m path[33m.[39mjoin(root[33m,[39m [33mNAMES[39m[33m.[39mledger)[33m,[39m sha256[33m:[39m sha256(outcome[33m.[39mledgerSha256[33m,[39m [32m"original media ledger SHA"[39m) })[33m;[39m
+ [90m    |[39m                                   [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 48 |[39m   [36mconst[39m actual [33m=[39m readOpeningProcessActivation(producer[33m,[39m held)[33m;[39m
+ [90m 49 |[39m   [36mif[39m (actual[33m.[39mhash [33m!==[39m hash [33m||[39m [33m![39misDeepStrictEqual(actual[33m.[39mfact[33m,[39m activation) [33m||[39m actual[33m.[39mprior[33m.[39msha256 [33m!==[39m prior) {
+ [90m 50 |[39m     [36mthrow[39m [36mnew[39m [33mError[39m([32m"Cleanup original media activation lineage changed"[39m)[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/guided-source-color-cleanup-attempt-media.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/guided-source-color-cleanup-attempt-media.ts
+    ./src/lib/server/guided-source-color-cleanup-attempt-hold.ts
+    ./src/lib/server/guided-source-color-approval-read.ts
+    ./src/lib/server/guided-opening-approval.ts
+    ./src/app/api/producer/guided-opening/approve/route.ts
+
+
+./src/app/api/producer/auto-edit/planning-gates.ts:66:10
+The file pattern (<dynamic> '/producer/' <dynamic> | <dynamic> 'producer/' <dynamic> | <dynamic> '/producer' <dynamic> | <dynamic> 'producer' <dynamic>) matches 15952 files in [project]/
+[0m [90m 64 |[39m
+ [90m 65 |[39m [36mfunction[39m gateScript(filename[33m:[39m string)[33m:[39m string {
+[31m[1m>[22m[39m[90m 66 |[39m   [36mreturn[39m path[33m.[39mjoin([33mPRODUCER[39m[33m,[39m filename)[33m;[39m
+ [90m    |[39m          [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 67 |[39m }
+ [90m 68 |[39m
+ [90m 69 |[39m [36mfunction[39m referenceCommand(input[33m:[39m [33mGateBundleInput[39m)[33m:[39m [33mPlanningGateCommand[39m [33m|[39m [36mnull[39m {[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/producer/auto-edit/planning-gates.ts
+    ./src/app/api/producer/transcript-authority/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/producer/auto-edit/planning-gates.ts
+    ./src/app/api/producer/ai-edit/surgical-governance.ts
+    ./src/app/api/producer/ai-edit/finalize.ts
+    ./src/app/api/producer/ai-edit/route.ts
+
+
+./src/app/api/producer/scene-review/runner.ts:182:9
+The file pattern (<dynamic> '/scene-reviews/' <dynamic> | <dynamic> 'scene-reviews/' <dynamic> | <dynamic> '/scene-reviews' <dynamic> | <dynamic> 'scene-reviews' <dynamic> | <dynamic>) matches 25705 files in [project]/
+[0m [90m 180 |[39m   } [36mcatch[39m (error) {
+ [90m 181 |[39m     [36mconst[39m quarantined [33m=[39m [32m`${location.attempt}.failed-${randomUUID()}`[39m[33m;[39m
+[31m[1m>[22m[39m[90m 182 |[39m     [36mif[39m (fs[33m.[39mexistsSync(location[33m.[39mattempt)) fs[33m.[39mrenameSync(location[33m.[39mattempt[33m,[39m quarantined)[33m;[39m
+ [90m     |[39m         [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 183 |[39m     [36mthrow[39m error[33m;[39m
+ [90m 184 |[39m   }
+ [90m 185 |[39m }[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/producer/scene-review/runner.ts
+    ./src/app/api/producer/transcript-authority/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/producer/scene-review/runner.ts
+    ./src/app/api/producer/scene-review/route.ts
+
+
+./src/lib/server/guided-source-color-cleanup-attempt-hold.ts:58:107
+The file pattern (<dynamic> '/start.json' | <dynamic> 'start.json' | <dynamic> '/invocation.json' | <dynamic> 'invocation.json' | <dynamic> '/output.json' | <dynamic> 'output.json' | <dynamic> '/reservation.json' | <dynamic> 'reservation.json' | <dynamic> '/' <dynamic> | <dynamic>) matches 51400 files in [project]/
+[0m [90m 56 |[39m     [36mif[39m ([36mthis[39m[33m.[39mfact[33m.[39marchive[33m.[39mpath [33m!==[39m path[33m.[39mjoin([36mthis[39m[33m.[39mdirectory[33m,[39m [32m"reservation.json"[39m)) [36mthrow[39m [36mnew[39m [33mError[39m([32m"Cleanup attempt archive namespace differs"[39m)[33m;[39m
+ [90m 57 |[39m     [36mthis[39m[33m.[39mledger [33m=[39m ownedProcessLedgerPath([36mthis[39m[33m.[39mdirectory[33m,[39m [32m"cleanup"[39m)[33m;[39m
+[31m[1m>[22m[39m[90m 58 |[39m     [36mfor[39m ([36mconst[39m file [36mof[39m [[32m"start.json"[39m[33m,[39m [32m"invocation.json"[39m[33m,[39m [32m"output.json"[39m[33m,[39m [32m"reservation.json"[39m]) [36mthis[39m[33m.[39mcapture(path[33m.[39mjoin([36mthis[39m[33m.[39mdirectory[33m,[39m file))[33m;[39m
+ [90m    |[39m                                                                                                           [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 59 |[39m     [36mthis[39m[33m.[39mcapture([36mthis[39m[33m.[39mledger)[33m;[39m [36mthis[39m[33m.[39massertMetadata()[33m;[39m media(input[33m.[39mheld[33m,[39m [36mthis[39m[33m.[39mcaptureMedia)[33m;[39m
+ [90m 60 |[39m     [36mif[39m ([36mthis[39m[33m.[39mmedia[33m.[39msize [33m!==[39m [33mCLEANUP_MEDIA_ROLES[39m[33m.[39mlength) [36mthrow[39m [36mnew[39m [33mError[39m([32m"Cleanup original media file coverage is incomplete"[39m)[33m;[39m
+ [90m 61 |[39m     [36mthis[39m[33m.[39massertMetadata()[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/guided-source-color-cleanup-attempt-hold.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/guided-source-color-cleanup-attempt-hold.ts
+    ./src/lib/server/guided-source-color-selection-read.ts
+    ./src/lib/server/guided-opening-selection.ts
+    ./src/app/api/producer/guided-opening/media/route.ts
+
+
+./src/app/api/_lib/reference-library.ts:137:23
+The file pattern (<dynamic> '/transcript.json' | <dynamic> 'transcript.json' | <dynamic>) matches 25705 files in [project]/
+[0m [90m 135 |[39m     [33m.[39msort()[33m;[39m
+ [90m 136 |[39m   [36mconst[39m cached [33m=[39m [path[33m.[39mjoin(canonicalStudyDir(video)[33m,[39m [32m"transcript.json"[39m)]
+[31m[1m>[22m[39m[90m 137 |[39m     [33m.[39mfilter((file) [33m=>[39m fs[33m.[39mexistsSync(file) [33m&&[39m fs[33m.[39mstatSync(file)[33m.[39mmtimeMs [33m>=[39m videoMtime)[33m;[39m
+ [90m     |[39m                       [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 138 |[39m   [36mreturn[39m [[33m...[39msiblings[33m,[39m [33m...[39mcached][33m.[39mfind(hasTimedWords) [33m?[39m[33m?[39m [36mnull[39m[33m;[39m
+ [90m 139 |[39m }
+ [90m 140 |[39m [36mfunction[39m sha256(video[33m:[39m string[33m,[39m stat[33m:[39m fs[33m.[39m[33mStats[39m)[33m:[39m string {[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/_lib/reference-library.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/_lib/reference-library.ts
+    ./src/app/api/producer/references/decision/route.ts
+
+
+./src/app/api/_lib/reference-library.ts:137:46
+The file pattern (<dynamic> '/transcript.json' | <dynamic> 'transcript.json' | <dynamic>) matches 25705 files in [project]/
+[0m [90m 135 |[39m     [33m.[39msort()[33m;[39m
+ [90m 136 |[39m   [36mconst[39m cached [33m=[39m [path[33m.[39mjoin(canonicalStudyDir(video)[33m,[39m [32m"transcript.json"[39m)]
+[31m[1m>[22m[39m[90m 137 |[39m     [33m.[39mfilter((file) [33m=>[39m fs[33m.[39mexistsSync(file) [33m&&[39m fs[33m.[39mstatSync(file)[33m.[39mmtimeMs [33m>=[39m videoMtime)[33m;[39m
+ [90m     |[39m                                              [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 138 |[39m   [36mreturn[39m [[33m...[39msiblings[33m,[39m [33m...[39mcached][33m.[39mfind(hasTimedWords) [33m?[39m[33m?[39m [36mnull[39m[33m;[39m
+ [90m 139 |[39m }
+ [90m 140 |[39m [36mfunction[39m sha256(video[33m:[39m string[33m,[39m stat[33m:[39m fs[33m.[39m[33mStats[39m)[33m:[39m string {[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/_lib/reference-library.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/_lib/reference-library.ts
+    ./src/app/api/producer/references/decision/route.ts
+
+
+./src/lib/server/guided-opening-runtime-control.ts:32:27
+The file pattern (<dynamic> | '/ROOT/') matches 25705 files in [project]/
+[0m [90m 30 |[39m   [36mconst[39m imageId [33m=[39m process[33m.[39menv[33m.[39m[33mSNIPER_RENDER_IMAGE_ID[39m[33m,[39m userId [33m=[39m process[33m.[39menv[33m.[39m[33mSNIPER_RENDER_UID_GID[39m[33m;[39m
+ [90m 31 |[39m   [36mif[39m (approval[33m.[39mvalue[33m.[39mschemaVersion [33m!==[39m [35m1[39m [33m||[39m approval[33m.[39mvalue[33m.[39mimageId [33m!==[39m imageId) [36mthrow[39m [36mnew[39m [33mError[39m([32m"Opening runtime does not select the exact pinned approved image"[39m)[33m;[39m
+[31m[1m>[22m[39m[90m 32 |[39m   [36mconst[39m runtimeRepoRoot [33m=[39m realpathSync(process[33m.[39menv[33m.[39m[33mSNIPER_RUNTIME_REPO_ROOT[39m [33m?[39m[33m?[39m process[33m.[39mcwd())[33m;[39m
+ [90m    |[39m                           [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 33 |[39m   [36mif[39m (runtimeRepoRoot [33m!==[39m realpathSync(process[33m.[39mcwd())) [36mthrow[39m [36mnew[39m [33mError[39m([32m"Opening runtime repository differs from its current verified TS execution"[39m)[33m;[39m
+ [90m 34 |[39m   assertCutPreviewDirectory(runtimeRepoRoot)[33m;[39m
+ [90m 35 |[39m   [36mreturn[39m parseOpeningRuntimeControl({ dockerPath[33m,[39m dockerSha256[33m:[39m docker[33m.[39msha256[33m,[39m dockerSocketPath[33m,[39m [33m...[39msocketIdentity(dockerSocketPath)[33m,[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/lib/server/guided-opening-runtime-control.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/lib/server/guided-opening-runtime-control.ts
+    ./src/lib/server/guided-opening-claim.ts
+    ./src/lib/server/guided-opening-launch-status.ts
+    ./src/app/api/producer/guided-opening/launch/route.ts
+
+
+./src/app/api/_lib/reference-library.ts:217:57
+The file pattern (<dynamic> | 'null') matches 25705 files in [project]/
+[0m [90m 215 |[39m   [36mif[39m (transcriptPath) args[33m.[39mpush([32m"--transcript"[39m[33m,[39m shellQuote(transcriptPath))[33m;[39m
+ [90m 216 |[39m   [36mconst[39m hashRecorded [33m=[39m profile[33m?[39m[33m.[39msource[33m.[39msha256[33m.[39mlength [33m===[39m [35m64[39m[33m;[39m
+[31m[1m>[22m[39m[90m 217 |[39m   [36mconst[39m sourceFresh [33m=[39m [33m![39mdeepStudyPath [33m||[39m stat[33m.[39mmtimeMs [33m<=[39m fs[33m.[39mstatSync(deepStudyPath)[33m.[39mmtimeMs[33m;[39m
+ [90m     |[39m                                                         [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 218 |[39m   [36mconst[39m usableProfile [33m=[39m sourceFresh [33m&&[39m validProfile(profile[33m,[39m id) [33m&&[39m profile[33m.[39mrepresentativeFrames[33m.[39mlength [33m>[39m [35m0[39m[33m;[39m
+ [90m 219 |[39m   [36mconst[39m state [33m=[39m [33m![39mdeepStudyPath [33m?[39m [32m"not-studied"[39m [33m:[39m [33m![39musableProfile [33m?[39m [32m"invalid"[39m [33m:[39m
+ [90m 220 |[39m     decision[33m.[39mvalue [33m&&[39m hashRecorded [33m?[39m [32m"ready"[39m [33m:[39m [32m"needs-decision"[39m[33m;[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/_lib/reference-library.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/_lib/reference-library.ts
+    ./src/app/api/producer/references/decision/route.ts
+
+
+./src/app/api/_lib/workspace.ts:219:28
+The file pattern (<dynamic> | 'null') matches 25705 files in [project]/
+[0m [90m 217 |[39m     [33m||[39m path[33m.[39misAbsolute(relative)[33m;[39m
+ [90m 218 |[39m   [36mif[39m (outside [33m||[39m [33m![39mprojectRoot
+[31m[1m>[22m[39m[90m 219 |[39m       [33m||[39m dir [33m!==[39m path[33m.[39mjoin(fs[33m.[39mrealpathSync(projectRoot)[33m,[39m [32m"producer"[39m)) {
+ [90m     |[39m                            [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 220 |[39m     [36mthrow[39m [36mnew[39m [33mError[39m(
+ [90m 221 |[39m       [32m"This operation may target only a canonical producer/ directory "[39m
+ [90m 222 |[39m         [33m+[39m [32m"inside the configured local workspace"[39m[33m,[39m[0m
+
+Overly broad patterns can lead to build performance issues and over bundling.
+
+Import traces:
+  #1 [App Route]:
+    ./src/app/api/_lib/workspace.ts
+    ./src/app/api/producer/references/fetch/route.ts
+
+  #2 [App Route]:
+    ./src/app/api/_lib/workspace.ts
+    ./src/app/api/producer/transcript-authority/route.ts
+
+
+✓ Compiled successfully in 20.5s
+  Running TypeScript ...
+
+  We detected TypeScript in your project and reconfigured your tsconfig.json file for you.
+  The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
+
+  	- include was updated to add '.next-testing-repair-20260910/types/**/*.ts'
+  	- include was updated to add '.next-testing-repair-20260910/dev/types/**/*.ts'
+
+  Collecting page data using 15 workers ...
+  Generating static pages using 15 workers (0/24) ...
+  Generating static pages using 15 workers (6/24) 
+  Generating static pages using 15 workers (12/24) 
+  Generating static pages using 15 workers (18/24) 
+✓ Generating static pages using 15 workers (24/24) in 149.0ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/clipper/clip-preview
+├ ƒ /api/clipper/debug-log
+├ ƒ /api/clipper/native-pick
+├ ƒ /api/clipper/save-to-workspace
+├ ƒ /api/clipper/transcribe
+├ ƒ /api/clipper/video
+├ ƒ /api/frameio-review/debug-log
+├ ƒ /api/frameio-review/frame
+├ ƒ /api/frameio-review/pick-file
+├ ƒ /api/frameio-review/review
+├ ƒ /api/frameio-review/video
+├ ƒ /api/producer/ai-edit
+├ ƒ /api/producer/assemble
+├ ƒ /api/producer/auto-edit
+├ ƒ /api/producer/auto-edit/stop
+├ ƒ /api/producer/color-diagnostic
+├ ƒ /api/producer/comp-html
+├ ○ /api/producer/comps
+├ ƒ /api/producer/cut-review
+├ ƒ /api/producer/cut-review/accept
+├ ƒ /api/producer/cut-review/decision
+├ ƒ /api/producer/cut-review/video
+├ ƒ /api/producer/filmstrip
+├ ƒ /api/producer/guided-opening/approve
+├ ƒ /api/producer/guided-opening/launch
+├ ƒ /api/producer/guided-opening/media
+├ ƒ /api/producer/guided-opening/status
+├ ƒ /api/producer/ingest
+├ ƒ /api/producer/intent
+├ ƒ /api/producer/lint
+├ ƒ /api/producer/live-build
+├ ƒ /api/producer/palmier/candidate-qc
+├ ƒ /api/producer/palmier/open
+├ ƒ /api/producer/palmier/ownership
+├ ƒ /api/producer/palmier/preflight
+├ ƒ /api/producer/palmier/push
+├ ƒ /api/producer/palmier/status
+├ ƒ /api/producer/palmier/view
+├ ƒ /api/producer/palmier/workspace
+├ ƒ /api/producer/pick-file
+├ ƒ /api/producer/plan
+├ ƒ /api/producer/project-status
+├ ƒ /api/producer/projects
+├ ƒ /api/producer/references
+├ ƒ /api/producer/references/decision
+├ ƒ /api/producer/references/fetch
+├ ƒ /api/producer/references/study
+├ ƒ /api/producer/render
+├ ƒ /api/producer/reveal
+├ ƒ /api/producer/save-plan
+├ ƒ /api/producer/scene-review
+├ ƒ /api/producer/source-frame
+├ ƒ /api/producer/speech-cleanup
+├ ƒ /api/producer/studio
+├ ƒ /api/producer/studio/import
+├ ƒ /api/producer/transcript
+├ ƒ /api/producer/transcript-authority
+├ ƒ /api/producer/waveform
+├ ƒ /api/producer/words
+├ ƒ /api/runtime
+├ ƒ /api/segmenter/export-mp4
+├ ƒ /api/segmenter/multicam-download/[id]
+├ ƒ /api/segmenter/multicam-export
+├ ƒ /api/segmenter/pick-file
+├ ƒ /api/segmenter/save-to-workspace
+├ ƒ /api/segmenter/segment
+├ ƒ /api/segmenter/transcribe
+├ ○ /clipper
+├ ○ /frameio-review
+├ ○ /producer
+└ ○ /segmenter
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

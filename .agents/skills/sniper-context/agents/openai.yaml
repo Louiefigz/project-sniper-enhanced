@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sniper Context"
+  short_description: "Load Sniper tools, project context and review routes"
+  default_prompt: "Use $sniper-context to load this project's local tools, governing workflow, current handoff and required reviews before starting work."

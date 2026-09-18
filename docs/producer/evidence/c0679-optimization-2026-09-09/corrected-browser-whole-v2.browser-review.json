@@ -1,0 +1,181 @@
+{
+  "browserReceiptSha256": "e886d87b8e84cdbaf001f99ddb0a4b2f9a778197a6b1cf003c04744d162b087a",
+  "guardReceiptSha256": "21f4cad6deba017836f600e2cdb914d5a9b97921b86fc1aca6f6835e51b058c9",
+  "reviewScriptSha256": "6477046d8a2c706720db7e8e9eac0537f23506c8f1f70bcfda026c3cc0b85aea",
+  "video": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/full-native-high-v10-lossless-av-color.mp4",
+  "videoSha256": "eef61c5a2a410d869c79c13c6fb9ba69f52690377d0a99c3fbd53db3ffa50181",
+  "color": {
+    "passed": false,
+    "observations": [
+      {
+        "frameIndex": 312,
+        "path": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/corrected-browser-whole-v2.browser-frame-312.png",
+        "sha256": "6961510e5cfffce561c520c4ac68a456fd929867a503220502f4af00bd62cd9d",
+        "nativeReferenceSha256": "8a753b2394ba3ba53338ef4fbaa4d91c0cb69a51a13529519df12615acb9cc03",
+        "metrics": {
+          "whole": {
+            "mae": 1.8005386766975309,
+            "meanRgbShift": [
+              -1.3964318094135801,
+              0.3983381558641975,
+              -2.128702739197531
+            ],
+            "psnrDb": 40.565833512726726
+          },
+          "presenter": {
+            "mae": 1.8805126457670756,
+            "meanRgbShift": [
+              -1.325495229441163,
+              0.36230349840981374,
+              -1.6385052248977738
+            ],
+            "psnrDb": 40.07846121880665
+          },
+          "rightGraphics": {
+            "mae": 1.7807823800131493,
+            "meanRgbShift": [
+              -1.4244896449704143,
+              0.43256163708086787,
+              -2.5902120315581856
+            ],
+            "psnrDb": 40.931978399442684
+          },
+          "lowerThird": {
+            "mae": 1.8449154228855722,
+            "meanRgbShift": [
+              -1.4446940298507462,
+              0.3266044776119403,
+              -2.189492537313433
+            ],
+            "psnrDb": 39.87051676388234
+          }
+        }
+      },
+      {
+        "frameIndex": 383,
+        "path": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/corrected-browser-whole-v2.browser-frame-383.png",
+        "sha256": "78fa0741693a35021b531a3b653bbb4ab97fb325baa65c4c8cc5327b007a741f",
+        "nativeReferenceSha256": "aa1d0e52895afd70d20c4cfcf4b603eb20e162fca36a11abb3999aefcf87a923",
+        "metrics": {
+          "whole": {
+            "mae": 1.347559960133745,
+            "meanRgbShift": [
+              -1.1040272955246913,
+              0.11389853395061729,
+              -1.9856114969135803
+            ],
+            "psnrDb": 41.44319906141364
+          },
+          "presenter": {
+            "mae": 1.399710737543541,
+            "meanRgbShift": [
+              -1.1044229895502045,
+              0.029348023625624716,
+              -2.4560699681962745
+            ],
+            "psnrDb": 38.7154725552286
+          },
+          "rightGraphics": {
+            "mae": 0.9999802761341223,
+            "meanRgbShift": [
+              -0.9999704142011834,
+              -2.9585798816568047e-05,
+              -1.9999408284023668
+            ],
+            "psnrDb": 45.912418905325374
+          },
+          "lowerThird": {
+            "mae": 1.4682412935323383,
+            "meanRgbShift": [
+              -1.195589552238806,
+              0.3050970149253731,
+              -1.293768656716418
+            ],
+            "psnrDb": 41.64236775003258
+          }
+        }
+      },
+      {
+        "frameIndex": 653,
+        "path": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/corrected-browser-whole-v2.browser-frame-653.png",
+        "sha256": "6d05ba6b64b8c686553cc0e3cebc304fb4f74cac0fbfe5aee770aca79cb3961a",
+        "nativeReferenceSha256": "a8778c4356b8116b0f9119796975089a977f46e4cba030ec81ebc2902505cb08",
+        "metrics": {
+          "whole": {
+            "mae": 1.879723990483539,
+            "meanRgbShift": [
+              -1.399504726080247,
+              0.3763016010802469,
+              -2.1294883294753086
+            ],
+            "psnrDb": 39.466828067673625
+          },
+          "presenter": {
+            "mae": 1.9528858094805392,
+            "meanRgbShift": [
+              -1.3282825988187188,
+              0.3748273512039982,
+              -1.7096092685143116
+            ],
+            "psnrDb": 39.737682036803946
+          },
+          "rightGraphics": {
+            "mae": 1.8386661735700198,
+            "meanRgbShift": [
+              -1.3888584812623275,
+              0.28133136094674555,
+              -2.6047140039447734
+            ],
+            "psnrDb": 38.349281053323324
+          },
+          "lowerThird": {
+            "mae": 2.4032437810945275,
+            "meanRgbShift": [
+              -1.5527462686567164,
+              0.36290298507462687,
+              -2.2532611940298506
+            ],
+            "psnrDb": 36.17283799746239
+          }
+        }
+      }
+    ],
+    "criteria": {
+      "wholeMaximumMae": 2,
+      "wholeMinimumPsnrDb": 40
+    }
+  },
+  "humanListened": false,
+  "creativeApproved": false,
+  "deliveryApproved": false,
+  "coverage": {
+    "passed": true,
+    "observedSamples": 1370,
+    "firstTime": 0.428801,
+    "lastTime": 683.766417,
+    "maximumSampleGapMs": 501.90000009536743,
+    "lastFrameMediaTime": 683.724708,
+    "frameCallbacks": 16393,
+    "endedWallSeconds": 683.8465,
+    "observationOverheadSeconds": 1.4336999998092652
+  },
+  "playback": {
+    "passed": true,
+    "wallSeconds": 685.2801999998093,
+    "mediaSeconds": 683.766417,
+    "totalFrames": 16391,
+    "droppedFrames": 0,
+    "disruptiveEvents": [],
+    "frameCallbacks": 16393,
+    "maxFrameGapMs": 83.5,
+    "limits": {
+      "maximumDropFraction": 0.01,
+      "maximumFrameGapMs": 500,
+      "maximumSlowdownFraction": 0.02
+    },
+    "humanListeningClaimed": false,
+    "headlessBrowserAudioOutputMuted": true
+  },
+  "status": "browser-review-fail",
+  "elapsedSeconds": 4.857190290931612
+}

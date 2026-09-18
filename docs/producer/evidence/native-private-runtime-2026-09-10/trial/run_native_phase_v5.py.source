@@ -1,0 +1,82 @@
+"""Existing bounded phase supervision with explicit post-seal revision provenance."""
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+import time
+
+from run_phase import (ROOT, GUARD, TRANSPORT, CLI, NODE, SANDBOX, digest,
+                       environment, event, QualifiedCacheAwareRun, ResourcePolicy)
+from native_measurement_retry import BoundedMeasurementRetryMixin
+from native_render_processes import ProcessRequest, ResourceMeasurementError
+from native_render_resources import ResourceSnapshot
+
+
+class FreshNativeRun(BoundedMeasurementRetryMixin, QualifiedCacheAwareRun):
+    """Use bounded actual measurement retries without accepting incomplete samples."""
+
+    def measure_resources(self, request: ProcessRequest) -> ResourceSnapshot | None:
+        """Preserve native exit handling; never fabricate a live-process snapshot."""
+        try:
+            return super().measure_resources(request)
+        except ResourceMeasurementError as error:
+            exited = self.child is not None and self.child.poll() is not None
+            if str(error) != 'Owned process footprint missing; resample tree' or not exited:
+                raise
+            self.result['measurementEndedWithNativeExit'] = {
+                'error': str(error), 'exitCode': self.child.returncode,
+                'scope': 'No snapshot accepted; parent sample exits before policy evaluation',
+            }
+            return None
+
+
+def pins(config: dict) -> dict:
+    """Pin all authored files/assets plus this phase's explicit code dependencies."""
+    paths = [path for path in (ROOT / 'project').rglob('*') if path.is_file()
+             and not any(part.startswith('.') for part in path.relative_to(ROOT / 'project').parts)]
+    paths += [Path(__file__), ROOT / 'run_phase.py', CLI, SANDBOX,
+        GUARD / 'render_native_bounded.py', GUARD / 'native_owned_processes.py',
+        TRANSPORT / 'qualified_native_admission.py']
+    paths += [ROOT / config['worker'], ROOT / 'native_measurement_retry.py']
+    paths += [ROOT / name for name in config['pins']]
+    return {str(path): digest(path) for path in paths}
+
+
+def run(label: str, config: dict) -> bool:
+    """Keep every owned server/browser in the same guarded phase tree."""
+    project = ROOT / 'project'
+    runtime = config.get('runtime', 'node')
+    if runtime not in {'node', 'python'}:
+        raise ValueError('Only pinned local Node/Python runtimes are supported')
+    executable = NODE if runtime == 'node' else Path('/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/.venv/bin/python')
+    child = ['/usr/bin/sandbox-exec', '-f', str(SANDBOX), str(executable),
+             str(ROOT / config['worker']), *config.get('args', [])]
+    env = environment()
+    env.update(config.get('environment', {}))
+    admission = {'output': str(ROOT / config['output']),
+                 'freshInputAttempt': None if config.get('revision') else 'B',
+                 'sourceAttempt': 'B', 'revision': config.get('revision'),
+                 'sdkSha256': digest(CLI), 'sandboxSha256': digest(SANDBOX)}
+    settings = {'project': project, 'cli': CLI, 'root': ROOT, 'admission': admission,
+        'environment': env, 'deadline': config['deadline'], 'command': child,
+        'policy': ResourcePolicy(maximum_owned_gib=6, maximum_process_gib=5,
+            maximum_swap_growth_gib=1, maximum_compressor_fraction=.1),
+        'additional_pins': pins(config), 'success_status': 'phase-completed-awaiting-review'}
+    event('native-phase-start', {'label': label, 'config': config})
+    attempt = FreshNativeRun(label, settings=settings)
+    attempt.result.update(fullEditTwoHourTargetAlreadyMissed=time.monotonic() - 1618505.458083375 >= 7200,
+        renderOnlyTiming=False, trialStartedMonotonic=1618505.458083375,
+        admissionReuseScope=config.get('reuseScope',
+            'Generic resource-policy software only; no prior edit media/cache/creative inputs'))
+    passed = attempt.execute()
+    attempt.result['trialElapsedSecondsAtPhaseEnd'] = time.monotonic() - 1618505.458083375
+    attempt.result['fullEditTwoHourTargetAlreadyMissed'] = attempt.result['trialElapsedSecondsAtPhaseEnd'] >= 7200
+    attempt.persist()
+    event('native-phase-end', {'label': label, 'passed': passed, 'receipt': str(attempt.path)})
+    return passed
+
+
+if __name__ == '__main__':
+    label, config_path = sys.argv[1:]
+    raise SystemExit(0 if run(label, json.loads(Path(config_path).read_text())) else 1)

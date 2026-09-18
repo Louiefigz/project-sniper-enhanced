@@ -1,0 +1,360 @@
+{
+  "status": "objective-file-checks-pass-awaiting-playback",
+  "input": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/render/native-master.mp4",
+  "output": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/render/delivery-master.mp4",
+  "humanListening": false,
+  "freshDonor": {
+    "status": "pass",
+    "failedWindows": 0,
+    "sha256": "3892fae8fe9562f55304f024389ca2eb6a572948a8d4b7eddf05de95c0fbeef3"
+  },
+  "losslessAssembly": {
+    "status": "pass",
+    "pictureSliceSha256": "0ea796dd858f46591cbae2083204754a2e79fdaa661c1aa9a032c3fcefa458cd",
+    "aacPacketsPreserved": 30815,
+    "additionalPictureEncodes": 0,
+    "additionalAudioEncodes": 0,
+    "outputSha256": "2b2b512eafecea3ef65768a676a78e76bf43bf07c09b0ab5ebad5a7e720846ee"
+  },
+  "container": {
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "h264",
+        "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+        "profile": "High",
+        "codec_type": "video",
+        "codec_tag_string": "avc1",
+        "codec_tag": "0x31637661",
+        "width": 1920,
+        "height": 1080,
+        "coded_width": 1920,
+        "coded_height": 1080,
+        "has_b_frames": 0,
+        "sample_aspect_ratio": "1:1",
+        "display_aspect_ratio": "16:9",
+        "pix_fmt": "yuv420p",
+        "level": 50,
+        "color_range": "tv",
+        "color_space": "bt709",
+        "color_transfer": "iec61966-2-1",
+        "color_primaries": "bt709",
+        "chroma_location": "left",
+        "field_order": "progressive",
+        "refs": 1,
+        "is_avc": "true",
+        "nal_length_size": "4",
+        "id": "0x1",
+        "r_frame_rate": "24000/1001",
+        "avg_frame_rate": "24000/1001",
+        "time_base": "1/24000",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "duration_ts": 15776761,
+        "duration": "657.365042",
+        "bit_rate": "5517835",
+        "bits_per_raw_sample": "8",
+        "nb_frames": "15761",
+        "extradata_size": 49,
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        },
+        "tags": {
+          "language": "und",
+          "handler_name": "VideoHandler",
+          "vendor_id": "[0][0][0][0]",
+          "encoder": "Lavc62.11.100 libx264"
+        }
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_long_name": "AAC (Advanced Audio Coding)",
+        "profile": "LC",
+        "codec_type": "audio",
+        "codec_tag_string": "mp4a",
+        "codec_tag": "0x6134706d",
+        "sample_fmt": "fltp",
+        "sample_rate": "48000",
+        "channels": 2,
+        "channel_layout": "stereo",
+        "bits_per_sample": 0,
+        "initial_padding": 0,
+        "id": "0x2",
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "time_base": "1/48000",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "duration_ts": 31553522,
+        "duration": "657.365042",
+        "bit_rate": "252426",
+        "nb_frames": "30815",
+        "extradata_size": 5,
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        },
+        "tags": {
+          "language": "und",
+          "handler_name": "SoundHandler",
+          "vendor_id": "[0][0][0][0]"
+        }
+      }
+    ],
+    "format": {
+      "filename": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/render/delivery-master.mp4",
+      "nb_streams": 2,
+      "nb_programs": 0,
+      "nb_stream_groups": 0,
+      "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+      "format_long_name": "QuickTime / MOV",
+      "start_time": "0.000000",
+      "duration": "657.365042",
+      "size": "474477794",
+      "bit_rate": "5774299",
+      "probe_score": 100,
+      "tags": {
+        "major_brand": "isom",
+        "minor_version": "512",
+        "compatible_brands": "isomiso2avc1mp41",
+        "encoder": "Lavf62.3.100"
+      }
+    }
+  },
+  "videoClock": {
+    "status": "pass",
+    "frames": 15761,
+    "duration": "15776761/24000",
+    "timeBase": "1/24000",
+    "startPts": 0,
+    "allPacketPtsChecked": true
+  },
+  "audioClock": {
+    "status": "pass",
+    "samples": 31553522,
+    "firstPacket": {
+      "pts": -1024,
+      "dts": -1024,
+      "duration": 1024,
+      "side_data_list": [
+        {
+          "side_data_type": "Skip Samples",
+          "skip_samples": 1024,
+          "discard_padding": 0,
+          "skip_reason": 0,
+          "discard_reason": 0
+        }
+      ]
+    },
+    "lastPacket": {
+      "pts": 31552512,
+      "dts": 31552512,
+      "duration": 1010
+    },
+    "packetCount": 30815
+  },
+  "decode": {
+    "status": "pass",
+    "wholeDecodeWithXerror": true,
+    "visuals": [
+      {
+        "panel": "panel-00",
+        "frame": 26
+      },
+      {
+        "panel": "panel-02",
+        "frame": 250
+      },
+      {
+        "panel": "panel-08",
+        "frame": 784
+      },
+      {
+        "panel": "panel-13",
+        "frame": 1342
+      },
+      {
+        "panel": "panel-18",
+        "frame": 2437
+      },
+      {
+        "panel": "panel-29",
+        "frame": 5810
+      },
+      {
+        "panel": "panel-35",
+        "frame": 8424
+      },
+      {
+        "panel": "panel-37",
+        "frame": 9840
+      },
+      {
+        "panel": "panel-42",
+        "frame": 11741
+      },
+      {
+        "panel": "panel-44",
+        "frame": 12713
+      },
+      {
+        "panel": "panel-48",
+        "frame": 14350
+      },
+      {
+        "panel": "panel-52",
+        "frame": 15512
+      }
+    ],
+    "interpretation": "Declared input metadata to full-range sRGB; not yet a fidelity comparison"
+  },
+  "motionScreen": {
+    "status": "pass",
+    "scanFrames": 1315,
+    "samplingFps": 2,
+    "exactDuplicateRunSeconds": 0.0,
+    "maximumAllowedDuplicateRunSecondsExclusive": 2.5,
+    "blackFrameIndices": [],
+    "minimumAdjacentMeanDifference": 0.08590277777777777,
+    "scope": "160x90 whole-composition screening; moving graphics can conceal a frozen presenter"
+  },
+  "audioMeasurements": {
+    "status": "pass",
+    "sourceAlignedSnrDb": 34.296585012186995,
+    "decoderPaddingSamples": 14,
+    "loudness": {
+      "input_i": "-16.16",
+      "input_tp": "-1.09",
+      "input_lra": "5.50",
+      "input_thresh": "-26.93",
+      "output_i": "-16.10",
+      "output_tp": "-1.50",
+      "output_lra": "5.40",
+      "output_thresh": "-26.84",
+      "normalization_type": "dynamic",
+      "target_offset": "0.10"
+    },
+    "localSignalPassed": true,
+    "failedWindowCount": 0,
+    "thresholds": {
+      "globalSnrDb": 25,
+      "targetLufs": -16,
+      "lufsTolerance": 0.5,
+      "maximumTruePeakDb": -1
+    },
+    "humanListening": false,
+    "globalSnrAloneQualifiesContinuity": false
+  },
+  "nativeColor": {
+    "status": "pass",
+    "frames": [
+      {
+        "frame": 26,
+        "panel": "panel-00",
+        "wholeFrame": {
+          "mae": 1.2366909400720165,
+          "mse": 3.211780317644033,
+          "psnrDb": 43.06334528525824,
+          "identical": false,
+          "maximumAbsoluteError": 23.0,
+          "passed": true
+        },
+        "presenterRegion": {
+          "mae": 1.35281536573439,
+          "mse": 3.590287899138851,
+          "psnrDb": 42.57951085550282,
+          "identical": false,
+          "maximumAbsoluteError": 23.0,
+          "passed": true
+        },
+        "decoded": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/visual-01.png",
+        "decodedSha256": "f952d95c99ec90e71ac2cdcea51ed48b7ab7c277f417532cd427f135520607f2",
+        "passed": true
+      },
+      {
+        "frame": 1342,
+        "panel": "panel-13",
+        "wholeFrame": {
+          "mae": 0.8240412808641975,
+          "mse": 1.8195730452674896,
+          "psnrDb": 45.53110866199934,
+          "identical": false,
+          "maximumAbsoluteError": 31.0,
+          "passed": true
+        },
+        "presenterRegion": {
+          "mae": 1.80052608311229,
+          "mse": 6.410950486295314,
+          "psnrDb": 40.0615793815853,
+          "identical": false,
+          "maximumAbsoluteError": 25.0,
+          "passed": true
+        },
+        "decoded": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/visual-04.png",
+        "decodedSha256": "b0c48592a945541671758193befe46ab981eafbdd24e054fee96410322b2cf58",
+        "passed": true
+      },
+      {
+        "frame": 14350,
+        "panel": "panel-48",
+        "wholeFrame": {
+          "mae": 1.0388659014917696,
+          "mse": 2.6306926761831275,
+          "psnrDb": 43.93010245140097,
+          "identical": false,
+          "maximumAbsoluteError": 32.0,
+          "passed": true
+        },
+        "presenterRegion": {
+          "mae": 1.5409126169138305,
+          "mse": 4.414134459795868,
+          "psnrDb": 41.68234802713325,
+          "identical": false,
+          "maximumAbsoluteError": 22.0,
+          "passed": true
+        },
+        "decoded": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/visual-11.png",
+        "decodedSha256": "85191d3524f8d536e616ee6927c9ee83d2e3f27231bcd280967515a077099112",
+        "passed": true
+      }
+    ],
+    "inputColorOverrideUsed": false,
+    "thresholdsUnchanged": true
+  }
+}

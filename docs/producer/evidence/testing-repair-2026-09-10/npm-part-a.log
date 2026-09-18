@@ -1,0 +1,377 @@
+Disjoint official server test partition a; one owned child at a time.
+src/lib/server/__tests__/guided-source-color-cleanup-adoption.test.ts
+✔ actual completed history enters first CAS without rerunning the expired original native attempt (9715.974708ms)
+✔ DTOs and cross-scope casts cannot manufacture either private completion capability (9105.380333ms)
+✔ first remaining callback cannot rebaseline original journal (8652.111333ms)
+✔ first remaining callback cannot rebaseline original active (8400.152875ms)
+✔ first remaining callback cannot rebaseline original claim (7786.480041ms)
+✔ first remaining callback cannot rebaseline original input (7739.999459ms)
+✔ first remaining callback cannot rebaseline original prepared (7801.510917ms)
+✔ first remaining callback cannot rebaseline original output (7820.371209ms)
+✔ first remaining callback cannot replace original media activation (8280.831459ms)
+✔ first remaining callback cannot replace original media priorJournal (8577.257084ms)
+✔ first remaining callback cannot replace original media intent (7993.590375ms)
+✔ first remaining callback cannot replace original media outcome (8466.756292ms)
+✔ first remaining callback cannot replace original media ledger (8415.361916ms)
+✔ unresolved sibling and missing selected attempt refuse without new native work (7959.778125ms)
+✔ workspace callback cannot replace the originally held active reservation (7926.0725ms)
+✔ claim callback cannot replace the originally held active reservation (7904.655ms)
+✔ configured foreign workspace and forged current claim refuse (8032.035ms)
+✔ private adoption denies subsequent clock replacement and recursive completion reentry (8426.977583ms)
+✔ actual adopted CAS guard 1 rejects expiry and retains original journal (8815.199709ms)
+✔ actual adopted CAS guard 2 rejects expiry and retains original journal (9033.831167ms)
+✔ missing actual project lease refuses historical adoption (7777.904042ms)
+✔ adopted CAS 1 rejects lost actual project lease (8826.175792ms)
+✔ adopted CAS 2 rejects lost actual project lease (9229.995375ms)
+✔ missing actual resource lease refuses historical adoption (7791.6845ms)
+✔ adopted CAS 1 rejects lost actual resource lease (9201.316916ms)
+✔ adopted CAS 2 rejects lost actual resource lease (9702.217708ms)
+✔ an after-CAS failure retains actual pending proof without native replay or failed-attempt rewrite (10487.954958ms)
+✔ post-CAS metadata still rejects original completion file replacement (9324.713375ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 239209.246958
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-cleanup-adoption.test.ts
+src/lib/server/__tests__/guided-source-color-cleanup-attempt-read-faults.test.ts
+✔ original start.json identity is captured before the first caller callback (8403.274208ms)
+✔ original invocation.json identity is captured before the first caller callback (7521.231833ms)
+✔ original output.json identity is captured before the first caller callback (7419.064833ms)
+✔ original reservation.json identity is captured before the first caller callback (7485.329417ms)
+✔ original owned-process-ledger.cleanup.jsonl identity is captured before the first caller callback (7403.774667ms)
+✔ the first clock callback cannot rebaseline original held (7302.39225ms)
+✔ the first clock callback cannot rebaseline original fact (7328.957875ms)
+✔ the first clock callback cannot rebaseline original guard (7321.998709ms)
+✔ the first clock callback cannot rebaseline original remaining (7467.760083ms)
+✔ a final actual ledger/descendant return cannot mutate earlier original input metadata (7564.142292ms)
+✔ a final actual ledger return cannot replace earlier invocation bytes (7516.480625ms)
+✔ same original protected remainder covers the last metadata and settlement bookkeeping (7502.57775ms)
+✔ retained assertCurrent preserves original refs and does not mint a later replacement baseline (7611.291542ms)
+✔ retained failure markers prevent a success history from being returned (7455.09275ms)
+✔ actual malformed cleanup ledger cannot be laundered with a matching output SHA (7537.487ms)
+✔ historical invocation rejects unpinned script without resampling installed tools (7520.546458ms)
+✔ historical invocation rejects unpinned runner without resampling installed tools (7521.341584ms)
+✔ historical invocation rejects cross-snapshot script without resampling installed tools (7543.415125ms)
+✔ historical invocation rejects relative Python without resampling installed tools (7480.632083ms)
+✔ historical invocation rejects missing Python config without resampling installed tools (7567.119ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 150479.175375
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-cleanup-attempt-read-faults.test.ts
+src/lib/server/__tests__/guided-source-color-cleanup-attempt.test.ts
+✔ writer defaults retain actual process and historical reader boundaries (0.62875ms)
+✔ actual writer and reader join exact raw start, invocation, output, archive and prepared fact (7660.0875ms)
+✔ original clock is handed through every process boundary without a new allowance (7533.188292ms)
+✔ only the actual live recording can be checked for its first journal handoff (7546.881292ms)
+✔ a live recording cannot conceal a changed output at journal handoff (7527.327875ms)
+✔ a live recording cannot renew the original caller allowance at journal handoff (7689.000708ms)
+✔ changed stopped return refuses before start publication and process invocation (7431.418958ms)
+✔ changed stopped return during archive callbacks cannot mint a changed start (7713.095375ms)
+✔ original guard and clock identities cannot be replaced by remaining callbacks (7609.242042ms)
+✔ invalid original remaining values fail before records and native work (7967.1075ms)
+✔ elapsed callback cannot change original caller after process normal return (7747.075916ms)
+✔ child elapsed cannot exceed actual enclosing elapsed and leaves partial records intact (7862.018958ms)
+✔ invalid elapsed clock never becomes an owned output (8176.764709ms)
+✔ native-leaf failure retains original error, start, archive, invocation and live lease (7551.899125ms)
+✔ final reader callback cannot substitute already written output with identical bytes (7605.558292ms)
+✔ final reader callback cannot replace held claim metadata after successful process work (7442.893042ms)
+✔ same completed attempt does not replay a second native cleanup (7474.346625ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 122549.336041
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-cleanup-attempt.test.ts
+src/lib/server/__tests__/guided-source-color-cleanup-final-commit.test.ts
+✔ final commit defaults to actual retained pending history (0.474083ms)
+✔ both CAS operations plus exact retirement clear only claim/outcome with retained raw history (9058.764416ms)
+✔ spread and JSON retirement records fail before final publications or journal writes (8573.201709ms)
+▶ history DTOs cannot replace the actual private reader capability
+  ✔ spread (8673.339583ms)
+  ✔ JSON (8731.757666ms)
+✔ history DTOs cannot replace the actual private reader capability (17405.422834ms)
+▶ each final CAS guard rejects original expiry and either actual lease loss
+  ✔ expiry-1 (8720.591625ms)
+  ✔ project-1 (8691.723834ms)
+  ✔ resource-1 (8699.284541ms)
+  ✔ expiry-2 (8807.381208ms)
+  ✔ project-2 (8914.9325ms)
+  ✔ resource-2 (9375.203833ms)
+✔ each final CAS guard rejects original expiry and either actual lease loss (53209.882458ms)
+▶ both final guards reject future retained wall observations without resetting history
+  ✔ future-1 (8881.907958ms)
+  ✔ future-2 (8932.148125ms)
+✔ both final guards reject future retained wall observations without resetting history (17814.253417ms)
+▶ journal, media, ack and final fact cannot be substituted at either final CAS guard
+  ▶ journal
+    ✔ guard-1 (8758.218875ms)
+    ✔ guard-2 (8847.071375ms)
+  ✔ journal (17605.437917ms)
+  ▶ media
+    ✔ guard-1 (8833.69775ms)
+    ✔ guard-2 (8785.23825ms)
+  ✔ media (17619.100958ms)
+  ▶ ack
+    ✔ guard-1 (8605.994375ms)
+    ✔ guard-2 (8708.919167ms)
+  ✔ ack (17315.073125ms)
+  ▶ fact
+    ✔ guard-1 (8756.309042ms)
+    ✔ guard-2 (8870.332625ms)
+  ✔ fact (17626.765ms)
+✔ journal, media, ack and final fact cannot be substituted at either final CAS guard (70166.656917ms)
+▶ post-CAS ack, media, pending snapshot and final fact substitutions retain the final journal
+  ✔ ack (8942.408834ms)
+  ✔ media (9010.01825ms)
+  ✔ pendingSnapshot (9077.82775ms)
+  ✔ fact (8961.045333ms)
+✔ post-CAS ack, media, pending snapshot and final fact substitutions retain the final journal (35991.64725ms)
+▶ post-CAS ownership tail detects loss of either actual lease without clearing final evidence
+  ✔ resource (8951.874375ms)
+  ✔ project (8896.800792ms)
+✔ post-CAS ownership tail detects loss of either actual lease without clearing final evidence (17848.896333ms)
+✔ after-CAS lost response retains final fact and refuses blind retry without new cleanup (9590.463ms)
+✔ successful final CAS cannot replay or create another final fact (9286.405625ms)
+ℹ tests 39
+ℹ suites 0
+ℹ pass 39
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 248951.281083
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-cleanup-final-commit.test.ts
+src/lib/server/__tests__/guided-source-color-cleanup-final-read.test.ts
+✔ actual final receipt and stop remain truthful after original cleanup leases and allowance are retired (9221.123792ms)
+✔ retained final history never opens current journal, new active reservation or current source/tool/job files (9634.022667ms)
+✔ only exact supplied current or SHA-named snapshot paths and original observed bytes are accepted (9012.412959ms)
+✔ unselected outer job must be the complete deterministic final transition (9150.42125ms)
+✔ selection/approval additions tolerate only their exact journal changes and confer no approval from cleanup (9337.569542ms)
+✔ final journal metadata is captured before the first caller guard (8936.880792ms)
+✔ final fact metadata is captured before the first caller guard (9322.648166ms)
+✔ final ack metadata is captured before the first caller guard (9346.546875ms)
+✔ final pending metadata is captured before the first caller guard (9040.763542ms)
+✔ final prepared metadata is captured before the first caller guard (9038.212834ms)
+✔ final result metadata is captured before the first caller guard (9846.246167ms)
+✔ final original metadata is captured before the first caller guard (9839.655334ms)
+✔ final media metadata is captured before the first caller guard (10157.626041ms)
+✔ final output metadata is captured before the first caller guard (9184.484666ms)
+✔ final archive metadata is captured before the first caller guard (9279.933ms)
+✔ prepared cleanup cannot be relabeled as a final receipt (9597.441125ms)
+✔ ack raw bound, full metadata bindings and chronology are independent requirements (9970.991375ms)
+✔ last callback may not replace outer context or already-held metadata (9796.615458ms)
+✔ final history return and original 30s observation cutoff are checked without callback rebaselining (9845.809291ms)
+✔ later metadata and assertCurrent retain all files and immutable actual read identity (9836.73575ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 189401.604625
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-cleanup-final-read.test.ts
+src/lib/server/__tests__/guided-source-color-cleanup-hold.test.ts
+✔ cold reservation uses original three metadata files and all names even with every sidecar/job file missing (8073.614875ms)
+▶ first callback cannot adopt replacement reservation/claim/input files
+  ✔ reservation (7965.61425ms)
+  ✔ claim (7765.133ms)
+  ✔ input (7805.174916ms)
+✔ first callback cannot adopt replacement reservation/claim/input files (23536.352791ms)
+✔ original request, reference and callback identities remain live after a successful cold read (7874.796125ms)
+✔ partial, reordered and substituted cleanup names cannot clear a full reservation (7576.806334ms)
+▶ raw hash/size, wrong namespace, expired original clock and changed metadata fail closed
+  ✔ hash (7463.833084ms)
+  ✔ size (7792.02225ms)
+  ✔ namespace (7811.099917ms)
+  ✔ deadline (7559.553042ms)
+  ✔ after-read (7590.734375ms)
+✔ raw hash/size, wrong namespace, expired original clock and changed metadata fail closed (38218.027916ms)
+✔ numeric returned deadline values cannot renew or erase the protected allowance (8165.827083ms)
+▶ actual cleanup result remains bound across its first and final owner callbacks
+  ✔ callback 1 (8233.219333ms)
+  ✔ callback 2 (8717.123708ms)
+✔ actual cleanup result remains bound across its first and final owner callbacks (16950.620666ms)
+✔ source cleanup cannot authenticate another top-level execution with matching color fields (9593.297959ms)
+✔ archive copies preserve original literal bytes and cannot mutate the held original (8412.7685ms)
+✔ copy cannot hide lost original metadata lifetime or caller expiry (8643.082083ms)
+✔ final metadata-only sweep authenticates actual hold without renewing or calling owner callbacks (8683.20775ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 145733.578917
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-cleanup-hold.test.ts
+src/lib/server/__tests__/guided-source-color-cleanup-pending-history.test.ts
+✔ explicit retained pending read survives changed current journal without granting current or retirement scope (10699.972208ms)
+✔ explicit retained pending read never opens a missing current journal (8675.703459ms)
+✔ retained hash is explicit and exact, never an automatic current journal fallback (8364.779166ms)
+✔ even a correctly hashed retained snapshot must equal the entire deterministic pending job (9458.114292ms)
+✔ retained journal is held before the first caller callback with no post-CAS exclusions (9153.409042ms)
+✔ retained fact is held before the first caller callback with no post-CAS exclusions (8224.059583ms)
+✔ retained snapshot is held before the first caller callback with no post-CAS exclusions (8020.088458ms)
+✔ retained result is held before the first caller callback with no post-CAS exclusions (7602.199667ms)
+✔ retained pending reader preserves original caller identities before its first callback (6889.504458ms)
+✔ last actual attempt callback cannot replace the retained pending snapshot (6872.697291ms)
+✔ retained pending lifetime rejects final expiry and later snapshot replacement (6917.920042ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 90883.041417
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-cleanup-pending-history.test.ts
+src/lib/server/__tests__/guided-source-color-cleanup-pending-read.test.ts
+✔ actual pending CAS/read keeps a complete Buffer-bearing original journal and exact deterministic job (6908.351209ms)
+✔ pending full-job comparison rejects every unrelated change, not just pointer drift (6773.458541ms)
+✔ pending journal original inode is captured before the first caller callback (6736.188834ms)
+✔ pending fact original inode is captured before the first caller callback (6776.634292ms)
+✔ pending snapshot original inode is captured before the first caller callback (6842.672125ms)
+✔ pending result original inode is captured before the first caller callback (6711.438709ms)
+✔ pending fact raw substitution cannot borrow its old hash path (6755.547ms)
+✔ pending snapshot raw substitution cannot borrow its old hash path (6806.962208ms)
+✔ pending result raw substitution cannot borrow its old hash path (6762.218916ms)
+✔ first caller callbacks cannot replace original directory, guard or remainder (6955.726666ms)
+✔ final actual attempt return cannot mutate already held pending metadata (6951.098292ms)
+✔ mutating original Buffer bytes in the final actual read callback is rejected (7608.68475ms)
+✔ same original deadline is checked after actual attempt bookkeeping (7035.228041ms)
+✔ retained pending evidence keeps original files and deadline without rebaselining (7005.943416ms)
+✔ an actual earlier attempt cannot validate a different self-consistent pending fact (6879.523209ms)
+✔ a forged result or cloned attempt does not become authenticated pending evidence (7178.322167ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 110699.306292
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-cleanup-pending-read.test.ts
+src/lib/server/__tests__/guided-source-color-cleanup-process-pins.test.ts
+✔ actual TEMP pins and immutable invocation carry the same frozen tools to the native stub (6869.568875ms)
+▶ real tool-byte verification rejects each original pin before invocation publication or spawn
+  ✔ script (6855.298041ms)
+  ✔ runnerScript (6659.573958ms)
+  ✔ python (6419.023791ms)
+  ✔ venvConfig (6409.213083ms)
+✔ real tool-byte verification rejects each original pin before invocation publication or spawn (26343.596833ms)
+▶ real tool-byte verification rejects each post-return change while retaining invocation and ledger
+  ✔ script (6398.726291ms)
+  ✔ runnerScript (6393.228334ms)
+  ✔ python (6373.721917ms)
+  ✔ venvConfig (6395.83175ms)
+✔ real tool-byte verification rejects each post-return change while retaining invocation and ledger (25562.129666ms)
+✔ invocation inode substitution fails in the actual pre-spawn guarded remainder (6368.406333ms)
+✔ last original post-return guard cannot replace the invocation with equal bytes (6394.0795ms)
+✔ mutating the caller's detached tool DTO cannot redirect the actual captured tool arguments (6350.164959ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 77893.9985
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-cleanup-process-pins.test.ts
+src/lib/server/__tests__/guided-source-color-cleanup-recovery-faults.test.ts
+✔ time spent awaiting the real project acquisition consumes the same original allowance (7345.385ms)
+✔ original request mutation during project acquisition rejects and releases only the new project lease (7253.047209ms)
+✔ pending-read journal replacement rejects before global acquisition (7259.999416ms)
+✔ pending-read original replacement rejects before global acquisition (7264.277542ms)
+✔ pending-read media replacement rejects before global acquisition (7232.838083ms)
+✔ pending-read output replacement rejects before global acquisition (7202.878709ms)
+✔ pending-read archive replacement rejects before global acquisition (7326.559375ms)
+✔ pending-read result replacement rejects before global acquisition (7194.625875ms)
+✔ expiry inside actual global acquisition releases its partial lease and the new project lease (7313.027791ms)
+✔ an acquired resource whose release is uncertain conservatively retains the project lease (7281.5655ms)
+✔ unrelated active bytes discovered after resource handoff retain both leases without unlink (7325.955625ms)
+✔ post-retirement media drift retains both leases and the actual ack (7407.392209ms)
+✔ post-retirement output drift retains both leases and the actual ack (7436.447958ms)
+✔ post-retirement archive drift retains both leases and the actual ack (7786.77425ms)
+✔ post-retirement original clock expiry keeps the ack and both leases without a new attempt (8838.576666ms)
+✔ post-final-CAS media drift retains the actual final journal and both leases (10119.8775ms)
+✔ a no-op resource release cannot report verified recovery (10319.688875ms)
+✔ a no-op project release cannot report verified recovery (11007.045333ms)
+✔ actual resource release is followed by exact metadata validation (10340.396042ms)
+✔ actual project release is followed by exact metadata validation (10052.347042ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 163314.673333
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-cleanup-recovery-faults.test.ts
+src/lib/server/__tests__/guided-source-color-cleanup-recovery-timing.test.ts
+✔ final proof gets one 30s read-only cap inside the unchanged 300s recovery clock (9874.411292ms)
+✔ expiry after actual resource release keeps the unreleased project lease and final proof (9774.865916ms)
+✔ clock callback identity replacement after final CAS never renews the original recovery allowance (9746.053708ms)
+✔ final awaited timing append cannot conceal expiry after both verified releases (9903.477625ms)
+✔ final awaited timing append cannot conceal media after both verified releases (9913.970625ms)
+✔ final awaited timing append cannot conceal journal after both verified releases (10002.312459ms)
+✔ the recovery timing span includes failed awaited project acquisition rather than reporting completion (8745.616291ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 67965.221584
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-cleanup-recovery-timing.test.ts
+src/lib/server/__tests__/guided-source-color-cleanup-retired-job.test.ts
+✔ deterministic retired transition clears only claim/outcome and preserves every unrelated field (7739.514792ms)
+✔ retirement preserves the exact trailing 256 event window and safely increments its original sequence (7778.562375ms)
+✔ required pending cleanup/claim/outcome pointers cannot be missing or changed (7825.717292ms)
+✔ selection, approval, body authority and wrong status never become a retired job (7750.894667ms)
+✔ full final identity joins cannot substitute parent, prepared fact, claim, execution, attempt or original clock (8022.282334ms)
+✔ both original timestamps fence backwards retirement but equal timestamps remain valid (7797.056ms)
+✔ strict closed fact contracts and pending raw hash are checked before transition (8068.234541ms)
+✔ unsafe event counters and replayed retired jobs remain rejected (8118.094375ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 63104.396708
+MODULE_EXIT 0 src/lib/server/__tests__/guided-source-color-cleanup-retired-job.test.ts
+src/lib/server/__tests__/guided-source-color-completed-recovery-faults.test.ts
+✔ failed global acquisition with actual no-op release retains both locks and reports AggregateError (8904.006292ms)
+✔ awaited actual project acquisition cannot adopt stale raw-prepared (8518.300958ms)
+✔ awaited actual project acquisition cannot adopt stale journal (8418.877083ms)
+✔ awaited actual project acquisition cannot adopt stale selector (8802.341584ms)
+✔ actual current claim reader cannot substitute claim under the original requested journal (8718.511125ms)
+✔ actual current claim reader cannot substitute job under the original requested journal (8327.2285ms)
+✔ last original clock callback after releases cannot conceal changed request (11808.351417ms)
+✔ last original clock callback after releases cannot conceal changed output (11838.012833ms)
+✔ actual final timing append cannot conceal request after completed recovery releases (11812.220333ms)
+✔ actual final timing append cannot conceal output after completed recovery releases (11821.858375ms)
+✔ actual final timing append cannot conceal expiry after completed recovery releases (12742.405958ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 111726.606959

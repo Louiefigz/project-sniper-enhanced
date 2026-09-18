@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-07-30",
+  "siteCount": 53,
+  "fileCount": 18,
+  "siteSetDigest": "7e905888e43d010fd1c154780986e713285ac33745a4dcd429ee28caa7aa24e7",
+  "categories": {
+    "tests-fixtures": {
+      "disposition": "excluded-non-production",
+      "rationale": "These writes create synthetic test media or an explicitly development-only captured fixture; neither path is a released runtime authority or delivery.",
+      "paths": [
+        "scripts/producer/make_test_footage.py",
+        "src/app/api/clipper/clip-preview/route.ts"
+      ]
+    },
+    "docs-build-tooling": {
+      "disposition": "excluded-non-production",
+      "rationale": "These calls materialize schemas, calibration inputs, or retained baseline evidence used to test and document the current system; they are not invoked as released editing authorities.",
+      "paths": [
+        "scripts/producer/baseline_repeat_equivalence.py",
+        "scripts/producer/baseline_trace.py",
+        "scripts/producer/contracts/schema_validator.py",
+        "scripts/producer/current_full_path_baseline.py",
+        "scripts/producer/current_render_calibration_source.py",
+        "scripts/producer/current_render_oracle.py",
+        "scripts/producer/current_render_oracle_calibrate.py",
+        "scripts/producer/prepare_current_baseline.py",
+        "scripts/producer/render_effect_discovery.py"
+      ]
+    },
+    "temp-cache": {
+      "disposition": "excluded-ephemeral",
+      "rationale": "Each listed site is confined to a reviewed scratch, response cache, or content-addressed cache lifecycle; promoted media or verdicts are independently re-created or revalidated and do not derive authority from these paths.",
+      "paths": [
+        "scripts/producer/audit/audit_motion.py",
+        "scripts/producer/graphics/composite_smoothness.py",
+        "scripts/producer/graphics/render_cache.py",
+        "scripts/producer/headless/render_lane_cache.py",
+        "src/app/api/_lib/codex-preflight.ts",
+        "src/app/api/producer/lint/route.ts",
+        "src/app/api/producer/source-frame/route.ts"
+      ]
+    },
+    "governed-production-authority": {
+      "disposition": "blocking-artifact-binding",
+      "rationale": "Every discovered production-state writer is now bound either to a first-class artifact row or to the explicit legacy governed-state family; this mandatory empty category catches future unbound writers.",
+      "paths": []
+    },
+    "delivery-output": {
+      "disposition": "blocking-artifact-binding",
+      "rationale": "Every discovered editor-facing media/output writer is now bound either to a first-class artifact row or to the explicit legacy delivery family; this mandatory empty category catches future unbound delivery paths.",
+      "paths": []
+    },
+    "unknown": {
+      "disposition": "blocking-unknown",
+      "rationale": "Any site that cannot be assigned safely remains a release blocker; this retained snapshot has no unreviewed file, but the category is mandatory so future drift cannot disappear into a default.",
+      "paths": []
+    }
+  },
+  "sideEffectBoundaries": {
+    "siteCount": 34,
+    "fileCount": 24,
+    "siteSetDigest": "5affd5d7fbf30634dba15ba723f5b08276020ebbe61c61cac13fbbcfc6c9509b",
+    "categories": {
+      "tests-fixtures": {
+        "disposition": "excluded-non-production",
+        "rationale": "No production-scope child-process boundary in this snapshot exists solely to create a test fixture.",
+        "paths": []
+      },
+      "docs-build-tooling": {
+        "disposition": "excluded-non-production",
+        "rationale": "These child processes measure or generate retained P0 baseline and inventory evidence and are not released editing-path writers.",
+        "paths": [
+          "scripts/producer/baseline_media_observation.py",
+          "scripts/producer/baseline_trace.py",
+          "scripts/producer/current_full_path_baseline.py",
+          "scripts/producer/current_render_oracle.py",
+          "scripts/producer/current_render_oracle_calibrate.py",
+          "scripts/producer/current_system_persistence_audit.py"
+        ]
+      },
+      "temp-cache": {
+        "disposition": "excluded-ephemeral",
+      "rationale": "These boundaries perform read-only media, font, tool, or liveness probes, or build reconstructable response caches; captured output and cache bytes never grant edit or promotion authority.",
+      "paths": [
+        "scripts/producer/audio/channel_normalization.py",
+        "scripts/producer/audio/dialogue_stem_probe.py",
+          "scripts/producer/audit/audio_quality.py",
+          "scripts/producer/audit/audit_probe.py",
+          "scripts/producer/captions/caption_font_closure.py",
+          "scripts/producer/captions/caption_shard_media.py",
+          "scripts/producer/edit/cut_repair_visual_lip_sync_media.py",
+          "scripts/producer/graphics/frame_oracles.py",
+          "scripts/producer/ingest_probe.py",
+          "scripts/producer/media_probe.py",
+          "src/app/api/_lib/codex-preflight.ts",
+          "src/app/api/_lib/local-whisper-preflight.ts",
+          "src/app/api/producer/filmstrip/route.ts",
+          "src/app/api/producer/lint/route.ts",
+          "src/app/api/producer/source-frame/route.ts",
+          "src/app/api/producer/waveform/route.ts",
+          "src/lib/server/clipper-media-probe.ts",
+          "src/lib/server/process-liveness.ts"
+        ]
+      },
+      "governed-production-authority": {
+        "disposition": "blocking-artifact-binding",
+        "rationale": "All discovered production-state process boundaries now bind to a governed artifact family or a dedicated launcher contract; this mandatory empty category catches future unbound process effects.",
+        "paths": []
+      },
+      "delivery-output": {
+        "disposition": "blocking-artifact-binding",
+        "rationale": "All discovered encoder, Hyperframes, transcript, proxy, and editor-export process boundaries now bind to a delivery artifact family; this mandatory empty category catches future unbound tool outputs.",
+        "paths": []
+      },
+      "unknown": {
+        "disposition": "blocking-unknown",
+        "rationale": "Generic command wrappers, native desktop launchers, Palmier preflight, and FRAME.IO report generation now have explicit input/output and durability contracts; this mandatory empty category fails closed on any future unknown boundary.",
+        "paths": []
+      }
+    }
+  },
+  "knownLimitations": [
+    "The category is assigned at source-file granularity; a file can contain several primitive calls, all of which inherit the most conservative lifecycle classification for that file.",
+    "The AST scan recognizes declared Python and TypeScript filesystem primitives, selected write wrappers, direct child-process calls, and the runCmd/spawnPython TypeScript wrappers, but arbitrary custom-wrapper call graphs require explicit family evidence.",
+    "Spawned process inputs and output domains are inventoried by bounded tool/artifact family; per-argument dataflow is not yet proven for every FFmpeg, Hyperframes, Demucs, Codex, or Python child invocation, so family binding is not per-output lineage proof.",
+    "External services, databases, and sources outside the declared production-source roots remain outside this repository-local evidence set."
+  ]
+}

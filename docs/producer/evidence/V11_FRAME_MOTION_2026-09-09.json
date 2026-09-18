@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "kind": "mirror-v11-pure-and-exact-frame-motion-checkpoint",
+  "date": "2026-09-09",
+  "activation": "integration-mirror-only-no-guided-or-live-activation",
+  "mirror": "/private/tmp/sniper-upgrade-build-qOKgnu",
+  "sdkVersion": "0.8.31",
+  "purePackage": {
+    "manifest": "/private/tmp/sniper-motion-v11-slice-a-review-20260909.XPQipV/manifest.json",
+    "candidate": "/private/tmp/sniper-guided-motion-v11-candidate-20260909.IgEk8v",
+    "fileCount": 12,
+    "allBeforeAbsent": true,
+    "allAfterHashesMatch": true,
+    "reviewBaselineMatches": 30,
+    "tests": {
+      "typescript49": {
+        "passed": 49,
+        "elapsedSeconds": 8.932225,
+        "tool": "664c56"
+      },
+      "python12": {
+        "passed": 12,
+        "suiteSeconds": 0.098,
+        "wallSeconds": 0.561,
+        "tool": "49792b"
+      },
+      "typecheck": {
+        "passed": true,
+        "tool": "794292"
+      },
+      "lint": {
+        "passed": true,
+        "tool": "88f016"
+      }
+    }
+  },
+  "frameAdapter": {
+    "files": [
+      {
+        "path": "scripts/producer/motion/frame_push.py",
+        "sha256": "e914fa33b4222ab4f497f4c3bd6f0e808b60f83acb2e3272c81a09b3a2915382"
+      },
+      {
+        "path": "scripts/producer/motion/punch_in.py",
+        "sha256": "983365ef943aba3fd917ce93c38fc13557196b510a01b2f509b828a5d8cb72e5"
+      },
+      {
+        "path": "scripts/producer/tests/_frame_push_fixture.py",
+        "sha256": "1719114870280f1ebf62a1aed6c750c85d609aa1a5a3ed26ed774f0f2bd3c64b"
+      },
+      {
+        "path": "scripts/producer/tests/test_frame_push.py",
+        "sha256": "06240222cd49a79df50f8f19de596e9882b9c4553d5a7706bfb3f8c144919c41"
+      }
+    ],
+    "semantics": "Explicit original integer-frame context only; exact half-open overlay. FFmpeg8.0.1 scale counter is observed one-based and normalized with n-1, crop/overlay are zero-based. Default legacy path unchanged.",
+    "retainedFailure": {
+      "path": "/private/tmp/sniper-frame-push-native-vfrv1o45/result.json",
+      "sha256": "57ad0de1c5cb649358df80aed124e8b2c1761670ccaa82740e1bab832d125523",
+      "testSeconds": 8.357,
+      "reportSeconds": 8.352342125028372,
+      "failedSubcases": 3,
+      "cause": "Using n unchanged for both scale and crop shifted animated center despite correct frame/audio clocks",
+      "tool": "3946e5"
+    },
+    "nativePass": {
+      "path": "/private/tmp/sniper-frame-push-native-8n_pmt5k/result.json",
+      "sha256": "94108684b7b96be3e40277cfdd649b088802c7cf42d30ee478d017953bdf0dea",
+      "testSeconds": 9.96,
+      "reportSeconds": 9.955006750067696,
+      "originalCapSeconds": 120,
+      "rates": [
+        "24/1",
+        "30/1",
+        "30000/1001"
+      ],
+      "outputs": 9,
+      "exactSamples": 36,
+      "frames": [
+        72,
+        90,
+        90
+      ],
+      "aacPacketsPerSource": 142,
+      "picturePTSUnchanged": true,
+      "audioPacketsUnchanged": true,
+      "sourcesAndToolsUnchanged": true,
+      "encoder": "libx264 CRF12 fast yuv420p unchanged",
+      "markerTolerance": {
+        "centerPixels": 1.6,
+        "widthPixels": 2
+      },
+      "tool": "7b1122"
+    },
+    "pureRegression": {
+      "passed": 63,
+      "suiteSeconds": 0.125,
+      "tool": "94d1c0"
+    },
+    "mechanicalFunctions": {
+      "over50Lines": 0,
+      "over4Parameters": 0,
+      "tool": "80e3ef"
+    },
+    "knownLegacyNTSCRepro": {
+      "frames": [
+        30,
+        31,
+        60,
+        61,
+        62
+      ],
+      "actual": [
+        0,
+        0,
+        1,
+        1,
+        0
+      ],
+      "required": [
+        0,
+        1,
+        1,
+        0,
+        0
+      ],
+      "tool": "7fe201"
+    }
+  },
+  "limits": [
+    "No V11 parser/compiler/history/profile/source-pin/opening/body lifecycle activation.",
+    "The supplied clock partition is not original held source-occurrence authority; that join remains required.",
+    "No creator-footage motion, audio-caption combination, second-source, shortform or ten-minute performance qualification.",
+    "Tiny serial native tests prove correctness, not whole-video speedup.",
+    "Root manual review and native observation only; no new independent adversarial agent review after subscription-limit failures.",
+    "No general process-death/container cleanup qualification. No Docker used for these exact-frame tests.",
+    "LIVE default remains unchanged. Real C0679 cut audition took priority once the user supplied editorial choices."
+  ]
+}

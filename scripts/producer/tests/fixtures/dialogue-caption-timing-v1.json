@@ -1,0 +1,106 @@
+{
+  "sourceWords": [
+    {
+      "sourceWordId": "w-1111111111111111",
+      "occurrence": 1,
+      "text": "early",
+      "sourceId": "source-b",
+      "ownerCutSegmentId": "cut-b",
+      "sourceSampleRate": 44100,
+      "sourceSampleRange": {
+        "startSample": 4000,
+        "endSampleExclusive": 5000
+      },
+      "transcriptTimingHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
+    {
+      "sourceWordId": "w-2222222222222222",
+      "occurrence": 1,
+      "text": "tail",
+      "sourceId": "source-b",
+      "ownerCutSegmentId": "cut-b",
+      "sourceSampleRate": 44100,
+      "sourceSampleRange": {
+        "startSample": 92000,
+        "endSampleExclusive": 93200
+      },
+      "transcriptTimingHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    }
+  ],
+  "timing": {
+    "schemaVersion": 1,
+    "kind": "dialogue-caption-timing",
+    "dialogueMapHash": "b07e571ea798a06d0d8e2382173c9e56b17a9a5a45d4bd6d351808c296efe0ac",
+    "dialogueTrackHash": "060d2031c5c2291082c48d99d12fe00b44efacd51405d2a0fc8e3116a1720eda",
+    "pictureTimelineMapHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "fps": {
+      "numerator": "30",
+      "denominator": "1"
+    },
+    "sampleRate": 48000,
+    "words": [
+      {
+        "wordId": "w-9189b3e34469e9b1",
+        "sourceWordId": "w-1111111111111111",
+        "occurrence": 1,
+        "text": "early",
+        "sourceId": "source-b",
+        "sourceSampleRate": 44100,
+        "sourceSampleRange": {
+          "startSample": 4000,
+          "endSampleExclusive": 5000
+        },
+        "transcriptTimingHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "ownerCutSegmentId": "cut-b",
+        "ownerElementVersion": 2,
+        "dialogueSegmentIds": [
+          "dialogue-b-j-handle",
+          "dialogue-b-primary"
+        ],
+        "dialogueRoles": [
+          "j-cut-handle",
+          "primary"
+        ],
+        "coveringCutSegmentIds": [
+          "cut-a",
+          "cut-b"
+        ],
+        "startSample": 143553,
+        "endSampleExclusive": 144642,
+        "startFrame": 89,
+        "endFrameExclusive": 91
+      },
+      {
+        "wordId": "w-e6992fb58079b894",
+        "sourceWordId": "w-2222222222222222",
+        "occurrence": 1,
+        "text": "tail",
+        "sourceId": "source-b",
+        "sourceSampleRate": 44100,
+        "sourceSampleRange": {
+          "startSample": 92000,
+          "endSampleExclusive": 93200
+        },
+        "transcriptTimingHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "ownerCutSegmentId": "cut-b",
+        "ownerElementVersion": 2,
+        "dialogueSegmentIds": [
+          "dialogue-b-primary",
+          "dialogue-b-l-handle"
+        ],
+        "dialogueRoles": [
+          "primary",
+          "l-cut-handle"
+        ],
+        "coveringCutSegmentIds": [
+          "cut-b",
+          "cut-c"
+        ],
+        "startSample": 239336,
+        "endSampleExclusive": 240642,
+        "startFrame": 149,
+        "endFrameExclusive": 151
+      }
+    ]
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/cut-repair-composite-receipt-v1.schema.json",
+  "title": "CutRepairCompositeReceiptV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "operationHash",
+    "fragmentReceiptHash",
+    "clock",
+    "dirtyFrameRange",
+    "dirtySampleRange",
+    "terminalExpectedSamples",
+    "exactOutputDurationPreserved",
+    "inputs",
+    "output",
+    "outsideDirtyOracle",
+    "tools"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "cut-repair-composite" },
+    "operationHash": { "$ref": "#/$defs/sha256" },
+    "fragmentReceiptHash": { "$ref": "#/$defs/sha256" },
+    "clock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fps", "sampleRate"],
+      "properties": {
+        "fps": { "$ref": "positive-rational-v1.schema.json" },
+        "sampleRate": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "dirtyFrameRange": { "$ref": "#/$defs/frameRange" },
+    "dirtySampleRange": { "$ref": "#/$defs/sampleRange" },
+    "terminalExpectedSamples": { "type": "integer", "minimum": 1 },
+    "exactOutputDurationPreserved": { "const": true },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "parentSha256",
+        "fragmentSha256",
+        "channelNormalization"
+      ],
+      "properties": {
+        "parentSha256": { "$ref": "#/$defs/sha256" },
+        "fragmentSha256": { "$ref": "#/$defs/sha256" },
+        "channelNormalization": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["parent", "fragment"],
+          "properties": {
+            "parent": {
+              "$ref": "channel-normalization-receipt-v1.schema.json"
+            },
+            "fragment": {
+              "$ref": "channel-normalization-receipt-v1.schema.json"
+            }
+          }
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "videoFrames",
+        "audioSamplesPerChannel",
+        "decodedPcmSha256",
+        "averageFrameRate",
+        "width",
+        "height",
+        "decode"
+      ],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "videoFrames": { "type": "integer", "minimum": 1 },
+        "audioSamplesPerChannel": { "type": "integer", "minimum": 1 },
+        "decodedPcmSha256": { "$ref": "#/$defs/sha256" },
+        "averageFrameRate": { "type": "string", "minLength": 1 },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 },
+        "decode": { "const": "ffmpeg-xerror-full-av-v1" }
+      }
+    },
+    "outsideDirtyOracle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pictureScope",
+        "parentPictureSha256",
+        "outputPictureSha256",
+        "parentPcmSha256",
+        "outputPcmSha256",
+        "pictureMatches",
+        "pcmMatches"
+      ],
+      "properties": {
+        "pictureScope": {
+          "enum": ["full-program", "outside-dirty"]
+        },
+        "parentPictureSha256": { "$ref": "#/$defs/sha256" },
+        "outputPictureSha256": { "$ref": "#/$defs/sha256" },
+        "parentPcmSha256": { "$ref": "#/$defs/sha256" },
+        "outputPcmSha256": { "$ref": "#/$defs/sha256" },
+        "pictureMatches": { "const": true },
+        "pcmMatches": { "const": true }
+      }
+    },
+    "tools": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ffmpegSha256", "ffprobeSha256"],
+      "properties": {
+        "ffmpegSha256": { "$ref": "#/$defs/sha256" },
+        "ffprobeSha256": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "frameRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startFrame", "endFrameExclusive"],
+      "properties": {
+        "startFrame": { "type": "integer", "minimum": 0 },
+        "endFrameExclusive": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "sampleRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startSample", "endSampleExclusive"],
+      "properties": {
+        "startSample": { "type": "integer", "minimum": 0 },
+        "endSampleExclusive": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

@@ -1,0 +1,220 @@
+{
+  "scope": "Failed Python baseline, focused repair results, complete aggregate JavaScript coverage, current production build, and explicit remaining qualification/resource failures. Not one clean full current-source suite.",
+  "logs": [
+    {
+      "file": "audio-reader-repair.log",
+      "bytes": 12573,
+      "sha256": "f3bee6e4c4510925fddc5be3f4b29930bccfb78c393021fdae20b6b95548c66e"
+    },
+    {
+      "file": "build-final.json",
+      "bytes": 1167,
+      "sha256": "4b9a2cfe3b535fadf402c8ab69346ba69c0487abd3067353ddf5c5ed568c7245"
+    },
+    {
+      "file": "build-final.log",
+      "bytes": 111772,
+      "sha256": "c4e2bb3d77ab19cd13dab4a43506479e6e0061d2a078f4ec20f53d0a34af5003"
+    },
+    {
+      "file": "build-warning-locations.json",
+      "bytes": 5721,
+      "sha256": "d581b0069cc361fc5b94e4a40820ac15f3d8ac3211884df92f552898d391e66b"
+    },
+    {
+      "file": "caption-deadline-final.log",
+      "bytes": 2932,
+      "sha256": "1a8731e29a7b93e0e0d72d38aad31a8acb935748fe7bdf85fc4ce6cf930f1e6f"
+    },
+    {
+      "file": "caption-profile-ts-final.log",
+      "bytes": 691,
+      "sha256": "44f01e455fc8b6b9bd0fe31dd1395dc2218f149c86d6c8ce3a644d6509875a35"
+    },
+    {
+      "file": "cleanup-deadline-regressions.log",
+      "bytes": 21230,
+      "sha256": "481335783ea109644fb5b96bb13b392d1bd1a68ab3283b84afd8ac268a885b0c"
+    },
+    {
+      "file": "cleanup-final.log",
+      "bytes": 10568,
+      "sha256": "55052d6e151919575d0e72604dc1feceb1bb3b5389b56a9152805c710e8738c4"
+    },
+    {
+      "file": "dependent-regressions.log",
+      "bytes": 44567,
+      "sha256": "18aa89b5976d513450b1828c235afc2d7a569c0b87bf2bacf087df0c229ea958"
+    },
+    {
+      "file": "eslint-changed-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "gain-parser-final.log",
+      "bytes": 16028,
+      "sha256": "e7b394c2b9a52c6a65e71d58439b10179c3ac014c8e2fbf5741ef85ec739835b"
+    },
+    {
+      "file": "guided-source-color-pipeline-pins-final.log",
+      "bytes": 2245,
+      "sha256": "ed44fc01b441a2fd7aaa7c00317627385f68525d33da327c4d9123cbb3f070dc"
+    },
+    {
+      "file": "guided-source-color-staging-batch-final.log",
+      "bytes": 3256,
+      "sha256": "558a0cc9b137c09a747aca4203c038095b5f4f558ee27f3a483d1ff39d1a2461"
+    },
+    {
+      "file": "javascript-coverage.json",
+      "bytes": 128315,
+      "sha256": "0df8239345b7c06d35525715afa84be3ec2ca669209e52224e00c0882329e2d4"
+    },
+    {
+      "file": "later-fixture-repairs.log",
+      "bytes": 1744,
+      "sha256": "e9f955ec3a4cd1cba273122b9c0e9311ceb582e94131c623575d9f1918095d5e"
+    },
+    {
+      "file": "lint-final.log",
+      "bytes": 5751,
+      "sha256": "155dc4bb98cdbf0fcbc643fbcb18b73d4cb16646277db2e0456f556bf44e6853"
+    },
+    {
+      "file": "manual-short-ts-final.log",
+      "bytes": 528,
+      "sha256": "8e6817f859d5e99654414406e97c9ba6b8449539c693c7865ecba40a6ab7764e"
+    },
+    {
+      "file": "native-readiness-close.json",
+      "bytes": 1037,
+      "sha256": "f3da2e86c5e4c8989b4ee7042c6e82092a0e17361bb98270db0bb94b75fe213c"
+    },
+    {
+      "file": "native-readiness-final.json",
+      "bytes": 1074,
+      "sha256": "9d0fbf745d1c29e57cbccd83c5ec5734d636f39dac67af1c4d47815fee3ba995"
+    },
+    {
+      "file": "npm-audit-tail.json",
+      "bytes": 11494,
+      "sha256": "d475e90400107befe3d517c532a711f006e62af2260ec14851211a8859b1cae9"
+    },
+    {
+      "file": "npm-audit-tail.log",
+      "bytes": 85723,
+      "sha256": "b5f3ef96f43752b85a579483bad10ebbfd70f4e5532aa81f4cc0def626af6710"
+    },
+    {
+      "file": "npm-continuation.log",
+      "bytes": 14078,
+      "sha256": "fe69df1797781eb8e1e4b545e7fc03cdeeb358978ff7df39e3a2c033b787fea5"
+    },
+    {
+      "file": "npm-extra-partitions.json",
+      "bytes": 6162,
+      "sha256": "51a858abe40df19a6a72806938ebaf9cab1fd14483467a68aaacae576db53438"
+    },
+    {
+      "file": "npm-part-a.json",
+      "bytes": 1925,
+      "sha256": "9d7babd8e631b7e5843b19cc5c315ef3b218f97a1c4d1dac2c954b013b556bae"
+    },
+    {
+      "file": "npm-part-a.log",
+      "bytes": 24053,
+      "sha256": "96330c15cda29af24440c4cbf2322629d1ef09179080fa810a9b8f085a6851f0"
+    },
+    {
+      "file": "npm-part-b.json",
+      "bytes": 1912,
+      "sha256": "944d1569b615f2388afd39bc59266a8f81fcbd6a1871b7030d3794ebb16884b9"
+    },
+    {
+      "file": "npm-part-b.log",
+      "bytes": 22324,
+      "sha256": "83e372c45ba98b13676fc119110af459aa535335677e2a92a7c47e86e645cac2"
+    },
+    {
+      "file": "npm-part-c.json",
+      "bytes": 5763,
+      "sha256": "6312fd73784d995b75c29e078378f345c04e340bc1b18303c4c5bdb9d7161135"
+    },
+    {
+      "file": "npm-part-c.log",
+      "bytes": 59551,
+      "sha256": "47ebb7a849bfa5fb7a18260b0253cf57e62c226ea39dfa4880f750d1caef53fc"
+    },
+    {
+      "file": "npm-part-d.json",
+      "bytes": 5703,
+      "sha256": "52888f0aeaaa41b02f6af6c56e1ebcbe3dffc817561af1f9b1227bd40731f9c3"
+    },
+    {
+      "file": "npm-part-d.log",
+      "bytes": 41999,
+      "sha256": "40cb16fda58049cf736094c162fbb79a62712868892260096492b60dc77b1563"
+    },
+    {
+      "file": "npm-partitions.json",
+      "bytes": 13808,
+      "sha256": "302f618e341e451cc55e11b8a907566e05265c786226191161979bb65e7d33b8"
+    },
+    {
+      "file": "npm-prefix-retirement.json",
+      "bytes": 1525,
+      "sha256": "c11802391e1679754b8852e8296f532e943dddaa6474815b52a6ffc35bccdef2"
+    },
+    {
+      "file": "npm-sdk-final.log",
+      "bytes": 1589,
+      "sha256": "0c28dcb8923d85dd837c4f342746cb8503bb46ad45bff132b9e8a1943f799971"
+    },
+    {
+      "file": "npm-skills-final.log",
+      "bytes": 46,
+      "sha256": "f6062ae2fa6bc8463105b5c873abedd18b06f7ab53060a4cd62444a2d3a804ce"
+    },
+    {
+      "file": "npm-supervisor-final.log",
+      "bytes": 48,
+      "sha256": "10e79e0b18ca803add777e1f3718c646b2409e787f01493fe00048fd3afacb1b"
+    },
+    {
+      "file": "opening-metadata-ts-final.log",
+      "bytes": 1121,
+      "sha256": "2f5f1e3ab8c87b9cd771a30dc55d03384fe8f63a6ceb8ab6e997147f1d2cb271"
+    },
+    {
+      "file": "python-baseline-full.log",
+      "bytes": 1459138,
+      "sha256": "a3c10d64d3b37f8ddffe90889ea51cecca4606b1be7b6707f3755ca523ac57d1"
+    },
+    {
+      "file": "python-baseline-resolution-index.json",
+      "bytes": 17627,
+      "sha256": "8301a113a3e13f7ddedceddc58b5d105c0c2d227774389a1382195056ca4932d"
+    },
+    {
+      "file": "qualification-current.log",
+      "bytes": 10343,
+      "sha256": "4c3193f0af583afd68dbc3b128800225bf9ec764efd371ef37d9f499f48169c4"
+    },
+    {
+      "file": "render-lane-final.log",
+      "bytes": 4154,
+      "sha256": "a6647f7bca9112d81f8d7369b349074121c11c3f774a20fef196a49e3416ec40"
+    },
+    {
+      "file": "source-pins-final.json",
+      "bytes": 206,
+      "sha256": "137dfa2a861b605ba77cf3e832eabd8f7e5d9dcbe32abd24b776ee8a83bab833"
+    },
+    {
+      "file": "typecheck-final.log",
+      "bytes": 60,
+      "sha256": "d85046a7bd990a7c70bea4e30fcad9808a7cf24dbab5b4c3f01d7335e64ccebd"
+    }
+  ]
+}

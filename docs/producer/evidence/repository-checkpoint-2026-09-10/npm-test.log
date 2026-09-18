@@ -1,0 +1,1440 @@
+
+> project-sniper-enhanced@0.1.0 test
+> node scripts/tests/next_supervisor.test.mjs && node scripts/tests/skill_surface.test.mjs && npm run test:sdk && (for f in src/lib/clipper/__tests__/*.test.ts src/lib/producer/__tests__/*.test.ts src/lib/segmenter/__tests__/*.test.ts src/lib/server/__tests__/*.test.ts; do echo "$f"; node --import tsx "$f" || exit 1; done) && echo 'all tests passed'
+
+next_supervisor.test.mjs: all assertions passed
+skill_surface.test.mjs: all assertions passed
+
+> project-sniper-enhanced@0.1.0 test:sdk
+> node --test scripts/tests/sdk_scene_variable_proposal.test.mjs
+
+✔ closed/bounded JSON and factory accessors refuse without opening or evaluating getters (2.893875ms)
+✔ project-installed default SDK → actual validated Python treatment handler changes only the authorized unit (150.95675ms)
+✔ new captured 0.8.31 bundle uses default SDK without relabeling the original 0.7.33 bundle (254.886666ms)
+✔ stale, shared, wrong raw binding and no-op inputs refuse before SDK callbacks (67.030833ms)
+✔ declared Unicode copy remains complete, never truncated (65.811875ms)
+✔ headless SDK parsing never executes supplied inline scripts or external scripts (64.329666ms)
+✔ static root geometry and exact frame duration are bound, including NTSC rational rates (70.293375ms)
+✔ patch whitelist refuses extra paths and differently typed values (67.379458ms)
+✔ reopen/inverse serialization refuses code changes, including normalization-dropped code (69.462625ms)
+✔ reopened timing and every unaffected declaration must remain exact (67.996125ms)
+✔ readback and disposal failures retain both errors and attempt both session disposals (63.627584ms)
+✔ successful readback still refuses disposal failure or late caller/factory substitution (71.02775ms)
+✔ first SDK callback cannot rebaseline original supplied input (61.398625ms)
+✔ late getter substitution refuses without executing the substituted getter (66.004583ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1275.704625
+src/lib/clipper/__tests__/media-contract.test.ts
+[SNIPER 05:29:26.667 server clipper:xml] generateFCPXML {
+  segments: 1,
+  angles: 1,
+  audioMode: 'camera',
+  lavMode: false,
+  audioChannels: 1,
+  fps: 23.976023976023978,
+  duration: 12.5,
+  speakerLabels: undefined
+}
+media-contract.test.ts: all assertions passed
+src/lib/producer/__tests__/ai-edit-authority-invalidation.test.ts
+ai-edit-authority-invalidation.test.ts: all assertions passed
+src/lib/producer/__tests__/ask-edit-authority-cas.test.ts
+ask-edit-authority-cas.test.ts: all assertions passed
+src/lib/producer/__tests__/ask-edit-authority-races.test.ts
+ask-edit-authority-races.test.ts: passed
+src/lib/producer/__tests__/ask-edit-cut-repair-route.test.ts
+ask-edit-cut-repair-route tests passed
+src/lib/producer/__tests__/ask-edit-preview-invalidation.test.ts
+ask-edit-preview-invalidation.test.ts: all assertions passed
+src/lib/producer/__tests__/ask-edit-refit-rollback.test.ts
+ask-edit-refit-rollback.test.ts: passed
+src/lib/producer/__tests__/ask-edit-stream-cancellation.test.ts
+ask-edit-stream-cancellation.test.ts: passed
+src/lib/producer/__tests__/audit-audio-policy.test.ts
+audit-audio-policy.test.ts: all assertions passed (including real FFmpeg reports)
+src/lib/producer/__tests__/audit-gate-contract.test.ts
+audit-gate-contract.test.ts: all assertions passed
+src/lib/producer/__tests__/authored-cut-seed-prompt.test.ts
+✔ explicit authored seed preserves version and complete target while allowing only cut prediction changes (1.142791ms)
+✔ seed instruction changes neither untrusted brief bytes, pinned commands, nor provider permissions (1.677916ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9.472834
+src/lib/producer/__tests__/authoring-blocked.test.ts
+[SNIPER 05:29:31.965 server producer:auto-edit] spawn codex (authoring) {
+  dir: '/private/TEST-not-a-project',
+  scope: 'light',
+  reasoning: 'high',
+  basis: 'short',
+  sourceDurationS: undefined
+}
+[SNIPER 05:29:31.967 server producer:auto-edit] spawn codex (authoring) {
+  dir: '/private/TEST-not-a-project',
+  scope: 'light',
+  reasoning: 'high',
+  basis: 'short',
+  sourceDurationS: undefined
+}
+[SNIPER 05:29:31.967 server producer:auto-edit] spawn codex (authoring) {
+  dir: '/private/TEST-not-a-project',
+  scope: 'light',
+  reasoning: 'high',
+  basis: 'short',
+  sourceDurationS: undefined
+}
+[SNIPER 05:29:31.969 server producer:auto-edit] ERROR codex authoring failed {
+  name: 'Error',
+  message: 'TEST ONLY timed out after prior explicit stop',
+  stack: 'Error: TEST ONLY timed out after prior explicit stop\n' +
+    '    at codex (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/producer/__tests__/authoring-blocked.test.ts:88:24)\n' +
+    '    at runCodexAuthoring (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/app/api/producer/auto-edit/authoring.ts:128:26)\n' +
+    '    at runAuthoring (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/app/api/producer/auto-edit/authoring.ts:198:12)\n' +
+    '    at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/producer/__tests__/authoring-blocked.test.ts:85:26)\n' +
+    '    at async Test.run (node:internal/test_runner/test:1054:7)\n' +
+    '    at async Test.processPendingSubtests (node:internal/test_runner/test:744:7)'
+}
+[SNIPER 05:29:31.969 server producer:auto-edit] spawn codex (authoring) {
+  dir: '/private/TEST-not-a-project',
+  scope: 'light',
+  reasoning: 'high',
+  basis: 'short',
+  sourceDurationS: undefined
+}
+[SNIPER 05:29:31.969 server producer:auto-edit] spawn codex (authoring) {
+  dir: '/private/TEST-not-a-project',
+  scope: 'light',
+  reasoning: 'high',
+  basis: 'short',
+  sourceDurationS: undefined
+}
+[SNIPER 05:29:31.970 server producer:auto-edit] ERROR codex authoring failed {
+  name: 'Error',
+  message: 'TEST ONLY timed out after malformed transport',
+  stack: 'Error: TEST ONLY timed out after malformed transport\n' +
+    '    at codex (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/producer/__tests__/authoring-blocked.test.ts:102:24)\n' +
+    '    at runCodexAuthoring (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/app/api/producer/auto-edit/authoring.ts:128:26)\n' +
+    '    at runAuthoring (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/app/api/producer/auto-edit/authoring.ts:198:12)\n' +
+    '    at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/producer/__tests__/authoring-blocked.test.ts:98:26)\n' +
+    '    at async Test.run (node:internal/test_runner/test:1054:7)\n' +
+    '    at async Test.processPendingSubtests (node:internal/test_runner/test:744:7)'
+}
+[SNIPER 05:29:31.975 server producer:auto-edit] spawn codex (authoring) {
+  dir: '/private/TEST-not-a-project',
+  scope: 'light',
+  reasoning: 'high',
+  basis: 'short',
+  sourceDurationS: undefined
+}
+[SNIPER 05:29:31.975 server producer:auto-edit] ERROR codex authoring failed {
+  name: 'Error',
+  message: 'Codex exceeded its 16777216-byte output budget',
+  stack: 'Error: Codex exceeded its 16777216-byte output budget\n' +
+    '    at codex (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/producer/__tests__/authoring-blocked.test.ts:206:11)\n' +
+    '    at runCodexAuthoring (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/app/api/producer/auto-edit/authoring.ts:128:26)\n' +
+    '    at runAuthoring (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/app/api/producer/auto-edit/authoring.ts:198:12)\n' +
+    '    at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/producer/__tests__/authoring-blocked.test.ts:205:24)\n' +
+    '    at Test.runInAsyncScope (node:async_hooks:214:14)\n' +
+    '    at Test.run (node:internal/test_runner/test:1047:25)\n' +
+    '    at Test.processPendingSubtests (node:internal/test_runner/test:744:18)\n' +
+    '    at Test.postRun (node:internal/test_runner/test:1173:19)\n' +
+    '    at Test.run (node:internal/test_runner/test:1101:12)\n' +
+    '    at async Test.processPendingSubtests (node:internal/test_runner/test:744:7)'
+}
+[SNIPER 05:29:31.979 server producer:auto-edit] spawn codex (authoring) {
+  dir: '/private/TEST-not-a-project',
+  scope: 'light',
+  reasoning: 'high',
+  basis: 'short',
+  sourceDurationS: undefined
+}
+[SNIPER 05:29:31.980 server producer:auto-edit] spawn codex (authoring) {
+  dir: '/private/TEST-not-a-project',
+  scope: 'light',
+  reasoning: 'high',
+  basis: 'short',
+  sourceDurationS: undefined
+}
+✔ recognized, unknown and missing editor-stop reasons are bounded and monotonic (1.03775ms)
+✔ only root completed editor text can stop authoring, never tools or raw token events (0.178875ms)
+✔ actual Codex adapter retains final stops with exit0 and preserves existing invocation policy (3.102416ms)
+✔ actual Codex adapter latches streamed stops across abort or a later success message (2.180875ms)
+✔ Codex raw transport failure cannot use prior success or timeout recovery (0.982084ms)
+✔ actual Claude binder preserves split UTF8 reason and unterminated complete message (1.05075ms)
+✔ actual Claude binder never replaces an assistant stop with later successful result (0.474958ms)
+✔ Claude byte bound rejects a no-newline row before JSON allocation or timeout salvage (1.202334ms)
+✔ Claude truncated final JSON and non-envelope JSON invalidate prior valid success (0.79875ms)
+✔ Claude invalid UTF8 cannot be replaced into successful editor transport (0.533333ms)
+✔ malformed known root editor envelopes cannot be overwritten by later valid results (0.273375ms)
+✔ exact Codex output-budget exception is protocol failure before saved-plan normalization (2.413792ms)
+✔ malformed terminal results and explicit provider errors cannot become later success (2.116125ms)
+✔ Codex adapter latches root error results while nested terminal metadata remains opaque (0.773583ms)
+✔ exit0 or timed-out explicit stop cannot normalize saved JSON, salvage, review or approve (1.353416ms)
+✔ protocol failure blocks saved-plan normalization and timeout salvage independently of editor markers (0.570083ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 23.020375
+src/lib/producer/__tests__/auto-edit-authoring-recovery.test.ts
+auto-edit-authoring-recovery.test.ts: all assertions passed
+src/lib/producer/__tests__/auto-edit-authority-cross-language.test.ts
+auto-edit-authority-cross-language.test.ts: all assertions passed
+src/lib/producer/__tests__/auto-edit-authority-policy.test.ts
+auto-edit-authority-policy.test.ts: all assertions passed
+src/lib/producer/__tests__/auto-edit-chain.test.ts
+[SNIPER 05:29:33.836 server producer:auto-edit] spawn graph-gated assemble {
+  dir: '/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-chain-assemble-wKP154',
+  args: [
+    '--phase',
+    'assemble',
+    '--producer-dir',
+    '/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-chain-assemble-wKP154',
+    '--plan',
+    '/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-chain-assemble-wKP154/edit_plan.json',
+    '--manifest',
+    '/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-chain-assemble-wKP154/asset_manifest.json',
+    '--base',
+    '/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-chain-assemble-wKP154/base_final.mp4',
+    '--output',
+    '/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-chain-assemble-wKP154/final.mp4',
+    '--defer-active',
+    '--',
+    '/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/assemble.py',
+    '/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-chain-assemble-wKP154/base_final.mp4',
+    '/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-chain-assemble-wKP154/edit_plan.json',
+    '/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-chain-assemble-wKP154/final.mp4',
+    '--auto-base',
+    '--fingerprint',
+    '/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-chain-assemble-wKP154/base.fingerprint.json',
+    '--manifest',
+    '/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-chain-assemble-wKP154/asset_manifest.json',
+    '--require-source-set-admission'
+  ]
+}
+[Errno 2] No such file or directory: '/private/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-chain-assemble-wKP154/edit_plan.json'
+auto-edit-chain.test.ts: all assertions passed
+src/lib/producer/__tests__/auto-edit-cut-candidate-resume.test.ts
+auto-edit-cut-candidate-resume.test.ts: all assertions passed
+src/lib/producer/__tests__/auto-edit-doctrine-runtime.test.ts
+auto-edit-doctrine-runtime.test.ts: all assertions passed
+src/lib/producer/__tests__/auto-edit-graph-promotion-failure.test.ts
+auto-edit graph promotion failure test passed
+src/lib/producer/__tests__/auto-edit-job-store.test.ts
+auto-edit-job-store.test.ts: all assertions passed
+src/lib/producer/__tests__/auto-edit-mp4-only-delivery.test.ts
+✔ delivery policy is closed and preserves the historical hybrid identity (0.967459ms)
+✔ MP4-only launch performs no Palmier discovery or legacy guard (1.036542ms)
+✔ production MP4-only pipeline suppresses every Palmier adapter and receipts zero calls (259.010834ms)
+✔ durable resume is delivery-bound and invalid stored values fail closed (2.820042ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 267.070875
+src/lib/producer/__tests__/auto-edit-pipeline-resume.test.ts
+auto-edit-pipeline-resume.test.ts: all assertions passed
+src/lib/producer/__tests__/auto-edit-planning-loop.test.ts
+auto-edit-planning-loop.test.ts: all assertions passed
+src/lib/producer/__tests__/auto-edit-quality-artifacts.test.ts
+auto-edit-quality-artifacts.test.ts: all assertions passed
+src/lib/producer/__tests__/auto-edit-quality-loop.test.ts
+auto-edit-quality-loop.test.ts: all assertions passed
+src/lib/producer/__tests__/auto-edit-review-concurrency.test.ts
+auto-edit-review-concurrency.test.ts: all assertions passed
+src/lib/producer/__tests__/auto-edit-round-policy.test.ts
+auto-edit-round-policy.test.ts: all assertions passed
+src/lib/producer/__tests__/auto-edit-worker-launcher.test.ts
+auto-edit-worker-launcher.test.ts: all assertions passed
+src/lib/producer/__tests__/brain-review.test.ts
+brain-review.test.ts: all assertions passed
+src/lib/producer/__tests__/brief-contract.test.ts
+brief-contract.test.ts: all assertions passed
+src/lib/producer/__tests__/brief-intent-conflict.test.ts
+brief-intent-conflict.test.ts: all assertions passed
+src/lib/producer/__tests__/caption-chapters-v1.test.ts
+caption-chapters-v1 tests passed
+src/lib/producer/__tests__/caption-operations-v1.test.ts
+caption-operations-v1 tests passed
+src/lib/producer/__tests__/caption-schema-parity-v1.test.ts
+caption-schema-parity-v1 tests passed
+src/lib/producer/__tests__/caption-word-index-v1.test.ts
+caption-word-index-v1 tests passed
+src/lib/producer/__tests__/claude-model-contract.test.ts
+claude-model-contract.test.ts: all assertions passed
+src/lib/producer/__tests__/codex-cli.test.ts
+codex-cli.test.ts: all assertions passed
+src/lib/producer/__tests__/color-diagnostic-client.test.ts
+✔ default source controls do not infer neutral lighting or untransformed history (5.565209ms)
+✔ client rejects approval claims and unbounded/invalid screening response (0.390541ms)
+✔ result panel makes private status and absent grade authority explicit (0.352833ms)
+✔ edited profile, history, lighting or notes cannot relabel a retained result (0.932916ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14.416333
+src/lib/producer/__tests__/color-diagnostic-flow.test.ts
+✔ rapid double launch invokes one task and restores guard on completion/failure (0.52675ms)
+✔ response fences reject older refreshes and another project (0.086542ms)
+✔ denied session read/write produces explicit error and never leaves starting or launches (0.375834ms)
+✔ lost POST keeps exact private token and explicit unknown outcome without resetting it (0.272709ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4.505125
+src/lib/producer/__tests__/compatibility-picture-lock-integration.test.ts
+compatibility-picture-lock-integration.test.ts: passed
+src/lib/producer/__tests__/compatibility-picture-lock.test.ts
+compatibility-picture-lock.test.ts: all assertions passed
+src/lib/producer/__tests__/compatibility-timeline-projection.test.ts
+compatibility-timeline-projection.test.ts: passed
+src/lib/producer/__tests__/comps-catalog-coverage.test.ts
+✔ every renderable composition is visible to the editor brain (0.750584ms)
+✔ the planner-facing catalog has unique kinds backed by real templates (2.289333ms)
+✔ every editor default spec satisfies the renderer template contract (53.778875ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 60.085208
+src/lib/producer/__tests__/continue-project-copy.test.ts
+continue-project-copy.test.ts: all assertions passed
+src/lib/producer/__tests__/cut-acceptance-client.test.ts
+✔ explicit human decision retains one exact identity through retry and reopened UI (0.924625ms)
+✔ changed stored decision or unavailable persistence cannot invent a replacement retry (0.376417ms)
+✔ decision results distinguish pending continuation from running and never mean final approval (0.229375ms)
+✔ submit sends only the exact decision once and preserves ambiguous failure for recheck (11.117417ms)
+✔ pre-canceled submission sends nothing (0.643167ms)
+✔ unfinished-verification recovery only replays a prior exact decision, never creates one (0.182584ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 20.745167
+src/lib/producer/__tests__/cut-acceptance-request.test.ts
+✔ closed acceptance and continuation envelopes resolve only the configured producer directory (11.555666ms)
+✔ request size, UTF-8/JSON and cancellation fail before reading project files (1.335792ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 16.622375
+src/lib/producer/__tests__/cut-acceptance-response.test.ts
+✔ local origin and media type rejection precede all body and authority reads (3.419042ms)
+✔ explicit POST dispatches once; uncertain accepted handoff never becomes running or final (6.310292ms)
+✔ accepted status is a read-only allowlist without process/token leakage or invented delivery scope (2.138666ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 16.155916
+src/lib/producer/__tests__/cut-accepted-status-client.test.ts
+✔ accepted status preserves truthful worker state and exact historical scope (1.714291ms)
+✔ accepted status fetch is read-only and abortable, never an implicit continuation retry (11.549042ms)
+✔ UI never auto-attests listening/watching or offers an unverified pending retry (10.594083ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 28.187375
+src/lib/producer/__tests__/cut-approval.test.ts
+cut-approval.test.ts: all assertions passed
+src/lib/producer/__tests__/cut-authoring-brief.test.ts
+✔ absent brief retains the exact previous prompt for both providers and workflows (1.892583ms)
+✔ brief preserves exact Unicode, quotes, newlines and whitespace as one JSON data value (0.85525ms)
+✔ brief validation rejects malformed or oversized input without truncation or fallback (0.579166ms)
+✔ editorial goals stay source-grounded while downstream and unsupported requests stay explicit (0.192ms)
+✔ hostile brief cannot expand the real allowlist or replace existing human and permission walls (0.784041ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11.366916
+src/lib/producer/__tests__/cut-checkpoint-card.test.ts
+✔ actual ProjectCard: awaiting_cut_approval, approved_working_head, missing final, candidate active=false (11.80525ms)
+✔ actual ProjectCard: awaiting_cut_approval, approved_working_head, missing final, candidate active=true (1.208375ms)
+✔ actual ProjectCard: awaiting_cut_approval, approved_working_head, unapproved final, candidate active=false (1.061333ms)
+✔ actual ProjectCard: awaiting_cut_approval, approved_working_head, unapproved final, candidate active=true (1.043708ms)
+✔ actual ProjectCard: awaiting_cut_approval, approved_working_head, approved final, candidate active=false (0.966125ms)
+✔ actual ProjectCard: awaiting_cut_approval, approved_working_head, approved final, candidate active=true (1.083042ms)
+✔ actual ProjectCard: awaiting_cut_approval, approved_mirror, missing final, candidate active=false (1.103417ms)
+✔ actual ProjectCard: awaiting_cut_approval, approved_mirror, missing final, candidate active=true (0.825917ms)
+✔ actual ProjectCard: awaiting_cut_approval, approved_mirror, unapproved final, candidate active=false (1.891209ms)
+✔ actual ProjectCard: awaiting_cut_approval, approved_mirror, unapproved final, candidate active=true (1.222791ms)
+✔ actual ProjectCard: awaiting_cut_approval, approved_mirror, approved final, candidate active=false (0.919125ms)
+✔ actual ProjectCard: awaiting_cut_approval, approved_mirror, approved final, candidate active=true (0.880417ms)
+✔ actual ProjectCard: awaiting_cut_approval, manual_working_head, missing final, candidate active=false (0.718625ms)
+✔ actual ProjectCard: awaiting_cut_approval, manual_working_head, missing final, candidate active=true (0.595167ms)
+✔ actual ProjectCard: awaiting_cut_approval, manual_working_head, unapproved final, candidate active=false (0.557ms)
+✔ actual ProjectCard: awaiting_cut_approval, manual_working_head, unapproved final, candidate active=true (0.50125ms)
+✔ actual ProjectCard: awaiting_cut_approval, manual_working_head, approved final, candidate active=false (0.7385ms)
+✔ actual ProjectCard: awaiting_cut_approval, manual_working_head, approved final, candidate active=true (0.646459ms)
+✔ actual ProjectCard: awaiting_cut_approval, pending_candidate, missing final, candidate active=false (0.580875ms)
+✔ actual ProjectCard: awaiting_cut_approval, pending_candidate, missing final, candidate active=true (0.663917ms)
+✔ actual ProjectCard: awaiting_cut_approval, pending_candidate, unapproved final, candidate active=false (0.557208ms)
+✔ actual ProjectCard: awaiting_cut_approval, pending_candidate, unapproved final, candidate active=true (0.517625ms)
+✔ actual ProjectCard: awaiting_cut_approval, pending_candidate, approved final, candidate active=false (0.686458ms)
+✔ actual ProjectCard: awaiting_cut_approval, pending_candidate, approved final, candidate active=true (0.569125ms)
+✔ actual ProjectCard: awaiting_cut_approval, approved_candidate, missing final, candidate active=false (0.535458ms)
+✔ actual ProjectCard: awaiting_cut_approval, approved_candidate, missing final, candidate active=true (0.489375ms)
+✔ actual ProjectCard: awaiting_cut_approval, approved_candidate, unapproved final, candidate active=false (0.489167ms)
+✔ actual ProjectCard: awaiting_cut_approval, approved_candidate, unapproved final, candidate active=true (0.503125ms)
+✔ actual ProjectCard: awaiting_cut_approval, approved_candidate, approved final, candidate active=false (0.489917ms)
+✔ actual ProjectCard: awaiting_cut_approval, approved_candidate, approved final, candidate active=true (0.521125ms)
+✔ actual ProjectCard: awaiting_cut_approval, no_workspace, missing final, candidate active=false (0.504375ms)
+✔ actual ProjectCard: awaiting_cut_approval, no_workspace, missing final, candidate active=true (0.4835ms)
+✔ actual ProjectCard: awaiting_cut_approval, no_workspace, unapproved final, candidate active=false (0.510375ms)
+✔ actual ProjectCard: awaiting_cut_approval, no_workspace, unapproved final, candidate active=true (0.482458ms)
+✔ actual ProjectCard: awaiting_cut_approval, no_workspace, approved final, candidate active=false (0.664708ms)
+✔ actual ProjectCard: awaiting_cut_approval, no_workspace, approved final, candidate active=true (0.570917ms)
+✔ actual ProjectCard: cut_accepted, approved_working_head, missing final, candidate active=false (0.560959ms)
+✔ actual ProjectCard: cut_accepted, approved_working_head, missing final, candidate active=true (0.609792ms)
+✔ actual ProjectCard: cut_accepted, approved_working_head, unapproved final, candidate active=false (0.638416ms)
+✔ actual ProjectCard: cut_accepted, approved_working_head, unapproved final, candidate active=true (1.980041ms)
+✔ actual ProjectCard: cut_accepted, approved_working_head, approved final, candidate active=false (0.624875ms)
+✔ actual ProjectCard: cut_accepted, approved_working_head, approved final, candidate active=true (0.56075ms)
+✔ actual ProjectCard: cut_accepted, approved_mirror, missing final, candidate active=false (0.522333ms)
+✔ actual ProjectCard: cut_accepted, approved_mirror, missing final, candidate active=true (0.506417ms)
+✔ actual ProjectCard: cut_accepted, approved_mirror, unapproved final, candidate active=false (0.604167ms)
+✔ actual ProjectCard: cut_accepted, approved_mirror, unapproved final, candidate active=true (0.5665ms)
+✔ actual ProjectCard: cut_accepted, approved_mirror, approved final, candidate active=false (0.513958ms)
+✔ actual ProjectCard: cut_accepted, approved_mirror, approved final, candidate active=true (0.5005ms)
+✔ actual ProjectCard: cut_accepted, manual_working_head, missing final, candidate active=false (0.499709ms)
+✔ actual ProjectCard: cut_accepted, manual_working_head, missing final, candidate active=true (0.5035ms)
+✔ actual ProjectCard: cut_accepted, manual_working_head, unapproved final, candidate active=false (0.551084ms)
+✔ actual ProjectCard: cut_accepted, manual_working_head, unapproved final, candidate active=true (0.694083ms)
+✔ actual ProjectCard: cut_accepted, manual_working_head, approved final, candidate active=false (0.506666ms)
+✔ actual ProjectCard: cut_accepted, manual_working_head, approved final, candidate active=true (0.514292ms)
+✔ actual ProjectCard: cut_accepted, pending_candidate, missing final, candidate active=false (0.515792ms)
+✔ actual ProjectCard: cut_accepted, pending_candidate, missing final, candidate active=true (0.485667ms)
+✔ actual ProjectCard: cut_accepted, pending_candidate, unapproved final, candidate active=false (0.669417ms)
+✔ actual ProjectCard: cut_accepted, pending_candidate, unapproved final, candidate active=true (0.597958ms)
+✔ actual ProjectCard: cut_accepted, pending_candidate, approved final, candidate active=false (0.62725ms)
+✔ actual ProjectCard: cut_accepted, pending_candidate, approved final, candidate active=true (0.59825ms)
+✔ actual ProjectCard: cut_accepted, approved_candidate, missing final, candidate active=false (0.482708ms)
+✔ actual ProjectCard: cut_accepted, approved_candidate, missing final, candidate active=true (0.472041ms)
+✔ actual ProjectCard: cut_accepted, approved_candidate, unapproved final, candidate active=false (0.489583ms)
+✔ actual ProjectCard: cut_accepted, approved_candidate, unapproved final, candidate active=true (0.511541ms)
+✔ actual ProjectCard: cut_accepted, approved_candidate, approved final, candidate active=false (0.537833ms)
+✔ actual ProjectCard: cut_accepted, approved_candidate, approved final, candidate active=true (0.507667ms)
+✔ actual ProjectCard: cut_accepted, no_workspace, missing final, candidate active=false (0.519ms)
+✔ actual ProjectCard: cut_accepted, no_workspace, missing final, candidate active=true (0.484375ms)
+✔ actual ProjectCard: cut_accepted, no_workspace, unapproved final, candidate active=false (0.520708ms)
+✔ actual ProjectCard: cut_accepted, no_workspace, unapproved final, candidate active=true (0.495667ms)
+✔ actual ProjectCard: cut_accepted, no_workspace, approved final, candidate active=false (0.517833ms)
+✔ actual ProjectCard: cut_accepted, no_workspace, approved final, candidate active=true (0.518667ms)
+✔ historical approved Palmier controls remain available outside the cut checkpoint (1.314084ms)
+ℹ tests 73
+ℹ suites 0
+ℹ pass 73
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 69.374333
+src/lib/producer/__tests__/cut-pending-decision.test.ts
+✔ pending recovery requires a closed exact prior decision, not new or upgraded approval (0.9165ms)
+✔ cross-tab recovery is one bounded read with no local storage or implicit POST (3.279333ms)
+✔ pending decision route validates local origin and all preview identities before returning readback (4.151125ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11.54825
+src/lib/producer/__tests__/cut-preview.test.ts
+✔ actual cut gates -> private decoded preview -> read-only admitted-byte verification (4109.299208ms)
+✔ lease guard rejects absent, released or replaced actual ownership (60.197125ms)
+✔ legacy cut deadline terminates and verifies the entire owned child/grandchild process group (686.257917ms)
+✔ guided-opening deadline terminates and verifies the entire owned child/grandchild process group (685.941083ms)
+✔ only explicit guided-opening admits the bounded25-minute ceiling; invalid inputs never launch (83.112208ms)
+✔ a zero-exit leader cannot leave a live descendant or exceed output budget (121.369375ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5748.663167
+src/lib/producer/__tests__/cut-restore-speech-v1.test.ts
+cut-restore-speech-v1 tests passed
+src/lib/producer/__tests__/cut-review-brief.test.ts
+✔ cut critic receives exact brief data without extra tools, cut authority, or downstream completion (291.728583ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 294.816334
+src/lib/producer/__tests__/cut-review-client.test.ts
+✔ client accepts only exact historical scope, identity and local playback URL (1.849208ms)
+✔ preview fetch is read-only, abortable, bounded and never retries a mutation (11.570167ms)
+✔ review UI renders no unverified media or acceptance action before readback (8.683959ms)
+✔ waiting copy never offers ordinary resume, generation or final approval (0.305167ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 25.521292
+src/lib/producer/__tests__/cut-review-contract.test.ts
+cut-review-contract.test.ts: all assertions passed
+src/lib/producer/__tests__/cut-review-loop.test.ts
+cut-review-loop.test.ts: all assertions passed
+src/lib/producer/__tests__/cut-review-media.test.ts
+✔ range parser rejects ambiguous/unsafe ranges and supports browser suffixes (0.810625ms)
+✔ whole/range/HEAD responses serve only the exact hashed descriptor (11.677292ms)
+✔ changed hashes, hardlinks, symlinks and canceled reads cannot yield playback (4.562709ms)
+✔ HEAD and short ranges still detect corruption outside the requested range (3.827292ms)
+✔ same-size mutation during playback aborts the remaining stream (3.55725ms)
+✔ request abort after verification rejects playback even when the reader is idle (2.900583ms)
+✔ review routes reject cross-origin, arbitrary paths and duplicate identities before reads (2.260042ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 31.728709
+src/lib/producer/__tests__/cut-review-state.test.ts
+✔ read-only description binds exact waiting identities without manufacturing acceptance (1014.84925ms)
+✔ media route observes proofs without a duplicate movie hash or a current-media claim (943.431291ms)
+✔ pointerless checkpoints and mismatched run/attempt/manifest/source proof cannot be reviewed (1212.902167ms)
+✔ a changed journal during private media observation fails without writeback (932.845ms)
+✔ malformed and backwards waiting clocks cannot appear as qualified user time (1081.877833ms)
+✔ acceptance verification stops user wait and a failed attempt starts a new visible interval (1097.903125ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6287.120291
+src/lib/producer/__tests__/cut-revision-prompt.test.ts
+✔ uncertain opening timing requires human source review, not a forbidden-span deletion rule (1.121375ms)
+✔ exact revision receipt and issue accounting survive without authoring-stage stop markers (0.607209ms)
+✔ revision keeps exact mutable fields, tool restrictions and independent review (0.156916ms)
+✔ revision carries the same exact bounded untrusted brief without importing writer outcome policy (0.69825ms)
+✔ absent brief adds nothing and malformed or oversized briefs fail without truncation (0.5295ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11.529209
+src/lib/producer/__tests__/cut-track.test.ts
+cut-track.test.ts: all assertions passed
+src/lib/producer/__tests__/deferred-request-v1.test.ts
+deferred-request-v1 tests passed
+src/lib/producer/__tests__/dialogue-authority-v1.test.ts
+dialogue-authority-v1 tests passed
+src/lib/producer/__tests__/dialogue-caption-timing-v1.test.ts
+dialogue-caption-timing-v1 tests passed
+src/lib/producer/__tests__/edit-plan.test.ts
+edit-plan.test.ts: all assertions passed
+src/lib/producer/__tests__/editor-artifact-consistency.test.ts
+editor-artifact-consistency.test.ts: all assertions passed
+src/lib/producer/__tests__/editor-external-run-lock.test.ts
+editor-external-run-lock.test.ts: all assertions passed
+src/lib/producer/__tests__/editor-preview-authority.test.ts
+editor-preview-authority.test.ts: all assertions passed
+src/lib/producer/__tests__/geometry-replan.test.ts
+geometry-replan tests passed
+src/lib/producer/__tests__/graphic-ids.test.ts
+graphic-ids.test.ts: all assertions passed
+src/lib/producer/__tests__/graphics-governance-prompt.test.ts
+✔ produced longform prompt governs style, semantic decisions, and floors (1.384833ms)
+✔ waived transitions do not demand a transition deliverable (0.266375ms)
+✔ waived or inactive graphics do not demand graphic governance (0.527291ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10.077375
+src/lib/producer/__tests__/gui-render-authority.test.ts
+gui-render-authority.test.ts: all assertions passed
+src/lib/producer/__tests__/guided-body-media-v2.test.ts
+✔ body media current parser preserves exact legacy object and closed legacy parser (1.06025ms)
+✔ body media V2 has detached replay and the same seven closed original references (0.69475ms)
+✔ body media V2 keeps every supported current profile without widening historical profile admission (1.024541ms)
+✔ body media requires exact version and complete V2 fields without legacy replay leakage (0.224708ms)
+✔ body media original references remain exact seven two-field records in both versions (0.663792ms)
+✔ body media V2 rejects malformed common values and runtime widening (0.183084ms)
+✔ body media V2 applies full nested replay parser including bounds, paths and false flags (0.360209ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11.429458
+src/lib/producer/__tests__/guided-body-result-v2.test.ts
+✔ body V2 completion/raw/readback require original replay and completed non-grading projection (2.926292ms)
+✔ legacy completion/readback parsers stay closed and current dispatch preserves schema1 (0.735208ms)
+✔ V2 source completion and raw result reject every missing or unknown top-level field (1.222834ms)
+✔ V2 readback rejects every missing or unknown top-level field (1.406834ms)
+✔ V2 replay proof is closed at each level with strict coverage and false qualification flags (1.819958ms)
+✔ V2 original evidence has bounded exact raw/semantic hashes and the original opening role (0.786ms)
+✔ V2 source readback rejects legacy-only, missing, duplicate, reordered and failed source stages (0.324709ms)
+✔ V2 readback stage totals cannot exceed actual elapsed except independent-rounding tolerance (0.383416ms)
+✔ V2 raw result cannot omit, duplicate, reverse or fail completed source work (0.350042ms)
+✔ V2 stdout rejects duplicate keys, trailing values, null bytes and oversized transports (0.431292ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17.8715
+src/lib/producer/__tests__/guided-body-source-color-replay.test.ts
+✔ body source replay parser returns detached closed non-authorizing references (0.90125ms)
+✔ body source replay rejects all missing or extra top-level and nested fields (0.357709ms)
+✔ body source replay refuses legacy, partial, mixed-role and approval spellings (0.343541ms)
+✔ body source replay rejects malformed hashes and noninteger or excessive raw sizes (0.301167ms)
+✔ body source replay requires canonical same-execution paths and exact UUID4 archive role (0.164041ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4.525125
+src/lib/producer/__tests__/guided-cut-launch.test.ts
+✔ guided workflow is explicit, MP4-only and separate from saved-plan review (0.563833ms)
+✔ pending or malformed journal rejects fresh, saved-plan and Resume before any prelaunch write (6.573875ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9.972
+src/lib/producer/__tests__/guided-cut-pause.test.ts
+✔ guided pipeline pauses only after actual cut gates and two clean independent reviews (1136.123833ms)
+✔ a reusable reviewed cut pauses without repeating its writers, critics or deterministic gate (1076.494375ms)
+✔ worker failure still stops heartbeat and releases the actual writer lease (59.137833ms)
+✔ waiting state survives restart, stops heartbeat, releases lease and cannot Resume or complete (890.616708ms)
+✔ request parser and current-artifact reobservation reject drift or missing evidence (1003.616875ms)
+✔ failed independent cut checks never create a waiting request or visual plan (70.272459ms)
+✔ CAS review verification reuses bound bytes and cannot perform a legacy receipt upgrade (833.10575ms)
+✔ unknown/autopilot and hybrid opt-ins cannot bypass guided gates (2.231708ms)
+✔ malformed waiting journals fail closed and stale workers cannot replace the request (880.093334ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5956.002708
+src/lib/producer/__tests__/guided-opening-cleanup-v2.test.ts
+✔ new complete cleanup metadata preserves exact batch and graphics without weakening legacy V1 (1.740667ms)
+✔ all-name cleanup requires stable canonical absence rather than removal responses (0.299667ms)
+✔ source-color proof must retain a closed bounded reservation and original semantic request hash (0.178708ms)
+✔ all cleanup stages are ordered and complete under the one protected allowance (0.423ms)
+✔ whole stdout rejects progress, duplicated completions, NUL and over-budget bytes (0.192875ms)
+✔ actual Python coordinator metadata for 2 and 128 names parses with virtual daemon and virtual 3s window (2500.347208ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2507.371084
+src/lib/producer/__tests__/guided-opening-client.test.ts
+✔ opening display parser accepts exact read-only states and selection URLs (2.969958ms)
+✔ opening parser cannot accept approval, hidden capabilities, foreign identity or invented time (0.726625ms)
+✔ opening media clocks, context, and URL parameters remain exact (0.70375ms)
+✔ exact audio boundary uses ties-to-even rather than rounded decimal seconds (0.211667ms)
+✔ browser metadata check distinguishes missing/foreign playback, never a review decision (0.108375ms)
+✔ opening status fetch is bounded, abortable, no-store and read-only without retry (12.28775ms)
+✔ initial opening panel exposes no media or premature launch/review controls (9.141542ms)
+✔ all nonselectable states have no video, no success claim and no automatic retry (2.528958ms)
+✔ ready display defaults to context playback and reports only the recorded attempt (1.485ms)
+✔ a verified operator approval is displayed without claiming body or delivery approval (0.964584ms)
+✔ server detail remains escaped plain text rather than interactive injected markup (0.644584ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 35.756375
+src/lib/producer/__tests__/guided-opening-launch-client.test.ts
+✔ launch metadata and acknowledgement are closed, exact and distinct from media/approval (2.146708ms)
+✔ terminal launch metadata clears the transient warning but retains the duplicate-action fence (9.186ms)
+✔ lost response retains exactly one UUID; stale/malformed/browser storage is never fresh authority (0.824792ms)
+✔ network calls are bounded/abortable; POST is exact once and unknown or wrong acknowledgements never retry (11.009583ms)
+✔ launch UI offers only explicit eligible actions and never advertises running/approved/full-video status (2.447209ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 29.841542
+src/lib/producer/__tests__/guided-presenter-profile.test.ts
+✔ four native presenter classes retain actual V8/cuts and do not release any legacy selector (22.622959ms)
+✔ shared manual geometry is not a bypass of either historical public owner fence (3.005042ms)
+✔ empty, inherited, downgraded or rehashed presenter authority cannot acquire the new class (5.037125ms)
+✔ unchanged or exact paired graphic-style decoration is accepted; altered target is never a crop authority (6.36675ms)
+✔ explicit no-caption choice and unchanged supported preset never ignore a track or custom authority (10.581791ms)
+✔ unsupported lanes, J-cut/bool speed, invented crop and numeric metadata still refuse (11.79775ms)
+✔ full-program graphics are allowed only disjoint; exact adjacent endpoints preserve original array indices (14.30575ms)
+✔ inset, bubble and split share declared geometry while upscaling and nonnormal graphics stay refused (12.689958ms)
+✔ mixed requested music and captions retain exact policies; a changed admitted asset cannot inherit old evidence (5.596583ms)
+✔ graphics entirely after the opening review still cannot overlap a requested presenter (4.120583ms)
+✔ new longform class refuses falsey malformed reframe without altering the legacy truthiness policy (13.869709ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 118.523625
+src/lib/producer/__tests__/guided-presenter-workload.test.ts
+✔ combined input budget accepts exact64MiPixel and rejects one extra pixel without dropping an occurrence (0.775917ms)
+✔ every occurrence is counted, including repeated equal canvases and all-future disjoint windows (0.144917ms)
+✔ NTSC uses original full-page frame origin and one extra frame costs an entire native page (0.148125ms)
+✔ native portrait and landscape have equal work without claiming asset display geometry (0.409875ms)
+✔ unknown, oversized and coerced occurrence metadata refuses before any execution (0.182ms)
+✔ original opening intake clock remains bounded and rational metadata cannot silently normalize (0.139959ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5.509916
+src/lib/producer/__tests__/guided-preview-boundary.test.ts
+✔ preview pointers are closed identities, never arbitrary media paths (0.749125ms)
+✔ engine preview work finishes before the atomic user-wait event and pointer (992.590417ms)
+✔ failed, malformed or missing preview generation never starts user wait or visual authoring (2195.127708ms)
+✔ worker closure receives the real held project lease, released after callback (29.85175ms)
+✔ worker settlement cannot create a new pointerless waiting checkpoint (742.961959ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3963.58375
+src/lib/producer/__tests__/guided-source-color-cleanup-facts.test.ts
+✔ all three exact phases parse as detached metadata while retaining every explicit flag (2.653625ms)
+✔ every required field and every unknown top-level field is closed (0.558583ms)
+✔ versions are strict and neither phase can masquerade as the other (0.192625ms)
+✔ pending cleanup cannot clear a claim and final cleanup cannot retain one (0.106917ms)
+✔ all selection and approval flags require literal false (0.27075ms)
+✔ every journal, claim, clock, output and invocation hash is a strict lowercase SHA (0.6315ms)
+✔ execution and cleanup attempt IDs require exact UUIDv4 strings (0.24225ms)
+✔ timestamps require canonical UTC milliseconds and clock facts cannot predate generation (0.315875ms)
+✔ archive and original active reference must preserve identical raw SHA and size (0.395083ms)
+✔ raw reference shapes reject missing, extra, unsafe path and non-SHA fields (0.495209ms)
+✔ reservation and archive sizes allow the exact 8 MiB boundary only (0.336625ms)
+✔ acknowledgement raw reference has its separate exact 128 KiB ceiling (0.137792ms)
+✔ archive and acknowledgement paths bind the exact declared execution, attempt and filename (0.231542ms)
+✔ retirement acknowledgement retains honest disposition without inferring earlier unlink (0.103875ms)
+✔ pure parser accepts structural metadata without claiming a real namespace or cross-fact joins (0.124125ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14.361958
+src/lib/producer/__tests__/guided-source-color-request.test.ts
+✔ V1 keeps exact parser behavior and identity; only the additive parser accepts explicit V2 (1.005375ms)
+✔ both request classes retain every original required field and exact pinned submission values (0.312084ms)
+✔ mixed profiles preserve explicit unknown history and null camera without inference or rewriting (0.580042ms)
+✔ closed nested transport rejects unknown fields, boxed enums, sparse arrays and numeric coercion (0.266416ms)
+✔ declared group topology is closed but the transport does not prove actual source-end coverage (0.281291ms)
+✔ coverage compares exact sets while preserving caller first-occurrence order and rejects holes (0.7715ms)
+✔ Unicode prose is exact data with codepoint bounds and strict control/surrogate rejection (0.387042ms)
+✔ the aggregate request byte budget is enforced without silently truncating valid fields (41.0995ms)
+✔ one actual Python batch agrees on pure declarations and separately refuses unproved source-end coverage (54.233959ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 102.718583
+src/lib/producer/__tests__/guided-sse.test.ts
+✔ guided callers explicitly allow pause, but output-only callers never mistake it for delivery (13.603417ms)
+✔ server errors propagate and cancel body rather than falsely finishing a guided request (0.508458ms)
+✔ disconnect interrupts a waiting stream read without claiming completion (1.755208ms)
+✔ cut-first authoring discloses its real speed capability without weakening ordinary workflows (0.790583ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 19.987958
+src/lib/producer/__tests__/guided-treatment-ui-state.test.ts
+✔ saved treatment copy distinguishes working opening controls from unfinished upstream and body controls (0.740292ms)
+✔ unreleased v2 awaiting_cut_approval cannot expose legacy approval or resume actions (11.924042ms)
+✔ unreleased v2 awaiting_treatment_brief cannot expose legacy approval or resume actions (1.308583ms)
+✔ unreleased v2 treatment_admitted cannot expose legacy approval or resume actions (0.894208ms)
+✔ unreleased v2 failed cannot expose legacy approval or resume actions (0.723167ms)
+✔ unreleased v2 interrupted cannot expose legacy approval or resume actions (0.805875ms)
+✔ legacy failed projects remain resumable and legacy checkpoints retain their controls (0.060125ms)
+✔ initial editor status check mounts no timeline, player, or premature Color controls (1.472708ms)
+✔ checkpoint navigation preserves an existing dirty timeline when discard is canceled (0.272917ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22.674583
+src/lib/producer/__tests__/hyperframes-launch.test.ts
+hyperframes-launch.test.ts: all assertions passed
+src/lib/producer/__tests__/ingest-source-placement.test.ts
+ingest-source-placement.test.ts: all assertions passed
+src/lib/producer/__tests__/intent-capabilities.test.ts
+intent-capabilities.test.ts: all assertions passed
+src/lib/producer/__tests__/intent-capability-persistence.test.ts
+intent-capability-persistence.test.ts: all assertions passed
+src/lib/producer/__tests__/intent-flow.test.ts
+intent-flow.test.ts: all assertions passed
+src/lib/producer/__tests__/intent-presets.test.ts
+intent-presets.test.ts: all assertions passed
+src/lib/producer/__tests__/intent-status-projection.test.ts
+intent-status-projection.test.ts: all assertions passed
+src/lib/producer/__tests__/manifest-music.test.ts
+manifest-music.test.ts: all assertions passed
+src/lib/producer/__tests__/mp4-launch-authority.test.ts
+✔ new MP4 projects do not discover, open, or contact Palmier (0.810709ms)
+✔ source and saved-cut bootstraps require unchanged live readback (1.796291ms)
+✔ manual, promoted, handed-off, checkpoint and unknown authority fail before readback (11.732ms)
+✔ orphaned, malformed and unsafe records never become an absent-workspace fallback (2.24ms)
+✔ unobserved human drift and unavailable Palmier both block in-place MP4 (1.049958ms)
+✔ fresh and saved-plan HTTP launches preserve a human-owned project's plan and master (60.009042ms)
+✔ the real guard subprocess has a hard deadline and rejects a killed readback (104.649625ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 184.270833
+src/lib/producer/__tests__/native-media-picker.test.ts
+native-media-picker.test.ts: all assertions passed
+src/lib/producer/__tests__/operator-intent-authority.test.ts
+operator-intent-authority.test.ts: all assertions passed
+src/lib/producer/__tests__/p0-legacy-regression-gates.test.ts
+p0 legacy regression gate registry tests passed
+src/lib/producer/__tests__/p0-machine-contracts.test.ts
+p0-machine-contracts tests passed
+src/lib/producer/__tests__/p2-cut-repair-alternate-take-prepare-wiring.test.ts
+p2-cut-repair-alternate-take-prepare-wiring tests passed
+src/lib/producer/__tests__/p2-cut-repair-alternate-take-runner.test.ts
+p2-cut-repair-alternate-take-runner tests passed
+src/lib/producer/__tests__/p2-cut-repair-approval-authority.test.ts
+p2 cut-repair approval authority tests passed
+src/lib/producer/__tests__/p2-cut-repair-approval-sealer.test.ts
+p2 cut-repair approval sealer tests passed
+src/lib/producer/__tests__/p2-cut-repair-execute-admission.test.ts
+p2-cut-repair-execute-admission tests passed
+src/lib/producer/__tests__/p2-cut-repair-package-replay.test.ts
+p2-cut-repair-package-replay tests passed
+src/lib/producer/__tests__/p2-cut-repair-picture-plan-authority.test.ts
+p2-cut-repair-picture-plan-authority tests passed
+src/lib/producer/__tests__/p2-cut-repair-review-approve-orchestration.test.ts
+p2 cut-repair review/approve orchestration tests passed
+src/lib/producer/__tests__/p2-cut-repair-route-policy.test.ts
+p2-cut-repair-route-policy tests passed
+src/lib/producer/__tests__/p2-cut-repair-route-runner.test.ts
+p2-cut-repair-route-runner tests passed
+src/lib/producer/__tests__/p2-cut-repair-speed-parity.test.ts
+p2-cut-repair-speed-parity tests passed
+src/lib/producer/__tests__/p2-row10-integrated-lifecycle.test.ts
+p2 row-10 integrated production lifecycle tests passed
+src/lib/producer/__tests__/p2-transition-schema-parity.test.ts
+p2-transition-schema-parity tests passed
+src/lib/producer/__tests__/palmier-candidate-qc-runner.test.ts
+palmier-candidate-qc-runner.test.ts: all assertions passed
+src/lib/producer/__tests__/palmier-candidate-qc.test.ts
+palmier-candidate-qc.test.ts: all assertions passed
+src/lib/producer/__tests__/palmier-canonical-ai-guard.test.ts
+palmier-canonical-ai-guard.test.ts: all assertions passed
+src/lib/producer/__tests__/palmier-draft-runner.test.ts
+palmier-draft-runner.test.ts: all assertions passed
+src/lib/producer/__tests__/palmier-launch-contract.test.ts
+palmier-launch-contract.test.ts: all assertions passed
+src/lib/producer/__tests__/palmier-live-build-contract.test.ts
+palmier-live-build-contract.test.ts: all assertions passed
+src/lib/producer/__tests__/palmier-live-build-reconciliation.test.ts
+palmier-live-build-reconciliation.test.ts: all assertions passed
+src/lib/producer/__tests__/palmier-native-plan-hash-cross-runtime.test.ts
+palmier-native-plan-hash-cross-runtime.test.ts: passed
+src/lib/producer/__tests__/palmier-native-runner.test.ts
+palmier-native-runner.test.ts: all assertions passed
+src/lib/producer/__tests__/palmier-native-stream.test.ts
+palmier-native-stream.test.ts: all assertions passed
+src/lib/producer/__tests__/palmier-open-handoff.test.ts
+palmier-open-handoff.test.ts: all assertions passed
+src/lib/producer/__tests__/palmier-ownership.test.ts
+palmier-ownership.test.ts: all assertions passed
+src/lib/producer/__tests__/palmier-parity.test.ts
+palmier-parity.test.ts: all assertions passed
+src/lib/producer/__tests__/palmier-primary-auto-edit-contract.test.ts
+✔ managed rich initial builds route through the full governed plan (0.608167ms)
+✔ catalog graphics and seam transitions cannot enter the primitive native planner (0.539291ms)
+✔ invalid managed state fails closed instead of using the flat legacy path (0.086959ms)
+✔ legacy flat mirrors cannot masquerade as an editable source bootstrap (0.147ms)
+✔ native initial Auto Edit keeps one editable candidate through QC and promotion (1.251625ms)
+✔ rich initial intent never starts the primitive native mutation path (0.14075ms)
+✔ the main pipeline cannot append a flat render or final mirror after native handling (0.705625ms)
+✔ promotion cannot substitute a different timeline for the reviewed candidate (0.337292ms)
+✔ resumed promoted candidate reconciles the durable dual commit before outputs (0.308667ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9.432917
+src/lib/producer/__tests__/palmier-qc-approval.test.ts
+palmier-qc-approval.test.ts: all assertions passed
+src/lib/producer/__tests__/palmier-view-target.test.ts
+palmier-view-target.test.ts: all assertions passed
+src/lib/producer/__tests__/palmier-working-checkpoints.test.ts
+palmier-working-checkpoints.test.ts: all assertions passed
+src/lib/producer/__tests__/placement-geometry.test.ts
+placement-geometry: all assertions passed
+src/lib/producer/__tests__/plan-history-version.test.ts
+✔ saved Studio import -> Undo -> Save -> Redo -> Save preserves live CAS and all cut content (45.878542ms)
+✔ legacy and malformed live version authority cannot be replaced by a historical version (0.205209ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 49.333417
+src/lib/producer/__tests__/plan-refit-hash-cross-runtime.test.ts
+plan-refit-hash-cross-runtime.test.ts: passed
+src/lib/producer/__tests__/plan-refit-provenance.test.ts
+plan-refit-provenance.test.ts: all assertions passed
+src/lib/producer/__tests__/plan-refit-transaction.test.ts
+plan-refit-transaction.test.ts: all assertions passed
+src/lib/producer/__tests__/plan-review-packet.test.ts
+plan-review-packet.test.ts: all assertions passed
+src/lib/producer/__tests__/planning-gates.test.ts
+planning-gates.test.ts: all assertions passed
+src/lib/producer/__tests__/polling-control.test.ts
+polling-control.test.ts: all assertions passed
+src/lib/producer/__tests__/presenter-layout-v1.test.ts
+✔ all three declared layouts preserve explicit source order and input bytes (1.561084ms)
+✔ portrait bubble and both split axes use actual pixel rather than normalized square geometry (0.158041ms)
+✔ the closed declaration cannot carry paths, tracking, asset audio or approval metadata (0.374125ms)
+✔ source IDs are ordered, unique and bounded without coercion or inferred replacements (0.094958ms)
+✔ all rectangle numbers and manual crop bounds fail closed without clamping (0.202625ms)
+✔ asset offsets are canonical reduced safe-integer rationals including zero as 0/1 (0.212542ms)
+✔ positive ramp frames are bounded declarations, not a substituted frame clock (0.207458ms)
+✔ mask class, radius and actual crop-to-destination aspect cannot be substituted (0.20175ms)
+✔ manual protected envelope must fit every actual rounded or circular mask corner (0.22925ms)
+✔ split must exactly tile and inset presentation must retain an explicit full canvas (0.379292ms)
+✔ target geometry rejects malformed canvas and subpixel surfaces (0.128792ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7.315708
+src/lib/producer/__tests__/preview-health.test.ts
+preview health protocol tests passed
+src/lib/producer/__tests__/preview-stale-reload.test.ts
+preview-stale-reload.test.ts: all assertions passed
+src/lib/producer/__tests__/producer-ai-provider.test.ts
+[SNIPER 05:31:09.158 server producer:auto-edit] spawn codex (authoring) {
+  dir: '/tmp/sniper job/producer',
+  scope: 'produced',
+  reasoning: 'xhigh',
+  basis: 'configured',
+  sourceDurationS: undefined
+}
+producer-ai-provider.test.ts: all assertions passed
+src/lib/producer/__tests__/producer-contracts-v1.test.ts
+producer-contracts-v1 tests passed
+src/lib/producer/__tests__/producer-run-registry.test.ts
+producer-run-registry.test.ts: all assertions passed
+src/lib/producer/__tests__/producer-schema-enum-parity.test.ts
+producer-schema-enum-parity tests passed
+src/lib/producer/__tests__/producer-schema-parity.test.ts
+producer-schema-parity tests passed
+src/lib/producer/__tests__/producer-stream-navigation.test.ts
+producer-stream-navigation.test.ts: all assertions passed
+src/lib/producer/__tests__/project-card-state.test.ts
+project-card-state.test.ts: all assertions passed
+src/lib/producer/__tests__/project-mutation-routes.test.ts
+project-mutation-routes.test.ts: all assertions passed
+src/lib/producer/__tests__/project-state.test.ts
+project-state.test.ts: all assertions passed
+src/lib/producer/__tests__/projects-client.test.ts
+projects-client.test.ts: all assertions passed
+src/lib/producer/__tests__/recent-project-pagination.test.ts
+✔ progressive pages do not strand projects after the eighth entry (26.054917ms)
+✔ a shortened registry cannot show negative remaining counts (0.681875ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 30.39725
+src/lib/producer/__tests__/reference-admission-verifier.test.ts
+reference-admission-verifier.test.ts: all assertions passed
+src/lib/producer/__tests__/reference-decision.test.ts
+reference-decision.test.ts: all assertions passed
+src/lib/producer/__tests__/reference-fetch-policy.test.ts
+reference-fetch-policy.test.ts: all assertions passed
+src/lib/producer/__tests__/reference-frame-policy.test.ts
+reference-frame-policy.test.ts: all assertions passed
+src/lib/producer/__tests__/reference-intake-policy.test.ts
+reference-intake-policy.test.ts: all assertions passed
+src/lib/producer/__tests__/reference-intent.test.ts
+reference-intent.test.ts: all assertions passed
+src/lib/producer/__tests__/reference-library.test.ts
+reference-library.test.ts: all assertions passed
+src/lib/producer/__tests__/reference-profile.test.ts
+reference-profile.test.ts: all assertions passed
+src/lib/producer/__tests__/reference-provenance.test.ts
+reference-provenance.test.ts: all assertions passed
+src/lib/producer/__tests__/reference-qualification.test.ts
+reference-qualification tests passed
+src/lib/producer/__tests__/reference-review-context.test.ts
+reference-review-context.test.ts: all assertions passed
+src/lib/producer/__tests__/reference-selection-flow.test.ts
+reference-selection-flow.test.ts: all assertions passed
+src/lib/producer/__tests__/reference-sidecar.test.ts
+reference-sidecar.test.ts: all assertions passed
+src/lib/producer/__tests__/reference-study-files.test.ts
+reference-study-files.test.ts: all assertions passed
+src/lib/producer/__tests__/render-graph-executor-v1.test.ts
+render-graph-executor-v1 tests passed
+src/lib/producer/__tests__/render-graph-v1.test.ts
+render-graph-v1 tests passed
+src/lib/producer/__tests__/resume-delivery-policy.test.ts
+✔ status derives historical and explicit policies only from a valid durable job (16.320875ms)
+✔ missing, invalid, and wrong-project journals cannot inherit policy from cached run state (15.225833ms)
+✔ legacy resume opens Palmier and sends explicit hybrid; MP4 resume contacts only Auto Edit (3.453291ms)
+✔ unknown policy and non-interrupted runs never open either editor or launch work (0.309583ms)
+✔ guided MP4 resume preserves explicit cut workflow and recognizes its pause without final approval (0.223375ms)
+✔ a rejected resume never retries fresh or changes delivery policy (0.927583ms)
+✔ a failed legacy Palmier open never falls through to MP4 or creates an Auto Edit job (0.203459ms)
+✔ resume buttons and captions identify the stored route and disable unknown policy (10.871ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 59.853292
+src/lib/producer/__tests__/review-batch-triage.test.ts
+review-batch-triage.test.ts: all assertions passed
+src/lib/producer/__tests__/review-stage-telemetry.test.ts
+✔ codex: exact prompt/policy preserved; negative verdict is not execution failure (24.89425ms)
+✔ legacy: exact prompt/policy preserved; negative verdict is not execution failure (17.201333ms)
+✔ provider error retains failed child and parent, without starting result checks (14.788458ms)
+✔ malformed critic output is a result-check failure, not a passing critic (14.385625ms)
+✔ missing evidence authority fails in measured preparation, before provider expense (15.033917ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 89.839958
+src/lib/producer/__tests__/run-status-copy.test.ts
+run-status-copy.test.ts: all assertions passed
+src/lib/producer/__tests__/save-plan-transaction.test.ts
+[SNIPER 05:31:15.167 server producer:save-plan] wrote {
+  file: '/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-save-plan-F1ZxkS/producer/edit_plan.json',
+  planVersion: 2,
+  snapshots: 1,
+  refit: true
+}
+[SNIPER 05:31:15.229 server producer:save-plan] wrote {
+  file: '/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-save-plan-LFS7oP/producer/edit_plan.json',
+  planVersion: 2,
+  snapshots: 1,
+  refit: false
+}
+[SNIPER 05:31:15.263 server producer:save-plan] wrote {
+  file: '/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-save-plan-NpvhFR/producer/edit_plan.json',
+  planVersion: 2,
+  snapshots: 1,
+  refit: false
+}
+[SNIPER 05:31:15.326 server producer:save-plan] wrote {
+  file: '/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-save-plan-ardBrj/producer/edit_plan.json',
+  planVersion: 2,
+  snapshots: 1,
+  refit: false
+}
+save-plan-transaction.test.ts: all assertions passed
+src/lib/producer/__tests__/saved-plan-planning-immutability.test.ts
+saved-plan-planning-immutability.test.ts: all assertions passed
+src/lib/producer/__tests__/saved-plan-review.test.ts
+saved-plan-review.test.ts: all assertions passed
+src/lib/producer/__tests__/scene-authoring-packet-v1.test.ts
+scene-authoring-packet-v1 tests passed
+src/lib/producer/__tests__/scene-package-contract-v1.test.ts
+scene-package-contract-v1 tests passed
+src/lib/producer/__tests__/section-marker-insert.test.ts
+✔ section-marker catalog role matches its actual alpha template (0.454ms)
+✔ actual editor insert creates free-band without migrating saved role or color (2.517875ms)
+✔ duplicating a saved marker preserves its authored anchor and color (0.190166ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10.385
+src/lib/producer/__tests__/set-graphic-text-v1.test.ts
+set-graphic-text-v1.test.ts: all assertions passed
+src/lib/producer/__tests__/short-long-route-matrix.test.ts
+short/long route matrix tests passed
+src/lib/producer/__tests__/sse-contract.test.ts
+sse-contract.test.ts: all assertions passed
+src/lib/producer/__tests__/studio-import-client.test.ts
+✔ proposal validation never enables import on missing, blocked or forged authority (1.007541ms)
+✔ prepare is explicit and sends no apply, force, render or authority override (10.586666ms)
+✔ apply invalidates first, sends only exact proposal bindings, then reloads canonical draft (1.557208ms)
+✔ lost/error/malformed responses never leave an apparently current preview or retry fresh (0.786333ms)
+✔ invalid or pre-aborted apply does not send or invalidate; same proposal can be replayed (0.4945ms)
+✔ UI shows proposed changes and draft-only action, with escaped text and blocked states (5.327375ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22.938
+src/lib/producer/__tests__/studio-review-client.test.ts
+studio-review-client.test.ts: all assertions passed
+src/lib/producer/__tests__/subscription-admission.test.ts
+✔ admission uses one executable/environment/cwd and charges status time to the original budget (343.648083ms)
+✔ unknown/pinned-version/API/cloud/oversize/failed statuses never admit inference or leak raw metadata (1687.039791ms)
+✔ Codex rejects API auth even though it reports logged in (219.137292ms)
+✔ already-cancelled invokes nothing; cancelled or expired status never receives a new deadline (456.382541ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2708.885958
+src/lib/producer/__tests__/subscription-policy.test.ts
+✔ Codex admits exact ChatGPT identity, never API-key or logged-in substrings (0.857458ms)
+✔ reusable Codex admission requires controlled argv, not caller-provided model-provider overrides (0.558958ms)
+✔ Claude rejects API, cloud, managed Console key, unknown entitlement and conflicting restriction (0.301583ms)
+✔ fixed settings prevent arbitrary paid-mode/config options without changing doctrine or MCP values (0.1455ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5.19525
+src/lib/producer/__tests__/subscription-status-cleanup.test.ts
+✔ valid metadata with a TERM-resistant ignored-stdio descendant rejects and observes group absence (345.525916ms)
+✔ overflow metadata with a TERM-resistant ignored-stdio descendant rejects and observes group absence (339.792875ms)
+✔ timeout metadata with a TERM-resistant ignored-stdio descendant rejects and observes group absence (689.29575ms)
+✔ abort metadata with a TERM-resistant ignored-stdio descendant rejects and observes group absence (690.255541ms)
+✔ unknown process-group observation rejects with truthful cleanup state and no raw account output (29.341416ms)
+✔ a false cleanup observation never upgrades to success because a timer elapsed (353.675375ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2450.518125
+src/lib/producer/__tests__/surgical-edit-critic.test.ts
+surgical-edit-critic.test.ts: all assertions passed
+src/lib/producer/__tests__/surgical-edit.test.ts
+surgical-edit.test.ts: all assertions passed
+src/lib/producer/__tests__/template-usage-approval.test.ts
+template-usage-approval.test.ts: all assertions passed
+src/lib/producer/__tests__/template-usage-history.test.ts
+template-usage-history.test.ts: all assertions passed
+src/lib/producer/__tests__/template-usage-stage.test.ts
+template-usage-stage.test.ts: all assertions passed
+src/lib/producer/__tests__/timeline-scale.test.ts
+timeline-scale.test.ts: all assertions passed
+src/lib/producer/__tests__/timing-anchor-migration-matrix.test.ts
+timing-anchor-migration-matrix tests passed
+src/lib/producer/__tests__/transcript-route.test.ts
+[SNIPER 05:31:25.104 server producer:transcript] read {
+  file: '/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-transcript-route-YssUE7/captions.srt',
+  cues: 1
+}
+[SNIPER 05:31:25.108 server producer:transcript] read failed {
+  file: '/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-transcript-route-YssUE7/captions.srt',
+  error: 'EISDIR: illegal operation on a directory, read'
+}
+transcript-route.test.ts: all assertions passed
+src/lib/producer/__tests__/treatment-operation-v1.test.ts
+treatment-operation-v1 tests passed
+src/lib/producer/__tests__/treatment-proposal-v4.test.ts
+✔ V4 keeps the closed V3/V2 contract and adds only decided style, graphic and seam fields (1.938375ms)
+✔ the provider's structured-output schema and the parser cannot drift apart (0.8295ms)
+✔ stored V2 and V3 objects still parse unchanged through the V4 dispatcher (0.330625ms)
+✔ every operation must declare a purposeful reason exactly when it is a catalog graphic (0.197083ms)
+✔ beat decisions are closed, single-use and cannot omit, delegate or under-consider a required beat (0.511ms)
+✔ hook seam decisions are clean-hook only and carry the renderer's minimum reason and evidence (0.270542ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7.0305
+src/lib/producer/__tests__/treatment-proposal-v5.test.ts
+✔ V5 retains the actual caption operation and complete clause coverage; V4 remains closed (1.076417ms)
+✔ V5 does not inherit legacy String coercion of enum arrays or objects (0.351583ms)
+✔ caption nullability, unknown metadata and arbitrary replacement words never enter V5 (0.901208ms)
+✔ ordinary V5 operations require null caption selection and preserve V4 constraints (0.524167ms)
+✔ caption projection preserves original plan and all non-caption fields exactly (0.966459ms)
+✔ contradictory caption clauses are blocked; duplicate identical requests produce only one track (0.568333ms)
+✔ caption requests cannot silently override accepted off/operator/trim intent (1.102875ms)
+✔ existing authority, unknown burn controls and legacy chapters cannot be silently overwritten (0.292209ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8.9675
+src/lib/producer/__tests__/treatment-proposal-v8.test.ts
+✔ actual V8 retains the real timed layout, Unicode brief and original clause indices (2.120541ms)
+✔ validation view removes geometry and timing only in the separate historical value (0.957167ms)
+✔ mixed V7 music, V6 crop, V5 captions and V8 layout preserve actual operation slots (1.083709ms)
+✔ V8 layout refuses every prior payload and extra field instead of laundering it through preserve-cut (0.833ms)
+✔ real window fields are mandatory integers inside the referenced actual beat (0.295875ms)
+✔ other V8 operations require explicit null and retain every inherited semantic constraint (0.174667ms)
+✔ historical parsers and the existing default remain closed; new dispatch is opt-in only (0.34425ms)
+✔ closed V8 JSON schema retains every unchanged V7 definition and all mandatory fields (53.316959ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 62.851625
+src/lib/producer/__tests__/typed-compatibility-edit.test.ts
+typed-compatibility-edit.test.ts: all assertions passed
+src/lib/producer/__tests__/typed-compatibility-finalize.test.ts
+typed-compatibility-finalize.test.ts: passed
+src/lib/producer/__tests__/warnings.test.ts
+warnings.test.ts: all assertions passed
+src/lib/producer/__tests__/workspace-isolation.test.ts
+workspace-isolation.test.ts: all assertions passed
+src/lib/segmenter/__tests__/file-browser-helpers.test.ts
+file-browser-helpers.test.ts: all assertions passed
+src/lib/server/__tests__/ask-editor-reconciliation.test.ts
+ask-editor-reconciliation.test.ts: passed
+src/lib/server/__tests__/auto-edit-authority.test.ts
+auto-edit-authority.test.ts: all assertions passed
+src/lib/server/__tests__/auto-edit-heartbeat.test.ts
+auto-edit-heartbeat.test.ts: all assertions passed
+src/lib/server/__tests__/auto-edit-promotion-process-crash.test.ts
+auto-edit promotion process-crash replay tests passed
+src/lib/server/__tests__/auto-edit-qc-seed.test.ts
+auto-edit-qc-seed.test.ts: all assertions passed
+src/lib/server/__tests__/auto-edit-stop.test.ts
+auto-edit-stop.test.ts: all assertions passed
+src/lib/server/__tests__/auto-edit-worker-mutation-lease.test.ts
+Auto Edit worker mutation lease tests passed
+src/lib/server/__tests__/bounded-json-body.test.ts
+✔ a 40 KiB streamed body without Content-Length is refused after at most limit + one chunk and the reader is cancelled (3.910584ms)
+✔ an oversize Content-Length is refused before any body read (0.867709ms)
+✔ a stalled stream hits the read deadline with 408 and the reader is cancelled (61.681375ms)
+✔ a small valid NextRequest body parses; invalid JSON and a missing body are 400 (1.993667ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 70.695333
+src/lib/server/__tests__/caller-process-deadline.test.ts
+✔ absent scope is unchanged; each declared ceiling and live ancestor only tightens (0.928083ms)
+✔ invalid/increasing/expired clocks poison rather than regain credit (0.412042ms)
+✔ a stale handed child remainder cannot replace or extend the original parent (0.161333ms)
+✔ cancelled ancestors remain cancelled in nested scopes (0.168458ms)
+✔ closed scopes reject escaped callbacks and final expiry rejects a successful value (1.101708ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4.497875
+src/lib/server/__tests__/caller-process-owned.test.ts
+✔ original malformed timeout is rejected before caller capping (1.057ms)
+✔ actual owned inert child is capped and exact group is absent before timeout returns (179.298167ms)
+✔ active-scope real Python projection retains original identity without media (55.475917ms)
+✔ unknown projection group observation retains exact private input and original error details (56.26375ms)
+ℹ TEST unknown-observation evidence retained: /var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-compat-projection-On63oR
+✔ scope expiry before projection never creates a private directory (2.905791ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 298.09925
+src/lib/server/__tests__/candidate-promotion-crash-recovery.test.ts
+candidate promotion process-crash recovery tests passed
+src/lib/server/__tests__/candidate-promotion-durability-adversarial.test.ts
+candidate promotion durability adversarial tests passed
+src/lib/server/__tests__/candidate-promotion-recovery-adversarial.test.ts
+candidate promotion adversarial recovery tests passed
+src/lib/server/__tests__/canonical-json-cross-runtime.test.ts
+canonical-json-cross-runtime.test.ts: 10011 values passed
+src/lib/server/__tests__/child-process-lifecycle.test.ts
+child-process-lifecycle.test.ts: all assertions passed
+src/lib/server/__tests__/color-diagnostic-api.test.ts
+✔ GET is project-bound/read-only and rejects path/query ambiguity (6.99425ms)
+✔ POST rejects cross-site and queries before body consumption (4.197916ms)
+✔ body disconnect cancels and unlocks the input stream (1.404792ms)
+✖ clean failed result releases exact leases; token replay is immutable and current-parent bound (50.723333ms)
+✔ shared project busy fails before runner or attempt writes (38.119708ms)
+✖ uncertain cleanup and changed active claim retain both ownership boundaries (47.863ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 4
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 152.765333
+
+✖ failing tests:
+
+test at src/lib/server/__tests__/color-diagnostic-api.test.ts:2:5788
+✖ clean failed result releases exact leases; token replay is immutable and current-parent bound (50.723333ms)
+  ColorError: Exact process identity is unavailable
+      at newRequest (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/app/api/producer/color-diagnostic/files.ts:48:54)
+      at startDiagnostic (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/app/api/producer/color-diagnostic/service.ts:58:21)
+      at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/color-diagnostic-api.test.ts:72:26)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    status: 503,
+    code: 'INVALID_COLOR_REQUEST'
+  }
+
+test at src/lib/server/__tests__/color-diagnostic-api.test.ts:2:8132
+✖ uncertain cleanup and changed active claim retain both ownership boundaries (47.863ms)
+  ColorError: Exact process identity is unavailable
+      at newRequest (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/app/api/producer/color-diagnostic/files.ts:48:54)
+      at startDiagnostic (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/app/api/producer/color-diagnostic/service.ts:58:21)
+      at TestContext.<anonymous> (/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/server/__tests__/color-diagnostic-api.test.ts:105:27)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1047:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+      at Test.postRun (node:internal/test_runner/test:1173:19)
+      at Test.run (node:internal/test_runner/test:1101:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:744:7) {
+    status: 503,
+    code: 'INVALID_COLOR_REQUEST'
+  }

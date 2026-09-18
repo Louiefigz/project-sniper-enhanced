@@ -1,0 +1,11 @@
+{
+  "status": "pass",
+  "testsRun": 9,
+  "failures": [],
+  "errors": [],
+  "skipped": [],
+  "elapsedSeconds": 9.851137332851067,
+  "scope": "Actual synthetic FFmpeg AAC/master/candidate delivery integration",
+  "realC0679Reencoded": false,
+  "humanListeningApproved": false
+}

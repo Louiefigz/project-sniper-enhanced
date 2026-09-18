@@ -1,0 +1,325 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"lineA","type":"string","label":"Setup line — holds center inside the mask, exits up on the swap beat","default":"You do not need more footage"},
+    {"id":"lineB","type":"string","label":"Payoff line — enters bottom-up on the swap beat and holds","default":"You need a sharper first line"},
+    {"id":"swapAt","type":"number","label":"Swap beat (s, comp-relative — the transcript time of the turn)","default":1.5,"min":0,"max":30,"step":0.1,"unit":"s"},
+    {"id":"underlineWord","type":"string","label":"Word/phrase in line B that gets the accent underline after landing (first case-insensitive whole-word match; empty = none)","default":"sharper"},
+    {"id":"accent","type":"color","label":"Underline color","default":"#054BC9"},
+    {"id":"exit","type":"enum","label":"Exit","default":"hold","options":[{"value":"hold","label":"Hold to end (compositor owns the seam)"},{"value":"fade","label":"Fade 0.45s"},{"value":"up","label":"Rise + fade 0.45s"}]}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · Motion template: LINE-SWAP (catalog port wave B — hook/
+    text-kinetics family; upstream: vendor/hyperframes-catalog/compositions/
+    components/line-swap.html, demo copy stripped, dark full-bleed stage
+    retargeted to the house white card).
+    Trigger it serves: the setup-then-subvert HOOK beat — line A rises into
+    an overflow-hidden mask and holds center; on the swap beat it exits up
+    through the mask as line B enters bottom-up on the SAME beat (one
+    restrained slam, smooth ease, no overshoot); an accent underline then
+    draws under the matched word of line B. Statement-beat sibling of
+    statement-card's statements[] chain — this is the two-line masked
+    REPLACEMENT anatomy, not an in-place text ramp.
+
+    CANVAS CHOICE (wave-B doctrine): 9:16 1080x1920 — hooks are the shorts
+    front-load (kinetic-quote precedent in the thesis family). Upstream is
+    container-responsive; a 16:9 sibling is a mechanical re-lane if a
+    long-form intro earns it. Transparent canvas -> white house card ->
+    alpha overlay: render with `--format mov` (ProRes 4444).
+
+    CONTRACT for the PRODUCER compositing stage:
+      - lineA / lineB / swapAt / underlineWord / accent / exit are
+        `data-composition-variables`. template_catalog_contract REJECTS a
+        plan with empty lines, a line over 48 characters or wider than the
+        758px mask under the measured glyph-width table (a char count alone
+        let "W"x40 clip half the line), a negative/non-finite swapAt, or an
+        underlineWord with no whole-word match in lineB; this file throws on
+        a non-empty unmatched underlineWord (defense in depth).
+      - swapAt is seconds relative to the overlay's outStart — set it to the
+        transcript time of the turn. It is CLAMPED (upstream law, kept) so
+        line A fully arrives before the beat and the swap + underline always
+        complete before any exit begins.
+      - MECHANISM (kept from upstream verbatim): both lines live inside one
+        overflow-hidden mask; every move is a yPercent fromTo with BOTH
+        endpoints explicit (the mid-timeline exit tween carries
+        immediateRender:false — house law #1); the underline is a scaleX
+        draw from a left origin (transforms only, house law #9); the
+        underline span wraps match + bar in one inline element so the flex
+        line cannot collapse the boundary space.
+      - ENVELOPE (house law #7): fixed IN 0.5s + swap span 0.72s + underline
+        span 0.6s + optional OUT 0.45s; only HOLD is elastic (completely
+        still). Default exit "hold" — THE EXIT LAW.
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (stat-card
+        note); graphics_render rewrites it per window.
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>SNIPER · line-swap</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="/vendor/gsap/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: var(--canvas-w);
+        height: var(--canvas-h);
+        overflow: hidden;
+        background: transparent;          /* alpha overlay — only the card paints */
+        font-family: var(--font);
+      }
+      #ls-root { position: relative; width: var(--canvas-w); height: var(--canvas-h); }
+
+      /* .stage OWNS the centering transform (visual center x, free band) so
+         GSAP can rise/fade the card without clobbering the centering. */
+      .stage {
+        position: absolute;
+        left: var(--visual-center-x);
+        top: 855px;
+        transform: translate(-50%, -50%);
+        display: flex;
+        justify-content: center;
+      }
+      #ls-card {
+        background: var(--card-bg);
+        border-radius: var(--card-radius);
+        padding: 44px 56px;
+        box-shadow: var(--card-shadow);
+        max-width: var(--safe-width);
+        will-change: transform, opacity;
+      }
+      /* Beat mask: both lines live inside; the swap slides through it. */
+      #ls-mask {
+        position: relative;
+        width: 758px;                     /* safe-width minus card padding */
+        height: var(--ls-mask-h, 120px);
+        overflow: hidden;
+      }
+      .ls-line {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: var(--ls-font-size, 84px);
+        font-weight: 600;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+        white-space: nowrap;
+        will-change: transform;
+      }
+      /* One inline wrapper per line: a bare text node next to the underline
+         span would become separate flex items and the boundary space would
+         collapse ("youcontrol."). */
+      .ls-line-inner { display: inline; }
+      .ls-ul-wrap {
+        position: relative;
+        display: inline-block;
+        white-space: nowrap;
+      }
+      .ls-underline {
+        position: absolute;
+        left: 0.02em;
+        right: 0.02em;
+        bottom: -0.14em;
+        height: 0.055em;
+        border-radius: 0.03em;
+        transform-origin: left center;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="ls-root"
+      data-composition-id="line-swap"
+      data-width="1080"
+      data-height="1920"
+      data-start="0"
+      data-duration="3.5"
+    >
+      <div class="stage">
+        <div id="ls-card" class="clip" data-start="0" data-duration="60" data-track-index="1">
+          <div id="ls-mask" role="img">
+            <div class="ls-line ls-line-a"><span class="ls-line-inner"></span></div>
+            <div class="ls-line ls-line-b"><span class="ls-line-inner"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        var root = document.getElementById("ls-root");
+        var card = document.getElementById("ls-card");
+        var mask = document.getElementById("ls-mask");
+        var lineAEl = root.querySelector(".ls-line-a");
+        var lineBEl = root.querySelector(".ls-line-b");
+        var lineAInner = lineAEl.querySelector(".ls-line-inner");
+        var lineBInner = lineBEl.querySelector(".ls-line-inner");
+        var D = Math.max(0.001, parseFloat(root.dataset.duration) || 3.5);
+
+        var defaults = {
+          lineA: "You do not need more footage",
+          lineB: "You need a sharper first line",
+          swapAt: 1.5, underlineWord: "sharper",
+          accent: "#054BC9", exit: "hold",
+        };
+        var HF = window.__hyperframes;
+        var vars = Object.assign({}, defaults,
+          HF && HF.getVariables ? HF.getVariables() : {});
+
+        function asLine(value, fallback) {
+          return value == null ? fallback
+            : String(value).trim().replace(/\s+/g, " ");
+        }
+        var lineA = asLine(vars.lineA, defaults.lineA);
+        var lineB = asLine(vars.lineB, defaults.lineB);
+        var underlineWord = asLine(vars.underlineWord, "");
+        var accent = String(vars.accent || "#054BC9");
+        var exit = vars.exit === "fade" || vars.exit === "up" ? vars.exit : "hold";
+
+        lineAInner.textContent = lineA;
+
+        // First case-insensitive WORD-BOUNDARY match: a bare indexOf
+        // underlines the wrong ink ("art" first hits inside "Start" —
+        // review F3); the chars around the match must be absent or
+        // non-alphanumeric (the same arithmetic the plan-side gate runs).
+        function boundaryIndexOf(haystack, needle) {
+          var low = haystack.toLowerCase();
+          var n = needle.toLowerCase();
+          var wordChar = /[\p{L}\p{N}]/u;
+          var i = low.indexOf(n);
+          while (i >= 0) {
+            var beforeOk = i === 0 || !wordChar.test(low[i - 1]);
+            var end = i + n.length;
+            var afterOk = end >= low.length || !wordChar.test(low[end]);
+            if (beforeOk && afterOk) return i;
+            i = low.indexOf(n, i + 1);
+          }
+          return -1;
+        }
+
+        // Split line B around that match — textContent nodes only, never
+        // innerHTML. An empty underlineWord renders plain lines (preview
+        // convenience); a non-empty UNMATCHED one throws —
+        // template_catalog_contract rejects it plan-side, this is defense
+        // in depth.
+        var matchIndex = underlineWord.length > 0
+          ? boundaryIndexOf(lineB, underlineWord) : -1;
+        if (underlineWord.length > 0 && matchIndex < 0) {
+          throw new Error("line-swap: underlineWord '" + underlineWord +
+            "' does not appear in lineB '" + lineB + "' as a whole word");
+        }
+        var underlineEl = null;
+        if (matchIndex >= 0) {
+          var before = lineB.slice(0, matchIndex);
+          var matched = lineB.slice(matchIndex, matchIndex + underlineWord.length);
+          var after = lineB.slice(matchIndex + underlineWord.length);
+          if (before) lineBInner.appendChild(document.createTextNode(before));
+
+          var wrap = document.createElement("span");
+          wrap.className = "ls-ul-wrap";
+          wrap.appendChild(document.createTextNode(matched));
+          underlineEl = document.createElement("span");
+          underlineEl.className = "ls-underline";
+          underlineEl.setAttribute("aria-hidden", "true");
+          underlineEl.style.background = accent;
+          wrap.appendChild(underlineEl);
+          lineBInner.appendChild(wrap);
+          if (after) lineBInner.appendChild(document.createTextNode(after));
+        } else {
+          lineBInner.textContent = lineB;
+        }
+        mask.setAttribute("aria-label", lineA + " " + lineB);
+
+        // Deterministic character-count fit against the longer line (both
+        // lines are nowrap): px against the 758px mask width (upstream's
+        // cqw formula rescaled). The mask height rides the fitted size.
+        var characters = Math.max(1,
+          Array.from(lineA).length, Array.from(lineB).length);
+        var fitted = Math.max(30, Math.min(84, Math.round(1440 / characters)));
+        root.style.setProperty("--ls-font-size", fitted + "px");
+        root.style.setProperty("--ls-mask-h", Math.round(fitted * 1.42) + "px");
+
+        // RETIME RANGE (house law #7): fixed phases; HOLD is the only
+        // elastic span; phases compress together when D is short.
+        var IN_A_BASE = 0.5;
+        var EXIT_A_BASE = 0.35;
+        var LAG_BASE = 0.22;   /* line B starts this long after the beat */
+        var IN_B_BASE = 0.5;
+        var UL_BEAT_BASE = 0.15;
+        var UL_BASE = underlineEl ? 0.45 : 0;
+        var OUT_BASE = exit === "hold" ? 0 : 0.45;
+        var swapSpanBase = LAG_BASE + IN_B_BASE;
+        var ulSpanBase = underlineEl ? UL_BEAT_BASE + UL_BASE : 0;
+        var totalBase = IN_A_BASE + swapSpanBase + ulSpanBase + OUT_BASE;
+        var scale = D < totalBase ? D / totalBase : 1;
+        var IN_A = IN_A_BASE * scale;
+        var EXIT_A = EXIT_A_BASE * scale;
+        var LAG = LAG_BASE * scale;
+        var IN_B = IN_B_BASE * scale;
+        var UL_BEAT = UL_BEAT_BASE * scale;
+        var UL = UL_BASE * scale;
+        var OUT = OUT_BASE * scale;
+        var OUT_START = D - OUT;
+
+        var swapAtRaw = Number(vars.swapAt);
+        var swapAt = Number.isFinite(swapAtRaw) ? Math.max(0, swapAtRaw) : 1.5;
+        // line A fully arrives before the beat; the swap and the underline
+        // always complete before the exit begins.
+        swapAt = Math.min(swapAt,
+          Math.max(IN_A, OUT_START - (LAG + IN_B + UL_BEAT + UL)));
+        swapAt = Math.max(swapAt, IN_A);
+        var landB = swapAt + LAG + IN_B;
+
+        gsap.set(lineBEl, { yPercent: 115 });
+        if (underlineEl) gsap.set(underlineEl, { scaleX: 0 });
+
+        window.__timelines = window.__timelines || {};
+        var tl = gsap.timeline({ paused: true });
+
+        // Card arrives with line A's rise (one settle, no separate beat).
+        tl.fromTo(card, { opacity: 0, y: 40 },
+          { opacity: 1, y: 0, duration: IN_A, ease: "power3.out" }, 0);
+
+        // IN: line A enters bottom-up through the mask. One move.
+        tl.fromTo(lineAEl, { yPercent: 115 },
+          { yPercent: 0, duration: IN_A, ease: "power4.out" }, 0);
+
+        // SWAP: the beat replacement. Line A exits up through the mask as
+        // line B slides in bottom-up. Single restrained slam, smooth ease.
+        tl.fromTo(lineAEl, { yPercent: 0 },
+          { yPercent: -115, duration: EXIT_A, ease: "power2.in",
+            immediateRender: false },
+          swapAt);
+        tl.fromTo(lineBEl, { yPercent: 115 },
+          { yPercent: 0, duration: IN_B, ease: "power4.out" },
+          swapAt + LAG);
+
+        // UNDERLINE: accent bar draws left to right after line B lands
+        // (scaleX from a left origin — transforms only, house law #9).
+        if (underlineEl) {
+          tl.fromTo(underlineEl, { scaleX: 0 },
+            { scaleX: 1, duration: UL, ease: "power2.out" },
+            landB + UL_BEAT);
+        }
+
+        // HOLD: completely still.
+
+        // OUT: optional departure; "hold" (default) leaves the seam to the
+        // compositor / exitOnCut (THE EXIT LAW).
+        if (exit === "fade") {
+          tl.to(card, { opacity: 0, duration: OUT, ease: "power2.in" }, OUT_START);
+        } else if (exit === "up") {
+          tl.to(card, { opacity: 0, y: -80, duration: OUT, ease: "power2.in" }, OUT_START);
+        }
+
+        tl.seek(0);
+        window.__timelines["line-swap"] = tl;
+      })();
+    </script>
+  </body>
+</html>

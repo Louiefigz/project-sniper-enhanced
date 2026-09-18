@@ -1,0 +1,119 @@
+test_retained_cross_product_is_fresh (test_comp_rate_matrix.CompRateMatrixTests.test_retained_cross_product_is_fresh) ... FAIL
+test_repository_measured_baselines_are_closed (test_current_system_inventory_check.CurrentSystemInventoryCheckTests.test_repository_measured_baselines_are_closed) ... ERROR
+test_retained_cohort_is_complete_fresh_and_fail_closed (test_p0_adversarial_ingress_artifact.P0AdversarialIngressArtifactTests.test_retained_cohort_is_complete_fresh_and_fail_closed) ... FAIL
+test_short_and_lf14_retained_evidence_is_current (test_p0_render_effect_parity_artifact.P0RenderEffectParityArtifactTests.test_short_and_lf14_retained_evidence_is_current) ... [SNIPER:graphics] render tools resolved: browser=/Users/aaronfigueroa/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-152.0.7977.30/chrome-headless-shell-mac-arm64/chrome-headless-shell ffmpeg=/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffmpeg ffprobe=/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffprobe node=/opt/homebrew/Cellar/node/23.10.0_1/bin/node
+FAIL
+test_receipt_is_fresh_self_hashed_and_path_free (test_p2_row1_claim_artifact.P2RowOneClaimArtifactTests.test_receipt_is_fresh_self_hashed_and_path_free) ... FAIL
+test_retained_live_closure_is_fresh_complete_and_load_bearing (test_p4_exit_closure_artifact.P4ExitClosureArtifactTests.test_retained_live_closure_is_fresh_complete_and_load_bearing) ... FAIL
+test_retained_twenty_four_overlay_proof_is_fresh (test_p5_compositor_artifact.P5CompositorArtifactTests.test_retained_twenty_four_overlay_proof_is_fresh) ... FAIL
+test_retained_review_repair_is_fresh_and_load_bearing (test_p5_review_repair_artifact.P5ReviewRepairArtifactTests.test_retained_review_repair_is_fresh_and_load_bearing) ... FAIL
+
+======================================================================
+ERROR: test_repository_measured_baselines_are_closed (test_current_system_inventory_check.CurrentSystemInventoryCheckTests.test_repository_measured_baselines_are_closed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/test_current_system_inventory_check.py", line 271, in test_repository_measured_baselines_are_closed
+    result = validate_inventory(repo, inventory)
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_system_inventory_check.py", line 191, in validate_inventory
+    baseline_evidence = _verify_baseline(repo, inventory.get("baseline"))
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_system_inventory_check.py", line 89, in _verify_baseline
+    raise RuntimeError(
+        f"baseline evidence is not one closed trace: {relative}")
+RuntimeError: baseline evidence is not one closed trace: docs/producer/command-driven-editing/contracts/p0-current-short-baseline-v1.json
+
+======================================================================
+FAIL: test_retained_cross_product_is_fresh (test_comp_rate_matrix.CompRateMatrixTests.test_retained_cross_product_is_fresh)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/test_comp_rate_matrix.py", line 79, in test_retained_cross_product_is_fresh
+    self.assertEqual(issue, "")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: 'rate matrix sourceDigest is stale or malformed' != ''
+- rate matrix sourceDigest is stale or malformed
+
+
+======================================================================
+FAIL: test_retained_cohort_is_complete_fresh_and_fail_closed (test_p0_adversarial_ingress_artifact.P0AdversarialIngressArtifactTests.test_retained_cohort_is_complete_fresh_and_fail_closed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/test_p0_adversarial_ingress_artifact.py", line 43, in test_retained_cohort_is_complete_fresh_and_fail_closed
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        value["sourceClosure"],
+        ^^^^^^^^^^^^^^^^^^^^^^^
+        {name: _sha(REPO / name) for name in CLOSURE},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: {'scripts/producer/headless/container_policy.py': '4756dec73[800 chars]7b4'} != {'scripts/producer/tests/live_p0_adversarial_ingress_accepta[800 chars]9f2'}
+Diff is 1515 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_short_and_lf14_retained_evidence_is_current (test_p0_render_effect_parity_artifact.P0RenderEffectParityArtifactTests.test_short_and_lf14_retained_evidence_is_current)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/test_p0_render_effect_parity_artifact.py", line 18, in test_short_and_lf14_retained_evidence_is_current
+    value = validate_retained_parity()
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/p0_render_effect_parity_artifact.py", line 215, in validate_retained_parity
+    return {case: validate_case(root, case) for case in CASES}
+                  ~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/p0_render_effect_parity_artifact.py", line 197, in validate_case
+    summary = _verify_summary(paths, oracle, (incremental, forced))
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/p0_render_effect_parity_artifact.py", line 181, in _verify_summary
+    raise ParityArtifactError("retained parity toolchain is stale")
+tests.p0_render_effect_parity_artifact.ParityArtifactError: retained parity toolchain is stale
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/test_p0_render_effect_parity_artifact.py", line 20, in test_short_and_lf14_retained_evidence_is_current
+    self.fail(str(error))
+    ~~~~~~~~~^^^^^^^^^^^^
+AssertionError: retained parity toolchain is stale
+
+======================================================================
+FAIL: test_receipt_is_fresh_self_hashed_and_path_free (test_p2_row1_claim_artifact.P2RowOneClaimArtifactTests.test_receipt_is_fresh_self_hashed_and_path_free)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/test_p2_row1_claim_artifact.py", line 70, in test_receipt_is_fresh_self_hashed_and_path_free
+    self.assertEqual(value["sourceClosure"], expected_closure)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'sch[1241 chars]y': '0d4bb999b645c6c5fb46f2ff706591bf0bed05e9f[6059 chars]c93'} != {'sch[1241 chars]y': 'a4b1282986a5b6ad473f4c77fc583babbbbc631ea[6302 chars]c93'}
+Diff is 8603 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_retained_live_closure_is_fresh_complete_and_load_bearing (test_p4_exit_closure_artifact.P4ExitClosureArtifactTests.test_retained_live_closure_is_fresh_complete_and_load_bearing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/test_p4_exit_closure_artifact.py", line 38, in test_retained_live_closure_is_fresh_complete_and_load_bearing
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        value["sourceClosure"], source_closure(REPO, CLOSURE))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'scr[121 chars]udio/channel_normalization.py': '3dfb8f4f926c1[16258 chars]280'} != {'scr[121 chars]udio/audio_enhance.py': '33a401499ef894e19798b[33486 chars]280'}
+Diff is 39734 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_retained_twenty_four_overlay_proof_is_fresh (test_p5_compositor_artifact.P5CompositorArtifactTests.test_retained_twenty_four_overlay_proof_is_fresh)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/test_p5_compositor_artifact.py", line 25, in test_retained_twenty_four_overlay_proof_is_fresh
+    self.assertEqual(value["sourceClosure"], source_closure(REPO, CLOSURE))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'scr[363 chars]ucer/graphics/__init__.py': '4235b51e1884aa647[973 chars]dd2'} != {'scr[363 chars]ucer/cut_preview_io.py': '8be4539b89d961a66e6d[2732 chars]dd2'}
+Diff is 3460 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_retained_review_repair_is_fresh_and_load_bearing (test_p5_review_repair_artifact.P5ReviewRepairArtifactTests.test_retained_review_repair_is_fresh_and_load_bearing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/tests/test_p5_review_repair_artifact.py", line 39, in test_retained_review_repair_is_fresh_and_load_bearing
+    self.assertEqual(value["toolchain"], toolchain())
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'bro[97 chars].0.7928.2/chrome-headless-shell-mac-arm64/chro[531 chars]82'}} != {'bro[97 chars].0.7977.30/chrome-headless-shell-mac-arm64/chr[532 chars]82'}}
+Diff is 1248 characters long. Set self.maxDiff to None to see it.
+
+----------------------------------------------------------------------
+Ran 8 tests in 1.881s
+
+FAILED (failures=7, errors=1)

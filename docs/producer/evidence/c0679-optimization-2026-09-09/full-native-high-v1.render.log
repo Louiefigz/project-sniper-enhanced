@@ -1,0 +1,122 @@
+
+◆  Rendering native-presenter-v1 → /private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/full-native-high-v1.mp4
+   24000/1001fps · high · 4 workers
+   GPU: browser GPU (auto-detect)
+
+[?25l│
+◇  Browser: env
+[?25h/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+/bin/sh: /bin/ps: Operation not permitted
+[INFO] [Render] Pipeline started {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","platform":"darwin","arch":"arm64","nodeVersion":"v23.10.0","fps":{"num":24000,"den":1001},"format":"mp4","quality":"high","browserGpuMode":"auto","forceScreenshot":false,"protocolTimeout":300000,"browserTimeout":120000,"pageNavigationTimeout":60000,"playerReadyTimeout":45000}
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"pipeline","status":"checkpoint","elapsedMs":2,"message":"started","format":"mp4","quality":"high","browserGpuMode":"auto","forceScreenshot":false,"protocolTimeoutMs":300000,"pageNavigationTimeoutMs":60000,"playerReadyTimeoutMs":45000,"requestedWorkers":4}
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"compile","status":"start","elapsedMs":3,"needsAlpha":false}
+  █░░░░░░░░░░░░░░░░░░░░░░░░  5%  Compiling composition
+[INFO] [Compiler] Injected deterministic @font-face rules for 2 requested font families
+[INFO] Compiled composition metadata {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","entryFile":"index.html","staticDuration":683.7664166666667,"width":1920,"height":1080,"videoCount":1,"audioCount":1,"renderModeHints":{"recommendScreenshot":false,"reasons":[]}}
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"compile","status":"end","elapsedMs":214,"durationMs":211,"needsAlpha":false}
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"compile","status":"checkpoint","elapsedMs":214,"message":"composition metadata resolved","width":1920,"height":1080,"videoCount":1,"audioCount":1,"imageCount":3,"deviceScaleFactor":1,"forceScreenshot":false,"compositionHash":"b49e016c762e2150"}
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"browser_probe","status":"start","elapsedMs":214,"forceScreenshot":false,"stagePhase":"calibrating"}
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"browser_probe","status":"end","elapsedMs":227,"durationMs":13,"forceScreenshot":false,"stagePhase":"calibrating"}
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"browser_probe","status":"checkpoint","elapsedMs":228,"message":"duration resolved","durationSeconds":683.7664166666667,"totalFrames":16394,"compositionHash":"b49e016c762e2150","beginFrameStalled":false}
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"video_extract","status":"start","elapsedMs":228,"videoCount":1}
+[INFO] Probing video color spaces... {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","videoCount":1}
+  ██░░░░░░░░░░░░░░░░░░░░░░░  10%  Extracting video frames
+[INFO] Extracting frames from video 1/1 {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","sourceType":"local"}
+[WARN] [Compiler] WARNING: Video "presenter" has sparse keyframes (max interval: 10.43s). This causes seek failures and frame freezing. Re-encode with: ffmpeg -i "assets/presenter-full.mp4" -c:v libx264 -r 30 -g 30 -keyint_min 30 -movflags +faststart -c:a copy output.mp4
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"video_extract","status":"checkpoint","elapsedMs":30230,"message":"stage still running","videoCount":1,"heartbeatIndex":1,"stageElapsedMs":30002}
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"video_extract","status":"checkpoint","elapsedMs":60232,"message":"stage still running","videoCount":1,"heartbeatIndex":2,"stageElapsedMs":60004}
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"video_extract","status":"checkpoint","elapsedMs":120234,"message":"stage still running","videoCount":1,"heartbeatIndex":3,"stageElapsedMs":120006}
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"video_extract","status":"end","elapsedMs":218399,"durationMs":218171,"videoCount":1}
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"video_extract","status":"checkpoint","elapsedMs":218410,"message":"frames resolved","videoCount":1,"extractedVideoCount":1,"totalFramesExtracted":16394,"maxFramesPerVideo":16394,"avgFramesPerExtractedVideo":16394,"vfrPreflightCount":0,"vfrPreflightMs":0,"cacheHits":0,"cacheMisses":1,"transientRetries":0,"minVideoFrameCoverageRatio":1,"authoredTimedClipCount":3}
+[INFO] [Render] No HDR sources detected — rendering SDR {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3"}
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"hdr_detection","status":"checkpoint","elapsedMs":218410,"message":"resolved","requestedHdrMode":"auto","effectiveHdr":"sdr","nativeHdrVideoCount":0,"nativeHdrImageCount":0}
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"audio_process","status":"start","elapsedMs":218410,"audioCount":1}
+  █████░░░░░░░░░░░░░░░░░░░░  20%  Processing audio tracks
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"audio_process","status":"end","elapsedMs":236439,"durationMs":18029,"audioCount":1}
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"file_server","status":"start","elapsedMs":236439,"reused":false}
+  ██████░░░░░░░░░░░░░░░░░░░  25%  Starting frame capture
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"file_server","status":"end","elapsedMs":236444,"durationMs":5}
+[hyperframes] browserGpuMode probe → hardware (WebGL renderer vendor="Google Inc. (Apple)" renderer="ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Max, Unspecified Version)")
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"capture_calibration","status":"checkpoint","elapsedMs":236841,"message":"skipped","requestedWorkers":4,"totalFrames":16394,"htmlInCanvasDetected":false,"lowMemoryMode":false,"deInversionEligible":false,"deParallelRouterEligible":false}
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"worker_resolution","status":"checkpoint","elapsedMs":236842,"message":"resolved","workerCount":4}
+[INFO] streaming-encode gate {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","enabled":false,"configFlag":true,"outputFormat":"mp4","workerCount":4,"durationSeconds":683.7664166666667,"maxDurationSeconds":240}
+[INFO] [Render] Fast capture: default-on drawElement disabled for this render — parallel capture has no runtime self-verification. Set PRODUCER_EXPERIMENTAL_FAST_CAPTURE=true to override. {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3"}
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"capture_strategy","status":"checkpoint","elapsedMs":236842,"message":"resolved","workerCount":4,"forceScreenshot":false,"captureBeyondViewport":true,"useStreamingEncode":false,"useLayeredComposite":false,"usePageSideCompositing":false,"hasHdrContent":false,"hasShaderTransitions":false,"isPngSequence":false}
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"capture_disk","status":"start","elapsedMs":236843,"stagePhase":"capturing","needsAlpha":false,"workerCount":4,"forceScreenshot":false,"totalFrames":16394,"framesCompleted":0,"captureMode":"beginframe","captureOperation":"beginFrame"}
+[INFO] [Render:trace] {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","phase":"capture_disk","status":"error","elapsedMs":236843,"durationMs":0,"message":"Disk capture may need ~135978.4 MB of temporary frame storage, but only 35031.4 MB is free at [path] Re-run with --low-memory-mode to stream frames, raise PRODUCER_STREAMING_ENCODE_MAX_DURATION_SECONDS if streaming is supported, or free up…","stagePhase":"capturing","needsAlpha":false,"workerCount":4,"forceScreenshot":false,"totalFrames":16394,"framesCompleted":0,"captureMode":"beginframe","captureOperation":"beginFrame"}
+  ██████░░░░░░░░░░░░░░░░░░░  25%  Failed: Disk capture may need ~135978.4 MB of temporary frame storage, but only 35031.4 MB is free at /private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/work-0b1f8fdb-c590-418e-81d6-8ae7234c82d3-xEW1sx/captured-frames. Re-run with --low-memory-mode to stream frames, raise PRODUCER_STREAMING_ENCODE_MAX_DURATION_SECONDS if streaming is supported, or free up disk space.
+[INFO] [Render] Failure summary {"renderJobId":"0b1f8fdb-c590-418e-81d6-8ae7234c82d3","failedStage":"Starting frame capture","error":"Disk capture may need ~135978.4 MB of temporary frame storage, but only 35031.4 MB is free at /private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/work-0b1f8fdb-c590-418e-81d6-8ae7234c82d3-xEW1sx/captured-frames. Re-run with --low-memory-mode to stream frames, raise PRODUCER_STREAMING_ENCODE_MAX_DURATION_SECONDS if streaming is supported, or free up disk space.","elapsedMs":236845,"stageTimings":{"compileOnlyMs":160,"browserProbeMs":12,"compileMs":225,"videoExtractMs":218171,"audioProcessMs":18028},"isTimeout":false,"workers":4,"protocolTimeout":300000,"observedFailedPhase":"capture_disk","observedLastPhase":"capture_disk","observedLastStatus":"error","browserDiagnostics":{"total":0,"errors":0,"pageErrors":0,"requestFailed":0,"httpErrors":0,"navigationStarts":0,"navigationFailures":0,"consoleErrors":0,"consoleWarnings":0},"extraction":{"videoCount":1,"extractedVideoCount":1,"totalFramesExtracted":16394,"maxFramesPerVideo":16394,"avgFramesPerExtractedVideo":16394,"vfrProbeMs":0,"vfrPreflightMs":0,"vfrPreflightCount":0,"cacheHits":0,"cacheMisses":1,"transientRetries":0,"minVideoFrameCoverageRatio":1,"authoredTimedClipCount":3},"browserConsoleErrors":[]}
+
+✗  Render failed
+
+   Disk capture may need ~135978.4 MB of temporary frame storage, but only 35031.4 MB is free at /private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/work-0b1f8fdb-c590-418e-81d6-8ae7234c82d3-xEW1sx/captured-frames. Re-run with --low-memory-mode to stream frames, raise PRODUCER_STREAMING_ENCODE_MAX_DURATION_SECONDS if streaming is supported, or free up disk space.
+   Try --docker for containerized rendering
+

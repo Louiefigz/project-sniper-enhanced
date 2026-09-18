@@ -1,0 +1,246 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"image","type":"string","label":"Image path (empty = CSS placeholder block)","default":""},
+    {"id":"label","type":"string","label":"Accent label (<= 4 words)","default":"wait for it…"},
+    {"id":"revealAt","type":"number","label":"Reveal moment (s); 0 = pure tease, never sharpens","default":0,"min":0,"max":30,"step":0.1,"unit":"s"},
+    {"id":"accent","type":"color","label":"Accent color","default":"#054BC9"}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · Motion template: BLUR-TEASE (MG-3)
+    Tactic it serves: `blur-tease` (PLAN §2.2) — the operator's curiosity move.
+    Show an asset DELIBERATELY BLURRED inside a white card frame with a small
+    accent label; the illusion of curiosity. Optional reveal (blur -> sharp) or
+    pure tease (never sharpens = comment bait).
+    Transparent 1080x1920 overlay -> render with `--format mov` (ProRes 4444) for alpha.
+
+    CONTRACT for the PRODUCER compositing stage:
+      - image / label / revealAt / accent are `data-composition-variables` (fill with --variables).
+      - `image` is a path served under the project web root (same origin as tokens.css).
+        EMPTY image -> a CSS-generated placeholder block stands in (so the tease
+        renders even before the asset exists). Either way it sits blurred in the card.
+      - `revealAt` (seconds, relative to this overlay's outStart) animates the blur
+        from heavy -> sharp AT that time. revealAt = 0 DISABLES the reveal: the asset
+        stays blurred for the whole overlay (pure tease / comment bait). A revealAt
+        past D-0.4 is clamped so the sharpen always completes inside the render.
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (see stat-card note); set it
+        directly per render — the framework ignores --variables for root duration. Make
+        it comfortably past revealAt so the sharpened asset holds before the fade.
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>SNIPER · blur-tease</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="/vendor/gsap/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: var(--canvas-w);
+        height: var(--canvas-h);
+        overflow: hidden;
+        background: transparent;          /* alpha overlay — the frame owns nothing */
+        font-family: var(--font);
+      }
+      #tease-root { position: relative; width: var(--canvas-w); height: var(--canvas-h); }
+
+      /* Centered on the true visual center (x=495), in the free band. */
+      .stage {
+        position: absolute;
+        left: var(--visual-center-x);
+        top: 820px;
+        transform: translate(-50%, -50%);
+        width: var(--safe-width);
+        display: flex;
+        justify-content: center;
+      }
+      .card {
+        background: var(--card-bg);
+        border-radius: var(--card-radius);
+        padding: 30px;
+        box-shadow: var(--card-shadow);
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 26px;
+        max-width: var(--safe-width);
+        will-change: transform, opacity;
+      }
+      /* The blurred asset lives inside a rounded window; the blur is on a child
+         wrapper so the card frame + label stay crisp while the asset softens. */
+      .window {
+        position: relative;
+        width: 760px;
+        height: 760px;
+        max-width: 100%;
+        border-radius: 20px;
+        overflow: hidden;                 /* clip the blur bleed to the window */
+        background: var(--accent-soft);
+      }
+      #tease-media {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        will-change: filter, transform;
+        transform: scale(1.08);           /* hide blur-edge transparency at the window rim */
+      }
+      /* CSS placeholder when no image path is given — brand-tinted diagonal weave
+         reads clearly as "an image withheld" once blurred. */
+      #tease-placeholder {
+        position: absolute;
+        inset: 0;
+        will-change: filter, transform;
+        transform: scale(1.08);
+        background:
+          repeating-linear-gradient(45deg, var(--accent) 0 60px, #3f7ae0 60px 120px);
+      }
+      .lock {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255, 255, 255, 0.92);
+        font-weight: 700;
+        font-size: 120px;
+        line-height: 1;
+        text-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+        will-change: opacity, transform;
+      }
+      .label-row {
+        display: inline-flex;
+        align-items: center;
+        gap: 16px;
+        will-change: transform, opacity;
+      }
+      .label-dot {
+        flex: 0 0 auto;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+      .label {
+        font-weight: 700;
+        font-size: 44px;
+        line-height: 1.05;
+        letter-spacing: 0.005em;
+        color: var(--accent);
+        text-align: center;
+        max-width: 700px;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="tease-root"
+      data-composition-id="blur-tease"
+      data-width="1080"
+      data-height="1920"
+      data-start="0"
+      data-duration="4"
+    >
+      <div class="stage">
+        <div
+          id="tease-card"
+          class="card clip"
+          data-start="0"
+          data-duration="60"
+          data-track-index="1"
+        >
+          <div class="window">
+            <div id="tease-blur">
+              <img id="tease-media" alt="" />
+              <div id="tease-placeholder"></div>
+            </div>
+            <div id="tease-lock" class="lock">?</div>
+          </div>
+          <div class="label-row">
+            <span class="label-dot"></span>
+            <span id="tease-label" class="label">wait for it…</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("tease-root");
+        // Single source of truth for render length: the root data-duration attr.
+        const D = parseFloat(root.dataset.duration) || 4;
+
+        // Declared defaults double as the no-framework fallback.
+        const defaults = { image: "", label: "wait for it…", revealAt: 0, accent: "#054BC9" };
+        const HF = window.__hyperframes;
+        const vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
+        document.documentElement.style.setProperty("--accent", vars.accent);
+
+        document.getElementById("tease-label").textContent = vars.label;
+
+        // Pick the media source: a real image path, else the CSS placeholder block.
+        const img = document.getElementById("tease-media");
+        const placeholder = document.getElementById("tease-placeholder");
+        const lock = document.getElementById("tease-lock");
+        const hasImage = String(vars.image || "").trim() !== "";
+        const mediaEl = hasImage ? img : placeholder;
+        if (hasImage) {
+          img.src = String(vars.image).trim();
+          placeholder.remove();
+        } else {
+          img.remove();
+        }
+
+        // Blur amounts: heavy tease, and a hair of residual blur is fine at reveal.
+        const HEAVY = 34; // px — clearly withheld but the silhouette teases
+        const blurCss = function (px) { return "blur(" + px + "px)"; };
+        // Resting DOM state = fully teased (correct even if a seek never fires onUpdate).
+        mediaEl.style.filter = blurCss(HEAVY);
+
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // Card pop-in + subtle settle (back.out overshoot IS the settle).
+        tl.fromTo(
+          "#tease-card",
+          { scale: 0.9, opacity: 0, y: 18 },
+          { scale: 1, opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.5)" },
+          0
+        );
+        // Label slides up under the window as the card lands.
+        tl.fromTo(".label-row", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 0.22);
+
+        // Reveal: animate blur heavy -> sharp at revealAt. revealAt = 0 -> pure tease.
+        const wantReveal = Number(vars.revealAt) > 0;
+        if (wantReveal) {
+          const revealAt = Math.max(0.3, Math.min(Number(vars.revealAt), D - 0.4));
+          const proxy = { b: HEAVY };
+          // Seek-safe: onUpdate is a pure function of tween progress.
+          tl.to(
+            proxy,
+            {
+              b: 0,
+              duration: 0.5,
+              ease: "power2.out",
+              onUpdate: function () { mediaEl.style.filter = blurCss(proxy.b); },
+            },
+            revealAt
+          );
+          // The "?" lock fades out as the asset sharpens (the withheld thing is now shown).
+          tl.to("#tease-lock", { opacity: 0, scale: 1.2, duration: 0.4, ease: "power2.out" }, revealAt);
+        }
+
+        // Fade-out — ends exactly at D so the timeline length == render length.
+        const fadeDur = Math.min(0.42, D * 0.15);
+        tl.to("#tease-card", { opacity: 0, scale: 0.98, y: -12, duration: fadeDur, ease: "power2.in" }, D - fadeDur);
+
+        tl.seek(0);
+        window.__timelines["blur-tease"] = tl;
+      })();
+    </script>
+  </body>
+</html>

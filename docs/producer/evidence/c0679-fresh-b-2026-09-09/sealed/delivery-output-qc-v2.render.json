@@ -1,0 +1,577 @@
+{
+  "status": "phase-completed-awaiting-review",
+  "startedAt": "2026-09-09T23:15:09.237895+00:00",
+  "admission": {
+    "output": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/native-qc.json",
+    "freshInputAttempt": "B",
+    "sdkSha256": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "sandboxSha256": "44309d0cf11391ec665221c43d73a40d81ad05009d517c4986aaff302dfee0ea"
+  },
+  "project": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project",
+  "output": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-qc-v2/native-qc.json",
+  "sdkVersion": "0.8.31",
+  "sourceHashesBefore": {
+    "hyperframes.json": "073afaf86f8c55d9a5c838b6357f24c1c28a91ee72d0023543fa485293b9dd53",
+    "index.html": "0769dae1316a2e8834767214ad189ff91e701419fab6a8f9cce22ae7f87c85e9",
+    "motion.js": "5ab4a8da199405a7126c4776dbdf74fa06ca0ce0a9054acb6158c48528004d79"
+  },
+  "fullEditTwoHourTargetAlreadyMissed": false,
+  "renderOnlyTiming": false,
+  "policy": {
+    "admission_free_percent": 25,
+    "stop_free_percent": 10,
+    "maximum_compressor_fraction": 0.1,
+    "maximum_owned_gib": 6,
+    "maximum_process_gib": 5,
+    "maximum_swap_growth_gib": 1,
+    "minimum_disk_free_gib": 10,
+    "minimum_unused_physical_gib": 6,
+    "maximum_snapshot_age_seconds": 30
+  },
+  "args": [
+    "/usr/bin/sandbox-exec",
+    "-f",
+    "/private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/localhost-only.sb",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/.venv/bin/python",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/finish_native_delivery.py"
+  ],
+  "nativeOverrides": {
+    "PATH": "/opt/homebrew/Cellar/node/23.10.0_1/bin:/opt/homebrew/Cellar/ffmpeg/8.0_1/bin:/opt/homebrew/bin:/usr/bin:/bin",
+    "TMPDIR": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/scratch",
+    "LC_ALL": "C",
+    "WHISPER_CPP_MODEL": "/Users/aaronfigueroa/.cache/hyperframes/whisper/models/ggml-small.en.bin",
+    "WHISPER_CPP_NO_GPU": "1",
+    "WHISPER_CPP_THREADS": "8",
+    "WHISPER_CPP_TIMEOUT_SECONDS": "900",
+    "HYPERFRAMES_BROWSER_PATH": "/Users/aaronfigueroa/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-152.0.7928.2/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+    "HYPERFRAMES_FFMPEG_PATH": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffmpeg",
+    "HYPERFRAMES_FFPROBE_PATH": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffprobe",
+    "HYPERFRAMES_TELEMETRY_DISABLED": "1"
+  },
+  "runDeadlineSeconds": 240,
+  "supervisorSigkillProtection": false,
+  "additionalFilePinsBefore": {
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/hyperframes.json": "073afaf86f8c55d9a5c838b6357f24c1c28a91ee72d0023543fa485293b9dd53",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/index.html": "0769dae1316a2e8834767214ad189ff91e701419fab6a8f9cce22ae7f87c85e9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/motion.js": "5ab4a8da199405a7126c4776dbdf74fa06ca0ce0a9054acb6158c48528004d79",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-29.html": "b04e47b7778ac97bfa2b84663d0e99e96b344aab68bc313c50ed640c0089ee60",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-52.html": "ee4e148e0f2d99ecfb7ae38dde0a58212dde4c911b1715c8149dc526d6078c17",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-05.html": "de481256267eb225e9048491e4e634697fcfe2b994aa4c2e218cb940218e6037",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-13.html": "805c93a329fe3e714b8561bd27bff85930f462b53c4c18a9bb020726edbd22fa",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-44.html": "22ce53d0380b329f198427020f689e0041e3c7b95210192989f4c8630605a83e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-33.html": "4017b1b64c8a16d5422b70ab9c011418298ea0af80233176c0f7b5bcce6929a4",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-25.html": "c3de09d632afc61128b941068fadfd7820dac7e54fcb74c6c25565f9ae20c9e8",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-09.html": "02e3509dd9cff403d4116b0f6d73341e7aa2be359e4556165f00d3dec8ef2106",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-48.html": "066e623a03e5f7f55eb89ba327e29fee0f404251ae1ff5aabee3eb6612800bfb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-49.html": "7c604dbb4bc4a279c19c928b68ff4d089be8debd7ebdfdd416ad9fac3b6e2642",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-08.html": "9c64a168d3c861c7450003d7e807e3c540ab8c7af9c026f540f78e8d1e5cf984",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-24.html": "ec07e2b29269241e7831e0dce0214047ba4073e7faa87adc5e755c33a7c8ffc0",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-32.html": "5d85122db9c91889e5415cc25868f14453accf6945f8ee3c8a925be67cb599eb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-45.html": "0a08b07e79b0a03069623f61ba407bb46455905c62fc778723ebdd048e8bc4f0",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-12.html": "b9635277d753a6d2a6a217367322dd5f8a0ad57737b6d0c393e6df95e4a22179",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-04.html": "ae85bcda977792a01efde64e599c63f3418fbc8a990075601a3ac8819db0078e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-28.html": "bc5312b21984b60436c16290dddfa8f049887bbed985cf9e44a7b21f0c0ef873",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-35.html": "5c85395e4ded204c0fb5e4f37a79545add86526c8d0b178f26f7dded4de6425e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-23.html": "091f4ef29945b3a0567baa733695f3f7ca12f2d3f27631ab51198acdd9450ceb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-19.html": "cb4a2d20d4bc035221ba28ebe161f277182baa624ea0ca11f0116dd1fcdb00de",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-39.html": "481e0ba711cc489bb93c0ff529621b6ae42af655011649a85e5847c2101adc0b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-03.html": "f286bda763d0bd1c0442997f997a3dd324ea182cd180e4697a651ac2c3568d55",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-15.html": "5203a27472d76f4ba7b6d12ab1de508e7d13582e0df31de3f0b820f60995c41f",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-42.html": "35013fff7e76994c3303e459dfcdae32316dbdb1c7520fb4aee72896e4568410",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-43.html": "09a1d855cee8933202b7328caf41f42d374bc048fc5d93f21338bf816138b096",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-14.html": "2eaff8ebe6051b4dac42a43eeb23d78d74cb8b7df8e7b373fb4c1481377ad042",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-02.html": "ebae43417cb63f1d2c40a3dc782ba0217a2615c363d799675c39f737d9d15233",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-38.html": "5d145316d2c5f962c92bffed232e98149a2ec819a146f9217d3500f9648828e6",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-18.html": "539732300a36fca6e122c7f85683a1b83a199a57f20beaa2bb7b4a58d46add4d",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-22.html": "c7ae32558ebca98dac8bc2e4a1d07a701fa8b47a57e44077e65f9d6a4bb378d9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-34.html": "63fe81a307e65489ca4c89fc97a01a0464331e9c6c8e4edfb8dd45327c099aa4",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-21.html": "7ec95317afe43bbc98f251128ab09e86bc406d75008e3ce839c0675a139305d9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-37.html": "d317aabc9c2a76573a0565d53ef53863cfb2bcc123410619ab2e513f3dc889d6",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-40.html": "d4e1f2289f7230374c18902271f00cea60517926886c7a2f1e2ba03b4a4f16f8",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-17.html": "26b79b64d38b0f1fe061ab1e4b5efb1962e82ad87288bb8dbf2c2a29e936fc33",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-01.html": "67cbaa6106ff42ff6cf4476c2decdbf1cc5ca4ee3fae9ada828f57b1845df30e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-00.html": "a44daa6a0c56d2b5ea74fcfb209d630612f14c8a05de944bbfdd7b6923839b8b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-16.html": "31c6f6b9d56a8a8da174051efdf1be54110a7db9e2946cc4d85fb37e589cc803",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-41.html": "356c507448664a29d4617d556b1de478c2f51863c22938bccb9d03427faee98c",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-36.html": "c785f72a59142734a5c8d7dea19c19503ad1e8e4b453bb0a116c48cbdb612651",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-20.html": "835d9b8cbb04808e4d160bb8f5b757f99f8b13ccc598bcc657ed144f3a5c13ab",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-46.html": "1c48341b994053d2e9ff895e58e9bf17d2337ac50948c236cc870eda1fed0c37",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-11.html": "78eed2d34fe6e647cea49bfd6065d63ee7d46a7b7b44afacbad1d0e61c41c7e3",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-07.html": "7466136dfe8c03db62e7eaacf4291957d6a722d1dc04760746a186bff7f5aece",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-50.html": "a97a2a60a3f732b7b4a5ac51fc3ade91e080167be0a09c5324dd44fa61f794ca",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-27.html": "859d3873fd9b7891d8c9a7f97933d43b266a51c482a5c2ebbed4c98568b9e35f",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-31.html": "5f3925b1f113050e90bff172bd2bc4617a7a1e32a468b637d967fd6035b8c6a1",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-30.html": "0f238135e444b316801d3b075c6dadd3803cead06acbe5149b3953fb2cfa685b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-26.html": "5ad3ac9ec195d3f9e5500e1d2ed80e0e049cde845b60259882fdb4b064287849",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-51.html": "aa5cfadb3e3deee4109793d19899662aaa1093505b680c7af7fe58870ad0797a",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-06.html": "3e11818d9e9ee7f394cd07c11f08a360cee097379269208ffa760d9e6b794fe7",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-10.html": "1f25e4975d59853dc9af4d03dfc23e5b28bed041bc4a916d8c02820171cddfae",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-47.html": "b42a6c328dc6095ae209ae33a5ca905feeb188952be5274da760a102e71339a5",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/presenter.mp4": "80cd51075b575818d86c4185476cb4576bd173ba20ed4e31e5daa252df167c5d",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/gsap.min.js": "c174bfce53a729418d57a8ad8625e7247c793a22fef8e2851e3cfa3de9cd8280",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration-unmastered.wav": "1a9e1cab7215c03a93d017af57ab2bfa37bdf420ff9d86cad3d52802c4aa5fea",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/mono.woff2": "a634cb9e7783af7e66d17e1dae9c859b8748da8174641b53d68b3b05de8ebce9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/mono-bold.woff2": "654a1d16c0b027ead89781bd3a4360d7f0af17a3ddf78c287d0e1843c6bca8d7",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/display.woff2": "2e5732c61470a890aee05ee399f6720664835efab8749dfc87d487e7882ffc44",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration.wav": "a4b8c664169887bfb6122856fc31454ab791112dcbfdcd7b6a32908b0c7ab0e1",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration-browser.wav": "c86f62360d2854ffcabd4cdd21934f91bb4cf1fabbfb87f54ce28b33afc57b56",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_native_phase_v4.py": "cb169743c30156b5d7d1268b53266a219e31b510f38941d539355260b6de1c8f",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_phase.py": "4f450f87d0b61970a15d2d3d060c0d0a4964ae4141a1e2a68134519b3d6379c8",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "/private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/localhost-only.sb": "44309d0cf11391ec665221c43d73a40d81ad05009d517c4986aaff302dfee0ea",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/render_native_bounded.py": "a5cccb20c65153ca3b63567243f0127ff12d6631776c0549e8ae1132556e5cf7",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native_owned_processes.py": "7c794c4c199e1c7a311171f835ff6cde938fda419e5c66eb3b2b2e5e3cbe74c8",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/qualified_native_admission.py": "7d8e6ccf4f701acfedaf3e2f8581e52a8a31f0f73ef0dba705cf54555cf01199",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/finish_native_delivery.py": "ada481f9922491b37db72afc3dd3b0be4173a03b48938b8de2d1e03d98d7e0fb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native_measurement_retry.py": "e437c2a71c8e1a3a93acf8acd20fe674b3033e796649db7c63d45f46328545f6",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/execution-plan.json": "185ff0840c07fb07a3d97703582be46e99a29a3a1395117d7abd37200e61233a",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/scene-map.json": "7755256028c4cd4ae42072329c1b521605e6ae48897835c98f29d64dc1bb414b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/qc_native_output.py": "2a7b4f18d79707264d442b902e44a4d1fe4e15d9cd3bc039ed4d2f8997d3eb78",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/qc_aroll.py": "ecdda4159f9b05e613a76eff85169f6e252b0f932c416784a844b92f6cc23d34",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/master_audio.py": "5a1c14bb4a4b1681110b3e90f1ccd506b6198632e5d16c0a5193ad8ea60c99f0",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/prepare_source.py": "59b5b43ddbfe6100605026008aa3d6b8b75bd09f604f82226ab720359f0c3e38",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/compare_native_color.py": "cebba0c5efb549f5a306f66407e8b3720a5d9c84624ec02ed21c99cd978fe97e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-qc.json": "57c3350ac9c330b182cc9322b34a407874aae2ded5c5810ab482238df42ae0d1",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/render/native-master.mp4": "3a3f62588856b6a9de852ce6dc4b644ff4c69c2c6c47d6c346203831a7a43cbd",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/fresh-delivery-audio/narration.m4a": "3892fae8fe9562f55304f024389ca2eb6a572948a8d4b7eddf05de95c0fbeef3",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/fresh-delivery-audio/decoded.wav": "0132c236e1edbd22672e8cff5f0ae3a52bfb0a66da8f7ef511a2537d1019c9fa",
+    "/private/tmp/sniper-pcm-local-comparison-20260909.Bnxh0V/pcm_local_comparison.py": "39ecf2722699d670d6f31c29536a7e178e7400e9584ca251649b05c31dc34cc1"
+  },
+  "trialStartedMonotonic": 1618505.458083375,
+  "admissionReuseScope": "Generic resource-policy software only; no prior edit media/cache/creative inputs",
+  "baseline": {
+    "measured_at": 1788995714.12972,
+    "physical_bytes": 68719476736,
+    "free_percent": 87.0,
+    "swap_used_bytes": 8073636741,
+    "compressor_bytes": 3159359488,
+    "disk_free_bytes": 29791621120,
+    "owned_footprint_bytes": 0,
+    "largest_owned_process_bytes": 0,
+    "owned_pids": [],
+    "processes": [],
+    "identity_verified": false,
+    "unused_physical_bytes": 150994944,
+    "missing_registered_pids": [],
+    "reused_registered_pids": [],
+    "kernel_pressure_level": 1
+  },
+  "logPath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/delivery-output-qc-v2.render.log",
+  "qualifiedCacheAwareAdmission": {
+    "status": "admitted",
+    "observations": [
+      {
+        "snapshot": {
+          "measured_at": 1788995709.238492,
+          "physical_bytes": 68719476736,
+          "free_percent": 87.0,
+          "swap_used_bytes": 8073636741,
+          "compressor_bytes": 3159359488,
+          "disk_free_bytes": 29792108544,
+          "owned_footprint_bytes": 0,
+          "largest_owned_process_bytes": 0,
+          "owned_pids": [],
+          "processes": [],
+          "identity_verified": false,
+          "unused_physical_bytes": 78643200,
+          "missing_registered_pids": [],
+          "reused_registered_pids": [],
+          "kernel_pressure_level": 1
+        },
+        "fileBackedBytes": 23457087488,
+        "vmStatRaw": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                     4097.\nPages active:                                1526246.\nPages inactive:                              2080632.\nPages speculative:                               529.\nPages throttled:                                   0.\nPages wired down:                             332969.\nPages purgeable:                               43049.\n\"Translation faults\":                    21602872527.\nPages copy-on-write:                       668079955.\nPages zero filled:                       18805250081.\nPages reactivated:                        1710208803.\nPages purged:                              576634688.\nFile-backed pages:                           1431707.\nAnonymous pages:                             2175700.\nPages stored in compressor:                  2086514.\nPages occupied by compressor:                 192822.\nDecompressions:                           1754645047.\nCompressions:                             1882567104.\nPageins:                                   261183740.\nPageouts:                                    4016236.\nSwapins:                                    10795185.\nSwapouts:                                   16314855.\n"
+      },
+      {
+        "snapshot": {
+          "measured_at": 1788995711.7439291,
+          "physical_bytes": 68719476736,
+          "free_percent": 88.0,
+          "swap_used_bytes": 8073636741,
+          "compressor_bytes": 3159359488,
+          "disk_free_bytes": 29791694848,
+          "owned_footprint_bytes": 0,
+          "largest_owned_process_bytes": 0,
+          "owned_pids": [],
+          "processes": [],
+          "identity_verified": false,
+          "unused_physical_bytes": 189792256,
+          "missing_registered_pids": [],
+          "reused_registered_pids": [],
+          "kernel_pressure_level": 1
+        },
+        "fileBackedBytes": 23369023488,
+        "vmStatRaw": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                    11627.\nPages active:                                1523585.\nPages inactive:                              2075232.\nPages speculative:                               801.\nPages throttled:                                   0.\nPages wired down:                             332974.\nPages purgeable:                               39194.\n\"Translation faults\":                    21602914636.\nPages copy-on-write:                       668081619.\nPages zero filled:                       18805281428.\nPages reactivated:                        1710208954.\nPages purged:                              576634882.\nFile-backed pages:                           1426332.\nAnonymous pages:                             2173286.\nPages stored in compressor:                  2086514.\nPages occupied by compressor:                 192822.\nDecompressions:                           1754645047.\nCompressions:                             1882567104.\nPageins:                                   261183747.\nPageouts:                                    4016240.\nSwapins:                                    10795185.\nSwapouts:                                   16314855.\n"
+      },
+      {
+        "snapshot": {
+          "measured_at": 1788995714.12972,
+          "physical_bytes": 68719476736,
+          "free_percent": 87.0,
+          "swap_used_bytes": 8073636741,
+          "compressor_bytes": 3159359488,
+          "disk_free_bytes": 29791621120,
+          "owned_footprint_bytes": 0,
+          "largest_owned_process_bytes": 0,
+          "owned_pids": [],
+          "processes": [],
+          "identity_verified": false,
+          "unused_physical_bytes": 150994944,
+          "missing_registered_pids": [],
+          "reused_registered_pids": [],
+          "kernel_pressure_level": 1
+        },
+        "fileBackedBytes": 23377920000,
+        "vmStatRaw": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                     9392.\nPages active:                                1523487.\nPages inactive:                              2075231.\nPages speculative:                              1344.\nPages throttled:                                   0.\nPages wired down:                             335123.\nPages purgeable:                               39194.\n\"Translation faults\":                    21602933420.\nPages copy-on-write:                       668082730.\nPages zero filled:                       18805302585.\nPages reactivated:                        1710208957.\nPages purged:                              576634882.\nFile-backed pages:                           1426875.\nAnonymous pages:                             2173187.\nPages stored in compressor:                  2086514.\nPages occupied by compressor:                 192822.\nDecompressions:                           1754645047.\nCompressions:                             1882567104.\nPageins:                                   261183755.\nPageouts:                                    4016240.\nSwapins:                                    10795185.\nSwapouts:                                   16314855.\n"
+      }
+    ],
+    "policyName": "qualified-native-cache-aware-unused-advisory-v1",
+    "failures": [],
+    "scope": "Explicit full-only experiment after actual4320-frame qualification",
+    "guaranteedReclaimableBytesClaimed": false,
+    "unchangedRenderCapsGiB": {
+      "ownedTree": 6,
+      "oneProcess": 5,
+      "newSwap": 1
+    },
+    "literalUnusedIsAdvisory": true,
+    "unusedAdvisoryThresholdGiB": 6,
+    "fileBackedCategoryMinimumGiB": 8,
+    "coarseHeadroomMinimumPercent": 50,
+    "compressorMaximumPhysicalFraction": 0.1,
+    "maximumAdmissionCompressorGrowthMiB": 16,
+    "maximumObservationAgeSeconds": 15,
+    "growthBaselineSwapBytes": 8073636741
+  },
+  "pid": 26836,
+  "nativeLaunchedAt": "2026-09-09T23:15:15.670801+00:00",
+  "ownerIdentities": [
+    {
+      "pid": 26836,
+      "parent_pid": 26817,
+      "pgid": 26836,
+      "started": "Wed Sep  9 18:15:15 2026"
+    },
+    {
+      "pid": 26845,
+      "parent_pid": 26836,
+      "pgid": 26836,
+      "started": "Wed Sep  9 18:15:16 2026"
+    },
+    {
+      "pid": 26861,
+      "parent_pid": 26836,
+      "pgid": 26836,
+      "started": "Wed Sep  9 18:15:18 2026"
+    },
+    {
+      "pid": 26877,
+      "parent_pid": 26836,
+      "pgid": 26836,
+      "started": "Wed Sep  9 18:15:20 2026"
+    },
+    {
+      "pid": 26926,
+      "parent_pid": 26836,
+      "pgid": 26836,
+      "started": "Wed Sep  9 18:15:35 2026"
+    }
+  ],
+  "measurementRetryWindows": [
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1625012.878813291,
+      "deadlineMonotonic": 1625030.878813291,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "missing-footprint",
+          "elapsedSeconds": 1.4311588751152158,
+          "errorType": "MissingProcessFootprint",
+          "evidence": {
+            "reason": "identity-not-stable-across-footprint-read",
+            "identities": [
+              {
+                "pid": 26845,
+                "started": "Wed Sep  9 18:15:16 2026",
+                "pgid": 26836
+              }
+            ]
+          }
+        },
+        {
+          "sample": 2,
+          "status": "missing-footprint",
+          "elapsedSeconds": 2.9624676250386983,
+          "errorType": "MissingProcessFootprint",
+          "evidence": {
+            "reason": "identity-not-stable-across-footprint-read",
+            "identities": [
+              {
+                "pid": 26861,
+                "started": "Wed Sep  9 18:15:18 2026",
+                "pgid": 26836
+              }
+            ]
+          }
+        },
+        {
+          "sample": 3,
+          "status": "measured",
+          "elapsedSeconds": 4.600859417114407
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 4.600881041958928
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1625022.823767041,
+      "deadlineMonotonic": 1625040.823767041,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.4811399588361382
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.4811582500115037
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1625029.651734958,
+      "deadlineMonotonic": 1625047.651734958,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5369715420529246
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.536985957995057
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1625036.529852083,
+      "deadlineMonotonic": 1625054.529852083,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.403215124970302
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.4032296671066433
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1625043.289377041,
+      "deadlineMonotonic": 1625061.289377041,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.4329811250790954
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.4329982500057667
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1625050.084172708,
+      "deadlineMonotonic": 1625068.084172708,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.4137349580414593
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.41374949994497
+    }
+  ],
+  "measurementFailureEvidence": [
+    {
+      "reason": "identity-not-stable-across-footprint-read",
+      "identities": [
+        {
+          "pid": 26845,
+          "started": "Wed Sep  9 18:15:16 2026",
+          "pgid": 26836
+        }
+      ]
+    },
+    {
+      "reason": "identity-not-stable-across-footprint-read",
+      "identities": [
+        {
+          "pid": 26861,
+          "started": "Wed Sep  9 18:15:18 2026",
+          "pgid": 26836
+        }
+      ]
+    }
+  ],
+  "processExitMeasurementRetries": 2,
+  "latestResourceSnapshot": {
+    "measured_at": 1788995752.950596,
+    "physical_bytes": 68719476736,
+    "free_percent": 87.0,
+    "swap_used_bytes": 8073636741,
+    "compressor_bytes": 3159359488,
+    "disk_free_bytes": 29003730944,
+    "owned_footprint_bytes": 230686720,
+    "largest_owned_process_bytes": 230686720,
+    "owned_pids": [
+      26836
+    ],
+    "processes": [
+      {
+        "pid": 26836,
+        "parent_pid": 26817,
+        "pgid": 26836,
+        "started": "Wed Sep  9 18:15:15 2026",
+        "footprint_bytes": 230686720,
+        "compressed_bytes": 0
+      }
+    ],
+    "identity_verified": true,
+    "unused_physical_bytes": 377487360,
+    "missing_registered_pids": [
+      26845,
+      26861,
+      26877,
+      26926
+    ],
+    "reused_registered_pids": [],
+    "kernel_pressure_level": 1,
+    "warnings": [
+      "unused physical RAM is below the reserved host margin"
+    ]
+  },
+  "cleanup": {
+    "verified": true,
+    "survivors": [],
+    "signals": [],
+    "scope": "Recorded owned identities; not an unobserved-child guarantee"
+  },
+  "exitCode": 0,
+  "leaseCleanupVerified": true,
+  "elapsedSeconds": 45.74798533320427,
+  "completedAt": "2026-09-09T23:15:54.987031+00:00",
+  "abortReason": null,
+  "sourceHashesAfter": {
+    "hyperframes.json": "073afaf86f8c55d9a5c838b6357f24c1c28a91ee72d0023543fa485293b9dd53",
+    "index.html": "0769dae1316a2e8834767214ad189ff91e701419fab6a8f9cce22ae7f87c85e9",
+    "motion.js": "5ab4a8da199405a7126c4776dbdf74fa06ca0ce0a9054acb6158c48528004d79"
+  },
+  "sourceStable": true,
+  "sdkStable": true,
+  "sandboxStable": true,
+  "additionalFilePinsAfter": {
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/hyperframes.json": "073afaf86f8c55d9a5c838b6357f24c1c28a91ee72d0023543fa485293b9dd53",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/index.html": "0769dae1316a2e8834767214ad189ff91e701419fab6a8f9cce22ae7f87c85e9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/motion.js": "5ab4a8da199405a7126c4776dbdf74fa06ca0ce0a9054acb6158c48528004d79",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-29.html": "b04e47b7778ac97bfa2b84663d0e99e96b344aab68bc313c50ed640c0089ee60",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-52.html": "ee4e148e0f2d99ecfb7ae38dde0a58212dde4c911b1715c8149dc526d6078c17",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-05.html": "de481256267eb225e9048491e4e634697fcfe2b994aa4c2e218cb940218e6037",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-13.html": "805c93a329fe3e714b8561bd27bff85930f462b53c4c18a9bb020726edbd22fa",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-44.html": "22ce53d0380b329f198427020f689e0041e3c7b95210192989f4c8630605a83e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-33.html": "4017b1b64c8a16d5422b70ab9c011418298ea0af80233176c0f7b5bcce6929a4",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-25.html": "c3de09d632afc61128b941068fadfd7820dac7e54fcb74c6c25565f9ae20c9e8",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-09.html": "02e3509dd9cff403d4116b0f6d73341e7aa2be359e4556165f00d3dec8ef2106",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-48.html": "066e623a03e5f7f55eb89ba327e29fee0f404251ae1ff5aabee3eb6612800bfb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-49.html": "7c604dbb4bc4a279c19c928b68ff4d089be8debd7ebdfdd416ad9fac3b6e2642",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-08.html": "9c64a168d3c861c7450003d7e807e3c540ab8c7af9c026f540f78e8d1e5cf984",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-24.html": "ec07e2b29269241e7831e0dce0214047ba4073e7faa87adc5e755c33a7c8ffc0",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-32.html": "5d85122db9c91889e5415cc25868f14453accf6945f8ee3c8a925be67cb599eb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-45.html": "0a08b07e79b0a03069623f61ba407bb46455905c62fc778723ebdd048e8bc4f0",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-12.html": "b9635277d753a6d2a6a217367322dd5f8a0ad57737b6d0c393e6df95e4a22179",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-04.html": "ae85bcda977792a01efde64e599c63f3418fbc8a990075601a3ac8819db0078e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-28.html": "bc5312b21984b60436c16290dddfa8f049887bbed985cf9e44a7b21f0c0ef873",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-35.html": "5c85395e4ded204c0fb5e4f37a79545add86526c8d0b178f26f7dded4de6425e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-23.html": "091f4ef29945b3a0567baa733695f3f7ca12f2d3f27631ab51198acdd9450ceb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-19.html": "cb4a2d20d4bc035221ba28ebe161f277182baa624ea0ca11f0116dd1fcdb00de",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-39.html": "481e0ba711cc489bb93c0ff529621b6ae42af655011649a85e5847c2101adc0b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-03.html": "f286bda763d0bd1c0442997f997a3dd324ea182cd180e4697a651ac2c3568d55",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-15.html": "5203a27472d76f4ba7b6d12ab1de508e7d13582e0df31de3f0b820f60995c41f",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-42.html": "35013fff7e76994c3303e459dfcdae32316dbdb1c7520fb4aee72896e4568410",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-43.html": "09a1d855cee8933202b7328caf41f42d374bc048fc5d93f21338bf816138b096",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-14.html": "2eaff8ebe6051b4dac42a43eeb23d78d74cb8b7df8e7b373fb4c1481377ad042",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-02.html": "ebae43417cb63f1d2c40a3dc782ba0217a2615c363d799675c39f737d9d15233",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-38.html": "5d145316d2c5f962c92bffed232e98149a2ec819a146f9217d3500f9648828e6",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-18.html": "539732300a36fca6e122c7f85683a1b83a199a57f20beaa2bb7b4a58d46add4d",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-22.html": "c7ae32558ebca98dac8bc2e4a1d07a701fa8b47a57e44077e65f9d6a4bb378d9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-34.html": "63fe81a307e65489ca4c89fc97a01a0464331e9c6c8e4edfb8dd45327c099aa4",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-21.html": "7ec95317afe43bbc98f251128ab09e86bc406d75008e3ce839c0675a139305d9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-37.html": "d317aabc9c2a76573a0565d53ef53863cfb2bcc123410619ab2e513f3dc889d6",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-40.html": "d4e1f2289f7230374c18902271f00cea60517926886c7a2f1e2ba03b4a4f16f8",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-17.html": "26b79b64d38b0f1fe061ab1e4b5efb1962e82ad87288bb8dbf2c2a29e936fc33",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-01.html": "67cbaa6106ff42ff6cf4476c2decdbf1cc5ca4ee3fae9ada828f57b1845df30e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-00.html": "a44daa6a0c56d2b5ea74fcfb209d630612f14c8a05de944bbfdd7b6923839b8b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-16.html": "31c6f6b9d56a8a8da174051efdf1be54110a7db9e2946cc4d85fb37e589cc803",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-41.html": "356c507448664a29d4617d556b1de478c2f51863c22938bccb9d03427faee98c",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-36.html": "c785f72a59142734a5c8d7dea19c19503ad1e8e4b453bb0a116c48cbdb612651",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-20.html": "835d9b8cbb04808e4d160bb8f5b757f99f8b13ccc598bcc657ed144f3a5c13ab",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-46.html": "1c48341b994053d2e9ff895e58e9bf17d2337ac50948c236cc870eda1fed0c37",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-11.html": "78eed2d34fe6e647cea49bfd6065d63ee7d46a7b7b44afacbad1d0e61c41c7e3",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-07.html": "7466136dfe8c03db62e7eaacf4291957d6a722d1dc04760746a186bff7f5aece",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-50.html": "a97a2a60a3f732b7b4a5ac51fc3ade91e080167be0a09c5324dd44fa61f794ca",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-27.html": "859d3873fd9b7891d8c9a7f97933d43b266a51c482a5c2ebbed4c98568b9e35f",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-31.html": "5f3925b1f113050e90bff172bd2bc4617a7a1e32a468b637d967fd6035b8c6a1",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-30.html": "0f238135e444b316801d3b075c6dadd3803cead06acbe5149b3953fb2cfa685b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-26.html": "5ad3ac9ec195d3f9e5500e1d2ed80e0e049cde845b60259882fdb4b064287849",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-51.html": "aa5cfadb3e3deee4109793d19899662aaa1093505b680c7af7fe58870ad0797a",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-06.html": "3e11818d9e9ee7f394cd07c11f08a360cee097379269208ffa760d9e6b794fe7",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-10.html": "1f25e4975d59853dc9af4d03dfc23e5b28bed041bc4a916d8c02820171cddfae",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-47.html": "b42a6c328dc6095ae209ae33a5ca905feeb188952be5274da760a102e71339a5",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/presenter.mp4": "80cd51075b575818d86c4185476cb4576bd173ba20ed4e31e5daa252df167c5d",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/gsap.min.js": "c174bfce53a729418d57a8ad8625e7247c793a22fef8e2851e3cfa3de9cd8280",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration-unmastered.wav": "1a9e1cab7215c03a93d017af57ab2bfa37bdf420ff9d86cad3d52802c4aa5fea",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/mono.woff2": "a634cb9e7783af7e66d17e1dae9c859b8748da8174641b53d68b3b05de8ebce9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/mono-bold.woff2": "654a1d16c0b027ead89781bd3a4360d7f0af17a3ddf78c287d0e1843c6bca8d7",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/display.woff2": "2e5732c61470a890aee05ee399f6720664835efab8749dfc87d487e7882ffc44",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration.wav": "a4b8c664169887bfb6122856fc31454ab791112dcbfdcd7b6a32908b0c7ab0e1",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration-browser.wav": "c86f62360d2854ffcabd4cdd21934f91bb4cf1fabbfb87f54ce28b33afc57b56",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_native_phase_v4.py": "cb169743c30156b5d7d1268b53266a219e31b510f38941d539355260b6de1c8f",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_phase.py": "4f450f87d0b61970a15d2d3d060c0d0a4964ae4141a1e2a68134519b3d6379c8",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "/private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/localhost-only.sb": "44309d0cf11391ec665221c43d73a40d81ad05009d517c4986aaff302dfee0ea",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/render_native_bounded.py": "a5cccb20c65153ca3b63567243f0127ff12d6631776c0549e8ae1132556e5cf7",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native_owned_processes.py": "7c794c4c199e1c7a311171f835ff6cde938fda419e5c66eb3b2b2e5e3cbe74c8",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/qualified_native_admission.py": "7d8e6ccf4f701acfedaf3e2f8581e52a8a31f0f73ef0dba705cf54555cf01199",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/finish_native_delivery.py": "ada481f9922491b37db72afc3dd3b0be4173a03b48938b8de2d1e03d98d7e0fb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native_measurement_retry.py": "e437c2a71c8e1a3a93acf8acd20fe674b3033e796649db7c63d45f46328545f6",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/execution-plan.json": "185ff0840c07fb07a3d97703582be46e99a29a3a1395117d7abd37200e61233a",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/scene-map.json": "7755256028c4cd4ae42072329c1b521605e6ae48897835c98f29d64dc1bb414b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/qc_native_output.py": "2a7b4f18d79707264d442b902e44a4d1fe4e15d9cd3bc039ed4d2f8997d3eb78",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/qc_aroll.py": "ecdda4159f9b05e613a76eff85169f6e252b0f932c416784a844b92f6cc23d34",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/master_audio.py": "5a1c14bb4a4b1681110b3e90f1ccd506b6198632e5d16c0a5193ad8ea60c99f0",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/prepare_source.py": "59b5b43ddbfe6100605026008aa3d6b8b75bd09f604f82226ab720359f0c3e38",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/compare_native_color.py": "cebba0c5efb549f5a306f66407e8b3720a5d9c84624ec02ed21c99cd978fe97e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-reference-qc.json": "57c3350ac9c330b182cc9322b34a407874aae2ded5c5810ab482238df42ae0d1",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/render/native-master.mp4": "3a3f62588856b6a9de852ce6dc4b644ff4c69c2c6c47d6c346203831a7a43cbd",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/fresh-delivery-audio/narration.m4a": "3892fae8fe9562f55304f024389ca2eb6a572948a8d4b7eddf05de95c0fbeef3",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/fresh-delivery-audio/decoded.wav": "0132c236e1edbd22672e8cff5f0ae3a52bfb0a66da8f7ef511a2537d1019c9fa",
+    "/private/tmp/sniper-pcm-local-comparison-20260909.Bnxh0V/pcm_local_comparison.py": "39ecf2722699d670d6f31c29536a7e178e7400e9584ca251649b05c31dc34cc1"
+  },
+  "additionalFilesStable": true,
+  "outputBytes": 10024,
+  "trialElapsedSecondsAtPhaseEnd": 6547.548936250154
+}

@@ -1,0 +1,50 @@
+:root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#17252c;background:#f4f6f5;font-synthesis:none}
+*{box-sizing:border-box}
+body{margin:0}
+header{padding:30px 5vw 22px;background:#152d2b;color:white}
+header p{max-width:850px;color:#d0dfd8;line-height:1.55;margin-bottom:0}
+.eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#acd9c3}
+h1{font-size:clamp(26px,3.3vw,42px);margin:12px 0}
+main{display:grid;grid-template-columns:minmax(320px,43%) 1fr;gap:26px;max-width:1550px;margin:auto;padding:28px 4vw}
+aside{position:sticky;top:20px;align-self:start;background:white;border:1px solid #dfe7e0;border-radius:15px;overflow:hidden}
+.player-meta{padding:18px 20px}
+.player-meta h2{font-size:19px;line-height:1.3;margin:0 0 8px}
+video{width:100%;display:block;background:#101413}
+.small{font-size:13px;color:#60716a;line-height:1.55}
+.status{font-variant-numeric:tabular-nums;color:#196047;font-weight:650;font-size:13px;margin:12px 0}
+.quote{font-size:15px;line-height:1.65;border-left:3px solid #bddbca;padding-left:13px;white-space:pre-wrap}
+.player-meta a{color:#155d48}
+.filter{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 17px}
+button{font:inherit;cursor:pointer;border:1px solid #b9ccc2;background:white;color:#214437;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600}
+button:hover{background:#eaf5ee}
+button.active,.primary{background:#1f5d45;color:white;border-color:#1f5d45}
+.primary:hover{background:#174733}
+.card{background:white;border:1px solid #dfe7e0;border-radius:14px;padding:22px;margin-bottom:15px}
+.card.playing{border:2px solid #1f7654;padding:21px}
+.topline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:#537361}
+.badge{background:#e6f2e9;color:#28583e;border-radius:20px;padding:5px 8px}
+.card h2{font-size:22px;margin:12px 0;line-height:1.25}
+.card p{font-size:14px;line-height:1.65;margin:10px 0}
+.ranges{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.ranges button{font-size:12px;background:#f7f9f8;padding:7px 9px;font-variant-numeric:tabular-nums}
+.note{color:#6c6350;background:#faf7ee;padding:11px 13px;border-radius:8px;font-size:13px!important}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+details{border-top:1px solid #e6ebe7;margin-top:16px;padding-top:13px}
+summary{font-size:13px;color:#2b634b;cursor:pointer;font-weight:600}
+details li{font-size:13px;line-height:1.6;margin-bottom:10px}
+ol{padding-left:23px}
+.group-count{font-size:13px;color:#5e7168;margin-bottom:15px}
+@media(max-width:850px){main{grid-template-columns:1fr}
+aside{position:static}
+.card h2{font-size:20px}
+header{padding:25px}
+}
+
+
+#player{scroll-margin-top:16px}
+video{max-height:62vh;object-fit:contain}
+button:focus-visible{outline:3px solid #9acfb2;outline-offset:3px}
+[hidden]{display:none!important}
+.player-controls{display:flex;gap:8px;flex-wrap:wrap}
+.selection-state{color:#196047;font-weight:650}
+.status[data-state="error"],.status[data-state="blocked"]{color:#a13725}

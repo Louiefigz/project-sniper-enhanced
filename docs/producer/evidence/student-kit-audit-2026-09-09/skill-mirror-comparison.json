@@ -1,0 +1,566 @@
+[
+  {
+    "path": ".agents/skills/cut-mistakes/SKILL.md",
+    "mirror": ".claude/skills/cut-mistakes/SKILL.md",
+    "identicalBlob": false,
+    "identicalAfterSkillPathNormalization": true
+  },
+  {
+    "path": ".agents/skills/cut-mistakes/scripts/apply-cuts.mjs",
+    "mirror": ".claude/skills/cut-mistakes/scripts/apply-cuts.mjs",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/cut-mistakes/scripts/find-cut-candidates.mjs",
+    "mirror": ".claude/skills/cut-mistakes/scripts/find-cut-candidates.mjs",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/cut-silences/SKILL.md",
+    "mirror": ".claude/skills/cut-silences/SKILL.md",
+    "identicalBlob": false,
+    "identicalAfterSkillPathNormalization": true
+  },
+  {
+    "path": ".agents/skills/cut-silences/scripts/cut-silences.mjs",
+    "mirror": ".claude/skills/cut-silences/scripts/cut-silences.mjs",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/edit-video/SKILL.md",
+    "mirror": ".claude/skills/edit-video/SKILL.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/gsap/NOTICE.txt",
+    "mirror": ".claude/skills/gsap/NOTICE.txt",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/gsap/SKILL.md",
+    "mirror": ".claude/skills/gsap/SKILL.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/gsap/references/effects.md",
+    "mirror": ".claude/skills/gsap/references/effects.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/gsap/scripts/extract-audio-data.py",
+    "mirror": ".claude/skills/gsap/scripts/extract-audio-data.py",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes-cli/NOTICE.txt",
+    "mirror": ".claude/skills/hyperframes-cli/NOTICE.txt",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes-cli/SKILL.md",
+    "mirror": ".claude/skills/hyperframes-cli/SKILL.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes-registry/NOTICE.txt",
+    "mirror": ".claude/skills/hyperframes-registry/NOTICE.txt",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes-registry/SKILL.md",
+    "mirror": ".claude/skills/hyperframes-registry/SKILL.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes-registry/examples/add-block.md",
+    "mirror": ".claude/skills/hyperframes-registry/examples/add-block.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes-registry/examples/add-component.md",
+    "mirror": ".claude/skills/hyperframes-registry/examples/add-component.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes-registry/references/demo-html-pattern.md",
+    "mirror": ".claude/skills/hyperframes-registry/references/demo-html-pattern.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes-registry/references/discovery.md",
+    "mirror": ".claude/skills/hyperframes-registry/references/discovery.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes-registry/references/install-locations.md",
+    "mirror": ".claude/skills/hyperframes-registry/references/install-locations.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes-registry/references/wiring-blocks.md",
+    "mirror": ".claude/skills/hyperframes-registry/references/wiring-blocks.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes-registry/references/wiring-components.md",
+    "mirror": ".claude/skills/hyperframes-registry/references/wiring-components.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes-video-beats/SKILL.md",
+    "mirror": ".claude/skills/hyperframes-video-beats/SKILL.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes-video-beats/agents/openai.yaml",
+    "mirror": ".claude/skills/hyperframes-video-beats/agents/openai.yaml",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/NOTICE.txt",
+    "mirror": ".claude/skills/hyperframes/NOTICE.txt",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/SKILL.md",
+    "mirror": ".claude/skills/hyperframes/SKILL.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/data-in-motion.md",
+    "mirror": ".claude/skills/hyperframes/data-in-motion.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/house-style.md",
+    "mirror": ".claude/skills/hyperframes/house-style.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/palettes/bold-energetic.md",
+    "mirror": ".claude/skills/hyperframes/palettes/bold-energetic.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/palettes/clean-corporate.md",
+    "mirror": ".claude/skills/hyperframes/palettes/clean-corporate.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/palettes/dark-premium.md",
+    "mirror": ".claude/skills/hyperframes/palettes/dark-premium.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/palettes/jewel-rich.md",
+    "mirror": ".claude/skills/hyperframes/palettes/jewel-rich.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/palettes/monochrome.md",
+    "mirror": ".claude/skills/hyperframes/palettes/monochrome.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/palettes/nature-earth.md",
+    "mirror": ".claude/skills/hyperframes/palettes/nature-earth.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/palettes/neon-electric.md",
+    "mirror": ".claude/skills/hyperframes/palettes/neon-electric.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/palettes/pastel-soft.md",
+    "mirror": ".claude/skills/hyperframes/palettes/pastel-soft.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/palettes/warm-editorial.md",
+    "mirror": ".claude/skills/hyperframes/palettes/warm-editorial.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/patterns.md",
+    "mirror": ".claude/skills/hyperframes/patterns.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/audio-reactive.md",
+    "mirror": ".claude/skills/hyperframes/references/audio-reactive.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/captions.md",
+    "mirror": ".claude/skills/hyperframes/references/captions.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/css-patterns.md",
+    "mirror": ".claude/skills/hyperframes/references/css-patterns.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/dynamic-techniques.md",
+    "mirror": ".claude/skills/hyperframes/references/dynamic-techniques.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/motion-principles.md",
+    "mirror": ".claude/skills/hyperframes/references/motion-principles.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transcript-guide.md",
+    "mirror": ".claude/skills/hyperframes/references/transcript-guide.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions.md",
+    "mirror": ".claude/skills/hyperframes/references/transitions.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/catalog.md",
+    "mirror": ".claude/skills/hyperframes/references/transitions/catalog.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-3d.md",
+    "mirror": ".claude/skills/hyperframes/references/transitions/css-3d.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-blur.md",
+    "mirror": ".claude/skills/hyperframes/references/transitions/css-blur.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-cover.md",
+    "mirror": ".claude/skills/hyperframes/references/transitions/css-cover.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-destruction.md",
+    "mirror": ".claude/skills/hyperframes/references/transitions/css-destruction.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-dissolve.md",
+    "mirror": ".claude/skills/hyperframes/references/transitions/css-dissolve.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-distortion.md",
+    "mirror": ".claude/skills/hyperframes/references/transitions/css-distortion.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-grid.md",
+    "mirror": ".claude/skills/hyperframes/references/transitions/css-grid.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-light.md",
+    "mirror": ".claude/skills/hyperframes/references/transitions/css-light.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-mechanical.md",
+    "mirror": ".claude/skills/hyperframes/references/transitions/css-mechanical.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-other.md",
+    "mirror": ".claude/skills/hyperframes/references/transitions/css-other.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-push.md",
+    "mirror": ".claude/skills/hyperframes/references/transitions/css-push.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-radial.md",
+    "mirror": ".claude/skills/hyperframes/references/transitions/css-radial.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-scale.md",
+    "mirror": ".claude/skills/hyperframes/references/transitions/css-scale.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/tts.md",
+    "mirror": ".claude/skills/hyperframes/references/tts.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/typography.md",
+    "mirror": ".claude/skills/hyperframes/references/typography.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/scripts/animation-map.mjs",
+    "mirror": ".claude/skills/hyperframes/scripts/animation-map.mjs",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/scripts/contrast-report.mjs",
+    "mirror": ".claude/skills/hyperframes/scripts/contrast-report.mjs",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/hyperframes/visual-styles.md",
+    "mirror": ".claude/skills/hyperframes/visual-styles.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/make-a-video/SKILL.md",
+    "mirror": ".claude/skills/make-a-video/SKILL.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/make-a-video/references/build-checklist.md",
+    "mirror": ".claude/skills/make-a-video/references/build-checklist.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/make-a-video/references/catalog-intent-map.md",
+    "mirror": ".claude/skills/make-a-video/references/catalog-intent-map.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/make-a-video/references/composition-scaffold.md",
+    "mirror": ".claude/skills/make-a-video/references/composition-scaffold.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/make-a-video/references/interview-questions.md",
+    "mirror": ".claude/skills/make-a-video/references/interview-questions.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/make-a-video/references/storyboard-template.md",
+    "mirror": ".claude/skills/make-a-video/references/storyboard-template.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/make-a-video/references/style-intake.md",
+    "mirror": ".claude/skills/make-a-video/references/style-intake.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/short-form-edit/SKILL.md",
+    "mirror": ".claude/skills/short-form-edit/SKILL.md",
+    "identicalBlob": false,
+    "identicalAfterSkillPathNormalization": true
+  },
+  {
+    "path": ".agents/skills/short-form-edit/references/curiosity-and-entertainment.md",
+    "mirror": ".claude/skills/short-form-edit/references/curiosity-and-entertainment.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/short-form-edit/references/plan-schema.md",
+    "mirror": ".claude/skills/short-form-edit/references/plan-schema.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/short-form-edit/references/premium-motion-and-footage.md",
+    "mirror": ".claude/skills/short-form-edit/references/premium-motion-and-footage.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/short-form-edit/references/quality-gates.md",
+    "mirror": ".claude/skills/short-form-edit/references/quality-gates.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/short-form-edit/references/reference-analysis.md",
+    "mirror": ".claude/skills/short-form-edit/references/reference-analysis.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/short-form-edit/scripts/validate-footage.mjs",
+    "mirror": ".claude/skills/short-form-edit/scripts/validate-footage.mjs",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/short-form-edit/scripts/validate-plan.mjs",
+    "mirror": ".claude/skills/short-form-edit/scripts/validate-plan.mjs",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/short-form-video/SKILL.md",
+    "mirror": ".claude/skills/short-form-video/SKILL.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/style-library/SKILL.md",
+    "mirror": ".claude/skills/style-library/SKILL.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/video-storytelling/SKILL.md",
+    "mirror": ".claude/skills/video-storytelling/SKILL.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/video-storytelling/reference/design-system.md",
+    "mirror": ".claude/skills/video-storytelling/reference/design-system.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/video-storytelling/reference/patterns/wall-of-slots/README.md",
+    "mirror": ".claude/skills/video-storytelling/reference/patterns/wall-of-slots/README.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/video-storytelling/reference/patterns/wall-of-slots/geom.py",
+    "mirror": ".claude/skills/video-storytelling/reference/patterns/wall-of-slots/geom.py",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/video-storytelling/reference/patterns/wall-of-slots/wall.py",
+    "mirror": ".claude/skills/video-storytelling/reference/patterns/wall-of-slots/wall.py",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/website-to-hyperframes/SKILL.md",
+    "mirror": ".claude/skills/website-to-hyperframes/SKILL.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/website-to-hyperframes/references/step-1-capture.md",
+    "mirror": ".claude/skills/website-to-hyperframes/references/step-1-capture.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/website-to-hyperframes/references/step-2-design.md",
+    "mirror": ".claude/skills/website-to-hyperframes/references/step-2-design.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/website-to-hyperframes/references/step-3-script.md",
+    "mirror": ".claude/skills/website-to-hyperframes/references/step-3-script.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/website-to-hyperframes/references/step-4-storyboard.md",
+    "mirror": ".claude/skills/website-to-hyperframes/references/step-4-storyboard.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/website-to-hyperframes/references/step-5-vo.md",
+    "mirror": ".claude/skills/website-to-hyperframes/references/step-5-vo.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/website-to-hyperframes/references/step-6-build.md",
+    "mirror": ".claude/skills/website-to-hyperframes/references/step-6-build.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/website-to-hyperframes/references/step-7-validate.md",
+    "mirror": ".claude/skills/website-to-hyperframes/references/step-7-validate.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  },
+  {
+    "path": ".agents/skills/website-to-hyperframes/references/techniques.md",
+    "mirror": ".claude/skills/website-to-hyperframes/references/techniques.md",
+    "identicalBlob": true,
+    "identicalAfterSkillPathNormalization": null
+  }
+]

@@ -1,0 +1,96 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+templates/motion/node_modules/
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/.next-*/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files — ignore EVERY env variant (they hold real secrets); keep only the
+# tracked *.example templates. Catches .env, .env.local, .env.production, etc.
+.env
+.env.*
+!.env.example
+!.env.local.example
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+debug-last-run.txt
+
+# python
+__pycache__/
+*.pyc
+.venv/
+
+# stray 0-byte files from mistyped commands
+/clipper@0.1.0
+/next
+
+# Claude Code per-user settings (project allowlist .claude/settings.json IS committed)
+.claude/settings.local.json
+
+# scratch artifacts (Playwright MCP output, design mockup screenshots)
+.playwright-mcp/
+file-browser-redesigned*.png
+
+# secrets — keys live in .env.local in THIS repo (never committed;
+# .env.local.example is the tracked template)
+.env
+
+# renders are regenerable outputs — keep only the sample PNG stills (the
+# visual catalog) in git; cache + preview videos stay local-only
+templates/motion/renders/*
+!templates/motion/renders/samples/
+templates/motion/renders/samples/*
+!templates/motion/renders/samples/*.png
+
+# throwaway per-render composition copies minted by graphics_render.py
+templates/motion/compositions/_gs-*.html
+
+# b-roll asset pool — commit the convention (README) and the brain's
+# annotations (broll_catalog.json: tags/descriptions are versioned judgment),
+# never the media/frames themselves
+broll/*
+!broll/README.md
+!broll/broll_catalog.json
+.sniper-palmier-livedrive
+.sniper-palmier-desktop-authority.json
+
+# Producer runs and frame-by-frame reference extractions are regenerable,
+# multi-gigabyte evidence stores. Keep their authored findings in docs, but
+# never commit rendered media, downloaded references, or extracted frames.
+/artifacts/
+/templates/motion/.sniper-native-runtime/
+/scripts/producer/artifacts/
+/docs/studies/gpt-5-6-sol-benchmark-2026-07-15/
+/docs/studies/shorts-visual-playbook/**/*.jpg

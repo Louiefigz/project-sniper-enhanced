@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/channel-normalization-materialization-v2.schema.json",
+  "title": "ChannelNormalizationMaterializationV2",
+  "description": "Float pre-master output proof, distinct from unchanged v1 source/channel authority and historical unversioned integer output proofs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion", "kind", "sourceReceiptHash", "stereoFilter",
+    "appliedFilter", "policy", "outputPath", "outputSha256", "codec",
+    "sampleFormat", "sampleRate", "channels", "channelLayout", "receiptHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 2 },
+    "kind": { "const": "channel-normalization-materialization" },
+    "sourceReceiptHash": { "$ref": "channel-normalization-receipt-v1.schema.json#/$defs/sha256" },
+    "stereoFilter": { "type": "string", "minLength": 1 },
+    "appliedFilter": { "type": "string", "minLength": 1 },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version", "codec", "sampleFormat", "headroom",
+        "multichannelMatrix", "masteringApplied"
+      ],
+      "properties": {
+        "version": { "const": 2 },
+        "codec": { "const": "pcm_f32le" },
+        "sampleFormat": { "const": "flt" },
+        "headroom": { "const": "preserved-no-limiter" },
+        "multichannelMatrix": { "const": "coefficient-row-sum-at-most-one" },
+        "masteringApplied": { "const": false }
+      }
+    },
+    "outputPath": { "type": "string", "minLength": 1 },
+    "outputSha256": { "$ref": "channel-normalization-receipt-v1.schema.json#/$defs/sha256" },
+    "codec": { "const": "pcm_f32le" },
+    "sampleFormat": { "const": "flt" },
+    "sampleRate": { "const": 48000 },
+    "channels": { "const": 2 },
+    "channelLayout": { "const": "stereo" },
+    "receiptHash": { "$ref": "channel-normalization-receipt-v1.schema.json#/$defs/sha256" }
+  }
+}

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en" data-composition-variables='[{"id":"leftTitle","type":"string","label":"Left card title","default":"Build it once"},{"id":"rightTitle","type":"string","label":"Right card title","default":"Change only this card"},{"id":"leftColor","type":"color","label":"Left card color","default":"#0B5FFF"},{"id":"seed","type":"number","label":"Deterministic particle seed","default":424242},{"id":"fireIntensity","type":"number","label":"Fire intensity","default":1},{"id":"sparkleCount","type":"number","label":"Sparkle count","default":22}]'>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <link rel="stylesheet" href="/tokens.css" />
+    <link rel="stylesheet" href="/compositions/scene.css" />
+    <script src="/vendor/gsap/gsap.min.js"></script>
+    <script src="/compositions/scene-common.js"></script>
+  </head>
+  <body>
+    <main id="root" data-composition-id="fire-sparkles-full" data-width="1920" data-height="1080" data-duration="6">
+      <section class="card card-left">
+        <div class="label"></div>
+        <div class="fire-field"></div>
+        <div class="micro-label">seeded fire</div>
+      </section>
+      <section class="card card-right">
+        <div class="sparkle-field"></div>
+        <div class="label"></div>
+        <div class="micro-label">seeded sparkles</div>
+      </section>
+    </main>
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("root");
+        const D = parseFloat(root.dataset.duration) || 6;
+        const HF = window.__hyperframes;
+        const vars = Object.assign({
+          leftTitle: "Build it once",
+          rightTitle: "Change only this card",
+          leftColor: "#0B5FFF",
+          seed: 424242,
+          fireIntensity: 1,
+          sparkleCount: 22
+        }, HF && HF.getVariables ? HF.getVariables() : {});
+        const seededRandom = window.__seededRandom;
+        seededRandom(vars.seed);
+        window.__sniperAnimationMap = [
+          {"eventId":"left-card-in","unitId":"unit-left","elementId":"left-blue-card","property":"transform","startFrame":0,"endFrameExclusive":18,"easing":"power3.out"},
+          {"eventId":"right-card-in","unitId":"unit-right","elementId":"right-copy","property":"transform","startFrame":6,"endFrameExclusive":24,"easing":"power3.out"},
+          {"eventId":"fire-breathe","unitId":"unit-left","elementId":"seeded-fire","property":"particles","startFrame":12,"endFrameExclusive":165,"easing":"power1.inOut"},
+          {"eventId":"sparkle-drift","unitId":"unit-right","elementId":"seeded-sparkles","property":"particles","startFrame":18,"endFrameExclusive":165,"easing":"power1.inOut"}
+        ];
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+        window.__buildFireSparkles(tl, root, vars, D);
+        tl.seek(0);
+        window.__timelines["fire-sparkles-full"] = tl;
+      })();
+    </script>
+  </body>
+</html>

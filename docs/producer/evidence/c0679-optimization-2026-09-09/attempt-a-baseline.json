@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-09-09T21:12:31.953346+00:00",
+  "attempt": "A",
+  "status": "saved-immutable-baseline-output-and-full-playback-qualified-studio-limits-retained",
+  "package": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-native-hyperframes-2026-09-09",
+  "packageManifest": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-native-hyperframes-2026-09-09/PACKAGE_MANIFEST.json",
+  "packageManifestSha256": "1cc0c92dfc15530afb57c2f6d33caf62061a6034d648e43b69d2d64069c5f7c5",
+  "packageFiles": 8614,
+  "output": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-native-hyperframes-2026-09-09/output/C0679-native.mp4",
+  "outputSha256": "eef61c5a2a410d869c79c13c6fb9ba69f52690377d0a99c3fbd53db3ffa50181",
+  "outputBytes": 875427947,
+  "runtimeManifestSha256": "8a668d99fbf9cc4af344022edade544728d5c873b28a629dc5ddc8ed113970f4",
+  "sourceAndOutputCopyHashesVerified": true,
+  "baselineChangedSinceCopy": false,
+  "objectiveWholeOutputPassed": true,
+  "supplementalAuthorityPassed": true,
+  "actualPackagedReexportExecuted": false,
+  "humanListeningApprovalClaimed": false,
+  "userCreativeApprovalClaimed": false,
+  "twoHourTargetMet": false,
+  "knownLimitations": [
+    "Strict browser color comparison failed at frame653 (39.4668dB vs40dB); controlled comparison and two-still agent review found no material visible loss. Failure remains retained.",
+    "The frozen baseline command supports unchanged soundtrack/governing source and CSS-scoped revisions; arbitrary HTML/JS/audio requalification is not implemented.",
+    "The frozen baseline still reserves cold extraction disk on every run. Warm-cache helpers are separate and not yet qualified.",
+    "Managed preview open may replace an existing registered preview; do not use it blindly while preserving41058.",
+    "A valid managed preview .studio-server.json currently enters the frozen governing-source closure. A narrow validated-record fix passes42 offline tests in separate preparation, not in this baseline.",
+    "The prior 65-second native Studio receipt remains telemetry-failed due to a startup Event error; only its timing and audio-disruption subchecks passed.",
+    "Current 65-second Studio observation failed: 668 audio seeking and 668 waiting events, plus blocked MotionPathPlugin CDN loading. Timing subchecks passed. Event semantics are under read-only investigation; Studio playback is not approved."
+  ],
+  "freshTrialBoundary": "Attempt B and comparison artifacts must be separate; do not use A edited sources, soundtrack, cuts, frames or project as B authoring inputs. Only generic engineering improvements may carry over.",
+  "correctedMp4FullPlayback": {
+    "passed": true,
+    "reportedDroppedFrames": 0,
+    "frameCallbacks": 16393,
+    "maxFrameGapMs": 83.5,
+    "guardSeconds": 694.5511284999084,
+    "humanListeningClaimed": false,
+    "combinedReviewStatus": "browser-review-fail-due-to-retained-strict-color-threshold"
+  },
+  "latestReviewRecordedAt": "2026-09-09T21:29:49.077048+00:00"
+}

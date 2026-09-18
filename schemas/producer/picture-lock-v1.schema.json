@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/picture-lock-v1.schema.json",
+  "title": "PictureLockV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "approvedCutRevisionHash",
+    "planContentHash",
+    "timelineMapHash",
+    "sourceSnapshotSetHash",
+    "transcriptTimingHash",
+    "cutApprovalReceiptHash",
+    "cutReviewApprovalReceiptHash",
+    "requiredCleanReviews",
+    "workflowPolicy",
+    "selectedApproval"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "approvedCutRevisionHash": { "$ref": "#/$defs/sha256" },
+    "planContentHash": { "$ref": "#/$defs/sha256" },
+    "timelineMapHash": { "$ref": "#/$defs/sha256" },
+    "sourceSnapshotSetHash": { "$ref": "#/$defs/sha256" },
+    "transcriptTimingHash": { "$ref": "#/$defs/sha256" },
+    "cutApprovalReceiptHash": { "$ref": "#/$defs/sha256" },
+    "cutReviewApprovalReceiptHash": { "$ref": "#/$defs/sha256" },
+    "requiredCleanReviews": { "const": 2 },
+    "workflowPolicy": {
+      "enum": ["cut-first", "autopilot"]
+    },
+    "selectedApproval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approver",
+        "approvalPolicyHash",
+        "approvalReceiptHash"
+      ],
+      "properties": {
+        "approver": {
+          "enum": ["operator", "system-policy"]
+        },
+        "approvalPolicyHash": { "$ref": "#/$defs/sha256" },
+        "approvalReceiptHash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "compatibilityAncestorHash": { "$ref": "#/$defs/sha256" },
+    "parentPictureLockHash": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

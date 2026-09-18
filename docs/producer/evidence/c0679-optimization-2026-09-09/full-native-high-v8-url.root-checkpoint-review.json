@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "status": "layout-checkpoints-reviewed-color-and-audio-open",
+  "video": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/full-native-high-v8-url.mp4",
+  "videoSha256": "73f883d2b03aa2129b605fe298147bf834e9e3b5d0de485f9dfc2b6e98d43a8c",
+  "index": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/full-native-high-v8-url.visual-review/index.json",
+  "reviewedBy": "root-agent",
+  "contactSheetsViewed": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+  "actualEncodedCheckpointsViewed": 83,
+  "scope": "All extracted checkpoints viewed on 1280px-wide contact sheets, not all frames or continuous playback. Exact source/output pair at13.013seconds and native pre-encode JPEG atframe312 also viewed.",
+  "layoutFindings": "Presenter-led full shots, rounded padded side insets and circular corner bubble remain visible and legible across the sampled programme. Graphics use purposeful varied layouts; selected numeric labels and ending follow the authored timing. Interpolated opening/reveal/fade frames are not mistaken for steady-state cropping defects. No new material layout failure found in the sampled output.",
+  "openFindings": [
+    "Native AAC fails true-peak ceiling and exact presentation by20samples; original failed QC retained.",
+    "Four exact source/output raw-RGB comparisons differ systematically byabout12levels. Source PNG cICP=[1,11,0,1], screenshot ICC=sRGB, final PNG transfer/gamma differ. Color-managed comparison is required before declaring actual displayed-color loss or applying a correction.",
+    "Continuous motion and perceptual audio review remain distinct from static checkpoints and objective signal checks."
+  ],
+  "humanListeningClaimed": false,
+  "humanApprovalClaimed": false,
+  "colorFidelityApproved": false,
+  "deliveryApproved": false,
+  "twoHourEndToEndTargetMet": false
+}

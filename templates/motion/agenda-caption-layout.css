@@ -1,0 +1,93 @@
+/*
+ * Explicit native 1920x1080 agenda layout; never an automatic caption fix.
+ *
+ * Keep the existing 132px title, 52px step titles, 30px subtitles and 88px
+ * chips. Reflow their relationship instead of scaling the entire graphic or
+ * suppressing captions. At most three steps are accepted by the shared
+ * template contract and by the composition itself.
+ *
+ * The upper stage is an authored layout intent, NOT a measured safe region.
+ * Long copy is allowed to wrap, never ellipsized or hidden. Full-animation
+ * geometry/paint measurement must reject overflow or caption intersections;
+ * the name of this layout alone cannot satisfy that observation.
+ *
+ * Selectors apply only to the explicit variant. The default centered template
+ * retains its previous geometry, font sizes, stagger and easing.
+ */
+
+#ag-root[data-sniper-layout="caption-safe-upper-v1"] #ag-stage {
+  inset: auto;
+  top: 72px;
+  left: 140px;
+  right: 140px;
+  height: 528px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 620px minmax(0, 1fr);
+  gap: 80px;
+  align-items: center;
+}
+
+#ag-root[data-sniper-layout="caption-safe-upper-v1"] #ag-header {
+  align-items: flex-start;
+  min-width: 0;
+  max-width: 100%;
+}
+
+#ag-root[data-sniper-layout="caption-safe-upper-v1"] #ag-title-wrap {
+  align-items: flex-start;
+  max-width: 100%;
+}
+
+#ag-root[data-sniper-layout="caption-safe-upper-v1"] #ag-title {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: normal;
+}
+
+#ag-root[data-sniper-layout="caption-safe-upper-v1"] #ag-eyebrow {
+  max-width: 100%;
+  white-space: normal;
+}
+
+/* Allocate actual line-box room for the unchanged native font sizes. This
+ * explicit variant still requires the unchanged all-frame overflow observer;
+ * line-height alone is not evidence of safe caption/graphic compatibility. */
+#ag-root[data-sniper-layout="caption-safe-upper-v1"] #ag-title,
+#ag-root[data-sniper-layout="caption-safe-upper-v1"] #ag-eyebrow,
+#ag-root[data-sniper-layout="caption-safe-upper-v1"] .ag-title-row {
+  line-height: 1.25;
+}
+
+#ag-root[data-sniper-layout="caption-safe-upper-v1"] #ag-rows {
+  min-width: 0;
+  max-width: 100%;
+}
+
+#ag-root[data-sniper-layout="caption-safe-upper-v1"] .ag-row {
+  min-width: 0;
+  max-width: 100%;
+}
+
+#ag-root[data-sniper-layout="caption-safe-upper-v1"] .ag-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+#ag-root[data-sniper-layout="caption-safe-upper-v1"] .ag-title-row,
+#ag-root[data-sniper-layout="caption-safe-upper-v1"] .ag-sub {
+  white-space: normal;
+  overflow-wrap: normal;
+}
+
+/* The bounded geometry profile measures text/layout envelopes, not blurred
+ * paint. This native flat treatment keeps the accent underline and chip
+ * colors but deliberately authors no glow/shadow requiring a pixel oracle. */
+#ag-root[data-sniper-layout="caption-safe-upper-v1"] #ag-title {
+  text-shadow: none;
+}
+
+#ag-root[data-sniper-layout="caption-safe-upper-v1"] #ag-underline,
+#ag-root[data-sniper-layout="caption-safe-upper-v1"] .ag-chip {
+  box-shadow: none;
+}

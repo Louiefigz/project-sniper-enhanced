@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/cut-repair-review-action-v1.schema.json",
+  "title": "CutRepairReviewActionV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "idempotencyKey",
+    "expectedParentRevisionHash",
+    "operation",
+    "operationHash",
+    "selectionPolicy",
+    "selectionPolicyHash",
+    "reviewPlanObjectHash",
+    "reviewPlanContentHash",
+    "reviewTimelineMapHash",
+    "reviewRenderGraphHash",
+    "reviewProjectionReceiptHash",
+    "workflowPolicy",
+    "requestedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "cut-repair-review-action" },
+    "idempotencyKey": { "$ref": "#/$defs/uuid" },
+    "expectedParentRevisionHash": { "$ref": "#/$defs/sha256" },
+    "operation": {
+      "$ref": "cut-restore-speech-v1.schema.json"
+    },
+    "operationHash": { "$ref": "#/$defs/sha256" },
+    "selectionPolicy": { "$ref": "#/$defs/selectionPolicy" },
+    "selectionPolicyHash": { "$ref": "#/$defs/sha256" },
+    "reviewPlanObjectHash": { "$ref": "#/$defs/sha256" },
+    "reviewPlanContentHash": { "$ref": "#/$defs/sha256" },
+    "reviewTimelineMapHash": { "$ref": "#/$defs/sha256" },
+    "reviewRenderGraphHash": { "$ref": "#/$defs/sha256" },
+    "reviewProjectionReceiptHash": {
+      "oneOf": [
+        { "$ref": "#/$defs/sha256" },
+        { "type": "null" }
+      ]
+    },
+    "workflowPolicy": { "enum": ["cut-first", "autopilot"] },
+    "requestedAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "selectionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "kind", "order"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "kind": { "const": "cut-repair-selection-policy" },
+        "order": {
+          "const": [
+            "audio-only-before-picture",
+            "fewest-picture-dirty-frames",
+            "fewest-audio-dirty-frames",
+            "shortest-source-extension",
+            "operation-hash-tiebreak"
+          ]
+        }
+      }
+    }
+  }
+}

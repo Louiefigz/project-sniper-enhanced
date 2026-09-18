@@ -1,0 +1,46 @@
+✔ no hooks: early original callback cannot replace first prospective pin (511.440292ms)
+✔ no hooks: early original callback cannot replace last prospective pin (11383.292208ms)
+✔ no hooks: end original callback cannot replace first prospective pin (9289.915708ms)
+✔ no hooks: end original callback cannot replace last prospective pin (7209.448084ms)
+✔ no hooks: shared parent replacement refuses before publication (334.660667ms)
+✔ no hooks: earlier hashed pin cannot change during a later read (7143.49575ms)
+✔ no hooks: restoring earlier pin bytes cannot rebaseline original metadata (7403.716291ms)
+✔ no hooks: middle original expiry preserves its exact error (4029.479833ms)
+✔ no hooks: end original expiry preserves its exact error (8239.480833ms)
+✔ no hooks: caught publish reentry poisons the batch (337.438875ms)
+✔ no hooks: caught batch reentry poisons the batch (338.42825ms)
+✔ no hooks: caught cancellation reentry poisons the batch (316.392667ms)
+✔ no hooks: caught read reentry poisons the batch (353.10375ms)
+✔ no hooks: caught directory reentry poisons the batch (321.566209ms)
+✔ no hooks: caught code reentry poisons the batch (318.527792ms)
+✔ live hooks: early original callback cannot replace first prospective pin (393.6055ms)
+✔ live hooks: early original callback cannot replace last prospective pin (3838.732625ms)
+✔ live hooks: end original callback cannot replace first prospective pin (3733.973208ms)
+✔ live hooks: end original callback cannot replace last prospective pin (3680.78ms)
+✔ live hooks: shared parent replacement refuses before publication (413.560959ms)
+✔ live hooks: earlier hashed pin cannot change during a later read (3756.144083ms)
+✔ live hooks: restoring earlier pin bytes cannot rebaseline original metadata (3776.028292ms)
+✔ live hooks: middle original expiry preserves its exact error (2004.710041ms)
+✔ live hooks: end original expiry preserves its exact error (3603.506375ms)
+✔ live hooks: caught publish reentry poisons the batch (367.428ms)
+✔ live hooks: caught batch reentry poisons the batch (363.778375ms)
+✔ live hooks: caught cancellation reentry poisons the batch (363.644ms)
+✔ live hooks: caught read reentry poisons the batch (364.726458ms)
+✔ live hooks: caught directory reentry poisons the batch (357.81625ms)
+✔ live hooks: caught code reentry poisons the batch (348.12375ms)
+✔ actual cancellation entry at middle stops the live batch (2036.006583ms)
+✔ actual cancellation entry at end stops the live batch (3726.40125ms)
+✔ all pin/parent captures precede first callback and final metadata checks retain completed pins (11054.184458ms)
+✔ batch API rejects empty, duplicate and oversized inventories before guard callbacks (146.281292ms)
+✔ no hooks: actual prepublication batch pin metadata is linear (10340.031375ms)
+ℹ TEST 304 prospective pins: 2432 actual pin stats; 2434 original work callback calls; no native work
+✔ live hooks: actual prepublication batch pin metadata is linear (7539.801958ms)
+ℹ TEST 304 prospective pins: 3648 actual pin stats; 2434 original work callback calls; no native work
+ℹ tests 36
+ℹ suites 0
+ℹ pass 36
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 119746.656917

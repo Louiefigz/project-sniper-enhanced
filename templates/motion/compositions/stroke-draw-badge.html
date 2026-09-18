@@ -1,0 +1,253 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"icon","type":"string","label":"Icon (file under /icons; the mark that stroke-draws)","default":""},
+    {"id":"label","type":"string","label":"Label under the mark (empty = omit)","default":""},
+    {"id":"atS","type":"number","label":"Draw start (s, window-relative)","default":0.2,"min":0,"max":30,"step":0.05,"unit":"s"},
+    {"id":"slotX","type":"number","label":"Badge center x (normalized)","default":0.5,"min":0.05,"max":0.95,"step":0.01},
+    {"id":"slotY","type":"number","label":"Badge center y (normalized)","default":0.5,"min":0.05,"max":0.95,"step":0.01},
+    {"id":"accent","type":"color","label":"Stroke/fill color (jaden lemon default)","default":"#F5E960"}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · Motion template: STROKE-DRAW-BADGE (jaden pack)
+    Reference: the Jaden save-CTA move — an icon OUTLINE stroke-draws in like
+    a marker, then the glyph FLOODS with fill; a short label lands with the
+    flood. Now a reusable comp (icon+label vars) powered by the vendored GSAP
+    DrawSVGPlugin (/vendor/gsap/DrawSVGPlugin.min.js, 3.14.2 — license +
+    source recorded in ../PROVENANCE.md).
+    Transparent 1080x1920 overlay -> render `--format mov` (ProRes 4444).
+
+    CONTRACT for the PRODUCER compositing stage:
+      - icon: a filename under the icons/ web root ("youtube" / "youtube.svg";
+        .svg optional — same resolution as icon-badge; plan_lint_motion's
+        icon* existence check covers this field). The SVG is inlined at build
+        time (sync local fetch of the served asset — deterministic, no
+        network) so DrawSVG can stroke its real <path> geometry. Non-<path>
+        shapes FAIL LOUD — no fallback drawing.
+      - label: OPTIONAL one-liner under the mark (heavy white grotesque +
+        black stroke, the jaden co-word skin). Empty = omitted.
+      - EMPTY-DEFAULTS LAW (G21): icon+label default EMPTY — unset renders
+        NOTHING; demo content ("youtube"/"Subscribe") only when BOTH unset.
+        label without icon FAILS LOUD (a badge is the mark, not bare text).
+      - TIMING (house laws): stroke-draw DRAW_S=0.5s power2.out starting at
+        atS (the stroke-draw band underline-circle proved, 0.4-0.5s);
+        fill FLOODS over FLOOD_S=0.18s power2.in immediately after; the label
+        pops AT the flood moment via M.popIn — alpha SNAP + <=2-FRAME scale
+        settle (jaden pop law, JADEN_STYLE §5.3). atS clamps so draw+flood
+        always resolve inside the window.
+      - OUT = NONE. Holds to D; the compositor clears it on the window end /
+        cut ("exitOnCut": true — §5.3 THE EXIT LAW). NEVER a fade.
+      - Placement: slotX/slotY are the badge CENTER (normalized). The
+        planner/anchors own placement law (keep it off the face) — this
+        template just draws where it is told.
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
+        rewrites it per window; --variables never sets it — stat-card note).
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>SNIPER · stroke-draw-badge</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="/vendor/gsap/gsap.min.js"></script>
+    <script src="/vendor/gsap/DrawSVGPlugin.min.js"></script>
+    <script src="/motion-tokens.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: transparent;         /* alpha overlay — the frame owns nothing */
+        font-family: var(--font);
+      }
+      #sdb-root { position: relative; width: 1080px; height: 1920px; }
+
+      /* .stage OWNS the centering transform (jaden-shout-lockup pattern);
+         GSAP animates only the mark's paths + the label. */
+      #sdb-stage {
+        position: absolute;
+        left: 540px;                     /* slotX * 1080 (script overrides) */
+        top: 960px;                      /* slotY * 1920 (script overrides) */
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 26px;
+      }
+      /* The inlined mark. Stroke + fill both ride --accent; the soft drop
+         lifts it off real footage (jaden payload treatment). */
+      #sdb-svg {
+        width: 170px;
+        height: 170px;
+        display: block;
+        overflow: visible;
+        filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.5));
+      }
+      /* Label: heavy white grotesque + black stroke (jaden co-word skin),
+         ~2.8%H. Falls back to synthesized 700 (tokens.css embeds 400/700). */
+      #sdb-label {
+        font-size: 54px;
+        font-weight: 800;
+        line-height: 1.05;
+        color: #FFFFFF;
+        -webkit-text-stroke: 4px #000;
+        paint-order: stroke fill;
+        text-shadow: 0 5px 18px rgba(0, 0, 0, 0.5);
+        white-space: nowrap;
+        will-change: opacity, transform;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="sdb-root"
+      data-composition-id="stroke-draw-badge"
+      data-width="1080"
+      data-height="1920"
+      data-start="0"
+      data-duration="3"
+    >
+      <div id="sdb-stage">
+        <svg id="sdb-svg" class="clip" data-start="0" data-duration="60" data-track-index="1"></svg>
+        <div id="sdb-label" class="clip" data-start="0" data-duration="60" data-track-index="2"></div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("sdb-root");
+        const D = parseFloat(root.dataset.duration) || 3;
+        const M = window.__motionTokens;
+
+        const DRAW_S = 0.5;              // stroke-draw (underline-circle band)
+        const FLOOD_S = 0.18;            // fill flood right after the draw
+
+        // Content defaults are EMPTY (G21 — unset renders NOTHING).
+        const defaults = {
+          icon: "", label: "", atS: 0.2, slotX: 0.5, slotY: 0.5,
+          accent: "#F5E960",
+        };
+        // PREVIEW-ONLY demo (the save-CTA move; only when BOTH content vars unset).
+        const SAMPLE = { icon: "youtube", label: "Subscribe" };
+        const HF = window.__hyperframes;
+        let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
+        const iconRaw = (vars.icon == null ? "" : String(vars.icon)).trim();
+        const labelRaw = (vars.label == null ? "" : String(vars.label)).trim();
+        if (!iconRaw && !labelRaw) vars = Object.assign({}, vars, SAMPLE);
+        else if (!iconRaw) {
+          throw new Error("stroke-draw-badge: label without icon — the badge IS the mark");
+        }
+
+        const clamp = function (raw, lo, hi, fallback) {
+          const v = isFinite(Number(raw)) ? Number(raw) : fallback;
+          return Math.max(lo, Math.min(hi, v));
+        };
+        const slotX = clamp(vars.slotX, 0.05, 0.95, 0.5);
+        const slotY = clamp(vars.slotY, 0.05, 0.95, 0.5);
+        // Draw + flood must resolve inside the window (fail-safe clamp).
+        const atS = clamp(vars.atS, 0, Math.max(0, D - DRAW_S - FLOOD_S - 0.1), 0.2);
+        const accent = String(vars.accent);
+
+        const stage = document.getElementById("sdb-stage");
+        stage.style.left = Math.round(slotX * 1080) + "px";
+        stage.style.top = Math.round(slotY * 1920) + "px";
+
+        // Resolve an icon var to a rooted /icons src (.svg optional; icon-badge twin).
+        function iconSrc(raw) {
+          const v = String(raw).trim();
+          if (v.charAt(0) === "/") return v;
+          return "/icons/" + (v.indexOf(".") >= 0 ? v : v + ".svg");
+        }
+
+        // Inline the icon SVG at build time. Sync fetch of a LOCAL served
+        // asset (same file an <img> would load) — deterministic; DrawSVG
+        // needs the real <path> geometry in the DOM. Missing file = LOUD.
+        function fetchSvgDoc(src) {
+          const xhr = new XMLHttpRequest();
+          xhr.open("GET", src, false);
+          xhr.send(null);
+          const ok = xhr.status === 200 || (xhr.status === 0 && xhr.responseText);
+          if (!ok) {
+            throw new Error("stroke-draw-badge: cannot load icon '" + src +
+              "' (HTTP " + xhr.status + ")");
+          }
+          const doc = new DOMParser().parseFromString(xhr.responseText, "image/svg+xml");
+          const svg = doc.documentElement;
+          if (!svg || svg.nodeName.toLowerCase() !== "svg") {
+            throw new Error("stroke-draw-badge: '" + src + "' is not an SVG document");
+          }
+          return svg;
+        }
+
+        const srcSvg = fetchSvgDoc(iconSrc(vars.icon));
+        const hostSvg = document.getElementById("sdb-svg");
+        const viewBox = srcSvg.getAttribute("viewBox") || "0 0 24 24";
+        hostSvg.setAttribute("viewBox", viewBox);
+        const viewW = parseFloat(viewBox.split(/\s+/)[2]) || 24;
+
+        // Load the paths; anything else fails loud (no fallback drawing).
+        const srcPaths = srcSvg.querySelectorAll("path");
+        const srcShapes = srcSvg.querySelectorAll("circle, rect, polygon, polyline, ellipse, line");
+        if (!srcPaths.length || srcShapes.length) {
+          throw new Error("stroke-draw-badge: icon must be <path>-only (got " +
+            srcPaths.length + " paths, " + srcShapes.length + " other shapes)");
+        }
+        // Stroke weight in viewBox units: ~0.75u on the 24u Simple Icons box
+        // (~4.4 visual px at 140px glyph — the marker-outline weight).
+        const strokeW = (viewW * 0.75) / 24;
+        const paths = [];
+        srcPaths.forEach(function (p) {
+          const el = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          el.setAttribute("d", p.getAttribute("d") || "");
+          el.setAttribute("fill", accent);
+          el.setAttribute("stroke", accent);
+          el.setAttribute("stroke-width", String(strokeW));
+          el.setAttribute("stroke-linecap", "round");
+          el.setAttribute("stroke-linejoin", "round");
+          // Resting DOM state = fully drawn + filled (correct even if a seek
+          // never fires the tweens — underline-circle pattern).
+          hostSvg.appendChild(el);
+          paths.push(el);
+        });
+
+        // Optional label (jaden co-word skin) — empty removes the node.
+        const labelEl = document.getElementById("sdb-label");
+        const label = (vars.label == null ? "" : String(vars.label)).trim();
+        if (label) labelEl.textContent = label;
+        else labelEl.remove();
+
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+        if (typeof DrawSVGPlugin === "undefined") {
+          throw new Error("stroke-draw-badge: /vendor/gsap/DrawSVGPlugin.min.js did not load");
+        }
+        gsap.registerPlugin(DrawSVGPlugin);
+
+        // 1) OUTLINE stroke-draws in (DrawSVG 0% -> 100%, DRAW_S power2.out).
+        //    The fromTo's from-state (drawSVG 0% + fill 0) hides the mark
+        //    from t=0 until atS — nothing paints before its moment.
+        tl.fromTo(paths, { drawSVG: "0%" },
+          { drawSVG: "100%", duration: DRAW_S, ease: "power2.out" }, atS);
+        // 2) Glyph FLOODS with fill right as the outline closes.
+        const floodAt = atS + DRAW_S;
+        tl.fromTo(paths, { fillOpacity: 0 },
+          { fillOpacity: 1, duration: FLOOD_S, ease: "power2.in" }, floodAt);
+        // 3) Label pops WITH the flood — alpha SNAP + <=2f settle (M.popIn).
+        if (label) {
+          tl.set(labelEl, { autoAlpha: 0 }, 0);
+          M.popIn(tl, labelEl, floodAt);
+        }
+
+        // Keep the paused timeline spanning D; HOLDS to the end — the
+        // compositor clears it on the cut (THE EXIT LAW, never a fade).
+        tl.set({}, {}, Math.max(0, D - 0.01));
+
+        tl.seek(0);
+        window.__timelines["stroke-draw-badge"] = tl;
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,447 @@
+{
+  "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+  "source": "https://unpkg.com/lucide-static@0.525.0/icons",
+  "version": "0.525.0",
+  "icons": {
+    "arrow-down": {
+      "name": "arrow-down",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/arrow-down.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "arrow-down.svg"
+    },
+    "arrow-left": {
+      "name": "arrow-left",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/arrow-left.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "arrow-left.svg"
+    },
+    "arrow-right": {
+      "name": "arrow-right",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/arrow-right.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "arrow-right.svg"
+    },
+    "arrow-up": {
+      "name": "arrow-up",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/arrow-up.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "arrow-up.svg"
+    },
+    "arrow-up-right": {
+      "name": "arrow-up-right",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/arrow-up-right.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "arrow-up-right.svg"
+    },
+    "box": {
+      "name": "box",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/box.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "box.svg"
+    },
+    "brain": {
+      "name": "brain",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/brain.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "brain.svg"
+    },
+    "calendar": {
+      "name": "calendar",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/calendar.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "calendar.svg"
+    },
+    "chart-column": {
+      "name": "chart-column",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/chart-column.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "chart-column.svg"
+    },
+    "chart-line": {
+      "name": "chart-line",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/chart-line.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "chart-line.svg"
+    },
+    "chart-pie": {
+      "name": "chart-pie",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/chart-pie.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "chart-pie.svg"
+    },
+    "check": {
+      "name": "check",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/check.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "check.svg"
+    },
+    "chevron-right": {
+      "name": "chevron-right",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/chevron-right.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "chevron-right.svg"
+    },
+    "circle-alert": {
+      "name": "circle-alert",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/circle-alert.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "circle-alert.svg"
+    },
+    "circle-check": {
+      "name": "circle-check",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/circle-check.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "circle-check.svg"
+    },
+    "circle-x": {
+      "name": "circle-x",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/circle-x.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "circle-x.svg"
+    },
+    "clock": {
+      "name": "clock",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/clock.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "clock.svg"
+    },
+    "cloud": {
+      "name": "cloud",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/cloud.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "cloud.svg"
+    },
+    "code": {
+      "name": "code",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/code.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "code.svg"
+    },
+    "cpu": {
+      "name": "cpu",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/cpu.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "cpu.svg"
+    },
+    "database": {
+      "name": "database",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/database.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "database.svg"
+    },
+    "dollar-sign": {
+      "name": "dollar-sign",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/dollar-sign.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "dollar-sign.svg"
+    },
+    "file-text": {
+      "name": "file-text",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/file-text.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "file-text.svg"
+    },
+    "folder": {
+      "name": "folder",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/folder.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "folder.svg"
+    },
+    "gauge": {
+      "name": "gauge",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/gauge.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "gauge.svg"
+    },
+    "git-branch": {
+      "name": "git-branch",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/git-branch.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "git-branch.svg"
+    },
+    "github": {
+      "name": "github",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/github.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "github.svg"
+    },
+    "globe": {
+      "name": "globe",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/globe.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "globe.svg"
+    },
+    "hard-drive": {
+      "name": "hard-drive",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/hard-drive.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "hard-drive.svg"
+    },
+    "info": {
+      "name": "info",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/info.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "info.svg"
+    },
+    "key": {
+      "name": "key",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/key.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "key.svg"
+    },
+    "layers": {
+      "name": "layers",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/layers.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "layers.svg"
+    },
+    "lightbulb": {
+      "name": "lightbulb",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/lightbulb.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "lightbulb.svg"
+    },
+    "link": {
+      "name": "link",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/link.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "link.svg"
+    },
+    "lock": {
+      "name": "lock",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/lock.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "lock.svg"
+    },
+    "lock-open": {
+      "name": "lock-open",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/lock-open.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "lock-open.svg"
+    },
+    "refresh-cw": {
+      "name": "refresh-cw",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/refresh-cw.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "refresh-cw.svg"
+    },
+    "rocket": {
+      "name": "rocket",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/rocket.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "rocket.svg"
+    },
+    "search": {
+      "name": "search",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/search.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "search.svg"
+    },
+    "server": {
+      "name": "server",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/server.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "server.svg"
+    },
+    "settings": {
+      "name": "settings",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/settings.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "settings.svg"
+    },
+    "shield": {
+      "name": "shield",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/shield.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "shield.svg"
+    },
+    "shield-check": {
+      "name": "shield-check",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/shield-check.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "shield-check.svg"
+    },
+    "sparkles": {
+      "name": "sparkles",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/sparkles.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "sparkles.svg"
+    },
+    "target": {
+      "name": "target",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/target.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "target.svg"
+    },
+    "terminal": {
+      "name": "terminal",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/terminal.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "terminal.svg"
+    },
+    "trending-down": {
+      "name": "trending-down",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/trending-down.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "trending-down.svg"
+    },
+    "trending-up": {
+      "name": "trending-up",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/trending-up.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "trending-up.svg"
+    },
+    "triangle-alert": {
+      "name": "triangle-alert",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/triangle-alert.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "triangle-alert.svg"
+    },
+    "user": {
+      "name": "user",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/user.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "user.svg"
+    },
+    "users": {
+      "name": "users",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/users.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "users.svg"
+    },
+    "workflow": {
+      "name": "workflow",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/workflow.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "workflow.svg"
+    },
+    "wrench": {
+      "name": "wrench",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/wrench.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "wrench.svg"
+    },
+    "x": {
+      "name": "x",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/x.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "x.svg"
+    },
+    "zap": {
+      "name": "zap",
+      "source_url": "https://unpkg.com/lucide-static@0.525.0/icons/zap.svg",
+      "fetched": "2026-07-11",
+      "color": "#054BC9",
+      "license": "Lucide (ISC; portions of Lucide are Feather, MIT) \u2014 lucide-static@0.525.0",
+      "file": "zap.svg"
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/dialogue-program-receipt-v2.schema.json",
+  "title": "DialogueProgramRenderReceiptV2",
+  "description": "Private, unmastered float program; source and auxiliary authority remain v1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion", "kind", "admissionStatus", "executionMode",
+    "reusedDialogueStem", "authority", "sourceSnapshotSetHash",
+    "auxiliarySnapshotSetHash", "expectedAuxiliaryCounts", "dialogue",
+    "auxiliaryProofs", "clock", "output", "renderGraph", "tools", "policies",
+    "receiptHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 2 },
+    "kind": { "const": "dialogue-program-render-receipt" },
+    "admissionStatus": { "const": "private-unpromoted" },
+    "executionMode": { "enum": ["incremental", "forced-full"] },
+    "reusedDialogueStem": { "type": "boolean" },
+    "authority": { "$ref": "dialogue-program-receipt-v1.schema.json#/$defs/authority" },
+    "sourceSnapshotSetHash": { "$ref": "dialogue-program-receipt-v1.schema.json#/$defs/sha256" },
+    "auxiliarySnapshotSetHash": { "$ref": "dialogue-program-receipt-v1.schema.json#/$defs/sha256" },
+    "expectedAuxiliaryCounts": { "$ref": "dialogue-program-receipt-v1.schema.json#/$defs/expectedCounts" },
+    "dialogue": { "$ref": "dialogue-program-receipt-v1.schema.json#/$defs/dialogue" },
+    "auxiliaryProofs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "dialogue-program-receipt-v1.schema.json#/$defs/auxiliaryProof" }
+    },
+    "clock": { "$ref": "dialogue-program-receipt-v1.schema.json#/$defs/clock" },
+    "output": { "$ref": "#/$defs/output" },
+    "renderGraph": { "$ref": "dialogue-program-receipt-v1.schema.json#/$defs/renderGraph" },
+    "tools": { "$ref": "dialogue-program-receipt-v1.schema.json#/$defs/tools" },
+    "policies": { "$ref": "#/$defs/policies" },
+    "receiptHash": { "$ref": "dialogue-program-receipt-v1.schema.json#/$defs/sha256" }
+  },
+  "$defs": {
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fileName", "sha256", "codec", "sampleFormat", "sampleRate",
+        "channels", "channelLayout", "channelLayoutEvidence", "decodedSamples"
+      ],
+      "properties": {
+        "fileName": { "const": "dialogue-program.wav" },
+        "sha256": { "$ref": "dialogue-program-receipt-v1.schema.json#/$defs/sha256" },
+        "codec": { "const": "pcm_f32le" },
+        "sampleFormat": { "const": "flt" },
+        "sampleRate": { "$ref": "dialogue-program-receipt-v1.schema.json#/$defs/positiveSafeInteger" },
+        "channels": { "const": 2 },
+        "channelLayout": { "const": "stereo" },
+        "channelLayoutEvidence": { "enum": ["declared-stereo", "ieee-float-two-channel"] },
+        "decodedSamples": { "$ref": "dialogue-program-receipt-v1.schema.json#/$defs/positiveSafeInteger" }
+      }
+    },
+    "policies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mix", "mixPolicyVersion", "masteringApplied", "dialogueChannels",
+        "auxiliaryDisposition", "legacyDefaultsMutated", "publication"
+      ],
+      "properties": {
+        "mix": { "const": "linear-sum-no-normalize" },
+        "mixPolicyVersion": { "const": 2 },
+        "masteringApplied": { "const": false },
+        "dialogueChannels": { "const": "mono-duplicated-to-stereo" },
+        "auxiliaryDisposition": { "const": "program-aligned-preserved-inputs" },
+        "legacyDefaultsMutated": { "const": false },
+        "publication": { "const": "atomic-no-replace-read-only-generation" }
+      }
+    }
+  }
+}

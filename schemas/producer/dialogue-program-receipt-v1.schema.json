@@ -1,0 +1,239 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/dialogue-program-receipt-v1.schema.json",
+  "title": "DialogueProgramRenderReceiptV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "admissionStatus",
+    "executionMode",
+    "reusedDialogueStem",
+    "authority",
+    "sourceSnapshotSetHash",
+    "auxiliarySnapshotSetHash",
+    "expectedAuxiliaryCounts",
+    "dialogue",
+    "auxiliaryProofs",
+    "clock",
+    "output",
+    "renderGraph",
+    "tools",
+    "policies",
+    "receiptHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "dialogue-program-render-receipt" },
+    "admissionStatus": { "const": "private-unpromoted" },
+    "executionMode": { "enum": ["incremental", "forced-full"] },
+    "reusedDialogueStem": { "type": "boolean" },
+    "authority": { "$ref": "#/$defs/authority" },
+    "sourceSnapshotSetHash": { "$ref": "#/$defs/sha256" },
+    "auxiliarySnapshotSetHash": { "$ref": "#/$defs/sha256" },
+    "expectedAuxiliaryCounts": { "$ref": "#/$defs/expectedCounts" },
+    "dialogue": { "$ref": "#/$defs/dialogue" },
+    "auxiliaryProofs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/auxiliaryProof" }
+    },
+    "clock": { "$ref": "#/$defs/clock" },
+    "output": { "$ref": "#/$defs/output" },
+    "renderGraph": { "$ref": "#/$defs/renderGraph" },
+    "tools": { "$ref": "#/$defs/tools" },
+    "policies": { "$ref": "#/$defs/policies" },
+    "receiptHash": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "stableId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"
+    },
+    "safeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "positiveSafeInteger": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trackPath",
+        "trackFileSha256",
+        "dialogueTrackHash",
+        "mapPath",
+        "mapFileSha256",
+        "dialogueMapHash"
+      ],
+      "properties": {
+        "trackPath": { "$ref": "#/$defs/path" },
+        "trackFileSha256": { "$ref": "#/$defs/sha256" },
+        "dialogueTrackHash": { "$ref": "#/$defs/sha256" },
+        "mapPath": { "$ref": "#/$defs/path" },
+        "mapFileSha256": { "$ref": "#/$defs/sha256" },
+        "dialogueMapHash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "expectedCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["room-tone", "music", "sfx"],
+      "properties": {
+        "room-tone": { "$ref": "#/$defs/safeInteger" },
+        "music": { "$ref": "#/$defs/safeInteger" },
+        "sfx": { "$ref": "#/$defs/safeInteger" }
+      }
+    },
+    "dialogue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["generationPath", "receiptHash", "outputSha256"],
+      "properties": {
+        "generationPath": { "$ref": "#/$defs/path" },
+        "receiptHash": { "$ref": "#/$defs/sha256" },
+        "outputSha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "auxiliaryProof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stemId",
+        "role",
+        "sha256",
+        "audioStreamIndex",
+        "path",
+        "sampleRate",
+        "channels",
+        "channelLayout",
+        "decodedSamples"
+      ],
+      "properties": {
+        "stemId": { "$ref": "#/$defs/stableId" },
+        "role": { "enum": ["room-tone", "music", "sfx"] },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "audioStreamIndex": { "$ref": "#/$defs/safeInteger" },
+        "path": { "$ref": "#/$defs/path" },
+        "sampleRate": { "$ref": "#/$defs/positiveSafeInteger" },
+        "channels": { "enum": [1, 2] },
+        "channelLayout": { "enum": ["mono", "stereo"] },
+        "decodedSamples": { "$ref": "#/$defs/positiveSafeInteger" }
+      }
+    },
+    "clock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fps",
+        "sampleRate",
+        "totalFrames",
+        "totalSamples",
+        "terminalSampleFormula"
+      ],
+      "properties": {
+        "fps": { "$ref": "positive-rational-v1.schema.json" },
+        "sampleRate": { "$ref": "#/$defs/positiveSafeInteger" },
+        "totalFrames": { "$ref": "#/$defs/positiveSafeInteger" },
+        "totalSamples": { "$ref": "#/$defs/positiveSafeInteger" },
+        "terminalSampleFormula": {
+          "const": "B(F)=floor(F*S*q/p)"
+        }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fileName",
+        "sha256",
+        "codec",
+        "sampleFormat",
+        "sampleRate",
+        "channels",
+        "channelLayout",
+        "decodedSamples"
+      ],
+      "properties": {
+        "fileName": { "const": "dialogue-program.wav" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "codec": { "const": "pcm_s32le" },
+        "sampleFormat": { "const": "s32" },
+        "sampleRate": { "$ref": "#/$defs/positiveSafeInteger" },
+        "channels": { "const": 2 },
+        "channelLayout": { "const": "stereo" },
+        "decodedSamples": { "$ref": "#/$defs/positiveSafeInteger" }
+      }
+    },
+    "renderGraph": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "graphHash",
+        "graphFileSha256",
+        "executionReceiptFileSha256",
+        "dialogueNodeId",
+        "programNodeId"
+      ],
+      "properties": {
+        "graphHash": { "$ref": "#/$defs/sha256" },
+        "graphFileSha256": { "$ref": "#/$defs/sha256" },
+        "executionReceiptFileSha256": { "$ref": "#/$defs/sha256" },
+        "dialogueNodeId": { "const": "node-dialogue" },
+        "programNodeId": { "const": "node-program" }
+      }
+    },
+    "tools": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ffmpegPath",
+        "ffmpegSha256",
+        "ffprobePath",
+        "ffprobeSha256"
+      ],
+      "properties": {
+        "ffmpegPath": { "$ref": "#/$defs/path" },
+        "ffmpegSha256": { "$ref": "#/$defs/sha256" },
+        "ffprobePath": { "$ref": "#/$defs/path" },
+        "ffprobeSha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "policies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mix",
+        "dialogueChannels",
+        "auxiliaryDisposition",
+        "legacyDefaultsMutated",
+        "publication"
+      ],
+      "properties": {
+        "mix": { "const": "linear-sum-no-normalize" },
+        "dialogueChannels": { "const": "mono-duplicated-to-stereo" },
+        "auxiliaryDisposition": {
+          "const": "program-aligned-preserved-inputs"
+        },
+        "legacyDefaultsMutated": { "const": false },
+        "publication": {
+          "const": "atomic-no-replace-read-only-generation"
+        }
+      }
+    }
+  }
+}

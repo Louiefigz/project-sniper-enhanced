@@ -1,0 +1,233 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/treatment-operation-v1.schema.json",
+  "title": "TreatmentOperationV1",
+  "unevaluatedProperties": false,
+  "oneOf": [
+    { "$ref": "#/$defs/sceneAdd" },
+    { "$ref": "#/$defs/sceneSetVariable" },
+    { "$ref": "#/$defs/sceneMove" },
+    { "$ref": "#/$defs/sceneRemove" },
+    { "$ref": "#/$defs/titleSetText" },
+    { "$ref": "#/$defs/transitionSet" },
+    { "$ref": "#/$defs/sfxSet" },
+    { "$ref": "#/$defs/gradeSet" }
+  ],
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+      "maxLength": 96
+    },
+    "variable": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+      "maxLength": 96
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "scalar": {
+      "type": ["string", "number", "boolean"],
+      "maxLength": 4000
+    },
+    "sfx": {
+      "oneOf": [
+        { "type": "boolean" },
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96,
+          "pattern": ".*\\S.*"
+        }
+      ]
+    },
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "outFrame", "kind", "sfx"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "outFrame": { "type": "integer", "minimum": 0 },
+        "kind": {
+          "enum": ["white-flash", "light-leak", "zoom-pull"]
+        },
+        "sfx": { "$ref": "#/$defs/sfx" }
+      }
+    },
+    "sceneAdd": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "operation", "scene"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "operation": { "const": "scene.add" },
+        "scene": { "$ref": "scene-spec-v1.schema.json" }
+      }
+    },
+    "sceneSetVariable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "operation",
+        "sceneId",
+        "elementId",
+        "variable",
+        "value",
+        "expectedValue",
+        "expectedSceneVersion"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "operation": { "const": "scene.setVariable" },
+        "sceneId": { "$ref": "#/$defs/stableId" },
+        "elementId": { "$ref": "#/$defs/stableId" },
+        "variable": { "$ref": "#/$defs/variable" },
+        "value": { "$ref": "#/$defs/scalar" },
+        "expectedValue": { "$ref": "#/$defs/scalar" },
+        "expectedSceneVersion": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "sceneMove": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "operation",
+        "sceneId",
+        "startFrame",
+        "endFrameExclusive",
+        "timelineMapHash",
+        "expectedSceneVersion"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "operation": { "const": "scene.move" },
+        "sceneId": { "$ref": "#/$defs/stableId" },
+        "startFrame": { "type": "integer", "minimum": 0 },
+        "endFrameExclusive": { "type": "integer", "minimum": 1 },
+        "timelineMapHash": { "$ref": "#/$defs/sha256" },
+        "expectedSceneVersion": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "sceneRemove": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "operation",
+        "sceneId",
+        "expectedSceneVersion"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "operation": { "const": "scene.remove" },
+        "sceneId": { "$ref": "#/$defs/stableId" },
+        "expectedSceneVersion": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "titleSetText": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "operation",
+        "sceneId",
+        "elementId",
+        "variable",
+        "text",
+        "expectedText",
+        "expectedSceneVersion"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "operation": { "const": "title.setText" },
+        "sceneId": { "$ref": "#/$defs/stableId" },
+        "elementId": { "$ref": "#/$defs/stableId" },
+        "variable": { "$ref": "#/$defs/variable" },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000,
+          "pattern": ".*\\S.*"
+        },
+        "expectedText": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "expectedSceneVersion": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "transitionSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "operation",
+        "transitionId",
+        "expectedValue",
+        "value"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "operation": { "const": "transition.set" },
+        "transitionId": { "$ref": "#/$defs/stableId" },
+        "expectedValue": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/transition" }
+          ]
+        },
+        "value": { "$ref": "#/$defs/transition" }
+      }
+    },
+    "sfxSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "operation",
+        "transitionId",
+        "expectedSfx",
+        "sfx"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "operation": { "const": "sfx.set" },
+        "transitionId": { "$ref": "#/$defs/stableId" },
+        "expectedSfx": { "$ref": "#/$defs/sfx" },
+        "sfx": { "$ref": "#/$defs/sfx" }
+      }
+    },
+    "gradeSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "operation",
+        "expectedGrade",
+        "grade"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "operation": { "const": "grade.set" },
+        "expectedGrade": { "enum": ["warm", "none"] },
+        "grade": { "enum": ["warm", "none"] }
+      }
+    }
+  }
+}

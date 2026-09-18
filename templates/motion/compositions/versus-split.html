@@ -1,0 +1,239 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"leftTitle","type":"string","label":"Left column header","default":"Before AI"},
+    {"id":"rightTitle","type":"string","label":"Right column header","default":"After AI"},
+    {"id":"left1","type":"string","label":"Left row 1","default":"Weeks of work"},
+    {"id":"right1","type":"string","label":"Right row 1","default":"One afternoon"},
+    {"id":"left2","type":"string","label":"Left row 2 (empty = omit row)","default":"A whole team"},
+    {"id":"right2","type":"string","label":"Right row 2","default":"Just you"},
+    {"id":"left3","type":"string","label":"Left row 3 (empty = omit row)","default":"$10k budget"},
+    {"id":"right3","type":"string","label":"Right row 3","default":"$0"},
+    {"id":"at1","type":"number","label":"Row 1 land time (s)","default":0.5,"min":0,"max":30,"step":0.05,"unit":"s"},
+    {"id":"at2","type":"number","label":"Row 2 land time (s)","default":1.0,"min":0,"max":30,"step":0.05,"unit":"s"},
+    {"id":"at3","type":"number","label":"Row 3 land time (s)","default":1.5,"min":0,"max":30,"step":0.05,"unit":"s"},
+    {"id":"accent","type":"color","label":"Accent color","default":"#054BC9"}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · Motion template: VERSUS-SPLIT (MG-3)
+    Trigger it serves: contrasts ("before AI vs after", "X not Y", "the old way vs the new way").
+    Transparent 1080x1920 overlay -> render with `--format mov` (ProRes 4444) for alpha.
+
+    CONTRACT for the PRODUCER compositing stage:
+      - HEADERS (leftTitle/rightTitle), ROW PAIRS (leftN/rightN), PER-ROW LAND TIMES
+        (at1..3, seconds), and accent are `data-composition-variables` — fill with
+        --variables. Land times sync each contrast row to the spoken beat (atN =
+        transcript time of the row's word, relative to the overlay's outStart).
+      - Left header is an ACCENT pill (white text); right header is a GOLD pill (ink
+        text) — the two "sides" read at a glance, both on-brand + high-contrast on white.
+      - An empty leftN OR rightN OMITS that whole row (a contrast needs both sides);
+        the remaining rows re-center. 1-3 rows supported.
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (see stat-card note) — set it
+        directly per render. Make it comfortably past the last atN so the card holds
+        before the fade.
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>SNIPER · versus-split</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="/vendor/gsap/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: var(--canvas-w);
+        height: var(--canvas-h);
+        overflow: hidden;
+        background: transparent;
+        font-family: var(--font);
+      }
+      #vs-root { position: relative; width: var(--canvas-w); height: var(--canvas-h); }
+
+      /* .stage owns the centering transform (x=495 visual center, free-band center). */
+      .stage {
+        position: absolute;
+        left: var(--visual-center-x);
+        top: 855px;
+        transform: translate(-50%, -50%);
+        display: flex;
+        justify-content: center;
+      }
+      .card {
+        position: relative;
+        background: var(--card-bg);
+        border-radius: var(--card-radius);
+        padding: 40px 44px 46px;
+        box-shadow: var(--card-shadow);
+        width: 820px;
+        max-width: var(--safe-width);
+        will-change: transform, opacity;
+      }
+
+      /* Two-column geometry shared by the header row and every data row. */
+      .headers, .vs-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 34px;
+        align-items: stretch;
+      }
+      .headers { margin-bottom: 30px; }
+      .col-head {
+        border-radius: 18px;
+        padding: 20px 22px;
+        font-weight: 700;
+        font-size: 46px;
+        line-height: 1.05;
+        text-align: center;
+        letter-spacing: -0.01em;
+        will-change: transform, opacity;
+      }
+      .col-head.left  { background: var(--accent); color: var(--accent-ink); }
+      .col-head.right { background: var(--gold);   color: var(--ink); }
+
+      /* Center "VS" badge sits over the seam between the two headers. */
+      .vs-badge {
+        position: absolute;
+        left: 50%;
+        top: 60px;                          /* aligned to the header band */
+        transform: translate(-50%, -50%);
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        background: var(--ink);
+        color: #FFFFFF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 34px;
+        letter-spacing: 0.02em;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+        z-index: 2;
+        will-change: transform, opacity;
+      }
+
+      #vs-rows { display: flex; flex-direction: column; gap: 20px; }
+      .vs-row { will-change: transform, opacity; }
+      .cell {
+        background: var(--accent-soft);
+        border-radius: 16px;
+        padding: 24px 22px;
+        font-weight: 700;
+        font-size: 44px;
+        line-height: 1.08;
+        color: var(--ink);
+        text-align: center;
+        letter-spacing: -0.01em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      /* Faint left tint vs faint gold tint keeps each side tied to its header. */
+      .cell.right { background: rgba(255, 212, 0, 0.16); }
+    </style>
+  </head>
+  <body>
+    <div
+      id="vs-root"
+      data-composition-id="versus-split"
+      data-width="1080"
+      data-height="1920"
+      data-start="0"
+      data-duration="4"
+    >
+      <div class="stage">
+        <div
+          id="vs-card"
+          class="card clip"
+          data-start="0"
+          data-duration="60"
+          data-track-index="1"
+        >
+          <div class="headers">
+            <div id="vs-head-left" class="col-head left"></div>
+            <div id="vs-head-right" class="col-head right"></div>
+          </div>
+          <div id="vs-badge" class="vs-badge">VS</div>
+          <div id="vs-rows">
+            <div id="vs-row-1" class="vs-row" data-slot="1">
+              <div class="cell left"></div><div class="cell right"></div>
+            </div>
+            <div id="vs-row-2" class="vs-row" data-slot="2">
+              <div class="cell left"></div><div class="cell right"></div>
+            </div>
+            <div id="vs-row-3" class="vs-row" data-slot="3">
+              <div class="cell left"></div><div class="cell right"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("vs-root");
+        const D = parseFloat(root.dataset.duration) || 4;
+
+        const defaults = {
+          leftTitle: "Before AI", rightTitle: "After AI",
+          left1: "Weeks of work", right1: "One afternoon",
+          left2: "A whole team", right2: "Just you",
+          left3: "$10k budget", right3: "$0",
+          at1: 0.5, at2: 1.0, at3: 1.5, accent: "#054BC9",
+        };
+        const HF = window.__hyperframes;
+        const vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
+        document.documentElement.style.setProperty("--accent", vars.accent);
+
+        document.getElementById("vs-head-left").textContent = vars.leftTitle;
+        document.getElementById("vs-head-right").textContent = vars.rightTitle;
+
+        const pairs = [
+          { l: vars.left1, r: vars.right1, at: Number(vars.at1) },
+          { l: vars.left2, r: vars.right2, at: Number(vars.at2) },
+          { l: vars.left3, r: vars.right3, at: Number(vars.at3) },
+        ];
+
+        // Fill / prune the three rows; a contrast needs BOTH sides, so drop a row
+        // missing either cell before the timeline is built.
+        const rows = Array.prototype.slice.call(document.querySelectorAll(".vs-row"));
+        const active = [];
+        rows.forEach(function (row, i) {
+          const p = pairs[i];
+          const l = (p.l == null ? "" : String(p.l)).trim();
+          const r = (p.r == null ? "" : String(p.r)).trim();
+          if (!l || !r) { row.remove(); return; }
+          row.querySelector(".cell.left").textContent = l;
+          row.querySelector(".cell.right").textContent = r;
+          active.push({ row: row, at: isFinite(p.at) ? p.at : 0.5 });
+        });
+
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // Card + headers + badge land first (the frame the rows fill in).
+        tl.fromTo("#vs-card", { scale: 0.92, opacity: 0, y: 18 }, { scale: 1, opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.5)" }, 0);
+        tl.fromTo(".col-head.left", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.42, ease: "power2.out" }, 0.18);
+        tl.fromTo(".col-head.right", { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.42, ease: "power2.out" }, 0.18);
+        tl.fromTo("#vs-badge", { opacity: 0, scale: 0.3 }, { opacity: 1, scale: 1, duration: 0.44, ease: "back.out(2.4)" }, 0.36);
+
+        active.forEach(function (a) {
+          // Hidden state pinned at t=0 so opacity is a pure function of timeline time.
+          tl.set(a.row, { opacity: 0, y: 22, scale: 0.94 }, 0);
+          const at = Math.max(0.4, Math.min(a.at, D - 0.5)); // rows land after the frame, inside the render
+          tl.to(a.row, { opacity: 1, y: 0, scale: 1, duration: 0.46, ease: "back.out(1.6)" }, at);
+        });
+
+        // Fade the whole card out — ends exactly at D so timeline length == render length.
+        const fadeDur = Math.min(0.42, D * 0.15);
+        tl.to("#vs-card", { opacity: 0, scale: 0.98, y: -12, duration: fadeDur, ease: "power2.in" }, D - fadeDur);
+
+        tl.seek(0);
+        window.__timelines["versus-split"] = tl;
+      })();
+    </script>
+  </body>
+</html>

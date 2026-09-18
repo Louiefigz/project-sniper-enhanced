@@ -1,0 +1,119 @@
+[
+  {
+    "path": "broll/archive-clips/cartoons.mp4",
+    "kind": "video",
+    "duration": 2.961,
+    "resolution": [
+      1920,
+      1080
+    ],
+    "orientation": "landscape",
+    "category": "archive-clips",
+    "hasSpeech": false,
+    "hasBurnedText": null,
+    "description": "Clip from his animated cartoon sketches (car scene, two characters driving)",
+    "descriptionSource": "vision",
+    "frames": [
+      ".frames/archive-clips-cartoons_1.jpg",
+      ".frames/archive-clips-cartoons_2.jpg",
+      ".frames/archive-clips-cartoons_3.jpg"
+    ],
+    "tags": [
+      "animated",
+      "archive",
+      "cartoon",
+      "cartoons",
+      "sketches"
+    ],
+    "cataloged": true,
+    "id": "archive-clips-cartoons",
+    "mtime": 1783352296.4320698
+  },
+  {
+    "path": "broll/screen-recordings/seo-site.mp4",
+    "kind": "video",
+    "duration": 3.337,
+    "resolution": [
+      1920,
+      1080
+    ],
+    "orientation": "landscape",
+    "category": "screen-recordings",
+    "hasSpeech": false,
+    "hasBurnedText": null,
+    "description": "Engineering-first SEO for SaaS site scroll: Technical Foundation / Data-Driven Growth / Market Fit cards, Book-your-strategy-call CTA",
+    "descriptionSource": "vision",
+    "frames": [
+      ".frames/screen-recordings-seo-site_1.jpg",
+      ".frames/screen-recordings-seo-site_2.jpg",
+      ".frames/screen-recordings-seo-site_3.jpg"
+    ],
+    "tags": [
+      "company",
+      "saas",
+      "scroll",
+      "seo",
+      "website"
+    ],
+    "cataloged": true,
+    "id": "screen-recordings-seo-site",
+    "mtime": 1783352296.42894
+  },
+  {
+    "path": "broll/screen-recordings/website-laptop.mp4",
+    "kind": "video",
+    "duration": 3.212,
+    "resolution": [
+      1920,
+      1080
+    ],
+    "orientation": "landscape",
+    "category": "screen-recordings",
+    "hasSpeech": false,
+    "hasBurnedText": null,
+    "description": "Laptop in studio showing his AI-business site: Unlock the Power of AI for Your Business, workflow diagrams",
+    "descriptionSource": "vision",
+    "frames": [
+      ".frames/screen-recordings-website-laptop_1.jpg",
+      ".frames/screen-recordings-website-laptop_2.jpg",
+      ".frames/screen-recordings-website-laptop_3.jpg"
+    ],
+    "tags": [
+      "agency",
+      "ai",
+      "laptop",
+      "website"
+    ],
+    "cataloged": true,
+    "id": "screen-recordings-website-laptop",
+    "mtime": 1783352296.4237907
+  },
+  {
+    "path": "broll/screen-recordings/yt-channel.mp4",
+    "kind": "video",
+    "duration": 3.045,
+    "resolution": [
+      1920,
+      1080
+    ],
+    "orientation": "landscape",
+    "category": "screen-recordings",
+    "hasSpeech": false,
+    "hasBurnedText": null,
+    "description": "His real YouTube channel page (The Products for Parents / cartoon thumbnails grid), tablet-framed screen recording on dark bg",
+    "descriptionSource": "vision",
+    "frames": [
+      ".frames/screen-recordings-yt-channel_1.jpg",
+      ".frames/screen-recordings-yt-channel_2.jpg",
+      ".frames/screen-recordings-yt-channel_3.jpg"
+    ],
+    "tags": [
+      "channel",
+      "screen-recording",
+      "youtube"
+    ],
+    "cataloged": true,
+    "id": "screen-recordings-yt-channel",
+    "mtime": 1783352296.4212863
+  }
+]

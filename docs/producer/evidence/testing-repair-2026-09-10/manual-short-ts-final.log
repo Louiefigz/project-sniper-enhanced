@@ -1,0 +1,12 @@
+✔ manual short selects a new explicit geometry class without mutating the submitted plan (1.564209ms)
+✔ TS and actual Python profile agree on manual crop and every unchanged finishing exclusion (107.72825ms)
+✔ no unknown tracker/layout/default caption allowance or nonfinite geometry (0.172666ms)
+✔ historical invocation parser refuses new class while current dispatcher retains exact new bytes (0.6865ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 114.72625

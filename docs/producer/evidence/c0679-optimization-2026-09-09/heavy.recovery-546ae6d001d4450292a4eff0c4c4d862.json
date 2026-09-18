@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "nonce": "546ae6d001d4450292a4eff0c4c4d862",
+  "originalMarker": {
+    "nonce": "546ae6d001d4450292a4eff0c4c4d862",
+    "processes": [
+      {
+        "pgid": 74631,
+        "pid": 74631,
+        "started": "Wed Sep  9 11:55:23 2026"
+      },
+      {
+        "pgid": 74631,
+        "pid": 74660,
+        "started": "Wed Sep  9 11:55:23 2026"
+      },
+      {
+        "pgid": 74631,
+        "pid": 74666,
+        "started": "Wed Sep  9 11:55:24 2026"
+      },
+      {
+        "pgid": 74668,
+        "pid": 74668,
+        "started": "Wed Sep  9 11:55:24 2026"
+      },
+      {
+        "pgid": 74668,
+        "pid": 74669,
+        "started": "Wed Sep  9 11:55:24 2026"
+      },
+      {
+        "pgid": 74668,
+        "pid": 74670,
+        "started": "Wed Sep  9 11:55:24 2026"
+      },
+      {
+        "pgid": 74668,
+        "pid": 74671,
+        "started": "Wed Sep  9 11:55:24 2026"
+      },
+      {
+        "pgid": 74668,
+        "pid": 74672,
+        "started": "Wed Sep  9 11:55:24 2026"
+      }
+    ],
+    "project": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1",
+    "schemaVersion": 1,
+    "startedAt": 1788972921.731054,
+    "supervisorPid": 74623
+  },
+  "originalMarkerSha256": "4ad69ed577403823785c904ae85b803ff5f420b990412ca8bfe22a63a57d24fe",
+  "firstCheck": {
+    "verifiedAt": 1788973268.5635478,
+    "supervisorAbsent": true,
+    "recordedChildrenAbsent": true,
+    "recordedIdentityCount": 8,
+    "reusedChildPids": []
+  },
+  "finalCheck": {
+    "verifiedAt": 1788973268.5902731,
+    "supervisorAbsent": true,
+    "recordedChildrenAbsent": true,
+    "recordedIdentityCount": 8,
+    "reusedChildPids": []
+  },
+  "status": "recorded-process-absence-verified",
+  "signals": [],
+  "scope": "Explicit recovery only; no output quality or unobserved-child claim"
+}

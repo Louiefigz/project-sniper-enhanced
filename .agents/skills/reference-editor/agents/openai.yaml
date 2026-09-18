@@ -1,0 +1,4 @@
+interface:
+  display_name: "Reference Editor"
+  short_description: "Study and apply reference editing mechanics"
+  default_prompt: "Use $reference-editor to study this benchmark and apply its mechanics to my footage."

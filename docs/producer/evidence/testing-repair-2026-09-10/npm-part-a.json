@@ -1,0 +1,68 @@
+{
+  "part": "a",
+  "startedAt": "2026-09-10T15:58:30.064988+00:00",
+  "expectedModules": 53,
+  "complete": false,
+  "results": [
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-adoption.test.ts",
+      "exitCode": 0,
+      "seconds": 239.501
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-attempt-read-faults.test.ts",
+      "exitCode": 0,
+      "seconds": 150.755
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-attempt.test.ts",
+      "exitCode": 0,
+      "seconds": 122.83
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-final-commit.test.ts",
+      "exitCode": 0,
+      "seconds": 249.276
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-final-read.test.ts",
+      "exitCode": 0,
+      "seconds": 189.723
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-hold.test.ts",
+      "exitCode": 0,
+      "seconds": 146.018
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-pending-history.test.ts",
+      "exitCode": 0,
+      "seconds": 91.298
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-pending-read.test.ts",
+      "exitCode": 0,
+      "seconds": 111.017
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-process-pins.test.ts",
+      "exitCode": 0,
+      "seconds": 78.164
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-recovery-faults.test.ts",
+      "exitCode": 0,
+      "seconds": 163.621
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-recovery-timing.test.ts",
+      "exitCode": 0,
+      "seconds": 68.285
+    },
+    {
+      "path": "src/lib/server/__tests__/guided-source-color-cleanup-retired-job.test.ts",
+      "exitCode": 0,
+      "seconds": 63.428
+    }
+  ]
+}

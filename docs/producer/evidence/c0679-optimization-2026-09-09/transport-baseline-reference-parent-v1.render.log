@@ -1,0 +1,44 @@
+[INFO] [Compiler] Injected deterministic @font-face rules for 2 requested font families
+[NativeReference:info] Compiled composition metadata {
+  entryFile: 'index.html',
+  staticDuration: 683.7664166666667,
+  width: 1920,
+  height: 1080,
+  videoCount: 1,
+  audioCount: 1,
+  renderModeHints: { recommendScreenshot: false, reasons: [] }
+}
+[BrowserManager] Browser launched (HeadlessChrome/152.0.7928.2, screenshot, gl=--use-gl=angle --use-angle=swiftshader, headlessShell=true, platform=darwin)
+[initSession:screenshot] page.goto start (0ms)
+[HyperFrames] render runtime fps [object Object]
+[initSession:screenshot] page.goto complete (202ms)
+[initSession:screenshot] GSAP proxy flush complete (228ms)
+[initSession:screenshot] pollHfReady complete (229ms)
+[initSession:screenshot] pollSubCompositionTimelines complete (ready) (230ms)
+[initSession:screenshot] applyVideoMetadataHints complete (231ms)
+[initSession:screenshot] media + fonts + tailwind ready (232ms)
+[initSession:screenshot] captureBeyondViewport downgraded: page content fits the capture viewport (234ms)
+[initSession:screenshot] static-frame dedup: disabled (before-capture hook / video injection active) (234ms)
+[WARN] [Compiler] WARNING: Video "presenter" has sparse keyframes (max interval: 10.43s). This causes seek failures and frame freezing. Re-encode with: ffmpeg -i "assets/presenter-full.mp4" -c:v libx264 -r 30 -g 30 -keyint_min 30 -movflags +faststart -c:a copy output.mp4
+[BrowserManager] Browser launched (HeadlessChrome/152.0.7928.2, screenshot, gl=--use-gl=angle --use-angle=swiftshader, headlessShell=true, platform=darwin)
+[initSession:screenshot] page.goto start (0ms)
+[HyperFrames] render runtime fps [object Object]
+[initSession:screenshot] page.goto complete (192ms)
+[initSession:screenshot] GSAP proxy flush complete (213ms)
+[initSession:screenshot] pollHfReady complete (214ms)
+[initSession:screenshot] pollSubCompositionTimelines complete (ready) (215ms)
+[initSession:screenshot] applyVideoMetadataHints complete (216ms)
+[initSession:screenshot] media + fonts + tailwind ready (217ms)
+[initSession:screenshot] captureBeyondViewport downgraded: page content fits the capture viewport (218ms)
+[initSession:screenshot] static-frame dedup: disabled (before-capture hook / video injection active) (219ms)
+[BrowserManager] Browser launched (HeadlessChrome/152.0.7928.2, screenshot, gl=--use-gl=angle --use-angle=swiftshader, headlessShell=true, platform=darwin)
+[initSession:screenshot] page.goto start (0ms)
+[HyperFrames] render runtime fps [object Object]
+[initSession:screenshot] page.goto complete (189ms)
+[initSession:screenshot] GSAP proxy flush complete (212ms)
+[initSession:screenshot] pollHfReady complete (212ms)
+[initSession:screenshot] pollSubCompositionTimelines complete (ready) (213ms)
+[initSession:screenshot] applyVideoMetadataHints complete (214ms)
+[initSession:screenshot] media + fonts + tailwind ready (215ms)
+[initSession:screenshot] captureBeyondViewport downgraded: page content fits the capture viewport (216ms)
+[initSession:screenshot] static-frame dedup: disabled (before-capture hook / video injection active) (216ms)

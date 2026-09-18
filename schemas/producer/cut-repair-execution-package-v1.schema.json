@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/cut-repair-execution-package-v1.schema.json",
+  "title": "CutRepairExecutionPackageV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "targetDirectiveHash",
+    "contextAuthorityHash",
+    "parentRevisionHash",
+    "reviewAction",
+    "promotionAction",
+    "candidate",
+    "promotionEvidence"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "cut-repair-execution-package" },
+    "targetDirectiveHash": { "$ref": "#/$defs/sha256" },
+    "contextAuthorityHash": { "$ref": "#/$defs/sha256" },
+    "parentRevisionHash": { "$ref": "#/$defs/sha256" },
+    "reviewAction": {
+      "$ref": "cut-repair-review-action-v1.schema.json"
+    },
+    "promotionAction": {
+      "$ref": "cut-repair-promotion-action-v1.schema.json"
+    },
+    "candidate": { "type": "object" },
+    "promotionEvidence": { "type": "object" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

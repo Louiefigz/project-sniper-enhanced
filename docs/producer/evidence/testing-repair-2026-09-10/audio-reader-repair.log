@@ -1,0 +1,102 @@
+Retained TEST-only held preparation fixture: /private/tmp/sniper-held-preparation-j_p4637p
+test_actual_assembly_result_decodes_and_rebinds_full_master_qc_and_cut_support (test_guided_body_result_media.BodyResultActualMediaTests.test_actual_assembly_result_decodes_and_rebinds_full_master_qc_and_cut_support) ... TEST actual body result adapter: 0.961s; retained /private/tmp/sniper-held-preparation-j_p4637p/body-result-adapter
+ok
+test_budget_is_checked_before_decode (test_program_delivery_signal.ProgramDeliverySignalTests.test_budget_is_checked_before_decode)
+No implicit unlimited budget or over-budget expanded PCM job. ... ok
+test_changed_encoded_or_reference_bytes_fail (test_program_delivery_signal.ProgramDeliverySignalTests.test_changed_encoded_or_reference_bytes_fail)
+The output and intended master must remain the compared bytes. ... ok
+test_disk_bound_is_a_rejection_not_a_trim (test_program_delivery_signal.ProgramDeliverySignalTests.test_disk_bound_is_a_rejection_not_a_trim)
+A decoder that reaches its output cap never qualifies partial output. ... ok
+test_dropout_preserves_failed_windows (test_program_delivery_signal.ProgramDeliverySignalTests.test_dropout_preserves_failed_windows)
+A one-channel dropout is a prepublication error with its measurements. ... ok
+test_gate_is_in_existing_static_import_closure (test_program_delivery_signal.ProgramDeliverySignalTests.test_gate_is_in_existing_static_import_closure)
+The existing ordinary-delivery source closure sees both new modules. ... ok
+test_identity_binds_bytes_and_cleans_decode (test_program_delivery_signal.ProgramDeliverySignalTests.test_identity_binds_bytes_and_cleans_decode)
+A valid result retains window evidence and leaves no decode scratch. ... ok
+test_padding_is_finite_and_explicitly_bounded (test_program_delivery_signal.ProgramDeliverySignalTests.test_padding_is_finite_and_explicitly_bounded)
+The codec tail is counted separately and never exempted from finiteness. ... ok
+test_quiet_identity_is_explicitly_quiet (test_program_delivery_signal.ProgramDeliverySignalTests.test_quiet_identity_is_explicitly_quiet)
+Do not demand or fabricate active speech for a silent reference. ... ok
+test_rate_channels_dtype_and_counts_are_not_coerced (test_program_delivery_signal.ProgramDeliverySignalTests.test_rate_channels_dtype_and_counts_are_not_coerced)
+Malformed decoder outputs cannot be aligned or normalized into passing. ... ok
+test_receipt_bound_fails_closed (test_program_delivery_signal.ProgramDeliverySignalTests.test_receipt_bound_fails_closed)
+A record too large to retain must not qualify the candidate. ... ok
+test_timeout_and_decoder_errors_retain_diagnostics (test_program_delivery_signal.ProgramDeliverySignalTests.test_timeout_and_decoder_errors_retain_diagnostics)
+A failed or expired command cannot produce local signal approval. ... ok
+test_default_refuses_large_input_before_master_or_output_work (test_program_delivery_budget.ProgramDeliveryBudgetTests.test_default_refuses_large_input_before_master_or_output_work)
+A sparse fixture proves the default boundary without reading gigabytes. ... ok
+test_explicit_limit_reaches_source_candidate_and_receipt (test_program_delivery_budget.ProgramDeliveryBudgetTests.test_explicit_limit_reaches_source_candidate_and_receipt)
+The opted-in budget flows through every bounded artifact read. ... ok
+test_failed_signal_keeps_prior_output_and_records_failure (test_program_delivery_budget.ProgramDeliveryBudgetTests.test_failed_signal_keeps_prior_output_and_records_failure)
+Local continuity failure prevents the existing atomic promotion. ... ok
+test_invalid_limits_fail_before_execution (test_program_delivery_budget.ProgramDeliveryBudgetTests.test_invalid_limits_fail_before_execution)
+No accidental unlimited, fractional, or boolean budget. ... ok
+test_oversized_candidate_preserves_prior_output (test_program_delivery_budget.ProgramDeliveryBudgetTests.test_oversized_candidate_preserves_prior_output)
+AAC growth past the picture budget must fail before publication. ... ok
+test_post_comparison_mutation_cannot_become_new_baseline (test_program_delivery_budget.ProgramDeliveryBudgetTests.test_post_comparison_mutation_cannot_become_new_baseline)
+A changed candidate is rejected before another quality pass or replace. ... ok
+test_unbound_legacy_renderer_keeps_existing_contract (test_program_delivery_budget.ProgramDeliveryBudgetTests.test_unbound_legacy_renderer_keeps_existing_contract)
+Callers without optional comparison identity retain the loudness gate. ... ok
+test_bound_body_wall_expiry_blocks_replay_despite_monotonic_time_left (test_body_source_color_work.BodySourceColorWorkTests.test_bound_body_wall_expiry_blocks_replay_despite_monotonic_time_left)
+No historical grade-phase expiry or fresh clock substitutes for current body time. ... ok
+test_constructor_raw_read_cannot_rebaseline_actual_pipeline_return (test_body_source_color_work.BodySourceColorWorkTests.test_constructor_raw_read_cannot_rebaseline_actual_pipeline_return)
+Current pipeline metadata is captured before the added bounded raw-control read. ... ok
+test_constructor_retains_control_before_its_original_json_read (test_body_source_color_work.BodySourceColorWorkTests.test_constructor_retains_control_before_its_original_json_read)
+A real bounded reader return cannot silently replace the pre-read control. ... ok
+test_copied_work_and_mutated_discriminator_do_not_drop_obligations (test_body_source_color_work.BodySourceColorWorkTests.test_copied_work_and_mutated_discriminator_do_not_drop_obligations)
+Original private work identity wins before a caller-mutated schema tag. ... ok
+test_missing_replays_cannot_reuse_whole_master_or_project_completion (test_body_source_color_work.BodySourceColorWorkTests.test_missing_replays_cannot_reuse_whole_master_or_project_completion)
+Registration alone does not satisfy either actual replay group. ... ok
+test_new_work_cannot_reconstruct_a_downgraded_source_control (test_body_source_color_work.BodySourceColorWorkTests.test_new_work_cannot_reconstruct_a_downgraded_source_control)
+Actual construction also joins raw input, not only the private copied-work fence. ... ok
+test_no_legacy_runtime_claim_reader_can_run_for_source2 (test_body_source_color_work.BodySourceColorWorkTests.test_no_legacy_runtime_claim_reader_can_run_for_source2)
+The old claim's runtime/socket is data, not current ownership to restore. ... ok
+test_real_replays_share_original_clock_and_project_actual_records (test_body_source_color_work.BodySourceColorWorkTests.test_real_replays_share_original_clock_and_project_actual_records)
+The genuine private groups complete once; no generated body/master is claimed. ... ok
+test_repeated_guards_never_reparse_original_control_json (test_body_source_color_work.BodySourceColorWorkTests.test_repeated_guards_never_reparse_original_control_json)
+Original raw construction proof is retained, not reopened on each guard. ... ok
+test_replay_is_not_repeated_or_retried_after_partial_failure (test_body_source_color_work.BodySourceColorWorkTests.test_replay_is_not_repeated_or_retried_after_partial_failure)
+A failed phase stays incomplete and cannot acquire a fresh allowance. ... ok
+test_seed_is_same_control_input_and_clock_and_is_single_use (test_body_source_color_work.BodySourceColorWorkTests.test_seed_is_same_control_input_and_clock_and_is_single_use)
+Copies and omissions do not inherit actual original-entry registration. ... ok
+test_all_six_original_controls_are_held_before_source_admission (test_body_source_color_work_faults.BodySourceColorWorkFaultTests.test_all_six_original_controls_are_held_before_source_admission)
+Same-byte source-reader callback replacement cannot establish a new baseline. ... ok
+test_both_actual_replays_are_sibling_timed_phases_on_the_original_clock (test_body_source_color_work_faults.BodySourceColorWorkFaultTests.test_both_actual_replays_are_sibling_timed_phases_on_the_original_clock)
+Real raw observation and packet readers run once beneath separate body timers. ... ok
+test_changed_original_source_reference_is_rejected_before_source_reader (test_body_source_color_work_faults.BodySourceColorWorkFaultTests.test_changed_original_source_reference_is_rejected_before_source_reader)
+Control data cannot select a different input before later work construction. ... ok
+test_copied_work_cannot_erase_all_source_discriminators (test_body_source_color_work_faults.BodySourceColorWorkFaultTests.test_copied_work_cannot_erase_all_source_discriminators)
+A copied original body cannot claim legacy permission by deleting metadata. ... ok
+test_current_body_result_raw_authority_cannot_be_rebound_during_readback (test_body_source_color_work_faults.BodySourceColorWorkFaultTests.test_current_body_result_raw_authority_cannot_be_rebound_during_readback)
+A new raw serialization cannot replace the externally supplied original SHA. ... ok
+test_current_worker_entry_identity_is_held_across_readback (test_body_source_color_work_faults.BodySourceColorWorkFaultTests.test_current_worker_entry_identity_is_held_across_readback)
+Equal worker-entry bytes do not permit a later original-file replacement. ... ok
+test_erased_source_tags_cannot_skip_original_pre_source_validation (test_body_source_color_work_faults.BodySourceColorWorkFaultTests.test_erased_source_tags_cannot_skip_original_pre_source_validation)
+Legacy dispatch cannot hide changed original control bytes from the entry join. ... ok
+test_failure_marker_after_final_actual_raw_read_keeps_result_unselectable (test_body_source_color_work_faults.BodySourceColorWorkFaultTests.test_failure_marker_after_final_actual_raw_read_keeps_result_unselectable)
+An orphan failure cannot hide between final raw receipt read and return. ... ok
+test_first_replay_failure_never_starts_consumption_or_preparation (test_body_source_color_work_faults.BodySourceColorWorkFaultTests.test_first_replay_failure_never_starts_consumption_or_preparation)
+One failed actual observation phase cannot be retried or projected as complete. ... ok
+test_original_body_watermark_cannot_move_back_before_a_work_guard (test_body_source_color_work_faults.BodySourceColorWorkFaultTests.test_original_body_watermark_cannot_move_back_before_a_work_guard)
+Changing both current wall sample and public watermark cannot renew time. ... ok
+test_result_join_cannot_replace_its_original_guard_at_final_comparison (test_body_source_color_work_faults.BodySourceColorWorkFaultTests.test_result_join_cannot_replace_its_original_guard_at_final_comparison)
+A late instance-method shadow cannot waive the original finite final guard. ... ok
+test_result_join_serialization_tail_consumes_the_same_original_body_cutoff (test_body_source_color_work_faults.BodySourceColorWorkFaultTests.test_result_join_serialization_tail_consumes_the_same_original_body_cutoff)
+Actual final semantic comparison time is work, not a renewed allowance. ... ok
+test_actual_replay_fields_survive_exact_new_receipt_and_external_raw_hold (test_body_source_color_result.BodySourceColorResultTests.test_actual_replay_fields_survive_exact_new_receipt_and_external_raw_hold)
+Only completed actual readers produce hashes; unrelated TEST media remains inert. ... ok
+test_closed_source_flags_original_refs_and_version_reject_mutations (test_body_source_color_result.BodySourceColorResultTests.test_closed_source_flags_original_refs_and_version_reject_mutations)
+Detached receipt edits cannot grant grading or substitute another original input. ... ok
+test_missing_duplicate_or_reordered_source_work_stages_reject (test_body_source_color_result.BodySourceColorResultTests.test_missing_duplicate_or_reordered_source_work_stages_reject)
+Raw worker receipt must retain both actual source phases exactly once. ... ok
+test_readback_replays_two_sibling_groups_on_one_new_bound_read_clock (test_body_source_color_result.BodySourceColorResultTests.test_readback_replays_two_sibling_groups_on_one_new_bound_read_clock)
+Real replay/wire route; whole base, graphics, media and AV-final leaves are TEST-only. ... ok
+test_self_reported_hashes_do_not_pass_actual_replay_join (test_body_source_color_result.BodySourceColorResultTests.test_self_reported_hashes_do_not_pass_actual_replay_join)
+Valid SHA syntax is not proof that either original reader produced it. ... ok
+test_unfinished_or_copied_work_cannot_publish_receipt (test_body_source_color_result.BodySourceColorResultTests.test_unfinished_or_copied_work_cannot_publish_receipt)
+The file remains absent when private actual replay authority is missing. ... ok
+
+----------------------------------------------------------------------
+Ran 48 tests in 42.222s
+
+OK

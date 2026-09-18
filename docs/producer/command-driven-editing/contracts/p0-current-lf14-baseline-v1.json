@@ -1,0 +1,1338 @@
+{
+  "classification": "codec-floor-equivalent-not-pixel-identical",
+  "command": [
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/.venv/bin/python3",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_full_path_baseline.py",
+    "--project",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14"
+  ],
+  "executionObserved": {
+    "classification": "current-full-path-baseline",
+    "complete": true
+  },
+  "fixture": {
+    "durationFrames": 20139,
+    "evidenceClass": "current-full-path-baseline",
+    "fixtureId": "p0-current-lf14",
+    "fps": {
+      "denominator": "1001",
+      "numerator": "24000"
+    },
+    "inputAuthority": {
+      "manifestPath": "asset_manifest.json",
+      "manifestSha256": "adc18bfba8c194897880c35b11f55993e49589f6f60d6dd5b7a29618ed268376",
+      "planPath": "edit_plan.json",
+      "planSha256": "c6df5b3ebb48ea891dee972f2680d0991b0e38f7a6320d7d5b1109edc3889a67",
+      "snapshotSha256s": [
+        "8cf8d2700ccda02bd068e75a4a365b6940fc4bd29071947b007d51e4d3598562"
+      ],
+      "sourceSetDigest": "4a8cdd21871987405912aeebd217876155c849e7ab97536673ba01c46d59d33f"
+    },
+    "mode": "longform",
+    "outputPaths": [
+      "render/final.mp4"
+    ],
+    "schemaVersion": 1
+  },
+  "host": {
+    "machine": "arm64",
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "python": "3.14.4"
+  },
+  "repeatEquivalence": {
+    "calibrationAuthority": {
+      "document": {
+        "classification": "local-current-master-control-cohort",
+        "kind": "current-render-codec-floor-calibration",
+        "masterPolicy": {
+          "audio": {
+            "jcut": {
+              "lead_band_ms": [
+                65,
+                95
+              ],
+              "lead_default_ms": 80,
+              "lead_max_ms": 300,
+              "prev_min_residual_s": 0.1
+            },
+            "join_crossfade_ms": 15,
+            "loudnorm_tp_param": -2,
+            "lra": 11,
+            "lufs_target": -14,
+            "lufs_tolerance": 1,
+            "music_duck_db": [
+              18,
+              20
+            ],
+            "music_gap_db": [
+              10,
+              12
+            ],
+            "riser_bridge_s": 1.2,
+            "sfx_classes": [
+              "whoosh",
+              "click",
+              "pop",
+              "riser",
+              "hit",
+              "drone"
+            ],
+            "sfx_fade_in_handle": true,
+            "sfx_trim_to_entrance": true,
+            "tiktok_loud_lufs": -11,
+            "true_peak_dbtp": -1.5
+          },
+          "encode": {
+            "acodec": "aac",
+            "audio_bitrate": "256k",
+            "audio_channels": 2,
+            "audio_rate": 48000,
+            "bframes": 2,
+            "bitrate_by_fps": {
+              "30": "12M",
+              "60": "18M"
+            },
+            "coder": "cabac",
+            "composite_preset": "veryfast",
+            "gop_closed": true,
+            "max_file_mb": 287,
+            "mezzanine_crf": 12,
+            "mezzanine_preset": "fast",
+            "movflags": "+faststart",
+            "pix_fmt": "yuv420p",
+            "profile": "high",
+            "vcodec": "libx264"
+          }
+        },
+        "masterPolicyHash": "fabcc72875bb8529fdab8aa913a41d46d1eb5eb406d2a5657baeeabb28103b1d",
+        "masterSpec": {
+          "durationSeconds": 45,
+          "fps": 30,
+          "fpsExact": "30/1",
+          "frameCount": 1350
+        },
+        "observed": {
+          "lowestFrameSsim": 0.992094,
+          "lowestMeanSsim": 0.997517339,
+          "pairCount": 3
+        },
+        "pairs": [
+          {
+            "decodedAudioMatch": true,
+            "left": {
+              "masterResult": {
+                "burned_captions": false,
+                "cover": null,
+                "cover_dims": null,
+                "fps": 30,
+                "lufs_measured": -14,
+                "lufs_target": -14,
+                "lufs_within_tolerance": true,
+                "out": "/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-codec-floor-g1lg0z86/pair-01-a.mp4",
+                "size_mb": 55.65,
+                "status": "done",
+                "warnings": [
+                  "quiet source: loudnorm linear ineligible (projected TP -0.1 > -2.0) \u2014 static gain +7.6 dB + true-peak limiter (LRA preserved)"
+                ]
+              },
+              "sha256": "3d9daf37a4183e73b39e56dae85f3f3aef6fdca2549521f5276ca4ccbe21fca3",
+              "sizeBytes": 58351935,
+              "wallSeconds": 9.526
+            },
+            "oracleReceiptHash": "503810b4827ca49b5041ea76b8eeb80ffc7c17cfd3c13da23842269f860d807e",
+            "pair": 1,
+            "passed": true,
+            "pictureComparison": {
+              "claim": "codec-floor-equivalent-not-pixel-identical",
+              "codecFloorEquivalent": true,
+              "method": "full-frame-ssim",
+              "metrics": {
+                "comparedFrames": 1350,
+                "meanSsim": 0.997529108,
+                "minimumFrameIndex": 444,
+                "minimumFrameSsim": 0.992094
+              },
+              "pixelIdentical": false
+            },
+            "right": {
+              "masterResult": {
+                "burned_captions": false,
+                "cover": null,
+                "cover_dims": null,
+                "fps": 30,
+                "lufs_measured": -14,
+                "lufs_target": -14,
+                "lufs_within_tolerance": true,
+                "out": "/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-codec-floor-g1lg0z86/pair-01-b.mp4",
+                "size_mb": 55.59,
+                "status": "done",
+                "warnings": [
+                  "quiet source: loudnorm linear ineligible (projected TP -0.1 > -2.0) \u2014 static gain +7.6 dB + true-peak limiter (LRA preserved)"
+                ]
+              },
+              "sha256": "5c5b443f87e6df76ec36ed97d7e69a481ab432c332033f438b7608f8f7c429c4",
+              "sizeBytes": 58292796,
+              "wallSeconds": 10.088
+            },
+            "streamFactsMatch": true
+          },
+          {
+            "decodedAudioMatch": true,
+            "left": {
+              "masterResult": {
+                "burned_captions": false,
+                "cover": null,
+                "cover_dims": null,
+                "fps": 30,
+                "lufs_measured": -14,
+                "lufs_target": -14,
+                "lufs_within_tolerance": true,
+                "out": "/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-codec-floor-g1lg0z86/pair-02-a.mp4",
+                "size_mb": 55.66,
+                "status": "done",
+                "warnings": [
+                  "quiet source: loudnorm linear ineligible (projected TP -0.1 > -2.0) \u2014 static gain +7.6 dB + true-peak limiter (LRA preserved)"
+                ]
+              },
+              "sha256": "eb987b939eaa2b44e429b818572f0b102354d98cef64ce64868af306c9c477e4",
+              "sizeBytes": 58361883,
+              "wallSeconds": 10.077
+            },
+            "oracleReceiptHash": "dc180d2990f0ad6940996e8ff373a93a4135fba56c6d97931218c745212b6e3e",
+            "pair": 2,
+            "passed": true,
+            "pictureComparison": {
+              "claim": "codec-floor-equivalent-not-pixel-identical",
+              "codecFloorEquivalent": true,
+              "method": "full-frame-ssim",
+              "metrics": {
+                "comparedFrames": 1350,
+                "meanSsim": 0.997517339,
+                "minimumFrameIndex": 479,
+                "minimumFrameSsim": 0.992122
+              },
+              "pixelIdentical": false
+            },
+            "right": {
+              "masterResult": {
+                "burned_captions": false,
+                "cover": null,
+                "cover_dims": null,
+                "fps": 30,
+                "lufs_measured": -14,
+                "lufs_target": -14,
+                "lufs_within_tolerance": true,
+                "out": "/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-codec-floor-g1lg0z86/pair-02-b.mp4",
+                "size_mb": 55.58,
+                "status": "done",
+                "warnings": [
+                  "quiet source: loudnorm linear ineligible (projected TP -0.1 > -2.0) \u2014 static gain +7.6 dB + true-peak limiter (LRA preserved)"
+                ]
+              },
+              "sha256": "dafd65e62cc50d1392f404da889ac09bc235c3d06364f7768d65641b184ebe67",
+              "sizeBytes": 58282260,
+              "wallSeconds": 10.421
+            },
+            "streamFactsMatch": true
+          },
+          {
+            "decodedAudioMatch": true,
+            "left": {
+              "masterResult": {
+                "burned_captions": false,
+                "cover": null,
+                "cover_dims": null,
+                "fps": 30,
+                "lufs_measured": -14,
+                "lufs_target": -14,
+                "lufs_within_tolerance": true,
+                "out": "/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-codec-floor-g1lg0z86/pair-03-a.mp4",
+                "size_mb": 55.55,
+                "status": "done",
+                "warnings": [
+                  "quiet source: loudnorm linear ineligible (projected TP -0.1 > -2.0) \u2014 static gain +7.6 dB + true-peak limiter (LRA preserved)"
+                ]
+              },
+              "sha256": "07d335a30e7368da9a01e60dc9681ed30185d8c3f5083f3c8323c97feb4a67e9",
+              "sizeBytes": 58244856,
+              "wallSeconds": 9.987
+            },
+            "oracleReceiptHash": "d5d00cebede1992d0c77f5717f0be8dc3b72408eff5cd95b0de1f9fd723b8441",
+            "pair": 3,
+            "passed": true,
+            "pictureComparison": {
+              "claim": "codec-floor-equivalent-not-pixel-identical",
+              "codecFloorEquivalent": true,
+              "method": "full-frame-ssim",
+              "metrics": {
+                "comparedFrames": 1350,
+                "meanSsim": 0.997522901,
+                "minimumFrameIndex": 450,
+                "minimumFrameSsim": 0.992095
+              },
+              "pixelIdentical": false
+            },
+            "right": {
+              "masterResult": {
+                "burned_captions": false,
+                "cover": null,
+                "cover_dims": null,
+                "fps": 30,
+                "lufs_measured": -14,
+                "lufs_target": -14,
+                "lufs_within_tolerance": true,
+                "out": "/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-codec-floor-g1lg0z86/pair-03-b.mp4",
+                "size_mb": 55.58,
+                "status": "done",
+                "warnings": [
+                  "quiet source: loudnorm linear ineligible (projected TP -0.1 > -2.0) \u2014 static gain +7.6 dB + true-peak limiter (LRA preserved)"
+                ]
+              },
+              "sha256": "2c29e9075f04c83218ec256a3bf31d7488f64b187335a7adc01f0f1242109c13",
+              "sizeBytes": 58280421,
+              "wallSeconds": 10.409
+            },
+            "streamFactsMatch": true
+          }
+        ],
+        "passed": true,
+        "policy": {
+          "meanSsimMinimum": 0.995,
+          "minimumControlPairs": 3,
+          "minimumFrameSsim": 0.985,
+          "pictureClaim": "codec-floor-equivalent-not-pixel-identical",
+          "policyId": "sniper-libx264-codec-floor-v1",
+          "schemaVersion": 1
+        },
+        "policyHash": "a7785b1954c2eeca4caa4ae998e8b1fa05f4ecc6cfae082956211c28e974d4f0",
+        "receiptHash": "6aaf2c09760ebd3d44c808635dd32fc96ef009bbefd415659306e27b3584f366",
+        "schemaVersion": 1,
+        "source": {
+          "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/current-render-codec-floor-calibration-v1/sources/sha256/cb/cbd60508ceed6af23291ac4dadf5127207142c2d4df7a4e5cdb857032d5a8cc8.media",
+          "sha256": "cbd60508ceed6af23291ac4dadf5127207142c2d4df7a4e5cdb857032d5a8cc8",
+          "sizeBytes": 54640334,
+          "storageClass": "content-addressed-retained-calibration-source-v1"
+        },
+        "sourceFiles": {
+          "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/audio/master.py": "99be06acb30ddd34b55ad7ead2cd5917600b10a7feddd483c43a58464c1009f0",
+          "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_render_calibration_source.py": "8efa02e1393890ed51b99185e9a1d9c8503e811eb41af45138e9035afc79ec96",
+          "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_render_oracle.py": "40e23935a9db1d417bc17f8476f710585f9639532af4f7a5bf5793858a01ac66",
+          "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_render_oracle_calibrate.py": "868ea1bdd583351e523734cbc203a19f926353180fee32133e42a034f2eb6517"
+        },
+        "tools": {
+          "ffmpeg": {
+            "path": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffmpeg",
+            "sha256": "d94d8e7af675f813e0a0faf036ff936d334ceb18daaec3a10a355679994e0311"
+          },
+          "ffmpegVersionOutputSha256": "7515c81b2aa7a7a6bef97f22ba6ff632929cacfce06d2dfec7e8446e74b3a7f2",
+          "ffprobe": {
+            "path": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffprobe",
+            "sha256": "96f53c2099a3f59fc20efb424dd36d5510373f735cf9af50479c2f4d458695af"
+          },
+          "oracle": {
+            "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_render_oracle.py",
+            "sha256": "40e23935a9db1d417bc17f8476f710585f9639532af4f7a5bf5793858a01ac66"
+          },
+          "python": {
+            "path": "/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/bin/python3.14",
+            "sha256": "b874063062531b7ac73b400141e9ce95184945f86fa1bda91bab5c6671a55149"
+          }
+        }
+      },
+      "documentSha256": "c0931bd02f2e98e8941937c57d1a0f149cb34e3ed6376f6863579f9148df5b31",
+      "path": "docs/producer/command-driven-editing/contracts/current-render-codec-floor-calibration-v1.json",
+      "sha256": "b79cf94184e30c5c2824ebc4cda8954cebfb696f566b521c17b379bdba637601"
+    },
+    "classification": "codec-floor-equivalent-not-pixel-identical",
+    "error": null,
+    "receipt": {
+      "byteIdentical": false,
+      "decodedAudioMatch": true,
+      "forcedFull": {
+        "fileSha256": "4cbf03bd649d661a5ad74b8173a9788c4f1d6f2594dbc9423c0733c96913a4a3",
+        "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/final.mp4",
+        "pcmBytes": 322551808,
+        "pcmSha256": "85defcc487d5080cca07fc7e173accaffd4a97e8e0237018839b5eceb7de3c21",
+        "pictureFrameMd5Sha256": "04bc414e97743417dcebf56b73b1d1a69ff2f3559253529a77f475de4c5f8608",
+        "sizeBytes": 852026827,
+        "streamFacts": {
+          "audio": {
+            "channels": 2,
+            "sampleRate": 48000
+          },
+          "streamTypes": [
+            "video",
+            "audio"
+          ],
+          "video": {
+            "decodedFrames": 20139,
+            "frameRate": "24000/1001",
+            "height": 1080,
+            "pixelFormat": "yuv420p",
+            "width": 1920
+          }
+        }
+      },
+      "incremental": {
+        "fileSha256": "5ac3838a6565f730efe1c9dfcbc72f00aaef9340b6cfe75c9096d54660901f7c",
+        "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/.baseline-repeat-evidence/p0-current-lf14/first-run-final.mp4",
+        "pcmBytes": 322551808,
+        "pcmSha256": "85defcc487d5080cca07fc7e173accaffd4a97e8e0237018839b5eceb7de3c21",
+        "pictureFrameMd5Sha256": "2c14250c95e8ed329f13647507b9bbbd9b3b1d699ee537f9be958a9042695874",
+        "sizeBytes": 852050078,
+        "streamFacts": {
+          "audio": {
+            "channels": 2,
+            "sampleRate": 48000
+          },
+          "streamTypes": [
+            "video",
+            "audio"
+          ],
+          "video": {
+            "decodedFrames": 20139,
+            "frameRate": "24000/1001",
+            "height": 1080,
+            "pixelFormat": "yuv420p",
+            "width": 1920
+          }
+        }
+      },
+      "kind": "current-render-forced-full-oracle",
+      "passed": true,
+      "pictureComparison": {
+        "claim": "codec-floor-equivalent-not-pixel-identical",
+        "codecFloorEquivalent": true,
+        "method": "full-frame-ssim",
+        "metrics": {
+          "comparedFrames": 20139,
+          "meanSsim": 0.997635465,
+          "minimumFrameIndex": 1578,
+          "minimumFrameSsim": 0.986361
+        },
+        "pixelIdentical": false
+      },
+      "policy": {
+        "meanSsimMinimum": 0.995,
+        "minimumControlPairs": 3,
+        "minimumFrameSsim": 0.985,
+        "pictureClaim": "codec-floor-equivalent-not-pixel-identical",
+        "policyId": "sniper-libx264-codec-floor-v1",
+        "schemaVersion": 1
+      },
+      "policyHash": "a7785b1954c2eeca4caa4ae998e8b1fa05f4ecc6cfae082956211c28e974d4f0",
+      "receiptHash": "5c3ff0d9f0f96e2b61dc632cfc7a2b84a54fdaa4128eb1245bb7f5d032d62bc6",
+      "schemaVersion": 1,
+      "streamFactsMatch": true,
+      "toolchain": {
+        "ffmpeg": {
+          "path": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffmpeg",
+          "sha256": "d94d8e7af675f813e0a0faf036ff936d334ceb18daaec3a10a355679994e0311"
+        },
+        "ffprobe": {
+          "path": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffprobe",
+          "sha256": "96f53c2099a3f59fc20efb424dd36d5510373f735cf9af50479c2f4d458695af"
+        },
+        "oracle": {
+          "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_render_oracle.py",
+          "sha256": "40e23935a9db1d417bc17f8476f710585f9639532af4f7a5bf5793858a01ac66"
+        }
+      }
+    },
+    "receiptPath": ".baseline-repeat-evidence/p0-current-lf14/repeat-oracle-v1.json",
+    "receiptSha256": "101a6863606661c639dd33f1e352d871e466a6b2b9aed9ae00d48177a1df4faa",
+    "schemaVersion": 1
+  },
+  "runs": [
+    {
+      "cacheState": "cold",
+      "childSystemCpuMs": 90623.226,
+      "childUserCpuMs": 4233890.408,
+      "childrenCumulativeMaxRssBytes": 1145585664,
+      "events": [
+        {
+          "event": "baseline_stage",
+          "stage": "audit",
+          "wallMs": 153472
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "audio_channels",
+          "wallMs": 1411
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "audio_enhance",
+          "wallMs": 13587
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "audio_gain",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "base_check",
+          "wallMs": 4
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "baseline_look",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "broll",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "captions",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "compile",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "composite",
+          "wallMs": 92957
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "cut_speed",
+          "wallMs": 119722
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "graphics",
+          "wallMs": 501
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "lint_gate",
+          "wallMs": 8
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "longform_srt",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "master",
+          "wallMs": 165032
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "music",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "overlays",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "proxy",
+          "wallMs": 18684
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "punch_in",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "recompose",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "reframe",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "transitions",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_cache_state",
+          "label": "first-run",
+          "state": "cold"
+        }
+      ],
+      "exitCode": 0,
+      "label": "first-run",
+      "outputs": [
+        {
+          "bytes": 852050078,
+          "media": {
+            "audio": {
+              "channels": 2,
+              "duration": "839.952000",
+              "sampleRate": 48000
+            },
+            "fullDecode": {
+              "audioPcmBytes": 161275904,
+              "audioPcmS16le48000StereoSha256": "0e1184a4de87dadad1a65314c298aac838efe8671b07380691315188b25dfb36",
+              "audioSamplesPerChannel": 40318976,
+              "videoSha256": "8eb78a815dfceada52ddcd3c73293eddf0244afd9940fdac683a362cdd12f303"
+            },
+            "qc": {
+              "assembledAuthority": {
+                "record": {
+                  "authorityHash": "5ac3838a6565f730efe1c9dfcbc72f00aaef9340b6cfe75c9096d54660901f7c",
+                  "graphicsFingerprint": "4f53cda18c2baa0c",
+                  "planHash": "2ea2716da1c0ad5663f670264c1a1e066299c8da412231f769e66191e8e0f17e",
+                  "videoFingerprint": "e144167d9979109d"
+                },
+                "recordSha256": "f8fd14a9a84a4fde23e53cef6067d79016eb8104652314614a47187a41da206e",
+                "sha256": "bab9a83a75eb01603c386ba79d413b23498c22c80d51b2d5ca54e4d399340c8a"
+              },
+              "auditReport": {
+                "document": {
+                  "checks": [
+                    {
+                      "detail": "drift 0.00f, tol 2.0f over 2 segments",
+                      "measured": "839.964s (20139f) vs 839.964s",
+                      "name": "duration",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "target -14.0 +/-1.0",
+                      "measured": "-14.1 LUFS",
+                      "name": "loudness_integrated",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "ceiling -1.5 dBTP (hard -0.5)",
+                      "measured": "-1.7 dBTP",
+                      "name": "loudness_true_peak",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "expected 16:9 passthrough",
+                      "measured": "1920x1080 (1.778)",
+                      "name": "format_resolution",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "expected h264",
+                      "measured": "h264",
+                      "name": "format_vcodec",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "expected High",
+                      "measured": "High",
+                      "name": "format_profile",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "expected yuv420p",
+                      "measured": "yuv420p",
+                      "name": "format_pix_fmt",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "CFR: r_frame_rate == avg",
+                      "measured": "r=24000/1001 avg=24000/1001",
+                      "name": "format_cfr",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "moov before mdat",
+                      "measured": "moov<mdat",
+                      "name": "format_faststart",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "expected aac",
+                      "measured": "aac",
+                      "name": "format_acodec",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "expected 48000",
+                      "measured": "48000 Hz",
+                      "name": "format_arate",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "expected 2",
+                      "measured": "2ch",
+                      "name": "format_achannels",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "start <= 0.080s; end <= 0.120s",
+                      "measured": "start +0.000s; end skew -0.012s (V 839.964s / A 839.952s)",
+                      "name": "audio_av_timing",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "fail if dead or >12 dB consistently",
+                      "measured": "L -17.9 / R -18.1 dBFS; median delta +0.1 dB, direction 84%",
+                      "name": "audio_channel_balance",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "stable narrow tone, not broadband low-frequency noise",
+                      "measured": "178.0 Hz; prominence 11.5 dB; level -35.0 dBFS; stable 6%/2.0s",
+                      "name": "audio_tonal_hum",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "ending dominance check not applicable",
+                      "measured": "music disabled/not declared",
+                      "name": "audio_ending_mix",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "no cap in longform mode (X18)",
+                      "measured": "812.6MB",
+                      "name": "file_budget",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "luma floor 16 (near-black check)",
+                      "measured": "1920x1080, luma 121",
+                      "name": "cover",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "head/tail <= 0.5s fades allowed",
+                      "measured": "none in body",
+                      "name": "glitch_black",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "screen-share/slide holds are legitimate \u2014 confirm by eye",
+                      "measured": "51 freeze(s), longest 51.89s",
+                      "name": "glitch_freeze",
+                      "status": "warn"
+                    },
+                    {
+                      "detail": "single-frame luma jump >= 45.0",
+                      "measured": "1 flash(es): 167.75s",
+                      "name": "glitch_flash",
+                      "status": "warn"
+                    },
+                    {
+                      "detail": "scene-detect sees hard cuts only",
+                      "measured": "rendered 201 hard changes, 14.4 changes/min (~1 plan cuts; eased-motion pacing gated plan-side)",
+                      "name": "motion_pacing",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "every planned visual-review frame extracted",
+                      "measured": "8/8 required frame(s)",
+                      "name": "review_frames_extracted",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "warn >= 0.015; heuristic (detail, not OCR) \u2014 confirm by eye",
+                      "measured": "edge density 0.000 in y>1400",
+                      "name": "safe_zone_caption1",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "warn >= 0.015; heuristic (detail, not OCR) \u2014 confirm by eye",
+                      "measured": "edge density 0.000 in y>1400",
+                      "name": "safe_zone_caption2",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "warn >= 0.015; heuristic (detail, not OCR) \u2014 confirm by eye",
+                      "measured": "edge density 0.000 in y>1400",
+                      "name": "safe_zone_caption3",
+                      "status": "pass"
+                    }
+                  ],
+                  "counts": {
+                    "fail": 0,
+                    "pass": 24,
+                    "warn": 2
+                  },
+                  "exitCode": 0,
+                  "final": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/final.mp4",
+                  "frames": [
+                    {
+                      "kind": "cover",
+                      "label": "cover",
+                      "note": "Frame 1 is the thumbnail + loop start: settled (not mid-word)? Hook card inside the safe box, centered ~x495?",
+                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cover_t000.200.jpg",
+                      "timestamp": 0.2
+                    },
+                    {
+                      "kind": "cut",
+                      "label": "cut0_before",
+                      "note": "Cut 1 before: intended continuity, no flash, duplicate frame, jump-back, or frozen outgoing/incoming shot?",
+                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cut0_before_t663.062.jpg",
+                      "timestamp": 663.062
+                    },
+                    {
+                      "kind": "cut",
+                      "label": "cut0_seam",
+                      "note": "Cut 1 seam: intended continuity, no flash, duplicate frame, jump-back, or frozen outgoing/incoming shot?",
+                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cut0_seam_t663.162.jpg",
+                      "timestamp": 663.162
+                    },
+                    {
+                      "kind": "cut",
+                      "label": "cut0_after",
+                      "note": "Cut 1 after: intended continuity, no flash, duplicate frame, jump-back, or frozen outgoing/incoming shot?",
+                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cut0_after_t663.262.jpg",
+                      "timestamp": 663.262
+                    },
+                    {
+                      "kind": "caption",
+                      "label": "caption1",
+                      "note": "Captions legible + fully on-canvas, in the lower band; subject framing sane (no chopped forehead / readable screen)?",
+                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/caption1_t209.991.jpg",
+                      "timestamp": 209.991
+                    },
+                    {
+                      "kind": "caption",
+                      "label": "caption2",
+                      "note": "Captions legible + fully on-canvas, in the lower band; subject framing sane (no chopped forehead / readable screen)?",
+                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/caption2_t419.982.jpg",
+                      "timestamp": 419.982
+                    },
+                    {
+                      "kind": "caption",
+                      "label": "caption3",
+                      "note": "Captions legible + fully on-canvas, in the lower band; subject framing sane (no chopped forehead / readable screen)?",
+                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/caption3_t629.973.jpg",
+                      "timestamp": 629.973
+                    },
+                    {
+                      "kind": "final",
+                      "label": "final",
+                      "note": "Tail frame clean? Loop-friendly back to the cover?",
+                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/final_t839.814.jpg",
+                      "timestamp": 839.8140000000001
+                    }
+                  ],
+                  "mode": "longform",
+                  "outDir": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render",
+                  "overall": "warn"
+                },
+                "documentSha256": "00290f220747df6f8d926ca9921d83f20c04a4e2e0973bad8534f8e473f7a91b",
+                "sha256": "bbf2ca6cc6c9c60de4e65b886e335a4e14a47ea3ef30e8cebc43c5e9e47e38a4"
+              },
+              "finalSha256": "5ac3838a6565f730efe1c9dfcbc72f00aaef9340b6cfe75c9096d54660901f7c",
+              "renderPlan": {
+                "contentHash": "2ea2716da1c0ad5663f670264c1a1e066299c8da412231f769e66191e8e0f17e",
+                "sha256": "c6df5b3ebb48ea891dee972f2680d0991b0e38f7a6320d7d5b1109edc3889a67"
+              },
+              "timelineMap": {
+                "outputDuration": 839.964125,
+                "sha256": "eea74b9840d7a1c4c5877ae55cce6f240aba6e4a688b02d7c1a741b4a04ffdf4"
+              }
+            },
+            "tools": {
+              "ffmpeg": {
+                "path": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffmpeg",
+                "sha256": "d94d8e7af675f813e0a0faf036ff936d334ceb18daaec3a10a355679994e0311",
+                "version": "ffmpeg version 8.0 Copyright (c) 2000-2025 the FFmpeg developers"
+              },
+              "ffprobe": {
+                "path": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffprobe",
+                "sha256": "96f53c2099a3f59fc20efb424dd36d5510373f735cf9af50479c2f4d458695af",
+                "version": "ffprobe version 8.0 Copyright (c) 2007-2025 the FFmpeg developers"
+              }
+            },
+            "video": {
+              "avgFrameRate": "24000/1001",
+              "decodedFrames": 20139,
+              "duration": "839.964000",
+              "height": 1080,
+              "rFrameRate": "24000/1001",
+              "width": 1920
+            }
+          },
+          "path": "render/final.mp4",
+          "sha256": "5ac3838a6565f730efe1c9dfcbc72f00aaef9340b6cfe75c9096d54660901f7c",
+          "status": "present"
+        }
+      ],
+      "startedAt": "2026-07-30T12:51:55.323635Z",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutSha256": "9ed213d611dceb72dd35468158bd2e74ee9a0a3337ec7ee6058818a0f8f7e0c6",
+      "wallMs": 566941
+    },
+    {
+      "cacheState": "warm",
+      "childSystemCpuMs": 64103.112,
+      "childUserCpuMs": 2816958.373,
+      "childrenCumulativeMaxRssBytes": 1157840896,
+      "events": [
+        {
+          "event": "baseline_stage",
+          "stage": "audit",
+          "wallMs": 153489
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "audio_channels",
+          "wallMs": 1751
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "audio_enhance",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "audio_gain",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "base_check",
+          "wallMs": 4
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "baseline_look",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "broll",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "captions",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "compile",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "composite",
+          "wallMs": 93086
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "cut_speed",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "graphics",
+          "wallMs": 481
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "lint_gate",
+          "wallMs": 9
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "longform_srt",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "master",
+          "wallMs": 173612
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "music",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "overlays",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "proxy",
+          "wallMs": 19011
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "punch_in",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "recompose",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "reframe",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_stage",
+          "stage": "transitions",
+          "wallMs": 0
+        },
+        {
+          "event": "baseline_cache_state",
+          "label": "immediate-repeat",
+          "state": "warm"
+        }
+      ],
+      "exitCode": 0,
+      "label": "immediate-repeat",
+      "outputs": [
+        {
+          "bytes": 852026827,
+          "media": {
+            "audio": {
+              "channels": 2,
+              "duration": "839.952000",
+              "sampleRate": 48000
+            },
+            "fullDecode": {
+              "audioPcmBytes": 161275904,
+              "audioPcmS16le48000StereoSha256": "0e1184a4de87dadad1a65314c298aac838efe8671b07380691315188b25dfb36",
+              "audioSamplesPerChannel": 40318976,
+              "videoSha256": "d647b9de192a43bc67219d78d89c987415d56d0a7578082d1a02c8a23bb00f9d"
+            },
+            "qc": {
+              "assembledAuthority": {
+                "record": {
+                  "authorityHash": "4cbf03bd649d661a5ad74b8173a9788c4f1d6f2594dbc9423c0733c96913a4a3",
+                  "graphicsFingerprint": "4f53cda18c2baa0c",
+                  "planHash": "2ea2716da1c0ad5663f670264c1a1e066299c8da412231f769e66191e8e0f17e",
+                  "videoFingerprint": "e144167d9979109d"
+                },
+                "recordSha256": "11ea9985602227f3ae85d48001ca284fc93f5b9b214b8e405626fa14e15b19d1",
+                "sha256": "f74cab51f68aa6ff3196157f07d155caa7871745672787a9efc88e76819a8dd5"
+              },
+              "auditReport": {
+                "document": {
+                  "checks": [
+                    {
+                      "detail": "drift 0.00f, tol 2.0f over 2 segments",
+                      "measured": "839.964s (20139f) vs 839.964s",
+                      "name": "duration",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "target -14.0 +/-1.0",
+                      "measured": "-14.1 LUFS",
+                      "name": "loudness_integrated",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "ceiling -1.5 dBTP (hard -0.5)",
+                      "measured": "-1.7 dBTP",
+                      "name": "loudness_true_peak",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "expected 16:9 passthrough",
+                      "measured": "1920x1080 (1.778)",
+                      "name": "format_resolution",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "expected h264",
+                      "measured": "h264",
+                      "name": "format_vcodec",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "expected High",
+                      "measured": "High",
+                      "name": "format_profile",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "expected yuv420p",
+                      "measured": "yuv420p",
+                      "name": "format_pix_fmt",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "CFR: r_frame_rate == avg",
+                      "measured": "r=24000/1001 avg=24000/1001",
+                      "name": "format_cfr",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "moov before mdat",
+                      "measured": "moov<mdat",
+                      "name": "format_faststart",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "expected aac",
+                      "measured": "aac",
+                      "name": "format_acodec",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "expected 48000",
+                      "measured": "48000 Hz",
+                      "name": "format_arate",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "expected 2",
+                      "measured": "2ch",
+                      "name": "format_achannels",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "start <= 0.080s; end <= 0.120s",
+                      "measured": "start +0.000s; end skew -0.012s (V 839.964s / A 839.952s)",
+                      "name": "audio_av_timing",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "fail if dead or >12 dB consistently",
+                      "measured": "L -17.9 / R -18.1 dBFS; median delta +0.1 dB, direction 84%",
+                      "name": "audio_channel_balance",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "stable narrow tone, not broadband low-frequency noise",
+                      "measured": "178.0 Hz; prominence 11.5 dB; level -35.0 dBFS; stable 6%/2.0s",
+                      "name": "audio_tonal_hum",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "ending dominance check not applicable",
+                      "measured": "music disabled/not declared",
+                      "name": "audio_ending_mix",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "no cap in longform mode (X18)",
+                      "measured": "812.6MB",
+                      "name": "file_budget",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "luma floor 16 (near-black check)",
+                      "measured": "1920x1080, luma 121",
+                      "name": "cover",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "head/tail <= 0.5s fades allowed",
+                      "measured": "none in body",
+                      "name": "glitch_black",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "screen-share/slide holds are legitimate \u2014 confirm by eye",
+                      "measured": "51 freeze(s), longest 51.89s",
+                      "name": "glitch_freeze",
+                      "status": "warn"
+                    },
+                    {
+                      "detail": "single-frame luma jump >= 45.0",
+                      "measured": "1 flash(es): 167.75s",
+                      "name": "glitch_flash",
+                      "status": "warn"
+                    },
+                    {
+                      "detail": "scene-detect sees hard cuts only",
+                      "measured": "rendered 201 hard changes, 14.4 changes/min (~1 plan cuts; eased-motion pacing gated plan-side)",
+                      "name": "motion_pacing",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "every planned visual-review frame extracted",
+                      "measured": "8/8 required frame(s)",
+                      "name": "review_frames_extracted",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "warn >= 0.015; heuristic (detail, not OCR) \u2014 confirm by eye",
+                      "measured": "edge density 0.000 in y>1400",
+                      "name": "safe_zone_caption1",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "warn >= 0.015; heuristic (detail, not OCR) \u2014 confirm by eye",
+                      "measured": "edge density 0.000 in y>1400",
+                      "name": "safe_zone_caption2",
+                      "status": "pass"
+                    },
+                    {
+                      "detail": "warn >= 0.015; heuristic (detail, not OCR) \u2014 confirm by eye",
+                      "measured": "edge density 0.000 in y>1400",
+                      "name": "safe_zone_caption3",
+                      "status": "pass"
+                    }
+                  ],
+                  "counts": {
+                    "fail": 0,
+                    "pass": 24,
+                    "warn": 2
+                  },
+                  "exitCode": 0,
+                  "final": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/final.mp4",
+                  "frames": [
+                    {
+                      "kind": "cover",
+                      "label": "cover",
+                      "note": "Frame 1 is the thumbnail + loop start: settled (not mid-word)? Hook card inside the safe box, centered ~x495?",
+                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cover_t000.200.jpg",
+                      "timestamp": 0.2
+                    },
+                    {
+                      "kind": "cut",
+                      "label": "cut0_before",
+                      "note": "Cut 1 before: intended continuity, no flash, duplicate frame, jump-back, or frozen outgoing/incoming shot?",
+                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cut0_before_t663.062.jpg",
+                      "timestamp": 663.062
+                    },
+                    {
+                      "kind": "cut",
+                      "label": "cut0_seam",
+                      "note": "Cut 1 seam: intended continuity, no flash, duplicate frame, jump-back, or frozen outgoing/incoming shot?",
+                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cut0_seam_t663.162.jpg",
+                      "timestamp": 663.162
+                    },
+                    {
+                      "kind": "cut",
+                      "label": "cut0_after",
+                      "note": "Cut 1 after: intended continuity, no flash, duplicate frame, jump-back, or frozen outgoing/incoming shot?",
+                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cut0_after_t663.262.jpg",
+                      "timestamp": 663.262
+                    },
+                    {
+                      "kind": "caption",
+                      "label": "caption1",
+                      "note": "Captions legible + fully on-canvas, in the lower band; subject framing sane (no chopped forehead / readable screen)?",
+                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/caption1_t209.991.jpg",
+                      "timestamp": 209.991
+                    },
+                    {
+                      "kind": "caption",
+                      "label": "caption2",
+                      "note": "Captions legible + fully on-canvas, in the lower band; subject framing sane (no chopped forehead / readable screen)?",
+                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/caption2_t419.982.jpg",
+                      "timestamp": 419.982
+                    },
+                    {
+                      "kind": "caption",
+                      "label": "caption3",
+                      "note": "Captions legible + fully on-canvas, in the lower band; subject framing sane (no chopped forehead / readable screen)?",
+                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/caption3_t629.973.jpg",
+                      "timestamp": 629.973
+                    },
+                    {
+                      "kind": "final",
+                      "label": "final",
+                      "note": "Tail frame clean? Loop-friendly back to the cover?",
+                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/final_t839.814.jpg",
+                      "timestamp": 839.8140000000001
+                    }
+                  ],
+                  "mode": "longform",
+                  "outDir": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render",
+                  "overall": "warn"
+                },
+                "documentSha256": "00290f220747df6f8d926ca9921d83f20c04a4e2e0973bad8534f8e473f7a91b",
+                "sha256": "bbf2ca6cc6c9c60de4e65b886e335a4e14a47ea3ef30e8cebc43c5e9e47e38a4"
+              },
+              "finalSha256": "4cbf03bd649d661a5ad74b8173a9788c4f1d6f2594dbc9423c0733c96913a4a3",
+              "renderPlan": {
+                "contentHash": "2ea2716da1c0ad5663f670264c1a1e066299c8da412231f769e66191e8e0f17e",
+                "sha256": "c6df5b3ebb48ea891dee972f2680d0991b0e38f7a6320d7d5b1109edc3889a67"
+              },
+              "timelineMap": {
+                "outputDuration": 839.964125,
+                "sha256": "eea74b9840d7a1c4c5877ae55cce6f240aba6e4a688b02d7c1a741b4a04ffdf4"
+              }
+            },
+            "tools": {
+              "ffmpeg": {
+                "path": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffmpeg",
+                "sha256": "d94d8e7af675f813e0a0faf036ff936d334ceb18daaec3a10a355679994e0311",
+                "version": "ffmpeg version 8.0 Copyright (c) 2000-2025 the FFmpeg developers"
+              },
+              "ffprobe": {
+                "path": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffprobe",
+                "sha256": "96f53c2099a3f59fc20efb424dd36d5510373f735cf9af50479c2f4d458695af",
+                "version": "ffprobe version 8.0 Copyright (c) 2007-2025 the FFmpeg developers"
+              }
+            },
+            "video": {
+              "avgFrameRate": "24000/1001",
+              "decodedFrames": 20139,
+              "duration": "839.964000",
+              "height": 1080,
+              "rFrameRate": "24000/1001",
+              "width": 1920
+            }
+          },
+          "path": "render/final.mp4",
+          "sha256": "4cbf03bd649d661a5ad74b8173a9788c4f1d6f2594dbc9423c0733c96913a4a3",
+          "status": "present"
+        }
+      ],
+      "startedAt": "2026-07-30T13:05:06.581543Z",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutSha256": "6c916291df81e07f639f0dad57726290f2e89283a8fa55c222dfd1a47b980f7b",
+      "wallMs": 443057
+    }
+  ],
+  "schemaVersion": 1,
+  "toolAuthority": {
+    "entrypoints": [
+      {
+        "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_full_path_baseline.py",
+        "sha256": "a9386565c55b335ed6f38db31938ca719b30c0275ca57f9ff97866afcba393df"
+      },
+      {
+        "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/render.py",
+        "sha256": "d65acaa1125664c4ce38dae7c4a50f47003878f3e465cb84f43c33517e213535"
+      },
+      {
+        "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/assemble.py",
+        "sha256": "b8d60e3dc335ba1049efb8b3738e45f0c303d53827965ea25ba205462b1468ff"
+      },
+      {
+        "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/audit/audit_render.py",
+        "sha256": "792552cfb33d34e50c40a3a42e4548c555a78f5dda0ebc466a68066545ae915f"
+      },
+      {
+        "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_render_oracle.py",
+        "sha256": "40e23935a9db1d417bc17f8476f710585f9639532af4f7a5bf5793858a01ac66"
+      },
+      {
+        "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/baseline_repeat_equivalence.py",
+        "sha256": "8f00cd45c60f93c1ea881953c6363a7612054430eff5919f9ee393328c76f93c"
+      }
+    ],
+    "executable": {
+      "path": "/opt/homebrew/Cellar/python@3.14/3.14.4/Frameworks/Python.framework/Versions/3.14/bin/python3.14",
+      "sha256": "b874063062531b7ac73b400141e9ce95184945f86fa1bda91bab5c6671a55149"
+    },
+    "externalTools": [
+      {
+        "path": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffmpeg",
+        "sha256": "d94d8e7af675f813e0a0faf036ff936d334ceb18daaec3a10a355679994e0311"
+      },
+      {
+        "path": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffprobe",
+        "sha256": "96f53c2099a3f59fc20efb424dd36d5510373f735cf9af50479c2f4d458695af"
+      }
+    ],
+    "scope": "direct-entrypoints-not-transitive-source-closure"
+  }
+}

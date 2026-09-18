@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/cut-repair-candidate-v2.schema.json",
+  "title": "CutRepairCandidateV2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "status",
+    "operationHash",
+    "fragmentReceipt",
+    "childPictureLock",
+    "childPictureLockHash",
+    "supersessionReceipt",
+    "supersessionHash",
+    "palmierDisposition",
+    "captionRevalidation",
+    "compositeReceipt",
+    "renderedCandidate",
+    "renderedCandidateHash",
+    "invariantProof",
+    "invariantProofHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 2 },
+    "kind": { "const": "cut-repair-candidate" },
+    "status": { "const": "candidate-proved" },
+    "operationHash": { "$ref": "#/$defs/sha256" },
+    "fragmentReceipt": {
+      "$ref": "cut-repair-fragment-receipt-v1.schema.json"
+    },
+    "childPictureLock": { "$ref": "picture-lock-v1.schema.json" },
+    "childPictureLockHash": { "$ref": "#/$defs/sha256" },
+    "supersessionReceipt": {
+      "$ref": "picture-lock-supersession-v1.schema.json"
+    },
+    "supersessionHash": { "$ref": "#/$defs/sha256" },
+    "palmierDisposition": {
+      "$ref": "palmier-cut-repair-disposition-v1.schema.json"
+    },
+    "captionRevalidation": {
+      "$ref": "caption-repair-revalidation-v1.schema.json"
+    },
+    "compositeReceipt": {
+      "$ref": "cut-repair-composite-receipt-v1.schema.json"
+    },
+    "renderedCandidate": {
+      "$ref": "cut-repair-rendered-candidate-v1.schema.json"
+    },
+    "renderedCandidateHash": { "$ref": "#/$defs/sha256" },
+    "invariantProof": { "$ref": "#/$defs/invariant" },
+    "invariantProofHash": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "invariant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "kind",
+        "operationHash",
+        "fragmentReceiptHash",
+        "childPictureLockHash",
+        "supersessionHash",
+        "palmierDispositionHash",
+        "captionRevalidationHash",
+        "diagnosticCompositeReceiptHash",
+        "renderedCandidateHash",
+        "terminalRenderedPlanProved",
+        "terminalCandidateSha256",
+        "totalOutputFramesPreserved"
+      ],
+      "properties": {
+        "schemaVersion": { "const": 2 },
+        "kind": { "const": "cut-repair-invariant-proof" },
+        "operationHash": { "$ref": "#/$defs/sha256" },
+        "fragmentReceiptHash": { "$ref": "#/$defs/sha256" },
+        "childPictureLockHash": { "$ref": "#/$defs/sha256" },
+        "supersessionHash": { "$ref": "#/$defs/sha256" },
+        "palmierDispositionHash": { "$ref": "#/$defs/sha256" },
+        "captionRevalidationHash": { "$ref": "#/$defs/sha256" },
+        "diagnosticCompositeReceiptHash": { "$ref": "#/$defs/sha256" },
+        "renderedCandidateHash": { "$ref": "#/$defs/sha256" },
+        "terminalRenderedPlanProved": { "const": true },
+        "terminalCandidateSha256": { "$ref": "#/$defs/sha256" },
+        "totalOutputFramesPreserved": { "const": true }
+      }
+    }
+  }
+}

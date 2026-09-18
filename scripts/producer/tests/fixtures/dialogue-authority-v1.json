@@ -1,0 +1,290 @@
+{
+  "trackHash": "060d2031c5c2291082c48d99d12fe00b44efacd51405d2a0fc8e3116a1720eda",
+  "track": {
+    "schemaVersion": 1,
+    "kind": "dialogue-track",
+    "sourceSnapshotSetHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "pictureTimelineMapHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "projectFps": {
+      "numerator": "30",
+      "denominator": "1"
+    },
+    "projectSampleRate": 48000,
+    "totalOutputFrames": 180,
+    "totalOutputSamples": 288000,
+    "maxAbsoluteSpeedDeviation": {
+      "numerator": "1",
+      "denominator": "48000"
+    },
+    "segments": [
+      {
+        "dialogueSegmentId": "dialogue-a-primary",
+        "cutSegmentId": "cut-a",
+        "elementVersion": 1,
+        "sourceId": "source-a",
+        "sourceSampleRate": 48000,
+        "sourceSampleRange": {
+          "startSample": 0,
+          "endSampleExclusive": 144000
+        },
+        "outputSampleRange": {
+          "startSample": 0,
+          "endSampleExclusive": 144000
+        },
+        "speed": {
+          "numerator": "1",
+          "denominator": "1"
+        },
+        "role": "primary"
+      },
+      {
+        "dialogueSegmentId": "dialogue-b-j-handle",
+        "cutSegmentId": "cut-b",
+        "elementVersion": 2,
+        "sourceId": "source-b",
+        "sourceSampleRate": 44100,
+        "sourceSampleRange": {
+          "startSample": 0,
+          "endSampleExclusive": 4410
+        },
+        "outputSampleRange": {
+          "startSample": 139200,
+          "endSampleExclusive": 144000
+        },
+        "speed": {
+          "numerator": "1",
+          "denominator": "1"
+        },
+        "role": "j-cut-handle",
+        "seamSample": 144000,
+        "coveredByCutSegmentId": "cut-a"
+      },
+      {
+        "dialogueSegmentId": "dialogue-b-primary",
+        "cutSegmentId": "cut-b",
+        "elementVersion": 2,
+        "sourceId": "source-b",
+        "sourceSampleRate": 44100,
+        "sourceSampleRange": {
+          "startSample": 4410,
+          "endSampleExclusive": 92610
+        },
+        "outputSampleRange": {
+          "startSample": 144000,
+          "endSampleExclusive": 240000
+        },
+        "speed": {
+          "numerator": "1",
+          "denominator": "1"
+        },
+        "role": "primary"
+      },
+      {
+        "dialogueSegmentId": "dialogue-c-primary",
+        "cutSegmentId": "cut-c",
+        "elementVersion": 1,
+        "sourceId": "source-c",
+        "sourceSampleRate": 48000,
+        "sourceSampleRange": {
+          "startSample": 0,
+          "endSampleExclusive": 60000
+        },
+        "outputSampleRange": {
+          "startSample": 240000,
+          "endSampleExclusive": 288000
+        },
+        "speed": {
+          "numerator": "5",
+          "denominator": "4"
+        },
+        "role": "primary"
+      },
+      {
+        "dialogueSegmentId": "dialogue-b-l-handle",
+        "cutSegmentId": "cut-b",
+        "elementVersion": 2,
+        "sourceId": "source-b",
+        "sourceSampleRate": 44100,
+        "sourceSampleRange": {
+          "startSample": 92610,
+          "endSampleExclusive": 97020
+        },
+        "outputSampleRange": {
+          "startSample": 240000,
+          "endSampleExclusive": 244800
+        },
+        "speed": {
+          "numerator": "1",
+          "denominator": "1"
+        },
+        "role": "l-cut-handle",
+        "seamSample": 240000,
+        "coveredByCutSegmentId": "cut-c"
+      }
+    ]
+  },
+  "map": {
+    "schemaVersion": 1,
+    "kind": "dialogue-map",
+    "dialogueTrackHash": "060d2031c5c2291082c48d99d12fe00b44efacd51405d2a0fc8e3116a1720eda",
+    "sourceSnapshotSetHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "pictureTimelineMapHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "projectFps": {
+      "numerator": "30",
+      "denominator": "1"
+    },
+    "projectSampleRate": 48000,
+    "totalOutputFrames": 180,
+    "totalOutputSamples": 288000,
+    "maxAbsoluteSpeedDeviation": {
+      "numerator": "1",
+      "denominator": "48000"
+    },
+    "entries": [
+      {
+        "dialogueSegmentId": "dialogue-a-primary",
+        "cutSegmentId": "cut-a",
+        "elementVersion": 1,
+        "sourceId": "source-a",
+        "sourceSampleRate": 48000,
+        "sourceSampleRange": {
+          "startSample": 0,
+          "endSampleExclusive": 144000
+        },
+        "normalizedSourceSampleRange": {
+          "startSample": 0,
+          "endSampleExclusive": 144000
+        },
+        "outputSampleRange": {
+          "startSample": 0,
+          "endSampleExclusive": 144000
+        },
+        "speed": {
+          "numerator": "1",
+          "denominator": "1"
+        },
+        "effectiveSpeed": {
+          "numerator": "1",
+          "denominator": "1"
+        },
+        "role": "primary"
+      },
+      {
+        "dialogueSegmentId": "dialogue-b-j-handle",
+        "cutSegmentId": "cut-b",
+        "elementVersion": 2,
+        "sourceId": "source-b",
+        "sourceSampleRate": 44100,
+        "sourceSampleRange": {
+          "startSample": 0,
+          "endSampleExclusive": 4410
+        },
+        "normalizedSourceSampleRange": {
+          "startSample": 0,
+          "endSampleExclusive": 4800
+        },
+        "outputSampleRange": {
+          "startSample": 139200,
+          "endSampleExclusive": 144000
+        },
+        "speed": {
+          "numerator": "1",
+          "denominator": "1"
+        },
+        "effectiveSpeed": {
+          "numerator": "1",
+          "denominator": "1"
+        },
+        "role": "j-cut-handle",
+        "seamSample": 144000,
+        "coveredByCutSegmentId": "cut-a"
+      },
+      {
+        "dialogueSegmentId": "dialogue-b-primary",
+        "cutSegmentId": "cut-b",
+        "elementVersion": 2,
+        "sourceId": "source-b",
+        "sourceSampleRate": 44100,
+        "sourceSampleRange": {
+          "startSample": 4410,
+          "endSampleExclusive": 92610
+        },
+        "normalizedSourceSampleRange": {
+          "startSample": 4800,
+          "endSampleExclusive": 100800
+        },
+        "outputSampleRange": {
+          "startSample": 144000,
+          "endSampleExclusive": 240000
+        },
+        "speed": {
+          "numerator": "1",
+          "denominator": "1"
+        },
+        "effectiveSpeed": {
+          "numerator": "1",
+          "denominator": "1"
+        },
+        "role": "primary"
+      },
+      {
+        "dialogueSegmentId": "dialogue-c-primary",
+        "cutSegmentId": "cut-c",
+        "elementVersion": 1,
+        "sourceId": "source-c",
+        "sourceSampleRate": 48000,
+        "sourceSampleRange": {
+          "startSample": 0,
+          "endSampleExclusive": 60000
+        },
+        "normalizedSourceSampleRange": {
+          "startSample": 0,
+          "endSampleExclusive": 60000
+        },
+        "outputSampleRange": {
+          "startSample": 240000,
+          "endSampleExclusive": 288000
+        },
+        "speed": {
+          "numerator": "5",
+          "denominator": "4"
+        },
+        "effectiveSpeed": {
+          "numerator": "5",
+          "denominator": "4"
+        },
+        "role": "primary"
+      },
+      {
+        "dialogueSegmentId": "dialogue-b-l-handle",
+        "cutSegmentId": "cut-b",
+        "elementVersion": 2,
+        "sourceId": "source-b",
+        "sourceSampleRate": 44100,
+        "sourceSampleRange": {
+          "startSample": 92610,
+          "endSampleExclusive": 97020
+        },
+        "normalizedSourceSampleRange": {
+          "startSample": 100800,
+          "endSampleExclusive": 105600
+        },
+        "outputSampleRange": {
+          "startSample": 240000,
+          "endSampleExclusive": 244800
+        },
+        "speed": {
+          "numerator": "1",
+          "denominator": "1"
+        },
+        "effectiveSpeed": {
+          "numerator": "1",
+          "denominator": "1"
+        },
+        "role": "l-cut-handle",
+        "seamSample": 240000,
+        "coveredByCutSegmentId": "cut-c"
+      }
+    ]
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/dialogue-track-v1.schema.json",
+  "title": "DialogueTrackV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "sourceSnapshotSetHash",
+    "pictureTimelineMapHash",
+    "projectFps",
+    "projectSampleRate",
+    "totalOutputFrames",
+    "totalOutputSamples",
+    "maxAbsoluteSpeedDeviation",
+    "segments"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "kind": { "const": "dialogue-track" },
+    "sourceSnapshotSetHash": { "$ref": "#/$defs/sha256" },
+    "pictureTimelineMapHash": { "$ref": "#/$defs/sha256" },
+    "projectFps": {
+      "$ref": "positive-rational-v1.schema.json"
+    },
+    "projectSampleRate": { "$ref": "#/$defs/positiveSafeInteger" },
+    "totalOutputFrames": { "$ref": "#/$defs/positiveSafeInteger" },
+    "totalOutputSamples": { "$ref": "#/$defs/positiveSafeInteger" },
+    "maxAbsoluteSpeedDeviation": {
+      "$ref": "positive-rational-v1.schema.json"
+    },
+    "segments": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/segment" }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "stableId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$"
+    },
+    "safeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "positiveSafeInteger": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "sampleRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startSample", "endSampleExclusive"],
+      "properties": {
+        "startSample": { "$ref": "#/$defs/safeInteger" },
+        "endSampleExclusive": { "$ref": "#/$defs/positiveSafeInteger" }
+      }
+    },
+    "segment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dialogueSegmentId",
+        "cutSegmentId",
+        "elementVersion",
+        "sourceId",
+        "sourceSampleRate",
+        "sourceSampleRange",
+        "outputSampleRange",
+        "speed",
+        "role"
+      ],
+      "properties": {
+        "dialogueSegmentId": { "$ref": "#/$defs/stableId" },
+        "cutSegmentId": { "$ref": "#/$defs/stableId" },
+        "elementVersion": { "$ref": "#/$defs/positiveSafeInteger" },
+        "sourceId": { "$ref": "#/$defs/stableId" },
+        "sourceSampleRate": { "$ref": "#/$defs/positiveSafeInteger" },
+        "sourceSampleRange": { "$ref": "#/$defs/sampleRange" },
+        "outputSampleRange": { "$ref": "#/$defs/sampleRange" },
+        "speed": { "$ref": "positive-rational-v1.schema.json" },
+        "role": {
+          "enum": ["primary", "j-cut-handle", "l-cut-handle"]
+        },
+        "seamSample": { "$ref": "#/$defs/safeInteger" },
+        "coveredByCutSegmentId": { "$ref": "#/$defs/stableId" }
+      },
+      "oneOf": [
+        {
+          "properties": { "role": { "const": "primary" } },
+          "allOf": [
+            { "not": { "required": ["seamSample"] } },
+            { "not": { "required": ["coveredByCutSegmentId"] } }
+          ]
+        },
+        {
+          "properties": { "role": { "const": "j-cut-handle" } },
+          "required": ["seamSample", "coveredByCutSegmentId"]
+        },
+        {
+          "properties": { "role": { "const": "l-cut-handle" } },
+          "required": ["seamSample", "coveredByCutSegmentId"]
+        }
+      ]
+    }
+  }
+}

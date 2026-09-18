@@ -1,0 +1,3962 @@
+{
+  "status": "phase-completed-awaiting-review",
+  "startedAt": "2026-09-09T22:47:05.313554+00:00",
+  "admission": {
+    "output": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/render/native-master.mp4",
+    "freshInputAttempt": "B",
+    "sdkSha256": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "sandboxSha256": "44309d0cf11391ec665221c43d73a40d81ad05009d517c4986aaff302dfee0ea"
+  },
+  "project": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project",
+  "output": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/render/native-master.mp4",
+  "sdkVersion": "0.8.31",
+  "sourceHashesBefore": {
+    "hyperframes.json": "073afaf86f8c55d9a5c838b6357f24c1c28a91ee72d0023543fa485293b9dd53",
+    "index.html": "0769dae1316a2e8834767214ad189ff91e701419fab6a8f9cce22ae7f87c85e9",
+    "motion.js": "5ab4a8da199405a7126c4776dbdf74fa06ca0ce0a9054acb6158c48528004d79"
+  },
+  "fullEditTwoHourTargetAlreadyMissed": false,
+  "renderOnlyTiming": false,
+  "policy": {
+    "admission_free_percent": 25,
+    "stop_free_percent": 10,
+    "maximum_compressor_fraction": 0.1,
+    "maximum_owned_gib": 6,
+    "maximum_process_gib": 5,
+    "maximum_swap_growth_gib": 1,
+    "minimum_disk_free_gib": 10,
+    "minimum_unused_physical_gib": 6,
+    "maximum_snapshot_age_seconds": 30
+  },
+  "args": [
+    "/usr/bin/sandbox-exec",
+    "-f",
+    "/private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/localhost-only.sb",
+    "/opt/homebrew/Cellar/node/23.10.0_1/bin/node",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/export_native.cjs",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-export-config-v1.json"
+  ],
+  "nativeOverrides": {
+    "PATH": "/opt/homebrew/Cellar/node/23.10.0_1/bin:/opt/homebrew/Cellar/ffmpeg/8.0_1/bin:/opt/homebrew/bin:/usr/bin:/bin",
+    "TMPDIR": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/scratch",
+    "LC_ALL": "C",
+    "WHISPER_CPP_MODEL": "/Users/aaronfigueroa/.cache/hyperframes/whisper/models/ggml-small.en.bin",
+    "WHISPER_CPP_NO_GPU": "1",
+    "WHISPER_CPP_THREADS": "8",
+    "WHISPER_CPP_TIMEOUT_SECONDS": "900",
+    "HYPERFRAMES_BROWSER_PATH": "/Users/aaronfigueroa/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-152.0.7928.2/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+    "HYPERFRAMES_FFMPEG_PATH": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffmpeg",
+    "HYPERFRAMES_FFPROBE_PATH": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffprobe",
+    "HYPERFRAMES_TELEMETRY_DISABLED": "1",
+    "SNIPER_NATIVE_FRAME_TRANSPORT": "url-v1",
+    "PRODUCER_LOW_MEMORY_MODE": "true",
+    "PRODUCER_FRAME_DATA_URI_CACHE_LIMIT": "32",
+    "PRODUCER_FRAME_DATA_URI_CACHE_BYTES_MB": "64",
+    "PRODUCER_EXPERIMENTAL_FAST_CAPTURE": "false",
+    "PRODUCER_STREAMING_ENCODE_MAX_DURATION_SECONDS": "900",
+    "FFMPEG_STREAMING_TIMEOUT_MS": "5400000",
+    "HYPERFRAMES_EXTRACT_CACHE_MAX_MB": "65536",
+    "HYPERFRAMES_EXTRACT_CACHE_DIR": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/fresh-native-frame-cache"
+  },
+  "runDeadlineSeconds": 2700,
+  "supervisorSigkillProtection": false,
+  "additionalFilePinsBefore": {
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/hyperframes.json": "073afaf86f8c55d9a5c838b6357f24c1c28a91ee72d0023543fa485293b9dd53",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/index.html": "0769dae1316a2e8834767214ad189ff91e701419fab6a8f9cce22ae7f87c85e9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/motion.js": "5ab4a8da199405a7126c4776dbdf74fa06ca0ce0a9054acb6158c48528004d79",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-29.html": "b04e47b7778ac97bfa2b84663d0e99e96b344aab68bc313c50ed640c0089ee60",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-52.html": "ee4e148e0f2d99ecfb7ae38dde0a58212dde4c911b1715c8149dc526d6078c17",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-05.html": "de481256267eb225e9048491e4e634697fcfe2b994aa4c2e218cb940218e6037",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-13.html": "805c93a329fe3e714b8561bd27bff85930f462b53c4c18a9bb020726edbd22fa",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-44.html": "22ce53d0380b329f198427020f689e0041e3c7b95210192989f4c8630605a83e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-33.html": "4017b1b64c8a16d5422b70ab9c011418298ea0af80233176c0f7b5bcce6929a4",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-25.html": "c3de09d632afc61128b941068fadfd7820dac7e54fcb74c6c25565f9ae20c9e8",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-09.html": "02e3509dd9cff403d4116b0f6d73341e7aa2be359e4556165f00d3dec8ef2106",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-48.html": "066e623a03e5f7f55eb89ba327e29fee0f404251ae1ff5aabee3eb6612800bfb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-49.html": "7c604dbb4bc4a279c19c928b68ff4d089be8debd7ebdfdd416ad9fac3b6e2642",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-08.html": "9c64a168d3c861c7450003d7e807e3c540ab8c7af9c026f540f78e8d1e5cf984",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-24.html": "ec07e2b29269241e7831e0dce0214047ba4073e7faa87adc5e755c33a7c8ffc0",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-32.html": "5d85122db9c91889e5415cc25868f14453accf6945f8ee3c8a925be67cb599eb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-45.html": "0a08b07e79b0a03069623f61ba407bb46455905c62fc778723ebdd048e8bc4f0",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-12.html": "b9635277d753a6d2a6a217367322dd5f8a0ad57737b6d0c393e6df95e4a22179",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-04.html": "ae85bcda977792a01efde64e599c63f3418fbc8a990075601a3ac8819db0078e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-28.html": "bc5312b21984b60436c16290dddfa8f049887bbed985cf9e44a7b21f0c0ef873",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-35.html": "5c85395e4ded204c0fb5e4f37a79545add86526c8d0b178f26f7dded4de6425e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-23.html": "091f4ef29945b3a0567baa733695f3f7ca12f2d3f27631ab51198acdd9450ceb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-19.html": "cb4a2d20d4bc035221ba28ebe161f277182baa624ea0ca11f0116dd1fcdb00de",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-39.html": "481e0ba711cc489bb93c0ff529621b6ae42af655011649a85e5847c2101adc0b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-03.html": "f286bda763d0bd1c0442997f997a3dd324ea182cd180e4697a651ac2c3568d55",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-15.html": "5203a27472d76f4ba7b6d12ab1de508e7d13582e0df31de3f0b820f60995c41f",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-42.html": "35013fff7e76994c3303e459dfcdae32316dbdb1c7520fb4aee72896e4568410",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-43.html": "09a1d855cee8933202b7328caf41f42d374bc048fc5d93f21338bf816138b096",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-14.html": "2eaff8ebe6051b4dac42a43eeb23d78d74cb8b7df8e7b373fb4c1481377ad042",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-02.html": "ebae43417cb63f1d2c40a3dc782ba0217a2615c363d799675c39f737d9d15233",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-38.html": "5d145316d2c5f962c92bffed232e98149a2ec819a146f9217d3500f9648828e6",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-18.html": "539732300a36fca6e122c7f85683a1b83a199a57f20beaa2bb7b4a58d46add4d",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-22.html": "c7ae32558ebca98dac8bc2e4a1d07a701fa8b47a57e44077e65f9d6a4bb378d9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-34.html": "63fe81a307e65489ca4c89fc97a01a0464331e9c6c8e4edfb8dd45327c099aa4",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-21.html": "7ec95317afe43bbc98f251128ab09e86bc406d75008e3ce839c0675a139305d9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-37.html": "d317aabc9c2a76573a0565d53ef53863cfb2bcc123410619ab2e513f3dc889d6",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-40.html": "d4e1f2289f7230374c18902271f00cea60517926886c7a2f1e2ba03b4a4f16f8",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-17.html": "26b79b64d38b0f1fe061ab1e4b5efb1962e82ad87288bb8dbf2c2a29e936fc33",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-01.html": "67cbaa6106ff42ff6cf4476c2decdbf1cc5ca4ee3fae9ada828f57b1845df30e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-00.html": "a44daa6a0c56d2b5ea74fcfb209d630612f14c8a05de944bbfdd7b6923839b8b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-16.html": "31c6f6b9d56a8a8da174051efdf1be54110a7db9e2946cc4d85fb37e589cc803",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-41.html": "356c507448664a29d4617d556b1de478c2f51863c22938bccb9d03427faee98c",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-36.html": "c785f72a59142734a5c8d7dea19c19503ad1e8e4b453bb0a116c48cbdb612651",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-20.html": "835d9b8cbb04808e4d160bb8f5b757f99f8b13ccc598bcc657ed144f3a5c13ab",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-46.html": "1c48341b994053d2e9ff895e58e9bf17d2337ac50948c236cc870eda1fed0c37",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-11.html": "78eed2d34fe6e647cea49bfd6065d63ee7d46a7b7b44afacbad1d0e61c41c7e3",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-07.html": "7466136dfe8c03db62e7eaacf4291957d6a722d1dc04760746a186bff7f5aece",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-50.html": "a97a2a60a3f732b7b4a5ac51fc3ade91e080167be0a09c5324dd44fa61f794ca",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-27.html": "859d3873fd9b7891d8c9a7f97933d43b266a51c482a5c2ebbed4c98568b9e35f",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-31.html": "5f3925b1f113050e90bff172bd2bc4617a7a1e32a468b637d967fd6035b8c6a1",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-30.html": "0f238135e444b316801d3b075c6dadd3803cead06acbe5149b3953fb2cfa685b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-26.html": "5ad3ac9ec195d3f9e5500e1d2ed80e0e049cde845b60259882fdb4b064287849",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-51.html": "aa5cfadb3e3deee4109793d19899662aaa1093505b680c7af7fe58870ad0797a",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-06.html": "3e11818d9e9ee7f394cd07c11f08a360cee097379269208ffa760d9e6b794fe7",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-10.html": "1f25e4975d59853dc9af4d03dfc23e5b28bed041bc4a916d8c02820171cddfae",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-47.html": "b42a6c328dc6095ae209ae33a5ca905feeb188952be5274da760a102e71339a5",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/presenter.mp4": "80cd51075b575818d86c4185476cb4576bd173ba20ed4e31e5daa252df167c5d",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/gsap.min.js": "c174bfce53a729418d57a8ad8625e7247c793a22fef8e2851e3cfa3de9cd8280",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration-unmastered.wav": "1a9e1cab7215c03a93d017af57ab2bfa37bdf420ff9d86cad3d52802c4aa5fea",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/mono.woff2": "a634cb9e7783af7e66d17e1dae9c859b8748da8174641b53d68b3b05de8ebce9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/mono-bold.woff2": "654a1d16c0b027ead89781bd3a4360d7f0af17a3ddf78c287d0e1843c6bca8d7",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/display.woff2": "2e5732c61470a890aee05ee399f6720664835efab8749dfc87d487e7882ffc44",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration.wav": "a4b8c664169887bfb6122856fc31454ab791112dcbfdcd7b6a32908b0c7ab0e1",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration-browser.wav": "c86f62360d2854ffcabd4cdd21934f91bb4cf1fabbfb87f54ce28b33afc57b56",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_native_phase_v3.py": "e49b3749786ef498717529bb6343cbb6a80869b304ba18bcfaafdf4bf4c0601f",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_phase.py": "4f450f87d0b61970a15d2d3d060c0d0a4964ae4141a1e2a68134519b3d6379c8",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "/private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/localhost-only.sb": "44309d0cf11391ec665221c43d73a40d81ad05009d517c4986aaff302dfee0ea",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/render_native_bounded.py": "a5cccb20c65153ca3b63567243f0127ff12d6631776c0549e8ae1132556e5cf7",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native_owned_processes.py": "7c794c4c199e1c7a311171f835ff6cde938fda419e5c66eb3b2b2e5e3cbe74c8",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/qualified_native_admission.py": "7d8e6ccf4f701acfedaf3e2f8581e52a8a31f0f73ef0dba705cf54555cf01199",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/export_native.cjs": "541f3d86d19538e885742284658d74a897f02f79dd33bd7c958d727b32ccc176",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native_measurement_retry.py": "e437c2a71c8e1a3a93acf8acd20fe674b3033e796649db7c63d45f46328545f6",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-export-config-v1.json": "ea4b9afb963f878b67454eefacb6e3d3bf166723d695faae0e776a00e6cb807a",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/execution-plan.json": "185ff0840c07fb07a3d97703582be46e99a29a3a1395117d7abd37200e61233a",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/hyperframes/dist/cli.js": "6d359af9c049a43402101da1b707663c285b89499109dfa687948777614b7985",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/hyperframes/dist/frame-source-transport.mjs": "20de6c202787a0aa47a8227e54925a1765be871a5bb8b4167032d550b2f55784"
+  },
+  "trialStartedMonotonic": 1618505.458083375,
+  "admissionReuseScope": "Generic resource-policy software only; no prior edit media/cache/creative inputs",
+  "baseline": {
+    "measured_at": 1788994030.089513,
+    "physical_bytes": 68719476736,
+    "free_percent": 86.0,
+    "swap_used_bytes": 8073636741,
+    "compressor_bytes": 3207593984,
+    "disk_free_bytes": 59959746560,
+    "owned_footprint_bytes": 0,
+    "largest_owned_process_bytes": 0,
+    "owned_pids": [],
+    "processes": [],
+    "identity_verified": false,
+    "unused_physical_bytes": 8590983168,
+    "missing_registered_pids": [],
+    "reused_registered_pids": [],
+    "kernel_pressure_level": 1
+  },
+  "logPath": "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-export-v1.render.log",
+  "qualifiedCacheAwareAdmission": {
+    "status": "admitted",
+    "observations": [
+      {
+        "snapshot": {
+          "measured_at": 1788994025.314176,
+          "physical_bytes": 68719476736,
+          "free_percent": 87.0,
+          "swap_used_bytes": 8073636741,
+          "compressor_bytes": 3207593984,
+          "disk_free_bytes": 59960909824,
+          "owned_footprint_bytes": 0,
+          "largest_owned_process_bytes": 0,
+          "owned_pids": [],
+          "processes": [],
+          "identity_verified": false,
+          "unused_physical_bytes": 8514437120,
+          "missing_registered_pids": [],
+          "reused_registered_pids": [],
+          "kernel_pressure_level": 1
+        },
+        "fileBackedBytes": 14487797760,
+        "vmStatRaw": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                   493384.\nPages active:                                1544464.\nPages inactive:                              1537147.\nPages speculative:                             27156.\nPages throttled:                                   0.\nPages wired down:                             338402.\nPages purgeable:                               67395.\n\"Translation faults\":                    21522720928.\nPages copy-on-write:                       667012022.\nPages zero filled:                       18738408319.\nPages reactivated:                        1710201097.\nPages purged:                              576596939.\nFile-backed pages:                            884265.\nAnonymous pages:                             2224502.\nPages stored in compressor:                  2090656.\nPages occupied by compressor:                 195806.\nDecompressions:                           1754641583.\nCompressions:                             1882567103.\nPageins:                                   259314026.\nPageouts:                                    3999966.\nSwapins:                                    10794488.\nSwapouts:                                   16314855.\n"
+      },
+      {
+        "snapshot": {
+          "measured_at": 1788994027.697267,
+          "physical_bytes": 68719476736,
+          "free_percent": 87.0,
+          "swap_used_bytes": 8073636741,
+          "compressor_bytes": 3207593984,
+          "disk_free_bytes": 59960377344,
+          "owned_footprint_bytes": 0,
+          "largest_owned_process_bytes": 0,
+          "owned_pids": [],
+          "processes": [],
+          "identity_verified": false,
+          "unused_physical_bytes": 8559525888,
+          "missing_registered_pids": [],
+          "reused_registered_pids": [],
+          "kernel_pressure_level": 1
+        },
+        "fileBackedBytes": 14485241856,
+        "vmStatRaw": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                   496096.\nPages active:                                1546075.\nPages inactive:                              1532859.\nPages speculative:                             27149.\nPages throttled:                                   0.\nPages wired down:                             338402.\nPages purgeable:                               64835.\n\"Translation faults\":                    21522738556.\nPages copy-on-write:                       667012766.\nPages zero filled:                       18738429483.\nPages reactivated:                        1710201106.\nPages purged:                              576596939.\nFile-backed pages:                            884109.\nAnonymous pages:                             2221974.\nPages stored in compressor:                  2090656.\nPages occupied by compressor:                 195806.\nDecompressions:                           1754641583.\nCompressions:                             1882567103.\nPageins:                                   259314032.\nPageouts:                                    3999966.\nSwapins:                                    10794488.\nSwapouts:                                   16314855.\n"
+      },
+      {
+        "snapshot": {
+          "measured_at": 1788994030.089513,
+          "physical_bytes": 68719476736,
+          "free_percent": 86.0,
+          "swap_used_bytes": 8073636741,
+          "compressor_bytes": 3207593984,
+          "disk_free_bytes": 59959746560,
+          "owned_footprint_bytes": 0,
+          "largest_owned_process_bytes": 0,
+          "owned_pids": [],
+          "processes": [],
+          "identity_verified": false,
+          "unused_physical_bytes": 8590983168,
+          "missing_registered_pids": [],
+          "reused_registered_pids": [],
+          "kernel_pressure_level": 1
+        },
+        "fileBackedBytes": 14484357120,
+        "vmStatRaw": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                   498039.\nPages active:                                1544452.\nPages inactive:                              1532846.\nPages speculative:                             27156.\nPages throttled:                                   0.\nPages wired down:                             338409.\nPages purgeable:                               63258.\n\"Translation faults\":                    21522756593.\nPages copy-on-write:                       667013504.\nPages zero filled:                       18738443425.\nPages reactivated:                        1710201106.\nPages purged:                              576596939.\nFile-backed pages:                            884055.\nAnonymous pages:                             2220399.\nPages stored in compressor:                  2090656.\nPages occupied by compressor:                 195806.\nDecompressions:                           1754641583.\nCompressions:                             1882567103.\nPageins:                                   259314038.\nPageouts:                                    3999966.\nSwapins:                                    10794488.\nSwapouts:                                   16314855.\n"
+      }
+    ],
+    "policyName": "qualified-native-cache-aware-unused-advisory-v1",
+    "failures": [],
+    "scope": "Explicit full-only experiment after actual4320-frame qualification",
+    "guaranteedReclaimableBytesClaimed": false,
+    "unchangedRenderCapsGiB": {
+      "ownedTree": 6,
+      "oneProcess": 5,
+      "newSwap": 1
+    },
+    "literalUnusedIsAdvisory": true,
+    "unusedAdvisoryThresholdGiB": 6,
+    "fileBackedCategoryMinimumGiB": 8,
+    "coarseHeadroomMinimumPercent": 50,
+    "compressorMaximumPhysicalFraction": 0.1,
+    "maximumAdmissionCompressorGrowthMiB": 16,
+    "maximumObservationAgeSeconds": 15,
+    "growthBaselineSwapBytes": 8073636741
+  },
+  "pid": 20915,
+  "nativeLaunchedAt": "2026-09-09T22:47:11.507136+00:00",
+  "ownerIdentities": [
+    {
+      "pid": 20915,
+      "parent_pid": 20891,
+      "pgid": 20915,
+      "started": "Wed Sep  9 17:47:11 2026"
+    },
+    {
+      "pid": 20918,
+      "parent_pid": 20915,
+      "pgid": 20915,
+      "started": "Wed Sep  9 17:47:11 2026"
+    },
+    {
+      "pid": 20946,
+      "parent_pid": 20918,
+      "pgid": 20915,
+      "started": "Wed Sep  9 17:47:12 2026"
+    },
+    {
+      "pid": 20947,
+      "parent_pid": 20918,
+      "pgid": 20915,
+      "started": "Wed Sep  9 17:47:12 2026"
+    },
+    {
+      "pid": 21207,
+      "parent_pid": 20918,
+      "pgid": 20915,
+      "started": "Wed Sep  9 17:48:29 2026"
+    },
+    {
+      "pid": 21267,
+      "parent_pid": 20918,
+      "pgid": 20915,
+      "started": "Wed Sep  9 17:48:42 2026"
+    },
+    {
+      "pid": 21269,
+      "parent_pid": 20918,
+      "pgid": 21269,
+      "started": "Wed Sep  9 17:48:42 2026"
+    },
+    {
+      "pid": 21270,
+      "parent_pid": 21269,
+      "pgid": 21269,
+      "started": "Wed Sep  9 17:48:43 2026"
+    },
+    {
+      "pid": 21271,
+      "parent_pid": 21269,
+      "pgid": 21269,
+      "started": "Wed Sep  9 17:48:43 2026"
+    },
+    {
+      "pid": 21272,
+      "parent_pid": 21269,
+      "pgid": 21269,
+      "started": "Wed Sep  9 17:48:43 2026"
+    },
+    {
+      "pid": 21273,
+      "parent_pid": 21269,
+      "pgid": 21269,
+      "started": "Wed Sep  9 17:48:43 2026"
+    },
+    {
+      "pid": 26349,
+      "parent_pid": 20918,
+      "pgid": 20915,
+      "started": "Wed Sep  9 18:10:35 2026"
+    }
+  ],
+  "measurementRetryWindows": [
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623328.7010675,
+      "deadlineMonotonic": 1623346.7010675,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "missing-footprint",
+          "elapsedSeconds": 1.6341179579030722,
+          "errorType": "MissingProcessFootprint",
+          "evidence": {
+            "reason": "identity-not-stable-across-footprint-read",
+            "identities": [
+              {
+                "pid": 20946,
+                "started": "Wed Sep  9 17:47:12 2026",
+                "pgid": 20915
+              },
+              {
+                "pid": 20947,
+                "started": "Wed Sep  9 17:47:12 2026",
+                "pgid": 20915
+              }
+            ]
+          }
+        },
+        {
+          "sample": 2,
+          "status": "measured",
+          "elapsedSeconds": 3.6372230409178883
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 3.637243874836713
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623337.806069041,
+      "deadlineMonotonic": 1623355.806069041,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.9088009591214359
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.9088219171389937
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623345.153873666,
+      "deadlineMonotonic": 1623363.153873666,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.4676095840986818
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.467623959062621
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623351.985968041,
+      "deadlineMonotonic": 1623369.985968041,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 2.136016916949302
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 2.1360307920258492
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623359.645277291,
+      "deadlineMonotonic": 1623377.645277291,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 2.2119592088274658
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 2.2119769589044154
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623367.373390833,
+      "deadlineMonotonic": 1623385.373390833,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 2.0661054169759154
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 2.066119958180934
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623374.898358125,
+      "deadlineMonotonic": 1623392.898358125,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 2.3177865829784423
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 2.317802583100274
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623382.682354458,
+      "deadlineMonotonic": 1623400.682354458,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 2.1166690420359373
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 2.11668683309108
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623390.211109833,
+      "deadlineMonotonic": 1623408.211109833,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.9402244579978287
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.940243124961853
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623397.600089541,
+      "deadlineMonotonic": 1623415.600089541,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 2.3458328749984503
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 2.345861000008881
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623405.439060375,
+      "deadlineMonotonic": 1623423.439060375,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "missing-footprint",
+          "elapsedSeconds": 1.5311628328636289,
+          "errorType": "MissingProcessFootprint",
+          "evidence": {
+            "reason": "identity-not-stable-across-footprint-read",
+            "identities": [
+              {
+                "pid": 21207,
+                "started": "Wed Sep  9 17:48:29 2026",
+                "pgid": 20915
+              }
+            ]
+          }
+        },
+        {
+          "sample": 2,
+          "status": "measured",
+          "elapsedSeconds": 2.9831486658658832
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 2.9831644578371197
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623413.793738791,
+      "deadlineMonotonic": 1623431.793738791,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.4201734999660403
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.4201899589970708
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623420.573829833,
+      "deadlineMonotonic": 1623438.573829833,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5468370420858264
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5468532079830766
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623427.47294575,
+      "deadlineMonotonic": 1623445.47294575,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.525691332994029
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5257103329058737
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623434.373039125,
+      "deadlineMonotonic": 1623452.373039125,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5336255829315633
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5336423749104142
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623441.245141666,
+      "deadlineMonotonic": 1623459.245141666,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.546364292036742
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5463837091811001
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623448.17479325,
+      "deadlineMonotonic": 1623466.17479325,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5365342909935862
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5365499581675977
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623455.076538791,
+      "deadlineMonotonic": 1623473.076538791,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5293157920241356
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5293343339581043
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623461.967199,
+      "deadlineMonotonic": 1623479.967199,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5366101248655468
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5366246248595417
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623468.863990375,
+      "deadlineMonotonic": 1623486.863990375,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5433951658196747
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5434114579111338
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623475.769811708,
+      "deadlineMonotonic": 1623493.769811708,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5152789580170065
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5152970419730991
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623482.637010875,
+      "deadlineMonotonic": 1623500.637010875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.508935958147049
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5089520001783967
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623489.492293333,
+      "deadlineMonotonic": 1623507.492293333,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5330681670457125
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5330850831232965
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623496.390057,
+      "deadlineMonotonic": 1623514.390057,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5217018749099225
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.521719333017245
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623503.264433416,
+      "deadlineMonotonic": 1623521.264433416,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5168413338251412
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.51686029182747
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623510.141391,
+      "deadlineMonotonic": 1623528.141391,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5182705828920007
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5182870829012245
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623516.995566416,
+      "deadlineMonotonic": 1623534.995566416,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5156800418626517
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5156949169468135
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623523.883194666,
+      "deadlineMonotonic": 1623541.883194666,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5257666672114283
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.525782334152609
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623530.762737083,
+      "deadlineMonotonic": 1623548.762737083,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.538082541897893
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5380987920798361
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623537.656106166,
+      "deadlineMonotonic": 1623555.656106166,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5365935419686139
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5366131248883903
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623544.54532475,
+      "deadlineMonotonic": 1623562.54532475,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5180276250466704
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5180421660188586
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623551.422144666,
+      "deadlineMonotonic": 1623569.422144666,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5104917499702424
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5105337498243898
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623558.282686833,
+      "deadlineMonotonic": 1623576.282686833,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5147379578556865
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5147518748417497
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623565.171317,
+      "deadlineMonotonic": 1623583.171317,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5272110409568995
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5272260000929236
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623572.051755416,
+      "deadlineMonotonic": 1623590.051755416,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.53608158393763
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5360962089616805
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623578.949466291,
+      "deadlineMonotonic": 1623596.949466291,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5291980421170592
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5292116252239794
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623585.822769833,
+      "deadlineMonotonic": 1623603.822769833,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5318051669746637
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5318237079773098
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623592.683786791,
+      "deadlineMonotonic": 1623610.683786791,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5341286668553948
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5341430420521647
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623599.595308166,
+      "deadlineMonotonic": 1623617.595308166,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5364457499235868
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.536460000090301
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623606.4866645,
+      "deadlineMonotonic": 1623624.4866645,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5452904580160975
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.545307582942769
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623613.370308875,
+      "deadlineMonotonic": 1623631.370308875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5187339999247342
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5187485828064382
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623620.251417291,
+      "deadlineMonotonic": 1623638.251417291,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5060748341493309
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5060894591733813
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623627.101463166,
+      "deadlineMonotonic": 1623645.101463166,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5312010839115828
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5312177499290556
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623634.004339416,
+      "deadlineMonotonic": 1623652.004339416,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5363475838676095
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5363624589517713
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623640.885377041,
+      "deadlineMonotonic": 1623658.885377041,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5468494589440525
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5468651249539107
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623647.789749833,
+      "deadlineMonotonic": 1623665.789749833,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5392499999143183
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5392671248409897
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623654.689064625,
+      "deadlineMonotonic": 1623672.689064625,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5244633750990033
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.524479125160724
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623661.567692208,
+      "deadlineMonotonic": 1623679.567692208,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.526449624914676
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.526464082999155
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623668.463560125,
+      "deadlineMonotonic": 1623686.463560125,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.524711832869798
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5247259580064565
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623675.350706416,
+      "deadlineMonotonic": 1623693.350706416,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5232739171478897
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.523289917036891
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623682.218816708,
+      "deadlineMonotonic": 1623700.218816708,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5249051668215543
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5249216249212623
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623689.095526875,
+      "deadlineMonotonic": 1623707.095526875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5257123750634491
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.525728290900588
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623695.958046,
+      "deadlineMonotonic": 1623713.958046,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5449336250312626
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.544948040973395
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623702.855503625,
+      "deadlineMonotonic": 1623720.855503625,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5311411661095917
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.53115633293055
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623709.72279925,
+      "deadlineMonotonic": 1623727.72279925,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5359113330487162
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5359310831408948
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623716.638700916,
+      "deadlineMonotonic": 1623734.638700916,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5318248749244958
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5318406249862164
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623723.519651791,
+      "deadlineMonotonic": 1623741.519651791,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.535365833900869
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.535383916925639
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623730.420304125,
+      "deadlineMonotonic": 1623748.420304125,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5421380831394345
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5421517910435796
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623737.311521458,
+      "deadlineMonotonic": 1623755.311521458,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5354955000802875
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5355100000742823
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623744.196275166,
+      "deadlineMonotonic": 1623762.196275166,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5340897920541465
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5341280000284314
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623751.094051375,
+      "deadlineMonotonic": 1623769.094051375,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.598269124981016
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5982882080134004
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623758.041629875,
+      "deadlineMonotonic": 1623776.041629875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5299470408353955
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5299615829717368
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623764.906990666,
+      "deadlineMonotonic": 1623782.906990666,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.520255875075236
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.520271500106901
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623771.790525541,
+      "deadlineMonotonic": 1623789.790525541,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5465992090757936
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5466167500708252
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623778.702483125,
+      "deadlineMonotonic": 1623796.702483125,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5492883750703186
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5493085000198334
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623785.595679,
+      "deadlineMonotonic": 1623803.595679,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5426937080919743
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5427132500335574
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623792.469953708,
+      "deadlineMonotonic": 1623810.469953708,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5535617501009256
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5535766670946032
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623799.355888291,
+      "deadlineMonotonic": 1623817.355888291,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.534815083956346
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5348302088677883
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623806.246085,
+      "deadlineMonotonic": 1623824.246085,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5361907910555601
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5362067909445614
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623813.130626333,
+      "deadlineMonotonic": 1623831.130626333,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5269341671373695
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5269480829592794
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623820.005985708,
+      "deadlineMonotonic": 1623838.005985708,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5346457499545068
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.534664458129555
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623826.899756916,
+      "deadlineMonotonic": 1623844.899756916,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5438059167936444
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.543819374870509
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623833.79143275,
+      "deadlineMonotonic": 1623851.79143275,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5441292501054704
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5441478751599789
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623840.692327666,
+      "deadlineMonotonic": 1623858.692327666,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5326612920034677
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5326759167946875
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623847.566363875,
+      "deadlineMonotonic": 1623865.566363875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5213014578912407
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5213155408855528
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623854.437428,
+      "deadlineMonotonic": 1623872.437428,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5410393751226366
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5410534581169486
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623861.336414833,
+      "deadlineMonotonic": 1623879.336414833,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5608162919525057
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5608313328120857
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623868.253038125,
+      "deadlineMonotonic": 1623886.253038125,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.572240832960233
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5722572908271104
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623875.173030166,
+      "deadlineMonotonic": 1623893.173030166,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5372677091509104
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.537285208934918
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623882.044967625,
+      "deadlineMonotonic": 1623900.044967625,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.566604832885787
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.566620749887079
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623888.977349208,
+      "deadlineMonotonic": 1623906.977349208,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5446219169534743
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5446370420977473
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623895.883140916,
+      "deadlineMonotonic": 1623913.883140916,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.535705584101379
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5357230419758707
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623902.776490041,
+      "deadlineMonotonic": 1623920.776490041,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5459149170201272
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5459288749843836
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623909.684807125,
+      "deadlineMonotonic": 1623927.684807125,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.549369625048712
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.549385708058253
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623916.58515225,
+      "deadlineMonotonic": 1623934.58515225,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5391055000945926
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5391208750661463
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623923.494307583,
+      "deadlineMonotonic": 1623941.494307583,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5423772500362247
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5423913749400526
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623930.368664291,
+      "deadlineMonotonic": 1623948.368664291,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5296420839149505
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5296574169769883
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623937.261975333,
+      "deadlineMonotonic": 1623955.261975333,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5137983330059797
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.513812332879752
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623944.145856833,
+      "deadlineMonotonic": 1623962.145856833,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.53942249994725
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5394405419938266
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623951.030270166,
+      "deadlineMonotonic": 1623969.030270166,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5426912088878453
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5427059589419514
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623957.917205083,
+      "deadlineMonotonic": 1623975.917205083,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5412654581014067
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5412800000049174
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623964.814658333,
+      "deadlineMonotonic": 1623982.814658333,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5300110829994082
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.530029707821086
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623971.71280875,
+      "deadlineMonotonic": 1623989.71280875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5348450827877969
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5348607499618083
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623978.61672475,
+      "deadlineMonotonic": 1623996.61672475,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5148907080292702
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.514906165888533
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623985.487923833,
+      "deadlineMonotonic": 1624003.487923833,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.535575124900788
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5355916668195277
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623992.3939175,
+      "deadlineMonotonic": 1624010.3939175,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5545044159516692
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5545195830054581
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1623999.298631875,
+      "deadlineMonotonic": 1624017.298631875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.552301290910691
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5523162910249084
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624006.235106583,
+      "deadlineMonotonic": 1624024.235106583,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5413619170431048
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5413777919020504
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624013.141743875,
+      "deadlineMonotonic": 1624031.141743875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5819230829365551
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5819392499979585
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624020.084986916,
+      "deadlineMonotonic": 1624038.084986916,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5385470420587808
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.538561916910112
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624026.971961375,
+      "deadlineMonotonic": 1624044.971961375,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6063467909116298
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.606364332837984
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624033.944781166,
+      "deadlineMonotonic": 1624051.944781166,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5539079590234905
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5539225419051945
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624040.845311458,
+      "deadlineMonotonic": 1624058.845311458,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6179103329777718
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6179292080923915
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624047.8249265,
+      "deadlineMonotonic": 1624065.8249265,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5407440830022097
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5407611660193652
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624054.720268625,
+      "deadlineMonotonic": 1624072.720268625,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.55621404084377
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5562293748371303
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624061.63813475,
+      "deadlineMonotonic": 1624079.63813475,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.556897124974057
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.556912458036095
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624068.556831125,
+      "deadlineMonotonic": 1624086.556831125,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5295338751748204
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5295537081547081
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624075.460896541,
+      "deadlineMonotonic": 1624093.460896541,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5082605420611799
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5082758751232177
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624082.331189166,
+      "deadlineMonotonic": 1624100.331189166,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.518745583947748
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5187609170097858
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624089.179958875,
+      "deadlineMonotonic": 1624107.179958875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5290203329641372
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5290418330114335
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624096.076831875,
+      "deadlineMonotonic": 1624114.076831875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5432872080709785
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5433043751399964
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624102.987371666,
+      "deadlineMonotonic": 1624120.987371666,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5371992092113942
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5372197921387851
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624109.872525875,
+      "deadlineMonotonic": 1624127.872525875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5311982498969883
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5312160409521312
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624116.7742545,
+      "deadlineMonotonic": 1624134.7742545,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.541971166152507
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5419872079510242
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624123.671266875,
+      "deadlineMonotonic": 1624141.671266875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5329323750920594
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5329519999213517
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624130.565960625,
+      "deadlineMonotonic": 1624148.565960625,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5450737499631941
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.545089374994859
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624137.470757458,
+      "deadlineMonotonic": 1624155.470757458,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5451145831029862
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5451322081498802
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624144.358122833,
+      "deadlineMonotonic": 1624162.358122833,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5453397498931736
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5453542079776525
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624151.26966825,
+      "deadlineMonotonic": 1624169.26966825,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5345279998145998
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5345430828165263
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624158.183241208,
+      "deadlineMonotonic": 1624176.183241208,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5439011668786407
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.54391595791094
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624165.087792583,
+      "deadlineMonotonic": 1624183.087792583,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5298890830017626
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5299065420404077
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624171.986208625,
+      "deadlineMonotonic": 1624189.986208625,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5392021250445396
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.539217125158757
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624178.862443583,
+      "deadlineMonotonic": 1624196.862443583,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5401959579903632
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5402130000293255
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624185.7803355,
+      "deadlineMonotonic": 1624203.7803355,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5519069160800427
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5519230000209063
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624192.701920416,
+      "deadlineMonotonic": 1624210.701920416,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5445857499726117
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5446004590485245
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624199.598428375,
+      "deadlineMonotonic": 1624217.598428375,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5417774578090757
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5417932500131428
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624206.50577725,
+      "deadlineMonotonic": 1624224.50577725,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.560954957967624
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5609722910448909
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624213.422798791,
+      "deadlineMonotonic": 1624231.422798791,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.544836499961093
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.544851625105366
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624220.320792875,
+      "deadlineMonotonic": 1624238.320792875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.530986791010946
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5310199579689652
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624227.179831416,
+      "deadlineMonotonic": 1624245.179831416,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5531019589398056
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5531190419569612
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624234.084409666,
+      "deadlineMonotonic": 1624252.084409666,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5556335840374231
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5556504998821765
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624240.973373958,
+      "deadlineMonotonic": 1624258.973373958,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5433576251380146
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.543374750064686
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624247.853187083,
+      "deadlineMonotonic": 1624265.853187083,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.541963916970417
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5419830000028014
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624254.775185916,
+      "deadlineMonotonic": 1624272.775185916,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.539496541954577
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5395136668812484
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624261.647482833,
+      "deadlineMonotonic": 1624279.647482833,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5414620421361178
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5414780001156032
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624268.520015375,
+      "deadlineMonotonic": 1624286.520015375,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5508815830107778
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5508968329522759
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624275.422020625,
+      "deadlineMonotonic": 1624293.422020625,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5482138749212027
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.548230207990855
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624282.338355125,
+      "deadlineMonotonic": 1624300.338355125,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5346041249576956
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5346202910877764
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624289.227943583,
+      "deadlineMonotonic": 1624307.227943583,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5428727499675006
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5428890830371529
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624296.117667416,
+      "deadlineMonotonic": 1624314.117667416,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.547670624917373
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5476861668284982
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624303.013184666,
+      "deadlineMonotonic": 1624321.013184666,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5479307500645518
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.547946291975677
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624309.911865791,
+      "deadlineMonotonic": 1624327.911865791,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5391403338871896
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5391614169348031
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624316.796860125,
+      "deadlineMonotonic": 1624334.796860125,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5268630411010236
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5268800409976393
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624323.6750985,
+      "deadlineMonotonic": 1624341.6750985,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5414147500414401
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.541428375057876
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624330.554779333,
+      "deadlineMonotonic": 1624348.554779333,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5253056669607759
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5253222920000553
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624337.440712833,
+      "deadlineMonotonic": 1624355.440712833,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.518691249890253
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5187076670117676
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624344.333405666,
+      "deadlineMonotonic": 1624362.333405666,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5165821670088917
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5165991669055074
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624351.217987083,
+      "deadlineMonotonic": 1624369.217987083,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5241014170460403
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5241173331160098
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624358.115709,
+      "deadlineMonotonic": 1624376.115709,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.513337415875867
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5133546248544008
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624365.00065375,
+      "deadlineMonotonic": 1624383.00065375,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5372582080308348
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5372817909810692
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624371.9040795,
+      "deadlineMonotonic": 1624389.9040795,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5599140000995249
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5599336251616478
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624378.823241083,
+      "deadlineMonotonic": 1624396.823241083,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5415701670572162
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5415950419846922
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624385.7184395,
+      "deadlineMonotonic": 1624403.7184395,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5387284578755498
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.538747124839574
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624392.613043,
+      "deadlineMonotonic": 1624410.613043,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5504772500135005
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.550496791023761
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624399.523712666,
+      "deadlineMonotonic": 1624417.523712666,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5478214588947594
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5478425840847194
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624406.425107958,
+      "deadlineMonotonic": 1624424.425107958,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.550241667078808
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.550256208050996
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624413.339178291,
+      "deadlineMonotonic": 1624431.339178291,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.552222500089556
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.552237292053178
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624420.25857975,
+      "deadlineMonotonic": 1624438.25857975,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.553868040908128
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5538844999391586
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624427.185255833,
+      "deadlineMonotonic": 1624445.185255833,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5230104580987245
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5230276670772582
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624434.071654458,
+      "deadlineMonotonic": 1624452.071654458,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5259326249361038
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5259472080506384
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624440.9571395,
+      "deadlineMonotonic": 1624458.9571395,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5507313329726458
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5507460830267519
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624447.860451208,
+      "deadlineMonotonic": 1624465.860451208,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5329742920584977
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5329892919398844
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624454.754472041,
+      "deadlineMonotonic": 1624472.754472041,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.527643834007904
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.527658750070259
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624461.641879125,
+      "deadlineMonotonic": 1624479.641879125,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5329463330563158
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5329617080278695
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624468.536038791,
+      "deadlineMonotonic": 1624486.536038791,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5426759999245405
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5426901248283684
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624475.43529275,
+      "deadlineMonotonic": 1624493.43529275,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5523145000915974
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.55232891603373
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624482.327675791,
+      "deadlineMonotonic": 1624500.327675791,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5444898749701679
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5445045419037342
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624489.212255208,
+      "deadlineMonotonic": 1624507.212255208,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.556454666890204
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.556474708020687
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624496.110148541,
+      "deadlineMonotonic": 1624514.110148541,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.633615625090897
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6336315001826733
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624503.104668916,
+      "deadlineMonotonic": 1624521.104668916,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.602512374985963
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.602530041942373
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624510.058701208,
+      "deadlineMonotonic": 1624528.058701208,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.517272291937843
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5172938748728484
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624516.933698541,
+      "deadlineMonotonic": 1624534.933698541,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5377316670492291
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5377544169314206
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624523.8237775,
+      "deadlineMonotonic": 1624541.8237775,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5357659999281168
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.535780832869932
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624530.704646583,
+      "deadlineMonotonic": 1624548.704646583,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.519670750014484
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5196874579414725
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624537.5721915,
+      "deadlineMonotonic": 1624555.5721915,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5358299158979207
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5358470829669386
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624544.441916041,
+      "deadlineMonotonic": 1624562.441916041,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5324959999416023
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5325137919280678
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624551.339543208,
+      "deadlineMonotonic": 1624569.339543208,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5466653748881072
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5466799999121577
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624558.223746041,
+      "deadlineMonotonic": 1624576.223746041,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6294956668280065
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6295107088517398
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624565.205185958,
+      "deadlineMonotonic": 1624583.205185958,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6111621670424938
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6111797080375254
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624572.177592291,
+      "deadlineMonotonic": 1624590.177592291,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5334073340054601
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.533421458909288
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624579.06774525,
+      "deadlineMonotonic": 1624597.06774525,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6066657081246376
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6066874160896987
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624586.05169775,
+      "deadlineMonotonic": 1624604.05169775,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5188991248141974
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5189428748562932
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624592.935270666,
+      "deadlineMonotonic": 1624610.935270666,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.517897334182635
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.517912584124133
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624599.803678333,
+      "deadlineMonotonic": 1624617.803678333,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5314268749207258
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5314413330052048
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624606.706456708,
+      "deadlineMonotonic": 1624624.706456708,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5550148750189692
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5550316250883043
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624613.604846083,
+      "deadlineMonotonic": 1624631.604846083,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5576581668574363
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5576725418213755
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624620.530948791,
+      "deadlineMonotonic": 1624638.530948791,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5466252921614796
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.546645584050566
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624627.412540958,
+      "deadlineMonotonic": 1624645.412540958,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5317482079844922
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5317662919405848
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624634.303785958,
+      "deadlineMonotonic": 1624652.303785958,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5493110828101635
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.549326749984175
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624641.220967375,
+      "deadlineMonotonic": 1624659.220967375,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5321290409192443
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5321433751378208
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624648.120526416,
+      "deadlineMonotonic": 1624666.120526416,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.542274917010218
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5422890840563923
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624654.991324083,
+      "deadlineMonotonic": 1624672.991324083,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5343186249956489
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.534332999959588
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624661.900290958,
+      "deadlineMonotonic": 1624679.900290958,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5377335001248866
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.537749292096123
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624668.798983833,
+      "deadlineMonotonic": 1624686.798983833,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.6208944169338793
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.6209106668829918
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624675.769704083,
+      "deadlineMonotonic": 1624693.769704083,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.541642083087936
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.541657832916826
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624682.672845458,
+      "deadlineMonotonic": 1624700.672845458,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5817428331356496
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5817576670087874
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624689.624108458,
+      "deadlineMonotonic": 1624707.624108458,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5762815831694752
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.576296417042613
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624696.565245583,
+      "deadlineMonotonic": 1624714.565245583,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5191620420664549
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5191826671361923
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624703.458859291,
+      "deadlineMonotonic": 1624721.458859291,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5448380841407925
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5448575420305133
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624710.3346625,
+      "deadlineMonotonic": 1624728.3346625,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.544360082829371
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5443754580337554
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624717.253419791,
+      "deadlineMonotonic": 1624735.253419791,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5480861249379814
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5481011669617146
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624724.171041625,
+      "deadlineMonotonic": 1624742.171041625,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5842104579787701
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5842392910271883
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624731.110287666,
+      "deadlineMonotonic": 1624749.110287666,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "missing-footprint",
+          "elapsedSeconds": 1.4801387498155236,
+          "errorType": "MissingProcessFootprint",
+          "evidence": {
+            "reason": "identity-not-stable-across-footprint-read",
+            "identities": [
+              {
+                "pid": 26349,
+                "started": "Wed Sep  9 18:10:35 2026",
+                "pgid": 20915
+              }
+            ]
+          }
+        },
+        {
+          "sample": 2,
+          "status": "measured",
+          "elapsedSeconds": 2.9197876669932157
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 2.9198015418369323
+    },
+    {
+      "status": "measured-awaiting-existing-policy-check",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624739.401948875,
+      "deadlineMonotonic": 1624757.401948875,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "measured",
+          "elapsedSeconds": 1.5392788748722523
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "elapsedSeconds": 1.5393001248594373
+    },
+    {
+      "status": "failed",
+      "maximumSamples": 4,
+      "maximumWindowSeconds": 18.0,
+      "startedMonotonic": 1624746.275231041,
+      "deadlineMonotonic": 1624764.275231041,
+      "attempts": [
+        {
+          "sample": 1,
+          "status": "missing-footprint",
+          "elapsedSeconds": 1.4520979169756174,
+          "errorType": "MissingProcessFootprint",
+          "evidence": {
+            "reason": "identity-not-stable-across-footprint-read",
+            "identities": [
+              {
+                "pid": 26401,
+                "started": "Wed Sep  9 18:10:49 2026",
+                "pgid": 20915
+              }
+            ]
+          }
+        },
+        {
+          "sample": 2,
+          "status": "missing-footprint",
+          "elapsedSeconds": 2.86329249991104,
+          "errorType": "MissingProcessFootprint",
+          "evidence": {
+            "reason": "missing-memory-row",
+            "identities": [
+              {
+                "pid": 20915,
+                "started": "Wed Sep  9 17:47:11 2026",
+                "pgid": 20915
+              }
+            ]
+          }
+        },
+        {
+          "sample": 3,
+          "status": "missing-footprint",
+          "elapsedSeconds": 4.222734374925494,
+          "errorType": "MissingProcessFootprint",
+          "evidence": {
+            "reason": "missing-memory-row",
+            "identities": [
+              {
+                "pid": 20915,
+                "started": "Wed Sep  9 17:47:11 2026",
+                "pgid": 20915
+              }
+            ]
+          }
+        },
+        {
+          "sample": 4,
+          "status": "missing-footprint",
+          "elapsedSeconds": 5.630050499923527,
+          "errorType": "MissingProcessFootprint",
+          "evidence": {
+            "reason": "missing-memory-row",
+            "identities": [
+              {
+                "pid": 20915,
+                "started": "Wed Sep  9 17:47:11 2026",
+                "pgid": 20915
+              }
+            ]
+          }
+        }
+      ],
+      "scope": "Actual measurements; health requires existing stop checks",
+      "errorType": "MissingProcessFootprint",
+      "error": "Owned process footprint missing; resample tree",
+      "elapsedSeconds": 5.632753791986033
+    }
+  ],
+  "measurementFailureEvidence": [
+    {
+      "reason": "identity-not-stable-across-footprint-read",
+      "identities": [
+        {
+          "pid": 20946,
+          "started": "Wed Sep  9 17:47:12 2026",
+          "pgid": 20915
+        },
+        {
+          "pid": 20947,
+          "started": "Wed Sep  9 17:47:12 2026",
+          "pgid": 20915
+        }
+      ]
+    },
+    {
+      "reason": "identity-not-stable-across-footprint-read",
+      "identities": [
+        {
+          "pid": 21207,
+          "started": "Wed Sep  9 17:48:29 2026",
+          "pgid": 20915
+        }
+      ]
+    },
+    {
+      "reason": "identity-not-stable-across-footprint-read",
+      "identities": [
+        {
+          "pid": 26349,
+          "started": "Wed Sep  9 18:10:35 2026",
+          "pgid": 20915
+        }
+      ]
+    },
+    {
+      "reason": "identity-not-stable-across-footprint-read",
+      "identities": [
+        {
+          "pid": 26401,
+          "started": "Wed Sep  9 18:10:49 2026",
+          "pgid": 20915
+        }
+      ]
+    },
+    {
+      "reason": "missing-memory-row",
+      "identities": [
+        {
+          "pid": 20915,
+          "started": "Wed Sep  9 17:47:11 2026",
+          "pgid": 20915
+        }
+      ]
+    },
+    {
+      "reason": "missing-memory-row",
+      "identities": [
+        {
+          "pid": 20915,
+          "started": "Wed Sep  9 17:47:11 2026",
+          "pgid": 20915
+        }
+      ]
+    },
+    {
+      "reason": "missing-memory-row",
+      "identities": [
+        {
+          "pid": 20915,
+          "started": "Wed Sep  9 17:47:11 2026",
+          "pgid": 20915
+        }
+      ]
+    }
+  ],
+  "processExitMeasurementRetries": 6,
+  "latestResourceSnapshot": {
+    "measured_at": 1788995442.263922,
+    "physical_bytes": 68719476736,
+    "free_percent": 87.0,
+    "swap_used_bytes": 8073636741,
+    "compressor_bytes": 3159359488,
+    "disk_free_bytes": 30056169472,
+    "owned_footprint_bytes": 204129280,
+    "largest_owned_process_bytes": 181403648,
+    "owned_pids": [
+      20915,
+      20918,
+      26349
+    ],
+    "processes": [
+      {
+        "pid": 20915,
+        "parent_pid": 20891,
+        "pgid": 20915,
+        "started": "Wed Sep  9 17:47:11 2026",
+        "footprint_bytes": 12582912,
+        "compressed_bytes": 0
+      },
+      {
+        "pid": 20918,
+        "parent_pid": 20915,
+        "pgid": 20915,
+        "started": "Wed Sep  9 17:47:11 2026",
+        "footprint_bytes": 181403648,
+        "compressed_bytes": 0
+      },
+      {
+        "pid": 26349,
+        "parent_pid": 20918,
+        "pgid": 20915,
+        "started": "Wed Sep  9 18:10:35 2026",
+        "footprint_bytes": 10142720,
+        "compressed_bytes": 0
+      }
+    ],
+    "identity_verified": true,
+    "unused_physical_bytes": 1971322880,
+    "missing_registered_pids": [
+      20946,
+      20947,
+      21207,
+      21267,
+      21269,
+      21270,
+      21271,
+      21272,
+      21273
+    ],
+    "reused_registered_pids": [],
+    "kernel_pressure_level": 1,
+    "warnings": [
+      "unused physical RAM is below the reserved host margin"
+    ]
+  },
+  "measurementEndedWithNativeExit": {
+    "error": "Owned process footprint missing; resample tree",
+    "exitCode": 0,
+    "scope": "No snapshot accepted; parent sample exits before policy evaluation"
+  },
+  "cleanup": {
+    "verified": true,
+    "survivors": [],
+    "signals": [],
+    "scope": "Recorded owned identities; not an unobserved-child guarantee"
+  },
+  "exitCode": 0,
+  "leaseCleanupVerified": true,
+  "elapsedSeconds": 1430.103289874969,
+  "completedAt": "2026-09-09T23:10:55.397936+00:00",
+  "abortReason": null,
+  "sourceHashesAfter": {
+    "hyperframes.json": "073afaf86f8c55d9a5c838b6357f24c1c28a91ee72d0023543fa485293b9dd53",
+    "index.html": "0769dae1316a2e8834767214ad189ff91e701419fab6a8f9cce22ae7f87c85e9",
+    "motion.js": "5ab4a8da199405a7126c4776dbdf74fa06ca0ce0a9054acb6158c48528004d79"
+  },
+  "sourceStable": true,
+  "sdkStable": true,
+  "sandboxStable": true,
+  "additionalFilePinsAfter": {
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/hyperframes.json": "073afaf86f8c55d9a5c838b6357f24c1c28a91ee72d0023543fa485293b9dd53",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/index.html": "0769dae1316a2e8834767214ad189ff91e701419fab6a8f9cce22ae7f87c85e9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/motion.js": "5ab4a8da199405a7126c4776dbdf74fa06ca0ce0a9054acb6158c48528004d79",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-29.html": "b04e47b7778ac97bfa2b84663d0e99e96b344aab68bc313c50ed640c0089ee60",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-52.html": "ee4e148e0f2d99ecfb7ae38dde0a58212dde4c911b1715c8149dc526d6078c17",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-05.html": "de481256267eb225e9048491e4e634697fcfe2b994aa4c2e218cb940218e6037",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-13.html": "805c93a329fe3e714b8561bd27bff85930f462b53c4c18a9bb020726edbd22fa",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-44.html": "22ce53d0380b329f198427020f689e0041e3c7b95210192989f4c8630605a83e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-33.html": "4017b1b64c8a16d5422b70ab9c011418298ea0af80233176c0f7b5bcce6929a4",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-25.html": "c3de09d632afc61128b941068fadfd7820dac7e54fcb74c6c25565f9ae20c9e8",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-09.html": "02e3509dd9cff403d4116b0f6d73341e7aa2be359e4556165f00d3dec8ef2106",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-48.html": "066e623a03e5f7f55eb89ba327e29fee0f404251ae1ff5aabee3eb6612800bfb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-49.html": "7c604dbb4bc4a279c19c928b68ff4d089be8debd7ebdfdd416ad9fac3b6e2642",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-08.html": "9c64a168d3c861c7450003d7e807e3c540ab8c7af9c026f540f78e8d1e5cf984",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-24.html": "ec07e2b29269241e7831e0dce0214047ba4073e7faa87adc5e755c33a7c8ffc0",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-32.html": "5d85122db9c91889e5415cc25868f14453accf6945f8ee3c8a925be67cb599eb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-45.html": "0a08b07e79b0a03069623f61ba407bb46455905c62fc778723ebdd048e8bc4f0",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-12.html": "b9635277d753a6d2a6a217367322dd5f8a0ad57737b6d0c393e6df95e4a22179",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-04.html": "ae85bcda977792a01efde64e599c63f3418fbc8a990075601a3ac8819db0078e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-28.html": "bc5312b21984b60436c16290dddfa8f049887bbed985cf9e44a7b21f0c0ef873",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-35.html": "5c85395e4ded204c0fb5e4f37a79545add86526c8d0b178f26f7dded4de6425e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-23.html": "091f4ef29945b3a0567baa733695f3f7ca12f2d3f27631ab51198acdd9450ceb",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-19.html": "cb4a2d20d4bc035221ba28ebe161f277182baa624ea0ca11f0116dd1fcdb00de",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-39.html": "481e0ba711cc489bb93c0ff529621b6ae42af655011649a85e5847c2101adc0b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-03.html": "f286bda763d0bd1c0442997f997a3dd324ea182cd180e4697a651ac2c3568d55",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-15.html": "5203a27472d76f4ba7b6d12ab1de508e7d13582e0df31de3f0b820f60995c41f",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-42.html": "35013fff7e76994c3303e459dfcdae32316dbdb1c7520fb4aee72896e4568410",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-43.html": "09a1d855cee8933202b7328caf41f42d374bc048fc5d93f21338bf816138b096",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-14.html": "2eaff8ebe6051b4dac42a43eeb23d78d74cb8b7df8e7b373fb4c1481377ad042",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-02.html": "ebae43417cb63f1d2c40a3dc782ba0217a2615c363d799675c39f737d9d15233",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-38.html": "5d145316d2c5f962c92bffed232e98149a2ec819a146f9217d3500f9648828e6",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-18.html": "539732300a36fca6e122c7f85683a1b83a199a57f20beaa2bb7b4a58d46add4d",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-22.html": "c7ae32558ebca98dac8bc2e4a1d07a701fa8b47a57e44077e65f9d6a4bb378d9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-34.html": "63fe81a307e65489ca4c89fc97a01a0464331e9c6c8e4edfb8dd45327c099aa4",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-21.html": "7ec95317afe43bbc98f251128ab09e86bc406d75008e3ce839c0675a139305d9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-37.html": "d317aabc9c2a76573a0565d53ef53863cfb2bcc123410619ab2e513f3dc889d6",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-40.html": "d4e1f2289f7230374c18902271f00cea60517926886c7a2f1e2ba03b4a4f16f8",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-17.html": "26b79b64d38b0f1fe061ab1e4b5efb1962e82ad87288bb8dbf2c2a29e936fc33",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-01.html": "67cbaa6106ff42ff6cf4476c2decdbf1cc5ca4ee3fae9ada828f57b1845df30e",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-00.html": "a44daa6a0c56d2b5ea74fcfb209d630612f14c8a05de944bbfdd7b6923839b8b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-16.html": "31c6f6b9d56a8a8da174051efdf1be54110a7db9e2946cc4d85fb37e589cc803",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-41.html": "356c507448664a29d4617d556b1de478c2f51863c22938bccb9d03427faee98c",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-36.html": "c785f72a59142734a5c8d7dea19c19503ad1e8e4b453bb0a116c48cbdb612651",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-20.html": "835d9b8cbb04808e4d160bb8f5b757f99f8b13ccc598bcc657ed144f3a5c13ab",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-46.html": "1c48341b994053d2e9ff895e58e9bf17d2337ac50948c236cc870eda1fed0c37",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-11.html": "78eed2d34fe6e647cea49bfd6065d63ee7d46a7b7b44afacbad1d0e61c41c7e3",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-07.html": "7466136dfe8c03db62e7eaacf4291957d6a722d1dc04760746a186bff7f5aece",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-50.html": "a97a2a60a3f732b7b4a5ac51fc3ade91e080167be0a09c5324dd44fa61f794ca",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-27.html": "859d3873fd9b7891d8c9a7f97933d43b266a51c482a5c2ebbed4c98568b9e35f",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-31.html": "5f3925b1f113050e90bff172bd2bc4617a7a1e32a468b637d967fd6035b8c6a1",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-30.html": "0f238135e444b316801d3b075c6dadd3803cead06acbe5149b3953fb2cfa685b",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-26.html": "5ad3ac9ec195d3f9e5500e1d2ed80e0e049cde845b60259882fdb4b064287849",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-51.html": "aa5cfadb3e3deee4109793d19899662aaa1093505b680c7af7fe58870ad0797a",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-06.html": "3e11818d9e9ee7f394cd07c11f08a360cee097379269208ffa760d9e6b794fe7",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-10.html": "1f25e4975d59853dc9af4d03dfc23e5b28bed041bc4a916d8c02820171cddfae",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/compositions/panel-47.html": "b42a6c328dc6095ae209ae33a5ca905feeb188952be5274da760a102e71339a5",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/presenter.mp4": "80cd51075b575818d86c4185476cb4576bd173ba20ed4e31e5daa252df167c5d",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/gsap.min.js": "c174bfce53a729418d57a8ad8625e7247c793a22fef8e2851e3cfa3de9cd8280",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration-unmastered.wav": "1a9e1cab7215c03a93d017af57ab2bfa37bdf420ff9d86cad3d52802c4aa5fea",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/mono.woff2": "a634cb9e7783af7e66d17e1dae9c859b8748da8174641b53d68b3b05de8ebce9",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/mono-bold.woff2": "654a1d16c0b027ead89781bd3a4360d7f0af17a3ddf78c287d0e1843c6bca8d7",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/display.woff2": "2e5732c61470a890aee05ee399f6720664835efab8749dfc87d487e7882ffc44",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration.wav": "a4b8c664169887bfb6122856fc31454ab791112dcbfdcd7b6a32908b0c7ab0e1",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/project/assets/narration-browser.wav": "c86f62360d2854ffcabd4cdd21934f91bb4cf1fabbfb87f54ce28b33afc57b56",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_native_phase_v3.py": "e49b3749786ef498717529bb6343cbb6a80869b304ba18bcfaafdf4bf4c0601f",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_phase.py": "4f450f87d0b61970a15d2d3d060c0d0a4964ae4141a1e2a68134519b3d6379c8",
+    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "/private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/localhost-only.sb": "44309d0cf11391ec665221c43d73a40d81ad05009d517c4986aaff302dfee0ea",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/render_native_bounded.py": "a5cccb20c65153ca3b63567243f0127ff12d6631776c0549e8ae1132556e5cf7",
+    "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native_owned_processes.py": "7c794c4c199e1c7a311171f835ff6cde938fda419e5c66eb3b2b2e5e3cbe74c8",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/qualified_native_admission.py": "7d8e6ccf4f701acfedaf3e2f8581e52a8a31f0f73ef0dba705cf54555cf01199",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/export_native.cjs": "541f3d86d19538e885742284658d74a897f02f79dd33bd7c958d727b32ccc176",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native_measurement_retry.py": "e437c2a71c8e1a3a93acf8acd20fe674b3033e796649db7c63d45f46328545f6",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-export-config-v1.json": "ea4b9afb963f878b67454eefacb6e3d3bf166723d695faae0e776a00e6cb807a",
+    "/private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/execution-plan.json": "185ff0840c07fb07a3d97703582be46e99a29a3a1395117d7abd37200e61233a",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/hyperframes/dist/cli.js": "6d359af9c049a43402101da1b707663c285b89499109dfa687948777614b7985",
+    "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/hyperframes/dist/frame-source-transport.mjs": "20de6c202787a0aa47a8227e54925a1765be871a5bb8b4167032d550b2f55784"
+  },
+  "additionalFilesStable": true,
+  "outputBytes": 469629788,
+  "trialElapsedSecondsAtPhaseEnd": 6247.72684491612
+}

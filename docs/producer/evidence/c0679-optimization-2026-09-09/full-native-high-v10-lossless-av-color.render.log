@@ -1,0 +1,10 @@
+{"phase": "assembly", "passed": true, "elapsedSeconds": 1.4342027080710977, "error": null}
+{"phase": "streamPreservation", "passed": true, "elapsedSeconds": 143.82930720807053, "error": null}
+{"phase": "picture", "passed": true, "elapsedSeconds": 12.381836791988462, "error": null}
+{"phase": "audioClock", "passed": true, "elapsedSeconds": 0.7056412498932332, "error": null}
+{"phase": "loudness", "passed": true, "elapsedSeconds": 19.16927854088135, "error": null}
+{"phase": "audioQuality", "passed": true, "elapsedSeconds": 0.9933166250120848, "error": null}
+{"phase": "audioContinuity", "passed": true, "elapsedSeconds": 1.3762322498951107, "error": null}
+{"phase": "declaredColor", "passed": true, "elapsedSeconds": 0.9411979999858886, "error": null}
+{"phase": "wholeOutput", "passed": true, "elapsedSeconds": 36.45433475007303, "error": null}
+{"status": "objective-qualified-awaiting-perceptual-review", "elapsedSeconds": 187.18379224999808}

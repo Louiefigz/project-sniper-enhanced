@@ -1,0 +1,19 @@
+✔ silence edit preserves speech and produces shorter, ordered timestamps (33.174833ms)
+✔ reviewed stutter cut drops only the first word and retimes the next word (34.334458ms)
+✔ a review with zero mistakes is a valid identity edit (39.882542ms)
+✔ out-of-source cuts fail instead of corrupting the edit timeline (30.66625ms)
+✔ beat validator accepts reordered attributes and enforces early and late limits (90.12375ms)
+✔ short-form fixture has complete source-mapped captions and scenes (0.767ms)
+✔ a caption that drifts from the retained word is rejected (0.253ms)
+✔ word source timestamps from the wrong edit are rejected (0.336209ms)
+✔ scene gaps and duplicate scene identifiers are rejected (0.326375ms)
+✔ footage cannot reuse a scene or overlap source ranges under a new name (0.217666ms)
+✔ CLI accepts no-footage edits and rejects missing or changed footage (164.408834ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 272.427

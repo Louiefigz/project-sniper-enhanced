@@ -1,0 +1,6140 @@
+[
+  {
+    "path": ".agents/skills/cut-mistakes/SKILL.md",
+    "gitBlob": "94cf1b8061e374a14c70fcbf0589d2cb4ea2c7ef",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/cut-mistakes/scripts/apply-cuts.mjs",
+    "gitBlob": "62973c4e8603613879ecd0962041b55d2655c18b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/cut-mistakes/scripts/find-cut-candidates.mjs",
+    "gitBlob": "ddc124283d901b83909f1bff4431cbab17feadcf",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/cut-silences/SKILL.md",
+    "gitBlob": "8615b65d991ec92b3aa845cb953c28198b6c836d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/cut-silences/scripts/cut-silences.mjs",
+    "gitBlob": "fd34ec6a7e808ae038d9f080b8aeece8e206fb37",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/edit-video/SKILL.md",
+    "gitBlob": "9a7e96fb7a44ef4ba4924189a8d73ce5381ad48d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/gsap/NOTICE.txt",
+    "gitBlob": "85e83aa9fdc096b7778093e977688dfc9464c164",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/gsap/SKILL.md",
+    "gitBlob": "84fbdacbe89b6014322b4ce4c96857014bddbef2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/gsap/references/effects.md",
+    "gitBlob": "82c0ebafb81203493bab5b9b5a0525147c6359cf",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/gsap/scripts/extract-audio-data.py",
+    "gitBlob": "b4efba788d03ed84d6fae25e3a7102fde934f61e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes-cli/NOTICE.txt",
+    "gitBlob": "85e83aa9fdc096b7778093e977688dfc9464c164",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes-cli/SKILL.md",
+    "gitBlob": "ba14cfe64ddb47c398c9ea72e3851f49704d2e25",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes-registry/NOTICE.txt",
+    "gitBlob": "85e83aa9fdc096b7778093e977688dfc9464c164",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes-registry/SKILL.md",
+    "gitBlob": "005666575869147240a82f295ece9076c11bf681",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes-registry/examples/add-block.md",
+    "gitBlob": "95bee6ff87928db0f6b3d39008e4f0913600ea79",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes-registry/examples/add-component.md",
+    "gitBlob": "1371289ddfa21b27ec461947686c840f02e3d956",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes-registry/references/demo-html-pattern.md",
+    "gitBlob": "3e53838c10b91dbf5fb196c95cde64bc385d2bc7",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes-registry/references/discovery.md",
+    "gitBlob": "65a8d27f937238576126ff1da2e295f13a65f17e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes-registry/references/install-locations.md",
+    "gitBlob": "65e3d34e57f1e509f82476992c8d72c05a7106ee",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes-registry/references/wiring-blocks.md",
+    "gitBlob": "957fa0786679a8219ef01b021223c378e96e321b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes-registry/references/wiring-components.md",
+    "gitBlob": "28216208c175d12fefde1f368dfb05d3d65e1cb2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes-video-beats/SKILL.md",
+    "gitBlob": "7f4a649eee91625fb86e050be7cf1548559cbd02",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes-video-beats/agents/openai.yaml",
+    "gitBlob": "94fea94e3ae2d73df2a748824f204a0606debc95",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/NOTICE.txt",
+    "gitBlob": "85e83aa9fdc096b7778093e977688dfc9464c164",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/SKILL.md",
+    "gitBlob": "5584493f318a553355d5d8afe167eaacd36cef30",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/data-in-motion.md",
+    "gitBlob": "8850e491519f07e0c3598d76b76a03772ce3bf4b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/house-style.md",
+    "gitBlob": "a5edc4b05987b2d8c705a972f2c107b59daddceb",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/palettes/bold-energetic.md",
+    "gitBlob": "e60e2d76a481c0f1f3853374532411426b261f9e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/palettes/clean-corporate.md",
+    "gitBlob": "a4b79c939d0517c3235cccf9dadc4cc59ef5b8c8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/palettes/dark-premium.md",
+    "gitBlob": "84f81d5622d8f3fd18b97e072a45e171356008ae",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/palettes/jewel-rich.md",
+    "gitBlob": "fbd5542b2a01ba16e5601d20d4115bc91d146201",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/palettes/monochrome.md",
+    "gitBlob": "e26d247379de3a2133af87294f5e3d7304a86c1e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/palettes/nature-earth.md",
+    "gitBlob": "cc3cb9d63b0320310852659b99d38de62e811288",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/palettes/neon-electric.md",
+    "gitBlob": "94c3e86e8de695ad49c1108c96ea3113095de368",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/palettes/pastel-soft.md",
+    "gitBlob": "f4e99c5383955b41932e776152f38be5179ce27b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/palettes/warm-editorial.md",
+    "gitBlob": "2b1907aac544928b0fd82d82a2bdd21960be6830",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/patterns.md",
+    "gitBlob": "dfa8775760952cf9c73a5c43bd51dd5d8c2c2a67",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/audio-reactive.md",
+    "gitBlob": "aabd51f0abe9623a19dc915b0fbb5f4d2a2607a4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/captions.md",
+    "gitBlob": "791d411f993feddde83729079406c7cd9169077e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/css-patterns.md",
+    "gitBlob": "92236fcc7726ea8b6d7f0149f460ff0043f1a444",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/dynamic-techniques.md",
+    "gitBlob": "c0cab609f8e83e359e46fd6bcbab3d6032623c71",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/motion-principles.md",
+    "gitBlob": "f02a3bd516542271190db00ea642df016fa2fa96",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transcript-guide.md",
+    "gitBlob": "5bbf764a27e768e16fd1cc7d1615225139bee8ea",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions.md",
+    "gitBlob": "3b5404bba522fe1356ad146fd206fef1db197543",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/catalog.md",
+    "gitBlob": "4918b77bc78bf4d3c5e5662aeaf1940d1bfacb22",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-3d.md",
+    "gitBlob": "b86b52012b41d8da60f9fb396da3a4dab8d7e985",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-blur.md",
+    "gitBlob": "2698ba90ece6a581d0482e89c244cf2cf0c5651e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-cover.md",
+    "gitBlob": "6ec60b80cec571776134265053b2ef1a322b4077",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-destruction.md",
+    "gitBlob": "9229cffc4b46b81e7a07954b7bdda5b6b6eb9241",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-dissolve.md",
+    "gitBlob": "3966fa9aa5b6dcb36f5215c5c2cba53cb177736e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-distortion.md",
+    "gitBlob": "44627f7c276a2dac3cec216b5aabd2fffaec1a79",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-grid.md",
+    "gitBlob": "ee16700684216e80e81d60d8c28a1079173e6f44",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-light.md",
+    "gitBlob": "08d4d5293eff3412695e0df81bf140f687bd5671",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-mechanical.md",
+    "gitBlob": "fa119e7de2a02db264c43fe2e65eb68d1de85884",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-other.md",
+    "gitBlob": "698368a3879d0e28a4b9b83e1e49c25e60e47dc4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-push.md",
+    "gitBlob": "b7f550351f1d044eb342d32cb68943cc01491b67",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-radial.md",
+    "gitBlob": "040dad2f130fbe74b508255b81e6a0d812b8861e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/transitions/css-scale.md",
+    "gitBlob": "b16e26469d6b813c730567fa931adb753b42797f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/tts.md",
+    "gitBlob": "ee94993a774e13f9dfb6bd4a8a2e7ddf6f333fc8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/references/typography.md",
+    "gitBlob": "2a2ee52c520327c2657cac224b8e23e50b0d414e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/scripts/animation-map.mjs",
+    "gitBlob": "55a96607c2aad71d2325703226ebce70db70dbaf",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/scripts/contrast-report.mjs",
+    "gitBlob": "63fa6259c4f037740119addd8fb34f8989c5d999",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/hyperframes/visual-styles.md",
+    "gitBlob": "d1e8025c81ad52e78e1cae096f4be0db982ac178",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/make-a-video/SKILL.md",
+    "gitBlob": "53fe977770bd8c98088c1a2ac7c76f3cf288e389",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/make-a-video/references/build-checklist.md",
+    "gitBlob": "75046e33532be2d137b224dab6c6e823cb5a36b2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/make-a-video/references/catalog-intent-map.md",
+    "gitBlob": "2fe4f2a503f444bc5480efa3d19fdc1a497a5b38",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/make-a-video/references/composition-scaffold.md",
+    "gitBlob": "9a176015cff5e45ca7a034850ada88e33586e15e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/make-a-video/references/interview-questions.md",
+    "gitBlob": "393e904fe1dd6bf4bb47445e1c9b06da985ff753",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/make-a-video/references/storyboard-template.md",
+    "gitBlob": "08a9c54e639f27cd7f70007df49cea7190b33d41",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/make-a-video/references/style-intake.md",
+    "gitBlob": "09594069a035b059c22471a28260b579ff7aea5c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/short-form-edit/SKILL.md",
+    "gitBlob": "a584e6424363bce4e04813041179be39c783134b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/short-form-edit/references/curiosity-and-entertainment.md",
+    "gitBlob": "87fd5ff8224023d94a2c4092c45721efb792777c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/short-form-edit/references/plan-schema.md",
+    "gitBlob": "17ed23b558b2f4a767445d87ba574c2745859185",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/short-form-edit/references/premium-motion-and-footage.md",
+    "gitBlob": "88ffbe56b5ecd65ec43450e45f63eea9da9ce60c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/short-form-edit/references/quality-gates.md",
+    "gitBlob": "7487d3682141a5d88dfb0db938153fa1188fa09a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/short-form-edit/references/reference-analysis.md",
+    "gitBlob": "4902b5093f16e439dfc25b3af800139417339430",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/short-form-edit/scripts/validate-footage.mjs",
+    "gitBlob": "4d4be237d1dd7313ea9cc4c8daa57b64f82bfadf",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/short-form-edit/scripts/validate-plan.mjs",
+    "gitBlob": "0860bdab829b363f5f5df1678756e9b63dc9a7ef",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/short-form-video/SKILL.md",
+    "gitBlob": "216c7325e7bf5d6d7550fc27c4f339bc5609a18e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/style-library/SKILL.md",
+    "gitBlob": "1720e2b23ca9b480cdcbdba11e057655cafb22e4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/video-storytelling/SKILL.md",
+    "gitBlob": "bdac2722d1f190b1184f8dff7fe457cb88c229bc",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/video-storytelling/reference/design-system.md",
+    "gitBlob": "3ada9aa6e11c0ce599a3f2a1c6d0f916d34899a7",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/video-storytelling/reference/patterns/wall-of-slots/README.md",
+    "gitBlob": "c6b1ac49ff9e745a2e494f203d1dd532be92f6c9",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/video-storytelling/reference/patterns/wall-of-slots/geom.py",
+    "gitBlob": "d10e80765d1750e7709973695cd29cd1871fce8a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/video-storytelling/reference/patterns/wall-of-slots/wall.py",
+    "gitBlob": "ed7d28702a536e113b47210808e8e43d171300f8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/website-to-hyperframes/SKILL.md",
+    "gitBlob": "8d73fefd50ee65876c4d271886e1ddad6401b7ae",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/website-to-hyperframes/references/step-1-capture.md",
+    "gitBlob": "770326203c224e65ffb3785c38cd845940ca4b4a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/website-to-hyperframes/references/step-2-design.md",
+    "gitBlob": "f4fc65511273f30bb28760151501f2fb7cdccb19",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/website-to-hyperframes/references/step-3-script.md",
+    "gitBlob": "2eca87a2e79d8fd35d76def228e5366ae33cfc3d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/website-to-hyperframes/references/step-4-storyboard.md",
+    "gitBlob": "0579c949ba5b0ce00832ceafe957fd1af0df2276",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/website-to-hyperframes/references/step-5-vo.md",
+    "gitBlob": "be656c6eb9e3a8379cd7366a620fc17db5e32c93",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/website-to-hyperframes/references/step-6-build.md",
+    "gitBlob": "be8a2d498f9945a2d0712fa82196d734006c229a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/website-to-hyperframes/references/step-7-validate.md",
+    "gitBlob": "fa094c1f484b28b7649f2abe628070f685df934a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".agents/skills/website-to-hyperframes/references/techniques.md",
+    "gitBlob": "f380dff8c9c4ecb484c0982e0cf90e35dcd1ed71",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".claude/launch.json",
+    "gitBlob": "cd439b1dc58e2945a042c663e716c034fc961790",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/cut-mistakes/SKILL.md",
+    "gitBlob": "475178d94a36c27075d31249407f5602b05adcb7",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".claude/skills/cut-mistakes/scripts/apply-cuts.mjs",
+    "gitBlob": "62973c4e8603613879ecd0962041b55d2655c18b",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/cut-mistakes/scripts/find-cut-candidates.mjs",
+    "gitBlob": "ddc124283d901b83909f1bff4431cbab17feadcf",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/cut-silences/SKILL.md",
+    "gitBlob": "55e5379949781d8e59548dc12f977d1d6eaf32de",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".claude/skills/cut-silences/scripts/cut-silences.mjs",
+    "gitBlob": "fd34ec6a7e808ae038d9f080b8aeece8e206fb37",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/edit-video/SKILL.md",
+    "gitBlob": "9a7e96fb7a44ef4ba4924189a8d73ce5381ad48d",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/gsap/NOTICE.txt",
+    "gitBlob": "85e83aa9fdc096b7778093e977688dfc9464c164",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/gsap/SKILL.md",
+    "gitBlob": "84fbdacbe89b6014322b4ce4c96857014bddbef2",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/gsap/references/effects.md",
+    "gitBlob": "82c0ebafb81203493bab5b9b5a0525147c6359cf",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/gsap/scripts/extract-audio-data.py",
+    "gitBlob": "b4efba788d03ed84d6fae25e3a7102fde934f61e",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes-cli/NOTICE.txt",
+    "gitBlob": "85e83aa9fdc096b7778093e977688dfc9464c164",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes-cli/SKILL.md",
+    "gitBlob": "ba14cfe64ddb47c398c9ea72e3851f49704d2e25",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes-registry/NOTICE.txt",
+    "gitBlob": "85e83aa9fdc096b7778093e977688dfc9464c164",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes-registry/SKILL.md",
+    "gitBlob": "005666575869147240a82f295ece9076c11bf681",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes-registry/examples/add-block.md",
+    "gitBlob": "95bee6ff87928db0f6b3d39008e4f0913600ea79",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes-registry/examples/add-component.md",
+    "gitBlob": "1371289ddfa21b27ec461947686c840f02e3d956",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes-registry/references/demo-html-pattern.md",
+    "gitBlob": "3e53838c10b91dbf5fb196c95cde64bc385d2bc7",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes-registry/references/discovery.md",
+    "gitBlob": "65a8d27f937238576126ff1da2e295f13a65f17e",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes-registry/references/install-locations.md",
+    "gitBlob": "65e3d34e57f1e509f82476992c8d72c05a7106ee",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes-registry/references/wiring-blocks.md",
+    "gitBlob": "957fa0786679a8219ef01b021223c378e96e321b",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes-registry/references/wiring-components.md",
+    "gitBlob": "28216208c175d12fefde1f368dfb05d3d65e1cb2",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes-video-beats/SKILL.md",
+    "gitBlob": "7f4a649eee91625fb86e050be7cf1548559cbd02",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes-video-beats/agents/openai.yaml",
+    "gitBlob": "94fea94e3ae2d73df2a748824f204a0606debc95",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/NOTICE.txt",
+    "gitBlob": "85e83aa9fdc096b7778093e977688dfc9464c164",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/SKILL.md",
+    "gitBlob": "5584493f318a553355d5d8afe167eaacd36cef30",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/data-in-motion.md",
+    "gitBlob": "8850e491519f07e0c3598d76b76a03772ce3bf4b",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/house-style.md",
+    "gitBlob": "a5edc4b05987b2d8c705a972f2c107b59daddceb",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/palettes/bold-energetic.md",
+    "gitBlob": "e60e2d76a481c0f1f3853374532411426b261f9e",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/palettes/clean-corporate.md",
+    "gitBlob": "a4b79c939d0517c3235cccf9dadc4cc59ef5b8c8",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/palettes/dark-premium.md",
+    "gitBlob": "84f81d5622d8f3fd18b97e072a45e171356008ae",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/palettes/jewel-rich.md",
+    "gitBlob": "fbd5542b2a01ba16e5601d20d4115bc91d146201",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/palettes/monochrome.md",
+    "gitBlob": "e26d247379de3a2133af87294f5e3d7304a86c1e",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/palettes/nature-earth.md",
+    "gitBlob": "cc3cb9d63b0320310852659b99d38de62e811288",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/palettes/neon-electric.md",
+    "gitBlob": "94c3e86e8de695ad49c1108c96ea3113095de368",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/palettes/pastel-soft.md",
+    "gitBlob": "f4e99c5383955b41932e776152f38be5179ce27b",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/palettes/warm-editorial.md",
+    "gitBlob": "2b1907aac544928b0fd82d82a2bdd21960be6830",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/patterns.md",
+    "gitBlob": "dfa8775760952cf9c73a5c43bd51dd5d8c2c2a67",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/audio-reactive.md",
+    "gitBlob": "aabd51f0abe9623a19dc915b0fbb5f4d2a2607a4",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/captions.md",
+    "gitBlob": "791d411f993feddde83729079406c7cd9169077e",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/css-patterns.md",
+    "gitBlob": "92236fcc7726ea8b6d7f0149f460ff0043f1a444",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/dynamic-techniques.md",
+    "gitBlob": "c0cab609f8e83e359e46fd6bcbab3d6032623c71",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/motion-principles.md",
+    "gitBlob": "f02a3bd516542271190db00ea642df016fa2fa96",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/transcript-guide.md",
+    "gitBlob": "5bbf764a27e768e16fd1cc7d1615225139bee8ea",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/transitions.md",
+    "gitBlob": "3b5404bba522fe1356ad146fd206fef1db197543",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/transitions/catalog.md",
+    "gitBlob": "4918b77bc78bf4d3c5e5662aeaf1940d1bfacb22",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/transitions/css-3d.md",
+    "gitBlob": "b86b52012b41d8da60f9fb396da3a4dab8d7e985",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/transitions/css-blur.md",
+    "gitBlob": "2698ba90ece6a581d0482e89c244cf2cf0c5651e",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/transitions/css-cover.md",
+    "gitBlob": "6ec60b80cec571776134265053b2ef1a322b4077",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/transitions/css-destruction.md",
+    "gitBlob": "9229cffc4b46b81e7a07954b7bdda5b6b6eb9241",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/transitions/css-dissolve.md",
+    "gitBlob": "3966fa9aa5b6dcb36f5215c5c2cba53cb177736e",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/transitions/css-distortion.md",
+    "gitBlob": "44627f7c276a2dac3cec216b5aabd2fffaec1a79",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/transitions/css-grid.md",
+    "gitBlob": "ee16700684216e80e81d60d8c28a1079173e6f44",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/transitions/css-light.md",
+    "gitBlob": "08d4d5293eff3412695e0df81bf140f687bd5671",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/transitions/css-mechanical.md",
+    "gitBlob": "fa119e7de2a02db264c43fe2e65eb68d1de85884",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/transitions/css-other.md",
+    "gitBlob": "698368a3879d0e28a4b9b83e1e49c25e60e47dc4",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/transitions/css-push.md",
+    "gitBlob": "b7f550351f1d044eb342d32cb68943cc01491b67",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/transitions/css-radial.md",
+    "gitBlob": "040dad2f130fbe74b508255b81e6a0d812b8861e",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/transitions/css-scale.md",
+    "gitBlob": "b16e26469d6b813c730567fa931adb753b42797f",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/tts.md",
+    "gitBlob": "ee94993a774e13f9dfb6bd4a8a2e7ddf6f333fc8",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/references/typography.md",
+    "gitBlob": "2a2ee52c520327c2657cac224b8e23e50b0d414e",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/scripts/animation-map.mjs",
+    "gitBlob": "55a96607c2aad71d2325703226ebce70db70dbaf",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/scripts/contrast-report.mjs",
+    "gitBlob": "63fa6259c4f037740119addd8fb34f8989c5d999",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/hyperframes/visual-styles.md",
+    "gitBlob": "d1e8025c81ad52e78e1cae096f4be0db982ac178",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/make-a-video/SKILL.md",
+    "gitBlob": "53fe977770bd8c98088c1a2ac7c76f3cf288e389",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/make-a-video/references/build-checklist.md",
+    "gitBlob": "75046e33532be2d137b224dab6c6e823cb5a36b2",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/make-a-video/references/catalog-intent-map.md",
+    "gitBlob": "2fe4f2a503f444bc5480efa3d19fdc1a497a5b38",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/make-a-video/references/composition-scaffold.md",
+    "gitBlob": "9a176015cff5e45ca7a034850ada88e33586e15e",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/make-a-video/references/interview-questions.md",
+    "gitBlob": "393e904fe1dd6bf4bb47445e1c9b06da985ff753",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/make-a-video/references/storyboard-template.md",
+    "gitBlob": "08a9c54e639f27cd7f70007df49cea7190b33d41",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/make-a-video/references/style-intake.md",
+    "gitBlob": "09594069a035b059c22471a28260b579ff7aea5c",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/short-form-edit/SKILL.md",
+    "gitBlob": "acda767baf09848f79d49235d78a905826d518ea",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".claude/skills/short-form-edit/references/curiosity-and-entertainment.md",
+    "gitBlob": "87fd5ff8224023d94a2c4092c45721efb792777c",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/short-form-edit/references/plan-schema.md",
+    "gitBlob": "17ed23b558b2f4a767445d87ba574c2745859185",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/short-form-edit/references/premium-motion-and-footage.md",
+    "gitBlob": "88ffbe56b5ecd65ec43450e45f63eea9da9ce60c",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/short-form-edit/references/quality-gates.md",
+    "gitBlob": "7487d3682141a5d88dfb0db938153fa1188fa09a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/short-form-edit/references/reference-analysis.md",
+    "gitBlob": "4902b5093f16e439dfc25b3af800139417339430",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/short-form-edit/scripts/validate-footage.mjs",
+    "gitBlob": "4d4be237d1dd7313ea9cc4c8daa57b64f82bfadf",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/short-form-edit/scripts/validate-plan.mjs",
+    "gitBlob": "0860bdab829b363f5f5df1678756e9b63dc9a7ef",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/short-form-video/SKILL.md",
+    "gitBlob": "216c7325e7bf5d6d7550fc27c4f339bc5609a18e",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/style-library/SKILL.md",
+    "gitBlob": "1720e2b23ca9b480cdcbdba11e057655cafb22e4",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/video-storytelling/SKILL.md",
+    "gitBlob": "bdac2722d1f190b1184f8dff7fe457cb88c229bc",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/video-storytelling/reference/design-system.md",
+    "gitBlob": "3ada9aa6e11c0ce599a3f2a1c6d0f916d34899a7",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/video-storytelling/reference/patterns/wall-of-slots/README.md",
+    "gitBlob": "c6b1ac49ff9e745a2e494f203d1dd532be92f6c9",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/video-storytelling/reference/patterns/wall-of-slots/geom.py",
+    "gitBlob": "d10e80765d1750e7709973695cd29cd1871fce8a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/video-storytelling/reference/patterns/wall-of-slots/wall.py",
+    "gitBlob": "ed7d28702a536e113b47210808e8e43d171300f8",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/website-to-hyperframes/SKILL.md",
+    "gitBlob": "8d73fefd50ee65876c4d271886e1ddad6401b7ae",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/website-to-hyperframes/references/step-1-capture.md",
+    "gitBlob": "770326203c224e65ffb3785c38cd845940ca4b4a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/website-to-hyperframes/references/step-2-design.md",
+    "gitBlob": "f4fc65511273f30bb28760151501f2fb7cdccb19",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/website-to-hyperframes/references/step-3-script.md",
+    "gitBlob": "2eca87a2e79d8fd35d76def228e5366ae33cfc3d",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/website-to-hyperframes/references/step-4-storyboard.md",
+    "gitBlob": "0579c949ba5b0ce00832ceafe957fd1af0df2276",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/website-to-hyperframes/references/step-5-vo.md",
+    "gitBlob": "be656c6eb9e3a8379cd7366a620fc17db5e32c93",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/website-to-hyperframes/references/step-6-build.md",
+    "gitBlob": "be8a2d498f9945a2d0712fa82196d734006c229a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/website-to-hyperframes/references/step-7-validate.md",
+    "gitBlob": "fa094c1f484b28b7649f2abe628070f685df934a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".claude/skills/website-to-hyperframes/references/techniques.md",
+    "gitBlob": "f380dff8c9c4ecb484c0982e0cf90e35dcd1ed71",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": ".codex/README.md",
+    "gitBlob": "c4ce224871a1a822718ca2337622c58b903f6247",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".codex/config.toml",
+    "gitBlob": "45874a5e60dd010704f503d805185161ae4b4083",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".env.example",
+    "gitBlob": "eeca4c3e9305838c7f82c174ba5390c9657279ef",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".gitattributes",
+    "gitBlob": "5b84c109422aa525a9b2a6af2fdfa788c0821d1b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".github/workflows/check.yml",
+    "gitBlob": "1e507bff6e9129bc97476689402120ac92a5283f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": ".gitignore",
+    "gitBlob": "12ae88eeb902164d0f3e0c9016d0a991e81bdb52",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "AGENTS.md",
+    "gitBlob": "8c7ce7c3564ef7ae1fdd36f9b7ec5677c67b8fc2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "CLAUDE.md",
+    "gitBlob": "8c7ce7c3564ef7ae1fdd36f9b7ec5677c67b8fc2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "DESIGN.ais-example.md",
+    "gitBlob": "9820d0d01f38753e6df37fe21576da38953eb5b3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "LICENSE",
+    "gitBlob": "ac910de62354ed873c7e5c873a7ef58b73365bab",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "MOTION_PHILOSOPHY.md",
+    "gitBlob": "d354d678e8b853bbd8af9646ae5f896d65e8d4c1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "README.md",
+    "gitBlob": "7c48778012771eec60e7a795bda6e2fd69256210",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "THIRD_PARTY_NOTICES.md",
+    "gitBlob": "3f80bd5e44a328ee85667c9c8bc4c4f6f5d23379",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "assets/AIS Background.png",
+    "gitBlob": "9981cd0c0f2e4b27569677334dc4e1143d1d19c9",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "assets/AIS Brand Guideline Small.jpg",
+    "gitBlob": "8a5a438c93c7605c5dd47d833d7ab9a709b82bec",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "assets/AIS Logo PNG.png",
+    "gitBlob": "da884517d8be8195ae7968680dac8f62d35ec86a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "assets/brand-tokens.css",
+    "gitBlob": "73a3ad3874e134997804069d47e5ce8f50fd13c5",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "docs/EXPORT-SCOPE.md",
+    "gitBlob": "4095109df46db9f7f37958d873b04f4a8633ffb7",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "docs/MIGRATION.md",
+    "gitBlob": "7a403812c7c9d049f91631eb1f6ed1375226af79",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "docs/PROMPTS.md",
+    "gitBlob": "f71781b74d901220363d1f07f79f512664f9a4c8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "docs/SETUP.md",
+    "gitBlob": "c07e4baf80eb9d49bed1cb34ec9a48807d130b91",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "docs/SHORT-FORM.md",
+    "gitBlob": "9742cd7c1a828a0ead294f16b2439656a6f006d4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "docs/STORYTELLING-WORKBOOK.md",
+    "gitBlob": "7b2ac0a678dc4a63278ea0692b3ea888a4459545",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "docs/TOOLS-AND-API-KEYS.md",
+    "gitBlob": "c8f6e62dd567c14db4a340f42edfdf1982aef031",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "docs/VERIFICATION.md",
+    "gitBlob": "6247f67adf8d764c6c5c9c9ad2259d5cb984d6dc",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "docs/WORKFLOW.md",
+    "gitBlob": "6721efd3a58315d1a3c9c398e9edc850d6068641",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "docs/images/ais-live-ad.jpg",
+    "gitBlob": "9f400d777b90f2ffe988e9433d6a4cf68807de28",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "docs/images/curiosity-reel-1.jpg",
+    "gitBlob": "530396768e5777ef965d95a559b1774881127d2a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "docs/images/curiosity-reel-2.jpg",
+    "gitBlob": "28472a449239b467791f874d73f872c97b361742",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "docs/superpowers/plans/2026-04-17-linear-promo-implementation.md",
+    "gitBlob": "7fb96d51255db9de6f89b75ef039f4f9e1960881",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "docs/superpowers/specs/2026-04-17-linear-promo-design.md",
+    "gitBlob": "cea56718db72976db961299f67624c1d2e482817",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "examples/editing/approved-cuts.json",
+    "gitBlob": "7719e88fcb4623ccd2e1a3100a342fde3a7c41ed",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "examples/editing/source.json",
+    "gitBlob": "83401f838a2bf08c89625b389928bfeb877e1bcd",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "examples/short-form/assets/edit-decisions.json",
+    "gitBlob": "5bc9369fc9dc901d93f0c2bee548aeb370383ee1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "examples/short-form/assets/plan.json",
+    "gitBlob": "bbd492fa0a114b4d4971c679ba96d8200d33377b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "examples/short-form/assets/transcript.json",
+    "gitBlob": "8dc328ad5ae395f3e4636558a2cb4939ed50eb73",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "examples/showcase/README.md",
+    "gitBlob": "0a7c79016c9940c7b85e36c9f250d214e6d776b3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "examples/showcase/ais-live-ad.mp4",
+    "gitBlob": "6e2e01ef78e30110aa2517988e01fee254676854",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "examples/showcase/curiosity-reel-1.mp4",
+    "gitBlob": "270b392739c1b9e4d52ac2342775eb67cdeeb675",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "examples/showcase/curiosity-reel-2.mp4",
+    "gitBlob": "e74a39c7acdbdd000cd43dccb3735b8e7767b60e",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "examples/starter/DESIGN.md",
+    "gitBlob": "78be6e2a92b4b11820ffd7102e9782370728a808",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "examples/starter/hyperframes.json",
+    "gitBlob": "5fb1d6d872f5ecb406008695d86ae69f4216b465",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "examples/starter/index.html",
+    "gitBlob": "02cbb6757e07c5183c0fbbba903fbdb4e51abd62",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "examples/starter/meta.json",
+    "gitBlob": "caead85733c001dc46100099dfb0304d17e41326",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "licenses/HYPERFRAMES-LICENSE",
+    "gitBlob": "ae06b37e1c5116ccfaa615ac25ec1aabf5658d8c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "licenses/PIPELINE-USE-PERMISSION.txt",
+    "gitBlob": "812408b5324fba76886f1007347370fea3cdf295",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "package-lock.json",
+    "gitBlob": "e943f84bb862fdaf0c3757ebf1c44726d7c87a6c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "package.json",
+    "gitBlob": "a78f3b0b1116dd05b694040f7c0752264a76f726",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "scripts/build-edl-review.mjs",
+    "gitBlob": "ae9892c146c111ee6a93e12f2d4bca4235336abd",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "scripts/check-kit.mjs",
+    "gitBlob": "b8500ebd60b435a3feebd2583b27450cc59a467c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "scripts/new-video.mjs",
+    "gitBlob": "49e210cfdce62f97dceedecf75440c63b202eac6",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "scripts/preflight-all.mjs",
+    "gitBlob": "9784888fcd06fa6b4e7032b55885680951088da1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "scripts/preflight.mjs",
+    "gitBlob": "32187fa4ed8b76ed05dc77e1b7eff5709f685008",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "scripts/setup.mjs",
+    "gitBlob": "32cc5a27130078f73f2da00f4ecd661ba215aa0c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "scripts/smoke-media.mjs",
+    "gitBlob": "53ded7c2ab8553f9f6cc0365fc7cf75e773dc9f1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "scripts/style-library/build-registry.mjs",
+    "gitBlob": "15abf886a50824ab5725e8b23a252ec8f670da99",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "scripts/style-library/gen-kallaway-style.mjs",
+    "gitBlob": "6975e7a3b77714e0ec9de6b0f4af3b3b7088a037",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "scripts/style-library/new-style.mjs",
+    "gitBlob": "0eb700a9d6a062bb7a443c6bfbb0148eb4b2672a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "scripts/sync-codex-skills.mjs",
+    "gitBlob": "ef3e83f56e2e95a21ced8bb23fc552cb5b9490f8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "scripts/transcribe-elevenlabs.mjs",
+    "gitBlob": "e62d1d6905f704b52cc5952d842fd0d49cdc749f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "scripts/validate-beat-sync.mjs",
+    "gitBlob": "0598585a72d0d6e421267e06c219b4c679b7419c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "scripts/video-use-to-hyperframes-transcript.mjs",
+    "gitBlob": "8683c7847bcff76e241e634402aac04887e7090f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "skills-lock.json",
+    "gitBlob": "41590853d671a8e17402b0993aeb13a8d258d972",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/DESIGN.md",
+    "gitBlob": "fb2fd64264c1081e874a19fc1211bd42c3f78b05",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/_preview/contact-sheet.html",
+    "gitBlob": "10acf1920ef86f1fd7ab6dade6c31de045b6b4c0",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-agenda.html",
+    "gitBlob": "dcd47a127273fbb4e846dfb849f98088e99b49d5",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-bigtype.html",
+    "gitBlob": "36f780862dadc152767d0c2735859fc0454e684d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-board.html",
+    "gitBlob": "a8132b1e4e684b036138dca4ccd2c52b8ca221b7",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-checklist.html",
+    "gitBlob": "ca496a8b69d6e0d774afd71369206751fbca0e77",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-compare.html",
+    "gitBlob": "0addf00fda9dd06ddbadd5fd236bc35073208101",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-deck.html",
+    "gitBlob": "e254e08c28444cd87303f45debfcf07760c9bed7",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-dossier.html",
+    "gitBlob": "05676c0ed1ee65bea57bd8579c991c8fd74b5b5a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-filmstrip.html",
+    "gitBlob": "595e01007067fd1505dede2e931a9c4aee711d48",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-grid6.html",
+    "gitBlob": "4ad3644ed4e2b455bd7b8971f67d1f75f3aed82d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-indexset.html",
+    "gitBlob": "f8d7a6f6c0f4e57dd6a6638ba4442800c8c70576",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-maplegend.html",
+    "gitBlob": "132711252da6bbbedc7e76e2da73aac5265ba836",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-matrix.html",
+    "gitBlob": "50d9054aa8a105fbfef267bf1bd18dcd15cba157",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-numlist.html",
+    "gitBlob": "b8fa2934e763d50b382c3c84be74ee41e10382f6",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-outline.html",
+    "gitBlob": "76c0e43418e08603f386646edc52c0eb80ba069e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-phases.html",
+    "gitBlob": "933e429178b1554b1897370047f2fbd10ae827c9",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-quad.html",
+    "gitBlob": "2a193e1be856407fa636b11ef2368c1477dd399f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-roadmap.html",
+    "gitBlob": "276f2336eb00d6b9780e7baf223cb360a86a00ad",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-stepper.html",
+    "gitBlob": "1ea227d792a9919bcc0cd1205aa9107af9ccf274",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-toc.html",
+    "gitBlob": "c2e9d4c1257c4f6b332ae38a1a915d37ce82c168",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-overview-vtimeline.html",
+    "gitBlob": "db3be70f0eae7a67fa2fcfbe6d667b1d83cc0310",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-section-bracket.html",
+    "gitBlob": "4945e54d74faee1cf489af927cb921f92103b63b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-section-circle.html",
+    "gitBlob": "9f170f04eb9f12e31934686194e9ce6e74cd7077",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-section-classified.html",
+    "gitBlob": "1ccea43e3e40ac878e91c564948e9d172402d1fe",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-section-collage.html",
+    "gitBlob": "0216d7ff434f216bbc184ff8ab808fb074e45a9a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-section-correction.html",
+    "gitBlob": "8b37bc5947373171003f1e36074674abc3784580",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-section-crt.html",
+    "gitBlob": "663deeb3bc5b39e6e680174a2863a56a9616dba8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-section-cutout.html",
+    "gitBlob": "57f49bb5f11256495d7afd19dffab7fb66f37a91",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-section-fullbleed.html",
+    "gitBlob": "ea8c8a114f0fe7d081691bce4fbea3939e136e66",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-section-highlight.html",
+    "gitBlob": "c8567b280b27dd7987ed457c162545493515c330",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-section-indexcard.html",
+    "gitBlob": "76351a36063bbf3a79602acbb6d365f016265077",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-section-map.html",
+    "gitBlob": "7e0fc263b836f7a31cb4871b472dbb17dd6322cf",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-section-markerbox.html",
+    "gitBlob": "fc47f4ca72144d136dc30b5a844842186a296dac",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-section-numeral.html",
+    "gitBlob": "cc57ad2ba7be18e141ef16a29e4f70d3a9b0c8a8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-section-split.html",
+    "gitBlob": "ebca98a66d49434f46f7c6580e7ff0673be3e437",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-section-stacked.html",
+    "gitBlob": "7f77d05496a89c72287171d929730b52fbdaf9b4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-section-stamp.html",
+    "gitBlob": "98d0c948c93eb72ec7ac9eae4cd728493e8254b8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-section-ticker.html",
+    "gitBlob": "00c6ceb542d28fcefd932e42aeaf6da990bf6277",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-section-tornstrip.html",
+    "gitBlob": "30112b28dc32dd6246c266844e2a833fe4b06532",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-annotated.html",
+    "gitBlob": "f7809708d9acd5707fa64503f9b7f6bfddabc43b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-arc.html",
+    "gitBlob": "0d9448e8623ecfb52d9e6590b0101fd7b08d81f2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-axis.html",
+    "gitBlob": "bb042fc0848ceea7e0a9545ca9d96ec9a889893d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-bar.html",
+    "gitBlob": "bcfbe531d4df9910d021d37a8248f341908b0fa1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-bracket.html",
+    "gitBlob": "c3bec4b49acdd01382552565ac7147e0ed3be2e9",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-calendar.html",
+    "gitBlob": "31f39b7bd08237cc3a3e06e7bf56d13a28f9be05",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-callout.html",
+    "gitBlob": "5bde7bdae132dfac016501c8d11fae76c08a1558",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-columns.html",
+    "gitBlob": "55f2ef1a75f4319c8fc03fc5a51efb9cc8229044",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-corner.html",
+    "gitBlob": "74a821378c71aee2fb298e028d5b7ddd46a87c89",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-dots.html",
+    "gitBlob": "a891f1ce6f1cefcca47be997354fd295bb2604f0",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-engraving.html",
+    "gitBlob": "6058a4b56f2481009cdc637b73980945e0e06aec",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-footnote.html",
+    "gitBlob": "8516d61bd587d71cb247ed3b6b1fdc5fbe7178fa",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-frac.html",
+    "gitBlob": "0cb58afc043db4ef04d2bb72767175ede6d19aab",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-heat.html",
+    "gitBlob": "1627fea145cdee4d96e050db93f4534eb0a20ae8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-isotype.html",
+    "gitBlob": "1322ecf111a925861001963a9d454aef1f4fb59a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-ledger.html",
+    "gitBlob": "49ee072ef0de9e497a7d425e4ea9ad6bc5e55870",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-left.html",
+    "gitBlob": "77f040091f8b06f9c0d2b5e13e8b3354edbf3566",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-magnifier.html",
+    "gitBlob": "44a6f2fef78e018af88332074262210c81dc9985",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-map.html",
+    "gitBlob": "d4061bf2c36f9e293dbb17be6efc7491e41216b9",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-meter.html",
+    "gitBlob": "1f45229ad6cc6dedec419953d6cd09d3286d541e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-multiplier.html",
+    "gitBlob": "c6efaa4fb46994494167a257c8b5ed6fff274596",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-odo.html",
+    "gitBlob": "74525b04c1f850a65e017b54d58e574084c6a0ba",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-pack.html",
+    "gitBlob": "be7cebc4e448ad206ca9c20b832695ccad8c5c46",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-photo.html",
+    "gitBlob": "53cefcf1a284135e952055daa9d19af85e9b3f0f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-pie.html",
+    "gitBlob": "76dadfd1df6274b771bd473156b489049619c1d6",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-postage.html",
+    "gitBlob": "4d4bc4ab10ed54286a7a384b27426a483ee3efda",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-pricetag.html",
+    "gitBlob": "49d32244b159967c3587ddc0db43b16983ded264",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-quote.html",
+    "gitBlob": "d632f9e173fc4461c367cdfd0441e56be692aafb",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-ranking.html",
+    "gitBlob": "2245f4631e894a3dc38b30555c6e93e0ad648ec0",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-receipt.html",
+    "gitBlob": "aa2b61e0f9880229175779f5def39cf4249d545c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-ribbon.html",
+    "gitBlob": "b9afdce2ebd682526bc497a3a66d3a82e92f0d59",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-semi.html",
+    "gitBlob": "6cdc7e8742e315b069d7320f24cd81d7d6df24d2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-spotlight.html",
+    "gitBlob": "335851c43c589f9e125d81ffa5f119a81f61e819",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-stamp.html",
+    "gitBlob": "7213841129e0db784af4bc675588f527ed1f9cae",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-steps.html",
+    "gitBlob": "6123627673e872239aa224a9424661e23ebc9112",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-tape.html",
+    "gitBlob": "87030bcbcb2ebf7cc02080cdcab6b3db4945c84f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-torn.html",
+    "gitBlob": "26c51ab5ad469188485f490dd3cad5e0227fa7b3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-trend.html",
+    "gitBlob": "8969038203012a5fc5e3288dc570d8f660bd2612",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-vs.html",
+    "gitBlob": "2966d9a17dfc8e28c992cc11710fd38e329da53b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat-window.html",
+    "gitBlob": "58da70185b5a2a0862b147ca2861413b2ff3186d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-stat.html",
+    "gitBlob": "afa06879dfff8a5a2198c75115c5b4f084c649fb",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier1/t1-timeline.html",
+    "gitBlob": "f5055e0f10c62d7e4112614ff53ef7ae801055ea",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-label.html",
+    "gitBlob": "20fc5986e25568b339b414d5df2dd698acc3bc49",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lb-bracket.html",
+    "gitBlob": "72e5781a1f0342d4d71075db1862ca8be3a1b402",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lb-caption.html",
+    "gitBlob": "bebb8c3e6ca37379a2206d782e1a3f8cf2bc5bb3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lb-circle.html",
+    "gitBlob": "f42f9437ee5a6ee1867f24da2bda57fa57c3a1bf",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lb-definition.html",
+    "gitBlob": "b290db43fa60ab9f7ef36001e7d00773f86e617d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lb-footnote.html",
+    "gitBlob": "68e51249adbee46d40f27ed68e26c347a9dae41a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lb-magnify.html",
+    "gitBlob": "cdfc6ef1561544581e03d773bc89d9172fd34ddf",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lb-pin.html",
+    "gitBlob": "c4bb0390638a7bb299e3f476ff4f63ff36f29258",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lb-pullquote.html",
+    "gitBlob": "345e78afacb549ea69aaee767a21bbbd6294087d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lb-spotlight.html",
+    "gitBlob": "1e7bacdf9e4cbe1c21cd6169512d073835bed8b3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lb-sticky.html",
+    "gitBlob": "c6f96c34b33eb78a97550dc3e328c523019abcbb",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lb-tag.html",
+    "gitBlob": "56884cc79ced9f2a7e2537f247315c6e2856273e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lb-underline.html",
+    "gitBlob": "2af25ff6f19b75d478660eca554194cbd36f0075",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lower-third.html",
+    "gitBlob": "bc49d8904015b5da205df085c4a80e6665d87541",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lt-badge.html",
+    "gitBlob": "0073f663392c41a64d6d2abedb35e249788bdef5",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lt-barslab.html",
+    "gitBlob": "eaf97d56b7c14325de66b827d2a7560deb6f1e9a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lt-bracket.html",
+    "gitBlob": "200674f188cbe0c78a1a8396c504a323dad99e75",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lt-clapper.html",
+    "gitBlob": "dca3047ef1dd3c25abefb92df1aa7be80c3ebaf2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lt-highlight.html",
+    "gitBlob": "083785f0ea64ef4b19a49f112e6a29def68b9666",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lt-indextab.html",
+    "gitBlob": "722d48c6af22d14f6d7f4136fd6bb87550e9ea38",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lt-rail.html",
+    "gitBlob": "7ea5a185d7478107691cc4efc63a0e3683720b0f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lt-ribbon.html",
+    "gitBlob": "036886ea0c37d580259b4a99f93b029a09a44109",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lt-stacked.html",
+    "gitBlob": "b67588db7942983384b0b96d07d9938674ac9d46",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lt-stamp.html",
+    "gitBlob": "5d19c61c4c4ecf0a4f2eaca4c47c202204fad9d3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lt-sticky.html",
+    "gitBlob": "e73418952c5f1bfd09f202031b29e5c8aa30b585",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/cards/tier2/t2-lt-typecard.html",
+    "gitBlob": "305115c0a34a323eb54dd9abc44034278e2ea98b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/style.json",
+    "gitBlob": "8972b0d0c50198adebda163ac442c3154f259eab",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/01-vox-explainer/tokens.css",
+    "gitBlob": "b8ea3fd9700a1b99912b1663a2ce131ea5e5c5f6",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/DESIGN.md",
+    "gitBlob": "73ab5850b5c5f1a08dd9532633ec782661cd7b4b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/_preview/contact-sheet.html",
+    "gitBlob": "b096d4b4af9b423d9aea4ed6f4d40d22db55c3e3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-agenda.html",
+    "gitBlob": "282fcf59c4e0850748c528ea70ff3eef0ba0873e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-beforeafter.html",
+    "gitBlob": "735ed0b885fe226460630586fc2ac2b169c7caca",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-bento.html",
+    "gitBlob": "26bfc44728b0e7fb40aa786c8c6605e9e02543e1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-bigleft.html",
+    "gitBlob": "7a93c9e6da03f17328b9d5b033a5fbbd650265c9",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-callouts.html",
+    "gitBlob": "8e5c78d7b3743af5e97e2859745388b1893c7157",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-cardrow5.html",
+    "gitBlob": "bee26f81d2aa6d39fa9ab668a50faded5e5a01d7",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-checklist.html",
+    "gitBlob": "72aaf77c5db08ae7f25486cd6978182a7ae24dd4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-cycle.html",
+    "gitBlob": "114ce68755f5859dad5d6653f9b039975fce5bc5",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-dashboard.html",
+    "gitBlob": "9dab6c4b814c4c7602a616ca5f0639174b0f8b5f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-deck2.html",
+    "gitBlob": "b6b6151194bffa3a63cb51804fa5df90cc953b5d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-deck3.html",
+    "gitBlob": "fb774249d9499da1be2625b28716b6dbbda92c4f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-duallist.html",
+    "gitBlob": "a9a612c623b9bd892e547d441c7b83998ab368b7",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-featurecompare.html",
+    "gitBlob": "781fa537d074512af99212ae89a8fa3418a27d01",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-featuregrid.html",
+    "gitBlob": "8b0b11d35775435de5c40fe71c42dce897e4f8b0",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-flashcards.html",
+    "gitBlob": "9887a77c58e8c3788a4d2cb6ce805d67cf96e3c3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-flow.html",
+    "gitBlob": "08dfa20b18a3d6bd3ba0bb14c602caa2dd5d54bb",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-funnel.html",
+    "gitBlob": "60e121a5ca8ce1cd5bf3800a7676b634662dd0a3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-gantt.html",
+    "gitBlob": "96a6c6116eeb26871100cbb74b63ce1e9ba481de",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-grid6.html",
+    "gitBlob": "9afbd767e743b8a212e1935d1bc8366dbbbd85a5",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-grid9.html",
+    "gitBlob": "e92c34b9bf58407dbff5dbb28ff4975aea1418ef",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-iconlist.html",
+    "gitBlob": "97f6124fac3c8f3cb2636a83c1be23b362d67e94",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-journey.html",
+    "gitBlob": "d43d8c15eb67e7317ef9da07155282819f7e4236",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-kpirow.html",
+    "gitBlob": "7ddd3fb6e4556f55788ff2fc4b6d6717a5321fdd",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-layers.html",
+    "gitBlob": "e55ab5ec67a6eedbe817ea0ce8144ad14398fa03",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-legend.html",
+    "gitBlob": "a9116112013b7c5dbe2992d68d2e39aad8a35335",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-levels.html",
+    "gitBlob": "a48490307c779aeb0772752a2ec95025880c0154",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-logowall.html",
+    "gitBlob": "24b5c8e3a225c76f9e1e042abd05e72984cfafef",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-mappoints.html",
+    "gitBlob": "ae4da4b6c68a276cd2d9427131181b46c641ff28",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-matrix.html",
+    "gitBlob": "f9cf6a69b53b01ad398fed8873080054b2524c20",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-milestones.html",
+    "gitBlob": "7561cadf85a52b29c8ce54abd3f635fbebf10f5a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-mindmap.html",
+    "gitBlob": "2bb08bbb249b86630da1fe130477347b761ead2e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-nested.html",
+    "gitBlob": "4f8e19d92db90a225df7299153b3f0c7d0562706",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-network.html",
+    "gitBlob": "7f61984d384eb86390c5db499538f10f24c34b93",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-notifs.html",
+    "gitBlob": "64a9d05b28d8372c721fe08a7721cf1986417444",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-numlist.html",
+    "gitBlob": "87e6eb9745a303531b8157987a613b8166b170eb",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-orgchart.html",
+    "gitBlob": "afdf2b8cce88297fe8ad637aef64b13e7a02963c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-outline.html",
+    "gitBlob": "0b687f2aceb4abaafa282c31851dc7c50e037b2e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-phases.html",
+    "gitBlob": "e6affb71c707f2b86fe28fb7bce0516b8a24e201",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-pipeline.html",
+    "gitBlob": "f2ba01bd56d607563c9c24e3948d07e36b610411",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-pricing.html",
+    "gitBlob": "71df74bc578f9ba5c693e686310de9fac892beab",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-profiles.html",
+    "gitBlob": "867358ea93881d36ae5a251ee919395dc570b79c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-proscons.html",
+    "gitBlob": "0d51027944e27fe6414d49bf8a4367b13e862a7f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-pyramid.html",
+    "gitBlob": "ae094ab89d9f3ed12e9bcf4bc71cb2f50ff3d71f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-quad.html",
+    "gitBlob": "ec44662dcd37fd04fe2a61ae6200a3a9e21cd7e2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-quotegrid.html",
+    "gitBlob": "1e5883df125d338f0b4821de24d483a26ae72ba4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-ranked.html",
+    "gitBlob": "18e9fa82d55c070bb12f26efef4dd18abc0858eb",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-roadmap.html",
+    "gitBlob": "e424839181d12eba1274007e5c87e45cc5a39518",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-spectrum.html",
+    "gitBlob": "8a9c435af81f211672cbe1dcde08a714951e4d79",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-split3.html",
+    "gitBlob": "a02c621677708e1d8809355a7c94a8c092253b5c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-spotlightcard.html",
+    "gitBlob": "e779971be4a3753b8726e14c03b5254ae32fcb17",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-statgrid.html",
+    "gitBlob": "e4ce9a205ce6a147c186192d8fb17303ee08450c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-steps.html",
+    "gitBlob": "0b47b48c78360c6d65468de18103f814f2343346",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-summary.html",
+    "gitBlob": "e5db3262f8aa05056ff33ac6fc51ee1b4c9c75bb",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-tiercompare.html",
+    "gitBlob": "5c7628b0ea19b79b7d8abdc09c27ac83bb08792d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-timeline.html",
+    "gitBlob": "08a8249992b6b6132930f4a0c0b30ede41d30928",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-toc.html",
+    "gitBlob": "a7601bc02dceefdf0b2ce611b4c03c1009849b33",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-tree.html",
+    "gitBlob": "0711d89ce6f90632f7b668d37300cc653399d89b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-tricards.html",
+    "gitBlob": "a414062dbf336f00b507f9b991e5e18c61833594",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-venn.html",
+    "gitBlob": "f414505e2849ff7640d48c5e17e3b1476622a518",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-overview-vstable.html",
+    "gitBlob": "dfefc5263b33741668025eda87f7906a7cec5c09",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-ascend.html",
+    "gitBlob": "83ca61d17f7d14ee9af047c7cfa41297050089d9",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-aurora-bars.html",
+    "gitBlob": "cda0d244877cb1557439cc474e527aa2e5d385ad",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-beam.html",
+    "gitBlob": "d6fd28e3060d02985a423ca13bb9770a6e3ef4d9",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-boxed.html",
+    "gitBlob": "815ebc250a60045243038b83f4b3556dedd804a6",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-breath.html",
+    "gitBlob": "359df58009ed977bf86ef87a270b1c7ff339a1b8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-chaptercard.html",
+    "gitBlob": "53fa699b3caa03965805dbb7981100e3d9bb3c23",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-column-light.html",
+    "gitBlob": "04044c93843db4d81b9a0fc549fb21feb980ed54",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-constellation.html",
+    "gitBlob": "6018b8e5f8acd649f3e5327b392602b4c82e2dbb",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-countdown.html",
+    "gitBlob": "9c603f96420b198a6a1efda59218a3f58346507d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-curtain.html",
+    "gitBlob": "e2f04cb3d1caa535eca3fc997bf064b339b0704a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-dawn.html",
+    "gitBlob": "aea791c297cfb723e08522225b5017b5493ed41b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-depth.html",
+    "gitBlob": "24a1f37b933bc9d8b433d9b501a2ab9bbc99b80c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-divider.html",
+    "gitBlob": "c446bd7a20a95659a1c7826052df71a3012f0597",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-drift-grid.html",
+    "gitBlob": "1bf7f6b315681863d2a8f0c79a50e4ef78005763",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-duotone.html",
+    "gitBlob": "ae0eb83ebdb56ece602bc5c8967f6f29459b2dc6",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-eclipse.html",
+    "gitBlob": "e35082c8ec079c096c7dbc7915f16f097c8b2162",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-emblem.html",
+    "gitBlob": "663e674072e705825b8ae235b71a2d61c41e0430",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-flare-sweep.html",
+    "gitBlob": "15f851bddd67fb9c9308b5b58177d464eabb0035",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-glow-rule.html",
+    "gitBlob": "000885903236d5554dbcd9308c99e07f42426e4a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-gradient-word.html",
+    "gitBlob": "5e9539e908d58006ab1753e703c76c58cb522f36",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-gridfloor.html",
+    "gitBlob": "85c31dce8498e6ef72f2b9db11b6d0d510b2a6e4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-halo.html",
+    "gitBlob": "750170afd3baadfb557e399445a4ef21cf0f501e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-horizon.html",
+    "gitBlob": "6a0093e9c98ace1f427b8342b07fc58d8bf037ad",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-index.html",
+    "gitBlob": "dddfb34db84bd1b56a4ff49c2d6b9240743aca91",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-kinetic.html",
+    "gitBlob": "9fd27350d441ebb8c042131a434d78b1bf3a941e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-lensflare.html",
+    "gitBlob": "48f5af5f53e50b258b24b00c995c4b6c409d2dc4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-liquid.html",
+    "gitBlob": "9ee042c6debb828161131695ae4d070036a0c7de",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-marquee.html",
+    "gitBlob": "06e2c611f49517104ff925ba63e69922dbe97e98",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-mesh.html",
+    "gitBlob": "5413c16ee44210432878710c56aa47e60c8becc5",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-monolith.html",
+    "gitBlob": "05ef31c867310cc9d3ee36f46b4cba47d511b078",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-node-title.html",
+    "gitBlob": "66403b7aa89cfc6ac6fbd38c01e98ac31dd24e9c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-numeral.html",
+    "gitBlob": "6b28f5ae44d695b30ce09c24300b350b14fc9d54",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-orb.html",
+    "gitBlob": "8510661870f8dbcb6abe9c2b6464af034d23a9cf",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-orbit.html",
+    "gitBlob": "3b3da7d14c9c1debf061ccb7a13c6d916453cbca",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-particles.html",
+    "gitBlob": "aff5b1946ecc61f4196c7c8a8bcfc68664257ccd",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-pill.html",
+    "gitBlob": "ff5b54d3123f16d840e8937424b8fad761c91e4a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-portal.html",
+    "gitBlob": "151867d0a736a9c55346d7f9e4efb454d6d53818",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-prism.html",
+    "gitBlob": "250d2ad49a64a5613797c53eb001ff5a4c3307dd",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-question.html",
+    "gitBlob": "a4f463310d041d65501d3086c6fa3ad5a76374c6",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-quoteopen.html",
+    "gitBlob": "11edbd90a1d9932023cfc67ffe982c6b6eadd6d0",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-reveal-mask.html",
+    "gitBlob": "4b8dda6431fc480854587bf7c6e629b04609fe11",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-ribbon.html",
+    "gitBlob": "15c7db7757531c459670435593f9b76193e0ab0b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-ripple.html",
+    "gitBlob": "d9c1224372d1f580ecc2421f6c4c63e692901f14",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-searchbar.html",
+    "gitBlob": "d27041e7fdbecb71cee58a80a03607ff94ee946d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-slab.html",
+    "gitBlob": "76fbb9ea7bae25210cdf07059d80c57b211633d6",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-sphere-top.html",
+    "gitBlob": "7631e8537ee0cb12b6e39f89fe912f7a1f27bbf9",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-split-reveal.html",
+    "gitBlob": "286dcb4a7eaad63cd00dce75f5e5c16e8c3d9d1a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-splitpanel.html",
+    "gitBlob": "0a1d7395938693b05f6d54d1879e64cce597e1c0",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-spotlight-cone.html",
+    "gitBlob": "7a0a9d49bffe57dccf8c081ce100031b84694614",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-spotlight.html",
+    "gitBlob": "ef80b29e9da8d54a500683108bef769db29bc915",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-stack.html",
+    "gitBlob": "f22b87ccc071c656b4f7d3ae37eadac09fcd863d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-stacked-words.html",
+    "gitBlob": "26c12f114052d344fb358d302c43bfe0022a9ee0",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-starfield.html",
+    "gitBlob": "f907e2c2c663508b7c80291c858840f5c6f91b87",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-sweep.html",
+    "gitBlob": "4d36f46ed6da5efb8f938b22a8746cc2b591eed2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-tunnel.html",
+    "gitBlob": "3ed6c37b84c648c4c23f62a17d3063f7cb434707",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-type-scale.html",
+    "gitBlob": "9b95a8147710e2413e70efe2b63b18d82e18c539",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-typed.html",
+    "gitBlob": "31d91340cb1060ee9424f955f1682c4e680e3079",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-underline-grow.html",
+    "gitBlob": "29a5db5e1abaf5428eafe311daf0ad51450bc9e3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-waveform.html",
+    "gitBlob": "90b78b07c63656775e637c6a6dd2bd23c3677a55",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-section-wordmark.html",
+    "gitBlob": "0f9e63a4c7a161d8a0fea0c96dcfe432f36b8829",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-annot.html",
+    "gitBlob": "61eba529b9b99286a4b63e19be9a813dd82a40ea",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-beforeafter.html",
+    "gitBlob": "a2a261fd4bb77109750b03689efe1fb0e631a5f3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-bigpercent.html",
+    "gitBlob": "67ee72591a34bf14df3161230c79c0f7f83db443",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-bracketstat.html",
+    "gitBlob": "185d1eb6f55ea80366eefcd0902e331ba8172523",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-bubble.html",
+    "gitBlob": "b0166f70b4131a6fe39bb3c49c77c2b7958c2b5b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-cbars.html",
+    "gitBlob": "a99269c1aea8724b9f5dfec3b787755598f2f7a3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-clockface.html",
+    "gitBlob": "e170457c38c94e249d2bab39c8ed4e2fdec02a79",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-column.html",
+    "gitBlob": "49fbb19e85fdc3f3bd48c53a3312fac3cd771185",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-compass.html",
+    "gitBlob": "6a517211e9b93177624ba548ab441e05bb02b991",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-counterpill.html",
+    "gitBlob": "b380023098d520c03b2293a566117372acc8390a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-curve.html",
+    "gitBlob": "22ad1d258002f5c5fa3549396aa78c3b7e2d327a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-delta.html",
+    "gitBlob": "46b0d1a9e03e2d9d403b79d2e764f24ff6feeb77",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-dial.html",
+    "gitBlob": "5b25d28f94e0b63b78f10566e921624e8980cfa2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-donut.html",
+    "gitBlob": "ba0c66de734489c2a66d42898c6ab9d0c4dc2f74",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-dotgrid.html",
+    "gitBlob": "02b0a5c09f71e56f4e7b92d4692b4fa4248edddf",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-figure.html",
+    "gitBlob": "77dd7c0d6ee513b04fc63c386cf79af1479840f1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-fillshape.html",
+    "gitBlob": "8e7aaa2d9422f8673c31b9e2a999975e13fbd428",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-fraction.html",
+    "gitBlob": "7ddf6be16c16297991d52803bb96b0b16fd35c7c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-funnel.html",
+    "gitBlob": "12f78570ec6a5f93135d639d2251f8ad563f6219",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-growtharrow.html",
+    "gitBlob": "92f95d4bec33f801a6137dec0a03510b83327396",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-heatcell.html",
+    "gitBlob": "302e82aaf382b514ba5f5bbfe0aa39bbed78213e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-isotype.html",
+    "gitBlob": "0d548c96cdd50683e2e35dc0a49385882518d82d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-layered.html",
+    "gitBlob": "fe254ed0b41e57c7c1f28b360061be6a8cfbf809",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-mega.html",
+    "gitBlob": "b1c241a219f021d3addddf9650ee8c2026e56af2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-meter.html",
+    "gitBlob": "b74c120071defbdcd11c9ee772796229a4f370fa",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-milestone.html",
+    "gitBlob": "4af15f3d0d137efcc2fc9dfeeef9bd503489b123",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-money.html",
+    "gitBlob": "f9adebf3b44945daeff81466580563f38e3d4876",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-multiplier.html",
+    "gitBlob": "c1493cb0b55e7273b3df4c592fa0f4491bcc08f3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-multiring.html",
+    "gitBlob": "90d6d673967e44892135ce141b44de15ccf34361",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-needle.html",
+    "gitBlob": "553cdfbb845831819ed7246655a4841e7a6b403e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-nodes.html",
+    "gitBlob": "69c4d7cc967523b050ea2f80a1242baddb141f4a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-odometer.html",
+    "gitBlob": "7c3be3ac88effff1d8b41f3730fb6019cfca19a4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-orbitmoons.html",
+    "gitBlob": "324b4bfcc8ae9a803e4272c5efc6cf122c727bab",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-orbitstat.html",
+    "gitBlob": "672b1f508919af130c2a750019935aed469b223f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-pair.html",
+    "gitBlob": "cd19aac09b4ab9e62a8f98ac01569ee72542d686",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-percentile.html",
+    "gitBlob": "dbec0bbb3af5b232bf9d39c104b4b7cb8e25bcb2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-pictobar.html",
+    "gitBlob": "25ec95d6bf4ae74f3226ba31d7a8f6ca770b7d9a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-polar.html",
+    "gitBlob": "c82d7e956a603b6831c2d101bc35b7cda8a22946",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-quotestat.html",
+    "gitBlob": "9a0cce8059164e136de02381430bfbef1c41083d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-radialbars.html",
+    "gitBlob": "a20d4a48c092c98be2b0c1cfb033e41e1056f1c7",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-range.html",
+    "gitBlob": "b6222a9ffc9c9674068542b02b8814f398455178",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-rank.html",
+    "gitBlob": "dc22a43bfe40e227b9706395211fea9e140311ee",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-ratio.html",
+    "gitBlob": "dc495f424c72b47cad325abb5b3660e7499d0eb2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-ring.html",
+    "gitBlob": "720998d0bb72043c51f679c7a5f290a526aedffc",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-risewall.html",
+    "gitBlob": "092caf0a0f13a1fcae6b57549bbd4f0d16451c16",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-score.html",
+    "gitBlob": "0fa4a55a68e1388a1db8a9794b9a6b4b664cdc0b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-segbar.html",
+    "gitBlob": "2078d97058be95cb2348ceec55ccbf56e9310210",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-semigauge.html",
+    "gitBlob": "68b3519836d69d8007cb10ff1921c65fc5cb999f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-sparkline.html",
+    "gitBlob": "da4e7a1a7207d829c6d7e419bb90954a749042ea",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-spectrum.html",
+    "gitBlob": "1c23293be2e4c6f9f2e6a0a7da8e12c65e4da417",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-split.html",
+    "gitBlob": "dbe65047d42198a78d989057c465d918c7233055",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-stackedbars.html",
+    "gitBlob": "c4f717925d74097b79122b9dc304bb3da90dd94d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-tickerstat.html",
+    "gitBlob": "b613740ffdb1b2f54acab1553551dbd2ba30cc93",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-tiles.html",
+    "gitBlob": "433977d567ffa48c97d0f137b4913684bb5d2a24",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-timer.html",
+    "gitBlob": "9e34ab141cd4abcc6913e45bc2e19253bc932269",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-trendline.html",
+    "gitBlob": "1c33583a4c21a35a46ec2904e616bb6600af0f22",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-underscore.html",
+    "gitBlob": "9d6f2ad2352471ac7653c7859e108694c8d2e812",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-versus.html",
+    "gitBlob": "78d17bdf033a2be4fd6f50786841b03d32eb5af6",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-waffle.html",
+    "gitBlob": "280532d282b11092ab680873e48f3da425637e4f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier1/t1-stat-waterfall.html",
+    "gitBlob": "dd0efdf128d275f3f8a3988c49551ccd4bf3c092",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-badge.html",
+    "gitBlob": "b8bf00c0786c643801c3e30f44e5a81ded94a3ce",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-brace.html",
+    "gitBlob": "7dcaf8f54576146514c94bc3ba84bb4df8349fb1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-bracket.html",
+    "gitBlob": "e892fee3fc9cbe1fc616e1c1eb0a0e7dae927f69",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-bubble.html",
+    "gitBlob": "18b1bd57924569012ba1910bb7e3b9553b2fcaa7",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-byline.html",
+    "gitBlob": "03a41eb1bee74dc43e9a5ee59a6d4ed69f5bdba1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-callout.html",
+    "gitBlob": "7e9e2b1d84983d59b31c70f1a44aada154ecf81e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-category.html",
+    "gitBlob": "4bb3bda88cd9876aa787c10359c04e5b37e0ef9c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-checkmark.html",
+    "gitBlob": "391a0de2e25cc6442abf9341b9ed67bc69870d48",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-chipstat.html",
+    "gitBlob": "fa3e03e16854feccb54356feb52d1adb0138d8c3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-comparemini.html",
+    "gitBlob": "c75dc9efd9409c3409b4e601b8381006b20d9744",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-coord.html",
+    "gitBlob": "54d7b1d40299dadcc71efe7e5c1302c81c48db95",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-counter.html",
+    "gitBlob": "418755f21fed30b47b72b98541c3f5ae4612ba8c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-crosshair.html",
+    "gitBlob": "b261bf35be1efdf0b3fde6e10b5cb6276dadd56f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-dashed.html",
+    "gitBlob": "036ca93a75fd3e72603d4a29e0019ed15d19e20e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-definition.html",
+    "gitBlob": "7d926c259aa5ae3411833d7d63e415c33a6f1ad4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-deltachip.html",
+    "gitBlob": "5094b420ada591b577bebef62147496144eb4155",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-eyebrow.html",
+    "gitBlob": "18cb3372fa6d524f47f3ff1a670ae536bb21b60f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-fact.html",
+    "gitBlob": "830a9c23e9588b2b47dd09e95fa217ad21bd515d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-flag.html",
+    "gitBlob": "00f4274567b92e61f7e682300d45e099f7c57413",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-formula.html",
+    "gitBlob": "d789f199827b2129e2a53f46a6696123fc3fcad2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-hash.html",
+    "gitBlob": "6211de8f5baefb8ade82aea7e49151089e6f157e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-highlightbox.html",
+    "gitBlob": "be7e368e1c859496c154bd0ab56449b741417770",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-iconchip.html",
+    "gitBlob": "72e06518bfbfd0f53b8b0e105f80fbb95586185f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-info.html",
+    "gitBlob": "ba21f1e142249d26007520760d66a41d701abeb6",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-infocard.html",
+    "gitBlob": "d38394cfb8b0bf926dba7d0198dba4d40f57bdc8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-keycap.html",
+    "gitBlob": "b53e488204cf797571c203d5bc56ea9022e89792",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-keyword.html",
+    "gitBlob": "421427671e77491a27dccd785ede2d854366a660",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-leader.html",
+    "gitBlob": "ea2d3a653334369d1301bf45e50fad4f2dad4c50",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-legend.html",
+    "gitBlob": "6b97b6be2f76e89badb123cc97b11938fad5a7e2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-measure.html",
+    "gitBlob": "fea2c936c2304e5ba1ab18b21e761ea194646218",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-meterchip.html",
+    "gitBlob": "2c1f666481a80f77fb3d9853312a1c45235a194d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-metric.html",
+    "gitBlob": "44312e9f2fbadcd8de9c283220b2c8bc866f8614",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-micropie.html",
+    "gitBlob": "2b0cccc559c668ef239e0990633a5a39bf7fac8d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-minibar.html",
+    "gitBlob": "caa741f17b8860de0d06bf43dcbc8af656a1b52f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-node.html",
+    "gitBlob": "901513cf1001ac13822116edf25aa69ad3afbb40",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-note.html",
+    "gitBlob": "a0b20a6e1993296e8ecde20f9e7796fdb03447b3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-numbercallout.html",
+    "gitBlob": "4d21df9ca6961fb4b8ead5852c0c9935198c10c3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-percent.html",
+    "gitBlob": "244ced3fe9bf6d8e93d42f1107109aa8da1b0ee2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-pointer.html",
+    "gitBlob": "d361e521833b685c9945f791e352c82dc232a312",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-price.html",
+    "gitBlob": "1dc2f0b52fe420002abaf71d2362926d87261005",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-progress.html",
+    "gitBlob": "94bcd06d99d3995820b5d044b0f3c64207e2137e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-pulse.html",
+    "gitBlob": "c9122fbfdb8ea5ff7b1a7f2387b89cfa34298167",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-qmark.html",
+    "gitBlob": "6c05334d941f5cc8dd9cf2113275e6cd9916d526",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-quote.html",
+    "gitBlob": "00de27772bba1f899f95379aaa6dcca6503a5aa4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-rating.html",
+    "gitBlob": "f374509e0ee4f3c326f531fc2660a6ee70938ee0",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-ribbon.html",
+    "gitBlob": "5242e1ef505cdbb01b6d1131ceb4df82c04ba268",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-ringmark.html",
+    "gitBlob": "9825835b64da4986ac0fecb418765e0eeddd8d85",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-search.html",
+    "gitBlob": "7f1834fbb45c44154febe6a388f7210237634706",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-sparkchip.html",
+    "gitBlob": "cebb86d2d0ca30d521d64839323484cf9b098db3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-spec.html",
+    "gitBlob": "20c87c224595260161c34fc68f6e4df7e199e5e1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-status.html",
+    "gitBlob": "55bac826f1fcd89f642129c2bfd4b99cca89242c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-step.html",
+    "gitBlob": "a5536a43e3eb48bce13c342908dfe6a9d365d4b6",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-tag.html",
+    "gitBlob": "2324931028106f4ae5dece0a8450dae5aa3c1b88",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-takeaway.html",
+    "gitBlob": "647c6b148d2b1b059ac7a1cc75f2072142e49003",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-tcode.html",
+    "gitBlob": "205655d7e4434382a44f79ec7c68c78477351d06",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-timestamp.html",
+    "gitBlob": "41186962d81ec10bba3e17bd7c801e9990d803a1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-toast.html",
+    "gitBlob": "1ff58d67be844b7d675c42a683a31bb3a00dec95",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-tooltip.html",
+    "gitBlob": "c41bb5738e85d4202abc7b313605f6f3e3b3b485",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-underline.html",
+    "gitBlob": "a97a1bc24c95dbd6f5eded9299173ad4fb4931ea",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lb-warning.html",
+    "gitBlob": "04d9a32454d3ba2ce70ce6dfbf4aa4575a6153bd",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-avatar.html",
+    "gitBlob": "6e93d148efe7c9d7c755dfcaae067a1021d45eb7",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-badgecard.html",
+    "gitBlob": "5e4e6f57cbd9f3b9c6855b685b3404186d16b7a8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-barslide.html",
+    "gitBlob": "609ee38d586b21070392dd5812df3875df04d33a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-bracket.html",
+    "gitBlob": "e4c91ebd76a0c30bfb790da04bae5378311cb6dd",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-brandbar.html",
+    "gitBlob": "9ad2de2ae1dece8fc287f656bd32aff79c10a167",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-bug.html",
+    "gitBlob": "4153fda1296adc5115403050f22d720282b09b7c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-capsule.html",
+    "gitBlob": "c2da82e01c33fa9de20dd951c60d59f7cffa74cb",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-chapterbar.html",
+    "gitBlob": "0286cd51f8e54887062bff3dee1fd71dce64e568",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-chip.html",
+    "gitBlob": "9884dfb0bc87d4f6611d81a629a12eac3c4f7970",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-cinemastrip.html",
+    "gitBlob": "420bddb3101d4535bd0226a19389ee1f471a137a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-cite.html",
+    "gitBlob": "7ea6d35f75205ebe360eb53bb1e55805ede38a7d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-clockname.html",
+    "gitBlob": "3fccadce366cb26d57c0473c3751ddac246afb0f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-coordbar.html",
+    "gitBlob": "13894a7b18e986fe621a7e4f70ff1666168ebc66",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-corner.html",
+    "gitBlob": "ede3514b80fea3482420dfe26c829931adb25324",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-cornerframe.html",
+    "gitBlob": "97e0a38f925209099580c9ddfff89142a03b180b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-countbar.html",
+    "gitBlob": "308d658e6673a4ddbe2b4e7dabc80cafa0abd881",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-dividername.html",
+    "gitBlob": "e35cc3fb0e41882c9fbf418a59e3c0c282fb07cb",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-dotline.html",
+    "gitBlob": "c96cd4c88bf6442474e5bced79ef8717126286d8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-doublecard.html",
+    "gitBlob": "e104d4db0f6484e32f6fe10af21b995ae16973c1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-dual.html",
+    "gitBlob": "bf105b7e57e494592196887fe3e5de827f4d9eaa",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-edgebar.html",
+    "gitBlob": "ff350936f50be01a4f1b327656b3c7be4e4f3160",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-flipcard.html",
+    "gitBlob": "a44f47e40b2da110eaeabac0aaa90d8658daf0e8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-geopin.html",
+    "gitBlob": "9c63fa907e14089704ce5a734505936a25ff1bf1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-glasscard.html",
+    "gitBlob": "b9092dce243744297c2ac30632944c4b7f851c23",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-gradient.html",
+    "gitBlob": "042d4523725d6f0f89af81cddd4513a785a802d0",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-gradientbar.html",
+    "gitBlob": "f893360b29c7d16738f2f0b876050c8173336533",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-handlebar.html",
+    "gitBlob": "bf93b8443f41e8b3de7fb18d23d2acaf84c294d6",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-infochips.html",
+    "gitBlob": "04709a34e840048a569d1ecfef3be77e380bea2c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-lensbar.html",
+    "gitBlob": "89d0b945df90e3a2d29be686db3bc976b00cbeb0",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-live.html",
+    "gitBlob": "b927cc70ac6c97c56949644e90357e23d720038e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-location.html",
+    "gitBlob": "912bd416d1bc1effe094e3403ee5e1a76fb74f3a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-logolock.html",
+    "gitBlob": "b333df0c8198f9cd5677933a81f1314eda411b71",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-micname.html",
+    "gitBlob": "59b53306f446b445051fa7d5fd81694ba73670e1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-minicard.html",
+    "gitBlob": "9ae34d4533b6ffd4cc999ca3595f35e6cf9a0874",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-minimal.html",
+    "gitBlob": "4f0bf07b5a65d4891e3f605b4712dab5621f02a3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-nameplate3d.html",
+    "gitBlob": "df709d0a07adf5b892089a83d9be4011bb2210ce",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-neonframe.html",
+    "gitBlob": "44dec027745cd743f99ae1ef7eeabfc8b5885826",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-neonpill.html",
+    "gitBlob": "b9dcc71ba9b4f6d8c9f8ab4424cda66ef42c3cdd",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-nowplaying.html",
+    "gitBlob": "39f7ae4c1fcf1e1736ad0b866a9ccefea2c06911",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-orbitbadge.html",
+    "gitBlob": "dd8940fdfc504de69f1d8ce66d1a3c6a8dae5afe",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-pill.html",
+    "gitBlob": "8c032f390db42435f27c42adccb0197c75351a47",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-portraitframe.html",
+    "gitBlob": "89d43b546d0e90b54bd46ba4246748abf8a79f61",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-progressname.html",
+    "gitBlob": "f4a086b0d0e986e5af61e46de70c976436e94fd3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-quote.html",
+    "gitBlob": "c0295230ea660c05e883fb9a811b06fd920876d9",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-ratingname.html",
+    "gitBlob": "d1dee0acac6a33093bede991cb96c188f0115859",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-ribbon.html",
+    "gitBlob": "552b481176471ecb6873daa5cae728d03229b6cc",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-sidebracket.html",
+    "gitBlob": "31b61d89aaa91c3b84d32316ba81cb5a6e16d0a7",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-slidetab.html",
+    "gitBlob": "3cba50d3d6641d7c5b2b77343cdf166574f28114",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-social.html",
+    "gitBlob": "39f9447321d801a9c5b733c1e2a27c533887bc79",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-spotlightname.html",
+    "gitBlob": "0b62cbe388f4aa51e224f499c0a320be1c2c9142",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-stacked.html",
+    "gitBlob": "de0f7522e7ddee79e29ea140aa71e1f9202e9cf8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-statline.html",
+    "gitBlob": "977f69f975b6627f73b7a4c5e5c99ac15f5a5882",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-tagrow.html",
+    "gitBlob": "e801bbc7dd0d692a3c137d94b9b72e8ffba4fcf3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-thinstrip.html",
+    "gitBlob": "33423540181af53abf9d51b6e20bae5650cc9bf1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-ticker.html",
+    "gitBlob": "817f841fa60420cb87c848218a728b554317479b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-titlebar.html",
+    "gitBlob": "c4bdca8585f123e042e16b5794fef69b1ea51787",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-trust.html",
+    "gitBlob": "ebb30fbe8a94e6bd8d3f727510a5d06a676152cf",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-typedname.html",
+    "gitBlob": "7c0057d3f3283116127af2838bf2e74df9e76420",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-underbar.html",
+    "gitBlob": "14cd053230eade93615ba2474d45118721a3dbbf",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/cards/tier2/t2-lt-waveband.html",
+    "gitBlob": "6ca31d7a6a149d6fe02f232b6a5a7cf6aac86a59",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/style.json",
+    "gitBlob": "64ee29a61747dab3d745940cf861c0c1b29dbfcf",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/02-kallaway/tokens.css",
+    "gitBlob": "ff9c783b57d7ca46a4c94b1eaed1cdaea1b9c4f0",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/GUIDE.md",
+    "gitBlob": "c36fecf84b99a6c901a5fdaed082c0669d174bee",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/_blueprint/DESIGN.md",
+    "gitBlob": "a9bac9b1885b4e1ffb609e136fde4272fc32fe3a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/_blueprint/cards/tier1/t1-stat.html",
+    "gitBlob": "f883075e97a8049ee5082c01d68c9e6a5cda3ef5",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/_blueprint/cards/tier2/t2-list.html",
+    "gitBlob": "d4172332e2929c2e7e7920be9407148908c474c4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/_blueprint/style.json",
+    "gitBlob": "709078bab9582c8a6e9ad002ee1ef40cff2b4ffa",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/_blueprint/tokens.css",
+    "gitBlob": "06bd9723215ce8cf94b4ba11b4a9d4c3badfa33f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-library/registry.json",
+    "gitBlob": "c0facf1bc267f09297be7939eb9d4963834958e2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-templates/README.md",
+    "gitBlob": "1a2bc0f356937c89a71feaf38dfeac27daeaa233",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-templates/dark-graph-paper-template/AGENTS.md",
+    "gitBlob": "3a4b46cc528a88737cc608ffebb8d2035cbde74a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-templates/dark-graph-paper-template/CLAUDE.md",
+    "gitBlob": "3a4b46cc528a88737cc608ffebb8d2035cbde74a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-templates/dark-graph-paper-template/DESIGN.md",
+    "gitBlob": "cfca81a3429d4023f485120402a63f14066a4369",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-templates/dark-graph-paper-template/hyperframes.json",
+    "gitBlob": "5fb1d6d872f5ecb406008695d86ae69f4216b465",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-templates/dark-graph-paper-template/index.html",
+    "gitBlob": "f09f2dc04a38881a406c47427b038a5d445d4078",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-templates/dark-graph-paper-template/meta.json",
+    "gitBlob": "5b6af045d5c416c817088b2981d5a509f8de96c9",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-templates/dark-graph-paper-template/package.json",
+    "gitBlob": "7b3b804bddb908a1341da3d531cbf96d7101bd7a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-templates/left-glass-popout/AGENTS.md",
+    "gitBlob": "3a4b46cc528a88737cc608ffebb8d2035cbde74a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-templates/left-glass-popout/CLAUDE.md",
+    "gitBlob": "3a4b46cc528a88737cc608ffebb8d2035cbde74a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-templates/left-glass-popout/DESIGN.md",
+    "gitBlob": "e95272270f3efc00ae2287f5200d26cee9f96bff",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-templates/left-glass-popout/hyperframes.json",
+    "gitBlob": "5fb1d6d872f5ecb406008695d86ae69f4216b465",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-templates/left-glass-popout/index.html",
+    "gitBlob": "fb8d8f079a241f55192720a332df0943b9887480",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "style-templates/left-glass-popout/meta.json",
+    "gitBlob": "620dadcb0bad0f785a00bc3d39cb8d5d1c66ea93",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "tests/editing.test.mjs",
+    "gitBlob": "04395e49dc2070815ead00ffca3602478c3b0ff1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "tests/short-form.test.mjs",
+    "gitBlob": "08c09037848effe345daec83fa5c631fc91480e1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-app-release/HANDOFF.md",
+    "gitBlob": "263f7870b37768295a9f9cb021ca100672948a15",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-app-release/STORYBOARD.md",
+    "gitBlob": "cffd7104694d6ad7a9a841903e5b7a70b27176e8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-app-release/assets/AIS Logo PNG.png",
+    "gitBlob": "da884517d8be8195ae7968680dac8f62d35ec86a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/aisoc-app-release/assets/avatar.jpg",
+    "gitBlob": "d5ca2e945b540ee8a9e7ea7d92826ad43ce61288",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/aisoc-app-release/assets/brand-tokens.css",
+    "gitBlob": "73a3ad3874e134997804069d47e5ce8f50fd13c5",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-app-release/assets/music.mp3",
+    "gitBlob": "b063eb631ce3b6f5ddd15a762ea619785f85e6eb",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/aisoc-app-release/compositions/ambient-bg.html",
+    "gitBlob": "4bc20c71e3d559b527421c1be8fbdc0f49e646a4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-app-release/compositions/components/grain-overlay.html",
+    "gitBlob": "8cdc707bd217290808c179b485aeea644ee9cacc",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-app-release/compositions/components/shimmer-sweep.html",
+    "gitBlob": "84d3be4eb97d2f58c86c3fa8d55810ae4232187b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-app-release/compositions/instagram-follow.html",
+    "gitBlob": "9fc4b33fcf883cac6e8a3ed77f1f1da8da021610",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-app-release/compositions/scene1-hook.html",
+    "gitBlob": "b9e95065fb5553d907f477018d37720adecfcf76",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-app-release/compositions/scene2-tease.html",
+    "gitBlob": "d650af1ffcfe7cb240dc690d618584f9f22a97af",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-app-release/compositions/scene3-reveal.html",
+    "gitBlob": "f60bf60c621a47fd5e7d3b5ac59cfa3e3e00fb5d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-app-release/compositions/scene4-showcase.html",
+    "gitBlob": "75ae4ce131e4e71cb12fd7d29e3f873f36c5ea6e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-app-release/compositions/scene6-instagram.html",
+    "gitBlob": "4d99fe5ba2304211c6146925af9515c62cde41ea",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-app-release/compositions/scene7-outro.html",
+    "gitBlob": "4109359a99031b956f93661618d1f9b34295eac0",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-app-release/compositions/x-post.html",
+    "gitBlob": "eeb9ffdacd6fe9da2ddcd6a1fee108de7c233329",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-app-release/final.mp4",
+    "gitBlob": "0a5a30d00e038784fcbe4fbb589b36b0620f7db9",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/aisoc-app-release/hyperframes.json",
+    "gitBlob": "7894b4c381d6bccf79426b4c16ef3a9bd4be4228",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-app-release/index.html",
+    "gitBlob": "4f6caf5a651a09f7dcdd5bb95d41b93b7a746eed",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-app-release/meta.json",
+    "gitBlob": "137c183831537163cb008ceba8338f3658b36480",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-hype/assets/AIS Brand Guideline Small.jpg",
+    "gitBlob": "8a5a438c93c7605c5dd47d833d7ab9a709b82bec",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/aisoc-hype/assets/AIS Logo PNG.png",
+    "gitBlob": "da884517d8be8195ae7968680dac8f62d35ec86a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/aisoc-hype/assets/brand-tokens.css",
+    "gitBlob": "73a3ad3874e134997804069d47e5ce8f50fd13c5",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-hype/assets/music.mp3",
+    "gitBlob": "b063eb631ce3b6f5ddd15a762ea619785f85e6eb",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/aisoc-hype/compositions/components/grain-overlay.html",
+    "gitBlob": "8cdc707bd217290808c179b485aeea644ee9cacc",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-hype/compositions/components/shimmer-sweep.html",
+    "gitBlob": "84d3be4eb97d2f58c86c3fa8d55810ae4232187b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-hype/compositions/s1-hook.html",
+    "gitBlob": "09c91f2240d9e98cea826511b3016b3e390c64ed",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-hype/compositions/s2-reveal.html",
+    "gitBlob": "8ff002ede6e26cdddc22c8913bb293f68cea1047",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-hype/compositions/s3-proof.html",
+    "gitBlob": "9e4acd826338685a8b8e8ea59519898e3614d0c3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-hype/compositions/s4-pillars.html",
+    "gitBlob": "20523622c992107d037fee475523fbe7272cb94f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-hype/compositions/s5-cta.html",
+    "gitBlob": "88ca699e6ab22f4c2a22e4fa5d90856601c470e7",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-hype/final.mp4",
+    "gitBlob": "7f8967c56cf1c7f30d8eeb47d3a0c2a3c48065ce",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/aisoc-hype/hyperframes.json",
+    "gitBlob": "7894b4c381d6bccf79426b4c16ef3a9bd4be4228",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-hype/index.html",
+    "gitBlob": "6cd76f7e5f295e4897fbc58a4897a31307a49fbf",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-hype/meta.json",
+    "gitBlob": "1f3e8af9395b5a74bbfdb1fc6f54fabc50054363",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/STORYBOARD.md",
+    "gitBlob": "d54c26a9e8bb9ac7ad3e91f313e2e2abed71f763",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/assets/ais-background.png",
+    "gitBlob": "9981cd0c0f2e4b27569677334dc4e1143d1d19c9",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/assets/ais-logo.png",
+    "gitBlob": "da884517d8be8195ae7968680dac8f62d35ec86a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/assets/brand-tokens.css",
+    "gitBlob": "73a3ad3874e134997804069d47e5ce8f50fd13c5",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/assets/lesson-5.1-stitched.mp4",
+    "gitBlob": "d7ea51bc5a3a1e08ada7769c9927c857ddf09a7a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/assets/lesson-5.1-stitched.wav",
+    "gitBlob": "9b9e3eb0424648c1210bb66f7a47c54ae3947794",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/assets/transcript.json",
+    "gitBlob": "939cf6dbb9adabbce433061f26ec61d18cb3d1e4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/compositions/sections/01-hook.html",
+    "gitBlob": "1d057cc970376b0b6e96220f80e2fc13d57a420a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/compositions/sections/02-cost-of-hesitation.html",
+    "gitBlob": "95c0599f95d71a3fde5af2281c9cc94297b20a77",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/compositions/sections/03-missing-pieces.html",
+    "gitBlob": "db991183ff6f89063cae78993138e1064c13767f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/compositions/sections/04-promise.html",
+    "gitBlob": "e31a73c84a022af8172089d4af86dec5fdaaf113",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/compositions/sections/05-relationship-tool.html",
+    "gitBlob": "ee69433b77fe0f36e36876a50dbb24a131a5c22a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/compositions/sections/06-cold-prospect.html",
+    "gitBlob": "ef2da70ae8888a5abcfd6604a54907d521f8a220",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/compositions/sections/07-two-paths.html",
+    "gitBlob": "265c8726c703c8bcf76314fee05ba9506dc2866c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/compositions/sections/08-when-not-whether.html",
+    "gitBlob": "d9dc2b2a43534581c21563ff461f8690a43bfa22",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/compositions/sections/09-three-signals.html",
+    "gitBlob": "dff83503a6e1c3843c287e0262a9a64948f03178",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/final.mp4",
+    "gitBlob": "7e34a1b75fa0ad9a77dac4f2a1ebfa06d12bdf0a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/hyperframes.json",
+    "gitBlob": "5fb1d6d872f5ecb406008695d86ae69f4216b465",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/index.html",
+    "gitBlob": "c419b9816a3a1bd2f1bd57210ee364e7c7d591ba",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/aisoc-lesson-5-1/meta.json",
+    "gitBlob": "30c8d44ca44a336c6c235579558872433ded9351",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/claude-edit-intro/.claude/launch.json",
+    "gitBlob": "72f4cf2179f1f0ca49a0ae794772a333999c9cd5",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/claude-edit-intro/.debug-studio.mjs",
+    "gitBlob": "c58783033981065b821bac69b473b832b6b97971",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/claude-edit-intro/assets/brand-tokens.css",
+    "gitBlob": "73a3ad3874e134997804069d47e5ce8f50fd13c5",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/claude-edit-intro/assets/claude-edit-intro.mp4",
+    "gitBlob": "95e8b37b3f10903ba4db713e325ccf99952c7b2d",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/claude-edit-intro/assets/claude-edit-intro.transcript.json",
+    "gitBlob": "e9b858aeb1f7124fd5bebf3ec2cc97287782dbe3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/claude-edit-intro/assets/claude-logo.png",
+    "gitBlob": "333771f4b750063d49b37bb0b409ee8a861faabe",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/claude-edit-intro/assets/music-bed.mp3",
+    "gitBlob": "b063eb631ce3b6f5ddd15a762ea619785f85e6eb",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/claude-edit-intro/compositions/01-hook.html",
+    "gitBlob": "474acbd81b41cf54edc52baae4a89c7bc59c73d9",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/claude-edit-intro/compositions/02-text-on-screen.html",
+    "gitBlob": "47a8f9aca9215e4ddd1f4182fbb1f372e07fb93b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/claude-edit-intro/compositions/03-karaoke-captions.html",
+    "gitBlob": "13c1bed1c4c98e1b46564581fcf19f56d22eadf3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/claude-edit-intro/compositions/04-mg-and-charts.html",
+    "gitBlob": "58f649566b1feb0218deddd20892839b879866bf",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/claude-edit-intro/compositions/05-pip.html",
+    "gitBlob": "d5ba2eb182ad2988f958bb87c058a7c3d132c3fb",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/claude-edit-intro/compositions/components/grain-overlay.html",
+    "gitBlob": "8cdc707bd217290808c179b485aeea644ee9cacc",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/claude-edit-intro/compositions/components/shimmer-sweep.html",
+    "gitBlob": "84d3be4eb97d2f58c86c3fa8d55810ae4232187b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/claude-edit-intro/final.mp4",
+    "gitBlob": "8fb6f586ada104bf99331d5465bd548aea72b1fd",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/claude-edit-intro/hyperframes.json",
+    "gitBlob": "5fb1d6d872f5ecb406008695d86ae69f4216b465",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/claude-edit-intro/index.html",
+    "gitBlob": "60cdb8e802e63f0410420a4bf1312ff0949a2aab",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/claude-edit-intro/meta.json",
+    "gitBlob": "3481bd476ba8e811ee2aec6a63096d58a5dbf623",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/clickup-demo/DESIGN.md",
+    "gitBlob": "30796ebfb1d7bd35f01076194df09843c37085c8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/clickup-demo/assets/logo/clickup-mark.png",
+    "gitBlob": "1dabd2802a4978add821db241fc0458f15115656",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/clickup-demo/assets/logo/clickup.jpg",
+    "gitBlob": "ed7d38ad6e4b92bca17e36c5d0daf1c99bc03146",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/clickup-demo/assets/recordings/brain.mp4",
+    "gitBlob": "49f79d01394f95958d390eb30d9d0e05e88139d7",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/clickup-demo/assets/recordings/raw/brain.webm",
+    "gitBlob": "78641832668ee47e078808fad0fb667516d78d80",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/clickup-demo/assets/recordings/raw/task.webm",
+    "gitBlob": "f09dbc3ff7ff899c9dfda1c286fd0ef186044817",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/clickup-demo/assets/recordings/raw/views.webm",
+    "gitBlob": "d4624c03cb4255effee587df40a1f406c70380c1",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/clickup-demo/assets/recordings/task.mp4",
+    "gitBlob": "ba882715a58d91b8873ca2bd544ef7e160fb41a1",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/clickup-demo/assets/recordings/views.mp4",
+    "gitBlob": "8fe6d791ba764383e79c182f84989b4d4992b565",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/clickup-demo/assets/stills/01-list-clean.png",
+    "gitBlob": "4d276eb4466845917d79588d9364ee32dc933656",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/clickup-demo/assets/stills/02-list-hover.png",
+    "gitBlob": "5a23c7beea0ef35d50e951f9f6f9513a5425c7ea",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/clickup-demo/assets/stills/03-board-clean.png",
+    "gitBlob": "91c7c47cb8499621185dc8969a5a12de7308674a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/clickup-demo/assets/stills/04-board-hover.png",
+    "gitBlob": "6322b97defbcb832e89a9cc9d37d319e0f4cc00d",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/clickup-demo/assets/stills/05-task-detail.png",
+    "gitBlob": "c1804e45463cfec9c30a4eb00fb40b7343bc65f5",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/clickup-demo/assets/stills/06-task-detail-scrolled.png",
+    "gitBlob": "1a8abe6f1ff64d71b42c1d4ba197c18eed72b9ee",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/clickup-demo/assets/stills/07-brain-clean.png",
+    "gitBlob": "54bd075366b13c3f11142f50d2d76ef3a8844cd0",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/clickup-demo/final.mp4",
+    "gitBlob": "847d0b40b35583bb12291478d7e1b4275e1b0a8e",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/clickup-demo/hyperframes.json",
+    "gitBlob": "7894b4c381d6bccf79426b4c16ef3a9bd4be4228",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/clickup-demo/index.html",
+    "gitBlob": "add293f5c7483eed7e473a3842d9c0ca895e7a37",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/clickup-demo/meta.json",
+    "gitBlob": "19b8daf004812be15ee1ab0a4e1394f694747b8f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/clickup-demo/scripts/capture-brain.mjs",
+    "gitBlob": "96ab2528e8192678a4a93c955861b90ebf91941c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/clickup-demo/scripts/capture-stills.mjs",
+    "gitBlob": "4fa66b849c681e634d2f9fcf73117d2ec3239156",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/clickup-demo/scripts/enrich.mjs",
+    "gitBlob": "63511559716b9d65dc1fc722458976db9628345d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/clickup-demo/scripts/inventory-full.mjs",
+    "gitBlob": "655d9d74e8e78660dcb926babdddbca0ae1d3d71",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/clickup-demo/scripts/inventory.mjs",
+    "gitBlob": "fc0ea3065c9a3c78c18d09961c2fa5e8927c6d14",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/clickup-demo/scripts/open-for-login.mjs",
+    "gitBlob": "a5fee5b4f6c1f4262b9d9119504624723477cd24",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/clickup-demo/scripts/populate.mjs",
+    "gitBlob": "a56bca47ff4d6b0dc83c289104e4d009d30af5f8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/clickup-demo/scripts/probe.mjs",
+    "gitBlob": "a6d76767263bf12d3852d4a862b53d74526c655d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/clickup-demo/scripts/recapture-brain.mjs",
+    "gitBlob": "85bd6458789e0ae6aace1f3bdbf6e1765ca18ed4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/clickup-demo/scripts/record-flows.mjs",
+    "gitBlob": "680009270bf8ca5c9bab68bef475061aa57650ae",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/clickup-demo/scripts/snap-cdp.mjs",
+    "gitBlob": "90c604d7afab1b7d4de57947d96eebdb4c9890f8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/clickup-demo/scripts/snap-list.mjs",
+    "gitBlob": "0ea2e7dcdc48ed339730b5360ce7102c7489ea8e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/clickup-demo/workspace-context.json",
+    "gitBlob": "9464a2a050423f225e094736974108ddbaadb6fa",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/design.tar.gz",
+    "gitBlob": "12d7553d298645edef97859dd938f7c0d1839b00",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/README.md",
+    "gitBlob": "ad327fbfe59cbf501ab1bdad32e3808eb078f736",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/chats/chat1.md",
+    "gitBlob": "9c21724fe5662717c9fbeee7d02b78d281a1fe13",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/project/First Agent Promo.html",
+    "gitBlob": "00a17b7f2525874472b131b0e5a8a71517310ebf",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/project/animations.jsx",
+    "gitBlob": "b6d7b82ddcb973c7f8e8c55650d52f76bf1c4c84",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/project/assets/AIS Logo.png",
+    "gitBlob": "da884517d8be8195ae7968680dac8f62d35ec86a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/project/colors_and_type.css",
+    "gitBlob": "4c0f47e1f9ce3d0c1d40cbd534ff8e2f941b3559",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/project/scenes.jsx",
+    "gitBlob": "4d43df580b9353e01dcaf2fef29c116ea7a4c88f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/project/screenshots/01-scenes.png",
+    "gitBlob": "0180b986a8be4cfc24b0f53ab2d883598c72af2b",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/project/screenshots/01-v2.png",
+    "gitBlob": "44ce60d26f3b3ce47e64df29dede3f7e6f2f02b5",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/project/screenshots/02-scenes.png",
+    "gitBlob": "b9905d979c0385d5a5a636904d5474c109e82ca3",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/project/screenshots/02-v2.png",
+    "gitBlob": "02d46cfd61218aae7a61a90122b04544d57f0af0",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/project/screenshots/03-scenes.png",
+    "gitBlob": "4f41bcbfe9020c1431898d7a37d6fa1fd5074a61",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/project/screenshots/03-v2.png",
+    "gitBlob": "1490f9b0b0aa3675868fe2c604d969ce42a30d69",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/project/screenshots/04-scenes.png",
+    "gitBlob": "0a0f9ca59cfba6d10a4408caf474d2243562a854",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/project/screenshots/05-scenes.png",
+    "gitBlob": "ec53719651128e2a490f8d7535df9c635da0b373",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/project/screenshots/06-scenes.png",
+    "gitBlob": "fb1e936f70c0c45c54c4614a0ac36aa80e3de046",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/project/screenshots/07-scenes.png",
+    "gitBlob": "155dd69eb4ad739fe93111b559b37c48bb2c093d",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/project/screenshots/08-scenes.png",
+    "gitBlob": "a93529e61a6b8e093a580f5e1be0456ffc6268b4",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/project/screenshots/source_full.png",
+    "gitBlob": "c777e2199c5a01a10989725ee1c028ac4f324ede",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/project/uploads/Your First AI Agent _standalone_.html",
+    "gitBlob": "0d3551da976e140f2374cccd5e2680c49705731d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/first-agent-promo/_design/first-agent-release-video/project/uploads/extracted_template.html",
+    "gitBlob": "8a64edfab0ea7c35f2a3a4f33530c3277d27900f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/first-agent-promo/animations.jsx",
+    "gitBlob": "38dd4a99c68f4db42b4307aa31c7858a2e77f8c5",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/first-agent-promo/assets/AIS Logo.png",
+    "gitBlob": "da884517d8be8195ae7968680dac8f62d35ec86a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/first-agent-promo/colors_and_type.css",
+    "gitBlob": "4c0f47e1f9ce3d0c1d40cbd534ff8e2f941b3559",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/first-agent-promo/final.mp4",
+    "gitBlob": "54c6e0b3d7f27ef6990f093861da8cf1b40c6058",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/first-agent-promo/index.html",
+    "gitBlob": "e1e42c65b938eb81bc49021694990669625bbc3a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/first-agent-promo/meta.json",
+    "gitBlob": "6f2e0238a745c3d104dc5eae0dd6a696ebfebe48",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/first-agent-promo/scenes.jsx",
+    "gitBlob": "4d43df580b9353e01dcaf2fef29c116ea7a4c88f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/first-agent-promo/scripts/capture.mjs",
+    "gitBlob": "79791994eb032b6b82ca266d4fd727454ca3ebf6",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/first-agent-promo/scripts/smoke.mjs",
+    "gitBlob": "876795c800fc249656f4d46ba38c1af74a72bd7d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/golden-ratio-demo/BRIEF.md",
+    "gitBlob": "f201965a5d0de0c5cfb35f2f9b0e5a1af207d205",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/golden-ratio-demo/NOTES.md",
+    "gitBlob": "7812a558868a819f59ffaef3c4c584947b2a2750",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/golden-ratio-demo/STORYBOARD.md",
+    "gitBlob": "c6ea76f788eeebb7b8958ce242fba0291b7afcab",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/golden-ratio-demo/assets/brand-tokens.css",
+    "gitBlob": "73a3ad3874e134997804069d47e5ce8f50fd13c5",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/golden-ratio-demo/assets/golden-ratio-demo.mp4",
+    "gitBlob": "d0df3f8abd98947d536bc5d9af7768190afb7418",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/golden-ratio-demo/assets/transcript/whisper.json",
+    "gitBlob": "94569ce9063ea0f38b3de539b953d9931c7b32c6",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/golden-ratio-demo/compositions/01-intro-title.html",
+    "gitBlob": "69cdff285dd593e4ee48132f6a3d6ef9aba9a762",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/golden-ratio-demo/compositions/02-sixty-deterministic.html",
+    "gitBlob": "08a5feef39c9e3d5831728f2795dee2063dea375",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/golden-ratio-demo/compositions/03-thirty-ai-assisted.html",
+    "gitBlob": "069bfbc4747cd4d6217e6f70d8f7a3b40ba51453",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/golden-ratio-demo/compositions/04-ten-human.html",
+    "gitBlob": "79631b0088bb953f6178bfb346cd6c73e82d7750",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/golden-ratio-demo/compositions/05-magic-trash-middle.html",
+    "gitBlob": "a1dc914dd8f0099a42fb5bd9e3cffc4f869efd47",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/golden-ratio-demo/compositions/06-outro-recap.html",
+    "gitBlob": "9b5c00ef1ad99b29d4f1e68bbc33b6bce6e13ae9",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/golden-ratio-demo/compositions/ambient-spiral.html",
+    "gitBlob": "04e363f5ae52aa5c819c655620c8b90e92e5939e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/golden-ratio-demo/compositions/components/grain-overlay.html",
+    "gitBlob": "8cdc707bd217290808c179b485aeea644ee9cacc",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/golden-ratio-demo/final.mp4",
+    "gitBlob": "cecd468f31c1276c8b70fe129b390c286b05d58d",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/golden-ratio-demo/hyperframes.json",
+    "gitBlob": "5fb1d6d872f5ecb406008695d86ae69f4216b465",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/golden-ratio-demo/index.html",
+    "gitBlob": "807e406f6b95430be27fae86354e8796ebf5ef32",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/golden-ratio-demo/meta.json",
+    "gitBlob": "88f8c5d38558b68bada4a923f17d826048e50c5c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/ais-logo.png",
+    "gitBlob": "da884517d8be8195ae7968680dac8f62d35ec86a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/.cursorrules",
+    "gitBlob": "7fffd967f0b0325388499c072f8de6f8bfa321f4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/CLAUDE.md",
+    "gitBlob": "7fffd967f0b0325388499c072f8de6f8bfa321f4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/67ce28d0ec624e2b733f8ad0-dots.svg",
+    "gitBlob": "ac4ffa6a8136b1ce1d42482d52f6596a62c13c62",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/67f0a72738c0c95d6dfc7845-dropdown.svg",
+    "gitBlob": "97354913f87fe311228299a0cdcd2940a80b44f4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/69d537c96b8953d88ab6bdaf-durandal-hero-p.webp",
+    "gitBlob": "05401861b0d309bfa408edca2d37c8016f6ef8ba",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/69d537c96b8953d88ab6bdaf-durandal-hero.webp",
+    "gitBlob": "e77e6bab718e7e5e0f50468d312c919bc29ed5ae",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/favicon.png",
+    "gitBlob": "f0b5d7c58480b0fd190c6653854a36e3a8dae80f",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/fonts/691cda762a35b6bc5a28ffaa_JetBrainsMono-Regular.woff2",
+    "gitBlob": "40da427651937ac3b65ea6842f9448a810f719c6",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/fonts/69971a00a3295036497e1a28_AnthropicSans-Roman-Web.woff2",
+    "gitBlob": "57824daacc4ac81d68515d050dd60ba321fe33d9",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/fonts/69971a016067bf14b9b8f48d_AnthropicSans-Italic-Web.woff2",
+    "gitBlob": "84e7ed1ad9e2022a9a036cbd7384a16c13b8e273",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/fonts/69971a1551eb6cda0d656e8a_AnthropicSerif-Roman-Web.woff2",
+    "gitBlob": "ef2960a382b941f183168b4660d86b7db53d7684",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/fonts/69971a15a9fb8c1107a3570e_AnthropicSerif-Italic-Web.woff2",
+    "gitBlob": "4b0d098ba1baad1f5d1837ef9eaacc54a48b32b3",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/fonts/69971a2e55d24d61bc045b1a_AnthropicMono-Roman-Web.woff2",
+    "gitBlob": "f9f73ea74138e6fad7c737998cb68b28e0c81bec",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/fonts/69971a2eb93743112c30fe9c_AnthropicMono-Italic-Web.woff2",
+    "gitBlob": "526fad927ce701b2deadec239f488f5d010a9b42",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/lottie/animation-0.json",
+    "gitBlob": "afeda6e2af0572ce9a138dcd2cb06387e23c7116",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/lottie/previews/animation-0-preview.png",
+    "gitBlob": "d638533a869b526a4ea19a5273cb77b512126a70",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/og-image.jpg",
+    "gitBlob": "20bc1dfac38abd7936a3bf779c991e0649984e08",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/svgs/icon-embed-xsmall.svg",
+    "gitBlob": "9fa6248d7ebb088696a39e03857cfe54e91c229e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/svgs/nav-linkout-icon.svg",
+    "gitBlob": "71a308a941871bc09b45d4355dccf9c6e3ed1739",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/svgs/nav-links-svg.svg",
+    "gitBlob": "7a105695adc6dabcf71ee19feef352b30feab128",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/svgs/nav-logo-lottie.svg",
+    "gitBlob": "9f5f32712674da9c6c61b0bb71759c06e1de7ff4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/assets/svgs/nav-logo-wrap.svg",
+    "gitBlob": "d46332bd7141c9b852ca2e5d24b3a5fa25f2bef2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/extracted/animations.json",
+    "gitBlob": "356c02a4cfe45f614d399fbee0893b22cdcc8610",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/extracted/asset-descriptions.md",
+    "gitBlob": "18208df5f9e5b5f9cff311633f053849bc32118f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/extracted/assets-catalog.json",
+    "gitBlob": "efd780442e9e8b57c693a1a2b3f21560cabdadbf",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/extracted/detected-libraries.json",
+    "gitBlob": "d4fdb801fd131313dea2e0b4f9743a98d4ad1b60",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/extracted/lottie-manifest.json",
+    "gitBlob": "e44f9dad1274510d59c4803082e19abeee6e4786",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/extracted/tokens.json",
+    "gitBlob": "d0558690d4b4410486cfbb2b7bab354ab1129085",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/extracted/visible-text.txt",
+    "gitBlob": "5b1d7afb9a648007e79fcfe930996d2baa1a4213",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/index.html",
+    "gitBlob": "964e8cf78aefa27aa040bc8b905d789a1779c9e4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/meta.json",
+    "gitBlob": "5e0ffa79c35d9eeb21a3ffecfbfd2e4c9dcc1cfe",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/screenshots/scroll-000.png",
+    "gitBlob": "ebe390f560bf3bda5e77fa4e0be37f6b3738e543",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/screenshots/scroll-034.png",
+    "gitBlob": "f0a98c1777510beab44bd0786f195f3a0f1e076f",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/screenshots/scroll-069.png",
+    "gitBlob": "c7fd540439a68fabb272ee16ac468c48877b5c33",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/anthropic-capture/screenshots/scroll-100.png",
+    "gitBlob": "0ac30977d91d7cb3a317e35b1baaa41a5d698cbd",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/avatar.jpg",
+    "gitBlob": "d5ca2e945b540ee8a9e7ea7d92826ad43ce61288",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/brand-tokens.css",
+    "gitBlob": "73a3ad3874e134997804069d47e5ce8f50fd13c5",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/assets/music.mp3",
+    "gitBlob": "e2497a2579c4902cead486cfbf3c3627f1fbce90",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/app-showcase.html",
+    "gitBlob": "deb3887d4ffc68702682b5e330ed228d3a25701a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/chromatic-radial-split.html",
+    "gitBlob": "8afcb95c9068e980a42156ef95f652799fb4cb64",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/cinematic-zoom.html",
+    "gitBlob": "6d96e5c9acce126751e87ee5338030c7972354c1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/components/grain-overlay.html",
+    "gitBlob": "8cdc707bd217290808c179b485aeea644ee9cacc",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/components/grid-pixelate-wipe.html",
+    "gitBlob": "af8c94beea0891dde5dfc4071b52302e3399d6db",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/components/shimmer-sweep.html",
+    "gitBlob": "84d3be4eb97d2f58c86c3fa8d55810ae4232187b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/cross-warp-morph.html",
+    "gitBlob": "32724552e914fd29b987093a84ee5ab2343166d4",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/data-chart.html",
+    "gitBlob": "0fc2d8e76aa4f9720e44355b9a3c4ff14ac7d260",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/domain-warp-dissolve.html",
+    "gitBlob": "26905b65d238235c163092ce994db3b88fb2e8d9",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/flash-through-white.html",
+    "gitBlob": "ce33edddfc9d2124c7d66e946759ebd170e90add",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/glitch.html",
+    "gitBlob": "73a6f8038a3b87061ce6f59e63561b7e059144e1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/gravitational-lens.html",
+    "gitBlob": "ae4a87fd421f9f57510df8d75c13d664f59d69a9",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/instagram-follow.html",
+    "gitBlob": "d168f4c4b4652861b2de4028ebbb2406f2e59675",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/light-leak.html",
+    "gitBlob": "9021da579622eb32605fd878b6f4bd5a07765d3a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/logo-outro.html",
+    "gitBlob": "f5fcca74a84c89017c7e511e2b4b2e633e78e200",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/ridged-burn.html",
+    "gitBlob": "3cb38e4433ea8efff6fd7c63c34df30aca5e9e38",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/sdf-iris.html",
+    "gitBlob": "207f73cb6acd791efe27219569b58a0a8a6c0f2a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/swirl-vortex.html",
+    "gitBlob": "0004b4b635f0d6fc7f75fd8565d8e0bc43997d35",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/thermal-distortion.html",
+    "gitBlob": "b628a03f16fe8022542a977f1f60482d05581a1a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/tiktok-follow.html",
+    "gitBlob": "631e7ef8580c47afdce68408ea8c36af10242214",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/v00-cold-open.html",
+    "gitBlob": "c60fac36cdc374fab30df7305291db10d1d41696",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/v01-kinetic-type.html",
+    "gitBlob": "a411c3e7d0c8a7f778d1d12a4ef26b50e9c01656",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/v02-data-chart.html",
+    "gitBlob": "4b5e30085f14dd18691f496cda9822e4e8b58ede",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/v03-app-showcase.html",
+    "gitBlob": "14e50e6a2a4ab7269ddf24db1bbd777338bdc4f7",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/v04-audio-reactive.html",
+    "gitBlob": "c9bb08fb51d20653b4943bff7068c4d14fb84fab",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/v05-web-to-video.html",
+    "gitBlob": "e41eefb0cdc15477343e679c3ada803d25fbd206",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/v07-social-stack.html",
+    "gitBlob": "fd00e4ce93fa986aba243afd4bc934d60704b2da",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/v08-caption-sync.html",
+    "gitBlob": "6ae9421ba1b77139410dc0b4a1445ba74fbfa362",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/v09-flowchart.html",
+    "gitBlob": "ae1fdf8b1e0be59c9493961edd476f43862fbacc",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/v10-logo-outro.html",
+    "gitBlob": "fd0faf37e975d74bfcd679ab1acee5e4e1da98a9",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/whip-pan.html",
+    "gitBlob": "057a69dd68af181d6b5b0b74c8382a32181fb5d0",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/x-post.html",
+    "gitBlob": "fa81aa7c3b327f3eb25b66eadfe621ffbcdabe93",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/compositions/yt-lower-third.html",
+    "gitBlob": "b69fbb1a52e304f6d95b3380c451089a2c783051",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/final.mp4",
+    "gitBlob": "ffdefca6c6cc7dc6e045cf4ad25ee44dfd412289",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/hyperframes.json",
+    "gitBlob": "5fb1d6d872f5ecb406008695d86ae69f4216b465",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/index.html",
+    "gitBlob": "c162904aa9c36b2696cabcd4fd677652eda43654",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/hyperframes-sizzle/meta.json",
+    "gitBlob": "6a66f5208df2d925e04f86e284867fbdaef92249",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/NOTES.md",
+    "gitBlob": "8cc39366c6e91f4a0b929615d955a0bafa4bde34",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/assets/linear-logo.svg",
+    "gitBlob": "686ac4288e42618c1f487dcd978cd26227d4c572",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/assets/linear-symbol.svg",
+    "gitBlob": "419f9c24d75c64b2609676fe7eb152dc65dd7bf2",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/assets/screenshot-build.png",
+    "gitBlob": "97f8dfa39301371ffabb39c3625b43b01aea23b1",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/linear-promo-30s/assets/screenshot-monitor.png",
+    "gitBlob": "ca9290efa263fd78f6bbefba16ab49648451d1f1",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/linear-promo-30s/assets/screenshot-plan.png",
+    "gitBlob": "443b1a99b5b84894d5301abb61aa3d4adfa9471f",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/linear-promo-30s/assets/sfx-twinkle.mp3",
+    "gitBlob": "0d2bfa7b2418540863db6df0b866d86e336bc7d3",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/linear-promo-30s/assets/sfx-whoosh-1.mp3",
+    "gitBlob": "5cdc367dbe08fd1a2a8c8da8725b8415ac1893de",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/linear-promo-30s/assets/sfx-whoosh-2.mp3",
+    "gitBlob": "8ed8da85a66c9a6f202af51c4278a74d25689b76",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/linear-promo-30s/assets/warm-pad.mp3",
+    "gitBlob": "12db78d5865876148b20850417a74806e3ec9972",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/linear-promo-30s/compositions/01-problem-type.html",
+    "gitBlob": "c431342cf6e791d1dbdb9eae4e494cfdb8adf21b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/compositions/02-card-to-logo.html",
+    "gitBlob": "99b5bb9bcae297889e7c7844833718b7df07bec5",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/compositions/03-brand-reveal.html",
+    "gitBlob": "9b7b3fff583847155ba93002511a72b30f4492ba",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/compositions/04-benefits-flowchart.html",
+    "gitBlob": "f8b9a2356f1b838152dc7955f96b72b9ec9cf450",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/compositions/05-product-surfaces.html",
+    "gitBlob": "7f7f677c4dcb659080256f14455ac8fa62e2cb62",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/compositions/06-wheel-pillars.html",
+    "gitBlob": "691243c33d751af042f46bfd27d7a70878d63dbc",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/compositions/07-foundation.html",
+    "gitBlob": "8712c05f63fc9bd393d4a04b22855fad324275f1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/compositions/08-cta-outro.html",
+    "gitBlob": "0709cf83768253d105c1e0b57a579819ac87e391",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/final.mp4",
+    "gitBlob": "19f948a7a78097d37edf702dece5da1b2fb47ef5",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/linear-promo-30s/hyperframes.json",
+    "gitBlob": "5fb1d6d872f5ecb406008695d86ae69f4216b465",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/index.html",
+    "gitBlob": "06b36a4074fa970945ad51449a337b7d7fd22e31",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/meta.json",
+    "gitBlob": "fb49f483ab356c13ab2cdf57d4f5f40f65536028",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/scripts/capture-screens.js",
+    "gitBlob": "da562d63183543ac2128558b07c61ebc012ea1d1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/scripts/diag-click.js",
+    "gitBlob": "7f965af1908bf6630bc70820bf9d6eec9376d620",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/scripts/diag-iframe-body.js",
+    "gitBlob": "456bd301b7eae6830672dac89e74be60e4be5be1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/scripts/diag-play.js",
+    "gitBlob": "659d24cfd34814391182b640735502f39c6728f1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/scripts/diag-sandbox.js",
+    "gitBlob": "f25e9e8a9ae6d5f761b3e146d5e02f7669cb3625",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/scripts/diag-sizzle.js",
+    "gitBlob": "4e5e68ef2cc510c4f1ac07bc71f4c2f260e88048",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/scripts/diag-wait.js",
+    "gitBlob": "a8355f4f6b2263abe9b629c47e77ec7c8533c0b6",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/scripts/diag2.js",
+    "gitBlob": "93402715dcf99fa37a204b225245e133cb09fdf0",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/scripts/diag3.js",
+    "gitBlob": "d042d5c4d42ffc1ffac031e808aead35605d861c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/scripts/diag4.js",
+    "gitBlob": "b0627e58f37bf19ee49f9203825218d49fae0d26",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/scripts/diag5.js",
+    "gitBlob": "452bae8b7b9208fbe72e7e41bfa620aec0880792",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/scripts/diagnose-studio.js",
+    "gitBlob": "5516302e641447019bc01ebf254f19afb008e74f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/linear-promo-30s/scripts/extract-logo.js",
+    "gitBlob": "2a5e75a0fe94d349ec07c22fa61a5e05f222d666",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-18/assets/AIS Brand Guideline Small.jpg",
+    "gitBlob": "8a5a438c93c7605c5dd47d833d7ab9a709b82bec",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/may-shorts-18/assets/AIS Logo PNG.png",
+    "gitBlob": "da884517d8be8195ae7968680dac8f62d35ec86a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/may-shorts-18/assets/brand-tokens.css",
+    "gitBlob": "73a3ad3874e134997804069d47e5ce8f50fd13c5",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-18/assets/may_shorts_18.json",
+    "gitBlob": "f993608141c9aea6adde6e76423dc9835a90fd34",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-18/assets/may_shorts_18.mp4",
+    "gitBlob": "1ba48d0d7b6b5bd948b550558d48e7a9568ec2c8",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/may-shorts-18/compositions/ambient-bg.html",
+    "gitBlob": "ed0e2c0bf5a48752d772c068ab9247f3aae0c4c0",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-18/compositions/captions.html",
+    "gitBlob": "f1b5304a50dc2e17aca889437e16c58be4547269",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-18/compositions/grain-overlay.html",
+    "gitBlob": "9ee741d419c7824a75fdbbccdbeb9aa3eb1dd785",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-18/compositions/scene1-hook-killed.html",
+    "gitBlob": "b92f1beee4adf06bca44cda54e3b91c6a5bfa4d3",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-18/compositions/scene2-not-hype.html",
+    "gitBlob": "f5d49d42310b2c50861537ac25011032053a6802",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-18/compositions/scene3-three-wins.html",
+    "gitBlob": "8e8ad83f7f7713ac67c9e63983edc1b9a4add45d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-18/compositions/scene4-felt-it.html",
+    "gitBlob": "237100a9b6d24f7cf9c8f3392f4d0b19bda693be",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-18/compositions/scene5-too-late.html",
+    "gitBlob": "92ec587cd2b8ebeaa20e9b4810dca2922d3397e1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-18/compositions/scene6-comment-cta.html",
+    "gitBlob": "c0feace97c5c5a630342864ae1314bd61d93f60d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-18/compositions/seam-treatment.html",
+    "gitBlob": "5e5fc218900da7d6350219bdbf8aba38340313d0",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-18/final.mp4",
+    "gitBlob": "32aefb087ad57d93ff16a1e09765cc5d90bd7bec",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/may-shorts-18/hyperframes.json",
+    "gitBlob": "5fb1d6d872f5ecb406008695d86ae69f4216b465",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-18/index.html",
+    "gitBlob": "19ff746db8832fe5960edb01d2697731a44dc860",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-18/meta.json",
+    "gitBlob": "0f704494fe38da047237261cee19266a1b89915c",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/assets/AIS Brand Guideline Small.jpg",
+    "gitBlob": "8a5a438c93c7605c5dd47d833d7ab9a709b82bec",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/may-shorts-19/assets/AIS Logo PNG.png",
+    "gitBlob": "da884517d8be8195ae7968680dac8f62d35ec86a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/may-shorts-19/assets/_archive/figma-cursors.svg",
+    "gitBlob": "65d99f1b00a4d2c94a7fd1e6a6dd37194286fc8f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/assets/_archive/figma-logo-pieces.svg",
+    "gitBlob": "c98cb21c2cb6996790cc47c9cfdfad1b15981f96",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/assets/_archive/figma-logo-pills.svg",
+    "gitBlob": "0745b16833084da930c31722dd44cc8151e274d6",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/assets/brand-tokens.css",
+    "gitBlob": "73a3ad3874e134997804069d47e5ce8f50fd13c5",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/assets/may_shorts_19-edit.mp4",
+    "gitBlob": "a5ea88a0bf89857d73d44906692380be27b018dd",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/may-shorts-19/assets/may_shorts_19.json",
+    "gitBlob": "1140edf7b5f97c76eb71f7948cec9dfeb552542e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/assets/may_shorts_19.mp4",
+    "gitBlob": "b2ebe828bdf6fdc7eaafb17e070d1ed2fbb575f9",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/may-shorts-19/assets/may_shorts_19.wav",
+    "gitBlob": "e7026241122a5dcce3b45f9b82132986b77f7f9a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/may-shorts-19/compositions/_archive/scene1-logo-intro.html",
+    "gitBlob": "c80b1928a9d754f937c1a153bdf4aec5fee51183",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/compositions/_archive/scene2-4-canvas.html",
+    "gitBlob": "41fa0db2509f03e8c2891c104d78ad7f7ea61521",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/compositions/_archive/scene5-logo-outro.html",
+    "gitBlob": "b182ddae0690305db75bb0854ff056cca4fb35a6",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/compositions/ambient-bg.html",
+    "gitBlob": "eed7202ed6e1d1defc938b96e56c77f14cebc2b7",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/compositions/captions.html",
+    "gitBlob": "488572ddc2c28ef95a16220ed8b470b589106e79",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/compositions/scene1-intro.html",
+    "gitBlob": "8bfaca7ccd9bcb90b24a66508104279b56b36514",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/compositions/scene2-rejection.html",
+    "gitBlob": "eb4d57a31178f2f3f00e673125e5689e31f24645",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/compositions/scene3-pointless.html",
+    "gitBlob": "2a8d5c0289aca6dc5d718fbbf5f7bdb58efbc949",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/compositions/scene4-six.html",
+    "gitBlob": "8d41dfbc2c97bff619775eaf6498df39b25c4c5f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/compositions/scene5-benefits.html",
+    "gitBlob": "f8a3dc9a7573f3549c9b9a428928ecb95176b174",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/compositions/scene6-only-ones.html",
+    "gitBlob": "2d6c3bce00d0c3ea7eff3db82dad6f3cf6f4dc1a",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/compositions/scene7-cta.html",
+    "gitBlob": "c2c948be00deb9667a7a74f56876c92eb1d7ed4d",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/compositions/seam-treatment.html",
+    "gitBlob": "58d0c7638c9093c3aa60d34101e4f575eca221e0",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/final.mp4",
+    "gitBlob": "df4a72889d2a454d246b4d201bf5c8f7eb22e7fe",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/may-shorts-19/hyperframes.json",
+    "gitBlob": "5fb1d6d872f5ecb406008695d86ae69f4216b465",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/index.html",
+    "gitBlob": "6f12bdd881f82b47303950b1282cd6d9ff31e787",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-19/meta.json",
+    "gitBlob": "e4970ffd8ad82b75db8bcf428178aa49deeb2067",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-6/assets/AIS Background.png",
+    "gitBlob": "9981cd0c0f2e4b27569677334dc4e1143d1d19c9",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/may-shorts-6/assets/AIS Logo PNG.png",
+    "gitBlob": "da884517d8be8195ae7968680dac8f62d35ec86a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/may-shorts-6/assets/brand-tokens.css",
+    "gitBlob": "73a3ad3874e134997804069d47e5ce8f50fd13c5",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-6/assets/may_shorts_6.json",
+    "gitBlob": "48032508b726e008da167fd109b274290237ab00",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-6/assets/may_shorts_6.mp4",
+    "gitBlob": "ec3a5516fa4d9efdb72f75306c0e95e09b74322a",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/may-shorts-6/assets/may_shorts_6.wav",
+    "gitBlob": "68b10c5a57d25178d1672ca1d6b72bbc533e4da0",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/may-shorts-6/compositions/ambient-bg.html",
+    "gitBlob": "57deb37e2eddc913217b799e898daf445fb554f1",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-6/compositions/captions.html",
+    "gitBlob": "e6e56a560a3e0a59100bfa5ed1f8fdbd8700804e",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-6/compositions/scene1-hook.html",
+    "gitBlob": "6aa9f8174a080872ea78fd69bb3978ca5d512dae",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-6/compositions/scene2-not-needed.html",
+    "gitBlob": "fc876a9fdac708d8b3c9456a0c598c779f770fed",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-6/compositions/scene3-flashy-list.html",
+    "gitBlob": "56f5085c4039af0cd987e2fcc7da9f875f449cd8",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-6/compositions/scene4-want-list.html",
+    "gitBlob": "698dda3f054b7ab087985514df48312274577a2f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-6/compositions/scene5-thats-it.html",
+    "gitBlob": "d3799df519bf6b0d6ad967dfbae5ed4b42033a5b",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-6/compositions/scene6-boring.html",
+    "gitBlob": "2eb416c59a77da90777c07a38db47914f2bb644f",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-6/compositions/scene7-pay-for.html",
+    "gitBlob": "ac7ccc96a3ccf53123692222e5778630d3e6f258",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-6/compositions/scene8-cta-outro.html",
+    "gitBlob": "18ccd551a9b8921384b0c7e50d91ba916c5fdb04",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-6/final.mp4",
+    "gitBlob": "bb078d7b507332f965405cdbb78bddf8b2637972",
+    "mode": "100644",
+    "checkedOut": false
+  },
+  {
+    "path": "video-projects/may-shorts-6/hyperframes.json",
+    "gitBlob": "5fb1d6d872f5ecb406008695d86ae69f4216b465",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-6/index.html",
+    "gitBlob": "71e1adf234ada1dc7ff1795994c5ac98cfb65ab7",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-6/meta.json",
+    "gitBlob": "e6eabdcb969643db8e839e3cf1b3dd392edb9ed7",
+    "mode": "100644",
+    "checkedOut": true
+  },
+  {
+    "path": "video-projects/may-shorts-6/scripts/transcribe.mjs",
+    "gitBlob": "941d6290e09cdb083bfd53da18b663ba2df96449",
+    "mode": "100644",
+    "checkedOut": true
+  }
+]

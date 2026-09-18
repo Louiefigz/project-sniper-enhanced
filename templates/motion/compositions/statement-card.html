@@ -1,0 +1,449 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"text","type":"string","label":"Statement (<= 10 words; wrap keyword(s) in *asterisks* for accent)","default":"That line fixes half your *content problems*"},
+    {"id":"bg","type":"enum","label":"Background gradient","default":"dark","options":[{"value":"dark","label":"Dark (navy)"},{"value":"warm","label":"Warm (orange->purple)"},{"value":"cream","label":"Cream (graph-paper, dark text — no panel)"}]},
+    {"id":"iconFile","type":"string","label":"Optional mark above (file under /icons; empty = none)","default":""},
+    {"id":"accent","type":"color","label":"Keyword accent color (LL-033: card is dark — keep LIGHT)","default":"#7FB4FF"},
+    {"id":"variant","type":"enum","label":"Build grammar","default":"classic","options":[{"value":"classic","label":"Classic (word-rise, unchanged)"},{"value":"nateherk","label":"Nateherk (eyebrow-first, opacity ramps, skeleton-first)"}]},
+    {"id":"splitText","type":"boolean","label":"SplitText per-CHAR staged word-rise (classic build only)","default":false},
+    {"id":"eyebrow","type":"string","label":"Eyebrow microtext (mono caps + colored dot; empty = omit)","default":""},
+    {"id":"headlineLines","type":"string","label":"Two-line headline, pipe-separated (line 2 in accent; nateherk only)","default":""},
+    {"id":"statements","type":"string","label":"Statement sequence, pipe-separated (nateherk v2 replace grammar; empty = single statement)","default":""},
+    {"id":"statementLands","type":"string","label":"Land times (s, comma-separated) for statements 2..N (empty = even split)","default":""},
+    {"id":"exit","type":"enum","label":"Exit","default":"hold","options":[{"value":"hold","label":"Hold to end (compositor owns the seam)"},{"value":"blur-recede","label":"Blur-recede 0.15s (graphics layer only)"}]},
+    {"id":"evidenceSource","type":"string","label":"Evidence ribbon source (mono receipt, lands last; empty = omit)","default":""},
+    {"id":"evidenceDate","type":"string","label":"Evidence ribbon date","default":""}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · Motion template: STATEMENT-CARD (batch 2, from the edited
+    long-form's "full-screen statement card" treatment — LONGFORM_VISUAL_STUDY §3,
+    reference frames 11.5s / 16s / 18.5s in the study sheets: a thesis-line takeover
+    on a dark (optionally warming) gradient, one bold white line with the keyword
+    emphasised, a small mark above the text).
+    Trigger it serves: a thesis / definition line — the frame hands off to the words.
+    OPAQUE 1920x1080 -> render with `--format mp4` (H.264, anchor "own-screen").
+
+    CONTRACT for the PRODUCER + graphics_stage:
+      - text: keep <= 10 words; wrap the keyword(s) in *asterisks* to render them
+        in the accent color (the rest is bold white). Multiple *runs* allowed.
+      - bg: "dark" (navy radial vignette, default) or "warm" (the 18.5s
+        orange->purple variant). iconFile is an OPTIONAL small mark above the text
+        (real marks only, R12); empty omits it and the text re-centers.
+      - The gradient field lives on a full-bleed CHILD and is OPAQUE from frame 0
+        (no base-video flash at the takeover seam). The card + text BUILD in staged
+        (R9 progressive disclosure): field -> card -> icon -> statement words rise
+        in a light stagger. HOLDS to the end (compositor owns the seam).
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
+        rewrites it per window; --variables never sets it — see stat-card note).
+
+    NATEHERK VARIANT (docs/studies/NATEHERK_STUDY.md §3 ranks 2-5 + §2 T-D/T-E — all
+    fields below default OFF; the classic path above is byte-identical when
+    they are absent):
+      - variant:"nateherk" — skeleton-first build (hairline container ramps
+        SKELETON_GAP_S=0.35s before content, rank 2), eyebrow-first (mono caps
+        + colored dot leads the headline by EYEBROW_LEAD_S=0.25s, rank 3), all
+        text = in-place opacity ramps TEXT_RAMP_S=0.2s, per-LINE stagger 0.25s
+        (T-B row cadence), NO travel (rank 4).
+      - headlineLines:"L1|L2" — two-line accent-shift headline, line 2 in the
+        accent color (rank 5, "ONE RUN. FOUR AGENTS." 32.65).
+      - statements:"s1|s2|..." — v2 replace grammar (T-E 185.80->186.30):
+        blur-dim out 0.15s -> 2 deliberately EMPTY frames (field stays) ->
+        next statement opacity-ramps in 0.3s. statementLands (s, for
+        statements 2..N) word-locks each swap; empty = even split of D.
+        Mutually exclusive with headlineLines (fail loud).
+      - exit:"blur-recede" — graphics-layer-only exit (T-D 67.12->67.28):
+        blur + fade + scale->0.98 over EXIT_BLUR_S=0.15s ending exactly at D.
+        The bg FIELD never fades (no base flash at the seam). Works in both
+        variants. Lint twin: scripts/producer/graphics/exit_on_cut.py.
+      - evidenceSource/-Date — mono evidence ribbon ("CLAIM SOURCE ... JUL 09
+        2026", §3 rank 9), lands LAST in the build. Empty = omitted.
+
+    SPLITTEXT VARIANT (OPT-IN; default false = classic path byte-identical):
+      - splitText:true — CLASSIC build only: the statement's word spans are
+        further split into CHARS via GSAP SplitText (vendored
+        /vendor/gsap/SplitText.min.js, 3.14.2 — see ../PROVENANCE.md) and the
+        word-rise becomes a per-char staged rise (same 0.3s start, same 22px
+        rise, same power2.out — only the reveal unit is finer: 0.012s/char
+        ~= the classic 0.055s/word cadence). kw accent runs are preserved
+        (chars split INSIDE the .w/.kw spans and inherit their color).
+      - splitText:true + variant:"nateherk" FAILS LOUD — nateherk text is
+        in-place opacity ramps with NO travel (rank 4); a per-char rise
+        violates that grammar.
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>SNIPER · statement-card</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="/vendor/gsap/gsap.min.js"></script>
+    <script src="/vendor/gsap/SplitText.min.js"></script>
+    <script src="/motion-tokens.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: transparent;
+        font-family: var(--font);
+      }
+      #sc-root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+
+      /* Full-bleed gradient field on a CHILD — opaque from frame 0 (no seam flash). */
+      #sc-bg { position: absolute; inset: 0; }
+      #sc-bg.dark {
+        background:
+          radial-gradient(1400px 1000px at 960px 500px, #14203f 0%, #0a1123 46%, #05070f 100%);
+      }
+      #sc-bg.warm {
+        background:
+          radial-gradient(1500px 1100px at 700px 620px, #f0913f 0%, #b0466b 42%, #3a2450 100%);
+      }
+      /* Cream graph-paper field (the operator's real pro "statement takeover"
+         look — LONGFORM_VISUAL_STUDY reference: cream ruled paper, bold BLACK
+         line, NO glass panel; the frame is the words). Opaque from frame 0. */
+      #sc-bg.cream {
+        background-color: #f6eac6;
+        background-image:
+          repeating-linear-gradient(0deg, #e6d7a0 0 2px, transparent 2px 104px),
+          repeating-linear-gradient(90deg, #e6d7a0 0 2px, transparent 2px 104px);
+      }
+      /* On cream, drop the dark glass panel entirely and set the type dark. */
+      #sc-root.cream #sc-card {
+        background: transparent; border: none; box-shadow: none; padding: 0;
+      }
+      #sc-root.cream #sc-text { color: #141414; }
+
+      #sc-stage {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        gap: 34px;
+        will-change: transform, opacity, filter;
+      }
+      /* Dark translucent card panel (the study's glass card, over the gradient). */
+      #sc-card {
+        max-width: 1240px;
+        padding: 64px 84px;
+        border-radius: 34px;
+        background: rgba(12, 18, 38, 0.42);
+        border: 1.5px solid rgba(255, 255, 255, 0.14);
+        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        display: flex; flex-direction: column; align-items: center; gap: 30px;
+        will-change: transform, opacity;
+      }
+      /* Optional small mark in an accent-tinted rounded square. */
+      #sc-icon-badge {
+        width: 96px; height: 96px;
+        border-radius: 24px;
+        background: var(--accent-soft, rgba(5, 75, 201, 0.14));
+        border: 1.5px solid rgba(255, 255, 255, 0.16);
+        display: flex; align-items: center; justify-content: center;
+        will-change: transform, opacity;
+      }
+      #sc-icon { width: 56px; height: 56px; object-fit: contain; display: block; }
+      #sc-text {
+        text-align: center;
+        font-weight: 800;
+        font-size: 78px;
+        line-height: 1.16;
+        letter-spacing: -0.015em;
+        color: #ffffff;
+        text-wrap: balance;
+      }
+      #sc-text .kw { color: var(--accent); }
+      #sc-text .w { display: inline-block; will-change: transform, opacity; }
+
+      /* ---- NATEHERK variant skin (NATEHERK_STUDY.md §3: content modules
+         with 1px hairline borders; mono-caps microtext, wide tracking) ---- */
+      #sc-root.nateherk #sc-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.20);   /* the 1px hairline */
+        border-radius: 18px;
+        box-shadow: none;
+        gap: 34px;
+        will-change: opacity;
+      }
+      #sc-root.nateherk.cream #sc-card {
+        background: rgba(20, 20, 20, 0.02);
+        border: 1px solid rgba(20, 20, 20, 0.35);
+        padding: 64px 84px;
+      }
+      #sc-eyebrow {
+        display: flex; align-items: center; gap: 18px;
+        font-family: var(--eyebrow-font);
+        font-weight: 700; font-size: 30px; line-height: 1;
+        letter-spacing: 5px; text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.85);
+        will-change: opacity;
+      }
+      #sc-eyebrow .dot {
+        width: 14px; height: 14px; border-radius: 50%;
+        background: var(--eyebrow-dot, var(--accent));
+        flex: 0 0 auto;
+      }
+      #sc-root.cream #sc-eyebrow { color: rgba(20, 20, 20, 0.8); }
+      /* Statements stack in ONE grid cell — swaps are in-place, zero travel. */
+      #sc-text.stack { display: grid; }
+      #sc-text.stack .statement { grid-area: 1 / 1; will-change: opacity, filter; }
+      .statement .line { display: block; will-change: opacity; }
+      .statement .l2 { color: var(--accent); }   /* two-line accent shift (rank 5) */
+      #sc-evidence {
+        font-family: var(--eyebrow-font);
+        font-weight: 500; font-size: 24px; line-height: 1;
+        letter-spacing: 3.5px; text-transform: uppercase;
+        /* LL-006: brighter receipt gray (0.55 was borderline at phone size) */
+        color: var(--receipt-gray, rgba(255, 255, 255, 0.72));
+        will-change: opacity;
+      }
+      #sc-root.cream #sc-evidence { color: rgba(20, 20, 20, 0.6); }
+    </style>
+  </head>
+  <body>
+    <div
+      id="sc-root"
+      data-composition-id="statement-card"
+      data-width="1920"
+      data-height="1080"
+      data-start="0"
+      data-duration="4"
+    >
+      <div id="sc-bg"></div>
+      <div id="sc-stage">
+        <div id="sc-card" class="clip" data-start="0" data-duration="60" data-track-index="1">
+          <div id="sc-icon-badge"><img id="sc-icon" alt="" /></div>
+          <div id="sc-eyebrow"><span class="dot"></span><span id="sc-eyebrow-text"></span></div>
+          <div id="sc-text"></div>
+          <div id="sc-evidence"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("sc-root");
+        const D = parseFloat(root.dataset.duration) || 4;
+        const M = window.__motionTokens;
+
+        const defaults = {
+          text: "That line fixes half your *content problems*",
+          bg: "dark", iconFile: "", accent: "#054BC9",
+          variant: "classic", splitText: false, eyebrow: "", headlineLines: "",
+          statements: "", statementLands: "", exit: "hold",
+          evidenceSource: "", evidenceDate: "",
+        };
+        const HF = window.__hyperframes;
+        const vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
+        document.documentElement.style.setProperty("--accent", vars.accent);
+
+        // Background variant. "cream" also flips the root to the no-panel,
+        // dark-text pro treatment (see #sc-root.cream rules above).
+        const bgEl = document.getElementById("sc-bg");
+        const mode = String(vars.bg);
+        bgEl.className = (mode === "warm") ? "warm" : (mode === "cream") ? "cream" : "dark";
+        if (mode === "cream") root.classList.add("cream");
+        const nateherk = String(vars.variant) === "nateherk";
+        if (nateherk) root.classList.add("nateherk");
+        // splitText:true (OPT-IN) — per-char staged word-rise, CLASSIC only.
+        const splitChars = vars.splitText === true || String(vars.splitText) === "true";
+        if (splitChars && nateherk) {
+          throw new Error("statement-card: splitText:true is classic-only — " +
+            "nateherk text is in-place opacity ramps with NO travel (rank 4)");
+        }
+
+        // Optional icon badge (real marks only, R12).
+        function iconSrc(raw) {
+          const v = (raw == null ? "" : String(raw)).trim();
+          if (!v) return "";
+          if (v.charAt(0) === "/") return v;
+          return "/icons/" + (v.indexOf(".") >= 0 ? v : v + ".svg");
+        }
+        const badge = document.getElementById("sc-icon-badge");
+        const src = iconSrc(vars.iconFile);
+        if (src) { document.getElementById("sc-icon").src = src; }
+        else { badge.remove(); }
+
+        // Eyebrow slot (rank 3: mono caps + colored dot; both variants).
+        const ebText = (vars.eyebrow == null ? "" : String(vars.eyebrow)).trim();
+        const ebEl = document.getElementById("sc-eyebrow");
+        if (ebText) document.getElementById("sc-eyebrow-text").textContent = ebText;
+        else ebEl.remove();
+
+        // Evidence ribbon (rank 9: mono source+date receipt, lands LAST).
+        const evSource = (vars.evidenceSource == null ? "" : String(vars.evidenceSource)).trim();
+        const evDate = (vars.evidenceDate == null ? "" : String(vars.evidenceDate)).trim();
+        const evEl = document.getElementById("sc-evidence");
+        // LL-006: separator glyph so the label never parses as the value.
+        if (evSource) evEl.textContent = ["CLAIM SOURCE", evSource, evDate].filter(Boolean).join(" \u00b7 ");
+        else evEl.remove();
+
+        // Parse *asterisk* keyword markup -> spans (kw runs in accent). `unit`
+        // controls the span class: "w" (classic per-word) or inline (per-line).
+        const textEl = document.getElementById("sc-text");
+        function appendMarkup(host, raw, perWord) {
+          String(raw).split(/(\*[^*]+\*)/).forEach(function (chunk) {
+            if (!chunk) return;
+            const isKw = chunk.charAt(0) === "*" && chunk.charAt(chunk.length - 1) === "*";
+            const body = isKw ? chunk.slice(1, -1) : chunk;
+            if (!perWord) {
+              const span = document.createElement("span");
+              if (isKw) span.className = "kw";
+              span.textContent = body;
+              host.appendChild(span);
+              return;
+            }
+            body.split(/\s+/).forEach(function (w) {
+              if (!w) return;
+              if (host.lastChild) host.appendChild(document.createTextNode(" "));
+              const span = document.createElement("span");
+              span.className = "w" + (isKw ? " kw" : "");
+              span.textContent = w;
+              host.appendChild(span);
+            });
+          });
+        }
+
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        if (!nateherk) {
+          // ---------- CLASSIC (unchanged build) ----------
+          appendMarkup(textEl, vars.text, true);
+          // Field opaque from frame 0; card scales in; icon pops; words rise staged.
+          tl.fromTo("#sc-card", { opacity: 0, scale: 0.94, y: 18 },
+            { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0);
+          if (src) {
+            tl.fromTo("#sc-icon-badge", { opacity: 0, scale: 0.7 },
+              { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.9)" }, 0.18);
+          }
+          // Eyebrow-first (only when the new slot is filled): leads the words
+          // by EYEBROW_LEAD_S (floor 0 — the words land at 0.3 in this build).
+          if (ebText) M.textRamp(tl, ebEl, Math.max(0, 0.3 - M.EYEBROW_LEAD_S));
+          if (!splitChars) {
+            tl.fromTo("#sc-text .w", { opacity: 0, y: 22 },
+              { opacity: 1, y: 0, duration: 0.42, ease: "power2.out", stagger: 0.055 }, 0.3);
+          } else {
+            // Per-CHAR staged rise (SplitText, vendored): chars split INSIDE
+            // the .w/.kw spans so accent runs keep their color. Same grammar
+            // (start 0.3s, 22px rise, power2.out) — only the unit is finer;
+            // 0.012s/char ~= the 0.055s/word cadence at ~5 chars/word.
+            if (typeof SplitText === "undefined") {
+              throw new Error("statement-card: splitText:true but " +
+                "/vendor/gsap/SplitText.min.js did not load");
+            }
+            gsap.registerPlugin(SplitText);
+            const split = new SplitText("#sc-text .w", { type: "chars" });
+            tl.fromTo(split.chars, { opacity: 0, y: 22 },
+              { opacity: 1, y: 0, duration: 0.42, ease: "power2.out", stagger: 0.012 }, 0.3);
+          }
+          if (evSource) M.textRamp(tl, evEl, Math.min(0.3 + 0.42 + M.EYEBROW_LEAD_S, D - 0.6));
+          // HOLDS to the end — opaque takeover; compositor owns the seam.
+        } else {
+          // ---------- NATEHERK (skeleton-first, eyebrow-first, opacity ramps) ----------
+          const LINE_STAGGER_S = 0.25;   // per-LINE stagger (T-B rows +250ms)
+          const SWAP_RAMP_S = 0.3;       // T-E: next statement ramps ~300ms
+          const GAP_S = 2 / M.FPS;       // T-E: 2 deliberately EMPTY frames
+
+          const heads = (vars.headlineLines == null ? "" : String(vars.headlineLines)).trim();
+          const stmtsRaw = (vars.statements == null ? "" : String(vars.statements)).trim();
+          if (heads && stmtsRaw) {
+            throw new Error("statement-card: headlineLines and statements are " +
+              "mutually exclusive — statements[] carries its own lines");
+          }
+          // Statement list: statements[] (v2 swap), else headlineLines (one
+          // two-line statement), else the classic `text` as one line.
+          let stmts;
+          if (stmtsRaw) {
+            stmts = stmtsRaw.split("|").map(function (s) { return { lines: [s.trim()] }; });
+          } else if (heads) {
+            stmts = [{ lines: heads.split("|").map(function (s) { return s.trim(); }) }];
+          } else {
+            stmts = [{ lines: [String(vars.text)] }];
+          }
+          textEl.classList.add("stack");
+          const stmtEls = stmts.map(function (st) {
+            const block = document.createElement("div");
+            block.className = "statement";
+            st.lines.forEach(function (line, j) {
+              const lineEl = document.createElement("span");
+              lineEl.className = "line" + (j === 1 ? " l2" : "");
+              appendMarkup(lineEl, line, false);
+              block.appendChild(lineEl);
+            });
+            textEl.appendChild(block);
+            return block;
+          });
+
+          // Land times for statements 2..N (word-locked upstream by the fill
+          // spec); empty = even split of D. Malformed input fails LOUDLY.
+          let lands = [];
+          const landsRaw = (vars.statementLands == null ? "" : String(vars.statementLands)).trim();
+          if (landsRaw) {
+            lands = landsRaw.split(",").map(function (s) { return parseFloat(s); });
+            if (lands.length !== stmts.length - 1 || lands.some(function (t) { return !isFinite(t); })) {
+              throw new Error("statement-card: statementLands needs " +
+                (stmts.length - 1) + " finite times, got '" + landsRaw + "'");
+            }
+          } else {
+            for (let k = 1; k < stmts.length; k++) lands.push(D * k / stmts.length);
+          }
+          lands.forEach(function (t, k) {
+            const prev = k === 0 ? 0 : lands[k - 1];
+            if (t - (M.EXIT_BLUR_S + GAP_S) <= prev || t + SWAP_RAMP_S > D + 1e-6) {
+              throw new Error("statement-card: statementLands[" + k + "]=" + t +
+                " leaves no room for blur-dim+gap after " + prev + " (or overruns D=" + D + ")");
+            }
+          });
+
+          // Build: skeleton (hairline container) FIRST, content at +0.35 (rank 2).
+          const contentAt = M.SKELETON_GAP_S;
+          const firstContent = ebText ? ebEl : stmtEls[0];
+          M.skeletonFirst(tl, "#sc-card", firstContent, { at: 0 });
+          let headAt = contentAt;
+          if (ebText) headAt += M.EYEBROW_LEAD_S;     // eyebrow leads (rank 3)
+          if (src) M.textRamp(tl, "#sc-icon-badge", contentAt);
+
+          // Statement 1: per-line in-place opacity ramps (rank 4 — no travel).
+          let lastLineAt = headAt;
+          stmtEls[0].querySelectorAll(".line").forEach(function (lineEl, j) {
+            lastLineAt = headAt + j * LINE_STAGGER_S;
+            // Skip the duplicate ramp when line 0 was the skeleton's content.
+            if (!(j === 0 && firstContent === stmtEls[0])) M.textRamp(tl, lineEl, lastLineAt);
+          });
+
+          // v2 replace grammar (T-E): blur-dim 0.15s -> 2 empty frames -> 0.3s ramp.
+          stmtEls.forEach(function (el, k) {
+            if (k === 0) return;
+            const land = lands[k - 1];
+            tl.to(stmtEls[k - 1], { filter: "blur(" + M.EXIT_BLUR_PX + "px)",
+              autoAlpha: 0, duration: M.EXIT_BLUR_S, ease: "power2.in" },
+              land - GAP_S - M.EXIT_BLUR_S);
+            tl.fromTo(el, { autoAlpha: 0 },
+              { autoAlpha: 1, duration: SWAP_RAMP_S, ease: "power2.out" }, land);
+          });
+
+          // Evidence ribbon lands LAST in the build (rank 9).
+          if (evSource) {
+            M.textRamp(tl, evEl,
+              Math.min(lastLineAt + M.TEXT_RAMP_S + M.EYEBROW_LEAD_S, D - 0.6));
+          }
+        }
+
+        // exit:"blur-recede" (T-D): graphics-layer-only blur+fade+recede over
+        // the last EXIT_BLUR_S, ending exactly at D. The bg FIELD stays opaque
+        // (no base flash); the compositor still owns the seam.
+        if (String(vars.exit) === "blur-recede") {
+          M.blurRecede(tl, "#sc-stage", D - M.EXIT_BLUR_S);
+        }
+        // Otherwise HOLDS to the end — opaque takeover; compositor owns the seam.
+
+        tl.seek(0);
+        window.__timelines["statement-card"] = tl;
+      })();
+    </script>
+  </body>
+</html>

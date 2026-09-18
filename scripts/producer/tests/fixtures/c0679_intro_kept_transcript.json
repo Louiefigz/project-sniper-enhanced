@@ -1,0 +1,15 @@
+{
+  "source": "source/raw-1.transcript.json",
+  "derivation": "Exact kept text remapped through the run's four cutTrack ranges into output time.",
+  "outputDurationS": 44.23,
+  "segments": [
+    {"outStart": 0.0, "outEnd": 7.14, "text": "you run content for clients, you lead a small media team, or maybe, you're just a one person shop doing every single thing."},
+    {"outStart": 7.14, "outEnd": 11.46, "text": "You're probably using chat GPT, Claude, Gemini, and whatever else."},
+    {"outStart": 11.46, "outEnd": 15.1, "text": "And this is going to be extremely helpful for you to watch."},
+    {"outStart": 15.12, "outEnd": 20.06, "text": "Because right now your AI content system is probably at this stage."},
+    {"outStart": 20.06, "outEnd": 25.11, "text": "You're using only prompts and even the prompts can probably even be better."},
+    {"outStart": 25.11, "outEnd": 33.19, "text": "So I've spent a decade as a software engineer and I'm obsessed with using AI to build content systems for video first brands."},
+    {"outStart": 33.19, "outEnd": 37.95, "text": "In fact, I'm building an AI content workflow tool."},
+    {"outStart": 37.95, "outEnd": 44.23, "text": "And this angle generator workbook is the exact engine that I use for my own brand and client accounts,"}
+  ]
+}

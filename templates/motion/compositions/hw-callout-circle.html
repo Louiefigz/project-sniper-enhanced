@@ -1,0 +1,327 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"x","type":"number","label":"Region left (canvas px)","default":240,"min":0,"max":1080,"step":1,"unit":"px"},
+    {"id":"y","type":"number","label":"Region top (canvas px)","default":780,"min":0,"max":1920,"step":1,"unit":"px"},
+    {"id":"w","type":"number","label":"Region width (canvas px)","default":600,"min":20,"max":1080,"step":1,"unit":"px"},
+    {"id":"h","type":"number","label":"Region height (canvas px)","default":300,"min":20,"max":1920,"step":1,"unit":"px"},
+    {"id":"label","type":"string","label":"Handwritten label (empty = circle only, no connector)","default":"look here"},
+    {"id":"labelAt","type":"enum","label":"Label side","default":"below","options":[{"value":"right","label":"Right"},{"value":"left","label":"Left"},{"value":"below","label":"Below"}]},
+    {"id":"scribble","type":"boolean","label":"Scribble hatch fill inside the circle","default":false},
+    {"id":"seed","type":"number","label":"Wobble/boil seed","default":4,"min":1,"max":99,"step":1},
+    {"id":"drawAt","type":"number","label":"Draw-in moment (s)","default":0.2,"min":0,"max":30,"step":0.05,"unit":"s"},
+    {"id":"accent","type":"color","label":"Ink color (outline/connector/label)","default":"#054BC9"},
+    {"id":"hatch","type":"color","label":"Scribble hatch color","default":"#FFD400"}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · Motion template: HW-CALLOUT-CIRCLE (catalog port wave A —
+    hand-drawn family; upstream: vendor/hyperframes-catalog/compositions/
+    components/hw-callout-circle.html + the family's hw-boil runtime, HeyGen
+    demo scene stripped, colors retargeted to tokens.css).
+    Trigger it serves: the full callout anatomy over footage — a hand-wobbled
+    ellipse outline draws AROUND a region of the frame, an optional zigzag
+    scribble hatch sketches in behind it, a curved connector leads to a
+    handwritten Caveat label that pops in. The whole callout "boils" (re-poses
+    every 3rd frame) like stop-motion marker ink. The richer sibling of
+    underline-circle. Transparent 1080x1920 overlay -> render with
+    `--format mov` (ProRes 4444) for alpha.
+
+    CONTRACT for the PRODUCER compositing stage:
+      - x/y/w/h are the CANVAS-PIXEL bounding box of the region to annotate
+        (same contract as underline-circle; template_hw_contract REQUIRES all
+        four explicitly — a default region is a mis-annotation — and rejects a
+        region outside the canvas). The ellipse draws around the box with
+        ~26px padding; connector + label extend beyond it toward labelAt.
+      - label may be an EXPLICIT empty string: circle-only annotation, the
+        connector and label are omitted. drawAt is seconds relative to the
+        overlay's outStart. seed selects the deterministic wobble AND boil
+        character (same seed -> byte-identical frames).
+      - MECHANISM (kept from upstream): hwWobbleEllipse (seeded quadratic
+        chain), the zigzag hatch row generator, the curved connector, the
+        label back.out pop, and the family boil (pose = pure function of
+        floor(t*fps/frameDrop) through the seeded hash; the boil owns x/y/
+        rotation of the WRAPPER — entrance tweens ride other properties).
+        Stroke draws run on the stroke-dashoffset ATTRIBUTE (house law #6).
+      - PORT DELTA: upstream drove the boil through a timeline-level
+        onUpdate (tl.eventCallback), which does NOT fire on seek (house trap
+        list); here the same pose math rides the sanctioned property-setter
+        driver — one inert linear proxy tween spanning [0,D] whose setter
+        re-poses every registered boil (house scrub laws #2/#3). Upstream's
+        hwCalloutOff fade + end-of-demo visibility kill were dropped: the
+        annotation HOLDS to the end (THE EXIT LAW — the compositor/exitOnCut
+        owns the seam).
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (see stat-card
+        note); set it per render, comfortably past drawAt + ~1.8s of draw
+        choreography (short renders compress the draw phases together).
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>SNIPER · hw-callout-circle</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="/vendor/gsap/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: var(--canvas-w);
+        height: var(--canvas-h);
+        overflow: hidden;
+        background: transparent;          /* alpha overlay — only the callout paints */
+        font-family: var(--font);
+      }
+      #hwco-root { position: relative; width: var(--canvas-w); height: var(--canvas-h); }
+
+      /* The callout wrapper is statically positioned around the region; the
+         BOIL owns its transform (x/y/rotation), so nothing else may animate
+         those on this element. */
+      #hwco-callout { position: absolute; will-change: transform; }
+      #hwco-callout svg { width: 100%; height: 100%; overflow: visible; display: block; }
+      #hwco-callout path {
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      #hwco-outline { stroke: var(--hw-ink); stroke-width: 10; }
+      /* Lighter weight + alpha so the hatch sits behind the subject instead
+         of over it (upstream note kept). */
+      #hwco-scribble { stroke: var(--hw-hatch); stroke-width: 5; opacity: 0.42; }
+      #hwco-connector { stroke: var(--hw-ink); stroke-width: 6; }
+      #hwco-label {
+        position: absolute;
+        font-family: var(--font-hand);
+        font-weight: 700;
+        font-size: 72px;
+        color: var(--hw-ink);
+        white-space: nowrap;
+        opacity: 0;
+        /* legibility over arbitrary footage, not branding */
+        text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
+        will-change: transform, opacity;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="hwco-root"
+      data-composition-id="hw-callout-circle"
+      data-width="1080"
+      data-height="1920"
+      data-start="0"
+      data-duration="3"
+    >
+      <div id="hwco-callout" class="clip" data-start="0" data-duration="60" data-track-index="1">
+        <svg id="hwco-svg">
+          <path id="hwco-scribble"></path>
+          <path id="hwco-outline"></path>
+          <path id="hwco-connector"></path>
+        </svg>
+        <div id="hwco-label"></div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("hwco-root");
+        // Single source of truth for render length: the root data-duration attr.
+        const D = parseFloat(root.dataset.duration) || 3;
+
+        // labelAt defaults "below": beside this default-width region a
+        // "right" label runs off the 1080 canvas — the declared defaults
+        // must pass their own label-geometry contract (review F1).
+        const defaults = {
+          x: 240, y: 780, w: 600, h: 300, label: "look here", labelAt: "below",
+          scribble: false, seed: 4, drawAt: 0.2, accent: "#054BC9", hatch: "#FFD400",
+        };
+        const HF = window.__hyperframes;
+        const vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
+        document.documentElement.style.setProperty("--hw-ink", vars.accent);
+        document.documentElement.style.setProperty("--hw-hatch", vars.hatch);
+
+        const x = Number(vars.x), y = Number(vars.y);
+        const w = Number(vars.w), h = Number(vars.h);
+        if (![x, y, w, h].every(isFinite) || w <= 0 || h <= 0) {
+          throw new Error("hw-callout-circle: x/y/w/h must be finite with w,h > 0; got " +
+            [vars.x, vars.y, vars.w, vars.h].join(","));
+        }
+        const label = String(vars.label == null ? "" : vars.label).trim();
+        const labelAt = vars.labelAt === "left" || vars.labelAt === "below"
+          ? vars.labelAt : "right";
+        const scribble = vars.scribble === true || String(vars.scribble) === "true";
+
+        // ---- hw family runtime (inlined per host, the way upstream ships it) ----
+
+        // Seeded hash -> [-1, 1]. Pure function of n — no wall clock, no PRNG state.
+        function hwHash(n, seed) {
+          const v = Math.sin(n * 127.1 + (seed || 1) * 311.7) * 43758.5453;
+          return (v - Math.floor(v)) * 2 - 1;
+        }
+
+        // One shared per-frame driver per timeline: an inert linear proxy tween
+        // spans [0, D]; its property SETTER re-runs every registered render as
+        // a pure function of the driven time (house scrub laws #2/#3 — a
+        // timeline-level onUpdate would not fire on seek).
+        function hwDrive(tl, fn) {
+          if (!tl.__hwRenders) {
+            tl.__hwRenders = [];
+            const drv = { _t: 0 };
+            Object.defineProperty(drv, "t", {
+              get: function () { return this._t; },
+              set: function (v) {
+                this._t = v;
+                for (let i = 0; i < tl.__hwRenders.length; i++) tl.__hwRenders[i](v);
+              },
+            });
+            tl.fromTo(drv, { t: 0 },
+              { t: D, duration: D, ease: "none", immediateRender: false }, 0);
+          }
+          tl.__hwRenders.push(fn);
+          fn(0);
+        }
+
+        // The boil: jitter that re-poses only every `frameDrop` frames (quake /
+        // frame-drop style). Pose is a pure function of the quantized driven
+        // time through the seeded hash — identical on every pass over a frame.
+        // The boil OWNS x/y/rotation of its targets.
+        function hwBoil(tl, target, opts) {
+          const amp = opts.amp !== undefined ? opts.amp : 1.6;
+          const rot = opts.rot !== undefined ? opts.rot : 0.5;
+          const fps = opts.fps || 30;
+          const drop = opts.frameDrop || 3;
+          const seed = opts.seed || 1;
+          const els = gsap.utils.toArray(target);
+          hwDrive(tl, function (time) {
+            const step = Math.floor((time * fps) / drop);
+            for (let i = 0; i < els.length; i++) {
+              gsap.set(els[i], {
+                x: hwHash(step * 3 + i * 97, seed) * amp,
+                y: hwHash(step * 3 + 1 + i * 97, seed) * amp,
+                rotation: hwHash(step * 3 + 2 + i * 97, seed) * rot,
+              });
+            }
+          });
+        }
+
+        // Seeded hand-wobbled ellipse path (smooth quadratic chain).
+        function hwWobbleEllipse(cx, cy, rx, ry, seed, wobblePct) {
+          const N = 14, pts = [];
+          for (let i = 0; i < N; i++) {
+            const a = (i / N) * Math.PI * 2;
+            const wr = 1 + hwHash(i * 13 + 5, seed) * (wobblePct / 100);
+            pts.push([cx + Math.cos(a) * rx * wr, cy + Math.sin(a) * ry * wr]);
+          }
+          const mx = (pts[0][0] + pts[N - 1][0]) / 2;
+          const my = (pts[0][1] + pts[N - 1][1]) / 2;
+          let d = "M" + mx.toFixed(1) + " " + my.toFixed(1);
+          for (let j = 0; j < N; j++) {
+            const p = pts[j], q = pts[(j + 1) % N];
+            d += " Q" + p[0].toFixed(1) + " " + p[1].toFixed(1) + " " +
+              ((p[0] + q[0]) / 2).toFixed(1) + " " + ((p[1] + q[1]) / 2).toFixed(1);
+          }
+          return d;
+        }
+
+        // ---- build the callout geometry around the region ----
+        const seed = isFinite(Number(vars.seed)) ? Number(vars.seed) : 4;
+        const PAD = 60;                    // wobble + overshoot margin around the region
+        const el = document.getElementById("hwco-callout");
+        el.style.left = (x - PAD) + "px";
+        el.style.top = (y - PAD) + "px";
+        el.style.width = (w + PAD * 2) + "px";
+        el.style.height = (h + PAD * 2) + "px";
+        const W = w + PAD * 2, H = h + PAD * 2;
+        const svg = document.getElementById("hwco-svg");
+        svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+        const cx = W / 2, cy = H / 2;
+        const rx = w / 2 + 26, ry = h / 2 + 26;   // underline-circle's marker pad
+
+        document.getElementById("hwco-outline")
+          .setAttribute("d", hwWobbleEllipse(cx, cy, rx, ry, seed, 4));
+
+        const scr = document.getElementById("hwco-scribble");
+        if (!scribble) {
+          scr.style.display = "none";
+        } else {
+          // Denser rows so the zigzag reads as a scribbled hatch: at ~6 rows
+          // the near-horizontal runs dominate and it renders as stacked bars.
+          let d = "";
+          const rows = 11;
+          for (let i = 0; i < rows; i++) {
+            const t = (i + 0.5) / rows;
+            const yy = cy - ry + t * ry * 2;
+            const half = Math.sqrt(Math.max(0.05, 1 - Math.pow((yy - cy) / ry, 2)));
+            const xw = rx * half * 0.86;
+            const xa = cx - xw + hwHash(i * 7 + 2, seed) * 8;
+            const xb = cx + xw + hwHash(i * 7 + 3, seed) * 8;
+            d += (i === 0 ? "M " : " L ") + (i % 2 ? xa : xb).toFixed(1) + " " + yy.toFixed(1);
+            d += " L " + (i % 2 ? xb : xa).toFixed(1) + " " +
+              (yy + hwHash(i * 7 + 4, seed) * 4).toFixed(1);
+          }
+          scr.setAttribute("d", d);
+        }
+
+        const conn = document.getElementById("hwco-connector");
+        const labelEl = document.getElementById("hwco-label");
+        if (!label) {
+          conn.style.display = "none";     // circle-only annotation (explicit blank)
+        } else {
+          const sx = labelAt === "left" ? cx - rx : labelAt === "below" ? cx : cx + rx;
+          const sy = labelAt === "below" ? cy + ry : cy + ry * 0.35;
+          const ex = labelAt === "left" ? sx - 70 : labelAt === "below" ? sx + 40 : sx + 70;
+          const ey = sy + 55;
+          conn.setAttribute("d",
+            "M " + sx.toFixed(1) + " " + sy.toFixed(1) +
+            " Q " + ((sx + ex) / 2 + hwHash(21, seed) * 14).toFixed(1) +
+            " " + (sy + 46).toFixed(1) +
+            " " + ex.toFixed(1) + " " + ey.toFixed(1));
+          labelEl.style.left = (labelAt === "left" ? ex - 180 : ex + 12) + "px";
+          labelEl.style.top = (ey - 30) + "px";
+          labelEl.textContent = label;
+        }
+
+        // ---- timeline: draw sequence outline -> hatch -> connector -> label ----
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // Short renders compress the ~1.8s draw choreography together
+        // (envelope law: fixed IN, elastic HOLD).
+        const squeeze = Math.min(1, Math.max(0.25, (D - 0.2) / 2.0));
+        const drawAtRaw = Number(vars.drawAt);
+        const drawAt = Math.max(0, Math.min(
+          isFinite(drawAtRaw) ? drawAtRaw : 0.2, D - 1.9 * squeeze));
+
+        let t = drawAt;
+        [["hwco-outline", 0.7], ["hwco-scribble", 0.55], ["hwco-connector", 0.35]]
+          .forEach(function (pair) {
+            const p = document.getElementById(pair[0]);
+            if (p.style.display === "none") return;
+            const len = p.getTotalLength();
+            const dur = pair[1] * squeeze;
+            // Resting state hidden; the draw is a dash tween on the
+            // stroke-dashoffset ATTRIBUTE (house scrub law #6).
+            p.setAttribute("stroke-dasharray", String(len));
+            p.setAttribute("stroke-dashoffset", String(len));
+            tl.fromTo(p, { attr: { "stroke-dashoffset": len } },
+              { attr: { "stroke-dashoffset": 0 }, duration: dur,
+                ease: "power2.inOut", immediateRender: false }, t);
+            t += dur * 0.85;
+          });
+        if (label) {
+          gsap.set(labelEl, { scale: 0.8, transformOrigin: "0% 50%" });
+          tl.fromTo(labelEl, { opacity: 0, scale: 0.8 },
+            { opacity: 1, scale: 1, duration: 0.4 * squeeze, ease: "back.out(1.6)" }, t);
+        }
+
+        // The family boil on the whole callout (classic frameDrop-3 character;
+        // the driver keeps it a pure function of the driven time).
+        hwBoil(tl, el, { amp: 1.8, rot: 0.4, frameDrop: 3, seed: seed });
+
+        // Annotation HOLDS to the end — the compositor/exitOnCut owns the seam.
+        tl.seek(0);
+        window.__timelines["hw-callout-circle"] = tl;
+      })();
+    </script>
+  </body>
+</html>

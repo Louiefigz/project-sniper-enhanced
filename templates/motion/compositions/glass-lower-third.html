@@ -13,7 +13,7 @@
 >
   <!--
     PROJECT SNIPER · LONG-FORM glass template: GLASS-LOWER-THIRD (16:9)
-    Reference: longform-ref lf-1 / lf-3 — a frosted BRIGHT glass lower-third that
+    A frosted BRIGHT glass lower-third that
     pops in from the side the speaker gestures to. Transparent 1920x1080 overlay
     -> render with `--format mov` (ProRes 4444) for alpha (anchor "free-band").
 
@@ -27,14 +27,13 @@
         titleHighlight / iconFile) is unset, i.e. a bare preview/render with
         no --variables. A card with no content at all is removed entirely.
       - TWO-TONE TITLE: titleBase renders in ink; titleHighlight (if non-empty)
-        renders as ONE white-on-accent pill inline after it (lf-3's "end-to-end").
-        Empty titleHighlight = plain ink title (lf-1).
+        renders as ONE white-on-accent pill inline after it. Empty
+        titleHighlight = plain ink title.
       - SIDE flips BOTH the slide direction (x:-60 left / x:+60 right) AND the
-        card's screen position (lower-left / lower-right) — "pop from where he
-        points" (liquid-glass style doc, DESIGN TOOLBOX).
+        card's screen position (lower-left / lower-right), so the card arrives
+        from the side the speaker points to.
       - The glass reads on its OWN semi-opaque white fill (not backdrop-blur), so
-        the isolated alpha render composites identically over any footage
-        (liquid-glass "THE glass surface" note).
+        the isolated alpha render composites identically over any footage.
       - YouTube-safe: the card's bottom edge stays above y=970 (110px hover
         scrubber + margin); copy stays inside title-safe (192px H / 108px V).
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
@@ -55,8 +54,8 @@
         background: transparent;              /* alpha overlay — frame owns nothing */
         font-family: var(--font);
       }
-      /* Liquid-glass token layer (long-form): brand accent stays #054BC9; the
-         ink/slate neutrals are the glass doc's deep-navy set, adapted. */
+      /* Glass token layer (long-form): brand accent stays #054BC9; deep-navy
+         ink and slate neutrals shared with glass-rail. */
       :root {
         --glass-ink: #0a1a4d;                 /* deep-navy title text */
         --glass-slate: #5e687d;               /* muted labels */
@@ -64,7 +63,7 @@
       }
       #lt-root { position: relative; width: 1920px; height: 1080px; }
 
-      /* THE glass surface — frosted BRIGHT translucent white (liquid-glass doc). */
+      /* THE glass surface — frosted BRIGHT translucent white. */
       .glass {
         background: linear-gradient(155deg, rgba(255,255,255,0.90), rgba(238,244,255,0.78));
         backdrop-filter: blur(22px) saturate(160%);
@@ -124,7 +123,7 @@
         letter-spacing: -2px;
         color: var(--glass-ink);
       }
-      /* ONE highlighted word: white text on an accent pill (lf-3 "end-to-end"). */
+      /* ONE highlighted word: white text on an accent pill. */
       .t-pill {
         font-weight: 900;
         font-size: 84px;
@@ -138,8 +137,8 @@
         will-change: transform, opacity;
       }
 
-      /* Square icon badge hanging off the card's left (right) edge — lf-3's
-         mascot. It overlaps the card corner by ~60% of its width. */
+      /* Square icon badge hanging off the card's left (right) edge. It
+         overlaps the card corner by ~60% of its width. */
       #lt-badge {
         position: absolute;
         bottom: 96px;
@@ -195,8 +194,8 @@
         // PREVIEW-ONLY demo copy. Activates ONLY when EVERY content variable
         // is unset (a bare preview/render with no --variables).
         const SAMPLE = {
-          eyebrow: "100% edited by Claude",
-          titleBase: "edited", titleHighlight: "end-to-end",
+          eyebrow: "Sample lower third",
+          titleBase: "reviewed", titleHighlight: "frame by frame",
         };
         const HF = window.__hyperframes;
         let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
@@ -246,14 +245,14 @@
         const tl = gsap.timeline({ paused: true });
 
         // Entrance: the whole card slides + fades in from the pointed-to side
-        // (x:-60 left / +60 right, power3.out) — "pop from where he points".
+        // (x:-60 left / +60 right, power3.out) — arrives from the pointed side.
         const dx = side === "right" ? 60 : -60;
         if (hasCard) {
           tl.set(card, { opacity: 0, x: dx, y: 12 }, 0);
           tl.to(card, { opacity: 1, x: 0, y: 0, duration: 0.42, ease: "power3.out" }, 0);
         }
 
-        // Progressive disclosure (R9): accent pill pops AFTER the card lands, and
+        // Progressive disclosure: accent pill pops AFTER the card lands, and
         // the badge stamps in last — ~100-170ms flourishes, never pop-from-nothing.
         if (hi) {
           tl.set(pill, { scale: 0.6, opacity: 0, transformOrigin: "left center" }, 0);

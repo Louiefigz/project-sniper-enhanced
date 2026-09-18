@@ -14,14 +14,15 @@
     {"id":"at4","type":"number","label":"Row 4 land time (s)","default":2.8,"min":0,"max":30,"step":0.05,"unit":"s"},
     {"id":"at5","type":"number","label":"Row 5 land time (s)","default":3.6,"min":0,"max":30,"step":0.05,"unit":"s"},
     {"id":"accent","type":"color","label":"Accent color (pill tint + checks + ticks)","default":"#054BC9"},
-    {"id":"paper","type":"enum","label":"Paper","default":"whiteboard","options":[{"value":"whiteboard","label":"Whiteboard (warm white)"},{"value":"cream","label":"Cream (graph-paper, dark ink)"}]}
+    {"id":"paper","type":"enum","label":"Paper","default":"whiteboard","options":[{"value":"whiteboard","label":"Whiteboard (cool paper, dot field)"},{"value":"cream","label":"Warm paper (dot field, dark ink)"}]}
   ]'
 >
   <!--
     PROJECT SNIPER · Motion template: WHITEBOARD-LIST (16:9 talking-head longform)
-    The checklist sibling of whiteboard-map — same graph-paper canvas language
-    (R14 full-frame cutaway world; reference/whiteboard-map-reference.png for the
-    canvas + pill + accent grammar). A title pill top-LEFT and up to 5 checklist
+    The checklist sibling of whiteboard-map — same full-frame paper canvas
+    (Sniper paper #F1F4F6 with a 96px ink dot field; the "cream" paper value is
+    a warm paper #F3EFE6 with the same dots; ink text 16.4 / 15.8:1). A title
+    pill top-LEFT and up to 5 checklist
     rows (accent check square + dark text) landing per spoken beat down a left
     spine: each row's short connector TICK draws on just before the row lands.
 
@@ -35,7 +36,7 @@
       - UNSET everything renders the PREVIEW SAMPLE only (glass-rail G21
         pattern): demo content activates when title AND item1..5 are ALL unset;
         any plan that sets one row gets exactly its rows — no sample leak.
-      - Grammar (burst-measured, same as whiteboard-map): row fades+rises ~250ms
+      - Timing (Sniper design parameters, same as whiteboard-map): row fades+rises ~250ms
         at atN; its spine tick draws ~300ms starting ~200ms before atN; the
         canvas drifts ~1.5% across D; un-landed rows are INVISIBLE.
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
@@ -53,13 +54,13 @@
         width: 1920px;
         height: 1080px;
         overflow: hidden;
-        background: #f7f5f0;             /* opaque — this comp owns the whole frame */
+        background: #F1F4F6;             /* opaque — this comp owns the whole frame */
         font-family: var(--font);
       }
       #wl-root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
 
       /* Full-bleed paper on a CHILD (never the root). */
-      #wl-bg { position: absolute; inset: 0; background: #f7f5f0; }
+      #wl-bg { position: absolute; inset: 0; background: #F1F4F6; }
 
       /* Drifting world (oversized so the drift never exposes an edge). */
       #wl-world {
@@ -71,17 +72,15 @@
       #wl-grid {
         position: absolute; inset: 0;
         background-image:
-          linear-gradient(to right, #e9e6de 0 1px, transparent 1px),
-          linear-gradient(to bottom, #e9e6de 0 1px, transparent 1px);
-        background-size: 192px 192px, 192px 192px;
+          radial-gradient(circle at 2px 2px, rgba(19, 23, 32, 0.16) 1.6px, transparent 2.2px);
+        background-size: 96px 96px;
       }
-      /* Cream graph-paper variant — the operator's real pro brand (ruled cream
-         paper, dark ink). Toggled by the `paper` var flipping #wl-root.cream. */
-      #wl-root.cream #wl-bg { background: #f6eac6; }
+      /* Warm-paper variant (paper value "cream"): warm off-white with the same
+         dot field, ink text. Toggled by the `paper` var flipping #wl-root.cream. */
+      #wl-root.cream #wl-bg { background: #F3EFE6; }
       #wl-root.cream #wl-grid {
         background-image:
-          linear-gradient(to right, #e6d7a0 0 1px, transparent 1px),
-          linear-gradient(to bottom, #e6d7a0 0 1px, transparent 1px);
+          radial-gradient(circle at 2px 2px, rgba(60, 44, 20, 0.18) 1.6px, transparent 2.2px);
       }
       #wl-root.cream .wl-text { color: #141414; }
       #wl-canvas { position: absolute; left: 48px; top: 48px; width: 1920px; height: 1080px; }

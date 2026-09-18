@@ -90,7 +90,7 @@
         kind when a plan sets no accent.
       - Default build ("stamp"): the eyebrow slides in first, then rows stamp
         in top->bottom (back.out, 0.12s stagger) and each chip pops just after
-        its row. Icon slots are emoji-free (real marks only, R12).
+        its row. Icon slots are emoji-free (real marks only).
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
         rewrites it per window; --variables never sets it — see stat-card).
       - Opt-ins (the defaults keep the classic stamp build):
@@ -506,7 +506,7 @@
           const chip = row.querySelector(".chip");
           chip.textContent = (vars["num" + n] == null ? String(n) : String(vars["num" + n])).trim() || String(n);
           chip.style.background = CHIP_COLORS[i % CHIP_COLORS.length];
-          // Icon slot: real mark only when set (R12, emoji-free); created on
+          // Icon slot: real mark only when set (emoji-free); created on
           // demand so the no-icon path leaves no empty media node (lint-clean).
           const src = iconSrc(vars["icon" + n]);
           if (src) {

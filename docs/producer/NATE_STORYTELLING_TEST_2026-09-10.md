@@ -77,8 +77,8 @@ catalog is loaded locally and frozen with its hash in the project.
 | 18.52–20.52s | Apply it to the same object | Current wording transforms into distinct outcome/timeframe slots |
 | 20.52–24.52s | Complete the worked example | “Get your dog to eat raw food” + “in 21 days”; owned dog footage and a short ending hold |
 
-The hook uses canonical `value-formula`: **Use this [X] formula to [Y]**, filled
-with X=`offer`, Y=`get specific`. Its two backed lines are at the top, end at
+The hook was a fill of a then-packaged Director anchor (withdrawn from the product on 2026-09-18) with
+the slot values `offer` and `get specific`. Its two backed lines are at the top, end at
 frame 81, and never determine the caption position. The 70-pixel captions remain
 centered around torso height with dark outline and yellow source-timed words.
 

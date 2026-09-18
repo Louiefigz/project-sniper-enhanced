@@ -95,8 +95,8 @@ test("a newly added reference invalidates the previous complete-library packet",
     const manifest = path.join(repo, LONGFORM_LIBRARY, "manifest.json");
     const original = readFileSync(manifest, "utf8");
     const changed = JSON.parse(original);
-    changed.cases.push({ id: "LF02", case_path: path.join(LONGFORM_LIBRARY, "cases/LF02.json") });
-    writeFileSync(path.join(path.dirname(manifest), "cases/LF02.json"), JSON.stringify({ id: "LF02", title: "TEST additional research", beats: [] }));
+    changed.cases.push({ id: "LG02", case_path: path.join(LONGFORM_LIBRARY, "cases/LG02.json") });
+    writeFileSync(path.join(path.dirname(manifest), "cases/LG02.json"), JSON.stringify({ id: "LG02", title: "TEST additional research", beats: [] }));
     writeFileSync(manifest, JSON.stringify(changed));
     assert.throws(() => checkNativeLongformRequest(prepared.directory), /input changed|library changed/);
   } finally { f.cleanup(); }

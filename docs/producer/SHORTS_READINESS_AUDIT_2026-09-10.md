@@ -103,8 +103,9 @@ alone do not establish a runtime improvement.
    central connection, not optional expansion of a local Sniper catalog.
 4. **Portrait views and authentic evidence:** the current presenter uses a
    contained 1080 × 660 region. This is not the requested full-frame portrait
-   opening or continuous face tracking. Reference staging currently accepts
-   Nate IDs only, so A05 is not yet selectable through that interface.
+   opening or continuous face tracking. Reference staging then accepted only
+   sequence-case IDs, so single entries were not selectable through that
+   interface (the third-party study cases were withdrawn from the product on 2026-09-18).
 5. **Native review and edits:** establish native audiovisual review, edit
    persistence/reload and completion ownership. Legacy readiness/opening/body
    paths correctly reject V9 instead of granting inappropriate approval.

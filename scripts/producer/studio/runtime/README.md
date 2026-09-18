@@ -50,8 +50,21 @@ paired transport measurement and its limits. It is not an upstream release or a
 claim that an arbitrary upgraded SDK is compatible. Patch offsets require the
 complete input SHA-256 and verify the complete resulting SHA-256.
 
-Upstream HyperFrames is Apache-2.0; its original distribution, license and
-notices remain authoritative. `frame-source-transport.mjs` is the local adapter.
+## Licence and modification notice
+
+Upstream HyperFrames 0.8.31 is Copyright 2026 HeyGen, Inc. and licensed under
+the Apache License, Version 2.0; its original distribution, license and notices
+remain authoritative (upstream publishes no NOTICE file). The patch text in
+`patches.json` contains portions of the upstream files, modified by Project
+Sniper. Five upstream files are modified — `dist/cli.js` (28 patches; renamed
+`native-render-sdk.mjs` in the adapted runtime), `dist/hyperframe.runtime.iife.js`
+(2), `dist/hyperframe-runtime.js` (2), `dist/hyperframe.manifest.json` (1) and the
+derived `dist/native-capture-library.mjs` (1) — 34 patches in total.
+[`NOTICE`](NOTICE) in this directory is the prominent statement that these files
+were modified by Project Sniper. It sits beside the patches, not inside the
+patched files, because every adapted file is hash-verified against
+`patches.json` before use. `frame-source-transport.mjs` and
+`native-export-guard.mjs` are Project Sniper files, not upstream code.
 
 September 16 long-export adaptation: video windows are half-open in all four
 frame-lookup paths, so an outgoing clip is inactive at its exact end. Source

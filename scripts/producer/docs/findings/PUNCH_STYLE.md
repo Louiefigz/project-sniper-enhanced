@@ -194,13 +194,14 @@ without changing this document.
 
 Three zones on the 1080×1920 canvas:
 
-1. **Headroom** — T1 lockups. The lockup's `slotY`/`slotX` defaults and `band` keep it above the
-   face.
+1. **Headroom** — T1 lockups, between 0.115 and 0.27 of frame height (the lockup's block
+   centre `slotY`, default 0.19).
 2. **Face** — never covered by text.
 3. **Caption band** — T2, centred horizontally, between 0.60 and 0.64 of frame height.
 
 *Why:* fixed zones let the viewer learn where each kind of text appears within the first seconds.
-*Enforced:* the caption band is config (§9.2). Lockup placement is advisory.
+*Enforced:* the caption band is config (§9.2); `punch-shout-lockup` clamps `slotY` to the
+headroom band. Keeping every other graphic off the face is advisory for this style.
 
 ### 5.3 Animation law
 

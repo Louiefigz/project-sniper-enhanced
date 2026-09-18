@@ -7,43 +7,53 @@
     {"id":"atS","type":"number","label":"Draw start (s, window-relative)","default":0.2,"min":0,"max":30,"step":0.05,"unit":"s"},
     {"id":"slotX","type":"number","label":"Badge center x (normalized)","default":0.5,"min":0.05,"max":0.95,"step":0.01},
     {"id":"slotY","type":"number","label":"Badge center y (normalized)","default":0.5,"min":0.05,"max":0.95,"step":0.01},
-    {"id":"accent","type":"color","label":"Stroke/fill color (punch lemon default)","default":"#F5E960"}
+    {"id":"accent","type":"color","label":"Stroke/fill colour (default: Sniper signal amber --lemon)","default":"#FDA933"}
   ]'
 >
   <!--
-    PROJECT SNIPER · Motion template: STROKE-DRAW-BADGE (punch pack)
-    Reference: the Punch save-CTA move — an icon OUTLINE stroke-draws in like
-    a marker, then the glyph FLOODS with fill; a short label lands with the
-    flood. Now a reusable comp (icon+label vars) powered by the vendored GSAP
-    DrawSVGPlugin (/vendor/gsap/DrawSVGPlugin.min.js, 3.14.2 — license +
-    source recorded in ../PROVENANCE.md).
+    PROJECT SNIPER · Motion template: STROKE-DRAW-BADGE (short-form punch pack)
+    A call-to-action badge: an ink tile pops on, the icon's OUTLINE draws
+    itself in like a marker, the glyph then FLOODS with fill, and a short
+    label pops underneath as the fill lands. Stroke drawing uses the vendored
+    GSAP DrawSVGPlugin (/vendor/gsap/DrawSVGPlugin.min.js, 3.14.2 — licence
+    and source recorded in ../PROVENANCE.md).
     Transparent 1080x1920 overlay -> render `--format mov` (ProRes 4444).
+
+    SNIPER DESIGN (tokens.css; same plates as punch-shout-lockup):
+      - Tile = one ink card (rgba(19,23,32,0.92), 6px corners, 1px light
+        hairline) that carries both the mark and the label, so the badge
+        reads the same over bright or busy footage.
+      - Mark = the icon's own <path> geometry, stroked and then filled in the
+        accent, default --lemon signal amber: 9.31:1 on solid ink, 7.47:1
+        where the tile sits over pure white footage.
+      - Label = --font-display (Bricolage Grotesque 800) white, 17.93:1 on
+        ink. No text outline — the tile carries legibility.
 
     CONTRACT for the PRODUCER compositing stage:
       - icon: a filename under the icons/ web root ("youtube" / "youtube.svg";
         .svg optional — same resolution as icon-badge; plan_lint_motion's
-        icon* existence check covers this field). The SVG is inlined at build
+        icon* existence check covers the field). The SVG is inlined at build
         time (sync local fetch of the served asset — deterministic, no
         network) so DrawSVG can stroke its real <path> geometry. Non-<path>
         shapes FAIL LOUD — no fallback drawing.
-      - label: OPTIONAL one-liner under the mark (heavy white grotesque +
-        black stroke, the punch co-word skin). Empty = omitted.
+      - label: OPTIONAL one-liner under the mark. Empty = omitted.
       - EMPTY-DEFAULTS LAW (G21): icon+label default EMPTY — unset renders
-        NOTHING; demo content ("youtube"/"Subscribe") only when BOTH unset.
+        NOTHING; sample content ("youtube"/"Subscribe") only when BOTH unset.
         label without icon FAILS LOUD (a badge is the mark, not bare text).
-      - TIMING (house laws): stroke-draw DRAW_S=0.5s power2.out starting at
-        atS (the stroke-draw band underline-circle proved, 0.4-0.5s);
-        fill FLOODS over FLOOD_S=0.18s power2.in immediately after; the label
-        pops AT the flood moment via M.popIn — alpha SNAP + <=2-FRAME scale
-        settle (punch pop law, PUNCH_STYLE §5.3). atS clamps so draw+flood
+      - TIMING (Sniper design parameters): the tile pops at atS via M.popIn
+        (alpha SNAP + <=2-frame scale settle) and the outline draws over
+        DRAW_S=0.5s power2.out from the same moment — long enough to be seen
+        being drawn, short enough to finish on the spoken word. The fill
+        FLOODS over FLOOD_S=0.18s power2.in immediately after, and the label
+        pops AT the flood moment via M.popIn. atS clamps so draw+flood
         always resolve inside the window.
       - OUT = NONE. Holds to D; the compositor clears it on the window end /
-        cut ("exitOnCut": true — §5.3 THE EXIT LAW). NEVER a fade.
+        cut ("exitOnCut": true). NEVER a fade.
       - Placement: slotX/slotY are the badge CENTER (normalized). The
         planner/anchors own placement law (keep it off the face) — this
         template just draws where it is told.
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
-        rewrites it per window; --variables never sets it — stat-card note).
+        rewrites it per window; --variables never sets it).
   -->
   <head>
     <meta charset="UTF-8" />
@@ -65,36 +75,41 @@
       #sdb-root { position: relative; width: 1080px; height: 1920px; }
 
       /* .stage OWNS the centering transform (punch-shout-lockup pattern);
-         GSAP animates only the mark's paths + the label. */
+         GSAP animates only the tile, the mark's paths and the label. */
       #sdb-stage {
         position: absolute;
         left: 540px;                     /* slotX * 1080 (script overrides) */
         top: 960px;                      /* slotY * 1920 (script overrides) */
         transform: translate(-50%, -50%);
+      }
+      /* The ink tile: carries the mark + label as one unit. */
+      #sdb-tile {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 26px;
+        gap: 22px;
+        padding: 36px 44px 34px;
+        background: rgba(19, 23, 32, 0.92);
+        border: 1px solid rgba(241, 244, 246, 0.14);
+        border-radius: 6px;
+        box-shadow: 0 16px 44px rgba(0, 0, 0, 0.4);
+        will-change: opacity, transform;
       }
-      /* The inlined mark. Stroke + fill both ride --accent; the soft drop
-         lifts it off real footage (punch payload treatment). */
+      /* The inlined mark. Stroke + fill both ride the accent. */
       #sdb-svg {
         width: 170px;
         height: 170px;
         display: block;
         overflow: visible;
-        filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.5));
       }
-      /* Label: heavy white grotesque + black stroke (punch co-word skin),
-         ~2.8%H. Falls back to synthesized 700 (tokens.css embeds 400/700). */
+      /* Label: white display grotesque on the tile. */
       #sdb-label {
-        font-size: 54px;
+        font-family: var(--font-display);
+        font-size: 52px;
         font-weight: 800;
         line-height: 1.05;
+        letter-spacing: -0.01em;
         color: #FFFFFF;
-        -webkit-text-stroke: 4px #000;
-        paint-order: stroke fill;
-        text-shadow: 0 5px 18px rgba(0, 0, 0, 0.5);
         white-space: nowrap;
         will-change: opacity, transform;
       }
@@ -110,8 +125,10 @@
       data-duration="3"
     >
       <div id="sdb-stage">
-        <svg id="sdb-svg" class="clip" data-start="0" data-duration="60" data-track-index="1"></svg>
-        <div id="sdb-label" class="clip" data-start="0" data-duration="60" data-track-index="2"></div>
+        <div id="sdb-tile">
+          <svg id="sdb-svg" class="clip" data-start="0" data-duration="60" data-track-index="1"></svg>
+          <div id="sdb-label" class="clip" data-start="0" data-duration="60" data-track-index="2"></div>
+        </div>
       </div>
     </div>
 
@@ -122,15 +139,15 @@
         const D = parseFloat(root.dataset.duration) || 3;
         const M = window.__motionTokens;
 
-        const DRAW_S = 0.5;              // stroke-draw (underline-circle band)
+        const DRAW_S = 0.5;              // outline stroke-draw
         const FLOOD_S = 0.18;            // fill flood right after the draw
 
         // Content defaults are EMPTY (G21 — unset renders NOTHING).
         const defaults = {
           icon: "", label: "", atS: 0.2, slotX: 0.5, slotY: 0.5,
-          accent: "#F5E960",
+          accent: "#FDA933",
         };
-        // PREVIEW-ONLY demo (the save-CTA move; only when BOTH content vars unset).
+        // PREVIEW-ONLY sample (only when BOTH content vars unset).
         const SAMPLE = { icon: "youtube", label: "Subscribe" };
         const HF = window.__hyperframes;
         let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
@@ -193,10 +210,10 @@
         const srcShapes = srcSvg.querySelectorAll("circle, rect, polygon, polyline, ellipse, line");
         if (!srcPaths.length || srcShapes.length) {
           throw new Error("stroke-draw-badge: icon must be <path>-only (got " +
-            srcPaths.length + " paths, " + srcShapes.length + " other shapes)");
+            srcPaths.length + " paths, " + srcShapes.length + " non-path shapes)");
         }
-        // Stroke weight in viewBox units: ~0.75u on the 24u Simple Icons box
-        // (~4.4 visual px at 140px glyph — the marker-outline weight).
+        // Stroke weight in viewBox units: 0.75u on a 24u icon box (~5px at
+        // the 170px mark) — heavy enough to read as a drawn marker line.
         const strokeW = (viewW * 0.75) / 24;
         const paths = [];
         srcPaths.forEach(function (p) {
@@ -208,12 +225,12 @@
           el.setAttribute("stroke-linecap", "round");
           el.setAttribute("stroke-linejoin", "round");
           // Resting DOM state = fully drawn + filled (correct even if a seek
-          // never fires the tweens — underline-circle pattern).
+          // never fires the tweens).
           hostSvg.appendChild(el);
           paths.push(el);
         });
 
-        // Optional label (punch co-word skin) — empty removes the node.
+        // Optional label — empty removes the node.
         const labelEl = document.getElementById("sdb-label");
         const label = (vars.label == null ? "" : String(vars.label)).trim();
         if (label) labelEl.textContent = label;
@@ -226,9 +243,14 @@
         }
         gsap.registerPlugin(DrawSVGPlugin);
 
+        // 0) The ink tile pops ON at atS (alpha SNAP + <=2f settle) so the
+        //    outline always draws on ink; nothing paints before atS.
+        const tileEl = document.getElementById("sdb-tile");
+        tl.set(tileEl, { autoAlpha: 0 }, 0);
+        M.popIn(tl, tileEl, atS);
         // 1) OUTLINE stroke-draws in (DrawSVG 0% -> 100%, DRAW_S power2.out).
         //    The fromTo's from-state (drawSVG 0% + fill 0) hides the mark
-        //    from t=0 until atS — nothing paints before its moment.
+        //    from t=0 until atS.
         tl.fromTo(paths, { drawSVG: "0%" },
           { drawSVG: "100%", duration: DRAW_S, ease: "power2.out" }, atS);
         // 2) Glyph FLOODS with fill right as the outline closes.
@@ -242,7 +264,7 @@
         }
 
         // Keep the paused timeline spanning D; HOLDS to the end — the
-        // compositor clears it on the cut (THE EXIT LAW, never a fade).
+        // compositor clears it on the cut (never a fade).
         tl.set({}, {}, Math.max(0, D - 0.01));
 
         tl.seek(0);

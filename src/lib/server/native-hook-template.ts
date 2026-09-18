@@ -52,9 +52,9 @@ export function fillLocalHookTemplate(catalog: DirectorCatalog, choice: LocalHoo
         || /[\[\]\r\n]/u.test(value)) throw new Error("Hook slot must contain explicit single-line copy");
   }
   let formula = quoted[1];
-  // The canonical how-to formula explicitly makes its obstacle clause optional.
-  if (anchor.id === "value-how-to" && !Object.hasOwn(choice.slots, "obstacle")) {
-    formula = formula.replace(" (even if [obstacle])", "");
+  // steps-toward-goal declares its timeframe clause optional (resources/director/hook-anchors.md).
+  if (anchor.id === "steps-toward-goal" && !Object.hasOwn(choice.slots, "timeframe")) {
+    formula = formula.replace(" (in [timeframe])", "");
   }
   const missing = templateSlots(formula).filter((name) => !Object.hasOwn(choice.slots, name));
   if (missing.length) throw new Error(`Missing hook template slots: ${missing.join(", ")}`);

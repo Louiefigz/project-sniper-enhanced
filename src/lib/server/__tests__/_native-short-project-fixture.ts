@@ -24,7 +24,7 @@ function assets(directory: string): NativeAssetBinding[] {
 
 export function nativeShortFixture(directory: string): NativeShortProjectInput {
   const bindings = assets(directory), request = { selection: "auto", supportingVideo: "source-first" } as const;
-  const copy = fillLocalHookTemplate(loadDirectorCatalog(), { anchor: "value-how-to", slots: { outcome: "test a saved plan" } });
+  const copy = fillLocalHookTemplate(loadDirectorCatalog(), { anchor: "steps-toward-goal", slots: { count: "Two", goal: "test a saved plan" } });
   const input: NativeShortProjectInput = { schemaVersion: 1, request, assets: bindings,
     canvas: { title: "TEST native contract", frameRate: "25/1", totalFrames: 50, background: "#111111",
       sourceSize: { w: 1920, h: 1080 }, sourceFile: bindings[0].file,

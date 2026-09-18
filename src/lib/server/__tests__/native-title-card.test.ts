@@ -8,22 +8,23 @@ import { buildNativeCanvas, centeredNativeCaptionView, type NativeCanvasInput } 
 
 const catalog = loadDirectorCatalog();
 function card(): NativeTitleCard & { copy: LocalHookCopy } {
-  return { copy: fillLocalHookTemplate(catalog, { anchor: "value-how-to", slots: { outcome: "earn trust with a follow-up" } }),
-    lines: ["How to earn trust", "with a follow-up"], palette: "white-on-red", endFrame: 80, top: 110, fontSize: 76 };
+  return { copy: fillLocalHookTemplate(catalog, { anchor: "steps-toward-goal", slots: { count: "Two", goal: "a follow-up that earns trust" } }),
+    lines: ["Two steps to a follow-up", "that earns trust"], palette: "white-on-red", endFrame: 80, top: 110, fontSize: 76 };
 }
 
 test("local slot filling reads the real Director formula, retaining source identity without inference", () => {
   const copy = card().copy;
-  assert.equal(copy.text, "How to earn trust with a follow-up");
-  assert.match(copy.template, /\[outcome\]/u);
+  assert.equal(copy.text, "Two steps to a follow-up that earns trust");
+  assert.match(copy.template, /\[goal\]/u);
   assert.match(copy.libraryHash, /^[a-f0-9]{64}$/u);
   assert.equal(copy.scope, "local-template-fill-not-editorial-approval");
-  assert.equal(fillLocalHookTemplate(catalog, { anchor: "value-how-to",
-    slots: { outcome: "write an offer", obstacle: "you are starting today" } }).text,
-  "How to write an offer (even if you are starting today)");
+  assert.equal(fillLocalHookTemplate(catalog, { anchor: "steps-toward-goal",
+    slots: { count: "Three", goal: "a clearer quote", timeframe: "one afternoon" } }).text,
+  "Three steps to a clearer quote (in one afternoon)");
   assert.throws(() => fillLocalHookTemplate(catalog, { anchor: "missing", slots: {} }), /Unknown/);
-  assert.throws(() => fillLocalHookTemplate(catalog, { anchor: "value-formula", slots: { X: "offer" } }), /Missing/);
-  assert.throws(() => fillLocalHookTemplate(catalog, { anchor: "value-how-to", slots: { result: "trust" } }), /Unknown/);
+  assert.throws(() => fillLocalHookTemplate(catalog, { anchor: "situation-if-you", slots: { situation: "invoice late" } }), /Missing/);
+  assert.throws(() => fillLocalHookTemplate(catalog, { anchor: "steps-toward-goal", slots: { goal: "trust" } }), /Missing/);
+  assert.throws(() => fillLocalHookTemplate(catalog, { anchor: "steps-toward-goal", slots: { result: "trust" } }), /Unknown/);
 });
 
 test("explicit user title preserves exact wording and truthful provenance with shared wrapping", () => {
@@ -78,7 +79,7 @@ test("native canvas includes the local title and exact word highlighting without
     occurrences: [[0, 0, 0, 0, 20, "Real", 0], [1, 0, 1, 20, 40, "words", 0]], captionGroups: [[0, 1]],
     captionViews: [view], titleCard: card(), text: [], shapes: [], motion: [] };
   const html = buildNativeCanvas(input);
-  assert.match(html, /data-hook-anchor="value-how-to"/u);
+  assert.match(html, /data-hook-anchor="steps-toward-goal"/u);
   assert.match(html, /left:90px;top:1080px;width:900px/u);
   assert.match(html, /data-word-start-frame="20" data-word-end-frame="40"/u);
   assert.ok(html.includes('tl.set("#word-1-0",{color:"#ffffff"},1.6)'));

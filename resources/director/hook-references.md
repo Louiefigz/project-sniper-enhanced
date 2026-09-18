@@ -1,31 +1,38 @@
-# Reference openings
+# Director reference openings
 
-Worked examples written for this library. Each shows one opening move with invented,
-generic subject matter. They widen the Director's options; a finished hook must be built
-from the speaker's own retained words, and the validator rejects one that reuses five or
-more consecutive words from an example here.
+Each reference shows one anchor filled from one short recording. The recordings,
+speakers and numbers are **illustrative examples written for Project Sniper on
+2026-09-18**; they are not real people, real results or quotations. Use a
+reference to see how a pattern binds to spoken words and where its limit sits,
+never as copy for a new Short: the Director rejects a written hook that repeats
+five or more consecutive words of a reference.
 
-- **R001 · The real reason most meal plans fail isn't willpower, it's the shopping list.**
-- **R002 · One thing changed in how I schedule calls, and my afternoons came back.**
-- **R003 · Everyone edits the video. Almost nobody edits the first three seconds.**
-- **R004 · Why does the second week of any new habit always fall apart?**
-- **R005 · What if the slow part of your process was the part you thought was fastest?**
-- **R006 · Stop posting every day. Post the day you have something to show.**
-- **R007 · Cold emails with a long intro are overrated for small agencies.**
-- **R008 · I did the opposite of batching my content and posted more, not less.**
-- **R009 · If you rewrite the same proposal every week, watch this.**
-- **R010 · Freelancers: this one is for you, and it takes ten minutes.**
-- **R011 · If clients keep going quiet after the quote, it's not you. It's the quote's first line.**
-- **R012 · I got pricing wrong for two years, and it cost me the good clients first.**
-- **R013 · Business owners: Do you ever wonder why your busiest weeks make the least money?**
-- **R014 · 43 new subscribers in six days, from one pinned comment.**
-- **R015 · From a two-hour edit to a forty-minute edit, with the same camera.**
-- **R016 · How to write a follow-up people answer, even if they ignored the first one.**
-- **R017 · The formula is simple: one clear promise plus one piece of proof.**
-- **R018 · The mistake almost everyone makes with a first client call is talking first.**
-- **R019 · Don't hire an editor until you've written down how you edit.**
-- **R020 · Templates or custom work? It depends on how often you repeat the job.**
-- **R021 · You know when you finish a task and immediately forget why it mattered?**
-- **R022 · I used to plan the whole month. Now I plan the next three posts.**
-- **R023 · Before you record another video, do this one check on your audio.**
-- **R024 · Stop explaining the feature. Start showing the before and after.**
+One line per reference: name, anchor, format, what the illustrative speaker says,
+the written opening, why it works and what it must not claim. The matching slot
+formula and disqualifier are in `hook-formulas.md` under the same ID.
+
+- **R501 · Habit with its consequence** — anchor `situation-if-you` · format `one_change` · speaker says: "If you wait until the end of the month to invoice, most clients have half forgotten the job by the time it arrives." · written opening: "If you invoice at month end, clients forget the job" · why it works: the viewer recognises their own habit in the first clause and the consequence is the speaker's claim · must not claim: a share of clients, since the speaker gave no count.
+- **R502 · Audience named by its symptom** — anchor `situation-for-anyone-whose` · format `ordered_steps` · speaker says: "This is for anyone whose sourdough bakes flat even though the starter bubbles nicely." · written opening: "For anyone whose sourdough bakes flat" · why it works: a visible symptom selects the right viewer faster than a job title · must not claim: a better rise, which the speaker never demonstrates.
+- **R503 · A check before an action** — anchor `situation-before-you` · format `mistake_and_fix` · speaker says: "Before you repaint a room, run your hand over the wall. If it comes away chalky, new paint will peel." · written opening: "Before you repaint, check the wall for chalk" · why it works: the viewer is about to act and the check takes seconds · must not claim: how long the paint will last.
+- **R504 · Why an everyday observation happens** — anchor `question-cause-behind` · format `analogy_bridge` · speaker says: "Ever notice the bottom leaves go yellow first? The plant is moving what it has left up to the new growth." · written opening: "Why do the bottom leaves yellow first?" · why it works: the viewer has seen it and has not heard the reason · must not claim: that this is the only cause of yellow leaves.
+- **R505 · A controlled change with a visible result** — anchor `question-what-happens-when` · format `live_demonstration` · speaker says: "Watch what happens when I let ten psi out of both tyres and ride the same gravel stretch again." · written opening: "What happens when you drop 10 psi on gravel?" · why it works: one change, one route, and the answer is on screen · must not claim: general performance gains from one rider on one ride.
+- **R506 · A quantity the viewer has dismissed** — anchor `question-how-much` · format `worked_numbers` · speaker says: "My tap drips once a second. I measured a quarter of a millilitre a drop, which is about twenty-one litres a day." · written opening: "How much water does one drip a second waste?" · why it works: the viewer has shrugged at a drip and the working is shown in the payoff · must not claim: a figure for other taps, since the drop size is the speaker's own measurement.
+- **R507 · One missing element** — anchor `question-what-is-missing` · format `one_change` · speaker says: "Our meeting notes had decisions and discussion, but no name next to each action, so nothing moved." · written opening: "What is missing from your meeting notes?" · why it works: the viewer owns the artifact and the gap is a single element · must not claim: productivity numbers.
+- **R508 · Counted steps to a named goal** — anchor `steps-toward-goal` · format `ordered_steps` · speaker says: "Three steps to a chain that stops squeaking: clean it, dry it, then oil each link." · written opening: "3 steps to a chain that stops squeaking" · why it works: a count and a concrete end state; the optional timeframe clause is omitted because no time is spoken · must not claim: a duration.
+- **R509 · An order with a reason** — anchor `steps-order-matters` · format `ordered_steps` · speaker says: "Sand with the grain before you stain, not after. Stain settles into every cross-scratch and shows it." · written opening: "Sand with the grain before you stain" · why it works: the order is the whole lesson and the reason follows at once · must not claim: a professional finish.
+- **R510 · A bounded checklist** — anchor `steps-checks-before` · format `ordered_steps` · speaker says: "Four checks before you send a quote: the scope, the date, the deposit, and what is not included." · written opening: "4 checks before you send a quote" · why it works: the viewer can use the list today and knows when it ends · must not claim: that the checks win more work.
+- **R511 · A small amount that adds up** — anchor `number-adds-up` · format `worked_numbers` · speaker says: "Five minutes a day hunting for files comes to about thirty hours a year." · written opening: "5 minutes a day is 30 hours a year" · why it works: both numbers are spoken and the jump between them is the surprise · must not claim: that the viewer loses exactly this much.
+- **R512 · A familiar number decoded** — anchor `number-here-is-what` · format `plain_definition` · speaker says: "Sixty-five percent hydration means sixty-five grams of water for every hundred grams of flour." · written opening: "65% hydration: here is what that means" · why it works: the viewer has seen the number in recipes without knowing what it measures · must not claim: that a given hydration makes better bread.
+- **R513 · Actual against expected** — anchor `number-took-not` · format `lived_moment` · speaker says: "I thought the shelf would take an afternoon. It took three weekends, because I had not planned the cuts." · written opening: "It took three weekends, not an afternoon" · why it works: the gap between plan and outcome is concrete and self-reported · must not claim: anything about other people's projects.
+- **R514 · A recognisable mistake** — anchor `mistake-you-might-be` · format `mistake_and_fix` · speaker says: "You might be shooting with the window behind your subject. Turn around so the light falls on their face." · written opening: "You might be shooting into the window" · why it works: the viewer can check their last photo and the fix is one move · must not claim: professional results.
+- **R515 · A mistake with a stated cost** — anchor `mistake-can-cost` · format `mistake_and_fix` · speaker says: "Saving only at the end can cost you the whole afternoon if the file crashes." · written opening: "Saving only at the end can cost you the afternoon" · why it works: the cost is in the viewer's own time and the speaker's hedge is kept · must not claim: that the file will crash.
+- **R516 · Looks right, then fails** — anchor `mistake-looks-right` · format `mistake_and_fix` · speaker says: "The captions look synced in the editor, then drift after the first cut, because the timestamps came from the uncut audio." · written opening: "Captions look synced, then drift after the cut" · why it works: the viewer has seen the symptom and not the cause · must not claim: that every editor behaves this way.
+- **R517 · A requirement removed** — anchor `assumption-no-need` · format `assumption_check` · speaker says: "You don't need a stand mixer for this loaf. Four sets of folds in the bowl build the dough just as well." · written opening: "You don't need a mixer for this loaf" · why it works: it removes a barrier the viewer assumed and names the alternative · must not claim: a wider scope than this dough.
+- **R518 · A rule that is only partly right** — anchor `assumption-half-true` · format `assumption_check` · speaker says: "Water every day is half right. Every day in a heatwave, otherwise only when the top inch of soil is dry." · written opening: "Water every day? Only half true" · why it works: the viewer's rule survives in corrected form, so the correction is easy to accept · must not claim: advice for plants the speaker did not discuss.
+- **R519 · Quantity is not the fix** — anchor `assumption-more-wont` · format `assumption_check` · speaker says: "More coffee won't fix a bitter cup. A coarser grind will." · written opening: "More coffee won't fix a bitter cup" · why it works: it contradicts the obvious move and names the one to try · must not claim: results for brewing methods the speaker did not use.
+- **R520 · Two options, one job** — anchor `compare-two-options` · format `side_by_side` · speaker says: "Paper notebook or an app for new vocabulary? I compared how often I actually reviewed with each." · written opening: "Paper notebook or app for new vocabulary?" · why it works: a real choice judged on a criterion the viewer cares about · must not claim: that one option suits every learner.
+- **R521 · The same thing done two ways** — anchor `compare-same-task` · format `side_by_side` · speaker says: "Same email, two subject lines. One says Update, the other says the decision I need by Friday." · written opening: "Same email, two subject lines" · why it works: the difference is visible at a glance once both versions are on screen · must not claim: open rates, which were not measured.
+- **R522 · One day with a concrete detail** — anchor `moment-the-day` · format `lived_moment` · speaker says: "The day my first market stall sold out, I realised I had priced the jam at cost." · written opening: "The day my stall sold out at cost" · why it works: a concrete moment with an obvious question behind it · must not claim: pricing advice beyond the lesson the speaker draws.
+- **R523 · A first-person observation** — anchor `moment-i-noticed` · format `lived_moment` · speaker says: "I noticed my runs felt easier when I slowed down enough to talk in full sentences." · written opening: "I noticed runs felt easier when I slowed down" · why it works: specific, personal and it invites the question why · must not claim: health or performance effects.
+- **R524 · A term answered plainly** — anchor `define-what-means` · format `plain_definition` · speaker says: "Depreciation just means spreading the cost of something you'll use for years across those years." · written opening: "What depreciation actually means" · why it works: the viewer hears the term often and gets the meaning in one sentence · must not claim: tax or accounting advice.
+- **R525 · A hidden setting located** — anchor `result-where-to-find` · format `live_demonstration` · speaker says: "The frame-rate option isn't on the main export panel. It's under Advanced, here." · written opening: "Where to find frame rate in export settings" · why it works: the viewer has looked and failed, and the screen shows the answer · must not claim: that other versions of the tool put it in the same place.

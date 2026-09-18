@@ -1,50 +1,102 @@
-# Short formats
+# Director formats
 
-Each format is a shape for the whole Short, not just its first line. Pick the one the
-speaker's retained material can actually support.
+A format is the shape of the explanation that follows a Short's opening. Choose it
+from what the retained recording actually contains, before choosing an opening
+pattern from `hook-anchors.md`: the opening has to promise what this shape can
+deliver. Every entry names the viewing need it serves, what the recording must
+contain, the beat shape, the job of the first seconds, the picture that usually
+carries it and when to reject it.
 
-## one_step — One step that changes the result
-One action, shown clearly, with the reason it works. The Short ends when the viewer could
-do it themselves. Needs: a single concrete action in the source. Avoid when the speaker
-lists several steps with equal weight.
+Authored for Project Sniper on 2026-09-18 (see `README.md`). Format IDs are the
+lower-case identifiers after `##`; the Director records one format and one or two
+rejected alternatives with a reason taken from the recording.
 
-## how_to — How to reach a specific outcome
-A named outcome, the obstacle that usually stops people, then the path through it in order.
-Needs: an outcome the viewer wants and at least two ordered steps. Avoid when the source is
-opinion without method.
+## one_change — One change and what it does
 
-## listicle — A short numbered set
-Three to five parallel items that each stand alone. Each item earns its place with one
-concrete detail. Needs: genuinely parallel points. Avoid padding a single idea into a list.
+- Viewing need: the viewer wants one thing to do differently, and why.
+- The recording must contain: one concrete change plus the effect or reason the speaker gives for it.
+- Beat shape: the situation → the change → why it works → what to do next.
+- Opening job: name the situation or the effect; the change itself is the payoff.
+- Usual picture: the presenter, with the changed object or setting shown once the change is named.
+- Reject when: the speaker offers several equal changes (use `ordered_steps`) or gives no reason, which would leave an unexplained instruction as the payoff.
 
-## before_after — The same thing, changed
-Show the starting state, the one change, and the new state, in that order. Needs: a visible
-or quotable contrast. Avoid when the "after" is a claim with no evidence in the source.
+## ordered_steps — Steps that must happen in order
 
-## proof_number — A result the number makes real
-Lead with a specific figure the speaker actually states, then how it happened. Needs: a
-number in the retained words and its context. Never round up or invent the figure.
+- Viewing need: the viewer wants to follow a procedure without losing their place.
+- The recording must contain: two to five steps in a stated order, each with a verb.
+- Beat shape: the finished state → step one … last step, one beat per step → the finished state again.
+- Opening job: state the finished state, and the number of steps when the speaker counts them.
+- Usual picture: a list or map that gains one item per spoken step; return to the presenter for the finished state.
+- Reject when: the order does not matter to the result, or the steps are only named and never explained.
 
-## mistake_story — A mistake and what it taught
-A moment the speaker got something wrong, what it cost, and the rule that came from it.
-Needs: a first-person account in the source. Avoid moralising beyond what was said.
+## side_by_side — Two options judged on the same points
 
-## stop_doing — Stop this, do that instead
-Name a common habit, show why it backfires, give the replacement. Needs: the replacement
-as well as the warning. A warning with no alternative is a different, weaker Short.
+- Viewing need: the viewer is choosing between two options.
+- The recording must contain: two named options and at least two points on which the speaker compares them.
+- Beat shape: the decision → point one for both options → point two for both → which option fits which viewer.
+- Opening job: name the decision or both options.
+- Usual picture: two columns whose rows arrive with the spoken points, both options always visible together.
+- Reject when: one option is dismissed in a sentence (use `assumption_check`) or the comparison points are not spoken.
 
-## contrarian_take — A view that goes against the usual advice
-State the usual advice fairly, then the speaker's disagreement and the reason. Needs: the
-reason, in the speaker's words. Avoid disagreement for its own sake.
+## worked_numbers — A calculation walked through
 
-## story_time — A short story with a point
-Setup, turn, point. The point must be stated, not implied. Needs: a complete story in the
-source. Cut the setup hard; keep the turn.
+- Viewing need: the viewer wants to see where a number comes from and what it means for them.
+- The recording must contain: every input number with its unit, the operation, and the result, all spoken.
+- Beat shape: the question → the inputs → the operation → the result with its scale.
+- Opening job: ask the question, or state the result with its unit.
+- Usual picture: the number counting to its spoken value, then a gauge or chart that gives it scale.
+- Reject when: a number would have to be estimated, rounded further or computed by the Director, or when a goal would read as an achieved result.
 
-## reaction — Responding to something on screen
-The speaker reacts to a page, a product, a result or a clip. The thing reacted to must be
-visible and legible. Needs: a real on-screen subject and permission to show it.
+## mistake_and_fix — A mistake, what it costs, and the correction
 
-## point_of_view — A situation the viewer recognises
-Put the viewer inside a familiar moment, then say what to do about it. Needs: a specific,
-recognisable situation rather than a generic mood.
+- Viewing need: the viewer wants to avoid something they may already be doing.
+- The recording must contain: the named mistake, its consequence, and the correction.
+- Beat shape: the mistake → its cost → the correction → a quick way to check.
+- Opening job: name the mistake or its cost so the viewer can recognise themselves.
+- Usual picture: the mistaken version, then the corrected version in the same frame position.
+- Reject when: the recording names no correction; a Short that ends on a warning leaves its promise open.
+
+## assumption_check — A common belief tested against the speaker's reason
+
+- Viewing need: the viewer wants to know whether something they believe holds.
+- The recording must contain: the belief stated plainly and the speaker's reason it fails, or holds only in part.
+- Beat shape: the belief → the reason or evidence → the more accurate version → what changes in practice.
+- Opening job: state the belief, or the contrast between the belief and the speaker's view.
+- Usual picture: the belief on screen, visibly revised when the reason arrives.
+- Reject when: the belief has been invented to create contrast and nobody in the audience holds it.
+
+## analogy_bridge — An everyday object explains an abstract idea
+
+- Viewing need: the viewer wants to grasp an abstract idea quickly.
+- The recording must contain: the analogy in the speaker's own words, ideally with the point where it stops working.
+- Beat shape: the idea → the familiar object → part-to-part mapping → the limit → back to the real case.
+- Opening job: pose the idea as a question, or show the unexpected pairing of idea and object.
+- Usual picture: a simple drawing of the object whose parts are labelled with the idea's parts.
+- Reject when: the analogy would carry a factual claim that the recording does not support.
+
+## live_demonstration — The real operation, performed
+
+- Viewing need: the viewer wants to see the operation itself, not a description of it.
+- The recording must contain: footage or a screen capture of the real operation and its visible result.
+- Beat shape: the starting state → the action → the result → a hold on the result.
+- Opening job: show or name the result or the task.
+- Usual picture: the real screen or object; move in on the exact control or detail on its spoken cue.
+- Reject when: the operation is not visible in the available material; never mock up an interface to fill the gap.
+
+## lived_moment — A specific moment from the speaker's experience
+
+- Viewing need: the viewer wants to learn from something that happened to a person.
+- The recording must contain: a specific moment (who, where, what happened) and what the speaker took from it.
+- Beat shape: the moment → the turn → the lesson → what the viewer can do with it.
+- Opening job: drop into the moment with one concrete detail.
+- Usual picture: the presenter for the telling, plus one real artifact from the moment when the material has one.
+- Reject when: the moment has no concrete detail, or the lesson does not follow from it.
+
+## plain_definition — What a term actually means
+
+- Viewing need: the viewer keeps hearing a term and wants its meaning.
+- The recording must contain: the term and a definition or example in the speaker's words.
+- Beat shape: the term → the plain meaning → one example → one thing it is not.
+- Opening job: pose the term as a question, or name the gap between how it is used and what it means.
+- Usual picture: the term on screen with its meaning building beneath it.
+- Reject when: the speaker uses the term without explaining it.

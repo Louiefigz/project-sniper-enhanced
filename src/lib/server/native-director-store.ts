@@ -3,11 +3,11 @@ import path from "node:path";
 import { runCodex, type CodexRunOptions } from "@/app/api/_lib/codex-cli";
 import { brainProvider } from "@/app/api/_lib/ai-provider";
 import { readCutPreviewObject } from "@/app/api/producer/auto-edit/cut-preview-receipt";
-import { parseNativeDirectorReview, type NativeDirectorPlan, type NativeDirectorReview } from "@/lib/producer/contracts/native-director-v1";
+import { parseNativeDirectorReview, type NativeDirectorPlan, type NativeDirectorReview } from "@/lib/producer/contracts/native-director-v2";
 import { createHumanCutIndex, humanCutDirectory } from "./human-cut-acceptance-store";
 import { canonicalJsonSha256 } from "./auto-edit-hash";
-import { catalogFromSources, directorCatalogHash, loadDirectorCatalog, type DirectorSource } from "./native-director-library";
-import { directorInput, validateDirectorPlan, type DirectorInput } from "./native-director-validation";
+import { catalogFromSources, directorCatalogHash, loadDirectorCatalog, type DirectorCatalog, type DirectorSource } from "./native-director-library";
+import { directorInput, validateDirectorPlan, validateStoredDirectorPlan, type DirectorInput } from "./native-director-validation";
 import { buildDirectorPrompt } from "./native-director-prompt";
 import { timedStage } from "./stage-timing";
 import type { ProposalEvidence } from "./guided-proposal-evidence";
@@ -23,14 +23,14 @@ export type DirectorBrain = (input: DirectorBrainInput) => Promise<{ output: unk
 /** Reuse configured subscription admission, model/effort, isolation, process lifetime and output bounds. */
 export const runNativeDirectorBrain: DirectorBrain = async (input) => {
   if (brainProvider() !== "codex") throw new Error("Native Director requires the configured Codex subscription route; no provider fallback");
-  const schema: CodexRunOptions["schema"] = input.phase === "author" ? "producer-native-director" : "producer-native-director-review";
+  const schema: CodexRunOptions["schema"] = input.phase === "author" ? "producer-native-director-v2" : "producer-native-director-review";
   const result = await runCodex({ prompt: input.prompt, cwd: input.cwd, timeoutMs: input.timeoutMs,
     sandbox: "read-only", tools: "none", schema, maxOutputBytes: 128 * 1024 });
   return { output: JSON.parse(result.message) };
 };
 
-function reviewedRecord(input: DirectorInput, sources: DirectorSource[], output: unknown, critique: unknown): NativeDirectorRecord {
-  const catalog = catalogFromSources(sources), plan = validateDirectorPlan(output, catalog, input);
+/** Bind an already validated plan to its passing critique and frozen library. */
+function reviewedRecord(input: DirectorInput, catalog: DirectorCatalog, plan: NativeDirectorPlan, critique: unknown): NativeDirectorRecord {
   const planHash = canonicalJsonSha256(plan), review = parseNativeDirectorReview(critique);
   if (review.planHash !== planHash || review.verdict !== "pass") throw new Error(`Director critique blocked native assembly: ${review.findings.join("; ")}`);
   return { schemaVersion: 1, sourceHash: canonicalJsonSha256(input), libraryHash: directorCatalogHash(catalog), planHash, plan, review,
@@ -53,22 +53,26 @@ export async function stageNativeDirector(options: { directory: string; rawInten
   const output = await invoke("author", buildDirectorPrompt(input, catalog));
   const plan = validateDirectorPlan(output, catalog, input), planHash = canonicalJsonSha256(plan);
   const critique = await invoke("critic", buildDirectorPrompt(input, catalog, { plan, planHash }));
-  const record = reviewedRecord(input, catalog.sources, output, critique);
+  const record = reviewedRecord(input, catalogFromSources(catalog.sources), plan, critique);
   createHumanCutIndex(path.join(directory, "record.json"), record);
   return readNativeDirector(options.directory);
 }
 
-/** Cold reconstruction reads frozen libraries; it never borrows changed current examples or calls a model. */
+/**
+ * Cold reconstruction reads frozen libraries; it never borrows changed current examples or calls a model.
+ * A retained v1 plan still parses and re-validates, but its frozen prompts were built from withdrawn
+ * Director wording, so the prompt comparison below refuses it rather than trusting unreproducible text.
+ */
 export function readNativeDirector(parent: string): NativeDirectorRecord {
   const directory = path.join(parent, "native-director"), read = (name: string) => readCutPreviewObject(path.join(directory, name)).value;
   const input = read("input.json") as unknown as DirectorInput, library = read("library.json");
   if (library.schemaVersion !== 1 || !Array.isArray(library.sources)) throw new Error("Director library snapshot is missing");
   const sources = library.sources as DirectorSource[], catalog = catalogFromSources(sources);
-  const plan = validateDirectorPlan(read("author-result.json").output, catalog, input);
+  const plan = validateStoredDirectorPlan(read("author-result.json").output, catalog, input);
   const planHash = canonicalJsonSha256(plan);
   if (read("author-prompt.json").prompt !== buildDirectorPrompt(input, catalog)
       || read("critic-prompt.json").prompt !== buildDirectorPrompt(input, catalog, { plan, planHash })) throw new Error("Director prompt differs from its frozen source/template evidence");
-  const record = reviewedRecord(input, sources, plan, read("critic-result.json").output);
+  const record = reviewedRecord(input, catalog, plan, read("critic-result.json").output);
   if (canonicalJsonSha256(record) !== canonicalJsonSha256(read("record.json"))) throw new Error("Director retained decision changed");
   return record;
 }

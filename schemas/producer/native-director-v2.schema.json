@@ -4,7 +4,7 @@
   "properties": {
     "schemaVersion": {
       "type": "integer",
-      "const": 1
+      "const": 2
     },
     "viewer": {
       "type": "string",
@@ -233,7 +233,7 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "knowledgeGap": {
+              "supportedClaim": {
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
@@ -266,7 +266,7 @@
                   "pass"
                 ]
               },
-              "belief": {
+              "answerablePromise": {
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
@@ -299,7 +299,7 @@
                   "pass"
                 ]
               },
-              "novelty": {
+              "viewerStake": {
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
@@ -332,7 +332,7 @@
                   "pass"
                 ]
               },
-              "relevance": {
+              "concreteDetail": {
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
@@ -365,7 +365,40 @@
                   "pass"
                 ]
               },
-              "clarity": {
+              "channelAgreement": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "surface": {
+                    "type": "string",
+                    "enum": [
+                      "written",
+                      "spoken",
+                      "visual"
+                    ]
+                  },
+                  "quote": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "pass": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "surface",
+                  "quote",
+                  "reason",
+                  "pass"
+                ]
+              },
+              "glanceReadable": {
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
@@ -400,11 +433,12 @@
               }
             },
             "required": [
-              "knowledgeGap",
-              "belief",
-              "novelty",
-              "relevance",
-              "clarity"
+              "supportedClaim",
+              "answerablePromise",
+              "viewerStake",
+              "concreteDetail",
+              "channelAgreement",
+              "glanceReadable"
             ]
           }
         },
@@ -473,11 +507,9 @@
         "level": {
           "type": "string",
           "enum": [
-            "unaware",
+            "problem_unseen",
             "problem_aware",
-            "solution_aware",
-            "product_aware",
-            "most_aware"
+            "solution_aware"
           ]
         },
         "reason": {

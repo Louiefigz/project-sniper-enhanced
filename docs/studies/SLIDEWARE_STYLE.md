@@ -73,7 +73,7 @@ slides will take.
 *Why:* in this style, cuts are section punctuation (AC1) and are rare in the hook. Opening
 density comes from graphic lands (deck header, cells, lockup words). The generic short ratio of
 1.5 would push the author to add opening cuts, which conflicts with AC1; 1.3 still requires a
-denser opening, measured on the graphic layer.
+denser opening, counted on the graphic layer.
 *Enforced:* **WARN** in `plan_lint_motion._warn_pacing`. Tests:
 `test_slideware_pace_relaxes_the_front_load_only` in `scripts/producer/tests/test_pacing.py`.
 
@@ -111,14 +111,14 @@ look at the running list). Mixing them makes every graphic a small puzzle about 
 
 **AC4 — Return to the speaker between sections.** Two takeover sections are never back to back;
 the talking head comes back between them, even briefly.
-*Why:* the speaker is the voice the viewer is following. Returning to the face resets attention
-and marks the section boundary.
+*Why:* the speaker is the voice the viewer is following. Returning to the face marks the
+section boundary and gives the eye a familiar anchor before the next section.
 *Enforced:* advisory.
 
 **AC5 — The voice never stops.** Takeover sections play over continuous narration; there are no
 silent slides.
-*Why:* a silent slide asks the viewer to read without guidance, and short-form viewers scroll
-away from silence.
+*Why:* a silent slide asks the viewer to read without guidance and stalls the clip's
+momentum; the voice is what connects one slide to the next.
 *Enforced:* advisory. Pause removal (`edit/pause_scan.py`) applies inside takeovers as elsewhere.
 
 ## 4. Camera

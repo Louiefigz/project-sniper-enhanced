@@ -61,11 +61,13 @@ class InstallerAndDoctorNode(unittest.TestCase):
         self.assertEqual(recorded, os.path.realpath(real))
 
     def test_installer_refuses_node_23_with_the_exact_fix(self) -> None:
-        stub = _stub_node(self.base / "node23", "23.10.0").parent
-        done = self._select(str(stub))
+        stub = _stub_node(self.base / "node23", "23.10.0")
+        done = self._select(str(stub.parent))
+        said = " ".join((done.stdout + done.stderr).split())
         self.assertNotEqual(done.returncode, 0)
-        self.assertIn("Node 23.10.0 is not supported", done.stdout + done.stderr)
-        self.assertIn("Install Node 24 (LTS)", done.stdout + done.stderr)
+        self.assertIn(f"Node 23.10.0 ({os.path.realpath(stub)}) is not supported", said)
+        self.assertIn("Install Node 24 (LTS) from https://nodejs.org", said)
+        self.assertIn("run 'brew upgrade node' instead", said)  # keg-only node@24 would not be on PATH
 
     def test_doctor_fails_node_23(self) -> None:
         stub = _stub_node(self.base / "node23", "23.10.0")
@@ -74,7 +76,8 @@ class InstallerAndDoctorNode(unittest.TestCase):
                 mock.patch.object(doctor_setup, "PKG_ROOT", self.pkg):
             doctor_setup.check_node(lambda *row: rows.append(row))
         self.assertEqual(rows[0][0], "FAIL")
-        self.assertIn("not supported", rows[0][2])
+        self.assertIn(f"v23.10.0 at {stub} is not supported", rows[0][2])
+        self.assertIn("brew upgrade node", rows[0][2])
 
     def test_doctor_fails_a_node_that_reports_22_0_0(self) -> None:
         stub = _stub_node(self.base / "oldnode", "22.0.0")

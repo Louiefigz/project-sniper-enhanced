@@ -42,8 +42,11 @@ Nothing was changed.</td></tr>
 old, or its path contains a space.</td><td>Install Node 24 LTS from nodejs.org. If you use nvm, fnm or
 volta, run the installer from Terminal.</td></tr>
 <tr><td><code>Node 23… is not supported by this release</code></td><td>Node 23 is outside the range this
-release's dependencies declare.</td><td>Install Node 24 LTS from nodejs.org (or <code>brew install
-node@24</code>), or select Node 24 in nvm, fnm or volta, then run the installer again from Terminal.</td></tr>
+release's dependencies declare, and its processes were seen hanging on exit. The message names
+the Node that was found.</td><td>Install Node 24 LTS from nodejs.org. If that Node came from Homebrew
+(its path starts with <code>/opt/homebrew</code>), run <code>brew upgrade node</code> instead, because
+Homebrew's Node stays first on your PATH. With nvm, fnm or volta, select Node 24 there. Then run the
+installer again from Terminal.</td></tr>
 <tr><td><code>The Node this install was set up with cannot be used: …</code></td><td>The Node the
 installer recorded was removed or upgraded (for example by <code>brew upgrade</code>).</td><td>Run
 <code>install/install.command</code> again; it sets up with the Node you have now.</td></tr>

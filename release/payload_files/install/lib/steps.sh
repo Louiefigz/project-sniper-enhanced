@@ -36,12 +36,13 @@ node_missing() {  # floor reason
   fail "Node is missing or not usable."
 }
 
-node_unsupported() {  # version
+node_unsupported() {  # version path
   local recommended; recommended="$(release_value components.node_recommended)"
-  say "Node $1 is not supported by this release. Its dependencies exclude Node ${1%%.*}, and Node"
-  say "  ${1%%.*} processes were seen hanging on exit. Install Node $recommended (LTS) from https://nodejs.org"
-  say "  (or: brew install node@$recommended), then run this installer again. If your Node comes"
-  say "  from nvm, fnm or volta, select Node $recommended there first and run the installer from Terminal."
+  say "Node $1 ($2) is not supported by this release. Its dependencies exclude Node ${1%%.*},"
+  say "  and Node ${1%%.*} processes were seen hanging on exit. Install Node $recommended (LTS) from"
+  say "  https://nodejs.org. If this Node came from Homebrew, run 'brew upgrade node' instead: Homebrew's"
+  say "  Node stays first on your PATH. If it comes from nvm, fnm or volta, select Node $recommended"
+  say "  there and run the installer from Terminal."
   fail "Node $1 is not supported."
 }
 
@@ -59,7 +60,7 @@ select_node() {
   [ -z "$problem" ] || node_missing "$floor" "$problem"
   NODE_VERSION="$(node_version_of "$NODE_BIN")"
   unsupported=" $(release_value components.node_unsupported_majors) "
-  case "$unsupported" in *" ${NODE_VERSION%%.*} "*) node_unsupported "$NODE_VERSION" ;; esac
+  case "$unsupported" in *" ${NODE_VERSION%%.*} "*) node_unsupported "$NODE_VERSION" "$NODE_BIN" ;; esac
   NPM_BIN="$(dirname "$NODE_BIN")/npm"
   [ -x "$NPM_BIN" ] || NPM_BIN="$(command -v npm)" || fail "npm was not found next to $NODE_BIN or on PATH."
   say "Node $NODE_VERSION — ok ($NODE_BIN; this release needs $floor or newer)"

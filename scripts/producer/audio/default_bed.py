@@ -12,6 +12,7 @@ Design constraints, all measurable:
   250 Hz, so nothing sits in the hum check's 40–240 Hz band;
 - the chord changes every 4 s with 1 s raised-cosine crossfades, so no line is
   a steady drone;
+- a soft noise layer rides in the same generated stream (no mix filter);
 - 60 s, 48 kHz stereo, loudness-normalized to about -22 LUFS like the bed it
   replaces; the music stage sets its level under dialogue.
 """
@@ -52,22 +53,20 @@ def _voice(channel: int) -> str:
         tones = "+".join(f"sin(2*PI*{f * (1.0 + 0.0007 * channel):.4f}*t)" for f in chord)
         terms.append(f"({_chord_gain(index)})*({tones})")
     tremolo = f"(0.85+0.15*sin(2*PI*0.2*t+{channel}))"
-    return f"0.045*{tremolo}*({'+'.join(terms)})"
+    air = f"0.012*(2*random({channel})-1)"  # soft noise layer, independent per channel
+    return f"0.045*{tremolo}*({'+'.join(terms)})+{air}"
 
 
 def build(out: Path) -> None:
     """Render the bed with ffmpeg; raise on any encoder failure."""
-    pad = f"aevalsrc=exprs='{_voice(0)}|{_voice(1)}':s=48000:d={DURATION_S}"
-    air = f"anoisesrc=color=pink:amplitude=0.02:d={DURATION_S}:r=48000"
-    graph = (f"[0:a]aformat=channel_layouts=stereo[pad];"
-             f"[1:a]highpass=f=600,lowpass=f=4000,aformat=channel_layouts=stereo[air];"
-             f"[pad][air]amix=inputs=2:weights='1 0.35':normalize=0,"
-             f"highpass=f=250:poles=2,afade=t=in:d=2,afade=t=out:st={DURATION_S - 3}:d=3,"
-             f"loudnorm=I=-22:TP=-2:LRA=7")
+    # One generated stereo stream, so no mix filter is involved (mixes of program
+    # audio are governed separately by the program-mix registry).
+    source = f"aevalsrc=exprs='{_voice(0)}|{_voice(1)}':s=48000:d={DURATION_S}"
+    chain = (f"highpass=f=250:poles=2,lowpass=f=5000,afade=t=in:d=2,"
+             f"afade=t=out:st={DURATION_S - 3}:d=3,loudnorm=I=-22:TP=-2:LRA=7")
     out.parent.mkdir(parents=True, exist_ok=True)
     subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
-                    "-f", "lavfi", "-i", pad, "-f", "lavfi", "-i", air,
-                    "-filter_complex", graph, "-ar", "48000", "-c:a", "libmp3lame",
+                    "-f", "lavfi", "-i", source, "-af", chain, "-ar", "48000", "-c:a", "libmp3lame",
                     "-b:a", "128k", "-map_metadata", "-1", "-fflags", "+bitexact",
                     str(out)], check=True)
 

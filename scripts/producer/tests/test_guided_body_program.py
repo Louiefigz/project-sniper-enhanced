@@ -84,11 +84,14 @@ class GuidedBodyProgramTests(unittest.TestCase):
         return historical
 
     def test_historical_program_and_treatment_values_are_unchanged(self) -> None:
+        # Treatment digests after the neutral rename of the module-* graphic kinds. The
+        # historical view is byte-identical to the pre-rename one apart from those kind
+        # names (pre-rename values: fd4f2c21…, 8d8b0234…); program digests are unchanged.
         expected = {
             96: ("9fec159458be8e4612106114e5dfb7dc2ce9e4bd62e6cea2b60403bf680425f7",
-                 "fd4f2c213198b9e7ffcd85e26fbbff8c383ad83dd9c8b5e915d7213c397dca11"),
+                 "43367928337b17ef7a96ce059f67d62cc3aa87f9bf15e24186e205a7bc30a5ad"),
             312: ("c244942738f8ca67bbd0605ede5b3cca403e3cfbf0cb1fd80b0e36cfb394f097",
-                  "8d8b02346857e77db08fe7a200547b5e8ae71119d8eb9a6b01a92714c1da0c05"),
+                  "06ede061d2366ded6e4f43a649b4a42ea34c91d040af72712d5cdb6e47de3991"),
         }
         for duration, hashes in expected.items():
             program = build_program(duration)

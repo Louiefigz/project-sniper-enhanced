@@ -42,6 +42,12 @@ STILL OPEN — each blocks release
      owner's own project (C0679), which name the owner, and the failure-ledger lessons
      that describe a client's video content.
 
+  7. STUDIO ANALYTICS: the HyperFrames Studio page (HeyGen's editor, which Sniper opens
+     for review) sends usage events to HeyGen's analytics service, including the
+     project's name from its page address, and loads a GSAP file from cdn.jsdelivr.net.
+     The privacy page now says so. Switch the analytics off by default with a runtime
+     patch (recommended), or ship with the disclosure only.
+
 NOT OWNER DECISIONS — acceptance still outstanding
   - Complete edits in both provider routes (Short and long-form, with a revision),
     signed in through Sniper's own sign-in.

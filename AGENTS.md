@@ -54,6 +54,9 @@ The full account, path by path, is `../manual/privacy.html`. In short: transcrip
 text, and still frames of the rendered edit (the rendered review runs in Auto Edit,
 trim-only jobs included), go to the selected provider. Reference links are downloaded with
 `yt-dlp`; Chrome cookies are read only when the operator ticks the box for that fetch.
+The HyperFrames Studio page loads a GSAP file from `cdn.jsdelivr.net` and, unless the
+browser's Do Not Track setting is on, sends usage events (including the project's name in
+its address) to HeyGen's analytics; say so if the operator asks what Studio shares.
 Instructions are not a privacy boundary: when you run with file tools, do not attach or
 upload video or audio files to the conversation; work from transcripts, plans and still
 frames.

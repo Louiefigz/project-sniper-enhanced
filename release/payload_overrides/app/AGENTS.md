@@ -44,8 +44,13 @@ revisions and across context handoffs.
   one version string per provider and one authentication shape. Do not relax it, and do
   not change a global CLI to make a check pass. The pinned copies live in this package's
   `../runtime/cli/`.
-- **Subscription only.** There is no paid-API path, and none may be added. Local
-  processing plus the operator's own subscription is the whole model.
+- **Subscription editor.** Planning uses the operator's subscription. Local transcription
+  is the default. Optional Deepgram transcription is separately billed and uploads audio.
+  A key connected during setup is configuration, not spending consent. Require explicit
+  authorization for the current edit and preserve `scripts/asr_policy.py`'s paired
+  `--provider deepgram --authorize-paid-asr deepgram` flags. Never switch to paid ASR on failure.
+  If a key is missing, direct the operator to `../install/setup.command`; never ask them
+  to paste a key into chat or display the contents of `../runtime/deepgram.env`.
 - **Never route video off the machine.** Transcript and plan text and the rendered
   still frames used for visual review go to the selected provider; the video does not.
 - **Optional integrations are not configured here.** Palmier Pro, the `separate` audio

@@ -49,6 +49,7 @@ REQUIRED = (
     "install/lib/settings.sh", "install/lib/tools.sh", "install/lib/processes.sh",
     "install/lib/steps.sh", "install/lib/configure.sh", "install/lib/install_tools.py",
     "install/lib/doctor_setup.py",
+    "install/setup.command", "install/lib/deepgram_setup.py",
     "install/cli/package.json", "install/cli/package-lock.json",
     "app/scripts/infra/sniper_lock.py",
     "app/scripts/infra/provider-admission.ts",

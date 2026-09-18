@@ -14,9 +14,9 @@
   <p class="lede">Checked against the code in this package, path by path. Read this before you edit anything confidential.</p>
 </header>
 <div class="ok">
-<p><strong>Your video file never leaves your Mac.</strong> No raw recording, no rendered
-video and no audio file is uploaded by the supported editing workflow. The code refuses
-to route video to a third party.</p>
+<p><strong>Local transcription is the default.</strong> If you explicitly authorize
+Deepgram for an edit, audio is uploaded to Deepgram and billed to your account. Saving a
+key during setup does not authorize an upload. Rendered videos stay on your Mac.</p>
 </div>
 
 <div class="warn">
@@ -50,10 +50,12 @@ on the explicit reference-proposal route.</td>
 <tr><td>Frame Review (the text spell-check)</td><td><strong>Sent</strong> — selected still
 JPEGs go to Anthropic. Needs your own paid API key and is not part of this purchase.</td>
 <td><code>app/scripts/frameio/claude_client.py</code></td></tr>
-<tr><td>Deepgram transcription</td><td><strong>Would upload your audio.</strong> Not
-selected in this install; it needs a key you would have to add yourself.</td>
+<tr><td>Deepgram transcription</td><td><strong>Uploads audio when explicitly authorized
+for an edit.</strong> Connect a key privately with <code>install/setup.command</code>.
+Setup validates the key without sending audio; local transcription remains the default.</td>
 <td><code>app/scripts/asr_policy.py</code></td></tr>
-<tr><td>Installing</td><td><strong>Downloads only.</strong> The installer fetches
+<tr><td>Installing</td><td><strong>Downloads and optional connection check.</strong>
+If you connect Deepgram, its HTTPS authentication endpoint receives the key, but no media. The installer fetches
 packages from the npm and Python package registries, the rendering browser from Google's
 Chrome for Testing, the speech model from Hugging Face and the two provider CLIs from npm.
 It sends none of your files or text.</td><td><code>install/install.command</code></td></tr>

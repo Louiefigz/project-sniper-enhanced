@@ -33,8 +33,9 @@ force. Read <code>RELEASE.json</code> for this build's exact status, and
   Codex <em>or</em> Claude subscription you already pay for. The full list, with
   what costs money, is in <a href="manual/index.html">What Sniper is</a>.</li>
   <li><strong>Install.</strong> Open Terminal in this folder and run
-  <code>install/install.command</code> (or double-click it in Finder), then
-  <code>install/sign-in.command</code>. Everything it installs stays inside this folder;
+  <code>install/setup.command</code> (or double-click it in Finder). It installs Sniper,
+  offers a private Deepgram key prompt, walks you through subscription sign-in, checks the
+  installation and opens your configured editor. No Cursor or settings-file editing is needed. Everything it installs stays inside this folder;
   your own Node, Python, Codex or Claude setup and login are not changed. Step-by-step:
   <a href="manual/install.html">Install and first launch</a>.</li>
   <li><strong>Make your first edit.</strong>
@@ -59,6 +60,7 @@ force. Read <code>RELEASE.json</code> for this build's exact status, and
 <h2>The commands, in one place</h2>
 <table>
   <tr><th>Do this</th><th>Run this</th></tr>
+  <tr><td>Guided setup, or connect/change/remove a Deepgram key</td><td><code>install/setup.command</code></td></tr>
   <tr><td>Install, or resume an interrupted install</td><td><code>install/install.command</code></td></tr>
   <tr><td>Check the install and see exactly what is wrong</td><td><code>install/doctor.command</code></td></tr>
   <tr><td>Sign in to Codex or Claude for Sniper</td><td><code>install/sign-in.command</code></td></tr>
@@ -73,8 +75,8 @@ force. Read <code>RELEASE.json</code> for this build's exact status, and
 </table>
 
 <footer class="foot">
-  <p>This manual is the whole manual — everything is in this folder and works offline.
-  Nothing here links to a website you need to log in to.</p>
+  <p>This manual is included and can be read offline. Subscription sign-in and optional
+  Deepgram connection require internet access and your own accounts.</p>
 </footer>
 
 </div>

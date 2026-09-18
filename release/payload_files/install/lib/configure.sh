@@ -10,8 +10,8 @@ choose_provider() {
   if [ -z "$PROVIDER" ] && [ -t 0 ]; then
     say "Which subscription will Sniper use to plan edits?"
     say "  1) Codex (ChatGPT subscription)   2) Claude (Claude subscription)"
-    printf 'Choose 1 or 2: '; read -r choice
-    case "$choice" in 1) PROVIDER=codex ;; 2) PROVIDER=claude ;; esac
+    printf 'Choose 1 or 2 [1]: '; read -r choice
+    case "$choice" in ''|1) PROVIDER=codex ;; 2) PROVIDER=claude ;; esac
   fi
   BRAIN="$(brain_for_provider "$PROVIDER")" \
     || fail "Choose a provider: run install/install.command --provider codex  (or claude)."

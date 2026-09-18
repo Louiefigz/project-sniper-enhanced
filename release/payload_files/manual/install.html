@@ -55,7 +55,12 @@ Sniper from Finder. Its path must not contain a space. Node 23 is accepted but l
 the range some dependencies declare; if you upgrade or remove the Node you installed with,
 run the installer again.</p>
 
-<h2>Step 3 — run the installer and choose your subscription</h2>
+<h2>Step 3 — open guided setup</h2>
+<p>Double-click <code>install/setup.command</code> in Finder. It installs Sniper if needed,
+then guides you through optional Deepgram connection, subscription sign-in and the readiness
+checks. When they pass it opens Sniper’s configured Codex or Claude editor. Press Enter at
+the subscription choice to use Codex. You do not need Cursor or a code editor.</p>
+<p>For a scripted installation you can still run:</p>
 <pre><code>install/install.command --provider codex     # or: --provider claude</code></pre>
 <p>Your videos go to <code>~/ProjectSniper</code> unless you add
 <code>--workspace /path/to/folder</code>.</p>
@@ -82,7 +87,9 @@ warn that a downloaded script is from an unidentified developer — right-click 
   <li>Builds the rendering runtime.</li>
   <li>Builds the app. This needs no internet connection.</li>
 </ol>
-<p>Then it runs the checker.</p>
+<p>In a Terminal window it continues into guided connection setup and sign-in, then runs
+the checker. A noninteractive installation leaves connections for you to finish by
+double-clicking <code>install/setup.command</code>.</p>
 <div class="ok">
 <p><strong>If it stops, run it again.</strong> Each step records what it finished with and the
 checksum of every file it produced. A step that did not finish, whose inputs changed, or
@@ -95,7 +102,20 @@ settings in <code>runtime/sniper.local.env</code> are never overwritten.</p>
 finish first. If something is still using it, the installer says what and changes nothing.</p>
 </div>
 
-<h2>Step 4 — sign in</h2>
+<h2>Step 4 — connect Deepgram and sign in</h2>
+<p>Setup asks whether you want to connect Deepgram. Choose <em>Connect/replace key</em>,
+create a key at <a href="https://console.deepgram.com/">Deepgram Console</a>, and paste it at
+the hidden prompt. Setup checks the key with Deepgram before saving it. A failed check
+keeps any previous key. You can retry or skip and use the included local transcription.</p>
+<p>Deepgram is optional and billed separately by Deepgram. Using it sends audio to
+Deepgram. The connection check sends no audio and does not prove your balance or every
+model permission. Connecting does not authorize paid transcription: approve it for the
+specific edit when you ask your editor to use Deepgram.</p>
+<p>The key is saved in <code>runtime/deepgram.env</code>, readable only by your Mac account,
+and loaded by Sniper’s launchers. It is not part of the source or diagnostic bundle.
+Reopen <code>install/setup.command</code> to replace or remove it without editing files.
+Removal disconnects this install; revoke the key in Deepgram Console to invalidate it.</p>
+<p>Setup signs you in next. If you only need to repeat sign-in:</p>
 <pre><code>install/sign-in.command</code></pre>
 <p>This signs in to the subscription you chose, using this package's own copy of the CLI and
 its own settings folder. Your existing Codex or Claude setup and login are not used or
@@ -129,7 +149,12 @@ app both use the model you set there.</p>
 does not, the provider rejects the request and Sniper reports it rather than switching to a
 different model.</p>
 
-<h2>Step 5 — check, then start</h2>
+<h2>Step 5 — make your first edit</h2>
+<p>Guided setup opens the configured editor only after all required checks pass. Say
+“Help me make my first edit from my own video.” Next time, double-click
+<code>install/editor.command</code>. This opens Sniper’s terminal editor using the installed
+settings and connection; launching an unrelated Codex desktop window does not load them.</p>
+<p>If you prefer the browser app, the existing check/start commands are:</p>
 <pre><code>install/doctor.command
 install/start.command</code></pre>
 <p>The checker asks the product's own code what it would use, runs a short real transcription

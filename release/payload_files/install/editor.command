@@ -10,6 +10,9 @@
 # background edits would keep using the installed one. Switch the whole install
 # with install/use-provider.command instead.
 . "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh" || exit 1
+if [ ! -f "$ENV_FILE" ]; then
+  "$PKG_ROOT/install/install.command" || exit $?
+fi
 load_env
 case "${1:-}" in
   ''|"$SNIPER_PROVIDER") ;;

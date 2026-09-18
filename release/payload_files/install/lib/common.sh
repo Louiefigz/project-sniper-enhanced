@@ -144,6 +144,11 @@ load_env() {
   if [ -f "$LOCAL_ENV" ]; then
     set -a; . "$LOCAL_ENV" || fail "runtime/sniper.local.env has an error (it is read as shell)."; set +a
   fi
+  # Guided setup owns this optional connection. Read as literal data, never shell.
+  # An empty key records an explicit disconnect and overrides older manual keys.
+  if [ -f "$RUNTIME_DIR/deepgram.env" ]; then
+    settings_load "$RUNTIME_DIR/deepgram.env" || fail "Reopen install/setup.command to repair the Deepgram connection."
+  fi
   recorded="$PKG_ROOT"; PKG_ROOT="$here"; APP_DIR="$here/app"; export PKG_ROOT APP_DIR
   if [ "$recorded" != "$here" ] && [ "${1:-}" != "--moved-ok" ]; then
     fail "This folder was moved or copied after it was installed (installed at:

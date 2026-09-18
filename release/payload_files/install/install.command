@@ -113,6 +113,11 @@ step "10/10  Building the app (no network needed)"
 build_step
 log_line "install finished"
 
+if [ -t 0 ] && [ -t 1 ]; then
+  "$PKG_ROOT/install/setup.command" --finish-install
+  exit $?
+fi
+
 say ""
 "$PKG_ROOT/install/doctor.command"
 DOCTOR=$?
@@ -121,6 +126,5 @@ if [ "$DOCTOR" -ne 0 ]; then
   say "Installed, but the checks above report something still to do."
   say "If the editor brain is among the failures, sign in next:"
 fi
-say "  install/sign-in.command         (signs in to $PROVIDER inside this folder)"
-say "Then open START-HERE.html."
+say "Double-click install/setup.command to connect Deepgram, sign in and finish setup."
 exit "$DOCTOR"

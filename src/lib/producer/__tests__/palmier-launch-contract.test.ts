@@ -25,7 +25,7 @@ assert.match(runtime, /input\.signal\?\.throwIfAborted\(\)/,
   "navigation cancellation between Palmier open and job POST must not launch work");
 assert.match(runtime, /No managed Palmier workspace exists/,
   "only an actually missing workspace may trigger draft creation; other Palmier locks fail closed");
-assert.match(provider, /return enumEnv\("SNIPER_BRAIN_PROVIDER", \["legacy", "codex"\], "legacy"\)/,
+assert.match(provider, /return brain \?\? fromChoice \?\? "legacy";/,
   "Claude Code must remain the default editor brain");
 assert.match(runtime, /if \(!status\) return "Claude Code · sonnet"/,
   "the launch caption must name Claude Code and its explicit default model immediately");

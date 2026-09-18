@@ -2,7 +2,9 @@
 # Project Sniper — stop the local app. A background edit that is already running
 # keeps running on purpose; it can be resumed from its project later.
 . "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh" || exit 1
-load_env
+# Stopping must work even when a setting is wrong or the folder was moved: the
+# supervisor is identified by its process and folder, never by the settings.
+load_env --moved-ok
 PORT="${SNIPER_PORT:-3000}"
 PIDFILE="$STATE_DIR/app.pid"
 PID="$(cat "$PIDFILE" 2>/dev/null)"

@@ -23,17 +23,18 @@
 >
   <!--
     PROJECT SNIPER · Motion template: WHITEBOARD-MAP (16:9 talking-head longform)
-    Reference: the pro's whiteboard mind-map cutaway (INTRO_MACHINE_VS_PRO_AUDIT
-    §2 row 4, §3 "Whiteboard"; REFERENCE_STYLE_STUDY R14) — anonymized frame
-    reference/whiteboard-map-reference.png.
-    A FULL-FRAME OPAQUE graph-paper world: a center-top title pill, child nodes
-    (dark rounded rects, white text) landing per spoken beat, each announced by a
-    rounded-elbow connector that DRAWS ON from the pill just before the node lands,
-    while the whole canvas drifts laterally. The reference's green is recolored to
-    the Project Sniper accent tint; the STRUCTURE is preserved.
+    A FULL-FRAME OPAQUE mind-map world: a center-top title pill, child nodes
+    (ink rounded rects, white text) landing per spoken beat, each announced by
+    a rounded-elbow connector that DRAWS ON from the pill just before the node
+    lands, while the whole canvas drifts laterally so the map never freezes.
+
+    SNIPER DESIGN: Sniper paper field (--rail-cream #F1F4F6) with a faint 96px
+    ink dot field that rides the drifting world; title pill = accent tint with
+    ink text (#131720) in --font-display 800; nodes = ink #131720 plates with
+    8px corners and white Inter 700 text (17.9:1); connectors = accent tint.
 
     CONTRACT for the PRODUCER compositing stage:
-      - anchor "own-screen" -> render `--format mp4` (opaque takeover, R14: the
+      - anchor "own-screen" -> render `--format mp4` (opaque takeover: the
         frame belongs to the canvas, never both). No self out-transition — the
         compositor (white flash / wash, transitions.py) owns both seams.
       - title / node1..4 / at1..4 / accent are `data-composition-variables`.
@@ -43,31 +44,32 @@
       - UNSET everything renders the PREVIEW SAMPLE only (glass-rail G21 pattern):
         the demo content activates when title AND node1..4 are ALL unset; any
         plan that sets one node gets exactly its nodes — no sample leak.
-      - Grammar (burst-measured): node fades+rises ~250ms at atN; its connector
-        draws ~300ms starting ~200ms before atN; canvas drifts ~1.5% across D;
+      - Timing (Sniper design parameters): node fades+rises ~250ms at atN; its
+        connector draws ~300ms starting ~200ms before atN, so the line points
+        at the node before it appears; canvas drifts ~1.5% across D;
         un-landed nodes are INVISIBLE (progressive disclosure).
-      - Layout auto-balances 1..4 nodes in the reference's staggered
-        left/right spread below the pill.
+      - Layout auto-balances 1..4 nodes in a staggered left/right spread
+        below the pill.
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
         rewrites it per window; --variables never sets it — see stat-card note).
         Make it comfortably past the last atN.
 
-    PAIR-2 UPGRADES (all OPTIONAL — a v1 variable set renders exactly as v1):
-      - handoffText + handoffAt (darkmap value handoff, study2 sheet_11 states
-        132-134): the sentence builds WORD-BY-WORD center-frame first, then at
-        handoffAt shrinks/rises into the title-pill position, where the pill
-        fades in to receive it. Use WITH title set (the pill is what the
-        sentence hands into; the plan usually sets title to the same or a
-        shortened sentence). Set every atN >= handoffAt + 0.55 — the comp
-        clamps node/connector starts to that floor while a handoff is active.
-        With title empty the sentence just builds and fades (no pill law holds).
-      - iconN (sheet_11 states 137-138, Dropbox gray->color): an icon FILE NAME
-        from templates/motion/icons/ (plan_lint_motion validates any spec.icon*
-        against that dir). The node gains a leading icon chip rendered
-        desaturated-gray, popping to full (baked) color ~350ms after the node
-        lands. Empty iconN = the v1 text-only node, layout identical.
-      - panX (panmap canvas-pan continuity): TOTAL lateral canvas translate in
-        px across the window (the world glides x: +panX/2 -> -panX/2). 0/unset
+    OPTIONAL UPGRADES (a v1 variable set renders exactly as v1):
+      - handoffText + handoffAt (value handoff): the sentence builds
+        WORD-BY-WORD center-frame first, then at handoffAt shrinks/rises into
+        the title-pill position, where the pill fades in to receive it. Use
+        WITH title set (the pill is what the sentence hands into; the plan
+        usually sets title to the same or a shortened sentence). Set every
+        atN >= handoffAt + 0.55 — the comp clamps node/connector starts to that
+        floor while a handoff is active. With title empty the sentence just
+        builds and fades (no pill law holds).
+      - iconN: an icon FILE NAME from templates/motion/icons/ (plan_lint_motion
+        validates any spec.icon* against that dir). The node gains a leading
+        icon chip rendered desaturated-gray, popping to full (baked) color
+        ~350ms after the node lands. Empty iconN = the v1 text-only node,
+        layout identical.
+      - panX (canvas-pan continuity): TOTAL lateral canvas translate in px
+        across the window (the world glides x: +panX/2 -> -panX/2). 0/unset
         keeps the v1 ~1.5% drift. The world auto-oversizes so no edge shows.
   -->
   <head>
@@ -82,17 +84,17 @@
         width: 1920px;
         height: 1080px;
         overflow: hidden;
-        background: #f7f5f0;             /* opaque — this comp owns the whole frame */
+        background: #F1F4F6;             /* opaque — this comp owns the whole frame */
         font-family: var(--font);
       }
       #map-root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
 
       /* Full-bleed paper on a CHILD (never the root) — the producer's frame
          compositing can drop the root's own background (frame renders black). */
-      #map-bg { position: absolute; inset: 0; background: #f7f5f0; }
+      #map-bg { position: absolute; inset: 0; background: var(--rail-cream, #F1F4F6); }
 
       /* Drifting world: oversized so the ~1.5% lateral drift never exposes an
-         edge. Grid + all content ride it together (the canvas IS the camera). */
+         edge. Dot field + all content ride it together (the canvas IS the camera). */
       #map-world {
         position: absolute;
         left: -48px; top: -48px;
@@ -102,9 +104,8 @@
       #map-grid {
         position: absolute; inset: 0;
         background-image:
-          linear-gradient(to right, #e9e6de 0 1px, transparent 1px),
-          linear-gradient(to bottom, #e9e6de 0 1px, transparent 1px);
-        background-size: 192px 192px, 192px 192px;
+          radial-gradient(circle at 2px 2px, rgba(19, 23, 32, 0.16) 1.6px, transparent 2.2px);
+        background-size: 96px 96px;
       }
       /* 1:1 coordinate space (1920x1080) inside the oversized world. */
       #map-canvas { position: absolute; left: 48px; top: 48px; width: 1920px; height: 1080px; }
@@ -119,9 +120,8 @@
         will-change: stroke-dashoffset;
       }
 
-      /* Title pill — accent-TINTED field, dark ink (the reference's green pill
-         recolored; structure identical). Centered by a full-width flex row so
-         GSAP transforms never fight the centering. */
+      /* Title pill — accent-TINTED field, ink text. Centered by a full-width
+         flex row so GSAP transforms never fight the centering. */
       #map-title-row {
         position: absolute;
         left: 0; top: 150px;
@@ -131,20 +131,21 @@
       }
       #map-title {
         padding: 20px 42px;
-        border-radius: 20px;
+        border-radius: 10px;
         background: color-mix(in srgb, var(--accent) 15%, #ffffff);
         border: 2px solid color-mix(in srgb, var(--accent) 30%, #ffffff);
-        color: #101318;
+        color: #131720;
+        font-family: var(--font-display);
         font-weight: 800;
         font-size: 50px;
         line-height: 1.05;
-        letter-spacing: -0.01em;
+        letter-spacing: -0.02em;
         white-space: nowrap;
         box-shadow: 0 10px 26px rgba(16, 24, 48, 0.10);
         will-change: transform, opacity;
       }
 
-      /* Child nodes — dark rounded rects, white text, 1-2 lines, centered in a
+      /* Child nodes — ink rounded rects, white text, 1-2 lines, centered in a
          fixed slot so text growth stays centered on the connector's landing x. */
       .map-slot {
         position: absolute;
@@ -155,8 +156,8 @@
       .map-node {
         max-width: 520px;
         padding: 18px 30px;
-        border-radius: 14px;
-        background: #14161b;
+        border-radius: 8px;
+        background: #131720;
         color: #ffffff;
         font-weight: 700;
         font-size: 32px;
@@ -167,7 +168,7 @@
         will-change: transform, opacity;
       }
 
-      /* Optional node icon chip (pair-2 iconN): white disc, brand mark stacked
+      /* Optional node icon chip (iconN): white disc, brand mark stacked
          gray-under-color; the color layer pops in after the node lands. The
          GRAY layer's filter is STATIC (never animated). */
       .map-node--icon {
@@ -195,7 +196,7 @@
       .map-icon-gray { filter: grayscale(1) opacity(0.55); }
       .map-icon-color { will-change: opacity; }
 
-      /* Value-handoff sentence (pair-2): builds word-by-word center-frame, then
+      /* Value-handoff sentence: builds word-by-word center-frame, then
          the whole block shrinks/rises into the title-pill position. */
       #map-handoff {
         position: absolute;
@@ -209,11 +210,12 @@
       #map-handoff-inner {
         width: 100%;
         text-align: center;
-        color: #14161b;
+        color: #131720;
+        font-family: var(--font-display);
         font-weight: 800;
         font-size: 64px;
         line-height: 1.15;
-        letter-spacing: -0.01em;
+        letter-spacing: -0.02em;
       }
       .map-hw { display: inline-block; will-change: transform, opacity; }
     </style>
@@ -271,14 +273,14 @@
           icon1: "", icon2: "", icon3: "", icon4: "",
           panX: 0,
         };
-        // PREVIEW-ONLY demo content (the reference beat itself). Activates ONLY
-        // when title AND every nodeN are unset — a bare preview/render with no
-        // --variables; any plan that sets a node gets EXACTLY its nodes.
+        // PREVIEW-ONLY demo content (original Sniper sample copy). Activates
+        // ONLY when title AND every nodeN are unset — a bare preview/render
+        // with no --variables; any plan that sets a node gets EXACTLY its nodes.
         const SAMPLE = {
-          title: "And in that time",
-          node1: "I've basically launched a YouTube comedy channel",
-          node2: "An SEO company",
-          node3: "An AI agency",
+          title: "Before you publish",
+          node1: "Cut the retakes and the dead air between lines",
+          node2: "Caption every line",
+          node3: "Check the levels",
           at1: 0.5, at2: 2.2, at3: 4.0,
         };
         const HF = window.__hyperframes;
@@ -299,7 +301,7 @@
         const PILL_MID = 198;      // connector side-exit y (hidden under the pill)
         const PILL_BOTTOM = 240;   // connector bottom-exit y
 
-        // Value handoff (pair-2, darkmap): word spans build center-frame, the
+        // Value handoff: word spans build center-frame, the
         // block shrinks/rises into the pill position at handoffAt. Inactive
         // (empty handoffText) = element removed, v1 behavior untouched.
         const handoffText = (vars.handoffText == null ? "" : String(vars.handoffText)).trim();
@@ -320,7 +322,7 @@
           handoffEl.remove();
         }
 
-        // Reference spread (staggered left/right below the pill), auto-balanced
+        // Node spread (staggered left/right below the pill), auto-balanced
         // per active-node count. [cx, slotTop] in 1920x1080 canvas coords.
         const SPREADS = {
           1: [[500, 560]],
@@ -330,7 +332,7 @@
         };
 
         // Fill / prune the four static slots; drop empties before layout.
-        // iconN (pair-2): a set icon file prepends a gray-under-color chip and
+        // iconN: a set icon file prepends a gray-under-color chip and
         // switches the node to flex; empty iconN keeps the v1 text-only path.
         function fillNode(node, text, iconFile) {
           if (!iconFile) { node.textContent = text; return null; }
@@ -376,8 +378,8 @@
         // Rounded-elbow connectors: exit the pill toward each node (side exit,
         // or straight down when the node sits under the pill), rounded 90°
         // corner, drop to the slot top. Start point hides UNDER the pill (drawn
-        // above the SVG), so the draw-on emerges from the pill edge like the
-        // reference. Same-side runs fan to distinct y so they never coincide.
+        // above the SVG), so the draw-on emerges from the pill edge. Same-side
+        // runs fan to distinct y so they never coincide.
         const svg = document.getElementById("map-svg");
         const NS = "http://www.w3.org/2000/svg";
         const sideCount = { left: 0, right: 0 };
@@ -415,9 +417,9 @@
         window.__timelines = window.__timelines || {};
         const tl = gsap.timeline({ paused: true });
 
-        // The canvas drifts laterally ~1.5% across the whole window (burst: the
-        // world feels alive; between-events motion is the drift, nothing else).
-        // panX (pair-2, panmap): a non-zero total pan replaces the default
+        // The canvas drifts laterally ~1.5% across the whole window (the world
+        // feels alive; between-events motion is the drift, nothing else).
+        // panX: a non-zero total pan replaces the default
         // drift; the world is widened so the glide never exposes an edge.
         const panX = Number(vars.panX) || 0;
         if (panX) {
@@ -451,7 +453,7 @@
           tl.to(handoffEl, { opacity: 0, duration: 0.25, ease: "power1.in" }, hAt + 0.3);
         }
 
-        // Title pill fades+rises first (~250ms, burst entrance timing); with a
+        // Title pill fades+rises first (~250ms entrance); with a
         // handoff active it instead fades in AT the handoff, receiving the
         // sentence as it arrives in the pill position.
         if (titleText) {
@@ -476,8 +478,8 @@
           tl.set(a.node, { opacity: 0, y: 16, scale: 0.97 }, 0);
           tl.to(a.node, { opacity: 1, y: 0, scale: 1, duration: 0.25, ease: "power2.out" }, at);
           if (a.icon) {
-            // Icon chip: gray at land, popping to full color ~350ms later
-            // (sheet_11 states 137-138). Crossfade + a small chip pop.
+            // Icon chip: gray at land, popping to full color ~350ms later.
+            // Crossfade + a small chip pop.
             tl.set(a.icon.color, { opacity: 0 }, 0);
             tl.to(a.icon.color, { opacity: 1, duration: 0.22, ease: "power2.out" }, at + 0.35);
             tl.to(a.icon.gray, { opacity: 0, duration: 0.22, ease: "power2.out" }, at + 0.35);

@@ -7,11 +7,10 @@
 >
   <!--
     PROJECT SNIPER · Motion template: GLITCH-HIT (16:9 full-frame emphasis hit)
-    Reference: the operator's "angle generator" long-form 300-500ms emphasis
-    hits (REFERENCE_STYLE_STUDY R23/R24 study pass) — a one-beat B&W static
-    slam OVER the footage: desaturating gray wash, heavy VERTICAL streak
-    noise, horizontal displacement slices, then INSTANTLY gone (hard cut,
-    no fade).
+    A 300-500ms emphasis hit for long-form: a one-beat B&W static slam OVER
+    the footage — desaturating gray wash, heavy VERTICAL streak noise,
+    horizontal displacement slices — then INSTANTLY gone (hard cut, no fade),
+    so the beat punctuates a line without covering the next one.
 
     CONTRACT for the PRODUCER compositing stage:
       - anchor "free-band" (or any alpha anchor) -> render `--format mov`
@@ -149,7 +148,7 @@
           }
           // Horizontal displacement slices: an IRREGULAR seeded stripe field
           // (varied segment widths + alphas — analog static, not venetian
-          // blinds) shifted sideways — the reference's horizontal displacement.
+          // blinds) shifted sideways — a horizontal tear.
           for (let i = 0; i < 6; i += 1) {
             const sl = document.createElement("div");
             sl.className = "gh-slice";

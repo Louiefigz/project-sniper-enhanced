@@ -18,11 +18,14 @@
   ]'
 >
   <!--
-    PROJECT SNIPER · Motion template: WIDGET-GAUGE (MG-3.5, R6)
-    Class it serves: a PERSISTENT parametric widget (Reference Style Study R6) —
-    a difficulty/intensity gauge (green -> red 6-segment bar + a marker arrow that
-    TRACKS THE NARRATIVE), pinned in the headroom. Unlike the pop-and-fade cards,
-    a widget holds for its whole window and its state moves with the story.
+    PROJECT SNIPER · Motion template: WIDGET-GAUGE (MG-3.5)
+    Class it serves: a PERSISTENT parametric widget — a difficulty/intensity
+    gauge (a 6-segment cool -> hot bar + a marker arrow that TRACKS THE
+    NARRATIVE), pinned in the headroom. Unlike the pop-and-fade cards, a
+    widget holds for its whole window and its state moves with the story.
+    SNIPER DESIGN: the segments run from Sniper process blue #447BE4 through
+    violet and magenta to Sniper warn red #D33B36 (an oklch ramp at constant
+    lightness 0.6, so no segment jumps out); the label pill uses the accent.
     Transparent 1080x1920 overlay -> render with `--format mov` (ProRes 4444) for alpha.
 
     CONTRACT for the PRODUCER compositing stage:
@@ -35,13 +38,13 @@
         eases pos1 -> nothing and holds. The marker holds pos1 before at1 and
         holds the last posN after the last atN (seek-safe: the marker position is
         a pure function of timeline time — hyperframes-keyframes doctrine).
-      - HEADROOM placement (R3): the widget sits high (y~150-260), NOT in the
+      - HEADROOM placement: the widget sits high (y~150-260), NOT in the
         free band — the face keeps the middle. The comp is full-canvas; the
         PRODUCER may additionally TRANSLATE it face-relative via anchor
         "headroom" + a measured faceBBoxNorm (graphics_stage).
       - The widget PERSISTS: it fades in once and holds to the end (no out-fade);
         the compositor gates it to the window and the base returns after.
-      - STAGED ENTRANCE (R9, deep-pass correction): labelInAt / barInAt / markerInAt
+      - STAGED ENTRANCE: labelInAt / barInAt / markerInAt
         give the pill, bar and marker-arrow their own entrance times so the widget
         BUILDS (pill first -> bar -> marker) instead of appearing whole. DEFAULTS
         ARE ALL 0 = the original single container fade (backward compatible — old
@@ -68,7 +71,7 @@
       }
       #gauge-root { position: relative; width: var(--canvas-w); height: var(--canvas-h); }
 
-      /* HEADROOM band (R3): high on the canvas, centered on the visual center. */
+      /* HEADROOM band: high on the canvas, centered on the visual center. */
       .stage {
         position: absolute;
         left: var(--visual-center-x);
@@ -117,13 +120,13 @@
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.30);
       }
       .seg { flex: 1 1 0; height: 100%; }
-      /* green -> red across six steps (intensity ramp). */
-      .seg.s1 { background: #2FBF71; }
-      .seg.s2 { background: #7DC93B; }
-      .seg.s3 { background: #E2C022; }
-      .seg.s4 { background: #F2A73B; }
-      .seg.s5 { background: #EF6D3A; }
-      .seg.s6 { background: #E23B3B; }
+      /* cool -> hot across six steps (Sniper blue to warn red, oklch L 0.6). */
+      .seg.s1 { background: #447BE4; }
+      .seg.s2 { background: #7E6ADE; }
+      .seg.s3 { background: #A75AC3; }
+      .seg.s4 { background: #C44E95; }
+      .seg.s5 { background: #D14A65; }
+      .seg.s6 { background: #D33B36; }
 
       /* Downward marker arrow, sitting just above the bar and pointing at it. */
       .marker {
@@ -223,7 +226,7 @@
         const tl = gsap.timeline({ paused: true });
 
         // Entrance. DEFAULT (all InAt == 0): the original single container fade —
-        // byte-identical to the pre-upgrade behavior. STAGED (any InAt > 0, R9):
+        // byte-identical to the pre-upgrade behavior. STAGED (any InAt > 0):
         // the pill, bar and marker enter on their own times so the widget builds.
         const labelInAt = Math.max(0, Number(vars.labelInAt) || 0);
         const barInAt = Math.max(0, Number(vars.barInAt) || 0);

@@ -5,7 +5,7 @@
     {"id":"num","type":"string","label":"Section number (renders as #N; empty = no numeral)","default":""},
     {"id":"title","type":"string","label":"Section title (accent, lands second)","default":""},
     {"id":"sub","type":"string","label":"Subline (gray, builds word-by-word third)","default":""},
-    {"id":"accentColor","type":"color","label":"Title accent color (per-video brand token, R23)","default":"#054BC9"},
+    {"id":"accentColor","type":"color","label":"Title accent color (per-video brand token)","default":"#054BC9"},
     {"id":"at1","type":"number","label":"Numeral drift-in start (s)","default":0.3,"min":0,"max":30,"step":0.05,"unit":"s"},
     {"id":"at2","type":"number","label":"Title land time (s)","default":1.5,"min":0,"max":30,"step":0.05,"unit":"s"},
     {"id":"at3","type":"number","label":"Subline build start (s)","default":2.5,"min":0,"max":30,"step":0.05,"unit":"s"}
@@ -13,34 +13,34 @@
 >
   <!--
     PROJECT SNIPER · Motion template: SECTION-TAKEOVER (16:9 own-screen)
-    Reference: the operator's "angle generator" long-form section card
-    (REFERENCE_STYLE_STUDY R24 — "section takeovers with drifting ghost
-    numerals"). Frames: study2 burst section1_259 (t259.2→261.7: white frame,
-    giant soft-gray ghost "#1" captured MID-DRIFT across consecutive frames,
-    legs dissolving in a vertical fade) + state sheet_24 295→299 (t259.5→265:
-    numeral settles left-third; azure title lands right of it; gray subline
-    builds word-by-word beneath the title). Reference title azure is
-    tokenized: accentColor, default Project Sniper #054BC9 (color = token, R23;
-    structure matches the reference).
+    A full-frame section card for long-form: a giant ghost section numeral
+    ("#1") drifts in from the right and settles in the left third, the
+    section title lands to its right in the accent colour, and a subline
+    builds word-by-word beneath the title.
+
+    SNIPER DESIGN: cool paper field (--rail-cream #F1F4F6); the ghost numeral
+    is --font-display (Bricolage Grotesque 800) filled with a process-blue
+    tint that dissolves downward; title in --font-display 800 and the
+    accentColor token (default Project Sniper #054BC9, 6.7:1 on the paper);
+    subline in Inter 500 slate #5B616B (5.6:1 on the paper).
 
     CONTRACT for the PRODUCER compositing stage:
       - anchor "own-screen" -> render `--format mp4` (OPAQUE takeover; it
-        REPLACES the frame for its window). The white field is opaque from
+        REPLACES the frame for its window). The paper field is opaque from
         FRAME 1 on a full-bleed CHILD (never the root — compositing drops
         root backgrounds).
       - num / title / sub / accentColor / at1 / at2 / at3 are
-        `data-composition-variables`. Build order is the reference grammar:
-        numeral DRIFTS IN from the right edge at at1 (slow power ease into
-        its left-third settle, then keeps a barely-perceptible residual
-        drift through the hold), title lands at at2, subline builds
-        word-by-word from at3 (~90ms cadence, compressed to finish by D-0.3).
+        `data-composition-variables`. Build order: numeral DRIFTS IN from the
+        right edge at at1 (slow power ease into its left-third settle, then
+        a barely-perceptible residual drift through the hold so the card is
+        never frozen), title lands at at2, subline builds word-by-word from
+        at3 (~90ms cadence, compressed to finish by D-0.3).
       - EMPTY-DEFAULTS LAW (G21): num, title, sub default EMPTY — an unset
         var renders NOTHING. Demo content activates ONLY when all three are
         unset; setting any renders exactly what was set, no sample leak.
       - EXIT: simple hold to the end — the compositor owns both seams.
-        TODO(phase-2): the reference exits by PANNING OUT to the next canvas
-        (camera-move across a larger whiteboard, sheet_24 299 -> next state).
-        That pan-out belongs to a multi-canvas host comp, not this card.
+        TODO(phase-2): an optional pan-out exit to a following canvas would
+        belong to a multi-canvas host comp, not this card.
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
         rewrites it per window; --variables never sets it).
   -->
@@ -56,16 +56,16 @@
         width: 1920px;
         height: 1080px;
         overflow: hidden;
-        background: #fcfcfb;               /* opaque — this comp owns the whole frame */
+        background: #F1F4F6;               /* opaque — this comp owns the whole frame */
         font-family: var(--font);
       }
       #st-root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
 
-      /* Opaque warm-white field on a full-bleed CHILD (reference ~#fcfcfa). */
-      #st-bg { position: absolute; inset: 0; background: #fcfcfb; }
+      /* Opaque cool-paper field on a full-bleed CHILD. */
+      #st-bg { position: absolute; inset: 0; background: var(--rail-cream, #F1F4F6); }
 
-      /* Giant ghost numeral — soft gray dissolving downward (reference: solid
-         at the top, legs fade out by ~78% height). background-clip:text keeps
+      /* Giant ghost numeral — a process-blue tint dissolving downward (solid
+         at the top, fading out by ~78% height). background-clip:text keeps
          the gradient INSIDE the glyphs; GSAP animates transform only. */
       #st-num {
         position: absolute;
@@ -73,22 +73,23 @@
         top: 30px;
         will-change: transform, opacity;
       }
-      /* Inner span owns a static scaleX condense (reference glyphs are a tall
-         condensed face; Inter 900 squeezed ~0.82 approximates it) so GSAP's
-         x-drift on #st-num never fights a CSS transform. */
+      /* Inner span owns a static scaleX condense (0.82 keeps the numeral in
+         the left third, clear of the title column) so GSAP's x-drift on
+         #st-num never fights a CSS transform. */
       #st-num-inner {
         display: inline-block;
         transform: scaleX(0.82);
         transform-origin: left top;
+        font-family: var(--font-display);
         font-size: 780px;
-        font-weight: 900;
+        font-weight: 800;
         line-height: 0.95;
         letter-spacing: -0.05em;
         background: linear-gradient(
           180deg,
-          #b9bdbc 0%,
-          #c6cac9 40%,
-          rgba(198, 202, 201, 0) 78%
+          rgba(68, 123, 228, 0.26) 0%,
+          rgba(68, 123, 228, 0.16) 40%,
+          rgba(68, 123, 228, 0) 78%
         );
         -webkit-background-clip: text;
         background-clip: text;
@@ -96,7 +97,7 @@
       }
 
       /* Title + subline column, centered in the space right of the numeral
-         (sheet_24 297: title centered ~x0.65W, ~y0.37H). */
+         (title centered near x0.65W, y0.37H). */
       #st-panel {
         position: absolute;
         left: 780px;
@@ -108,10 +109,11 @@
         gap: 30px;
       }
       #st-title {
+        font-family: var(--font-display);
         font-size: 66px;
         font-weight: 800;
-        line-height: 1.15;
-        letter-spacing: -0.01em;
+        line-height: 1.12;
+        letter-spacing: -0.02em;
         color: var(--accent);
         text-align: center;
         will-change: transform, opacity;
@@ -129,7 +131,7 @@
         font-size: 38px;
         font-weight: 500;
         line-height: 1.35;
-        color: #999ea1;
+        color: #5B616B;
         will-change: transform, opacity;
       }
     </style>
@@ -162,12 +164,12 @@
           num: "", title: "", sub: "",
           accentColor: "#054BC9", at1: 0.3, at2: 1.5, at3: 2.5,
         };
-        // PREVIEW-ONLY demo content (the reference card itself, sheet_24
-        // 295→299). Activates ONLY when num AND title AND sub are all unset.
+        // PREVIEW-ONLY demo content (original Sniper sample copy).
+        // Activates ONLY when num AND title AND sub are all unset.
         const SAMPLE = {
           num: "1",
-          title: "Not get more ideas from AI",
-          sub: "It's give AI real pain that it can actually work with",
+          title: "Start with the strongest take",
+          sub: "Pick the version where the point lands in one breath",
         };
         const HF = window.__hyperframes;
         let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
@@ -190,13 +192,12 @@
         const tl = gsap.timeline({ paused: true });
 
         // Field micro-settle — imperceptible, keeps the timeline non-empty even
-        // for a numeral-only card (the base <body> is the same opaque white, so
+        // for a numeral-only card (the base <body> is the same opaque paper, so
         // frame 1 stays fully lit — own-screen law).
         tl.fromTo("#st-bg", { opacity: 0.985 }, { opacity: 1, duration: 0.5, ease: "power1.out" }, 0);
 
-        // --- 1) Ghost numeral drifts in FROM THE RIGHT EDGE (burst grammar:
-        //        consecutive frames catch it mid-slide), settles left-third,
-        //        and keeps a slow residual drift through the hold. ---
+        // --- 1) Ghost numeral drifts in FROM THE RIGHT EDGE, settles in the
+        //        left third, and keeps a slow residual drift through the hold. ---
         const numEl = document.getElementById("st-num");
         const numText = (vars.num == null ? "" : String(vars.num)).trim().replace(/^#+/, "");
         if (numText) {
@@ -207,7 +208,7 @@
           tl.to(numEl, { x: 26, duration: driftDur, ease: "power3.out" }, at1);
           const holdFrom = at1 + driftDur;
           if (D - holdFrom > 0.1) {
-            // Still slightly moving through the hold (reference is never static).
+            // Still slightly moving through the hold (the card never freezes).
             tl.to(numEl, { x: 0, duration: D - holdFrom, ease: "none" }, holdFrom);
           }
         } else {
@@ -252,7 +253,7 @@
         }
 
         // No self exit — holds to the end; the compositor owns both seams.
-        // TODO(phase-2): reference pan-out-to-next-canvas exit (see header).
+        // TODO(phase-2): optional pan-out exit (see header).
         tl.seek(0);
         window.__timelines["section-takeover"] = tl;
       })();

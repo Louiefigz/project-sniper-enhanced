@@ -2,13 +2,13 @@
 <html
   lang="en"
   data-composition-variables='[
-    {"id":"text","type":"string","label":"Statement (<= 10 words; wrap keyword(s) in *asterisks* for accent)","default":"That line fixes half your *content problems*"},
-    {"id":"bg","type":"enum","label":"Background gradient","default":"dark","options":[{"value":"dark","label":"Dark (navy)"},{"value":"warm","label":"Warm (orange->purple)"},{"value":"cream","label":"Cream (graph-paper, dark text — no panel)"}]},
+    {"id":"text","type":"string","label":"Statement (<= 10 words; wrap keyword(s) in *asterisks* for accent)","default":"Every cut should *earn its place*"},
+    {"id":"bg","type":"enum","label":"Background gradient","default":"dark","options":[{"value":"dark","label":"Dark (navy)"},{"value":"warm","label":"Warm (amber->graphite)"},{"value":"cream","label":"Paper (light dot field, dark text — no panel)"}]},
     {"id":"iconFile","type":"string","label":"Optional mark above (file under /icons; empty = none)","default":""},
     {"id":"accent","type":"color","label":"Keyword accent color (LL-033: card is dark — keep LIGHT)","default":"#7FB4FF"},
     {"id":"variant","type":"enum","label":"Build grammar","default":"classic","options":[{"value":"classic","label":"Classic (word-rise, unchanged)"},{"value":"module","label":"Module (eyebrow-first, opacity ramps, skeleton-first)"}]},
     {"id":"splitText","type":"boolean","label":"SplitText per-CHAR staged word-rise (classic build only)","default":false},
-    {"id":"eyebrow","type":"string","label":"Eyebrow microtext (mono caps + colored dot; empty = omit)","default":""},
+    {"id":"eyebrow","type":"string","label":"Eyebrow microtext (mono caps + square marker; empty = omit)","default":""},
     {"id":"headlineLines","type":"string","label":"Two-line headline, pipe-separated (line 2 in accent; module only)","default":""},
     {"id":"statements","type":"string","label":"Statement sequence, pipe-separated (module v2 replace grammar; empty = single statement)","default":""},
     {"id":"statementLands","type":"string","label":"Land times (s, comma-separated) for statements 2..N (empty = even split)","default":""},
@@ -18,50 +18,58 @@
   ]'
 >
   <!--
-    PROJECT SNIPER · Motion template: STATEMENT-CARD (batch 2, from the edited
-    long-form's "full-screen statement card" treatment — LONGFORM_VISUAL_STUDY §3,
-    reference frames 11.5s / 16s / 18.5s in the study sheets: a thesis-line takeover
-    on a dark (optionally warming) gradient, one bold white line with the keyword
-    emphasised, a small mark above the text).
+    PROJECT SNIPER · Motion template: STATEMENT-CARD (16:9 thesis takeover)
+    A full-screen statement card: one bold line with its keyword emphasised,
+    an optional small mark above it, on an opaque field.
     Trigger it serves: a thesis / definition line — the frame hands off to the words.
     OPAQUE 1920x1080 -> render with `--format mp4` (H.264, anchor "own-screen").
+
+    SNIPER DESIGN: "dark" = navy radial field (#0a1123 core) under a
+    translucent card with a 1px hairline and 14px corners; "warm" = an
+    amber-to-graphite radial field (Sniper result amber into the module
+    graphite); "cream" (identifier kept) = the Sniper paper surface
+    (--rail-cream #F1F4F6) with a faint 48px dot field, no panel, ink text
+    #131720 (16.2:1) and the accent keyword (#054BC9 default, 6.7:1).
+    Statement text is --font-display (Bricolage Grotesque 800).
 
     CONTRACT for the PRODUCER + graphics_stage:
       - text: keep <= 10 words; wrap the keyword(s) in *asterisks* to render them
         in the accent color (the rest is bold white). Multiple *runs* allowed.
-      - bg: "dark" (navy radial vignette, default) or "warm" (the 18.5s
-        orange->purple variant). iconFile is an OPTIONAL small mark above the text
-        (real marks only, R12); empty omits it and the text re-centers.
-      - The gradient field lives on a full-bleed CHILD and is OPAQUE from frame 0
-        (no base-video flash at the takeover seam). The card + text BUILD in staged
-        (R9 progressive disclosure): field -> card -> icon -> statement words rise
+      - bg: "dark" (default), "warm" or "cream". iconFile is an OPTIONAL small
+        mark above the text (real marks only — never an invented logo); empty
+        omits it and the text re-centers.
+      - The field lives on a full-bleed CHILD and is OPAQUE from frame 0 (no
+        base-video flash at the takeover seam). The card + text BUILD in stages
+        (progressive disclosure): field -> card -> icon -> statement words rise
         in a light stagger. HOLDS to the end (compositor owns the seam).
+      - Contrast lint: plan_lint_visual reads MOTION["contrast"]["kind_bg"]
+        ["statement-card"] for the dark and cream fields — keep those hexes in
+        step with #sc-bg below.
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
         rewrites it per window; --variables never sets it — see stat-card note).
 
-    MODULE VARIANT (docs/studies/MODULE_STUDY.md §3 ranks 2-5 + §2 T-D/T-E — all
-    fields below default OFF; the classic path above is byte-identical when
-    they are absent):
+    MODULE VARIANT (all fields below default OFF; the classic path above is
+    unchanged when they are absent):
       - variant:"module" — skeleton-first build (hairline container ramps
-        SKELETON_GAP_S=0.35s before content, rank 2), eyebrow-first (mono caps
-        + colored dot leads the headline by EYEBROW_LEAD_S=0.25s, rank 3), all
-        text = in-place opacity ramps TEXT_RAMP_S=0.2s, per-LINE stagger 0.25s
-        (T-B row cadence), NO travel (rank 4).
+        SKELETON_GAP_S=0.35s before content), eyebrow-first (mono caps +
+        square marker leads the headline by EYEBROW_LEAD_S=0.25s), all text =
+        in-place opacity ramps TEXT_RAMP_S=0.2s, per-LINE stagger 0.25s, NO
+        travel.
       - headlineLines:"L1|L2" — two-line accent-shift headline, line 2 in the
-        accent color (rank 5, "ONE RUN. FOUR AGENTS." 32.65).
-      - statements:"s1|s2|..." — v2 replace grammar (T-E 185.80->186.30):
-        blur-dim out 0.15s -> 2 deliberately EMPTY frames (field stays) ->
-        next statement opacity-ramps in 0.3s. statementLands (s, for
-        statements 2..N) word-locks each swap; empty = even split of D.
-        Mutually exclusive with headlineLines (fail loud).
-      - exit:"blur-recede" — graphics-layer-only exit (T-D 67.12->67.28):
-        blur + fade + scale->0.98 over EXIT_BLUR_S=0.15s ending exactly at D.
+        accent color.
+      - statements:"s1|s2|..." — replace grammar: blur-dim out 0.15s -> 2
+        deliberately EMPTY frames (field stays) -> next statement
+        opacity-ramps in 0.3s, so each statement reads as a fresh beat.
+        statementLands (s, for statements 2..N) word-locks each swap; empty =
+        even split of D. Mutually exclusive with headlineLines (fail loud).
+      - exit:"blur-recede" — graphics-layer-only exit: blur + fade +
+        scale->0.98 over EXIT_BLUR_S=0.15s ending exactly at D.
         The bg FIELD never fades (no base flash at the seam). Works in both
         variants. Lint twin: scripts/producer/graphics/exit_on_cut.py.
-      - evidenceSource/-Date — mono evidence ribbon ("CLAIM SOURCE ... JUL 09
-        2026", §3 rank 9), lands LAST in the build. Empty = omitted.
+      - evidenceSource/-Date — mono evidence ribbon ("CLAIM SOURCE · <source> ·
+        <date>"), lands LAST in the build. Empty = omitted.
 
-    SPLITTEXT VARIANT (OPT-IN; default false = classic path byte-identical):
+    SPLITTEXT VARIANT (OPT-IN; default false = classic path unchanged):
       - splitText:true — CLASSIC build only: the statement's word spans are
         further split into CHARS via GSAP SplitText (vendored
         /vendor/gsap/SplitText.min.js, 3.14.2 — see ../PROVENANCE.md) and the
@@ -70,8 +78,8 @@
         ~= the classic 0.055s/word cadence). kw accent runs are preserved
         (chars split INSIDE the .w/.kw spans and inherit their color).
       - splitText:true + variant:"module" FAILS LOUD — module text is
-        in-place opacity ramps with NO travel (rank 4); a per-char rise
-        violates that grammar.
+        in-place opacity ramps with NO travel; a per-char rise violates that
+        grammar.
   -->
   <head>
     <meta charset="UTF-8" />
@@ -100,22 +108,21 @@
       }
       #sc-bg.warm {
         background:
-          radial-gradient(1500px 1100px at 700px 620px, #f0913f 0%, #b0466b 42%, #3a2450 100%);
+          radial-gradient(1500px 1100px at 700px 620px, #CC7200 0%, #7A3A2A 44%, #1B1F2E 100%);
       }
-      /* Cream graph-paper field (the operator's real pro "statement takeover"
-         look — LONGFORM_VISUAL_STUDY reference: cream ruled paper, bold BLACK
-         line, NO glass panel; the frame is the words). Opaque from frame 0. */
+      /* Paper field (bg value "cream"): Sniper paper with a faint 48px dot
+         field, NO panel — the frame is the words. Opaque from frame 0. */
       #sc-bg.cream {
-        background-color: #f6eac6;
+        background-color: #F1F4F6;
         background-image:
-          repeating-linear-gradient(0deg, #e6d7a0 0 2px, transparent 2px 104px),
-          repeating-linear-gradient(90deg, #e6d7a0 0 2px, transparent 2px 104px);
+          radial-gradient(circle at 1px 1px, rgba(19, 23, 32, 0.12) 1.3px, transparent 1.8px);
+        background-size: 48px 48px;
       }
-      /* On cream, drop the dark glass panel entirely and set the type dark. */
+      /* On paper, drop the dark panel entirely and set the type in ink. */
       #sc-root.cream #sc-card {
         background: transparent; border: none; box-shadow: none; padding: 0;
       }
-      #sc-root.cream #sc-text { color: #141414; }
+      #sc-root.cream #sc-text { color: #131720; }
 
       #sc-stage {
         position: absolute; inset: 0;
@@ -124,13 +131,13 @@
         gap: 34px;
         will-change: transform, opacity, filter;
       }
-      /* Dark translucent card panel (the study's glass card, over the gradient). */
+      /* Dark translucent card panel over the field (1px hairline, 14px corners). */
       #sc-card {
         max-width: 1240px;
         padding: 64px 84px;
-        border-radius: 34px;
+        border-radius: 14px;
         background: rgba(12, 18, 38, 0.42);
-        border: 1.5px solid rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.14);
         box-shadow: 0 30px 90px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.12);
         display: flex; flex-direction: column; align-items: center; gap: 30px;
         will-change: transform, opacity;
@@ -138,7 +145,7 @@
       /* Optional small mark in an accent-tinted rounded square. */
       #sc-icon-badge {
         width: 96px; height: 96px;
-        border-radius: 24px;
+        border-radius: 12px;
         background: var(--accent-soft, rgba(5, 75, 201, 0.14));
         border: 1.5px solid rgba(255, 255, 255, 0.16);
         display: flex; align-items: center; justify-content: center;
@@ -147,59 +154,60 @@
       #sc-icon { width: 56px; height: 56px; object-fit: contain; display: block; }
       #sc-text {
         text-align: center;
+        font-family: var(--font-display);
         font-weight: 800;
         font-size: 78px;
-        line-height: 1.16;
-        letter-spacing: -0.015em;
+        line-height: 1.14;
+        letter-spacing: -0.02em;
         color: #ffffff;
         text-wrap: balance;
       }
       #sc-text .kw { color: var(--accent); }
       #sc-text .w { display: inline-block; will-change: transform, opacity; }
 
-      /* ---- MODULE variant skin (MODULE_STUDY.md §3: content modules
-         with 1px hairline borders; mono-caps microtext, wide tracking) ---- */
+      /* ---- MODULE variant skin (Sniper module chassis: 1px hairline panel,
+         mono caps microtext, square marker) ---- */
       #sc-root.module #sc-card {
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.20);   /* the 1px hairline */
-        border-radius: 18px;
+        border-radius: 6px;
         box-shadow: none;
         gap: 34px;
         will-change: opacity;
       }
       #sc-root.module.cream #sc-card {
-        background: rgba(20, 20, 20, 0.02);
-        border: 1px solid rgba(20, 20, 20, 0.35);
+        background: rgba(255, 255, 255, 0.55);
+        border: 1px solid rgba(19, 23, 32, 0.28);
         padding: 64px 84px;
       }
       #sc-eyebrow {
         display: flex; align-items: center; gap: 18px;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 30px; line-height: 1;
-        letter-spacing: 5px; text-transform: uppercase;
+        font-weight: 600; font-size: 28px; line-height: 1;
+        letter-spacing: 0.2em; text-transform: uppercase;
         color: rgba(255, 255, 255, 0.85);
         will-change: opacity;
       }
       #sc-eyebrow .dot {
-        width: 14px; height: 14px; border-radius: 50%;
+        width: 13px; height: 13px; border-radius: 2px;
         background: var(--eyebrow-dot, var(--accent));
         flex: 0 0 auto;
       }
-      #sc-root.cream #sc-eyebrow { color: rgba(20, 20, 20, 0.8); }
+      #sc-root.cream #sc-eyebrow { color: rgba(19, 23, 32, 0.8); }
       /* Statements stack in ONE grid cell — swaps are in-place, zero travel. */
       #sc-text.stack { display: grid; }
       #sc-text.stack .statement { grid-area: 1 / 1; will-change: opacity, filter; }
       .statement .line { display: block; will-change: opacity; }
-      .statement .l2 { color: var(--accent); }   /* two-line accent shift (rank 5) */
+      .statement .l2 { color: var(--accent); }   /* two-line accent shift */
       #sc-evidence {
         font-family: var(--eyebrow-font);
         font-weight: 500; font-size: 24px; line-height: 1;
-        letter-spacing: 3.5px; text-transform: uppercase;
+        letter-spacing: 0.14em; text-transform: uppercase;
         /* LL-006: brighter receipt gray (0.55 was borderline at phone size) */
         color: var(--receipt-gray, rgba(255, 255, 255, 0.72));
         will-change: opacity;
       }
-      #sc-root.cream #sc-evidence { color: rgba(20, 20, 20, 0.6); }
+      #sc-root.cream #sc-evidence { color: rgba(19, 23, 32, 0.66); }
     </style>
   </head>
   <body>
@@ -230,7 +238,7 @@
         const M = window.__motionTokens;
 
         const defaults = {
-          text: "That line fixes half your *content problems*",
+          text: "Every cut should *earn its place*",
           bg: "dark", iconFile: "", accent: "#054BC9",
           variant: "classic", splitText: false, eyebrow: "", headlineLines: "",
           statements: "", statementLands: "", exit: "hold",
@@ -240,8 +248,8 @@
         const vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
         document.documentElement.style.setProperty("--accent", vars.accent);
 
-        // Background variant. "cream" also flips the root to the no-panel,
-        // dark-text pro treatment (see #sc-root.cream rules above).
+        // Background variant. "cream" (the paper field) also flips the root to
+        // the no-panel, ink-text treatment (see #sc-root.cream rules above).
         const bgEl = document.getElementById("sc-bg");
         const mode = String(vars.bg);
         bgEl.className = (mode === "warm") ? "warm" : (mode === "cream") ? "cream" : "dark";
@@ -252,10 +260,10 @@
         const splitChars = vars.splitText === true || String(vars.splitText) === "true";
         if (splitChars && module) {
           throw new Error("statement-card: splitText:true is classic-only — " +
-            "module text is in-place opacity ramps with NO travel (rank 4)");
+            "module text is in-place opacity ramps with NO travel");
         }
 
-        // Optional icon badge (real marks only, R12).
+        // Optional icon badge (real marks only).
         function iconSrc(raw) {
           const v = (raw == null ? "" : String(raw)).trim();
           if (!v) return "";
@@ -267,13 +275,13 @@
         if (src) { document.getElementById("sc-icon").src = src; }
         else { badge.remove(); }
 
-        // Eyebrow slot (rank 3: mono caps + colored dot; both variants).
+        // Eyebrow slot (mono caps + square marker; both variants).
         const ebText = (vars.eyebrow == null ? "" : String(vars.eyebrow)).trim();
         const ebEl = document.getElementById("sc-eyebrow");
         if (ebText) document.getElementById("sc-eyebrow-text").textContent = ebText;
         else ebEl.remove();
 
-        // Evidence ribbon (rank 9: mono source+date receipt, lands LAST).
+        // Evidence ribbon (mono source+date receipt, lands LAST).
         const evSource = (vars.evidenceSource == null ? "" : String(vars.evidenceSource)).trim();
         const evDate = (vars.evidenceDate == null ? "" : String(vars.evidenceDate)).trim();
         const evEl = document.getElementById("sc-evidence");
@@ -344,9 +352,9 @@
           // HOLDS to the end — opaque takeover; compositor owns the seam.
         } else {
           // ---------- MODULE (skeleton-first, eyebrow-first, opacity ramps) ----------
-          const LINE_STAGGER_S = 0.25;   // per-LINE stagger (T-B rows +250ms)
-          const SWAP_RAMP_S = 0.3;       // T-E: next statement ramps ~300ms
-          const GAP_S = 2 / M.FPS;       // T-E: 2 deliberately EMPTY frames
+          const LINE_STAGGER_S = 0.25;   // per-LINE stagger
+          const SWAP_RAMP_S = 0.3;       // next statement ramps in over 0.3s
+          const GAP_S = 2 / M.FPS;       // 2 deliberately EMPTY frames
 
           const heads = (vars.headlineLines == null ? "" : String(vars.headlineLines)).trim();
           const stmtsRaw = (vars.statements == null ? "" : String(vars.statements)).trim();
@@ -399,15 +407,15 @@
             }
           });
 
-          // Build: skeleton (hairline container) FIRST, content at +0.35 (rank 2).
+          // Build: skeleton (hairline container) FIRST, content at +0.35.
           const contentAt = M.SKELETON_GAP_S;
           const firstContent = ebText ? ebEl : stmtEls[0];
           M.skeletonFirst(tl, "#sc-card", firstContent, { at: 0 });
           let headAt = contentAt;
-          if (ebText) headAt += M.EYEBROW_LEAD_S;     // eyebrow leads (rank 3)
+          if (ebText) headAt += M.EYEBROW_LEAD_S;     // eyebrow leads
           if (src) M.textRamp(tl, "#sc-icon-badge", contentAt);
 
-          // Statement 1: per-line in-place opacity ramps (rank 4 — no travel).
+          // Statement 1: per-line in-place opacity ramps (no travel).
           let lastLineAt = headAt;
           stmtEls[0].querySelectorAll(".line").forEach(function (lineEl, j) {
             lastLineAt = headAt + j * LINE_STAGGER_S;
@@ -415,7 +423,7 @@
             if (!(j === 0 && firstContent === stmtEls[0])) M.textRamp(tl, lineEl, lastLineAt);
           });
 
-          // v2 replace grammar (T-E): blur-dim 0.15s -> 2 empty frames -> 0.3s ramp.
+          // Replace grammar: blur-dim 0.15s -> 2 empty frames -> 0.3s ramp.
           stmtEls.forEach(function (el, k) {
             if (k === 0) return;
             const land = lands[k - 1];
@@ -426,14 +434,14 @@
               { autoAlpha: 1, duration: SWAP_RAMP_S, ease: "power2.out" }, land);
           });
 
-          // Evidence ribbon lands LAST in the build (rank 9).
+          // Evidence ribbon lands LAST in the build.
           if (evSource) {
             M.textRamp(tl, evEl,
               Math.min(lastLineAt + M.TEXT_RAMP_S + M.EYEBROW_LEAD_S, D - 0.6));
           }
         }
 
-        // exit:"blur-recede" (T-D): graphics-layer-only blur+fade+recede over
+        // exit:"blur-recede": graphics-layer-only blur+fade+recede over
         // the last EXIT_BLUR_S, ending exactly at D. The bg FIELD stays opaque
         // (no base flash); the compositor still owns the seam.
         if (String(vars.exit) === "blur-recede") {

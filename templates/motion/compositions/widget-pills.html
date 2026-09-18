@@ -2,14 +2,14 @@
 <html
   lang="en"
   data-composition-variables='[
-    {"id":"l1","type":"string","label":"Left pill @ keyframe 1","default":"10k"},
-    {"id":"r1","type":"string","label":"Right pill @ keyframe 1","default":"50k"},
+    {"id":"l1","type":"string","label":"Left pill @ keyframe 1","default":"5k"},
+    {"id":"r1","type":"string","label":"Right pill @ keyframe 1","default":"25k"},
     {"id":"at1","type":"number","label":"Keyframe 1 time (s)","default":0.3,"min":0,"max":60,"step":0.05,"unit":"s"},
-    {"id":"l2","type":"string","label":"Left pill @ keyframe 2 (empty = omit onward)","default":"50k"},
-    {"id":"r2","type":"string","label":"Right pill @ keyframe 2","default":"100k"},
+    {"id":"l2","type":"string","label":"Left pill @ keyframe 2 (empty = omit onward)","default":"25k"},
+    {"id":"r2","type":"string","label":"Right pill @ keyframe 2","default":"60k"},
     {"id":"at2","type":"number","label":"Keyframe 2 time (s)","default":1.6,"min":0,"max":60,"step":0.05,"unit":"s"},
-    {"id":"l3","type":"string","label":"Left pill @ keyframe 3 (empty = omit onward)","default":"100k"},
-    {"id":"r3","type":"string","label":"Right pill @ keyframe 3","default":"200k"},
+    {"id":"l3","type":"string","label":"Left pill @ keyframe 3 (empty = omit onward)","default":"60k"},
+    {"id":"r3","type":"string","label":"Right pill @ keyframe 3","default":"150k"},
     {"id":"at3","type":"number","label":"Keyframe 3 time (s)","default":2.9,"min":0,"max":60,"step":0.05,"unit":"s"},
     {"id":"l4","type":"string","label":"Left pill @ keyframe 4 (empty = omit)","default":""},
     {"id":"r4","type":"string","label":"Right pill @ keyframe 4","default":""},
@@ -20,11 +20,12 @@
   ]'
 >
   <!--
-    PROJECT SNIPER · Motion template: WIDGET-PILLS (MG-3.5, R6)
-    Class it serves: a PERSISTENT parametric widget (Reference Style Study R6) —
-    a "from -> to" counter (left pill, arrow, right pill) whose values STEP with
-    the narrative (ref-3's 10k -> 50k -> 100k -> 200k follower run), pinned in the
-    headroom. A widget with STATE, not a one-shot pop.
+    PROJECT SNIPER · Motion template: WIDGET-PILLS (MG-3.5)
+    Class it serves: a PERSISTENT parametric widget — a "from -> to" counter
+    (left pill, arrow, right pill) whose values STEP with the narrative (e.g. a
+    metric climbing 5k -> 25k -> 60k -> 150k), pinned in the headroom. A widget
+    with STATE, not a one-shot pop. Left pill = the Sniper accent field (where
+    we were); right pill = the gold caption accent (the target).
     Transparent 1080x1920 overlay -> render with `--format mov` (ProRes 4444) for alpha.
 
     CONTRACT for the PRODUCER compositing stage:
@@ -36,12 +37,12 @@
         pill POPS. Before at1 the widget is hidden; after the last keyframe it
         holds. The shown pair + the pop are pure functions of timeline time
         (hyperframes-keyframes seek-safe doctrine) — no .call()/stateful swaps.
-      - STAGED ENTRANCE (R9, deep-pass correction): arrowInAt / rightInAt offset
+      - STAGED ENTRANCE: arrowInAt / rightInAt offset
         the arrow and the right (target) pill AFTER the left pill so the widget
         BUILDS (left pill -> arrow -> right pill pops) instead of appearing whole.
         DEFAULTS ARE 0 = the original single group fade (backward compatible — old
         specs render identically). The value hand-off (rN -> next lN) is unchanged.
-      - HEADROOM placement (R3): high on the canvas (y~150-260), face clear. The
+      - HEADROOM placement: high on the canvas (y~150-260), face clear. The
         comp is full-canvas; the PRODUCER may TRANSLATE it face-relative via
         anchor "headroom" + a measured faceBBoxNorm (graphics_stage).
       - The widget PERSISTS to the end (no out-fade); the compositor gates it to
@@ -65,7 +66,7 @@
       }
       #pills-root { position: relative; width: var(--canvas-w); height: var(--canvas-h); }
 
-      /* HEADROOM band (R3): high on the canvas, centered on the visual center. */
+      /* HEADROOM band: high on the canvas, centered on the visual center. */
       .stage {
         position: absolute;
         left: var(--visual-center-x);
@@ -143,9 +144,9 @@
         const D = parseFloat(root.dataset.duration) || 5;
 
         const defaults = {
-          l1: "10k", r1: "50k", at1: 0.3,
-          l2: "50k", r2: "100k", at2: 1.6,
-          l3: "100k", r3: "200k", at3: 2.9,
+          l1: "5k", r1: "25k", at1: 0.3,
+          l2: "25k", r2: "60k", at2: 1.6,
+          l3: "60k", r3: "150k", at3: 2.9,
           l4: "", r4: "", at4: 4.2,
           arrowInAt: 0, rightInAt: 0, accent: "#054BC9",
         };
@@ -175,7 +176,7 @@
         const arrowEl = document.getElementById("pill-arrow");
         const rightEl = document.getElementById("pill-right");
 
-        // Staged entrance offsets (R9). 0 = the left/arrow/right fade together from
+        // Staged entrance offsets. 0 = the left/arrow/right fade together from
         // the first keyframe (byte-identical to the original single group fade).
         const arrowInAt = Math.max(0, Number(vars.arrowInAt) || 0);
         const rightInAt = Math.max(0, Number(vars.rightInAt) || 0);

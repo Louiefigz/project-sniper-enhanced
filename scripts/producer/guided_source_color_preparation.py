@@ -21,11 +21,11 @@ from color.grade_project_authority import _candidate_count, _selected_source
 from cut_preview_io import digest, read_bytes, real_directory
 from graphics.render_rate import normalize_render_rate
 from guided_opening_inputs import OpeningInputs, hash_value
-from headless.external_media_probe_policy import MediaProbeLimits, validate_probe_document
+from headless.admission_receipt import AdmissionReceiptError, validate_admission_receipt
 from headless.external_media_verification import (
     SourceVerificationRuntime, VerifiedSnapshotIdentity, assert_verified_snapshots, snapshot_stat_identity,
 )
-from ingest_admission_contract import MAX_ADMISSION_RECEIPT_BYTES, MAX_SOURCE_SET_BYTES, POLICY_VERSION, RECEIPTS_NAME, STORE_NAME
+from ingest_admission_contract import MAX_ADMISSION_RECEIPT_BYTES, MAX_SOURCE_SET_BYTES, RECEIPTS_NAME, STORE_NAME
 from ingest_execution_authority import _verify_admitted_row
 from ingest_media_observation import VerifiedExecutionMedia
 
@@ -232,13 +232,10 @@ def _receipt(read: _PreparationRead, entry: dict, source: VerifiedSnapshotIdenti
     if type(entry["admissionReceiptPath"]) is not str or entry["admissionReceiptPath"] != str(relative):
         raise RuntimeError("source color preparation admission receipt path is not canonical")
     receipt = read.read(read.context.parents.producer_dir / relative, expected, MAX_ADMISSION_RECEIPT_BYTES)
-    closed(receipt, {"schemaVersion", "policy", "snapshot", "limits", "image", "isolation", "network", "decoded"}, "source color receipt")
-    if type(receipt["schemaVersion"]) is not int or receipt["schemaVersion"] != 1 or receipt["policy"] != POLICY_VERSION:
-        raise RuntimeError("source color preparation admission policy is unsupported")
-    limits = MediaProbeLimits(**receipt["limits"])
-    if type(limits.max_decode_seconds) is not int or not 90 <= limits.max_decode_seconds <= 3600:
-        raise RuntimeError("source color preparation admission timeout is malformed")
-    validate_probe_document(receipt["decoded"], limits)
+    try:
+        validate_admission_receipt(receipt)  # native v4 or historical container v3, same rules as ingest
+    except AdmissionReceiptError as exc:
+        raise RuntimeError(f"source color preparation admission receipt is unsupported: {exc}") from exc
     snapshot = receipt.get("snapshot")
     if type(snapshot) is not dict or _json(snapshot) != _json({"path": source.path, "sha256": source.sha256, "sizeBytes": source.size_bytes}):
         raise RuntimeError("source color preparation receipt differs from original admitted snapshot")

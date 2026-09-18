@@ -1,0 +1,10 @@
+{
+  "approved": [
+    {
+      "launcherSha256": "3cc40c6310244099d6052f9d24d430c4d79c5690c1e52fb204800b9460e96c5f",
+      "profileSha256": "9756cd0a3a0c8e21aca5be7180e873d6fc72868183407a878dd1d2503ecfe2a1"
+    }
+  ],
+  "policy": "sniper-native-media-jail-v1",
+  "schemaVersion": 1
+}

@@ -1,0 +1,30 @@
+; Sniper native media admission jail (policy sniper-native-media-jail-v1).
+;
+; Applied in-process by headless/native_media_jail.py immediately before it
+; replaces itself with ffprobe or ffmpeg. Everything is denied unless listed:
+; no network, no process creation (fork) and no writes except /dev/null. Reads
+; are limited to the OS images dyld needs, the decoder's own library tree and
+; the one immutable input snapshot. Paths arrive as parameters so this text
+; stays fixed; its SHA-256 is bound into every admission receipt.
+;
+;   DECODER  real path of the ffprobe/ffmpeg executable being started
+;   LIBROOT  directory holding the decoder and every non-OS library it loads
+;   LINKROOT directory of the symlinks its install names go through
+;   INPUT    the content-addressed snapshot being admitted
+(version 1)
+(deny default)
+(import "dyld-support.sb")
+(allow process-exec (literal (param "DECODER")))
+(allow file-read* file-map-executable
+  (subpath "/usr/lib")
+  (subpath "/System/Library")
+  (subpath (param "LIBROOT")))
+(allow file-read*
+  (subpath (param "LINKROOT"))
+  (literal (param "INPUT"))
+  (literal "/dev/null")
+  (literal "/dev/urandom")
+  (literal "/dev/random"))
+(allow file-read-metadata)
+(allow file-write-data (literal "/dev/null"))
+(allow sysctl-read)

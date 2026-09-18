@@ -2,12 +2,18 @@ import crypto from "node:crypto";
 import fs, { type BigIntStats } from "node:fs";
 import path from "node:path";
 import { verifyReferenceVttAdmission } from "./reference-sidecar";
+import { SCRIPTS_DIR } from "./spawn-python";
 
 const SHA256 = /^[0-9a-f]{64}$/u;
 const IMAGE_ID = /^sha256:[0-9a-f]{64}$/u;
 const CONTAINER_ID = /^[0-9a-f]{64}$/u;
 // v3 retains the receipt schema and isolation contract; validation decode uses four CPUs/threads.
 const PROBE_POLICIES = new Set(["sniper-external-media-probe-v2", "sniper-external-media-probe-v3"]);
+// Native admission (macOS Seatbelt jail): headless/admission_receipt.py applies the same rules in Python.
+const NATIVE_POLICY = "sniper-external-media-probe-v4-native";
+const JAIL_POLICY = "sniper-native-media-jail-v1";
+const JAIL_MEMORY_MIB = 768;
+const JAIL_APPROVAL = path.join(SCRIPTS_DIR, "producer", "headless", "native_media_runtime_approval.json");
 const hashCache = new Map<string, { key: string; value: string }>();
 const REFERENCE_LIMITS = {
   max_bytes: 2 * 1024 ** 3,
@@ -189,14 +195,54 @@ function validFacts(
     Number(facts.declaredFrames) <= REFERENCE_LIMITS.max_frames;
 }
 
-function receiptMatches(
-  receipt: Record<string, unknown>,
-  admission: Record<string, unknown>,
-  video: string,
-): boolean {
-  const snapshot = object(receipt.snapshot);
-  const decoded = object(receipt.decoded);
-  const facts = object(decoded?.facts);
+function approvedJail(profileSha256: unknown, launcherSha256: unknown): boolean {
+  const approval = readObject(JAIL_APPROVAL, 64 * 1024);
+  const rows = Array.isArray(approval?.approved) ? approval.approved : [];
+  return approval?.schemaVersion === 1 && approval?.policy === JAIL_POLICY &&
+    rows.some((row) => object(row)?.profileSha256 === profileSha256 &&
+      object(row)?.launcherSha256 === launcherSha256);
+}
+
+function validNativeRuntime(runtime: Record<string, unknown> | null): boolean {
+  const tools = object(runtime?.tools);
+  const tool = (name: string) => {
+    const row = object(tools?.[name]);
+    return row !== null && typeof row.path === "string" && row.path.startsWith("/") &&
+      typeof row.sha256 === "string" && SHA256.test(row.sha256) && typeof row.version === "string";
+  };
+  return runtime !== null && runtime.kind === "macos-seatbelt" && runtime.policy === JAIL_POLICY &&
+    tools !== null && exactKeys(tools, ["ffprobe", "ffmpeg"]) && tool("ffprobe") && tool("ffmpeg") &&
+    typeof runtime.closureSha256 === "string" && SHA256.test(runtime.closureSha256) &&
+    Number.isSafeInteger(runtime.closureCount) && Number(runtime.closureCount) > 0 &&
+    typeof runtime.profileSha256 === "string" && SHA256.test(runtime.profileSha256) &&
+    approvedJail(runtime.profileSha256, runtime.launcherSha256);
+}
+
+function validJailRun(value: unknown, decoder: unknown, profileSha256: unknown): boolean {
+  const run = object(value), limits = object(run?.rlimits);
+  const zero = (key: string) => Array.isArray(limits?.[key]) &&
+    (limits[key] as unknown[]).length === 2 && (limits[key] as unknown[]).every((item) => item === 0);
+  return run !== null && run.sandboxed === true && run.decoder === decoder &&
+    run.profileSha256 === profileSha256 && run.memoryMiB === JAIL_MEMORY_MIB &&
+    zero("RLIMIT_FSIZE") && zero("RLIMIT_CORE");
+}
+
+/** Timed media must carry attested ffprobe and ffmpeg runs from the approved jail. */
+function nativeIsolationMatches(receipt: Record<string, unknown>): boolean {
+  const runtime = object(receipt.runtime), isolation = object(receipt.isolation);
+  const tools = object(runtime?.tools);
+  const runs = Array.isArray(isolation?.decoderRuns) ? isolation.decoderRuns : [];
+  return validNativeRuntime(runtime) && isolation !== null &&
+    isolation.kind === "macos-seatbelt" && isolation.policy === JAIL_POLICY &&
+    isolation.profileSha256 === runtime?.profileSha256 && isolation.network === "denied" &&
+    isolation.processCreation === "denied" && isolation.writes === "/dev/null only" &&
+    isolation.memoryMiB === JAIL_MEMORY_MIB && runs.length === 2 &&
+    validJailRun(runs[0], object(tools?.ffprobe)?.path, runtime?.profileSha256) &&
+    validJailRun(runs[1], object(tools?.ffmpeg)?.path, runtime?.profileSha256);
+}
+
+/** Historical container receipts (v2/v3) keep their original isolation contract. */
+function containerIsolationMatches(receipt: Record<string, unknown>, video: string): boolean {
   const isolation = object(receipt.isolation);
   const network = object(receipt.network);
   const image = object(receipt.image);
@@ -204,21 +250,7 @@ function receiptMatches(
     "containerId", "imageId", "mountSource", "networkMode",
     "nonrootUser", "readonlyRoot",
   ];
-  const keys = [
-    "decoded", "image", "isolation", "limits", "network",
-    "policy", "schemaVersion", "snapshot",
-  ];
-  return exactKeys(receipt, keys) &&
-    receipt.schemaVersion === 1 &&
-    typeof receipt.policy === "string" && PROBE_POLICIES.has(receipt.policy) &&
-    snapshot?.path === video &&
-    snapshot?.sha256 === admission.snapshotSha256 &&
-    snapshot?.sizeBytes === admission.sizeBytes &&
-    decoded?.schemaVersion === 1 &&
-    decoded?.ok === true &&
-    decoded?.decoded === true &&
-    validFacts(facts, admission) &&
-    validLimits(receipt.limits) &&
+  return typeof receipt.policy === "string" && PROBE_POLICIES.has(receipt.policy) &&
     isolation !== null && exactKeys(isolation, isolationKeys) &&
     image?.Id === isolation?.imageId &&
     typeof isolation?.imageId === "string" &&
@@ -232,6 +264,31 @@ function receiptMatches(
     isolation.nonrootUser !== "0" && isolation.nonrootUser !== "0:0" &&
     network?.schemaVersion === 1 &&
     network?.hostDecoyPositive === true;
+}
+
+function receiptMatches(
+  receipt: Record<string, unknown>,
+  admission: Record<string, unknown>,
+  video: string,
+): boolean {
+  const snapshot = object(receipt.snapshot);
+  const decoded = object(receipt.decoded);
+  const facts = object(decoded?.facts);
+  const native = receipt.policy === NATIVE_POLICY;
+  const keys = native
+    ? ["decoded", "isolation", "limits", "policy", "runtime", "schemaVersion", "snapshot"]
+    : ["decoded", "image", "isolation", "limits", "network", "policy", "schemaVersion", "snapshot"];
+  return exactKeys(receipt, keys) &&
+    receipt.schemaVersion === 1 &&
+    snapshot?.path === video &&
+    snapshot?.sha256 === admission.snapshotSha256 &&
+    snapshot?.sizeBytes === admission.sizeBytes &&
+    decoded?.schemaVersion === 1 &&
+    decoded?.ok === true &&
+    decoded?.decoded === true &&
+    validFacts(facts, admission) &&
+    validLimits(receipt.limits) &&
+    (native ? nativeIsolationMatches(receipt) : containerIsolationMatches(receipt, video));
 }
 
 /** Rehash the exact sandbox receipt and media before exposing a new reference. */

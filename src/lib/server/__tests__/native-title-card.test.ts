@@ -9,7 +9,7 @@ import { buildNativeCanvas, centeredNativeCaptionView, type NativeCanvasInput } 
 const catalog = loadDirectorCatalog();
 function card(): NativeTitleCard & { copy: LocalHookCopy } {
   return { copy: fillLocalHookTemplate(catalog, { anchor: "steps-toward-goal", slots: { count: "Two", goal: "a follow-up that earns trust" } }),
-    lines: ["Two steps to a follow-up", "that earns trust"], palette: "white-on-red", endFrame: 80, top: 110, fontSize: 76 };
+    lines: ["Two steps to a follow-up", "that earns trust"], palette: "white-on-slate", endFrame: 80, top: 110, fontSize: 76 };
 }
 
 test("local slot filling reads the real Director formula, retaining source identity without inference", () => {
@@ -63,7 +63,7 @@ test("backed title requires copy-preserving line breaks, strong contrast and an 
   assertHookLineBreaks(value.copy, value.lines);
   assert.throws(() => assertHookLineBreaks(value.copy, ["A different promise"]), /preserve/);
   for (const palette of Object.keys(NATIVE_TITLE_PALETTES) as NativeTitleCard["palette"][]) {
-    assert.ok(titleContrast(palette) >= 4.5);
+    assert.ok(titleContrast(palette) >= 11, `${palette} keeps its documented contrast`);
     assert.match(renderNativeTitleCard({ ...value, palette }, clock), /data-duration="3.2"/u);
   }
   assert.throws(() => renderNativeTitleCard({ ...value, top: 950 }, clock), /upper position/);

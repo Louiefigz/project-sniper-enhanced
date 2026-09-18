@@ -118,6 +118,23 @@ def check_runtime_and_build() -> None:
     record("PASS" if ok else "FAIL", "app build", build.read_text().strip() if ok else "not built — run install.command")
 
 
+def check_admission() -> None:
+    """Can footage be admitted at all? The product admits every media file inside its
+    network-less Docker sandbox with one approved image; without it nothing can be edited."""
+    _product_paths()
+    try:
+        from headless.container_policy import attest_image, required_runtime  # noqa: PLC0415
+        runtime = required_runtime()
+        with tempfile.TemporaryDirectory(prefix="sniper-doctor-sandbox-") as control:
+            os.chmod(control, 0o700)
+            attest_image(runtime, control)
+    except Exception as error:  # the policy raises RuntimeError with the exact reason
+        record("FAIL", "media admission sandbox",
+               f"{error} — this candidate cannot admit footage; see PENDING-OWNER-DECISIONS.txt")
+        return
+    record("PASS", "media admission sandbox", f"approved image {runtime.image_id[:19]}… present")
+
+
 def check_transcription(skip: bool) -> None:
     """Model hash, then an actual transcription through the product's own path."""
     _product_paths()
@@ -195,7 +212,7 @@ def main() -> int:
     parser.add_argument("--skip-transcription", action="store_true")
     args = parser.parse_args()
     if not args.provider_only:
-        check_foundations(); check_media(); check_runtime_and_build()
+        check_foundations(); check_media(); check_runtime_and_build(); check_admission()
         check_transcription(args.skip_transcription)
     check_provider()
     if not args.provider_only:

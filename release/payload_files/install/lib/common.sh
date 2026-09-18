@@ -29,6 +29,10 @@ export PATH
 # Sniper's login is separate from yours. This variable would override that
 # naming and point Sniper's sign-in and sign-out at your own login; never inherit it.
 unset CLAUDE_SECURESTORAGE_CONFIG_DIR
+# Sniper runs on subscriptions. An API key exported in your shell must never be
+# billed by accident; the optional Frame Review reads one only from
+# runtime/sniper.local.env, where you would have to put it on purpose.
+unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN CLAUDE_CODE_OAUTH_TOKEN OPENAI_API_KEY
 
 say()  { printf '%s\n' "$*"; }
 step() { printf '\n== %s\n' "$*"; }
@@ -65,9 +69,9 @@ require_macos() {
 # before install; it does not repair the underlying path handling.
 require_safe_install_path() {
   case "$PKG_ROOT" in
-    *,*|*\'*|*:*|*\\*)
-      fail "The folder path contains one of  ,  '  :  \\  which the audio cleanup
-  filter cannot handle. Move this folder somewhere without those characters
+    *,*|*\'*|*:*|*\\*|*\$*|*\`*|*\"*)
+      fail "The folder path contains one of  ,  '  :  \\  \$  \`  \"  which the audio
+  cleanup filter or the settings file cannot handle. Move this folder somewhere without those characters
   (spaces and accents are fine) and run the installer again.
   Current path: $PKG_ROOT" ;;
   esac

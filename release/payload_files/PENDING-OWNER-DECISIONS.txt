@@ -13,7 +13,8 @@ SETTLED on 2026-09-17 (reflected in the manual and LICENSE-DRAFT.txt)
 
 RESOLVED BY IMPLEMENTATION in rc3 (no owner action needed)
   - Teacher-named identifiers: migrated to neutral names across code, compositions,
-    tests, skills and docs; saved projects convert with release/normalize_project.py.
+    tests, skills and docs. The material behind some of them is not resolved; see
+    STILL OPEN 5.
   - Creator-derived reference libraries: replaced by an original library rendered
     from Sniper's own templates (resources/references).
   - Director hook library from a sibling repository: replaced by an original packaged
@@ -30,14 +31,24 @@ STILL OPEN — each blocks release
   3. SUPPORTED PLATFORM BOUNDARY (input R): only a developer Mac on macOS 26 / Apple
      silicon has run this. A clean-Mac install run is needed before any boundary is
      stated to buyers.
+  4. HOW FOOTAGE IS ADMITTED: Sniper admits every media file inside a network-less
+     Docker sandbox with one approved image, and this package ships no way to provide
+     it. As built, this candidate cannot start an edit. install/doctor.command reports
+     it as "media admission sandbox". The options are in DECISION-SANDBOX-RUNTIME.md
+     beside the release.
+  5. CREATOR-DERIVED EDITING DOCTRINE: the saved styles (Restrained, Punch, Slideware)
+     and several doctrine studies the editor reads are analyses of specific creators'
+     videos or one teacher's taught material. Renaming removed the names, not the
+     material. Files: docs/studies/RESTRAINED_STYLE.md, PUNCH_STYLE.md (and
+     scripts/producer/docs/findings/PUNCH_STYLE.md), SLIDEWARE_STYLE.md, MODULE_STUDY.md,
+     MODULE_CARDS.md, EDITCRAFT_LESSONS.md, SHORTFORM_LESSONS.md,
+     REFERENCE_STYLE_STUDY.md. They must be re-authored as original doctrine or
+     withheld (dropping the saved styles) before sale.
 
 NOT BLOCKING THIS PRODUCT
   - Sample footage: the first run no longer needs a shipped clip. The manual has the
     buyer record a 45-second test clip from an original script (manual/first-edits.html).
     A shipped sample stays optional; it would need a clip you own and agree to ship.
-  - The optional paid offer recorded in decisions.md stays switched off until its own
-    terms and fulfilment are settled (including its "everything I'm working on" scope).
-    Nothing in this package mentions it or depends on it.
 
 NOT OWNER DECISIONS — acceptance still outstanding
   - Listen to app/assets/music/default-bed.mp3 once (60 s). It is measured clean, not heard.

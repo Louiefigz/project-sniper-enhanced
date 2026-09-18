@@ -244,6 +244,16 @@ say "Editor brain: $PROVIDER   ·   Video projects: $WORKSPACE"
 
 # ------------------------------------------------------------ 9. render runtime
 step "9/10  Rendering runtime"
+# native_runtime.py refuses to overwrite a half-built runtime ('installing/'), by
+# design. The installer is its only writer while installing: if nothing has a file
+# open there and no finished runtime sits beside it, it is left from an interrupted
+# run and is removed so this step can be redone.
+for staging in "$APP_DIR"/templates/motion/.sniper-native-runtime/*/installing; do
+  [ -d "$staging" ] || continue
+  [ -d "$(dirname "$staging")/hyperframes" ] && continue
+  [ -z "$(lsof +D "$staging" 2>/dev/null | awk 'NR>1')" ] || fail "A rendering runtime is being built by another process ($staging). Wait for it, then run the installer again."
+  rm -rf "$staging"; say "Removed an unfinished rendering runtime left by an interrupted run."
+done
 ( load_env; cd "$APP_DIR" && PYTHONPATH="$APP_DIR/scripts/producer" "$APP_DIR/.venv/bin/python3" \
     "$APP_DIR/scripts/producer/studio/native_runtime.py" >/dev/null ) \
   || fail "The rendering runtime did not build from its shipped patch set."

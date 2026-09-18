@@ -96,4 +96,9 @@ screenshot, brand, likeness or creator name is used.
 
 | Material | Why |
 |---|---|
-| Development study libraries built from other creators' videos | Replaced by Sniper's own libraries in `app/resources/director` and `app/resources/references`; no creator's footage, frames or names ship. |
+| Development reference libraries built from other creators' videos | Replaced by Sniper's own libraries in `app/resources/director` and `app/resources/references`; no creator's footage or frames ship. |
+
+**Known exception, blocking sale:** several editing-doctrine studies that still ship
+(the saved styles and some `docs/studies` files) are analyses of specific creators'
+videos or one teacher's material, with creator names removed. They are listed in
+`PENDING-OWNER-DECISIONS.txt`, item 5, and must be re-authored or withheld before sale.

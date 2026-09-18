@@ -71,6 +71,8 @@ OPEN_BLOCKERS = (
     "outside-operator install and edit not run (Z10)",
     "authenticated delivery of these exact bytes not run (Z11)",
     "Claude route not exercised for real: the Claude CLI on the build Mac is not signed in",
+    "media admission needs a Docker sandbox this package does not provide; no edit can start (DECISION-SANDBOX-RUNTIME.md)",
+    "saved styles and some doctrine studies are derived from specific creators' videos or a teacher's material",
 )
 
 

@@ -30,9 +30,11 @@ another editor. Deliberately rough: clips snap to the nearest keyframe and may o
 by a frame or two, because nothing is re-encoded and nothing is quality-lost.</td></tr>
 <tr><td><strong>Clipper</strong></td><td>Tightens one clip word by word and exports a
 frame-accurate Final Cut Pro timeline (FCPXML).</td></tr>
-<tr><td><strong>Frame Review</strong></td><td>A separate spell-check for text on screen.
-<span class="tag">needs your own paid API key</span> This one is not covered by your
-purchase — see <a href="privacy.html">what leaves your Mac</a>.</td></tr>
+<tr><td><strong>Text Review</strong></td><td>A separate spell-check for text on screen.
+<span class="tag">optional · needs your own paid API key</span> It sends still frames to
+Anthropic and Anthropic bills your key; it is not covered by your purchase or your
+subscription, and it runs only when you tick its opt-in — see
+<a href="privacy.html">what leaves your Mac</a>.</td></tr>
 </table>
 
 <h3>What Producer can do to a video</h3>
@@ -76,11 +78,11 @@ Leave at least 20 GB free; a full-length render uses a lot of temporary space.</
 command each. The installer tells you if they are missing.</td><td>Free</td></tr>
 <tr><td><strong>A Codex or Claude subscription</strong></td><td>This is the part that
 thinks about your edit. You use the subscription you already pay for. There is no extra
-Sniper processing fee, and Producer edits use only the subscription. Two things can bill
-per call if you add an Anthropic API key yourself: the optional Frame Review, and the AI
-steps of Segmenter and Clipper when your provider is Claude. Sniper ignores keys exported in
-your shell; it uses one only if you put it in <code>runtime/sniper.local.env</code> or
-<code>app/.env.local</code>.</td><td><strong>You pay
+Sniper processing fee: Producer, Segmenter and Clipper all run on that subscription, with
+no API-key route and no fallback to one. The only thing that can bill per call is the
+optional Text Review, and only if you add an Anthropic API key yourself and tick its opt-in.
+Sniper ignores keys exported in your shell; it reads one only from
+<code>runtime/sniper.local.env</code> or <code>app/.env.local</code>.</td><td><strong>You pay
 your provider directly. Their plan price, model access and usage limits apply.</strong></td></tr>
 </table>
 

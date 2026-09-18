@@ -47,6 +47,17 @@ test("the UI labels Text Review as paid before use and cannot start it without t
   assert.match(read("src/app/page.tsx"), /Optional paid add-on: it sends still frames to Anthropic on your own API key/);
 });
 
+test("the in-app privacy panel states what leaves the Mac without the retired Deepgram default", () => {
+  const panel = read("src/app/page.tsx");
+  const start = panel.indexOf("Where does my footage go?");
+  const text = panel.slice(start, panel.indexOf("</details>", start));
+  assert.match(text, /No feature of the app uploads a video or audio file/);
+  assert.match(text, /still frames of each rendered edit[\s\S]*trim-only edits included/);
+  assert.match(text, /not\s+enforced by the app/);
+  assert.match(text, /yt-dlp[\s\S]*Chrome cookies are\s+used only when you tick/);
+  assert.doesNotMatch(text, /Deepgram/);
+});
+
 test("no app route authorizes paid Deepgram transcription", () => {
   const hits: string[] = [];
   const walk = (dir: string) => {

@@ -8,9 +8,16 @@
  * video paint state, and a play/getTime advance check. Screenshots land in
  * the configured directory. Assertions live in the Python test, not here.
  *
+ * Privacy facts (every run): every request the page makes to a host other than
+ * the loopback server, from page creation until the page is left, and whether the
+ * fresh browser profile carries Studio's analytics opt-out or Do Not Track. With
+ * config.interact the probe also presses playback/seek keys and clicks the
+ * timeline area (representative editing input), then leaves the page, which makes
+ * Studio flush any queued analytics.
+ *
  * Usage: node studio_player_probe.cjs <config.json>
  *   config: { puppeteerDir, chrome, url, shotsDir, settleMs,
- *             beats: [number, ...] }
+ *             beats: [number, ...], interact?: boolean }
  */
 const fs = require("fs");
 const path = require("path");
@@ -122,6 +129,11 @@ function beatFacts(beat) {
   const pageErrors = [];
   const consoleErrors = [];
   const badResponses = [];
+  const externalRequests = [];
+  const loopback = /^(https?:\/\/(127\.0\.0\.1|localhost)[:\/]|data:|blob:|about:)/;
+  page.on("request", (req) => {
+    if (!loopback.test(req.url())) externalRequests.push(req.url().slice(0, 200));
+  });
   page.on("pageerror", (err) => pageErrors.push(String(err).slice(0, 300)));
   page.on("console", (msg) => {
     if (msg.type() === "error") consoleErrors.push(msg.text().slice(0, 300));
@@ -134,6 +146,10 @@ function beatFacts(beat) {
 
   const result = { hostFrameFound: false, beats: [], play: null };
   await page.goto(config.url, { waitUntil: "networkidle2", timeout: 45000 });
+  result.optOut = await page.evaluate(() => ({
+    stored: window.localStorage.getItem("hyperframes-studio:telemetryDisabled"),
+    doNotTrack: navigator.doNotTrack,
+  }));
   const frame = await findHostFrame(page);
   if (frame) {
     result.hostFrameFound = true;
@@ -157,6 +173,20 @@ function beatFacts(beat) {
     });
     result.play = { before, after };
   }
+  if (config.interact) {
+    for (const key of ["Space", "ArrowRight", "ArrowLeft", "Space"]) {
+      await page.keyboard.press(key);
+      await sleep(250);
+    }
+    for (const [x, y] of [[900, 980], [600, 1020], [1200, 1000]]) {  // the timeline area
+      await page.mouse.click(x, y);
+      await sleep(250);
+    }
+    await sleep(1500);
+    await page.goto("about:blank");  // pagehide: Studio flushes queued analytics here
+    await sleep(1500);
+  }
+  result.externalRequests = externalRequests;
   result.pageErrors = pageErrors;
   result.consoleErrors = consoleErrors;
   result.badResponses = badResponses;

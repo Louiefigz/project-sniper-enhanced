@@ -14,6 +14,7 @@ and a painted (non-black) base video. Screenshots land in
 import glob
 import json
 import os
+import re
 import shutil
 import signal
 import subprocess
@@ -26,6 +27,8 @@ from _common import _HAVE_FFMPEG
 
 from graphics.graphics_render import HYPERFRAMES_BIN
 from studio.studio_project import GenerateRequest, generate_project
+from studio.managed_preview import open_preview, stop_preview
+from studio.native_runtime import install_runtime
 from studio.studio_server import pick_free_port
 
 _TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -122,6 +125,14 @@ class StudioPlayerViewTests(unittest.TestCase):
         with open(os.path.join(cls.studio_dir, "studio.manifest.json"),
                   encoding="utf-8") as handle:
             cls.manifest = json.load(handle)
+        cls._start_server()
+        cls.result = cls._run_probe()
+
+    INTERACT = False
+
+    @classmethod
+    def _start_server(cls) -> None:
+        """The stock HyperFrames preview (the player gate's historical baseline)."""
         # Keep tests out of the operator's default 3990-3999 preview range.
         cls.port = pick_free_port((41000, 41100))
         cls.server = subprocess.Popen(
@@ -132,7 +143,6 @@ class StudioPlayerViewTests(unittest.TestCase):
             start_new_session=True)
         cls.addClassCleanup(cls._stop_server)
         cls._wait_ready()
-        cls.result = cls._run_probe()
 
     @classmethod
     def _stop_server(cls) -> None:
@@ -152,6 +162,10 @@ class StudioPlayerViewTests(unittest.TestCase):
             cls.server.wait(timeout=5)
 
     @classmethod
+    def _server_exited(cls) -> bool:
+        return cls.server.poll() is not None
+
+    @classmethod
     def _wait_ready(cls) -> None:
         for _ in range(60):
             try:
@@ -162,7 +176,7 @@ class StudioPlayerViewTests(unittest.TestCase):
                         return
             except OSError:
                 pass
-            if cls.server.poll() is not None:
+            if cls._server_exited():
                 raise RuntimeError("studio preview server exited early")
             import time
             time.sleep(0.5)
@@ -180,6 +194,7 @@ class StudioPlayerViewTests(unittest.TestCase):
             "shotsDir": cls.shots_dir,
             "settleMs": _SETTLE_MS,
             "beats": beats,
+            "interact": cls.INTERACT,
         }
         config_path = os.path.join(cls.tmp, "probe-config.json")
         with open(config_path, "w", encoding="utf-8") as handle:
@@ -203,6 +218,12 @@ class StudioPlayerViewTests(unittest.TestCase):
                         f"(shots: {self.shots_dir})")
         self.assertEqual(len(self.result["beats"]),
                          len(self.manifest["entries"]))
+
+    def test_stock_page_attempts_analytics(self) -> None:
+        # Negative control for StudioBuyerRoutePrivacyTests: the published page does send
+        # analytics, so the same probe on the adapted runtime could observe a leak.
+        self.assertTrue([url for url in self.result["externalRequests"] if "posthog" in url],
+                        "the stock Studio page sent no analytics; re-check the privacy gate's premise")
 
     def test_no_page_errors(self) -> None:
         self.assertEqual(self.result["pageErrors"], [])
@@ -286,6 +307,69 @@ class StudioPlayerViewTests(unittest.TestCase):
         self.assertIsNotNone(play)
         self.assertGreater(play["after"], play["before"],
                            "player.play() did not advance the timeline")
+
+
+
+_ANALYTICS_KEY = re.compile(r"phc_[A-Za-z0-9]{20,}")
+_SCRIPT_SRC = re.compile(r'<script[^>]+src="(/[^"]+\.js)"')
+# The one outside download Studio makes, disclosed on the privacy page.
+_DISCLOSED = frozenset({"https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/MotionPathPlugin.min.js"})
+
+
+class StudioBuyerRoutePrivacyTests(StudioPlayerViewTests):
+    """The player gate through the buyer's route, plus Studio's privacy gate.
+
+    Studio opens the way install/studio.command opens it (managed_preview on the
+    adapted runtime), in a fresh browser profile with no stored opt-out. The page
+    is driven through playback, seeking and editing input, then left so Studio
+    flushes any queued analytics. No analytics request may be attempted, and only
+    the disclosed download may leave the Mac.
+    """
+
+    INTERACT = True
+    test_stock_page_attempts_analytics = None  # the control belongs to the stock route only
+
+    @classmethod
+    def _start_server(cls) -> None:
+        cls.cli = str(install_runtime() / "dist" / "cli.js")
+        record = open_preview(cls.studio_dir, pick_free_port((41100, 41200)))
+        cls.addClassCleanup(stop_preview, cls.studio_dir)
+        cls.port, cls.pid = record.port, record.pid
+        cls.server_command = subprocess.run(["/bin/ps", "-o", "command=", "-p", str(record.pid)],
+                                            capture_output=True, text=True, check=False).stdout
+        cls._wait_ready()
+
+    @classmethod
+    def _server_exited(cls) -> bool:
+        try:
+            os.kill(cls.pid, 0)
+        except ProcessLookupError:
+            return True
+        return False
+
+    def _served(self, path: str) -> str:
+        with urllib.request.urlopen(f"http://127.0.0.1:{self.port}{path}", timeout=10) as response:
+            return response.read().decode("utf-8", "replace")
+
+    def test_served_by_the_adapted_runtime(self) -> None:
+        self.assertIn(f"{self.cli} preview", self.server_command)
+
+    def test_served_studio_page_has_no_analytics_key(self) -> None:
+        scripts = _SCRIPT_SRC.findall(self._served("/"))
+        self.assertTrue(scripts, "the Studio page names its bundle")
+        for script in scripts:
+            self.assertIsNone(_ANALYTICS_KEY.search(self._served(script)), f"{script} carries an analytics key")
+
+    def test_fresh_profile_has_no_opt_out(self) -> None:
+        # The absence of analytics must come from Sniper's runtime, not from a browser setting.
+        self.assertIsNone(self.result["optOut"]["stored"])
+        self.assertNotEqual(self.result["optOut"]["doNotTrack"], "1")
+
+    def test_no_analytics_request_is_attempted(self) -> None:
+        self.assertEqual([url for url in self.result["externalRequests"] if "posthog" in url], [])
+
+    def test_only_the_disclosed_download_leaves_the_mac(self) -> None:
+        self.assertLessEqual(set(self.result["externalRequests"]), _DISCLOSED)
 
 
 if __name__ == "__main__":

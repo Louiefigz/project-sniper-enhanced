@@ -58,7 +58,7 @@ test("empty modules prune without inventing copy, while all-empty preview keeps 
   for (const name of ["eyebrow", "headline", "explainer", "foot"]) assert.equal(result.snapshot["npl-" + name].removed, true);
   const preview = runPipelineScript(source, {});
   assert.equal(preview.snapshot["npl-chain"].children.length, 6);
-  assert.equal(preview.snapshot["npl-headline"].children[0].ownText, "The chain changed.");
+  assert.equal(preview.snapshot["npl-headline"].children[0].ownText, "One job per pass.");
 });
 
 test("explicit narration lands preserve original module order and reject malformed schedules", () => {

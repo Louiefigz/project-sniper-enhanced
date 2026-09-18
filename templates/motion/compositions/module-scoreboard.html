@@ -2,14 +2,14 @@
 <html
   lang="en"
   data-composition-variables='[
-    {"id":"eyebrow","type":"string","label":"Eyebrow microtext (mono caps + accent dot; empty = omit)","default":""},
-    {"id":"eyebrowAccent","type":"enum","label":"Eyebrow dot semantic accent","default":"process","options":[{"value":"process","label":"Process (cyan)"},{"value":"result","label":"Result (lime)"}]},
-    {"id":"contextChips","type":"string","label":"Context chip row, pipe-separated (ONE RUN|13 TASKS|THIS MACHINE; empty = omit)","default":""},
-    {"id":"heroValue","type":"string","label":"Hero metric (giant lime; a trailing % renders smaller)","default":""},
+    {"id":"eyebrow","type":"string","label":"Eyebrow microtext (mono caps + square accent marker; empty = omit)","default":""},
+    {"id":"eyebrowAccent","type":"enum","label":"Eyebrow marker semantic accent","default":"process","options":[{"value":"process","label":"Process (blue)"},{"value":"result","label":"Result (amber)"}]},
+    {"id":"contextChips","type":"string","label":"Context chip row, pipe-separated (e.g. ONE EPISODE|13 CLIPS|LOCAL RENDER; empty = omit)","default":""},
+    {"id":"heroValue","type":"string","label":"Hero metric (giant result amber; a trailing % renders smaller)","default":""},
     {"id":"heroLabel","type":"string","label":"Hero metric label (mono caps under the number)","default":""},
-    {"id":"tiles","type":"string","label":"Outlined stat tiles, pipe-separated: value~label (7~WINS|5~TIES|1~LOSS; empty = omit)","default":""},
+    {"id":"tiles","type":"string","label":"Outlined stat tiles, pipe-separated: value~label (e.g. 9~CLEAN|3~MINOR|1~REDO; empty = omit)","default":""},
     {"id":"stripChips","type":"string","label":"Per-item chip strip, pipe-separated: label~state (state: win|tie|loss; empty = omit)","default":""},
-    {"id":"limitLabel","type":"string","label":"Limit footer label (amber mono)","default":"LIMIT"},
+    {"id":"limitLabel","type":"string","label":"Limit footer label (warn-red mono)","default":"LIMIT"},
     {"id":"limitText","type":"string","label":"Limit footer caveat text (empty = no footer)","default":""},
     {"id":"moduleLands","type":"string","label":"Narration-paced lands (s, comp-relative, pipe/comma) — one per PRESENT module [head, hero, tiles, strip, limit]; empty = 0.2 + k*0.9","default":""},
     {"id":"exit","type":"enum","label":"Exit","default":"hold","options":[{"value":"hold","label":"Hold to end (compositor owns the seam)"},{"value":"blur-recede","label":"Blur-recede 0.15s (stage only — the canvas never flashes)"}]},
@@ -18,43 +18,83 @@
 >
   <!--
     PROJECT SNIPER · LONG-FORM template: MODULE-SCOREBOARD (16:9, 1920x1080)
-    Reference: docs/studies/MODULE_CARDS.md §1.2 form #11 — big-number scoreboard
-    (DARK chassis), 78.5-94.0s:
-      `• SMALL LOCAL CHECK`; chip row ONE RUN / 13 TASKS / THIS MACHINE;
-      giant lime `97%` + mono label; 3 outlined stat tiles 7 WINS / 5 TIES /
-      1 LOSS; 13-chip strip color-coded (01-07 lime win, 08-12 teal tie,
-      13 amber loss); footer `LIMIT(amber) | Not proof it wins everything.`
-    Build (measured): hero -> tiles -> chip sweep (~1 per 85ms, STUDY MG-4)
-    -> limit footer; THE STRIP LANDS SECONDS AFTER THE 97% (§1.3 "a card is
-    a live surface" — the default 0.9s module cadence + sweep delivers that).
-    Info pattern: hero metric + stat tiles + per-item color ledger +
-    limitation footer — the "single number + distribution + honest caveat"
-    payoff card (§1.4). Evidence frames: contact sheet states 031_t0083 /
-    032_t0084. Timing +-1 frame (~40ms); N=1 priors.
+    A results card: one hero metric, up to a handful of outlined stat tiles
+    that break it down, an optional colour-coded strip with one chip per
+    item, and a limit footer that states what the number does NOT prove.
+    Use it when the narration lands a single result and should show its
+    distribution and its caveat in the same breath.
+
+    SNIPER DESIGN (tokens.css module palette + type; the dark sibling of
+    module-takeover, same chassis):
+      - Canvas = --module-canvas (blue graphite) with a faint 48px dot field
+        and a soft process-blue glow at the top-left.
+      - Eyebrow = --eyebrow-font (IBM Plex Mono 600) caps behind a square
+        marker; context chips, labels and strip chips are Plex Mono 600;
+        the hero metric and tile values are --font-display (Bricolage
+        Grotesque 800); the caveat is --font (Inter 400).
+      - Hero metric in --accent-result (amber) — the number to remember. A
+        trailing % renders as a smaller unit so the digits carry the weight.
+        Tiles and chips: 1px hairlines, 3-6px corners.
+      - Strip semantics (closed vocabulary): win = --accent-result (amber),
+        tie = --accent-process (blue), loss = --accent-warn (red). Red is
+        reserved for losses and the LIMIT label only.
+      - Contrast (WCAG 2.x, text on its own background; canvas #121721, tile
+        fill = 3% paper over it): hero amber 5.11:1 (4.24:1 at the
+        brightest point of the glow); hero label 6.11:1; context chips
+        8.82:1; tile values 16.72:1 and tile labels 5.48:1 on the tile
+        fill; strip text on its own 12% tint: amber 4.46:1, blue 3.88:1,
+        red 3.47:1; LIMIT label red 3.80:1; caveat 10.14:1; eyebrow blue
+        4.44:1 / amber 5.11:1.
 
     CONTRACT for the PRODUCER compositing stage:
-      - anchor "own-screen" OPAQUE takeover (render --format mp4): near-black
-        canvas + faint grid on a full-bleed CHILD, opaque from frame 0.
-      - NO FACE HOLE this wave (STUDY §5 item 9 "PIP slot EXCLUDED"
-        precedent); content column matches module-takeover's stage (left
-        96px, width 1130px) so the right band [1344..1878] stays clear for a
-        later pip_hole registration with zero content reflow.
-      - Semantics: lime --accent-result = hero + wins, cyan/teal
-        --accent-process = ties, amber = LOSSES + the LIMIT footer ONLY
-        (§1.1 "amber is reserved"). Amber hex: the study fixes amber's ROLE,
-        not a value — --accent-warn fallback #e8a13c, brand-overridable.
-      - stripChips states are a closed vocabulary (win|tie|loss) — an unknown
-        state FAILS LOUDLY (never silently gray). The strip sweeps L->R at
-        CHIP_SWEEP_S=0.085 (~85ms/chip, MG-4: 13 chips over ~1.1s).
+      - Default: an OPAQUE own-screen takeover (render --format mp4). The
+        canvas is a full-bleed CHILD, opaque from frame 0, so the seam never
+        shows the layer underneath.
+      - presenterFrame (opt-in, default false): the root gains
+        .has-presenter, the canvas is masked (SVG evenodd) into a rounded
+        face hole and #nsb-face-slot draws the ring around it; the
+        compositor scales the speaker into the hole UNDER the graphics. The
+        render keeps alpha (graphics_render.format_for keys on
+        graphics.pip_hole.entry_has_hole) and the entry must be a longform
+        own-screen takeover.
+        HOLE GEOMETRY IS A CONTRACT: left 1344px / top 60px / 534x960 /
+        r 24px. It MUST equal graphics.pip_hole.HOLE_BY_KIND
+        ["module-scoreboard"] exactly (test_module_longform pins both
+        sides). The content column keeps module-takeover's stage (left 96px,
+        width 1130px), so the right band [1344..1878] stays empty; with the
+        hole on, any module whose settled box leaves [0..1226] x [0..1080]
+        FAILS LOUDLY before the render records a frame.
+      - Word heroes: a hero value that is not a plain number (for example a
+        word) switches the card to a stacked layout — a 168px hero with the
+        tiles in a full-width row beneath — so wide copy stays inside the
+        1130px column instead of crossing into the presenter band.
+      - Grammar (each FAILS LOUDLY when malformed): tiles = "value~label";
+        stripChips = "label~state" with state in win|tie|loss (an unknown
+        state is never silently grey).
+      - Build (Sniper design parameters; graphics/template_visual_contract.py
+        reads these declarations from the HTML source, and
+        tests/test_scoreboard_visible_timing.py executes the actual build
+        block, so the constant declarations and the marker comments that
+        bound the land/build block stay exactly as they are): the eyebrow
+        leads by EYEBROW_LEAD_S and the context chips follow
+        CTX_STAGGER_S=0.1 apart; the hero lands on its own beat; tiles
+        ramp TILE_STAGGER_S=0.1 apart; the strip sweeps left to right
+        CHIP_SWEEP_S=0.085 per chip, so a thirteen-chip strip is complete in
+        about a second and the colour sequence still reads in order; the
+        LIMIT caveat lands LAST, after everything it qualifies.
       - moduleLands: one land per PRESENT module in order [head, hero,
-        tiles, strip, limit]. Count mismatch FAILS LOUDLY. Empty = 0.2 +
-        k*0.9 default cadence. The LIMIT caveat lands LAST (§1.3 "receipts
-        AND caveats land last").
-      - UNSET content renders NOTHING (G21); the SAMPLE (form #11 verbatim)
-        activates only when EVERY content variable is unset.
+        tiles, strip, limit]. A count mismatch or a non-finite time FAILS
+        LOUDLY. Empty = the default cadence 0.2 + k*0.9s, about one module
+        per spoken clause, so the strip arrives well after the hero instead
+        of competing with it.
+      - UNSET content renders NOTHING (G21). The SAMPLE below (original
+        Sniper preview copy) activates only when EVERY content variable is
+        unset; the capability probe supplies its own TEST copy.
       - RENDER LENGTH is the root data-duration ATTRIBUTE (graphics_render
         rewrites it per window; --variables never sets it).
-      - exit:"blur-recede" (T-D): stage only; the canvas stays opaque.
+      - exit:"blur-recede": only #nsb-stage-layer blurs, fades and recedes
+        over the final EXIT_BLUR_S; the canvas stays opaque. Default "hold" =
+        hard-off on the cut (the compositor owns the seam).
   -->
   <head>
     <meta charset="UTF-8" />
@@ -75,12 +115,15 @@
       #nsb-root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
       #nsb-stage-layer { position: absolute; inset: 0; will-change: transform, opacity, filter; }
 
+      /* Graphite canvas + faint 48px dot field + a soft blue glow at the
+         top-left — full-bleed CHILD, opaque from frame 0. */
       #nsb-canvas {
         position: absolute; inset: 0;
-        background-color: var(--module-canvas, #0c1014);
+        background-color: var(--module-canvas, #121721);
         background-image:
-          repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 96px),
-          repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 96px);
+          radial-gradient(circle at 1px 1px, rgba(241,244,246,0.07) 1.2px, transparent 1.6px),
+          radial-gradient(ellipse 1100px 700px at 8% 0%, rgba(68,123,228,0.16), transparent 70%);
+        background-size: 48px 48px, 100% 100%;
       }
 
       /* FRAMED PRESENTER-CONTAINER (opt-in: spec.presenterFrame). When the
@@ -100,9 +143,9 @@
         position: absolute;
         left: 1344px; top: 60px; width: 534px; height: 960px;
         border-radius: 24px;
-        border: 1.5px solid rgba(255, 255, 255, 0.22);
-        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+        border: 2px solid rgba(241, 244, 246, 0.16);
+        box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5),
+                    inset 0 1px 0 rgba(241, 244, 246, 0.08);
       }
 
       /* Content column — module-takeover stage geometry (PIP band clear). */
@@ -119,69 +162,71 @@
       #nsb-eyebrow {
         display: flex; align-items: center; gap: 16px;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 34px; line-height: 1;
-        letter-spacing: 5px; text-transform: uppercase;
-        color: var(--accent-process, #35b6d9);
+        font-weight: 600; font-size: 34px; line-height: 1;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        color: var(--accent-process, #447BE4);
       }
       #nsb-eyebrow .dot {
-        width: 13px; height: 13px; border-radius: 50%;
-        background: var(--accent-process, #35b6d9);
+        width: 13px; height: 13px; border-radius: 2px;
+        background: var(--accent-process, #447BE4);
         flex: 0 0 auto;
       }
-      #nsb-eyebrow.result, #nsb-eyebrow.result .dot { color: var(--accent-result, #c6f542); }
-      #nsb-eyebrow.result .dot { background: var(--accent-result, #c6f542); }
+      #nsb-eyebrow.result, #nsb-eyebrow.result .dot { color: var(--accent-result, #CC7200); }
+      #nsb-eyebrow.result .dot { background: var(--accent-result, #CC7200); }
 
       #nsb-context { display: flex; gap: 16px; }
       .ctx-chip {
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 7px;
+        border: 1px solid rgba(241, 244, 246, 0.16);
+        border-radius: 4px;
         padding: 10px 16px;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 18px;
-        letter-spacing: 3px; text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.7);
+        font-weight: 600; font-size: 18px;
+        letter-spacing: 0.14em; text-transform: uppercase;
+        color: rgba(241, 244, 246, 0.72);
         will-change: opacity;
       }
 
-      /* Hero metric row: giant lime number left, outlined tiles beside it
-         (evidence 031_t0083: 97% left, 7/5/1 tiles right on the same row). */
+      /* Hero metric row: the big result-amber number on the left, the
+         outlined tiles beside it on the same row. */
       #nsb-hero-row { display: flex; align-items: center; gap: 70px; }
       #nsb-hero { display: flex; flex-direction: column; gap: 14px; }
       #nsb-hero-value {
-        font-weight: 900;
+        font-family: var(--font-display);
+        font-weight: 800;
         font-size: 230px;
         line-height: 0.92;
-        letter-spacing: -6px;
-        color: var(--accent-result, #c6f542);
+        letter-spacing: -0.025em;
+        color: var(--accent-result, #CC7200);
         will-change: opacity;
       }
-      #nsb-hero-value .unit { font-size: 96px; letter-spacing: -2px; }
+      #nsb-hero-value .unit { font-size: 96px; letter-spacing: -0.01em; }
       #nsb-hero-label {
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 25px;
-        letter-spacing: 3.5px; text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.55);
+        font-weight: 600; font-size: 25px;
+        letter-spacing: 0.14em; text-transform: uppercase;
+        color: rgba(241, 244, 246, 0.58);
       }
       #nsb-tiles { display: flex; gap: 22px; }
       .nsb-tile {
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(241, 244, 246, 0.14);
+        border-radius: 6px;
+        background: rgba(241, 244, 246, 0.03);
         padding: 26px 34px;
         display: flex; flex-direction: column; align-items: center; gap: 8px;
         min-width: 130px;
         will-change: opacity;
       }
       .nsb-tile .value {
+        font-family: var(--font-display);
         font-weight: 800; font-size: 66px; line-height: 1;
-        letter-spacing: -1px;
+        letter-spacing: -0.01em;
         color: #ffffff;
       }
       .nsb-tile .label {
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 17px;
-        letter-spacing: 3px; text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.5);
+        font-weight: 600; font-size: 17px;
+        letter-spacing: 0.16em; text-transform: uppercase;
+        color: rgba(241, 244, 246, 0.55);
       }
 
       /* Text heroes such as PROMPTS are wider than numeric metrics. Stack the
@@ -194,7 +239,7 @@
       }
       #nsb-root.word-hero #nsb-hero-value {
         font-size: 168px;
-        letter-spacing: -4px;
+        letter-spacing: -0.02em;
       }
       #nsb-root.word-hero #nsb-tiles {
         display: grid;
@@ -207,55 +252,56 @@
       }
       #nsb-root.word-hero .nsb-tile .value { font-size: 44px; }
 
-      /* Per-item color ledger: win lime / tie teal / loss amber (§1.1 —
-         amber only for the losses and the LIMIT footer). */
+      /* Per-item strip: win amber / tie blue / loss red (red is reserved for
+         losses and the LIMIT label). Each chip sits on a 12% tint of its
+         own accent. */
       #nsb-strip { display: flex; flex-wrap: wrap; gap: 12px; }
       .strip-chip {
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 19px;
-        letter-spacing: 2px;
-        border-radius: 6px;
+        font-weight: 600; font-size: 19px;
+        letter-spacing: 0.1em;
+        border-radius: 3px;
         padding: 10px 14px;
         border: 1px solid transparent;
         will-change: opacity;
       }
       .strip-chip.win {
-        color: var(--accent-result, #c6f542);
-        border-color: color-mix(in srgb, var(--accent-result, #c6f542) 45%, transparent);
-        background: color-mix(in srgb, var(--accent-result, #c6f542) 12%, transparent);
+        color: var(--accent-result, #CC7200);
+        border-color: color-mix(in srgb, var(--accent-result, #CC7200) 45%, transparent);
+        background: color-mix(in srgb, var(--accent-result, #CC7200) 12%, transparent);
       }
       .strip-chip.tie {
-        color: var(--accent-process, #35b6d9);
-        border-color: color-mix(in srgb, var(--accent-process, #35b6d9) 45%, transparent);
-        background: color-mix(in srgb, var(--accent-process, #35b6d9) 12%, transparent);
+        color: var(--accent-process, #447BE4);
+        border-color: color-mix(in srgb, var(--accent-process, #447BE4) 45%, transparent);
+        background: color-mix(in srgb, var(--accent-process, #447BE4) 12%, transparent);
       }
       .strip-chip.loss {
-        color: var(--accent-warn, #e8a13c);
-        border-color: color-mix(in srgb, var(--accent-warn, #e8a13c) 45%, transparent);
-        background: color-mix(in srgb, var(--accent-warn, #e8a13c) 12%, transparent);
+        color: var(--accent-warn, #D33B36);
+        border-color: color-mix(in srgb, var(--accent-warn, #D33B36) 45%, transparent);
+        background: color-mix(in srgb, var(--accent-warn, #D33B36) 12%, transparent);
       }
 
-      /* LIMIT footer: amber mono label | hairline divider | gray caveat. */
+      /* LIMIT footer: red mono label | hairline divider | the caveat. */
       #nsb-limit {
         display: flex; align-items: center; gap: 22px;
-        border-top: 1px solid rgba(255, 255, 255, 0.14);
+        border-top: 1px solid rgba(241, 244, 246, 0.14);
         padding-top: 24px;
       }
       #nsb-limit-label {
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 26px;
-        letter-spacing: 3.5px; text-transform: uppercase;
-        color: var(--accent-warn, #e8a13c);
+        font-weight: 600; font-size: 26px;
+        letter-spacing: 0.14em; text-transform: uppercase;
+        color: var(--accent-warn, #D33B36);
         flex: 0 0 auto;
       }
       #nsb-limit-divider {
         width: 1px; height: 26px;
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba(241, 244, 246, 0.2);
         flex: 0 0 auto;
       }
       #nsb-limit-text {
-        font-weight: 600; font-size: 34px; line-height: 1.2;
-        color: rgba(255, 255, 255, 0.78);
+        font-weight: 400; font-size: 34px; line-height: 1.2;
+        color: rgba(241, 244, 246, 0.78);
       }
     </style>
   </head>
@@ -296,10 +342,10 @@
         const D = parseFloat(root.dataset.duration) || 10;
         const M = window.__motionTokens;
 
-        // Measured payoff constants:
-        const CHIP_SWEEP_S = 0.085;   // MG-4: ~1 chip per 85ms, L->R
-        const CTX_STAGGER_S = 0.1;    // context chips (MG-2 80-120ms band)
-        const TILE_STAGGER_S = 0.1;   // stat tiles (same fan-out band)
+        // Payoff constants (Sniper design parameters, see header):
+        const CHIP_SWEEP_S = 0.085;   // one strip chip per 85ms, L->R
+        const CTX_STAGGER_S = 0.1;    // context chips, L->R
+        const TILE_STAGGER_S = 0.1;   // stat tiles, L->R
         const LAND_DEFAULT_START_S = 0.2;
         const LAND_DEFAULT_GAP_S = 0.9;
 
@@ -312,15 +358,17 @@
         };
         const CONTENT_KEYS = ["eyebrow", "contextChips", "heroValue",
           "heroLabel", "tiles", "stripChips", "limitText"];
-        // PREVIEW-ONLY demo — form #11 verbatim (78.5-94.0s).
+        // PREVIEW-ONLY demo (original Sniper sample copy): activates ONLY
+        // when every content variable is unset (G21 — no sample leaks into
+        // plans).
         const SAMPLE = {
-          eyebrow: "SMALL LOCAL CHECK",
-          contextChips: "ONE RUN|13 TASKS|THIS MACHINE",
-          heroValue: "97%", heroLabel: "AVAILABLE OBJECTIVE POINTS",
-          tiles: "7~WINS|5~TIES|1~LOSS",
+          eyebrow: "CAPTION ACCURACY",
+          contextChips: "ONE EPISODE|13 CLIPS|LOCAL RENDER",
+          heroValue: "94%", heroLabel: "WORDS MATCHED ON FIRST PASS",
+          tiles: "9~CLEAN|3~MINOR|1~REDO",
           stripChips: "01~win|02~win|03~win|04~win|05~win|06~win|07~win|" +
-            "08~tie|09~tie|10~tie|11~tie|12~tie|13~loss",
-          limitText: "Not proof it wins everything.",
+            "08~win|09~win|10~tie|11~tie|12~tie|13~loss",
+          limitText: "Sample numbers, not a benchmark.",
         };
         const HF = window.__hyperframes;
         let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
@@ -359,7 +407,7 @@
         if (!ctxEls.length) ctxEl.remove();
 
         // Hero metric: a trailing % renders as a smaller unit glyph
-        // (typography only — evidence 031_t0083's smaller % on the 97).
+        // (typography only — the unit stays secondary to the digits).
         const heroRowEl = document.getElementById("nsb-hero-row");
         const heroValue = str("heroValue");
         const heroValueEl = document.getElementById("nsb-hero-value");
@@ -437,7 +485,7 @@
         } else { limitEl.remove(); }
 
         // Fail loudly if any scoreboard module escapes the content stage or
-        // intrudes into the presenter band. This checks the settled DOM boxes,
+        // intrudes into the presenter band. The check reads the settled DOM boxes,
         // including dynamically generated tiles, before Hyperframes records.
         if (root.classList.contains("has-presenter")) {
           const stageRight = 1226;
@@ -479,7 +527,7 @@
         const landOf = {};
         modules.forEach(function (name, k) { landOf[name] = lands[k]; });
 
-        // ---- Build: hero -> tiles -> chip sweep -> limit (form #11) ----
+        // ---- Build: hero -> tiles -> chip sweep -> limit ----
         window.__timelines = window.__timelines || {};
         const tl = gsap.timeline({ paused: true });
 
@@ -488,7 +536,7 @@
           let at = t0;
           if (ebText) {
             M.textRamp(tl, ebEl, t0);
-            at = t0 + M.EYEBROW_LEAD_S;         // eyebrow leads (rank 3)
+            at = t0 + M.EYEBROW_LEAD_S;         // eyebrow leads the chips
           }
           if (ctxEls.length) {
             M.textRamp(tl, ctxEl, at);
@@ -510,8 +558,8 @@
           });
         }
 
-        // The strip lands SECONDS after the hero (its own land), then sweeps
-        // L->R at 85ms/chip (MG-4: 13 chips over ~1.1s).
+        // The strip lands on its own beat after the hero, then sweeps
+        // L->R one chip per CHIP_SWEEP_S.
         if (landOf.strip != null) {
           M.textRamp(tl, stripEl, landOf.strip);
           stripEls.forEach(function (el, i) {
@@ -519,10 +567,10 @@
           });
         }
 
-        // The honest caveat lands LAST (§1.3).
+        // The caveat lands LAST, after everything it qualifies.
         if (landOf.limit != null) M.textRamp(tl, limitEl, landOf.limit);
 
-        // exit:"blur-recede" (T-D): stage only; the canvas stays opaque.
+        // exit:"blur-recede": stage only; the canvas stays opaque.
         if (String(vars.exit) === "blur-recede") {
           M.blurRecede(tl, "#nsb-stage-layer", D - M.EXIT_BLUR_S);
         }

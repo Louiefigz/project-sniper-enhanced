@@ -10,11 +10,13 @@ const nplRenderer = {
     nodes: "", activeIndex: 0, footChip: "", footAccent: "result",
     moduleLands: "", exit: "hold", presenterFrame: false, layout: "full-canvas",
   },
+  // Preview-only original Sniper sample copy; used only when every content
+  // variable is unset (G21), never inside a plan.
   sample: {
-    eyebrow: "ONE INSTRUCTION TO FINISHED VIDEO",
-    headlineLines: "The chain changed.|The outcome held.",
-    nodes: "01~PROMPT|02~ELEVENLABS VOICE|03~HEYGEN AVATAR V|" +
-      "04~HYPERFRAMES EDIT|05~INDEPENDENT QA|06~FINISHED VIDEO",
+    eyebrow: "FROM RAW TAKE TO FINISHED CUT",
+    headlineLines: "One job per pass.|The cut stays honest.",
+    nodes: "01~TRANSCRIBE|02~CUT RETAKES|03~TIGHTEN PAUSES|" +
+      "04~ADD CAPTIONS|05~REVIEW PASS|06~FINISHED CUT",
     activeIndex: 5,
   },
   text(vars, key) { return (vars[key] == null ? "" : String(vars[key])).trim(); },
@@ -59,7 +61,7 @@ const nplRenderer = {
     if (!text) { element.remove(); return; }
     const lines = text.split("|").map((line) => line.trim());
     if (lines.length > 2) {
-      throw new Error("module-pipeline: headlineLines is 2 lines max (§1.1 thesis grammar), got " + lines.length);
+      throw new Error("module-pipeline: headlineLines is 2 lines max (two-line thesis limit), got " + lines.length);
     }
     lines.forEach((line, index) => {
       const child = document.createElement("span");

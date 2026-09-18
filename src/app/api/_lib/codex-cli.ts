@@ -147,10 +147,21 @@ export function agentMessage(event: Record<string, unknown>): string | null {
   return typeof item.text === "string" ? item.text : null;
 }
 
-function codexError(code: number | null, stderr: string, message: string): Error {
+/** The provider's own failure text from a `--json` event (usage limit, auth, model). */
+export function codexEventError(event: Record<string, unknown>): string | null {
+  if (event.type === "error" && typeof event.message === "string") return event.message;
+  const error = event.error as Record<string, unknown> | undefined;
+  if (event.type === "turn.failed" && typeof error?.message === "string") return error.message;
+  return null;
+}
+
+function codexError(code: number | null, stderr: string, message: string, reported = ""): Error {
   const detail = stderr.trim().slice(-1_200);
-  if (code === 0 && !message) return new Error("Codex exited without a final agent message");
-  return new Error(`Codex exited ${code ?? "without a status"}${detail ? `: ${detail}` : ""}`);
+  if (code === 0 && !message && !reported) return new Error("Codex exited without a final agent message");
+  // Codex reports the reason for a failed turn on stdout; stderr often holds only
+  // unrelated log lines, so the reported reason leads.
+  const reason = reported ? `: Codex reported: ${reported.slice(0, 600)}` : "";
+  return new Error(`Codex exited ${code ?? "without a status"}${reason}${detail ? `${reason ? " | " : ": "}${detail}` : ""}`);
 }
 
 export async function runCodex(options: CodexRunOptions): Promise<CodexRunResult> {
@@ -172,6 +183,7 @@ export async function runCodex(options: CodexRunOptions): Promise<CodexRunResult
     }));
     let message = "";
     let stderr = "";
+    let reported = "";
     let settled = false;
     let stopError: Error | undefined;
     let outputBytes = 0;
@@ -212,6 +224,7 @@ export async function runCodex(options: CodexRunOptions): Promise<CodexRunResult
         const event = JSON.parse(line) as Record<string, unknown>;
         options.onEvent?.(event);
         message = agentMessage(event) ?? message;
+        reported = codexEventError(event) ?? reported;
       } catch {
         options.onEvent?.({ type: "raw", line: line.slice(0, 2_000) });
       }
@@ -223,7 +236,7 @@ export async function runCodex(options: CodexRunOptions): Promise<CodexRunResult
     proc.on("error", (error) => finish(stopError ?? error));
     proc.on("close", (code) => {
       if (stopError) return finish(stopError);
-      if (code !== 0 || !message) finish(codexError(code, stderr, message));
+      if (code !== 0 || !message) finish(codexError(code, stderr, message, reported));
       else finish();
     });
     const timer = setTimeout(() => {

@@ -57,7 +57,7 @@ export default function Home() {
           </h1>
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground">
             Choose raw footage, describe the result you want, and Producer makes a finished MP4.
-            Watch it, type another change, render the revision, and send the latest edit to Palmier.
+            Watch it, type another change, render the revision, and open the editable project in Studio.
           </p>
         </section>
 
@@ -80,7 +80,7 @@ export default function Home() {
                   "1 · Choose media",
                   "2 · Describe the edit",
                   "3 · Generate and review",
-                  "4 · Revise or send to Palmier",
+                  "4 · Revise or open in Studio",
                 ].map((step) => (
                   <span key={step} className="rounded-full border border-border bg-background/50 px-3 py-1">
                     {step}

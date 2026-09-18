@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { agentMessage, buildCodexArgs } from "../../../app/api/_lib/codex-cli";
+import { agentMessage, buildCodexArgs, codexEventError } from "../../../app/api/_lib/codex-cli";
 import { codexProcessEnv } from "../../../app/api/_lib/ai-provider";
 
 process.env.SNIPER_CODEX_MODEL = "gpt-5.6";
@@ -82,5 +82,13 @@ assert.equal(
   "done",
 );
 assert.equal(agentMessage({ type: "item.started", item: { type: "command_execution" } }), null);
+
+// A failed turn's reason arrives on stdout as JSON (seen: a subscription usage limit
+// while stderr held only an unrelated models-cache log line).
+assert.equal(codexEventError({ type: "error", message: "You've hit your usage limit." }),
+  "You've hit your usage limit.");
+assert.equal(codexEventError({ type: "turn.failed", error: { message: "limit" } }), "limit");
+assert.equal(codexEventError({ type: "turn.started" }), null);
+assert.equal(codexEventError({ type: "error" }), null);
 
 console.log("codex-cli.test.ts: all assertions passed");

@@ -98,8 +98,8 @@ Useful modifiers, all optional:
 - **Treatment**: "just clean it up" (edit only) vs "produce it" (full stack —
   the default). "Keep it alive but no graphics" for the in-between.
 - **Duration**: "target ~30s" / "keep it under 60s" / "up to 90s". Choose the
-  shortest complete explanation within the current brief; Aaron's standing
-  produced-clip allowance is up to 90s, not an automatic target.
+  shortest complete explanation within the current brief; when the brief names
+  no length, a produced clip may run up to 90s, which is not an automatic target.
 - **Music vibe**: "energetic", "chill", "no music" — or say nothing and I'll
   recommend one from the content's mood. Music is off unless you approve it;
   multiple mix variants render only when requested.
@@ -157,15 +157,15 @@ plan/review notes; it does not require another report or a new plan schema:
 | Visual feasibility | What can be shown in portrait, including the speaker, screen content and existing baked text |
 | Selection | Relative rank, a concrete reason, unresolved uncertainty and any overlapping candidate it replaces |
 
-**Aaron chooses the moment before production.** Present the ranked shortlist
+**The product owner chooses the moment before production.** Present the ranked shortlist
 with source timestamps, watchable source previews, hook/payoff excerpts,
 estimated edited length, selection rationale and a brief visual-storytelling
-idea for each. Recommend the strongest option, but wait for his choice before
+idea for each. Recommend the strongest option, but wait for that choice before
 trimming or producing it. Use seekable source playback where available; create
 lightweight review excerpts only when needed for viewing, not fully treated
 candidate renders. Do not claim a timestamp or transcript is a playable preview.
 An already selected moment or an explicit instruction to choose and proceed
-satisfies this step; do not ask him to choose again. This is Aaron's default,
+satisfies this step; do not ask again. This is the product owner's default,
 not an extra approval requirement for unrelated users or delegated selections.
 
 Prefer a small, meaningful comparison over a fixed candidate quota. These are
@@ -229,7 +229,7 @@ landscape cards are not prerequisites or automatically admitted assets.
 
 For a production request, continue through the selected cut/treatment workflow
 under the user's existing authorization after their requested moment selection.
-Honor Aaron's selection preference above, a requested shortlist-only or
+Honor the product owner's selection preference above, a requested shortlist-only or
 plan-first stopping point, and any existing explicit review gates. Shortlist
 notes add no further approval round after the moment is selected. Apply scoped
 revisions to the selected short, preserving the long-form master and unrelated

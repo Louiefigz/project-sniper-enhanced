@@ -52,7 +52,7 @@ from producer_config import ENCODE  # noqa: E402
 # Long-form canvas + the reserved face-PiP region, KEYED BY BACKDROP comp.
 # Each entry's RESERVED must match the empty rect the comp leaves for the card
 # (glass-takeover-bg: right side x[1180,1820] y[140,940]; canvas-pip-list:
-# left-of-center x[140,660] y[190,890] — pair-2 "8 Doors" reference); the
+# left-of-center x[140,660] y[190,890] — the canvas-pip-list reserved rect); the
 # default 4:5 settled card is inset inside it. Change a comp, change its entry.
 LF_W, LF_H = 1920, 1080
 RESERVED_BY_BG = {

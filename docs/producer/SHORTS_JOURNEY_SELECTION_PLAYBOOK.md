@@ -7,9 +7,8 @@ still own execution. Reuse the current brief for the creator and format.
 
 ## Establish the edit the user wants
 
-Aaron clarified that the nonlinear payoff-first assemblies in this case were
-appropriate to this assignment. They are not a default instruction to rebuild
-every future clip. A user may want an existing passage, podcast exchange or
+A nonlinear, payoff-first assembly is right only when the assignment asks for
+it. It is not a default instruction to rebuild every clip. A user may want an existing passage, podcast exchange or
 set of topic segments, with or without cleanup.
 
 | Edit | What to do |
@@ -49,9 +48,8 @@ that scope. Review quality against the chosen edit, not a different deliverable.
 
 ### Plan independent production work in parallel
 
-Aaron authorized production subagents on September 15 after the 56.24-second
-Short took 65m11s. Delegate concrete independent work when it shortens the
-critical path; retain one lead editor responsible for the coherent result.
+Delegate concrete independent work to production subagents when it shortens
+the critical path; retain one lead editor responsible for the coherent result.
 
 Establish the story, source ranges and shared output clock before dependent
 assembly. Then give one worker source/audio/caption preparation and another
@@ -80,14 +78,15 @@ Use the [staged export and resume path](NATIVE_SHORTS_WORKFLOW.md#resume-verific
 for verification failures. Do not promise a future full-production time from a
 prepared render or a synthetic test.
 
-### Aaron's standing produced-clip preference — September 15, 2026
+### Produced-clip length and visual storytelling
 
-Aaron explicitly allows clips up to **90 seconds**. Use the shortest version
+Use the length the brief asks for. When it names none, a produced clip may run
+up to **90 seconds**. Use the shortest version
 that gives a new viewer the subject, why it matters, the necessary development
 and a complete payoff. Do not default to 20–30 seconds, discard useful reasoning
 to get under a minute, or pad an already complete idea to reach 90 seconds.
-The current brief can override this preference. Segment/excerpt and cleanup
-requests retain their previously agreed scope.
+The brief always overrides this default. Segment/excerpt and cleanup requests
+retain their agreed scope.
 
 For produced clips, visual storytelling is expected where it helps the important
 explanation. Show the actual object, action, relationship or change through
@@ -243,9 +242,9 @@ material because its setup and payoff are several minutes apart.
 
 ## Plan visual explanation at the important moments
 
-For Aaron's produced journey Shorts, proactively look for visual explanations
-where the speech becomes abstract, a board detail matters, or an example would
-make the point easier to follow. His presence remains important; authenticity
+For produced journey Shorts, proactively look for visual explanations where
+the speech becomes abstract, a board detail matters, or an example would make
+the point easier to follow. The speaker's presence remains important; authenticity
 does not mean uninterrupted full-frame talking or only keyword captions.
 Respect an explicit trim-only or graphics-disabled request.
 
@@ -274,7 +273,7 @@ second crop is a detail view, not an invented second camera.
 For each selected visual, identify what the viewer should notice, what changes
 or becomes clearer, the spoken cue, and when to return or change view. Examples:
 
-- Keep one offer visible as $9 becomes the planned $19 at a 20-member threshold.
+- Keep one offer visible while its price changes at the threshold the speaker names.
 - Show the existing list and community, with outreach explicitly still to do,
   as the creator explains the next experiment.
 - Show a relevant failed/result comparison when those actual examples exist;

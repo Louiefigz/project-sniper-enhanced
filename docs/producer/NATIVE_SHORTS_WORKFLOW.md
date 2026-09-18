@@ -218,7 +218,7 @@ evidence as unfinished review.
 
 ### Visual storytelling: choose how concrete each beat should be
 
-Aaron's direction: a physical/cartoon key can explain an API key in a high-level
+Product direction: a physical/cartoon key can explain an API key in a high-level
 overview. A tutorial can show the actual credentials field. Select the visual
 from the teaching moment, audience and complete spoken point. This decision
 belongs between understanding the script and choosing assets or captures; it
@@ -267,7 +267,7 @@ and supporting-shot scouting. Existing frozen requests and exports stay intact.
 
 ### Script and delivery set the rhythm
 
-Aaron's September 12 direction: pace the whole Short coherently. A faster script
+Product direction (September 12): pace the whole Short coherently. A faster script
 and delivery need quicker visual development, caption phrasing and motion;
 a calmer performance needs more sustained, restrained treatment. The reference
 informs the visual mechanics, adapted to that performance. Do not choose B-roll

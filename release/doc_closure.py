@@ -13,7 +13,8 @@ Three sources, no transitive walk into history:
 
 Dated development history reached only through those documents is withheld: it
 records internal evidence, client work and third-party study material, and no
-shipped surface needs it to operate. A link from a shipped document into that
+shipped surface needs it to operate. Internal audits (docs/audits/) ship only when
+shipped code names them (the runtime reads them); a link from an index is not enough. A link from a shipped document into that
 history is recorded by the builder as withheld, not silently followed.
 """
 from __future__ import annotations
@@ -74,9 +75,10 @@ def _named_in_code() -> set[str]:
 
 def closure() -> list[str]:
     """The sorted operational document list (docs/ only; scripts/ ships whole)."""
-    wanted = set(REQUIRED) | _named_in_code()
+    named = _named_in_code()
+    wanted = set(REQUIRED) | named
     for surface in _surfaces():
-        wanted |= _linked(surface)
+        wanted |= {doc for doc in _linked(surface) if not doc.startswith("docs/audits/") or doc in named}
     return sorted(doc for doc in wanted if doc.startswith("docs/") and (ROOT / doc).is_file()
                   and not any(mark in doc for mark in WITHHELD))
 

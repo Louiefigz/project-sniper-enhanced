@@ -92,8 +92,9 @@ schema in `scripts/producer/study/DEEP_SCHEMA.md`.
    staged builds, never pop-from-nothing — R9).
 
 ## Phase 3 — Write the rules
-Append findings to `docs/studies/REFERENCE_STYLE_STUDY.md` (numbered R-rules with
-evidence: timestamps, quoted words, measured values). Contradictions with
+Append findings to `docs/studies/REFERENCE_STYLE_STUDY.md` as numbered R-rules that
+record the mechanism (what changes, when, for how long, and why it helps a viewer),
+not the reference's words, branding or identity. Contradictions with
 existing doctrine get an operator-visible callout, never silently resolved.
 
 ## Phase 4 — Template specs → build

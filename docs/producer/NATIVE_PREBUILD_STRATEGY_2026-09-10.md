@@ -1,6 +1,6 @@
 # Native edits need a directing plan before assembly
 
-Aaron rejected the first native Shorts preview on September 10: the full
+The product owner rejected the first native Shorts preview on September 10: the full
 landscape source occupied a small part of a portrait canvas, captions sat in
 empty space underneath, and the proposed split had no demonstrated story need.
 This was a planning failure, not a memory or rendering failure.
@@ -9,7 +9,7 @@ This was a planning failure, not a memory or rendering failure.
 
 The current C0679 native project's
 [brief](/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/BRIEF.md)
-defines the viewer, their problem, Aaron's role, the visual idea, rhythm,
+defines the viewer, their problem, the presenter's role, the visual idea, rhythm,
 palette/type hierarchy, a timed editorial scene plan, source-word cues,
 catalog adaptations, rejected alternatives and verification requirements.
 Its extension notes develop those decisions across the programme. This is a
@@ -91,7 +91,7 @@ keep the person prominent. Neither split nor full presenter is a universal rule.
 
 ## Standing directing requirements — September 16, 2026
 
-Aaron's review of IMG_7446 rejected abrupt layout cuts, repeated Joker grooming,
+The product owner's review of IMG_7446 rejected abrupt layout cuts, repeated Joker grooming,
 unexplained chicken/beef images, an omitted Facebook-advertising beat and a brief,
 unreadable supplier view. His subsequent clarification makes this a standing
 standard for all future Shorts and long-form work, not just this source or

@@ -2,7 +2,7 @@
 
 The project has a local path from the packaged Director library to an actual
 backed title card. It does not launch a model or require an external
-Director call. Aaron requested local-only work on September 10; do not treat
+Director call. The product owner requested local-only work on September 10; do not treat
 later styling feedback as permission to send transcripts or references externally.
 
 ## Implementation
@@ -74,7 +74,7 @@ Copy provenance and visual-template reuse are separate decisions. Preserve the
 original speech, cuts, captions and title lifetime during a copy-only revision,
 then verify the rebuilt title's actual readability and promise against the clip.
 
-Aaron's subsequent review accepted the offer storytelling/B-roll and rejected
+The product owner's subsequent review accepted the offer storytelling/B-roll and rejected
 mechanism-led hooks. The current revision uses “Use this offer formula to get
 more buyers”; members uses “Who else wants $1K/mo in their first 30 days?”.
 See [template compliance versus hook strength](../findings/TEMPLATE_COMPLIANCE_IS_NOT_A_STRONG_HOOK.md).

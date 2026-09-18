@@ -67,8 +67,8 @@ class WhisperCaptionTests(unittest.TestCase):
         cfg = {**cap.CAPTIONS, "emphasisWords": ["zero"]}
         ass = cap.build_ass(self.WORDS, "whisper", cfg)
         # CAP3: tier-A tint is an INLINE override on the cue's first frame —
-        # #F2D24B -> ASS BGR 4BD2F2, reset with bare \c; never its own event.
-        self.assertIn("{\\c&H4BD2F2&}zero{\\c}", ass)
+        # #FDA933 -> ASS BGR 33A9FD, reset with bare \c; never its own event.
+        self.assertIn("{\\c&H33A9FD&}zero{\\c}", ass)
         self.assertEqual(ass.count("Dialogue:"), 4)   # no extra accent events
 
     def test_lint_accepts_whisper_style(self) -> None:

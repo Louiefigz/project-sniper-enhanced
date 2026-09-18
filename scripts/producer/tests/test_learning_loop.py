@@ -278,9 +278,9 @@ class ContrastTests(unittest.TestCase):
             "statement-card", {"text": "x", "bg": "cream", "accent": "#054BC9"}))
         self.assertEqual(rep.errors, [])
 
-    def test_lime_on_the_takeover_canvas_passes(self) -> None:
+    def test_result_accent_on_the_takeover_canvas_passes(self) -> None:
         rep = _visual_report(self._entry(
-            "module-takeover", {"eyebrow": "ULTRA", "accent": "#c6f542"}))
+            "module-takeover", {"eyebrow": "REVIEW", "accent": "#CC7200"}))
         self.assertEqual(rep.errors, [])
 
     def test_unknown_kind_or_variant_is_skipped_never_guessed(self) -> None:

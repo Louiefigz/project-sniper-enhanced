@@ -207,8 +207,10 @@ formula/slot/disqualification index. The native backend now runs
 `stageNativeDirector` from `src/lib/server/native-director-store.ts` during V9
 input preparation, before the scene worker: viewer/payoff/awareness → format
 alternatives → one template and rejected alternatives → 2–3 fills of that same
-template with exact source/slot bindings → quote-or-fail condition audit → a
-separate critic invocation. Missing source libraries, unresolved IDs, absent
+template with exact source/slot bindings → a quote-or-fail audit against the six
+opening criteria (`supportedClaim`, `answerablePromise`, `viewerStake`,
+`concreteDetail`, `channelAgreement`, `glanceReadable`) → a separate critic
+invocation. Missing source libraries, unresolved IDs, absent
 slots, invented recorded words, failed selected conditions or a rejected/stale
 critique stop this path. Store the actual plan and its library provenance;
 reference IDs added after drafting are not retrieval. Use existing source material
@@ -1094,9 +1096,8 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
        what was ACTUALLY said (the words may have been trimmed — update the card to
        the kept words), spelled correctly, no ASR mishears.
      - **Claims — VERIFY every claim-bearing card against the transcript/source
-       BEFORE render** (MODULE_STUDY §1.2#11 + §5.6 — his pipeline caught
-       false claims only AFTER paying for a full render; we catch them on the
-       plan). For each card whose copy states a fact (a number, a result, a
+       BEFORE render** (MODULE_STUDY §1.2#11 + §5.6 — a false claim caught only
+       after a full render costs the whole render; catch it on the plan). For each card whose copy states a fact (a number, a result, a
        comparison, a capability): quote the kept transcript words it restates
        and confirm the copy is a FAITHFUL restatement — right magnitude, right
        subject, no rounding a claim UP, no inventing precision. The

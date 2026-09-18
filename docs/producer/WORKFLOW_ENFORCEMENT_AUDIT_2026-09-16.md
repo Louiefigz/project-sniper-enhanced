@@ -4,7 +4,7 @@ Status: mandatory wiring implemented; focused and real-media qualification passe
 Repository-wide verification results are recorded below. This is not approval of
 a client video, a production deployment, or a ten-minute editorial benchmark.
 
-Aaron requested mandatory long-export wiring and an audit of critical workflows
+The product owner requested mandatory long-export wiring and an audit of critical workflows
 that depend on instructions. Scope: Producer native and compatibility editing,
 preparation, render, recovery, review and delivery entry points, and their shared
 source/resource/authority controls. The executable matrix inventories **50 API
@@ -14,7 +14,7 @@ RAG, Clipper and Segmenter applications are not consumers of this render workflo
 
 ## Instruction-to-result record
 
-Short automatic recovery follow-up (complete): Aaron authorized closing the
+Short automatic recovery follow-up (complete): The product owner authorized closing the
 Short-specific discovery gap. Acceptance: the normal Short export selects and
 registers attempts under the shared reservation; compatible sealed media/capture,
 qualified picture and prepared audio can be reused without flags; changed inputs

@@ -119,6 +119,20 @@ def _verified_or_none(directory: Path, manifest: dict, repair: bool) -> Path | N
     return directory
 
 
+def _with_notice(runtime: Path) -> Path:
+    """Place the Apache-2.0 modification notice inside the materialised runtime.
+
+    Verification hashes only the runtime's `dist/` files, so the notice does not
+    change the runtime identity or its qualification.
+    """
+    notice, target = PATCH_ROOT / 'NOTICE', runtime / 'NOTICE'
+    if notice.is_file() and (not target.is_file() or target.read_bytes() != notice.read_bytes()):
+        staged = runtime / '.NOTICE.tmp'
+        shutil.copyfile(notice, staged)
+        staged.replace(target)
+    return runtime
+
+
 def install_runtime(repair: bool = False, repo: Path | None = None) -> Path:
     """Materialize a content-addressed runtime beside the installed dependencies.
 
@@ -143,11 +157,11 @@ def install_runtime(repair: bool = False, repo: Path | None = None) -> Path:
     parent = root / 'templates/motion/.sniper-native-runtime' / identity
     found = _verified_or_none(parent / 'hyperframes', manifest, repair)
     if found:
-        return found
+        return _with_notice(found)
     build_lock = sniper_lock.lock_file(sniper_lock.state_dir(root), sniper_lock.RUNTIME_BUILD)
     with sniper_lock.held(build_lock, 'exclusive', 'render runtime construction', BUILD_WAIT_SECONDS):
         found = _verified_or_none(parent / 'hyperframes', manifest, repair)
-        return found or _construct(stock, parent, manifest)
+        return _with_notice(found or _construct(stock, parent, manifest))
 
 
 if __name__ == '__main__':

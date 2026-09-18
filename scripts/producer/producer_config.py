@@ -745,7 +745,7 @@ CAPTIONS = {
         "fill": "white",
         # Inline emphasis accent (CAP3, §5.1). The value is a design-system
         # choice; the style specification fixes only its role.
-        "accent": "#F2D24B",
+        "accent": "#FDA933",  # Sniper signal amber (templates/motion/tokens.css)
         "sentence_case": True,          # white sentence-case (CAP2)
     },
 }

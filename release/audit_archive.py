@@ -181,6 +181,7 @@ def audit_closure(root: Path) -> None:
     check(len(frames) > 0, "closure: packaged reference frames present", f"{len(frames)} frames")
     audit_pipeline_capture(app)
     audit_composition_sources(app)
+    audit_capability_matrix(app)
     segment_paths = [f"docs/producer/command-driven-editing/contracts/{name}" for name in (
         "render-effect-registry-v1.json", "program-audio-mix-registry-v1.json",
         "external-ingress-registry-v1.json", "current-render-codec-floor-calibration-v1.json",
@@ -205,6 +206,28 @@ for path in paths:
         print("MISSING", os.path.basename(path), error)
 print("CHECKED", len(paths))
 """
+
+
+_MATRIX = """
+import os, sys
+sys.path.insert(0, os.path.join(sys.argv[1], "scripts", "producer"))
+from graphics.comp_capability_artifact import load_artifact
+value, error = load_artifact(os.path.join(sys.argv[1], "templates", "motion", "comp_capabilities.json"))
+print("FRESH" if value else "STALE " + error)
+"""
+
+
+def audit_capability_matrix(app: Path) -> None:
+    """The shipped capability matrix is fresh for the shipped tree, judged by the package's own loader.
+
+    Planning refuses every graphics beat when this matrix is stale, so a digest computed over
+    files the archive withholds would block guided editing on a buyer's Mac.
+    """
+    done = subprocess.run([sys.executable, "-c", _MATRIX, str(app)],
+                          capture_output=True, text=True, check=False)
+    line = (done.stdout.strip().splitlines() or [done.stderr.strip()[-300:]])[-1]
+    check(done.returncode == 0 and line == "FRESH",
+          "closure: composition capability matrix is fresh for the shipped tree", line)
 
 
 def audit_composition_sources(app: Path) -> None:

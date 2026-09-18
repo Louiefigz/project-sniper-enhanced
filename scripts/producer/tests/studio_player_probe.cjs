@@ -119,10 +119,17 @@ function beatFacts(beat) {
 }
 
 (async () => {
+  // A test run never sends anything off this Mac: every outside request is recorded, only the
+  // listed (disclosed) files are fetched, the rest are answered locally below, and Chrome cannot
+  // even resolve any other host (catches requests the interception does not see).
+  const allowExternal = new Set(config.allowExternal || []);
+  const allowHosts = [...allowExternal].map((url) => new URL(url).hostname);
+  const resolverRules = ["MAP * ~NOTFOUND", "EXCLUDE localhost", "EXCLUDE 127.0.0.1", ...allowHosts.map((h) => "EXCLUDE " + h)];
   const browser = await puppeteer.launch({
     executablePath: config.chrome,
     headless: "shell",
-    args: ["--no-sandbox", "--window-size=1800,1100"],
+    args: ["--no-sandbox", "--window-size=1800,1100",
+           "--host-resolver-rules=" + resolverRules.join(", ")],
   });
   const page = await browser.newPage();
   await page.setViewport({ width: 1800, height: 1100 });
@@ -131,8 +138,16 @@ function beatFacts(beat) {
   const badResponses = [];
   const externalRequests = [];
   const loopback = /^(https?:\/\/(127\.0\.0\.1|localhost)[:\/]|data:|blob:|about:)/;
+  await page.setRequestInterception(true);
   page.on("request", (req) => {
-    if (!loopback.test(req.url())) externalRequests.push(req.url().slice(0, 200));
+    const url = req.url();
+    if (loopback.test(url)) return req.continue();
+    externalRequests.push(url.slice(0, 200));
+    if (allowExternal.has(url)) return req.continue();
+    return req.respond({ status: 200, contentType: "application/json", body: "{}",
+                         headers: { "access-control-allow-origin": "*",  // answers CORS preflights too
+                                    "access-control-allow-methods": "GET, POST, OPTIONS",
+                                    "access-control-allow-headers": "*" } });
   });
   page.on("pageerror", (err) => pageErrors.push(String(err).slice(0, 300)));
   page.on("console", (msg) => {

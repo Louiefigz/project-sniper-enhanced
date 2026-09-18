@@ -103,6 +103,10 @@ def _make_base_4k(path: str) -> None:
          "-pix_fmt", "yuv420p", path], check=True)
 
 
+# The one outside file Studio loads, disclosed in manual/privacy.html.
+_DISCLOSED = frozenset({"https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/MotionPathPlugin.min.js"})
+
+
 @unittest.skipIf(_skip_reason() is not None, _skip_reason() or "")
 class StudioPlayerViewTests(unittest.TestCase):
     """One server + one probe run; every assertion reads the same facts."""
@@ -135,11 +139,15 @@ class StudioPlayerViewTests(unittest.TestCase):
         """The stock HyperFrames preview (the player gate's historical baseline)."""
         # Keep tests out of the operator's default 3990-3999 preview range.
         cls.port = pick_free_port((41000, 41100))
+        # --foreground: without a terminal the stock CLI otherwise re-launches itself detached in
+        # a new session and exits, so the server escaped this cleanup. Its session files go to
+        # this test's folder, not the operator's ~/.local/state.
         cls.server = subprocess.Popen(
             ["node", HYPERFRAMES_BIN, "preview", cls.studio_dir,
-             "--port", str(cls.port), "--no-open"],
+             "--port", str(cls.port), "--foreground", "--no-open"],
             cwd=cls.studio_dir, stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            env={**os.environ, "XDG_STATE_HOME": os.path.join(cls.tmp, "state")},
             start_new_session=True)
         cls.addClassCleanup(cls._stop_server)
         cls._wait_ready()
@@ -195,6 +203,7 @@ class StudioPlayerViewTests(unittest.TestCase):
             "settleMs": _SETTLE_MS,
             "beats": beats,
             "interact": cls.INTERACT,
+            "allowExternal": sorted(_DISCLOSED),  # everything else is answered inside the probe
         }
         config_path = os.path.join(cls.tmp, "probe-config.json")
         with open(config_path, "w", encoding="utf-8") as handle:
@@ -219,9 +228,15 @@ class StudioPlayerViewTests(unittest.TestCase):
         self.assertEqual(len(self.result["beats"]),
                          len(self.manifest["entries"]))
 
+    def test_server_stays_attached_for_cleanup(self) -> None:
+        # Without --foreground the stock CLI re-launches itself detached and exits; the
+        # class cleanup could then never stop the server it started.
+        self.assertFalse(self._server_exited(), "the preview server detached or exited")
+
     def test_stock_page_attempts_analytics(self) -> None:
-        # Negative control for StudioBuyerRoutePrivacyTests: the published page does send
-        # analytics, so the same probe on the adapted runtime could observe a leak.
+        # Negative control for StudioBuyerRoutePrivacyTests: the published page tries to send
+        # analytics (the probe answers those requests locally, so none leaves this Mac), so the
+        # same probe on the adapted runtime could observe a leak.
         self.assertTrue([url for url in self.result["externalRequests"] if "posthog" in url],
                         "the stock Studio page sent no analytics; re-check the privacy gate's premise")
 
@@ -312,9 +327,6 @@ class StudioPlayerViewTests(unittest.TestCase):
 
 _ANALYTICS_KEY = re.compile(r"phc_[A-Za-z0-9]{20,}")
 _SCRIPT_SRC = re.compile(r'<script[^>]+src="(/[^"]+\.js)"')
-# The one outside download Studio makes, disclosed on the privacy page.
-_DISCLOSED = frozenset({"https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/MotionPathPlugin.min.js"})
-
 
 class StudioBuyerRoutePrivacyTests(StudioPlayerViewTests):
     """The player gate through the buyer's route, plus Studio's privacy gate.

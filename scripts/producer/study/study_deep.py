@@ -47,7 +47,8 @@ from study.deep_frames import probe_video  # noqa: E402
 from study.deep_semantics import run_semantics  # noqa: E402
 from study.deep_signals import collect_signals, freeze_runs  # noqa: E402
 from study.deep_text import graphics_text, require_tesseract, states_text  # noqa: E402
-from study.deep_wordlock import load_words, word_lock_stats  # noqa: E402
+from study.deep_wordlock import load_words, sibling_vtt, word_lock_stats  # noqa: E402
+from study.study_admission import admitted_study_input  # noqa: E402
 from study.study_transcribe import (add_asr_arguments, invocation_from_options,  # noqa: E402
                                     use_asr_invocation)
 
@@ -173,6 +174,9 @@ def main() -> int:
         _emit("error", error=f"not a file: {opts.video}")
         return 1
     try:
+        # Keep the original's sibling captions, then study only the admitted snapshot.
+        opts.transcript = opts.transcript or sibling_vtt(opts.video)
+        opts.video = admitted_study_input(opts.video, opts.out_dir)
         with use_asr_invocation(invocation_from_options(opts)):
             run_deep(opts)
     except (OSError, RuntimeError, ValueError) as exc:

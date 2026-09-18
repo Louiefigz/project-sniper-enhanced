@@ -13,6 +13,7 @@ PRODUCER_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PRODUCER_ROOT)
 
 from graphics import graphics_render as gr  # noqa: E402
+from graphics import hyperframes_invocation  # noqa: E402
 from graphics import render_tools as rt  # noqa: E402
 from graphics.comp_capability_artifact import (  # noqa: E402
     composition_paths,
@@ -168,8 +169,11 @@ class GraphicsRuntimeClosureTests(unittest.TestCase):
                     "compositions/card.html", "mp4", {}, output, 30.0)
         command = run.call_args.args[0]
         kwargs = run.call_args.kwargs
-        self.assertEqual(command[:3], [os.path.realpath(paths["SNIPER_NODE_PATH"]),
-                                       os.path.realpath(cli), "render"])
+        # The render runs under the OS network boundary, then the pinned node + CLI.
+        self.assertEqual(command[:3], [hyperframes_invocation.SANDBOX_EXEC, "-f",
+                                       hyperframes_invocation.LOCALHOST_ONLY_PROFILE])
+        self.assertEqual(command[3:6], [os.path.realpath(paths["SNIPER_NODE_PATH"]),
+                                        os.path.realpath(cli), "render"])
         self.assertNotEqual(kwargs["cwd"], runtime)
         self.assertEqual(kwargs["stdin"], gr.subprocess.DEVNULL)
         self.assertNotIn("HOME", kwargs["env"])

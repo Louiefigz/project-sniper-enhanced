@@ -1,6 +1,6 @@
-"""Zoom-pull seam transitions (LIAM-4-MOVES move 1, measured 2026-07-11).
+"""Zoom-pull seam transitions (continuity mechanism CM-1, EDITCRAFT_LESSONS §2.7).
 
-Pins the measured grammar: three variants (punch-cut / whip / settle) with
+Pins the zoom-pull grammar: three variants (punch-cut / whip / settle) with
 band-validated magnitudes, the punch-cut's SEQUENTIAL seam cover, the whip's
 blur-masked peak, longform-only + seam-role lint, budget counting, and the
 1:1 frame-count contract through transitions.py.
@@ -18,7 +18,7 @@ def _ev(variant: str, t: float = 10.0, **extra) -> dict:
 
 
 class ZoomPullParseTests(unittest.TestCase):
-    """zoom_pull.parse_event — variants, measured bands, footprints."""
+    """zoom_pull.parse_event — variants, design bands, footprints."""
 
     def test_defaults_resolve_from_config(self) -> None:
         spec = zp.parse_event(0, _ev("punch-cut"), 60.0)
@@ -169,7 +169,7 @@ class ZoomPullLintTests(unittest.TestCase):
 
     def test_band_violation_is_a_lint_error(self) -> None:
         rep = self._lint([_ev("whip", t=30.0, peakScale=5.0)], "longform")
-        self.assertTrue(any("measured band" in e for e in rep.errors),
+        self.assertTrue(any("design band" in e for e in rep.errors),
                         rep.errors)
 
     def test_zoom_pulls_count_against_the_density_budget(self) -> None:

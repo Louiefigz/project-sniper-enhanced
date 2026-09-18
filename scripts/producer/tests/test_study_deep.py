@@ -297,84 +297,60 @@ class WordLockUnitTests(unittest.TestCase):
         self.assertIsNone(stats["medianAbsDtS"])
 
 
-# Verbatim ``cueTexts`` from the EC1/EC2 deep studies that FALSELY read as a
-# detected caption system (LL-012) — editor UI chrome + file paths OCR'd out
-# of screen-share zones on longforms with NO caption track.
-_EC1_FALSE_CUES = [
-    "a", "om", "e 708 SOR",
-    "B- TI bd a) on Ton Effects Traraitions C ines 0906 (1) (1) Aspect "
-    "ratio: mate...",
-    "(0) On J TI Audio Toa Effects Traraitions C wice in mage, nes 0906 "
-    "(1) (1) presets Aspect ratio: ock mate... Color 700",
-    "TI Be 0906 (1) Data/Projects/ Reo. 709 SOR",
-    "TI ‘Stickers Effects Traraitions o> mage, es 0906 (1) at "
-    "Data/Projects (1) Aspect ratio: i} mate... i Color spece: Rec. 709 SOR",
-    "Tot TI ont Ww mage, (1) Rec. 709 SOR",
-    "TI in mage, nes 0906 (1) Be /Users/example-user/Mov a (1 Aspect "
-    "ratio: Color space: Reo. 709 SOR",
-    "Treraitions a", "SIMPLE", "SIMPLE AS)", "0", "il", "PS", "oe,", "ig",
-    "STRUC E a", "ss", "ig", "ge", "1080P", "xX 1080P", "WHICH", "ig",
-    "a ig", "ig", "ig", "SIMn", "SIMPLE", "ig", "ig", "ig", "wr ig", "ig",
-    "fi", "ig", "an", "as ig", "ig",
+# SYNTHETIC ``cueTexts`` shaped like the LL-012 false positives: OCR'd text
+# from the screen-share region of a long-form with NO caption track. Each list
+# holds 40 cues; most are ordinary on-screen text, and a minority are editor
+# chrome or file paths (list A: 3 path-char cues + 2 chrome-token cues =
+# 0.125; list B: 2 path-char cues + 5 chrome-token cues = 0.175). Original
+# text written for this test — no third-party material.
+_SCREEN_SHARE_CUES_A = [
+    "Welcome back", "Chapter two", "Weekly plan", "Draft outline",
+    "Intro hook", "Section one", "Notes", "Review pass", "Scene list",
+    "Shot three", "Voice take", "Rough cut", "Morning block", "Plan B",
+    "Team sync", "Open questions", "Next steps", "Budget", "Launch",
+    "/Users/editor/Projects/launch", "Q3 goals", "Checklist", "Ideas",
+    "EXPORT_FINAL_V2.MOV", "Script v4", "Topic map", "Outline",
+    "C:\\Clips\\intro", "Frame rate: 30 fps", "Aspect ratio 16:9",
+    "Priorities", "Summary", "Key points", "Wrap up", "Thanks",
+    "Recap", "Part three", "Timing", "Hook ideas", "Closing line",
 ]
-_EC2_FALSE_CUES = [
-    "ora Grap 2024-01-2812-28-| Gra Ge", "mm Ge", "t 10:57", "M wa 9:20",
-    "9:20", "3.) 2)", "we", "SCOR", "SCONFLICTS_IMG_3392 MOV [V] ml",
-    "6 5 MOV [V] Chi", "SCONFLICTS_IMG_3392 MOV i mi", "Wr",
-    "Free Stock Video jo", "Stock Video", "8 Free Stock Video wo HOO",
-    "ree Stock Video", "1.) THE HARD TRU", "i", "if t fi Fa", "a t te 4 s",
-    "66",
-    "2 truths 1 lie Terraria 36 GO TO CHANNEL ANALYTICS G0 TO VIDEO "
-    "ANALYTICS SEE COMMENTS (1)",
-    "Average percentage viewed 2 truths 1 lie Likes 30 GO TO CHANNEL "
-    "ANALYTICS GO TO VIDEO ANALYTICS SEE COMMENTS (1)",
-    "Views how to craft the ankh shield in terraria 22% Average "
-    "percentage viewed 30 2 truths 1 lie Likes GO TO CHANNEL ANALYTICS "
-    "GO TO VIDEO ANALYTICS",
-    "8 0 vee Views how to craft the ankh shield in terraria 22% Average "
-    "percentage viewed 30 2 truths he Terraria Likes TO VIDEO ANALYTICS "
-    "GO TO CHANNEL ANALYTICS",
-    "Ranking by views Views 80 terraspark crafting tree 22% how to craft "
-    "the ankh shield in terraria Average percentage viewed 2 truths 1 he "
-    "Likes",
-    "110f10 Last 48 hours wws Ranking by views terraspark crafting tree "
-    "Views how to craft the ankh shield in ter Average percentage viewed "
-    "22% 2 truths 1 lie Terraria 30 Likes",
-    "WHY?", "=r q a", "SS ba", "We a The Best Worst BA",
-    "wll The Best Worst BA 1216", "The Best Worst BA Ay", "Se", "bi,", "4",
-    "ei a*",
-    "Lost in How Freeze to W 2345 Uncle Roger Found IMPRESSIVE FRIED "
-    "RICE 1253 Winter Bulk Day",
-    "How to NOT ‘reeze to Death! Winter IMPRESSIVE FRIED RICE Uncle "
-    "Roger Found THE MOS\" 7",
-    "in Uncle Roger Found THE MOST ‘Winter Bulk Armes views month ago",
+_SCREEN_SHARE_CUES_B = [
+    "Getting started", "Menu", "Edit", "View", "Window", "Help",
+    "Inspector", "Library", "Sequence one", "Marker", "Title card",
+    "Stock library", "Download settings", "Resolution 1920",
+    "Stickers panel", "Sort files by name", "Track one", "Track two",
+    "Master", "Levels", "Speed", "Crop", "Transform", "Opacity",
+    "Blend mode", "Normal", "Keyframes", "Zoom", "Fit", "Snapping",
+    "/Volumes/Media/raw", "draft_v3_notes", "Playhead", "In point",
+    "Out point", "Duration", "Render", "Preview", "Share", "Done",
 ]
 
 
 class CaptionChromeGateTests(unittest.TestCase):
-    """LL-012: the real EC1/EC2 screen-share false positives must clear the
-    UI-chrome rejection threshold, while genuine caption text stays under."""
+    """LL-012: screen-share false positives (synthetic, same shape) must
+    clear the UI-chrome rejection threshold, while genuine caption text
+    stays under."""
 
-    # Real caption lines of the SAME tutorial (the EC1 VTT) — deliberately
-    # includes the speakable UI vocabulary an editing tutorial legitimately
-    # captions (import / timeline / color / desktop).
+    # Synthetic genuine caption lines of an editing walkthrough — they
+    # deliberately include the speakable UI vocabulary such a walkthrough's
+    # real captions use (import / timeline / color / desktop).
     GENUINE = [
-        "cap cut is without a doubt the best",
-        "beginner-friendly editing program and",
-        "recommend using the downloadable desktop",
-        "content to import your content into cap",
-        "in chronological order on the timeline",
-        "content color and sound with talking",
-        "nice and easy import and organize your",
-        "10-step workflow to create YouTube",
+        "so the first thing we do is import",
+        "drag the clip onto the timeline here",
+        "then we fix the color before anything else",
+        "save it to the desktop for now",
+        "this is where most people get stuck",
+        "trim the start so it opens on action",
+        "and now the whole sequence plays clean",
+        "let me show you why that matters",
     ]
 
-    def test_ec1_screen_share_chrome_rejected(self) -> None:
-        self.assertGreaterEqual(dcap.chrome_cue_fraction(_EC1_FALSE_CUES),
+    def test_screen_share_chrome_list_a_rejected(self) -> None:
+        self.assertGreaterEqual(dcap.chrome_cue_fraction(_SCREEN_SHARE_CUES_A),
                                 DEEP["caption_chrome_max_frac"])
 
-    def test_ec2_screen_share_chrome_rejected(self) -> None:
-        self.assertGreaterEqual(dcap.chrome_cue_fraction(_EC2_FALSE_CUES),
+    def test_screen_share_chrome_list_b_rejected(self) -> None:
+        self.assertGreaterEqual(dcap.chrome_cue_fraction(_SCREEN_SHARE_CUES_B),
                                 DEEP["caption_chrome_max_frac"])
 
     def test_genuine_caption_text_passes(self) -> None:
@@ -384,36 +360,38 @@ class CaptionChromeGateTests(unittest.TestCase):
             self.assertFalse(dcap.cue_is_chrome(cue), cue)
 
     def test_path_chars_and_chrome_tokens_flag_cues(self) -> None:
-        self.assertTrue(dcap.cue_is_chrome("/Users/example-user/Mov"))
-        self.assertTrue(dcap.cue_is_chrome("SCONFLICTS_IMG_3392 MOV [V] ml"))
-        self.assertTrue(dcap.cue_is_chrome("(1) Aspect ratio: mate..."))
+        self.assertTrue(dcap.cue_is_chrome("/Users/editor/Projects"))
+        self.assertTrue(dcap.cue_is_chrome("EXPORT_FINAL_V2.MOV"))
+        self.assertTrue(dcap.cue_is_chrome("(1) Aspect ratio 16:9"))
         self.assertFalse(dcap.cue_is_chrome("ONE TWO THREE"))
         self.assertEqual(dcap.chrome_cue_fraction([]), 0.0)
 
 
-# Verbatim excerpt of the EC1 VTT (the "14-day filmmaker" pitch beat) —
-# the corrected §2.1 citation source (LL-013).
-_EC1_VTT_EXCERPT = """WEBVTT
+# SYNTHETIC word-timed caption file in the roll-up VTT shape (a plain
+# roll-over line, a <c>-tagged payload line, a 10 ms repeat cue, then a
+# repeat line plus a new payload line) — the LL-013 citation source shape.
+# Original text written for this test.
+_SYNTHETIC_VTT_EXCERPT = """WEBVTT
 Kind: captions
 Language: en
 
-00:29:28.480 --> 00:29:30.350 align:start position:0%
-free but first let me tell you about
-14-day<00:29:29.000><c> filmmaker</c><00:29:29.679><c> if</c><00:29:29.760><c> you</c><00:29:29.840><c> want</c><00:29:29.919><c> to</c><00:29:30.039><c> learn</c>
+00:12:05.200 --> 00:12:07.040 align:start position:0%
+and the reason this works is the
+30-second<00:12:05.760><c> checklist</c><00:12:06.300><c> keeps</c><00:12:06.420><c> every</c><00:12:06.560><c> edit</c><00:12:06.700><c> on</c><00:12:06.880><c> track</c>
 
-00:29:30.350 --> 00:29:30.360 align:start position:0%
-14-day filmmaker if you want to learn
+00:12:07.040 --> 00:12:07.050 align:start position:0%
+30-second checklist keeps every edit on track
 
 
-00:29:30.360 --> 00:29:31.870 align:start position:0%
-14-day filmmaker if you want to learn
-everything<00:29:30.720><c> there</c><00:29:30.880><c> is</c><00:29:31.080><c> to</c><00:29:31.279><c> shooting</c><00:29:31.720><c> and</c>
+00:12:07.050 --> 00:12:08.600 align:start position:0%
+30-second checklist keeps every edit on track
+because<00:12:07.400><c> it</c><00:12:07.560><c> is</c><00:12:07.740><c> short</c><00:12:07.980><c> enough</c><00:12:08.320><c> to</c>
 """
 
 
 class VttWordTests(unittest.TestCase):
-    """LL-013: word timings parse straight from a YouTube-style VTT, and a
-    sibling .vtt auto-discovers — the wordLock pass runs with zero API, so
+    """LL-013: ``parse_vtt_words`` reads word timings from a VTT and a
+    sibling .vtt auto-discovers — the wordLock pass runs without an API, so
     word-timed citations can be machine-read instead of hand-copied."""
 
     def setUp(self) -> None:
@@ -421,23 +399,24 @@ class VttWordTests(unittest.TestCase):
         self.addCleanup(shutil.rmtree, self.dir, ignore_errors=True)
         self.vtt = os.path.join(self.dir, "ref.en.vtt")
         with open(self.vtt, "w", encoding="utf-8") as fh:
-            fh.write(_EC1_VTT_EXCERPT)
+            fh.write(_SYNTHETIC_VTT_EXCERPT)
 
-    def test_real_ec1_excerpt_word_timing(self) -> None:
+    def test_synthetic_excerpt_word_timing(self) -> None:
         words = dwl.parse_vtt_words(self.vtt)
         by = {w["word"]: w for w in words}
-        self.assertAlmostEqual(by["14-day"]["start"], 1768.48, places=3)
-        self.assertAlmostEqual(by["filmmaker"]["start"], 1769.0, places=3)
-        self.assertAlmostEqual(by["learn"]["end"], 1770.35, places=3)
+        self.assertAlmostEqual(by["30-second"]["start"], 725.2, places=3)
+        self.assertAlmostEqual(by["checklist"]["start"], 725.76, places=3)
+        self.assertAlmostEqual(by["track"]["end"], 727.04, places=3)
         # roll-up repeat lines contribute no duplicate words
-        self.assertEqual(sum(1 for w in words if w["word"] == "filmmaker"), 1)
+        self.assertEqual(sum(1 for w in words if w["word"] == "checklist"), 1)
 
-    def test_corrected_citation_sits_inside_trigger_band(self) -> None:
-        """The §2.1 pair: word 1768.48 → zoom 1769.39 / graphic 1769.65."""
+    def test_citation_read_from_word_timings_sits_inside_trigger_band(self) -> None:
+        """A trigger phrase starting at 725.2s with inserts at +0.9s / +1.15s
+        is inside ``BROLL['trigger_latency_s']`` (EDITCRAFT_LESSONS §2.1)."""
         words = dwl.parse_vtt_words(self.vtt)
-        start = {w["word"]: w["start"] for w in words}["14-day"]
+        start = {w["word"]: w["start"] for w in words}["30-second"]
         lo, hi = BROLL["trigger_latency_s"]
-        for insert_t in (1769.39, 1769.65):
+        for insert_t in (726.1, 726.35):
             self.assertGreaterEqual(insert_t - start, lo)
             self.assertLessEqual(insert_t - start, hi)
 
@@ -450,12 +429,12 @@ class VttWordTests(unittest.TestCase):
         words, meta = dwl.load_words(video, out_dir, None)
         self.assertEqual(meta.get("source"), "vtt-sibling")
         self.assertTrue(meta["transcriptPath"].endswith("ref.en.vtt"))
-        self.assertTrue(any(w["word"] == "filmmaker" for w in words))
+        self.assertTrue(any(w["word"] == "checklist" for w in words))
 
     def test_explicit_transcript_accepts_vtt_path(self) -> None:
         words, meta = dwl.load_words(os.path.join(self.dir, "none.mp4"),
                                      self.dir, self.vtt)
-        self.assertTrue(any(w["word"] == "14-day" for w in words))
+        self.assertTrue(any(w["word"] == "30-second" for w in words))
         self.assertTrue(meta["transcriptPath"].endswith(".vtt"))
 
     def test_cue_level_vtt_fails_loudly(self) -> None:

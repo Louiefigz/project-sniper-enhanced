@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """graphics_planner_longform — MG-4.3 canvas filter + R14/R18 retarget.
 
-Ground truth (docs/audits/INTRO_MACHINE_VS_PRO_AUDIT.md §2/§6/§7, REFERENCE_STYLE_
-STUDY.md R14/R17/R18): on talking-head LONGFORM the pro NEVER floats a panel
-over the face. Enumerations/stories earn FULL-FRAME whiteboard cutaways,
-theses earn dark takeovers or burned kinetic quotes, and artifact mentions
+Doctrine (REFERENCE_STYLE_STUDY.md R14/R17/R18; audit record in
+docs/audits/INTRO_MACHINE_VS_PRO_AUDIT.md §2/§6/§7): in the cutaway-only
+talking-head LONGFORM grammar no panel floats over the face.
+Enumerations/stories earn FULL-FRAME whiteboard cutaways, theses earn dark
+takeovers or burned kinetic quotes, and artifact mentions
 ("my YouTube channel", "an SEO company") earn receipts b-roll. This module
 retargets the generic trigger→template candidates for that grammar:
 
@@ -67,9 +68,10 @@ from planner import graphics_planner_rules as rules
 # =========================================================================== #
 NATURAL_ASPECT = {"short": "9:16", "longform": "16:9"}
 
-# The R14 contradiction, operator-visible (REFERENCE_STYLE_STUDY.md pair 2):
-# both styles are the operator's own videos. Produced/full longform must carry
-# an explicit choice plus the editorial rationale; lighter/short work retains
+# The R14 contradiction, operator-visible (REFERENCE_STYLE_STUDY.md R22 and
+# the "R14 contradiction" callout): the owner's own long-form edits use more
+# than one legitimate graphic grammar. Produced/full longform must carry an
+# explicit choice plus the editorial rationale; lighter/short work retains
 # the legacy default because the rich longform grammar is not in force there.
 STYLES = ("cutaway-only", "overlay-rich", "face-bridge")
 DEFAULT_STYLE = "cutaway-only"
@@ -382,7 +384,8 @@ def _remap_talking_head(cand: dict, ctx: Ctx, wb_maps: list[dict],
                                          f"at {cover:.1f}s")
         return "reject", reject_cand(cand, "R14: enumeration without 3+ "
                                      "extractable items earns NOTHING over a "
-                                     "talking head (pro control case: agenda)")
+                                     "talking head (R14: an agenda needs "
+                                     "real items)")
     if trigger == "entity" and cand["kind"] in ("icon-badge", "chip-row"):
         return "reject", reject_cand(cand, "R14: no badge/chip floats over the "
                                      "face — showable artifacts ride the "

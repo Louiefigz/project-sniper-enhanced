@@ -49,9 +49,10 @@ class RailPushCompTests(unittest.TestCase):
         self.assertIn('"id":"theme","type":"enum","label":"Skin",'
                       '"default":"glass"', self.html)
 
-    def test_rail_push_carries_the_measured_timings(self) -> None:
-        # T-B: grow 0->33%W (634px of 1920) in 0.33s power-out; headline at
-        # 65% of the grow; rows +0.25s container / +0.40s text after it.
+    def test_rail_push_carries_the_design_timings(self) -> None:
+        # MODULE_STUDY T-B (Sniper design parameters): grow 0->33%W (634px of
+        # 1920) in 0.33s power-out; headline at 65% of the grow; rows +0.25s
+        # container / +0.40s text after it.
         for token in ("const RAIL_PUSH_S = 0.33",
                       "const HEADLINE_AT_GROWTH = 0.65",
                       "const ROW_CONTAINER_DELAY_S = 0.25",

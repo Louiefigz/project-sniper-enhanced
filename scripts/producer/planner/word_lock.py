@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """word_lock — word-locked seams: snap plan seams onto kept-word boundaries.
 
-MODULE_STUDY.md T-G / §5 item 5: every transition start in the reference
-lands on a narration phrase boundary (4/4 spot checks vs the VTT: 25.7 "…about
-to see.", 67.2 "But benchmarks…", 186.0 "This is day one", 187.4 "So that
-was…"). Our graphics ENTRANCES are mostly word-anchored already (triggers are
-transcript-derived), but transitions-stage event times and graphic out-starts
-are not snapped — this util closes that at PLAN time.
+MODULE_STUDY.md T-G / §5 item 5: every seam lands on a boundary between kept
+words — a seam between words reads as the speaker's own punctuation, one
+inside a word clips a sound. Our graphics ENTRANCES are mostly word-anchored
+already (triggers are transcript-derived), but transitions-stage event times
+and graphic out-starts are not snapped — this util closes that at PLAN time.
 
 DETERMINISTIC (code finds WHERE, the brain never picks the numbers): the
 boundaries are the starts/ends of the KEPT words in OUTPUT time — the words

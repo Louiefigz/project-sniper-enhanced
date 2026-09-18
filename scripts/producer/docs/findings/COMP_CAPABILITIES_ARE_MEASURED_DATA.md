@@ -1,6 +1,6 @@
 # Comp capabilities are measured data, not catalog claims
 
-## The night that taught it (2026-07-23)
+## The night that revealed it (2026-07-23)
 
 Five comps failed one at a time through the render/mint cycles. Each failure
 followed the same loop: pick a comp from the catalog, author its spec, mint the

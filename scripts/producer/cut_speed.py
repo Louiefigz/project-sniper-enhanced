@@ -14,7 +14,8 @@ then an in-filter ``trim`` selects the exact window on the (input-seek-rebased)
 timeline before ``setpts`` applies the speed — re-encoded throughout, so the
 stream-copy truncation caveat that bites ``export_mp4.py`` does not apply here.
 
-J-CUT LEADS (LIAM-4-MOVES move 2, additive): a cutTrack range may carry
+J-CUT LEADS (continuity mechanism CM-2, docs/studies/EDITCRAFT_LESSONS.md
+§6.3; additive): a cutTrack range may carry
 ``audioLeadMs`` — the incoming segment's audio PRE-ROLL (source audio from
 before its in-point) starts that early, so sound leads picture at the seam.
 Architecture: the lead is baked into the OUTGOING part's audio TAIL (own

@@ -90,8 +90,8 @@ def _whole_plan_floor(cards: list[tuple[int, dict]], cfg: dict,
     rep.error(
         f"{len(cards)} graphic windows use only {len(distinct)} distinct "
         f"{label} (< floor {floor} = ceil({ratio:g} × {len(cards)})) — drain "
-        "compatible forms before repeating one; the reference uses 20 forms "
-        "across 23 windows (LL-016/LESSON-030, MODULE_CARDS §2)")
+        "compatible forms before repeating one; tokens repeat, layouts do "
+        "not (LL-016/LESSON-030, MODULE_CARDS §2)")
 
 
 def _duration(cards: list[tuple[int, dict]], out_dur: float | None) -> float:

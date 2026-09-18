@@ -24,7 +24,7 @@ focus-shift anchor (which already blurs the base).
 
 And the ``spec.exit`` vocabulary (MODULE_STUDY.md §2 T-D / §5 item 2): a
 comp may exit via a graphics-layer-only blur+fade+recede (``"blur-recede"``,
-``EXIT_BLUR_S`` = 0.15s ≈ 4 frames @30fps — measured 67.12→67.28). The
+``EXIT_BLUR_S`` = 0.15s ≈ 4 frames @30fps — a Sniper design parameter). The
 renderers clamp BEFORE rendering (``apply_exit_on_cut`` runs ahead of
 ``graphics_render``), so the comp re-times its exit to the clamped window and
 the blur ends exactly on the seam — lint's job (``exit_grammar_issues``) is

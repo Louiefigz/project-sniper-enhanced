@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """graphics_planner_style — the overlay-rich (pair-2) longform retarget.
 
-REFERENCE_STYLE_STUDY.md pair 2 (R21-R24 + the R14 CONTRADICTION callout):
-pair 2's editor overlays constantly — two-tier burned text at chest, icon
-stacks in headroom, chips beside the face — and reserves full takeovers for
-section/canvas moments. R14 is therefore a PER-VIDEO STYLE AXIS
+REFERENCE_STYLE_STUDY.md R22-R24 (pair 2, the owner's own long-form) + the
+"R14 contradiction" callout: the overlay-rich grammar overlays constantly —
+two-tier burned text at chest, icon stacks in headroom, chips beside the
+face — and reserves full takeovers for section/canvas moments. R14 is
+therefore a PER-VIDEO STYLE AXIS
 (graphics_style: cutaway-only | overlay-rich), never a universal law. This
 module is the overlay-rich half; graphics_planner_longform stays the
 cutaway-only half (byte-identical to the pre-axis planner) and
@@ -20,9 +21,9 @@ What overlay-rich changes (each PROPOSES only, like all of MG-4):
 * number-payoff lines: the 9:16 stat-card (canvas-dead on 16:9) becomes a
   ``fragment-payoff`` too — setup words small, the number clause as payoff.
 * headroom icon stacks (icon-badge) become legal again over the talking head
-  — pair 2 runs them constantly. The comp is 9:16-AUTHORED but placed by
-  REGION (free_space/graphics_anchors scale the element region, not the
-  canvas), and the pair-2 reference shows the grammar on 16:9, so icon-badge
+  — the overlay-rich grammar runs them constantly. The comp is 9:16-AUTHORED
+  but placed by REGION (free_space/graphics_anchors scale the element region,
+  not the canvas), and the grammar is a 16:9 one (R22-R24), so icon-badge
   is exempted from the MG-4.3 canvas gate IN THIS STYLE ONLY.
 * topic boundaries on a 16:9 target: ``section-takeover`` own-screen chapter
   cards (drifting ghost numeral = chapter ordinal, title lands second)

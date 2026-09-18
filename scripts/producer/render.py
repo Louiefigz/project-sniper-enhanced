@@ -547,7 +547,7 @@ def graphics_track_stage(ctx: RenderCtx, video: str,
             "--cache-dir", os.path.join(SCRIPT_DIR, "..", "..", "templates",
                                         "motion", "renders", "cache"),
             # Eye-trace placements sidecar → out_dir so Audit B finds it
-            # (audit_motion.check_eye_trace — advisory WARN, LIAM move 4).
+            # (audit_motion.check_eye_trace — advisory WARN, eye-trace CM-4).
             "--placements-out", os.path.join(ctx.out_dir,
                                              "graphics_placements.json")]
     # Verify + A3 calibration wiring (occlusion allow-vocabulary, producer

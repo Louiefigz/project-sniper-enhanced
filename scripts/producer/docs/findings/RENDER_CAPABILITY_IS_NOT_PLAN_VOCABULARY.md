@@ -1,6 +1,6 @@
 # Render capability is not plan vocabulary
 
-## The question that taught it (2026-07-28)
+## The question that revealed it (2026-07-28)
 
 An operator asked what sounds like a simple feature question:
 

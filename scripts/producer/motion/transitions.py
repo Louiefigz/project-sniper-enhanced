@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """transitions — seam-cover engine: white flashes + light-leak washes + whoosh SFX.
 
-Research (INTRO_MACHINE_VS_PRO_AUDIT.md §3/§5, REFERENCE_STYLE_STUDY.md R15,
-2026-07-05): every world-change in the pro cut is covered — zero naked butt
-joints. This stage bakes the measured transition grammar, deterministically:
+Doctrine (REFERENCE_STYLE_STUDY.md R15; audit record in
+INTRO_MACHINE_VS_PRO_AUDIT.md §3/§5): a change of world may carry a seam
+cover so it reads as deliberate — no naked butt joints between worlds. This
+stage renders the seam-cover grammar deterministically:
 
 * WHITE FLASH — ~3 frames total at the video's NATIVE fps, centered on the
   seam: one frame ramping toward white (~60%), one FULL-white frame on the
@@ -13,7 +14,7 @@ joints. This stage bakes the measured transition grammar, deterministically:
   band) warm wash that rises FAST and decays SLOW (attack 40% of the window,
   decay 60%), peaking ~78% opacity exactly on the seam. Luma uses screen-blend
   math (``255-(255-Y)*(255-L)/255``) so highlights blow out like a real leak;
-  chroma drifts orange→pink across the wash (the pro's leaks read orange first,
+  chroma drifts orange→pink across the wash (the leak reads orange first,
   pink on the tail). Envelope + drift are pure functions of T — no random.
 * WHOOSH SFX — the audit measured transitions as AUDIOVISUAL: flash/wash
   moments carry −11..−15 dB whoosh peaks against a −40 dB speech-gap floor.
@@ -32,12 +33,12 @@ this primitive only enforces hard sanity (sorted, spaced, in-range).
 
 The ffmpeg-xfade family (stock fades/wipes/slides) was REMOVED 2026-07-11 —
 operator-rejected on sight (FAILURE_LEDGER LL-014). Longform seams use ONLY
-the studied reference grammar (panel sweeps, face-bridged recomposition,
-under-panel cuts, blur-recede, seam-role zoom-pulls); flash/leak stay only
-where already measured legal.
+Sniper's seam grammar (panel sweeps, face-bridged recomposition, under-panel
+cuts, blur-recede, seam-role zoom-pulls — MODULE_STUDY.md §2,
+EDITCRAFT_LESSONS.md §2.7); flash/leak stay only at their seam role.
 
-* ZOOM-PULL (kind "zoom-pull", LIAM-4-MOVES move 1) — an EASED digital zoom
-  bridging the seam, three measured variants (punch-cut / whip / settle)
+* ZOOM-PULL (kind "zoom-pull", continuity mechanism CM-1) — an EASED digital
+  zoom bridging the seam, three variants (punch-cut / whip / settle)
   rendered by ``motion/zoom_pull.py`` (punch-engine expression reuse; the
   punch-cut's sequential light-leak/flash cover rides the same event).
   Longform-only at the lint gate; budget-counted with the other seams.
@@ -150,7 +151,7 @@ def parse_events(raw: object, duration: float) -> list[TransitionEvent]:
         if isinstance(kind, str) and kind.startswith("xfade:"):
             raise ValueError(
                 f"event[{i}]: kind {kind!r} — operator-rejected (LL-014): "
-                "use the studied longform transition grammar (panel sweeps, "
+                "use Sniper's longform transition grammar (panel sweeps, "
                 "face-bridged recomposition, under-panel cuts, blur-recede, "
                 "seam-role zoom-pulls), never stock wipes/slides/dissolves")
         if kind not in KINDS:
@@ -226,8 +227,9 @@ def _leak_geq(e: TransitionEvent) -> str:
 
 
 def _cover_events(events: list[TransitionEvent]) -> list[TransitionEvent]:
-    """Synthesized flash/leak covers for punch-cut zoom-pulls (LIAM move 1:
-    the zoom completes BEFORE the seam; the cut itself is covered — zoom and
+    """Synthesized flash/leak covers for punch-cut zoom-pulls (CM-1,
+    EDITCRAFT_LESSONS §2.7: the zoom completes BEFORE the seam; the cut
+    itself is covered — zoom and
     cover are sequential, one event). SFX rides the parent event."""
     return [TransitionEvent(e.out_time, e.zoom.cover, False)
             for e in events

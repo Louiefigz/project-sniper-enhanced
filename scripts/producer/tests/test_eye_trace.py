@@ -1,4 +1,5 @@
-"""Eye-trace continuity tests (LIAM move 4 — gaze bias + Audit B advisory).
+"""Eye-trace continuity tests (continuity mechanism CM-4, EDITCRAFT_LESSONS §7.1 —
+gaze bias + Audit B advisory).
 
 Covers the four legs of the primitive:
   * GAZE READ — planner ``gazeXY`` wins, ``faceBBoxNorm`` center falls back,

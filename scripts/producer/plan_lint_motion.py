@@ -679,14 +679,14 @@ def _check_transition_kind_sfx(ev: dict, tag: str, mode: str, rep: Any) -> None:
     """Kind vocabulary (flash/leak/zoom-pull — the xfade family is BANNED in
     all modes, LL-014) + the SFX slot (bool, or a named one-shot from
     audio/sfx_library). A zoom-pull runs the executor's own validator
-    (``motion.zoom_pull.lint_event``: longform-only, measured bands,
+    (``motion.zoom_pull.lint_event``: longform-only, design bands,
     a-roll<->b-roll seam-role advisory) — lint and primitive cannot drift;
     density stays with ``check_transitions`` (zoom-pulls are budget-counted
     like every seam cover)."""
     cfg = MOTION["transitions"]
     kind = ev.get("kind")
     if isinstance(kind, str) and kind.startswith("xfade:"):
-        rep.error(f"{tag}: {kind!r} — operator-rejected: use the studied "
+        rep.error(f"{tag}: {kind!r} — operator-rejected: use Sniper's "
                   "longform transition grammar (FAILURE_LEDGER LL-014): panel "
                   "sweeps, face-bridged recomposition, under-panel cuts, "
                   "blur-recede, seam-role zoom-pulls; never stock "
@@ -744,8 +744,8 @@ def check_transitions(plan: dict, out_dur: float, mode: str, rep: Any) -> None:
 def check_word_lock(plan: dict, words_out: list[dict], rep: Any) -> None:
     """WARN on seams sitting off the kept-word grid (MODULE_STUDY.md T-G).
 
-    Every transition in the reference lands on a narration phrase boundary
-    (4/4 VTT spot checks), so ``transitions[].outTime`` and
+    A seam between words reads as the speaker's own punctuation and one
+    inside a word clips a sound, so ``transitions[].outTime`` and
     ``graphicsTrack[].outStart`` further than
     ``MOTION['word_lock']['warn_off_boundary_s']`` (150ms) from the nearest
     KEPT-word boundary draw a WARN. Deterministic: ``words_out`` are the kept
@@ -772,8 +772,8 @@ def check_word_lock(plan: dict, words_out: list[dict], rep: Any) -> None:
                      "boundary; MODULE_STUDY T-G)")
 
 
-# Editorial bounds for the plan-level ``baselineLook`` key (R16: the pro's
-# baseline is a tight chest-up recrop + warm grade; rendered by
+# Editorial bounds for the plan-level ``baselineLook`` key (R16: the
+# baseline look is a tight chest-up recrop + warm grade; rendered by
 # baseline_look.py, whose hard-safety ceiling is wider at 2.0).
 BASELINE_LOOK_ZOOM = (1.0, 1.5)
 BASELINE_LOOK_CENTER = (0.2, 0.8)

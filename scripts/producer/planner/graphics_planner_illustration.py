@@ -32,7 +32,7 @@ from planner.graphics_planner_longform import HOOK_WINDOW_S, Ctx
 from producer_config import BROLL
 
 # Hold/gap knobs live in producer_config.BROLL (consolidated b-roll lane
-# doctrine, docs/studies/EDITCRAFT_LESSONS.md 2026-07-11); module names kept.
+# doctrine, docs/studies/EDITCRAFT_LESSONS.md §2.4); module names kept.
 ILLUSTRATION_HOLD_S = BROLL["illustration_hold_s"]        # = receipts hold
 ILLUSTRATION_MIN_GAP_S = BROLL["illustration_min_gap_s"]  # 1 slot per 30s body
 RAWSPAN_WORDS = 16                 # transcript context the brain reads to decide

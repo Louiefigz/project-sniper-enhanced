@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """claims_contract — the pre-render TRUTH gate on claim-bearing card copy.
 
-Closes MODULE_STUDY.md §1.2 gap #11 at the CHEAP point (§5 item 6): his
-pipeline runs "factual claims vs source docs" only POST-render, paying a full
-render per bug; ours gates the PLAN. Mirrors ``hook_contract.py``'s shape —
-content-derived obligations, a pure check + a CLI run in the SKILL step-4
-convergence loop as a MANDATORY pre-render gate.
+Implements MODULE_STUDY.md §1.2 #11 at the CHEAP point (§5.6, item 6): a
+false number on a card is visible in the PLAN as text beside a transcript
+window, so it is caught there instead of after paying for a full render.
+Mirrors ``hook_contract.py``'s shape — content-derived obligations, a pure
+check + a CLI run in the SKILL step-4 convergence loop as a MANDATORY
+pre-render gate.
 
 THE SPLIT (no regex for semantics): this module does ONLY the deterministic
 half — every NUMERIC token in a card's copy must appear in the transcript

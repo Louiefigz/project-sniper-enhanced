@@ -104,14 +104,15 @@ def _focus_hold_band(op: Any) -> tuple | None:
 
 
 def check_focus_ops(plan: dict, rep: Any) -> None:
-    """Image-focus operators on b-roll inserts (LIAM move 3; EC2 vocabulary).
+    """Image-focus operators on b-roll inserts (continuity mechanism CM-3,
+    docs/studies/EDITCRAFT_LESSONS.md §7.4).
 
     Hard shape/vocabulary/window rules run through the EXECUTOR's own
     validator (``broll.focus_ops.parse_ops`` — broll_insert parses the same
-    way, no drift). Doctrine on top: the ops are EC2's produced-graphics
-    vocabulary (EC1 uses zero), so a treatment whose graphics lane is off
-    (clean-cut) may not carry them — ERROR; holds outside the measured bands
-    WARN (legal, off-grammar).
+    way, no drift). Doctrine on top: the ops are part of the produced
+    graphics stack, so a treatment whose graphics lane is off (clean-cut)
+    may not carry them — ERROR; holds outside the design bands WARN (legal,
+    off-grammar).
     """
     from broll.focus_ops import parse_ops
     entries = [(i, b) for i, b in enumerate(plan.get("brollTrack") or [])
@@ -125,7 +126,8 @@ def check_focus_ops(plan: dict, rep: Any) -> None:
         if not flags["graphics"]:
             rep.error(f"{tag}: focusOps under treatment {treatment!r} — the "
                       "image-focus vocabulary is part of the produced "
-                      "graphics stack (EC2), not a clean cut")
+                      "graphics stack (EDITCRAFT_LESSONS §7.4), not a clean "
+                      "cut")
             continue
         try:
             dur = float(b.get("outEnd", 0)) - float(b.get("outStart", 0))
@@ -137,8 +139,9 @@ def check_focus_ops(plan: dict, rep: Any) -> None:
             band = _focus_hold_band(op)
             if band and not (band[0] <= op.hold_s <= band[1]):
                 rep.warn(f"{tag}: {op.op} hold {op.hold_s:g}s outside the "
-                         f"measured band [{band[0]},{band[1]}]s — legal but "
-                         "off the measured grammar")
+                         f"design band [{band[0]},{band[1]}]s — legal but "
+                         "off the focus-operator grammar "
+                         "(EDITCRAFT_LESSONS §7.4)")
 
 
 def check_slipcover(plan: dict, manifest: dict, rep: Any) -> None:

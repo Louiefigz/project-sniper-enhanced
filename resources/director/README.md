@@ -165,9 +165,12 @@ establish before its promise makes sense.
 
 New Director decisions use plan schema v2 (`src/lib/producer/contracts/native-director-v2.ts`,
 `schemas/producer/native-director-v2.schema.json`). Plans saved before 2026-09-18
-used schema v1 with a different audit key set; the parser still reads them so a
-retained record can be inspected against its own frozen library, but new
-decisions are always v2.
+used schema v1 with a different audit key set. The parser still reads a v1 plan
+and re-validates it against its own frozen library with the same binding and
+audit rules, but the full cold check of a saved Director record
+(`readNativeDirector`) refuses one: its frozen prompts were built from wording
+that is no longer in the product and cannot be reproduced. New decisions are
+always v2.
 
 ## Sources
 

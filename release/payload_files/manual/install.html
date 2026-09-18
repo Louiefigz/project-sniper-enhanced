@@ -11,102 +11,101 @@
 <header class="top">
   <p class="kicker">Manual · 2 of 10</p>
   <h1>Install, first launch, and signing in</h1>
-  <p class="lede">About fifteen minutes, most of it downloads. The installer is safe to run again if it stops.</p>
+  <p class="lede">Most of the time is downloads. The installer is safe to run again: it redoes only what did not finish.</p>
 </header>
 <h2>Step 0 — check the download is the file it should be</h2>
-<p>Beside the download there is a checksum file. Compare it with the archive you actually
-received:</p>
+<p>Beside the download there is a checksum file. Compare it with the archive you received:</p>
 <pre><code>shasum -a 256 project-sniper-&lt;version&gt;-mac.zip</code></pre>
 <p>The value must match the one in <code>SHA256SUMS</code>. If it does not, the file is
-incomplete or altered — download it again and do not install it.</p>
-<div class="note">
-<p>Do not use any hash printed inside the archive to check the archive. That cannot work.
-The real value is only ever published outside it.</p>
-</div>
+incomplete or altered — download it again and do not install it. The real checksum is
+only ever published outside the archive; a hash inside a file cannot verify that file.</p>
 
 <h2>Step 1 — unzip somewhere sensible</h2>
-<p>Put the folder where you keep applications or work — your home folder, or
-<code>~/Applications</code>. Two constraints:</p>
+<p>Your home folder or <code>~/Applications</code> is fine. Two constraints:</p>
 <ul>
-  <li><strong>Not inside a path containing</strong> a comma, an apostrophe, a colon or a
-  backslash. Those characters break the audio-cleanup filter, because it embeds this
-  folder's path. Spaces and accented letters are fine. The installer refuses and tells
-  you if the path is unusable.</li>
-  <li>Not on an external drive you unplug, and not in a folder that syncs to cloud storage
-  — the render caches are large and will fight the sync.</li>
+  <li><strong>No comma, apostrophe, colon or backslash in the folder path.</strong> The
+  audio-cleanup filter embeds this folder's path and cannot handle those characters. Spaces
+  and accented letters are fine. The installer checks and tells you if the path is unusable;
+  this is a known limit, not something the installer fixes.</li>
+  <li>Not on a drive you unplug, and not in a folder that syncs to cloud storage — render
+  caches are large and will fight the sync.</li>
 </ul>
 
-<h2>Step 2 — install what you do not already have</h2>
-<p>The installer requires four free tools to be present and installs everything else
-itself. If any are missing it stops and tells you the one command to run:</p>
-<pre><code># Node 22 or newer  —  https://nodejs.org  (choose LTS)
-# Python 3.11 or newer  —  https://www.python.org/downloads/macos/
-brew install ffmpeg
-brew install whisper-cpp</code></pre>
+<h2>Step 2 — the four tools you install yourself</h2>
+<p>Sniper installs everything else, but it needs these first. The installer checks each one
+and stops with the exact next step if something is missing or too old.</p>
+<table>
+<tr><th>Tool</th><th>Version</th><th>How</th></tr>
+<tr><td>Node</td><td>22 or newer; 24 recommended</td><td><a href="https://nodejs.org">nodejs.org</a> — choose LTS</td></tr>
+<tr><td>Python</td><td>3.12 or newer (3.14.4 is the version tested)</td><td><a href="https://www.python.org/downloads/macos/">python.org</a></td></tr>
+<tr><td>ffmpeg</td><td>with libass, librubberband, libzimg, libx264</td><td><code>brew install ffmpeg</code></td></tr>
+<tr><td>whisper-cpp</td><td>any current</td><td><code>brew install whisper-cpp</code></td></tr>
+</table>
+<p>The <code>brew</code> commands need <a href="https://brew.sh">Homebrew</a>. If you don't have
+it, the installer says so rather than failing on a missing command. If you installed ffmpeg
+some other way, the installer checks that your copy actually has every filter the renderer
+uses, and names any that are missing.</p>
 
-<h2>Step 3 — run the installer</h2>
-<pre><code>install/install.command</code></pre>
-<p>In Finder you can double-click it. macOS may warn that it is from an unidentified
-developer; right-click and choose <em>Open</em> to allow it, which is the normal macOS
-prompt for a downloaded script.</p>
-<p>It has eight steps and prints each one. It installs into this folder's
-<code>runtime/</code> directory:</p>
+<h2>Step 3 — run the installer and choose your subscription</h2>
+<pre><code>install/install.command --provider codex     # or: --provider claude</code></pre>
+<p>Double-clicking it in Finder also works; it then asks which subscription to use. macOS may
+warn that a downloaded script is from an unidentified developer — right-click it and choose
+<em>Open</em>, the normal macOS prompt for a downloaded script.</p>
+<p>What it does, in order:</p>
 <ol>
-  <li>Checks Node, Python, ffmpeg and whisper-cli.</li>
-  <li>Installs the app's two dependency sets.</li>
-  <li>Creates the Python environment from a pinned list, so you get the exact package
+  <li>Checks the four tools above, including ffmpeg's features.</li>
+  <li>Installs the app's two dependency sets into <code>app/node_modules</code> and
+  <code>app/templates/motion/node_modules</code>.</li>
+  <li>Creates <code>app/.venv</code> from a pinned list, so you get exactly the Python package
   versions this release was tested with.</li>
-  <li>Downloads the exact rendering browser (about 150 MB). Sniper deliberately never
-  downloads a browser during a render, so this has to succeed once.</li>
-  <li>Downloads the speech model (about 465 MB) and verifies its checksum.</li>
-  <li>Installs the pinned Codex and Claude CLIs <em>inside this package</em>.</li>
-  <li>Writes this install's settings and creates <code>~/ProjectSniper</code>.</li>
-  <li>Builds the rendering runtime and runs the checker.</li>
+  <li>Downloads the exact rendering browser into <code>runtime/browser</code>.</li>
+  <li>Puts the speech model in <code>runtime/whisper</code>. If an identical copy is already on
+  your Mac it reuses it; otherwise it downloads about 465 MB. The file must match its recorded
+  checksum or the install stops.</li>
+  <li>Installs the pinned Codex and Claude CLIs into <code>runtime/cli</code>.</li>
+  <li>Writes this install's settings to <code>runtime/sniper.env</code>.</li>
+  <li>Builds the rendering runtime.</li>
+  <li>Builds the app. This needs no internet connection.</li>
+  <li>Runs the checker.</li>
 </ol>
 <div class="ok">
-<p><strong>If it stops partway, run it again.</strong> Every step checks what is already
-correct and skips it. It never deletes work you already have.</p>
+<p><strong>If it stops, run it again.</strong> Each step records what it finished with. A step
+that did not finish — or whose inputs changed — is redone; a finished one is skipped. An
+interrupted model download resumes from where it stopped. Your own settings in
+<code>runtime/sniper.local.env</code> are never overwritten.</p>
 </div>
 
-<h2>Step 4 — sign in to Codex or Claude</h2>
-<p>You only need one. Run the command for the one you use, from Terminal in this folder:</p>
-<pre><code># Codex
-runtime/cli/node_modules/.bin/codex login
-
-# Claude
-runtime/cli/node_modules/.bin/claude auth login</code></pre>
-<div class="note">
-<p><strong>Why the long path.</strong> These are this package's own copies, pinned to the
-exact versions this release accepts, with their own settings folder under
-<code>runtime/</code>. Signing in this way does not change your existing Codex or Claude
-login, and an auto-update to your own CLI cannot break Sniper.</p>
-</div>
-<p>You will be asked to authorise in a browser, using the subscription you already pay
-for. Sniper refuses an API-key login on purpose: it is built to use your subscription,
-not to bill you per call.</p>
+<h2>Step 4 — sign in</h2>
+<pre><code>install/sign-in.command</code></pre>
+<p>This signs in to the subscription you chose, using this package's own copy of the CLI and
+its own settings folder. Your existing Codex or Claude setup and login are not used or
+changed. A browser window asks you to authorise with the subscription you already pay for.</p>
+<ul>
+  <li><strong>Codex</strong> keeps this login in <code>runtime/codex-home</code>.</li>
+  <li><strong>Claude</strong> keeps it in your macOS Keychain as its own item, separate from
+  any Claude login you already have. <code>install/uninstall.command</code> signs it out.</li>
+</ul>
+<p>Sniper accepts only a subscription login. An API-key login is refused on purpose — Sniper
+does not bill per call. To switch subscription later: <code>install/use-provider.command claude</code>
+(or <code>codex</code>), then sign in again.</p>
 
 <h3>Choosing the model</h3>
-<p>Sniper sends an explicit model with every request rather than inheriting whatever your
-CLI defaults to. This release's defaults are Opus for Claude, and
-<code>gpt-5.6-sol</code> at the highest reasoning setting for Codex. To use a different
-Codex model — Aaron's own preference is GPT-6 Astra — add one line to
-<code>app/.env.local</code>:</p>
+<p>Sniper sends an explicit model with every request. This release's defaults are Opus for
+Claude and <code>gpt-5.6-sol</code> at the highest reasoning setting for Codex. Aaron's own
+preference is Codex with GPT-6 Astra; to use a different Codex model, create
+<code>runtime/sniper.local.env</code> containing one line:</p>
 <pre><code>SNIPER_CODEX_MODEL=gpt-6-astra</code></pre>
-<p>Use the identifier your plan actually exposes. Not every subscription tier includes
-every model; if the model is unavailable the provider rejects the request and Sniper
-reports it rather than silently downgrading.</p>
+<p>Use the identifier your plan actually offers. Not every plan includes every model; if yours
+does not, the provider rejects the request and Sniper reports it rather than switching to a
+different model.</p>
 
-<h2>Step 5 — start it</h2>
-<pre><code>install/start.command</code></pre>
-<p>It waits until the app answers, then opens <code>http://127.0.0.1:3000</code>. If the
-port is busy it names the program holding it. Stop it with
-<code>install/stop.command</code>.</p>
-<p>The app listens on loopback only, so nothing else on your network can reach it.</p>
-
-<h2>If the checker reports a problem</h2>
-<pre><code>install/doctor.command</code></pre>
-<p>It prints the actual resolved path for every component and marks the failing lines.
-<a href="troubleshooting.html">When something goes wrong</a> lists what each message means.</p>
+<h2>Step 5 — check, then start</h2>
+<pre><code>install/doctor.command
+install/start.command</code></pre>
+<p>The checker asks the product's own code what it would use, runs a short real transcription
+of speech it generates on your Mac, and signs in the way a real edit does, without running an
+edit. <code>start.command</code> waits until the app is serving <em>this</em> build, then opens
+<code>http://127.0.0.1:3000</code>. If the port is busy it names the program holding it.</p>
 
 <p class="next"><strong>Next:</strong> <a href="first-edits.html">Your first three edits &rarr;</a></p>
 <footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>

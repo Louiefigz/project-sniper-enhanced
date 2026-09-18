@@ -11,7 +11,7 @@ description: >
   best N shorts from this recording", "break this recording into segments", "turn
   these clips into a short", or feedback on a previous render ("the hook card is
   too wordy", "let 0:31 breathe"). Do NOT trigger for building/modifying the
-  SNIPER app itself, or for script WRITING (that's the rag-system's domain).
+  SNIPER app itself, or for script WRITING (that is outside this product).
 ---
 
 # PRODUCER — Codex / Claude skill → deterministic video + HyperFrames Studio
@@ -335,9 +335,9 @@ than importing another toolkit's runtime, fixed layouts, mandatory extra renders
 or duplicate editor.
 The legacy short-form scaffold is not the new shorts workflow.
 
-For source examples of restrained versus produced Shorts and catalog fit, read
-`docs/studies/SHORTS_STYLE_SELECTION_2026-09-10.md` when choosing that treatment.
-Its references support planning; they do not qualify a production template.
+For examples of restrained versus produced Shorts and catalog fit, use the packaged
+[format foundations](../../../resources/references/shorts/FORMAT_FOUNDATIONS.md) and the
+reference cases it names. They support planning; they do not qualify a production template.
 
 **Explicit native-project routing:** when the operator has selected the native
 HyperFrames composition route, use that project's approved native direction and

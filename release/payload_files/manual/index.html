@@ -65,12 +65,13 @@ purchase — see <a href="privacy.html">what leaves your Mac</a>.</td></tr>
 <h2>What you need</h2>
 <table>
 <tr><th>Requirement</th><th>Detail</th><th>Cost to you</th></tr>
-<tr><td>A Mac</td><td>Apple silicon (M-series). The only qualified baseline is macOS 26
-on Apple silicon. Intel Macs and older macOS are untested, not blocked.</td><td>—</td></tr>
+<tr><td>A Mac</td><td>Apple silicon (M-series). So far Sniper has only been run on a developer
+Mac with macOS 26 on Apple silicon; that is not yet a qualified buyer baseline. Intel Macs and
+older macOS are untested, not blocked.</td><td>—</td></tr>
 <tr><td>Disk space</td><td>About 4 GB for the install, plus room for your projects.
 Leave at least 20 GB free; a full-length render uses a lot of temporary space.</td><td>—</td></tr>
 <tr><td>Node 22 or newer</td><td>Free, from nodejs.org. Node 24 is recommended.</td><td>Free</td></tr>
-<tr><td>Python 3.11 or newer</td><td>Free, from python.org.</td><td>Free</td></tr>
+<tr><td>Python 3.12 or newer</td><td>Free, from python.org. 3.14.4 is the version tested.</td><td>Free</td></tr>
 <tr><td><code>ffmpeg</code> and <code>whisper-cpp</code></td><td>Free, one Homebrew
 command each. The installer tells you if they are missing.</td><td>Free</td></tr>
 <tr><td><strong>A Codex or Claude subscription</strong></td><td>This is the part that
@@ -88,10 +89,11 @@ includes every model. Both routes are supported and documented.</p>
 
 <div class="warn">
 <p><strong>An unusual requirement, stated plainly.</strong> This release only accepts one
-exact version of each provider CLI. The installer downloads those exact versions into
-this package and points Sniper at them, so your own <code>codex</code> or
-<code>claude</code> installation is left alone and an auto-update to it cannot break
-Sniper. The exact versions are in <code>RELEASE.json</code>.</p>
+exact version of each provider CLI. The installer installs those exact versions inside this
+folder, and you sign in to them with <code>install/sign-in.command</code>, which keeps its own
+settings. Your own <code>codex</code> or <code>claude</code> installation and login are left
+alone, and an auto-update to them cannot break Sniper. The exact versions are in
+<code>RELEASE.json</code>.</p>
 </div>
 <footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>
 </div>

@@ -1,48 +1,45 @@
 # Release notes
 
-## 0.1.0-rc1 — release candidate, not for sale
+## 0.1.0-rc3 — release candidate, not for sale
 
-First assembled package. Previously Project Sniper could only be set up by a developer
-working in the source tree; there was no archive, no installer and no manual.
+### Product changes
+- **Neutral names.** Styles, paces, presets, compositions, lint profiles and every
+  document now use neutral names (`restrained`, `punch`, `slideware`, `module-*`).
+  Existing projects convert with the maintainer tool `release/normalize_project.py`.
+- **Original Director library** (`app/resources/director/`): the hook anchors, formats,
+  reference openings and training pairs the Director uses. No other repository is read.
+- **Original reference library** (`app/resources/references/`): worked examples of
+  editing mechanisms with frames rendered from Sniper's own templates.
+- **The app builds offline.** Interface fonts are vendored; `next build` no longer
+  contacts Google Fonts.
 
-### New
-- **A real installer.** `install/install.command` installs both Node dependency roots,
-  a Python environment from a pinned list, the exact rendering browser, the speech model
-  and the pinned provider CLIs — all inside the package's own `runtime/` folder. It is
-  safe to run again and resumes where it stopped.
-- **Pinned provider CLIs, installed locally.** This release admits exactly one version of
-  the Codex CLI and one of the Claude CLI. Those exact versions are now installed inside
-  the package with their own settings folder and their auto-updater disabled, so your own
-  CLI installation and login are untouched and an update to it cannot break Sniper.
-- **A checker that asks the product, not a script.** `install/doctor.command` calls the
-  product's own resolvers to report which browser, ffmpeg, node, speech model and runtime
-  a render would actually use, and reports optional features as available, gated or
-  needing a key rather than advertising them.
-- **A complete offline manual** at `START-HERE.html`, in ten pages, with no links to
-  anything you have to log in to.
-- **Redacted diagnostics**, safe cache cleanup that lists candidates and sizes first, and
-  an uninstall that leaves your videos alone.
+### Installer
+- Builds the app during install, so `start.command` has something to start.
+- Each step records what it finished with and is redone when its inputs change or it
+  never finished. The speech model is reused from an identical copy on the Mac, resumes
+  an interrupted download, and fails the install on a checksum mismatch.
+- The chosen subscription is recorded and used consistently by sign-in, the checker and
+  the app. `sign-in.command`, `editor.command` and `use-provider.command` run the pinned
+  CLIs with this package's own settings.
+- `start.command` confirms it is serving this install's build; `stop.command` signals
+  only a process it can prove is this install's app.
+- Python 3.12 is the minimum (the locked numpy, scipy and PyWavelets need it).
+- Finder-launched scripts now find Homebrew tools.
 
-### Fixed
-- **Python dependencies are now pinned.** `requirements.txt` pinned almost nothing, so two
-  installs a month apart produced different package versions — including a major
-  `anthropic` version jump. The installer now installs `install/requirements.lock.txt`.
-- **The rendering browser is now supplied.** The product resolves
-  `chrome-headless-shell` from a user cache and refuses to download one during a render.
-  Previously that only worked on a machine that happened to have the right build cached.
-  The installer provisions the exact pinned build and points the product at it.
-- **The install path is validated.** A path containing `,` `'` `:` or `\` silently broke
-  the `voice-rnn` audio cleanup preset. The installer now refuses such a path up front and
-  explains why, and the checker re-checks it.
+### Checker
+- The editor-brain check uses the same admission code as a real edit, for the provider
+  you chose. It no longer reports an API-key or signed-out CLI as ready.
+- The speech check verifies the model's checksum and transcribes a spoken sentence.
 
-### Known limits in this candidate
-- Not qualified for sale. No clean-Mac install test, no full-length or Short output
-  qualification, no delivery test. `RELEASE.json` records this.
-- Licence terms are a draft. See `PENDING-OWNER-DECISIONS.txt`.
-- Teacher-named identifiers remain in the shipped source. See `PENDING-RENAME.txt`.
-- No sample clip is included; no footage is cleared for redistribution.
-- The music bed asset is withheld pending provenance and a listening check.
-- `next build` still fetches three fonts from Google Fonts, so building the web UI
-  offline fails. The installer does not build it, and the CLI route does not need it.
-- The `separate` audio preset needs Demucs, which is not installed. The other three
-  cleanup presets work.
+### Diagnostics, cleanup, uninstall
+- Diagnostics contain structured facts only, not app-log text, unless you ask for it.
+- Cache cleanup refuses to run while a render is active.
+- Uninstall signs out the logins made for Sniper before removing files.
+
+### Known limits
+- Not qualified for sale. See `PENDING-OWNER-DECISIONS.txt` and `RELEASE.json`.
+- No sample clip is included.
+- The `separate` audio preset needs Demucs, which is not installed.
+
+## 0.1.0-rc2 and rc1
+Superseded candidates; their archives and evidence are preserved unchanged.

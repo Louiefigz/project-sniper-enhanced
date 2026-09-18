@@ -95,9 +95,10 @@ somewhere other than the default.</p>
 
 <h2>Uninstall</h2>
 <pre><code>install/uninstall.command</code></pre>
-<p>It asks you to type <code>REMOVE</code>, then deletes only what the installer created:
-<code>runtime/</code>, the two <code>node_modules</code> folders and the Python
-environment. Then delete the folder.</p>
+<p>It asks you to type <code>REMOVE</code>, signs out the Codex or Claude login you made for
+Sniper (including the Claude login's Keychain item), then deletes only what the installer
+created: <code>runtime/</code>, the two <code>node_modules</code> folders, the Python environment,
+the app build and the render caches. Then delete the folder.</p>
 <p>It does <strong>not</strong> touch your videos in <code>~/ProjectSniper</code>, your
 own Node, Python, Homebrew, ffmpeg or whisper install, or your global Codex and Claude
 CLIs and their logins.</p>

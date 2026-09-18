@@ -349,4 +349,4 @@ M ≤ 2 days, L > 2 days. Every item names its files.
 **Deliberately not adopted:** agent-swarm rendering (his own cost data argues against it);
 fresh per-video comp authoring (producer-study mints comps instead); post-render-only QC
 (inverts our cheapest-failure-first architecture); research/fact pipeline before scripting
-(rag-system's domain, not PRODUCER's).
+(outside this product's scope).

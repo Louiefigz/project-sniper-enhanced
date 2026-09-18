@@ -303,4 +303,4 @@ text; they verify orchestration and freshness, not visual quality. No new custom
 component, experimental promotion, paid strategy session or rendered reproduction
 is claimed by those tests. A real source/reference pair is needed for that review.
 
-The first real case is [LF01: screen-share-led long-form with a dramatic opening](../studies/longform-visual-playbook/README.md). It includes 23 directing sections, all 222 reviewed state representatives, 101 selected native frames, and eight inspected catalog sources.
+The packaged long-form library starts with [LF01: chapter a long explanation into steps](../../resources/references/longform/cases/LF01.json), an original case with frames rendered from Sniper's own pipeline template. It illustrates a mechanism; it is not a reviewed real-source reproduction.

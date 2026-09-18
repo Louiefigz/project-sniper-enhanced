@@ -10,6 +10,7 @@ import { executeNativeShortCommand } from "../../../../scripts/producer/native-s
 import { longformInputPin, readLongformPacket, writeLongformPacket } from "../longform-strategy-packet";
 import { longformReferenceInputs } from "../longform-reference-inputs";
 import { loadReferenceStrategyLibrary } from "../reference-strategy-library";
+import { LONGFORM_LIBRARY } from "../reference-library-paths";
 import { pythonInterpreter, SCRIPTS_DIR } from "@/app/api/_lib/spawn-python";
 
 function fixture() {
@@ -91,10 +92,10 @@ test("a newly added reference invalidates the previous complete-library packet",
       mkdirSync(path.dirname(destination), { recursive: true }); cpSync(pin.path, destination);
     }
     const prepared = prepareNativeLongformRequest(f.producerDir, repo);
-    const manifest = path.join(repo, "docs/studies/longform-visual-playbook/manifest.json");
+    const manifest = path.join(repo, LONGFORM_LIBRARY, "manifest.json");
     const original = readFileSync(manifest, "utf8");
     const changed = JSON.parse(original);
-    changed.cases.push({ id: "LF02", case_path: "docs/studies/longform-visual-playbook/cases/LF02.json" });
+    changed.cases.push({ id: "LF02", case_path: path.join(LONGFORM_LIBRARY, "cases/LF02.json") });
     writeFileSync(path.join(path.dirname(manifest), "cases/LF02.json"), JSON.stringify({ id: "LF02", title: "TEST additional research", beats: [] }));
     writeFileSync(manifest, JSON.stringify(changed));
     assert.throws(() => checkNativeLongformRequest(prepared.directory), /input changed|library changed/);

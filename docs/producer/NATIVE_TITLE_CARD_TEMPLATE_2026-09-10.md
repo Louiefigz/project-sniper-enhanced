@@ -8,7 +8,8 @@ later styling feedback as permission to send transcripts or references externall
 ## Implementation
 
 - [`native-director-library.ts`](../../src/lib/server/native-director-library.ts)
-  reads the canonical files in the sibling RAG project (or `SNIPER_RAG_ROOT`).
+  reads the packaged Director library (`resources/director`, or an operator-configured
+`SNIPER_DIRECTOR_LIBRARY` with the same files).
   The existing library snapshot/hash stays authoritative; there is no second
   manually maintained list of hooks.
 - [`native-hook-template.ts`](../../src/lib/server/native-hook-template.ts)

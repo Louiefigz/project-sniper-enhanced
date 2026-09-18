@@ -101,7 +101,12 @@ def stage_tree(root: Path, dest: Path, report: StageReport) -> None:
     Raises:
         StagingError: An allow-listed path does not exist.
     """
-    for entry, _reason in spec.INCLUDE:
+    for entry, reason in spec.INCLUDE:
+        if entry == "@operational-docs":
+            import json  # noqa: PLC0415
+            for doc in json.loads((root / reason).read_text(encoding="utf-8")):
+                _walk_include(root, doc, dest, report)
+            continue
         _walk_include(root, entry, dest, report)
 
 

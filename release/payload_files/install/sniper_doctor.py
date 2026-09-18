@@ -1,273 +1,214 @@
 #!/usr/bin/env python3
-"""Check this install by asking the product's own resolvers what they resolve.
+"""Check this install by asking the product's own code what it would do.
 
-Nothing here re-implements a lookup. The browser/ffmpeg/node resolution comes
-from `graphics.render_tools`, the transcription paths from `scripts.local_whisper`
-and the render runtime from `studio.native_runtime`, so the doctor cannot drift
-away from what a render would actually use.
+    install/doctor.command [--json] [--provider-only] [--skip-transcription]
 
-Exit 0 = every required check passed. Exit 1 = at least one required check failed.
-Optional features are reported as available, gated or needs-key and never
-affect the exit code.
+Nothing is re-implemented here. Render tools come from `graphics.render_tools`,
+transcription from `local_whisper.transcribe_media`, the render runtime from
+`studio.native_runtime`, and the provider check from the same
+`admitSubscriptionInvocation` every real edit uses (via
+`scripts/infra/provider-admission.ts`). A check passes on what the tool
+actually did, never on an exit code alone.
+
+Exit 0 = every required check passed. Optional features are reported as
+available / gated and never change the exit code.
 """
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 PKG_ROOT = Path(__file__).resolve().parents[1]
 APP = PKG_ROOT / "app"
-_REQUIRED_FILTERS = ("rubberband", "zscale", "subtitles", "ass", "drawtext", "arnndn",
-                     "loudnorm", "ebur128", "afftdn", "acompressor", "alimiter",
-                     "sidechaincompress", "aresample", "amix", "overlay", "crop")
-_REQUIRED_ENCODERS = ("libx264", "aac")
-_UNSAFE_PATH_CHARS = (",", "'", ":", "\\")
-_RESULTS: list[tuple[str, str, str]] = []
+RECEIPTS = PKG_ROOT / "runtime" / "state" / "receipts"
+MODEL_SHA = "c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d"
+FILTERS = ("rubberband", "zscale", "subtitles", "ass", "drawtext", "arnndn", "loudnorm", "ebur128",
+           "afftdn", "acompressor", "alimiter", "sidechaincompress", "aresample", "amix", "overlay", "crop")
+SPOKEN = "Sniper checks that local transcription works on this Mac."
+_RESULTS: list[dict] = []
 
 
 def record(state: str, name: str, detail: str) -> None:
-    """Record one check outcome. `state` is PASS, FAIL, INFO or GATED."""
-    _RESULTS.append((state, name, detail))
+    """state: PASS, FAIL, INFO or GATED."""
+    _RESULTS.append({"state": state, "check": name, "detail": detail})
 
 
-def _run(argv: list[str], timeout: int = 20) -> tuple[int, str]:
-    """Run a command and return its exit code with stdout+stderr."""
+def _run(argv: list[str], timeout: int = 60, cwd: Path | None = None) -> tuple[int, str]:
     try:
-        done = subprocess.run(argv, capture_output=True, text=True, timeout=timeout,
-                              check=False)
+        done = subprocess.run(argv, capture_output=True, text=True, timeout=timeout, check=False, cwd=cwd)
     except (OSError, subprocess.TimeoutExpired) as error:
-        return 1, f"{type(error).__name__}"
+        return 1, type(error).__name__
     return done.returncode, f"{done.stdout}{done.stderr}"
 
 
-def check_install_path() -> None:
-    """The install path must not break the audio cleanup filtergraph."""
-    bad = [ch for ch in _UNSAFE_PATH_CHARS if ch in str(PKG_ROOT)]
-    if bad:
-        record("FAIL", "install path", "contains " + " ".join(bad)
-               + " — the voice-rnn cleanup preset cannot run; move the folder")
-    else:
-        record("PASS", "install path", str(PKG_ROOT))
+def _sha(path: Path) -> str:
+    import hashlib  # noqa: PLC0415
+    with path.open("rb") as handle:
+        return hashlib.file_digest(handle, "sha256").hexdigest()
 
 
-def check_runtimes() -> None:
-    """Node, the two dependency roots, tsx and the Python environment."""
+def _product_paths() -> None:
+    for extra in (APP / "scripts", APP / "scripts/producer"):
+        if str(extra) not in sys.path:
+            sys.path.insert(0, str(extra))
+
+
+def check_foundations() -> None:
+    """Install path, Node, both dependency roots, tsx, venv and the pinned Python set."""
+    bad = [ch for ch in (",", "'", ":", "\\") if ch in str(PKG_ROOT)]
+    record("FAIL" if bad else "PASS", "install path",
+           f"contains {' '.join(bad)}: voice-rnn cleanup cannot run" if bad else str(PKG_ROOT))
     code, out = _run(["node", "--version"])
-    major = out.strip().lstrip("v").split(".")[0] if code == 0 else ""
-    if major.isdigit() and int(major) >= 22:
-        record("PASS", "node", out.strip())
-    else:
-        record("FAIL", "node", f"need 22 or newer, found {out.strip() or 'nothing'}")
-    for root in (APP, APP / "templates/motion"):
-        name = f"dependencies {root.relative_to(PKG_ROOT)}"
-        record("PASS" if (root / "node_modules").is_dir() else "FAIL", name,
-               "installed" if (root / "node_modules").is_dir() else "run install.command")
-    tsx = APP / "node_modules/tsx/dist/cli.mjs"
-    record("PASS" if tsx.exists() else "FAIL", "tsx runtime",
-           "present" if tsx.exists() else "missing — background edits cannot start")
+    major = out.strip().lstrip("v").split(".")[0]
+    record("PASS" if code == 0 and major.isdigit() and int(major) >= 22 else "FAIL", "node", out.strip() or "missing")
+    for root, receipt in ((APP, "npm-app"), (APP / "templates/motion", "npm-motion")):
+        ok = (root / "node_modules").is_dir() and (RECEIPTS / receipt).exists()
+        record("PASS" if ok else "FAIL", f"dependencies {root.relative_to(PKG_ROOT)}",
+               "installed and receipted" if ok else "incomplete — run install.command")
+    record("PASS" if (APP / "node_modules/tsx/dist/cli.mjs").exists() else "FAIL", "tsx runtime", "background edits need it")
     venv = APP / ".venv/bin/python3"
-    if not venv.exists():
-        record("FAIL", "python environment", "missing — run install.command")
-        return
-    code, out = _run([str(venv), "-c", "import sys;print('.'.join(map(str,sys.version_info[:3])))"])
-    record("PASS" if code == 0 else "FAIL", "python environment", out.strip())
-
-
-def check_pinned_packages() -> None:
-    """Every Python package must be at the version this release was tested with."""
     lock = PKG_ROOT / "install/requirements.lock.txt"
-    venv = APP / ".venv/bin/python3"
-    if not lock.exists() or not venv.exists():
-        record("FAIL", "python packages", "cannot check without the lock and the venv")
-        return
-    wanted = dict(line.split("==", 1) for line in lock.read_text().splitlines()
-                  if "==" in line and not line.startswith("#"))
-    code, out = _run([str(venv), "-m", "pip", "freeze", "--disable-pip-version-check"], 90)
-    if code != 0:
-        record("FAIL", "python packages", "pip freeze failed")
-        return
-    have = dict(line.split("==", 1) for line in out.splitlines() if "==" in line)
-    drift = [f"{k} {have.get(k, 'missing')}≠{v}" for k, v in wanted.items()
-             if have.get(k.strip()) != v.strip()]
+    if not venv.exists():
+        record("FAIL", "python packages", "no environment — run install.command"); return
+    wanted = dict(l.split("==", 1) for l in lock.read_text().splitlines() if "==" in l and not l.startswith("#"))
+    _, frozen = _run([str(venv), "-m", "pip", "freeze", "--disable-pip-version-check"], 120)
+    have = dict(l.split("==", 1) for l in frozen.splitlines() if "==" in l)
+    drift = [f"{k} {have.get(k, 'missing')}≠{v}" for k, v in wanted.items() if have.get(k) != v]
     record("PASS" if not drift else "FAIL", "python packages",
-           f"{len(wanted)} pinned packages match" if not drift
-           else "drift: " + "; ".join(drift[:4]))
+           f"{len(wanted)} pinned packages match" if not drift else "drift: " + "; ".join(drift[:4]))
 
 
-def check_media_tools() -> None:
-    """ffmpeg must advertise the filters and encoders the render chain uses."""
-    ffmpeg = os.environ.get("HYPERFRAMES_FFMPEG_PATH") or shutil.which("ffmpeg")
-    if not ffmpeg:
-        record("FAIL", "ffmpeg", "not found")
-        return
-    code, filters = _run([ffmpeg, "-hide_banner", "-filters"], 30)
-    _, encoders = _run([ffmpeg, "-hide_banner", "-encoders"], 30)
-    names = {line.split()[1] for line in filters.splitlines() if len(line.split()) > 2}
-    enc = {line.split()[1] for line in encoders.splitlines() if len(line.split()) > 2}
-    missing = [f for f in _REQUIRED_FILTERS if f not in names]
-    missing += [e for e in _REQUIRED_ENCODERS if e not in enc]
-    record("PASS" if code == 0 and not missing else "FAIL", "ffmpeg features",
-           ffmpeg if not missing else f"{ffmpeg} is missing: {' '.join(missing)}")
-
-
-def _product_paths() -> str:
-    """Add the product's own import roots so its resolvers can be reused."""
-    producer = str(APP / "scripts/producer")
-    sys.path[:0] = [producer, str(APP / "scripts")]
-    return producer
-
-
-def check_render_tools() -> None:
-    """Ask the product which node/browser/ffmpeg/ffprobe a render would use."""
+def check_media() -> None:
+    """ffmpeg features, and the tools a render would actually resolve."""
+    ffmpeg = os.environ.get("HYPERFRAMES_FFMPEG_PATH") or shutil.which("ffmpeg") or ""
+    _, filters = _run([ffmpeg, "-hide_banner", "-filters"]) if ffmpeg else (1, "")
+    _, encoders = _run([ffmpeg, "-hide_banner", "-encoders"]) if ffmpeg else (1, "")
+    names = {l.split()[1] for l in filters.splitlines() if len(l.split()) > 2}
+    enc = {l.split()[1] for l in encoders.splitlines() if len(l.split()) > 2}
+    missing = [f for f in FILTERS if f not in names] + [e for e in ("libx264", "aac") if e not in enc]
+    record("PASS" if ffmpeg and not missing else "FAIL", "ffmpeg features",
+           ffmpeg if not missing else f"missing: {' '.join(missing)}")
     _product_paths()
     try:
         from graphics.render_tools import resolve_tools  # noqa: PLC0415
-        resolved = resolve_tools()
-    except Exception as error:  # the resolver raises a plain RuntimeError by design
-        record("FAIL", "render tools", f"{type(error).__name__}: {error}")
-        return
-    pin = json.loads((PKG_ROOT / "RELEASE.json").read_text())["components"]
-    wanted = pin["chrome_headless_shell"]
-    browser = resolved["browser"]
-    inside = str(PKG_ROOT) in browser
-    record("PASS" if wanted in browser and inside else "FAIL", "render browser",
-           f"{browser}" if wanted in browser and inside else
-           f"expected {wanted} inside this package, resolved {browser}")
-    for name in ("node", "ffmpeg", "ffprobe"):
-        record("PASS", f"render {name}", resolved[name])
+        tools = resolve_tools()
+    except Exception as error:  # the resolver raises RuntimeError by design
+        record("FAIL", "render tools", str(error)); return
+    pin = json.loads((PKG_ROOT / "RELEASE.json").read_text())["components"]["chrome_headless_shell"]
+    ok = pin in tools["browser"] and str(PKG_ROOT) in tools["browser"]
+    record("PASS" if ok else "FAIL", "render browser",
+           tools["browser"] if ok else f"expected {pin} inside this folder, resolved {tools['browser']}")
 
 
-def check_transcription() -> None:
-    """Resolve the whisper binary and model, then actually transcribe."""
-    _product_paths()
-    try:
-        from local_whisper import resolve_whisper_binary, resolve_whisper_model  # noqa: PLC0415
-        binary, model = resolve_whisper_binary(), resolve_whisper_model()
-    except Exception as error:
-        record("FAIL", "transcription", f"{type(error).__name__}: {error}")
-        return
-    record("PASS", "transcription model", model)
-    code, _ = _run([binary, "--help"], 30)
-    record("PASS" if code == 0 else "FAIL", "transcription binary", binary)
-
-
-def check_render_runtime() -> None:
-    """Rebuild the adapted render runtime from the shipped patch set."""
+def check_runtime_and_build() -> None:
     _product_paths()
     try:
         from studio.native_runtime import install_runtime  # noqa: PLC0415
-        record("PASS", "render runtime", str(install_runtime()))
+        record("PASS", "render runtime", f"verified from the shipped patch set: {install_runtime().name}")
     except Exception as error:
         record("FAIL", "render runtime", f"{type(error).__name__}: {error}")
+    build = APP / ".next/BUILD_ID"
+    ok = build.exists() and (RECEIPTS / "build").exists()
+    record("PASS" if ok else "FAIL", "app build", build.read_text().strip() if ok else "not built — run install.command")
 
 
-def _cli_state(binary: str, version_args: list[str], wanted: str,
-               status_args: list[str]) -> tuple[str, str]:
-    """Classify one provider CLI as missing, wrong version, logged out or ready."""
-    if not Path(binary).exists():
-        return "FAIL", "not installed — re-run install.command"
-    code, out = _run([binary, *version_args], 60)
-    if code != 0:
-        return "FAIL", "the CLI did not run"
-    found = out.strip().splitlines()[0] if out.strip() else ""
-    if found != wanted:
-        return "FAIL", f"this release admits only {wanted!r}; this CLI reports {found!r}"
-    code, _ = _run([binary, *status_args], 60)
-    return ("PASS", f"{found} — signed in") if code == 0 else \
-        ("FAIL", f"{found} — not signed in yet")
+def check_transcription(skip: bool) -> None:
+    """Model hash, then an actual transcription through the product's own path."""
+    _product_paths()
+    try:
+        from local_whisper import LocalTranscribeRequest, resolve_whisper_model, transcribe_media  # noqa: PLC0415
+        model = Path(resolve_whisper_model())
+    except Exception as error:
+        record("FAIL", "speech model", str(error)); return
+    if _sha(model) != MODEL_SHA:
+        record("FAIL", "speech model", f"{model} does not match the expected checksum — delete it and reinstall"); return
+    record("PASS", "speech model", f"{model.name} checksum verified")
+    if skip:
+        record("INFO", "transcription", "skipped by request"); return
+    with tempfile.TemporaryDirectory(prefix="sniper-doctor-") as tmp:
+        speech = Path(tmp) / "speech.aiff"
+        if _run(["say", "-o", str(speech), SPOKEN], 60)[0] != 0:
+            record("FAIL", "transcription", "could not create the local speech sample with macOS 'say'"); return
+        try:
+            result = transcribe_media(LocalTranscribeRequest(path=str(speech)))
+        except Exception as error:
+            record("FAIL", "transcription", f"{type(error).__name__}: {error}"); return
+    words = [w for seg in result.get("transcript", result.get("segments", [])) for w in seg.get("words", [])] \
+        if isinstance(result, dict) else []
+    text = " ".join(str(w.get("word", w.get("text", ""))) for w in words).lower()
+    starts = [float(w.get("start", 0)) for w in words]
+    heard = sum(token in text for token in ("sniper", "checks", "local", "transcription", "mac"))
+    ok = heard >= 4 and starts == sorted(starts) and len(words) >= 6
+    record("PASS" if ok else "FAIL", "transcription",
+           f"{len(words)} timed words, {heard}/5 expected words heard" if ok
+           else f"output unusable: {len(words)} words, {heard}/5 expected words, ordered={starts == sorted(starts)}")
 
 
-def check_providers() -> None:
-    """At least one provider must be installed at its exact version and signed in."""
-    pin = json.loads((PKG_ROOT / "RELEASE.json").read_text())["components"]
-    codex = os.environ.get("SNIPER_CODEX_BIN", "")
-    claude = os.environ.get("CLAUDE_BIN", "")
-    states = [
-        ("Codex", *_cli_state(codex, ["--version"], pin["codex_cli_admitted"],
-                              ["login", "status"])),
-        ("Claude", *_cli_state(claude, ["--version"], pin["claude_cli_admitted"],
-                               ["auth", "status"])),
-    ]
-    for name, state, detail in states:
-        record("INFO" if state == "FAIL" else "PASS", f"editor brain: {name}", detail)
-    ready = [name for name, state, _ in states if state == "PASS"]
-    record("PASS" if ready else "FAIL", "editor brain",
-           f"ready: {', '.join(ready)}" if ready else
-           "neither Codex nor Claude is installed at its admitted version and signed in")
+def check_provider() -> None:
+    """The selected provider, through production admission. Never prints auth output."""
+    selected = os.environ.get("SNIPER_PROVIDER") or ("codex" if os.environ.get("SNIPER_BRAIN_PROVIDER") == "codex" else "claude")
+    code, out = _run(["node", "--import", "tsx", "scripts/infra/provider-admission.ts", "--provider", selected], 90, APP)
+    try:
+        report = json.loads(out.strip().splitlines()[-1])
+    except (ValueError, IndexError):
+        record("FAIL", f"editor brain ({selected})", "the admission check did not run"); return
+    advice = {"not-signed-in-or-not-subscription": "sign in: install/sign-in.command",
+              "wrong-version": "reinstall the pinned CLI: install/install.command",
+              "cli-missing": "reinstall: install/install.command"}.get(report["reason"], report["detail"])
+    record("PASS" if report["ready"] else "FAIL", f"editor brain ({selected})",
+           f"{report['admittedVersion']} admitted and signed in" if report["ready"] else f"{report['reason']} — {advice}")
 
 
-def check_workspace() -> None:
-    """The project workspace must exist and be writable, with room to render."""
+def check_workspace_and_port() -> None:
     root = Path(os.environ.get("SNIPER_WORKSPACE_ROOT") or Path.home() / "ProjectSniper")
     try:
         root.mkdir(parents=True, exist_ok=True)
-        probe = root / ".sniper-doctor-probe"
-        probe.write_text("ok", encoding="utf-8")
-        probe.unlink()
+        (root / ".sniper-doctor-probe").write_text("ok"); (root / ".sniper-doctor-probe").unlink()
+        free = shutil.disk_usage(root).free / 1e9
+        record("PASS" if free >= 20 else "FAIL", "workspace", f"{root} — {free:.0f} GB free"
+               + ("" if free >= 20 else "; long-form renders need at least 20 GB"))
     except OSError as error:
-        record("FAIL", "workspace", f"{root} is not writable: {error.strerror}")
-        return
-    free_gb = shutil.disk_usage(root).free / 1_000_000_000
-    record("PASS" if free_gb >= 20 else "FAIL", "workspace",
-           f"{root} — {free_gb:.0f} GB free"
-           + ("" if free_gb >= 20 else "; a long-form render needs at least 20 GB"))
-
-
-def check_port() -> None:
-    """Report the conflicting listener rather than a generic port error."""
+        record("FAIL", "workspace", f"{root} not writable: {error.strerror}")
     port = os.environ.get("SNIPER_PORT", "3000")
-    code, out = _run(["lsof", "-nP", f"-iTCP:{port}", "-sTCP:LISTEN"], 15)
-    holders = {line.split()[0] for line in out.splitlines()[1:] if line.split()}
-    record("PASS" if code != 0 or not holders else "INFO", f"port {port}",
-           "free" if not holders else f"in use by {', '.join(sorted(holders))}"
-           " — stop it or set SNIPER_PORT")
+    _, out = _run(["lsof", "-nP", "-t", f"-iTCP:{port}", "-sTCP:LISTEN"], 15)
+    record("INFO", f"port {port}", "free" if not out.strip() else f"in use by pid {' '.join(out.split())}")
 
 
 def check_optional() -> None:
-    """Report optional features honestly instead of advertising them."""
-    venv = APP / ".venv/bin/python3"
-    demucs = APP / "scripts/producer/audio/.demucs-venv/bin/python3"
-    have = demucs.exists() or (venv.exists()
-                               and _run([str(venv), "-c", "import demucs"], 40)[0] == 0)
-    record("PASS" if have else "GATED", "audio preset: separate",
-           "available" if have else
-           "not installed (needs Demucs + torch); voice, voice-strong and voice-rnn work")
-    record("PASS" if shutil.which("tesseract") else "GATED", "Frame Review OCR mode",
-           shutil.which("tesseract") or "not installed; the default visual mode does not need it")
-    record("GATED", "Frame Review (either mode)",
-           "needs your own paid Anthropic API key — not included in this purchase")
-    record("GATED", "Palmier Pro mirror",
-           "optional separate app; not configured in this package")
+    demucs = (APP / "scripts/producer/audio/.demucs-venv/bin/python3").exists()
+    record("PASS" if demucs else "GATED", "audio preset: separate",
+           "available" if demucs else "not installed (needs Demucs); voice, voice-strong, voice-rnn work")
+    record("GATED", "Frame Review", "needs your own paid Anthropic API key — not part of this purchase")
+    record("GATED", "Palmier Pro mirror", "optional separate app; not configured in this package")
 
 
 def main() -> int:
-    """Run every check and print the report."""
-    check_install_path()
-    check_runtimes()
-    check_pinned_packages()
-    check_media_tools()
-    check_render_tools()
-    check_transcription()
-    check_render_runtime()
-    check_providers()
-    check_workspace()
-    check_port()
-    check_optional()
-    width = max(len(name) for _, name, _ in _RESULTS)
-    for state, name, detail in _RESULTS:
-        print(f"[{state:5}] {name.ljust(width)}  {detail}")
-    failed = [name for state, name, _ in _RESULTS if state == "FAIL"]
-    print()
-    if failed:
-        print(f"{len(failed)} required check(s) failed: {', '.join(failed)}")
-        print("Fix the lines marked FAIL, then run doctor.command again.")
-        return 1
-    print("All required checks passed.")
-    return 0
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--json", action="store_true")
+    parser.add_argument("--provider-only", action="store_true")
+    parser.add_argument("--skip-transcription", action="store_true")
+    args = parser.parse_args()
+    if not args.provider_only:
+        check_foundations(); check_media(); check_runtime_and_build()
+        check_transcription(args.skip_transcription)
+    check_provider()
+    if not args.provider_only:
+        check_workspace_and_port(); check_optional()
+    failed = [r["check"] for r in _RESULTS if r["state"] == "FAIL"]
+    if args.json:
+        print(json.dumps({"ok": not failed, "failed": failed, "checks": _RESULTS}))
+        return 1 if failed else 0
+    width = max(len(r["check"]) for r in _RESULTS)
+    for r in _RESULTS:
+        print(f"[{r['state']:5}] {r['check'].ljust(width)}  {r['detail']}")
+    print(f"\n{len(failed)} required check(s) failed: {', '.join(failed)}" if failed else "\nAll required checks passed.")
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":

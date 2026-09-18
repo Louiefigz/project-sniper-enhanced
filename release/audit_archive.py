@@ -43,6 +43,21 @@ REQUIRED = (
     "manual/install.html", "manual/privacy.html", "manual/license-and-updates.html",
     "RELEASE.json", "RELEASE-NOTES.md", "THIRD-PARTY-NOTICES.md",
     "LICENSE-DRAFT.txt", "licenses/Apache-2.0-hyperframes.txt",
+    "licenses/MIT-YuNet-face-detection.txt",
+    "install/sign-in.command", "install/editor.command", "install/use-provider.command",
+    "install/sniper_diagnostics.py",
+    "app/scripts/infra/provider-admission.ts",
+    "app/src/app/fonts/archivo-latin-wght-normal.woff2",
+    "app/resources/director/formats.md", "app/resources/director/hook-anchors.md",
+    "app/resources/director/hook-formulas.md", "app/resources/director/hook-references.md",
+    "app/resources/director/hook-training-problem-aware.md",
+    "app/resources/director/hook-training-solution-aware.md",
+    "app/resources/references/shorts/manifest.json",
+    "app/resources/references/shorts/sequences/manifest.json",
+    "app/resources/references/shorts/sequences/cases/N26.json",
+    "app/resources/references/shorts/expansion/manifest.json",
+    "app/resources/references/longform/manifest.json",
+    "app/docs/audits/INTRO_MACHINE_VS_PRO_AUDIT.md",
 )
 REQUIRED_SKILLS = ("producer", "segmenter", "clipper", "reference-editor", "producer-study")
 FORBIDDEN = (
@@ -138,6 +153,34 @@ def audit_extraction(root: Path) -> None:
             _findings.append(f"link outside the package in {relative}")
 
 
+_CODE_DOC = re.compile(r'"((?:docs|scripts/producer/docs)/[^"]+\.md)"')
+_SIBLING_TEXT = re.compile(r"\.\./youtube-automation|SNIPER_RAG_ROOT|value-first-script-director")
+
+
+def audit_closure(root: Path) -> None:
+    """Dependency closure: what shipped code reads is in the archive, and nothing
+    shipped points outside it. Reported separately from archive shape."""
+    app = root / "app"
+    named: set[str] = set()
+    for pattern in ("src/**/*.ts", "scripts/**/*.py"):
+        for path in app.glob(pattern):
+            if "__tests__" in path.parts or "tests" in path.parts:
+                continue
+            named |= set(_CODE_DOC.findall(path.read_text(encoding="utf-8", errors="ignore")))
+    missing = sorted(doc for doc in named if not (app / doc).is_file())
+    check(not missing, "closure: every document shipped code reads is present",
+          f"{len(named)} named, all present" if not missing else "MISSING: " + ", ".join(missing[:6]))
+    outside = []
+    for path in app.rglob("*"):
+        if path.is_file() and path.suffix in {".ts", ".tsx", ".py", ".mjs", ".md", ".json"} \
+                and _SIBLING_TEXT.search(path.read_text(encoding="utf-8", errors="ignore")):
+            outside.append(path.relative_to(root).as_posix())
+    check(not outside, "closure: no shipped file points at a sibling repository",
+          "none" if not outside else f"{len(outside)}: " + ", ".join(outside[:6]))
+    frames = list((app / "resources/references").rglob("*.jpg"))
+    check(len(frames) > 0, "closure: packaged reference frames present", f"{len(frames)} frames")
+
+
 def audit_runtime_inputs(root: Path) -> None:
     """Prove the render runtime can be rebuilt from the shipped patch inputs alone."""
     import json  # noqa: PLC0415
@@ -164,6 +207,7 @@ def main(argv: list[str]) -> int:
     check(root.is_dir(), "fresh extraction", str(root))
     audit_extraction(root)
     audit_runtime_inputs(root)
+    audit_closure(root)
     for line in _passes:
         print(f"[PASS] {line}")
     for line in _findings:

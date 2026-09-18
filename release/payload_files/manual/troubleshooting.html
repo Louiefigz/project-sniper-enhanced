@@ -25,8 +25,7 @@ passes, the install is fine and the problem is in the edit, not the setup.</p>
 <table>
 <tr><th>What you see</th><th>What it means</th><th>What to do</th></tr>
 <tr><td>Editor brain: not signed in yet</td><td>Your provider login expired, or you never
-signed in with this package's CLI.</td><td>Run the login command from
-<a href="install.html">Install</a>. It signs in to this package's own settings folder.</td></tr>
+signed in with this package's CLI.</td><td>Run <code>install/sign-in.command</code>. It signs in to this package's own settings.</td></tr>
 <tr><td>This release admits only '…'; this CLI reports '…'</td><td>The CLI version does
 not match. Usually an auto-update.</td><td>Run <code>install/install.command</code> again
 — it reinstalls the exact pinned version into this package.</td></tr>
@@ -71,11 +70,13 @@ learning what to ask for.</p>
 
 <h2>Sending something useful</h2>
 <pre><code>install/diagnostics.command</code></pre>
-<p>This writes a folder to your Desktop containing the checker's report, your macOS and
-Node versions, this build's <code>RELEASE.json</code>, and the last 400 lines of the app
-log with anything key-shaped replaced by <code>[redacted]</code>. It does <strong>not</strong>
-copy your footage, your transcripts, your edit plans or your login. Open it and read it
-before you send it.</p>
+<p>This writes a folder to your Desktop containing structured facts only: this build's
+<code>RELEASE.json</code>, your macOS, Node and Python versions, the checker's report, the
+installer's own step log, and <em>counts</em> of app-log lines by kind. It does
+<strong>not</strong> copy app-log text, footage, transcripts, edit plans or logins. If support
+asks for more, <code>install/diagnostics.command --include-app-log</code> adds the last 200
+app-log lines after redaction — pattern redaction cannot promise to catch everything, so read
+them before you send them.</p>
 
 <div class="warn">
 <p><strong>Support is not settled for this candidate.</strong> There is no support address

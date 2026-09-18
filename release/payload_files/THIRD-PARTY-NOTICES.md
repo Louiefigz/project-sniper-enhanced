@@ -51,6 +51,27 @@ are not creative work and are not subject to copyright; only that repository's `
 directory carries a licence. The verbatim upstream README is kept alongside the model as
 `README.upstream.md`, and the file's SHA-256 is recorded in the `PROVENANCE.md` beside it.
 
+### Bricolage Grotesque, Archivo, IBM Plex Mono — SIL Open Font License 1.1
+`app/src/app/fonts/`. The app's interface fonts, vendored from the npm packages
+`@fontsource-variable/bricolage-grotesque@5.3.0`, `@fontsource-variable/archivo@5.3.0` and
+`@fontsource/ibm-plex-mono@5.3.0` so the app builds without contacting Google Fonts. Licence
+texts: `licenses/SIL-OFL-1.1-Bricolage-Grotesque.txt`, `licenses/SIL-OFL-1.1-Archivo.txt`,
+`licenses/SIL-OFL-1.1-IBM-Plex-Mono.txt`.
+
+### YuNet face-detection model — MIT License
+`app/assets/models/face_detection_yunet_2023mar.onnx`, used for face-aware vertical framing.
+Copyright (c) 2020 Shiqi Yu. From OpenCV Zoo (`models/face_detection_yunet/`), whose README
+states that all files in that directory are MIT-licensed. The shipped file's SHA-256
+(`8f2383e4…d2552fa4`, 232,589 bytes) matches the upstream Git LFS record for
+`face_detection_yunet_2023mar.onnx` exactly (checked 2026-09-17). Licence text:
+`licenses/MIT-YuNet-face-detection.txt`.
+
+### Director library and reference library — original to Project Sniper
+`app/resources/director/` and `app/resources/references/` were written for Project Sniper.
+The reference frames are rendered from Project Sniper's own motion templates; each frame
+records the composition, variables and time that produced it. No third-party footage,
+screenshot, brand, likeness or creator name is used.
+
 ## Installed by the installer, not redistributed here
 
 | Component | Publisher | Licence |
@@ -63,9 +84,8 @@ directory carries a licence. The verbatim upstream README is kept alongside the 
 | `@anthropic-ai/claude-code` CLI | Anthropic | its own published terms |
 | `ffmpeg`, `whisper-cpp`, Node, Python | you install these yourself | their own licences |
 
-## Not yet cleared — recorded rather than quietly shipped
+## Not shipped
 
-| Component | Issue |
+| Component | Why |
 |---|---|
-| `app/assets/models/face_detection_yunet_2023mar.onnx` | Used for face-aware vertical framing. Its licence is not recorded in the repository and was not verified for this build. **Clear or replace it before sale.** |
-| `app/assets/music/default-bed.mp3` | **Withheld from this archive.** Its provenance is not recorded and a historical report of a 111 Hz hum in it has not been rechecked. The music-bed lane is off by default and reports the missing asset rather than failing silently. |
+| The repository's default music bed | Synthesized in-repo (no third-party rights), but it fails the product's own tonal-hum check: a 111.0 Hz line at 39.1 dB prominence against a 14 dB limit, stable for 59.5 s (measured 2026-09-17). Music remains available: put your own licensed track in a project's `music/` folder. |

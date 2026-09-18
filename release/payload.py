@@ -69,9 +69,10 @@ def component_versions(root: Path) -> dict[str, object]:
         "claude_cli_admitted": claude.group(1),
         "node_floor": "22.0.0",
         "node_recommended": "24",
-        "python_floor": "3.11",
+        "python_floor": "3.12",
+        "python_tested": "3.14.4",
         "whisper_model": "ggml-small.en.bin",
-        "supported_platform": "macOS on Apple silicon (arm64)",
+        "supported_platform": "macOS on Apple silicon (arm64); only a developer Mac on macOS 26 has run it",
     }
 
 

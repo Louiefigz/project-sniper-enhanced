@@ -47,8 +47,8 @@ Why this shape:
   skills-parity pattern: skills import prod logic + runnable gates.)
 - **Feedback = a JSON diff.** "Make the hook punchier, drop the b-roll at 0:14" becomes
   a v2 plan; re-render; diff is auditable. Revisions are cheap and traceable.
-- **LLM identifier contract enforced** (per `rag-system` finding
-  `LLM_IDENTIFIER_CONTRACTS`): the brain may only reference `sourceId`s, `assetId`s and
+- **LLM identifier contract enforced** (the identifier-contract
+  rule): the brain may only reference `sourceId`s, `assetId`s and
   timestamps that exist in the manifest; `plan_lint.py` validates every reference and
   rejects the plan (retry with errors) — the LLM never invents a pipeline identifier.
 - **Reproducible.** Same plan + same assets = same output. Version-control the plans.

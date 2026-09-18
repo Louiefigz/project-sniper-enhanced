@@ -28,13 +28,13 @@ force. Read <code>RELEASE.json</code> for this build's exact status, and
 <h2>Three steps</h2>
 <ol>
   <li><strong>Check what you have.</strong> A Mac with Apple silicon, Node 22+,
-  Python 3.11+, Homebrew <code>ffmpeg</code> and <code>whisper-cpp</code>, and a
+  Python 3.12+, <code>ffmpeg</code> and <code>whisper-cpp</code>, and a
   Codex <em>or</em> Claude subscription you already pay for. The full list, with
   what costs money, is in <a href="manual/index.html">What Sniper is</a>.</li>
   <li><strong>Install.</strong> Open Terminal in this folder and run
-  <code>install/install.command</code> (or double-click it in Finder). It installs
-  everything into this folder's own <code>runtime/</code> directory and does not
-  change your existing Node, Python, Codex or Claude setup. Step-by-step:
+  <code>install/install.command</code> (or double-click it in Finder), then
+  <code>install/sign-in.command</code>. Everything it installs stays inside this folder;
+  your own Node, Python, Codex or Claude setup and login are not changed. Step-by-step:
   <a href="manual/install.html">Install and first launch</a>.</li>
   <li><strong>Make your first edit.</strong>
   <a href="manual/first-edits.html">Your first three edits</a> walks a short sample,
@@ -60,6 +60,9 @@ force. Read <code>RELEASE.json</code> for this build's exact status, and
   <tr><th>Do this</th><th>Run this</th></tr>
   <tr><td>Install, or resume an interrupted install</td><td><code>install/install.command</code></td></tr>
   <tr><td>Check the install and see exactly what is wrong</td><td><code>install/doctor.command</code></td></tr>
+  <tr><td>Sign in to Codex or Claude for Sniper</td><td><code>install/sign-in.command</code></td></tr>
+  <tr><td>Edit by asking (opens your editor brain)</td><td><code>install/editor.command</code></td></tr>
+  <tr><td>Switch between Codex and Claude</td><td><code>install/use-provider.command codex</code></td></tr>
   <tr><td>Start the app</td><td><code>install/start.command</code></td></tr>
   <tr><td>Stop the app</td><td><code>install/stop.command</code></td></tr>
   <tr><td>Make a support bundle to send</td><td><code>install/diagnostics.command</code></td></tr>

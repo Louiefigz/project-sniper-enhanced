@@ -63,22 +63,15 @@ INCLUDE: tuple[tuple[str, str], ...] = (
     ("CLAUDE.md", "Claude-route instructions"),
     ("README.md", "developer-facing reference retained for the agent"),
 
-    # --- Docs the retained workflows actually require -----------------------
-    ("docs/PIPELINE.md", "canonical route doctrine; skills point here"),
-    ("docs/README.md", "docs index"),
-    ("docs/producer", "the workflow instructions every retained lane reads"),
-    ("docs/studies/EDITCRAFT_LESSONS.md", "measured craft rules referenced by the skill"),
-    ("docs/studies/EDIT_DECISION_STUDY.md", "measured decision rules"),
-    ("docs/studies/MEASURED_EDIT_GRAMMAR.md", "measured grammar the linter cites"),
-    ("docs/studies/MOTION_GRAMMAR_STUDY.md", "motion grammar the linter cites"),
-    ("docs/studies/PACING_RHYTHM_STUDY.md", "pacing bands the linter cites"),
-    ("docs/studies/PRODUCTION_ENVELOPE_STUDY.md", "production envelope"),
-    ("docs/studies/SHORTFORM_LESSONS.md", "short-form craft rules"),
-    ("docs/studies/LONGFORM_VISUAL_STUDY.md", "long-form visual rules"),
-    ("docs/studies/REFERENCE_STYLE_STUDY.md", "reference-study mechanics"),
-    ("docs/palmier", "optional-integration contracts, shipped because the guide "
-                     "describes the optional mirror"),
-    ("docs/findings", "engine findings the Producer skill cites by path"),
+    # --- Docs: the operational set only (release/operational-docs.json) -------
+    # Computed by release/doc_closure.py: docs named in shipped code, docs linked
+    # directly from shipped instruction surfaces, and the required workflow docs.
+    # Dated development history is withheld (client work, internal evidence).
+    ("@operational-docs", "release/operational-docs.json"),
+
+    # --- Packaged original libraries -----------------------------------------
+    ("resources/director", "original Director hook/format library (resources/director/README.md)"),
+    ("resources/references", "original reference library rendered from Sniper templates"),
 
     # --- Read-only catalog mirror (reachable: catalog_discovery_sources.py) -
     ("vendor/hyperframes-catalog/README.md", "boundary statement"),
@@ -126,6 +119,7 @@ EXCLUDE_DIRS: tuple[tuple[str, str], ...] = (
      "reference-strategy-library.ts. See release/PROVENANCE-BLOCKERS.md"),
     ("docs/marketing", "source of the buyer guides; the edited guides ship under manual/"),
     ("release", "maintainer release tooling"),
+    ("scripts/producer/artifacts", "maintainer's retained acceptance evidence (gitignored)"),
     (".git", "history is not part of the product"),
     (".next", "build cache"),
     ("__pycache__", "byte cache"),
@@ -144,13 +138,7 @@ EXCLUDE_GLOBS: tuple[tuple[str, str], ...] = (
                   "not configured in the buyer package"),
     (".sniper-*", "machine-local control-plane state"),
     ("*.bundle", "git bundles"),
-    ("docs/studies/CALEB_STYLE.md", "teacher-named study derived from paid material"),
-    ("docs/studies/JADEN_STYLE.md", "teacher-named study derived from paid material"),
-    ("docs/studies/ANGELA_STYLE.md", "teacher-named study derived from paid material"),
-    ("docs/studies/NATEHERK_STUDY.md", "teacher-named study derived from paid material"),
-    ("docs/studies/NATEHERK_CARDS.md", "teacher-named study derived from paid material"),
     ("docs/studies/GPT56_SOL_C0679_GAP_STUDY.md", "internal model-gap study"),
-    ("scripts/producer/docs/findings/JADEN_STYLE.md", "teacher-named study"),
 )
 
 # --------------------------------------------------------------------------
@@ -189,7 +177,7 @@ DENY_PATH: tuple[tuple[str, str], ...] = (
     (r"(?i)(?:^|/)id_(?:rsa|ed25519|ecdsa)$", "private ssh key"),
     (r"(?i)(?:^|/)\.netrc$", "credential file"),
     (r"(?i)(?:^|/)credentials?\.json$", "credential file"),
-    (r"(?i)caleb|jadenly|(?<![a-z])jaden(?![a-z])|angela|nateherk|adrian[_-]?per",
+    (r"(?i)caleb|jadenly|(?<![a-z])jaden(?![a-z])|angela|nateherk|nate[- ]herk|(?<![a-z])nate(?![a-z])|mudrich|(?<![a-z])lewis(?![a-z])|ralston|kallaway|hormozi|(?<![a-z])trevor(?![a-z])|odom|wendt|adrian[_ -]?per|iampunch|personalbrandlaunch|world ?pet|pet achievers",
      "teacher name in a shipped path (accepted decision: no teacher names in the product)"),
 )
 
@@ -199,9 +187,10 @@ DENY_BUYER_TEXT: tuple[tuple[str, str], ...] = (
     (r"(?i)first edit in (?:a few )?minutes", "unsupported speed claim"),
     (r"(?i)student[- ]kit", "meaningless internal term"),
     (r"(?i)hands[- ]off", "unsupported autonomy claim"),
+    (r"(?i)about fifteen minutes|in (?:a few|fifteen) minutes", "unmeasured setup-time claim"),
     (r"(?i)nothing leaves your (?:computer|machine)", "false privacy claim"),
     (r"(?i)only the \*{0,2}text\*{0,2} .{0,40}is sent", "false privacy claim"),
-    (r"(?i)caleb|jadenly|(?<![a-z])jaden(?![a-z])|angela|nateherk", "teacher name"),
+    (r"(?i)caleb|jadenly|(?<![a-z])jaden(?![a-z])|angela|nateherk|nate[- ]herk|(?<![a-z])nate(?![a-z])|mudrich|(?<![a-z])lewis(?![a-z])|ralston|kallaway|hormozi|(?<![a-z])trevor(?![a-z])|odom|wendt|adrian[_ -]?per|iampunch|personalbrandlaunch|world ?pet|pet achievers", "creator, course or client name"),
     (r"/Users/[A-Za-z0-9._-]+/", "developer machine path"),
     (r"\{[A-Z_]{3,}\}", "unresolved placeholder"),
 )
@@ -211,6 +200,6 @@ DENY_BUYER_TEXT: tuple[tuple[str, str], ...] = (
 # class as the path rule: the accepted decision covers the distributed product,
 # and these move only with the identifier migration in release/RENAME_SPEC.md.
 DENY_SHIPPED_TEXT: tuple[tuple[str, str], ...] = (
-    (r"(?i)caleb|jadenly|(?<![a-z])jaden(?![a-z])|angela|nateherk|nate herk",
-     "teacher name in a shipped path"),
+    (r"(?i)caleb|jadenly|(?<![a-z])jaden(?![a-z])|angela|nateherk|nate[- ]herk|(?<![a-z])nate(?![a-z])|mudrich|(?<![a-z])lewis(?![a-z])|ralston|kallaway|hormozi|(?<![a-z])trevor(?![a-z])|odom|wendt|adrian[_ -]?per|iampunch|personalbrandlaunch|world ?pet|pet achievers",
+     "creator, course or client name in shipped text"),
 )

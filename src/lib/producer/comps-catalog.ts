@@ -32,10 +32,10 @@ export interface CompCatalogEntry {
   canvas: CompCanvas;
   defaultSpec: Record<string, unknown>;
   /** Sectioned entries group after a divider in the ELEMENTS panel:
-   *  "slideware" = the slideware reference pack (reel-study comps, all 9:16),
-   *  "module" = the module card pack (MODULE_CARDS study, all 16:9
-   *  longform — cream split-panel rails overlay footage, dark cards are
-   *  own-screen takeovers),
+   *  "slideware" = the Sniper short-form slide set (all 9:16),
+   *  "module" = the Sniper module card pack (all 16:9 longform — paper
+   *  split-panel rails overlay footage, graphite cards are own-screen
+   *  takeovers),
    *  "primitives" = raw building blocks. */
   section?: "primitives" | "slideware" | "module";
   /** Extra editable spec fields (graphic-properties renders them generically). */
@@ -64,7 +64,7 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
   {
     kind: "kinetic-quote-wide",
     label: "Kinetic quote",
-    description: "Full-frame quote that builds word by word; emphasis words land in yellow.",
+    description: "Full-frame quote that builds word by word; emphasis words land in signal amber.",
     ownScreen: true,
     canvas: "16:9",
     defaultSpec: {
@@ -215,7 +215,7 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
       atS: 0.2,
       slotX: 0.5,
       slotY: 0.5,
-      accent: "#F5E960",
+      accent: "#FDA933",
     },
     specFields: [
       { key: "atS", label: "draw at s", type: "number", min: 0, max: 30, step: 0.05 },
@@ -239,71 +239,71 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     },
   },
 
-  // ---- SLIDEWARE PACK — comps decomposed from the slideware reel study (top 4 by
-  // rank). All 9:16; templates at compositions/slideware-*.html. The lime accent
-  // (#C9FB00) is ONE token per reel — override it once, everywhere.
+  // ---- SLIDEWARE SET — Sniper's short-form slide system. All 9:16; templates at
+  // compositions/slideware-*.html. Graphite or paper surfaces, ink plates for
+  // text over footage, signal amber (--lemon) as the single emphasis colour.
   {
     kind: "slideware-takeover-deck",
     label: "Takeover deck",
     description:
-      "Full-frame lime slide deck — header + caption pill ON at the cut, card-white sheets page carousel-style (exit-left / enter-right).",
+      "Full-frame graphite slide deck — display header + amber caption pill ON at the cut, paper sheets page carousel-style (exit-left / enter-right).",
     ownScreen: true,
     canvas: "9:16",
     section: "slideware",
     defaultSpec: {
-      header: "For Carousel Posts",
+      header: "The Three-Pass Edit",
       headerInk: "white",
-      slide1: "Call out the exact viewer|Show the receipt on screen|Say the payoff in 5 words",
-      slide2: "Post before 9am|Reply to the first 10 comments",
-      pill1: "steal this structure",
-      pill2: "then do this",
+      slide1: "Cut the dead air first|Tighten every retake|Read the captions aloud",
+      slide2: "Watch it once on mute|Fix the first 3 seconds",
+      pill1: "run them in order",
+      pill2: "then check this",
       pageAt2: 2.0,
-      accent: "#C9FB00",
+      accent: "#121721",
     },
     specFields: [
       { key: "pageAt2", label: "page 2 at s", type: "number", min: 0, max: 30, step: 0.05 },
       { key: "pageAt3", label: "page 3 at s", type: "number", min: 0, max: 30, step: 0.05 },
-      { key: "accent", label: "lime", type: "color" },
+      { key: "accent", label: "canvas", type: "color" },
     ],
   },
   {
     kind: "slideware-staircase-lockup",
     label: "Staircase lockup",
     description:
-      "Kicker / lime ALL-CAPS payload / co-word staircase — word-locked 0-frame pops, in-place replace-chain, never a fade.",
+      "Kicker tab / amber ALL-CAPS payload on an ink plate / paper co-word tab — word-locked 0-frame pops, in-place replace-chain, never a fade.",
     ownScreen: false,
     canvas: "9:16",
     section: "slideware",
     defaultSpec: {
-      kicker: "Step *#1:* do this every day",
-      payload: "Post Daily",
-      coWord: "for 30 days",
+      kicker: "Pass *#1:* cut before you polish",
+      payload: "Cut Dead Air",
+      coWord: "then retakes",
       band: "headroom",
       payloadSize: 106,
       kickerAt: 0,
       payloadAt: 0.35,
       coAt: 0.75,
-      accent: "#C9FB00",
+      accent: "#FDA933",
     },
     specFields: [
       { key: "payloadSize", label: "payload px", type: "number", min: 60, max: 152, step: 2 },
       { key: "payloadAt", label: "payload at s", type: "number", min: 0, max: 30, step: 0.05 },
       { key: "coAt", label: "co-word at s", type: "number", min: 0, max: 30, step: 0.05 },
-      { key: "accent", label: "lime", type: "color" },
+      { key: "accent", label: "accent", type: "color" },
     ],
   },
   {
     kind: "slideware-receipt-cell",
     label: "Receipt cells",
     description:
-      "Proof-stamp thumb cells — olive label chip over a 9:16 media slot with an eye-count view chip; strip / grid / showcase, per-cell pops.",
+      "Proof-stamp thumb cells — mono label tab over a 9:16 media slot with an amber eye-count chip; strip / grid / showcase, per-cell pops.",
     ownScreen: false,
     canvas: "9:16",
     section: "slideware",
     defaultSpec: {
       layout: "strip",
-      label1: "Day 1", label2: "Day 7", label3: "Day 14", label4: "Day 30",
-      views1: "1.2M", views2: "847K", views3: "2.1M", views4: "3.4M",
+      label1: "Rough cut", label2: "Tight cut", label3: "Captioned", label4: "Final",
+      views1: "3.1K", views2: "9.8K", views3: "24K", views4: "61K",
       at1: 0.2, at2: 0.55, at3: 0.9, at4: 1.25,
       corner: "rounded",
     },
@@ -318,15 +318,15 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     kind: "slideware-caption-dual-mode",
     label: "Whisper captions",
     description:
-      "Whisper caption chain — hard replace-per-cue, footage skin (white, chest band) or canvas pill skin (for lime takeovers); *bold* is the only emphasis.",
+      "Whisper caption chain — hard replace-per-cue, footage skin (white on an ink plate, chest band) or canvas pill skin (amber pill for slide takeovers); *bold* is the only emphasis.",
     ownScreen: false,
     canvas: "9:16",
     section: "slideware",
     defaultSpec: {
       mode: "footage",
-      cue1: "here is the",
-      cue2: "one *mistake*",
-      cue3: "everyone makes",
+      cue1: "cut the pause",
+      cue2: "right *before*",
+      cue3: "the punchline",
       at1: 0, at2: 0.8, at3: 1.6,
     },
     specFields: [
@@ -335,108 +335,107 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     ],
   },
 
-  // ---- MODULE PACK — the card library decomposed from the module
-  // longform study (docs/studies/MODULE_CARDS.md; templates compositions/
-  // module-*.html). All 16:9 LONGFORM. Two chassis (§1.1): the CREAM
+  // ---- MODULE PACK — Sniper's long-form card library (templates
+  // compositions/module-*.html). All 16:9 LONGFORM. Two chassis: the PAPER
   // split-panel (alpha rail beside the live face — NOT own-screen) and the
-  // DARK takeover (own-screen full-frame). His cream/ink/lime/cyan are the
-  // CSS-var fallbacks; brand tokens override (--rail-cream, --accent-result,
-  // --accent-process, --accent-warn). Variety doctrine (§2): tokens repeat,
+  // GRAPHITE takeover (own-screen full-frame). Colours come from tokens.css
+  // (--rail-cream paper, --module-canvas graphite, --accent-result amber,
+  // --accent-process blue, --accent-warn red). Variety: tokens repeat,
   // layouts don't — the planner should drain distinct forms before reuse.
   {
     kind: "module-rail",
-    label: "Cream rail (chassis)",
+    label: "Paper rail (chassis)",
     description:
-      "Cream split-panel that wipes in from the left edge (33%W) beside the live face — eyebrow, thesis headline, and a modular zone: KV ledger, status/queue cards, numbered steps, checklist with OK badges, or a dated vertical timeline (contentMode).",
+      "Paper split-panel that wipes in from the left edge (33%W) beside the live face — eyebrow, thesis headline, and a modular zone: KV ledger, status/queue cards, numbered steps, checklist with OK badges, or a dated vertical timeline (contentMode).",
     ownScreen: false, // overlays footage — the face stays full-frame right
     canvas: "16:9",
     section: "module",
     defaultSpec: {
-      eyebrow: "LONG-HORIZON WORK",
-      headlineLines: "One thread.|Every handoff.",
-      explainer: "Long, messy work that crosses tools.",
+      eyebrow: "ROUGH-CUT PASS",
+      headlineLines: "One pass.|Nothing missed.",
+      explainer: "Every step a rough cut runs before review.",
       contentMode: "steps",
-      rows: "01~Research~SOURCE|02~Code~BUILD|03~APIs~CALL|04~Wait~RESUME|05~Inspect~VERIFY",
-      evidenceSource: "OPENAI · BEST CODING MODEL YET",
+      rows: "01~Transcribe~WORDS|02~Trim~CUTS|03~Captions~BURN|04~Pacing~TIGHTEN|05~Review~VERIFY",
+      evidenceSource: "SAMPLE PROJECT · PREVIEW DATA",
     },
   },
   {
     kind: "module-takeover",
     label: "Dark takeover (face PIP)",
     description:
-      "Near-black takeover with the face in a rounded PIP card right — eyebrow, two-line accent headline, hero-vs-comparison bars with a delta chip, chip sweep, evidence ribbon. Longform-only (the renderer fills the face hole).",
+      "Graphite takeover with the face in a rounded PIP card right — eyebrow, two-line accent headline, hero-vs-comparison bars with a delta chip, chip sweep, evidence ribbon. Longform-only (the renderer fills the face hole).",
     ownScreen: true,
     canvas: "16:9",
     section: "module",
     defaultSpec: {
-      eyebrow: "ULTRA ORCHESTRATION",
-      headlineLines: "ONE RUN.|FOUR AGENTS.",
-      heroLabel: "GPT-5.6 SOUL",
-      heroValue: "92.4",
-      heroPct: "92",
-      compareLabel: "PREV BEST",
-      compareValue: "86.1",
-      comparePct: "86",
-      deltaChip: "+6.3 POINTS",
-      evidenceSource: "OPENAI GPT-5.6 RELEASE",
-      evidenceDate: "JUL 09 2026",
+      eyebrow: "REVIEW PASS",
+      headlineLines: "ONE PASS.|FEWER RETAKES.",
+      heroLabel: "CLEAN TAKES",
+      heroValue: "91%",
+      heroPct: "91",
+      compareLabel: "FIRST DRAFT",
+      compareValue: "74%",
+      comparePct: "74",
+      deltaChip: "+17 POINTS",
+      evidenceSource: "SAMPLE DATA",
+      evidenceDate: "PREVIEW",
     },
   },
   {
     kind: "module-ledger-dark",
     label: "Dark ledger + fan-out",
     description:
-      "Dark config/parallel-process card — KV ledger rows with status tags (model → VERIFIED), an optional wide ledger bar, and a fan-out under a cyan connector tree: numbered chips or parallel-agent columns with lime underlines (grid).",
+      "Graphite config/parallel-process card — KV ledger rows with status tags (model → VERIFIED), an optional wide ledger bar, and a fan-out under a blue connector tree: numbered chips or parallel columns with amber underlines (grid).",
     ownScreen: true,
     canvas: "16:9",
     section: "module",
     defaultSpec: {
-      eyebrow: "ULTRA ORCHESTRATION",
-      headlineLines: "ONE RUN.|FOUR AGENTS.",
-      barLabel: "DEFAULT PARALLELISM",
+      eyebrow: "PARALLEL REVIEW",
+      headlineLines: "CHECKS RUN|SIDE BY SIDE.",
+      barLabel: "REVIEW PASSES",
       barValue: "4",
-      barStatus: "COORDINATING",
+      barStatus: "RUNNING",
       grid: "columns",
-      gridItems: "AGENT 01~RESEARCH|AGENT 02~SCRIPT|AGENT 03~PRODUCTION|AGENT 04~VERIFICATION",
-      footChip: "OPENAI: FOUR AGENTS IN PARALLEL BY DEFAULT",
+      gridItems: "PASS 01~PACING|PASS 02~CAPTIONS|PASS 03~LOUDNESS|PASS 04~FACT CHECK",
+      footChip: "SAMPLE PREVIEW · NOT A REAL PROJECT",
     },
   },
   {
     kind: "module-scoreboard",
     label: "Big-number scoreboard",
     description:
-      "Dark hero-metric payoff card — giant lime number, outlined stat tiles, a color-coded per-item chip strip (win/tie/loss sweep), and the amber LIMIT caveat footer that lands last.",
+      "Graphite hero-metric payoff card — giant amber number, outlined stat tiles, a color-coded per-item chip strip (win/tie/loss sweep), and the red LIMIT caveat footer that lands last.",
     ownScreen: true,
     canvas: "16:9",
     section: "module",
     defaultSpec: {
-      eyebrow: "SMALL LOCAL CHECK",
-      contextChips: "ONE RUN|13 TASKS|THIS MACHINE",
-      heroValue: "97%",
-      heroLabel: "AVAILABLE OBJECTIVE POINTS",
-      tiles: "7~WINS|5~TIES|1~LOSS",
-      stripChips: "01~win|02~win|03~win|04~win|05~win|06~win|07~win|08~tie|09~tie|10~tie|11~tie|12~tie|13~loss",
+      eyebrow: "CAPTION ACCURACY",
+      contextChips: "ONE EPISODE|13 CLIPS|LOCAL RENDER",
+      heroValue: "94%",
+      heroLabel: "WORDS MATCHED ON FIRST PASS",
+      tiles: "9~CLEAN|3~MINOR|1~REDO",
+      stripChips: "01~win|02~win|03~win|04~win|05~win|06~win|07~win|08~win|09~win|10~tie|11~tie|12~tie|13~loss",
       limitLabel: "LIMIT",
-      limitText: "Not proof it wins everything.",
+      limitText: "Sample numbers, not a benchmark.",
     },
   },
   {
     kind: "module-bullet-bars",
     label: "Bullet bars vs limit",
     description:
-      "Cream rail with measured lime bullet bars against an amber threshold tick — measurements vs a limit, with a lime verdict footnote and an optional spectrum rail. Overlays footage (face stays full-frame right).",
-    ownScreen: false, // overlays footage — same cream-chassis law as the rail
+      "Paper rail with amber bullet bars against a red limit tick — measurements vs a limit, with a verdict footnote and an optional spectrum rail. Overlays footage (face stays full-frame right).",
+    ownScreen: false, // overlays footage — same paper-chassis law as the rail
     canvas: "16:9",
     section: "module",
     defaultSpec: {
-      eyebrow: "VOICE CONSISTENCY",
-      headlineLines: "Four short generations.",
-      explainer: "Each section stayed below a self-imposed 60-second production cap.",
-      axisLabel: "60 SEC PRODUCTION CAP",
-      bars: "01~40.4~67|02~48.1~80|03~47.4~79|04~45.4~76",
+      eyebrow: "RENDER TIMES",
+      headlineLines: "Four review passes.",
+      explainer: "Every pass finished inside the two-minute render budget we set.",
+      axisLabel: "120 SEC RENDER BUDGET",
+      bars: "01~84.2~70|02~96.5~80|03~91.3~76|04~88.0~73",
       threshPct: 100,
-      verdict: "4 OF 4 UNDER 60 SEC",
-      spectrum: "BEGINNING|VOICE HELD|END",
+      verdict: "4 OF 4 INSIDE BUDGET",
+      spectrum: "FIRST PASS|PACING HELD|FINAL",
     },
     specFields: [
       { key: "threshPct", label: "limit tick %", type: "number", min: 0, max: 100, step: 1 },
@@ -446,14 +445,14 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     kind: "module-pipeline",
     label: "Node pipeline",
     description:
-      "Dark process-summary card — 2-8 connected pipeline tiles (num + label) with a cyan you-are-here dot on the active node; the whole chain in one glance.",
+      "Graphite process-summary card — 2-8 connected pipeline tiles (num + label) with a blue you-are-here marker on the active node; the whole chain in one glance.",
     ownScreen: true,
     canvas: "16:9",
     section: "module",
     defaultSpec: {
-      eyebrow: "ONE INSTRUCTION TO FINISHED VIDEO",
-      headlineLines: "The chain changed.|The outcome held.",
-      nodes: "01~PROMPT|02~ELEVENLABS VOICE|03~HEYGEN AVATAR V|04~HYPERFRAMES EDIT|05~INDEPENDENT QA|06~FINISHED VIDEO",
+      eyebrow: "FROM RAW TAKE TO FINISHED CUT",
+      headlineLines: "One job per pass.|The cut stays honest.",
+      nodes: "01~TRANSCRIBE|02~CUT RETAKES|03~TIGHTEN PAUSES|04~ADD CAPTIONS|05~REVIEW PASS|06~FINISHED CUT",
       activeIndex: 5,
     },
     specFields: [
@@ -472,9 +471,9 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     canvas: "16:9",
     defaultSpec: {
       eyebrow: "The plan", title: "3 Steps",
-      num1: "1", title1: "Pick your target", sub1: "the next 90 days",
-      num2: "2", title2: "Get help", sub2: "even cheap help",
-      num3: "3", title3: "Ship weekly", sub3: "one every week",
+      num1: "1", title1: "Record the take", sub1: "one clean pass",
+      num2: "2", title2: "Trim it", sub2: "no dead air",
+      num3: "3", title3: "Caption it", sub3: "every line",
       num4: "4", title4: "", sub4: "", num5: "5", title5: "", sub5: "",
       accent: "#054BC9",
     },
@@ -517,7 +516,7 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
   {
     kind: "glass-rail",
     label: "Glass process rail",
-    description: "Transparent left/right process rail with up to six numbered rows, transcript-locked row lands, and measured rail-push motion.",
+    description: "Transparent left/right process rail with up to six numbered rows, transcript-locked row lands, and an optional rail-push entrance.",
     ownScreen: false,
     canvas: "16:9",
     defaultSpec: {
@@ -542,7 +541,7 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
   {
     kind: "section-takeover",
     label: "Section takeover",
-    description: "Warm-white chapter takeover whose numeral, title, and subline build in three transcript-locked states.",
+    description: "Paper chapter takeover whose ghost numeral, title, and subline build in three transcript-locked states.",
     ownScreen: true,
     canvas: "16:9",
     defaultSpec: {
@@ -557,7 +556,7 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     ownScreen: false,
     canvas: "16:9",
     defaultSpec: {
-      label: "And in that time", text: "I built the whole content pipeline",
+      label: "In one afternoon", text: "I cut the whole episode",
       accent: "#054BC9",
     },
   },
@@ -577,7 +576,7 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
   {
     kind: "glass-takeover-bg",
     label: "Glass takeover canvas",
-    description: "Opaque widescreen grid-and-glass canvas for a coordinated face-PIP or rail composition; content stays empty unless authored.",
+    description: "Opaque widescreen pale-blue dot-field canvas for a coordinated face-PIP or rail composition; content stays empty unless authored.",
     ownScreen: true,
     canvas: "16:9",
     defaultSpec: { eyebrow: "", title: "", accent: "#054BC9" },
@@ -622,13 +621,13 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
   {
     kind: "punch-shout-lockup",
     label: "Shout lockup",
-    description: "Measured vertical kicker/payload/co-word typography with hard pops or tightly timed word appends.",
+    description: "Vertical kicker / amber payload plate / co-word lockup in the headroom band, with hard pops or tightly timed word appends.",
     ownScreen: false,
     canvas: "9:16",
     defaultSpec: {
       kicker: "", payload: "", coword: "", kicker2: "", build: "pop",
       splitText: false, atS: 0, appendS: 0.15, slotY: 0.19, slotX: 0.3,
-      payloadPctH: 5, accent: "#F5E960",
+      payloadPctH: 5, accent: "#FDA933",
     },
   },
   {
@@ -649,10 +648,10 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     ownScreen: false,
     canvas: "9:16",
     defaultSpec: {
-      title1: "Ideation", time1: "8-10am", color1: "#2FBF71",
-      title2: "Filming", time2: "10-2pm", color2: "#3B82F6",
-      title3: "Distribution", time3: "2-3pm", color3: "#F2724B",
-      title4: "", time4: "", color4: "#7C5CF0",
+      title1: "Record", time1: "9-11am", color1: "#447BE4",
+      title2: "Edit", time2: "11am-2pm", color2: "#CC7200",
+      title3: "Publish", time3: "2-3pm", color3: "#7C8088",
+      title4: "", time4: "", color4: "#D33B36",
       side: "right", accent: "#054BC9",
     },
   },
@@ -671,9 +670,9 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     ownScreen: false,
     canvas: "9:16",
     defaultSpec: {
-      l1: "10k", r1: "50k", at1: 0.3,
-      l2: "50k", r2: "100k", at2: 1.6,
-      l3: "100k", r3: "200k", at3: 2.9,
+      l1: "5k", r1: "25k", at1: 0.3,
+      l2: "25k", r2: "60k", at2: 1.6,
+      l3: "60k", r3: "150k", at3: 2.9,
       l4: "", r4: "", at4: 4.2,
       arrowInAt: 0, rightInAt: 0, accent: "#054BC9",
     },
@@ -688,7 +687,7 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     kind: "marker-highlight",
     label: "Marker highlight",
     description:
-      "Cream paper panel with one spoken line — a hand-drawn marker stroke (highlight/circle/underline/scribble) draws over the emphasis word on cue (whole-word match).",
+      "Paper panel with one spoken line — a hand-drawn marker stroke (highlight/circle/underline/scribble) draws over the emphasis word on cue (whole-word match).",
     ownScreen: false,
     canvas: "9:16",
     defaultSpec: {

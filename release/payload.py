@@ -228,3 +228,30 @@ def apply_overrides(stage: Path, report: StageReport) -> None:
         if not target.exists():
             raise StagingError(f"override has nothing to replace: {relative}")
         shutil.copyfile(path, target)
+
+
+# Folders the installer or the tooling creates on the buyer's Mac. A missing file under
+# one of these is a broken install, never "withheld evidence", so they are not listed.
+_INSTALL_MADE = frozenset({"node_modules", "templates/motion/node_modules", ".venv", ".next", "__pycache__",
+                           ".pytest_cache", ".git", "templates/motion/.sniper-native-runtime"})
+
+
+def withheld_records(root: Path, skipped: list[tuple[str, str]], shipped: list[str]) -> list[dict]:
+    """The complete withheld manifest: what the release source has that the package does not.
+
+    Three kinds, all package-relative (the same paths as under app/):
+    files skipped inside allow-listed folders; whole folders the spec withholds
+    (except folders the install itself creates); and every tracked source file that
+    is not shipped (for example retained contracts that are not runtime inputs).
+    """
+    from release import package_spec as spec  # noqa: PLC0415
+    records = {path: {"path": path, "reason": reason} for path, reason in skipped}
+    for folder, reason in spec.EXCLUDE_DIRS:
+        if folder not in _INSTALL_MADE:
+            records[folder] = {"path": folder, "reason": reason, "kind": "folder"}
+    tracked = subprocess.run(["git", "-C", str(root), "ls-files", "-z"], capture_output=True, check=True).stdout
+    shipped_set = set(shipped)
+    for path in (item.decode("utf-8") for item in tracked.split(b"\0") if item):
+        if path not in shipped_set and path not in records:
+            records[path] = {"path": path, "reason": "not in the package allow-list (release/package_spec.py)"}
+    return sorted(records.values(), key=lambda row: row["path"])

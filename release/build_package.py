@@ -115,7 +115,7 @@ def _write_set(version: str, work: Path, allow_pending: bool, source: dict[str, 
     archive.write_json(target_dir / "release-manifest.json", external)
     archive.write_json(target_dir / "file-manifest.json", manifest)
     archive.write_json(target_dir / "withheld.json",
-                       [{"path": p, "reason": r} for p, r in sorted(report.skipped)])
+                       payload.withheld_records(ROOT, report.skipped, report.files))
     return external
 
 

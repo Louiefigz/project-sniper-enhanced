@@ -268,6 +268,7 @@ class CurrentSystemInventoryCheckTests(unittest.TestCase):
             repo / "docs/producer/command-driven-editing/contracts/"
             "current-system-inventory-v1.json"
         )
+        inventory.stat()  # absent retained evidence fails as FileNotFoundError, not a wrapped error
         result = validate_inventory(repo, inventory)
         self.assertEqual(result["baselineEvidence"], 2)
         self.assertEqual(result["discoveryBacklog"], 0)

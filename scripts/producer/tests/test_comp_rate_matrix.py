@@ -75,6 +75,7 @@ class CompRateMatrixTests(unittest.TestCase):
             self.assertEqual(list(Path(raw).iterdir()), [])
 
     def test_retained_cross_product_is_fresh(self) -> None:
+        ARTIFACT.stat()  # absent retained evidence fails as FileNotFoundError, not a later assertion
         value, issue = load_rate_matrix(str(ARTIFACT))
         self.assertEqual(issue, "")
         validate_document("hyperframes-rate-matrix-v1.schema.json", value)

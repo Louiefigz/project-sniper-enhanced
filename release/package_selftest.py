@@ -10,8 +10,11 @@ when BOTH hold:
 
 1. the test is declared below with the reason its input is not a product input
    (runtime reachability recorded per entry), and
-2. its failure is exactly a missing-file error naming a path that this build's
-   withheld manifest lists.
+2. its TERMINAL exception, recorded structurally by the runner (type, errno,
+   filename; never parsed from traceback text, never an earlier exception in a
+   chain), is exactly FileNotFoundError/ENOENT for a path that is absent from the
+   package and that this build's withheld manifest lists (a withheld file, or a
+   file under a withheld folder).
 
 Every other failure or error fails the gate, including a failed or errored
 subtest and an unexpected success. The recorded rows must agree with unittest's
@@ -27,6 +30,7 @@ result, never an earlier pass.
 from __future__ import annotations
 
 import argparse
+import errno
 import json
 import os
 import re
@@ -35,6 +39,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 
 # test-id prefix → why its input is not read by any buyer workflow
@@ -56,7 +61,8 @@ DEV_EVIDENCE: dict[str, str] = {
                                      "the container-only guided opening/body path, which refuses on the Mac package",
     "test_scene_brief_matrix.": "retained P4 scene-brief matrix evidence",
 }
-_MISSING = re.compile(r"No such file or directory: '([^']+)'|retained parity evidence root is unavailable")
+# unittest reports class/module fixture errors under a holder id, e.g. "setUpClass (mod.Class)".
+_FIXTURE_ID = re.compile(r"^(?:setUpClass|tearDownClass|setUpModule|tearDownModule) \((.+)\)$")
 
 _RUNNER = r"""
 import json, os, sys, traceback, unittest
@@ -67,6 +73,11 @@ class Result(unittest.TextTestResult):
     def _row(self, test, outcome, err=None, subtest=None):
         text = "".join(traceback.format_exception(*err)) if err else ""
         row = {"id": test.id(), "outcome": outcome, "detail": text[-4000:]}
+        if err is not None:  # the TERMINAL exception only, recorded as data
+            exc = err[1]
+            name = getattr(exc, "filename", None)
+            row["exc"] = {"type": type(exc).__module__ + "." + type(exc).__qualname__,
+                          "errno": getattr(exc, "errno", None), "filename": name if isinstance(name, str) else None}
         if subtest is not None:
             row["subtest"] = subtest.id()
         Result.rows.append(row)
@@ -95,24 +106,44 @@ class GateInfrastructureError(RuntimeError):
     """The test run did not produce a trustworthy result."""
 
 
+@dataclass(frozen=True)
+class Withheld:
+    """This build's withheld manifest: exact files and whole folders (package-relative)."""
+
+    files: frozenset[str]
+    folders: tuple[str, ...]
+
+    @classmethod
+    def load(cls, path: Path) -> "Withheld":
+        rows = json.loads(path.read_text(encoding="utf-8"))
+        return cls(frozenset(row["path"] for row in rows if row.get("kind") != "folder"),
+                   tuple(row["path"].rstrip("/") for row in rows if row.get("kind") == "folder"))
+
+    def lists(self, relative: str) -> bool:
+        return relative in self.files or any(relative.startswith(folder + "/") for folder in self.folders)
+
+
 def _declared(test_id: str) -> str | None:
-    """The reason a test's input is development-only, if declared."""
-    return next((reason for prefix, reason in DEV_EVIDENCE.items() if test_id.startswith(prefix)), None)
+    """The reason a test's input is development-only, if declared (fixture holders map to their class)."""
+    fixture = _FIXTURE_ID.match(test_id)
+    name = fixture.group(1) + "." if fixture else test_id
+    return next((reason for prefix, reason in DEV_EVIDENCE.items() if name.startswith(prefix)), None)
 
 
-def _withheld_miss(detail: str, package_app: Path, withheld: set[str]) -> bool:
-    """Whether the failure is a missing withheld path (or the unavailable local evidence root)."""
-    for match in _MISSING.finditer(detail):
-        if match.group(1) is None:
-            return True
-        path = Path(match.group(1))
-        try:
-            relative = path.resolve(strict=False).relative_to(package_app.resolve()).as_posix()
-        except ValueError:
-            continue
-        if relative in withheld or any(relative.startswith(entry.rstrip("/") + "/") for entry in withheld):
-            return True
-    return False
+def _withheld_miss(row: dict, package_app: Path, withheld: Withheld) -> bool:
+    """Whether the row's terminal exception is a missing withheld file absent from the package."""
+    exc = row.get("exc") or {}
+    if exc.get("type") != "builtins.FileNotFoundError" or exc.get("errno") != errno.ENOENT:
+        return False
+    if not isinstance(exc.get("filename"), str) or not exc["filename"]:
+        return False
+    path = Path(exc["filename"])
+    path = path if path.is_absolute() else package_app / "scripts" / "producer" / path
+    try:
+        relative = path.resolve(strict=False).relative_to(package_app.resolve()).as_posix()
+    except ValueError:
+        return False
+    return not (package_app / relative).exists() and withheld.lists(relative)
 
 
 def _reconcile(rows: list[dict], summary: dict) -> list[dict]:
@@ -126,7 +157,7 @@ def _reconcile(rows: list[dict], summary: dict) -> list[dict]:
                        f"(wasSuccessful={summary['wasSuccessful']})"}]
 
 
-def classify(rows: list[dict], package_app: Path, withheld: set[str], summary: dict | None = None) -> dict:
+def classify(rows: list[dict], package_app: Path, withheld: Withheld, summary: dict | None = None) -> dict:
     """Split results into passes, tolerated withheld-evidence failures and gate failures."""
     tolerated, failures = [], []
     for row in rows:
@@ -134,7 +165,7 @@ def classify(rows: list[dict], package_app: Path, withheld: set[str], summary: d
             continue
         reason = _declared(row["id"])
         entry = {"id": row["id"], **({"subtest": row["subtest"]} if "subtest" in row else {})}
-        if reason and _withheld_miss(row["detail"], package_app, withheld):
+        if reason and _withheld_miss(row, package_app, withheld):
             tolerated.append({**entry, "reason": reason})
         else:
             failures.append({**entry, "outcome": row["outcome"], "detail": row["detail"][-1200:]})
@@ -193,8 +224,7 @@ def main(argv: list[str] | None = None) -> int:
         _write(args.out, {"passed": False, "infrastructureError": str(error)})
         print(f"GATE INFRASTRUCTURE FAILURE: {error}", file=sys.stderr)
         return 2
-    withheld = {row["path"] for row in json.loads(args.withheld.read_text(encoding="utf-8"))}
-    result = classify(rows, app, withheld, summary)
+    result = classify(rows, app, Withheld.load(args.withheld), summary)
     _write(args.out, result)
     print(json.dumps({key: result[key] for key in ("counts", "total", "passed")}))
     for row in result["gateFailures"]:

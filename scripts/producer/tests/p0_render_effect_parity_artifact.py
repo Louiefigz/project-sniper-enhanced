@@ -1,6 +1,7 @@
 """Cheap freshness contract for retained P0 dirty/forced parity evidence."""
 from __future__ import annotations
 
+import errno
 import json
 import re
 from dataclasses import dataclass
@@ -206,6 +207,8 @@ def validate_case(root: Path, case: str) -> dict:
 
 def validate_retained_parity(root: Path = RETAINED_ROOT) -> dict[str, dict]:
     """Validate the exact two-case release root without rerendering."""
+    if not root.exists() and not root.is_symlink():  # absent evidence: a structured missing-file error
+        raise FileNotFoundError(errno.ENOENT, "retained parity evidence root is unavailable", str(root))
     if root.is_symlink() or not root.is_dir():
         raise ParityArtifactError("retained parity evidence root is unavailable")
     directories = {path.name for path in root.iterdir() if path.is_dir()}

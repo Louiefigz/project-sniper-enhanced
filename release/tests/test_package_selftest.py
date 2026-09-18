@@ -9,15 +9,21 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from release.package_selftest import classify, main
+from release.package_selftest import Withheld, classify, main
 
 APP = Path("/pkg/app")
-WITHHELD = {"docs/producer/command-driven-editing/contracts/p4-live-exit-closure-v1.json", "templates/motion/container"}
+WITHHELD = Withheld(frozenset({"docs/producer/command-driven-editing/contracts/p4-live-exit-closure-v1.json"}),
+                    ("templates/motion/container",))
 
 
-def row(test_id: str, outcome: str, missing: str | None = None, text: str = "") -> dict:
-    detail = text + (f"FileNotFoundError: [Errno 2] No such file or directory: '{missing}'" if missing else "")
-    return {"id": test_id, "outcome": outcome, "detail": detail}
+def row(test_id: str, outcome: str, missing: str | None = None, exc_type: str | None = None) -> dict:
+    """A recorded outcome; `missing` makes its terminal exception FileNotFoundError for that path."""
+    result = {"id": test_id, "outcome": outcome, "detail": ""}
+    if missing:
+        result["exc"] = {"type": "builtins.FileNotFoundError", "errno": 2, "filename": missing}
+    elif exc_type:
+        result["exc"] = {"type": exc_type, "errno": None, "filename": None}
+    return result
 
 
 class PackageSelftestGateTests(unittest.TestCase):
@@ -32,7 +38,8 @@ class PackageSelftestGateTests(unittest.TestCase):
 
     def test_declared_test_failing_for_another_reason_fails_the_gate(self) -> None:
         result = classify([row("test_x.A.test_ok", "pass"),
-                           row("test_p4_exit_closure_artifact.P.t", "fail", text="AssertionError: stale")], APP, WITHHELD)
+                           row("test_p4_exit_closure_artifact.P.t", "fail", exc_type="builtins.AssertionError")],
+                          APP, WITHHELD)
         self.assertFalse(result["passed"])
 
     def test_declared_test_missing_a_shipped_file_fails_the_gate(self) -> None:
@@ -40,6 +47,22 @@ class PackageSelftestGateTests(unittest.TestCase):
                            row("test_p4_exit_closure_artifact.P.t", "error", "/pkg/app/scripts/producer/render.py")],
                           APP, WITHHELD)
         self.assertFalse(result["passed"])
+
+    def test_a_fixture_error_is_matched_to_its_declared_class(self) -> None:
+        result = classify([row("test_x.A.test_ok", "pass"),
+                           row("setUpClass (test_p4_exit_closure_artifact.P)", "error",
+                               "/pkg/app/docs/producer/command-driven-editing/contracts/p4-live-exit-closure-v1.json")],
+                          APP, WITHHELD)
+        self.assertTrue(result["passed"])
+
+    def test_a_failure_text_naming_a_withheld_path_is_not_enough(self) -> None:
+        # The old gate matched traceback text; only the structured terminal exception counts now.
+        failing = {"id": "test_p4_exit_closure_artifact.P.t", "outcome": "fail",
+                   "detail": "FileNotFoundError: [Errno 2] No such file or directory: "
+                             "'/pkg/app/docs/producer/command-driven-editing/contracts/p4-live-exit-closure-v1.json'"
+                             "\nDuring handling of the above exception, another exception occurred:\nAssertionError: x",
+                   "exc": {"type": "builtins.AssertionError", "errno": None, "filename": None}}
+        self.assertFalse(classify([row("test_x.A.test_ok", "pass"), failing], APP, WITHHELD)["passed"])
 
     def test_undeclared_failure_fails_the_gate_even_on_a_withheld_path(self) -> None:
         result = classify([row("test_x.A.test_ok", "pass"),
@@ -120,6 +143,49 @@ class PackageSelftestRunTests(unittest.TestCase):
         code, result = self._gate(PASSING)
         self.assertEqual((code, result["passed"]), (2, False))
         self.assertIn("not this run", result["infrastructureError"])
+
+    def _declared_artifact_test(self, body: str) -> None:
+        withheld = self.base / "app/docs/withheld.json"  # absent from the fake package, listed as withheld
+        self.withheld.write_text(json.dumps([{"path": "docs/withheld.json", "reason": "retained evidence"}]))
+        (self.tests / "test_p4_exit_closure_artifact.py").write_text(
+            "import unittest\nfrom pathlib import Path\nEVIDENCE = Path(" + repr(str(withheld)) + ")\n"
+            "class P(unittest.TestCase):\n" + body)
+
+    def test_missing_withheld_evidence_alone_is_tolerated(self) -> None:
+        self._declared_artifact_test("    def test_fresh(self):\n        EVIDENCE.read_text()\n")
+        code, result = self._gate(PASSING)
+        self.assertEqual((code, result["passed"], len(result["toleratedWithheldEvidence"])), (0, True, 1))
+
+    def test_a_regression_raised_while_handling_missing_evidence_fails_the_gate(self) -> None:
+        # The independent review's reproduction: AssertionError after catching FileNotFoundError.
+        self._declared_artifact_test("    def test_fresh(self):\n        try:\n            EVIDENCE.read_text()\n"
+                                     "        except FileNotFoundError:\n"
+                                     "            raise AssertionError('REAL REGRESSION')\n")
+        code, result = self._gate(PASSING)
+        self.assertEqual((code, result["passed"]), (1, False))
+        self.assertEqual(result["toleratedWithheldEvidence"], [])
+
+    def test_a_runtime_error_chained_from_missing_evidence_fails_the_gate(self) -> None:
+        self._declared_artifact_test("    def test_fresh(self):\n        try:\n            EVIDENCE.read_text()\n"
+                                     "        except FileNotFoundError as error:\n"
+                                     "            raise RuntimeError('broken') from error\n")
+        self.assertEqual(self._gate(PASSING)[0], 1)
+
+    def test_a_subtest_regression_after_missing_evidence_fails_the_gate(self) -> None:
+        self._declared_artifact_test("    def test_fresh(self):\n        with self.subTest(case='x'):\n"
+                                     "            try:\n                EVIDENCE.read_text()\n"
+                                     "            except FileNotFoundError:\n"
+                                     "                self.fail('REAL REGRESSION')\n")
+        code, result = self._gate(PASSING)
+        self.assertEqual((code, result["passed"]), (1, False))
+
+    def test_a_missing_shipped_file_is_not_excused(self) -> None:
+        # Same declared test, but the missing file is not in the withheld manifest.
+        self.withheld.write_text("[]")
+        (self.tests / "test_p4_exit_closure_artifact.py").write_text(
+            "import unittest\nfrom pathlib import Path\nclass P(unittest.TestCase):\n"
+            "    def test_fresh(self):\n        Path(" + repr(str(self.base / "app/scripts/x.py")) + ").read_text()\n")
+        self.assertEqual(self._gate(PASSING)[0], 1)
 
     def test_rows_that_disagree_with_unittest_totals_fail_the_gate(self) -> None:
         summary = {"testsRun": 2, "failures": 1, "errors": 0, "unexpectedSuccesses": 0, "wasSuccessful": False}

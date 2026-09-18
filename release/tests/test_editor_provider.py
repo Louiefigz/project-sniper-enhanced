@@ -7,6 +7,7 @@ Run: .venv/bin/python -m unittest release.tests.test_editor_provider
 """
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 import tempfile
@@ -14,6 +15,12 @@ import unittest
 from pathlib import Path
 
 from release.tests import _fixture as fx
+
+
+def _settings_json(calls: str) -> dict:
+    """The JSON passed after --settings in a recorded stub call."""
+    start = calls.index("[--settings] [") + len("[--settings] [")
+    return json.JSONDecoder().raw_decode(calls[start:])[0]
 
 
 class EditorProvider(unittest.TestCase):
@@ -77,11 +84,25 @@ class EditorProvider(unittest.TestCase):
         self.assertEqual(done.returncode, 0, done.stderr)
         calls = self._calls("claude")
         self.assertIn("[--model=opus]", calls)
-        self.assertIn('[--settings] [{"forceLoginMethod":"claudeai"}]', calls)
+        self.assertIn("[--setting-sources] [project,local]", calls)
+        settings = _settings_json(calls)
+        self.assertEqual(settings["forceLoginMethod"], "claudeai")
+        base = self.base.resolve()  # the launchers work from the resolved package path
+        self.assertIn(str(base / "CLAUDE.md"), settings["claudeMdExcludes"], "folders above the app are excluded")
+        self.assertIn(str(base / ".claude/CLAUDE.md"), settings["claudeMdExcludes"])
+        self.assertNotIn(str(base / "pkg/app/CLAUDE.md"), settings["claudeMdExcludes"], "the app's own file still loads")
         self.assertIn("SNIPER_PROVIDER=claude SNIPER_BRAIN_PROVIDER=legacy SNIPER_CLAUDE_MODEL=opus", calls)
         env = (self.pkg / "runtime/sniper.env").read_text()
         self.assertIn("SNIPER_PROVIDER=claude\n", env)
         self.assertIn("SNIPER_BRAIN_PROVIDER=legacy\n", env)
+
+    def test_the_editor_never_receives_a_paid_api_key(self) -> None:
+        for provider in ("codex", "claude"):
+            self._install(provider)
+            (self.pkg / "runtime/sniper.local.env").write_text(
+                "ANTHROPIC_API_KEY=sk-ant-test-only\nOPENAI_API_KEY=sk-test-only\n")
+            self.assertEqual(self._editor().returncode, 0)
+            self.assertIn("KEYS anthropic= openai=", self._calls(provider), provider)
 
     def test_a_model_override_reaches_the_editor_and_the_app_alike(self) -> None:
         self._install("codex")

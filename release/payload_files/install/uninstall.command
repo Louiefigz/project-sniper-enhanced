@@ -67,7 +67,7 @@ codex_signed_in() {  # 0 signed in, 1 not, 2 cannot tell
 }
 claude_signed_in() {
   local out rc=0
-  out="$(cli claude auth status --json 2>&1)" || rc=$?
+  out="$(cd "$RUNTIME_DIR" && cli claude --setting-sources "" auth status --json 2>&1)" || rc=$?
   case "$out" in *'"loggedIn": true'*|*'"loggedIn":true'*) return 0 ;; *'"loggedIn": false'*|*'"loggedIn":false'*) return 1 ;; esac
   return 2
 }
@@ -79,7 +79,7 @@ sign_out() {  # provider logout-args...
   [ "$state" = 2 ] && fail "Could not check Sniper's $provider login, so nothing was removed.
   Reinstall the CLIs (install/install.command) and run this again, or run it with
   --keep-logins to remove everything else and leave that login in place."
-  out="$(cli "$provider" "$@" 2>&1)" || rc=$?
+  out="$(cd "$RUNTIME_DIR" && cli "$provider" "$@" 2>&1)" || rc=$?
   "${provider}_signed_in"; state=$?
   [ "$state" = 1 ] || fail "Signing out of Sniper's $provider login failed (exit $rc): $(printf '%s' "$out" | head -3)
   Nothing was removed. Check your connection and run this again, or use --keep-logins."
@@ -91,7 +91,8 @@ if [ "$KEEP_LOGINS" = 1 ]; then
   starts with 'Claude Code-credentials-' — delete it in Keychain Access if you want."
 else
   [ -x "$CLI_BIN/codex" ] && sign_out codex logout
-  [ -x "$CLI_BIN/claude" ] && sign_out claude auth logout
+  # Claude with no setting sources: your own ~/.claude settings must not answer for Sniper's login.
+  [ -x "$CLI_BIN/claude" ] && sign_out claude --setting-sources "" auth logout
   [ -x "$CLI_BIN/claude" ] || [ ! -d "$CLAUDE_CONFIG_DIR_LOCAL" ] \
     || warn "Sniper's Claude CLI is not installed here, so a Claude login made for Sniper could
   not be checked; if one exists it stays in your Keychain ('Claude Code-credentials-…')."

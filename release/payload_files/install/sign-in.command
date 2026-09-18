@@ -22,7 +22,9 @@ case "$PROVIDER" in
     say "Signing in to Claude with your Claude subscription (settings: $CLAUDE_CONFIG_DIR)."
     say "macOS keeps this login in your Keychain as its own item, separate from any"
     say "Claude login you already have. install/uninstall.command signs it out."
-    "$CLI_BIN/claude" --settings '{"forceLoginMethod":"claudeai"}' auth login ;;
+    # No setting sources: opened from Finder the working folder is your home, whose
+    # ~/.claude settings (an apiKeyHelper, for example) would otherwise be read.
+    (cd "$RUNTIME_DIR" && "$CLI_BIN/claude" --setting-sources "" --settings '{"forceLoginMethod":"claudeai"}' auth login) ;;
 esac
 say ""
 if [ "$PROVIDER" != "$SNIPER_PROVIDER" ]; then

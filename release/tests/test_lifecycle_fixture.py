@@ -98,6 +98,21 @@ class Lifecycle(unittest.TestCase):
         for rel in KEPT:
             self.assertEqual((self.pkg / rel).read_text(), _content(rel), rel)
         self.assertTrue((self.base / "videos").is_dir(), "the video workspace was touched")
+        claude = (self.logs / "claude.calls").read_text()
+        self.assertIn("[--setting-sources] [] [auth] [status] [--json]", claude)
+        self.assertIn("[--setting-sources] [] [auth] [logout]", claude)
+        self.assertNotIn(f"cwd={self.env['HOME']}", claude, "your home settings folder must not be the working folder")
+
+    def test_claude_sign_in_reads_no_setting_sources_from_your_home(self) -> None:
+        # Sign-in ends with the doctor's provider check; this test is about the login call only.
+        doctor = self.pkg / "install/doctor.command"
+        doctor.write_text("#!/bin/bash\nexit 0\n")
+        doctor.chmod(0o755)
+        done = self._run("sign-in.command", "claude")
+        self.assertEqual(done.returncode, 0, done.stderr)
+        claude = (self.logs / "claude.calls").read_text()
+        self.assertIn('[--setting-sources] [] [--settings] [{"forceLoginMethod":"claudeai"}] [auth] [login]', claude)
+        self.assertIn(f"cwd={(self.pkg / 'runtime').resolve()}", claude)
 
     def test_failed_sign_out_is_reported_and_nothing_is_removed(self) -> None:
         self._sign_in("codex", "claude")

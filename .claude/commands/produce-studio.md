@@ -35,5 +35,5 @@ the user explicitly requests it.
 
 Studio is a review surface ONLY: never `hyperframes render` the studio dir —
 the deliverable path is unchanged (footage = ffmpeg; graphics =
-`graphics_render.py` + `assemble.py`). For a pro-NLE footage-level pass, the
-optional legacy Palmier exact-master mirror remains `/produce-palmier`.
+`graphics_render.py` + `assemble.py`). Palmier Pro is not configured in the
+packaged release, so `/produce-palmier` does not apply there.

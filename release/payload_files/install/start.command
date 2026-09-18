@@ -21,7 +21,9 @@ PY="$APP_DIR/.venv/bin/python3"
 serving_this_build() { [ "$(curl -s -o /dev/null -m 3 -w '%{http_code}' "$PROBE")" = 200 ]; }
 
 if pid_is_our_supervisor "$(cat "$PIDFILE" 2>/dev/null)"; then
-  if serving_this_build; then say "Already running: http://127.0.0.1:$PORT"; open "http://127.0.0.1:$PORT"; exit 0; fi
+  if serving_this_build; then
+    say "Already running: http://127.0.0.1:$PORT"; [ -n "$SNIPER_NO_OPEN" ] || open "http://127.0.0.1:$PORT"; exit 0
+  fi
   fail "A Sniper supervisor is running but not serving yet. Wait a moment, or run install/stop.command."
 fi
 HOLDERS="$(port_listener_pids)"

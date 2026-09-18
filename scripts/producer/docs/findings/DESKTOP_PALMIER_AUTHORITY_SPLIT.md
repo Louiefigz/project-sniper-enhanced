@@ -40,21 +40,29 @@ This lets the cut appear early without letting downstream visual work bypass
 its checks. The durable JSONL journal also means a 90-minute edit can resume
 without rebuilding or replaying verified work.
 
-## Reference mechanics that changed the quality target
+## The mechanics that set the quality target
 
-The Module reference (`J_jswzXhYJA`, 5:23) is not smooth because it uses a
-large number of stock transitions. The study found:
+A smooth long-form edit does not get its smoothness from transitions. Sniper's
+long-form doctrine (`docs/studies/MODULE_STUDY.md`,
+`docs/studies/MODULE_CARDS.md`, `docs/studies/EDITCRAFT_LESSONS.md`) places it
+elsewhere:
 
-- 20 distinct card forms across 23 graphic windows;
-- graphics visible for roughly 93% of the timeline after 13.5 seconds;
-- only 7 hard cuts (about 1.3/minute);
-- a roughly 136-second screen-share chapter kept alive by persistent PIP,
-  cursor movement, and scrolling rather than repeated scene transitions.
+- a varied card anatomy on constant brand tokens (MODULE_CARDS §2 — no
+  information-bearing kind twice in a row, four forms in the first minute);
+- graphics that build module by module on the words that introduce them
+  (MODULE_STUDY §3 rank 1, §5.4) and seams locked to word boundaries (T-G);
+- few hard cuts, with seam covers used only as markers of a change of world
+  (EDITCRAFT_LESSONS §2.7);
+- long screen-share stretches kept alive by the cursor, a persistent presenter
+  PIP and scrolling rather than by repeated scene transitions
+  (EDITCRAFT_LESSONS §1.1, §4).
 
-The transferable rule is: **tokens repeat; layouts do not**. Smoothness comes
-from progressive module builds, word-locked entrances, a stable face bridge,
-earned seam punctuation, and clear visual hierarchy. “Use more transitions”
-without those mechanics creates noise, not polish.
+The rule this finding depends on is: **tokens repeat; layouts do not**.
+Smoothness comes from progressive module builds, word-locked entrances, a
+stable face bridge, earned seam punctuation, and clear visual hierarchy. “Use
+more transitions” without those mechanics creates noise, not polish. That is
+why the Desktop authority split must let the visual lane run its full gate
+bundle rather than accepting a quick transition pass.
 
 ## Implementation
 

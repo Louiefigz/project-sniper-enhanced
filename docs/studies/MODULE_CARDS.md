@@ -138,10 +138,11 @@ Rules, all encoded in `MOTION["variety"]` and enforced by the hard
    that already has four windows still owes four forms (LL-030 — a duration threshold
    decides when density is owed, never whether variety is).
 3. **The first three minutes.** Over the first min(output, 180 s) the floor grows from
-   **5 windows / 4 forms at 60 s to 8 windows / 6 forms at 180 s** (one more window per
-   25 s, one more form per 30 s, distinct ratio ≥ 0.67; `local_floors`).
-4. **The whole plan.** At least 6 windows, and at least ceil(0.5 × windows) distinct
-   kinds (`min_windows`, `min_distinct_ratio`).
+   **5 windows / 4 forms at 60 s to 8 windows / 6 forms at 180 s**: at least one window
+   per 25 s and one form per 30 s of the elapsed window, never fewer than 5 windows and
+   4 forms, with a distinct ratio of at least 0.67 (`local_floors`).
+4. **The whole plan.** Once a plan carries 6 or more windows, at least
+   ceil(0.5 × windows) of them are distinct kinds (`min_windows`, `min_distinct_ratio`).
 5. **Exemptions.** Caption layer kinds (`layer_kinds`) and a deliberate `statements[]`
    replacement chain on one statement card do not count as repeats.
 6. **Variety never authorises a wrong form.** If only one compatible form fits a beat,

@@ -43,8 +43,8 @@ export function nativeShortSupportingInventory(manifestPath: string, manifest: A
 /** Available reference cases are retrieval context; the brain must inspect the actual frames. */
 function referenceInventory(repo: string) {
   const root = path.join(repo, SHORTS_LIBRARY);
-  const files = ["FORMAT_FOUNDATIONS.md", "expansion/CATALOG_MAP.md", "entries/A02.md",
-    "sequences/cases/N27.md", "sequences/cases/N26.md", "expansion/cases/CR07.md"];
+  const files = ["FORMAT_FOUNDATIONS.md", "expansion/CATALOG_MAP.md", "entries/ME02.md",
+    "sequences/cases/SQ01.md", "sequences/cases/SQ02.md", "expansion/cases/DV01.md"];
   return files.map((file) => ({ ...observed(path.join(root, file)), purpose: file.includes("FORMAT")
     ? "Choose the viewing need and format; follow linked cases and contrasting examples"
     : "Starting reference context; inspect its cited individual images before adapting" }));

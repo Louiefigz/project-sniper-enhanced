@@ -1,297 +1,105 @@
 {
   "schema": "sniper-reference-sequences-v1",
-  "version": "2026-09-17.1",
+  "version": "2026-09-18.1",
   "cases": [
     {
-      "id": "N26",
-      "version": "2026-09-17.1",
-      "title": "Change the route, keep the destination",
+      "id": "SQ01",
+      "version": "2026-09-18.1",
+      "title": "State the claim, then show the measured spread and its limit",
       "scope": "original-reference-rendered-from-project-sniper-templates",
       "render_aspects": [
         "16:9"
       ],
-      "lesson": "When the speaker compares ways of reaching one goal, keep the goal fixed on screen and change only the route, so the viewer compares like with like.",
-      "opening": "The destination is named and placed first, before any route appears.",
-      "story_arc": "goal fixed -> first route -> its cost -> second route -> its cost -> the route the speaker recommends -> hand back to the speaker",
-      "payoff": "The recommended route is the last one drawn and the only one still lit.",
+      "lesson": "A claim earns belief when the measurement behind it follows at once, with what was and was not measured visible on the same screen.",
+      "opening": "The claim alone, as one short statement with one accented word.",
+      "story_arc": "Claim → the measured range and what was counted → the limit of the measurement.",
+      "payoff": "The viewer sees the spread that supports the claim and the conditions it was measured under.",
       "catalog": [
-        "whiteboard-map",
-        "module-rail",
-        "glass-rail"
+        "statement-card",
+        "module-scoreboard",
+        "stat-card"
       ],
       "beats": [
         {
-          "id": "N26-B01",
-          "spoken_idea": "The goal is stated",
-          "visible": "Title appears alone.",
-          "why_this_picture": "Name the destination before any option exists.",
-          "composition": "whiteboard-map",
+          "id": "SQ01-B01",
+          "spoken_idea": "A scoop is not a measurement.",
+          "visible": "One statement on its own, the key word accented.",
+          "why_this_picture": "The claim is short enough to read in one glance before any evidence arrives.",
+          "composition": "statement-card",
           "catalog_candidates": [
-            "whiteboard-map"
+            "statement-card"
           ],
           "source_frames": [
             {
-              "path": "resources/references/shorts/sequences/frames/N26-B01-0.jpg",
-              "sha256": "d3824aa82a51889457c3a08aff1a277a4d2bc0db5a51a7254a6f1d956df4f3b3",
-              "dimensions": [
-                1280,
-                720
-              ],
-              "requested_time": 0.2,
-              "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
-                "variables": {
-                  "title": "Get the first client",
-                  "node1": "",
-                  "node2": "",
-                  "node3": "",
-                  "node4": ""
-                },
-                "time_s": 0.2
-              }
-            },
-            {
-              "path": "resources/references/shorts/sequences/frames/N26-B01-1.jpg",
-              "sha256": "0a008c8ac460d066f7f659f600f03b3171f5d87dfaf8c2c0e38b18ab6244e433",
-              "dimensions": [
-                1280,
-                720
-              ],
-              "requested_time": 0.6,
-              "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
-                "variables": {
-                  "title": "Get the first client",
-                  "node1": "",
-                  "node2": "",
-                  "node3": "",
-                  "node4": ""
-                },
-                "time_s": 0.6
-              }
-            },
-            {
-              "path": "resources/references/shorts/sequences/frames/N26-B01-2.jpg",
-              "sha256": "78f090a4208ba98390209f4a61d2452bbf9a06ca8fbddacef3944b4451b230b9",
-              "dimensions": [
-                1280,
-                720
-              ],
-              "requested_time": 1.0,
-              "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
-                "variables": {
-                  "title": "Get the first client",
-                  "node1": "",
-                  "node2": "",
-                  "node3": "",
-                  "node4": ""
-                },
-                "time_s": 1.0
-              }
-            }
-          ],
-          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
-          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
-        },
-        {
-          "id": "N26-B02",
-          "spoken_idea": "First route: cold outreach",
-          "visible": "First node joins the fixed title.",
-          "why_this_picture": "One option at a time; the goal stays where it was.",
-          "composition": "whiteboard-map",
-          "catalog_candidates": [
-            "whiteboard-map"
-          ],
-          "source_frames": [
-            {
-              "path": "resources/references/shorts/sequences/frames/N26-B02-0.jpg",
-              "sha256": "6c3657528aa2ac53f441b994de45908dd08cc62cc430d051419a13b05d67dd94",
+              "path": "resources/references/shorts/sequences/frames/SQ01-B01-0.jpg",
+              "sha256": "ac2172654869e481aff676b218a93d22953bc7582cd403056f1b60ce245026e4",
               "dimensions": [
                 1280,
                 720
               ],
               "requested_time": 0.4,
               "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "composition": "templates/motion/compositions/statement-card.html",
                 "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach"
+                  "text": "A scoop is not a *measurement*",
+                  "bg": "dark",
+                  "variant": "classic",
+                  "eyebrow": "",
+                  "iconFile": "",
+                  "headlineLines": "",
+                  "statements": "",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
                 },
                 "time_s": 0.4
               }
             },
             {
-              "path": "resources/references/shorts/sequences/frames/N26-B02-1.jpg",
-              "sha256": "1f17924c82b6a4da3fd9ef353ed1287d73c4cf4dbd5e40e5a7fa475497163f73",
-              "dimensions": [
-                1280,
-                720
-              ],
-              "requested_time": 0.8,
-              "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
-                "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach"
-                },
-                "time_s": 0.8
-              }
-            },
-            {
-              "path": "resources/references/shorts/sequences/frames/N26-B02-2.jpg",
-              "sha256": "d036ea6cb4ecfefe65b7104b36957260b76671c357cb487bff736f750619b283",
+              "path": "resources/references/shorts/sequences/frames/SQ01-B01-1.jpg",
+              "sha256": "202a1dda4329c2d481503562d9c46317ccbd707987ac839708ce7c110a724c37",
               "dimensions": [
                 1280,
                 720
               ],
               "requested_time": 1.2,
               "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "composition": "templates/motion/compositions/statement-card.html",
                 "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach"
+                  "text": "A scoop is not a *measurement*",
+                  "bg": "dark",
+                  "variant": "classic",
+                  "eyebrow": "",
+                  "iconFile": "",
+                  "headlineLines": "",
+                  "statements": "",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
                 },
                 "time_s": 1.2
               }
-            }
-          ],
-          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
-          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
-        },
-        {
-          "id": "N26-B03",
-          "spoken_idea": "What the first route costs",
-          "visible": "Second node describes the cost.",
-          "why_this_picture": "Attach the cost to the route, not to a separate slide.",
-          "composition": "whiteboard-map",
-          "catalog_candidates": [
-            "whiteboard-map"
-          ],
-          "source_frames": [
-            {
-              "path": "resources/references/shorts/sequences/frames/N26-B03-0.jpg",
-              "sha256": "33a920da156d9889246ca300d6e85e5b31299a47259723174fa209308f91f1a4",
-              "dimensions": [
-                1280,
-                720
-              ],
-              "requested_time": 1.0,
-              "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
-                "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach",
-                  "node2": "Weeks of silence"
-                },
-                "time_s": 1.0
-              }
             },
             {
-              "path": "resources/references/shorts/sequences/frames/N26-B03-1.jpg",
-              "sha256": "83994c19387c11fb95b76d43d28edb25f2710c8b4f00cf5f2d265994eaec34c4",
-              "dimensions": [
-                1280,
-                720
-              ],
-              "requested_time": 1.5,
-              "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
-                "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach",
-                  "node2": "Weeks of silence"
-                },
-                "time_s": 1.5
-              }
-            },
-            {
-              "path": "resources/references/shorts/sequences/frames/N26-B03-2.jpg",
-              "sha256": "7642f7d226ab1f1da9925f5cd8f7b624d2dba7149231990ac442d9c88b45812b",
-              "dimensions": [
-                1280,
-                720
-              ],
-              "requested_time": 2.0,
-              "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
-                "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach",
-                  "node2": "Weeks of silence"
-                },
-                "time_s": 2.0
-              }
-            }
-          ],
-          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
-          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
-        },
-        {
-          "id": "N26-B04",
-          "spoken_idea": "Second route: referrals",
-          "visible": "Third node adds the alternative.",
-          "why_this_picture": "The alternative arrives in the same frame as the first route.",
-          "composition": "whiteboard-map",
-          "catalog_candidates": [
-            "whiteboard-map"
-          ],
-          "source_frames": [
-            {
-              "path": "resources/references/shorts/sequences/frames/N26-B04-0.jpg",
-              "sha256": "eb95962755efd1c042ea9e38a666690b4c80436d7d42429015890d68dfb07abe",
-              "dimensions": [
-                1280,
-                720
-              ],
-              "requested_time": 1.9,
-              "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
-                "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach",
-                  "node2": "Weeks of silence",
-                  "node3": "Ask past colleagues"
-                },
-                "time_s": 1.9
-              }
-            },
-            {
-              "path": "resources/references/shorts/sequences/frames/N26-B04-1.jpg",
-              "sha256": "2f8c9731156e73b4a03bf5abe34dd8d454c32f0d97c6b2b7e6a058b7fc2c50dd",
+              "path": "resources/references/shorts/sequences/frames/SQ01-B01-2.jpg",
+              "sha256": "202a1dda4329c2d481503562d9c46317ccbd707987ac839708ce7c110a724c37",
               "dimensions": [
                 1280,
                 720
               ],
               "requested_time": 2.4,
               "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "composition": "templates/motion/compositions/statement-card.html",
                 "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach",
-                  "node2": "Weeks of silence",
-                  "node3": "Ask past colleagues"
+                  "text": "A scoop is not a *measurement*",
+                  "bg": "dark",
+                  "variant": "classic",
+                  "eyebrow": "",
+                  "iconFile": "",
+                  "headlineLines": "",
+                  "statements": "",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
                 },
                 "time_s": 2.4
-              }
-            },
-            {
-              "path": "resources/references/shorts/sequences/frames/N26-B04-2.jpg",
-              "sha256": "4221abdafe585a80237681794faeafd01eaf571d3c2fada1c49f6edb5d145cb8",
-              "dimensions": [
-                1280,
-                720
-              ],
-              "requested_time": 2.9,
-              "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
-                "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach",
-                  "node2": "Weeks of silence",
-                  "node3": "Ask past colleagues"
-                },
-                "time_s": 2.9
               }
             }
           ],
@@ -299,73 +107,79 @@
           "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
         },
         {
-          "id": "N26-B05",
-          "spoken_idea": "Keep the destination while the route changes",
-          "visible": "The fourth node completes the comparison under the unchanged title.",
-          "why_this_picture": "The title never moves, so every node reads as a way to the same goal.",
-          "composition": "whiteboard-map",
+          "id": "SQ01-B02",
+          "spoken_idea": "I weighed ten scoops from the same bag. They ranged from seven to eleven grams.",
+          "visible": "The range lands as the hero figure; the lightest, the heaviest and the count arrive as tiles.",
+          "why_this_picture": "The spread is the evidence, and the tiles say exactly what was counted.",
+          "composition": "module-scoreboard",
           "catalog_candidates": [
-            "whiteboard-map"
+            "module-scoreboard"
           ],
           "source_frames": [
             {
-              "path": "resources/references/shorts/sequences/frames/N26-B05-0.jpg",
-              "sha256": "afd5ab5d02de536afa8336f467c1cd69b765bbed5d6d669e3268221effaa6452",
+              "path": "resources/references/shorts/sequences/frames/SQ01-B02-0.jpg",
+              "sha256": "e77cd1c34960557399381a80b971ff305e84cdcde85067ed01d52cb769ec3e9a",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 0.6,
+              "render": {
+                "composition": "templates/motion/compositions/module-scoreboard.html",
+                "variables": {
+                  "eyebrow": "Ten scoops, one spoon",
+                  "contextChips": "SAME BAG|SAME SPOON|KITCHEN SCALE",
+                  "heroValue": "7–11 g",
+                  "heroLabel": "RANGE ACROSS TEN SCOOPS",
+                  "tiles": "7 g~LIGHTEST|11 g~HEAVIEST|10~SCOOPS WEIGHED",
+                  "stripChips": "",
+                  "limitText": ""
+                },
+                "time_s": 0.6
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/SQ01-B02-1.jpg",
+              "sha256": "23184c0d3339123e2241d3715e229af45b144b9f0079109b298e9fa66ed9636a",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 1.4,
+              "render": {
+                "composition": "templates/motion/compositions/module-scoreboard.html",
+                "variables": {
+                  "eyebrow": "Ten scoops, one spoon",
+                  "contextChips": "SAME BAG|SAME SPOON|KITCHEN SCALE",
+                  "heroValue": "7–11 g",
+                  "heroLabel": "RANGE ACROSS TEN SCOOPS",
+                  "tiles": "7 g~LIGHTEST|11 g~HEAVIEST|10~SCOOPS WEIGHED",
+                  "stripChips": "",
+                  "limitText": ""
+                },
+                "time_s": 1.4
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/SQ01-B02-2.jpg",
+              "sha256": "1ee47178630f92210324815ce16fdc4fbfb2b1ba6f36d8eff7086e30812880c3",
               "dimensions": [
                 1280,
                 720
               ],
               "requested_time": 2.6,
               "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "composition": "templates/motion/compositions/module-scoreboard.html",
                 "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach",
-                  "node2": "Weeks of silence",
-                  "node3": "Ask past colleagues",
-                  "node4": "First call this week"
+                  "eyebrow": "Ten scoops, one spoon",
+                  "contextChips": "SAME BAG|SAME SPOON|KITCHEN SCALE",
+                  "heroValue": "7–11 g",
+                  "heroLabel": "RANGE ACROSS TEN SCOOPS",
+                  "tiles": "7 g~LIGHTEST|11 g~HEAVIEST|10~SCOOPS WEIGHED",
+                  "stripChips": "",
+                  "limitText": ""
                 },
                 "time_s": 2.6
-              }
-            },
-            {
-              "path": "resources/references/shorts/sequences/frames/N26-B05-1.jpg",
-              "sha256": "750ec17fb49fe23377986b9db5feef7c1732d09e2fea18928a005ee6d7ce4a54",
-              "dimensions": [
-                1280,
-                720
-              ],
-              "requested_time": 3.4,
-              "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
-                "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach",
-                  "node2": "Weeks of silence",
-                  "node3": "Ask past colleagues",
-                  "node4": "First call this week"
-                },
-                "time_s": 3.4
-              }
-            },
-            {
-              "path": "resources/references/shorts/sequences/frames/N26-B05-2.jpg",
-              "sha256": "05b539678642e8c2a5288c7f4f751ad32d7f6f8c997a919d0e2580755e2f4e6d",
-              "dimensions": [
-                1280,
-                720
-              ],
-              "requested_time": 4.2,
-              "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
-                "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach",
-                  "node2": "Weeks of silence",
-                  "node3": "Ask past colleagues",
-                  "node4": "First call this week"
-                },
-                "time_s": 4.2
               }
             }
           ],
@@ -373,233 +187,197 @@
           "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
         },
         {
-          "id": "N26-B06",
-          "spoken_idea": "The recommendation is named",
-          "visible": "Handoff text appears.",
-          "why_this_picture": "State the choice in words once the picture has made the case.",
-          "composition": "whiteboard-map",
+          "id": "SQ01-B03",
+          "spoken_idea": "That is one spoon and one bag, so yours will differ. It will not be zero.",
+          "visible": "The same board gains a limit footer naming the spoon and the bag.",
+          "why_this_picture": "Putting the limit on screen stops one kitchen's numbers from reading as a universal result.",
+          "composition": "module-scoreboard",
           "catalog_candidates": [
-            "whiteboard-map"
+            "module-scoreboard"
           ],
           "source_frames": [
             {
-              "path": "resources/references/shorts/sequences/frames/N26-B06-0.jpg",
-              "sha256": "1679f43546e4f0c4fe1ed57ba0bd5fef9f33821ab97531b2dfb1fa7c9fb1e728",
+              "path": "resources/references/shorts/sequences/frames/SQ01-B03-0.jpg",
+              "sha256": "e5e2886974af7d9638c5da42c2992fefb6a96190b132e4462e1826fab834df25",
               "dimensions": [
                 1280,
                 720
               ],
-              "requested_time": 4.5,
+              "requested_time": 2.4,
               "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "composition": "templates/motion/compositions/module-scoreboard.html",
                 "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach",
-                  "node2": "Weeks of silence",
-                  "node3": "Ask past colleagues",
-                  "node4": "First call this week",
-                  "handoffText": "Start with who already trusts you",
-                  "handoffAt": 4.4
+                  "eyebrow": "Ten scoops, one spoon",
+                  "contextChips": "SAME BAG|SAME SPOON|KITCHEN SCALE",
+                  "heroValue": "7–11 g",
+                  "heroLabel": "RANGE ACROSS TEN SCOOPS",
+                  "tiles": "7 g~LIGHTEST|11 g~HEAVIEST|10~SCOOPS WEIGHED",
+                  "stripChips": "",
+                  "limitText": "One spoon, one bag of beans; yours will differ",
+                  "limitLabel": "LIMIT"
                 },
-                "time_s": 4.5
+                "time_s": 2.4
               }
             },
             {
-              "path": "resources/references/shorts/sequences/frames/N26-B06-1.jpg",
-              "sha256": "07e46eb223b8888b776993ffba12c597bb49948989cc3b30e066605bc5eea1d5",
+              "path": "resources/references/shorts/sequences/frames/SQ01-B03-1.jpg",
+              "sha256": "67958733c0ec96a0fd7deb55a140e2ab1ab73839c802e4a3a5c637905dd87031",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 3.4,
+              "render": {
+                "composition": "templates/motion/compositions/module-scoreboard.html",
+                "variables": {
+                  "eyebrow": "Ten scoops, one spoon",
+                  "contextChips": "SAME BAG|SAME SPOON|KITCHEN SCALE",
+                  "heroValue": "7–11 g",
+                  "heroLabel": "RANGE ACROSS TEN SCOOPS",
+                  "tiles": "7 g~LIGHTEST|11 g~HEAVIEST|10~SCOOPS WEIGHED",
+                  "stripChips": "",
+                  "limitText": "One spoon, one bag of beans; yours will differ",
+                  "limitLabel": "LIMIT"
+                },
+                "time_s": 3.4
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/SQ01-B03-2.jpg",
+              "sha256": "67958733c0ec96a0fd7deb55a140e2ab1ab73839c802e4a3a5c637905dd87031",
               "dimensions": [
                 1280,
                 720
               ],
               "requested_time": 5.0,
               "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "composition": "templates/motion/compositions/module-scoreboard.html",
                 "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach",
-                  "node2": "Weeks of silence",
-                  "node3": "Ask past colleagues",
-                  "node4": "First call this week",
-                  "handoffText": "Start with who already trusts you",
-                  "handoffAt": 4.4
+                  "eyebrow": "Ten scoops, one spoon",
+                  "contextChips": "SAME BAG|SAME SPOON|KITCHEN SCALE",
+                  "heroValue": "7–11 g",
+                  "heroLabel": "RANGE ACROSS TEN SCOOPS",
+                  "tiles": "7 g~LIGHTEST|11 g~HEAVIEST|10~SCOOPS WEIGHED",
+                  "stripChips": "",
+                  "limitText": "One spoon, one bag of beans; yours will differ",
+                  "limitLabel": "LIMIT"
                 },
                 "time_s": 5.0
               }
-            },
-            {
-              "path": "resources/references/shorts/sequences/frames/N26-B06-2.jpg",
-              "sha256": "f5e8faf585a13f220d4c5b4e03ebd99f12992295a2dc66543aa5324900e919d1",
-              "dimensions": [
-                1280,
-                720
-              ],
-              "requested_time": 5.5,
-              "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
-                "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach",
-                  "node2": "Weeks of silence",
-                  "node3": "Ask past colleagues",
-                  "node4": "First call this week",
-                  "handoffText": "Start with who already trusts you",
-                  "handoffAt": 4.4
-                },
-                "time_s": 5.5
-              }
             }
           ],
           "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
           "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
-        },
+        }
+      ]
+    },
+    {
+      "id": "SQ02",
+      "version": "2026-09-18.1",
+      "title": "Let both bars land before naming the difference",
+      "scope": "original-reference-rendered-from-project-sniper-templates",
+      "render_aspects": [
+        "16:9"
+      ],
+      "lesson": "When two measured values are compared, show both before stating the difference, then show the conditions that make the comparison fair.",
+      "opening": "A two-line headline asks which option is faster; no bars yet.",
+      "story_arc": "Question → both measured bars → the difference → the conditions both options shared.",
+      "payoff": "The viewer reads the difference and knows the comparison was like for like.",
+      "catalog": [
+        "module-takeover",
+        "module-bullet-bars",
+        "stat-card"
+      ],
+      "beats": [
         {
-          "id": "N26-B07",
-          "spoken_idea": "Hold the finished map",
-          "visible": "Everything is on screen; nothing moves.",
-          "why_this_picture": "Give the viewer time to read the whole comparison.",
-          "composition": "whiteboard-map",
+          "id": "SQ02-B01",
+          "spoken_idea": "Is the new route actually faster?",
+          "visible": "The headline and its eyebrow, with the bar area still empty.",
+          "why_this_picture": "Asking before answering gives the bars a question to settle.",
+          "composition": "module-takeover",
           "catalog_candidates": [
-            "whiteboard-map"
+            "module-takeover"
           ],
           "source_frames": [
             {
-              "path": "resources/references/shorts/sequences/frames/N26-B07-0.jpg",
-              "sha256": "366adf566debfbfbdebb89d8018417284d917a121601cbc2e755f73ecd92c713",
+              "path": "resources/references/shorts/sequences/frames/SQ02-B01-0.jpg",
+              "sha256": "6c4bc18ff0554a894ebb1fde4e079ad3a4e89e1d25e1aab34b12c37092c82d95",
               "dimensions": [
                 1280,
                 720
               ],
-              "requested_time": 5.6,
+              "requested_time": 0.3,
               "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "composition": "templates/motion/compositions/module-takeover.html",
                 "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach",
-                  "node2": "Weeks of silence",
-                  "node3": "Ask past colleagues",
-                  "node4": "First call this week",
-                  "handoffText": "Start with who already trusts you",
-                  "handoffAt": 4.4
+                  "eyebrow": "Five trips each",
+                  "headlineLines": "Old route or new?|Same start, same hour",
+                  "heroLabel": "NEW ROUTE",
+                  "heroValue": "26 min",
+                  "heroPct": "76",
+                  "compareLabel": "OLD ROUTE",
+                  "compareValue": "34 min",
+                  "comparePct": "100",
+                  "deltaChip": "8 MIN SHORTER",
+                  "chips": "SAME START|SAME HOUR|FIVE TRIPS EACH",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
                 },
-                "time_s": 5.6
+                "time_s": 0.3
               }
             },
             {
-              "path": "resources/references/shorts/sequences/frames/N26-B07-1.jpg",
-              "sha256": "7a525f58cd1f55bffe5b06d2b7e74b80c608f72914ab1a9aa67d2bc41f2a0634",
-              "dimensions": [
-                1280,
-                720
-              ],
-              "requested_time": 6.1,
-              "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
-                "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach",
-                  "node2": "Weeks of silence",
-                  "node3": "Ask past colleagues",
-                  "node4": "First call this week",
-                  "handoffText": "Start with who already trusts you",
-                  "handoffAt": 4.4
-                },
-                "time_s": 6.1
-              }
-            },
-            {
-              "path": "resources/references/shorts/sequences/frames/N26-B07-2.jpg",
-              "sha256": "2b3f4d064a4105329098487e1e8426d901ff6a5e7e0d5b8fe40c6439e650076b",
-              "dimensions": [
-                1280,
-                720
-              ],
-              "requested_time": 6.6,
-              "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
-                "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach",
-                  "node2": "Weeks of silence",
-                  "node3": "Ask past colleagues",
-                  "node4": "First call this week",
-                  "handoffText": "Start with who already trusts you",
-                  "handoffAt": 4.4
-                },
-                "time_s": 6.6
-              }
-            }
-          ],
-          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
-          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
-        },
-        {
-          "id": "N26-B08",
-          "spoken_idea": "A shorter variant for a tighter Short",
-          "visible": "Two routes only, same fixed destination.",
-          "why_this_picture": "When time is short, cut to the two routes that differ most.",
-          "composition": "whiteboard-map",
-          "catalog_candidates": [
-            "whiteboard-map"
-          ],
-          "source_frames": [
-            {
-              "path": "resources/references/shorts/sequences/frames/N26-B08-0.jpg",
-              "sha256": "e4cdceab9f6a2cd823dce4bfa3aede28f3a87f22188177cbf2b94ede28c39c2c",
+              "path": "resources/references/shorts/sequences/frames/SQ02-B01-1.jpg",
+              "sha256": "2e73611107a18a1c71f46a61e15a13132a949536d405b9172a7cfeaa51b5b713",
               "dimensions": [
                 1280,
                 720
               ],
               "requested_time": 0.6,
               "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "composition": "templates/motion/compositions/module-takeover.html",
                 "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach",
-                  "node2": "Ask past colleagues",
-                  "node3": "",
-                  "node4": ""
+                  "eyebrow": "Five trips each",
+                  "headlineLines": "Old route or new?|Same start, same hour",
+                  "heroLabel": "NEW ROUTE",
+                  "heroValue": "26 min",
+                  "heroPct": "76",
+                  "compareLabel": "OLD ROUTE",
+                  "compareValue": "34 min",
+                  "comparePct": "100",
+                  "deltaChip": "8 MIN SHORTER",
+                  "chips": "SAME START|SAME HOUR|FIVE TRIPS EACH",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
                 },
                 "time_s": 0.6
               }
             },
             {
-              "path": "resources/references/shorts/sequences/frames/N26-B08-1.jpg",
-              "sha256": "c8ec0d419d3981aabca3db3e65a2032934ab3f8e307579ccbeb6688814c271cc",
+              "path": "resources/references/shorts/sequences/frames/SQ02-B01-2.jpg",
+              "sha256": "89eb9e6c121c391e50ca584bdcfd2ee1861d4fcdf25aab8c27368b52f30a4d49",
               "dimensions": [
                 1280,
                 720
               ],
-              "requested_time": 1.2,
+              "requested_time": 0.9,
               "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "composition": "templates/motion/compositions/module-takeover.html",
                 "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach",
-                  "node2": "Ask past colleagues",
-                  "node3": "",
-                  "node4": ""
+                  "eyebrow": "Five trips each",
+                  "headlineLines": "Old route or new?|Same start, same hour",
+                  "heroLabel": "NEW ROUTE",
+                  "heroValue": "26 min",
+                  "heroPct": "76",
+                  "compareLabel": "OLD ROUTE",
+                  "compareValue": "34 min",
+                  "comparePct": "100",
+                  "deltaChip": "8 MIN SHORTER",
+                  "chips": "SAME START|SAME HOUR|FIVE TRIPS EACH",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
                 },
-                "time_s": 1.2
-              }
-            },
-            {
-              "path": "resources/references/shorts/sequences/frames/N26-B08-2.jpg",
-              "sha256": "8be50e1794cfefbbe3fb7b44b3e02216196448737eaabbc4c79e2f00735c5917",
-              "dimensions": [
-                1280,
-                720
-              ],
-              "requested_time": 1.8,
-              "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
-                "variables": {
-                  "title": "Get the first client",
-                  "node1": "Cold outreach",
-                  "node2": "Ask past colleagues",
-                  "node3": "",
-                  "node4": ""
-                },
-                "time_s": 1.8
+                "time_s": 0.9
               }
             }
           ],
@@ -607,71 +385,447 @@
           "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
         },
         {
-          "id": "N26-B09",
-          "spoken_idea": "A different goal, same method",
-          "visible": "The mechanism reused for a different destination.",
-          "why_this_picture": "The method transfers; only the destination and routes change.",
-          "composition": "whiteboard-map",
+          "id": "SQ02-B02",
+          "spoken_idea": "Five trips each: thirty-four minutes the old way, twenty-six the new way.",
+          "visible": "Both bars grow to their measured values; the difference is not shown yet.",
+          "why_this_picture": "Seeing both values first lets the viewer judge the gap before hearing it.",
+          "composition": "module-takeover",
           "catalog_candidates": [
-            "whiteboard-map"
+            "module-takeover"
           ],
           "source_frames": [
             {
-              "path": "resources/references/shorts/sequences/frames/N26-B09-0.jpg",
-              "sha256": "c0f4d9fec1a8bec2bc2114f68b7afafc8bef06a2f7638512567eb7e95c15d3fe",
+              "path": "resources/references/shorts/sequences/frames/SQ02-B02-0.jpg",
+              "sha256": "fe4594c969a4984166611e544b944154d87c1025131f7e5520f27d651a3e7a43",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 1.2,
+              "render": {
+                "composition": "templates/motion/compositions/module-takeover.html",
+                "variables": {
+                  "eyebrow": "Five trips each",
+                  "headlineLines": "Old route or new?|Same start, same hour",
+                  "heroLabel": "NEW ROUTE",
+                  "heroValue": "26 min",
+                  "heroPct": "76",
+                  "compareLabel": "OLD ROUTE",
+                  "compareValue": "34 min",
+                  "comparePct": "100",
+                  "deltaChip": "8 MIN SHORTER",
+                  "chips": "SAME START|SAME HOUR|FIVE TRIPS EACH",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
+                },
+                "time_s": 1.2
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/SQ02-B02-1.jpg",
+              "sha256": "4f42e55daa94724f9dab67e4e5ddb54b918a8cab4348684ce3d07a1645b2966c",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 1.7,
+              "render": {
+                "composition": "templates/motion/compositions/module-takeover.html",
+                "variables": {
+                  "eyebrow": "Five trips each",
+                  "headlineLines": "Old route or new?|Same start, same hour",
+                  "heroLabel": "NEW ROUTE",
+                  "heroValue": "26 min",
+                  "heroPct": "76",
+                  "compareLabel": "OLD ROUTE",
+                  "compareValue": "34 min",
+                  "comparePct": "100",
+                  "deltaChip": "8 MIN SHORTER",
+                  "chips": "SAME START|SAME HOUR|FIVE TRIPS EACH",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
+                },
+                "time_s": 1.7
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/SQ02-B02-2.jpg",
+              "sha256": "7cb91f410fee320c9092385fda75a3fd5e4c221e0a0dabbbf2654f76847948eb",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 2.2,
+              "render": {
+                "composition": "templates/motion/compositions/module-takeover.html",
+                "variables": {
+                  "eyebrow": "Five trips each",
+                  "headlineLines": "Old route or new?|Same start, same hour",
+                  "heroLabel": "NEW ROUTE",
+                  "heroValue": "26 min",
+                  "heroPct": "76",
+                  "compareLabel": "OLD ROUTE",
+                  "compareValue": "34 min",
+                  "comparePct": "100",
+                  "deltaChip": "8 MIN SHORTER",
+                  "chips": "SAME START|SAME HOUR|FIVE TRIPS EACH",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
+                },
+                "time_s": 2.2
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        },
+        {
+          "id": "SQ02-B03",
+          "spoken_idea": "Eight minutes shorter, from the same start at the same hour.",
+          "visible": "The difference chip and the three shared conditions land last.",
+          "why_this_picture": "The conditions come last because they are what makes the difference trustworthy.",
+          "composition": "module-takeover",
+          "catalog_candidates": [
+            "module-takeover"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/SQ02-B03-0.jpg",
+              "sha256": "7cb91f410fee320c9092385fda75a3fd5e4c221e0a0dabbbf2654f76847948eb",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 2.2,
+              "render": {
+                "composition": "templates/motion/compositions/module-takeover.html",
+                "variables": {
+                  "eyebrow": "Five trips each",
+                  "headlineLines": "Old route or new?|Same start, same hour",
+                  "heroLabel": "NEW ROUTE",
+                  "heroValue": "26 min",
+                  "heroPct": "76",
+                  "compareLabel": "OLD ROUTE",
+                  "compareValue": "34 min",
+                  "comparePct": "100",
+                  "deltaChip": "8 MIN SHORTER",
+                  "chips": "SAME START|SAME HOUR|FIVE TRIPS EACH",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
+                },
+                "time_s": 2.2
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/SQ02-B03-1.jpg",
+              "sha256": "392126aeb4ff62f21a9ca464412282ab4167bb835f9967c6e98b1d4e5b0a0025",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 3.0,
+              "render": {
+                "composition": "templates/motion/compositions/module-takeover.html",
+                "variables": {
+                  "eyebrow": "Five trips each",
+                  "headlineLines": "Old route or new?|Same start, same hour",
+                  "heroLabel": "NEW ROUTE",
+                  "heroValue": "26 min",
+                  "heroPct": "76",
+                  "compareLabel": "OLD ROUTE",
+                  "compareValue": "34 min",
+                  "comparePct": "100",
+                  "deltaChip": "8 MIN SHORTER",
+                  "chips": "SAME START|SAME HOUR|FIVE TRIPS EACH",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
+                },
+                "time_s": 3.0
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/SQ02-B03-2.jpg",
+              "sha256": "392126aeb4ff62f21a9ca464412282ab4167bb835f9967c6e98b1d4e5b0a0025",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 4.5,
+              "render": {
+                "composition": "templates/motion/compositions/module-takeover.html",
+                "variables": {
+                  "eyebrow": "Five trips each",
+                  "headlineLines": "Old route or new?|Same start, same hour",
+                  "heroLabel": "NEW ROUTE",
+                  "heroValue": "26 min",
+                  "heroPct": "76",
+                  "compareLabel": "OLD ROUTE",
+                  "compareValue": "34 min",
+                  "comparePct": "100",
+                  "deltaChip": "8 MIN SHORTER",
+                  "chips": "SAME START|SAME HOUR|FIVE TRIPS EACH",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
+                },
+                "time_s": 4.5
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        }
+      ]
+    },
+    {
+      "id": "SQ03",
+      "version": "2026-09-18.1",
+      "title": "Rank every part on one axis before naming the largest",
+      "scope": "original-reference-rendered-from-project-sniper-templates",
+      "render_aspects": [
+        "16:9"
+      ],
+      "lesson": "When a total is broken into parts, put every part on one axis first and name the largest only after the viewer can see that it is the largest.",
+      "opening": "The headline names the total being broken down, with a one-line key to the parts.",
+      "story_arc": "The hour → four parts on one axis → the verdict on the part worth fixing.",
+      "payoff": "The viewer sees which part is largest before the speaker says so.",
+      "catalog": [
+        "module-bullet-bars",
+        "module-ledger-dark",
+        "module-takeover"
+      ],
+      "beats": [
+        {
+          "id": "SQ03-B01",
+          "spoken_idea": "Here is where one hour of editing goes.",
+          "visible": "The headline and the key, before any bar.",
+          "why_this_picture": "Naming the total first tells the viewer what the bars will add up to.",
+          "composition": "module-bullet-bars",
+          "catalog_candidates": [
+            "module-bullet-bars"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/SQ03-B01-0.jpg",
+              "sha256": "488419ef573610885d128f6e71329ed882fbc44268edb33559b945cb997915c0",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 0.3,
+              "render": {
+                "composition": "templates/motion/compositions/module-bullet-bars.html",
+                "variables": {
+                  "eyebrow": "One edit, timed",
+                  "headlineLines": "Where the hour goes|when I edit a Short",
+                  "explainer": "1 cutting · 2 captions · 3 export · 4 colour",
+                  "axisLabel": "MINUTES",
+                  "bars": "1~22 min~100|2~18 min~82|3~12 min~55|4~8 min~36",
+                  "verdict": "Captions take almost as long as cutting",
+                  "spectrum": ""
+                },
+                "time_s": 0.3
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/SQ03-B01-1.jpg",
+              "sha256": "b57d9273747d036102da9c0bfec8efdcebab9749f76bfe8255ab372ad063cd9b",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 0.6,
+              "render": {
+                "composition": "templates/motion/compositions/module-bullet-bars.html",
+                "variables": {
+                  "eyebrow": "One edit, timed",
+                  "headlineLines": "Where the hour goes|when I edit a Short",
+                  "explainer": "1 cutting · 2 captions · 3 export · 4 colour",
+                  "axisLabel": "MINUTES",
+                  "bars": "1~22 min~100|2~18 min~82|3~12 min~55|4~8 min~36",
+                  "verdict": "Captions take almost as long as cutting",
+                  "spectrum": ""
+                },
+                "time_s": 0.6
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/SQ03-B01-2.jpg",
+              "sha256": "729e0b28eccb0b1fb43e7fcab39206eb19fb2e0d9f2b0f70940c53cd5f7dc500",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 1.0,
+              "render": {
+                "composition": "templates/motion/compositions/module-bullet-bars.html",
+                "variables": {
+                  "eyebrow": "One edit, timed",
+                  "headlineLines": "Where the hour goes|when I edit a Short",
+                  "explainer": "1 cutting · 2 captions · 3 export · 4 colour",
+                  "axisLabel": "MINUTES",
+                  "bars": "1~22 min~100|2~18 min~82|3~12 min~55|4~8 min~36",
+                  "verdict": "Captions take almost as long as cutting",
+                  "spectrum": ""
+                },
+                "time_s": 1.0
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        },
+        {
+          "id": "SQ03-B02",
+          "spoken_idea": "Twenty-two minutes cutting, eighteen on captions, twelve exporting, eight on colour.",
+          "visible": "Four numbered bars grow on one axis, each value landing with its bar tip; a one-line key names the parts.",
+          "why_this_picture": "A shared axis makes the ranking visible without any extra labels.",
+          "composition": "module-bullet-bars",
+          "catalog_candidates": [
+            "module-bullet-bars"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/SQ03-B02-0.jpg",
+              "sha256": "85a5b45869d3b5569a8a55c3c83bcf1c8e7e1eb343d23b7ae5320f042a611ea7",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 1.2,
+              "render": {
+                "composition": "templates/motion/compositions/module-bullet-bars.html",
+                "variables": {
+                  "eyebrow": "One edit, timed",
+                  "headlineLines": "Where the hour goes|when I edit a Short",
+                  "explainer": "1 cutting · 2 captions · 3 export · 4 colour",
+                  "axisLabel": "MINUTES",
+                  "bars": "1~22 min~100|2~18 min~82|3~12 min~55|4~8 min~36",
+                  "verdict": "Captions take almost as long as cutting",
+                  "spectrum": ""
+                },
+                "time_s": 1.2
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/SQ03-B02-1.jpg",
+              "sha256": "f839457e8d4bf79f59fa03fcedc775bafc96e88d74c12c4d95e6d21ff5356f5e",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 1.8,
+              "render": {
+                "composition": "templates/motion/compositions/module-bullet-bars.html",
+                "variables": {
+                  "eyebrow": "One edit, timed",
+                  "headlineLines": "Where the hour goes|when I edit a Short",
+                  "explainer": "1 cutting · 2 captions · 3 export · 4 colour",
+                  "axisLabel": "MINUTES",
+                  "bars": "1~22 min~100|2~18 min~82|3~12 min~55|4~8 min~36",
+                  "verdict": "Captions take almost as long as cutting",
+                  "spectrum": ""
+                },
+                "time_s": 1.8
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/SQ03-B02-2.jpg",
+              "sha256": "811345a9c451ccea0c4c66c5cafcaeafcb29bd6ab3e0e073f0c0c33059b4ace2",
               "dimensions": [
                 1280,
                 720
               ],
               "requested_time": 2.6,
               "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "composition": "templates/motion/compositions/module-bullet-bars.html",
                 "variables": {
-                  "title": "Finish the first draft",
-                  "node1": "Write every day",
-                  "node2": "Write one long session",
-                  "node3": "Outline first",
-                  "node4": "Done by Friday"
+                  "eyebrow": "One edit, timed",
+                  "headlineLines": "Where the hour goes|when I edit a Short",
+                  "explainer": "1 cutting · 2 captions · 3 export · 4 colour",
+                  "axisLabel": "MINUTES",
+                  "bars": "1~22 min~100|2~18 min~82|3~12 min~55|4~8 min~36",
+                  "verdict": "Captions take almost as long as cutting",
+                  "spectrum": ""
                 },
                 "time_s": 2.6
               }
-            },
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        },
+        {
+          "id": "SQ03-B03",
+          "spoken_idea": "Captions take almost as long as the cut itself.",
+          "visible": "The verdict line lands under the finished bars.",
+          "why_this_picture": "The verdict names what the bars already show, so it confirms rather than asserts.",
+          "composition": "module-bullet-bars",
+          "catalog_candidates": [
+            "module-bullet-bars"
+          ],
+          "source_frames": [
             {
-              "path": "resources/references/shorts/sequences/frames/N26-B09-1.jpg",
-              "sha256": "8886f5b8e4734252999cc14e57edca345f1ebf7161d6c9fe07eb10b9fbc71ee5",
+              "path": "resources/references/shorts/sequences/frames/SQ03-B03-0.jpg",
+              "sha256": "811345a9c451ccea0c4c66c5cafcaeafcb29bd6ab3e0e073f0c0c33059b4ace2",
               "dimensions": [
                 1280,
                 720
               ],
-              "requested_time": 3.4,
+              "requested_time": 2.2,
               "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "composition": "templates/motion/compositions/module-bullet-bars.html",
                 "variables": {
-                  "title": "Finish the first draft",
-                  "node1": "Write every day",
-                  "node2": "Write one long session",
-                  "node3": "Outline first",
-                  "node4": "Done by Friday"
+                  "eyebrow": "One edit, timed",
+                  "headlineLines": "Where the hour goes|when I edit a Short",
+                  "explainer": "1 cutting · 2 captions · 3 export · 4 colour",
+                  "axisLabel": "MINUTES",
+                  "bars": "1~22 min~100|2~18 min~82|3~12 min~55|4~8 min~36",
+                  "verdict": "Captions take almost as long as cutting",
+                  "spectrum": ""
                 },
-                "time_s": 3.4
+                "time_s": 2.2
               }
             },
             {
-              "path": "resources/references/shorts/sequences/frames/N26-B09-2.jpg",
-              "sha256": "2c715473ef70400de97c6c9b03698850f01c7a951422dc8abc418bd84ecbf169",
+              "path": "resources/references/shorts/sequences/frames/SQ03-B03-1.jpg",
+              "sha256": "811345a9c451ccea0c4c66c5cafcaeafcb29bd6ab3e0e073f0c0c33059b4ace2",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 2.9,
+              "render": {
+                "composition": "templates/motion/compositions/module-bullet-bars.html",
+                "variables": {
+                  "eyebrow": "One edit, timed",
+                  "headlineLines": "Where the hour goes|when I edit a Short",
+                  "explainer": "1 cutting · 2 captions · 3 export · 4 colour",
+                  "axisLabel": "MINUTES",
+                  "bars": "1~22 min~100|2~18 min~82|3~12 min~55|4~8 min~36",
+                  "verdict": "Captions take almost as long as cutting",
+                  "spectrum": ""
+                },
+                "time_s": 2.9
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/SQ03-B03-2.jpg",
+              "sha256": "811345a9c451ccea0c4c66c5cafcaeafcb29bd6ab3e0e073f0c0c33059b4ace2",
               "dimensions": [
                 1280,
                 720
               ],
               "requested_time": 4.2,
               "render": {
-                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "composition": "templates/motion/compositions/module-bullet-bars.html",
                 "variables": {
-                  "title": "Finish the first draft",
-                  "node1": "Write every day",
-                  "node2": "Write one long session",
-                  "node3": "Outline first",
-                  "node4": "Done by Friday"
+                  "eyebrow": "One edit, timed",
+                  "headlineLines": "Where the hour goes|when I edit a Short",
+                  "explainer": "1 cutting · 2 captions · 3 export · 4 colour",
+                  "axisLabel": "MINUTES",
+                  "bars": "1~22 min~100|2~18 min~82|3~12 min~55|4~8 min~36",
+                  "verdict": "Captions take almost as long as cutting",
+                  "spectrum": ""
                 },
                 "time_s": 4.2
               }
@@ -683,152 +837,103 @@
       ]
     },
     {
-      "id": "N27",
-      "version": "2026-09-17.1",
-      "title": "Show value growing against time",
+      "id": "SQ04",
+      "version": "2026-09-18.1",
+      "title": "Grow the checklist one row per spoken check, then mark it done",
       "scope": "original-reference-rendered-from-project-sniper-templates",
       "render_aspects": [
-        "16:9",
-        "9:16"
+        "16:9"
       ],
-      "lesson": "When the claim is about how much something gains over time, show the amount and the time together so the viewer sees the rate, not just the total.",
-      "opening": "The starting value appears before any growth.",
-      "story_arc": "starting value -> the number climbs -> the time bar fills -> the comparison chart settles -> hand back",
-      "payoff": "The final chart holds with the largest bar emphasised.",
+      "lesson": "A checklist the speaker walks through should gain one row per spoken check, keep earlier rows in place and end on an explicit finished state.",
+      "opening": "The headline says what the checklist is for.",
+      "story_arc": "Purpose → four checks, one per sentence → the finished state.",
+      "payoff": "The complete list stays readable and ends on a clear finished state.",
       "catalog": [
-        "count-up",
-        "widget-gauge",
-        "chart-story",
-        "stat-card"
+        "module-rail",
+        "glass-rail",
+        "list-build"
       ],
       "beats": [
         {
-          "id": "N27-B01",
-          "spoken_idea": "The number climbs",
-          "visible": "A counter rises to the stated figure.",
-          "why_this_picture": "Let the number arrive; do not start on the total.",
-          "composition": "count-up",
+          "id": "SQ04-B01",
+          "spoken_idea": "Four checks before you send a quote. First, the scope in writing.",
+          "visible": "The headline, then the first checklist row with its badge.",
+          "why_this_picture": "The first row arrives with the first check, so the list and the speech stay together.",
+          "composition": "module-rail",
           "catalog_candidates": [
-            "count-up"
+            "module-rail"
           ],
           "source_frames": [
             {
-              "path": "resources/references/shorts/sequences/frames/N27-B01-0.jpg",
-              "sha256": "93dbf697c48bf5136ce9bd244817e40f517bea8f06665f75759d53ccda8ef30a",
+              "path": "resources/references/shorts/sequences/frames/SQ04-B01-0.jpg",
+              "sha256": "bd16dc53325e943211d8f141b6dba6eb1fd241a8efec73e4b6526f12cb0fb503",
               "dimensions": [
-                720,
-                1280
-              ],
-              "requested_time": 0.1,
-              "render": {
-                "composition": "templates/motion/compositions/count-up.html",
-                "variables": {
-                  "start": 0,
-                  "end": 43,
-                  "prefix": "",
-                  "suffix": " subscribers"
-                },
-                "time_s": 0.1
-              }
-            },
-            {
-              "path": "resources/references/shorts/sequences/frames/N27-B01-1.jpg",
-              "sha256": "a23a91c29de4ba3834a96b918634ca9a40ec33633027d2498442ef725c0cfe10",
-              "dimensions": [
-                720,
-                1280
-              ],
-              "requested_time": 1.2,
-              "render": {
-                "composition": "templates/motion/compositions/count-up.html",
-                "variables": {
-                  "start": 0,
-                  "end": 43,
-                  "prefix": "",
-                  "suffix": " subscribers"
-                },
-                "time_s": 1.2
-              }
-            },
-            {
-              "path": "resources/references/shorts/sequences/frames/N27-B01-2.jpg",
-              "sha256": "3ee20424d103df412a94ee91add566ffa940eb115785c307b43b17c22a249659",
-              "dimensions": [
-                720,
-                1280
-              ],
-              "requested_time": 2.8,
-              "render": {
-                "composition": "templates/motion/compositions/count-up.html",
-                "variables": {
-                  "start": 0,
-                  "end": 43,
-                  "prefix": "",
-                  "suffix": " subscribers"
-                },
-                "time_s": 2.8
-              }
-            }
-          ],
-          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
-          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
-        },
-        {
-          "id": "N27-B02",
-          "spoken_idea": "Time passes on the same screen",
-          "visible": "A marker advances along a labelled bar.",
-          "why_this_picture": "Pair the gain with the time it took.",
-          "composition": "widget-gauge",
-          "catalog_candidates": [
-            "widget-gauge"
-          ],
-          "source_frames": [
-            {
-              "path": "resources/references/shorts/sequences/frames/N27-B02-0.jpg",
-              "sha256": "acd66d114709a6102688ad0039b3c5177728389272caa8debe984ef748e2372e",
-              "dimensions": [
-                720,
-                1280
+                1280,
+                720
               ],
               "requested_time": 0.4,
               "render": {
-                "composition": "templates/motion/compositions/widget-gauge.html",
+                "composition": "templates/motion/compositions/module-rail.html",
                 "variables": {
-                  "label": "Days since posting"
+                  "eyebrow": "Before you send a quote",
+                  "headlineLines": "Four checks|before you hit send",
+                  "explainer": "",
+                  "contentMode": "checklist",
+                  "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+                  "footChip": "READY TO SEND",
+                  "footAccent": "result",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
                 },
                 "time_s": 0.4
               }
             },
             {
-              "path": "resources/references/shorts/sequences/frames/N27-B02-1.jpg",
-              "sha256": "14fa89ed35fc5edcae0ab1203c28b01941c592f057764fa2604575380a4a50ee",
+              "path": "resources/references/shorts/sequences/frames/SQ04-B01-1.jpg",
+              "sha256": "b9207693ddc0a4c656d880f4cb0f78a4054fcecd532751a0768be0336a8228f6",
               "dimensions": [
-                720,
-                1280
+                1280,
+                720
               ],
-              "requested_time": 2.0,
+              "requested_time": 0.9,
               "render": {
-                "composition": "templates/motion/compositions/widget-gauge.html",
+                "composition": "templates/motion/compositions/module-rail.html",
                 "variables": {
-                  "label": "Days since posting"
+                  "eyebrow": "Before you send a quote",
+                  "headlineLines": "Four checks|before you hit send",
+                  "explainer": "",
+                  "contentMode": "checklist",
+                  "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+                  "footChip": "READY TO SEND",
+                  "footAccent": "result",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
                 },
-                "time_s": 2.0
+                "time_s": 0.9
               }
             },
             {
-              "path": "resources/references/shorts/sequences/frames/N27-B02-2.jpg",
-              "sha256": "caeb1770d234d333fc389b639f9b885ed96312397d810e059d59b1224b4b58d7",
+              "path": "resources/references/shorts/sequences/frames/SQ04-B01-2.jpg",
+              "sha256": "fa0f99226a9803b4d9f4d572f78b62b5b060022dbb6f80860feca1b4b698170c",
               "dimensions": [
-                720,
-                1280
+                1280,
+                720
               ],
-              "requested_time": 3.9,
+              "requested_time": 1.4,
               "render": {
-                "composition": "templates/motion/compositions/widget-gauge.html",
+                "composition": "templates/motion/compositions/module-rail.html",
                 "variables": {
-                  "label": "Days since posting"
+                  "eyebrow": "Before you send a quote",
+                  "headlineLines": "Four checks|before you hit send",
+                  "explainer": "",
+                  "contentMode": "checklist",
+                  "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+                  "footChip": "READY TO SEND",
+                  "footAccent": "result",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
                 },
-                "time_s": 3.9
+                "time_s": 1.4
               }
             }
           ],
@@ -836,310 +941,257 @@
           "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
         },
         {
-          "id": "N27-B03",
-          "spoken_idea": "Compare periods",
-          "visible": "Bars grow period by period and the last is emphasised.",
-          "why_this_picture": "A comparison makes the rate readable at a glance.",
-          "composition": "chart-story",
+          "id": "SQ04-B02",
+          "spoken_idea": "Then the start date, agreed with the client.",
+          "visible": "The second row lands under the first.",
+          "why_this_picture": "Earlier rows stay put, so the viewer sees the list accumulate.",
+          "composition": "module-rail",
           "catalog_candidates": [
-            "chart-story"
+            "module-rail"
           ],
           "source_frames": [
             {
-              "path": "resources/references/shorts/sequences/frames/N27-B03-0.jpg",
-              "sha256": "8d50adc0f5d95b6f0442e28e957a2bcc6347255bf3b6e7a77cef967f6c0310a5",
+              "path": "resources/references/shorts/sequences/frames/SQ04-B02-0.jpg",
+              "sha256": "b56e0b9e68877e3d331580fb70358c12da29015f8f7afdc387b3b5357caf993f",
               "dimensions": [
                 1280,
                 720
               ],
-              "requested_time": 0.6,
+              "requested_time": 1.7,
               "render": {
-                "composition": "templates/motion/compositions/chart-story.html",
+                "composition": "templates/motion/compositions/module-rail.html",
                 "variables": {
-                  "data": "4, 11, 19, 43",
-                  "labels": "Day 1, Day 2, Day 4, Day 6",
-                  "emphasize": 3,
-                  "unit": ""
+                  "eyebrow": "Before you send a quote",
+                  "headlineLines": "Four checks|before you hit send",
+                  "explainer": "",
+                  "contentMode": "checklist",
+                  "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+                  "footChip": "READY TO SEND",
+                  "footAccent": "result",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
                 },
-                "time_s": 0.6
+                "time_s": 1.7
               }
             },
             {
-              "path": "resources/references/shorts/sequences/frames/N27-B03-1.jpg",
-              "sha256": "4ff617f600e36f5e73b3443e26d040060b395e2da10408b110b4a2868f433fb2",
+              "path": "resources/references/shorts/sequences/frames/SQ04-B02-1.jpg",
+              "sha256": "e60371308ac287c7768ea5d76d17f724e7080171300c6e8975a2e0cf45226012",
               "dimensions": [
                 1280,
                 720
               ],
-              "requested_time": 2.2,
+              "requested_time": 2.1,
               "render": {
-                "composition": "templates/motion/compositions/chart-story.html",
+                "composition": "templates/motion/compositions/module-rail.html",
                 "variables": {
-                  "data": "4, 11, 19, 43",
-                  "labels": "Day 1, Day 2, Day 4, Day 6",
-                  "emphasize": 3,
-                  "unit": ""
+                  "eyebrow": "Before you send a quote",
+                  "headlineLines": "Four checks|before you hit send",
+                  "explainer": "",
+                  "contentMode": "checklist",
+                  "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+                  "footChip": "READY TO SEND",
+                  "footAccent": "result",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
                 },
-                "time_s": 2.2
+                "time_s": 2.1
               }
             },
             {
-              "path": "resources/references/shorts/sequences/frames/N27-B03-2.jpg",
-              "sha256": "c5c199e6cc5b8bfec087adfb4a6f674045bbac168f2d67271110452ee477db07",
+              "path": "resources/references/shorts/sequences/frames/SQ04-B02-2.jpg",
+              "sha256": "2be22ebce7a9c3bf251e2cde4621c120293580f4ae1193e0b381e26491d8d860",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 2.5,
+              "render": {
+                "composition": "templates/motion/compositions/module-rail.html",
+                "variables": {
+                  "eyebrow": "Before you send a quote",
+                  "headlineLines": "Four checks|before you hit send",
+                  "explainer": "",
+                  "contentMode": "checklist",
+                  "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+                  "footChip": "READY TO SEND",
+                  "footAccent": "result",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
+                },
+                "time_s": 2.5
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        },
+        {
+          "id": "SQ04-B03",
+          "spoken_idea": "The deposit, stated as an amount. And what the price does not include.",
+          "visible": "The third and fourth rows land in turn.",
+          "why_this_picture": "One row per spoken check, even when two checks come in one breath.",
+          "composition": "module-rail",
+          "catalog_candidates": [
+            "module-rail"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/SQ04-B03-0.jpg",
+              "sha256": "2be22ebce7a9c3bf251e2cde4621c120293580f4ae1193e0b381e26491d8d860",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 2.8,
+              "render": {
+                "composition": "templates/motion/compositions/module-rail.html",
+                "variables": {
+                  "eyebrow": "Before you send a quote",
+                  "headlineLines": "Four checks|before you hit send",
+                  "explainer": "",
+                  "contentMode": "checklist",
+                  "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+                  "footChip": "READY TO SEND",
+                  "footAccent": "result",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
+                },
+                "time_s": 2.8
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/SQ04-B03-1.jpg",
+              "sha256": "50f0f76af2a39609f08ad77007c970d3e8534485c9254d4d3aedb8f59a91b48f",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 3.4,
+              "render": {
+                "composition": "templates/motion/compositions/module-rail.html",
+                "variables": {
+                  "eyebrow": "Before you send a quote",
+                  "headlineLines": "Four checks|before you hit send",
+                  "explainer": "",
+                  "contentMode": "checklist",
+                  "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+                  "footChip": "READY TO SEND",
+                  "footAccent": "result",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
+                },
+                "time_s": 3.4
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/SQ04-B03-2.jpg",
+              "sha256": "65be54a6559aae8de9ee8504128b1bdc9b4315acd06d7b4ecebd7c6bd5443a55",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 4.1,
+              "render": {
+                "composition": "templates/motion/compositions/module-rail.html",
+                "variables": {
+                  "eyebrow": "Before you send a quote",
+                  "headlineLines": "Four checks|before you hit send",
+                  "explainer": "",
+                  "contentMode": "checklist",
+                  "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+                  "footChip": "READY TO SEND",
+                  "footAccent": "result",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
+                },
+                "time_s": 4.1
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        },
+        {
+          "id": "SQ04-B04",
+          "spoken_idea": "Then it is ready to send.",
+          "visible": "A footer tag marks the list finished.",
+          "why_this_picture": "An explicit finished state tells the viewer the list is complete, not cut off.",
+          "composition": "module-rail",
+          "catalog_candidates": [
+            "module-rail"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/SQ04-B04-0.jpg",
+              "sha256": "a9e0138ffa58add0901c6497a73f1ab35cfa21a7bded43b2f9ef5f4a568bed24",
               "dimensions": [
                 1280,
                 720
               ],
               "requested_time": 4.6,
               "render": {
-                "composition": "templates/motion/compositions/chart-story.html",
+                "composition": "templates/motion/compositions/module-rail.html",
                 "variables": {
-                  "data": "4, 11, 19, 43",
-                  "labels": "Day 1, Day 2, Day 4, Day 6",
-                  "emphasize": 3,
-                  "unit": ""
+                  "eyebrow": "Before you send a quote",
+                  "headlineLines": "Four checks|before you hit send",
+                  "explainer": "",
+                  "contentMode": "checklist",
+                  "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+                  "footChip": "READY TO SEND",
+                  "footAccent": "result",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
                 },
                 "time_s": 4.6
               }
-            }
-          ],
-          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
-          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
-        }
-      ]
-    },
-    {
-      "id": "N10",
-      "version": "2026-09-17.1",
-      "title": "Mark the one word that carries the point",
-      "scope": "original-reference-rendered-from-project-sniper-templates",
-      "render_aspects": [
-        "9:16"
-      ],
-      "lesson": "When a sentence on screen has one word that matters, draw attention to that word after the sentence has been read, not before.",
-      "opening": "The full sentence appears unmarked.",
-      "story_arc": "sentence read -> emphasis drawn on one word -> hold",
-      "payoff": "The emphasised word is the last thing that changes.",
-      "catalog": [
-        "marker-highlight",
-        "underline-circle",
-        "hw-callout-circle"
-      ],
-      "beats": [
-        {
-          "id": "N10-B01",
-          "spoken_idea": "Read the sentence first",
-          "visible": "The line appears plain.",
-          "why_this_picture": "The viewer needs the whole thought before the emphasis means anything.",
-          "composition": "marker-highlight",
-          "catalog_candidates": [
-            "marker-highlight"
-          ],
-          "source_frames": [
-            {
-              "path": "resources/references/shorts/sequences/frames/N10-B01-0.jpg",
-              "sha256": "66ecaade2fd11e08a1a6fa8d0b678e30b96d362fb0b0a11ef3d5c6969cc84ebf",
-              "dimensions": [
-                720,
-                1280
-              ],
-              "requested_time": 0.3,
-              "render": {
-                "composition": "templates/motion/compositions/marker-highlight.html",
-                "variables": {
-                  "text": "The first line does the heavy lifting",
-                  "emphasisWord": "first line"
-                },
-                "time_s": 0.3
-              }
             },
             {
-              "path": "resources/references/shorts/sequences/frames/N10-B01-1.jpg",
-              "sha256": "3efad2c8fe04ab4fcd44c87b1b6e9ea2b24409072709f55fdf4549521b97c56b",
-              "dimensions": [
-                720,
-                1280
-              ],
-              "requested_time": 0.6,
-              "render": {
-                "composition": "templates/motion/compositions/marker-highlight.html",
-                "variables": {
-                  "text": "The first line does the heavy lifting",
-                  "emphasisWord": "first line"
-                },
-                "time_s": 0.6
-              }
-            },
-            {
-              "path": "resources/references/shorts/sequences/frames/N10-B01-2.jpg",
-              "sha256": "3efad2c8fe04ab4fcd44c87b1b6e9ea2b24409072709f55fdf4549521b97c56b",
-              "dimensions": [
-                720,
-                1280
-              ],
-              "requested_time": 0.85,
-              "render": {
-                "composition": "templates/motion/compositions/marker-highlight.html",
-                "variables": {
-                  "text": "The first line does the heavy lifting",
-                  "emphasisWord": "first line"
-                },
-                "time_s": 0.85
-              }
-            }
-          ],
-          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
-          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
-        },
-        {
-          "id": "N10-B14",
-          "spoken_idea": "Focus the relevant detail",
-          "visible": "A highlight is drawn behind the key phrase.",
-          "why_this_picture": "Emphasis arrives after reading, on the phrase the speaker stresses.",
-          "composition": "marker-highlight",
-          "catalog_candidates": [
-            "marker-highlight"
-          ],
-          "source_frames": [
-            {
-              "path": "resources/references/shorts/sequences/frames/N10-B14-0.jpg",
-              "sha256": "ee9602ee1f0835f074723bf21d3672a360c9ea221a4435017fe1058365bb266d",
-              "dimensions": [
-                720,
-                1280
-              ],
-              "requested_time": 1.0,
-              "render": {
-                "composition": "templates/motion/compositions/marker-highlight.html",
-                "variables": {
-                  "text": "The first line does the heavy lifting",
-                  "emphasisWord": "first line"
-                },
-                "time_s": 1.0
-              }
-            },
-            {
-              "path": "resources/references/shorts/sequences/frames/N10-B14-1.jpg",
-              "sha256": "f7dbe05dfef53fd8f2a043d97aae4e9844c27e8a80de91d8d0e74492d8f4fdb6",
-              "dimensions": [
-                720,
-                1280
-              ],
-              "requested_time": 1.6,
-              "render": {
-                "composition": "templates/motion/compositions/marker-highlight.html",
-                "variables": {
-                  "text": "The first line does the heavy lifting",
-                  "emphasisWord": "first line"
-                },
-                "time_s": 1.6
-              }
-            },
-            {
-              "path": "resources/references/shorts/sequences/frames/N10-B14-2.jpg",
-              "sha256": "e757e986d78749532f470c10726580c6a9ba182ce6e3cd6928cbc24a635b14fa",
-              "dimensions": [
-                720,
-                1280
-              ],
-              "requested_time": 3.2,
-              "render": {
-                "composition": "templates/motion/compositions/marker-highlight.html",
-                "variables": {
-                  "text": "The first line does the heavy lifting",
-                  "emphasisWord": "first line"
-                },
-                "time_s": 3.2
-              }
-            }
-          ],
-          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
-          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
-        }
-      ]
-    },
-    {
-      "id": "N04",
-      "version": "2026-09-17.1",
-      "title": "Zoom to the control that matters",
-      "scope": "original-reference-rendered-from-project-sniper-templates",
-      "render_aspects": [
-        "16:9"
-      ],
-      "lesson": "When the speaker refers to one part of a busy screen, move the view to that part instead of asking the viewer to find it.",
-      "opening": "The whole screen is shown briefly so the viewer knows where they are.",
-      "story_arc": "whole screen -> push in on the relevant control -> hold on it",
-      "payoff": "The control fills the frame, with a halo marking it.",
-      "catalog": [
-        "ui-focus-zoom",
-        "marker-highlight"
-      ],
-      "beats": [
-        {
-          "id": "N04-B13",
-          "spoken_idea": "Focus a relevant control",
-          "visible": "The view pushes in on one region of the screen.",
-          "why_this_picture": "Establish the whole screen, then move to the part being discussed.",
-          "composition": "ui-focus-zoom",
-          "catalog_candidates": [
-            "ui-focus-zoom"
-          ],
-          "source_frames": [
-            {
-              "path": "resources/references/shorts/sequences/frames/N04-B13-0.jpg",
-              "sha256": "a85d206ff3150c9f8c946454f8b461cecd0dc901b34f04404490b03d05309625",
+              "path": "resources/references/shorts/sequences/frames/SQ04-B04-1.jpg",
+              "sha256": "81e4c8987bb791cb129741e014513dfe52e6e29c0c9e27f3880a2587591ba45e",
               "dimensions": [
                 1280,
                 720
               ],
-              "requested_time": 0.3,
+              "requested_time": 5.4,
               "render": {
-                "composition": "templates/motion/compositions/ui-focus-zoom.html",
+                "composition": "templates/motion/compositions/module-rail.html",
                 "variables": {
-                  "anchorX": 57,
-                  "anchorY": 63,
-                  "zoom": 1.9,
-                  "zoomAt": 1.2
+                  "eyebrow": "Before you send a quote",
+                  "headlineLines": "Four checks|before you hit send",
+                  "explainer": "",
+                  "contentMode": "checklist",
+                  "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+                  "footChip": "READY TO SEND",
+                  "footAccent": "result",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
                 },
-                "time_s": 0.3
+                "time_s": 5.4
               }
             },
             {
-              "path": "resources/references/shorts/sequences/frames/N04-B13-1.jpg",
-              "sha256": "0c5bbb7ab903ef1dac2ef09330cad3238b8140a0ffa1cacb23d0ae95af275d9d",
+              "path": "resources/references/shorts/sequences/frames/SQ04-B04-2.jpg",
+              "sha256": "81e4c8987bb791cb129741e014513dfe52e6e29c0c9e27f3880a2587591ba45e",
               "dimensions": [
                 1280,
                 720
               ],
-              "requested_time": 1.6,
+              "requested_time": 6.6,
               "render": {
-                "composition": "templates/motion/compositions/ui-focus-zoom.html",
+                "composition": "templates/motion/compositions/module-rail.html",
                 "variables": {
-                  "anchorX": 57,
-                  "anchorY": 63,
-                  "zoom": 1.9,
-                  "zoomAt": 1.2
+                  "eyebrow": "Before you send a quote",
+                  "headlineLines": "Four checks|before you hit send",
+                  "explainer": "",
+                  "contentMode": "checklist",
+                  "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+                  "footChip": "READY TO SEND",
+                  "footAccent": "result",
+                  "evidenceSource": "",
+                  "evidenceDate": ""
                 },
-                "time_s": 1.6
-              }
-            },
-            {
-              "path": "resources/references/shorts/sequences/frames/N04-B13-2.jpg",
-              "sha256": "52179acf8ad05984cdcf7327c4217882246cfccfb2ba6a98a4ded437a3e26749",
-              "dimensions": [
-                1280,
-                720
-              ],
-              "requested_time": 3.6,
-              "render": {
-                "composition": "templates/motion/compositions/ui-focus-zoom.html",
-                "variables": {
-                  "anchorX": 57,
-                  "anchorY": 63,
-                  "zoom": 1.9,
-                  "zoomAt": 1.2
-                },
-                "time_s": 3.6
+                "time_s": 6.6
               }
             }
           ],

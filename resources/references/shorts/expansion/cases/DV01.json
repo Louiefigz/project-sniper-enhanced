@@ -1,0 +1,318 @@
+{
+  "id": "DV01",
+  "version": "2026-09-18.1",
+  "title": "Reveal each point beside the speaker on the word that names it",
+  "scope": "original-reference-rendered-from-project-sniper-templates",
+  "message": "A routine of three or four points is easiest to follow when each point appears as it is spoken and the earlier points stay visible beside the speaker.",
+  "arc": "Eyebrow → point one → point two → point three, then the full rail held.",
+  "execution": "Set one land time per row from its spoken cue, keep the rail on the side away from the speaker, and hold the full rail through the last sentence.",
+  "avoid": "Rows that land on a fixed rhythm ahead of the speech, or more rows than a side rail can show at phone size.",
+  "typography": "Short titles with an optional one-line subtitle; numbers live in the chips, not the titles.",
+  "catalog": [
+    "glass-rail",
+    "module-rail",
+    "list-build"
+  ],
+  "beats": [
+    {
+      "id": "DV01-B01",
+      "message_paraphrase": "First, clear the desk.",
+      "composition": "glass-rail",
+      "catalog_candidates": [
+        "glass-rail"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/expansion/frames/DV01-B01-0.jpg",
+          "sha256": "afd79e39ea52a53c6663700b951522b5e97196f6a63936231343e2b089d86759",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 0.5,
+          "render": {
+            "composition": "templates/motion/compositions/glass-rail.html",
+            "variables": {
+              "eyebrow": "Before the first task",
+              "num1": "1",
+              "title1": "Clear the desk",
+              "sub1": "Only today's work stays out",
+              "num2": "2",
+              "title2": "Pick one task",
+              "sub2": "Write it where you can see it",
+              "num3": "3",
+              "title3": "Start a timer",
+              "sub3": "Twenty-five minutes, phone in a drawer",
+              "title4": "",
+              "title5": "",
+              "title6": "",
+              "rowLands": "0.4|1.6|2.8",
+              "side": "left"
+            },
+            "time_s": 0.5
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/DV01-B01-1.jpg",
+          "sha256": "9651a17e568313dd4b1642a6daa840048053db029534690a570acbdc71f569db",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 0.9,
+          "render": {
+            "composition": "templates/motion/compositions/glass-rail.html",
+            "variables": {
+              "eyebrow": "Before the first task",
+              "num1": "1",
+              "title1": "Clear the desk",
+              "sub1": "Only today's work stays out",
+              "num2": "2",
+              "title2": "Pick one task",
+              "sub2": "Write it where you can see it",
+              "num3": "3",
+              "title3": "Start a timer",
+              "sub3": "Twenty-five minutes, phone in a drawer",
+              "title4": "",
+              "title5": "",
+              "title6": "",
+              "rowLands": "0.4|1.6|2.8",
+              "side": "left"
+            },
+            "time_s": 0.9
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/DV01-B01-2.jpg",
+          "sha256": "9651a17e568313dd4b1642a6daa840048053db029534690a570acbdc71f569db",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 1.4,
+          "render": {
+            "composition": "templates/motion/compositions/glass-rail.html",
+            "variables": {
+              "eyebrow": "Before the first task",
+              "num1": "1",
+              "title1": "Clear the desk",
+              "sub1": "Only today's work stays out",
+              "num2": "2",
+              "title2": "Pick one task",
+              "sub2": "Write it where you can see it",
+              "num3": "3",
+              "title3": "Start a timer",
+              "sub3": "Twenty-five minutes, phone in a drawer",
+              "title4": "",
+              "title5": "",
+              "title6": "",
+              "rowLands": "0.4|1.6|2.8",
+              "side": "left"
+            },
+            "time_s": 1.4
+          }
+        }
+      ]
+    },
+    {
+      "id": "DV01-B02",
+      "message_paraphrase": "Then pick one task and write it down.",
+      "composition": "glass-rail",
+      "catalog_candidates": [
+        "glass-rail"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/expansion/frames/DV01-B02-0.jpg",
+          "sha256": "db487a1b5b2ac373bc523f23bdb543ff5e6e7d6a312adfce81f196b1cdc43ca4",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 1.7,
+          "render": {
+            "composition": "templates/motion/compositions/glass-rail.html",
+            "variables": {
+              "eyebrow": "Before the first task",
+              "num1": "1",
+              "title1": "Clear the desk",
+              "sub1": "Only today's work stays out",
+              "num2": "2",
+              "title2": "Pick one task",
+              "sub2": "Write it where you can see it",
+              "num3": "3",
+              "title3": "Start a timer",
+              "sub3": "Twenty-five minutes, phone in a drawer",
+              "title4": "",
+              "title5": "",
+              "title6": "",
+              "rowLands": "0.4|1.6|2.8",
+              "side": "left"
+            },
+            "time_s": 1.7
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/DV01-B02-1.jpg",
+          "sha256": "bd425d2d60cc7e90be1a7f6d6e63f9f2b730252fc7093c7db884d8a9bd39a0cf",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 2.1,
+          "render": {
+            "composition": "templates/motion/compositions/glass-rail.html",
+            "variables": {
+              "eyebrow": "Before the first task",
+              "num1": "1",
+              "title1": "Clear the desk",
+              "sub1": "Only today's work stays out",
+              "num2": "2",
+              "title2": "Pick one task",
+              "sub2": "Write it where you can see it",
+              "num3": "3",
+              "title3": "Start a timer",
+              "sub3": "Twenty-five minutes, phone in a drawer",
+              "title4": "",
+              "title5": "",
+              "title6": "",
+              "rowLands": "0.4|1.6|2.8",
+              "side": "left"
+            },
+            "time_s": 2.1
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/DV01-B02-2.jpg",
+          "sha256": "bd425d2d60cc7e90be1a7f6d6e63f9f2b730252fc7093c7db884d8a9bd39a0cf",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 2.6,
+          "render": {
+            "composition": "templates/motion/compositions/glass-rail.html",
+            "variables": {
+              "eyebrow": "Before the first task",
+              "num1": "1",
+              "title1": "Clear the desk",
+              "sub1": "Only today's work stays out",
+              "num2": "2",
+              "title2": "Pick one task",
+              "sub2": "Write it where you can see it",
+              "num3": "3",
+              "title3": "Start a timer",
+              "sub3": "Twenty-five minutes, phone in a drawer",
+              "title4": "",
+              "title5": "",
+              "title6": "",
+              "rowLands": "0.4|1.6|2.8",
+              "side": "left"
+            },
+            "time_s": 2.6
+          }
+        }
+      ]
+    },
+    {
+      "id": "DV01-B03",
+      "message_paraphrase": "Then start a timer and put the phone away.",
+      "composition": "glass-rail",
+      "catalog_candidates": [
+        "glass-rail"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/expansion/frames/DV01-B03-0.jpg",
+          "sha256": "529d8a602a9df2518638d2a2e75a4c5d1b8bf00d1b01ae57286011926cbb1e33",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 2.9,
+          "render": {
+            "composition": "templates/motion/compositions/glass-rail.html",
+            "variables": {
+              "eyebrow": "Before the first task",
+              "num1": "1",
+              "title1": "Clear the desk",
+              "sub1": "Only today's work stays out",
+              "num2": "2",
+              "title2": "Pick one task",
+              "sub2": "Write it where you can see it",
+              "num3": "3",
+              "title3": "Start a timer",
+              "sub3": "Twenty-five minutes, phone in a drawer",
+              "title4": "",
+              "title5": "",
+              "title6": "",
+              "rowLands": "0.4|1.6|2.8",
+              "side": "left"
+            },
+            "time_s": 2.9
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/DV01-B03-1.jpg",
+          "sha256": "2f43f9c0ad0bafe6188d42dd4d7156bb673f22e6023102cbaa685cc0075a041d",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 3.3,
+          "render": {
+            "composition": "templates/motion/compositions/glass-rail.html",
+            "variables": {
+              "eyebrow": "Before the first task",
+              "num1": "1",
+              "title1": "Clear the desk",
+              "sub1": "Only today's work stays out",
+              "num2": "2",
+              "title2": "Pick one task",
+              "sub2": "Write it where you can see it",
+              "num3": "3",
+              "title3": "Start a timer",
+              "sub3": "Twenty-five minutes, phone in a drawer",
+              "title4": "",
+              "title5": "",
+              "title6": "",
+              "rowLands": "0.4|1.6|2.8",
+              "side": "left"
+            },
+            "time_s": 3.3
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/DV01-B03-2.jpg",
+          "sha256": "2f43f9c0ad0bafe6188d42dd4d7156bb673f22e6023102cbaa685cc0075a041d",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 3.8,
+          "render": {
+            "composition": "templates/motion/compositions/glass-rail.html",
+            "variables": {
+              "eyebrow": "Before the first task",
+              "num1": "1",
+              "title1": "Clear the desk",
+              "sub1": "Only today's work stays out",
+              "num2": "2",
+              "title2": "Pick one task",
+              "sub2": "Write it where you can see it",
+              "num3": "3",
+              "title3": "Start a timer",
+              "sub3": "Twenty-five minutes, phone in a drawer",
+              "title4": "",
+              "title5": "",
+              "title6": "",
+              "rowLands": "0.4|1.6|2.8",
+              "side": "left"
+            },
+            "time_s": 3.8
+          }
+        }
+      ]
+    }
+  ]
+}

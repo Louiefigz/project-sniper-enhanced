@@ -1,0 +1,364 @@
+{
+  "id": "SQ04",
+  "version": "2026-09-18.1",
+  "title": "Grow the checklist one row per spoken check, then mark it done",
+  "scope": "original-reference-rendered-from-project-sniper-templates",
+  "render_aspects": [
+    "16:9"
+  ],
+  "lesson": "A checklist the speaker walks through should gain one row per spoken check, keep earlier rows in place and end on an explicit finished state.",
+  "opening": "The headline says what the checklist is for.",
+  "story_arc": "Purpose → four checks, one per sentence → the finished state.",
+  "payoff": "The complete list stays readable and ends on a clear finished state.",
+  "catalog": [
+    "module-rail",
+    "glass-rail",
+    "list-build"
+  ],
+  "beats": [
+    {
+      "id": "SQ04-B01",
+      "spoken_idea": "Four checks before you send a quote. First, the scope in writing.",
+      "visible": "The headline, then the first checklist row with its badge.",
+      "why_this_picture": "The first row arrives with the first check, so the list and the speech stay together.",
+      "composition": "module-rail",
+      "catalog_candidates": [
+        "module-rail"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ04-B01-0.jpg",
+          "sha256": "bd16dc53325e943211d8f141b6dba6eb1fd241a8efec73e4b6526f12cb0fb503",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 0.4,
+          "render": {
+            "composition": "templates/motion/compositions/module-rail.html",
+            "variables": {
+              "eyebrow": "Before you send a quote",
+              "headlineLines": "Four checks|before you hit send",
+              "explainer": "",
+              "contentMode": "checklist",
+              "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+              "footChip": "READY TO SEND",
+              "footAccent": "result",
+              "evidenceSource": "",
+              "evidenceDate": ""
+            },
+            "time_s": 0.4
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ04-B01-1.jpg",
+          "sha256": "b9207693ddc0a4c656d880f4cb0f78a4054fcecd532751a0768be0336a8228f6",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 0.9,
+          "render": {
+            "composition": "templates/motion/compositions/module-rail.html",
+            "variables": {
+              "eyebrow": "Before you send a quote",
+              "headlineLines": "Four checks|before you hit send",
+              "explainer": "",
+              "contentMode": "checklist",
+              "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+              "footChip": "READY TO SEND",
+              "footAccent": "result",
+              "evidenceSource": "",
+              "evidenceDate": ""
+            },
+            "time_s": 0.9
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ04-B01-2.jpg",
+          "sha256": "fa0f99226a9803b4d9f4d572f78b62b5b060022dbb6f80860feca1b4b698170c",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 1.4,
+          "render": {
+            "composition": "templates/motion/compositions/module-rail.html",
+            "variables": {
+              "eyebrow": "Before you send a quote",
+              "headlineLines": "Four checks|before you hit send",
+              "explainer": "",
+              "contentMode": "checklist",
+              "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+              "footChip": "READY TO SEND",
+              "footAccent": "result",
+              "evidenceSource": "",
+              "evidenceDate": ""
+            },
+            "time_s": 1.4
+          }
+        }
+      ],
+      "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+      "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+    },
+    {
+      "id": "SQ04-B02",
+      "spoken_idea": "Then the start date, agreed with the client.",
+      "visible": "The second row lands under the first.",
+      "why_this_picture": "Earlier rows stay put, so the viewer sees the list accumulate.",
+      "composition": "module-rail",
+      "catalog_candidates": [
+        "module-rail"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ04-B02-0.jpg",
+          "sha256": "b56e0b9e68877e3d331580fb70358c12da29015f8f7afdc387b3b5357caf993f",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 1.7,
+          "render": {
+            "composition": "templates/motion/compositions/module-rail.html",
+            "variables": {
+              "eyebrow": "Before you send a quote",
+              "headlineLines": "Four checks|before you hit send",
+              "explainer": "",
+              "contentMode": "checklist",
+              "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+              "footChip": "READY TO SEND",
+              "footAccent": "result",
+              "evidenceSource": "",
+              "evidenceDate": ""
+            },
+            "time_s": 1.7
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ04-B02-1.jpg",
+          "sha256": "e60371308ac287c7768ea5d76d17f724e7080171300c6e8975a2e0cf45226012",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 2.1,
+          "render": {
+            "composition": "templates/motion/compositions/module-rail.html",
+            "variables": {
+              "eyebrow": "Before you send a quote",
+              "headlineLines": "Four checks|before you hit send",
+              "explainer": "",
+              "contentMode": "checklist",
+              "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+              "footChip": "READY TO SEND",
+              "footAccent": "result",
+              "evidenceSource": "",
+              "evidenceDate": ""
+            },
+            "time_s": 2.1
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ04-B02-2.jpg",
+          "sha256": "2be22ebce7a9c3bf251e2cde4621c120293580f4ae1193e0b381e26491d8d860",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 2.5,
+          "render": {
+            "composition": "templates/motion/compositions/module-rail.html",
+            "variables": {
+              "eyebrow": "Before you send a quote",
+              "headlineLines": "Four checks|before you hit send",
+              "explainer": "",
+              "contentMode": "checklist",
+              "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+              "footChip": "READY TO SEND",
+              "footAccent": "result",
+              "evidenceSource": "",
+              "evidenceDate": ""
+            },
+            "time_s": 2.5
+          }
+        }
+      ],
+      "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+      "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+    },
+    {
+      "id": "SQ04-B03",
+      "spoken_idea": "The deposit, stated as an amount. And what the price does not include.",
+      "visible": "The third and fourth rows land in turn.",
+      "why_this_picture": "One row per spoken check, even when two checks come in one breath.",
+      "composition": "module-rail",
+      "catalog_candidates": [
+        "module-rail"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ04-B03-0.jpg",
+          "sha256": "2be22ebce7a9c3bf251e2cde4621c120293580f4ae1193e0b381e26491d8d860",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 2.8,
+          "render": {
+            "composition": "templates/motion/compositions/module-rail.html",
+            "variables": {
+              "eyebrow": "Before you send a quote",
+              "headlineLines": "Four checks|before you hit send",
+              "explainer": "",
+              "contentMode": "checklist",
+              "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+              "footChip": "READY TO SEND",
+              "footAccent": "result",
+              "evidenceSource": "",
+              "evidenceDate": ""
+            },
+            "time_s": 2.8
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ04-B03-1.jpg",
+          "sha256": "50f0f76af2a39609f08ad77007c970d3e8534485c9254d4d3aedb8f59a91b48f",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 3.4,
+          "render": {
+            "composition": "templates/motion/compositions/module-rail.html",
+            "variables": {
+              "eyebrow": "Before you send a quote",
+              "headlineLines": "Four checks|before you hit send",
+              "explainer": "",
+              "contentMode": "checklist",
+              "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+              "footChip": "READY TO SEND",
+              "footAccent": "result",
+              "evidenceSource": "",
+              "evidenceDate": ""
+            },
+            "time_s": 3.4
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ04-B03-2.jpg",
+          "sha256": "65be54a6559aae8de9ee8504128b1bdc9b4315acd06d7b4ecebd7c6bd5443a55",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 4.1,
+          "render": {
+            "composition": "templates/motion/compositions/module-rail.html",
+            "variables": {
+              "eyebrow": "Before you send a quote",
+              "headlineLines": "Four checks|before you hit send",
+              "explainer": "",
+              "contentMode": "checklist",
+              "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+              "footChip": "READY TO SEND",
+              "footAccent": "result",
+              "evidenceSource": "",
+              "evidenceDate": ""
+            },
+            "time_s": 4.1
+          }
+        }
+      ],
+      "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+      "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+    },
+    {
+      "id": "SQ04-B04",
+      "spoken_idea": "Then it is ready to send.",
+      "visible": "A footer tag marks the list finished.",
+      "why_this_picture": "An explicit finished state tells the viewer the list is complete, not cut off.",
+      "composition": "module-rail",
+      "catalog_candidates": [
+        "module-rail"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ04-B04-0.jpg",
+          "sha256": "a9e0138ffa58add0901c6497a73f1ab35cfa21a7bded43b2f9ef5f4a568bed24",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 4.6,
+          "render": {
+            "composition": "templates/motion/compositions/module-rail.html",
+            "variables": {
+              "eyebrow": "Before you send a quote",
+              "headlineLines": "Four checks|before you hit send",
+              "explainer": "",
+              "contentMode": "checklist",
+              "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+              "footChip": "READY TO SEND",
+              "footAccent": "result",
+              "evidenceSource": "",
+              "evidenceDate": ""
+            },
+            "time_s": 4.6
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ04-B04-1.jpg",
+          "sha256": "81e4c8987bb791cb129741e014513dfe52e6e29c0c9e27f3880a2587591ba45e",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 5.4,
+          "render": {
+            "composition": "templates/motion/compositions/module-rail.html",
+            "variables": {
+              "eyebrow": "Before you send a quote",
+              "headlineLines": "Four checks|before you hit send",
+              "explainer": "",
+              "contentMode": "checklist",
+              "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+              "footChip": "READY TO SEND",
+              "footAccent": "result",
+              "evidenceSource": "",
+              "evidenceDate": ""
+            },
+            "time_s": 5.4
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ04-B04-2.jpg",
+          "sha256": "81e4c8987bb791cb129741e014513dfe52e6e29c0c9e27f3880a2587591ba45e",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 6.6,
+          "render": {
+            "composition": "templates/motion/compositions/module-rail.html",
+            "variables": {
+              "eyebrow": "Before you send a quote",
+              "headlineLines": "Four checks|before you hit send",
+              "explainer": "",
+              "contentMode": "checklist",
+              "rows": "1~Scope in writing~OK|2~Start date agreed~OK|3~Deposit stated~OK|4~What is not included~OK",
+              "footChip": "READY TO SEND",
+              "footAccent": "result",
+              "evidenceSource": "",
+              "evidenceDate": ""
+            },
+            "time_s": 6.6
+          }
+        }
+      ],
+      "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+      "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+    }
+  ]
+}

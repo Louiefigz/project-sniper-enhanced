@@ -1,217 +1,232 @@
 {
   "schema": "sniper-reference-library-v1",
-  "version": "2026-09-17.1",
+  "version": "2026-09-18.1",
   "entry_count": 3,
   "entries": [
     {
-      "id": "A01",
-      "version": "2026-09-17.1",
-      "title": "A numbered list that builds as it is spoken",
+      "id": "ME01",
+      "version": "2026-09-18.1",
+      "title": "A short rule as one typographic lockup",
       "scope": "original-reference-rendered-from-project-sniper-templates",
-      "story_job": "Let the viewer count along with the speaker.",
-      "use_when": "The speaker names three short, parallel items.",
-      "do_not_use_when": "The items are long sentences, or not parallel.",
+      "story_job": "Give a rule the speaker stresses a single, memorable visual form above the speaker.",
+      "use_when": "The speaker states a rule of two to four words and stresses or repeats it.",
+      "do_not_use_when": "The rule needs a qualification to be true, or another text layer already occupies the frame.",
       "catalog": [
-        "list-build"
+        "punch-shout-lockup"
       ],
       "frames": [
         {
-          "path": "resources/references/shorts/frames/A01-0.jpg",
-          "sha256": "f458a6a9ffd32088d699713726ee606e837787ebbbbf9c32ca2d91d17ac789df",
+          "path": "resources/references/shorts/frames/ME01-0.jpg",
+          "sha256": "c656b2390de26b997766491ee3393907ff7ea0ee7f4febd96aed515f493f1e3e",
           "dimensions": [
             720,
             1280
           ],
-          "requested_time": 0.4,
+          "requested_time": 0.1,
           "render": {
-            "composition": "templates/motion/compositions/list-build.html",
+            "composition": "templates/motion/compositions/punch-shout-lockup.html",
             "variables": {
-              "item1": "Write the promise",
-              "item2": "Show the proof",
-              "item3": "Ask one question"
+              "kicker": "the rule is",
+              "payload": "MEASURE",
+              "coword": "first",
+              "kicker2": ""
             },
-            "time_s": 0.4
+            "time_s": 0.1
           }
         },
         {
-          "path": "resources/references/shorts/frames/A01-1.jpg",
-          "sha256": "1bd6ab52d1e7a354bd1f2aad3dc47f04057da6ca6a1f60d7e575078722ed3899",
+          "path": "resources/references/shorts/frames/ME01-1.jpg",
+          "sha256": "c656b2390de26b997766491ee3393907ff7ea0ee7f4febd96aed515f493f1e3e",
           "dimensions": [
             720,
             1280
           ],
-          "requested_time": 1.1,
+          "requested_time": 0.5,
           "render": {
-            "composition": "templates/motion/compositions/list-build.html",
+            "composition": "templates/motion/compositions/punch-shout-lockup.html",
             "variables": {
-              "item1": "Write the promise",
-              "item2": "Show the proof",
-              "item3": "Ask one question"
+              "kicker": "the rule is",
+              "payload": "MEASURE",
+              "coword": "first",
+              "kicker2": ""
             },
-            "time_s": 1.1
+            "time_s": 0.5
           }
         },
         {
-          "path": "resources/references/shorts/frames/A01-2.jpg",
-          "sha256": "8372dc63a270cac0065afc20660e8df143a15edab513244fbf98947d7f5b8465",
+          "path": "resources/references/shorts/frames/ME01-2.jpg",
+          "sha256": "c656b2390de26b997766491ee3393907ff7ea0ee7f4febd96aed515f493f1e3e",
           "dimensions": [
             720,
             1280
           ],
-          "requested_time": 2.6,
+          "requested_time": 1.5,
           "render": {
-            "composition": "templates/motion/compositions/list-build.html",
+            "composition": "templates/motion/compositions/punch-shout-lockup.html",
             "variables": {
-              "item1": "Write the promise",
-              "item2": "Show the proof",
-              "item3": "Ask one question"
+              "kicker": "the rule is",
+              "payload": "MEASURE",
+              "coword": "first",
+              "kicker2": ""
             },
-            "time_s": 2.6
+            "time_s": 1.5
           }
         }
       ]
     },
     {
-      "id": "A02",
-      "version": "2026-09-17.1",
-      "title": "Before and after, side by side",
+      "id": "ME02",
+      "version": "2026-09-18.1",
+      "title": "List the items, then the total they make",
       "scope": "original-reference-rendered-from-project-sniper-templates",
-      "story_job": "Make a change visible by putting both states in one frame.",
-      "use_when": "The speaker contrasts a before and an after with concrete details.",
-      "do_not_use_when": "The 'after' is a claim the source does not support.",
+      "story_job": "Make a total believable by showing the items it is made of.",
+      "use_when": "The speaker adds up a handful of items and states the total.",
+      "do_not_use_when": "The items are estimates shown as exact amounts, or there are more than six of them.",
       "catalog": [
-        "versus-split"
+        "module-ledger-dark"
       ],
       "frames": [
         {
-          "path": "resources/references/shorts/frames/A02-0.jpg",
-          "sha256": "84f0dd368fc31383b4243fa19cbe382795c59dc6ca6f72f200ae4f1140b072dc",
+          "path": "resources/references/shorts/frames/ME02-0.jpg",
+          "sha256": "04c6a0468ad12279a88542053aa3f146e74c85f393acb9f5a089fcc94c3ffa74",
           "dimensions": [
-            720,
-            1280
+            1280,
+            720
           ],
-          "requested_time": 0.3,
+          "requested_time": 0.5,
           "render": {
-            "composition": "templates/motion/compositions/versus-split.html",
+            "composition": "templates/motion/compositions/module-ledger-dark.html",
             "variables": {
-              "leftTitle": "Before",
-              "rightTitle": "After",
-              "left1": "Two-hour edit",
-              "right1": "Forty minutes",
-              "left2": "Every take reviewed",
-              "right2": "Best takes first",
-              "left3": "Guessing the cut",
-              "right3": "Plan, then cut"
+              "eyebrow": "One week of lunches",
+              "headlineLines": "Five lunches|add up fast",
+              "explainer": "",
+              "barLabel": "WEEK TOTAL",
+              "barValue": "$62",
+              "barStatus": "",
+              "rows": "Monday~$12~LUNCH~process|Tuesday~$14~LUNCH~process|Wednesday~$11~LUNCH~process|Thursday~$13~LUNCH~process|Friday~$12~LUNCH~process",
+              "gridItems": "",
+              "footChip": ""
             },
-            "time_s": 0.3
+            "time_s": 0.5
           }
         },
         {
-          "path": "resources/references/shorts/frames/A02-1.jpg",
-          "sha256": "38c6d8be542884980df6cf42f238cf3c2e07b22c5679eb94070f28d3b65f6058",
+          "path": "resources/references/shorts/frames/ME02-1.jpg",
+          "sha256": "7000e1306547f488d0ef09017619c488596c33978a48f3bbd25f99a6f471e49d",
           "dimensions": [
-            720,
-            1280
-          ],
-          "requested_time": 1.1,
-          "render": {
-            "composition": "templates/motion/compositions/versus-split.html",
-            "variables": {
-              "leftTitle": "Before",
-              "rightTitle": "After",
-              "left1": "Two-hour edit",
-              "right1": "Forty minutes",
-              "left2": "Every take reviewed",
-              "right2": "Best takes first",
-              "left3": "Guessing the cut",
-              "right3": "Plan, then cut"
-            },
-            "time_s": 1.1
-          }
-        },
-        {
-          "path": "resources/references/shorts/frames/A02-2.jpg",
-          "sha256": "2ee5d2ed11a2f7d6536d4a2b7a75524d06874591e50c288ee9fb0ee3ee12f98f",
-          "dimensions": [
-            720,
-            1280
+            1280,
+            720
           ],
           "requested_time": 2.4,
           "render": {
-            "composition": "templates/motion/compositions/versus-split.html",
+            "composition": "templates/motion/compositions/module-ledger-dark.html",
             "variables": {
-              "leftTitle": "Before",
-              "rightTitle": "After",
-              "left1": "Two-hour edit",
-              "right1": "Forty minutes",
-              "left2": "Every take reviewed",
-              "right2": "Best takes first",
-              "left3": "Guessing the cut",
-              "right3": "Plan, then cut"
+              "eyebrow": "One week of lunches",
+              "headlineLines": "Five lunches|add up fast",
+              "explainer": "",
+              "barLabel": "WEEK TOTAL",
+              "barValue": "$62",
+              "barStatus": "",
+              "rows": "Monday~$12~LUNCH~process|Tuesday~$14~LUNCH~process|Wednesday~$11~LUNCH~process|Thursday~$13~LUNCH~process|Friday~$12~LUNCH~process",
+              "gridItems": "",
+              "footChip": ""
             },
             "time_s": 2.4
+          }
+        },
+        {
+          "path": "resources/references/shorts/frames/ME02-2.jpg",
+          "sha256": "45dbf3e89f196fc883b88b590275fd33154a16873b1d0e6484ec06534b7c0465",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 5.0,
+          "render": {
+            "composition": "templates/motion/compositions/module-ledger-dark.html",
+            "variables": {
+              "eyebrow": "One week of lunches",
+              "headlineLines": "Five lunches|add up fast",
+              "explainer": "",
+              "barLabel": "WEEK TOTAL",
+              "barValue": "$62",
+              "barStatus": "",
+              "rows": "Monday~$12~LUNCH~process|Tuesday~$14~LUNCH~process|Wednesday~$11~LUNCH~process|Thursday~$13~LUNCH~process|Friday~$12~LUNCH~process",
+              "gridItems": "",
+              "footChip": ""
+            },
+            "time_s": 5.0
           }
         }
       ]
     },
     {
-      "id": "A03",
-      "version": "2026-09-17.1",
-      "title": "One statement with one emphasis",
+      "id": "ME03",
+      "version": "2026-09-18.1",
+      "title": "Mark the start of a new part",
       "scope": "original-reference-rendered-from-project-sniper-templates",
-      "story_job": "Give a single line the whole screen when it is the thesis.",
-      "use_when": "The line is the point the rest of the Short supports.",
-      "do_not_use_when": "The line is setup rather than the thesis.",
+      "story_job": "Tell the viewer the Short has moved on to its next part.",
+      "use_when": "The speaker clearly moves from one part to the next, for example from the problem to the fix.",
+      "do_not_use_when": "The Short has only one part, or the marker would cover the speaker's face.",
       "catalog": [
-        "statement-card"
+        "section-marker"
       ],
       "frames": [
         {
-          "path": "resources/references/shorts/frames/A03-0.jpg",
-          "sha256": "e316d373a83bb11cffb141a2b8fd3da072ed5001776d40a2bd060dbcc7f47b1f",
+          "path": "resources/references/shorts/frames/ME03-0.jpg",
+          "sha256": "135b1746996bc2a2dc0ac8512351f3494d3536de991fd6c651adc6a68a999451",
           "dimensions": [
-            1280,
-            720
+            720,
+            1280
           ],
           "requested_time": 0.3,
           "render": {
-            "composition": "templates/motion/compositions/statement-card.html",
+            "composition": "templates/motion/compositions/section-marker.html",
             "variables": {
-              "text": "Show the result *before* the method"
+              "num": "Part 2",
+              "line1": "The fix",
+              "line2": "",
+              "side": "left"
             },
             "time_s": 0.3
           }
         },
         {
-          "path": "resources/references/shorts/frames/A03-1.jpg",
-          "sha256": "4f9be008207c966a2b5de9484e0e61e7216095739ff16cb4fde4e4e7bfe13c77",
+          "path": "resources/references/shorts/frames/ME03-1.jpg",
+          "sha256": "e734431e3fd5697209e1f34983db6690a67d77b79a105d4414c3cda23aef3cb5",
           "dimensions": [
-            1280,
-            720
+            720,
+            1280
           ],
-          "requested_time": 1.2,
+          "requested_time": 0.9,
           "render": {
-            "composition": "templates/motion/compositions/statement-card.html",
+            "composition": "templates/motion/compositions/section-marker.html",
             "variables": {
-              "text": "Show the result *before* the method"
+              "num": "Part 2",
+              "line1": "The fix",
+              "line2": "",
+              "side": "left"
             },
-            "time_s": 1.2
+            "time_s": 0.9
           }
         },
         {
-          "path": "resources/references/shorts/frames/A03-2.jpg",
-          "sha256": "4f9be008207c966a2b5de9484e0e61e7216095739ff16cb4fde4e4e7bfe13c77",
+          "path": "resources/references/shorts/frames/ME03-2.jpg",
+          "sha256": "e734431e3fd5697209e1f34983db6690a67d77b79a105d4414c3cda23aef3cb5",
           "dimensions": [
-            1280,
-            720
+            720,
+            1280
           ],
-          "requested_time": 3.0,
+          "requested_time": 2.0,
           "render": {
-            "composition": "templates/motion/compositions/statement-card.html",
+            "composition": "templates/motion/compositions/section-marker.html",
             "variables": {
-              "text": "Show the result *before* the method"
+              "num": "Part 2",
+              "line1": "The fix",
+              "line2": "",
+              "side": "left"
             },
-            "time_s": 3.0
+            "time_s": 2.0
           }
         }
       ]

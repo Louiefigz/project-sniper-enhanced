@@ -44,10 +44,10 @@ test("15-minute long-form handoff reuses the complete library, catalog and origi
     const library = JSON.parse(readFileSync(path.join(directory, "REFERENCE-LIBRARY.json"), "utf8"));
     const expected = loadReferenceStrategyLibrary(process.cwd());
     assert.equal(library.total, expected.index.total);
-    assert.ok(library.references.some((row: { id: string }) => row.id === "A01"));
-    assert.ok(library.references.some((row: { id: string }) => row.id === "CR07"));
-    assert.ok(library.references.some((row: { id: string }) => row.id === "N27"));
-    assert.ok(library.references.some((row: { id: string; sourceAspect: string }) => row.id === "LF01" && row.sourceAspect === "16:9"));
+    assert.ok(library.references.some((row: { id: string }) => row.id === "ME01"));
+    assert.ok(library.references.some((row: { id: string }) => row.id === "DV01"));
+    assert.ok(library.references.some((row: { id: string }) => row.id === "SQ02"));
+    assert.ok(library.references.some((row: { id: string; sourceAspect: string }) => row.id === "LG01" && row.sourceAspect === "16:9"));
     const catalog = JSON.parse(readFileSync(path.join(directory, "CATALOG-INDEX.json"), "utf8"));
     assert.equal(catalog.total, catalog.items.length); assert.equal(catalog.limited, false);
     assert.ok(catalog.items.length > 100);

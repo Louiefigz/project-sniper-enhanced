@@ -18,7 +18,7 @@ const INDEX = "native-references.json";
 const SCOPE = "research-reference-not-production-asset-or-qualified-template" as const;
 
 function selectedCase(selection: NativeReferenceSelection) {
-  if (!/^N\d{2}$/u.test(selection.caseId) || !new RegExp(`^${selection.caseId}-B\\d{2}$`, "u").test(selection.beatId)) {
+  if (!/^SQ\d{2}$/u.test(selection.caseId) || !new RegExp(`^${selection.caseId}-B\\d{2}$`, "u").test(selection.beatId)) {
     throw new Error("Native reference selection must name an exact curated case and beat");
   }
   const observed = readCutPreviewObject(path.join(process.cwd(), LIBRARY, "cases", `${selection.caseId}.json`));

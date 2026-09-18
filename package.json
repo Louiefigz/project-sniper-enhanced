@@ -17,7 +17,6 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.78.0",
     "@hyperframes/lint": "0.8.31",
     "@hyperframes/parsers": "0.8.31",
     "@hyperframes/sdk": "0.8.31",

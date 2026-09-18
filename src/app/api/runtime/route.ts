@@ -15,8 +15,9 @@ export async function GET(request: Request) {
   const provider = brainProvider();
   const codex = provider === "codex" ? codexSettings() : null;
   const preflight = codex ? await codexPreflight(request.signal) : null;
-  const transcription = process.env.SNIPER_TRANSCRIBE_PROVIDER ||
-    (mode === "local" ? "local-whisper" : "deepgram");
+  // scripts/asr_policy.py transcribes locally in every mode; Deepgram needs explicit
+  // per-run command-line authorization that no app route passes.
+  const transcription = process.env.SNIPER_TRANSCRIBE_PROVIDER || "local-whisper";
   const whisper = transcription === "local-whisper" ? localWhisperPreflight() : null;
   return NextResponse.json(
     {

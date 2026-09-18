@@ -60,7 +60,7 @@ REQUIRED = (
     "app/resources/director/hook-training-solution-aware.md",
     "app/resources/references/shorts/manifest.json",
     "app/resources/references/shorts/sequences/manifest.json",
-    "app/resources/references/shorts/sequences/cases/N26.json",
+    "app/resources/references/shorts/sequences/cases/SQ01.json",
     "app/resources/references/shorts/expansion/manifest.json",
     "app/resources/references/longform/manifest.json",
     "app/docs/audits/INTRO_MACHINE_VS_PRO_AUDIT.md",

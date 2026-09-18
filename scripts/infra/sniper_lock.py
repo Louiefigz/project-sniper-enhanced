@@ -22,7 +22,7 @@ app's virtual environment exists)::
 
     sniper_lock.py exec   --state-dir D --mode exclusive|shared --label L -- CMD...
     sniper_lock.py hold   --state-dir D --mode exclusive|shared --label L --seconds N
-    sniper_lock.py status --state-dir D
+    sniper_lock.py status --state-dir D [--mode shared]
 """
 from __future__ import annotations
 
@@ -220,7 +220,7 @@ def _exec_holding(args: argparse.Namespace) -> int:
         try:
             fd = acquire(path, args.mode, args.label, args.wait)
         except LockBusy as error:
-            print(f"STOPPED: {args.busy_message or 'Sniper is busy'}: in use by {error}.", file=sys.stderr)
+            print(f"STOPPED: {args.busy_message or 'Sniper is busy.'}\n  In use by: {error}.", file=sys.stderr)
             return BUSY_EXIT
         os.set_inheritable(fd, True)
         os.environ[ENV_FD], os.environ[ENV_MODE] = str(fd), args.mode
@@ -243,10 +243,14 @@ def _hold(args: argparse.Namespace) -> int:
 
 
 def _status(args: argparse.Namespace) -> int:
-    """Exit 0 when nothing holds the maintenance lock, 1 (with holders) otherwise."""
+    """Exit 0 when the maintenance lock could be taken in ``--mode`` now, 1 (naming holders) if not.
+
+    A momentary answer for messages only; work that must stay exclusive holds the
+    lock itself (``exec``) instead of relying on this.
+    """
     path = lock_file(Path(args.state_dir), MAINTENANCE)
     try:
-        fd = acquire(path, "exclusive", "status probe")
+        fd = acquire(path, args.mode, "status probe")
     except LockBusy as error:
         print(f"held by {error}")
         return 1
@@ -264,6 +268,7 @@ def main(argv: list[str] | None = None) -> int:
         cmd = sub.add_parser(name)
         cmd.add_argument("--state-dir", required=True)
         if name == "status":
+            cmd.add_argument("--mode", choices=sorted(_MODES), default="exclusive")
             continue
         cmd.add_argument("--mode", choices=sorted(_MODES), required=True)
         cmd.add_argument("--label", required=True)

@@ -13,8 +13,16 @@ when BOTH hold:
 2. its failure is exactly a missing-file error naming a path that this build's
    withheld manifest lists.
 
-Every other failure or error fails the gate. Declared tests that pass are
-reported. Nothing is skipped: every test runs.
+Every other failure or error fails the gate, including a failed or errored
+subtest and an unexpected success. The recorded rows must agree with unittest's
+own totals. Declared tests that pass are reported. Nothing is skipped: every test
+runs.
+
+A result is accepted only from the run the gate just started: the runner writes
+to a fresh private file, echoes a per-run nonce and must exit 0. Any previous
+``--out`` is removed before the run, and an infrastructure failure (the runner
+crashed, wrote nothing, wrote a truncated or foreign file) writes a failing
+result, never an earlier pass.
 """
 from __future__ import annotations
 
@@ -22,8 +30,11 @@ import argparse
 import json
 import os
 import re
+import secrets
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 # test-id prefix → why its input is not read by any buyer workflow
@@ -50,19 +61,38 @@ _MISSING = re.compile(r"No such file or directory: '([^']+)'|retained parity evi
 _RUNNER = r"""
 import json, os, sys, traceback, unittest
 tests = os.path.join(os.getcwd(), "tests"); sys.path.insert(0, tests); sys.path.insert(0, os.getcwd())
+out, nonce = sys.argv[1], sys.argv[2]
 class Result(unittest.TextTestResult):
     rows = []
-    def _row(self, test, outcome, err=None):
+    def _row(self, test, outcome, err=None, subtest=None):
         text = "".join(traceback.format_exception(*err)) if err else ""
-        Result.rows.append({"id": test.id(), "outcome": outcome, "detail": text[-4000:]})
+        row = {"id": test.id(), "outcome": outcome, "detail": text[-4000:]}
+        if subtest is not None:
+            row["subtest"] = subtest.id()
+        Result.rows.append(row)
     def addSuccess(self, test): super().addSuccess(test); self._row(test, "pass")
     def addFailure(self, test, err): super().addFailure(test, err); self._row(test, "fail", err)
     def addError(self, test, err): super().addError(test, err); self._row(test, "error", err)
     def addSkip(self, test, reason): super().addSkip(test, reason); Result.rows.append({"id": test.id(), "outcome": "skip", "detail": reason})
+    def addExpectedFailure(self, test, err): super().addExpectedFailure(test, err); self._row(test, "xfail", err)
+    def addUnexpectedSuccess(self, test):
+        super().addUnexpectedSuccess(test); Result.rows.append({"id": test.id(), "outcome": "fail", "detail": "unexpected success"})
+    def addSubTest(self, test, subtest, err):
+        super().addSubTest(test, subtest, err)
+        if err is not None:
+            self._row(test, "fail" if issubclass(err[0], test.failureException) else "error", err, subtest)
 suite = unittest.TestLoader().discover(start_dir=tests, top_level_dir=tests, pattern="test_*.py")
-unittest.TextTestRunner(verbosity=1, resultclass=Result, stream=sys.stderr).run(suite)
-json.dump(Result.rows, open(sys.argv[1], "w"))
+result = unittest.TextTestRunner(verbosity=1, resultclass=Result, stream=sys.stderr).run(suite)
+summary = {"testsRun": result.testsRun, "failures": len(result.failures), "errors": len(result.errors),
+           "unexpectedSuccesses": len(result.unexpectedSuccesses), "wasSuccessful": result.wasSuccessful()}
+with open(out + ".partial", "w") as handle:
+    json.dump({"nonce": nonce, "complete": True, "summary": summary, "rows": Result.rows}, handle)
+os.replace(out + ".partial", out)
 """
+
+
+class GateInfrastructureError(RuntimeError):
+    """The test run did not produce a trustworthy result."""
 
 
 def _declared(test_id: str) -> str | None:
@@ -85,20 +115,68 @@ def _withheld_miss(detail: str, package_app: Path, withheld: set[str]) -> bool:
     return False
 
 
-def classify(rows: list[dict], package_app: Path, withheld: set[str]) -> dict:
+def _reconcile(rows: list[dict], summary: dict) -> list[dict]:
+    """Gate failures when the recorded rows disagree with unittest's own totals."""
+    failing = sum(row["outcome"] in ("fail", "error") for row in rows)
+    expected = summary["failures"] + summary["errors"] + summary["unexpectedSuccesses"]
+    if failing == expected and summary["wasSuccessful"] == (failing == 0):
+        return []
+    return [{"id": "<unittest totals>", "outcome": "error",
+             "detail": f"recorded {failing} failing outcomes; unittest reported {expected} "
+                       f"(wasSuccessful={summary['wasSuccessful']})"}]
+
+
+def classify(rows: list[dict], package_app: Path, withheld: set[str], summary: dict | None = None) -> dict:
     """Split results into passes, tolerated withheld-evidence failures and gate failures."""
     tolerated, failures = [], []
     for row in rows:
         if row["outcome"] not in ("fail", "error"):
             continue
         reason = _declared(row["id"])
+        entry = {"id": row["id"], **({"subtest": row["subtest"]} if "subtest" in row else {})}
         if reason and _withheld_miss(row["detail"], package_app, withheld):
-            tolerated.append({"id": row["id"], "reason": reason})
+            tolerated.append({**entry, "reason": reason})
         else:
-            failures.append({"id": row["id"], "outcome": row["outcome"], "detail": row["detail"][-1200:]})
-    counts = {key: sum(row["outcome"] == key for row in rows) for key in ("pass", "fail", "error", "skip")}
+            failures.append({**entry, "outcome": row["outcome"], "detail": row["detail"][-1200:]})
+    if summary is not None:
+        failures.extend(_reconcile(rows, summary))
+    counts = {key: sum(row["outcome"] == key for row in rows) for key in ("pass", "fail", "error", "skip", "xfail")}
     return {"counts": counts, "total": len(rows), "toleratedWithheldEvidence": tolerated,
             "gateFailures": failures, "passed": not failures and counts["pass"] > 0}
+
+
+def _load_run(path: Path, nonce: str, returncode: int) -> tuple[list[dict], dict]:
+    """The rows of the run just started, or GateInfrastructureError."""
+    if returncode != 0:
+        raise GateInfrastructureError(f"the test runner exited {returncode}")
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as error:
+        raise GateInfrastructureError(f"the test runner wrote no readable result ({error})") from error
+    if type(document) is not dict or document.get("nonce") != nonce or document.get("complete") is not True:
+        raise GateInfrastructureError("the result file is not this run's complete result")
+    rows, summary = document.get("rows"), document.get("summary")
+    if type(rows) is not list or type(summary) is not dict:
+        raise GateInfrastructureError("the result file is malformed")
+    return rows, summary
+
+
+def _run_suite(app: Path) -> tuple[list[dict], dict]:
+    """Run the shipped suite in a fresh private folder; return its rows and unittest totals."""
+    python = app / ".venv" / "bin" / "python3"
+    work = Path(tempfile.mkdtemp(prefix="sniper-package-selftest-"))
+    try:
+        rows_path, nonce = work / "rows.json", secrets.token_hex(16)
+        done = subprocess.run([str(python), "-B", "-c", _RUNNER, str(rows_path), nonce],
+                              cwd=app / "scripts" / "producer",
+                              env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}, check=False)
+        return _load_run(rows_path, nonce, done.returncode)
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
+def _write(out: Path, result: dict) -> None:
+    out.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -107,15 +185,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--withheld", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
+    args.out.unlink(missing_ok=True)  # an earlier pass must never stand for this run
     app = args.package / "app"
-    python = app / ".venv" / "bin" / "python3"
-    raw = args.out.with_suffix(".rows.json")
-    subprocess.run([str(python), "-B", "-c", _RUNNER, str(raw.resolve())], cwd=app / "scripts" / "producer",
-                   env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}, check=False)
-    rows = json.loads(raw.read_text(encoding="utf-8"))
+    try:
+        rows, summary = _run_suite(app)
+    except GateInfrastructureError as error:
+        _write(args.out, {"passed": False, "infrastructureError": str(error)})
+        print(f"GATE INFRASTRUCTURE FAILURE: {error}", file=sys.stderr)
+        return 2
     withheld = {row["path"] for row in json.loads(args.withheld.read_text(encoding="utf-8"))}
-    result = classify(rows, app, withheld)
-    args.out.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    result = classify(rows, app, withheld, summary)
+    _write(args.out, result)
     print(json.dumps({key: result[key] for key in ("counts", "total", "passed")}))
     for row in result["gateFailures"]:
         print(f"GATE FAILURE {row['outcome']}: {row['id']}", file=sys.stderr)

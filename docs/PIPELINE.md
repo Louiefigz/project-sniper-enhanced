@@ -166,14 +166,14 @@ compare source-bound standalone moments, trim only the selected ranges, then
 apply the adopted visual-storytelling guidance. Topic segmentation is optional;
 ranked selection precedes graphic production and intermediate clip exports.
 
-Measured style grammars (each has a studied doc + a `pacing_<style>` lint
-profile):
+Built-in short-form styles (each is a Sniper style specification with a
+`pacing_<style>` lint profile):
 
-| Preset | Scope | Grammar doc |
+| Preset | Scope | Style specification |
 |---|---|---|
-| **Restrained light** | light | `docs/studies/RESTRAINED_STYLE.md` — restraint pole, whisper cues |
-| **Punch produced** | produced | `docs/studies/PUNCH_STYLE.md` — breath-gap punch-cuts, two-layer text |
-| **Slideware involved** | full | `docs/studies/SLIDEWARE_STYLE.md` — lime takeover-deck slideware |
+| **Restrained light** | light | `docs/studies/RESTRAINED_STYLE.md` — one steady frame and a frame-one thesis card; plain captions carry the pace |
+| **Punch produced** | produced | `scripts/producer/docs/findings/PUNCH_STYLE.md` — hard cuts between wide and tight framings on key words; keyword lockups over small captions |
+| **Slideware involved** | full | `docs/studies/SLIDEWARE_STYLE.md` — full-frame slide sections alternate with the speaker; real evidence, no camera motion |
 
 Plus the generic presets (**Light short · Produced short · Trim only**) and the
 **talking-head pace** toggle (slow, sustained graphics — paces like longform).

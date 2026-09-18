@@ -1,266 +1,297 @@
-# SHORTFORM LESSONS — shorts curriculum + breakdown reasoning (baked 2026-07-11)
+# SHORTFORM LESSONS — Sniper's produced-Short doctrine (hook, captions, bursts, the client-reel pace)
 
-Two shorts studies folded into the PRODUCER's deterministic pipelines:
+Status: Sniper-authored design doctrine, rewritten for rc4 (2026-09-18). Pinned into
+every Auto Edit doctrine snapshot. It is the rationale for `MODES.short.hook_stack`,
+`MODES.short.pacing_client_reel`, `BROLL["burst"]["short"]` and
+`AUDIO["riser_bridge_s"]` in `scripts/producer/producer_config.py`, for the pace ID
+`client-reel` (`src/lib/producer/intent-presets.ts`), and for Brain lessons
+LESSON-022 … LESSON-024.
 
-- **SF1** — a Resolve shorts-editing tutorial where every taught rule was
-  also MEASURED in the editor's own demo timeline (hook stack, caption
-  spec, J-cuts, track architecture).
-- **SF2** — a produced outdoor client-reel/commercial breakdown (30.5s
-  reel, frame-verified), taught with the editor's reasoning per decision.
+How to read this document:
 
-Every rule carries its evidence stamp (timestamps / frame refs from the
-source reports) and its encoding. Conflicts with our measured shorts
-grammars (punch / restrained / slideware / talking-head) are adjudicated in §9 —
-the EC2 R12 audience-experience selector (see `EDITCRAFT_LESSONS.md` §9)
-governs all of them. **SF2 is a THIRD PACE POLE** and is encoded as its own
-pacing profile; its motion budget never bleeds into desk talking-head
-presets.
-
-Encoding map: `producer_config.MODES["short"]` (`hook_stack`,
-`pacing_client_reel`), `BROLL["burst"]["short"]`,
-`AUDIO["riser_bridge_s"]`, FAILURE_LEDGER LESSON-022/023/024. Additive
-only; no default changed.
+- Section numbers are identifiers; code and ledger lessons cite them.
+- Every number is a **Sniper design parameter** with a stated reason; none is a
+  measurement of a third-party video.
+- The three style documents (restrained, punch, slideware) own their own grammars.
+  This document holds what is common to produced Shorts plus the **client-reel** pace,
+  and it says explicitly where a rule is scoped to one pace. When rules conflict, the
+  audience-experience rule in `EDITCRAFT_LESSONS.md` §9 decides first.
 
 ---
 
-## 1. The hook zone (0 → ~2.5–3s)
+## §1 The hook zone
 
-### 1.1 Hook stack (SF1, TAUGHT + MEASURED-IN-DEMO)
-A shorts hook zone is a **5-element simultaneous stack**: zoom-OUT reveal
-at t=0, 2-line mixed-typography text lockup, blur/treatment layer BEHIND
-the text, ~1.2s riser SFX resolving exactly at body start, and **NO
-captions** (delete auto-caption cues under the hook). CORROBORATED for the
-text-owns-the-hook part (Punch H2/T1, Restrained H1); zoom-out + riser are
-**promo-pole additions**.
+The first ~3 seconds of a Short decide whether the rest is watched. Everything in the
+hook zone serves one job: **state the promise so it can be read and heard at once**.
 
-### 1.2 Hook typography (SF1, MEASURED)
-The lockup is two-tier — plain white bold line + payload word in accent
-style (bold-italic + glow; blue here, yellow in Punch — **accent color is
-a skin choice, the two-tier structure is the invariant**). ~5–7%H per
-line, chest band, never covering the face. CORROBORATED (Punch T1).
+### §1.1 The hook stack
 
-### 1.3 Hook = one continuous shot (SF2, cross-creator HIGH)
-ZERO cuts in the hook; all hook energy lives in staged text + one zoom
-move. Frame-verified 0 cuts in reel 0–4.4s with ~6 text events. Agrees
-Punch H2 (6/6), Restrained H2 (3/3). Plan the hook camera move at the SHOOT
-(pan-up/reveal) so the edit can stage word-group reveals over it
-(SF2 1:01–1:17).
+The hook zone is `0 … 3.0 s` (`hook_stack.zone_s`, equal to the Short's
+`hook_window_s`). It stacks, in order of importance:
 
-### 1.4 Hook zoom-out reveal + frame-zero legality (SF2, 8:24–10:13)
-Adjustment layer above all text, scale **~1.3x→1.0 over ~60 frames**, ease
-out-cubic hand-shaped to an S-curve. **HARD RULE: frame zero must not be
-visibly over-zoomed** — a 2.08x start was rejected on sight; shipped ~1.34
-(Fusion readout Size 1.339874).
+1. a **designed text lockup** carrying the promise (§1.2) — the invariant across every
+   produced style;
+2. the spoken hook in **one continuous shot** (§1.3);
+3. optionally, for the client-reel pole only, a **zoom-out reveal** (§1.4) and a
+   **riser bridge** (§1.6).
 
-### 1.5 Hook word staging (SF2, timeline-verified t=443)
-Each word-group (This / VOLUSIA COUNTY / Mansion / EMBARRASSING / until we
-showed up) is its own text clip with staggered starts, **landing every
-~0.5s**, word-locked to the VO. TEXT-BEHIND-SUBJECT (magic-mask sandwich)
-is legal ONLY in wide outdoor scenes with subject <~30% of frame and real
-scene depth (SF2 4:27–5:47) — in tight talking-head the cutaway/zone
-doctrine stands (adjudicated vs `feedback_pro_graphics_are_cutaways`).
+Auto-captions are **removed under the hook**; the lockup shows instead, and captions
+start at the first body word (§2.2).
 
-### 1.6 Riser bridge (SF1, new device)
-~1.2s riser under the hook, ending exactly where the body starts; level
-pulled well down. No coverage in measured corpora — adopted as an
-**optional produced-treatment SFX slot**.
+**Encoded as** `MODES.short.hook_stack` (advisory; the brain reads it when authoring a
+produced Short's hook).
 
-**Encoded:** `MODES["short"]["hook_stack"]` (zone, captions-off,
-zoom-out scale band + frame-zero cap, lockup invariant, riser),
-`AUDIO["riser_bridge_s"]`, LESSON-022/024. The existing `hook_window_s`
-3.0 and HOOK_CARD comp defaults are unchanged.
+### §1.2 The two-tier lockup
 
-## 2. Captions
+The lockup is **two tiers**: a plain line in the primary text style plus the payload
+word or phrase in the accent style. Each line is **5-7 % of frame height** (roughly
+96-134 px on a 1920-px canvas), placed in the chest band, **never covering the face**.
+The accent colour is a skin choice made by the style; the two-tier structure is the
+rule. Rationale: at 5-7 % of height a line is readable at phone size in the fraction of
+a second a scrolling viewer gives it; the tier split tells the viewer which word is the
+promise.
 
-### 2.1 Caption spec (SF1, MEASURED — exact numbers)
-Auto-captions at max 10 chars/line, single line, 0-frame gap → 1–3 word
-cues; styled once at TRACK level: serif-adjacent font, white, ~3.3%H,
-stroke 1, center-x, MID-FRAME (~0.55–0.60H), plain preset (no karaoke).
-**CONFIRMS the Punch/Restrained mid-frame whisper band as the 3rd independent
-source** — karaoke remains off-style in every measured shorts grammar.
-Our `CAPTIONS["WHISPER"]` (2.2%H, band 0.60–0.64) is a sibling SKIN of the
-same family — defaults unchanged (§9.5).
+**Encoded as** `hook_stack.lockup = "two-tier"`,
+`hook_stack.lockup_line_h_frac = (0.05, 0.07)`.
 
-### 2.2 Captions start post-hook (SF1) + caption-vs-graphic law (SF2)
-Captions run from ~3s (first body word) to end; the hook zone shows the
-designed lockup INSTEAD. Never double styled hook text and captions in the
-same window. SF2 generalizes it: **captions are generated LAST, then cues
-are DELETED wherever a designed text moment exists** — captions live only
-in open space/time (frame-verified: no frame shows captions + shout text
-simultaneously). Gate-encodable: never render a caption cue overlapping a
-shout window. **Encoded:** `hook_stack["captions_in_hook"] = False` +
-LESSON-022; gate roadmap: a caption/graphic overlap check in the captions
-stage (shorts already suppress burned captions under own-screen takeovers
-in the monolithic path).
+### §1.3 The hook is one shot
 
-### 2.3 Whisper caption spec (SF2)
-White mixed-case (italic here), 1–3 word groups, replace every ~0.5–1.0s,
-floated into per-shot open space near chest/shoulder — total on-screen
-churn measured **92.9 states/min** (top of Punch 51–89 / Restrained 72.5–87
-bands). No karaoke, no box (3rd corroboration). **Encoded:**
-`pacing_client_reel["state_changes_per_min"]`.
+Do not cut inside the hook. The hook's energy comes from the promise and the staged
+text (§1.5), not from cut density. Rationale: a cut in the first seconds forces the
+viewer to re-find the speaker's face at the moment they are deciding whether to stay.
 
-### 2.4 Emphasis is EARNED per word (SF2, 7:50–14:22)
-Only words the script wants remembered get a styled treatment — stop-motion
-preset on action phrases, partial-blur zoom on outcome phrases,
-delay-up-slide on secondary hook lines; everything else stays whisper
-captions. **YELLOW = PAYLOAD WORD ONLY: exactly 3 accent words in 30s**
-(the location, the outcome, the CTA verb) via character-level styling.
-Cross-creator HIGH (Punch T1 yellow lockups; whisper tier-A amber).
-**Encoded:** `pacing_client_reel["accent_words_per_30s"] = 3`; LESSON-023.
+**Encoded as** `pacing_client_reel.hook_cuts = 0` (client-reel); style documents own
+their own hook rules.
 
-## 3. Cut grammar
+### §1.4 The zoom-out reveal (client-reel only)
 
-### 3.1 Silence-chop density ≠ punch-cut density (SF1, MEASURED)
-A raw talking take chopped to zero dead air yields **~26 seam cuts/min**
-(7 segments/14s from a 2:16 take, ~8–9x compression) — but these seams are
-MASKED (J-cuts, b-roll, punch-ins), unlike Punch's felt punch-cuts. **Do
-not conflate masked-seam density with punch-cut density when linting
-pace.** The pacing lint counts DISCRETE VISIBLE changes — a masked seam
-under b-roll is one change, not two. Doc + LESSON-024 context.
+The client-reel pole may open on a slight zoom that eases **out** to the full frame:
+from **1.34×** (never above **1.5×**) over **60 frames** with an out-cubic ease. **Frame
+zero must never look visibly over-zoomed**: a first frame that is obviously cropped
+into softness reads as a mistake before the reveal can read as a reveal. The zoom is
+applied above the footage and below the text, so the lockup does not scale with it.
 
-### 3.2 J-cut rule (SF1, TAUGHT — 3–4 frames; AXIS, not law)
-On every retained seam, the next clip's audio starts 3–4 frames early on a
-second audio track; start the early audio on a phrase start read from the
-waveform — never mid-sentence. Apply ONLY in clean/invisible-seam
-treatments; **OFF for punch-cut grammar** (Punch — cuts ARE the energy)
-and **restraint grammar** (Restrained keeps breath gaps, zero J/L).
-**Encoded:** doc + adjudication §9.3 (the cut engine renders butt joins
-with a 15ms audio crossfade today; J-cut leads are a named roadmap for the
-clean-seam treatment).
+**Encoded as** `hook_stack.zoom_out = {"scale_from": 1.34, "scale_from_max": 1.5,
+"dur_frames": 60, "ease": "out-cubic"}`; LESSON-024.
 
-### 3.3 Punch-in on clip change (SF1, TAUGHT)
-A small punch/zoom-in when moving to the next clip; the closing clip may
-take a slow zoom-out. CORROBORATED: this IS our shorts rhythmic-zoom
-grammar (`MOTION["zoom"]["by_mode"]["short"]` — zoom IS the cut). No
-change.
+### §1.5 Word staging
 
-## 4. B-roll micro-rules (SF1 + SF2)
+Hook text arrives in **word groups at speech cadence**: each group appears as the
+speaker says it. Rationale: staged text reads with the voice instead of ahead of it,
+so the viewer hears and sees the same word.
 
-1. **Word-matched**: b-roll is matched to the exact spoken phrase
-   (trigger→content) — corroborates `BROLL["trigger_latency_s"]` and the
-   receipts lane word-locking.
-2. **Action frame**: the cutaway starts ON the action frame, not before it
-   (brain picks `assetStart`; LESSON-025's shorts corollary).
-3. **Full-frame V2 over CONTINUOUS A-roll audio** — already how
-   `broll/broll_insert.py` composites (video-only riders).
-4. **Audio hygiene**: strip ALL b-roll audio in one bulk operation at
-   import — `BROLL["vo_continuity"]`.
-5. **Burst density datum**: 3 cutaways in ~4s (~1.3s each) mid-reel —
-   encoded `BROLL["burst"]["short"]` (§9.2 for the spacing adjudication).
-6. **B-roll inherits the grade AND the motion language** (SF2): copy the
-   A-roll grade onto every b-roll clip and reuse the same zoom-out
-   animation — one motion vocabulary per short
-   (`BROLL["insert_polish"]`).
-7. **AI-reframe b-roll subject-centered** for 9:16 instead of static crops
-   (SF2) — our face-aware reframe already does this for sources; pool
-   b-roll reframing is roadmap.
-8. **B-roll is the PROOF layer** (SF2): cover spoken process claims with a
-   4–5 clip montage (~6s window), each entry word-locked; punch-in on the
-   proof/testimonial beat when the credibility payoff lands.
+### §1.6 The riser bridge
 
-## 5. Energy + emphasis budget (the client-reel pole)
+An optional riser of about **1.2 s** plays under the end of the hook and **ends exactly
+where the body starts**, with its level pulled well below the voice. Rationale: it
+signals "the promise is about to be paid" and makes the hook-to-body boundary feel
+intentional. It is subject to the riser honesty gate (`EDITCRAFT_LESSONS.md` §6.1): only
+when a real payoff follows.
 
-- **ONE ENERGY PEAK PER SHORT** (SF2): a single light-leak/CRT overlay
-  burst (composite Add) + riser SFX, placed EXACTLY on the hook's promise
-  resolution ("until we showed up", reel ~3.1–4.5s) — **not on every
-  cut**. Agrees MEASURED_EDIT_GRAMMAR "flash covers energy beats"; never
-  import into punch/restrained paces (their measured transition count is zero).
-- Motion budget: **2 zoom-outs + 1 punch-in + 1 overlay per 30s** — this
-  is the whole per-reel allowance.
-- **CTA grammar** (SF2 17:08): end the client reel with the client's offer
-  + strategy-call link + subject POINTING DOWN + accent action word
-  ("Click the link!"); no channel outro inside the reel.
-- **Hand-drawn accent layer**: yellow arrow/scribble pointing at the
-  referenced object during the hook; arrows layer BELOW all text effects.
+**Encoded as** `AUDIO["riser_bridge_s"] = 1.2`, `hook_stack.riser_s = 1.2`.
 
-**Encoded:** `MODES["short"]["pacing_client_reel"]` (floors + advisory
-budget keys); LESSON-024.
+---
 
-## 6. Treatment-gated devices (promo pole ONLY)
+## §2 Captions
 
-- **Text-entrance recipe** (SF1, TAUGHT): keyframe rise over 20 frames
-  (~0.67s @30fps), ease-out cubic, ~4-frame smoothing handle, optional
-  glow. **CONFLICT with measured top-tier grammars** (Punch pop ≤83ms,
-  module in-place opacity 120–250ms, Restrained zero animation) — legal only
-  under a flashy/promo treatment; calibrated presets keep pop/opacity
-  tokens (§9.4).
-- **Light-leak/film-burn seam cover** (SF1, TAUGHT): Add-composite overlay
-  into the next clip. Matches the LONG-FORM cut-cover family; OFF-style
-  for punch (C2: 21/21 hard cuts) and restrained shorts. Only in
-  produced/flashy shorts treatment.
-- **Music at platform** (SF1, operational): for IG distribution, prefer
-  trending audio added in-app at post time (or a free-copyright track)
-  over a baked bed — a DISTRIBUTION choice that coexists with the −14 LUFS
-  baked-bed doctrine for other styles. Encoded:
-  `pacing_client_reel["music"] = False` (bed added at the platform).
+### §2.1 Captions come from kept words
 
-## 7. Process curriculum (speed system)
+Burned captions are derived from the **kept transcript words** and their timings; the
+brain never writes caption text. Corrections fix transcription errors only
+(`captions.corrections`, `CAPTION_AUTO_CORRECTIONS`) and never change what was said.
 
-- **Hook text only** (SF2): script exactly one line — the hook; the body
-  is spitballed by the subject. Hook formula: named location +
-  status/number signal + negative state + "until we" transformation.
-- **Target length ~30s** for client-reel shorts (timeline-verified 30.5s).
-- **Color grade FIRST, one restrained LUT** — grade before any cutting
-  (matches EC1's enhance-before-cut order); reject over-saturating looks.
-- **Speed doctrine** (SF1): the whole reel edit is ~10 minutes because
-  everything reusable is pre-built (asset pack: text animations, overlays,
-  SFX) and the cut loop uses exactly 2 bindings. System analog: comp
-  templates + brand tokens; never hand-author per video — exactly our
-  comps + `tokens.css` model.
-- **Template everything reusable** (SF2): saved template timeline with
-  hook text stacks + comment-card comps, copy-paste per client reel —
-  agrees our comp+parameterize doctrine.
-- **Track architecture** (SF1, MEASURED): subtitle track on top /
-  hook-title layer / effect-backdrop + b-roll / A-roll video / A-roll
-  audio / J-cut leads / SFX-riser — graphics and captions live ABOVE
-  footage as independent layers, matching our output-space overlay
-  compositing model. Corroboration; no change.
-- **Vertical setup** (SF1): 1080x1920 timeline before any editing —
-  matches `CANVAS`.
-- **Iterate taste in the edit loop** (SF2): author→look→revise convergence
-  (presets rejected on sight, layout re-staged 3x) — matches SKILL step-4
-  multi-round convergence.
-- **ANTI-RULE (3rd cross-creator sighting):** speed-over-polish ships
-  typos ("Houeses" on screen, reel 7–8.5s). Do NOT replicate typos — run
-  FRAME.IO REVIEW on every render; DO replicate fast hand-set text over
-  over-designed cards.
+**Encoded as** `CAPTIONS`, `captions/caption_corrections.py`.
 
-## 8. The third pace pole — `pacing_client_reel`
+### §2.2 No captions under designed text
 
-SF2's SCOPE GUARD verbatim: "this is a THIRD PACE POLE (produced outdoor
-client-reel/commercial) — 2 zoom-outs + 1 punch-in + 1 overlay per 30s
-CONFLICTS with measured punch (zero transitions) and restrained (zero zoom);
-keep it as its own pacing profile, do not bleed its motion budget into
-desk talking-head presets."
+Captions are generated **last**, and every cue that overlaps a designed text moment is
+removed: the hook zone shows the lockup instead of captions, and no frame ever shows
+captions together with a shout lockup or card text. Rationale: two text layers saying
+the same thing at once halve the reading time for both.
 
-Encoded as `MODES["short"]["pacing_client_reel"]`, selected by
-`target.pace == "client-reel"` (the `_pacing_profile` lookup maps dashes
-to underscores). Floors sit below the measured values as with every pack;
-the budget keys are advisory doctrine the brain/skill reads.
+**Encoded as** `hook_stack.captions_in_hook = False`; LESSON-022.
 
-## 9. Conflicts with our shorts grammars — adjudicated
+### §2.3 Placement
 
-| # | conflict | adjudication |
+Captions sit in the lower band inside the universal safe box (`SAFE_BOX`,
+`CAPTIONS["y_band"]`), dropping lower when the mid-frame is occupied by the body
+(`FREE_SPACE["caption_low_band"]`).
+
+### §2.4 Earned emphasis
+
+Accent colour or a styled treatment is **earned per word**. Only payload words the
+viewer should remember get it — typically the place or subject, the outcome and the
+call-to-action verb — about **three accent words per 30 s**, and at most **one accent
+keyword per list-card title**. Everything else stays in the base caption style.
+Rationale: emphasis works by contrast; a caption track in which every third word is
+coloured has no emphasis.
+
+**Encoded as** `pacing_client_reel.accent_words_per_30s = 3`; LESSON-023.
+
+### §2.5 Caption pace
+
+At most 10 words per second on screen (`CAPTIONS["words_per_sec_max"]`), with blocks
+held long enough to read (`CAPTIONS["block_s"]`).
+
+### §2.6 Case and punctuation
+
+Captions keep the speaker's words; casing follows the chosen style (sentence case for
+the whisper layer). Brand and product casing is fixed by the correction map.
+
+### §2.7 Line breaks
+
+Break captions at phrase boundaries (`CAPTIONS["gap_split_s"]`), never inside a name or
+a number.
+
+### §2.8 One reading target per moment
+
+At any frame the viewer has one primary thing to read: the lockup, a card, or the
+caption. When a card is up, captions yield (§2.2).
+
+### §2.9 Caption style follows the pace
+
+`karaoke` is the default produced-Short style; `whisper` is the punch pace's small
+verbatim layer; `minimal` is the word-at-a-time style (`REFERENCE_STYLE_STUDY.md` R1-R2).
+The client-reel pace uses a quiet verbatim layer so that the three accent words (§2.4)
+stand out.
+
+**Encoded as** `CAPTION_STYLES`, `MODES.short.captions_style`.
+
+---
+
+## §3 Cut grammar in Shorts
+
+- A cut is either an **eraser** (removes a flub, a pause, a false start) or an **energy
+  beat** (a reframe on emphasis). Know which one each cut is.
+- In Shorts, a reframe usually rides the cut (`REFERENCE_STYLE_STUDY.md` R13: zoom is the
+  cut), balanced between tighter and wider so the video does not creep in.
+- The hook is one shot (§1.3); cutaways land on their trigger words
+  (`EDITCRAFT_LESSONS.md` §2.1).
+
+---
+
+## §4 B-roll in Shorts: lone inserts and bursts
+
+A lone insert lasts 1-2 s (at most 5 s) and lone inserts are spaced at least 8 s apart.
+A **burst** — up to **three inserts within 4 s**, each held **0.6-1.3 s** — is the
+exception, and it belongs to a beat whose content is a group (examples, proof, a
+process shown in steps). Rationale: three quick shots read as "look how much"; the same
+shots spread out read as filler.
+
+**Encoded as** `MODES.short.broll_min_spacing_s = 8.0`, `broll_insert_s = (1.0, 2.0)`,
+`broll_insert_max_s = 5.0`, `BROLL["burst"]["short"] = {"max_inserts": 3,
+"window_s": 4.0, "hold_s": (0.6, 1.3)}`.
+
+---
+
+## §5 One energy peak per Short
+
+A produced Short has **one** energy peak: a single overlay burst plus a riser, landing
+**exactly on the resolution of the hook's promise** — the moment the viewer gets what
+they were promised. Never put an energy device on every cut. Rationale: a peak is
+defined by contrast with what surrounds it; several peaks are a plateau.
+
+**Encoded as** `pacing_client_reel.energy_peaks_max = 1`,
+`overlay_bursts_per_30s = 1`; LESSON-024.
+
+---
+
+## §6 Audio hygiene
+
+- The voice never stops under an insert (`EDITCRAFT_LESSONS.md` §2.5).
+- Masters target −14 LUFS integrated with a −1.5 dBTP ceiling (`AUDIO`).
+- In the client-reel pace, music is **not baked into the master**: the bed is chosen at
+  posting time on the platform, so the master carries voice and designed sound effects
+  only.
+
+**Encoded as** `pacing_client_reel.music = False`.
+
+---
+
+## §7 Endings
+
+A produced Short ends so that it can loop: the last line resolves the hook and the
+call to action lives in the caption text, not in a closing card (`MODES.short.ending_loop`).
+
+---
+
+## §8 The third pace: `client-reel`
+
+Sniper's Short paces span a restraint pole (`restrained`: almost no cuts, captions carry
+the tempo) and a stimulation pole (`punch`: frequent visible cuts and lockups). The
+`client-reel` pace is a third, **promotional** pole for produced reels about a service or
+result: one continuous hook shot, a proof montage in the body, and a small, fixed
+motion budget spent deliberately. Each key of its profile:
+
+| Key | Value | Rationale |
 |---|---|---|
-| 9.1 | SF2 client-reel motion budget (2 zoom-outs + 1 punch + 1 overlay + 1 energy peak / 30s) vs punch (zero transitions, punch-cut energy) and restrained (zero zooms) | New third pace pole `pacing_client_reel`; budgets scoped to it, selected only by `target.pace`. R12: different audience expectation (commercial/promo vs desk talking-head). Nothing bleeds. |
-| 9.2 | SF1 b-roll burst (3 cutaways in ~4s) vs `MODES["short"]["broll_min_spacing_s"]` = 8.0 | Spacing default KEPT for lone purposeful inserts (it was never lint-enforced — advisory cadence). Bursts are a beat-attached exception (EC1: bursts attach to montage/proof beats, not positions), recorded in `BROLL["burst"]["short"]`. |
-| 9.3 | SF1 J-cut law ("on every retained seam") vs punch punch-cut grammar and restrained breath-gap grammar | AXIS, not law (as the study itself flags): clean/invisible-seam treatments only; OFF elsewhere. Cut engine unchanged (15ms equal-power crossfade stays); J-cut audio leads = named roadmap for the clean-seam treatment. |
-| 9.4 | SF1 text-entrance 20-frame rise (taught) vs measured pop ≤83ms / 120–250ms opacity / restrained zero animation | Treatment-gated: legal only under flashy/promo treatment; calibrated comp presets keep their pop/opacity tokens. Not added to any default. |
-| 9.5 | SF1 caption spec (~3.3%H, band 0.55–0.60H, serif-adjacent) vs `CAPTIONS["WHISPER"]` (2.2%H, band 0.60–0.64, Inter) | Skin variance inside one family; third independent corroboration of the mid-frame whisper band + no-karaoke. WHISPER defaults unchanged; a future "SF1 skin" may override per-plan. |
-| 9.6 | Karaoke off-style in every measured grammar (SF1/SF2/R11) vs `MODES["short"]["captions_style"]` default `"karaoke"` | Default KEPT: it is the operator's base/brand default with its own evidence line (TikTok official pacing); every measured style pack overrides to whisper/minimal via `captions.style`. Flagged so the operator can flip the default deliberately — not silently by a bake. |
-| 9.7 | SF1 hook riser + zoom-out (5-element stack) vs punch/restrained hooks (text-owns-the-hook, no riser/zoom) | The lockup/text part is the cross-style INVARIANT (corroborated); zoom-out + riser are promo-pole additions gated behind produced/flashy treatment (`hook_stack` records both tiers). |
-| 9.8 | SF2 text-behind-subject (magic-mask sandwich) vs `feedback_pro_graphics_are_cutaways` (never panels over face) | Condition-scoped as the study itself adjudicates: legal only in wide OUTDOOR scenes, subject <~30% of frame, real depth; tight talking-head keeps the cutaway/zone doctrine. |
-| 9.9 | SF1 hook captions OFF vs shorts `captions_burn: True` | Compatible: captions still burn for the body; the hook zone's cues are deleted (designed lockup instead). `hook_stack["captions_in_hook"] = False` + LESSON-022; renderer wiring for cue deletion under designed-text windows is the named gate roadmap. |
+| `min_changes_per_min` | 8.0 | the body's proof montage carries the change rate; the floor sits below it so a quieter body is a WARN, not a wall |
+| `max_still_gap_s` | 10.0 | the hook may hold one shot for several seconds under text; the body never rests longer than the montage spacing |
+| `hook_front_load` | 1.3 | hook density lives in the staged text (§1.5), not in cuts |
+| `state_changes_per_min` | 90.0 (advisory) | a quiet verbatim caption layer churns about every 0.7 s even when the picture holds |
+| `music` | False | the bed is chosen at posting time (§6) |
+| `target_duration_s` | 30.0 | a reel of about 30 s, usually shorter |
+| `hook_cuts` | 0 | the hook is one shot (§1.3) |
+| `energy_peaks_max` | 1 | one peak on the promise's resolution (§5) |
+| `zoom_outs_per_30s` | 2 | the hook reveal (§1.4) and one closing move |
+| `punch_ins_per_30s` | 1 | reserved for the proof or testimonial beat |
+| `overlay_bursts_per_30s` | 1 | the single energy peak |
+| `accent_words_per_30s` | 3 | earned emphasis (§2.4) |
 
-## 10. Encoded-where map
+The first three keys are read by the pacing lint; the rest are advisory budget the
+brain spends exactly, never per cut.
 
-| rule | encoding |
-|---|---|
-| hook stack, zoom-out scale + frame-zero cap, riser, captions-off-in-hook | `MODES["short"]["hook_stack"]`, `AUDIO["riser_bridge_s"]`, LESSON-022/024 |
-| client-reel pole floors + motion/emphasis budget | `MODES["short"]["pacing_client_reel"]` (selected by `target.pace`) |
-| b-roll bursts, audio hygiene, grade/motion inheritance | `BROLL["burst"]["short"]`, `BROLL["vo_continuity"]`, `BROLL["insert_polish"]` |
-| caption/designed-text separation, payload emphasis economy | LESSON-022, LESSON-023 |
-| one-energy-peak + hook one-shot legality | LESSON-024 |
-| typo anti-rule | FRAME.IO REVIEW QC pass (already a standing tool) |
-| J-cut axis, text-entrance recipe, light-leak | doc-only, treatment-gated (§9.3/§9.4) |
+**Encoded as** `MODES.short.pacing_client_reel`; selected by
+`target.pace == "client-reel"`; LESSON-024.
+
+### §8.1 Scope guard
+
+The client-reel budget **never bleeds into other paces**. It conflicts with punch
+(which uses no transitions) and with restrained (which uses no zooms), so it lives in
+its own profile and is never applied to desk talking-head presets. A promotional motion
+budget applied to a conversational clip reads as an advertisement for a video that is
+not one.
+
+### §8.2 The talking-head pace, for contrast
+
+The `talking-head` pace is the slow end of produced Shorts: one continuous speaker, few
+cuts, and pace carried by **a few sustained content graphics** rather than a change
+every few seconds. Long stretches of presenter plus captions are on-style. A run of
+climbing quantities in the speech (a milestone sequence) earns **one sustained gauge**
+that updates as the numbers are spoken, instead of one card per number. Profile:
+`min_changes_per_min` 4.0, `max_still_gap_s` 16.0, `hook_front_load` 1.3
+(`MODES.short.pacing_talking_head`). Pace is not treatment: a talking-head Short is
+still produced (it has graphics), just slow.
+
+---
+
+## §9 Conflicts
+
+### §9.1 Client-reel versus the other paces
+
+Resolved by the scope guard (§8.1): the operator's selected pace decides which budget
+applies; budgets never mix.
+
+### §9.2 The burst exception
+
+`broll_min_spacing_s` (8 s in Shorts) is the cadence for **lone** inserts. A burst
+(§4) is a beat-attached exception to that cadence, not a violation of it, and is bounded
+by its own window and count. The long-form intro receipt montage is a different device
+again (`EDITCRAFT_LESSONS.md` §10.2).
+
+---
+
+## §10 Encoded-where map
+
+| Rule | Config / code | Lesson |
+|---|---|---|
+| §1.1-§1.2 hook stack, lockup | `MODES.short.hook_stack` | LESSON-022 |
+| §1.4 zoom-out reveal | `hook_stack.zoom_out` | LESSON-024 |
+| §1.6 riser bridge | `AUDIO["riser_bridge_s"]`, `hook_stack.riser_s` | — |
+| §2.2 no captions under designed text | `hook_stack.captions_in_hook` | LESSON-022 |
+| §2.4 earned emphasis | `pacing_client_reel.accent_words_per_30s` | LESSON-023 |
+| §4 bursts | `BROLL["burst"]["short"]`, `MODES.short.broll_*` | — |
+| §5 one peak | `pacing_client_reel.energy_peaks_max`, `overlay_bursts_per_30s` | LESSON-024 |
+| §8 client-reel | `MODES.short.pacing_client_reel`, pace ID `client-reel` | LESSON-024 |
+| §8.2 talking-head | `MODES.short.pacing_talking_head`, `planner/graphics_planner_gauge.py` | — |
+| §9.2 burst exception | `BROLL["burst"]`, `broll_min_spacing_s` | — |

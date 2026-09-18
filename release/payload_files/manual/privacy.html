@@ -97,27 +97,25 @@ Testing, the speech model from Hugging Face and the two provider CLIs from npm. 
 Deepgram during setup, the key is checked once against Deepgram's HTTPS authentication
 endpoint; no audio or other media is sent. None of your files or text is sent.</td>
 <td><code>install/install.command</code></td></tr>
-<tr><td>Framework usage statistics</td><td><strong>Switched off</strong> for Next.js and
-for the HyperFrames command-line tools that render. <strong>Not</strong> for the HyperFrames
-Studio page (next row).</td><td><code>NEXT_TELEMETRY_DISABLED</code>, <code>HYPERFRAMES_NO_TELEMETRY</code>
-in <code>runtime/sniper.env</code></td></tr>
-<tr><td>The HyperFrames Studio page (editable review), made by HeyGen</td><td><strong>Usage
-events</strong> go to HeyGen's analytics service (PostHog, <code>us.i.posthog.com</code>) while
-the page is open. Every event carries an anonymous ID, the Studio version, your browser's
-user-agent, your screen and window sizes, whether an agent is driving Studio, and the
-<strong>project's name as it appears in the Studio page address</strong>. The events also
-say which Studio features you use; individual events may add their own details, which
-Sniper has not audited in full. Your video files are not uploaded by these requests. The
-page also loads one animation library file (GSAP MotionPathPlugin) from
-<code>cdn.jsdelivr.net</code>. Sniper does not currently switch any of this off. The Studio page does not send the
-usage events when your browser's <em>Do Not Track</em> setting is on (Chrome and Firefox
-offer it).</td><td>the Studio page itself (<code>hyperframes/dist/studio</code>)</td></tr>
+<tr><td>Framework usage statistics</td><td><strong>Switched off</strong> for Next.js, for
+the HyperFrames command-line tools that render, and for the HyperFrames Studio page.</td>
+<td><code>NEXT_TELEMETRY_DISABLED</code>, <code>HYPERFRAMES_NO_TELEMETRY</code> in
+<code>runtime/sniper.env</code>; for Studio, Sniper's runtime patch
+(<code>app/scripts/producer/studio/runtime/patches.json</code>)</td></tr>
+<tr><td>The HyperFrames Studio page (editable review), made by HeyGen</td><td><strong>One
+download.</strong> Studio's own page, as published by HeyGen, would send usage events to
+HeyGen's analytics service, including the project's name. Sniper serves Studio from its
+adapted copy, in which those analytics are switched off; no usage events are sent. The page
+still loads one animation library file (GSAP MotionPathPlugin) from
+<code>cdn.jsdelivr.net</code> when you edit, which reveals your IP address to that CDN, as
+any web download does.</td><td>the adapted runtime's Studio page, checked by recording its
+network requests</td></tr>
 <tr><td>The Codex or Claude CLI itself</td><td><strong>Talks to its provider</strong> as it
 does anywhere you use it: sign-in, usage events, and housekeeping requests such as Claude's
 short session title (made from the task text). Your provider's terms cover this, not Sniper.</td>
 <td>your provider's documentation</td></tr>
 <tr><td>The app and its previews</td><td><strong>Nothing</strong>, except the Studio page's
-own requests above. The app, the Studio preview and the review pages listen on
+one download above. The app, the Studio preview and the review pages listen on
 <code>127.0.0.1</code> only; no other machine can reach them.</td><td>loopback binding and
 the local request policy</td></tr>
 </table>

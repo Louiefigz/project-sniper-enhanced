@@ -38,6 +38,13 @@ The following upstream files were modified by Project Sniper (September 2026):
   dist/native-capture-library.mjs  new file derived from the patched
                                    dist/cli.js (1 patch: library entry instead
                                    of the command-line entry point)
+  dist/studio/assets/index-CfQexXc6.js
+                                   3 patches (Studio page analytics off: the
+                                   analytics project key is replaced, so the
+                                   page's own "key configured" check fails and
+                                   no usage events are sent)
+  dist/studio/index.js             3 patches (the same change in the Studio
+                                   library entry)
 
 Added by Project Sniper (not upstream code): dist/cli.js in the adapted runtime
 is replaced by a three-line wrapper written by native_runtime.py;

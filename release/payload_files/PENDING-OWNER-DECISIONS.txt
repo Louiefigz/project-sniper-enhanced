@@ -13,6 +13,8 @@ SETTLED on 2026-09-17 (reflected in the manual and LICENSE-DRAFT.txt)
   - Media admission runs natively on macOS with no mandatory Docker (route B of
     DECISION-SANDBOX-RUNTIME.md).
   - The saved styles and the editing doctrine are re-authored as original material.
+  - HyperFrames Studio's analytics are switched off by default (decided 2026-09-18);
+    its page still loads one GSAP file from cdn.jsdelivr.net, which the privacy page says.
 
 RESOLVED BY IMPLEMENTATION in rc4 (no owner action needed)
   - Footage admission: a native macOS sandbox, checked by install/doctor.command.
@@ -41,12 +43,6 @@ STILL OPEN — each blocks release
      may ship. Also decide whether to ship or withhold two dated case records of the
      owner's own project (C0679), which name the owner, and the failure-ledger lessons
      that describe a client's video content.
-
-  7. STUDIO ANALYTICS: the HyperFrames Studio page (HeyGen's editor, which Sniper opens
-     for review) sends usage events to HeyGen's analytics service, including the
-     project's name from its page address, and loads a GSAP file from cdn.jsdelivr.net.
-     The privacy page now says so. Switch the analytics off by default with a runtime
-     patch (recommended), or ship with the disclosure only.
 
 NOT OWNER DECISIONS — acceptance still outstanding
   - Complete edits in both provider routes (Short and long-form, with a revision),

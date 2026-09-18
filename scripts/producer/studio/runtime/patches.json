@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "sdkVersion": "0.8.31",
-  "scope": "local-native-file-transport-realm-zero-clock-and-half-open-video-windows-bounded-source-work",
+  "scope": "local-native-file-transport-realm-zero-clock-and-half-open-video-windows-bounded-source-work-and-studio-telemetry-off",
   "files": [
     {
       "file": "cli.js",
@@ -206,6 +206,50 @@
           "offset": 11039542,
           "remove": 13236,
           "text": "\ninit_src();\ninit_fileServer2();\ninit_compileStage();\ninit_shared();\nexport { createCaptureSession, initializeSession, captureFrame, closeCaptureSession, drainBrowserPool, createFrameLookupTable, createVideoFrameInjector, createFileServer2, runCompileStage, resolveConfig, extractMediaMetadata, extractAllVideoFrames, isHdrColorSpace, VIRTUAL_TIME_SHIM };\n"
+        }
+      ]
+    },
+    {
+      "file": "studio/assets/index-CfQexXc6.js",
+      "baseSha256": "deda7cbe4d1798f0efab397093048a41164bd34877c01a55dd2d59a23c514bd1",
+      "sha256": "3c6fd1c682a2ffad4ebc697aff150bcceedd75513da759a0270356ff50f50e67",
+      "patches": [
+        {
+          "offset": 199602,
+          "remove": 47,
+          "text": "sniper-disabled-studio-telemetry"
+        },
+        {
+          "offset": 204648,
+          "remove": 47,
+          "text": "sniper-disabled-studio-telemetry"
+        },
+        {
+          "offset": 363940,
+          "remove": 47,
+          "text": "sniper-disabled-studio-telemetry"
+        }
+      ]
+    },
+    {
+      "file": "studio/index.js",
+      "baseSha256": "5f65556d718f25326195bfc4ad3a905c2436fe0aab008629dbfe839d0bdbdd01",
+      "sha256": "f88d6ce150718b4bd2fe656b3c3f947885597b672edd80be53d0a4a8a4481cce",
+      "patches": [
+        {
+          "offset": 74857,
+          "remove": 47,
+          "text": "sniper-disabled-studio-telemetry"
+        },
+        {
+          "offset": 79538,
+          "remove": 47,
+          "text": "sniper-disabled-studio-telemetry"
+        },
+        {
+          "offset": 349777,
+          "remove": 47,
+          "text": "sniper-disabled-studio-telemetry"
         }
       ]
     }

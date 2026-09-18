@@ -14,6 +14,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import unittest
 from pathlib import Path
@@ -216,6 +217,19 @@ class NativeJailPropertyTests(unittest.TestCase):
             victim.wait()
         self.assertNotIn(str(victim.pid), jailed.stdout)
         self.assertIn("Cannot get process list", jailed.stderr)
+
+    def test_watchdog_lifecycle_does_not_touch_thread_internals(self) -> None:
+        # Python 3.12's Thread.join calls self._stop(); a subclass attribute of that name crashed it.
+        attest = os.open(self.root / "idle-attest", os.O_RDWR | os.O_CREAT | os.O_EXCL, 0o600)
+        try:
+            watchdog = JailWatchdog(attest, 1 << 30, 60)
+            self.assertNotIsInstance(watchdog, threading.Thread)
+            watchdog.start()
+            watchdog.stop()
+            watchdog.stop()  # idempotent
+            self.assertIsNone(watchdog.exceeded)
+        finally:
+            os.close(attest)
 
     def test_watchdog_never_signals_a_process_older_than_itself(self) -> None:
         bystander = subprocess.Popen(["/bin/sleep", "30"])

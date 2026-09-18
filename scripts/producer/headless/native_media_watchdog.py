@@ -63,21 +63,30 @@ def usage(pid: int) -> tuple[int, float] | None:
     return None if sample is None else sample[:2]
 
 
-class JailWatchdog(threading.Thread):
-    """Kill the jailed process group above its memory or CPU ceiling."""
+class JailWatchdog:
+    """Kill the jailed process group above its memory or CPU ceiling.
+
+    It owns a daemon thread rather than subclassing ``threading.Thread``: private
+    names such as ``_stop`` or ``_started`` are Thread internals on some Python
+    versions (3.12 calls ``self._stop()`` from ``join``), so a subclass attribute can
+    silently replace them.
+    """
 
     def __init__(self, attest_fd: int, memory_bytes: int, cpu_seconds: float) -> None:
-        super().__init__(daemon=True)
         self._fd, self._memory, self._cpu = attest_fd, memory_bytes, cpu_seconds
-        self._stop = threading.Event()
+        self._stop_event = threading.Event()
         self._created = _now()
         self._pinned_start: int | None = None
+        self._thread = threading.Thread(target=self._watch, name="sniper-jail-watchdog", daemon=True)
         self.exceeded: str | None = None
         self.peak_bytes = 0
 
+    def start(self) -> None:
+        self._thread.start()
+
     def stop(self) -> None:
-        self._stop.set()
-        self.join(timeout=2)
+        self._stop_event.set()
+        self._thread.join(timeout=2)
 
     def _pid(self) -> int | None:
         """The jailed pid from its attestation, once written."""
@@ -117,16 +126,16 @@ class JailWatchdog(threading.Thread):
         footprint, cpu = sample[0], sample[1]
         self.peak_bytes = max(self.peak_bytes, footprint)
         reason = "MEMORY_LIMIT" if footprint > self._memory else "CPU_LIMIT" if cpu > self._cpu else None
-        if reason and not self._stop.is_set():
+        if reason and not self._stop_event.is_set():
             self.exceeded = reason
             self._kill(pid)
             return False
         return True
 
-    def run(self) -> None:
+    def _watch(self) -> None:
         pid = None
-        while not self._stop.is_set() and pid is None:
+        while not self._stop_event.is_set() and pid is None:
             pid = self._pid()
             time.sleep(_POLL_SECONDS)
-        while pid is not None and not self._stop.is_set() and self._check(pid):
+        while pid is not None and not self._stop_event.is_set() and self._check(pid):
             time.sleep(_POLL_SECONDS)

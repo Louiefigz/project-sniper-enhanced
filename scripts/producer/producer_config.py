@@ -1237,7 +1237,7 @@ MOTION = {
         # Reviewed local text/backing declarations, not a guessed footage color.
         # Any template edit invalidates this narrow qualification until reviewed.
         "text_plate_sources": {
-            "section-marker": "9b5711bcbe3c40c4f667d60603e13b0cc91141c79e54e4c390091fc63dcf94ea",
+            "section-marker": "64b1e7733ff6b975edbb288fce74c712fd127ba86d488b939dc1b285497962ee",
         },
         # kind -> {spec.bg value -> bg hex}. "" = the comp's default variant.
         # Only VERIFIED tokens (sampled from the comp css) — an unknown

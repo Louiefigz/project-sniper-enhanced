@@ -26,7 +26,7 @@ const SPECIALIZED_TOOLS = [
     name: "Check text on screen",
     product: "Text Review",
     description:
-      "Scan a local MP4 for likely spelling, grammar, and formatting problems. This creates a report; it does not change the video.",
+      "Scan a local MP4 for likely spelling, grammar, and formatting problems. Optional paid add-on: it sends still frames to Anthropic on your own API key, billed by Anthropic. It creates a report and does not change the video.",
     input: "Finished MP4",
     output: "Issue report",
     action: "Check a video",

@@ -50,8 +50,9 @@ class RailPushCompTests(unittest.TestCase):
                       '"default":"glass"', self.html)
 
     def test_rail_push_carries_the_measured_timings(self) -> None:
-        # T-B: grow 0->33%W (634px of 1920) in 0.33s power-out; headline at
-        # 65% of the grow; rows +0.25s container / +0.40s text after it.
+        # Sniper design parameters: grow 0->33%W (634px of 1920) in 0.33s
+        # power-out; headline at 65% of the grow; rows +0.25s container /
+        # +0.40s text after it.
         for token in ("const RAIL_PUSH_S = 0.33",
                       "const HEADLINE_AT_GROWTH = 0.65",
                       "const ROW_CONTAINER_DELAY_S = 0.25",
@@ -62,9 +63,9 @@ class RailPushCompTests(unittest.TestCase):
         self.assertIn("#rail-field", self.html)
 
     def test_light_skin_uses_the_cream_tokens(self) -> None:
-        self.assertIn("var(--rail-cream, #f0f0e6)", self.html)
-        self.assertIn("var(--rail-cream-ink, #1a1a1a)", self.html)
-        self.assertIn("var(--accent-process, #35b6d9)", self.html)
+        self.assertIn("var(--rail-cream, #F1F4F6)", self.html)
+        self.assertIn("var(--rail-cream-ink, #131720)", self.html)
+        self.assertIn("var(--accent-process, #447BE4)", self.html)
 
     def test_classic_build_survives_verbatim(self) -> None:
         self.assertIn("back.out(1.6)", self.html)      # stamp build

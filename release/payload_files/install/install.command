@@ -86,10 +86,10 @@ step "9/10  Rendering runtime"
 # native_runtime.py builds under runtime-build.lock and removes what an interrupted
 # build left; --repair also rebuilds a finished runtime that no longer verifies.
 # This installer holds the maintenance lock exclusively, so no render uses it now.
-( load_env; cd "$APP_DIR" && PYTHONPATH="$APP_DIR/scripts/producer" "$APP_DIR/.venv/bin/python3" \
-    "$APP_DIR/scripts/producer/studio/native_runtime.py" --repair >/dev/null ) \
+RUNTIME_RESULT="$( load_env; cd "$APP_DIR" && PYTHONPATH="$APP_DIR/scripts/producer" "$APP_DIR/.venv/bin/python3" \
+    "$APP_DIR/scripts/producer/studio/native_runtime.py" --repair )" \
   || fail "The rendering runtime did not build from its shipped patch set."
-say "Rendering runtime — verified"
+say "Rendering runtime — ${RUNTIME_RESULT%%$'\t'*}"
 
 # ------------------------------------------------------------ 10. production app
 build_step() {

@@ -153,15 +153,16 @@ fetch_part() {
 }
 
 # download_verified URL TARGET SHA256 LABEL — resumable; the file appears at
-# TARGET only once its SHA-256 matches. A partial file that proves wrong or cannot
-# be resumed is discarded and fetched once more from the start, in the same run.
+# TARGET only once its SHA-256 matches. A resumed partial file that proves wrong or
+# cannot be resumed is discarded and fetched once more from the start, in the same
+# run; a fresh download that is wrong is deleted and reported.
 download_verified() {
-  local url="$1" target="$2" want="$3" label="$4" part="$2.part" rc
+  local url="$1" target="$2" want="$3" label="$4" part="$2.part" rc resumed=0
   if [ -f "$target" ] && [ "$(sha "$target")" = "$want" ]; then return 0; fi
   rm -f "$target"
-  if [ -f "$part" ]; then say "Resuming $label from $(stat -f %z "$part") bytes."; else say "Downloading $label."; fi
+  if [ -f "$part" ]; then resumed=1; say "Resuming $label from $(stat -f %z "$part") bytes."; else say "Downloading $label."; fi
   fetch_part "$url" "$part" "$want"; rc=$?
-  if [ "$rc" = 1 ] || [ "$rc" = 3 ]; then
+  if [ "$resumed" = 1 ] && { [ "$rc" = 1 ] || [ "$rc" = 3 ]; }; then
     rm -f "$part"; say "The partial download was not usable; downloading $label again from the beginning."
     fetch_part "$url" "$part" "$want"; rc=$?
   fi

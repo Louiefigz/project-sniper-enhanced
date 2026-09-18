@@ -87,6 +87,9 @@ class RuntimeLockTests(unittest.TestCase):
         built = install_runtime(repo=self.repo)
         self.assertEqual(built, self._runtime() / "hyperframes")
         self.assertFalse(staging.exists())
+        self.assertTrue(native_runtime.LAST_ACTION["action"].startswith("rebuilt"))
+        install_runtime(repo=self.repo)
+        self.assertEqual(native_runtime.LAST_ACTION["action"], "reused (verified)")
         native_runtime.verify_runtime(built, native_runtime._runtime_manifest()[0])
 
     def test_construction_waits_for_another_builder_then_gives_up(self) -> None:
@@ -116,6 +119,8 @@ class RuntimeLockTests(unittest.TestCase):
             install_runtime(repo=self.repo)
         repaired = install_runtime(repair=True, repo=self.repo)
         native_runtime.verify_runtime(repaired, native_runtime._runtime_manifest()[0])
+        self.assertIn("repaired (Installed native runtime changed: frame-source-transport.mjs)",
+                      native_runtime.LAST_ACTION["action"])
 
     def test_a_process_using_the_runtime_blocks_exclusive_maintenance(self) -> None:
         code = textwrap.dedent(f"""

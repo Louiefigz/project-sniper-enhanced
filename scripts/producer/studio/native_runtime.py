@@ -25,6 +25,7 @@ if str(REPO / 'scripts/infra') not in sys.path:
 import sniper_lock  # noqa: E402  (stdlib-only helper shared with the installer)
 
 BUILD_WAIT_SECONDS = 600.0
+LAST_ACTION = {"action": ""}  # what the latest install_runtime did, for the installer's log
 GUARD = 'native-export-guard.mjs'
 WRAPPER = ("#!/usr/bin/env node\nimport { admitNativeCommand } from './native-export-guard.mjs';\n"
            "if (admitNativeCommand()) await import('./native-render-sdk.mjs');\n")
@@ -84,6 +85,7 @@ def _construct(stock: Path, parent: Path, manifest: dict) -> Path:
     staging = parent / 'installing'
     if staging.exists():
         shutil.rmtree(staging)
+        LAST_ACTION["action"] = "rebuilt (an interrupted construction was removed)"
     staging.mkdir()  # A concurrent/incomplete install must not be overwritten.
     shutil.copyfile(stock / 'package.json', staging / 'package.json')
     shutil.copytree(stock / 'dist', staging / 'dist')
@@ -107,11 +109,13 @@ def _verified_or_none(directory: Path, manifest: dict, repair: bool) -> Path | N
         return None
     try:
         verify_runtime(directory, manifest)
-    except (OSError, ValueError):
+    except (OSError, ValueError) as error:
         if not repair:
             raise
+        LAST_ACTION["action"] = f"repaired ({error})"
         shutil.rmtree(directory)
         return None
+    LAST_ACTION["action"] = "reused (verified)"
     return directory
 
 
@@ -130,6 +134,7 @@ def install_runtime(repair: bool = False, repo: Path | None = None) -> Path:
         ValueError: The stock SDK or the built runtime does not verify.
     """
     root = repo or REPO
+    LAST_ACTION["action"] = "built"
     manifest, identity = _runtime_manifest()
     stock = root / 'templates/motion/node_modules/hyperframes'
     if json.loads((stock / 'package.json').read_text())['version'] != manifest['sdkVersion']:
@@ -146,4 +151,5 @@ def install_runtime(repair: bool = False, repo: Path | None = None) -> Path:
 
 
 if __name__ == '__main__':
-    print(install_runtime(repair='--repair' in sys.argv[1:]))
+    built = install_runtime(repair='--repair' in sys.argv[1:])
+    print(f"{LAST_ACTION['action']}\t{built}")

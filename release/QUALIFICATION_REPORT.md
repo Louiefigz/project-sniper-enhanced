@@ -1,204 +1,187 @@
-# Qualification report — project-sniper-0.1.0-rc2
+# Qualification report — project-sniper-0.1.0-rc3
 
-Built 2026-09-17 from the isolated release source recorded in `release/SOURCE.json`.
+Built 2026-09-18 UTC from the isolated release checkout (commit `3744f6a`). The checkout is a verified snapshot of
+the live tree at upstream `8ebcdfc` plus its 2026-09-17 working tree: 6,133 captured files, byte-identical to the
+live files at capture time. rc2 and its evidence are unchanged in `../project-sniper-release-2026-09-17/`.
 
-**Verdict: NOT QUALIFIED FOR SALE.** A real, reproducible, inspected archive now exists
-where none did before, and the installation path is designed and partly proven. What is
-missing is not paperwork: clean-machine installation, both-provider edits, full-length
-and Short output with playback, Studio round-trip, the outside-operator run and
-authenticated delivery have **not** been performed. Two provenance blockers and one
-identifier migration also stand between this candidate and a sellable one, and one of the
-provenance blockers is a component whose own text forbids redistributing it.
+**Verdict: NOT QUALIFIED FOR SALE. Two product decisions block it, and no real edit could be run.**
+1. **Producer cannot admit footage on a buyer's Mac.** Every media file is admitted inside a Docker container
+   with one approved image, which the native package doesn't provide (`DECISION-SANDBOX-RUNTIME.md`).
+2. **The saved styles and several doctrine studies are still derived from specific creators' videos or one
+   teacher's material.** The rename replaced the listed teacher names in identifiers only; other creator names,
+   reel and video IDs, a creator tagline and the material itself remain. The independent review found this; my
+   rc3 rename work had wrongly claimed it resolved.
+3. **No real edit could run here.** The Codex subscription is out of quota until 2026-09-24 13:44, and Sniper's own
+   Claude login isn't signed in.
 
-Every row below cites a command that was run and an output saved under `evidence/`.
-Where something was not run, the row says so and does not imply a result.
+Everything else the continuation brief asked for is implemented and exercised on this Mac, with the exceptions
+listed under "Open items".
+
+"Developer Mac" means this machine (macOS 26, Apple M3 Max, Homebrew, Docker Desktop, both CLIs). It is not a
+clean Mac and not a qualified baseline. Evidence paths are relative to `evidence/`.
 
 ## The archive
 
 | | |
 |---|---|
-| File | `project-sniper-0.1.0-rc2-mac.zip` |
-| Size | 17,044,225 bytes (17.0 MB) |
-| SHA-256 | `e5f10b499276d39c3f3b05b56cf214acb639d4a7495a2c4afefa7a4abd64c78b` |
-| Entries | 5,049 files under one top-level folder |
-| Upstream source | HEAD `8ebcdfc4e37a4503082cbc64839752bf241f4a08` plus the working tree as of 2026-09-17 14:06 local |
-| Sellable | **false** — recorded inside `RELEASE.json` with its blockers |
+| File | `project-sniper-0.1.0-rc3-mac.zip` |
+| Size | 18,454,561 bytes |
+| SHA-256 | `bd33082736c6f8dc64374421ac9d3b3194a7fb97d1e885ea85f50d8205124071` (in `SHA256SUMS`, outside the archive) |
+| Entries | 5,020 under one top-level folder |
+| Reproducible | two builds of commit `3744f6a` are byte-identical (`60b-final-determinism.txt`) |
+| Source commit | read from git by the build, which refuses an uncommitted checkout (`release-manifest.json`) |
+| Sellable | `false`; `RELEASE.json` lists 8 blockers |
 
-The hash above is the archive's own and is published only **outside** it, in `SHA256SUMS`
-and `release-manifest.json`. `RELEASE.json` inside the archive deliberately contains no
-self-referential hash.
+**How the evidence maps to these bytes.**
+- **The app code is byte-identical to commit `15dac37`**, on which the full suites ran. Every later commit changed
+  only `release/`.
+- **Run on these exact bytes (`bd330827`):**
+  - the Z1 audit (`60-`);
+  - the fresh install (`61-`);
+  - launcher acceptance (`62-`);
+  - the 24 in-package closure tests (`63-`);
+  - the interrupted-runtime and unsafe-path tests (`54c-`).
+- **The R7 lifecycle run** (`56b-`) used the previous installer scripts. They differ from the final ones only in
+  two extra unset variables, two comments and one message line.
+- **R5 cases A–H** (`54b-`) and the repeat-install and disk figures (`53b-`) ran on an earlier rc3 install with
+  earlier installer scripts.
+- **The in-package Python selftest** (`65-`) ran in an install of build `fd26bacb`; its app code is identical.
 
-An earlier candidate, `0.1.0-rc1` (17,865,038 bytes, `15e620c2…7579`, 5,126 entries), was
-built before the provenance withholdings and the maintainer-path redaction. Changing the
-bytes produced a new hash and a new candidate number, which is the rule working rather
-than an accident: rc1's qualification does not transfer to rc2's bytes.
+## Requirement-to-evidence table
 
-## Acceptance matrix Z1–Z11
+### Archive shape and dependency closure
 
-| ID | Result | Evidence and what it does not show |
+| Req | Result | Evidence | What it does not show |
+|---|---|---|---|
+| **Z1** archive and closure | **Archive shape and runtime closure: PASS. Content rule: FAIL** (see B2) | `60-final-z1.log`: 98 passed, 0 failed, on a fresh `unzip` into a path containing a space and `ü`. The audit now reads Auto Edit's own required files, prefixes and source paths from the shipped `auto-edit-pipeline-assets.ts` (43), checks data files reached by path segments (6), resolves all 53 compositions with the package's own resolver, and loads the capability matrix with the package's loader. `63-installed-closure-tests.log`: 24 of 24 TypeScript closure tests pass inside the installed package with an empty HOME, `SNIPER_RAG_ROOT` unset and no sibling repository. `65-package-selftest.log`: in-package Python selftest with the install's own settings, 7,595 tests; all 13 failures read development evidence or Docker build inputs deliberately not shipped (listed below). | That Producer can admit media (it cannot; see Z3). |
+| **B1/B7** packaged Director and reference resources | **PASS** | Original `resources/director` (11 formats, 48 anchors, 40 examples, 24 formulas, 12 categories) and `resources/references` (78 frames rendered from Sniper's own templates). Tests `36-`, `37-` and the in-package tests. | The reviewer notes the new library reuses the withheld studies' case IDs (N04, N26, …); its "not adapted" provenance wording needs a person's check. |
+| **B2** no teacher names or paid corpus | **FAIL** | The listed teacher names are gone from identifiers, and the build fails closed on that fixed list (`32-`, `35-`). But other creator names (MKBHD, Trahan, Dude Perfect, MrBeast in `EDITCRAFT_LESSONS.md` and in `producer_config.py` comments), reel and video IDs and a creator tagline still ship. Still shipping and pinned as editor doctrine: `RESTRAINED_STYLE.md`, `PUNCH_STYLE.md` (two copies), `SLIDEWARE_STYLE.md`, `MODULE_STUDY.md`, `MODULE_CARDS.md`, `EDITCRAFT_LESSONS.md` (a teacher's taught curriculum), `SHORTFORM_LESSONS.md` (a tutorial), `REFERENCE_STYLE_STUDY.md` (third-party Shorts). `75-creator-provenance-inventory.txt`, `76-independent-review.md`, `77-focused-rereview.md`. | — |
+| **B3** YuNet | **Cleared** | MIT (OpenCV Zoo); hash matches upstream; notice shipped. | — |
+| **B4** music | **Replaced; not yet heard** | The old bed hummed at 111 Hz (`49-`). The new bed comes from `scripts/producer/audio/default_bed.py` (deterministic, no mix filter). Hum check PASS: strongest line in the 40–240 Hz band at −110.7 dBFS. −22.2 LUFS, balanced channels (`64-`). | A person listening to it. |
+
+### Installer behaviour (developer Mac only)
+
+| Req | Result | Evidence | What it does not show |
+|---|---|---|---|
+| **Z2** installation | **Developer Mac: PASS. Clean Mac: NOT RUN** | `61-final-install.log`: fresh extraction; empty HOME; Finder's minimal PATH; 81.2 s including every download. The doctor passes everything except two required checks: `media admission sandbox` (the blocker) and Sniper's own sign-in (empty as designed). `53b-`: repeat install 6.9 s, 2.6 GB installed. `47-`: Python floor 3.12 from the lock. `48-`: builds with remote network denied. | A clean Mac, other macOS versions, Intel, or a Node from nvm/fnm/volta (see Open items). |
+| **R1** build and launch | **PASS (developer Mac)** | `62-final-r1-launch.log`: start from Finder PATH; serves this build and the page; start while running; stop; relaunch; port held by another program; `SNIPER_PORT` override (was ignored, fixed); a foreign PID is not signalled; a missing build receipt refuses. | — |
+| **R2** wrappers and provider choice | **PASS, with one unverified point** | Isolated config; the provider choice persists and drives app and doctor. `CLAUDE_SECURESTORAGE_CONFIG_DIR`, inherited API/OAuth keys and the Bedrock/Vertex/base-URL switches are cleared from the shell environment. A key placed in `runtime/sniper.local.env` or `app/.env.local` is still read. The Codex version check no longer writes to the buyer's `~/.codex`. | `sign-in.command` for Claude doesn't pass `--setting-sources ""`; unverified whether it reads the buyer's `~/.claude` settings. No real sign-in through Sniper's wrapper has run. |
+| **R3** doctor uses production admission | **Fixtures PASS; real Codex admission PASS with the owner's global login** | `provider-admission-cli.test.ts` covers valid, API-key, logged out, CLI exit 1, malformed, wrong or newer version, stderr noise, missing CLI and provider mismatch; no account metadata in any report. Real: `codex-cli 0.144.1 admitted and signed in`, with Sniper pointed at the owner's existing `~/.codex` login, on build `f96f25a0` (the admission code is unchanged since) (`69-`). | Admission of a login made through Sniper's own wrapper; Claude. |
+| **R4** model and transcription | **PASS (developer Mac)** | A hash mismatch refuses. The doctor transcribes a local sample through `transcribe_media` (9 timed words, 5/5). A real download resumed from byte 62,337,024 and verified (`54b-`). | — |
+| **R5** resumable install | **PASS for the cases tested** | `54b-`: moved or copied folder; `npm ci` killed; lockfile changed; model corrupted; download failed; real download interrupted and resumed; build interrupted; build failing then repaired; settings kept. `54c-` (final bytes): an interrupted render-runtime step used to leave an `installing/` folder that failed every rerun. The installer now removes it when no process holds a file there (tested). It refuses while a file there is held, then recovers once released (tested). Paths containing `$`, a backtick or `"` are refused before any install step starts; only the refusal is logged (all three tested). Such paths could break or inject into the settings file. The removal assumes the app is stopped: renders and the doctor can also build the runtime, and a concurrent build between file writes could be removed. | Interrupting the Python-environment, browser or CLI steps; the browser step's handling of a partial download. |
+| **R6** prerequisites and claims | **PASS** | Homebrew guidance; Finder PATH; ffmpeg features checked on the actual binary; Python floor from `Requires-Python`; the "fifteen minutes" claim removed and blocked; path limits documented; Next.js and HyperFrames telemetry off. | Download integrity: pip installs without hashes; the CLIs install from npm without a lockfile; the browser has no checksum (see Open items). |
+| **R7 / Z8** lifecycle | **PASS (developer Mac)** | `56b-final-r7-lifecycle.log` on the final scripts. Cleanup refuses during a render, an open cache file or an unfinished export, and removes only caches. Diagnostics leak none of a sensitive fixture by default. Rollback between release folders. Moved folder. Uninstall of a copy leaves the original running. Uninstall refuses during a background edit. Real uninstall. Global login state unchanged. | That uninstall deletes the export-recovery pointers and the buyer's `sniper.local.env` settings (by design, but worth saying in the manual); that a failed sign-out still prints "Removed"; signing out Sniper's own Claude Keychain item (never created here). |
+
+### Real editing
+
+| Req | Result | Evidence |
 |---|---|---|
-| **Z1** Archive and dependency closure | **PASS** | `release/audit_archive.py` on a fresh `unzip` of the final candidate: **69 checks passed, 0 failed, exit 0** (`evidence/26-z1-final.log`). One top-level folder; no symlinks; no path escaping it; `.env`, `.git`, `node_modules`, `.venv`, `.next*`, `artifacts/`, `.sniper-*`, `.DS_Store`, `.mcp.json`, `*.pyc` and `vendor/hyperframes-skills/` all absent; every required agent, runtime, installer and manual file present, including all ten `SKILL.md` files across both `.claude` and `.agents`; the render runtime's patch set is present and its `sdkVersion` matches the pinned lockfile. The first run of this audit (`evidence/21-z1-archive-audit.log`) surfaced two real defects, both then fixed: `app/AGENTS.md` linked to a parent repository the buyer never receives, and the maintainer's home path appeared in 25 staged files. Does not show that the extracted tree installs or runs. |
-| **Z2** Installation | **NOT RUN on a clean Mac.** Partial evidence only | On the developer Mac: `npm ci` root 727 packages exit 0 in 6.7 s (`evidence/02`); `npm ci` `templates/motion` 138 packages exit 0 in 1.8 s, 371 MB (`evidence/03`); `python3 -m venv` + pinned install exit 0 in 12.9 s (`evidence/04`). App-local pinned CLI provisioning verified: `@openai/codex@0.144.1` and `@anthropic-ai/claude-code@2.1.247` installed into a package-local prefix report **exactly** `codex-cli 0.144.1` and `2.1.247 (Claude Code)`, the two strings the admission policy demands, in ~6 s and 520 MB (`evidence/11`). **The installer script itself has not been executed end to end on any machine**, and this machine is a developer Mac with Homebrew, four cached browsers and both CLIs already present, so it cannot satisfy Z2 by definition. |
-| **Z3** Both providers | **NOT RUN.** No provider-authenticated edit was performed for either route. Neither route may be inferred from the other. |
-| **Z4** Long-form | **NOT RUN.** No 16:9 educational edit was produced or reviewed. |
-| **Z5** Shorts | **NOT RUN.** No Short was produced from fresh footage. |
-| **Z6** Delivered-video and Studio review | **NOT RUN.** No export was played, and no Studio project was opened, edited, synced, reopened or rebuilt. |
-| **Z7** Included secondary tools | **NOT RUN** as an exercise. Their contracts are covered by the automated suites (Segmenter stream-copy and Clipper frame-accuracy invariants have dedicated tests), but no buyer-shaped run happened. `separate` is correctly reported **gated** because Demucs is absent; Frame Review is correctly reported as needing the buyer's own paid API key. |
-| **Z8** Recovery and lifecycle | **PARTIAL.** The mechanisms are implemented and the resume/port/cleanup/uninstall paths are written and syntax-checked (`bash -n` on all seven `.command` files plus `common.sh`). **No interruption, port conflict, resume, update, rollback or uninstall was actually exercised.** |
-| **Z9** Manual and provenance | **PARTIAL PASS.** All ten manual pages exist and are scanned at build time: the build fails closed on "first edit in minutes", "student-kit", "hands-off", "nothing leaves your computer", the "only the text is sent" privacy claim, a teacher name, a developer path or an unresolved `{PLACEHOLDER}`. Third-party notices are complete for every shipped component, with the Apache-2.0 text fetched from source. **Not done:** a buyer read-through following the instructions from the extracted archive, and three components remain uncleared (`PROVENANCE-BLOCKERS.md` B3, B4, and B1 which is withheld). |
-| **Z10** Outside operator | **BLOCKED_INPUT.** No second operator and no clean supported Mac. The protocol itself was strengthened to revision 18 by the commercial session and now requires both providers, a full-length edit, a Short, a correction and Studio persistence. Materials a candidate needs are prepared; the run is not. |
-| **Z11** Delivery and updates | **BLOCKED_CAPABILITY.** Hash and size are recorded. Authenticated delivery of these exact bytes has not been tested. One useful new constraint: the SamCart digital-file UI shows a **1 GB** maximum, and this archive is 17.0 MB, so the direct-file route fits comfortably; the Courses/entitlement route still needs its own probe. |
+| **Z3** both providers | **BLOCKED** | Without the sandbox, Producer ingest stops. A developer-only harness approved a locally built image inside the test install (never shipped): ingest and local transcription passed (88 words, correct), and cut authoring reached Codex, which refused with its usage limit. The app now shows that reason; it previously showed an unrelated log line (fixed). Claude: Sniper's login isn't signed in. (`69-`, `69b-`) |
+| **Z4** long-form, **Z5** Shorts, **Z6** playback and Studio | **NOT RUN** | Blocked as above. The manual now has buyers record their own 45-second first clip from an original script. Playback with sound is a person's check. |
+| **Z7** secondary tools | **NOT RUN** | Segmenter and Clipper don't need the sandbox. On the Claude route their AI steps call the paid Anthropic API through the SDK, so without a key they don't work, and with one they bill per call. The installer creates `app/.env.local` from a template that invites that key. Shell keys are now ignored; the manual now says this. |
 
-## Test suites — what actually ran
+### Outside person and buyer delivery
 
-### Python engine (`selftest.py`)
-
-```
-Ran 7584 tests in 1938.337s
-FAILED (failures=8, errors=4, skipped=16)
-```
-
-`evidence/05-selftest-baseline.log`. **Twelve failures. Zero of them introduced by this
-work.** Classified by re-running each one in the live working tree
-(`evidence/08-failure-classification-aarons-tree.log`):
-
-| Test | Live tree | Class |
+| Req | Result | Evidence |
 |---|---|---|
-| `test_p5_compositor_artifact` | fails identically | stale receipt: recorded source closure no longer matches the tree |
-| `test_p4_exit_closure_artifact` | fails identically | stale receipt: same |
-| `test_p0_adversarial_ingress_artifact` | fails identically | stale receipt: same |
-| `test_p2_row1_claim_artifact` | fails identically | stale receipt: same |
-| `test_p5_review_repair_artifact` | fails identically | stale receipt: recorded toolchain pins `chrome-headless-shell` 152.0.7928.2; the machine now resolves 152.0.7977.30 |
-| `test_comp_rate_matrix` | fails identically | stale receipt: "rate matrix sourceDigest is stale or malformed" |
-| `test_learning_loop` | fails identically | stale receipt: `LESSON-048` ordering |
-| `test_current_system_inventory_check` | fails identically | stale receipt: measured baselines not closed |
-| `test_p0_render_effect_parity_artifact` | fails identically | stale receipt: retained parity evidence root unavailable |
-| `test_private_graphics_audit_reference` | fails identically | **current runtime defect**: "source-float assembly full Audit B failed" — a real assembly runs and its own Audit B rejects the result |
-| `test_p2_visual_lip_sync_artifact` | **passes** | snapshot drift: the retained receipt in the gitignored `scripts/producer/artifacts/` was regenerated against a newer implementation closure than this snapshot. Exactly two leaves differ — `positiveReceipt.implementationClosureHash` and the derived `acceptanceHash` — out of 126 |
-| `test_grade_observation_policy` | passes | flaky under suite load: a real-daemon cleanup deadline. Passes 3/3 standalone in the release checkout (`evidence/09-flakiness-recheck.log`) |
+| **Z9** manual and provenance | **FAIL** | Fixed: no mention of the switched-off paid offer; no invented refund effect; home page no longer promises Palmier; the start and install pages now say which features can bill an API key; uninstall text names what it deletes; "streaming level" rather than "broadcast level"; both blockers stated in the doctor, the installer's closing message, PENDING, troubleshooting and first-edits. Still wrong: the privacy page against the code (review items: frames reach Codex by folder read access, not `--image`; the "reference video" row; yt-dlp downloads, website capture and Chrome-cookie access undisclosed; the app's own "Where does my footage go?" panel), and the B2 material. |
+| **Z10** outside operator | **BLOCKED_INPUT** | Needs a person, a clean Mac and their own subscription and footage, after both decisions. |
+| **Z11** delivery and updates | **BLOCKED_CAPABILITY** | Hash and size recorded; authenticated delivery not tested. |
 
-**Nine stale receipts, one real runtime defect, one snapshot-drift artefact, one
-load-dependent flake.** No test was deleted, skipped or weakened, and no receipt was
-regenerated by hand. Regenerating them legitimately means running the real render and
-media exercises that produced them, which needs the render-capable exercises listed under
-Z4–Z6.
+## Test suites on the frozen app code (commit 15dac37; unchanged through 3744f6a)
 
-### TypeScript (`npm test`)
-
-```
-next_supervisor.test.mjs       all assertions passed
-skill_surface.test.mjs         all assertions passed
-test:sdk                       14 tests, 14 pass, 0 fail
-test:native                    144 tests, 144 pass, 0 fail (+2, +16 in adjacent blocks)
-TS loop                        14 files passed, then ABORTED
-```
-
-**A finding worth more than the failure itself:** `npm test` runs the TS files in a
-`for … || exit 1` loop, so the first failure stops everything after it. The first failure
-is `src/lib/producer/__tests__/auto-edit-authority-cross-language.test.ts`, which is 15th
-alphabetically. **`npm test` therefore reaches 14 of 476 TS test files — about 3% — and
-the state of the other 462 is invisible.** The repository's own instruction that "two
-test suites, both must stay green" is not currently achievable, and a single stale digest
-is hiding the rest.
-
-That failure is also pre-existing: it produces **byte-identical** digests in the live
-working tree — actual `0a3659436db201f48721c7a9a7eaee6c13083329adf724d3cd909f2fdfaf816f`
-versus expected `c20b8bbb31b492a2a0f96862833e5a83a292d3969880c6a433b4791c05b90da4`
-(`evidence/13-crosslang-in-aarons-tree.log`). It is a stale stored pipeline digest, not a
-parity break between the TypeScript and Python authority code.
-
-Every TS file was then run individually, continuing past failures, without modifying the
-suite (`evidence/14-ts-suite-full.log`, 2 h 22 m):
-
-```
-TS test files: pass=456 fail=20 total=476
-```
-
-**All 20 classified, none introduced by this work:**
-
-| Count | Tests | Class |
+| Check | Result | Evidence |
 |---|---|---|
-| 18 | `native-*` and `guided-native-*` | **blocker B7**: they load the Director catalog from the sibling `youtube-automation/rag-system`. `ENOENT … lstat '<parent>/youtube-automation'`. Proven: they pass in the live tree where the sibling exists, and pass in the isolated checkout when `SNIPER_RAG_ROOT` points at it (`evidence/15-sibling-repo-dependency.log`) |
-| 1 | `auto-edit-authority-cross-language` | pre-existing stale pipeline digest; byte-identical failure in the live tree |
-| 1 | `guided-source-color-pipeline-pins` | pre-existing stale pin expectation; fails in the live tree too |
+| `tsc --noEmit` | exit 0 | `71-final-tsc-lint-build.log` |
+| `npm run lint` | exit 0 (0 errors, 41 warnings) | `71-` |
+| `npm run build` | exit 0 | `71-` |
+| `npm test` stages: supervisor, skill surface, `test:sdk` | all pass (`test:sdk` 14/14) | `72-final-npm-test-stages.log` |
+| `npm test` stage: `test:native` | 144 tests pass; one file, `native_source_cache.test.mjs`, never exits and is cancelled at 120 s. Its 10 tests pass, then the process stays alive when HOME holds this Mac's 861 MB HyperFrames cache. With an empty HOME it finishes 10/10 in 0.2 s. It passed here at `811c706` too. This is a test-isolation problem, not a product failure; the test should not touch the real user cache. | `72-`, `72b-native-source-cache-rerun.log` |
+| Every TypeScript test file (`npm test`'s loop), each in its own process, 4 at a time | **477 of 477 pass** | `ts-final/73-final-ts-files.log` |
+| Python selftest (source) | 7,600 tests; 5 failures and 1 error, exactly the six blocked retained-receipt checks (below). Everything else passes, including Audit B, the cleanup-signal test, the ledger, the caption fixture and the treatment digests fixed this round. | `74-final-selftest.log` |
+| Python selftest inside the installed package (the install's own settings, `TMPDIR` set) | 7,595 tests; 13 fail. All read development evidence or Docker build inputs the package deliberately withholds: retained receipts under `docs/.../contracts`, `templates/motion/container/`, `.dockerignore`. | `65-package-selftest.log`; earlier runs without the install's settings, `65-…plain-env…`, `65b-`, `65c-`, show why those settings matter |
 
-So the environment those 18 tests need is one a buyer may not be given — the failure is
-environmental **and** the environment is itself a release blocker.
+The six blocked receipt checks are listed in "Open items".
 
-### Other checks
+## Defects found and fixed in this round (in the final bytes)
 
-| Check | Result |
-|---|---|
-| `npm run type-check` | exit 0 (`evidence/06`) |
-| `npm run lint` | exit 0 — 41 warnings, 0 errors (`evidence/07`) |
-| Deterministic build | **two builds byte-identical**, for both candidates: rc1 `15e620c2…7579` and rc2 `e5f10b49…c78b`; file manifests identical entry for entry; only `built_at_utc` in the external manifest differs (`evidence/20-determinism.log`, `evidence/25-final-build.log`) |
-| Post-redaction re-run | `selftest.py` again: **7,584 tests, failures=9 errors=3 — the same 12 tests**, with `test_p2_visual_lip_sync_artifact` moving ERROR→FAIL only because the gitignored evidence root was restored. Each of the 12 re-checked individually (`evidence/27-post-redaction-failure-set.log`). `type-check` and `lint` still exit 0. **No new failure from redacting 28,648 path occurrences across 136 files.** |
-| Defect repaired | `scripts/producer/tests/test_render_layout_contract.py` had `ROOT` hardcoded to an absolute path, so in any other checkout it silently read a **different** tree. Made relative to the checkout under test: **19 tests recovered** (0 → 19 passing). Two opt-in harnesses (`test_layout_observer.mjs`, `studio_native_ui_regression.cjs`) had the same class of literal and now resolve from their own location and from `HYPERFRAMES_BROWSER_PATH`. |
+1. **Auto Edit could not start from any package (rc2 and early rc3):**
+   - the required contracts and `assets/music/` weren't shipped;
+   - three runtime registries, a calibration file, the route matrix and the catalog study were missing;
+   - `module-pipeline.js` was missing;
+   - the capability matrix could never be fresh in the package, because its digest covered a withheld
+     third-party screenshot.
 
-## What this work changed in the product
+   The screenshot is removed from the release source and the matrix regenerated. The Z1 audit now checks all of
+   this with the package's own code.
+2. **Capability matrix and several pinned values went stale through the rename.** All were regenerated by their
+   own tools or proven equivalent:
+   - capability matrix: regenerated by the probe;
+   - cleanup pins: regenerated from the import graph;
+   - authority golden: rewritten only after TypeScript/Python parity passed;
+   - treatment digests: identical once the renamed kinds are mapped back.
+3. **Audit B false failure.** The audit hashed a plan it had mutated, so sealed cut lineage never verified; now
+   fixed.
+4. **Load-dependent cleanup test.** 248/300 runs failed with stray threads; after the fix, 0/300.
+5. **Installer and launchers:**
+   - accented-path PID identity;
+   - regex matching of folder names containing `(1)`;
+   - moved or copied installs acting on the other folder;
+   - `SNIPER_PORT` ignored;
+   - stale build and model receipts;
+   - `npm ci` repair;
+   - Codex writing to the buyer's `~/.codex`;
+   - Next.js telemetry;
+   - uninstall under a running edit;
+   - the interrupted runtime step;
+   - shell-unsafe paths;
+   - inherited API keys.
+6. **The doctor said "All required checks passed" on an install that can't edit.** It now checks the admission sandbox's prerequisites (runtime and approved image), not a real admission of a clip.
+7. **Codex failures were misreported.** The app shows Codex's own reason.
+8. **Content and fixtures:** ledger order; a scrubbed caption fixture; the music generator's `amix`; three retained
+   receipts regenerated by their own generators.
 
-| Change | Why it was needed |
-|---|---|
-| Pinned `requirements.lock.txt`, installed instead of `requirements.txt` | `requirements.txt` pins almost nothing. A fresh resolve produced a different set from the working venv, including `anthropic` **0.117.0 → 1.6.0**, plus `deepgram-sdk`, `opencv-python-headless`, `numpy` and `scipy` drift. A buyer installing next month would have got a third set. |
-| Installer provisions `chrome-headless-shell` 152.0.7977.30 into the package and pins `HYPERFRAMES_BROWSER_PATH` | `render_tools.py:73-91` globs two user caches and **raises rather than downloading** during a render. This machine has four cached builds totalling 1.8 GB; a clean Mac has none. A render succeeding here proved nothing. |
-| Installer provisions both provider CLIs at their exact admitted versions into the package, with their own config dirs and the auto-updater disabled | `subscription-invocation.ts:50` compares the CLI's `--version` output by **exact string equality**. Any auto-update to the buyer's own CLI breaks Sniper. Verified: the app-local npm installs report the exact required strings. This also materially reduces the risk of the selected N1 "purchased release only" update policy. |
-| Install path validated against `,` `'` `:` `\` | `audio_enhance.py:61-67` refuses to build the `voice-rnn` filtergraph when the models directory contains those characters, and tells the operator to move the repository. The installer now refuses up front with the reason, and the doctor re-checks it. |
-| A doctor that calls the product's own resolvers | Anything else drifts. It imports `graphics.render_tools.resolve_tools`, `local_whisper.resolve_whisper_binary/model` and `studio.native_runtime.install_runtime`, so it reports what a render would really use, and reports optional features as available/gated/needs-key rather than advertising them. |
-| A ten-page offline manual, with the privacy page corrected | See below. |
-| Package builder that fails closed | Credential shapes, maintainer paths, teacher names in paths or text, third-party creator source URLs, unsupported buyer claims and missing allow-listed paths all refuse the build rather than warn. |
+Details: `59-defect-fixes.md`, `57-`, `66-`, `64-`.
 
-## Input T settled against the code: the privacy claim was wrong
+## Open items (not fixed in rc3)
 
-The shipped FAQ said only text leaves the machine. **It does not.** During the rendered
-visual review, still frames extracted from the candidate video are sent to the selected
-provider:
+- **The two blocking decisions:** `DECISION-SANDBOX-RUNTIME.md`, and the creator-derived doctrine (re-author it
+  as original material, or drop the saved styles).
+- **Privacy page and in-app privacy panel** against the code (Z9 above).
+- **Download integrity:** hash-pinned pip install, a lockfile for the pinned CLIs, and a browser checksum.
+- **Node:** the installer checks the `node` on the buyer's PATH, but `sniper.env` fixes PATH to Homebrew and
+  system folders, so nvm/fnm/volta users can run a different Node. The Node floor, 22.0, is below the lockfiles'
+  `>=22.12`.
+- **Segmenter and Clipper on the Claude route** should go through the subscription CLI, not the SDK.
+- **Minor items from the review:**
+  - troubleshooting step numbers and quoted messages;
+  - the Studio commands in `review-and-studio.html` call the venv directly, bypassing the settings file and the key unset;
+  - `START-HERE.html` points to the two blocker files but doesn't name the blockers;
+  - a developer hostname in `next.config.ts`;
+  - HeyGen Studio screenshots under `scripts/producer/tests/.artifacts`;
+  - owner-specific notes in the producer skill and a playbook;
+  - `docs/audits` shipping although listed as withheld;
+  - `RELEASE.json` lacks the source commit (it is in `release-manifest.json`).
+- **P4/P5 receipt lanes** need a new HyperFrames 0.8.31 fixture. **P0 ingress and the rate matrix** need the approved
+  image. **P0 render parity** needs 21 GB of local evidence. All nine already failed at HEAD `8ebcdfc`
+  (`58b-receipts-at-live-head.log`).
 
-- Codex receives them as image attachments — `src/app/api/_lib/codex-cli.ts:131-133`
-  pushes `--image <path>` for up to 12 controller-owned absolute paths.
-- Claude is given the frame paths and instructed to look at them —
-  `src/app/api/producer/auto-edit/rendered-review-prompt.ts:51-55` lists every frame and
-  says "Inspect EVERY listed frame visually", with the `Read` tool granted
-  (`brain-review-process.ts:14`).
-- The reference-proposal route may additionally send reference stills
-  (`src/lib/server/guided-proposal-compiler.ts:148-151`).
+## Owner inputs needed
+1. **Choose the sandbox route** (A, B or C in `DECISION-SANDBOX-RUNTIME.md`).
+2. **Decide the saved styles:** re-author them as original doctrine, or drop them.
+3. **A provider for qualification edits:** Codex quota returns 2026-09-24 13:44, or run
+   `install/sign-in.command claude` in a test install.
+4. **Final licence wording and a support route** (input D).
+5. **A clean Mac and an outside operator** (Z2, Z10), and an authenticated delivery test (Z11).
+6. **Listen to the 60-second music bed once.**
+7. **Remove one test entry from your Codex config.** The developer test added two lines to `~/.codex/config.toml`:
+   `[projects."…/scratchpad/work3/devws/test-clip-20260918/producer"]` and `trust_level = "trusted"`. They mark
+   only that scratch folder as trusted and are safe to delete. The permission guard stopped me from editing your
+   global config.
 
-The correct statement, now in the manual: the video never leaves; transcription is local;
-the transcript and plan text go to the provider; **and selected still frames of the
-rendered result go to the provider too.** Frame Review and Deepgram are separate,
-explicit, key-gated egress paths.
-
-## Blockers, in the order they must be cleared
-
-1. **Provenance B1 — the Shorts and long-form reference libraries** cannot ship: they are
-   built from three named creators' copyrighted videos, complete with source URLs, hashes
-   of downloaded copies and embedded extracted frames. They are also a **runtime
-   dependency** of the native Short request path, so withholding them blocks that path.
-   Three concrete options in `PROVENANCE-BLOCKERS.md`.
-2. **Identifier migration B2** — 147 shipped files and 17 filenames carry teacher names,
-   and the identifiers are written into saved project state. Full specification, mapping
-   and ordered migration with a reader-side compatibility step in `RENAME_SPEC.md`.
-3. **B3 YuNet model licence** and **B4 the music bed** (withheld) — small, but both need
-   an answer before sale.
-4. **Owner decisions** still open: final licence wording, the support route and response
-   commitment, the supported-platform boundary, sample footage, and the upsell scope
-   clarification. Listed in the package's own `PENDING-OWNER-DECISIONS.txt`.
-5. **The render-capable exercises**: Z2–Z7 need a clean Mac, both subscriptions and real
-   footage. Z10 needs a person who has not seen the repository.
-
-## Two honest notes about this candidate
-
-**It is already superseded.** The release source is a snapshot taken at 2026-09-17 14:06
-local. A concurrent session added a whole `sniper-context` skill to the working tree
-about 40 minutes later — four Python files, a doc, two skill files, a command, and edits
-to `AGENTS.md`, `CLAUDE.md`, `README.md` and `scripts/tests/skill_surface.test.mjs`;
-the dirty path count moved from 237 to 248. Nothing was pulled in mid-flight, because
-those files were being written as the build ran. A release must be cut from a quiescent
-tree. This is recorded, not worked around.
-
-**The build's own scans are shape scans, not proofs.** The secret scan matches known key
-prefixes above a length floor, with no entropy model; the length floor is set above the
-short fixtures the product's own tests use to prove its trace writer refuses a key
-(`test_attempt_trace.py:170`), which is why that fixture no longer trips it. It catches a
-pasted credential. It would not catch an obfuscated or encoded one. The buyer-text scan
-is a phrase list with the same kind of limit — it caught the specific claims the
-integrations pass named, and a person still has to read the manual.
+## Not changed
+- rc2 and its evidence.
+- Your real projects.
+- Global Codex auth, Claude settings and the Claude Keychain item: hash-checked; only the config entry above
+  changed.
+- The live `PROJECT_SNIPER` tree. Fixes to port there are listed in a separate task.

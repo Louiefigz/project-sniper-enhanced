@@ -28,6 +28,14 @@ icon name. They are used by the `icon-badge-wide` Elements defaults
 `graphics/template_visual_contract.py` and the capability probe
 (`graphics/comp_catalog_probe.py`), so they ship with the package.
 
+Simple Icons notes that its CC0 dedication does not imply that every icon is CC0 and
+records per-icon licences where they apply. In the `simple-icons` 16.31.0 data file
+(checked 2026-09-18) none of the marks used here carries a separate licence entry. The
+OpenAI mark is absent from that data: Simple Icons removed it in 16.0.0 (November 2025)
+after a public call to seek OpenAI's agreement to keep it went unanswered. `openai.svg`,
+`codex.svg` and `openai-color.svg` use the Simple Icons 15.0.0 drawing (path data
+identical). Whether to keep shipping that mark is an open owner decision.
+
 ## Trademarks
 
 CC0 covers the drawing data only. Every brand mark in this folder is a trademark of

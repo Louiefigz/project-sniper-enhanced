@@ -175,7 +175,12 @@ download_verified() {
   Run the installer again to download it afresh."
 }
 
-browser_runs() { [ -x "$BROWSER_BIN" ] && "$BROWSER_BIN" --version 2>/dev/null | grep -q "$1"; }
+browser_runs() {
+  local out
+  [ -x "$BROWSER_BIN" ] && out="$("$BROWSER_BIN" --version 2>/dev/null)" || return 1
+  case "$out" in *"$1"*) return 0 ;; esac
+  return 1
+}
 
 browser_step() {
   local pin platform prefix sha url dir key why archive record="$RECEIPTS/browser.tree.json"
@@ -229,8 +234,11 @@ model_step() {
 }
 
 cli_ok() {  # name expected-version-line
-  [ -x "$CLI_BIN/$1" ] && [ "$(PATH="$RUNTIME_BIN:$PATH" CODEX_HOME="$CODEX_HOME_LOCAL" \
-    CLAUDE_CONFIG_DIR="$CLAUDE_CONFIG_DIR_LOCAL" "$CLI_BIN/$1" --version 2>/dev/null | head -1)" = "$2" ]
+  local out
+  [ -x "$CLI_BIN/$1" ] || return 1
+  out="$(PATH="$RUNTIME_BIN:$PATH" CODEX_HOME="$CODEX_HOME_LOCAL" CLAUDE_CONFIG_DIR="$CLAUDE_CONFIG_DIR_LOCAL" \
+    "$CLI_BIN/$1" --version 2>/dev/null)" || return 1
+  [ "$(first_line "$out")" = "$2" ]
 }
 
 # The two CLIs come from install/cli/package-lock.json, whose integrity hashes

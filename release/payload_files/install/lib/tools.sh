@@ -17,11 +17,15 @@ version_ge() {
   return 0
 }
 
+# first_line TEXT — the text up to its first newline (no pipe: under pipefail a
+# reader that stops early, like head or grep -q, can fail the whole pipeline).
+first_line() { printf '%s' "${1%%$'\n'*}"; }
+
 # "22.13.0" from a node binary, or nothing.
 node_version_of() {
   local out
-  out="$("$1" --version 2>/dev/null | head -1)" || return 1
-  out="${out#v}"
+  out="$("$1" --version 2>/dev/null)" || return 1
+  out="$(first_line "$out")"; out="${out#v}"
   case "$out" in [0-9]*.[0-9]*.[0-9]*) printf '%s' "$out" ;; *) return 1 ;; esac
 }
 
@@ -36,22 +40,6 @@ node_problem() {  # path floor
   version_ge "$version" "$2" || { printf 'Node %s at %s is older than %s, the oldest version every dependency of this release accepts' "$version" "$1" "$2"; return 0; }
   case "$1" in *[[:space:]]*) printf 'the Node path %s contains a space; Studio cannot identify a preview server started from it' "$1"; return 0 ;; esac
   [ "$(basename "$1")" = node ] || printf 'the Node executable %s is not named node' "$1"
-}
-
-# resolve_node FLOOR — print the one real Node executable this install will use.
-# It starts from `node` on the PATH the installer runs with (Terminal's PATH, so
-# nvm, fnm and volta work) and records the binary that node reports actually
-# running (process.execPath): a shim or a per-shell symlink resolves to the real
-# file, which stays valid when the app is later started from Finder.
-resolve_node() {
-  local found real problem
-  found="$(command -v node)" || return 1
-  problem="$(node_problem "$found" "$1")"
-  case "$problem" in *"older than"*|*"does not report"*) printf '%s' "$problem" >&2; return 2 ;; esac
-  real="$("$found" -p 'require("fs").realpathSync(process.execPath)' 2>/dev/null)" || return 1
-  problem="$(node_problem "$real" "$1")"
-  [ -z "$problem" ] || { printf '%s' "$problem" >&2; return 2; }
-  printf '%s' "$real"
 }
 
 python_ok() {
@@ -71,12 +59,27 @@ find_python() {
 # Every filter and encoder the render chain actually uses, checked on the
 # ffmpeg this install will run — not assumed from a version string.
 FFMPEG_FILTERS="rubberband zscale subtitles ass drawtext arnndn loudnorm ebur128 afftdn acompressor alimiter sidechaincompress aresample amix overlay crop"
+# Matched in the shell, not with `printf | grep -q`: under pipefail grep -q exiting
+# at the first match can SIGPIPE the writer and report a present filter as missing
+# (seen under load in the rc4 repair runs).
 ffmpeg_missing_features() {
   local have enc f e
   have="$("$1" -hide_banner -filters 2>/dev/null | awk '{print $2}')"
   enc="$("$1" -hide_banner -encoders 2>/dev/null | awk '{print $2}')"
-  for f in $FFMPEG_FILTERS; do printf '%s\n' "$have" | grep -qx "$f" || printf '%s ' "$f"; done
-  for e in libx264 aac; do printf '%s\n' "$enc" | grep -qx "$e" || printf '%s ' "$e"; done
+  for f in $FFMPEG_FILTERS; do
+    case "
+$have
+" in *"
+$f
+"*) ;; *) printf '%s ' "$f" ;; esac
+  done
+  for e in libx264 aac; do
+    case "
+$enc
+" in *"
+$e
+"*) ;; *) printf '%s ' "$e" ;; esac
+  done
 }
 
 # Tools a feature needs, with the Homebrew formula that provides each and the

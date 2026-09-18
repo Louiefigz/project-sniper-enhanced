@@ -1246,7 +1246,7 @@ MOTION = {
             "statement-card": {"": "#0a1123", "dark": "#0a1123",
                                "cream": "#F1F4F6"},
             "module-takeover": {"": "#121721"},
-            "whiteboard-list": {"": "#f7f5f0", "cream": "#f6eac6"},
+            "whiteboard-list": {"": "#F1F4F6", "cream": "#F3EFE6"},
         },
     },
     # LEFT-COLUMN OWN-SCREEN BALANCE (showpiece QC 2026-07-10, LL-005): the

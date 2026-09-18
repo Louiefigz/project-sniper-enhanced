@@ -17,7 +17,7 @@
       "frames": [
         {
           "path": "resources/references/shorts/frames/ME01-0.jpg",
-          "sha256": "c656b2390de26b997766491ee3393907ff7ea0ee7f4febd96aed515f493f1e3e",
+          "sha256": "9e6bcd7fe1ffba119e844dbf76180ef1a0a8ec30cf656e636284f85e34dce0dc",
           "dimensions": [
             720,
             1280
@@ -36,7 +36,7 @@
         },
         {
           "path": "resources/references/shorts/frames/ME01-1.jpg",
-          "sha256": "c656b2390de26b997766491ee3393907ff7ea0ee7f4febd96aed515f493f1e3e",
+          "sha256": "9e6bcd7fe1ffba119e844dbf76180ef1a0a8ec30cf656e636284f85e34dce0dc",
           "dimensions": [
             720,
             1280
@@ -55,7 +55,7 @@
         },
         {
           "path": "resources/references/shorts/frames/ME01-2.jpg",
-          "sha256": "c656b2390de26b997766491ee3393907ff7ea0ee7f4febd96aed515f493f1e3e",
+          "sha256": "9e6bcd7fe1ffba119e844dbf76180ef1a0a8ec30cf656e636284f85e34dce0dc",
           "dimensions": [
             720,
             1280
@@ -88,7 +88,7 @@
       "frames": [
         {
           "path": "resources/references/shorts/frames/ME02-0.jpg",
-          "sha256": "04c6a0468ad12279a88542053aa3f146e74c85f393acb9f5a089fcc94c3ffa74",
+          "sha256": "eaa9e5dc0ab9ac745cba2e6b023f0fe5f3c63256e7692bbf387a21552e83c5b8",
           "dimensions": [
             1280,
             720
@@ -112,7 +112,7 @@
         },
         {
           "path": "resources/references/shorts/frames/ME02-1.jpg",
-          "sha256": "7000e1306547f488d0ef09017619c488596c33978a48f3bbd25f99a6f471e49d",
+          "sha256": "d1ac1d02eb6722139eb6a0d1756f55237808bbaf1e4e141f0af3084fbd16565d",
           "dimensions": [
             1280,
             720
@@ -136,7 +136,7 @@
         },
         {
           "path": "resources/references/shorts/frames/ME02-2.jpg",
-          "sha256": "45dbf3e89f196fc883b88b590275fd33154a16873b1d0e6484ec06534b7c0465",
+          "sha256": "5ba28db9b88fe37f642acfc6ccd789db4a2427f89c1fedee35dc18d73a0b7444",
           "dimensions": [
             1280,
             720

@@ -28,7 +28,7 @@
       "source_frames": [
         {
           "path": "resources/references/shorts/sequences/frames/SQ01-B01-0.jpg",
-          "sha256": "ac2172654869e481aff676b218a93d22953bc7582cd403056f1b60ce245026e4",
+          "sha256": "6e173fa54b0c2151b5dec337b58e6cea87629134096589653308e5aacd481e2a",
           "dimensions": [
             1280,
             720
@@ -52,7 +52,7 @@
         },
         {
           "path": "resources/references/shorts/sequences/frames/SQ01-B01-1.jpg",
-          "sha256": "202a1dda4329c2d481503562d9c46317ccbd707987ac839708ce7c110a724c37",
+          "sha256": "6a308101c483447ca5acae358a3a3176e7f8699cc3cab569af5253fd88746927",
           "dimensions": [
             1280,
             720
@@ -76,7 +76,7 @@
         },
         {
           "path": "resources/references/shorts/sequences/frames/SQ01-B01-2.jpg",
-          "sha256": "202a1dda4329c2d481503562d9c46317ccbd707987ac839708ce7c110a724c37",
+          "sha256": "6a308101c483447ca5acae358a3a3176e7f8699cc3cab569af5253fd88746927",
           "dimensions": [
             1280,
             720
@@ -114,7 +114,7 @@
       "source_frames": [
         {
           "path": "resources/references/shorts/sequences/frames/SQ01-B02-0.jpg",
-          "sha256": "e77cd1c34960557399381a80b971ff305e84cdcde85067ed01d52cb769ec3e9a",
+          "sha256": "5303bbe4ede6f98e932ab27b24ae757874de27ca1a15dec1aa9593815988f446",
           "dimensions": [
             1280,
             720
@@ -136,7 +136,7 @@
         },
         {
           "path": "resources/references/shorts/sequences/frames/SQ01-B02-1.jpg",
-          "sha256": "23184c0d3339123e2241d3715e229af45b144b9f0079109b298e9fa66ed9636a",
+          "sha256": "c7664cbbe250e1be46141998acd9b95772ec76852ae03a3d4210220a539e0fb6",
           "dimensions": [
             1280,
             720
@@ -158,7 +158,7 @@
         },
         {
           "path": "resources/references/shorts/sequences/frames/SQ01-B02-2.jpg",
-          "sha256": "1ee47178630f92210324815ce16fdc4fbfb2b1ba6f36d8eff7086e30812880c3",
+          "sha256": "c8657fba6bdce0e5f05cddf2c37888c00f3265bf308620e3942f9f7f2f692efd",
           "dimensions": [
             1280,
             720
@@ -194,7 +194,7 @@
       "source_frames": [
         {
           "path": "resources/references/shorts/sequences/frames/SQ01-B03-0.jpg",
-          "sha256": "e5e2886974af7d9638c5da42c2992fefb6a96190b132e4462e1826fab834df25",
+          "sha256": "b02fc8ae259c8c995eb346f00bfc16e35e481a8b8e0c1ecb7802f87311bd611b",
           "dimensions": [
             1280,
             720
@@ -217,7 +217,7 @@
         },
         {
           "path": "resources/references/shorts/sequences/frames/SQ01-B03-1.jpg",
-          "sha256": "67958733c0ec96a0fd7deb55a140e2ab1ab73839c802e4a3a5c637905dd87031",
+          "sha256": "52be3ec469b76adfbc4d993a94fa5eed34ae99da3c417e04b1eb93459deac43b",
           "dimensions": [
             1280,
             720
@@ -240,7 +240,7 @@
         },
         {
           "path": "resources/references/shorts/sequences/frames/SQ01-B03-2.jpg",
-          "sha256": "67958733c0ec96a0fd7deb55a140e2ab1ab73839c802e4a3a5c637905dd87031",
+          "sha256": "52be3ec469b76adfbc4d993a94fa5eed34ae99da3c417e04b1eb93459deac43b",
           "dimensions": [
             1280,
             720

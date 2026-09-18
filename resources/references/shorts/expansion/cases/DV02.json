@@ -24,7 +24,7 @@
       "source_frames": [
         {
           "path": "resources/references/shorts/expansion/frames/DV02-B01-0.jpg",
-          "sha256": "8db4cb85c06fbf532937bcf53f1f09ab4735bdbed91d5ed479293d7a5a57d9d3",
+          "sha256": "27c259f99ba05f8a50f8052e2863e877ec88a2c962ff7963377b83da7d72f633",
           "dimensions": [
             720,
             1280
@@ -49,7 +49,7 @@
         },
         {
           "path": "resources/references/shorts/expansion/frames/DV02-B01-1.jpg",
-          "sha256": "8db4cb85c06fbf532937bcf53f1f09ab4735bdbed91d5ed479293d7a5a57d9d3",
+          "sha256": "27c259f99ba05f8a50f8052e2863e877ec88a2c962ff7963377b83da7d72f633",
           "dimensions": [
             720,
             1280
@@ -74,7 +74,7 @@
         },
         {
           "path": "resources/references/shorts/expansion/frames/DV02-B01-2.jpg",
-          "sha256": "8db4cb85c06fbf532937bcf53f1f09ab4735bdbed91d5ed479293d7a5a57d9d3",
+          "sha256": "27c259f99ba05f8a50f8052e2863e877ec88a2c962ff7963377b83da7d72f633",
           "dimensions": [
             720,
             1280
@@ -109,7 +109,7 @@
       "source_frames": [
         {
           "path": "resources/references/shorts/expansion/frames/DV02-B02-0.jpg",
-          "sha256": "171ebd3050d7d279347e1cfec58c417dcef49852d35ad26e25a7a67e7120fe00",
+          "sha256": "eaa91e67f12d6c72e680b2aa90078f097786269cb961b27657d38b6887aba9d8",
           "dimensions": [
             720,
             1280
@@ -134,7 +134,7 @@
         },
         {
           "path": "resources/references/shorts/expansion/frames/DV02-B02-1.jpg",
-          "sha256": "0b3d89b83baec8ad75e9fd6e422177bc2369c2e1f9b74b5a75eb39d937d40659",
+          "sha256": "93b011b9749204f114ff390f5463d358189c9b57defb2a3483deb2d7b255978b",
           "dimensions": [
             720,
             1280
@@ -159,7 +159,7 @@
         },
         {
           "path": "resources/references/shorts/expansion/frames/DV02-B02-2.jpg",
-          "sha256": "0b3d89b83baec8ad75e9fd6e422177bc2369c2e1f9b74b5a75eb39d937d40659",
+          "sha256": "93b011b9749204f114ff390f5463d358189c9b57defb2a3483deb2d7b255978b",
           "dimensions": [
             720,
             1280
@@ -194,7 +194,7 @@
       "source_frames": [
         {
           "path": "resources/references/shorts/expansion/frames/DV02-B03-0.jpg",
-          "sha256": "64d3675d72e63e5c9a24c5bce0b15976202d16dfbef3a5da7b9b996cd80a8966",
+          "sha256": "448e601976f76b9bcb0862668f7c9e3f66b8693b45cbc64781a7ee6914a5447c",
           "dimensions": [
             720,
             1280
@@ -219,7 +219,7 @@
         },
         {
           "path": "resources/references/shorts/expansion/frames/DV02-B03-1.jpg",
-          "sha256": "87852a841257336d008a41a7036c7d610c9167e8568034e050c20f48285d6d1c",
+          "sha256": "69583e29cd4e63f94f42006dd2b0233dc3d90de36b338a9f4fc0ccf27d855bec",
           "dimensions": [
             720,
             1280
@@ -244,7 +244,7 @@
         },
         {
           "path": "resources/references/shorts/expansion/frames/DV02-B03-2.jpg",
-          "sha256": "87852a841257336d008a41a7036c7d610c9167e8568034e050c20f48285d6d1c",
+          "sha256": "69583e29cd4e63f94f42006dd2b0233dc3d90de36b338a9f4fc0ccf27d855bec",
           "dimensions": [
             720,
             1280

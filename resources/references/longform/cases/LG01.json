@@ -20,7 +20,7 @@
       "source_frames": [
         {
           "path": "resources/references/longform/frames/LG01-B01-0.jpg",
-          "sha256": "f89eec6d38b251fc5bd48f83a17ae476e2d4e72840e9e1b870882fc6b4c54db5",
+          "sha256": "9ac628ab99eb2af785d01d4883dea55e64e73ad5a93217da9496e08942fe88cb",
           "dimensions": [
             1280,
             720
@@ -43,7 +43,7 @@
         },
         {
           "path": "resources/references/longform/frames/LG01-B01-1.jpg",
-          "sha256": "6aa24a57a95723007d691d607286317ed4a67b1f90aa30fce2c93236aa0a1c16",
+          "sha256": "d7e70ea83a1235621629fcc511b4cf978ba27734259f842368c5c98b070dccae",
           "dimensions": [
             1280,
             720
@@ -66,7 +66,7 @@
         },
         {
           "path": "resources/references/longform/frames/LG01-B01-2.jpg",
-          "sha256": "b8fd72782abc40f377b46893d61e404da42206258d33ac03dbf2b9d549f95c10",
+          "sha256": "632043d15025d72ed0505937a6cebf68259209ce221d55c3253b382eed3b21e6",
           "dimensions": [
             1280,
             720
@@ -98,7 +98,7 @@
       "source_frames": [
         {
           "path": "resources/references/longform/frames/LG01-B02-0.jpg",
-          "sha256": "f89eec6d38b251fc5bd48f83a17ae476e2d4e72840e9e1b870882fc6b4c54db5",
+          "sha256": "9ac628ab99eb2af785d01d4883dea55e64e73ad5a93217da9496e08942fe88cb",
           "dimensions": [
             1280,
             720
@@ -121,7 +121,7 @@
         },
         {
           "path": "resources/references/longform/frames/LG01-B02-1.jpg",
-          "sha256": "b994424508a3a5ae9e97a4c6389c309b2a7efbc4136334a2149d2475a1154d76",
+          "sha256": "bef14c9950b1b7e682e6976ae83ff3535af97f09e4c9d5369dab2fdce8121c1a",
           "dimensions": [
             1280,
             720
@@ -144,7 +144,7 @@
         },
         {
           "path": "resources/references/longform/frames/LG01-B02-2.jpg",
-          "sha256": "17fd4dff4f1707f9d9b952686753d794da227a2fe631a31942485360b3de033d",
+          "sha256": "c22b61896105c582329b2c801d0aad0d5859d6f48335e974f981efd3ce2c6fce",
           "dimensions": [
             1280,
             720

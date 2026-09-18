@@ -132,6 +132,7 @@ export const GUIDED_SOURCE_COLOR_CLEANUP_TS_FILES = Object.freeze([
   "src/lib/producer/short-direction.ts",
   "src/lib/producer/surgical-edit.ts",
   "src/lib/producer/types.ts",
+  "src/lib/producer/visual-storytelling.ts",
   "src/lib/server/ask-editor-reconciliation.ts",
   "src/lib/server/atomic-file.ts",
   "src/lib/server/auto-edit-approval.ts",
@@ -318,6 +319,7 @@ export const GUIDED_SOURCE_COLOR_CLEANUP_TS_FILES = Object.freeze([
   "src/lib/server/project-palmier-state.ts",
   "src/lib/server/proposal-readiness-deadline.ts",
   "src/lib/server/readiness-gate-execution.ts",
+  "src/lib/server/reference-library-paths.ts",
   "src/lib/server/stage-timing-context.ts",
   "src/lib/server/stage-timing.ts",
   "src/lib/server/template-usage-history.ts"

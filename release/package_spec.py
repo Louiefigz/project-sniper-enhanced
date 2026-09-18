@@ -53,6 +53,22 @@ INCLUDE: tuple[tuple[str, str], ...] = (
     ("assets/fonts", "OFL faces plus their licence text"),
     ("assets/models", "YuNet face-detection weights"),
     ("assets/sfx", "bundled SFX and their PROVENANCE.md"),
+    ("assets/music", "starter bed synthesized by scripts/producer/audio/default_bed.py; "
+                     "the Auto Edit pipeline snapshot requires this set"),
+
+    # --- Runtime contracts and data read by shipped code ----------------------
+    # Loaded by path segments (render_effect_registry.py, program_mix_registry.py,
+    # external_ingress_registry.py, current_render_calibration_source.py,
+    # short-long-route-matrix.ts) and required by auto-edit-pipeline-assets.ts.
+    # The retained development evidence beside them (p0-p5 receipts, rate matrix,
+    # inventories) is not shipped.
+    ("docs/producer/command-driven-editing/contracts/render-effect-registry-v1.json", "runtime registry"),
+    ("docs/producer/command-driven-editing/contracts/program-audio-mix-registry-v1.json", "runtime registry"),
+    ("docs/producer/command-driven-editing/contracts/external-ingress-registry-v1.json", "runtime registry"),
+    ("docs/producer/command-driven-editing/contracts/current-render-codec-floor-calibration-v1.json",
+     "runtime render calibration"),
+    ("docs/producer/command-driven-editing/contracts/short-long-route-matrix-v1.json", "runtime route matrix"),
+    ("docs/producer/catalog-study/catalog-study.json", "catalog discovery study read by graphics/catalog_discovery_sources.py"),
 
     # --- Agent instruction chain (reachable through skills, not imports) ----
     (".claude/skills", "the five canonical skills: producer, segmenter, clipper, "
@@ -108,15 +124,10 @@ EXCLUDE_DIRS: tuple[tuple[str, str], ...] = (
     ("docs/audits", "internal development audits"),
     ("docs/studies/adrian-per", "study derived from paid teaching material, teacher-named"),
     ("docs/studies/shorts-visual-playbook",
-     "BLOCKING: built from three named real creators' copyrighted Shorts (source URLs, "
-     "SHA-256 of downloaded videos, and entries embedding extracted frames of their "
-     "videos at developer absolute paths). Cannot be redistributed commercially and "
-     "carries teacher names. It IS a runtime dependency of the native Short request "
-     "path, so withholding it blocks that path until the library is rebuilt from owned "
-     "material or the inventory is made optional. See release/PROVENANCE-BLOCKERS.md"),
+     "creator-derived study (third-party Shorts, creator names); replaced by the original "
+     "library in resources/references"),
     ("docs/studies/longform-visual-playbook",
-     "BLOCKING: same provenance question as the shorts library; read by "
-     "reference-strategy-library.ts. See release/PROVENANCE-BLOCKERS.md"),
+     "creator-derived study; replaced by the original library in resources/references"),
     ("docs/marketing", "source of the buyer guides; the edited guides ship under manual/"),
     ("release", "maintainer release tooling"),
     ("scripts/producer/artifacts", "maintainer's retained acceptance evidence (gitignored)"),

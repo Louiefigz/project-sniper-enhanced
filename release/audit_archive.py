@@ -179,6 +179,39 @@ def audit_closure(root: Path) -> None:
           "none" if not outside else f"{len(outside)}: " + ", ".join(outside[:6]))
     frames = list((app / "resources/references").rglob("*.jpg"))
     check(len(frames) > 0, "closure: packaged reference frames present", f"{len(frames)} frames")
+    audit_pipeline_capture(app)
+    segment_paths = [f"docs/producer/command-driven-editing/contracts/{name}" for name in (
+        "render-effect-registry-v1.json", "program-audio-mix-registry-v1.json",
+        "external-ingress-registry-v1.json", "current-render-codec-floor-calibration-v1.json",
+        "short-long-route-matrix-v1.json")] + ["docs/producer/catalog-study/catalog-study.json"]
+    absent = [rel for rel in segment_paths if not (app / rel).is_file()]
+    check(not absent, "closure: data files code builds by path segments are present",
+          f"{len(segment_paths)} present" if not absent else "MISSING: " + ", ".join(absent))
+
+
+_TS_LIST = r"const {name} = \[(.*?)\] as const;"
+
+
+def audit_pipeline_capture(app: Path) -> None:
+    """Read Auto Edit's own capture requirements from the shipped source and check them.
+
+    `auto-edit-pipeline-assets.ts` refuses to snapshot the pipeline when a required
+    file, source path or asset prefix is absent, which stops every Auto Edit. The
+    lists are parsed from the shipped file itself so the audit cannot drift from it.
+    """
+    source = (app / "src/lib/server/auto-edit-pipeline-assets.ts").read_text(encoding="utf-8")
+    lists = {}
+    for name in ("REQUIRED_FILES", "REQUIRED_PREFIXES", "SOURCE_PATHS"):
+        match = re.search(_TS_LIST.format(name=name), source, flags=re.S)
+        check(match is not None, f"closure: pipeline capture list {name} readable", "parsed" if match else "not found")
+        lists[name] = re.findall(r'"([^"]+)"', match.group(1)) if match else []
+    missing = [rel for rel in lists["REQUIRED_FILES"] if not (app / rel).is_file()]
+    missing += [rel for rel in lists["SOURCE_PATHS"] if not (app / rel).exists()]
+    empty = [prefix for prefix in lists["REQUIRED_PREFIXES"]
+             if not any(path.is_file() for path in (app / prefix).rglob("*"))]
+    check(not missing and not empty, "closure: Auto Edit pipeline capture requirements satisfied",
+          f"{sum(len(v) for v in lists.values())} requirements met" if not (missing or empty)
+          else "MISSING: " + ", ".join(missing[:6]) + (" EMPTY: " + ", ".join(empty) if empty else ""))
 
 
 def audit_runtime_inputs(root: Path) -> None:

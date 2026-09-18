@@ -22,6 +22,14 @@ The mirror's media assets (sound effects, wallpapers, textures, fonts) are **not
 included, because they are not read by the software and their individual terms were not
 verified.
 
+### Starter music bed — original, no third-party rights
+`app/assets/music/default-bed.mp3` is synthesized from sine tones and filtered noise by
+`app/scripts/producer/audio/default_bed.py`, which regenerates it. It replaced an earlier
+synthesized bed that failed the product's own hum check (a 111 Hz line). The current bed
+passes that check; it has been measured, not yet listened to by a person. It is available
+to an edit only when you turn music on; your own licensed track in a project's `music/`
+folder works the same way.
+
 ### GSAP 3.14.2 core, SplitText and DrawSVGPlugin — GSAP Standard "No Charge" licence
 `app/templates/motion/vendor/gsap/`. Copyright GreenSock. Subject to the terms at
 <https://gsap.com/standard-license>. Since GSAP 3.13 the standard licence covers
@@ -86,6 +94,6 @@ screenshot, brand, likeness or creator name is used.
 
 ## Not shipped
 
-| Component | Why |
+| Material | Why |
 |---|---|
-| The repository's default music bed | Synthesized in-repo (no third-party rights), but it fails the product's own tonal-hum check: a 111.0 Hz line at 39.1 dB prominence against a 14 dB limit, stable for 59.5 s (measured 2026-09-17). Music remains available: put your own licensed track in a project's `music/` folder. |
+| Development study libraries built from other creators' videos | Replaced by Sniper's own libraries in `app/resources/director` and `app/resources/references`; no creator's footage, frames or names ship. |

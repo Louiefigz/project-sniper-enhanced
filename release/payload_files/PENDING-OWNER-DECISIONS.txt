@@ -19,7 +19,9 @@ RESOLVED BY IMPLEMENTATION in rc3 (no owner action needed)
   - Director hook library from a sibling repository: replaced by an original packaged
     library (resources/director); no sibling repository is read.
   - YuNet model: MIT (OpenCV Zoo), file hash matches upstream; notice shipped.
-  - Default music bed: measured defective (111 Hz hum) and not shipped; buyer music works.
+  - Default music bed: the old bed hummed at 111 Hz; replaced by an original synthesized
+    bed (scripts/producer/audio/default_bed.py) that passes the product's hum check.
+    A person has not listened to it yet (see below).
 
 STILL OPEN — each blocks release
   1. LICENCE WORDING (input D): LICENSE-DRAFT.txt is not final or reviewed; the
@@ -38,6 +40,7 @@ NOT BLOCKING THIS PRODUCT
     Nothing in this package mentions it or depends on it.
 
 NOT OWNER DECISIONS — acceptance still outstanding
+  - Listen to app/assets/music/default-bed.mp3 once (60 s). It is measured clean, not heard.
   - Claude sign-in on this Mac: the Claude CLI here is not signed in, so no real Claude
     admission or edit could run. One interactive 'install/sign-in.command claude' by the
     owner unblocks it.

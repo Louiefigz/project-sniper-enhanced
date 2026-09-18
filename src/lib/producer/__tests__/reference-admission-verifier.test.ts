@@ -103,6 +103,40 @@ try {
   }
   fs.writeFileSync(sourcePath, originalSource);
 
+  // Native (v4) receipts: accepted only with the approved jail's identity and both attested decoder runs.
+  const approval = JSON.parse(fs.readFileSync(path.join(process.cwd(),
+    "scripts/producer/headless/native_media_runtime_approval.json"), "utf8")) as { approved: Array<Record<string, string>> };
+  const jail = approval.approved[0];
+  const tools = { ffprobe: { path: "/opt/homebrew/Cellar/ffmpeg/8.0/bin/ffprobe", sha256: "e".repeat(64), version: "ffprobe version 8.0" },
+    ffmpeg: { path: "/opt/homebrew/Cellar/ffmpeg/8.0/bin/ffmpeg", sha256: "f".repeat(64), version: "ffmpeg version 8.0" } };
+  const run = (decoder: string) => ({ sandboxed: true, decoder, profileSha256: jail.profileSha256, memoryMiB: 768, pid: 1,
+    rlimits: { RLIMIT_CORE: [0, 0], RLIMIT_CPU: [10, 15], RLIMIT_FSIZE: [0, 0], RLIMIT_NOFILE: [256, 256] } });
+  const common = Object.fromEntries(Object.entries(receipt).filter(([key]) => !["image", "network", "isolation"].includes(key)));
+  const native = { ...common, policy: "sniper-external-media-probe-v4-native",
+    runtime: { kind: "macos-seatbelt", policy: "sniper-native-media-jail-v1", profileSha256: jail.profileSha256,
+      launcherSha256: jail.launcherSha256, platform: { system: "Darwin" }, tools, libraryRoot: "/opt/homebrew/Cellar",
+      linkRoot: "/opt/homebrew/opt", closureSha256: "d".repeat(64), closureCount: 93 },
+    isolation: { kind: "macos-seatbelt", policy: "sniper-native-media-jail-v1", profileSha256: jail.profileSha256,
+      network: "denied", processCreation: "denied", writes: "/dev/null only", memoryMiB: 768,
+      decoderRuns: [run(tools.ffprobe.path), run(tools.ffmpeg.path)], fontSvg: "recognised from bounded reads; not decoded" } };
+  const variants: Array<[string, Record<string, unknown>, boolean]> = [
+    ["approved native", native, true],
+    ["unapproved profile", { ...native, runtime: { ...native.runtime, profileSha256: "0".repeat(64) } }, false],
+    ["one decoder run", { ...native, isolation: { ...native.isolation, decoderRuns: [run(tools.ffprobe.path)] } }, false],
+    ["wrong memory cap", { ...native, isolation: { ...native.isolation, memoryMiB: 4096 } }, false],
+    ["unconfined run", { ...native, isolation: { ...native.isolation,
+      decoderRuns: [run(tools.ffprobe.path), { ...run(tools.ffmpeg.path), sandboxed: false }] } }, false],
+    ["extra key", { ...native, network: { schemaVersion: 1, hostDecoyPositive: true } }, false],
+  ];
+  for (const [label, value, expected] of variants) {
+    const bytes = Buffer.from(`${JSON.stringify(value)}\n`);
+    const hash = sha(bytes), file = path.join(receiptDir, `${hash}.json`);
+    fs.writeFileSync(file, bytes);
+    fs.writeFileSync(sourcePath, JSON.stringify({ kind: "local", admission: { ...admission, receiptPath: file, receiptSha256: hash } }));
+    assert.equal(validAdmittedReference(video), expected, label);
+  }
+  fs.writeFileSync(sourcePath, originalSource);
+
   const sourceVtt = path.join(dir, "source-input.vtt");
   const admittedVtt = path.join(dir, `${path.parse(video).name}.en.vtt`);
   const vttBytes = "WEBVTT\n\n00:00.000 --> 00:01.000\n<c>Hello</c>\n";

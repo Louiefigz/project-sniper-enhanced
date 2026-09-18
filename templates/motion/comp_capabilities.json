@@ -66,248 +66,6 @@
         "meanAlpha8": 255.0
       }
     },
-    "slideware-caption-dual-mode": {
-      "aspect": "9:16",
-      "canvas": [
-        1080,
-        1920
-      ],
-      "contentBBox": [
-        372,
-        1172,
-        706,
-        1221
-      ],
-      "contentDims": [
-        334,
-        49
-      ],
-      "fadeClass": "partial-fade",
-      "positionKnobs": [],
-      "probeDurationS": 4.75,
-      "specDefaults": {
-        "at1": 0,
-        "at2": 0.8,
-        "at3": 1.6,
-        "at4": 2.4,
-        "at5": 3.2,
-        "at6": 4.0,
-        "cue1": "",
-        "cue2": "",
-        "cue3": "",
-        "cue4": "",
-        "cue5": "",
-        "cue6": "",
-        "mode": "footage"
-      },
-      "specFields": [
-        "at1",
-        "at2",
-        "at3",
-        "at4",
-        "at5",
-        "at6",
-        "cue1",
-        "cue2",
-        "cue3",
-        "cue4",
-        "cue5",
-        "cue6",
-        "mode"
-      ],
-      "terminalAlpha": {
-        "maxAlpha8": 137,
-        "meanAlpha8": 0.6
-      }
-    },
-    "slideware-receipt-cell": {
-      "aspect": "9:16",
-      "canvas": [
-        1080,
-        1920
-      ],
-      "contentBBox": [
-        173,
-        300,
-        906,
-        684
-      ],
-      "contentDims": [
-        733,
-        384
-      ],
-      "fadeClass": "partial-fade",
-      "positionKnobs": [
-        "corner"
-      ],
-      "probeDurationS": 2.7,
-      "specDefaults": {
-        "at1": 0.2,
-        "at2": 0.55,
-        "at3": 0.9,
-        "at4": 1.25,
-        "at5": 1.6,
-        "at6": 1.95,
-        "corner": "rounded",
-        "label1": "",
-        "label2": "",
-        "label3": "",
-        "label4": "",
-        "label5": "",
-        "label6": "",
-        "layout": "strip",
-        "media1": "",
-        "media2": "",
-        "media3": "",
-        "media4": "",
-        "media5": "",
-        "media6": "",
-        "views1": "",
-        "views2": "",
-        "views3": "",
-        "views4": "",
-        "views5": "",
-        "views6": ""
-      },
-      "specFields": [
-        "at1",
-        "at2",
-        "at3",
-        "at4",
-        "at5",
-        "at6",
-        "corner",
-        "label1",
-        "label2",
-        "label3",
-        "label4",
-        "label5",
-        "label6",
-        "layout",
-        "media1",
-        "media2",
-        "media3",
-        "media4",
-        "media5",
-        "media6",
-        "views1",
-        "views2",
-        "views3",
-        "views4",
-        "views5",
-        "views6"
-      ],
-      "terminalAlpha": {
-        "maxAlpha8": 255,
-        "meanAlpha8": 27.4
-      }
-    },
-    "slideware-staircase-lockup": {
-      "aspect": "9:16",
-      "canvas": [
-        1080,
-        1920
-      ],
-      "contentBBox": [
-        195,
-        331,
-        905,
-        559
-      ],
-      "contentDims": [
-        710,
-        228
-      ],
-      "fadeClass": "partial-fade",
-      "positionKnobs": [],
-      "probeDurationS": 2.5,
-      "specDefaults": {
-        "accent": "#C9FB00",
-        "band": "headroom",
-        "coAt": 0.75,
-        "coWord": "",
-        "kicker": "",
-        "kickerAt": 0,
-        "payload": "",
-        "payload2": "",
-        "payload3": "",
-        "payloadAt": 0.35,
-        "payloadSize": 106,
-        "replaceAt2": 0,
-        "replaceAt3": 0
-      },
-      "specFields": [
-        "accent",
-        "band",
-        "coAt",
-        "coWord",
-        "kicker",
-        "kickerAt",
-        "payload",
-        "payload2",
-        "payload3",
-        "payloadAt",
-        "payloadSize",
-        "replaceAt2",
-        "replaceAt3"
-      ],
-      "terminalAlpha": {
-        "maxAlpha8": 255,
-        "meanAlpha8": 4.6
-      }
-    },
-    "slideware-takeover-deck": {
-      "aspect": "9:16",
-      "canvas": [
-        1080,
-        1920
-      ],
-      "contentBBox": [
-        0,
-        0,
-        1079,
-        1919
-      ],
-      "contentDims": [
-        1079,
-        1919
-      ],
-      "fadeClass": "hold-to-cut",
-      "positionKnobs": [],
-      "probeDurationS": 2.5,
-      "specDefaults": {
-        "accent": "#C9FB00",
-        "gradientTop": false,
-        "header": "",
-        "headerInk": "white",
-        "pageAt2": 0,
-        "pageAt3": 0,
-        "pill1": "",
-        "pill2": "",
-        "pill3": "",
-        "slide1": "",
-        "slide2": "",
-        "slide3": ""
-      },
-      "specFields": [
-        "accent",
-        "gradientTop",
-        "header",
-        "headerInk",
-        "pageAt2",
-        "pageAt3",
-        "pill1",
-        "pill2",
-        "pill3",
-        "slide1",
-        "slide2",
-        "slide3"
-      ],
-      "terminalAlpha": {
-        "maxAlpha8": 255,
-        "meanAlpha8": 255.0
-      }
-    },
     "avatar-bio-card": {
       "aspect": "16:9",
       "canvas": [
@@ -705,14 +463,14 @@
         1080
       ],
       "contentBBox": [
-        196,
-        724,
+        195,
+        725,
         1724,
-        905
+        904
       ],
       "contentDims": [
-        1528,
-        181
+        1529,
+        179
       ],
       "fadeClass": "fades-clean",
       "positionKnobs": [
@@ -737,7 +495,7 @@
       ],
       "terminalAlpha": {
         "maxAlpha8": 39,
-        "meanAlpha8": 1.65
+        "meanAlpha8": 1.64
       }
     },
     "glass-lower-third": {
@@ -992,7 +750,7 @@
       ],
       "terminalAlpha": {
         "maxAlpha8": 209,
-        "meanAlpha8": 2.5
+        "meanAlpha8": 2.4
       }
     },
     "hw-scribble-transition": {
@@ -1129,61 +887,6 @@
       "terminalAlpha": {
         "maxAlpha8": 57,
         "meanAlpha8": 2.3
-      }
-    },
-    "punch-shout-lockup": {
-      "aspect": "9:16",
-      "canvas": [
-        1080,
-        1920
-      ],
-      "contentBBox": [
-        105,
-        235,
-        549,
-        504
-      ],
-      "contentDims": [
-        444,
-        269
-      ],
-      "fadeClass": "partial-fade",
-      "positionKnobs": [
-        "slotX",
-        "slotY"
-      ],
-      "probeDurationS": 2.5,
-      "specDefaults": {
-        "accent": "#F5E960",
-        "appendS": 0.15,
-        "atS": 0,
-        "build": "pop",
-        "coword": "",
-        "kicker": "",
-        "kicker2": "",
-        "payload": "",
-        "payloadPctH": 5,
-        "slotX": 0.3,
-        "slotY": 0.19,
-        "splitText": false
-      },
-      "specFields": [
-        "accent",
-        "appendS",
-        "atS",
-        "build",
-        "coword",
-        "kicker",
-        "kicker2",
-        "payload",
-        "payloadPctH",
-        "slotX",
-        "slotY",
-        "splitText"
-      ],
-      "terminalAlpha": {
-        "maxAlpha8": 255,
-        "meanAlpha8": 4.7
       }
     },
     "kinetic-quote": {
@@ -1742,6 +1445,61 @@
         "meanAlpha8": 192.1
       }
     },
+    "punch-shout-lockup": {
+      "aspect": "9:16",
+      "canvas": [
+        1080,
+        1920
+      ],
+      "contentBBox": [
+        104,
+        236,
+        550,
+        506
+      ],
+      "contentDims": [
+        446,
+        270
+      ],
+      "fadeClass": "partial-fade",
+      "positionKnobs": [
+        "slotX",
+        "slotY"
+      ],
+      "probeDurationS": 2.5,
+      "specDefaults": {
+        "accent": "#F5E960",
+        "appendS": 0.15,
+        "atS": 0,
+        "build": "pop",
+        "coword": "",
+        "kicker": "",
+        "kicker2": "",
+        "payload": "",
+        "payloadPctH": 5,
+        "slotX": 0.3,
+        "slotY": 0.19,
+        "splitText": false
+      },
+      "specFields": [
+        "accent",
+        "appendS",
+        "atS",
+        "build",
+        "coword",
+        "kicker",
+        "kicker2",
+        "payload",
+        "payloadPctH",
+        "slotX",
+        "slotY",
+        "splitText"
+      ],
+      "terminalAlpha": {
+        "maxAlpha8": 255,
+        "meanAlpha8": 4.7
+      }
+    },
     "schedule-stack": {
       "aspect": "9:16",
       "canvas": [
@@ -1796,7 +1554,7 @@
         "title4"
       ],
       "terminalAlpha": {
-        "maxAlpha8": 56,
+        "maxAlpha8": 57,
         "meanAlpha8": 5.4
       }
     },
@@ -1809,11 +1567,11 @@
       "contentBBox": [
         0,
         203,
-        674,
+        839,
         511
       ],
       "contentDims": [
-        674,
+        839,
         308
       ],
       "fadeClass": "fades-clean",
@@ -1878,6 +1636,248 @@
         "num",
         "sub",
         "title"
+      ],
+      "terminalAlpha": {
+        "maxAlpha8": 255,
+        "meanAlpha8": 255.0
+      }
+    },
+    "slideware-caption-dual-mode": {
+      "aspect": "9:16",
+      "canvas": [
+        1080,
+        1920
+      ],
+      "contentBBox": [
+        372,
+        1172,
+        706,
+        1221
+      ],
+      "contentDims": [
+        334,
+        49
+      ],
+      "fadeClass": "partial-fade",
+      "positionKnobs": [],
+      "probeDurationS": 4.75,
+      "specDefaults": {
+        "at1": 0,
+        "at2": 0.8,
+        "at3": 1.6,
+        "at4": 2.4,
+        "at5": 3.2,
+        "at6": 4.0,
+        "cue1": "",
+        "cue2": "",
+        "cue3": "",
+        "cue4": "",
+        "cue5": "",
+        "cue6": "",
+        "mode": "footage"
+      },
+      "specFields": [
+        "at1",
+        "at2",
+        "at3",
+        "at4",
+        "at5",
+        "at6",
+        "cue1",
+        "cue2",
+        "cue3",
+        "cue4",
+        "cue5",
+        "cue6",
+        "mode"
+      ],
+      "terminalAlpha": {
+        "maxAlpha8": 136,
+        "meanAlpha8": 0.6
+      }
+    },
+    "slideware-receipt-cell": {
+      "aspect": "9:16",
+      "canvas": [
+        1080,
+        1920
+      ],
+      "contentBBox": [
+        173,
+        300,
+        906,
+        684
+      ],
+      "contentDims": [
+        733,
+        384
+      ],
+      "fadeClass": "partial-fade",
+      "positionKnobs": [
+        "corner"
+      ],
+      "probeDurationS": 2.7,
+      "specDefaults": {
+        "at1": 0.2,
+        "at2": 0.55,
+        "at3": 0.9,
+        "at4": 1.25,
+        "at5": 1.6,
+        "at6": 1.95,
+        "corner": "rounded",
+        "label1": "",
+        "label2": "",
+        "label3": "",
+        "label4": "",
+        "label5": "",
+        "label6": "",
+        "layout": "strip",
+        "media1": "",
+        "media2": "",
+        "media3": "",
+        "media4": "",
+        "media5": "",
+        "media6": "",
+        "views1": "",
+        "views2": "",
+        "views3": "",
+        "views4": "",
+        "views5": "",
+        "views6": ""
+      },
+      "specFields": [
+        "at1",
+        "at2",
+        "at3",
+        "at4",
+        "at5",
+        "at6",
+        "corner",
+        "label1",
+        "label2",
+        "label3",
+        "label4",
+        "label5",
+        "label6",
+        "layout",
+        "media1",
+        "media2",
+        "media3",
+        "media4",
+        "media5",
+        "media6",
+        "views1",
+        "views2",
+        "views3",
+        "views4",
+        "views5",
+        "views6"
+      ],
+      "terminalAlpha": {
+        "maxAlpha8": 255,
+        "meanAlpha8": 27.4
+      }
+    },
+    "slideware-staircase-lockup": {
+      "aspect": "9:16",
+      "canvas": [
+        1080,
+        1920
+      ],
+      "contentBBox": [
+        195,
+        331,
+        904,
+        560
+      ],
+      "contentDims": [
+        709,
+        229
+      ],
+      "fadeClass": "partial-fade",
+      "positionKnobs": [],
+      "probeDurationS": 2.5,
+      "specDefaults": {
+        "accent": "#C9FB00",
+        "band": "headroom",
+        "coAt": 0.75,
+        "coWord": "",
+        "kicker": "",
+        "kickerAt": 0,
+        "payload": "",
+        "payload2": "",
+        "payload3": "",
+        "payloadAt": 0.35,
+        "payloadSize": 106,
+        "replaceAt2": 0,
+        "replaceAt3": 0
+      },
+      "specFields": [
+        "accent",
+        "band",
+        "coAt",
+        "coWord",
+        "kicker",
+        "kickerAt",
+        "payload",
+        "payload2",
+        "payload3",
+        "payloadAt",
+        "payloadSize",
+        "replaceAt2",
+        "replaceAt3"
+      ],
+      "terminalAlpha": {
+        "maxAlpha8": 255,
+        "meanAlpha8": 4.5
+      }
+    },
+    "slideware-takeover-deck": {
+      "aspect": "9:16",
+      "canvas": [
+        1080,
+        1920
+      ],
+      "contentBBox": [
+        0,
+        0,
+        1079,
+        1919
+      ],
+      "contentDims": [
+        1079,
+        1919
+      ],
+      "fadeClass": "hold-to-cut",
+      "positionKnobs": [],
+      "probeDurationS": 2.5,
+      "specDefaults": {
+        "accent": "#C9FB00",
+        "gradientTop": false,
+        "header": "",
+        "headerInk": "white",
+        "pageAt2": 0,
+        "pageAt3": 0,
+        "pill1": "",
+        "pill2": "",
+        "pill3": "",
+        "slide1": "",
+        "slide2": "",
+        "slide3": ""
+      },
+      "specFields": [
+        "accent",
+        "gradientTop",
+        "header",
+        "headerInk",
+        "pageAt2",
+        "pageAt3",
+        "pill1",
+        "pill2",
+        "pill3",
+        "slide1",
+        "slide2",
+        "slide3"
       ],
       "terminalAlpha": {
         "maxAlpha8": 255,
@@ -2024,11 +2024,11 @@
         399,
         833,
         681,
-        1091
+        1093
       ],
       "contentDims": [
         282,
-        258
+        260
       ],
       "fadeClass": "partial-fade",
       "positionKnobs": [
@@ -2065,9 +2065,9 @@
       ],
       "contentBBox": [
         279,
-        823,
+        824,
         712,
-        885
+        886
       ],
       "contentDims": [
         433,
@@ -2093,7 +2093,7 @@
         "weight"
       ],
       "terminalAlpha": {
-        "maxAlpha8": 46,
+        "maxAlpha8": 44,
         "meanAlpha8": 0.24
       }
     },
@@ -2105,9 +2105,9 @@
       ],
       "contentBBox": [
         744,
-        508,
+        509,
         1177,
-        570
+        571
       ],
       "contentDims": [
         433,
@@ -2544,7 +2544,7 @@
       }
     }
   },
-  "digest": "32730e0573a193de31b811dc2d8382d9377ed1be",
+  "digest": "1725d555462241c5f4c1382e80a9acf4da368f60",
   "schemaVersion": 2,
-  "sourceDigest": "af80862764f7a6b86a8159b377adf2bdf2b0d19c4598198301886a524b5c34ad"
+  "sourceDigest": "501eec03c6900d741cbe0e818ca26388295641b65763d95438dc158adba356fb"
 }

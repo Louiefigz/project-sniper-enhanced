@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
 import platform
 import re
 import subprocess
@@ -51,14 +52,17 @@ def _run(argv: list[str]) -> str:
 
 
 def machine() -> dict:
-    """Versions only; no hostnames, serials or user names."""
+    """Versions only; no hostnames, serials or user names. Node is the one this install uses."""
+    node = os.environ.get("SNIPER_NODE_PATH") or "node"
     return {"macos": platform.mac_ver()[0], "arch": platform.machine(),
-            "node": _run(["node", "--version"]), "python": platform.python_version()}
+            "node": _run([node, "--version"]), "python": platform.python_version()}
 
 
 def receipts() -> dict:
+    """Each step's receipt (what it was built from); the per-file records are left out."""
     folder = RUNTIME / "state" / "receipts"
-    return {p.name: p.read_text(encoding="utf-8")[:200] for p in sorted(folder.glob("*"))} if folder.exists() else {}
+    return {p.name: p.read_text(encoding="utf-8")[:200] for p in sorted(folder.glob("*"))
+            if p.is_file() and not p.name.endswith(".tree.json")} if folder.exists() else {}
 
 
 def app_log_summary(path: Path) -> dict:

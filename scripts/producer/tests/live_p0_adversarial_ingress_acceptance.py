@@ -44,6 +44,8 @@ CLOSURE = (
     "scripts/producer/headless/native_media_runtime.py",
     "scripts/producer/headless/native_media_runtime_approval.json",
     "scripts/producer/headless/native_media_sandbox.py",
+    "scripts/producer/headless/native_media_watchdog.py",
+    "scripts/producer/headless/native_macho.py",
     "scripts/producer/headless/sealed_archive.py",
 )
 def _sha(path: Path) -> str:
@@ -150,7 +152,7 @@ def _decoder_timeout(root: Path) -> Path:
         raise RuntimeError("4K timeout fixture has no repeatable P slice")
     repeated.write_bytes(
         b"".join(value for _kind, value in units[:-1])
-        + units[-1][1] * 20_000)
+        + units[-1][1] * 60_000)  # well past the 90 s decode ceiling even on a fast Mac
     _ffmpeg("-r", "1000", "-i", str(repeated), "-c", "copy", str(target))
     return target
 

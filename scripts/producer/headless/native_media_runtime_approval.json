@@ -1,10 +1,10 @@
 {
   "approved": [
     {
-      "launcherSha256": "3cc40c6310244099d6052f9d24d430c4d79c5690c1e52fb204800b9460e96c5f",
-      "profileSha256": "9756cd0a3a0c8e21aca5be7180e873d6fc72868183407a878dd1d2503ecfe2a1"
+      "launcherSha256": "4bb73a0e1346e95d3081214aa1f82de98c16b80d7ca68e51ae511551fc2eb89d",
+      "profileTemplateSha256": "4d1a8e3d6aaf07462a30000a7e022a918c9fa758ffcf0adeb5447d9cec5c7dc0"
     }
   ],
-  "policy": "sniper-native-media-jail-v1",
-  "schemaVersion": 1
+  "policy": "sniper-native-media-jail-v2",
+  "schemaVersion": 2
 }

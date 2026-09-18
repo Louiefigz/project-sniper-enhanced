@@ -298,7 +298,7 @@ async function testCodexInvocations(): Promise<void> {
       // Tool-less, no directory access, frames attached, OS media boundary on.
       assert.equal(options.tools, "none");
       assert.deepEqual(options.addDirs, []);
-      assert.equal(options.jail, true);
+      assert.deepEqual(options.jail, { project: ctx.dir, review: ctx.dir });
       assert.deepEqual(options.imagePaths, [`${ctx.dir}/audit_frames/graphic-01.png`]);
       assert.ok(!options.prompt.includes("Rendered deliverable:"), "no video path is offered to the critic");
       return { message: renderedJson, stderr: "", ms: 11 };
@@ -396,7 +396,7 @@ async function testLegacyInvocation(): Promise<void> {
       assert.equal(invocation.args[invocation.args.indexOf("--allowedTools") + 1], "");
       assert.equal(invocation.args[invocation.args.indexOf("--input-format") + 1], "stream-json");
       assert.ok(!invocation.args.includes("--add-dir"));
-      assert.equal(invocation.jail, true);
+      assert.deepEqual(invocation.jail, { project: ctx.dir, review: ctx.dir });
       const input = JSON.parse(invocation.stdin!) as { message: { content: Array<{ type: string }> } };
       assert.deepEqual(input.message.content.map((block) => block.type), ["text", "image"]);
       return { message: renderedJson, stderr: "", ms: 9 };

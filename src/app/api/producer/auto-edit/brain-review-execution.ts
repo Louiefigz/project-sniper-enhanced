@@ -1,6 +1,7 @@
 import path from "node:path";
 import { brainProvider, type BrainProvider } from "../../_lib/ai-provider";
 import { runCodex } from "../../_lib/codex-cli";
+import type { ProviderJailScope } from "../../_lib/provider-media-jail";
 import { buildClaudeBrainArgs, runLegacyBrainProcess } from "./brain-review-process";
 import { buildPlanReviewPrompt } from "./plan-review-prompt";
 import { buildCutReviewPrompt } from "./cut-review-prompt";
@@ -74,20 +75,25 @@ function validateIsolatedRequest(request: ProducerReviewRequest): void {
 }
 
 
+/** The producer folder is hidden from a rendered critic except the folder holding its frames. */
+function jailScope(request: ProducerReviewRequest): ProviderJailScope {
+  return { project: request.ctx.dir, review: reviewCwd(request) };
+}
+
 /** Every critic is tool-less; rendered critics also run under the OS media boundary. */
 async function runCodexReview(request: ProducerReviewRequest, prepared: PreparedReview, codex: CodexRunner) {
   return codex({
     prompt: prepared.prompt, sandbox: "read-only", timeoutMs: reviewTimeoutMs(request),
     reasoning: PRODUCER_CRITIC_REASONING, cwd: reviewCwd(request),
     schema: "producer-review", addDirs: [], tools: "none",
-    ...(prepared.attachments ? { imagePaths: attachmentPaths(prepared.attachments), jail: true } : {}),
+    ...(prepared.attachments ? { imagePaths: attachmentPaths(prepared.attachments), jail: jailScope(request) } : {}),
   });
 }
 
 async function runLegacyReview(request: ProducerReviewRequest, prepared: PreparedReview, legacy: LegacyRunner) {
   const common = { cwd: reviewCwd(request), timeoutMs: reviewTimeoutMs(request) };
   if (prepared.attachments) {
-    return legacy({ ...common, args: claudeRenderedArgs(request.ctx), jail: true,
+    return legacy({ ...common, args: claudeRenderedArgs(request.ctx), jail: jailScope(request),
       stdin: claudeRenderedInput(prepared.prompt, prepared.attachments) });
   }
   return legacy({ ...common, args: buildClaudeBrainArgs(prepared.prompt, request.ctx, "isolated-review", []) });

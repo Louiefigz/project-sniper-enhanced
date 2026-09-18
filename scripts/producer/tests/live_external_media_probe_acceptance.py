@@ -56,7 +56,7 @@ class LiveExternalMediaProbeTests(unittest.TestCase):
         self.assertTrue(receipt["decoded"]["decoded"])
         self.assertEqual(receipt["isolation"]["network"], "denied")
         self.assertEqual(receipt["isolation"]["processCreation"], "denied")
-        self.assertTrue(all(run["sandboxed"] for run in receipt["isolation"]["decoderRuns"]))
+        self.assertTrue(all(run["sandboxed"] for run in receipt["isolation"]["jailRuns"]))
 
     def test_reference_wrapper_retains_exact_video_authority(self) -> None:
         media = self.root / "reference.mp4"

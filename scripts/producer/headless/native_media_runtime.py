@@ -1,12 +1,13 @@
-"""Identity of the native (macOS Seatbelt) media admission runtime.
+"""Identity and exact jail profile of the native (macOS Seatbelt) media admission runtime.
 
 The container route bound every receipt to one approved image. The native route
-binds it to what actually ran: the approved jail profile and launcher (hashes
-listed in ``native_media_runtime_approval.json``), the buyer's decoder
+binds it to what actually runs: the approved profile template and launcher
+(hashes listed in ``native_media_runtime_approval.json``), the buyer's decoder
 executables and every non-OS library they load (hashed, read from the Mach-O
-headers), and the macOS release. Decoders come from the local install
-(``HYPERFRAMES_FFPROBE_PATH`` / ``HYPERFRAMES_FFMPEG_PATH``, which the installer
-writes), so the identity is recorded per admission rather than pinned in advance.
+headers), and the macOS release. The jail profile is generated from the template
+by listing exactly those files (every path dyld opens and every real path) and
+their ancestor directories, so the decoder can read nothing else. Decoders come
+from the local install (``HYPERFRAMES_FFPROBE_PATH`` / ``HYPERFRAMES_FFMPEG_PATH``).
 
     python3 -m headless.native_media_runtime --write-approval   # maintainer only
 """
@@ -16,14 +17,15 @@ import hashlib
 import json
 import os
 import platform
+import re
 import stat
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-from headless.native_macho import MachOError, dependency_closure
+from headless.native_macho import MachOError, dependency_paths
 
-POLICY = "sniper-native-media-jail-v1"
+POLICY = "sniper-native-media-jail-v2"
 HERE = Path(__file__).resolve().parent
 PROFILE = HERE / "native_media_probe.sb"
 LAUNCHER = HERE / "native_media_jail.py"
@@ -31,6 +33,8 @@ APPROVAL = HERE / "native_media_runtime_approval.json"
 MIN_FFMPEG_MAJOR = 6  # -fps_mode (5.1+) and the decoders the probe relies on
 _TOOL_ENV = {"ffprobe": "HYPERFRAMES_FFPROBE_PATH", "ffmpeg": "HYPERFRAMES_FFMPEG_PATH"}
 _DEFAULT_DIRS = ("/opt/homebrew/bin", "/usr/local/bin")
+_FILES_MARK, _DIRS_MARK = ";;@DECODER-FILES@", ";;@DECODER-DIRECTORIES@"
+_UNSAFE = re.compile(r'["\\\x00-\x1f\x7f]')
 _CACHE: dict[tuple, "NativeMediaRuntime"] = {}
 
 
@@ -40,12 +44,11 @@ class NativeRuntimeError(RuntimeError):
 
 @dataclass(frozen=True)
 class NativeMediaRuntime:
-    """Resolved decoder paths, jail roots and the identity bound into receipts."""
+    """Resolved decoders, the generated jail profile and the identity bound into receipts."""
 
     ffprobe: str
     ffmpeg: str
-    library_root: str
-    link_root: str
+    profile_text: str
     identity: dict
 
 
@@ -64,17 +67,17 @@ def file_sha256(path: str | Path) -> str:
 
 
 def read_approval() -> dict:
-    """The maintainer-generated list of approved jail profile/launcher hashes."""
+    """The maintainer-generated list of approved profile-template/launcher hashes."""
     value = json.loads(APPROVAL.read_text(encoding="utf-8"))
     rows = value.get("approved") if isinstance(value, dict) else None
-    if value.get("schemaVersion") != 1 or value.get("policy") != POLICY or not isinstance(rows, list) or not rows:
+    if value.get("schemaVersion") != 2 or value.get("policy") != POLICY or not isinstance(rows, list) or not rows:
         raise NativeRuntimeError("native media runtime approval is invalid")
     return value
 
 
-def approved_pair(profile_sha256: str, launcher_sha256: str) -> bool:
-    """Whether a profile/launcher hash pair is listed in the shipped approval."""
-    return any(row.get("profileSha256") == profile_sha256 and row.get("launcherSha256") == launcher_sha256
+def approved_pair(template_sha256: str, launcher_sha256: str) -> bool:
+    """Whether a profile-template/launcher hash pair is listed in the shipped approval."""
+    return any(row.get("profileTemplateSha256") == template_sha256 and row.get("launcherSha256") == launcher_sha256
                for row in read_approval()["approved"])
 
 
@@ -89,22 +92,32 @@ def _tool(name: str) -> str:
     raise NativeRuntimeError(f"{name} is not an executable at {where}; install ffmpeg (brew install ffmpeg)")
 
 
-def _roots(tools: tuple[str, str], closure: dict[str, str]) -> tuple[str, str]:
-    """Library/link roots the jail may read; refuse layouts it cannot contain."""
-    for prefix in ("/opt/homebrew", "/usr/local"):
-        cellar = prefix + "/Cellar/"
-        if all(path.startswith(cellar) for path in closure):
-            return prefix + "/Cellar", prefix + "/opt"
-    own = os.path.dirname(os.path.dirname(tools[0]))
-    if own != "/" and all(path.startswith(own + "/") for path in closure):
-        return own, own
-    raise NativeRuntimeError("ffmpeg loads libraries from outside its own install tree; "
-                             "use the Homebrew build (brew install ffmpeg)")
+def _ancestors(paths: frozenset[str]) -> list[str]:
+    """Every ancestor directory of the listed files (for symlink traversal), excluding '/'."""
+    found = set()
+    for path in paths:
+        parent = os.path.dirname(path)
+        while parent not in ("", "/"):
+            found.add(parent)
+            parent = os.path.dirname(parent)
+    return sorted(found)
 
 
-def _closure_digest(closure: dict[str, str]) -> tuple[str, dict[str, str]]:
-    """Digest over every image in the closure, in path order."""
-    hashes = {path: file_sha256(path) for path in sorted(closure)}
+def generate_profile(template: str, opened: frozenset[str]) -> str:
+    """Fill the template with literal rules for exactly the decoder's files and their directories."""
+    if template.count(_FILES_MARK) != 1 or template.count(_DIRS_MARK) != 1:
+        raise NativeRuntimeError("native media jail template is malformed")
+    listed = sorted(opened)
+    if any(not os.path.isabs(path) or _UNSAFE.search(path) for path in listed):
+        raise NativeRuntimeError("the decoder's library paths contain characters the jail cannot express")
+    files = "\n".join(f'  (literal "{path}")' for path in listed)
+    directories = "\n".join(f'  (literal "{path}")' for path in _ancestors(opened))
+    return template.replace(_FILES_MARK, files).replace(_DIRS_MARK, directories)
+
+
+def _closure_digest(images: list[str]) -> tuple[str, dict[str, str]]:
+    """Digest over every loaded image, in path order."""
+    hashes = {path: file_sha256(path) for path in sorted(images)}
     digest = hashlib.sha256()
     for path, value in hashes.items():
         digest.update(f"{path}\0{value}\n".encode("utf-8"))
@@ -120,21 +133,21 @@ def _cache_key(tools: tuple[str, str]) -> tuple:
     return tuple(rows)
 
 
-def _identity(tools: tuple[str, str], roots: tuple[str, str], closure: dict[str, str]) -> dict:
+def _identity(tools: tuple[str, str], profile_text: str, images: list[str], opened: int) -> dict:
     """The JSON identity recorded in every native admission receipt."""
-    closure_sha, hashes = _closure_digest(closure)
+    closure_sha, hashes = _closure_digest(images)
     return {
         "kind": "macos-seatbelt",
         "policy": POLICY,
-        "profileSha256": file_sha256(PROFILE),
+        "profileTemplateSha256": file_sha256(PROFILE),
+        "profileSha256": hashlib.sha256(profile_text.encode("utf-8")).hexdigest(),
         "launcherSha256": file_sha256(LAUNCHER),
         "platform": {"system": platform.system(), "release": os.uname().release,
                      "macos": platform.mac_ver()[0], "machine": os.uname().machine},
         "tools": {name: {"path": path, "sha256": hashes[path]} for name, path in zip(("ffprobe", "ffmpeg"), tools)},
-        "libraryRoot": roots[0],
-        "linkRoot": roots[1],
         "closureSha256": closure_sha,
-        "closureCount": len(closure),
+        "closureCount": len(images),
+        "openedPathCount": opened,
     }
 
 
@@ -147,22 +160,22 @@ def required_native_runtime() -> NativeMediaRuntime:
     if key in _CACHE:
         return _CACHE[key]
     try:
-        closure = dependency_closure(tools)
+        closure = dependency_paths(tools)
     except (MachOError, OSError, UnicodeDecodeError) as error:
         raise NativeRuntimeError(f"cannot read the decoder's libraries: {error}") from error
-    roots = _roots(tools, closure)
-    identity = _identity(tools, roots, closure)
-    if not approved_pair(identity["profileSha256"], identity["launcherSha256"]):
+    profile_text = generate_profile(PROFILE.read_text(encoding="utf-8"), closure.opened)
+    identity = _identity(tools, profile_text, list(closure.images), len(closure.opened))
+    if not approved_pair(identity["profileTemplateSha256"], identity["launcherSha256"]):
         raise NativeRuntimeError("the native admission jail files are not the approved ones")
-    runtime = NativeMediaRuntime(tools[0], tools[1], roots[0], roots[1], identity)
+    runtime = NativeMediaRuntime(tools[0], tools[1], profile_text, identity)
     _CACHE[key] = runtime
     return runtime
 
 
 def write_approval() -> dict:
-    """Maintainer tool: approve the current profile and launcher text."""
-    row = {"profileSha256": file_sha256(PROFILE), "launcherSha256": file_sha256(LAUNCHER)}
-    document = {"schemaVersion": 1, "policy": POLICY, "approved": [row]}
+    """Maintainer tool: approve the current profile template and launcher text."""
+    row = {"profileTemplateSha256": file_sha256(PROFILE), "launcherSha256": file_sha256(LAUNCHER)}
+    document = {"schemaVersion": 2, "policy": POLICY, "approved": [row]}
     APPROVAL.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return document
 

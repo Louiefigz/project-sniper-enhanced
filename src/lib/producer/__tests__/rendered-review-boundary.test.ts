@@ -18,36 +18,58 @@ function scratch(): string {
   return mkdtempSync(path.join(os.tmpdir(), "rendered-boundary-"));
 }
 
-test("the provider media profile denies video, audio and snapshots in any case, not stills or text", { skip: !darwin }, () => {
+function jailRun(scope: { project: string; review: string }, file: string) {
+  const jail = providerMediaJail("/bin/cat", [file], scope);
+  return spawnSync(jail.bin, jail.args, { encoding: "utf8" });
+}
+
+test("the provider media profile hides the project except the review folder and denies media names", { skip: !darwin }, () => {
   const dir = scratch();
   try {
-    const denied = ["final.mp4", "RAW.MOV", "take.Mp4", "voice.WAV", "bed.m4a", "abc.media", "clip.mkv", "cam.MTS"];
-    const allowed = ["frame.jpg", "sheet.PNG", "audit_report.json", "plan.json"];
-    for (const name of [...denied, ...allowed]) writeFileSync(path.join(dir, name), "x");
-    for (const name of denied) {
-      const jail = providerMediaJail("/bin/cat", [path.join(dir, name)]);
-      const run = spawnSync(jail.bin, jail.args, { encoding: "utf8" });
-      assert.notEqual(run.status, 0, `${name} must be unreadable`);
-      assert.match(run.stderr, /Operation not permitted/);
+    const project = path.join(dir, "producer"), review = path.join(project, ".sniper-qc", "round-1");
+    mkdirSync(review, { recursive: true });
+    const outside = path.join(dir, "elsewhere");
+    mkdirSync(outside);
+    const scope = { project, review };
+    const cases: Array<[string, boolean]> = [
+      [path.join(review, "frame.jpg"), true], [path.join(review, "sheet-01.PNG"), true],
+      [path.join(outside, "notes.json"), true], [path.join(project, "edit_plan.json"), false],
+      [path.join(review, "final.mp4"), false], [path.join(outside, "RAW.MOV"), false],
+      [path.join(outside, "take.Mp4"), false], [path.join(outside, "voice.WAV"), false],
+      [path.join(outside, "abc.media"), false], [path.join(outside, "clip.ogv"), false],
+      [path.join(outside, "clip.nut"), false], [path.join(outside, "track.mka"), false],
+      [path.join(outside, "book.m4b"), false], [path.join(outside, "raw.y4m"), false],
+      [path.join(outside, "stream.hevc"), false], [path.join(outside, ".snapshot-1234.tmp"), false],
+    ];
+    for (const [file] of cases) writeFileSync(file, "x");
+    for (const [file, readable] of cases) {
+      const run = jailRun(scope, file);
+      assert.equal(run.status === 0 && run.stdout === "x", readable, `${path.relative(dir, file)} readable=${readable}`);
     }
-    for (const name of allowed) {
-      const jail = providerMediaJail("/bin/cat", [path.join(dir, name)]);
-      assert.equal(spawnSync(jail.bin, jail.args, { encoding: "utf8" }).stdout, "x", `${name} stays readable`);
-    }
-    const child = providerMediaJail("/bin/sh", ["-c", `/bin/cat '${path.join(dir, "final.mp4")}'`]);
+    const child = providerMediaJail("/bin/sh", ["-c", `/bin/cat '${path.join(outside, "RAW.MOV")}'`], scope);
     assert.notEqual(spawnSync(child.bin, child.args).status, 0, "children inherit the boundary");
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
-test("the jail wraps an absolute admitted binary through sandbox-exec with the shipped profile", { skip: !darwin }, () => {
-  assert.deepEqual(providerMediaJail("/bin/echo", ["hi"]), { bin: SANDBOX_EXEC, args: ["-f", PROVIDER_MEDIA_PROFILE, "/bin/echo", "hi"] });
-  assert.throws(() => providerMediaJail("echo", []), /absolute/);
+test("the jail wraps an absolute admitted binary with the scope and the shipped profile", { skip: !darwin }, () => {
+  const dir = scratch();
+  try {
+    const project = path.join(dir, "p"), review = path.join(project, "r");
+    mkdirSync(review, { recursive: true });
+    const scope = { project, review };
+    assert.deepEqual(providerMediaJail("/bin/echo", ["hi"], scope).args.slice(4), ["-f", PROVIDER_MEDIA_PROFILE, "/bin/echo", "hi"]);
+    assert.equal(providerMediaJail("/bin/echo", [], scope).bin, SANDBOX_EXEC);
+    assert.throws(() => providerMediaJail("echo", [], scope), /absolute/);
+    assert.throws(() => providerMediaJail("/bin/echo", [], { project, review: project }), /inside the project/);
+    assert.throws(() => providerMediaJail("/bin/echo", [], { project: review, review: project }), /inside the project/);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
 test("a jailed review must be tool-less on both providers", async () => {
-  await assert.rejects(runCodex({ prompt: "x", sandbox: "read-only", timeoutMs: 1000, tools: "default", jail: true }),
+  const scope = { project: "/p", review: "/p/r" };
+  await assert.rejects(runCodex({ prompt: "x", sandbox: "read-only", timeoutMs: 1000, tools: "default", jail: scope }),
     /only to tool-less Codex runs/);
-  await assert.rejects(runLegacyBrainProcess({ args: ["-p", "x", "--tools", "default"], cwd: os.tmpdir(), timeoutMs: 1000, jail: true }),
+  await assert.rejects(runLegacyBrainProcess({ args: ["-p", "x", "--tools", "default"], cwd: os.tmpdir(), timeoutMs: 1000, jail: scope }),
     /only to tool-less Claude runs/);
 });
 

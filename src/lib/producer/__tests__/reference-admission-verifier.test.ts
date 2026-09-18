@@ -103,29 +103,34 @@ try {
   }
   fs.writeFileSync(sourcePath, originalSource);
 
-  // Native (v4) receipts: accepted only with the approved jail's identity and both attested decoder runs.
+  // Native (v4) receipts: accepted only with the approved jail template/launcher and three attested runs on this snapshot.
   const approval = JSON.parse(fs.readFileSync(path.join(process.cwd(),
     "scripts/producer/headless/native_media_runtime_approval.json"), "utf8")) as { approved: Array<Record<string, string>> };
-  const jail = approval.approved[0];
+  const jail = approval.approved[0], generated = "a".repeat(64);
   const tools = { ffprobe: { path: "/opt/homebrew/Cellar/ffmpeg/8.0/bin/ffprobe", sha256: "e".repeat(64), version: "ffprobe version 8.0" },
     ffmpeg: { path: "/opt/homebrew/Cellar/ffmpeg/8.0/bin/ffmpeg", sha256: "f".repeat(64), version: "ffmpeg version 8.0" } };
-  const run = (decoder: string) => ({ sandboxed: true, decoder, profileSha256: jail.profileSha256, memoryMiB: 768, pid: 1,
+  const run = (decoder: string, input = video) => ({ sandboxed: true, decoder, input, profileSha256: generated, memoryMiB: 768,
+    pid: 1, mode: decoder === "/dev/null" ? "inspect" : "exec",
     rlimits: { RLIMIT_CORE: [0, 0], RLIMIT_CPU: [10, 15], RLIMIT_FSIZE: [0, 0], RLIMIT_NOFILE: [256, 256] } });
   const common = Object.fromEntries(Object.entries(receipt).filter(([key]) => !["image", "network", "isolation"].includes(key)));
+  const runs = [run("/dev/null"), run(tools.ffprobe.path), run(tools.ffmpeg.path)];
   const native = { ...common, policy: "sniper-external-media-probe-v4-native",
-    runtime: { kind: "macos-seatbelt", policy: "sniper-native-media-jail-v1", profileSha256: jail.profileSha256,
-      launcherSha256: jail.launcherSha256, platform: { system: "Darwin" }, tools, libraryRoot: "/opt/homebrew/Cellar",
-      linkRoot: "/opt/homebrew/opt", closureSha256: "d".repeat(64), closureCount: 93 },
-    isolation: { kind: "macos-seatbelt", policy: "sniper-native-media-jail-v1", profileSha256: jail.profileSha256,
-      network: "denied", processCreation: "denied", writes: "/dev/null only", memoryMiB: 768,
-      decoderRuns: [run(tools.ffprobe.path), run(tools.ffmpeg.path)], fontSvg: "recognised from bounded reads; not decoded" } };
+    runtime: { kind: "macos-seatbelt", policy: "sniper-native-media-jail-v2", profileTemplateSha256: jail.profileTemplateSha256,
+      profileSha256: generated, launcherSha256: jail.launcherSha256, platform: { system: "Darwin" }, tools,
+      closureSha256: "d".repeat(64), closureCount: 93, openedPathCount: 216 },
+    isolation: { kind: "macos-seatbelt", policy: "sniper-native-media-jail-v2", profileSha256: generated,
+      network: "denied", processCreation: "denied", writes: "/dev/null only", otherProcesses: "denied",
+      watchdog: "footprint+cpu", memoryMiB: 768, jailRuns: runs } };
   const variants: Array<[string, Record<string, unknown>, boolean]> = [
     ["approved native", native, true],
-    ["unapproved profile", { ...native, runtime: { ...native.runtime, profileSha256: "0".repeat(64) } }, false],
-    ["one decoder run", { ...native, isolation: { ...native.isolation, decoderRuns: [run(tools.ffprobe.path)] } }, false],
+    ["unapproved template", { ...native, runtime: { ...native.runtime, profileTemplateSha256: "0".repeat(64) } }, false],
+    ["missing inspection", { ...native, isolation: { ...native.isolation, jailRuns: runs.slice(1) } }, false],
     ["wrong memory cap", { ...native, isolation: { ...native.isolation, memoryMiB: 4096 } }, false],
     ["unconfined run", { ...native, isolation: { ...native.isolation,
-      decoderRuns: [run(tools.ffprobe.path), { ...run(tools.ffmpeg.path), sandboxed: false }] } }, false],
+      jailRuns: [runs[0], runs[1], { ...runs[2], sandboxed: false }] } }, false],
+    ["run on another input", { ...native, isolation: { ...native.isolation,
+      jailRuns: [runs[0], run(tools.ffprobe.path, "/elsewhere.media"), runs[2]] } }, false],
+    ["no watchdog", { ...native, isolation: { ...native.isolation, watchdog: "none" } }, false],
     ["extra key", { ...native, network: { schemaVersion: 1, hostDecoyPositive: true } }, false],
   ];
   for (const [label, value, expected] of variants) {

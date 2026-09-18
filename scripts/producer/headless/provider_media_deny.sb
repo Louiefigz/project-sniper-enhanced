@@ -1,16 +1,29 @@
-; Sniper provider-CLI media boundary (policy sniper-provider-media-deny-v1).
+; Sniper provider-CLI media boundary (policy sniper-provider-media-deny-v2).
 ;
 ; Wraps a Codex or Claude CLI process that Sniper starts for a tool-less review
-; (src/app/api/_lib/provider-media-jail.ts). Whatever the model asks for, the
-; CLI and anything it starts cannot open a video or audio file or a Sniper media
-; snapshot (*.media). Still images stay readable: they are the review evidence.
-; Everything else, including the network connection to the provider, is
-; unchanged. Extensions cover everything Sniper ingests
-; (scripts/producer/ingest_probe.py VIDEO_EXTS/AUDIO_EXTS) plus common camera
-; and container formats, matched without regard to case.
+; (src/app/api/_lib/provider-media-jail.ts). The primary boundary is that the
+; review has no tools; this profile is defence in depth for the CLI and anything
+; it starts:
+;   - nothing inside the project folder is readable except the review folder
+;     that holds the still frames and contact sheets being attached;
+;   - no file with a video or audio extension, no Sniper media snapshot
+;     (*.media) and no snapshot staging file can be opened anywhere, including
+;     inside the review folder.
+; Rules are matched on names, so a video renamed to .jpg outside the project
+; folder is not caught here; the tool-less review is what prevents reading it.
+; Network access to the provider is unchanged.
+;
+;   PROJECT  the project folder (holds source snapshots, renders and plans)
+;   REVIEW   the folder with the review's still images (inside PROJECT)
 (version 1)
 (allow default)
+(deny file-read-data file-write-data (subpath (param "PROJECT")))
+(allow file-read-data (subpath (param "REVIEW")))
 (deny file-read-data file-write-data
-  (regex #"\.([mM][pP]4|[mM][oO][vV]|[mM]4[vV]|[mM][kK][vV]|[wW][eE][bB][mM]|[aA][vV][iI]|[mM][pP][eE]?[gG]|[mM][tT][sS]|[mM]2[tT][sS]|[tT][sS]|[mM][xX][fF]|3[gG][pP]|[fF][lL][vV]|[wW][mM][vV]|[dD][vV]|[bB][rR][aA][wW]|[rR]3[dD])$")
-  (regex #"\.([mM][pP]3|[wW][aA][vV]|[mM]4[aA]|[aA][aA][cC]|[fF][lL][aA][cC]|[oO][gG][gG]|[oO][pP][uU][sS]|[wW][mM][aA]|[aA][iI][fF][fF]?|[cC][aA][fF])$")
-  (regex #"\.[mM][eE][dD][iI][aA]$"))
+  (regex #"\.([mM][pP]4|[mM]4[vVbBaA]|[mM][oO][vV]|[mM][kK][vVaA]|[wW][eE][bB][mM]|[aA][vV][iI]|[mM][pP][eE]?[gG]|[mM]2[vV]|[mM][pP]2)$")
+  (regex #"\.([mM]2?[tT][sS]|[tT][sS]|[mM][xX][fF]|3[gG][pP2]|[fF][lL][vV]|[fF]4[vV]|[wW][mM][vV]|[aA][sS][fF]|[vV][oO][bB]|[dD][vV]|[oO][gG][vVgG])$")
+  (regex #"\.([bB][rR][aA][wW]|[rR]3[dD]|[nN][uU][tT]|[yY]4[mM]|[iI][vV][fF]|[oO][bB][uU]|[hH]26[45]|26[45]|[hH][eE][vV][cC])$")
+  (regex #"\.([mM][pP]3|[wW][aA][vV]|[aA][aA][cC]|[fF][lL][aA][cC]|[oO][pP][uU][sS]|[wW][mM][aA]|[aA][iI][fF][fFcC]?|[cC][aA][fF])$")
+  (regex #"\.([aA][cC]3|[eE][aA][cC]3|[dD][tT][sS]|[aA][mM][rR]|[aA][uU]|[sS][nN][dD]|[wW][vV]|[aA][pP][eE])$")
+  (regex #"\.[mM][eE][dD][iI][aA]$")
+  (regex #"/\.snapshot-[^/]*\.tmp$"))

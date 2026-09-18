@@ -6,6 +6,7 @@ import json
 import unittest
 from pathlib import Path
 
+from headless.native_media_runtime import POLICY as JAIL_POLICY
 from live_p0_adversarial_ingress_acceptance import CASES, CLOSURE
 
 REPO = Path(__file__).parents[3]
@@ -37,7 +38,7 @@ class P0AdversarialIngressArtifactTests(unittest.TestCase):
             },
         )
         self.assertEqual(value["schemaVersion"], 2)
-        self.assertEqual(value["nativeRuntime"]["policy"], "sniper-native-media-jail-v1")
+        self.assertEqual(value["nativeRuntime"]["policy"], JAIL_POLICY)  # regenerate the cohort when the jail changes
         self.assertEqual(
             value["kind"], "p0-adversarial-ingress-acceptance")
         self.assertTrue(value["passed"])

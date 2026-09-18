@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -20,21 +21,32 @@ from unittest import mock
 
 from _native_media_fixture import HAVE_NATIVE, DecoyListener, valid_mp4
 from headless import native_media_runtime, native_media_sandbox
-from headless.native_media_runtime import LAUNCHER, PROFILE, NativeRuntimeError
-from headless.native_media_sandbox import JailLimits, JailRejection, run_decoder, verified_runtime
+from headless.native_macho import dependency_paths
+from headless.native_media_runtime import LAUNCHER, PROFILE, NativeRuntimeError, generate_profile
+from headless.native_media_sandbox import JailLimits, JailRejection, run_decoder, run_inspect, verified_runtime
+from headless.native_media_watchdog import JailWatchdog
 
 
-def _launcher(decoder: str, arguments: list[str], root: Path) -> subprocess.CompletedProcess:
-    """Run the real launcher with an arbitrary decoder (tests only; production allows two)."""
-    runtime = verified_runtime()
+def _request(decoder: str, root: Path, wall: float = 30, memory: int = 256,
+             profile_text: str | None = None) -> tuple[Path, int]:
+    """A real launcher request with a generated profile and an arbitrary decoder (tests only)."""
+    profile_text = verified_runtime().profile_text if profile_text is None else profile_text
     root = Path(tempfile.mkdtemp(dir=root))
+    profile = root / "jail.sb"
+    profile.write_text(profile_text, encoding="utf-8")
     request = root / "request.json"
     request.write_text(json.dumps({
-        "profilePath": str(PROFILE), "profileSha256": runtime.identity["profileSha256"],
-        "memoryMiB": 256, "cpuSeconds": 10,
-        "parameters": {"DECODER": decoder, "LIBROOT": runtime.library_root,
-                       "LINKROOT": runtime.link_root, "INPUT": "/dev/null"}}))
-    attest = os.open(root / "attest", os.O_RDWR | os.O_CREAT | os.O_EXCL, 0o600)
+        "profilePath": str(profile), "profileSha256": hashlib.sha256(profile_text.encode()).hexdigest(),
+        "mode": "exec",
+        "memoryMiB": memory, "cpuSeconds": 10, "wallSeconds": wall, "limits": {}, "inputPath": "/dev/null",
+        "parameters": {"DECODER": decoder, "INPUT": "/dev/null"}}))
+    return request, os.open(root / "attest", os.O_RDWR | os.O_CREAT | os.O_EXCL, 0o600)
+
+
+def _launcher(decoder: str, arguments: list[str], root: Path,
+              profile_text: str | None = None) -> subprocess.CompletedProcess:
+    """Run the real launcher with an arbitrary decoder (tests only; production allows two)."""
+    request, attest = _request(decoder, root, profile_text=profile_text)
     try:
         return subprocess.run([sys.executable, "-I", "-S", "-B", str(LAUNCHER), str(request), str(attest), "--",
                                decoder, *arguments], pass_fds=(attest,), capture_output=True, text=True,
@@ -154,7 +166,104 @@ class NativeJailPropertyTests(unittest.TestCase):
 
     def test_shipped_profile_and_launcher_are_the_approved_pair(self) -> None:
         identity = native_media_runtime.required_native_runtime().identity
-        self.assertTrue(native_media_runtime.approved_pair(identity["profileSha256"], identity["launcherSha256"]))
+        self.assertTrue(native_media_runtime.approved_pair(identity["profileTemplateSha256"], identity["launcherSha256"]))
+
+    def test_input_named_through_a_symlinked_folder_is_decoded_and_attested(self) -> None:
+        linked = self.root / "linked"
+        linked.symlink_to(self.root, target_is_directory=True)  # like /var -> /private/var
+        path = str(linked / "input.mp4")
+        done = run_decoder(self.runtime, self.runtime.ffmpeg, ("-nostdin", "-v", "error", "-i", path, "-f", "null", "-"),
+                           (path, JailLimits(30, 30)))
+        self.assertEqual((done.attestation["input"], done.attestation["inputResolved"]), (path, str(self.media)))
+
+    def test_reads_are_limited_to_the_decoders_own_files(self) -> None:
+        other = next(Path("/opt/homebrew/Cellar").glob("python@*/*/Frameworks/Python.framework/Versions/*/lib/*/LICENSE.txt"), None)
+        if other is None:
+            self.skipTest("no other Homebrew formula file to probe")
+        denied = _launcher("/bin/cat", [str(other)], self.root)
+        self.assertNotEqual(denied.returncode, 0)
+        self.assertIn("Operation not permitted", denied.stderr)
+
+    @unittest.skipUnless(shutil.which("cc"), "needs a C compiler for the stand-in decoder")
+    def test_a_decoder_outside_homebrew_exposes_only_its_own_files(self) -> None:
+        home = self.root / "home"  # the reviewer's layout: a decoder installed under a home folder
+        (home / ".ssh").mkdir(parents=True)
+        secret = home / ".ssh" / "id_ed25519"
+        secret.write_text("PRIVATE KEY")
+        (home / "bin").mkdir()
+        source = home / "bin" / "reader.c"
+        source.write_text('#include <stdio.h>\nint main(int c,char**v){FILE*f=fopen(v[1],"r");'
+                          'if(!f){perror(v[1]);return 3;}int ch;while((ch=fgetc(f))!=EOF)putchar(ch);return 0;}')
+        decoder = home / "bin" / "ffprobe"
+        subprocess.run(["cc", "-o", str(decoder), str(source)], check=True, capture_output=True)
+        profile = generate_profile(PROFILE.read_text(encoding="utf-8"), dependency_paths((str(decoder),)).opened)
+        self.assertEqual(_launcher(str(decoder), ["/dev/null"], self.root, profile).returncode, 0)
+        for other in (secret, source):
+            denied = _launcher(str(decoder), [str(other)], self.root, profile)
+            self.assertEqual(denied.returncode, 3, other.name)
+            self.assertIn("Operation not permitted", denied.stderr)
+            self.assertNotIn("PRIVATE", denied.stdout)
+
+    def test_other_processes_environment_and_arguments_are_hidden(self) -> None:
+        victim = subprocess.Popen(["/bin/sleep", "30"], env={"PATH": "/usr/bin", "SNIPER_TEST_SECRET": "leak-me-please"})
+        try:
+            seen = _launcher("/bin/ps", ["-E", "-ww", "-p", str(victim.pid), "-o", "command="], self.root)
+        finally:
+            victim.kill()
+            victim.wait()
+        self.assertNotIn("leak-me-please", seen.stdout + seen.stderr)
+
+    def test_watchdog_enforces_the_cpu_ceiling(self) -> None:
+        began = time.monotonic()
+        with self.assertRaises(JailRejection) as caught:
+            self._ffmpeg("-f", "lavfi", "-i", "mandelbrot=size=1920x1080:rate=30", "-t", "120",
+                         "-f", "null", "-", limits=JailLimits(60, 2))
+        self.assertEqual(caught.exception.code, "CPU_LIMIT")
+        self.assertLess(time.monotonic() - began, 20)
+
+    @unittest.skipUnless(shutil.which("cc"), "needs a C compiler for the re-exec probe")
+    def test_watchdog_catches_a_decoder_that_re_execs_to_shed_the_kernel_limit(self) -> None:
+        source = self.root / "reexec.c"
+        source.write_text('#include <stdlib.h>\n#include <string.h>\n#include <unistd.h>\n'
+                          'int main(int c,char**v){if(c<3){char*a[]={v[0],"x","y",0};execv(v[0],a);}'
+                          'for(int i=0;i<64;i++){char*p=malloc(16<<20);memset(p,1,16<<20);usleep(20000);}return 0;}')
+        binary = self.root / "reexec"
+        subprocess.run(["cc", "-O0", "-o", str(binary), str(source)], check=True, capture_output=True)
+        request, attest = _request(str(binary), self.root, memory=128)
+        watchdog = JailWatchdog(attest, 128 << 20, 60)
+        watchdog.start()
+        try:
+            done = subprocess.run([sys.executable, "-I", "-S", "-B", str(LAUNCHER), str(request), str(attest), "--",
+                                   str(binary)], pass_fds=(attest,), capture_output=True, timeout=60)
+        finally:
+            watchdog.stop()
+            os.close(attest)
+        self.assertEqual(watchdog.exceeded, "MEMORY_LIMIT")
+        self.assertLess(watchdog.peak_bytes, 400 << 20)
+        self.assertEqual(done.returncode, -9)
+
+    def test_alarm_ends_an_orphaned_decoder(self) -> None:
+        request, attest = _request(self.runtime.ffmpeg, self.root, wall=1)
+        try:
+            began = time.monotonic()
+            done = subprocess.run([sys.executable, "-I", "-S", "-B", str(LAUNCHER), str(request), str(attest), "--",
+                                   self.runtime.ffmpeg, "-nostdin", "-v", "error", "-re", "-f", "lavfi", "-i",
+                                   "testsrc2=size=64x64:rate=30", "-t", "60", "-f", "null", "-"],
+                                  pass_fds=(attest,), capture_output=True, timeout=30)
+        finally:
+            os.close(attest)
+        self.assertEqual(done.returncode, -14)  # SIGALRM, with no supervisor watching
+        self.assertLess(time.monotonic() - began, 15)
+
+    def test_svg_inspection_is_linear_and_jailed(self) -> None:
+        hostile = self.root / "many-open-tags.svg"
+        hostile.write_text("<svg " * 60000)
+        began = time.monotonic()
+        result, attestation = run_inspect(self.runtime, str(hostile), {"maxBytes": 1 << 30, "maxWidth": 8192,
+                                                                      "maxHeight": 8192})
+        self.assertLess(time.monotonic() - began, 5)
+        self.assertEqual((attestation["mode"], attestation["sandboxed"]), ("inspect", True))
+        self.assertIn("rejected", result)
 
 
 if __name__ == "__main__":

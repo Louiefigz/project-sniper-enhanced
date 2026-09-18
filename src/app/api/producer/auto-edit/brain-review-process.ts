@@ -2,7 +2,7 @@ import { spawn } from "child_process";
 import path from "path";
 import { claudeModelArgs, claudeProcessEnv } from "../../_lib/ai-provider";
 import { admitSubscriptionInvocation } from "../../_lib/subscription-invocation";
-import { providerMediaJail } from "../../_lib/provider-media-jail";
+import { providerMediaJail, type ProviderJailScope } from "../../_lib/provider-media-jail";
 import {
   PROCESS_TERM_GRACE_MS,
   shouldDetachProcessGroup,
@@ -24,7 +24,7 @@ export interface LegacyBrainInvocation {
   /** stream-json input (text + image blocks) written to stdin, then closed. */
   stdin?: string;
   /** Run under the OS media boundary (provider-media-jail.ts); requires `--tools ""`. */
-  jail?: boolean;
+  jail?: ProviderJailScope;
 }
 
 function toolless(args: readonly string[]): boolean {
@@ -132,7 +132,7 @@ export async function runLegacyBrainProcess(
   const admitted = await admitSubscriptionInvocation({ provider: "claude", bin: CLAUDE_BIN,
     args: invocation.args, cwd: invocation.cwd, env: claudeProcessEnv(),
     timeoutMs: invocation.timeoutMs, signal: invocation.signal });
-  const command = invocation.jail ? providerMediaJail(admitted.bin, admitted.args)
+  const command = invocation.jail ? providerMediaJail(admitted.bin, admitted.args, invocation.jail)
     : { bin: admitted.bin, args: [...admitted.args] };
   return new Promise((resolve, reject) => {
     const timeoutMs = admitted.remainingMs();

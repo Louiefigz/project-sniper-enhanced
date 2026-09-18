@@ -18,7 +18,7 @@ from pathlib import Path
 from _native_media_fixture import FONT, HAVE_NATIVE, DecoyListener, ffmpeg, valid_mp4
 from headless.admission_receipt import validate_admission_receipt
 from headless.external_media_probe import admit_external_media
-from headless.external_media_probe_native import probe_facts, special_facts
+from headless.external_media_probe_native import inspected_facts, probe_facts
 from headless.external_media_probe_policy import NODE_PROBE, MediaProbeLimits
 from headless.native_media_sandbox import JailRejection, verified_runtime
 
@@ -43,7 +43,7 @@ def _native(path: Path, limits: MediaProbeLimits) -> dict:
     """The native port's facts or its rejection code, without the jail wrapper."""
     runtime = verified_runtime()
     try:
-        special = special_facts(str(path), limits)
+        special, _attestation = inspected_facts(runtime, str(path), limits)
         if special is not None:
             return {"ok": True, "facts": special}
         from headless.native_media_sandbox import JailLimits, run_decoder
@@ -115,8 +115,20 @@ class NativeAdmissionHostileInputTests(unittest.TestCase):
         receipt = self._admit(valid_mp4(self.root / "valid.mp4"))
         limits, decoded = validate_admission_receipt(receipt)
         self.assertEqual(decoded["facts"]["mediaKind"], "timed-media")
-        self.assertEqual([run["decoder"] for run in receipt["isolation"]["decoderRuns"]],
-                         [receipt["runtime"]["tools"]["ffprobe"]["path"], receipt["runtime"]["tools"]["ffmpeg"]["path"]])
+        self.assertEqual([run["decoder"] for run in receipt["isolation"]["jailRuns"]],
+                         ["/dev/null", receipt["runtime"]["tools"]["ffprobe"]["path"],
+                          receipt["runtime"]["tools"]["ffmpeg"]["path"]])
+        self.assertEqual({run["input"] for run in receipt["isolation"]["jailRuns"]}, {receipt["snapshot"]["path"]})
+
+    def test_store_under_a_symlinked_folder_is_admitted(self) -> None:
+        linked = self.root / "linked-workspace"
+        linked.symlink_to(self.root, target_is_directory=True)  # like /var -> /private/var
+        (self.root / "store").mkdir()
+        receipt = admit_external_media(str(valid_mp4(self.root / "valid.mp4")), str(linked / "store"), LIMITS)
+        validate_admission_receipt(receipt)
+        self.assertEqual(receipt["snapshot"]["path"], str(linked / "store" / (receipt["snapshot"]["sha256"] + ".media")))
+        self.assertEqual({run["inputResolved"] for run in receipt["isolation"]["jailRuns"]},
+                         {str(self.root / "store" / (receipt["snapshot"]["sha256"] + ".media"))})
 
     def test_playlist_that_fetches_the_network_is_rejected_without_a_connection(self) -> None:
         decoy = DecoyListener()

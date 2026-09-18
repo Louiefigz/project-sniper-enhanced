@@ -113,45 +113,73 @@ def _expand(template: str, loader: str, executable: str) -> str:
     return template
 
 
-def _resolve(name: str, loader: str, executable: str, rpaths: list[str]) -> str | None:
-    """Resolve one install name to an existing file, or None for system images."""
+def _candidate(name: str, loader: str, executable: str, rpaths: list[str]) -> str | None:
+    """The path dyld opens for one install name (before symlinks), or None for OS images."""
     if name.startswith(_SYSTEM_PREFIXES):
         return None
     if name.startswith("@rpath/"):
         for rpath in rpaths:
-            candidate = os.path.join(_expand(rpath, loader, executable), name[len("@rpath/"):])
+            candidate = os.path.normpath(os.path.join(_expand(rpath, loader, executable), name[len("@rpath/"):]))
             if os.path.isfile(candidate):
-                return os.path.realpath(candidate)
+                return candidate
         raise MachOError(f"unresolved run-path dependency {name} of {loader}")
-    candidate = _expand(name, loader, executable)
+    candidate = os.path.normpath(_expand(name, loader, executable))
     if not os.path.isabs(candidate) or not os.path.isfile(candidate):
         raise MachOError(f"missing dependency {name} of {loader}")
-    return os.path.realpath(candidate)
+    return candidate
 
 
-def dependency_closure(executables: tuple[str, ...]) -> dict[str, str]:
-    """Map every non-system image loaded by ``executables`` to the path that names it.
+def link_chain(path: str) -> set[str]:
+    """Every path a lookup of ``path`` passes through: as named, with its directory
+    resolved, and each hop of a final-component symlink chain (bounded)."""
+    seen = {os.path.normpath(path)}
+    current = os.path.join(os.path.realpath(os.path.dirname(path)), os.path.basename(path))
+    for _ in range(32):
+        seen.add(current)
+        if not os.path.islink(current):
+            break
+        target = os.readlink(current)
+        joined = target if os.path.isabs(target) else os.path.join(os.path.dirname(current), target)
+        current = os.path.join(os.path.realpath(os.path.dirname(joined)), os.path.basename(joined))
+    seen.add(os.path.realpath(path))
+    return seen
 
-    Args:
-        executables: Absolute paths of the decoder executables.
 
-    Returns:
-        ``{real_path: declared_name}`` for each executable and dylib in the
-        closure, excluding the OS images under /usr/lib and /System.
-    """
-    closure: dict[str, str] = {}
+@dataclass(frozen=True)
+class DependencyClosure:
+    """Every non-OS image a set of executables loads."""
+
+    images: dict[str, str]
+    """``{real_path: declared_name}`` for each executable and dylib."""
+    opened: frozenset[str]
+    """Every path dyld opens on the way (install-name and run-path expansions,
+    executable paths as given) plus every real path; a sandbox checks these."""
+
+
+def dependency_paths(executables: tuple[str, ...]) -> DependencyClosure:
+    """Images and opened paths for ``executables`` (OS images under /usr/lib and /System excluded)."""
+    images: dict[str, str] = {}
+    opened: set[str] = set()
     for executable in executables:
         real = os.path.realpath(executable)
+        opened.update(link_chain(executable))
         pending = [(real, executable, [])]
         while pending:
             image, declared, inherited = pending.pop()
-            if image in closure:
+            if image in images:
                 continue
-            closure[image] = declared
+            images[image] = declared
             deps = read_dependencies(image)
             rpaths = [_expand(item, image, real) for item in deps.rpaths] + inherited
             for name in deps.dylibs:
-                resolved = _resolve(name, image, real, rpaths)
-                if resolved is not None:
+                candidate = _candidate(name, image, real, rpaths)
+                if candidate is not None:
+                    resolved = os.path.realpath(candidate)
+                    opened.update(link_chain(candidate))
                     pending.append((resolved, name, rpaths))
-    return closure
+    return DependencyClosure(images, frozenset(opened))
+
+
+def dependency_closure(executables: tuple[str, ...]) -> dict[str, str]:
+    """Map every non-OS image loaded by ``executables`` to the path that names it."""
+    return dependency_paths(executables).images

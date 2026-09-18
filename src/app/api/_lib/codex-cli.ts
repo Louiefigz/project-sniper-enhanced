@@ -1,7 +1,7 @@
 import { spawn } from "child_process";
 import path from "path";
 import readline from "readline";
-import { providerMediaJail } from "./provider-media-jail";
+import { providerMediaJail, type ProviderJailScope } from "./provider-media-jail";
 import { admitSubscriptionInvocation } from "./subscription-invocation";
 import { CODEX_SUBSCRIPTION_CONFIG } from "./subscription-policy";
 import {
@@ -55,7 +55,7 @@ export interface CodexRunOptions {
   /** Optional aggregate stdout+stderr byte budget; never truncate a successful result. */
   maxOutputBytes?: number;
   /** Run under the OS media boundary (provider-media-jail.ts); requires tools "none". */
-  jail?: boolean;
+  jail?: ProviderJailScope;
 }
 
 export interface CodexRunResult {
@@ -181,7 +181,7 @@ export async function runCodex(options: CodexRunOptions): Promise<CodexRunResult
   const admitted = await admitSubscriptionInvocation({ provider: "codex", bin: settings.bin,
     args: buildCodexArgs(options), cwd: options.cwd ?? process.cwd(), env: codexProcessEnv(),
     timeoutMs: options.timeoutMs, signal: options.signal });
-  const command = options.jail ? providerMediaJail(admitted.bin, admitted.args)
+  const command = options.jail ? providerMediaJail(admitted.bin, admitted.args, options.jail)
     : { bin: admitted.bin, args: [...admitted.args] };
   return new Promise((resolve, reject) => {
     const timeoutMs = admitted.remainingMs();

@@ -1,34 +1,26 @@
 """Native full-decode admission for one immutable external-media snapshot.
 
 Same observations and ceilings as the container probe (``NODE_PROBE`` in
-external_media_probe_policy.py): ffprobe facts, the size/stream/dimension/
-duration/frame limits, then a complete ffmpeg decode that must finish without a
-single error line. Each decoder runs alone in the native jail
-(native_media_sandbox.py). Fonts and SVG are recognised from bounded reads here,
-as the container probe did, and are never decoded.
+external_media_probe_policy.py): a font/SVG recogniser, ffprobe facts, the
+size/stream/dimension/duration/frame limits, then a complete ffmpeg decode that
+must finish without a single error line. Every step that reads the untrusted
+bytes runs alone in the native jail (native_media_sandbox.py): the recogniser in
+the launcher's inspection mode, the decoders by exec. Fonts and SVG are never
+decoded.
 """
 from __future__ import annotations
 
 import json
 import math
-import os
-import re
-import struct
 from dataclasses import asdict
 
 from headless.external_media_probe_document import validate_probe_document
 from headless.external_media_probe_policy import MediaProbeLimits
 from headless.external_media_snapshot import ExternalMediaSnapshot, verify_external_media_snapshot
-from headless.native_media_sandbox import JailLimits, JailRejection, run_decoder, verified_runtime
+from headless.native_media_sandbox import JailLimits, JailRejection, run_decoder, run_inspect, verified_runtime
 
 POLICY_VERSION = "sniper-external-media-probe-v4-native"  # headless/admission_receipt.py NATIVE_POLICY
 _PROBE_ENTRIES = "stream=codec_type,width,height,nb_frames,avg_frame_rate:format=duration,size"
-_FONT_MAGIC = {b"\x00\x01\x00\x00", b"OTTO", b"true"}
-_SVG_ACTIVE = re.compile(r"<!doctype|<!entity|<script|javascript:|https?://|onload\s*=|onerror\s*=|<foreignobject")
-_SVG_TAG = re.compile(r"<svg\b[^>]*>", re.I)
-_VIEWBOX = re.compile(r"\bviewBox\s*=\s*[\"']\s*[\d.+-]+\s+[\d.+-]+\s+([\d.]+)\s+([\d.]+)\s*[\"']", re.I)
-
-
 def js_number(value: object) -> float:
     """``Number(value || 0)`` as the container's JavaScript probe computed it."""
     if value in (None, "", 0, False):
@@ -46,57 +38,6 @@ def js_number(value: object) -> float:
 def _json_number(value: float) -> int | float:
     """Integral values serialise as integers, exactly like JSON.stringify."""
     return int(value) if math.isfinite(value) and value == int(value) else value
-
-
-def _font_facts(head: bytes, size: int) -> dict:
-    """Bounded table-directory check for TrueType/OpenType fonts."""
-    tables = struct.unpack_from(">H", head, 4)[0] if len(head) >= 6 else 0
-    if tables < 1 or tables > 128 or 12 + tables * 16 > len(head):
-        raise JailRejection("FONT_TABLE_LIMIT")
-    for index in range(tables):
-        offset, length = struct.unpack_from(">II", head, 12 + index * 16 + 8)
-        if offset + length > size:
-            raise JailRejection("FONT_TABLE_RANGE")
-    return {"mediaKind": "font", "durationSeconds": 0, "sizeBytes": size, "width": 0, "height": 0,
-            "videoStreams": 0, "audioStreams": 0, "streamCount": 1, "declaredFrames": 0}
-
-
-def _svg_facts(path: str, size: int, limits: MediaProbeLimits) -> dict:
-    """Refuse active or remote SVG content and bound its declared size."""
-    if size > 16 * 1024 * 1024:
-        raise JailRejection("SVG_SIZE_LIMIT")
-    with open(path, "rb") as handle:
-        text = handle.read(size + 1).decode("utf-8", errors="replace")
-    lower = text.lower()
-    remote = lower.replace("http://www.w3.org/2000/svg", "").replace("http://www.w3.org/1999/xlink", "")
-    if "<svg" not in lower or _SVG_ACTIVE.search(remote):
-        raise JailRejection("SVG_ACTIVE_CONTENT")
-    tag = (_SVG_TAG.search(text) or [""])[0] if _SVG_TAG.search(text) else ""
-    view = _VIEWBOX.search(tag)
-    width_match = re.search(r"\bwidth\s*=\s*[\"']([\d.]+)", tag, re.I)
-    height_match = re.search(r"\bheight\s*=\s*[\"']([\d.]+)", tag, re.I)
-    width = js_number(width_match.group(1) if width_match else (view.group(1) if view else 0))
-    height = js_number(height_match.group(1) if height_match else (view.group(2) if view else 0))
-    if not (width > 0 and height > 0) or width > limits.max_width or height > limits.max_height:
-        raise JailRejection("DIMENSION_LIMIT")
-    return {"mediaKind": "svg", "durationSeconds": 0, "sizeBytes": size, "width": _json_number(width),
-            "height": _json_number(height), "videoStreams": 1, "audioStreams": 0, "streamCount": 1,
-            "declaredFrames": 1}
-
-
-def special_facts(path: str, limits: MediaProbeLimits) -> dict | None:
-    """Facts for a font or SVG, or None when the file must be decoded."""
-    size = os.stat(path).st_size
-    if size <= 0 or size > limits.max_bytes:
-        raise JailRejection("SIZE_LIMIT")
-    with open(path, "rb") as handle:
-        head = handle.read(min(65536, size))
-    if head[:4] in _FONT_MAGIC:
-        return _font_facts(head, size)
-    prefix = head[:1024].decode("utf-8", errors="replace").lstrip().lower()
-    if prefix.startswith("<svg") or prefix.startswith("<?xml"):
-        return _svg_facts(path, size, limits)
-    return None
 
 
 def _stream_totals(streams: list, duration: float) -> dict:
@@ -166,16 +107,27 @@ def native_isolation(runtime, attestations: list[dict]) -> dict:
     """What confined the observations, as recorded in the receipt."""
     return {"kind": "macos-seatbelt", "policy": runtime.identity["policy"],
             "profileSha256": runtime.identity["profileSha256"], "network": "denied",
-            "processCreation": "denied", "writes": "/dev/null only", "memoryMiB": attestations[0]["memoryMiB"]
-            if attestations else None, "decoderRuns": attestations,
-            "fontSvg": "recognised from bounded reads; not decoded"}
+            "processCreation": "denied", "writes": "/dev/null only", "otherProcesses": "denied",
+            "memoryMiB": attestations[0]["memoryMiB"], "watchdog": "footprint+cpu", "jailRuns": attestations}
+
+
+def inspected_facts(runtime, path: str, limits: MediaProbeLimits) -> tuple[dict | None, dict]:
+    """Font/SVG facts from the jailed inspection (None: timed media or a still), plus its attestation."""
+    result, attestation = run_inspect(runtime, path, {"maxBytes": limits.max_bytes, "maxWidth": limits.max_width,
+                                                      "maxHeight": limits.max_height})
+    if isinstance(result, dict) and isinstance(result.get("rejected"), str):
+        raise JailRejection(result["rejected"])
+    if not isinstance(result, dict) or set(result) != {"special"}:
+        raise JailRejection("INSPECT_OUTPUT", "inspection result is malformed")
+    return result["special"], attestation
 
 
 def probe_native_snapshot(path: str, limits: MediaProbeLimits) -> dict:
     """Observe one snapshot; return runtime, isolation and the validated decode document."""
     runtime = verified_runtime()
-    special = special_facts(path, limits)
+    special, inspection = inspected_facts(runtime, path, limits)
     facts, attestations = (special, []) if special is not None else _decode(runtime, path, limits)
+    attestations = [inspection, *attestations]
     document = validate_probe_document({"schemaVersion": 1, "ok": True, "decoded": True, "facts": facts}, limits)
     return {"runtime": runtime.identity, "isolation": native_isolation(runtime, attestations), "decoded": document}
 

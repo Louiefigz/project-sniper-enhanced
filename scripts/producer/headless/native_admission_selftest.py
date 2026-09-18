@@ -48,7 +48,7 @@ def _admission(runtime, root: Path) -> dict:
     kind = receipt_snapshot(receipt, store)[3]
     if kind != "timed-media" or decoded["facts"]["videoStreams"] != 1:
         raise RuntimeError("admitted sample facts are wrong")
-    return {"policy": receipt["policy"], "mediaKind": kind, "decoderRuns": len(receipt["isolation"]["decoderRuns"])}
+    return {"policy": receipt["policy"], "mediaKind": kind, "jailRuns": len(receipt["isolation"]["jailRuns"])}
 
 
 def _denied(runtime, arguments: tuple[str, ...], allowed: str) -> str:

@@ -31,7 +31,8 @@ def _isolation(runtime) -> dict:
     """The confinement every sample and probe ran under."""
     return {"kind": "macos-seatbelt", "policy": runtime.identity["policy"],
             "profileSha256": runtime.identity["profileSha256"], "network": "denied",
-            "processCreation": "denied", "writes": "/dev/null only", "memoryMiB": 768}
+            "processCreation": "denied", "writes": "/dev/null only", "otherProcesses": "denied",
+            "watchdog": "footprint+cpu", "memoryMiB": 768}
 
 
 def _isolated(source: str, request: dict, started: float) -> dict:

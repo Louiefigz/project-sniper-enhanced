@@ -11,7 +11,8 @@ const CONTAINER_ID = /^[0-9a-f]{64}$/u;
 const PROBE_POLICIES = new Set(["sniper-external-media-probe-v2", "sniper-external-media-probe-v3"]);
 // Native admission (macOS Seatbelt jail): headless/admission_receipt.py applies the same rules in Python.
 const NATIVE_POLICY = "sniper-external-media-probe-v4-native";
-const JAIL_POLICY = "sniper-native-media-jail-v1";
+const JAIL_POLICY = "sniper-native-media-jail-v2";
+const INSPECT = "/dev/null";
 const JAIL_MEMORY_MIB = 768;
 const JAIL_APPROVAL = path.join(SCRIPTS_DIR, "producer", "headless", "native_media_runtime_approval.json");
 const hashCache = new Map<string, { key: string; value: string }>();
@@ -195,12 +196,16 @@ function validFacts(
     Number(facts.declaredFrames) <= REFERENCE_LIMITS.max_frames;
 }
 
-function approvedJail(profileSha256: unknown, launcherSha256: unknown): boolean {
+function approvedJail(templateSha256: unknown, launcherSha256: unknown): boolean {
   const approval = readObject(JAIL_APPROVAL, 64 * 1024);
   const rows = Array.isArray(approval?.approved) ? approval.approved : [];
-  return approval?.schemaVersion === 1 && approval?.policy === JAIL_POLICY &&
-    rows.some((row) => object(row)?.profileSha256 === profileSha256 &&
+  return approval?.schemaVersion === 2 && approval?.policy === JAIL_POLICY &&
+    rows.some((row) => object(row)?.profileTemplateSha256 === templateSha256 &&
       object(row)?.launcherSha256 === launcherSha256);
+}
+
+function sha(value: unknown): boolean {
+  return typeof value === "string" && SHA256.test(value);
 }
 
 function validNativeRuntime(runtime: Record<string, unknown> | null): boolean {
@@ -208,37 +213,40 @@ function validNativeRuntime(runtime: Record<string, unknown> | null): boolean {
   const tool = (name: string) => {
     const row = object(tools?.[name]);
     return row !== null && typeof row.path === "string" && row.path.startsWith("/") &&
-      typeof row.sha256 === "string" && SHA256.test(row.sha256) && typeof row.version === "string";
+      sha(row.sha256) && typeof row.version === "string";
   };
   return runtime !== null && runtime.kind === "macos-seatbelt" && runtime.policy === JAIL_POLICY &&
     tools !== null && exactKeys(tools, ["ffprobe", "ffmpeg"]) && tool("ffprobe") && tool("ffmpeg") &&
-    typeof runtime.closureSha256 === "string" && SHA256.test(runtime.closureSha256) &&
-    Number.isSafeInteger(runtime.closureCount) && Number(runtime.closureCount) > 0 &&
-    typeof runtime.profileSha256 === "string" && SHA256.test(runtime.profileSha256) &&
-    approvedJail(runtime.profileSha256, runtime.launcherSha256);
+    ["profileTemplateSha256", "profileSha256", "launcherSha256", "closureSha256"].every((key) => sha(runtime[key])) &&
+    ["closureCount", "openedPathCount"].every((key) => Number.isSafeInteger(runtime[key]) && Number(runtime[key]) > 0) &&
+    approvedJail(runtime.profileTemplateSha256, runtime.launcherSha256);
 }
 
-function validJailRun(value: unknown, decoder: unknown, profileSha256: unknown): boolean {
+function validJailRun(value: unknown, decoder: unknown, context: { profileSha256: unknown; video: string }): boolean {
   const run = object(value), limits = object(run?.rlimits);
   const zero = (key: string) => Array.isArray(limits?.[key]) &&
     (limits[key] as unknown[]).length === 2 && (limits[key] as unknown[]).every((item) => item === 0);
   return run !== null && run.sandboxed === true && run.decoder === decoder &&
-    run.profileSha256 === profileSha256 && run.memoryMiB === JAIL_MEMORY_MIB &&
+    run.mode === (decoder === INSPECT ? "inspect" : "exec") && run.input === context.video &&
+    run.profileSha256 === context.profileSha256 && run.memoryMiB === JAIL_MEMORY_MIB &&
     zero("RLIMIT_FSIZE") && zero("RLIMIT_CORE");
 }
 
-/** Timed media must carry attested ffprobe and ffmpeg runs from the approved jail. */
-function nativeIsolationMatches(receipt: Record<string, unknown>): boolean {
+/** Timed media must carry attested inspection, ffprobe and ffmpeg runs from the approved jail, on this snapshot. */
+function nativeIsolationMatches(receipt: Record<string, unknown>, video: string): boolean {
   const runtime = object(receipt.runtime), isolation = object(receipt.isolation);
   const tools = object(runtime?.tools);
-  const runs = Array.isArray(isolation?.decoderRuns) ? isolation.decoderRuns : [];
+  const runs = Array.isArray(isolation?.jailRuns) ? isolation.jailRuns : [];
+  const context = { profileSha256: runtime?.profileSha256, video };
   return validNativeRuntime(runtime) && isolation !== null &&
     isolation.kind === "macos-seatbelt" && isolation.policy === JAIL_POLICY &&
     isolation.profileSha256 === runtime?.profileSha256 && isolation.network === "denied" &&
     isolation.processCreation === "denied" && isolation.writes === "/dev/null only" &&
-    isolation.memoryMiB === JAIL_MEMORY_MIB && runs.length === 2 &&
-    validJailRun(runs[0], object(tools?.ffprobe)?.path, runtime?.profileSha256) &&
-    validJailRun(runs[1], object(tools?.ffmpeg)?.path, runtime?.profileSha256);
+    isolation.otherProcesses === "denied" && isolation.watchdog === "footprint+cpu" &&
+    isolation.memoryMiB === JAIL_MEMORY_MIB && runs.length === 3 &&
+    validJailRun(runs[0], INSPECT, context) &&
+    validJailRun(runs[1], object(tools?.ffprobe)?.path, context) &&
+    validJailRun(runs[2], object(tools?.ffmpeg)?.path, context);
 }
 
 /** Historical container receipts (v2/v3) keep their original isolation contract. */
@@ -288,7 +296,7 @@ function receiptMatches(
     decoded?.decoded === true &&
     validFacts(facts, admission) &&
     validLimits(receipt.limits) &&
-    (native ? nativeIsolationMatches(receipt) : containerIsolationMatches(receipt, video));
+    (native ? nativeIsolationMatches(receipt, video) : containerIsolationMatches(receipt, video));
 }
 
 /** Rehash the exact sandbox receipt and media before exposing a new reference. */

@@ -17,10 +17,14 @@
 ;
 ;   PROJECT  the project folder (holds source snapshots, renders and plans)
 ;   REVIEW   the folder with the review's still images (inside PROJECT)
+; Both are given for an Auto Edit rendered review. A text-only call that has no
+; project (Segmenter, Clipper) gives neither and keeps only the name rules.
 (version 1)
 (allow default)
-(deny file-read-data file-write* (subpath (param "PROJECT")))
-(allow file-read-data (subpath (param "REVIEW")))
+(if (param "PROJECT")
+  (begin
+    (deny file-read-data file-write* (subpath (param "PROJECT")))
+    (allow file-read-data (subpath (param "REVIEW")))))
 (deny file-read-data file-write-data
   (regex #"\.([mM][pP]4|[mM]4[vVbBaA]|[mM][oO][vV]|[mM][kK][vVaA]|[wW][eE][bB][mM]|[aA][vV][iI]|[mM][pP][eE]?[gG]|[mM]2[vV]|[mM][pP]2)$")
   (regex #"\.([mM]2?[tT][sS]|[tT][sS]|[mM][xX][fF]|3[gG][pP2]|[fF][lL][vV]|[fF]4[vV]|[wW][mM][vV]|[aA][sS][fF]|[vV][oO][bB]|[dD][vV]|[oO][gG][vVgG])$")

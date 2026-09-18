@@ -34,13 +34,18 @@ function scopedDirectory(value: string, label: string): string {
   return fs.realpathSync(value);
 }
 
-/** Wrap an admitted provider command; refuse rather than run unconfined. */
-export function providerMediaJail(bin: string, args: readonly string[], scope: ProviderJailScope): JailedCommand {
+/**
+ * Wrap an admitted provider command; refuse rather than run unconfined. With a scope the
+ * project folder is hidden except its review folder; without one (a text-only call such as
+ * Segmenter or Clipper, which has no project) only the media-name rules apply.
+ */
+export function providerMediaJail(bin: string, args: readonly string[], scope?: ProviderJailScope): JailedCommand {
   if (process.platform !== "darwin") throw new Error("The provider media boundary requires macOS");
   if (!path.isAbsolute(bin) || !fs.statSync(bin).isFile()) throw new Error("Jailed provider CLI must be an absolute file");
   if (!fs.statSync(SANDBOX_EXEC).isFile() || !fs.statSync(PROVIDER_MEDIA_PROFILE).isFile()) {
     throw new Error("The provider media boundary is unavailable on this Mac");
   }
+  if (!scope) return { bin: SANDBOX_EXEC, args: ["-f", PROVIDER_MEDIA_PROFILE, bin, ...args] };
   const project = scopedDirectory(scope.project, "project"), review = scopedDirectory(scope.review, "review folder");
   if (!review.startsWith(`${project}${path.sep}`)) throw new Error("Provider jail review folder must be inside the project");
   return { bin: SANDBOX_EXEC,

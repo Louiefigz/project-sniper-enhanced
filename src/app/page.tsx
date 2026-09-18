@@ -26,7 +26,7 @@ const SPECIALIZED_TOOLS = [
     name: "Check text on screen",
     product: "Text Review",
     description:
-      "Scan a local MP4 for likely spelling, grammar, and formatting problems. This creates a report; it does not change the video.",
+      "Scan a local MP4 for likely spelling, grammar, and formatting problems. Optional paid add-on: it sends still frames to Anthropic on your own API key, billed by Anthropic. It creates a report and does not change the video.",
     input: "Finished MP4",
     output: "Issue report",
     action: "Check a video",
@@ -135,12 +135,22 @@ export default function Home() {
 
         <details className="mb-10 rounded-lg border border-border bg-card/30 px-5 py-4 text-sm text-muted-foreground">
           <summary className="cursor-pointer font-medium text-foreground">Where does my footage go?</summary>
-          <p className="mt-3 max-w-3xl leading-relaxed">
-            File selection and rendering stay on this Mac. Depending on your configured runtime,
-            transcription may send audio to Deepgram, the editor brain receives transcript and plan
-            context, and Text Review sends selected still frames for visual analysis. The full video is
-            not uploaded by these workflows.
-          </p>
+          <div className="mt-3 max-w-3xl space-y-2 leading-relaxed">
+            <p>
+              Sniper never uploads a video file, and audio leaves only if you explicitly authorize the
+              optional paid Deepgram transcription. Speech-to-text and rendering run on this Mac. Your Codex or Claude subscription receives the transcript, the edit plan and
+              your instructions as text, and still frames of each rendered edit for its review —
+              trim-only edits included.
+            </p>
+            <p>
+              The agent that writes and revises the plan works with file tools in your project folders;
+              its instructions keep video and audio on this Mac, but for that agent this is not
+              enforced by the app. Reference links are downloaded with yt-dlp, and Chrome cookies are
+              used only when you tick the box for that fetch. Text Review is an optional paid add-on
+              that sends still frames to Anthropic on your own API key. The full list is in the
+              manual&apos;s privacy page.
+            </p>
+          </div>
         </details>
 
         <footer className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-border py-5">

@@ -67,6 +67,19 @@ test("the provider media profile hides the project except the review folder and 
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
+test("without a project scope (Segmenter, Clipper) only the media-name rules apply", { skip: !darwin }, () => {
+  const dir = scratch();
+  try {
+    const notes = path.join(dir, "notes.json"), take = path.join(dir, "take.MOV"), snapshot = path.join(dir, "abc.media");
+    for (const file of [notes, take, snapshot]) writeFileSync(file, "x");
+    const run = (file: string) => { const jail = providerMediaJail("/bin/cat", [file]); return spawnSync(jail.bin, jail.args, { encoding: "utf8" }); };
+    assert.equal(run(notes).stdout, "x", "ordinary files stay readable");
+    assert.notEqual(run(take).status, 0, "video names are refused");
+    assert.notEqual(run(snapshot).status, 0, "media snapshots are refused");
+    assert.deepEqual(providerMediaJail("/bin/echo", ["hi"]).args, ["-f", PROVIDER_MEDIA_PROFILE, "/bin/echo", "hi"]);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
 test("the jail wraps an absolute admitted binary with the scope and the shipped profile", { skip: !darwin }, () => {
   const dir = scratch();
   try {

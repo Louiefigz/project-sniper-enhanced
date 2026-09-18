@@ -32,6 +32,7 @@ function requestBody(options: ReviewRequestOptions) {
     model: config.model,
     confirmThreshold: config.confirmThreshold,
     yes: confirmed,
+    paidApiConsent: config.paidApiConsent,
   };
 }
 

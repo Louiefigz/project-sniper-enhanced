@@ -25,15 +25,34 @@ export default function ConfigStep({
         most videos. This review only reports possible issues; it never edits the MP4.
       </p>
 
+      <PaidFeatureNotice consent={config.paidApiConsent} onConsent={(paidApiConsent) => set({ paidApiConsent })} />
       <VideoTypeField mode={config.mode} onSelect={(mode) => set({ mode })} />
       <AdvancedSettings config={config} set={set} />
 
       <div className="mt-8 flex items-center gap-3">
-        <Button onClick={onRun}>Start text review →</Button>
+        <Button onClick={onRun} disabled={!config.paidApiConsent}>Send frames and start review →</Button>
         <span className="label text-muted-foreground/70">
           If the review is unusually large, it will pause and ask before continuing.
         </span>
       </div>
+    </div>
+  );
+}
+
+/** Text Review is the one optional paid add-on; it is never used by any other tool. */
+function PaidFeatureNotice({ consent, onConsent }: { consent: boolean; onConsent: (value: boolean) => void }) {
+  return (
+    <div className="mt-6 rounded-lg border border-amber-500/40 bg-amber-500/5 px-4 py-3 text-sm leading-relaxed">
+      <p className="font-medium text-foreground">Optional paid feature — not part of your subscription</p>
+      <p className="mt-1 text-muted-foreground">
+        Text Review sends still frames from this video (at its full resolution) to Anthropic&apos;s API,
+        using an Anthropic API key you add yourself in <code>runtime/sniper.local.env</code>. Anthropic bills
+        that key per image. The video file itself is not uploaded. Nothing else in Sniper uses this key.
+      </p>
+      <label className="mt-3 flex items-start gap-2 text-foreground">
+        <input type="checkbox" className="mt-1" checked={consent} onChange={(e) => onConsent(e.target.checked)} />
+        <span>I understand: send still frames to Anthropic and bill my own API key for this review.</span>
+      </label>
     </div>
   );
 }

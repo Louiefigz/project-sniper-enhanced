@@ -10,7 +10,7 @@
  * and never prints authentication output — the admission code discards it.
  */
 import { admitSubscriptionInvocation } from "@/app/api/_lib/subscription-invocation";
-import { brainProvider, claudeModelArgs, claudeProcessEnv, codexProcessEnv, codexSettings }
+import { claudeModelArgs, claudeProcessEnv, claudeSettings, codexProcessEnv, codexSettings, subscriptionProvider }
   from "@/app/api/_lib/ai-provider";
 import { buildCodexArgs } from "@/app/api/_lib/codex-cli";
 import { SUBSCRIPTION_VERSIONS, type SubscriptionProvider } from "@/app/api/_lib/subscription-policy";
@@ -36,7 +36,7 @@ const REASONS: Array<[RegExp, AdmissionReport["reason"]]> = [
 /** The provider the app will actually use, from the same setting the app reads. */
 export function selectedProvider(explicit?: string): SubscriptionProvider {
   if (explicit === "codex" || explicit === "claude") return explicit;
-  return brainProvider() === "codex" ? "codex" : "claude";
+  return subscriptionProvider();
 }
 
 function invocation(provider: SubscriptionProvider) {
@@ -45,7 +45,7 @@ function invocation(provider: SubscriptionProvider) {
     return { provider, bin: codexSettings().bin, timeoutMs, cwd: process.cwd(), env: codexProcessEnv(),
       args: buildCodexArgs({ sandbox: "read-only", timeoutMs }) };
   }
-  return { provider, bin: process.env.CLAUDE_BIN || "claude", timeoutMs, cwd: process.cwd(),
+  return { provider, bin: claudeSettings().bin, timeoutMs, cwd: process.cwd(),
     env: claudeProcessEnv(), args: ["-p", "admission check", ...claudeModelArgs(), "--output-format", "json"] };
 }
 

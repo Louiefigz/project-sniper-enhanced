@@ -10,75 +10,132 @@
 <div class="wrap">
 <header class="top">
   <p class="kicker">Manual · 9 of 10</p>
-  <h1>What leaves your Mac, and what never does</h1>
-  <p class="lede">Checked against the code in this package, path by path. Read this before you edit anything confidential.</p>
+  <h1>What leaves your Mac, and what does not</h1>
+  <p class="lede">Checked against the code in this package, feature by feature. Read this before you edit anything confidential.</p>
 </header>
+
 <div class="ok">
-<p><strong>Local transcription is the default.</strong> If you explicitly authorize
-Deepgram for an edit, audio is uploaded to Deepgram and billed to your account. Saving a
-key during setup does not authorize an upload. Rendered videos stay on your Mac.</p>
+<p><strong>Sniper never uploads a video file, and audio leaves only if you explicitly
+authorize the optional paid Deepgram transcription.</strong> Rendering, speech-to-text and
+the edit itself run on this Mac. What does leave is text and still images, sent to the
+Codex or Claude subscription you chose, plus the separately optional paid features below if
+you turn them on.</p>
 </div>
 
 <div class="warn">
-<p><strong>Text is not the only thing that leaves.</strong> During the visual review step,
-Sniper extracts still frames from the video it just rendered and sends those images to
-your provider so it can look at the result. That is how it catches a graphic in the wrong
-place or an unreadable caption. <strong>Still images of your footage do leave your
-machine.</strong> An earlier version of this manual said only text was sent. That was
-wrong, and this page is the correction.</p>
+<p><strong>Still images of your footage do leave.</strong> Before Auto Edit approves a
+video it runs a rendered review: Sniper takes still frames from the video it just rendered
+and sends them to your provider so it can check the result. This happens for trim-only
+edits too; there is no text-only mode.</p>
+<p><strong>The editing agents can read your project folder.</strong> The Codex or Claude
+session that writes and revises your edit plan works with file tools inside your project,
+footage and reference folders. Its instructions tell it not to send video or audio, but for
+these agents that is an instruction, not something the code can enforce. See
+<a href="#agents">the editing agents</a> below.</p>
 </div>
 
-<h2>Path by path</h2>
+<h2>Feature by feature</h2>
 <table>
-<tr><th>What</th><th>Where it goes</th><th>Where that is in the code</th></tr>
-<tr><td>Your recording, and every rendered video</td><td><strong>Stays local.</strong>
-Nowhere.</td><td>"No full-video egress" invariant, <code>app/CLAUDE.md</code></td></tr>
-<tr><td>Speech-to-text</td><td><strong>Stays local.</strong> This install uses
-whisper.cpp on your Mac. It never downloads a model silently and never falls back to a
-paid service.</td><td><code>app/scripts/local_whisper.py</code></td></tr>
-<tr><td>Transcript and edit plan</td><td><strong>Sent</strong> to the provider you chose
-(Codex or Claude) as text.</td><td><code>app/src/app/api/producer/auto-edit/</code></td></tr>
-<tr><td>Still frames from the rendered candidate</td><td><strong>Sent</strong> to the
-provider you chose, for the visual review. Codex receives them as image attachments;
-Claude is given the frame paths and reads them.</td>
-<td><code>app/src/app/api/_lib/codex-cli.ts</code> (<code>--image</code>);
-<code>app/src/app/api/producer/auto-edit/rendered-review-prompt.ts</code>
-("Inspect EVERY listed frame visually")</td></tr>
-<tr><td>Still frames from a reference video you supply</td><td><strong>Sent</strong>, only
-on the explicit reference-proposal route.</td>
-<td><code>app/src/lib/server/guided-proposal-compiler.ts</code></td></tr>
-<tr><td>Frame Review (the text spell-check)</td><td><strong>Sent</strong> — selected still
-JPEGs go to Anthropic. Needs your own paid API key and is not part of this purchase.</td>
-<td><code>app/scripts/frameio/claude_client.py</code></td></tr>
-<tr><td>Deepgram transcription</td><td><strong>Uploads audio when explicitly authorized
-for an edit.</strong> Connect a key privately with <code>install/setup.command</code>.
-Setup validates the key without sending audio; local transcription remains the default.</td>
-<td><code>app/scripts/asr_policy.py</code></td></tr>
-<tr><td>Installing</td><td><strong>Downloads and optional connection check.</strong>
-If you connect Deepgram, its HTTPS authentication endpoint receives the key, but no media. The installer fetches
-packages from the npm and Python package registries, the rendering browser from Google's
-Chrome for Testing, the speech model from Hugging Face and the two provider CLIs from npm.
-It sends none of your files or text.</td><td><code>install/install.command</code></td></tr>
-<tr><td>Framework usage statistics</td><td><strong>Switched off.</strong> Next.js and
-HyperFrames both collect anonymous usage statistics by default; this install turns both
-off.</td><td><code>NEXT_TELEMETRY_DISABLED</code>, <code>HYPERFRAMES_NO_TELEMETRY</code>
+<tr><th>Feature</th><th>What leaves your Mac, and to whom</th><th>How it is enforced</th></tr>
+<tr><td>Speech-to-text</td><td><strong>Nothing.</strong> whisper.cpp runs on this Mac with a
+model the installer put there. It never downloads a model during a job and never falls back
+to a paid service.</td><td><code>app/scripts/asr_policy.py</code>,
+<code>app/scripts/local_whisper.py</code></td></tr>
+<tr><td>Producer: planning and revising the edit</td><td><strong>Text</strong> — transcript,
+plan, the editing rules and your brief — to your provider (Codex or Claude), plus the
+representative frames of a reference study when you attached one. See the editing agents
+below for what else they can open.</td><td><code>app/src/app/api/producer/auto-edit/</code></td></tr>
+<tr><td>Producer: plan and cut reviews</td><td><strong>Text</strong> to your provider. These
+reviewers run with their file, shell and browser tools switched off; everything they judge
+is written into the request.</td><td>Codex with its tools disabled, Claude with
+<code>--tools ""</code> (<code>brain-review-execution.ts</code>)</td></tr>
+<tr><td>Producer: rendered review (Auto Edit, trim-only included)</td><td><strong>Still
+JPEG frames</strong> of the rendered edit, attached one by one (up to 16) or packed into
+labelled contact sheets (never dropping a frame, at most 24 attachments), plus up to 4
+frames from a reference study if you attached one, and the plan, the audit report and the
+editing rules as text — to your provider.</td><td>Tools switched off, and the
+provider CLI runs inside a macOS sandbox profile that hides your project folder except the
+review's still frames, and refuses files named as video or audio anywhere (it matches names,
+not contents) (<code>app/scripts/producer/headless/provider_media_deny.sb</code>,
+<code>app/src/app/api/_lib/provider-media-jail.ts</code>)</td></tr>
+<tr><td>Segmenter and Clipper</td><td><strong>Text</strong> — the transcript and your
+instructions — to your provider, through the same subscription CLI. No API key is involved.</td>
+<td>Tools switched off and the same video/audio sandbox profile
+(<code>app/src/app/api/_lib/subscription-brain.ts</code>)</td></tr>
+<tr><td>Adding a reference from a link</td><td><strong>A download.</strong> The video is
+fetched to this Mac from the YouTube, Instagram or TikTok link you paste (HTTPS only, up to
+1080p and 2 GB) with <code>yt-dlp</code>, which contacts that site and its media servers.
+Studying it happens locally.</td><td><code>app/scripts/producer/study/fetch_reference.py</code></td></tr>
+<tr><td>Chrome cookies for a reference link</td><td><strong>Your browser session, to that
+site.</strong> Only if you tick <em>Allow Chrome cookies for this fetch</em> and the site
+asks for a sign-in: <code>yt-dlp</code> then reads Chrome's cookies (macOS may ask for your
+Keychain password) and sends them to that site for that one download. Nothing is stored as a
+default.</td><td>A per-fetch checkbox; off by default
+(<code>app/src/app/api/producer/references/fetch/route.ts</code>)</td></tr>
+<tr><td>Capturing a public website for b-roll</td><td><strong>Page requests.</strong> Used when
+a Short's media sources are set to public web (the default is local only): a fresh headless
+browser with no cookies or
+sign-in loads the pages the plan names and records the scroll on this Mac. It sends ordinary
+page requests to those sites, nothing of yours.</td><td>A macOS sandbox profile that allows
+only secure web connections (<code>app/scripts/producer/studio/web_capture.sb</code>); the
+list of allowed sites is checked by the capture script, not by the sandbox</td></tr>
+<tr><td>Text Review <span class="tag">optional, paid</span></td><td><strong>Still JPEG frames
+at the video's full resolution</strong> to Anthropic's API, billed per image on an Anthropic
+API key you add yourself. The video file is not sent. Not part of your subscription.</td>
+<td>Refuses to run without your tick on the settings screen and a key you configured
+(<code>runtime/sniper.local.env</code>; <code>app/src/app/api/_lib/paid-features.ts</code>)</td></tr>
+<tr><td>Deepgram transcription <span class="tag">optional, paid</span></td><td><strong>Uploads
+your audio</strong> to Deepgram, billed by Deepgram on your own key — only when you
+explicitly authorize Deepgram for a transcription. Local transcription is the default; the
+app's own screens never use Deepgram, and a saved key or setting alone never authorizes it.
+You connect, replace or remove the key privately with <code>install/setup.command</code>.</td>
+<td>A transcription run needs the paired paid-transcription switches for that one run
+(<code>app/scripts/asr_policy.py</code>); nothing falls back to it</td></tr>
+<tr><td>Installing and setup</td><td><strong>Downloads, and one optional key check.</strong>
+Packages from the npm and Python registries, the rendering browser from Google's Chrome for
+Testing, the speech model from Hugging Face and the two provider CLIs from npm. If you connect
+Deepgram during setup, the key is checked once against Deepgram's HTTPS authentication
+endpoint; no audio or other media is sent. None of your files or text is sent.</td>
+<td><code>install/install.command</code></td></tr>
+<tr><td>Framework usage statistics</td><td><strong>Switched off</strong> for Next.js and
+HyperFrames.</td><td><code>NEXT_TELEMETRY_DISABLED</code>, <code>HYPERFRAMES_NO_TELEMETRY</code>
 in <code>runtime/sniper.env</code></td></tr>
-<tr><td>The Codex or Claude CLI itself</td><td><strong>Talks to its provider</strong>, as
-it does anywhere you use it, including whatever usage reporting that provider's CLI does.
-That is covered by your provider's terms, not by Sniper.</td><td>your provider's
-documentation</td></tr>
+<tr><td>The Codex or Claude CLI itself</td><td><strong>Talks to its provider</strong> as it
+does anywhere you use it: sign-in, usage events, and housekeeping requests such as Claude's
+short session title (made from the task text). Your provider's terms cover this, not Sniper.</td>
+<td>your provider's documentation</td></tr>
+<tr><td>The app and its previews</td><td><strong>Nothing.</strong> The app, the Studio
+preview and the review pages listen on <code>127.0.0.1</code> only; no other machine can
+reach them.</td><td>loopback binding and the local request policy</td></tr>
 </table>
+
+<h2 id="agents">The editing agents</h2>
+<p>Writing and revising the edit plan is done by a Codex or Claude session with tools, so it
+can read the transcript, the rules and the project. What the code allows today:</p>
+<ul>
+  <li><strong>Codex</strong> runs in its own sandbox with a shell. The sandbox limits where it
+  can write (the folders Sniper hands it), not which files it can read, so it could open any
+  file your user account can read, including video files.</li>
+  <li><strong>Claude</strong> is given the project, source-footage, snapshot and reference
+  folders, file-reading tools, a few exact commands and write permission for the plan. It
+  could read files in those folders, including video files (whether its unrestricted file
+  reader also reaches other folders was not verified).</li>
+  <li>The editor window you open with <code>install/editor.command</code> is the same CLI
+  with its ordinary tools, working in the app folder.</li>
+</ul>
+<p>The macOS video/audio sandbox cannot wrap these sessions: the provider CLI sandboxes its
+own tool commands, and macOS does not allow a sandbox inside a sandbox. If a still frame of a
+recording must never leave your Mac, do not edit that recording with Sniper; the rendered
+review sends frames whenever Auto Edit runs.</p>
 
 <h2>What that means in practice</h2>
 <ul>
-  <li>The words you said go to your provider. So do pictures of your finished frames.</li>
-  <li>Your provider's own data policy for your plan governs what happens to them. Sniper
-  does not change it and cannot see it.</li>
-  <li>If a recording is confidential enough that a still frame of it must not be sent,
-  do not run the graphics or visual-review lanes on it. A trim-only edit still sends the
-  transcript.</li>
-  <li>The app itself binds to <code>127.0.0.1</code> only — it is not reachable from
-  another machine on your network, and it has no login because nothing else can reach it.</li>
+  <li>Your words, as a transcript, go to your provider. So do still pictures of your edited
+  video.</li>
+  <li>Your provider's data policy for your plan governs what happens to them. Sniper does
+  not change it and cannot see it.</li>
+  <li>The optional paid features stay off unless you add a key and switch them on for a run.
+  Nothing falls back to them.</li>
 </ul>
 
 <h2>Where your files live</h2>

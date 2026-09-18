@@ -13,7 +13,9 @@ identity, words, claims, logos, footage, screenshots, music, or branding.
 guidance. Verified mimic is not released (P6 is 0/7). The safe output is an
 audited exact MP4 or its approved flat mirror; editable Palmier application is
 an isolated, production-shaped experiment whose connected hybrid path remains
-P5-blocked.
+P5-blocked. Palmier Pro is not configured in the packaged release, so its steps
+below do not apply there. Fetching a reference link downloads it with `yt-dlp`;
+Chrome cookies are read only with the operator's explicit per-fetch permission.
 
 ## Choose the workflow
 

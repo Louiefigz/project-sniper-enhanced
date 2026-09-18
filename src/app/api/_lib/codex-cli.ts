@@ -54,8 +54,11 @@ export interface CodexRunOptions {
   signal?: AbortSignal;
   /** Optional aggregate stdout+stderr byte budget; never truncate a successful result. */
   maxOutputBytes?: number;
-  /** Run under the OS media boundary (provider-media-jail.ts); requires tools "none". */
-  jail?: ProviderJailScope;
+  /**
+   * Run under the OS media boundary (provider-media-jail.ts); requires tools "none".
+   * `true` = media-name rules only (no project); a scope also hides the project folder.
+   */
+  jail?: true | ProviderJailScope;
 }
 
 export interface CodexRunResult {
@@ -181,7 +184,8 @@ export async function runCodex(options: CodexRunOptions): Promise<CodexRunResult
   const admitted = await admitSubscriptionInvocation({ provider: "codex", bin: settings.bin,
     args: buildCodexArgs(options), cwd: options.cwd ?? process.cwd(), env: codexProcessEnv(),
     timeoutMs: options.timeoutMs, signal: options.signal });
-  const command = options.jail ? providerMediaJail(admitted.bin, admitted.args, options.jail)
+  const command = options.jail
+    ? providerMediaJail(admitted.bin, admitted.args, options.jail === true ? undefined : options.jail)
     : { bin: admitted.bin, args: [...admitted.args] };
   return new Promise((resolve, reject) => {
     const timeoutMs = admitted.remainingMs();

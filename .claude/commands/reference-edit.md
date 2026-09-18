@@ -12,6 +12,5 @@ both independent review lenses and any required adjudication. Reuse or build and
 prove every required template, then compile an evidence-bound study pack. If a
 new source is supplied, invoke the producer skill and use the pack as
 reference-inspired profile guidance. Verified mimic is not released (P6 0/7):
-never claim exact style replication. Deliver through the audited exact-MP4 path;
-an editable Palmier application is isolated/experimental and connected
-hybrid-P5-blocked.
+never claim exact style replication. Deliver through the audited exact-MP4 path.
+Palmier Pro is not configured in the packaged release.

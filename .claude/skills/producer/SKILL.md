@@ -96,18 +96,8 @@ scope, disabled or operator-owned lanes, accepted cuts and copy-only revision
 boundaries. Existing jobs retain their pinned doctrine; apply new creative
 direction to a separate authorized revision, never rewrite a sealed benchmark.
 
-**Aaron's presenter-led preference:** establish him in a strong full-frame
-opening shot, rather than opening with a tiny picture inside a card. This does
-not require holding full frame throughout the hook or for 15 seconds. A few
-seconds may be enough; neither 3 nor 15 seconds is a mandated duration. Then
-choose the next composition from the story and spoken cue. Use overlays,
-diagrams, images and layout changes when they advance the idea; do not delay
-them to satisfy a presenter hold. The editor owns those decisions. This is
-Aaron's channel brief, not a rule for unrelated faceless, product-only or
-differently briefed videos.
-
-**Journey selection and visual development:** for Aaron's journey recordings,
-read [the journey Shorts playbook](../../../docs/producer/SHORTS_JOURNEY_SELECTION_PLAYBOOK.md)
+**Selection and visual development:** read
+[the Shorts selection playbook](../../../docs/producer/SHORTS_JOURNEY_SELECTION_PLAYBOOK.md)
 before ranking or revising candidates. Assemble a complete message across the
 whole transcript when standalone story assembly is requested; a current
 experiment and its reason, a decision, progress or
@@ -116,16 +106,13 @@ readable board/example/diagram alongside the presenter, including a temporary
 top/bottom split. Match each visual and cut to the explanation, then return to
 performance where useful; authenticity does not imply an all-talking-head edit.
 
-**Aaron's September 15 correction is a standing editing preference:** produced
-clips may run up to **90 seconds** unless his current brief says otherwise.
-Choose the shortest complete explanation for a new viewer; 20–30 seconds is not
-an achievement when context, relevance or reasoning was removed. Important
+**Length follows the brief.** Honour the operator's requested duration. Without
+one, choose the shortest complete explanation for a new viewer; a short runtime
+is not an achievement when context, relevance or reasoning was removed. Important
 actions need visual development: relevant pictures, real scrolling footage,
 board details or a truthful HyperFrames illustration. A static whiteboard
 presenter plus captions and keyword panels does not fulfill that request.
-See the playbook's [persistent preference](../../../docs/producer/SHORTS_JOURNEY_SELECTION_PLAYBOOK.md#aarons-standing-produced-clip-preference-september-15-2026)
-for concrete selection and review criteria. Preserve segment-only and
-graphics-disabled scope. Do not hand known damaged speech to the user as a
+Preserve segment-only and graphics-disabled scope. Do not hand known damaged speech to the user as a
 listening note after rendering.
 
 Before choosing templates, read the kept speech and inspect available footage.
@@ -294,12 +281,12 @@ and ranges. Graphics should add an explanation rather than repeat captions and
 narration verbatim. Animate the relevant action and consequence on spoken cues,
 with time to read the result; sound cues, when used, support that action and speech.
 
-For Aaron's native Studio edits, vary full presenter, graphics over the studio
-shot, left/right teaching layouts, a live corner inset, and selective full-screen
-explanations without him. Choose placement to serve the idea and clear the actual
+For presenter-led native Studio edits, vary full presenter, graphics over the
+studio shot, left/right teaching layouts, a live corner inset, and selective
+full-screen explanations without the presenter. Choose placement to serve the idea and clear the actual
 content. Keep the face and necessary gestures safely framed through entry,
 movement and exit; inspect intermediate motion, not just settled endpoints.
-Do not mirror his footage to switch sides or add continuous head-following motion.
+Do not mirror the presenter's footage to switch sides or add continuous head-following motion.
 Keep a coherent palette, type system and motion language while varying scale,
 hierarchy, image treatment, graphic anatomy, reveal and presenter placement.
 
@@ -308,21 +295,21 @@ headings mentally removed. Repeating the same notebook sheet, box entrance and
 text build is still repetitive despite different titles, colors or template IDs.
 Repair unnecessary repetition across the whole video, including the middle and
 ending. An evolving explanation may intentionally hold its composition. For
-Aaron's faster produced treatment, review purposeful activity about every 2–4
+a faster produced treatment, review purposeful activity about every 2–4
 seconds; a reveal, highlight or demonstration can supply it without a new card.
 This is not a forced cadence for authentic delivery or a maximum shot duration.
 Choose each change from the next spoken development and allow the action, result
 and reading to finish. Caption updates alone do not fulfill a missing visual
 explanation. Review actual scene changes and audio before claiming success.
 
-**Aaron's September 16 correction — plan the visual story before rendering.**
-For all future Shorts and long-form edits, apply the [standing directing requirements](../../../docs/producer/NATIVE_PREBUILD_STRATEGY_2026-09-10.md#standing-directing-requirements-september-16-2026) within the requested treatment and enabled lanes. Do not confine this correction to one video or presenter.
+**Plan the visual story before rendering.**
+For Shorts and long-form edits, apply the [standing directing requirements](../../../docs/producer/NATIVE_PREBUILD_STRATEGY_2026-09-10.md#standing-directing-requirements-september-16-2026) within the requested treatment and enabled lanes. Do not confine this correction to one video or presenter.
 Scout a sufficiently varied real footage pool before committing to the shot map;
 matching a noun or repeatedly using one action is not visual storytelling. Plan
 smooth presenter/layout handoffs, deliberate presenter removal, left/right and
 temporary circular corner views, and simultaneous footage where the relationship
-benefits from it. Give food/product examples the spoken problem and decision
-context. Cover meaningful business beats such as paying Facebook. Establish,
+benefits from it. Give product examples the spoken problem and decision
+context, and cover the meaningful business beats the speech names. Establish,
 enlarge and hold the real brand/product/destination so viewers can recognize it.
 Select these mechanisms from the complete current catalog; do not retrofit a
 strategy after assembly. Review continuous motion and the explanation a new
@@ -341,8 +328,7 @@ reference cases it names. They support planning; they do not qualify a productio
 
 **Explicit native-project routing:** when the operator has selected the native
 HyperFrames composition route, use that project's approved native direction and
-the installed SDK instructions. For C0679, that direction is
-`docs/producer/C0679_NATIVE_HYPERFRAMES_DIRECTION_2026-09-09.md`. The legacy
+the installed SDK instructions. The legacy
 `face-bridge` two-chassis grammar, compulsory presenter hole and review-only
 Studio export prohibition below describe their existing routes; they must not
 replace the explicitly selected native composition. This does not silently
@@ -350,7 +336,7 @@ change a stored legacy/headless job's profile or waive its gates. Retain native
 editable layers for visual revisions and perform the applicable playback/export
 checks on the actual candidate before delivery.
 
-**Aaron's review handoff:** apply the shared
+**Review handoff:** apply the shared
 [local playback and Studio requirement](../../../docs/producer/STUDIO_REVIEW_LANE.md#required-review-handoff-local-playback-and-studio)
 to Shorts, long-form and revisions. Open both the checked MP4 review and matching
 editable Studio project; providing only one view or a project file link leaves
@@ -361,6 +347,11 @@ Headless writers leave browser opening to the owning interactive task/controller
 
 Choose the destination from the operator's words. Do not force a Palmier job
 through the GUI or a flattened mirror.
+
+**Packaged release:** Palmier Pro is not configured in the buyer package (no MCP
+server is declared). The Palmier bullets and the Desktop-native Palmier steps
+below do not apply there; tell the operator Palmier is not available and deliver
+the audited MP4 and its Studio project.
 
 **Default direct workflow:** take the brief in Codex or Claude Code, drive the
 existing local Producer stage CLIs, and use HyperFrames Studio for graphics
@@ -650,12 +641,12 @@ notes. Inspect actual shortlisted footage, deduplicate overlapping ideas, then
 compile the winner directly from original source ranges. A topic boundary or a
 high-energy sentence alone does not establish a suitable short.
 
-**Aaron's selection preference:** show the ranked strongest moments before
+**Selection before production:** show the ranked strongest moments before
 trimming or producing a short. Include source timestamps and watchable source
 previews, exact hook/payoff excerpts, estimated edited length, why each works,
 and a brief visual-storytelling idea. Recommend a favorite, then
-wait for his selection. Reuse a moment he already chose; an explicit request
-to choose and proceed overrides this default. Ranking alone is not selection.
+wait for the operator's selection. Reuse a moment the operator already chose; an
+explicit request to choose and proceed overrides this default. Ranking alone is not selection.
 
 Finished-source repurposing refines the generic raw-footage steps below: review
 pause/retake proposals before applying them, preserve deliberate callbacks and
@@ -1372,12 +1363,14 @@ adjudication, template proof and compilation. Verified mimic is not released
 - **Honest reporting** — if a stage failed or a check is unverifiable
   (e.g. LUFS on synthetic audio), say so with numbers, not vibes.
 - **Music: NONE by default.** Only when the operator explicitly asks. Source =
-  operator-provided track or Higgsfield (opt-in). If a treatment zone's
-  convention wants a bed, RECOMMEND and ask — never add unrequested music.
-- **Visual generation: hyperframes templates are the DEFAULT engine.**
-  Higgsfield is opt-in only, with the prompt-review protocol: propose/discuss
-  prompts first, agree, generate, review together before anything enters a
-  composition. AI imagery varies wildly — never fire-and-forget.
+  an operator-provided track; this package includes no music-generation
+  service. If a treatment zone's convention wants a bed, RECOMMEND and ask —
+  never add unrequested music.
+- **Visual generation: HyperFrames templates are the engine.** This package
+  includes no image-generation service. If the operator explicitly supplies
+  one, use the prompt-review protocol: propose/discuss prompts first, agree,
+  generate, review together before anything enters a composition. AI imagery
+  varies wildly — never fire-and-forget.
 - **Costs**: use subscription-backed agent tools and local processing by
   default. No paid API, credit purchase, overage, or silent provider fallback
   without explicit user approval. An API key, environment variable, CLI login,
@@ -1385,7 +1378,8 @@ adjudication, template proof and compilation. Verified mimic is not released
   before CLI inference; unknown authentication or exhausted usage stops that
   invocation. CLI authentication alone does not prove no subscription overage.
   Never invoke an optional paid-ASR authorization flag on the user's behalf
-  under a no-paid request. Local model downloads still need network/installation
+  under a no-paid request. Text Review (Anthropic API, the operator's own key)
+  is the only in-app feature that bills an API key; it is never a fallback. Local model downloads still need network/installation
   permission; don't claim all compute or third-party media is universally free.
 - During a creator edit, do not ad-hoc modify renderer/transcriber code to
   force a result. Application-development requests are separate. Preserve

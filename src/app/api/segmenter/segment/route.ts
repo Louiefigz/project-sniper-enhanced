@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
 import { SEGMENT_SYSTEM_PROMPT } from "@/prompts/segment-system";
 import { dlog, summarize } from "@/lib/debug";
-import { brainProvider, codexSettings } from "../../_lib/ai-provider";
-import { runCodexJson } from "../../_lib/codex-cli";
+import { brainModel, brainProvider } from "../../_lib/ai-provider";
+import { runBrainJson } from "../../_lib/subscription-brain";
 
 export const maxDuration = 900;
 export const dynamic = "force-dynamic";
 
-const SEGMENT_MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6";
-const SEGMENT_MAX_TOKENS = 64000;
-const CODEX_TIMEOUT_MS = 30 * 60 * 1000;
+const BRAIN_TIMEOUT_MS = 30 * 60 * 1000;
 
 interface WordTiming {
   word: string;
@@ -38,7 +35,7 @@ interface SegmentResponse {
   segments: ClaudeSegment[];
 }
 
-function codexPrompt(transcriptText: string, prompt: string): string {
+function segmentPrompt(transcriptText: string, prompt: string): string {
   return [
     SEGMENT_SYSTEM_PROMPT,
     "",
@@ -52,48 +49,6 @@ function codexPrompt(transcriptText: string, prompt: string): string {
     prompt,
     "</segmentation_instructions>",
   ].join("\n");
-}
-
-async function requestCodexSegments(
-  transcriptText: string,
-  prompt: string,
-): Promise<ClaudeSegment[]> {
-  const result = await runCodexJson<SegmentResponse>({
-    prompt: codexPrompt(transcriptText, prompt),
-    schema: "segmenter",
-    timeoutMs: CODEX_TIMEOUT_MS,
-  });
-  return result.segments;
-}
-
-async function requestAnthropicSegments(
-  transcriptText: string,
-  prompt: string,
-): Promise<{ segments: ClaudeSegment[]; text: string; stopReason: string | null }> {
-  const response = await new Anthropic().messages.stream({
-    model: SEGMENT_MODEL,
-    max_tokens: SEGMENT_MAX_TOKENS,
-    system: SEGMENT_SYSTEM_PROMPT,
-    messages: [{ role: "user", content: `Here is the timestamped transcript:\n\n${transcriptText}\n\nSegmentation instructions: ${prompt}` }],
-  }).finalMessage();
-  if (response.stop_reason === "max_tokens") {
-    throw new Error(`Model output hit max_tokens (${SEGMENT_MAX_TOKENS}) before finishing the JSON.`);
-  }
-  const content = response.content[0];
-  const text = content.type === "text" ? content.text : "";
-  return { segments: parseSegments(text), text, stopReason: response.stop_reason };
-}
-
-function parseSegments(text: string): ClaudeSegment[] {
-  try {
-    const parsed = JSON.parse(text) as SegmentResponse | ClaudeSegment[];
-    return Array.isArray(parsed) ? parsed : parsed.segments;
-  } catch (parseErr) {
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw parseErr;
-    const parsed = JSON.parse(jsonMatch[0]) as SegmentResponse;
-    return parsed.segments;
-  }
 }
 
 function formatTranscript(transcript: TranscriptLine[]): string {
@@ -141,26 +96,21 @@ function enrichSegments(segments: ClaudeSegment[], transcript: TranscriptLine[])
   });
 }
 
+/** The selected subscription brain answers; a failure is returned, never retried on an API key. */
 async function generateSegments(transcript: TranscriptLine[], prompt: string) {
-  const provider = brainProvider();
-  const model = provider === "codex" ? codexSettings().model : SEGMENT_MODEL;
-  const transcriptText = formatTranscript(transcript);
-  const segments = provider === "codex"
-    ? await requestCodexSegments(transcriptText, prompt)
-    : (await requestAnthropicSegments(transcriptText, prompt)).segments;
+  const result = await runBrainJson<SegmentResponse>({
+    prompt: segmentPrompt(formatTranscript(transcript), prompt),
+    schema: "segmenter",
+    timeoutMs: BRAIN_TIMEOUT_MS,
+  });
+  const segments = result.value.segments;
   if (!Array.isArray(segments) || segments.length === 0) throw new Error("Model returned no segments");
-  return { segments: enrichSegments(segments, transcript), provider, model };
+  return { segments: enrichSegments(segments, transcript), provider: result.provider, model: result.model };
 }
 
 function errorResponse(error: unknown): NextResponse {
-  if (error instanceof Anthropic.APIError) {
-    return NextResponse.json(
-      { error: error.message, type: error.name, status: error.status },
-      { status: error.status ?? 500 },
-    );
-  }
   const message = error instanceof Error ? error.message : "Segmentation failed";
-  return NextResponse.json({ error: message }, { status: 500 });
+  return NextResponse.json({ error: message }, { status: 502 });
 }
 
 export async function POST(req: NextRequest) {
@@ -178,7 +128,7 @@ export async function POST(req: NextRequest) {
     }
 
     const provider = brainProvider();
-    const model = provider === "codex" ? codexSettings().model : SEGMENT_MODEL;
+    const model = brainModel(provider);
     dlog("segmenter:segment", "incoming request", {
       provider,
       model,
@@ -188,7 +138,7 @@ export async function POST(req: NextRequest) {
 
     const result = await generateSegments(transcript, prompt);
     dlog("segmenter:segment", "returning enriched segments", summarize(result.segments));
-    return NextResponse.json({ segments: result.segments, brain: { provider, model } });
+    return NextResponse.json({ segments: result.segments, brain: { provider: result.provider, model: result.model } });
   } catch (error: unknown) {
     console.error("[/api/segment] caught error:", error);
     dlog("segmenter:segment", "caught error", error instanceof Error ? error.message : String(error));

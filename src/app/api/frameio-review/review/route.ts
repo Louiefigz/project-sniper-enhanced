@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { spawn } from "child_process";
 import { existsSync } from "fs";
 import path from "path";
+import { textReviewPaidFeatureError } from "../../_lib/paid-features";
 import { pythonInterpreter, SCRIPTS_DIR } from "../../_lib/spawn-python";
 import { dlog, derror } from "@/lib/debug";
 
@@ -42,9 +43,11 @@ export async function POST(req: NextRequest) {
     model = "claude-sonnet-4-6",
     confirmThreshold = 200,
     yes = false,
+    paidApiConsent = false,
   } = await req.json();
 
-  const invalid = configError({ fps, mode, fuzz, maxReps, maxFrames, hamming, model, confirmThreshold, yes });
+  const invalid = textReviewPaidFeatureError(paidApiConsent)
+    ?? configError({ fps, mode, fuzz, maxReps, maxFrames, hamming, model, confirmThreshold, yes });
   if (invalid) {
     return new Response(JSON.stringify({ error: invalid }), {
       status: 400,

@@ -60,7 +60,7 @@ test("Claude force-disables autoupdater regardless of incoming value", () => {
   assert.equal(claudeProcessEnv({ DISABLE_AUTOUPDATER: "false" }).DISABLE_AUTOUPDATER, "1");
 });
 
-test("Claude keeps subscription context, excludes secrets, and never mutates source", () => {
+test("Claude keeps its own config dir, excludes secrets and inherited login tokens, never mutates source", () => {
   const source = {
     HOME: "/home/u", CLAUDE_CONFIG_DIR: "/home/u/.claude", CLAUDE_CODE_OAUTH_TOKEN: "tok",
     ANTHROPIC_API_KEY: "nope", CLAUDE_CODE_USE_VERTEX: "1", DISABLE_AUTOUPDATER: "0",
@@ -68,7 +68,7 @@ test("Claude keeps subscription context, excludes secrets, and never mutates sou
   const snapshot = JSON.stringify(source);
   const env = claudeProcessEnv(source);
   assert.equal(env.CLAUDE_CONFIG_DIR, "/home/u/.claude");
-  assert.equal(env.CLAUDE_CODE_OAUTH_TOKEN, "tok");
+  assert.equal("CLAUDE_CODE_OAUTH_TOKEN" in env, false, "Sniper signs in through CLAUDE_CONFIG_DIR only");
   assert.equal("ANTHROPIC_API_KEY" in env, false);
   assert.equal("CLAUDE_CODE_USE_VERTEX" in env, false);
   assert.equal(JSON.stringify(source), snapshot);

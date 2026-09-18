@@ -44,6 +44,8 @@ export interface ReviewConfig {
   hamming: number;
   model: string;
   confirmThreshold: number;
+  /** Explicit per-session opt-in: this optional paid feature sends still frames to Anthropic. */
+  paidApiConsent: boolean;
 }
 
 export const MODEL_OPTIONS = [
@@ -65,6 +67,7 @@ export const DEFAULT_CONFIG: ReviewConfig = {
   hamming: 5,
   model: "claude-sonnet-4-6",
   confirmThreshold: 200,
+  paidApiConsent: false,
 };
 
 // --- Server (review.py --server) NDJSON events, forwarded over SSE ----------

@@ -24,7 +24,8 @@ For the deterministic review lane, open Studio through `studio/studio_review.py`
 use `docs/producer/STUDIO_REVIEW_LANE.md` for sync, manifest and receipt handling.
 An explicitly selected native HyperFrames project follows the canonical native
 routing exception and its approved project direction. The owning interactive
-task opens Aaron's next review visibly in Chrome; headless writers do not launch
+task opens the operator's next review visibly in Chrome (or the browser the
+operator names); headless writers do not launch
 browsers or switch execution routes.
 For an existing guided opening checkpoint, read
 `docs/producer/CODEX_COMMAND_WORKFLOW.md` and use its direct status/review/launch
@@ -36,8 +37,9 @@ For GUI headless authoring, author only the requested `edit_plan.json` and
 permitted scratch JSON inside the job directory. Run only the exact local
 Producer gate or planner commands named by the caller. Do not render, make
 network calls, install dependencies, modify repository doctrine, or touch files
-outside the job directory. The deterministic Python, FFmpeg, HyperFrames, and
-Palmier stages—not the language model—produce the video output.
+outside the job directory. The deterministic Python, FFmpeg and HyperFrames
+stages—not the language model—produce the video output. Palmier Pro is not
+configured in the packaged release.
 
 In the GUI's initial headless writer call, do not simulate or spawn the fresh
 critic required by canonical step 4. The durable controller owns that bounded

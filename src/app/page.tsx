@@ -137,8 +137,8 @@ export default function Home() {
           <summary className="cursor-pointer font-medium text-foreground">Where does my footage go?</summary>
           <div className="mt-3 max-w-3xl space-y-2 leading-relaxed">
             <p>
-              No feature of the app uploads a video or audio file. Speech-to-text and rendering run
-              on this Mac. Your Codex or Claude subscription receives the transcript, the edit plan and
+              Sniper never uploads a video file, and audio leaves only if you explicitly authorize the
+              optional paid Deepgram transcription. Speech-to-text and rendering run on this Mac. Your Codex or Claude subscription receives the transcript, the edit plan and
               your instructions as text, and still frames of each rendered edit for its review —
               trim-only edits included.
             </p>

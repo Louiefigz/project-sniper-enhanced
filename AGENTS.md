@@ -35,10 +35,14 @@ revisions and context handoffs.
   - *Text Review* (`/frameio-review`) sends still frames to Anthropic's API on the
     operator's own `ANTHROPIC_API_KEY` (from `../runtime/sniper.local.env`); the app refuses
     a run without the operator's explicit opt-in.
-  - *Deepgram transcription* runs only from a direct script call with
-    `--provider deepgram --authorize-paid-asr deepgram`. No app route uses it; transcription
-    is local Whisper. Never add those flags for the operator.
-  - Nothing falls back to either of these.
+  - *Deepgram transcription* uploads audio to Deepgram and bills the operator's own
+    Deepgram key. Transcription is local Whisper by default and no app route uses Deepgram;
+    it runs only from a transcription script call with the paired
+    `--provider deepgram --authorize-paid-asr deepgram` flags (`scripts/asr_policy.py`).
+    Add them only when the operator explicitly authorizes Deepgram for the current edit. A
+    saved key, an environment variable or a failed local run is never that authorization.
+  - Nothing falls back to either of these. Never ask the operator to paste a key into the
+    conversation, and never display or copy a key file.
 - **No Docker.** The supported route runs natively on macOS.
 
 ## What leaves this Mac

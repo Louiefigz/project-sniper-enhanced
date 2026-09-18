@@ -15,8 +15,9 @@
 </header>
 
 <div class="ok">
-<p><strong>No feature of the app uploads a video or audio file.</strong> Rendering,
-speech-to-text and the edit itself run on this Mac. What does leave is text and still images, sent to the
+<p><strong>Sniper never uploads a video file, and audio leaves only if you explicitly
+authorize the optional paid Deepgram transcription.</strong> Rendering, speech-to-text and
+the edit itself run on this Mac. What does leave is text and still images, sent to the
 Codex or Claude subscription you chose, plus the separately optional paid features below if
 you turn them on.</p>
 </div>
@@ -82,10 +83,12 @@ at the video's full resolution</strong> to Anthropic's API, billed per image on 
 API key you add yourself. The video file is not sent. Not part of your subscription.</td>
 <td>Refuses to run without your tick on the settings screen and a key you configured
 (<code>runtime/sniper.local.env</code>; <code>app/src/app/api/_lib/paid-features.ts</code>)</td></tr>
-<tr><td>Deepgram transcription <span class="tag">not used by the app</span></td><td><strong>Would
-upload your audio</strong> to Deepgram. No part of the app uses it; only a direct script run
-with explicit paid-transcription switches and your own key can.</td>
-<td><code>app/scripts/asr_policy.py</code></td></tr>
+<tr><td>Deepgram transcription <span class="tag">optional, paid</span></td><td><strong>Uploads
+your audio</strong> to Deepgram, billed by Deepgram on your own key — only when you
+explicitly authorize Deepgram for a transcription. Local transcription is the default; the
+app's own screens never use Deepgram, and a saved key or setting alone never authorizes it.</td>
+<td>A transcription run needs the paired paid-transcription switches for that one run
+(<code>app/scripts/asr_policy.py</code>); nothing falls back to it</td></tr>
 <tr><td>Installing</td><td><strong>Downloads only.</strong> Packages from the npm and Python
 registries, the rendering browser from Google's Chrome for Testing, the speech model from
 Hugging Face and the two provider CLIs from npm. None of your files or text is sent.</td>

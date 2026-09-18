@@ -4,9 +4,14 @@ The jetsam limit the launcher attaches is enforced by the kernel but reset by an
 later exec, and ``RLIMIT_CPU`` on macOS only raises one SIGXCPU. This watchdog
 reads the jailed pid (from its attestation) and polls the kernel's accounting
 for that pid (``proc_pid_rusage``: physical footprint, user + system CPU time)
-every few milliseconds. Above either ceiling it SIGKILLs the process group and
-records why. The pid stays the same across exec, so a decoder that re-executes
-itself is still watched. A sampled limit can be exceeded briefly between polls.
+every few milliseconds. Above either ceiling it SIGKILLs the process (and its
+group when it leads one) and records why. The pid stays the same across exec, so
+a decoder that re-executes itself is still watched. A sampled limit can be
+exceeded briefly between polls.
+
+The watched process is pinned by its kernel start time: it must have started
+after this watchdog was created, and a later sample with a different start time
+(a reused pid) or an exit time ends the watch without signalling anything.
 """
 from __future__ import annotations
 
@@ -36,14 +41,26 @@ def _ticks_to_seconds() -> float:
 _TICK_SECONDS = _ticks_to_seconds()
 
 
-def usage(pid: int) -> tuple[int, float] | None:
-    """Physical footprint (bytes) and user+system CPU seconds of ``pid``, or None when gone."""
+def _now() -> int:
+    """The kernel's absolute clock, in the units of ``proc_start_abstime``."""
+    _LIBC.mach_absolute_time.restype = ctypes.c_uint64
+    return _LIBC.mach_absolute_time()
+
+
+def _rusage(pid: int) -> tuple[int, float, int, int] | None:
+    """Footprint, CPU seconds, start and exit abstime of ``pid`` (rusage_info_v2), or None."""
     buffer = ctypes.create_string_buffer(512)
     if _LIBC.proc_pid_rusage(pid, _RUSAGE_INFO_V2, buffer) != 0:
         return None
     user, system = struct.unpack_from("<QQ", buffer.raw, 16)
-    footprint = struct.unpack_from("<Q", buffer.raw, 72)[0]
-    return footprint, (user + system) * _TICK_SECONDS
+    footprint, started, exited = struct.unpack_from("<QQQ", buffer.raw, 72)
+    return footprint, (user + system) * _TICK_SECONDS, started, exited
+
+
+def usage(pid: int) -> tuple[int, float] | None:
+    """Physical footprint (bytes) and user+system CPU seconds of ``pid``, or None when gone."""
+    sample = _rusage(pid)
+    return None if sample is None else sample[:2]
 
 
 class JailWatchdog(threading.Thread):
@@ -53,6 +70,8 @@ class JailWatchdog(threading.Thread):
         super().__init__(daemon=True)
         self._fd, self._memory, self._cpu = attest_fd, memory_bytes, cpu_seconds
         self._stop = threading.Event()
+        self._created = _now()
+        self._pinned_start: int | None = None
         self.exceeded: str | None = None
         self.peak_bytes = 0
 
@@ -68,21 +87,39 @@ class JailWatchdog(threading.Thread):
         except (OSError, ValueError, KeyError, UnicodeDecodeError):
             return None
 
+    def _same_process(self, started: int, exited: int) -> bool:
+        """Whether a sample still describes the process first seen (not exited, pid not reused)."""
+        if self._pinned_start is None:
+            if started < self._created:
+                return False  # an older process holds this pid: never ours
+            self._pinned_start = started
+        return started == self._pinned_start and exited == 0
+
+    def _kill(self, pid: int) -> None:
+        """SIGKILL the jailed pid, and its process group when it leads one (its own session)."""
+        targets = [os.kill]
+        try:
+            if os.getpgid(pid) == pid:
+                targets.append(os.killpg)
+        except (ProcessLookupError, PermissionError):
+            pass
+        for kill in targets:
+            try:
+                kill(pid, signal.SIGKILL)
+            except (ProcessLookupError, PermissionError):
+                pass
+
     def _check(self, pid: int) -> bool:
-        """True while the process is alive and within its ceilings."""
-        sample = usage(pid)
-        if sample is None:
+        """True while the same process is alive and within its ceilings."""
+        sample = _rusage(pid)
+        if sample is None or not self._same_process(sample[2], sample[3]):
             return False
-        footprint, cpu = sample
+        footprint, cpu = sample[0], sample[1]
         self.peak_bytes = max(self.peak_bytes, footprint)
         reason = "MEMORY_LIMIT" if footprint > self._memory else "CPU_LIMIT" if cpu > self._cpu else None
         if reason and not self._stop.is_set():
             self.exceeded = reason
-            for kill in (os.kill, os.killpg):  # the jailed pid itself, then its own process group
-                try:
-                    kill(pid, signal.SIGKILL)
-                except (ProcessLookupError, PermissionError):
-                    pass
+            self._kill(pid)
             return False
         return True
 

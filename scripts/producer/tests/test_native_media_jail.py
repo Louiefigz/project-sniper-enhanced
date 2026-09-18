@@ -204,14 +204,34 @@ class NativeJailPropertyTests(unittest.TestCase):
             self.assertIn("Operation not permitted", denied.stderr)
             self.assertNotIn("PRIVATE", denied.stdout)
 
-    def test_other_processes_environment_and_arguments_are_hidden(self) -> None:
-        victim = subprocess.Popen(["/bin/sleep", "30"], env={"PATH": "/usr/bin", "SNIPER_TEST_SECRET": "leak-me-please"})
+    def test_other_processes_are_invisible_inside_the_jail(self) -> None:
+        marker = f"sniper-victim-{os.getpid()}-{time.monotonic_ns()}"
+        victim = subprocess.Popen(["/bin/sh", "-c", 'exec -a "$0" /bin/sleep 30', marker])
         try:
-            seen = _launcher("/bin/ps", ["-E", "-ww", "-p", str(victim.pid), "-o", "command="], self.root)
+            seen = subprocess.run(["/usr/bin/pgrep", "-f", marker], capture_output=True, text=True)
+            self.assertIn(str(victim.pid), seen.stdout, "control: pgrep outside the jail sees the victim")
+            jailed = _launcher("/usr/bin/pgrep", ["-f", marker], self.root)  # not setuid, so it does start
         finally:
             victim.kill()
             victim.wait()
-        self.assertNotIn("leak-me-please", seen.stdout + seen.stderr)
+        self.assertNotIn(str(victim.pid), jailed.stdout)
+        self.assertIn("Cannot get process list", jailed.stderr)
+
+    def test_watchdog_never_signals_a_process_older_than_itself(self) -> None:
+        bystander = subprocess.Popen(["/bin/sleep", "30"])
+        attest = os.open(self.root / "bystander-attest", os.O_RDWR | os.O_CREAT | os.O_EXCL, 0o600)
+        try:
+            os.write(attest, (json.dumps({"pid": bystander.pid}) + "\n").encode())
+            watchdog = JailWatchdog(attest, 1, 60)  # a 1-byte ceiling the bystander already exceeds
+            watchdog.start()
+            time.sleep(0.3)
+            watchdog.stop()
+            self.assertIsNone(watchdog.exceeded)
+            self.assertIsNone(bystander.poll(), "an unrelated process named by pid must survive")
+        finally:
+            os.close(attest)
+            bystander.kill()
+            bystander.wait()
 
     def test_watchdog_enforces_the_cpu_ceiling(self) -> None:
         began = time.monotonic()

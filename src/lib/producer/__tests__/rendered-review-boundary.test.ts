@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import fs, { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -48,6 +48,22 @@ test("the provider media profile hides the project except the review folder and 
     }
     const child = providerMediaJail("/bin/sh", ["-c", `/bin/cat '${path.join(outside, "RAW.MOV")}'`], scope);
     assert.notEqual(spawnSync(child.bin, child.args).status, 0, "children inherit the boundary");
+    const master = path.join(project, "master.mp4");
+    writeFileSync(master, "video");
+    const writes: Array<[string, string]> = [
+      ["create", `echo x > '${path.join(project, "new.txt")}'`],
+      ["create in review", `echo x > '${path.join(review, "new.jpg")}'`],
+      ["rename media into review", `/bin/mv '${master}' '${path.join(review, "moved.jpg")}'`],
+      ["hardlink media into review", `/bin/ln '${master}' '${path.join(review, "linked.jpg")}'`],
+      ["delete", `/bin/rm '${path.join(project, "edit_plan.json")}'`],
+    ];
+    const control = providerMediaJail("/bin/sh", ["-c", `echo x > '${path.join(outside, "new.txt")}'`], scope);
+    assert.equal(spawnSync(control.bin, control.args).status, 0, "control: writing outside the project still works");
+    for (const [label, command] of writes) {
+      const jailed = providerMediaJail("/bin/sh", ["-c", command], scope);
+      assert.notEqual(spawnSync(jailed.bin, jailed.args).status, 0, `${label} is denied inside the project`);
+    }
+    assert.ok(fs.existsSync(master) && fs.existsSync(path.join(project, "edit_plan.json")), "project files are untouched");
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 

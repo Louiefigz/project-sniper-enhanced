@@ -3,7 +3,7 @@
     {
       "admissionReceiptPublished": false,
       "caseId": "malformed-codec",
-      "error": "external-media decode rejected: DECODER_EXIT_234: DECODER_EXIT_234: [vist#0:0/none @ 0x8acc10180] Decoding requested, but no decoder found for: none\nError opening output file -.\nError opening output files: Invalid argument",
+      "error": "external-media decode rejected: DECODER_EXIT_234: DECODER_EXIT_234: [vist#0:0/none @ 0x838c18180] Decoding requested, but no decoder found for: none\nError opening output file -.\nError opening output files: Invalid argument",
       "inputSha256": "c56d313afe5dc703f87130532e0d74f984f6215b4e4aabe7b36d034ca5b1ad5f",
       "processCleanupProved": true,
       "status": "rejected"
@@ -27,7 +27,7 @@
     {
       "admissionReceiptPublished": false,
       "caseId": "truncated-stream",
-      "error": "external-media decode rejected: DECODER_EXIT_1: DECODER_EXIT_1: [mov,mp4,m4a,3gp,3g2,mj2 @ 0xa62824000] moov atom not found\n/private/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-p0-adversarial-q3r2cy66/truncated-stream-store/22838d0adff1e28bf508f8f7dc4c924ae35f313a8a191ace8cfde37d7dfd6eb0.media: Invalid data found when processing input",
+      "error": "external-media decode rejected: DECODER_EXIT_1: DECODER_EXIT_1: [mov,mp4,m4a,3gp,3g2,mj2 @ 0xcbd038000] moov atom not found\n/private/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-p0-adversarial-hebzo0sq/truncated-stream-store/22838d0adff1e28bf508f8f7dc4c924ae35f313a8a191ace8cfde37d7dfd6eb0.media: Invalid data found when processing input",
       "inputSha256": "22838d0adff1e28bf508f8f7dc4c924ae35f313a8a191ace8cfde37d7dfd6eb0",
       "processCleanupProved": true,
       "status": "rejected"
@@ -49,7 +49,7 @@
       "status": "rejected"
     }
   ],
-  "generatedAt": "2026-09-18T16:21:05.001369+00:00",
+  "generatedAt": "2026-09-18T16:49:33.051464+00:00",
   "kind": "p0-adversarial-ingress-acceptance",
   "nativeRuntime": {
     "closureSha256": "65cff556720856c717ae824e21709efa9dc33c1d0df89579b0d9f5aca5fcf936",
@@ -77,7 +77,7 @@
     "scripts/producer/headless/native_media_runtime.py": "da89ec67334529b0c700bfecd6c5cad727d7d827f68e063b1857c19794878f4b",
     "scripts/producer/headless/native_media_runtime_approval.json": "95e618b96020e366d718afe2ff15e1728ea4de48f1556e8503585acdda980317",
     "scripts/producer/headless/native_media_sandbox.py": "b726c88401eb950757577c0841c9e8958d7fed63cb58f7de0ff96d013190968d",
-    "scripts/producer/headless/native_media_watchdog.py": "a90bd980082c6af525469b89c0a41644519953618e0302b83ceaf9020c751d5e",
+    "scripts/producer/headless/native_media_watchdog.py": "61b128b3af83c6f4ec38f291fafecd694916ca56b0d61aa211fdc1cf72216da6",
     "scripts/producer/headless/sealed_archive.py": "3896610aa65f3dad589779bdf599ac1e8a1a0de19e5ef78b8fc01740879dc78f",
     "scripts/producer/tests/live_p0_adversarial_ingress_acceptance.py": "0ef18bc8cd2309be8a777351078da67e6bd168e2af7f4a8c65bc5edf78129d1f"
   }

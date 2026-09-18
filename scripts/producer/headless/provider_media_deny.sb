@@ -5,7 +5,9 @@
 ; review has no tools; this profile is defence in depth for the CLI and anything
 ; it starts:
 ;   - nothing inside the project folder is readable except the review folder
-;     that holds the still frames and contact sheets being attached;
+;     that holds the still frames and contact sheets being attached, and nothing
+;     there can be created, changed, renamed, linked or deleted (so project media
+;     cannot be moved or linked into the review folder under an image name);
 ;   - no file with a video or audio extension, no Sniper media snapshot
 ;     (*.media) and no snapshot staging file can be opened anywhere, including
 ;     inside the review folder.
@@ -17,7 +19,7 @@
 ;   REVIEW   the folder with the review's still images (inside PROJECT)
 (version 1)
 (allow default)
-(deny file-read-data file-write-data (subpath (param "PROJECT")))
+(deny file-read-data file-write* (subpath (param "PROJECT")))
 (allow file-read-data (subpath (param "REVIEW")))
 (deny file-read-data file-write-data
   (regex #"\.([mM][pP]4|[mM]4[vVbBaA]|[mM][oO][vV]|[mM][kK][vVaA]|[wW][eE][bB][mM]|[aA][vV][iI]|[mM][pP][eE]?[gG]|[mM]2[vV]|[mM][pP]2)$")

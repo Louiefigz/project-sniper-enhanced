@@ -7,14 +7,14 @@ import { AutoEditError } from "./stream";
 import { boundedDeepStudyContext } from "./reference-review-context";
 import { visualStorytellingInstructions } from "@/lib/producer/visual-storytelling";
 
-interface PinnedText {
+export interface PinnedText {
   label: string;
   sourcePath: string;
   byteHash: string;
   content: string;
 }
 
-function pinnedText(label: string, filePath: string): PinnedText {
+export function pinnedText(label: string, filePath: string): PinnedText {
   const bytes = readFileSync(filePath);
   const content = bytes.toString("utf8");
   if (!Buffer.from(content, "utf8").equals(bytes)) {
@@ -26,7 +26,7 @@ function pinnedText(label: string, filePath: string): PinnedText {
   };
 }
 
-function doctrineContext(ctx: AutoEditCtx): PinnedText[] {
+export function doctrineContext(ctx: AutoEditCtx): PinnedText[] {
   if (!ctx.doctrine) throw new AutoEditError("plan critic requires pinned doctrine");
   const doctrine = restoreAutoEditDoctrine(ctx.doctrine);
   return Object.entries(doctrine.files).sort(([left], [right]) => left.localeCompare(right))

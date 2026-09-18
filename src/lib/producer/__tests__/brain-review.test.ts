@@ -182,11 +182,12 @@ function testPromptsAndTools(): void {
   assert.ok(!plan.includes(ctx.planPath));
   assert.ok(!plan.includes(ctx.manifestPath));
   assert.ok(!plan.includes(ctx.transcriptsDir));
-  const visual = buildRenderedReviewPrompt(ctx, {
-    auditReportPath: `${ctx.dir}/audit_report.json`,
-    framePaths: [`${ctx.dir}/audit_frames/graphic-01.png`],
-  }, 1);
-  assert.match(visual, /Inspect EVERY listed frame visually/);
+  const visual = buildRenderedReviewPrompt(ctx, renderedEvidence(), 1, "composition",
+    { frames: [{ path: `${ctx.dir}/audit_frames/graphic-01.png`, labels: ["#1 graphic-01"] }], reference: [] });
+  assert.match(visual, /Inspect EVERY attached frame visually/);
+  assert.match(visual, /NO filesystem, shell, browser/);
+  assert.match(visual, /BEGIN_PINNED_RENDERED_REVIEW_EVIDENCE_JSON/);
+  assert.match(visual, /Image 1\/1: #1 graphic-01/);
   assert.ok(visual.includes(visualStorytellingInstructions("longform", "rendered-review")));
   assert.match(visual, /missing gaze\/visual measurements/i);
   assert.match(visual, /"stage":"rendered"/);
@@ -250,6 +251,14 @@ function testPromptsAndTools(): void {
     '{"type":"object","properties":{"changedPlan":{"type":"boolean"}}}');
 }
 
+function renderedEvidence(): { auditReportPath: string; framePaths: string[] } {
+  const frame = `${ctx.dir}/audit_frames/graphic-01.png`, audit = `${ctx.dir}/audit_report.json`;
+  mkdirSync(path.dirname(frame), { recursive: true });
+  writeFileSync(frame, Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64"));
+  writeFileSync(audit, JSON.stringify({ frames: [{ path: frame }] }));
+  return { auditReportPath: audit, framePaths: [frame] };
+}
+
 async function testCodexInvocations(): Promise<void> {
   let calls = 0;
   const reviewResult = await runProducerReview({ stage: "plan", ctx, round: 1, packet }, {
@@ -274,10 +283,7 @@ async function testCodexInvocations(): Promise<void> {
     stage: "rendered",
     ctx,
     round: 1,
-    evidence: {
-      auditReportPath: `${ctx.dir}/audit_report.json`,
-      framePaths: [`${ctx.dir}/audit_frames/graphic-01.png`],
-    },
+    evidence: renderedEvidence(),
   }, {
     provider: () => "codex",
     codex: async (options) => {
@@ -289,6 +295,12 @@ async function testCodexInvocations(): Promise<void> {
       // so an Opus-xhigh vision critic isn't killed mid-reasoning.
       assert.equal(options.timeoutMs, 25 * 60 * 1000);
       assert.equal(options.cwd, ctx.dir);
+      // Tool-less, no directory access, frames attached, OS media boundary on.
+      assert.equal(options.tools, "none");
+      assert.deepEqual(options.addDirs, []);
+      assert.equal(options.jail, true);
+      assert.deepEqual(options.imagePaths, [`${ctx.dir}/audit_frames/graphic-01.png`]);
+      assert.ok(!options.prompt.includes("Rendered deliverable:"), "no video path is offered to the critic");
       return { message: renderedJson, stderr: "", ms: 11 };
     },
   });
@@ -374,16 +386,19 @@ async function testLegacyInvocation(): Promise<void> {
     stage: "rendered",
     ctx,
     round: 1,
-    evidence: {
-      auditReportPath: `${ctx.dir}/audit_report.json`,
-      framePaths: [`${ctx.dir}/audit_frames/graphic-01.png`],
-    },
+    evidence: renderedEvidence(),
   }, {
     provider: () => "legacy",
     legacy: async (invocation) => {
       calls += 1;
       assert.equal(invocation.cwd, ctx.dir);
-      assert.equal(invocation.args[invocation.args.indexOf("--allowedTools") + 1], "Read,Glob,Grep");
+      assert.equal(invocation.args[invocation.args.indexOf("--tools") + 1], "");
+      assert.equal(invocation.args[invocation.args.indexOf("--allowedTools") + 1], "");
+      assert.equal(invocation.args[invocation.args.indexOf("--input-format") + 1], "stream-json");
+      assert.ok(!invocation.args.includes("--add-dir"));
+      assert.equal(invocation.jail, true);
+      const input = JSON.parse(invocation.stdin!) as { message: { content: Array<{ type: string }> } };
+      assert.deepEqual(input.message.content.map((block) => block.type), ["text", "image"]);
       return { message: renderedJson, stderr: "", ms: 9 };
     },
   });

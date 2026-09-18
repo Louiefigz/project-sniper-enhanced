@@ -1,0 +1,16 @@
+; Sniper provider-CLI media boundary (policy sniper-provider-media-deny-v1).
+;
+; Wraps a Codex or Claude CLI process that Sniper starts for a tool-less review
+; (src/app/api/_lib/provider-media-jail.ts). Whatever the model asks for, the
+; CLI and anything it starts cannot open a video or audio file or a Sniper media
+; snapshot (*.media). Still images stay readable: they are the review evidence.
+; Everything else, including the network connection to the provider, is
+; unchanged. Extensions cover everything Sniper ingests
+; (scripts/producer/ingest_probe.py VIDEO_EXTS/AUDIO_EXTS) plus common camera
+; and container formats, matched without regard to case.
+(version 1)
+(allow default)
+(deny file-read-data file-write-data
+  (regex #"\.([mM][pP]4|[mM][oO][vV]|[mM]4[vV]|[mM][kK][vV]|[wW][eE][bB][mM]|[aA][vV][iI]|[mM][pP][eE]?[gG]|[mM][tT][sS]|[mM]2[tT][sS]|[tT][sS]|[mM][xX][fF]|3[gG][pP]|[fF][lL][vV]|[wW][mM][vV]|[dD][vV]|[bB][rR][aA][wW]|[rR]3[dD])$")
+  (regex #"\.([mM][pP]3|[wW][aA][vV]|[mM]4[aA]|[aA][aA][cC]|[fF][lL][aA][cC]|[oO][gG][gG]|[oO][pP][uU][sS]|[wW][mM][aA]|[aA][iI][fF][fF]?|[cC][aA][fF])$")
+  (regex #"\.[mM][eE][dD][iI][aA]$"))

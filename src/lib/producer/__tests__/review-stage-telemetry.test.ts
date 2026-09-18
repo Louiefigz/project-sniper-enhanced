@@ -1,5 +1,6 @@
+import { frameLabel } from "../../../app/api/producer/auto-edit/rendered-review-attachments";
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -28,6 +29,7 @@ async function fixture(run: (ctx: AutoEditCtx) => Promise<void>): Promise<void> 
   const dir = mkdtempSync(path.join(os.tmpdir(), "sniper-review-telemetry-"));
   const base: AutoEditCtx = { dir, scope: "produced", planPath: path.join(dir, "edit_plan.json"),
     manifestPath: path.join(dir, "asset_manifest.json"), transcriptsDir: dir, deliveryPolicy: "mp4-only" };
+  writeFileSync(base.planPath, JSON.stringify({ planVersion: 1, cutTrack: [] }));
   try {
     const ctx = { ...base, doctrine: captureAutoEditDoctrine(base, "test-only", process.cwd()) };
     await withStageTimingContext(lineage, () => run(ctx));
@@ -35,9 +37,16 @@ async function fixture(run: (ctx: AutoEditCtx) => Promise<void>): Promise<void> 
 }
 
 function request(ctx: AutoEditCtx): Extract<ProducerReviewRequest, { stage: "rendered" }> {
+  const frames = [path.join(ctx.dir, "TEST-ONLY-one.png"), path.join(ctx.dir, "TEST-ONLY-two.png")];
+  for (const frame of frames) writeFileSync(frame, Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64"));
+  writeFileSync(path.join(ctx.dir, "TEST-ONLY.json"), JSON.stringify({ frames: frames.map((frame) => ({ path: frame })) }));
   return { stage: "rendered", ctx, round: 2, lens: "editorial",
-    evidence: { auditReportPath: path.join(ctx.dir, "TEST-ONLY.json"),
-      framePaths: [path.join(ctx.dir, "TEST-ONLY-one.png"), path.join(ctx.dir, "TEST-ONLY-two.png")] } };
+    evidence: { auditReportPath: path.join(ctx.dir, "TEST-ONLY.json"), framePaths: frames } };
+}
+
+function attachments(req: Extract<ProducerReviewRequest, { stage: "rendered" }>) {
+  return { frames: req.evidence.framePaths.map((frame, index) => ({ path: frame, labels: [`#${index + 1} ${frameLabel(frame)}`] })),
+    reference: [] };
 }
 
 function rows(ctx: AutoEditCtx): Row[] {
@@ -46,7 +55,7 @@ function rows(ctx: AutoEditCtx): Row[] {
 
 for (const provider of ["codex", "legacy"] as const) {
   test(`${provider}: exact prompt/policy preserved; negative verdict is not execution failure`, () => fixture(async (ctx) => {
-    const req = request(ctx), expected = buildRenderedReviewPrompt(ctx, req.evidence, req.round, req.lens);
+    const req = request(ctx), expected = buildRenderedReviewPrompt(ctx, req.evidence, req.round, req.lens!, attachments(req));
     let observed = "";
     const result = await runProducerReview(req, { provider: () => provider,
       codex: async (options) => {
@@ -54,7 +63,7 @@ for (const provider of ["codex", "legacy"] as const) {
         assert.equal(options.reasoning, "medium"); assert.equal(options.sandbox, "read-only");
         return { message, ms: 99_999, stderr: "PRIVATE-STDERR" };
       }, legacy: async (invocation) => {
-        observed = invocation.args[invocation.args.indexOf("-p") + 1];
+        observed = (JSON.parse(invocation.stdin!) as { message: { content: Array<{ text?: string }> } }).message.content[0].text!;
         assert.equal(invocation.args[invocation.args.indexOf("--effort") + 1], "xhigh");
         return { message, ms: 99_999, stderr: "PRIVATE-STDERR" };
       } });

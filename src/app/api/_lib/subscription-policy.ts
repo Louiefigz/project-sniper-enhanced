@@ -9,7 +9,7 @@ const CLAUDE_CONFIG_ARGS = ["--setting-sources", "", "--settings", CLAUDE_SUBSCR
 const CLAUDE_VALUE_FLAGS = new Set([
   "-p", "--print", "--model", "--effort", "--output-format", "--permission-mode",
   "--tools", "--allowedTools", "--allowed-tools", "--disallowedTools", "--disallowed-tools",
-  "--add-dir", "--json-schema", "--session-id", "--resume", "-r", "--mcp-config",
+  "--add-dir", "--json-schema", "--session-id", "--resume", "-r", "--mcp-config", "--input-format",
   "--append-system-prompt", "--system-prompt",
 ]);
 const CLAUDE_SWITCHES = new Set(["--verbose", "--strict-mcp-config", "--no-session-persistence", "--no-chrome"]);

@@ -1,6 +1,7 @@
 import { spawn } from "child_process";
 import path from "path";
 import readline from "readline";
+import { providerMediaJail } from "./provider-media-jail";
 import { admitSubscriptionInvocation } from "./subscription-invocation";
 import { CODEX_SUBSCRIPTION_CONFIG } from "./subscription-policy";
 import {
@@ -53,6 +54,8 @@ export interface CodexRunOptions {
   signal?: AbortSignal;
   /** Optional aggregate stdout+stderr byte budget; never truncate a successful result. */
   maxOutputBytes?: number;
+  /** Run under the OS media boundary (provider-media-jail.ts); requires tools "none". */
+  jail?: boolean;
 }
 
 export interface CodexRunResult {
@@ -83,6 +86,8 @@ const SCHEMAS: Record<CodexSchema, string> = {
 };
 
 const MAX_STDERR_CHARS = 8_000;
+/** Per-call bound on controller-owned image attachments (frames or labelled contact sheets). */
+export const MAX_IMAGE_ATTACHMENTS = 24;
 const NO_TOOL_FEATURES = [
   "shell_tool",
   "unified_exec",
@@ -128,7 +133,7 @@ export function buildCodexArgs(options: Omit<CodexRunOptions, "prompt" | "onEven
     "--json",
   ];
   for (const dir of options.addDirs ?? []) args.push("--add-dir", dir);
-  if ((options.imagePaths?.length ?? 0) > 12) throw new Error("Codex image attachments exceed the native evidence bound");
+  if ((options.imagePaths?.length ?? 0) > MAX_IMAGE_ATTACHMENTS) throw new Error("Codex image attachments exceed the evidence bound");
   for (const image of options.imagePaths ?? []) {
     if (!path.isAbsolute(image) || image.includes("\0")) throw new Error("Codex image attachments need absolute controller-owned paths");
     args.push("--image", image);
@@ -169,13 +174,18 @@ export async function runCodex(options: CodexRunOptions): Promise<CodexRunResult
       || options.maxOutputBytes < 1 || options.maxOutputBytes > 16 * 1024 * 1024)) {
     throw new Error("Codex output budget is invalid");
   }
+  if (options.jail && options.tools !== "none") {
+    throw new Error("The provider media boundary applies only to tool-less Codex runs");
+  }
   const settings = codexSettings();
   const admitted = await admitSubscriptionInvocation({ provider: "codex", bin: settings.bin,
     args: buildCodexArgs(options), cwd: options.cwd ?? process.cwd(), env: codexProcessEnv(),
     timeoutMs: options.timeoutMs, signal: options.signal });
+  const command = options.jail ? providerMediaJail(admitted.bin, admitted.args)
+    : { bin: admitted.bin, args: [...admitted.args] };
   return new Promise((resolve, reject) => {
     const timeoutMs = admitted.remainingMs();
-    const proc = trackProcessTree(spawn(admitted.bin, admitted.args, {
+    const proc = trackProcessTree(spawn(command.bin, command.args, {
       cwd: admitted.cwd,
       env: admitted.env,
       stdio: ["pipe", "pipe", "pipe"],

@@ -150,10 +150,7 @@ function testLiveDriftKeepsPinnedPromptAuthority(root: string): void {
     buildAuthoringPrompt(pinned, "codex"),
     buildPlanReviewPrompt(pinned, 1, packet, packetValue),
     buildRevisionPrompt(pinned, materialReview(), 1),
-    buildRenderedReviewPrompt(pinned, {
-      auditReportPath: path.join(ctx.dir, "audit_report.json"),
-      framePaths: [path.join(ctx.dir, "frame-1.png")],
-    }, 1),
+    renderedPrompt(pinned),
   ];
   for (const prompt of prompts) {
     assert.ok(prompt.includes(doctrine.files[PRODUCER_CORE_DOCTRINE_PATHS[0]]));
@@ -161,6 +158,14 @@ function testLiveDriftKeepsPinnedPromptAuthority(root: string): void {
     assert.ok(!prompt.includes(liveSkill));
   }
   assert.equal(restoreAutoEditDoctrine(doctrine).doctrineHash, doctrine.doctrineHash);
+}
+
+function renderedPrompt(pinned: AutoEditCtx): string {
+  const frame = path.join(pinned.dir, "frame-1.png"), audit = path.join(pinned.dir, "audit_report.json");
+  writeFileSync(frame, Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64"));
+  writeFileSync(audit, JSON.stringify({ frames: [{ path: frame }] }));
+  return buildRenderedReviewPrompt(pinned, { auditReportPath: audit, framePaths: [frame] }, 1, "composition",
+    { frames: [{ path: frame, labels: ["#1 frame-1"] }], reference: [] });
 }
 
 function testResumeRestores(root: string): void {

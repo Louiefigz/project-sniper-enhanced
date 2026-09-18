@@ -76,6 +76,12 @@ def check_node(record: Record) -> None:
                "the CLIs and workers would run a different Node — run install/install.command")
         return
     _, out, _ = run([pinned, "--version"], 30)
+    components = release()["components"]
+    major = out.strip().lstrip("v").split(".")[0]
+    if major.isdigit() and int(major) in components.get("node_unsupported_majors", []):
+        record("FAIL", "node", f"{out.strip()} is not supported by this release — install Node "
+               f"{components['node_recommended']} (LTS), then run install/install.command")
+        return
     record("PASS", "node", f"{out.strip()} at {pinned} (needs {floor}+); the CLIs and workers use it")
 
 

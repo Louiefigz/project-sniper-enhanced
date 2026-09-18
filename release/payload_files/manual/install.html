@@ -37,7 +37,7 @@ only ever published outside the archive; a hash inside a file cannot verify that
 lists everything that is missing in one go, and stops with the exact next step.</p>
 <table>
 <tr><th>Tool</th><th>Version</th><th>How</th><th>Needed for</th></tr>
-<tr><td>Node</td><td>Node 22.13 or newer; 24 recommended</td><td><a href="https://nodejs.org">nodejs.org</a> — choose LTS</td><td>the app, rendering, the provider CLIs</td></tr>
+<tr><td>Node</td><td>Node 22.13 or newer, not 23; 24 (LTS) recommended</td><td><a href="https://nodejs.org">nodejs.org</a> — choose LTS</td><td>the app, rendering, the provider CLIs</td></tr>
 <tr><td>Python</td><td>3.12 or newer (3.14.4 is the version tested)</td><td><a href="https://www.python.org/downloads/macos/">python.org</a></td><td>the editing engine</td></tr>
 <tr><td>ffmpeg</td><td>with libass, librubberband, libzimg, libx264</td><td><code>brew install ffmpeg</code></td><td>every render</td></tr>
 <tr><td>whisper-cpp</td><td>any current</td><td><code>brew install whisper-cpp</code></td><td>local transcription</td></tr>
@@ -51,9 +51,9 @@ uses, and names any that are missing.</p>
 <p><strong>Node from nvm, fnm or volta:</strong> run the installer from Terminal, where that
 Node is on your PATH. The installer records the exact Node it checked and the app, the
 doctor, the provider CLIs and every render use that same one, even when you later start
-Sniper from Finder. Its path must not contain a space. Node 23 is accepted but lies outside
-the range some dependencies declare; if you upgrade or remove the Node you installed with,
-run the installer again.</p>
+Sniper from Finder. Its path must not contain a space. Node 23 is refused: it lies outside the
+range this release's dependencies declare, and its processes were seen hanging on exit. If you
+upgrade or remove the Node you installed with, run the installer again.</p>
 
 <h2>Step 3 — open guided setup</h2>
 <p>Double-click <code>install/setup.command</code> in Finder. It installs Sniper if needed,

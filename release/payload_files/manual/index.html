@@ -72,8 +72,9 @@ Mac with macOS 26 on Apple silicon; that is not yet a qualified buyer baseline. 
 packages need macOS 13 or newer (an Intel Mac: macOS 14 or newer); Intel Macs are untested.</td><td>—</td></tr>
 <tr><td>Disk space</td><td>About 4 GB for the install, plus room for your projects.
 Leave at least 20 GB free; a full-length render uses a lot of temporary space.</td><td>—</td></tr>
-<tr><td>Node 22.13 or newer</td><td>Free, from nodejs.org. Node 24 is recommended. The floor comes
-from what this release's dependencies declare.</td><td>Free</td></tr>
+<tr><td>Node 22.13 or newer, except Node 23</td><td>Free, from nodejs.org. Node 24 (LTS) is
+recommended. The floor comes from what this release's dependencies declare; Node 23 is outside
+their range and is refused.</td><td>Free</td></tr>
 <tr><td>Python 3.12 or newer</td><td>Free, from python.org. 3.14.4 is the version tested.</td><td>Free</td></tr>
 <tr><td><code>ffmpeg</code>, <code>whisper-cpp</code>, <code>tesseract</code> and
 <code>yt-dlp</code></td><td>Free, one Homebrew command each. tesseract reads on-screen text when

@@ -18,14 +18,16 @@ from release.tests import _fixture as fx
 sys.path.insert(0, str(fx.INSTALL_SRC / "lib"))
 import doctor_setup  # noqa: E402
 
-REAL_NODE = shutil.which("node", path="/opt/homebrew/bin:/usr/local/bin:" + os.environ.get("PATH", ""))
-
 
 def _stub_node(folder: Path, version: str) -> Path:
-    """A 'node' that reports a version and nothing else (a too-old install)."""
+    """A 'node' that reports a version and, for `-p ...execPath`, its own real path.
+
+    A regular file (never a link to a real Node), so the tests do not depend on which
+    Node this Mac happens to run.
+    """
     folder.mkdir(parents=True, exist_ok=True)
     stub = folder / "node"
-    stub.write_text(f"#!/bin/bash\necho v{version}\n")
+    stub.write_text(f'#!/bin/bash\ncase "$1" in\n  -p) /usr/bin/readlink -f "$0" ;;\n  *) echo v{version} ;;\nesac\n')
     stub.chmod(0o755)
     return stub
 
@@ -48,15 +50,31 @@ class InstallerAndDoctorNode(unittest.TestCase):
         self.assertNotEqual(done.returncode, 0)
         self.assertIn("older than 22.13.0", done.stdout + done.stderr)
 
-    @unittest.skipUnless(REAL_NODE, "no real node on this machine")
     def test_installer_records_the_real_binary_of_a_node_in_a_nonstandard_folder(self) -> None:
-        custom = self.base / "tools/nvm-like/versions/node/bin"
+        real = _stub_node(self.base / "tools/nvm-like/versions/node/v24.1.0/bin", "24.1.0")
+        custom = self.base / "tools/fnm-like/multishell/bin"
         custom.mkdir(parents=True)
-        (custom / "node").symlink_to(REAL_NODE)  # the link is what is tested (nvm-style); nothing writes to it
+        (custom / "node").symlink_to(real)  # the per-shell link is what is tested; it points at a stub
         done = self._select(str(custom))
         self.assertEqual(done.returncode, 0, done.stderr)
         recorded = done.stdout.strip().splitlines()[-1].removeprefix("NODE=")
-        self.assertEqual(recorded, os.path.realpath(REAL_NODE))
+        self.assertEqual(recorded, os.path.realpath(real))
+
+    def test_installer_refuses_node_23_with_the_exact_fix(self) -> None:
+        stub = _stub_node(self.base / "node23", "23.10.0").parent
+        done = self._select(str(stub))
+        self.assertNotEqual(done.returncode, 0)
+        self.assertIn("Node 23.10.0 is not supported", done.stdout + done.stderr)
+        self.assertIn("Install Node 24 (LTS)", done.stdout + done.stderr)
+
+    def test_doctor_fails_node_23(self) -> None:
+        stub = _stub_node(self.base / "node23", "23.10.0")
+        rows: list[tuple[str, str, str]] = []
+        with mock.patch.dict(os.environ, {"SNIPER_NODE_PATH": str(stub), "PATH": str(stub.parent)}), \
+                mock.patch.object(doctor_setup, "PKG_ROOT", self.pkg):
+            doctor_setup.check_node(lambda *row: rows.append(row))
+        self.assertEqual(rows[0][0], "FAIL")
+        self.assertIn("not supported", rows[0][2])
 
     def test_doctor_fails_a_node_that_reports_22_0_0(self) -> None:
         stub = _stub_node(self.base / "oldnode", "22.0.0")
@@ -67,11 +85,11 @@ class InstallerAndDoctorNode(unittest.TestCase):
         self.assertEqual(rows[0][0], "FAIL")
         self.assertIn("older than 22.13.0", rows[0][2])
 
-    @unittest.skipUnless(REAL_NODE, "no real node on this machine")
     def test_doctor_fails_when_path_finds_a_different_node(self) -> None:
+        pinned = _stub_node(self.base / "pinned", "24.1.0")
         other = _stub_node(self.base / "other", "24.0.0")
         rows: list[tuple[str, str, str]] = []
-        with mock.patch.dict(os.environ, {"SNIPER_NODE_PATH": os.path.realpath(REAL_NODE),
+        with mock.patch.dict(os.environ, {"SNIPER_NODE_PATH": str(pinned),
                                           "PATH": str(other.parent)}), \
                 mock.patch.object(doctor_setup, "PKG_ROOT", self.pkg):
             doctor_setup.check_node(lambda *row: rows.append(row))

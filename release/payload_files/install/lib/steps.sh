@@ -141,6 +141,7 @@ fetch_part() {
   local before=0 after=0 rc=0
   [ -f "$2" ] && before="$(stat -f %z "$2")"
   curl -fL --retry 3 --retry-delay 2 -C - -o "$2" "$1" || rc=$?
+  CURL_RC="$rc"
   if [ "$rc" = 0 ]; then
     [ "$(sha "$2")" = "$3" ] && return 0
     return 1
@@ -166,8 +167,8 @@ download_verified() {
   fi
   case "$rc" in
     0) mv "$part" "$target"; return 0 ;;
-    2) fail "Downloading $label stopped before it finished; the $(stat -f %z "$part" 2>/dev/null || echo 0) bytes
-  received are kept. Run the installer again when your connection is stable; it resumes." ;;
+    2) fail "Downloading $label stopped before it finished (curl error $CURL_RC); the $(stat -f %z "$part" 2>/dev/null || echo 0)
+  bytes received are kept. Run the installer again when your connection is stable; it resumes." ;;
   esac
   rm -f "$part"
   fail "Downloading $label produced the wrong file (checksum mismatch); it was deleted.

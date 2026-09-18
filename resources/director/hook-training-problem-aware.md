@@ -12,7 +12,7 @@ real results. Never reuse an output as copy.
 - Viewer start: problem_aware — their loaves come out dense and they do not know why.
 - Recording: "If your bread comes out dense, it's usually under-proofed. Give it another hour, then press it: the dent should spring back slowly."
 - Format: `one_change`. Rejected `ordered_steps`: the press test is a check, not a second step.
-- Anchor: `situation-if-you`, using this entry's formula. Rejected `question-cause-behind` with R504: the speaker answers in the first sentence, so a question would delay an answer the recording gives at once.
+- Anchor: `situation-if-you`, using this entry's formula. Rejected `gap-cause-behind` with R504: the speaker answers in the first sentence, so a question would delay an answer the recording gives at once.
 - Slots: thing ← "bread"; symptom ← "dense"; cause ← "under-proofed".
 - Output: "If your bread comes out dense, it's usually under-proofed"
 - Rejected fill: "Dense bread? Here's the fix" — no concrete detail, and "the fix" promises more than one extra hour of proofing.
@@ -34,7 +34,7 @@ real results. Never reuse an output as copy.
 - Viewer start: problem_aware — their coffee tastes sour.
 - Recording: "Why does my coffee taste sour? The grind's too coarse, so the water runs through before it pulls out the sweeter part."
 - Format: `mistake_and_fix`. Rejected `plain_definition`: no term is being defined.
-- Anchor: `question-cause-behind`. Rejected `assumption-more-wont` with R519: the recording never discusses adding more coffee.
+- Anchor: `gap-cause-behind`. Rejected `assumption-more-wont` with R519: the recording never discusses adding more coffee.
 - Slots: thing ← "my coffee", written as "your coffee"; observation ← "taste sour".
 - Output: "Why does your coffee taste sour?"
 - Rejected fill: "The secret to sweeter coffee" — "secret" overstates a common adjustment and names no symptom.

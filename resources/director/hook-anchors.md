@@ -23,14 +23,14 @@ the pattern misleads (`Avoid`).
 | `situation-this-is-why` | "[situation]? This is why" | Needs: a frustration the speaker names and explains within the retained cut. Avoid: when the cause is only hinted. |
 | `situation-before-you` | "Before you [action], check [thing]" | Needs: an action the viewer is about to take and one concrete check the speaker names. Avoid: checks that are not explained. |
 
-### 2. OPEN QUESTION — a precise question that the retained recording answers
+### 2. GAP THE SPEAKER CLOSES — a precise question that the retained recording answers
 
 | Anchor | Template | Notes |
 |---|---|---|
-| `question-cause-behind` | "Why does [thing] [observation]?" | Needs: something the viewer has noticed and the reason the speaker gives. Avoid: an observation without a stated cause. |
-| `question-what-happens-when` | "What happens when you [action]?" | Needs: an action and its result, shown or described. Avoid: a result the footage does not show and the speaker does not state. |
-| `question-how-much` | "How much [quantity] does [thing] take?" | Needs: a spoken quantity with its unit. Avoid: questions whose answer is an estimate the speaker did not give. |
-| `question-what-is-missing` | "What is missing from [artifact]?" | Needs: one missing element the speaker identifies. Avoid: several missing elements (use a counted-steps anchor). |
+| `gap-cause-behind` | "Why does [thing] [observation]?" | Needs: something the viewer has noticed and the reason the speaker gives. Avoid: an observation without a stated cause. |
+| `gap-what-happens-when` | "What happens when you [action]?" | Needs: an action and its result, shown or described. Avoid: a result the footage does not show and the speaker does not state. |
+| `gap-how-much` | "How much [quantity] does [thing] take?" | Needs: a spoken quantity with its unit. Avoid: questions whose answer is an estimate the speaker did not give. |
+| `gap-what-is-missing` | "What is missing from [artifact]?" | Needs: one missing element the speaker identifies. Avoid: several missing elements (use a counted-steps anchor). |
 
 ### 3. COUNTED STEPS — the speaker walks through an explicit sequence
 

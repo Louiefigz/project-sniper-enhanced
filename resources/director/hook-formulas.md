@@ -25,22 +25,22 @@ matching entry in `hook-references.md` or a training file.
 - disqualify-if: the recording names no concrete sign to look for.
 
 ### R504 · Why an everyday observation happens
-- anchor: `question-cause-behind`
+- anchor: `gap-cause-behind`
 - formula: "Why do [things] [observation] first?"
 - disqualify-if: the recording states the observation but not its cause, or the order ("first") is not part of what the speaker describes.
 
 ### R505 · A controlled change with a visible result
-- anchor: `question-what-happens-when`
+- anchor: `gap-what-happens-when`
 - formula: "What happens when you [change] on [condition]?"
 - disqualify-if: the result of the change is neither shown in the footage nor stated by the speaker.
 
 ### R506 · A quantity the viewer has dismissed
-- anchor: `question-how-much`
+- anchor: `gap-how-much`
 - formula: "How much [resource] does [small thing] waste?"
 - disqualify-if: the recording contains no quantity with a unit, or the quantity depends on a measurement the speaker did not make.
 
 ### R507 · One missing element
-- anchor: `question-what-is-missing`
+- anchor: `gap-what-is-missing`
 - formula: "What is missing from your [artifact]?"
 - disqualify-if: the speaker names more than one missing element, or the viewer would not own the artifact.
 

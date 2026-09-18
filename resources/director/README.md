@@ -38,7 +38,7 @@ saved project's record.
 Every formula ID has a matching reference or training entry. All 25 references and
 T701, T704, T707 and T710 have formulas; the other training pairs use their named
 anchor's slots. Identifiers: format IDs are lower-case words joined by `_`; anchor
-IDs begin with a short category word (`situation-`, `question-`, `steps-`,
+IDs begin with a short category word (`situation-`, `gap-`, `steps-`,
 `number-`, `mistake-`, `assumption-`, `compare-`, `moment-`, `define-`,
 `result-`); references are numbered from R501 and training pairs from T701.
 
@@ -72,7 +72,7 @@ and the critic can check in the transcript:
 | Category | Material the recording must contain | Why it can hold attention |
 |---|---|---|
 | NAMED SITUATION | a situation the viewer is in, with its consequence | people attend to and remember information that refers to themselves (Rogers, Kuiper & Kirker, 1977) |
-| OPEN QUESTION | a precise question the speaker answers | a specific, recognised gap in knowledge produces curiosity (Loewenstein, 1994) |
+| GAP THE SPEAKER CLOSES | a precise question the speaker answers | a specific, recognised gap in knowledge produces curiosity (Loewenstein, 1994) |
 | COUNTED STEPS | an explicit sequence the speaker walks through | a stated count tells the viewer the gap is bounded and closable |
 | REAL NUMBER | a number with its unit and meaning | a concrete figure is easier to picture and hold than a general claim (Sadoski, Goetz & Fritz, 1993) |
 | COSTLY MISTAKE | a mistake, its cost and its fix | people weigh potential losses more heavily than equivalent gains (Kahneman & Tversky, 1979) |

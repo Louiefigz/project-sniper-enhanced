@@ -177,7 +177,7 @@ DENY_PATH: tuple[tuple[str, str], ...] = (
     (r"(?i)(?:^|/)id_(?:rsa|ed25519|ecdsa)$", "private ssh key"),
     (r"(?i)(?:^|/)\.netrc$", "credential file"),
     (r"(?i)(?:^|/)credentials?\.json$", "credential file"),
-    (r"(?i)caleb|jadenly|(?<![a-z])jaden(?![a-z])|angela|nateherk|nate[- ]herk|(?<![a-z])nate(?![a-z])|mudrich|(?<![a-z])lewis(?![a-z])|ralston|kallaway|hormozi|(?<![a-z])trevor(?![a-z])|odom|wendt|adrian[_ -]?per|iampunch|personalbrandlaunch|world ?pet|pet achievers",
+    (r"(?i)(?<![a-z0-9])(?:caleb|jadenly|jaden|angela|nateherk|nate[- ]herk|nate|mudrich|lewis|ralston|kallaway|hormozi|trevor|odom|wendt|adrian[_ -]?per|iampunch|personalbrandlaunch|world ?pet|pet achievers)(?![a-z0-9])",
      "teacher name in a shipped path (accepted decision: no teacher names in the product)"),
 )
 
@@ -190,7 +190,7 @@ DENY_BUYER_TEXT: tuple[tuple[str, str], ...] = (
     (r"(?i)about fifteen minutes|in (?:a few|fifteen) minutes", "unmeasured setup-time claim"),
     (r"(?i)nothing leaves your (?:computer|machine)", "false privacy claim"),
     (r"(?i)only the \*{0,2}text\*{0,2} .{0,40}is sent", "false privacy claim"),
-    (r"(?i)caleb|jadenly|(?<![a-z])jaden(?![a-z])|angela|nateherk|nate[- ]herk|(?<![a-z])nate(?![a-z])|mudrich|(?<![a-z])lewis(?![a-z])|ralston|kallaway|hormozi|(?<![a-z])trevor(?![a-z])|odom|wendt|adrian[_ -]?per|iampunch|personalbrandlaunch|world ?pet|pet achievers", "creator, course or client name"),
+    (r"(?i)(?<![a-z0-9])(?:caleb|jadenly|jaden|angela|nateherk|nate[- ]herk|nate|mudrich|lewis|ralston|kallaway|hormozi|trevor|odom|wendt|adrian[_ -]?per|iampunch|personalbrandlaunch|world ?pet|pet achievers)(?![a-z0-9])", "creator, course or client name"),
     (r"/Users/[A-Za-z0-9._-]+/", "developer machine path"),
     (r"\{[A-Z_]{3,}\}", "unresolved placeholder"),
 )
@@ -200,6 +200,6 @@ DENY_BUYER_TEXT: tuple[tuple[str, str], ...] = (
 # class as the path rule: the accepted decision covers the distributed product,
 # and these move only with the identifier migration in release/RENAME_SPEC.md.
 DENY_SHIPPED_TEXT: tuple[tuple[str, str], ...] = (
-    (r"(?i)caleb|jadenly|(?<![a-z])jaden(?![a-z])|angela|nateherk|nate[- ]herk|(?<![a-z])nate(?![a-z])|mudrich|(?<![a-z])lewis(?![a-z])|ralston|kallaway|hormozi|(?<![a-z])trevor(?![a-z])|odom|wendt|adrian[_ -]?per|iampunch|personalbrandlaunch|world ?pet|pet achievers",
+    (r"(?i)(?<![a-z0-9])(?:caleb|jadenly|jaden|angela|nateherk|nate[- ]herk|nate|mudrich|lewis|ralston|kallaway|hormozi|trevor|odom|wendt|adrian[_ -]?per|iampunch|personalbrandlaunch|world ?pet|pet achievers)(?![a-z0-9])",
      "creator, course or client name in shipped text"),
 )

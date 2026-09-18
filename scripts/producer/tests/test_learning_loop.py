@@ -837,7 +837,7 @@ class CardFormMapTests(unittest.TestCase):
                 self.assertTrue((_COMPS / f"{kind}.html").exists(),
                                 f"{family}: comp {kind!r} has no HTML")
 
-    def test_the_nate_mapping_rows_are_covered(self) -> None:
+    def test_the_module_mapping_rows_are_covered(self) -> None:
         # MODULE_CARDS §1.4 — one spot check per table row we encode.
         self.assertIn("module-bullet-bars", self.MAP["comparison"])   # #9/#12
         self.assertIn("versus-split", self.MAP["comparison"])

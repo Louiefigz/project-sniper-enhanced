@@ -178,116 +178,86 @@ MODES = {
             "max_still_gap_s": 16.0,       # 13s bare stretches are on-style
             "hook_front_load": 1.3,        # still front-load, but relaxed
         },
-        # PUNCH tempo (scripts/producer/docs/findings/PUNCH_STYLE.md — 6
-        # the punch reference reels, granular frame-verified traces 2026-07-09,
-        # 55.9-150.7s each): locked-tripod punch-cut shorts. Eye-verified
-        # VISIBLE cuts median 17.2/min (range 10.4-20.4) — scdet undercounts
-        # these same-background punch cuts ~2x (fingerprint counts said 9.9;
-        # Daf 9->19, DZ2 17->31, DaV 14->23), plus word-locked graphic
-        # entrances land on top, so a compliant plan's discrete visual changes
-        # (cuts + graphics, what the pacing lint counts) run well above the
-        # floor. The camera may HOLD ~10-34s, but the longest measured stretch
-        # with NO cut AND NO graphic entrance is 10.9s (DZ2u2o8qEjV
-        # 83.7-94.5s outro hold; DaGwe1PCFWQ ends on 9.2s) — the fingerprints'
-        # "20-34s static" stretches were camera-holds carried by the two-layer
-        # text system (whisper captions + shout keyword lockups) churning the
-        # on-screen STATE (51-89 distinct states/min, 6/6 reels). The hook is
-        # carried by a graphic from frame ~0, not by cut density (4/6 reels
-        # open with <=1 cut in the first 10s). Selected by
+        # PUNCH tempo (scripts/producer/docs/findings/PUNCH_STYLE.md): one
+        # locked camera, hard cuts between wide and tight framings on key
+        # words (§2), and two text layers carrying the emphasis (§4). The
+        # pacing lint counts cuts plus graphic entrances and staged lands, so
+        # the floor is met by cuts and word-locked text together; caption
+        # changes are not counted, which is why the still ceiling sits above
+        # the generic 8s (§2 C8). The hook is carried by a graphic from frame
+        # zero rather than by a burst of cuts (§1 H2). Selected by
         # ``target.pace == "punch"``.
         "pacing_punch": {
-            "min_changes_per_min": 14.0,   # floor below the 17.2/min visible-
-                                           # cut median (PUNCH_STYLE.md §2 C1)
-            "max_still_gap_s": 12.0,       # measured no-change max 10.9s —
-                                           # admits the legal outro hold (§2 C8)
+            "min_changes_per_min": 14.0,   # design floor, ~one change per
+                                           # 4.3s (PUNCH_STYLE.md §2 C1)
+            "max_still_gap_s": 12.0,       # admits one held closing line
+                                           # (§2 C8)
             "hook_front_load": 1.3,        # front-load lives in the graphics/
-                                           # state layer (PUNCH_STYLE.md §1 H2)
+                                           # text layer (PUNCH_STYLE.md §1 H2)
             # Advisory doctrine (the brain/skill reads these; the pacing lint
-            # only reads the three keys above): tempo between cuts comes from
-            # caption/graphic STATE churn, and every reel runs a music bed
-            # (PUNCH_STYLE.md §6: integrated -14.5..-14.7 LUFS, zero silence
-            # gaps, bed ~3±1 LU under the dialogue median in speech gaps,
-            # NEVER beat-synced — the timing authority is speech).
-            "state_changes_per_min": 70.0, # measured 51-89 states/min (6/6)
-            "music": True,                 # 6/6 reels carry a compressed bed
-            # Style-aware punch ceiling (G17): the measured C5 step band is
-            # +12..45% face-height (biggest legal punch x1.44, DaG @17.0 on
-            # the promise; the x1.92 Daf outlier is NOT admitted). Read by
-            # plan_lint_motion when target.pace == "punch"; other paces
-            # keep MOTION["punch_in"]["zoom_max"] = 1.25. Stays inside the
-            # punch_in.py primitive's hard ceiling (ZOOM_MAX_HARD 1.55).
+            # only reads the three keys above): the text layers keep the
+            # on-screen state changing between cuts, and a music bed is
+            # recommended but stays the operator's opt-in (PUNCH_STYLE.md §6
+            # M1-M3: standard duck, never cut to the beat — speech is the
+            # timing authority).
+            "state_changes_per_min": 70.0, # advisory design target (§9.1)
+            "music": True,                 # bed recommended (§6 M1)
+            # Style-aware punch ceiling (G17): static punch-in steps may reach
+            # x1.45 so a tight framing reads as a new shot (PUNCH_STYLE.md
+            # §2 C5, §10 G17). Read by plan_lint_motion when target.pace ==
+            # "punch"; other paces keep MOTION["punch_in"]["zoom_max"] = 1.25.
+            # Stays inside the punch_in.py primitive's hard ceiling
+            # (ZOOM_MAX_HARD 1.55).
             "punch_zoom_max": 1.45,
         },
-        # RESTRAINED tempo (docs/studies/RESTRAINED_STYLE.md — 3 restrained reels, granular traces +
-        # fresh-pixel spot-checks 2026-07-09, 36.5-62.9s each): the SIMPLE-CUTS
-        # / podcast-clip RESTRAINT pole. Cuts are ERASERS (one mid-clause jump
-        # cut to splice out a flub) or 0.25-0.9s listener-reaction cutaways —
-        # never energy beats: 0 / 1 / 8 cuts per reel (0.0 / 0.95 / 10.25
-        # cuts/min, and the 10.25 is 4 cutaway PAIRS over one unbroken take).
-        # Zero zooms in all three reels (ORB scale 0.999-1.000). Retention is
-        # carried ENTIRELY by verbatim caption churn (72.5-87 cues/min, 3/3 —
-        # inside the punch 51-89 states/min band, but the churn lives in the
-        # CAPTION layer, which the pacing lint's cut+graphic counter cannot
-        # see) plus ONE static thesis graphic pinned from frame 0 (title chip
-        # held the whole reel, or a ~7.4s cold-open card) and the speaker's own
-        # physicality. The camera legally holds the ENTIRE reel: the longest
-        # measured zero-cut zero-graphic-entrance stretch is 36.5s (a whole
-        # reel, DWASWqDkqEU). So the lint floors are effectively OFF — a
-        # compliant plan still clears hook_front_load because the thesis
-        # graphic enters at t=0. Selected by ``target.pace == "restrained"``.
+        # RESTRAINED tempo (docs/studies/RESTRAINED_STYLE.md): one steady
+        # frame, a frame-one thesis card, and plain verbatim captions that
+        # carry the pace. Cuts only remove flubs, retakes and dead air (§2 C2);
+        # a single uncut take is on-style, so the rate floor is zero and the
+        # still ceiling is long (§2 C1, C4). No zoom (§3 Z1). The pacing lint
+        # does not count the caption layer, which is why these floors are
+        # effectively off; the t=0 thesis card still satisfies the hook ratio.
+        # Selected by ``target.pace == "restrained"``.
         "pacing_restrained": {
-            "min_changes_per_min": 0.0,    # measured floor IS zero cuts
-                                           # (RESTRAINED_STYLE.md §2 C1: 0/1/8)
-            "max_still_gap_s": 40.0,       # longest zero-change hold = 36.5s,
-                                           # an entire reel (§2 C4)
-            "hook_front_load": 1.0,        # cadence is FLAT — hook only ~8%
-                                           # denser (§1 H3); the t=0 thesis
-                                           # graphic satisfies the ratio
+            "min_changes_per_min": 0.0,    # cuts are optional
+                                           # (RESTRAINED_STYLE.md §2 C1)
+            "max_still_gap_s": 40.0,       # longest legal hold (§2 C4)
+            "hook_front_load": 1.0,        # flat cadence: the hook need not
+                                           # be denser than the body (§1 H3);
+                                           # the t=0 thesis card satisfies it
             # Advisory doctrine (the brain/skill reads these; the pacing lint
             # only reads the three keys above): the tempo authority is the
-            # verbatim whisper-caption layer, word-locked 1-5 word cues at
-            # 0.25-1.4s each, and there is NO music bed — all three reels'
-            # "music likely" heuristic votes were spectral-verified FALSE
-            # POSITIVES (compressed podcast/cab mastering fooled the
-            # crest/floor votes; RESTRAINED_STYLE.md §6).
-            "state_changes_per_min": 80.0, # caption cues 72.5-87/min (3/3)
-            "music": False,                # 3/3 spectral-verified: no bed
+            # plain whisper caption layer, and there is no music bed
+            # (RESTRAINED_STYLE.md §4 CAP1, §6 M1).
+            "state_changes_per_min": 80.0, # advisory caption-cue target (§4 CAP1)
+            "music": False,                # no bed (§6 M1)
         },
-        # SLIDEWARE tempo (docs/studies/SLIDEWARE_STYLE.md — 4 a reference account reels,
-        # granular frame-verified traces 2026-07-09, 35.97-46.74s each):
-        # takeover-alternation shorts. Hard cuts are SECTION punctuation
-        # (talking-head <-> full-frame lime-canvas takeovers), never energy:
-        # 0-18.4 cuts/min across the corpus (DaiA1H9hd0i runs 41.1s on ZERO
-        # cuts) and zero punch-ins / zoom steps / transitions anywhere (one
-        # lime-wash wipe in 164.7s total). Momentum lives in the graphics
-        # layer: 54-87 state-events/min (4/4); plan-level discrete changes
-        # (cuts + graphic entrances, what the pacing lint counts) run
-        # ~23-53/min, leanest reel ~23/min (Daix1yuJAP3). The longest stretch
-        # with NO cut AND NO graphic entrance is ~5.8s (Daix 12.48-18.28, a
-        # formula slide held under caption-pill churn) — the 12.7s "static"
-        # stretches were camera holds carried by slide carousels. The hook is
-        # graphics-carried: frame 0 fully dressed 4/4, cuts in the first 10s
-        # {0, 0, 1, 2} — cut density is LOWEST in the hook. Selected by
-        # ``target.pace == "slideware"``.
+        # SLIDEWARE tempo (docs/studies/SLIDEWARE_STYLE.md): full-frame slide
+        # sections alternate with the talking head; cuts happen only at
+        # section boundaries (§3 AC1) and the camera never moves (§4). The
+        # pacing lint counts page turns, staged lands and graphic entrances,
+        # so the rate floor is met by the graphics layer, not by cuts. The
+        # hook is carried by graphics, with frame zero fully dressed
+        # (§2 AH1-AH3). Selected by ``target.pace == "slideware"``.
         "pacing_slideware": {
-            "min_changes_per_min": 16.0,   # floor below the leanest reel's
-                                           # cuts+graphics rate ~23/min
+            "min_changes_per_min": 16.0,   # design floor, ~one change per
+                                           # 3.75s from the graphics layer
                                            # (SLIDEWARE_STYLE.md §9)
-            "max_still_gap_s": 8.0,        # measured no-change max ~5.8s —
-                                           # the graphic churn never rests
+            "max_still_gap_s": 8.0,        # the slides never rest longer
+                                           # than a generic short (§9)
             "hook_front_load": 1.3,        # hook density lives in graphics,
                                            # not cuts (SLIDEWARE_STYLE.md §2 AH3)
             # Advisory doctrine (the brain/skill reads these; the pacing lint
-            # only reads the three keys above): pick ONE graphic economy
-            # (takeover deck OR persistent ledger), captions dual-mode with a
-            # pill skin on lime canvas, receipts always carry eye-count
-            # chips, mock-OS CTA at the end (SLIDEWARE_STYLE.md §9 checklist).
-            "state_changes_per_min": 65.0, # measured 54-87 state-events/min (4/4)
-            "music": True,                 # 4/4 carry a bed ~3-4 LU under
-                                           # speech; -14.3..-14.6 LUFS masters
-            "punch_ins": False,            # ZERO punch-ins 4/4 (§4 AZ1) —
-                                           # the punchIns track stays EMPTY
-            "transitions": False,          # 27/28 cuts hard (§4 AZ2) — the
+            # only reads the three keys above): one graphic economy (slide
+            # deck OR persistent ledger, §3 AC3), two caption skins (§5 ACAP2),
+            # one accent (§1 B1) and real evidence only (§6 E3) — the
+            # SLIDEWARE_STYLE.md §9 checklist.
+            "state_changes_per_min": 65.0, # advisory design target (§9)
+            "music": True,                 # bed recommended, operator
+                                           # opt-in (§7 AM1)
+            "punch_ins": False,            # no punch-ins (§4 AZ1) — the
+                                           # punchIns track stays EMPTY
+            "transitions": False,          # hard cuts only (§4 AZ2) — the
                                            # transitions track stays EMPTY
         },
         # CLIENT-REEL tempo (docs/studies/SHORTFORM_LESSONS.md §8, SF2 — produced
@@ -742,37 +712,38 @@ CAPTIONS = {
         "accent": "#FFD400",
         "accent_font": "Georgia",
     },
-    # WHISPER — the punch base caption layer (G2; scripts/producer/docs/
-    # findings/PUNCH_STYLE.md §4 CAP2/CAP3, 5/6 reels HIGH). Tiny white
-    # sentence-case sans cues, 1-3 words, hard replace-per-cue (no fade, no
-    # karaoke sweep — CAP1: zero sweeps in 623s), soft shadow with NO box and
-    # NO outline stroke, centered x0.5 in the y0.60-0.64 band. Emphasis is
-    # tier-A INLINE amber: payload words tint from the cue's FIRST frame
-    # (CAP3 — never swept in); tier-B promotions live in the SHOUT layer
-    # (punch-shout-lockup comp), not here. Rendered by captions_whisper.py.
+    # WHISPER — the Punch base caption layer (G2; scripts/producer/docs/
+    # findings/PUNCH_STYLE.md §4 CAP1-CAP3, §9.2). Small white sentence-case
+    # sans cues of 1-3 words, hard replace-per-cue (no fade, no karaoke
+    # sweep — CAP1), soft shadow with NO box and NO outline stroke, centred
+    # in the y0.60-0.64 band below the face. Emphasis is inline: listed
+    # words take the accent from the cue's FIRST frame (CAP3 — never swept
+    # in); keyword promotions live in the lockup layer (punch-shout-lockup
+    # comp, §5.4 E1), not here. Also the plain caption layer of the
+    # Restrained style, with no emphasis words (RESTRAINED_STYLE.md §4
+    # CAP2). Rendered by captions_whisper.py.
     "WHISPER": {
         "font": "Inter",
-        "font_size": 42,                # 2.2%H of 1920 — measured 2.1-2.3%H
-        "font_size_range": (40, 44),    # the 2.1-2.3%H band (§11 delta table)
+        "font_size": 42,                # 2.2%H of 1920 (PUNCH_STYLE.md §9.2)
+        "font_size_range": (40, 44),    # design band (§9.2)
         # Cue grouping: verbatim 1-3 word chunks; a gap >= phrase_gap_s or a
-        # sentence end starts a new cue (measured hold 0.25-1.2s, median
-        # 0.45-0.55s at 185-280 wpm — CAP2).
+        # sentence end starts a new cue (CAP2).
         "phrase_gap_s": 0.35,
         "phrase_max_words": 3,
         "min_hold_s": 0.25,             # CAP2 replace-cadence floor
         "hang_s": 0.35,                 # never linger through dead air
-        # Cue center band as a fraction of frame height (task band y0.60-0.64
-        # inside the measured CAP2 y0.55-0.66 spread).
+        # Cue center band as a fraction of frame height (§5.2 placement
+        # grid: headroom lockups above the face, captions below it).
         "band_y_frac": (0.60, 0.64),
-        "center_x": 540,                # measured center x0.5 (CAP2) — NOT the
-                                        # icon-rail-corrected 495
+        "center_x": 540,                # horizontal centre of 1080 (§5.2) —
+                                        # NOT the icon-rail-corrected 495
         "outline_px": 0,                # NO stroke, NO box (CAP2 treatment)
         "shadow_px": 2,                 # soft shadow only
         "fill": "white",
-        # Tier-A amber (CAP3, measured: DZ2 ~#f0b03a · DaG ~#F5C518 ·
-        # DaV #F2D24B) — DaV's value as the house token.
+        # Inline emphasis accent (CAP3, §5.1). The value is a design-system
+        # choice; the style specification fixes only its role.
         "accent": "#F2D24B",
-        "sentence_case": True,          # white sentence-case (CAP2 face row)
+        "sentence_case": True,          # white sentence-case (CAP2)
     },
 }
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """exit_on_cut — THE EXIT LAW as a first-class compositing rule (G4).
 
-Source: scripts/producer/docs/findings/PUNCH_STYLE.md §5.3 [6/6 HIGH]:
-graphics are NEVER animated out — hard-off <= 1-2 frames, either (a) exactly
-ON the next cut or (b) an instant pop at the semantic boundary. House comps
+Specification: scripts/producer/docs/findings/PUNCH_STYLE.md §5.3 (animation
+law): graphics are NEVER animated out — they go hard-off either (a) exactly
+ON the next cut or (b) instantly at a sentence boundary. House comps
 already hold to their window end (no self fade-out); this module supplies (a):
 a ``graphicsTrack`` entry may opt in with ``"exitOnCut": true`` and its
 ``outEnd`` is CLAMPED to the first cutTrack seam after ``outStart`` — the
@@ -38,8 +38,8 @@ from __future__ import annotations
 from compile_timeline import compile_plan
 from graphics.placement_context import bind_plan_face_bbox
 
-# G5 vocabulary: full-frame gaussian-blur + desaturate of the FOOTAGE as a
-# takeover background (PUNCH_STYLE.md §5.4 E4 — 8 instances / 4 reels HIGH).
+# G5 vocabulary: gaussian-blur + desaturate of the FOOTAGE under a graphic's
+# window, a quiet ground for text (PUNCH_STYLE.md §5.4 E4, §10 G5).
 TAKEOVER_BASES = ("blur-desat",)
 
 # spec.exit vocabulary — the union of the comps' exit enums ("hold" =

@@ -29,7 +29,7 @@ interface Draft {
   candidateStyleName: string;
 }
 
-const CLOSED_STYLE_NAMES = new Set(["restrained", "punch", "punch", "slideware"]);
+const CLOSED_STYLE_NAMES = new Set(["restrained", "punch", "slideware"]);
 
 function reservedCandidate(name: string): boolean {
   return CLOSED_STYLE_NAMES.has(name.trim().toLowerCase());

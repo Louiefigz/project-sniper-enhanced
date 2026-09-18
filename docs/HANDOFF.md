@@ -87,24 +87,28 @@ Full session-by-session state lives in Claude's memory file
 
 ## Style system (the calibration loop)
 
-Paste reels → yt-dlp fetch (chrome-cookie fallback) → `study/study_video.py`
-fingerprint → granular frame-by-frame study (vision agents) → grammar doc with
-receipts → executable pacing profile → style preset.
+Reference intake (URL or local file → `study/study_video.py` fingerprint →
+deterministic deep study → profile guidance) is how an outside example is
+studied. The three built-in short-form styles do not come from that loop: each
+is a Sniper style specification with an executable pacing profile and an
+intent-card preset (rewritten as original material in rc4, 2026-09-18).
 
-- **docs/studies/RESTRAINED_STYLE.md** (`pacing_restrained`, Light-short calibration): restraint pole —
-  9 cuts/146s, zero zooms/music, retention = 72–87 whisper cues/min + one pinned title.
-- **docs/studies/PUNCH_STYLE.md** (`pacing_punch`): tripod, breath-gap punch-cuts (NOT
-  beat-timed, measured), two-layer whisper/shout text, ≤2-frame pops.
-  Comprehension audit: 50/53 rules frame-verified; reproduction render brackets his
-  cuts/min, matches his punch band 1.30–1.45, Audit B 22/22.
-- **docs/studies/SLIDEWARE_STYLE.md** (`pacing_slideware`): lime takeover-deck slideware; 4 of her
-  elements authored as our comps (`slideware-*.html`, brandable via `accent` token).
-- Punch delta kit shipped: `punch-shout-lockup` comp (ChunkFive OFL + `--lemon`),
-  `CAPTIONS.WHISPER` preset, pop-in/instant-out motion tokens, `exitOnCut`,
-  blur-desat `takeoverBase`, per-style punch ceiling (1.45), builtin music bed
-  auto-registered at ingest.
+- **docs/studies/RESTRAINED_STYLE.md** (`pacing_restrained`, calibrates the
+  Restrained light preset): one steady frame and a single frame-one thesis card;
+  plain whisper captions carry the pace; cuts only remove mistakes; no zoom, no music.
+- **scripts/producer/docs/findings/PUNCH_STYLE.md** (`pacing_punch`): hard cuts
+  between wide and tight framings on stressed words, keyword lockups above a
+  small caption layer, two-frame pops that never animate out.
+- **docs/studies/SLIDEWARE_STYLE.md** (`pacing_slideware`): full-frame slide
+  sections alternate with the speaker, cuts only at section boundaries, real
+  evidence in receipt cells, no punch-ins or seam transitions; built as the four
+  `slideware-*.html` comps sharing one `accent` variable.
+- Punch implementation kit: `punch-shout-lockup` comp (display-face and accent
+  tokens), `CAPTIONS.WHISPER` preset, pop-in/instant-out motion tokens,
+  `exitOnCut`, blur-desat `takeoverBase`, per-style punch ceiling (1.45),
+  builtin music bed auto-registered at ingest.
 - Presets in the intent card: **Restrained light · Punch produced · Slideware involved**
-  (+ 4 generics). `target.style` tells Auto-edit to read the grammar doc first.
+  (+ 4 generics). `target.style` tells Auto-edit to read the style specification first.
 
 ## Historical test state (2026-07-11)
 

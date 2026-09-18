@@ -6,14 +6,13 @@
 > rationale only. The "DRAFT" line below is the original 2026-07-05 header.
 >
 > Status: DRAFT — operator review. 2026-07-05.
-> Extends PRODUCER_PLAN.md. Reference styles: (a) dense kinetic
-> talking-head (long-form YouTube, operator-supplied script excerpt);
-> (b) INSTAGRAM SHORT-FORM layout study (operator-supplied screenshots — lost
-> to macOS thumbnail-drag purge ×3; re-save to Desktop/folder to restore).
-> When the IG references land: (1) calibrate placement/proportionality against
-> real pixels, (2) MINE THE GRAPHICS for reusable patterns → new template
-> candidates (operator: "take note of the cool graphics to see if we can
-> reuse any of them").
+> Extends PRODUCER_PLAN.md. Design targets: (a) a dense kinetic-typography
+> talking-head treatment (long-form); (b) a short-form 9:16 layout system.
+> rc4 note (2026-09-18): third-party reference material is not part of the
+> product; placement and proportion are calibrated against Sniper's own
+> renders, and new templates are original Sniper designs
+> (`docs/studies/REFERENCE_STYLE_STUDY.md` R31: study mechanics, never
+> content).
 
 Turn talking-head cuts into a **motion-graphic experience**: transitions,
 infographics, stat cards, list builds, kinetic typography — appearing exactly
@@ -40,16 +39,16 @@ If a sentence has none of these, the speaker's face IS the graphic. Silence of
 graphics is a design choice, not a failure — over-decorating is the #1 way this
 goes wrong (research: visual variety helps retention; noise fatigues it).
 
-### The kinetic grammar (from the supplied intro script, annotated)
+### The kinetic grammar (an illustrative intro script, annotated)
 
 | Script beat | Graphic that carries it |
 |---|---|
-| "Social media is going to look completely different **in the age of AI**" | Full-frame kinetic title takeover (~2s) |
-| "for **brands**, for **creators**, for **anyone**…" | 3-chip sequential pop, one per spoken item |
-| "the rules are being **completely rewritten**" | Kinetic text effect (strike-through / rewrite animation) |
-| "**a million followers** … **billions of views**" | Stat cards with animated counters |
-| "the **six biggest** social media shifts" | Numbered 6-slot grid tease (empty slots = open loop) |
-| "**strategy** and the exact **tactics**" | Two-column framework card |
+| "Editing a video is about to take **one pass instead of three**" | Full-frame kinetic title takeover (~2s) |
+| "for **interviews**, for **demos**, for **anything** you record…" | 3-chip sequential pop, one per spoken item |
+| "the old workflow is **completely broken**" | Kinetic text effect (strike-through / rewrite animation) |
+| "**forty hours** saved … **twelve videos** a month" | Stat cards with animated counters |
+| "the **five biggest** editing mistakes" | Numbered 5-slot grid tease (empty slots = open loop) |
+| "the **plan** and the exact **checklist**" | Two-column framework card |
 
 That's the grammar to encode: every graphic maps 1:1 to a spoken structural
 element, appears ON the word (word-level timestamps make this exact), and
@@ -58,8 +57,8 @@ holds just long enough to read.
 ## 1.5 The treatment map + editor notes (operator input channel, 2026-07-05)
 
 A video is not uniformly decorated — it has **treatment zones** (operator
-observation from the kinetic reference: the dense kinetic treatment is mostly
-the FIRST MINUTE; later sections lean on b-roll; others on templated graphics;
+observation, 2026-07-05: a dense kinetic treatment belongs mostly in the
+FIRST MINUTE; later sections lean on b-roll; others on templated graphics;
 some stay clean). Every produce run therefore builds a **treatment map**:
 
 ```jsonc
@@ -77,7 +76,7 @@ some stay clean). Every produce run therefore builds a **treatment map**:
 **Where the map comes from — EDITOR NOTES, a first-class input.** The operator
 gives freeform direction, exactly like briefing a human editor:
 
-> "Make the first 45 seconds pop hard — full kinetic. The coaching-bot section
+> "Make the first 45 seconds pop hard — full kinetic. The pricing section
 > should use b-roll from the folder. Keep the last third clean, just captions.
 > Stat cards whenever I say numbers."
 
@@ -159,11 +158,10 @@ because it TOOK OVER instead of stacking).
 
 Named, reusable cutaway tactics — the visual analog of the hook swipe files
 swipe file (`hooks_catalog.py`): the brain picks BY NAME from proven tactics,
-never improvises unnamed moves. Grows as references land; eventually a
-`tactics_catalog` data module. Seed entries from the operator's IG study
-(top block) + the edited long-form graphics study (batch 2, bottom block —
-`whiteboard-note` … `schedule-stack`, see LONGFORM_VISUAL_STUDY §3 +
-REFERENCE_STYLE_STUDY R9):
+never improvises unnamed moves. Grows as new tactics are designed; eventually a
+`tactics_catalog` data module. Seed entries: short-form cutaway tactics (top
+block) and long-form graphics tactics (bottom block — `whiteboard-note` …
+`schedule-stack`, see LONGFORM_VISUAL_STUDY §3 + REFERENCE_STYLE_STUDY R7-R10):
 
 | Tactic | What it is | When |
 |---|---|---|
@@ -180,13 +178,12 @@ REFERENCE_STYLE_STUDY R9):
 | `statement-takeover` | Full-frame dark (or warm) gradient carrying one bold statement, keyword in accent, staged text build (template: `statement-card`, opaque MP4) | Thesis / definition lines — the frame hands off to the words |
 | `agenda-takeover` | Dark "N Steps" title with an accent glow underline over numbered rows that stamp in (template: `agenda-slide`, opaque MP4) | Enumerated plan / chapter agenda — "3 steps", roadmap beats |
 | `color-wash` | Brief accent-family gradient wash that sweeps across the frame to bridge a cut (template: `color-wash`, alpha ~0.8s) | Beat / topic transitions — a soft colored bridge between shots |
-| `section-marker` | Eyebrow + serif-accent title + qualifier, anchored on the empty side, eyebrow-first build (R9/R10; template: `section-marker`, alpha) | Numbered section markers over the live head — "System No.2 / Familiarity / Rule" |
+| `section-marker` | Eyebrow + serif-accent title + qualifier, anchored on the empty side, eyebrow-first build (R9/R10; template: `section-marker`, alpha) | Numbered section markers over the live head — "Part 2 / Planning / First pass" |
 | `schedule-stack` | Color-semantic rounded cards (title + time) stacked on the empty side, staggered wipe-in (template: `schedule-stack`, alpha) | Routine / schedule / phased-plan beats — time-blocked days or workflows |
 
 Each tactic entry declares: template(s) it uses, visual states it's legal in,
-duration bounds, and its trigger affinity. IG reference screenshots (pending
-operator re-save to Desktop — thumbnail-drag purged ×4) will be mined for
-additional tactics + exact styling.
+duration bounds, and its trigger affinity. New tactics join only as original
+Sniper templates with their own rationale (REFERENCE_STYLE_STUDY R31).
 
 | Parameter | SHORTS | LONG-FORM |
 |---|---|---|
@@ -357,13 +354,13 @@ yields motion graphics with zero extra operator input.**
 
 1. ~~Brand tokens~~ SETTLED 2026-07-05 (rec adopted): accent = the Project Sniper
    badge blue, pixel-sampled from real footage into tokens.css. Fonts Inter.
-2. **kinetic reference screenshots** — two drop attempts expired (macOS deletes
-   thumbnail-drag temp files the instant the drag ends). Reliable path: save
-   to Desktop/a folder, tell the session where; it sweeps them into permanent
-   reference storage. They calibrate exact card styling/spacing/animation feel.
+2. ~~Reference screenshots~~ WITHDRAWN (rc4, 2026-09-18): card styling,
+   spacing and animation feel are calibrated against Sniper's own renders and
+   design tokens, not third-party screenshots.
 3. ~~Pilot pick~~ SETTLED (rec adopted): c1 is the MG-1 pilot (in progress).
-4. How loud should the style be? Kinetic is maximalist; a dialed-back variant
-   (fewer takeovers, more lower-thirds) may fit Project Sniper's visual system better. MG-1
+4. How loud should the style be? A maximalist kinetic treatment versus a
+   dialed-back variant (fewer takeovers, more lower-thirds) that may fit
+   Project Sniper's visual system better. MG-1
    review answers this empirically.
 
 ---
@@ -382,7 +379,7 @@ matting.
 | C | Horizontal split: asset top / speaker bottom / captions in seam | ubiquitous | FF | our `split-critique`; = OpusClip Screenshare family |
 | D | 16:9 centered + blurred pad + title in top blur | common | FF | our `blurpad-screen` ✓ |
 | E | Greenscreen-cutout speaker over full asset | common | **SEG** | highest ceiling for critique; ONLY layout needing matting; flag-gated, build last |
-| F | **Corner PiP webcam bubble over screen recording** | common | FF | "THE livestream money layout" for this creator; needs separate webcam track (or crop the baked-in corner cam) |
+| F | **Corner PiP webcam bubble over screen recording** | common | FF | a common livestream / screen-walkthrough layout; needs separate webcam track (or crop the baked-in corner cam) |
 | G | Top-bar meme frame (solid bar + setup line) | common | FF | cheapest hook-delivery layout |
 | H | Faceless b-roll + VO + captions | ubiquitous | FF | for no-speaker zones; NEEDS a music bed |
 | I | Podcast stacked two-cam / audiogram | common | FF+diarization | deferred (needs two-cam source) |

@@ -291,7 +291,7 @@ Component qualification does not waive review of the assembled scene or video.
 
 | Operator requirement | Existing evidence | Remaining acceptance check |
 | --- | --- | --- |
-| Save shot-to-catalog matches during study | `save-study` / `check-study`; cross-project Short → long-form test forbids new discovery | LF01 now retains a whole-video visual study and eight source-inspected functional candidates; new project adaptation still needs review |
+| Save shot-to-catalog matches during study | `save-study` / `check-study`; cross-project Short → long-form test forbids new discovery | The packaged long-form case LF01 is an original illustration (see below), not a retained study of a real video; each new project's saved matches and adaptation still need review |
 | Reuse working animation before custom work | Existing route/gap checks plus retained saved inspections and decisions | New content/layout/timing still needs a source-bound strategy decision |
 | Give strategy the entire available library | Complete 39-reference/418-item local packet; no ranked-result limit; hashes checked on reuse | New experimental-item indexing/promotion remains separate; absent sources stay explicit |
 | Preserve a complete long-form study and 16:9 intent | Synthetic 900-second fixture retains 1,500 events, original lane choices, selected study and saved matches | A real 10–15-minute source/reference has not been reproduced in this implementation pass |

@@ -197,7 +197,7 @@ runs it as TWO layers; the entry shapes:
 | Filler (um/uh/false starts) | remove all | clarity test only — keep conversational cadence | Descript |
 | Speech speed | global 1.1x (cap 1.25x); up to 1.5x on marked filler stretches | 1.0x — cut time out, don't accelerate | comprehension data |
 | Cut/visual-change cadence | every 2–4s (jump cut, punch-in, b-roll, text) | 10–15s early; no pattern > 60–90s; burst every 2–3min | practitioner |
-| Hook | on-screen text promise frame 1, spoken hook ≤ 3s | 0–5s grab / 5–15s promise / 15–30s stakes; open loops | TikTok official + 1of10 |
+| Hook | on-screen text promise frame 1, spoken hook ≤ 3s | 0–5s grab / 5–15s promise / 15–30s stakes; open loops | TikTok official + practitioner consensus |
 | Captions | burn always, karaoke, 5–10 w/s (TikTok official) | sidecar SRT/CC by default; burn optional | 3Play/Verizon studies |
 | Music | optional bed, ducked 18–20dB under voice | subtle or none; -20 to -25dB calm | audio engineering |
 | Duration | 15–40s default target (≤ 90s cross-platform, ≤ 3min hard) | 15–20min sweet spot; chapters for topic content | Wistia/AIR |
@@ -398,7 +398,7 @@ patch/composite re-run.
   loudnorm — order matters; loudnorm re-measure keeps program at −14 while
   relative levels shift. (MG-2 build.)
 - **Caption corrections** — Deepgram mishears become burned-in misspellings
-  ("Hermosibot"). Plan gains `captions.corrections` {heard→correct}, logged +
+  (e.g. "Snyperbot" for "Sniper bot"). Plan gains `captions.corrections` {heard→correct}, logged +
   validated; fixes TRANSCRIPTION errors only, never changes what was said.
   (MG-2 build.)
 

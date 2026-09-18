@@ -61,5 +61,32 @@ class FfmpegFeatureCheck(unittest.TestCase):
         self.assertEqual(done.stdout, "codex-cli 0.144.1")
 
 
+class ExternalToolsAtInstall(unittest.TestCase):
+    """check_external_tools (installer step 1) on a Mac without the reference tools."""
+
+    def setUp(self) -> None:
+        self.base = Path(tempfile.mkdtemp(prefix="sniper-tools-"))
+        self.addCleanup(shutil.rmtree, self.base, ignore_errors=True)
+        self.pkg = fx.make_package(self.base)
+        self.bin = self.base / "bin"
+        self.bin.mkdir()
+        for tool in ("ffmpeg", "ffprobe", "whisper-cli"):
+            real = shutil.which(tool, path="/opt/homebrew/bin:/usr/local/bin")
+            if real:
+                (self.bin / tool).symlink_to(real)
+
+    @unittest.skipUnless(shutil.which("ffmpeg", path="/opt/homebrew/bin:/usr/local/bin"), "no ffmpeg on this Mac")
+    def test_missing_tesseract_and_ytdlp_are_listed_together_with_brew_commands(self) -> None:
+        # common.sh appends Homebrew's folders to PATH, so the test narrows PATH after sourcing it.
+        done = fx.bash(self.pkg, f'. "$FIXTURE_PKG/install/lib/steps.sh"; PATH="{self.bin}"; check_external_tools')
+        self.assertEqual(done.returncode, 1)
+        out = done.stdout + done.stderr
+        self.assertIn("tesseract is required for reference study", out)
+        self.assertIn("brew install tesseract", out)
+        self.assertIn("yt-dlp is required for adding a reference from a URL", out)
+        self.assertIn("brew install yt-dlp", out)
+        self.assertIn("Missing: tesseract yt-dlp.", out)
+
+
 if __name__ == "__main__":
     unittest.main()

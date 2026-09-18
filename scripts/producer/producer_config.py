@@ -150,7 +150,8 @@ MODES = {
         "hook_window_s": 3.0,
         # B-roll density (Phase 2): one purposeful insert per 8-12s output.
         # LONE-insert cadence — a montage/proof-beat BURST is the exception
-        # (BROLL["burst"]["short"]: 3 cutaways in ~4s, SF1 measured).
+        # (BROLL["burst"]["short"]: up to 3 cutaways in 4s;
+        # docs/studies/SHORTFORM_LESSONS.md §4, §9.2).
         "broll_min_spacing_s": 8.0,
         "broll_insert_s": (1.0, 2.0),
         "broll_insert_max_s": 5.0,
@@ -167,15 +168,16 @@ MODES = {
             "max_still_gap_s": 8.0,        # P1: shorts change every ~3s, none past ~8s
             "hook_front_load": 1.5,        # below the measured ×2.0 hook front-load
         },
-        # TALKING-HEAD tempo: a continuous single-speaker take. Measured on the
-        # reference reels (Video-472: 0 hard cuts / 30s, one SUSTAINED gauge over
-        # ~16s, then ~13s of bare talking-head + captions). Pace comes from a few
-        # sustained content graphics, NOT a change every ~3s — long bare stretches
-        # are intentional. Pace ≠ treatment: a talking-head short is still
-        # "produced" (has graphics), just slow. Selected by ``target.pace``.
+        # TALKING-HEAD tempo: a continuous single-speaker take
+        # (docs/studies/SHORTFORM_LESSONS.md §8.2). Pace comes from a few
+        # sustained content graphics (e.g. one milestone gauge that updates as
+        # a climb of numbers is spoken), NOT a change every ~3s — long stretches
+        # of presenter + captions are intentional. Pace ≠ treatment: a
+        # talking-head short is still "produced" (has graphics), just slow.
+        # Sniper design parameters. Selected by ``target.pace``.
         "pacing_talking_head": {
-            "min_changes_per_min": 4.0,    # ~4.6 cuts/min measured + sustained gfx
-            "max_still_gap_s": 16.0,       # 13s bare stretches are on-style
+            "min_changes_per_min": 4.0,    # a few cuts/min + sustained graphics
+            "max_still_gap_s": 16.0,       # long presenter stretches are on-style
             "hook_front_load": 1.3,        # still front-load, but relaxed
         },
         # PUNCH tempo (scripts/producer/docs/findings/PUNCH_STYLE.md — 6
@@ -290,50 +292,50 @@ MODES = {
             "transitions": False,          # 27/28 cuts hard (§4 AZ2) — the
                                            # transitions track stays EMPTY
         },
-        # CLIENT-REEL tempo (docs/studies/SHORTFORM_LESSONS.md §8, SF2 — produced
-        # outdoor client-reel/commercial breakdown, 30.5s reel frame-verified
-        # 2026-07-11): the THIRD PACE POLE. Hook = ONE continuous shot with
-        # ZERO cuts (0 cuts in reel 0-4.4s, ~6 staged text events); body
-        # momentum lives in a word-locked proof MONTAGE (4-5 process clips in
-        # ~6s) + whisper-caption churn measured 92.9 states/min. Motion budget
-        # for the WHOLE 30s: 2 zoom-outs + 1 punch-in + 1 overlay burst — a
-        # budget that CONFLICTS with punch (zero transitions) and restrained
-        # (zero zooms), so it lives in its own profile and never bleeds into
-        # desk talking-head presets (SF2 SCOPE GUARD). Selected by
-        # ``target.pace == "client-reel"``.
+        # CLIENT-REEL tempo (docs/studies/SHORTFORM_LESSONS.md §8): the THIRD
+        # PACE POLE — a promotional reel about a service or result. Hook = ONE
+        # continuous shot with ZERO cuts under staged text (§1.3, §1.5); body
+        # momentum lives in a word-locked proof MONTAGE + a quiet verbatim
+        # caption layer. Motion budget for the WHOLE ~30s: 2 zoom-outs + 1
+        # punch-in + 1 overlay burst — a budget that CONFLICTS with punch
+        # (zero transitions) and restrained (zero zooms), so it lives in its
+        # own profile and never bleeds into desk talking-head presets (§8.1
+        # scope guard). Every key is a Sniper design parameter justified in
+        # §8. Selected by ``target.pace == "client-reel"``.
         "pacing_client_reel": {
             "min_changes_per_min": 8.0,    # floor below the montage-driven
-                                           # change rate (proof montage ~6s
-                                           # of 1.2-1.5s cutaways mid-reel)
-            "max_still_gap_s": 10.0,       # hook holds one shot ~4.4s under
-                                           # text churn; body never rests
+                                           # change rate — a quieter body
+                                           # WARNs, it is not a wall
+            "max_still_gap_s": 10.0,       # the hook may hold one shot under
+                                           # text; the body never rests
                                            # longer than the montage spacing
             "hook_front_load": 1.3,        # hook density lives in the staged
-                                           # text stack, not cuts (SF2 §1)
+                                           # text stack, not cuts (§1.5)
             # Advisory doctrine (the brain/skill reads these; the pacing lint
             # only reads the three keys above): the per-30s motion/emphasis
             # BUDGET of the pole — spend it exactly, never per-cut.
-            "state_changes_per_min": 90.0, # whisper churn measured 92.9/min
-            "music": False,                # bed added AT THE PLATFORM (IG
-                                           # trending audio at post time) —
-                                           # not baked (SF1 MUSIC AT PLATFORM)
-            "target_duration_s": 30.0,     # "~30s reel, typically shorter"
+            "state_changes_per_min": 90.0, # quiet caption layer churning
+                                           # about every 0.7s
+            "music": False,                # the bed is chosen at posting
+                                           # time on the platform, not baked
+                                           # into the master (§6)
+            "target_duration_s": 30.0,     # a ~30s reel, usually shorter
             "hook_cuts": 0,                # hook = one continuous shot
             "energy_peaks_max": 1,         # ONE overlay burst + riser on the
                                            # hook's promise resolution, never
-                                           # per-cut (SF2 §5)
+                                           # per-cut (§5)
             "zoom_outs_per_30s": 2,        # hook reveal + closing move
             "punch_ins_per_30s": 1,        # the proof/testimonial beat only
             "overlay_bursts_per_30s": 1,   # the single energy peak above
-            "accent_words_per_30s": 3,     # YELLOW = payload only: location,
-                                           # outcome, CTA verb (SF2 §2.4)
+            "accent_words_per_30s": 3,     # accent = payload only: place,
+                                           # outcome, CTA verb (§2.4)
         },
-        # HOOK STACK (docs/studies/SHORTFORM_LESSONS.md §1, SF1 taught+measured +
-        # SF2 frame-verified, 2026-07-11). Advisory doctrine the brain/skill
-        # reads when authoring a produced short's hook zone. The TEXT LOCKUP
-        # tier is the cross-style INVARIANT (Punch H2/T1 + Restrained H1 + SF1/SF2
-        # = 4 sources); the zoom-out + riser tier is a PROMO-POLE addition —
-        # only under a flashy/produced client-reel treatment.
+        # HOOK STACK (docs/studies/SHORTFORM_LESSONS.md §1). Advisory doctrine
+        # the brain/skill reads when authoring a produced short's hook zone.
+        # The two-tier TEXT LOCKUP is the cross-style INVARIANT (§1.2; the
+        # style documents' hook rules agree on it); the zoom-out + riser tier
+        # is a PROMO-POLE addition — only under a produced client-reel
+        # treatment (§1.4, §1.6).
         "hook_stack": {
             "zone_s": 3.0,                  # hook zone 0..~2.5-3s (= the
                                             # hook_window_s proposition beat)
@@ -347,14 +349,15 @@ MODES = {
                                             # two-tier structure the invariant
             "lockup_line_h_frac": (0.05, 0.07),  # ~5-7%H per line, chest
                                             # band, never covering the face
-            # Promo-pole tier (SF2 8:24-10:13): zoom-OUT reveal at t=0 via an
-            # adjustment layer above all text. HARD RULE: frame zero must not
-            # be visibly over-zoomed — a 2.08x start was REJECTED on sight;
-            # the shipped reveal was 1.34x (Fusion Size 1.339874).
+            # Promo-pole tier (SHORTFORM_LESSONS §1.4): zoom-OUT reveal at
+            # t=0 on a layer above footage and text. HARD RULE: frame zero
+            # must not be visibly over-zoomed — start at 1.34x, never above
+            # 1.5x (Sniper design parameters).
             "zoom_out": {"scale_from": 1.34, "scale_from_max": 1.5,
                          "dur_frames": 60, "ease": "out-cubic"},
             # ~1.2s riser under the hook resolving EXACTLY at body start,
-            # level pulled well down (SF1 RISER-BRIDGE; AUDIO["riser_bridge_s"]).
+            # level pulled well down (SHORTFORM_LESSONS §1.6;
+            # AUDIO["riser_bridge_s"]).
             "riser_s": 1.2,
         },
     },
@@ -397,10 +400,10 @@ MODES = {
         # FLAGS (never flips) a later take that scores clearly worse.
         "retake_default": "later",
         "retake_lookback_utts": 10,     # search this many later utts for a re-delivery
-        # Study pair 2 (R21) had a re-delivered BLOCK ~65s downstream (a whole
-        # failed segment re-taken after an interruption) — far beyond the utt
-        # window. retake_scan additionally searches this many SECONDS ahead
-        # under stricter guards (long anchors, higher ratio, joined-window
+        # A whole failed segment can be re-delivered after an interruption,
+        # far beyond the utt window (REFERENCE_STYLE_STUDY.md R21, from the
+        # owner's own footage). retake_scan additionally searches this many
+        # SECONDS ahead under stricter guards (long anchors, higher ratio, joined-window
         # match) and always flags long-range finds needsOperator.
         "retake_lookback_s": 120.0,
         # Pause-tightening is the PRIMARY length lever (62% of the reference
@@ -447,77 +450,74 @@ MODES = {
             "hook60_min_nonhead_share": 0.40,  # pro ~0.50 in the first 60s
             "hook_overlay_by_s": 4.0,          # first graphic/overlay opens by here
             "receipt_montage_state_s": (0.8, 1.5),  # per-receipt hold in a montage
-            # STATE-CHURN INVARIANT (docs/studies/EDITCRAFT_LESSONS.md §1, EC2 R7 —
-            # CONFIRMED 4/4 grammars): produced content churns SOME visual
-            # layer at ~45-90 events/min while hard cuts stay 0-17/min
-            # (editcraft2 measured 46.6 states/min vs 6.95 cuts/min). Advisory
-            # band the brain reads — never force CUT density to hit an energy
-            # number; pick WHICH layer churns per style.
-            # SCOPE (machine cross-check 2026-07-11): the (45, 90) band holds
-            # for PRESENTER/PRODUCED zones only — screen-share-heavy videos
-            # measure 25-45 events/min under honest state counting, which is
-            # on-style there (retention rides cursor/PIP/demo audio, §1 lane
-            # split). Never flag a screen-share-heavy longform against this
-            # floor; a future lint must scope the band by visual-state zone.
+            # STATE-CHURN INVARIANT (docs/studies/EDITCRAFT_LESSONS.md §1.2):
+            # produced content churns SOME visual layer (captions, card
+            # builds, lands, pills, cuts, inserts) at ~45-90 events/min while
+            # hard cuts may stay far lower. Advisory band the brain reads —
+            # never force CUT density to hit an energy number; pick WHICH
+            # layer churns per style. Sniper design parameter.
+            # SCOPE: the (45, 90) band describes PRESENTER/PRODUCED zones —
+            # screen-share-heavy videos legitimately run below it (retention
+            # rides cursor/PIP/demo audio, §1.1 lane split). Never flag a
+            # screen-share-heavy longform against this floor; a future lint
+            # must scope the band by visual-state zone.
             "state_churn_per_min": (45.0, 90.0),
         },
-        # LANE SPLIT (docs/studies/EDITCRAFT_LESSONS.md §1, EC1 measured 158 shot/
-        # state changes, 2026-07-11): presenter footage and screen-share
-        # footage are DIFFERENT GRAMMARS — presenter runs 15.6 shot/state
-        # CHANGES per minute with a 39% cutaway share (state-change CADENCE,
-        # not detector hard cuts: those measure ~5.8/min on the presenter
-        # lane — machine cross-check 2026-07-11); screen-share runs 0.6
-        # cuts/min with retention carried by cursor motion + persistent PIP
-        # + demo audio. Never apply one lane's pacing lint to the other.
-        # Advisory doctrine today (the brain reads it; LESSON-014); roadmap
-        # = a lane-aware pacing pass that switches ceilings by the plan's
-        # visual-state zones.
+        # LANE SPLIT (docs/studies/EDITCRAFT_LESSONS.md §1.1): presenter
+        # footage and screen-share footage are DIFFERENT GRAMMARS — the
+        # presenter lane changes shot/state about 15.6 times per minute (a
+        # change every ~4s), only ~5.8/min of them hard cuts, ~39% of them
+        # cutaways; the screen-share lane runs ~0.6 cuts/min with retention
+        # carried by cursor motion + persistent PIP + demo audio + pills.
+        # Sniper design parameters (advisory; the decimals are kept because
+        # consumers read them, not because they were measured). Never apply
+        # one lane's pacing lint to the other. Advisory doctrine today (the
+        # brain reads it; LESSON-014); roadmap = a lane-aware pacing pass
+        # that switches ceilings by the plan's visual-state zones.
         "pacing_lanes": {
             "presenter": {"state_changes_per_min": 15.6,
                           "hard_cuts_per_min": 5.8,   # detector cuts only
                           "cutaway_share": 0.39},
             "screen-share": {
                 "cuts_per_min": 0.6,
-                # CAMERA-HOLD LEGALITY (Restrained C4 reconfirmed at longform
-                # scale): a 157s zero-cut hold is legal ONLY while another
-                # layer churns — a bare hold that long is NEVER legal on
-                # presenter footage.
+                # CAMERA-HOLD LEGALITY (EDITCRAFT_LESSONS §1.1): a zero-cut
+                # hold up to 157s is legal ONLY while another layer churns —
+                # a bare hold that long is NEVER legal on presenter footage.
                 "retention_layers": ("cursor", "pip", "demo-audio", "pills"),
                 "churned_hold_max_s": 157.0,
             },
         },
-        # KEYWORD PILLS, NOT CAPTIONS (EDITCRAFT_LESSONS.md §5, EC1 + EC2
-        # R11 CONFIRMED): the longform emphasis layer is sparse white caption
-        # pills echoing the key phrase — measured ~8 per 35 min (~0.23/min),
-        # <=3 words TYPICAL (not a hard cap — a 7-word emphasis card is
-        # observed on-style; machine cross-check 2026-07-11), center-screen,
-        # only where the exact words matter. Never a verbatim caption stream
-        # (the SRT sidecar remains the CC track).
+        # KEYWORD PILLS, NOT CAPTIONS (EDITCRAFT_LESSONS.md §5): the longform
+        # emphasis layer is sparse caption pills echoing the key phrase —
+        # about one every four minutes, <=3 words TYPICAL (not a hard cap —
+        # a longer phrase is legal when the exact wording is the point),
+        # center-screen, only where the exact words matter. Never a verbatim
+        # caption stream (the SRT sidecar remains the CC track).
         "emphasis_pills": {"per_min": 0.25, "words_typical": 3},
-        # PERSISTENT TUTORIAL PIP (EDITCRAFT_LESSONS.md §4.1, EC1 — extends
-        # pending pip_takeover #39): during screen-share TEACHING, composite
-        # a circular webcam PIP ~11% frame width bottom-right over the
-        # timeline zone (never over the content being taught); introduce it
-        # when depth increases, omit during quick cruise-through demos.
+        # PERSISTENT WALKTHROUGH PIP (EDITCRAFT_LESSONS.md §4.1 — extends
+        # pending pip_takeover #39; the key keeps its historical name): during
+        # an in-depth screen walkthrough, composite a circular presenter PIP
+        # ~11% frame width bottom-right over the least important region
+        # (never over the content being discussed); introduce it when depth
+        # increases, omit during quick fly-throughs.
         # LONGFORM ONLY — the shorts PIP ban (2026-07-10) stands.
         "tutorial_pip": {"width_frac": 0.11, "corner": "bottom-right",
                          "avoid": "content-zone",
                          "introduce_on": "depth-increase"},
-        # MUSIC AS SEGMENT ARCHITECTURE (EDITCRAFT_LESSONS.md §6, EC2 R4
-        # taught 12:33-14:22 + EC1 practiced): split the longform by subject
-        # change, one music mood per segment, NEW track per chapter with a
-        # riser+hit at the section card; a music-STOP is a deliberate jolt
-        # at a major pivot (his 2:30 hits -56 LUFS), a slow fade-out is the
-        # segment-closing signal; drop/duck the bed under the pitch/CTA
-        # (his 4:50-5:33 runs -21..-27 LUFS). LONGFORM ONLY — punch shorts
-        # keep a constant bed (6/6 zero-gap), restrained has none. Advisory
+        # MUSIC AS SEGMENT ARCHITECTURE (EDITCRAFT_LESSONS.md §6.2): split
+        # the longform by subject change, one music mood per segment, NEW
+        # track per chapter with a riser+hit at the section card; a
+        # music-STOP is a deliberate jolt reserved for a major pivot, a slow
+        # fade-out is the segment-closing signal; drop/duck the bed under the
+        # offer/CTA so the ask is heard. LONGFORM ONLY — punch shorts keep a
+        # constant bed, restrained has none (their style documents). Advisory
         # doctrine (the brain plans segments; audio_mix executes the bed).
         "music_segments": {"mood_per_segment": True,
                            "new_track_per_chapter": True,
                            "stop_is_jolt": True, "fade_out_closes": True,
                            "duck_under_cta": True,
-                           "bed_under_voice_db": 20.0},  # taught "~-20 dB
-                                           # under voice" — inside the
+                           "bed_under_voice_db": 20.0},  # ~20 dB under
+                                           # voice (§6.2) — inside the
                                            # AUDIO["music_duck_db"] band
     },
 }
@@ -553,15 +553,16 @@ TREATMENTS = {
 TREATMENT_DEFAULT = "produced"
 
 # ---------------------------------------------------------------------------
-# B-roll lane doctrine (docs/studies/EDITCRAFT_LESSONS.md + docs/studies/SHORTFORM_LESSONS.md,
-# baked 2026-07-11). DATA CATALOG — exempt from the logic line limit.
+# B-roll lane doctrine (docs/studies/EDITCRAFT_LESSONS.md §2 +
+# docs/studies/SHORTFORM_LESSONS.md §4). DATA CATALOG — exempt from the logic
+# line limit.
 #
 # The consolidated b-roll knobs: the planner lanes
 # (planner/graphics_planner_receipts.py + _illustration.py) read their hold/
 # gap constants from here (same values they shipped with — relocated, not
-# retuned); the trigger/hold/burst/credit/polish bands are the EC1 measured
-# numbers (158-cut longform trace + 5 word-timed trigger confirmations) and
-# the SF1/SF2 shorts data. The per-mode footage ceilings
+# retuned); the trigger/hold/burst/credit/polish bands are Sniper design
+# parameters whose rationale lives in EDITCRAFT_LESSONS §2.1-§2.9 (long-form)
+# and SHORTFORM_LESSONS §4 (Shorts). The per-mode footage ceilings
 # (MODES[*]["broll_insert_s"/"broll_insert_max_s"]) are UNCHANGED — these
 # bands are the per-KIND doctrine the brain picks holds from.
 # ---------------------------------------------------------------------------
@@ -573,19 +574,19 @@ BROLL = {
     "concept_every_s": 60.0,        # tier-below-receipts cap: 1 per 60s
     "illustration_hold_s": 2.5,     # matches the receipts / concept-stock hold
     "illustration_min_gap_s": 30.0, # at most one slot per 30s of body
-    # -- TRIGGER→INSERT LATENCY (EC1, 5 word-timed confirmations: MKBHD
-    #    757→760, Trahan ~766→766, "keyboard shortcuts" 489-495→492,
-    #    "regret" 56-62→57, "14-day filmmaker" word 1768.48 → zoom 1769.39
-    #    (+0.91s) / graphic +1.16s — machine-verified from the VTT +
-    #    deep-study events, replacing a hand-copied ~798→796 pair that
-    #    contradicted the band, LL-013): land every b-roll/graphic within
-    #    this window of its trigger. The ANCHOR is the REFERENCE-PHRASE
+    # -- TRIGGER→INSERT LATENCY (EDITCRAFT_LESSONS §2.1): land every
+    #    b-roll/graphic within this window of its trigger — before the
+    #    phrase the image is a riddle, much later the viewer has moved on.
+    #    Timing citations are read from word timings, never recalled
+    #    (LL-013, LESSON-027). The ANCHOR is the REFERENCE-PHRASE
     #    START (the first word of the naming phrase), so an insert may lead
     #    the phrase's head noun by up to ~1.5s while trailing the trigger.
     #    The receipts lane lands outStart ON the word (latency 0 — inside
     #    the band).
     "trigger_latency_s": (0.0, 1.5),
-    # -- HOLD BANDS by insert kind (EC1 measured; EDITCRAFT_LESSONS.md §2.4).
+    # -- HOLD BANDS by insert kind (EDITCRAFT_LESSONS.md §2.4 — recognise
+    #    vs read time per kind; "referenced-creator" = footage of a person
+    #    the speaker names, the key keeps its historical name).
     #    The brain picks the band by kind; card kinds also respect
     #    MOTION["hold_max_s"] — see EDITCRAFT_LESSONS.md §10.4 for the
     #    12s-list-card vs 11s-ceiling adjudication (ceiling stands).
@@ -598,55 +599,57 @@ BROLL = {
         "step-card": (2.0, 3.0),
         "diagram-card": (2.5, 8.5),
     },
-    # -- LITERAL-FIRST MATCHING (EC1; LESSON-012): named person/tool/product/
-    #    site → show THAT thing. Conceptual b-roll only for emotional beats
-    #    (regret/boredom/diligence), staged as cinematic SELF-footage.
+    # -- LITERAL-FIRST MATCHING (EDITCRAFT_LESSONS §2.2; LESSON-012): named
+    #    person/tool/product/site → show THAT thing. Conceptual b-roll only
+    #    for emotional beats (regret/boredom/effort), staged as graded
+    #    footage of the speaker's own world.
     "literal_first": True,
     "conceptual_only_for": ("emotional",),
-    # -- B-ROLL PRIORITY LADDER (EC2 R10, 3rd source; confirms HyperFrames-
-    #    PRIMARY): choose by explanatory density; stock is the "lazy version"
-    #    — last. Self-demonstrating b-roll (demo the taught technique on a
-    #    real on-screen artifact) outranks metaphor illustration.
+    # -- B-ROLL PRIORITY LADDER (EDITCRAFT_LESSONS §2.3): choose by
+    #    explanatory density — Sniper motion graphics first, a purpose-shot
+    #    insert of the real thing next, stock last. Demonstrating the
+    #    explained thing on a real on-screen artifact outranks any metaphor
+    #    illustration.
     "priority": ("motion-graphics", "purpose-shot", "stock"),
-    # -- VO CONTINUITY LAW (EC1; SF1 audio hygiene; LESSON-013): A-roll
+    # -- VO CONTINUITY LAW (EDITCRAFT_LESSONS §2.5; LESSON-013): A-roll
     #    speech never stops under an insert; all b-roll is VIDEO-ONLY,
-    #    borrowed-clip audio muted (broll_insert already composites
-    #    video-only). Demo/native audio only when the demo IS the lesson.
+    #    embedded clip audio muted (broll_insert already composites
+    #    video-only). Demo/native audio only when the demo IS the point.
     "vo_continuity": True,
     "demo_audio_exception": "playthrough",
-    # -- CREDIT LABEL LAW (EC1, observed on 100% of MKBHD/Trahan shots):
-    #    borrowed third-party footage carries a lower-left credit label for
-    #    the insert's FULL duration. Chip comp + brollTrack `credit` field =
-    #    roadmap; LESSON-013 binds the brain now.
+    # -- CREDIT LABEL LAW (EDITCRAFT_LESSONS §2.6): footage the operator did
+    #    not shoot (and has the right to use) carries a lower-left credit
+    #    label for the insert's FULL duration. Chip comp + brollTrack
+    #    `credit` field = roadmap; LESSON-013 binds the brain now.
     "credit_label": {"corner": "lower-left", "template": "CREDIT: {name}",
                      "full_duration": True},
-    # -- INSERT POLISH LAW (EC1 + SF2): every insert gets the A-roll
-    #    LUT/grade + stabilization when handheld, and reuses the short's one
+    # -- INSERT POLISH LAW (EDITCRAFT_LESSONS §2.8): every insert gets the
+    #    A-roll LUT/grade + stabilization when handheld, and reuses the one
     #    motion vocabulary — indistinguishable in polish from A-cam.
     "insert_polish": {"grade_matches_aroll": True,
                       "stabilize_handheld": True},
-    # -- STILLS vs CARDS SPLIT (EC2 R6; LESSON-017): photos/screenshots get
-    #    slow scale/position drift in this band (%/s) or an image-focus
+    # -- STILLS vs CARDS SPLIT (EDITCRAFT_LESSONS §7.3; LESSON-017):
+    #    photos/screenshots get slow scale/position drift in this band
+    #    (%/s) or an image-focus
     #    operator (MOTION["image_focus_ops"]); DESIGNED cards stay
     #    pixel-frozen — aliveness comes from build cadence, never drift.
     "still_drift_pct_per_s": (0.5, 1.0),
-    # -- BURSTS ATTACH TO MONTAGE BEATS, NOT POSITIONS (EC1 envelope
-    #    refinement + SF1 burst datum). Example/proof/sell beats carry the
-    #    cut bursts; each pitch-montage shot gets a benefit label. The
+    # -- BURSTS ATTACH TO MONTAGE BEATS, NOT POSITIONS (EDITCRAFT_LESSONS
+    #    §2.9; SHORTFORM_LESSONS §4). Example/proof/offer beats carry the
+    #    cut bursts; each offer-montage shot gets a benefit label. The
     #    MODES[*]["broll_min_spacing_s"] cadence stays the rule for LONE
     #    inserts — a burst is the beat-attached exception (SHORTFORM_LESSONS
     #    §9.2; the intro envelope's receipt_montage_state_s (0.8-1.5) is a
     #    DIFFERENT device and unchanged — EDITCRAFT_LESSONS §10.2).
     #    BURST MAGNITUDES ARE VISUAL-STATE/SHOT-CHANGE COUNTS, NOT DETECTOR
-    #    HARD CUTS (machine cross-check 2026-07-11): the same EC1 windows
-    #    measure 11 hard cuts/10s (intro log-montage) and 19/30s (course
-    #    pitch) on the deterministic cut detector. Any future burst lint
-    #    must count STATE EVENTS (cuts + graphics + b-roll + panel churn),
-    #    never detector cuts alone.
+    #    HARD CUTS: the detector-cut ceilings below are a separate, lower
+    #    bound. Any future burst lint must count STATE EVENTS (cuts +
+    #    graphics + b-roll + panel churn), never detector cuts alone. All
+    #    burst numbers are Sniper design parameters (EDITCRAFT_LESSONS §2.9).
     "burst": {
         "short": {"max_inserts": 3, "window_s": 4.0, "hold_s": (0.6, 1.3)},
-        "longform": {"intro_states_per_10s": 16,   # log-montage measured
-                     "pitch_states_per_30s": 42,   # course-pitch peak
+        "longform": {"intro_states_per_10s": 16,   # intro montage ceiling
+                     "pitch_states_per_30s": 42,   # offer/CTA montage ceiling
                      "detector_cut_peaks": {"per_10s": 11, "per_30s": 19},
                      "hold_s": (0.6, 0.7)},
     },
@@ -703,8 +706,8 @@ CAPTIONS = {
         "outline_px": 5,
         "karaoke_highlight": "#FFD400",  # active-word color in karaoke mode
     },
-    # Minimal word-at-a-time style (reference study R1/R2 — see
-    # docs/studies/REFERENCE_STYLE_STUDY.md, 2026-07-05). ONE word (or a <=3-word phrase
+    # Minimal word-at-a-time style (docs/studies/REFERENCE_STYLE_STUDY.md
+    # R1/R2). ONE word (or a <=3-word phrase
     # when adjacent words nearly touch) per Dialogue event, chest-anchored, soft
     # drop shadow, no heavy outline box; emphasis words render gold in a
     # serif-italic accent face. Additive sub-dict — karaoke/line ignore it.
@@ -860,32 +863,35 @@ AUDIO = {
     "lufs_tolerance": 1.0,          # audit: measured LUFS within ±1
     "tiktok_loud_lufs": -11.0,      # optional TikTok-only loud master
     # Music bed (Phase 2): duck under dialogue while speaking; rise in gaps.
-    # Corroborated 2026-07-11 (docs/studies/EDITCRAFT_LESSONS.md §6, EC1 taught):
-    # "music bed ~-20 dB under voice, adjusted by ear" — inside this band.
+    # Long-form music segments sit ~20 dB under the voice, inside this band
+    # (docs/studies/EDITCRAFT_LESSONS.md §6.2).
     "music_duck_db": (18.0, 20.0),
     "music_gap_db": (10.0, 12.0),
     # Word-boundary cut joins: short equal-power crossfade kills clicks.
     "join_crossfade_ms": 15,
-    # J-CUT LEADS (LIAM-4-MOVES move 2, measured 2026-07-11 on n=176
-    # retained seams at 5ms RMS precision): the DEFAULT seam is late-in-pause
-    # (picture ~70-130ms before the incoming word onset — that lives in the
-    # cut boundaries the edit brain picks, not here). ~1-in-5 seams carry a
-    # TRUE J-LEAD: incoming audio onset BEFORE picture, median 65-95ms.
+    # J-CUT LEADS (docs/studies/EDITCRAFT_LESSONS.md §6.3, continuity
+    # mechanism CM-2): the DEFAULT seam is late-in-pause (picture shortly
+    # before the incoming word onset — that lives in the cut boundaries the
+    # edit brain picks, not here). About 1-in-5 seams may carry a TRUE
+    # J-LEAD: incoming audio onset BEFORE picture, preferred band 65-95ms
+    # (near the ITU-R BT.1359 audio-before-video acceptability limit, so a
+    # lead reads as momentum, not a sync error). Sniper design parameters.
     # ``cutTrack[i].audioLeadMs`` = the incoming segment's audio PRE-ROLL
     # (source audio from before its in-point) starts this many ms before the
     # picture cut — baked into the OUTGOING part's tail by cut_speed, so
     # every part keeps audio == video length and A/V sync is untouched.
-    # Never exceed ~300ms onset lag (the measured hard edge).
+    # Never exceed ~300ms (beyond it the lead is heard as two sentences
+    # overlapping — the hard edge).
     "jcut": {
-        "lead_default_ms": 80,          # inside the measured 65-95ms band
-        "lead_band_ms": (65, 95),       # true J-lead median band (lint WARNs
+        "lead_default_ms": 80,          # inside the preferred 65-95ms band
+        "lead_band_ms": (65, 95),       # preferred J-lead band (lint WARNs
                                         # outside it; the hard max ERRORs)
         "lead_max_ms": 300,
         "prev_min_residual_s": 0.1,     # the outgoing part must keep at
                                         # least this much of its own audio
     },
-    # SFX class vocabulary (docs/studies/EDITCRAFT_LESSONS.md §6, EC2 R3 taught
-    # 11:16-12:01 + EC1 doctrine). whoosh/click/pop = the MECHANICAL layer
+    # SFX class vocabulary (docs/studies/EDITCRAFT_LESSONS.md §6.1).
+    # whoosh/click/pop = the MECHANICAL layer
     # (whoosh-on-motion, highlight-sound-on-highlight — audio/sfx_library
     # ships these); riser/hit/drone = the EMOTIONAL layer mapped to beat
     # types at plan time: riser = pre-payoff tension (HONESTY GATE: only
@@ -895,13 +901,13 @@ AUDIO = {
     # LESSON-018 binds the brain's mapping.
     "sfx_classes": ("whoosh", "click", "pop", "riser", "hit", "drone"),
     # Trim every SFX to the animation's ENTRANCE duration only, and give it
-    # a fade-in handle to soften the attack (EC1 taught practice).
+    # a fade-in handle to soften the attack (EDITCRAFT_LESSONS §6.1).
     "sfx_trim_to_entrance": True,
     "sfx_fade_in_handle": True,
-    # RISER-BRIDGE (docs/studies/SHORTFORM_LESSONS.md §1.6, SF1 taught+measured):
-    # ~1.2s riser under a short's hook, ENDING exactly where the body
-    # starts, level pulled well down. Optional produced-treatment slot —
-    # no coverage in the measured punch/restrained corpora.
+    # RISER-BRIDGE (docs/studies/SHORTFORM_LESSONS.md §1.6): ~1.2s riser
+    # under a short's hook, ENDING exactly where the body starts, level
+    # pulled well down; subject to the riser honesty gate. Optional
+    # produced-treatment slot — not a default of any style pace.
     "riser_bridge_s": 1.2,
 }
 
@@ -1048,50 +1054,49 @@ MOTION = {
         "leak_dur_s": 0.375,         # 9 frames @24fps, in the 150-400ms band
         # XFADE FAMILY — REMOVED (operator rejection, 2026-07-11, FAILURE_
         # LEDGER LL-014). The curated ffmpeg-xfade sampler (fades/wipes/
-        # slides/dissolves) was rejected on sight; the verdict matches the
-        # measured references, which use ZERO stock transitions. Longform
-        # seams are joined ONLY with the studied grammar: panel sweeps,
-        # face-bridged recomposition, under-panel cuts, blur-recede, and
-        # seam-role zoom-pulls (flash/leak only where already measured
-        # legal). plan_lint_motion hard-ERRORs any "xfade:*" kind, all modes.
-        # SEAM ROLES (docs/studies/EDITCRAFT_LESSONS.md §2.7, EC1 measured): hard cut
-        # in/out covers ~90% of inserts; each cover kind is legal ONLY at its
-        # seam type — zoom pull-in/pull-out at a-roll<->b-roll seams,
+        # slides/dissolves) was rejected on sight: no rule in Sniper's
+        # doctrine gives a stock transition an editorial job. Longform seams
+        # are joined ONLY with Sniper's seam grammar: panel sweeps (rail
+        # push, MODULE_STUDY T-B), face-bridged recomposition, under-panel
+        # cuts, blur-recede (T-D), and seam-role zoom-pulls; flash/leak only
+        # at their seam role (below). plan_lint_motion hard-ERRORs any
+        # "xfade:*" kind, all modes.
+        # SEAM ROLES (docs/studies/EDITCRAFT_LESSONS.md §2.7): most inserts
+        # enter and leave on a plain hard cut; each cover kind is legal ONLY
+        # at its seam type — zoom pull-in/pull-out at a-roll<->b-roll seams,
         # glare/flash/whip-blur at graphic<->a-roll seams. Transitions are
-        # SEAM MARKERS (~10-12 events in 35 min), never intra-lane
+        # SEAM MARKERS (about one every three minutes), never intra-lane
         # decoration. Advisory doctrine; max_per_min above stays the ceiling.
         "seam_roles": {"zoom-pull": "aroll<->broll",
                        "flash-leak": "graphic<->aroll"},
-        "longform_events_per_min": 0.34,   # measured ~10-12 / 35 min
-        # ZOOM-PULL SEAMS (LIAM-4-MOVES move 1, measured 2026-07-11 on
-        # EC1=Ex1R3rsdlms @23.976 + EC2=sLgHqZSe2o0 @30: 8 windows burst-
-        # extracted + ECC scale-traced, 7 true instances, each variant n<3 →
-        # LOW-CONFIDENCE bands, deliberately configurable). Executed by
+        "longform_events_per_min": 0.34,   # ~1 seam marker per 3 min
+        # ZOOM-PULL SEAMS (EDITCRAFT_LESSONS.md §2.7, continuity mechanism
+        # CM-1): three variants with defaults and allowed bands — Sniper
+        # design parameters, deliberately configurable. Executed by
         # motion/zoom_pull.py through transitions.py kind "zoom-pull";
         # LONGFORM-ONLY at the lint gate (seam-role grammar), and the events
         # count against max_per_min like every other seam cover.
         # FALSE-POSITIVE GUARD baked upstream: only feature-tracked (ORB/ECC)
-        # scale evidence may propose a zoom-pull — never faceW-only events
-        # (EC1 76.7 was a physical lean + hard cut, <0.4%/frame on ECC).
+        # scale evidence may propose a zoom-pull during study — never
+        # faceW-only events (a face-width change can be a physical lean).
         "zoom_pull": {
             "variants": ("punch-cut", "whip", "settle"),
             "seam_roles": ("aroll->broll", "broll->aroll"),
-            # (A) PUNCH-THEN-CUT, n=2 [EC1 1769.4, 1783.7]: +20.7%/+20.4%
-            # digital punch-IN on the a-roll, active 6-10 frames (0.25-0.42s),
-            # bell velocity (ease-in-out), COMPLETES 0.6-1.3s BEFORE the cut;
-            # the cut itself is covered by a light-leak/flash — zoom and
-            # cover are SEQUENTIAL, never simultaneous (cover defaults on).
+            # (A) PUNCH-THEN-CUT: a ~+20% digital punch-IN on the a-roll
+            # over 0.25-0.42s, bell velocity (ease-in-out), COMPLETES
+            # 0.6-1.3s BEFORE the cut; the cut itself is covered by a
+            # light-leak/flash — zoom and cover are SEQUENTIAL, never
+            # simultaneous, so the seam reads as one event (cover defaults on).
             "punch_cut": {
                 "scale": 1.205, "scale_band": (1.10, 1.25),
                 "attack_s": 0.33, "attack_band_s": (0.25, 0.42),
                 "complete_before_s": 0.9, "complete_band_s": (0.6, 1.3),
                 "cover_default": "light-leak",   # or "white-flash" / false
             },
-            # (B) WHIP-THROUGH, n=2 [EC2 153.6 a->b, EC1 1773.5 b->a]:
-            # accelerating zoom SPANS the cut — ease-in ramp ~1s (+19% at
-            # 1.0-1.4%/frame) into a blur-masked peak AT the cut (peak vel
-            # 12.3-38.8%/frame, +89-98% total); the incoming side settles
-            # ease-out (+19.5% over 10f, landing 0.6s after the cut).
+            # (B) WHIP-THROUGH: an accelerating zoom SPANS the cut — an
+            # ease-in ramp of ~1s into a blur-masked peak AT the cut (the
+            # blur hides the frames where the upscale is largest); the
+            # incoming side settles ease-out, landing ~0.6s after the cut.
             "whip": {
                 "peak_scale": 1.9, "peak_band": (1.5, 2.0),
                 "ramp_s": 1.0, "ramp_band_s": (0.7, 1.4),
@@ -1100,9 +1105,9 @@ MOTION = {
                 "blur_sigma": 12.0,          # radial/motion blur proxy at peak
                 "blur_span_s": 0.12,         # blur gate ± this around the seam
             },
-            # (C) POST-CUT SETTLE, n=3 [EC1 764.2, 781.1, EC2 452.8]: the
-            # incoming shot zooms OUT −6..−10% over 9-15 frames (0.3-0.5s)
-            # starting 0-16 frames (≤ ~0.55s) after the cut — a soft landing.
+            # (C) POST-CUT SETTLE: the incoming shot eases OUT from a slight
+            # zoom (under 12%) over 0.3-0.55s, starting within ~0.55s of the
+            # cut — a soft landing, not an emphasis.
             "settle": {
                 "from_scale": 1.08, "from_band": (1.05, 1.12),
                 "dur_s": 0.4, "dur_band_s": (0.3, 0.55),
@@ -1110,74 +1115,72 @@ MOTION = {
             },
         },
     },
-    # EYE-TRACE CONTINUITY (docs/studies/EDITCRAFT_LESSONS.md §7.1, EC2 R1 taught
-    # 9:26-9:57 w/ self-demo): at every hard cut and full-frame graphic
+    # EYE-TRACE CONTINUITY (docs/studies/EDITCRAFT_LESSONS.md §7.1,
+    # continuity mechanism CM-4): at a hard cut or full-frame graphic
     # insertion, the incoming frame's focal point (face / key text /
-    # highlighted element) must land near the outgoing frame's gaze point;
-    # violations only as deliberate FLAGGED jolts (his 10:08 anti-rule).
-    # WIRED (LIAM-4-MOVES move 4, 2026-07-11): previous-shot focal xy
-    # (entry ``gazeXY`` when the planner knows a cursor/focal point, else
-    # the faceBBoxNorm center) is an ADDITIVE placement bias in
+    # highlighted element) should land near the outgoing frame's gaze point
+    # when legibility and fit leave a choice; violations only as deliberate
+    # FLAGGED jolts. WIRED (2026-07-11): previous-shot focal xy (entry
+    # ``gazeXY`` when the planner knows a cursor/focal point, else the
+    # faceBBoxNorm center) is an ADDITIVE placement bias in
     # planner/graphics_anchors.resolve_offset_v2 + an Audit B advisory WARN
     # (audit/audit_motion.check_eye_trace over the graphics_placements.json
-    # sidecar). MEASURED NULL (n=24 large + n=299 small graphic entrances):
-    # face->landing correlation rx=+0.05/ry=-0.16, mean 2D distance 0.351
-    # screen units vs shuffled-null 0.348 (0% improvement) — the pros land
-    # graphics at DESIGNED ANCHORS, so the bias is a NEAR-TIE BREAKER only
-    # (never overrides emptiness/fit legality) and the audit stays advisory.
+    # sidecar). Designed anchors, emptiness and fit legality win first, so
+    # the bias is a NEAR-TIE BREAKER only and the audit stays advisory.
+    # Sniper design parameters:
     #   bias_weight     — additive term on the free-space region score
     #                     (scores run ~0.1-0.5; 0.05 = tie-breaker scale).
     #   warn_dist_frac  — Audit B WARN when a graphic's landed center sits
     #                     further than this from the gaze point (normalized
-    #                     2D screen units; the measured pro cloud means
-    #                     0.351, so 0.45 warns only ABOVE the null cloud).
+    #                     2D screen units; 0.45 flags only clear jumps
+    #                     across the frame, not ordinary anchor offsets).
     #   audit           — "warn" (advisory) | "off" (skip the check).
-    #   jolt_flag_key   — entry flag naming a DELIBERATE violation (his
-    #                     10:08 anti-rule): flagged entries never WARN.
+    #   jolt_flag_key   — entry flag naming a DELIBERATE violation:
+    #                     flagged entries never WARN.
     "eye_trace": {"audit": "warn", "jolt_flag_key": "deliberateJolt",
                   "bias_weight": 0.05, "warn_dist_frac": 0.45},
-    # ENTRANCE CAUSALITY (docs/studies/EDITCRAFT_LESSONS.md §7.2, EC2 R5 —
-    # generalized; adjudicates taught move-ins vs punch instant-pop vs
-    # restrained frame-0 pins): every graphic entrance needs a cause the viewer
+    # ENTRANCE CAUSALITY (docs/studies/EDITCRAFT_LESSONS.md §7.2 —
+    # reconciles long-form move-ins, punch instant-pops and restrained
+    # frame-0 pins): every graphic entrance needs a cause the viewer
     # can perceive. A silent unexplained mid-video pop is the ONLY illegal
     # state. Lint spec (longform produced lane, roadmap in
     # plan_lint_motion): entries with inDur=0 must carry an sfx slot or
     # start at t=0. LESSON-016 binds the brain now.
     "entrance_causality": {"legal": ("move-in", "pop+sfx", "frame0")},
-    # IMAGE-FOCUS OPERATORS (docs/studies/EDITCRAFT_LESSONS.md §7.4, EC2 R2 taught
-    # 7:40-8:18, all six demoed on a real screenshot): the still-image
-    # b-roll operator set, to be built as comp variants. Use on
+    # IMAGE-FOCUS OPERATORS (docs/studies/EDITCRAFT_LESSONS.md §7.4,
+    # continuity mechanism CM-3): the six-name still-image b-roll operator
+    # vocabulary (four are executable today — ``focus_ops`` below). Use on
     # screenshots/photos, NOT on designed cards (those stay pixel-frozen —
     # BROLL["still_drift_pct_per_s"] / LESSON-017 own the split).
     "image_focus_ops": ("animate-key-text", "highlight-scribble",
                         "darken-surround", "hue-shift-signed",
                         "circle-arrow-underline", "subject-glow"),
     # SIGNED color semantics for hue-shift: red = negative connotation,
-    # green/yellow = positive (EC2 R2 — his hue lesson turns the screenshot
-    # red @8:02 on the negative read).
+    # green/yellow = positive (EDITCRAFT_LESSONS §7.4 — the colour lands the
+    # evaluation before the viewer parses the numbers).
     "hue_shift_semantics": {"negative": "red", "positive": "green-yellow"},
-    # EXECUTABLE image-focus operators (LIAM-4-MOVES move 3, measured
-    # 2026-07-11: EC2 R2 taught executions on a real analytics screenshot
-    # [468-500s] n=4 + real-use n=2 LOW-CONFIDENCE; EC1 uses ZERO of these —
-    # the vocabulary is EC2's, gated by treatment at the lint gate). Rendered
-    # by broll/focus_ops.py on brollTrack inserts (plan field ``focusOps``);
-    # still images only — designed cards stay pixel-frozen (LESSON-017).
+    # EXECUTABLE image-focus operators (EDITCRAFT_LESSONS §7.4, CM-3):
+    # Sniper design parameters, part of the produced graphics stack (gated
+    # by treatment at the lint gate). Rendered by broll/focus_ops.py on
+    # brollTrack inserts (plan field ``focusOps``); still images only —
+    # designed cards stay pixel-frozen (LESSON-017).
     "focus_ops": {
         "ops": ("highlight", "darken-surround", "blur-surround",
                 "hue-shift-signed"),
-        # (a) HIGHLIGHT: marker-yellow (hue 50-60°) left-to-right wipe —
-        # key-number pass 12 frames (0.4s), whole-tile pass 18f (0.6s).
+        # (a) HIGHLIGHT: translucent marker-colour left-to-right wipe —
+        # 0.4s by default (a short key-number pass), up to 0.7s for a
+        # larger region.
         "highlight": {"color": "0xFFD84D", "alpha": 0.4,
                       "wipe_s": 0.4, "wipe_band_s": (0.3, 0.7)},
         # (b) DARKEN-SURROUND: flat ~−25% luma outside the focus tile,
-        # ≤1-frame apply (no measurable ramp @30fps), hold 1-2s.
+        # applied within one frame (no ramp), hold ~1-2s.
         "darken": {"luma_gain": 0.75, "hold_band_s": (0.8, 2.5)},
-        # sibling BLUR-SURROUND: sharpness ×5-6 drop (LapVar 1028→161).
+        # sibling BLUR-SURROUND: blur outside the sharp region, no dim.
         "blur": {"sigma": 8.0},
-        # (c) HUE-SHIFT-SIGNED: full-frame fill; demo apply instant, real
-        # use ramps 7 frames/233ms to ~78% coverage; hold 1.7s-4.4s. BT.601
-        # chroma targets: red ~354° (negative), yellow 64° → green 114°
-        # (positive, yellow holds ~1.0s first — the taught two-stage read).
+        # (c) HUE-SHIFT-SIGNED: full-frame fill ramped over ~233ms (7
+        # frames @30fps); hold 0.8-4.5s. BT.601 chroma targets: red
+        # (negative), yellow → green (positive; yellow holds ~1.0s first so
+        # a positive wash never reads as a warning).
         "hue_shift": {"mix": 0.65, "ramp_s": 0.233,
                       "hold_band_s": (0.8, 4.5),
                       "positive_yellow_s": 1.0,
@@ -1187,14 +1190,14 @@ MOTION = {
     },
     # Narration-paced module builds (MODULE_STUDY.md §3 rank 1 / §5 item 4):
     # a card lands 3-6 modules timed to SPOKEN WORDS, not a fixed stagger —
-    # measured: MG-1 benchmark card builds over ~2s (52.4-59.5), MG-3 timeline
-    # nodes 1.2-1.4s apart (= narration beats), MG-2 agent cards stagger after
-    # a 900ms narration wait. The brain picks WHICH words; code converts them
-    # to comp-relative times (graphics_copy.fill_module_lands); the lint floor
-    # keeps two modules from stacking on one instant.
+    # the guidance band is about one short spoken phrase between lands, and
+    # 0.25s is the shortest gap at which two arrivals still read as two
+    # events (Sniper design parameters). The brain picks WHICH words; code
+    # converts them to comp-relative times (graphics_copy.fill_module_lands);
+    # the lint floor keeps two modules from stacking on one instant.
     "module_lands": {
         "min_spacing_s": 0.25,       # HARD lint floor between consecutive lands
-        "band_s": (0.6, 1.4),        # measured narration-beat band (guidance
+        "band_s": (0.6, 1.4),        # narration-beat band (guidance
                                      # for the brain's word picks, not a wall)
     },
     # PROGRESSIVE POINT REVEAL (operator doctrine 2026-07-10, FAILURE_LEDGER
@@ -1219,7 +1222,8 @@ MOTION = {
     # EMPTY-CHROME STAGING (showpiece QC 2026-07-10, FAILURE_LEDGER LL-002):
     # the c0679 whiteboard entered on 3 dead frames + 2.08s of frozen canvas
     # before item 1 (at1 2.29s); the rail sat textless 0.9s; the takeover panel
-    # black 1.0s. The reference never shows >~0.5s of near-empty canvas. The
+    # black 1.0s. Sniper's build envelope (MODULE_CARDS §1.3) never holds a
+    # near-empty shell longer than a moment — blank chrome reads as a stall. The
     # FIRST DECLARED content land (spec.moduleLands[0] / earliest atN) must sit
     # this close to the comp's outStart — else enter the card later (still
     # word-locked) or land a module on the cut. plan_lint_visual.check_first_land.
@@ -1316,9 +1320,9 @@ MOTION = {
         "strict_scopes": ("produced", "full"),
     },
     # VARIETY (docs/studies/MODULE_CARDS.md §2, LL-016 / LESSON-030): variety
-    # lives in STRUCTURE, not palette — tokens repeat, layouts don't (the
-    # reference uses 20 distinct forms across 23 graphic windows; repeats
-    # only statement x2 / screenshare x3). plan_lint_visual.check_variety:
+    # lives in STRUCTURE, not palette — tokens repeat, layouts don't (a
+    # repeated anatomy reads as something already read; the catalog offers a
+    # distinct form per information shape, §1.4). plan_lint_visual.check_variety:
     # consecutive same-kind windows ERROR for produced/full longform (WARN in
     # lighter scopes; caption layers + deliberate statements[] swap chains
     # exempt). At >=40s the first minute needs >=4 windows / >=4 forms; below
@@ -1326,8 +1330,8 @@ MOTION = {
     # Beyond
     # 60s the first min(output,180s) grows from >=5 windows / >=4 forms to
     # >=8 / >=6 at 180s, while retaining proportional diversity. The whole plan
-    # keeps its >=6 / ceil(.5*N) floor. module measures 20/23 ~ .87 distinct, so
-    # every shipped floor remains deliberately permissive relative to it.
+    # keeps its >=6 / ceil(.5*N) floor. Sniper design parameters, all
+    # deliberately permissive: a well-planned video clears them without trying.
     "variety": {
         "min_windows": 6,
         "min_distinct_ratio": 0.5,
@@ -1348,38 +1352,38 @@ MOTION = {
         # the consecutive-repeat WARN and the diversity denominator.
         "layer_kinds": ("slideware-caption-dual-mode",),
     },
-    # Word-locked seams (MODULE_STUDY.md T-G / §5 item 5): every transition
-    # in the reference lands on a narration phrase boundary (4/4 VTT spot
-    # checks: 25.7 / 67.2 / 186.0 / 187.4). Seams further than this from the
-    # nearest KEPT-word boundary draw a lint WARN; the planner snaps them at
-    # plan time (planner/word_lock.snap_to_word_boundary).
+    # Word-locked seams (MODULE_STUDY.md T-G / §5 item 5): a seam between
+    # words reads as the speaker's own punctuation; one inside a word clips a
+    # sound. Seams further than this (shorter than a typical stressed
+    # syllable — a Sniper design parameter) from the nearest KEPT-word
+    # boundary draw a lint WARN; the planner snaps them at plan time
+    # (planner/word_lock.snap_to_word_boundary).
     "word_lock": {
         "warn_off_boundary_s": 0.15,
     },
     # FACE-ANCHORED RECOMPOSE (operator defect report 2026-07-10, defect 1):
     # when a rail/panel is on screen the SUBJECT RE-CENTERS in the remaining
     # space — footage scales+pans (eased, one overlapping move WITH the rail
-    # growth) so the face lands at the midpoint of the non-panel region.
-    # Measured on the reference: recompose starts ~3 frames BEFORE the rail is
-    # visible, glides eased over ~0.40s OVERLAPPING the 0.33s rail growth, and
-    # lands at remaining-space center ±0.012 in ALL SEVEN rail windows.
+    # growth) so the face lands at the midpoint of the non-panel region
+    # (MODULE_STUDY.md T-B): the glide starts ~3 frames BEFORE the rail is
+    # visible and runs eased over ~0.40s, OVERLAPPING the 0.33s rail growth,
+    # so the rail reads as the cause of the move (Sniper design parameters).
     # Rendered as role:"recompose" punchIns windows (motion/recompose.py) —
     # eased attack in, hold through the panel, eased release out.
     "recompose": {
         "lead_s": 0.12,          # glide starts ~3 frames before the rail lands
-        "move_s": 0.40,          # eased glide duration (ref: 12fr / 0.40s)
+        "move_s": 0.40,          # eased glide duration (12 frames @30fps)
         "zoom_margin": 1.02,     # headroom over the minimal pan-enabling zoom
         "zoom_floor": 1.05,      # below MOTION["punch_in"]["zoom_min"] the
                                  # move is imperceptible — floor it there
         "zoom_cap": 1.34,        # recompose band ceiling (was 1.25 =
                                  # punch_in.zoom_max). Measured on c0679 v2
                                  # (2026-07-10): our delivered baseline face is
-                                 # dead-centered (fx 0.5154) and SMALLER than
-                                 # the reference's (Haar fw 0.125 vs his 0.186),
-                                 # so landing the remaining-space center 0.6651
-                                 # needs z=1.32 — and the zoomed in-rail face
-                                 # width (0.165) still sits UNDER his in-rail
-                                 # 0.186-0.191, so it is not a lunge. punch_in's
+                                 # dead-centered (fx 0.5154) and small (Haar
+                                 # fw 0.125), so landing the remaining-space
+                                 # center 0.6651 needs z=1.32 — and the zoomed
+                                 # in-rail face width (0.165) is still a
+                                 # modest chest-up framing, not a lunge. punch_in's
                                  # hard ceiling (1.55) still governs safety;
                                  # ordinary punches keep the 1.25 band
                                  # (plan_lint_motion routes recompose windows
@@ -1410,9 +1414,9 @@ MOTION = {
                                  # entrance/exit (even on-seam) draws a WARN
         "seam_tol_s": 0.15,      # "on a seam" tolerance
         "scale_jump_tol": 0.01,  # boundary scale step above this = a pop
-        "max_layout_families": 3,  # defect 7: the pro alternates TWO canonical
-                                   # layouts + one lower panel; more reads as
-                                   # N one-off graphics (WARN)
+        "max_layout_families": 3,  # defect 7: TWO module chassis + one
+                                   # lower-band card (MODULE_CARDS §1.1);
+                                   # more reads as N one-off graphics (WARN)
         # GAP-FILLER ZOOM PAIRS (operator review v2 showpiece 2026-07-10,
         # FAILURE_LEDGER LL-007): the 14-17s zoom-in+out pair existed only to
         # fill the 12.47→19.60 graphics gap. A punch that releases back to
@@ -1423,8 +1427,10 @@ MOTION = {
         "gap_pair_max_s": 4.0,
     },
     # Placement-zone discipline (defect 7): kind → canonical layout FAMILY.
-    # The pro's system: cream LEFT rail (always 0.334W, face at 0.667), dark
-    # takeover with right PIP (fx 0.845-0.851, sd 0.002), one lower panel.
+    # Sniper's system (MODULE_CARDS §1.1): a light rail on the anchored side
+    # (~1/3 of the width, the face re-centred in the rest), a dark takeover
+    # with an optional right-hand presenter card (MODULE_STUDY rank 11), and
+    # one lower-band panel.
     # Data catalog (O(1) lookup) — exempt from the logic line limit.
     "layout_families": {
         "glass-rail": "rail",
@@ -1442,18 +1448,17 @@ MOTION = {
         "agenda-slide": "whiteboard",
     },
     # Zoom engine doctrine — the two formats INVERT the zoom's role (REFERENCE_
-    # STYLE_STUDY.md R13, 2026-07-06, measured on the operator's 3 reference shorts
-    # vs LONGFORM_VISUAL_STUDY.md §2):
+    # STYLE_STUDY.md R13; long-form numbers also in LONGFORM_VISUAL_STUDY.md §2):
     #   LONG-FORM = SEMANTIC. Zoom is a second, sparse track under the cuts (2.15
     #     events/min) that lands on MEANING: punch-IN on a stressed claim (Rule 1),
     #     punch-OUT on a section reset (Rule 2), in→out BRACKET reserved for the
     #     biggest lines (Rule 3), slow RAMP under a story (Rule 4), every zoom a
     #     departure from a preserved-wide baseline that resolves back (Rule 5).
-    #   SHORTS = RHYTHMIC. Zoom IS the cut: ref-1 punches on 94% of its cuts, ref-3
-    #     on 100% — every cut lands tighter or wider than the last. 4-10 events/min
-    #     (2-5× long-form) but the SAME ~18% magnitude (frequency scales, size does
-    #     not); direction BALANCED (in:out ≈ 1.0), alternating push-pull, not a
-    #     lean-in; ramps rare; brackets demoted from signature to texture.
+    #   SHORTS = RHYTHMIC. Zoom IS the cut: most cuts land tighter or wider than
+    #     the last. Up to 10 events/min (well above long-form) but a similar
+    #     ~18% magnitude (frequency scales, size does not); direction BALANCED
+    #     (in:out ≈ 1.0), alternating push-pull, not a lean-in; ramps rare;
+    #     brackets are occasional texture. Sniper design parameters.
     # The lint + the MG-4 zoom proposer branch on grammar via ["by_mode"].
     "zoom": {
         # Shared LINEAR-scale bounds. step_max is the ceiling a BRACKET's in-punch
@@ -1461,8 +1466,8 @@ MOTION = {
         # MOTION["punch_in"] band). Ramps creep at 0.3-1.8%/s (long-form only).
         "magnitude": {"step_max": 1.51, "ramp_rate_range": (0.3, 1.8),
                       "ramp_rate_default": 0.8},
-        # In→out brackets are capped HARD per video (long-form spent 3; a short
-        # uses them only as occasional texture, ref-1 × 3).
+        # In→out brackets are capped HARD per video (R13 Rule 3: the biggest
+        # lines only; a short uses them only as occasional texture).
         "bracket_max_per_video": 3,
         # Baseline doctrine (Rule 5): the wide framing is "home" (scale 1.0). Every
         # zoom resolves back to it, never below (the framed clip can't reveal more).
@@ -1486,9 +1491,9 @@ MOTION = {
             },
             "short": {
                 "grammar": "rhythmic",       # zoom IS the cut; every cut reframes
-                "step_median": 1.18,         # R13: shorts median reframe 17.7-18.6%
-                # Uniform, cut-driven cadence — one reframe every ~6-10s (ref-3's
-                # 4/min reads calm, ref-1's 10/min high-energy); no hook/body split.
+                "step_median": 1.18,         # R13: shorts median reframe ~18%
+                # Uniform, cut-driven cadence — one reframe every ~6-10s (a few
+                # per minute reads calm, 10/min high-energy); no hook/body split.
                 "cadence": {"per_min": 10, "reframe_every_s": (6, 10)},
             },
         },

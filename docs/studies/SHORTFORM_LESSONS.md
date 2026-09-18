@@ -69,7 +69,8 @@ The client-reel pole may open on a slight zoom that eases **out** to the full fr
 from **1.34×** (never above **1.5×**) over **60 frames** with an out-cubic ease. **Frame
 zero must never look visibly over-zoomed**: a first frame that is obviously cropped
 into softness reads as a mistake before the reveal can read as a reveal. The zoom is
-applied above the footage and below the text, so the lockup does not scale with it.
+applied to the whole composed frame (a layer above footage and text), so the lockup
+rides the reveal with the picture instead of sliding against it.
 
 **Encoded as** `hook_stack.zoom_out = {"scale_from": 1.34, "scale_from_max": 1.5,
 "dur_frames": 60, "ease": "out-cubic"}`; LESSON-024.

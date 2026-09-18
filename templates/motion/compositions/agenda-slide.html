@@ -6,38 +6,37 @@
     {"id":"eyebrow","type":"string","label":"Eyebrow (small-caps, accent)","default":"The plan"},
     {"id":"title","type":"string","label":"Big title (e.g. 3 Steps)","default":"3 Steps"},
     {"id":"num1","type":"string","label":"Step 1 chip label","default":"1"},
-    {"id":"title1","type":"string","label":"Step 1 title (empty = omit row)","default":"Pick your target"},
-    {"id":"sub1","type":"string","label":"Step 1 subtitle","default":"the next 90 days"},
+    {"id":"title1","type":"string","label":"Step 1 title (empty = omit row)","default":"Record the take"},
+    {"id":"sub1","type":"string","label":"Step 1 subtitle","default":"one clean pass"},
     {"id":"num2","type":"string","label":"Step 2 chip label","default":"2"},
-    {"id":"title2","type":"string","label":"Step 2 title (empty = omit row)","default":"Get help"},
-    {"id":"sub2","type":"string","label":"Step 2 subtitle","default":"even cheap help"},
+    {"id":"title2","type":"string","label":"Step 2 title (empty = omit row)","default":"Trim it"},
+    {"id":"sub2","type":"string","label":"Step 2 subtitle","default":"no dead air"},
     {"id":"num3","type":"string","label":"Step 3 chip label","default":"3"},
-    {"id":"title3","type":"string","label":"Step 3 title (empty = omit row)","default":"Ship weekly"},
-    {"id":"sub3","type":"string","label":"Step 3 subtitle","default":"one every week"},
+    {"id":"title3","type":"string","label":"Step 3 title (empty = omit row)","default":"Caption it"},
+    {"id":"sub3","type":"string","label":"Step 3 subtitle","default":"every line"},
     {"id":"num4","type":"string","label":"Step 4 chip label","default":"4"},
     {"id":"title4","type":"string","label":"Step 4 title (empty = omit row)","default":""},
     {"id":"sub4","type":"string","label":"Step 4 subtitle","default":""},
     {"id":"num5","type":"string","label":"Step 5 chip label","default":"5"},
     {"id":"title5","type":"string","label":"Step 5 title (empty = omit row)","default":""},
     {"id":"sub5","type":"string","label":"Step 5 subtitle","default":""},
-    {"id":"accent","type":"color","label":"Accent (eyebrow, chip 1, title glow)","default":"#054BC9"}
+    {"id":"accent","type":"color","label":"Accent (eyebrow, chip 1, title underline)","default":"#054BC9"}
   ]'
 >
   <!--
-    PROJECT SNIPER · Motion template: AGENDA-SLIDE (batch 2, from the edited
-    long-form's "title / agenda slide" treatment — LONGFORM_VISUAL_STUDY §3,
-    reference frames 473.5s / 495.5s in validate_cards.jpg: a big "3 Steps" title
-    with a glowing underline over numbered steps). "N Steps" chapter takeover.
-    Reuses GLASS-RAIL row mechanics (numbered chips stamp in top->bottom,
-    back.out + 0.12 stagger) but on a DARK theme; the reference's magenta title
-    glow is recolored to the Project Sniper accent.
+    PROJECT SNIPER · Motion template: AGENDA-SLIDE — an "N Steps" chapter
+    takeover for long-form: a big title with an accent underline over up to
+    five numbered steps. Reuses GLASS-RAIL row mechanics (numbered chips stamp
+    in top->bottom, back.out + 0.12 stagger) on a DARK navy field. Sniper
+    design: the underline is a crisp accent bar (no glow) and the chips step
+    from the accent toward ink, the same rotation glass-rail uses.
     OPAQUE 1920x1080 -> render with `--format mp4` (H.264, anchor "own-screen").
 
     CONTRACT for the PRODUCER + graphics_stage:
       - eyebrow + title header, then up to 5 numbered rows (numN chip / titleN /
         subN). An empty titleN OMITS that row and the stack re-centers.
       - Number chips cycle a fixed on-brand rotation (chip 1 = accent). The title
-        carries an accent glow underline that draws out (the reference's signature).
+        carries an accent underline that draws out from its center.
       - The dark field lives on a full-bleed CHILD and is OPAQUE from frame 0 (no
         base-video flash at the takeover seam). Header builds first, rows stamp in
         staggered; HOLDS to the end (compositor owns the seam).
@@ -90,11 +89,11 @@
         text-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
         will-change: transform, opacity;
       }
-      /* Accent glow underline (the reference's magenta rule, recolored). */
+      /* Crisp accent underline (no glow halo). */
       #ag-underline {
-        width: 320px; height: 12px; border-radius: 8px;
+        width: 320px; height: 12px; border-radius: 3px;
         background: var(--accent);
-        box-shadow: 0 0 26px 2px var(--accent), 0 0 60px 6px var(--accent);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
         transform-origin: center;
         will-change: transform, opacity;
       }
@@ -105,7 +104,7 @@
       }
       .ag-chip {
         flex: 0 0 auto;
-        width: 88px; height: 88px; border-radius: 24px;
+        width: 88px; height: 88px; border-radius: 12px;
         color: #ffffff; font-weight: 900; font-size: 46px; line-height: 1;
         letter-spacing: -1px;
         display: flex; align-items: center; justify-content: center;
@@ -175,9 +174,9 @@
         const defaults = {
           layout: "full-canvas",
           eyebrow: "The plan", title: "3 Steps",
-          num1: "1", title1: "Pick your target", sub1: "the next 90 days",
-          num2: "2", title2: "Get help", sub2: "even cheap help",
-          num3: "3", title3: "Ship weekly", sub3: "one every week",
+          num1: "1", title1: "Record the take", sub1: "one clean pass",
+          num2: "2", title2: "Trim it", sub2: "no dead air",
+          num3: "3", title3: "Caption it", sub3: "every line",
           num4: "4", title4: "", sub4: "",
           num5: "5", title5: "", sub5: "",
           accent: "#054BC9",
@@ -190,8 +189,12 @@
         root.dataset.sniperLayout = vars.layout;
         document.documentElement.style.setProperty("--accent", vars.accent);
 
-        // Chip 1 = accent; rows 2..5 rotate a fixed on-brand palette (as glass-rail).
-        const CHIP_COLORS = [vars.accent, "#3B82F6", "#7C5CF0", "#E8895A", "#E85AA8"];
+        // Chip 1 = accent; rows 2..5 step from the accent toward ink (as glass-rail).
+        const CHIP_COLORS = [vars.accent,
+          "color-mix(in srgb, var(--accent) 88%, #131720)",
+          "color-mix(in srgb, var(--accent) 76%, #131720)",
+          "color-mix(in srgb, var(--accent) 64%, #131720)",
+          "color-mix(in srgb, var(--accent) 52%, #131720)"];
 
         const eyebrow = document.getElementById("ag-eyebrow");
         const ebText = (vars.eyebrow == null ? "" : String(vars.eyebrow)).trim();

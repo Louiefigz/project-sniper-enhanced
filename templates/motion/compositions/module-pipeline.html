@@ -3,14 +3,14 @@
   lang="en"
   data-composition-variables='[
     {"id":"layout","type":"enum","label":"Native layout intent (requires observed overlap review)","default":"full-canvas","options":[{"value":"full-canvas","label":"Original full canvas"},{"value":"caption-safe-upper-v1","label":"Upper full-width, no presenter, 2-6 nodes"},{"value":"teaching-full-width-v1","label":"Full-width teaching diagram, 2-6 nodes"}]},
-    {"id":"eyebrow","type":"string","label":"Eyebrow microtext (mono caps + accent dot; empty = omit)","default":""},
-    {"id":"eyebrowAccent","type":"enum","label":"Eyebrow dot semantic accent","default":"result","options":[{"value":"result","label":"Result (lime)"},{"value":"process","label":"Process (cyan)"}]},
+    {"id":"eyebrow","type":"string","label":"Eyebrow microtext (mono caps + square accent marker; empty = omit)","default":""},
+    {"id":"eyebrowAccent","type":"enum","label":"Eyebrow marker semantic accent","default":"result","options":[{"value":"result","label":"Result (amber)"},{"value":"process","label":"Process (blue)"}]},
     {"id":"headlineLines","type":"string","label":"Thesis headline, pipe-separated lines (2 max; line 2 in --accent-result)","default":""},
     {"id":"explainer","type":"string","label":"1-2 line gray explainer (empty = omit)","default":""},
     {"id":"nodes","type":"string","label":"Pipeline nodes, pipe-separated: num~label (2-8 tiles)","default":""},
-    {"id":"activeIndex","type":"number","label":"Active node (1-based, cyan you-are-here dot; 0 = none)","default":0,"min":0,"max":8,"step":1},
-    {"id":"footChip","type":"string","label":"Source footnote chip (mono + dot, lands last; empty = omit)","default":""},
-    {"id":"footAccent","type":"enum","label":"Footnote dot accent","default":"result","options":[{"value":"result","label":"Result (lime)"},{"value":"process","label":"Process (cyan)"},{"value":"warn","label":"Warn (amber — limits/failures ONLY)"}]},
+    {"id":"activeIndex","type":"number","label":"Active node (1-based, process-blue you-are-here marker; 0 = none)","default":0,"min":0,"max":8,"step":1},
+    {"id":"footChip","type":"string","label":"Source footnote chip (mono + square marker, lands last; empty = omit)","default":""},
+    {"id":"footAccent","type":"enum","label":"Footnote marker accent","default":"result","options":[{"value":"result","label":"Result (amber)"},{"value":"process","label":"Process (blue)"},{"value":"warn","label":"Warn (red — limits/failures ONLY)"}]},
     {"id":"moduleLands","type":"string","label":"Narration-paced lands (s, comp-relative, pipe/comma) — one per PRESENT module [head, chain, foot]; empty = 0.2 + k*0.9","default":""},
     {"id":"exit","type":"enum","label":"Exit","default":"hold","options":[{"value":"hold","label":"Hold to end (compositor owns the seam)"},{"value":"blur-recede","label":"Blur-recede 0.15s (stage only — the canvas never flashes)"}]},
     {"id":"presenterFrame","type":"boolean","label":"Framed presenter container: mask the reserved right band into a rounded face hole + draw the card ring (compositor fills it with the speaker; forces alpha + longform own-screen)","default":false}
@@ -18,42 +18,82 @@
 >
   <!--
     PROJECT SNIPER · LONG-FORM template: MODULE-PIPELINE (16:9, 1920x1080)
-    Reference: docs/studies/MODULE_CARDS.md §1.2 form #18 — horizontal node pipeline
-    (DARK chassis), 169.5-179.5s:
-      `• ONE INSTRUCTION TO FINISHED VIDEO / The chain changed. The outcome
-      held.(lime)`; 6 connected tiles `01 PROMPT -> 02 ELEVENLABS VOICE ->
-      03 HEYGEN AVATAR V -> 04 HYPERFRAMES EDIT -> 05 INDEPENDENT QA (active
-      cyan dot) -> 06 FINISHED VIDEO`. Build: tile-by-tile along the chain.
-    Info pattern: linear pipeline w/ active-node marker — "the whole chain in
-    one glance, you-are-here dot" (§1.4 process summary). Evidence: contact
-    sheet state 047_t0169.5 (sentence-case headline, mono tile labels, node
-    05 carries the cyan dot). Timing +-1 frame (~40ms); N=1 priors.
+    A process card. A thesis headline sits over a row of 2-8 connected,
+    numbered tiles; one tile can carry a "you are here" marker, and an
+    optional source chip closes the card. Use it when the narration walks
+    through ordered steps and the viewer should see the whole path at once.
+    The DOM builder and timeline live in /module-pipeline.js; the HTML owns
+    the markup, the look and the registration check.
 
-    NOTE — dated vertical timeline (form #6): NOT here. The cream chassis
-    owns it (module-rail contentMode:"timeline"), matching the reference
-    (form #6 is a CREAM card). This comp stays the dark process-summary lane.
+    SNIPER DESIGN (tokens.css module palette + type; the dark sibling of
+    module-takeover, same chassis):
+      - Canvas = --module-canvas (blue graphite) with a faint 48px dot field
+        and a soft process-blue glow at the top-left, so the card reads as an
+        instrument panel, not a flat slide.
+      - Eyebrow = --eyebrow-font (IBM Plex Mono 600) caps behind a square
+        marker; headline = --font-display (Bricolage Grotesque 800), line 2
+        in --accent-result; explainer = --font (Inter 400) at 62% paper;
+        tile numbers, tile labels and the source chip are Plex Mono 600.
+      - Tiles and chip use 1px hairlines and 4-5px corners, with a hairline
+        connector between neighbouring tiles. The active tile takes
+        --accent-process (blue): border, faint tint and a square marker.
+      - Contrast (WCAG 2.x, text on its own background): headline white
+        17.95:1 and line-2 amber 5.11:1 on --module-canvas #121721;
+        explainer 6.82:1; source-chip text (--receipt-gray) 9.66:1; tile
+        labels 11.9:1 and tile numbers 4.75:1 on the tile fill; the active
+        marker blue 3.79:1 on the tinted active tile. Marker accents on the
+        canvas: amber 5.11:1, blue 4.44:1, red 3.80:1 (3.16:1 for red even
+        at the brightest point of the glow).
 
     CONTRACT for the PRODUCER compositing stage:
-      - anchor "own-screen" OPAQUE takeover (render --format mp4): near-black
-        canvas + faint 96px grid on a full-bleed CHILD, opaque from frame 0.
-      - NO FACE HOLE this wave (STUDY §5 item 9 "PIP slot EXCLUDED"
-        precedent); the content column matches module-takeover's stage
-        (left 96px, width 1130px) so the right band [1344..1878] stays clear
-        for a later pip_hole registration with zero content reflow.
-      - The active node is PROCESS cyan (--accent-process — a "you are here"
-        status, STUDY §3 rank 6); headline line 2 is result lime (rank 5).
-        activeIndex out of [0, nodeCount] FAILS LOUDLY.
-      - Build (§1.3): eyebrow-first -> ghost-resolve headline -> tiles land
-        tile-by-tile along the chain at NODE_STAGGER_S=0.15 (keeps a 6-tile
-        chain inside the §1.3 "time to fully-built ~1.2-2s" envelope) ->
-        footnote chip lands LAST (provenance module).
+      - Default: an OPAQUE own-screen takeover (render --format mp4). The
+        canvas is a full-bleed CHILD, opaque from frame 0, so the seam never
+        shows the layer underneath.
+      - presenterFrame (opt-in, default false): module-pipeline.js adds
+        .has-presenter to the root, the canvas is masked (SVG evenodd) into a
+        rounded face hole and #npl-face-slot draws the ring around it; the
+        compositor scales the speaker into the hole UNDER the graphics. The
+        render keeps alpha (graphics_render.format_for keys on
+        graphics.pip_hole.entry_has_hole) and the entry must be a longform
+        own-screen takeover.
+        HOLE GEOMETRY IS A CONTRACT: left 1344px / top 60px / 534x960 /
+        r 24px. It MUST equal graphics.pip_hole.HOLE_BY_KIND
+        ["module-pipeline"] exactly (test_module_longform pins both sides).
+        The content column keeps module-takeover's stage (left 96px, width
+        1130px), so the right band [1344..1878] is empty with or without the
+        hole and switching the hole on never reflows content.
+      - layout (explicit native intent, validated in module-pipeline.js):
+        "full-canvas" (default) = the stage above. "caption-safe-upper-v1" =
+        an upper 1728x528 band at left 96 / top 64 for 2-6 nodes, hold exit,
+        no presenter hole. "teaching-full-width-v1" = a 1728px-wide stage
+        with larger tile labels for 2-6 nodes, hold or blur-recede exit, no
+        presenter hole. A variant is intent, not proof: overlap and
+        legibility still need an observed render
+        (graphics/template_layout_contract.py,
+        headless/render_layout_contract.py). Variants never shrink type,
+        clip or hide copy to make it fit.
+      - Node grammar: nodes = "num~label" rows, 2-8 tiles. A malformed node,
+        or activeIndex outside [0, nodeCount], FAILS LOUDLY; headlineLines
+        is two lines max.
+      - Build (Sniper design parameters, declared in module-pipeline.js):
+        the eyebrow leads by EYEBROW_LEAD_S; headline lines ramp in place
+        LINE_STAGGER_S=0.12 apart and the explainer one stagger later; the
+        chain frame lands, then its tiles ramp left to right
+        NODE_STAGGER_S=0.15 apart, so the eye travels the path in reading
+        order and a six-tile chain is complete in under a second; the source
+        chip lands LAST.
       - moduleLands: one land per PRESENT module in order [head, chain,
-        foot]. Count mismatch FAILS LOUDLY. Empty = 0.2 + k*0.9.
-      - UNSET content renders NOTHING (G21); the SAMPLE (form #18 verbatim)
-        activates only when EVERY content variable is unset.
+        foot]. A count mismatch or a non-finite time FAILS LOUDLY. Empty =
+        the default cadence 0.2 + k*0.9s (about one module per spoken
+        clause).
+      - UNSET content renders NOTHING (G21). The preview SAMPLE (original
+        Sniper copy in module-pipeline.js) activates only when EVERY content
+        variable is unset; the capability probe supplies its own TEST copy.
       - RENDER LENGTH is the root data-duration ATTRIBUTE (graphics_render
         rewrites it per window; --variables never sets it).
-      - exit:"blur-recede" (T-D): stage only; the canvas stays opaque.
+      - exit:"blur-recede": only #npl-stage-layer blurs, fades and recedes
+        over the final EXIT_BLUR_S; the canvas stays opaque. Default "hold" =
+        hard-off on the cut (the compositor owns the seam).
   -->
   <head>
     <meta charset="UTF-8" />
@@ -74,12 +114,15 @@
       #npl-root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
       #npl-stage-layer { position: absolute; inset: 0; will-change: transform, opacity, filter; }
 
+      /* Graphite canvas + faint 48px dot field + a soft blue glow at the
+         top-left — full-bleed CHILD, opaque from frame 0. */
       #npl-canvas {
         position: absolute; inset: 0;
-        background-color: var(--module-canvas, #0c1014);
+        background-color: var(--module-canvas, #121721);
         background-image:
-          repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 96px),
-          repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 96px);
+          radial-gradient(circle at 1px 1px, rgba(241,244,246,0.07) 1.2px, transparent 1.6px),
+          radial-gradient(ellipse 1100px 700px at 8% 0%, rgba(68,123,228,0.16), transparent 70%);
+        background-size: 48px 48px, 100% 100%;
       }
 
       /* FRAMED PRESENTER-CONTAINER (opt-in: spec.presenterFrame). When the
@@ -99,9 +142,9 @@
         position: absolute;
         left: 1344px; top: 60px; width: 534px; height: 960px;
         border-radius: 24px;
-        border: 1.5px solid rgba(255, 255, 255, 0.22);
-        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+        border: 2px solid rgba(241, 244, 246, 0.16);
+        box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5),
+                    inset 0 1px 0 rgba(241, 244, 246, 0.08);
       }
 
       /* Content column — module-takeover stage geometry (PIP band clear). */
@@ -118,31 +161,32 @@
       #npl-eyebrow {
         display: flex; align-items: center; gap: 16px;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 34px; line-height: 1;
-        letter-spacing: 5px; text-transform: uppercase;
-        color: var(--accent-result, #c6f542);
+        font-weight: 600; font-size: 34px; line-height: 1;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        color: var(--accent-result, #CC7200);
       }
       #npl-eyebrow .dot {
-        width: 13px; height: 13px; border-radius: 50%;
-        background: var(--accent-result, #c6f542);
+        width: 13px; height: 13px; border-radius: 2px;
+        background: var(--accent-result, #CC7200);
         flex: 0 0 auto;
       }
-      #npl-eyebrow.process, #npl-eyebrow.process .dot { color: var(--accent-process, #35b6d9); }
-      #npl-eyebrow.process .dot { background: var(--accent-process, #35b6d9); }
+      #npl-eyebrow.process, #npl-eyebrow.process .dot { color: var(--accent-process, #447BE4); }
+      #npl-eyebrow.process .dot { background: var(--accent-process, #447BE4); }
 
       #npl-headline {
-        font-weight: 900;
+        font-family: var(--font-display);
+        font-weight: 800;
         font-size: 110px;
         line-height: 1.05;
-        letter-spacing: -2px;
+        letter-spacing: -0.02em;
         color: #ffffff;
       }
       #npl-headline .line { display: block; will-change: opacity; }
-      #npl-headline .l2 { color: var(--accent-result, #c6f542); }
+      #npl-headline .l2 { color: var(--accent-result, #CC7200); }
 
       #npl-explainer {
-        font-weight: 500; font-size: 34px; line-height: 1.35;
-        color: rgba(255, 255, 255, 0.6);
+        font-weight: 400; font-size: 34px; line-height: 1.35;
+        color: rgba(241, 244, 246, 0.62);
         max-width: 900px;
       }
 
@@ -155,9 +199,9 @@
       }
       .npl-node {
         position: relative;
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(241, 244, 246, 0.14);
+        border-radius: 5px;
+        background: rgba(241, 244, 246, 0.03);
         padding: 18px 16px 16px;
         display: flex; flex-direction: column; gap: 10px;
         will-change: opacity;
@@ -166,27 +210,30 @@
         content: "";
         position: absolute; right: -18px; top: 50%;
         width: 18px; height: 1px;
-        background: rgba(255, 255, 255, 0.22);
+        background: rgba(241, 244, 246, 0.28);
       }
       .npl-node .numrow { display: flex; align-items: center; gap: 10px; }
       .npl-node .num {
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 17px;
-        letter-spacing: 2px;
-        color: rgba(255, 255, 255, 0.45);
+        font-weight: 600; font-size: 17px;
+        letter-spacing: 0.12em;
+        color: rgba(241, 244, 246, 0.5);
       }
       .npl-node .label {
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 22px; line-height: 1.25;
-        letter-spacing: 1px; text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.88);
+        font-weight: 600; font-size: 22px; line-height: 1.25;
+        letter-spacing: 0.04em; text-transform: uppercase;
+        color: rgba(241, 244, 246, 0.88);
         overflow-wrap: break-word;
       }
-      /* Active node — the cyan "you are here" marker (form #18 node 05). */
-      .npl-node.active { border-color: color-mix(in srgb, var(--accent-process, #35b6d9) 60%, transparent); }
+      /* Active node — the process-blue "you are here" marker. */
+      .npl-node.active {
+        border-color: color-mix(in srgb, var(--accent-process, #447BE4) 70%, transparent);
+        background: color-mix(in srgb, var(--accent-process, #447BE4) 8%, rgba(241, 244, 246, 0.03));
+      }
       .npl-node.active .activedot {
-        width: 10px; height: 10px; border-radius: 50%;
-        background: var(--accent-process, #35b6d9);
+        width: 10px; height: 10px; border-radius: 2px;
+        background: var(--accent-process, #447BE4);
         flex: 0 0 auto;
       }
       .npl-node.active .label { color: #ffffff; }
@@ -194,20 +241,20 @@
       #npl-foot {
         align-self: flex-start;
         display: flex; align-items: center; gap: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 8px;
+        border: 1px solid rgba(241, 244, 246, 0.16);
+        border-radius: 4px;
         padding: 14px 20px;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 21px;
-        letter-spacing: 3px; text-transform: uppercase;
+        font-weight: 600; font-size: 21px;
+        letter-spacing: 0.14em; text-transform: uppercase;
         color: var(--receipt-gray, rgba(255, 255, 255, 0.72));
       }
       #npl-foot .dot {
-        width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto;
-        background: var(--accent-result, #c6f542);
+        width: 10px; height: 10px; border-radius: 2px; flex: 0 0 auto;
+        background: var(--accent-result, #CC7200);
       }
-      #npl-foot.process .dot { background: var(--accent-process, #35b6d9); }
-      #npl-foot.warn .dot { background: var(--accent-warn, #e8a13c); }
+      #npl-foot.process .dot { background: var(--accent-process, #447BE4); }
+      #npl-foot.warn .dot { background: var(--accent-warn, #D33B36); }
       /* Opt-in teaching canvas: retain every node and original animation order.
          Larger instructional labels, no reserved presenter band or face hole. */
       #npl-root[data-sniper-layout="teaching-full-width-v1"] #npl-stage {
@@ -245,9 +292,9 @@
       #npl-root[data-sniper-layout="caption-safe-upper-v1"] .npl-native-cell { position: relative; }
       #npl-root[data-sniper-layout="caption-safe-upper-v1"] .npl-native-cell > .npl-node { height: 100%; }
       #npl-root[data-sniper-layout="caption-safe-upper-v1"] .npl-native-link {
-        /* Original node border is1px; this sibling uses its outer cell box. */
+        /* Original node border is 1px; the link sibling uses its outer cell box. */
         position: absolute; right: -17px; top: 50%; width: 18px; height: 1px;
-        background: rgba(255, 255, 255, 0.22);
+        background: rgba(241, 244, 246, 0.28);
       }
     </style>
   </head>

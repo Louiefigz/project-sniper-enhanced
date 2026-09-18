@@ -45,7 +45,8 @@ INCLUDE: tuple[tuple[str, str], ...] = (
     ("templates/motion/icons", "icon set referenced by comps"),
     ("templates/motion/assets", "comp-local assets"),
     ("templates/motion/vendor", "pinned GSAP core + SplitText + DrawSVG (see PROVENANCE.md)"),
-    ("templates/motion/PROVENANCE.md", "required third-party notice for the GSAP files"),
+    ("templates/motion/PROVENANCE.md", "vendored-material record: GSAP terms, embedded fonts, "
+                                       "ported compositions, icon sources"),
     ("templates/motion/AGENTS.md", "motion-project instructions for the agent"),
     ("templates/motion/CLAUDE.md", "same instructions for the Claude route"),
     ("templates/clip-review", "local clip review page used at handoff"),
@@ -94,7 +95,8 @@ INCLUDE: tuple[tuple[str, str], ...] = (
     ("vendor/hyperframes-catalog/README.md", "boundary statement"),
     ("vendor/hyperframes-catalog/catalog-index.json", "the searchable index discovery loads"),
     ("vendor/hyperframes-catalog/hyperframes-catalog-lock.json", "provenance lock discovery validates"),
-    ("vendor/hyperframes-catalog/compositions", "item sources discovery reads for mechanism selection"),
+    ("vendor/hyperframes-catalog/compositions", "item HTML sources discovery reads for mechanism selection "
+                                                "(the media and script files inside are withheld below)"),
 
     # --- B-roll lane descriptor (clips are the buyer's own) -----------------
     ("broll/README.md", "explains that the operator supplies b-roll"),
@@ -121,6 +123,15 @@ EXCLUDE_DIRS: tuple[tuple[str, str], ...] = (
     ("vendor/hyperframes-catalog/assets", "catalog media (sfx, wallpapers, textures, fonts) "
                                           "is not read by discovery and its media terms are "
                                           "unverified"),
+    ("vendor/hyperframes-catalog/compositions/assets",
+     "catalog fonts (Barlow Condensed, Recursive and their OFL.txt) and the HyperFrames logo; "
+     "graphics/catalog_discovery_sources.py reads only item HTML, the index and the lock, "
+     "and no shipped composition loads them"),
+    ("vendor/hyperframes-catalog/compositions/lib",
+     "catalog script library (liquid-glass.iife.js); never read by discovery or loaded by a "
+     "shipped composition; its terms were not reviewed"),
+    ("scripts/producer/tests/.artifacts",
+     "development screenshots of interface views left by a test run; not product"),
     ("docs/producer/evidence", "22 MB of the owner's render/audit evidence"),
     ("docs/audits", "internal development audits"),
     ("docs/studies/adrian-per", "study derived from paid teaching material, teacher-named"),
@@ -151,6 +162,16 @@ EXCLUDE_GLOBS: tuple[tuple[str, str], ...] = (
     (".sniper-*", "machine-local control-plane state"),
     ("*.bundle", "git bundles"),
     ("docs/studies/GPT56_SOL_C0679_GAP_STUDY.md", "internal model-gap study"),
+    ("vendor/hyperframes-catalog/compositions/components/*.png",
+     "catalog texture images; discovery reads item HTML only and nothing renders them; "
+     "their terms were not reviewed"),
+    ("assets/fonts/ChunkFive-*", "ChunkFive and its licence: no longer used, the motion "
+                                 "templates' display face is Bricolage Grotesque (tokens.css)"),
+    ("public/file.svg", "create-next-app sample icon; nothing references it"),
+    ("public/globe.svg", "create-next-app sample icon; nothing references it"),
+    ("public/next.svg", "create-next-app sample logo (a third-party mark); nothing references it"),
+    ("public/vercel.svg", "create-next-app sample logo (a third-party mark); nothing references it"),
+    ("public/window.svg", "create-next-app sample icon; nothing references it"),
 )
 
 # --------------------------------------------------------------------------

@@ -4,21 +4,19 @@
   data-composition-variables='[
     {"id":"fragment","type":"string","label":"Verbatim fragment line (small white, top tier)","default":""},
     {"id":"payoff","type":"string","label":"Payoff line (large bold accent, builds word-by-word)","default":""},
-    {"id":"accentColor","type":"color","label":"Payoff accent color (per-video brand token, R23; LL-033: keep LIGHT — this floats over footage)","default":"#7FB4FF"},
+    {"id":"accentColor","type":"color","label":"Payoff accent color (per-video brand token; LL-033: keep LIGHT — this floats over footage)","default":"#7FB4FF"},
     {"id":"payoffAt","type":"number","label":"Payoff build start (s)","default":0.8,"min":0,"max":30,"step":0.05,"unit":"s"},
     {"id":"wordGapMs","type":"number","label":"Gap between payoff word lands (ms)","default":130,"min":40,"max":400,"step":5,"unit":"ms"},
-    {"id":"align","type":"enum","label":"Horizontal anchor (slide to the emptier side, R10)","default":"center","options":[{"value":"center","label":"Center"},{"value":"left","label":"Left"},{"value":"right","label":"Right"}]}
+    {"id":"align","type":"enum","label":"Horizontal anchor (slide to the emptier side of the frame)","default":"center","options":[{"value":"center","label":"Center"},{"value":"left","label":"Left"},{"value":"right","label":"Right"}]}
   ]'
 >
   <!--
     PROJECT SNIPER · Motion template: FRAGMENT-PAYOFF (16:9 burned overlay)
-    Reference: the operator's "angle generator" long-form (REFERENCE_STYLE_STUDY
-    R23 — burned text grammar). Frames: study2 burst stacked_64 (fragment line
-    burned chest-height while the speaker talks) + state sheet_06 075→083
-    (t64.5→70.5: small white verbatim fragment holds, then a LARGE bold accent
-    payoff line builds WORD-BY-WORD beneath it at speech cadence — reference used
-    green for beliefs / yellow for numbers; the accent is a per-video BRAND TOKEN,
-    never hardcoded — default Project Sniper #054BC9).
+    A two-tier burned text overlay at chest height while the speaker talks: a
+    small white verbatim fragment holds on top, then a LARGE bold accent
+    payoff line builds WORD-BY-WORD beneath it at speech cadence. The accent
+    is a per-video BRAND TOKEN, never hardcoded (JS default: Project Sniper
+    #054BC9; LL-033 asks for a light accent when it floats over footage).
 
     CONTRACT for the PRODUCER compositing stage:
       - anchor "free-band"/"chest" -> render `--format mov` (ProRes 4444 ALPHA).
@@ -28,11 +26,11 @@
       - fragment / payoff / accentColor / payoffAt / wordGapMs / align are
         `data-composition-variables`. payoffAt is when the payoff starts
         building (sync to the spoken payoff words, relative to the overlay's
-        outStart); wordGapMs is the land cadence (~100-150ms in the reference).
+        outStart); wordGapMs is the land cadence (100-150ms keeps up with speech).
         The payoff line's LAYOUT is fixed (final geometry from frame 0 of the
-        build) and words pop into their final slots — reference frames 079/080
-        show the partial line already sitting at its settled left edge.
-      - align follows R10 (burned text slides to the emptier side on reframes):
+        build) and words pop into their final slots, so a partial line already
+        sits at its settled left edge and never re-centers mid-build.
+      - align moves burned text to the emptier side of the frame on reframes:
         "center" (default, chest-anchored lower-center), "left", "right".
       - EMPTY-DEFAULTS LAW (G21): fragment and payoff default EMPTY — an unset
         var renders NOTHING. Demo content activates ONLY when BOTH are unset;
@@ -59,9 +57,8 @@
       }
       #fp-root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
 
-      /* Chest-anchored lower band: stack bottom sits at y=890 (~0.82H), the
-         reference's caption tier (burst stacked_64: fragment center ~0.79H;
-         stacked state lifts the fragment as the payoff opens beneath). */
+      /* Chest-anchored lower band: stack bottom sits at y=890 (~0.82H), a
+         caption-height tier; the fragment lifts as the payoff opens beneath. */
       .stage {
         position: absolute; inset: 0;
         display: flex;
@@ -83,8 +80,8 @@
       #fp-root[data-align="left"] #fp-stack { align-items: flex-start; }
       #fp-root[data-align="right"] #fp-stack { align-items: flex-end; }
 
-      /* Small white sans verbatim fragment (reference: burned caption weight,
-         soft dark halo so it reads over any footage). */
+      /* Small white sans verbatim fragment (caption weight, soft dark halo so
+         it reads over any footage). */
       #fp-frag {
         font-size: 46px;
         font-weight: 600;
@@ -150,11 +147,11 @@
           fragment: "", payoff: "",
           accentColor: "#054BC9", payoffAt: 0.8, wordGapMs: 130, align: "center",
         };
-        // PREVIEW-ONLY demo content (the reference beat itself, sheet_06
-        // 075→083). Activates ONLY when fragment AND payoff are both unset.
+        // PREVIEW-ONLY demo content (original Sniper sample copy).
+        // Activates ONLY when fragment AND payoff are both unset.
         const SAMPLE = {
-          fragment: "The output from the chat gpt or Claude would be something",
-          payoff: "5 tips to stay consistent with your content",
+          fragment: "Most of the work in an edit happens before the first cut",
+          payoff: "Remove the dead air before anything else",
           payoffAt: 1.0,
         };
         const HF = window.__hyperframes;
@@ -171,7 +168,7 @@
         window.__timelines = window.__timelines || {};
         const tl = gsap.timeline({ paused: true });
 
-        // --- Fragment (top tier): quick rise-in at t=0.12 (R9 — 100-170ms, never pop). ---
+        // --- Fragment (top tier): quick rise-in at t=0.12 (100-170ms, never a pop). ---
         const fragEl = document.getElementById("fp-frag");
         const fragText = (vars.fragment == null ? "" : String(vars.fragment)).trim();
         if (fragText) {
@@ -188,8 +185,8 @@
         const payoffText = (vars.payoff == null ? "" : String(vars.payoff)).trim();
         if (payoffText) {
           const words = payoffText.split(/\s+/).filter(Boolean);
-          // Reference scale (sheet_06 083): the payoff line owns ~85% of the
-          // frame width — it is THE hit, sized above kinetic-quote body text.
+          // Scale: the payoff line owns up to ~85% of the frame width — it is
+          // THE hit, sized above kinetic-quote body text.
           const fpx = payoffText.length <= 30 ? 84 : (payoffText.length <= 48 ? 74 : 60);
           const spans = words.map(function (w) {
             const el = document.createElement("span");

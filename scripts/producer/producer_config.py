@@ -1212,16 +1212,16 @@ MOTION = {
         # Reviewed local text/backing declarations, not a guessed footage color.
         # Any template edit invalidates this narrow qualification until reviewed.
         "text_plate_sources": {
-            "section-marker": "fbfbe486619a699f46e3e5cc7e2eef4b227564cc1a0dd3b6e9dbf72ad0e8d46a",
+            "section-marker": "64b1e7733ff6b975edbb288fce74c712fd127ba86d488b939dc1b285497962ee",
         },
         # kind -> {spec.bg value -> bg hex}. "" = the comp's default variant.
         # Only VERIFIED tokens (sampled from the comp css) — an unknown
         # kind/variant is skipped, never guessed. Data catalog.
         "kind_bg": {
             "statement-card": {"": "#0a1123", "dark": "#0a1123",
-                               "cream": "#f6eac6"},
-            "module-takeover": {"": "#0c1014"},
-            "whiteboard-list": {"": "#f7f5f0", "cream": "#f6eac6"},
+                               "cream": "#F1F4F6"},
+            "module-takeover": {"": "#121721"},
+            "whiteboard-list": {"": "#F1F4F6", "cream": "#F3EFE6"},
         },
     },
     # LEFT-COLUMN OWN-SCREEN BALANCE (showpiece QC 2026-07-10, LL-005): the

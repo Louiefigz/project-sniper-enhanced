@@ -2,8 +2,8 @@
 <html
   lang="en"
   data-composition-variables='[
-    {"id":"header","type":"string","label":"Deck header (all-caps slot, y0.195)","default":""},
-    {"id":"headerInk","type":"enum","label":"Header ink","default":"white","options":[{"value":"white","label":"White"},{"value":"charcoal","label":"Charcoal"}]},
+    {"id":"header","type":"string","label":"Deck header (display caps, flush-left above the sheet)","default":""},
+    {"id":"headerInk","type":"enum","label":"Header ink","default":"white","options":[{"value":"white","label":"White (dark canvas)"},{"value":"charcoal","label":"Charcoal ink (light canvas)"}]},
     {"id":"slide1","type":"string","label":"Slide 1 rows (pipe-separated: Row one|Row two)","default":""},
     {"id":"slide2","type":"string","label":"Slide 2 rows (empty = single-slide deck)","default":""},
     {"id":"slide3","type":"string","label":"Slide 3 rows (empty = 2-slide deck)","default":""},
@@ -12,39 +12,63 @@
     {"id":"pill3","type":"string","label":"Caption pill during slide 3","default":""},
     {"id":"pageAt2","type":"number","label":"Page to slide 2 at (s; 0 = off)","default":0,"min":0,"max":30,"step":0.05,"unit":"s"},
     {"id":"pageAt3","type":"number","label":"Page to slide 3 at (s; 0 = off)","default":0,"min":0,"max":30,"step":0.05,"unit":"s"},
-    {"id":"gradientTop","type":"boolean","label":"Darker gradient top (settles to flat lime by y0.35)","default":false},
-    {"id":"accent","type":"color","label":"Lime canvas color (one token per reel)","default":"#C9FB00"}
+    {"id":"gradientTop","type":"boolean","label":"Darker gradient top (settles to the flat canvas by y0.35)","default":false},
+    {"id":"accent","type":"color","label":"Canvas colour (default: Sniper graphite --module-canvas)","default":"#121721"}
   ]'
 >
   <!--
-    PROJECT SNIPER · Motion template: SLIDEWARE-TAKEOVER-DECK (slideware pack #1)
-    Reference: the lime slide-deck container + paging — 3/4 studied reels,
-    39-60% of runtime where present; THE signature structural move. Full-frame
-    solid lime canvas, an all-caps header slot, card-white square-corner sheets
-    in the content zone, a caption-pill slot at y0.78, and carousel paging.
-    OPAQUE 1080x1920 -> anchor "own-screen", render `--format mp4`.
+    PROJECT SNIPER · Motion template: SLIDEWARE-TAKEOVER-DECK (short-form slide set, 1 of 4)
+    A full-screen "slide" takeover for a Short: a header, one paper sheet of
+    rows in the middle of the frame and a caption pill near the bottom. A
+    deck can hold up to three sheets that page like a carousel. OPAQUE
+    1080x1920 -> anchor "own-screen", render `--format mp4`.
 
-    HER STRUCTURE/MOTION, OUR TOKENS: geometry + frame timings are decomposed
-    from the reference reels; the lime is a brandable token (accent var,
-    per-reel sample #C8F800/#C9FB00/#CEFF0A — ONE token per reel), type is the
-    house Inter stack from tokens.css.
+    SNIPER DESIGN (the short-form slide set — shared with
+    slideware-staircase-lockup, slideware-receipt-cell and
+    slideware-caption-dual-mode; tokens.css):
+      - Canvas = the `accent` colour, default --module-canvas #121721 (blue
+        graphite), with the faint 48px Sniper dot field. gradientTop darkens
+        the top of the canvas and settles to the flat colour by y0.35.
+      - Header = --font-display (Bricolage Grotesque 800) caps, flush-left on
+        the sheet's left edge, with a short 6px signal-amber rule under it.
+        The header grows UPWARD from just above the sheet, so a two-line
+        header never runs into the rows. White ink on the graphite canvas
+        17.95:1; "charcoal" (--rail-cream-ink) is for a paper canvas, 16.23:1
+        on --rail-cream, and its rule switches to --accent-result (3.18:1).
+      - Sheet = a --rail-cream paper card, 6px corners, 1px ink hairline,
+        rows in Inter 700 --rail-cream-ink (16.23:1) split by 1px hairlines,
+        each led by a square --accent-result marker (3.18:1 on paper).
+      - Caption pill = --lemon signal-amber plate, 4px corners, Inter 400
+        --rail-cream-ink text (9.31:1) — the same plate as the canvas skin
+        of slideware-caption-dual-mode. The pill is the live spoken cue, so
+        it takes the colour the Sniper app uses for its one live signal.
+      - Page markers: when the deck pages, square markers at the right end
+        of the header rule show which sheet is up (active --lemon 9.31:1 on
+        graphite; waiting squares 40% white 3.83:1; charcoal mode uses ink /
+        50% ink, 3.32:1 on paper).
 
     CONTRACT for the PRODUCER compositing stage:
-      - The lime field, header and caption pill are ON at frame 0 — the hard
-        camera cut IS the enter (0-frame arrive). The field is opaque from
+      - The canvas, header and caption pill are ON at frame 0 — the hard
+        camera cut IS the enter (0-frame arrive). The canvas is opaque from
         frame 0 on a full-bleed CHILD (never the root).
-      - slide1 content enters as ONE WHOLE UNIT: 5f@24 fade (~0.21s) + ~2%W
-        (22px) settle drift. NEVER row-staggered — a 6-row sheet is one unit.
-      - Paging (pageAt2/pageAt3 > 0) is a carousel: current sheet exits LEFT
-        while the next enters FROM THE RIGHT simultaneously, 11f@24 (~0.46s),
-        settle at the end (power3.out). The caption pill hard-swaps its text
-        ON the page (replace-per-cue, no fade).
+      - slide1 enters as ONE WHOLE UNIT: SLIDE_FADE (5/24 s, ~0.21s) plus a
+        DRIFT_PX (22px, ~2%W) settle. Sniper design parameters: the sheet is
+        seen to land in place without the move reading as a slide-in, and
+        it is fully resolved well inside the first half-second. NEVER
+        row-staggered — a 6-row sheet is one unit.
+      - Paging (pageAt2/pageAt3 > 0) is a carousel: the current sheet exits
+        LEFT while the next enters FROM THE RIGHT simultaneously over
+        PAGE_DUR (11/24 s, ~0.46s, power3.out) — both sheets move together
+        so the eye tracks one continuous page turn. ZONE_SHIFT (948px = the
+        908px zone + 40px) moves each sheet fully clear of the clipped zone.
+        The caption pill hard-swaps its text ON the page (replace-per-cue,
+        no fade).
       - The deck is CLEARED ON the hard cut back to footage — the comp holds
         to D and never fades itself out; the compositor owns both seams.
       - EMPTY-DEFAULTS LAW (G21): header/slides/pills default EMPTY — unset
-        renders nothing. Demo content activates ONLY when ALL are unset.
+        renders nothing. Sample content activates ONLY when ALL are unset.
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
-        rewrites it per window; --variables never sets it — stat-card note).
+        rewrites it per window; --variables never sets it).
   -->
   <head>
     <meta charset="UTF-8" />
@@ -54,41 +78,78 @@
     <script src="/vendor/gsap/gsap.min.js"></script>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      :root { --lime: #C9FB00; }
+      :root { --atd-canvas: #121721; }     /* = --module-canvas; the accent var re-tints it */
       html, body {
         width: 1080px;
         height: 1920px;
         overflow: hidden;
-        background: var(--lime);           /* opaque — this comp owns the whole frame */
+        background: var(--atd-canvas);     /* opaque — the comp owns the whole frame */
         font-family: var(--font);
       }
       #atd-root { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
 
-      /* Opaque lime field on a full-bleed CHILD (own-screen law). */
-      #atd-bg { position: absolute; inset: 0; background: var(--lime); }
+      /* Opaque canvas + 48px dot field on a full-bleed CHILD (own-screen law). */
+      #atd-bg {
+        position: absolute; inset: 0;
+        background-color: var(--atd-canvas);
+        background-image: radial-gradient(circle at 1px 1px, rgba(241,244,246,0.07) 1.2px, transparent 1.6px);
+        background-size: 48px 48px;
+      }
       #atd-bg.gradient {
-        background: linear-gradient(
-          180deg,
-          color-mix(in srgb, var(--lime) 74%, #223300) 0%,
-          var(--lime) 35%
-        );
+        background-image:
+          radial-gradient(circle at 1px 1px, rgba(241,244,246,0.07) 1.2px, transparent 1.6px),
+          linear-gradient(180deg, color-mix(in srgb, var(--atd-canvas) 74%, #000) 0%, var(--atd-canvas) 35%);
+        background-size: 48px 48px, 100% 100%;
       }
 
-      /* Header slot: all-caps, center y≈0.195H (reference y0.18-0.21), 3.6%H. */
+      /* Header: display caps, flush-left on the sheet edge. Bottom-anchored
+         so its rule sits 24px above the sheet zone (y470) and extra lines
+         grow upward into the free headroom. */
       #atd-header {
         position: absolute;
-        left: 40px; right: 40px;
-        top: 340px;                        /* 69px line -> optical center ~y374 */
+        left: 86px;
+        width: 908px;
+        bottom: 1474px;                    /* 1920 - 446: rule ends at y446 */
+        font-family: var(--font-display);
         font-size: 69px;
-        line-height: 1.0;
+        line-height: 1.02;
         font-weight: 800;
-        letter-spacing: 0.015em;
+        letter-spacing: -0.01em;
         text-transform: uppercase;
-        text-align: center;
-        color: #F8F8F8;
+        text-align: left;
+        color: #FFFFFF;
         text-wrap: balance;
       }
-      #atd-header.charcoal { color: #303030; }
+      #atd-header::after {
+        content: "";
+        display: block;
+        width: 96px;
+        height: 6px;
+        margin-top: 20px;
+        border-radius: 1px;
+        background: var(--lemon);
+      }
+      #atd-header.charcoal { color: var(--rail-cream-ink); }
+      #atd-header.charcoal::after { background: var(--accent-result); }
+
+      /* Page markers on the header-rule row, right edge of the sheet. */
+      #atd-pages {
+        position: absolute;
+        right: 86px;
+        top: 437px;
+        display: flex;
+        gap: 10px;
+      }
+      .atd-page {
+        position: relative;
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+        background: rgba(255, 255, 255, 0.4);
+      }
+      .atd-page i { position: absolute; inset: 0; border-radius: 2px; background: var(--lemon); }
+      #atd-root.ink-charcoal .atd-page { background: rgba(19, 23, 32, 0.5); }
+      #atd-root.ink-charcoal .atd-page i { background: var(--rail-cream-ink); }
 
       /* Content zone x0.08-0.92 (86..994px); sheets page inside it. */
       #atd-zone {
@@ -106,49 +167,61 @@
         align-items: flex-start;
         will-change: transform, opacity;
       }
-      /* Card-white SQUARE-corner sheet (reference #FBFBFB, corners ~square). */
+      /* Paper sheet: 6px corners + 1px ink hairline, flat on the canvas (no
+         shadow — the clipped zone would cut a shadow at its edges). */
       .atd-sheet {
         width: 100%;
-        background: #FBFBFB;
-        border-radius: 4px;
-        box-shadow: 0 10px 34px rgba(34, 44, 0, 0.18);
-        padding: 26px 44px;
+        background: var(--rail-cream);
+        border: 1px solid rgba(19, 23, 32, 0.12);
+        border-radius: 6px;
+        padding: 10px 44px;
       }
       .atd-row {
+        position: relative;
         font-size: 34px;
-        font-weight: 600;
-        line-height: 1.35;
-        color: #3A3F3D;
-        padding: 20px 4px;
-        border-bottom: 2px solid rgba(48, 48, 48, 0.08);
+        font-weight: 700;
+        line-height: 1.3;
+        color: var(--rail-cream-ink);
+        padding: 22px 4px 22px 40px;
+        border-bottom: 1px solid rgba(19, 23, 32, 0.14);
         overflow-wrap: break-word;
+      }
+      /* Square result-amber row marker, centred on the first text line. */
+      .atd-row::before {
+        content: "";
+        position: absolute;
+        left: 2px;
+        top: 37px;                          /* 22px pad + (44px line - 14px) / 2 */
+        width: 14px;
+        height: 14px;
+        border-radius: 2px;
+        background: var(--accent-result);
       }
       .atd-row:last-child { border-bottom: none; }
 
-      /* Caption-pill slot x0.5 y≈0.78H — white SQUARE-corner pill, charcoal
-         bold ~1.8%H text. Already ON at the cut frame; hard replace per page. */
+      /* Caption-pill slot x0.5 y≈0.78H. Each cue is its own amber plate,
+         stacked in one grid cell so a hard swap never reflows. Already ON at
+         the cut frame; hard replace per page. */
       #atd-pill {
         position: absolute;
         left: 540px;
         top: 1497px;
         transform: translate(-50%, -50%);
-        background: #FCFAFB;
-        border-radius: 6px;
-        padding: 16px 30px;
-        box-shadow: 0 6px 22px rgba(34, 44, 0, 0.16);
+        display: grid;
+        justify-items: center;
+        align-items: center;
         white-space: nowrap;
       }
       .atd-pill-cue {
+        grid-area: 1 / 1;
         font-size: 35px;
-        font-weight: 700;
-        color: #3A3F3D;
-        letter-spacing: 0.005em;
-      }
-      .atd-pill-cue.alt {
-        position: absolute;
-        left: 50%; top: 50%;
-        transform: translate(-50%, -50%);
-        white-space: nowrap;
+        font-weight: 400;                   /* = slideware-caption-dual-mode canvas skin */
+        line-height: 1.2;
+        color: var(--rail-cream-ink);
+        background: var(--lemon);
+        border-radius: 4px;
+        padding: 14px 30px 16px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
       }
     </style>
   </head>
@@ -177,15 +250,16 @@
         const defaults = {
           header: "", slide1: "", slide2: "", slide3: "",
           pill1: "", pill2: "", pill3: "",
-          pageAt2: 0, pageAt3: 0, gradientTop: false, accent: "#C9FB00",
+          pageAt2: 0, pageAt3: 0, gradientTop: false, accent: "#121721",
         };
-        // PREVIEW-ONLY demo deck (activates only when ALL content is unset).
+        // PREVIEW-ONLY sample deck, original Sniper copy (activates only when
+        // ALL content is unset).
         const SAMPLE = {
-          header: "The 3-Part Hook",
-          slide1: "Call out the exact viewer|Show the receipt on screen|Say the payoff in 5 words",
-          slide2: "Post it before 9am|Reply to the first 10 comments",
-          pill1: "steal this structure",
-          pill2: "then do this",
+          header: "The Three-Pass Edit",
+          slide1: "Cut the dead air first|Tighten every retake|Read the captions aloud",
+          slide2: "Watch it once on mute|Fix the first 3 seconds",
+          pill1: "run them in order",
+          pill2: "then check this",
           pageAt2: 2.4,
         };
         const HF = window.__hyperframes;
@@ -195,23 +269,25 @@
           return !(vars[k] == null ? "" : String(vars[k])).trim();
         });
         if (isPreview) vars = Object.assign({}, vars, SAMPLE);
-        document.documentElement.style.setProperty("--lime", String(vars.accent));
+        document.documentElement.style.setProperty("--atd-canvas", String(vars.accent));
 
-        // Decomposed frame timings (the spec's carousel grammar).
-        const SLIDE_FADE = 5 / 24;         // whole-unit fade, 5f@24
+        // Carousel timing (Sniper design parameters — see header CONTRACT).
+        const SLIDE_FADE = 5 / 24;         // whole-unit fade (~0.21s)
         const DRIFT_PX = 22;               // ~2%W settle drift
-        const PAGE_DUR = 11 / 24;          // exit-left + enter-right, 11f@24
+        const PAGE_DUR = 11 / 24;          // exit-left + enter-right (~0.46s)
         const ZONE_SHIFT = 948;            // zone width + margin (clears the zone)
 
         if (vars.gradientTop === true || vars.gradientTop === "true") {
           document.getElementById("atd-bg").classList.add("gradient");
         }
+        const charcoalInk = String(vars.headerInk) === "charcoal";
+        if (charcoalInk) root.classList.add("ink-charcoal");
 
         const headerEl = document.getElementById("atd-header");
         const headerText = (vars.header == null ? "" : String(vars.header)).trim();
         if (headerText) {
           headerEl.textContent = headerText;
-          if (String(vars.headerInk) === "charcoal") headerEl.classList.add("charcoal");
+          if (charcoalInk) headerEl.classList.add("charcoal");
         } else {
           headerEl.remove();               // unset var renders NOTHING
         }
@@ -246,8 +322,27 @@
         };
         const pageAt2 = s2 ? clampAt(vars.pageAt2) : 0;
         const pageAt3 = (s3 && pageAt2) ? Math.max(clampAt(vars.pageAt3), 0) : 0;
+        const paged2 = Boolean(s2 && pageAt2);
+        const paged3 = Boolean(paged2 && s3 && pageAt3 && pageAt3 > pageAt2);
 
-        // Caption pill: cue spans stacked; hard replace ON each page.
+        // Page markers: one square per sheet the deck will actually show.
+        const pageCount = paged3 ? 3 : (paged2 ? 2 : 1);
+        const pageOn = [];
+        if (pageCount > 1) {
+          const pages = document.createElement("div");
+          pages.id = "atd-pages";
+          for (let i = 0; i < pageCount; i++) {
+            const sq = document.createElement("span");
+            sq.className = "atd-page";
+            const on = document.createElement("i");
+            sq.appendChild(on);
+            pages.appendChild(sq);
+            pageOn.push(on);
+          }
+          root.appendChild(pages);
+        }
+
+        // Caption pill: cue plates stacked in one cell; hard replace ON each page.
         const pill = document.getElementById("atd-pill");
         const pillTexts = [vars.pill1, vars.pill2, vars.pill3].map(function (p) {
           return (p == null ? "" : String(p)).trim();
@@ -265,11 +360,11 @@
         window.__timelines = window.__timelines || {};
         const tl = gsap.timeline({ paused: true });
 
-        // Field micro-settle — imperceptible; keeps the timeline non-empty and
-        // frame 0 fully lit (the cut IS the enter; nothing else tweens in).
+        // Canvas micro-settle — imperceptible; keeps the timeline non-empty
+        // and frame 0 fully lit (the cut IS the enter; nothing else tweens in).
         tl.fromTo("#atd-bg", { opacity: 0.995 }, { opacity: 1, duration: 0.4, ease: "power1.out" }, 0);
 
-        // Slide 1: whole-unit fade 5f@24 + ~2%W settle drift (ONE unit, never
+        // Slide 1: whole-unit fade + settle drift (ONE unit, never
         // row-staggered).
         if (s1) {
           tl.fromTo(s1, { autoAlpha: 0, x: DRIFT_PX },
@@ -277,7 +372,8 @@
         }
 
         // Carousel paging: exit-left + enter-from-right SIMULTANEOUSLY, settle
-        // at the end (power3.out). Pill text hard-swaps on the page frame.
+        // at the end (power3.out). Pill text and page marker hard-swap on the
+        // page frame.
         function page(fromSlide, toSlide, at, cueIdx) {
           tl.set(toSlide, { autoAlpha: 1, x: ZONE_SHIFT }, 0);
           tl.to(fromSlide, { x: -ZONE_SHIFT, duration: PAGE_DUR, ease: "power3.out" }, at);
@@ -286,11 +382,16 @@
           const next = pillCues[cueIdx];
           if (prev) tl.set(prev, { autoAlpha: 0 }, at);
           if (next) tl.set(next, { autoAlpha: 1 }, at);
+          if (pageOn[cueIdx]) {
+            tl.set(pageOn[cueIdx - 1], { autoAlpha: 0 }, at);
+            tl.set(pageOn[cueIdx], { autoAlpha: 1 }, at);
+          }
         }
         if (pillCues[1]) tl.set(pillCues[1], { autoAlpha: 0 }, 0);
         if (pillCues[2]) tl.set(pillCues[2], { autoAlpha: 0 }, 0);
-        if (s2 && pageAt2) page(s1, s2, pageAt2, 1);
-        if (s3 && pageAt3 && pageAt3 > pageAt2) page(s2, s3, pageAt3, 2);
+        pageOn.forEach(function (on, i) { if (i > 0) tl.set(on, { autoAlpha: 0 }, 0); });
+        if (paged2) page(s1, s2, pageAt2, 1);
+        if (paged3) page(s2, s3, pageAt3, 2);
 
         // No self exit — deck is cleared ON the hard cut back to footage
         // (compositor owns both seams); NEVER a comp fade-out.

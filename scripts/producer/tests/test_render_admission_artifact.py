@@ -45,9 +45,9 @@ def _entry(label: str = "A", duration: float = 2.5) -> dict:
         "outEnd": duration,
         "anchor": "free-band",
         "spec": {
-            "num": "System No.1",
+            "num": "Part 1",
             "line1": label,
-            "line2": "Rule",
+            "line2": "Basics",
             "side": "left",
             "accent": "#054BC9",
         },

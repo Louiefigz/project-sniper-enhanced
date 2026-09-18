@@ -7,9 +7,7 @@
   ]'
 >
   <!--
-    PROJECT SNIPER · Motion template: LOGO-CARD (batch 2, from the edited
-    long-form's "logo / brand card" treatment — LONGFORM_VISUAL_STUDY §3,
-    reference frame 331.5s in validate_graphics.jpg: the Notion "N" full-frame).
+    PROJECT SNIPER · Motion template: LOGO-CARD — a full-frame brand card.
     Trigger it serves: naming a specific TOOL being replaced ("5 tools" beat) — a
     clean white full-frame takeover with a single centered brand mark that pops.
     OPAQUE 1920x1080 -> render with `--format mp4` (H.264, anchor "own-screen"):
@@ -17,9 +15,9 @@
 
     CONTRACT for the PRODUCER + graphics_stage:
       - iconFile is a file under templates/motion/icons/ (bare name gets .svg;
-        a leading "/" is used as-is) — real marks only (R12, emoji-free).
+        a leading "/" is used as-is) — real marks only (emoji-free).
       - accent drives ONLY a very faint radial glow behind the mark; the field
-        stays clean white (matches the reference). The white field lives on a
+        stays clean white so the mark carries the frame. The white field lives on a
         full-bleed CHILD (never the root) and is OPAQUE from frame 0, so the
         compositor's frame handling can drop the root's own background at the
         takeover seam without flashing the base video underneath.

@@ -2,15 +2,15 @@
 <html
   lang="en"
   data-composition-variables='[
-    {"id":"eyebrow","type":"string","label":"Eyebrow microtext (mono caps + dot; empty = omit)","default":""},
-    {"id":"eyebrowAccent","type":"enum","label":"Eyebrow dot semantic accent","default":"ink","options":[{"value":"ink","label":"Ink (neutral)"},{"value":"process","label":"Process (cyan)"},{"value":"result","label":"Result (lime)"}]},
+    {"id":"eyebrow","type":"string","label":"Eyebrow microtext (mono caps + square marker; empty = omit)","default":""},
+    {"id":"eyebrowAccent","type":"enum","label":"Eyebrow marker semantic accent","default":"ink","options":[{"value":"ink","label":"Ink (neutral)"},{"value":"process","label":"Process (blue)"},{"value":"result","label":"Result (amber)"}]},
     {"id":"headlineLines","type":"string","label":"Thesis headline, pipe-separated lines (2 max)","default":""},
-    {"id":"l2Accent","type":"enum","label":"Headline line-2 accent","default":"ink","options":[{"value":"ink","label":"Ink"},{"value":"process","label":"Process (cyan)"},{"value":"result","label":"Result (lime)"}]},
+    {"id":"l2Accent","type":"enum","label":"Headline line-2 accent","default":"ink","options":[{"value":"ink","label":"Ink"},{"value":"process","label":"Process (blue)"},{"value":"result","label":"Result (amber)"}]},
     {"id":"explainer","type":"string","label":"1-2 line gray explainer (empty = omit)","default":""},
-    {"id":"contentMode","type":"enum","label":"Content-zone module form (MODULE_CARDS forms #4/#6/#8/#10 + KV)","default":"steps","options":[{"value":"kv","label":"KV ledger rows (key~value~tag~accent)"},{"value":"status","label":"Status/queue cards (label~status~accent; lime connectors)"},{"value":"steps","label":"Numbered steps + dot rail (num~title~tag)"},{"value":"checklist","label":"Checklist w/ OK badges (num~title~badge)"},{"value":"timeline","label":"Dated vertical timeline (date~title~ring)"}]},
+    {"id":"contentMode","type":"enum","label":"Content-zone module form (ledger, status queue, steps, checklist or timeline)","default":"steps","options":[{"value":"kv","label":"KV ledger rows (key~value~tag~accent)"},{"value":"status","label":"Status/queue cards (label~status~accent; blue connectors)"},{"value":"steps","label":"Numbered steps + marker rail (num~title~tag)"},{"value":"checklist","label":"Checklist w/ OK badges (num~title~badge)"},{"value":"timeline","label":"Dated vertical timeline (date~title~node accent)"}]},
     {"id":"rows","type":"string","label":"Content rows, pipe-separated; fields tilde-separated per contentMode (empty = no zone)","default":""},
-    {"id":"footChip","type":"string","label":"Outlined footer tag (mono + dot, e.g. CHAIN RESOLVED; empty = omit)","default":""},
-    {"id":"footAccent","type":"enum","label":"Footer tag accent","default":"result","options":[{"value":"result","label":"Result (lime)"},{"value":"process","label":"Process (cyan)"},{"value":"warn","label":"Warn (amber — limits/failures ONLY)"}]},
+    {"id":"footChip","type":"string","label":"Outlined footer tag (mono + square marker, e.g. PASS COMPLETE; empty = omit)","default":""},
+    {"id":"footAccent","type":"enum","label":"Footer tag accent","default":"result","options":[{"value":"result","label":"Result (amber)"},{"value":"process","label":"Process (blue)"},{"value":"warn","label":"Warn (red — limits/failures ONLY)"}]},
     {"id":"evidenceSource","type":"string","label":"Evidence ribbon source (mono receipt, lands LAST; empty = omit)","default":""},
     {"id":"evidenceDate","type":"string","label":"Evidence ribbon date","default":""},
     {"id":"moduleLands","type":"string","label":"Narration-paced lands (s, comp-relative, pipe/comma) — one per PRESENT module [head, row x N, foot, evidence]; empty = 0.2 + k*0.9","default":""},
@@ -19,67 +19,86 @@
 >
   <!--
     PROJECT SNIPER · LONG-FORM template: MODULE-RAIL (16:9, 1920x1080)
-    THE CREAM SPLIT-PANEL CHASSIS — docs/studies/MODULE_CARDS.md §1.1 (LIGHT chassis)
-    + §1.2 forms #4/#6/#8/#10, one chassis with a modular content zone:
-      #4  status/queue cards      13.5-15.2s  (PROMPT_001 | RECEIVED -> queue)
-      #6  dated vertical timeline 26.0-32.0s  (JUN 26 cyan ring -> JUL 09 lime)
-      #8  numbered steps + rail   46.0-52.0s  (01 Research->SOURCE ... 05)
-      #10 checklist w/ OK badges  67.5-78.0s  (6 rows one-by-one, lime OK)
-    plus a cream KV-ledger mode (the #3/#5 ledger vocabulary on the light
-    chassis). Provenance: MODULE_CARDS §1.1-§1.3 (geometry/build grammar),
-    full-res LOOK "full_light_thread" (form #8 @ ~48s: rail 33%W, eyebrow ->
-    sentence-case ink headline -> gray explainer -> white hairline rows w/
-    cyan dot rail -> mono receipt). Timing +-1 frame (~40ms); N=1 priors.
+    The light information panel. A cool-paper field grows out of the LEFT
+    edge into a 634px column beside the presenter and carries, top to bottom:
+    an eyebrow, a thesis headline (2 lines max), an optional explainer, ONE
+    content zone in one of five information shapes, an optional footer tag
+    and a receipt line. The presenter keeps playing, full-frame, on the right.
+
+    SNIPER DESIGN (tokens.css light module surface):
+      - Field = --rail-cream (cool paper #F1F4F6) carrying a faint 48px ink
+        dot field and a faint process-blue glow in the top-left corner — the
+        light twin of module-takeover's graphite canvas, so both module
+        surfaces read as the same instrument.
+      - Eyebrow = --eyebrow-font (IBM Plex Mono 600) caps led by a square
+        marker; headline = --font-display (Bricolage Grotesque 800) in
+        --rail-cream-ink; explainer + row titles = --font (Inter 400/700);
+        every number, key, tag, date, badge and receipt = Plex Mono.
+      - Rows are white cards with 5px corners and 1px ink hairlines; the
+        steps rail, status connectors and timeline nodes are square-cornered
+        markers (2-3px radii), never dots or pills.
+      - Semantic accents, one hex per role (WCAG 2.x ratios computed from
+        the tokens.css values against the surface each colour sits on):
+                     role                on paper #F1F4F6   on white card
+          process  #447BE4 blue          3.66:1             4.04:1
+          result   #CC7200 amber         3.18:1             3.51:1
+          warn     #D33B36 red           4.27:1             4.72:1
+          ink      #131720               16.23:1            17.93:1
+          ink 72%  (eyebrow text)        6.78:1             7.13:1
+          ink 62%  (explainer, numbers,
+                    keys, dates, receipt) 4.85:1            5.02:1
+        Checklist badge = ink text on an amber fill, 5.10:1. Amber is the
+        result the viewer should remember; red is reserved for limits and
+        failures (footAccent / row accent "warn") and appears nowhere else.
 
     CONTRACT for the PRODUCER compositing stage:
-      - ALPHA OVERLAY, anchor "free-band" (render --format mov). NOT own-screen:
-        the cream panel wipes in from the LEFT edge (~0.3s, HARD vertical edge,
-        settled 634px = 33.0%W — the §1.1 33-40% band, matching the recompose
-        rail_width_frac 0.3302) and the footage stays FULL-FRAME right. The
-        face is NEVER covered (§1.1) — plan entries pair this comp with the
-        face-anchored `recompose` move (motion/recompose.py: the footage
-        scales+pans so the face lands centered in the remaining 67%W), same
-        doctrine as glass-rail rail-push.
-      - Shared card grammar (§1.1): mono-caps eyebrow + colored dot ->
-        heavy-sans thesis headline (2 lines max, period in the copy; caps come
-        from the COPY, never CSS — the reference mixes "One thread." and
-        "ONE RUN.") -> 1-2 line gray explainer -> content modules landing in
-        narration order -> provenance last. Amber is RESERVED for
-        limits/failures/search targets only (footAccent "warn").
-      - contentMode picks the zone's information shape (§1.4 mapping rule);
-        rows are `field~field~...` per mode:
-          kv        key~value[~TAG[~accent]]     accent: process|result|warn
-          status    label~status[~accent]        lime connector between cards
-          steps     num~title[~TAG]              cyan dot rail links rows
-          checklist num~title[~badge]            badge default OK (lime)
-          timeline  date~title[~ring]            ring: process|result
-        Unknown mode/malformed row FAILS LOUDLY. UNSET content renders
-        NOTHING (G21); the SAMPLE (form #8) activates only when EVERY content
-        variable is unset.
-      - moduleLands (§1.3 module stagger 0.4-0.9s, narration order —
-        MODULE_STUDY §5 item 4): one land per PRESENT module in order
-        [head, row x N (each row word-lockable, its own land), foot,
-        evidence]. Count mismatch FAILS LOUDLY. Empty = 0.2 + k*0.9 default
-        cadence (mid of the measured band, same as module-takeover).
-      - Build: field wipe RAIL_WIPE_S=0.3 power2.out (§1.1 "wipes in from the
-        LEFT edge ~0.3s"; fastest-first like T-B) -> head (eyebrow leads by
-        EYEBROW_LEAD_S, lines ramp in place — ghost-resolve §1.3) -> rows
-        land skeleton-FIRST (shell at land, text +0.15s — T-B "+250ms
-        container / +400ms text" grammar, shared with glass-rail rail-push);
-        checklist badges land WITH their row; status connectors arrive WITH
-        the next card (#4 build: panel wipe -> card -> connector -> card);
-        timeline nodes land node-by-node down the spine (#6). Foot + evidence
-        land LAST (§1.3 "receipts AND caveats land last").
-      - exit:"blur-recede" (T-D): the WHOLE FIELD blurs+fades+recedes over
-        the final EXIT_BLUR_S — this comp is an alpha layer, the live face
-        beside it stays sharp; the cream never outlives the stage (glass-rail
-        twin). Default "hold" = hard-off on the cut (compositor owns seams).
+      - ALPHA OVERLAY, anchor "free-band" (render --format mov). NOT
+        own-screen: the field grows from the LEFT edge with a HARD vertical
+        edge (RAIL_WIPE_S = 0.3s power2.out — one quick gesture the eye can
+        follow without waiting on it) and settles at RAIL_WIDTH_PX = 634
+        (33.0%W). 634px is a geometry pin: it equals producer_config's
+        recompose rail_width_frac 0.3302 for the kind, so the face-anchored
+        `recompose` move (motion/recompose.py) re-centres the presenter in the
+        remaining 67%W. The face is never covered.
+      - Headline: at most 2 pipe-separated lines (more FAILS LOUDLY);
+        capitalisation comes from the COPY, never from CSS.
+      - contentMode picks the zone's information shape; rows are
+        `field~field~...` per mode:
+          kv        key~value[~TAG[~accent]]   accent: process|result|warn|ink
+          status    label~status[~accent]      blue connector between cards
+          steps     num~title[~TAG]            square markers on a blue rail
+          checklist num~title[~badge]          badge default OK (amber fill)
+          timeline  date~title[~node]          node: process|result
+        An unknown mode, an unknown accent or a malformed row FAILS LOUDLY.
+      - UNSET content renders NOTHING (G21). The SAMPLE below (original Sniper
+        preview copy, steps mode) activates only when EVERY content variable
+        is unset (bare preview/render).
+      - moduleLands: narration-paced lands, one per PRESENT module in order
+        [head, row x N (each row is its own land, so every point can lock to
+        the word that introduces it), foot, evidence]. A count mismatch FAILS
+        LOUDLY. Empty = LAND_DEFAULT_START_S + k * LAND_DEFAULT_GAP_S
+        (0.2 + k*0.9s: one module per spoken clause at a relaxed pace — the
+        same default cadence as module-takeover).
+      - Build order: field grow -> head (the eyebrow leads the headline by
+        EYEBROW_LEAD_S; headline lines ramp in place LINE_STAGGER_S = 0.12s
+        apart; the explainer follows one stagger later) -> the zone chrome
+        (steps/timeline spine) ramps SKELETON_GAP_S before the first row,
+        never before the field has grown -> each row lands SHELL-FIRST and its
+        text follows ROW_TEXT_GAP_S = 0.15s later (Sniper design parameter:
+        the card registers a beat before its words, short enough that the
+        row still reads as one land). Checklist badges land WITH their row;
+        a status connector arrives WITH the card it leads to; timeline nodes
+        land as whole units down the spine -> the footer tag and the receipt
+        land LAST.
+      - exit:"blur-recede": the WHOLE FIELD blurs+fades+recedes over the
+        final EXIT_BLUR_S. The comp is an alpha layer, so the live face beside
+        it stays sharp and the paper never outlives the stage. Default "hold"
+        = hard-off on the cut (the compositor owns the seam).
       - RENDER LENGTH is the root data-duration ATTRIBUTE (graphics_render
         rewrites it per window; --variables never sets it).
-      - Brandable via CSS vars: --rail-cream / --rail-cream-ink /
-        --accent-process / --accent-result (tokens.css; reference values are
-        the fallbacks). Amber: --accent-warn fallback #e8a13c — the study
-        fixes amber's ROLE, not a hex; override per brand.
+      - Re-tint through the tokens: --rail-cream / --rail-cream-ink /
+        --accent-process / --accent-result / --accent-warn (each fallback hex
+        below equals the tokens.css value).
   -->
   <head>
     <meta charset="UTF-8" />
@@ -97,18 +116,29 @@
         background: transparent;
         font-family: var(--font);
       }
-      #nr-root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+      #nr-root {
+        position: relative; width: 1920px; height: 1080px; overflow: hidden;
+        /* Ink steps derived from the ink token (ratios in the header). */
+        --nr-ink: var(--rail-cream-ink, #131720);
+        --nr-ink-label: color-mix(in srgb, var(--rail-cream-ink, #131720) 72%, transparent);
+        --nr-ink-soft: color-mix(in srgb, var(--rail-cream-ink, #131720) 62%, transparent);
+        --nr-hairline: color-mix(in srgb, var(--rail-cream-ink, #131720) 12%, transparent);
+      }
 
-      /* The cream field: grows 0 -> 634px (33.0%W) from the LEFT edge — a
-         HARD vertical edge (no radius, §1.1). overflow-hidden REVEALS the
-         pinned fixed-width stage (never squishes it — glass-rail twin). */
+      /* The paper field: grows 0 -> 634px (33.0%W) from the LEFT edge with a
+         HARD vertical edge (no radius). overflow-hidden REVEALS the pinned,
+         fixed-width stage instead of squishing it (glass-rail twin). */
       #nr-field {
         position: absolute;
         left: 0; top: 0;
         width: 634px;
         height: 1080px;
         overflow: hidden;
-        background: var(--rail-cream, #f0f0e6);
+        background-color: var(--rail-cream, #F1F4F6);
+        background-image:
+          radial-gradient(circle at 1px 1px, rgba(19, 23, 32, 0.09) 1.2px, transparent 1.6px),
+          radial-gradient(ellipse 760px 520px at 0% 0%, rgba(68, 123, 228, 0.09), transparent 70%);
+        background-size: 48px 48px, 100% 100%;
         will-change: width, opacity, filter;
       }
       #nr-stage {
@@ -125,32 +155,33 @@
       #nr-eyebrow {
         display: flex; align-items: center; gap: 14px;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 24px; line-height: 1;
-        letter-spacing: 4px; text-transform: uppercase;
-        color: rgba(26, 26, 26, 0.72);
+        font-weight: 600; font-size: 23px; line-height: 1;
+        letter-spacing: 0.18em; text-transform: uppercase;
+        color: var(--nr-ink-label);
       }
       #nr-eyebrow .dot {
-        width: 12px; height: 12px; border-radius: 50%;
-        background: var(--rail-cream-ink, #1a1a1a);
+        width: 12px; height: 12px; border-radius: 2px;
+        background: var(--nr-ink);
         flex: 0 0 auto;
       }
-      #nr-eyebrow.process .dot { background: var(--accent-process, #35b6d9); }
-      #nr-eyebrow.result .dot { background: var(--accent-result, #c6f542); }
+      #nr-eyebrow.process .dot { background: var(--accent-process, #447BE4); }
+      #nr-eyebrow.result .dot { background: var(--accent-result, #CC7200); }
 
       #nr-headline {
+        font-family: var(--font-display);
         font-weight: 800;
         font-size: 62px;
-        line-height: 1.06;
-        letter-spacing: -1.5px;
-        color: var(--rail-cream-ink, #1a1a1a);
+        line-height: 1.02;
+        letter-spacing: -0.02em;
+        color: var(--nr-ink);
       }
       #nr-headline .line { display: block; will-change: opacity; }
-      #nr-headline .l2.process { color: var(--accent-process, #35b6d9); }
-      #nr-headline .l2.result { color: var(--accent-result, #c6f542); }
+      #nr-headline .l2.process { color: var(--accent-process, #447BE4); }
+      #nr-headline .l2.result { color: var(--accent-result, #CC7200); }
 
       #nr-explainer {
-        font-weight: 500; font-size: 25px; line-height: 1.32;
-        color: rgba(26, 26, 26, 0.58);
+        font-weight: 400; font-size: 25px; line-height: 1.34;
+        color: var(--nr-ink-soft);
       }
 
       /* ---- Content zone (one chassis, five information shapes) ---- */
@@ -158,160 +189,161 @@
       .nr-row { will-change: opacity; }
       .nr-row .row-inner { will-change: opacity; }
 
-      /* White hairline card — the shared module container (§2 "1px-stroke
-         rounded cards"; steps/checklist/kv/status all live in it). */
+      /* White hairline card — the shared row container (kv, status, steps
+         and checklist rows all live in it). */
       .card {
-        background: #ffffff;
-        border: 1px solid rgba(26, 26, 26, 0.12);
-        border-radius: 8px;
+        background: #FFFFFF;
+        border: 1px solid var(--nr-hairline);
+        border-radius: 5px;
         padding: 16px 20px;
-        box-shadow: 0 2px 8px rgba(26, 26, 26, 0.05);
+        box-shadow: 0 1px 3px rgba(19, 23, 32, 0.06);
       }
       .row-inner { display: flex; align-items: center; gap: 16px; min-width: 0; }
       .row-num {
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 17px;
-        color: rgba(26, 26, 26, 0.45);
+        font-weight: 600; font-size: 17px;
+        color: var(--nr-ink-soft);
         flex: 0 0 auto;
       }
       .row-title {
         font-weight: 700; font-size: 27px; line-height: 1.05;
-        letter-spacing: -0.5px;
-        color: var(--rail-cream-ink, #1a1a1a);
+        letter-spacing: -0.01em;
+        color: var(--nr-ink);
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
       .row-tag {
         margin-left: auto;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 16px;
-        letter-spacing: 2px; text-transform: uppercase;
-        color: var(--accent-process, #35b6d9);
+        font-weight: 600; font-size: 16px;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        color: var(--accent-process, #447BE4);
         flex: 0 0 auto;
       }
-      .row-tag.result { color: var(--accent-result, #c6f542); }
-      .row-tag.warn { color: var(--accent-warn, #e8a13c); }
-      .row-tag.ink { color: rgba(26, 26, 26, 0.55); }
+      .row-tag.result { color: var(--accent-result, #CC7200); }
+      .row-tag.warn { color: var(--accent-warn, #D33B36); }
+      .row-tag.ink { color: var(--nr-ink-soft); }
 
-      /* steps (#8): cyan dot rail linking the rows. */
+      /* steps: square markers on a blue rail linking the rows. */
       #nr-zone.mode-steps { padding-left: 30px; }
       #nr-zone.mode-steps::before {
         content: "";
         position: absolute; left: 5px; top: 18px; bottom: 18px;
         width: 2px;
-        background: color-mix(in srgb, var(--accent-process, #35b6d9) 55%, transparent);
+        background: color-mix(in srgb, var(--accent-process, #447BE4) 55%, transparent);
       }
       .rail-dot {
         position: absolute; left: -30px; top: 50%;
-        margin-top: -5px;
-        width: 10px; height: 10px; border-radius: 50%;
-        background: var(--accent-process, #35b6d9);
+        margin-top: -6px;
+        width: 12px; height: 12px; border-radius: 2px;
+        background: var(--accent-process, #447BE4);
       }
       #nr-zone.mode-steps .nr-row { position: relative; }
 
-      /* checklist (#10): lime OK badge rides the row's right edge. */
+      /* checklist: the badge rides the row's right edge — ink mono on an
+         amber fill (5.10:1). */
       .row-badge {
         margin-left: auto; flex: 0 0 auto;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 15px;
-        letter-spacing: 1.5px;
-        color: var(--rail-cream-ink, #1a1a1a);
-        background: var(--accent-result, #c6f542);
-        border-radius: 5px;
+        font-weight: 600; font-size: 15px;
+        letter-spacing: 0.1em;
+        color: var(--nr-ink);
+        background: var(--accent-result, #CC7200);
+        border-radius: 3px;
         padding: 5px 10px;
       }
 
-      /* status/queue (#4): cyan left border + mono status; lime connector. */
-      .card.status { border-left: 4px solid var(--accent-process, #35b6d9); }
+      /* status/queue: blue left rule + mono state; blue connector. */
+      .card.status { border-left: 4px solid var(--accent-process, #447BE4); }
       .status-label {
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 23px; letter-spacing: 1px;
-        color: var(--rail-cream-ink, #1a1a1a);
+        font-weight: 600; font-size: 23px; letter-spacing: 0.04em;
+        color: var(--nr-ink);
         white-space: nowrap;
       }
       .status-state {
         margin-left: auto; flex: 0 0 auto;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 16px; letter-spacing: 2px;
+        font-weight: 600; font-size: 16px; letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: var(--accent-process, #35b6d9);
+        color: var(--accent-process, #447BE4);
       }
-      .status-state.result { color: var(--accent-result, #c6f542); }
-      .status-state.warn { color: var(--accent-warn, #e8a13c); }
+      .status-state.result { color: var(--accent-result, #CC7200); }
+      .status-state.warn { color: var(--accent-warn, #D33B36); }
       .nr-connector {
         width: 2px; height: 22px;
         margin: -8px 0 -8px 28px;
-        background: var(--accent-result, #c6f542);
+        background: var(--accent-process, #447BE4);
         will-change: opacity;
       }
 
-      /* kv ledger (light-chassis #3/#5 vocabulary): mono receipts. */
+      /* kv ledger: mono receipt rows. */
       .kv-key {
         font-family: var(--eyebrow-font);
         font-weight: 500; font-size: 19px;
-        color: rgba(26, 26, 26, 0.5);
+        color: var(--nr-ink-soft);
         flex: 0 0 auto;
       }
       .kv-value {
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 22px;
-        color: var(--rail-cream-ink, #1a1a1a);
+        font-weight: 600; font-size: 22px;
+        color: var(--nr-ink);
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
 
-      /* timeline (#6): ringed nodes on a cyan spine. */
+      /* timeline: square outlined nodes on a blue spine. */
       #nr-zone.mode-timeline { padding-left: 40px; gap: 26px; }
       #nr-zone.mode-timeline::before {
         content: "";
         position: absolute; left: 9px; top: 14px; bottom: 14px;
         width: 2px;
-        background: var(--accent-process, #35b6d9);
+        background: var(--accent-process, #447BE4);
       }
       #nr-zone.mode-timeline .nr-row { position: relative; }
       .tl-ring {
         position: absolute; left: -40px; top: 4px;
-        width: 20px; height: 20px; border-radius: 50%;
-        background: var(--rail-cream, #f0f0e6);
-        border: 3px solid var(--accent-process, #35b6d9);
+        width: 20px; height: 20px; border-radius: 3px;
+        background: var(--rail-cream, #F1F4F6);
+        border: 3px solid var(--accent-process, #447BE4);
       }
-      .tl-ring.result { border-color: var(--accent-result, #c6f542); }
+      .tl-ring.result { border-color: var(--accent-result, #CC7200); }
       .tl-date {
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 17px; letter-spacing: 2px;
+        font-weight: 600; font-size: 17px; letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: rgba(26, 26, 26, 0.5);
+        color: var(--nr-ink-soft);
       }
       .tl-title {
-        font-weight: 800; font-size: 28px; line-height: 1.1;
-        letter-spacing: -0.5px;
-        color: var(--rail-cream-ink, #1a1a1a);
+        font-weight: 700; font-size: 28px; line-height: 1.1;
+        letter-spacing: -0.01em;
+        color: var(--nr-ink);
       }
       .mode-timeline .row-inner { flex-direction: column; align-items: flex-start; gap: 4px; }
 
-      /* Outlined footer tag (#6 "AVAILABLE BROADLY" / #10 "CHAIN RESOLVED"). */
+      /* Outlined footer tag: mono caps led by a square accent marker. */
       #nr-foot {
         align-self: flex-start;
         display: flex; align-items: center; gap: 12px;
-        border: 1px solid rgba(26, 26, 26, 0.3);
-        border-radius: 7px;
+        border: 1px solid color-mix(in srgb, var(--rail-cream-ink, #131720) 30%, transparent);
+        border-radius: 4px;
         padding: 10px 16px;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 18px;
-        letter-spacing: 2.5px; text-transform: uppercase;
-        color: var(--rail-cream-ink, #1a1a1a);
+        font-weight: 600; font-size: 18px;
+        letter-spacing: 0.14em; text-transform: uppercase;
+        color: var(--nr-ink);
       }
       #nr-foot .dot {
-        width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto;
-        background: var(--accent-result, #c6f542);
+        width: 10px; height: 10px; border-radius: 2px; flex: 0 0 auto;
+        background: var(--accent-result, #CC7200);
       }
-      #nr-foot.process .dot { background: var(--accent-process, #35b6d9); }
-      #nr-foot.warn .dot { background: var(--accent-warn, #e8a13c); }
+      #nr-foot.process .dot { background: var(--accent-process, #447BE4); }
+      #nr-foot.warn .dot { background: var(--accent-warn, #D33B36); }
 
       #nr-evidence {
         font-family: var(--eyebrow-font);
         font-weight: 500; font-size: 19px; line-height: 1.3;
-        letter-spacing: 2.5px; text-transform: uppercase;
-        color: rgba(26, 26, 26, 0.6);
-        border-top: 1px solid rgba(26, 26, 26, 0.18);
+        letter-spacing: 0.13em; text-transform: uppercase;
+        color: var(--nr-ink-soft);
+        border-top: 1px solid color-mix(in srgb, var(--rail-cream-ink, #131720) 18%, transparent);
         padding-top: 16px;
       }
     </style>
@@ -344,13 +376,13 @@
         const D = parseFloat(root.dataset.duration) || 8;
         const M = window.__motionTokens;
 
-        // Chassis constants (MODULE_CARDS §1.1/§1.3 + T-B row grammar):
-        const RAIL_WIPE_S = 0.3;        // left-edge wipe ~0.3s, hard edge
+        // Chassis constants (Sniper design parameters, see header):
+        const RAIL_WIPE_S = 0.3;        // left-edge grow, hard vertical edge
         const RAIL_WIDTH_PX = 634;      // settled 33.0%W (recompose 0.3302)
         const LINE_STAGGER_S = 0.12;    // headline per-line ramp stagger
-        const ROW_TEXT_GAP_S = 0.15;    // T-B: container +250ms, text +400ms
+        const ROW_TEXT_GAP_S = 0.15;    // row shell first, its text 0.15s later
         const LAND_DEFAULT_START_S = 0.2;
-        const LAND_DEFAULT_GAP_S = 0.9; // mid of the 0.4-0.9(-1.4)s band
+        const LAND_DEFAULT_GAP_S = 0.9; // one module per spoken clause
 
         const MODES = ["kv", "status", "steps", "checklist", "timeline"];
         const ACCENTS = ["process", "result", "warn", "ink"];
@@ -364,15 +396,15 @@
         };
         const CONTENT_KEYS = ["eyebrow", "headlineLines", "explainer", "rows",
           "footChip", "evidenceSource", "evidenceDate"];
-        // PREVIEW-ONLY demo — form #8 (46.0-52.0s, the full-res LOOK). It
+        // PREVIEW-ONLY demo (original Sniper sample copy, steps mode). It
         // activates ONLY when every content variable is unset (G21).
         const SAMPLE = {
-          eyebrow: "LONG-HORIZON WORK",
-          headlineLines: "One thread.|Every handoff.",
-          explainer: "Long, messy work that crosses tools.",
+          eyebrow: "ROUGH-CUT PASS",
+          headlineLines: "One pass.|Nothing missed.",
+          explainer: "Every step a rough cut runs before review.",
           contentMode: "steps",
-          rows: "01~Research~SOURCE|02~Code~BUILD|03~APIs~CALL|04~Wait~RESUME|05~Inspect~VERIFY",
-          evidenceSource: "OPENAI · BEST CODING MODEL YET",
+          rows: "01~Transcribe~WORDS|02~Trim~CUTS|03~Captions~BURN|04~Pacing~TIGHTEN|05~Review~VERIFY",
+          evidenceSource: "SAMPLE PROJECT · PREVIEW DATA",
         };
         const HF = window.__hyperframes;
         let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
@@ -407,7 +439,7 @@
           const lines = heads.split("|").map(function (s) { return s.trim(); });
           if (lines.length > 2) {
             throw new Error("module-rail: headlineLines is 2 lines max " +
-              "(§1.1 thesis grammar), got " + lines.length);
+              "(thesis headline), got " + lines.length);
           }
           lines.forEach(function (line, j) {
             const el = document.createElement("span");
@@ -461,7 +493,7 @@
             } else if (mode === "status") {
               span("status-label", f[0]);
               span("status-state " + (accentOf(f[2], "status row " + (i + 1)) || "process"), f[1]);
-              if (i > 0) {           // #4: card -> connector -> card
+              if (i > 0) {           // card -> connector -> card
                 const conn = document.createElement("div");
                 conn.className = "nr-connector";
                 zone.appendChild(conn);
@@ -478,7 +510,7 @@
               span("row-num", f[0]);
               span("row-title", f[1]);
               span("row-badge", f[2] || "OK");
-            } else {                 // timeline (#6)
+            } else {                 // timeline
               const ring = document.createElement("span");
               ring.className = "tl-ring" +
                 ((accentOf(f[2], "timeline row " + (i + 1)) || "process") === "result" ? " result" : "");
@@ -506,7 +538,7 @@
             .filter(Boolean).join(" · ");
         } else { evEl.remove(); }
 
-        // ---- Narration-paced module lands (§1.3 / STUDY §5 item 4) ----
+        // ---- Narration-paced module lands ----
         // One land per PRESENT module, rows EXPANDED (each row word-lockable):
         // [head, row x N, foot, evidence]. Mismatch fails LOUDLY.
         const modules = [];
@@ -538,7 +570,7 @@
         window.__timelines = window.__timelines || {};
         const tl = gsap.timeline({ paused: true });
 
-        // Field wipes in from the LEFT edge (hard vertical edge, §1.1).
+        // Field grows in from the LEFT edge (hard vertical edge).
         tl.fromTo("#nr-field", { width: 0 },
           { width: RAIL_WIDTH_PX, duration: RAIL_WIPE_S, ease: "power2.out" }, 0);
 
@@ -547,31 +579,31 @@
           let headAt = t0;
           if (ebText) {
             M.textRamp(tl, ebEl, t0);
-            headAt = t0 + M.EYEBROW_LEAD_S;    // eyebrow leads (STUDY rank 3)
+            headAt = t0 + M.EYEBROW_LEAD_S;    // the eyebrow leads the headline
           }
           let lastAt = headAt;
           if (heads) {
             headEl.querySelectorAll(".line").forEach(function (lineEl, j) {
               lastAt = headAt + j * LINE_STAGGER_S;
-              M.textRamp(tl, lineEl, lastAt);  // in-place ghost-resolve (rank 4)
+              M.textRamp(tl, lineEl, lastAt);  // in-place opacity ramp
             });
           }
           if (expText) M.textRamp(tl, expEl, lastAt + LINE_STAGGER_S);
         }
 
         // Zone chrome (the steps/timeline spine) is a SKELETON: it ramps
-        // SKELETON_GAP_S before the first row (rank 2 containers-first,
-        // clamped to the wipe) so no bare spine sits on empty cream longer
+        // SKELETON_GAP_S before the first row (containers before text,
+        // clamped to the grow) so no bare spine sits on empty paper longer
         // than the skeleton beat (plan_lint_visual LL-002 doctrine).
         if (rowEls.length) {
           M.textRamp(tl, zone,
             Math.max(RAIL_WIPE_S, landOf.row1 - M.SKELETON_GAP_S));
         }
 
-        // Rows: skeleton-FIRST at each land (shell, then text +0.15s — the
-        // T-B +250/+400ms row grammar). Timeline nodes land as whole units,
-        // node-by-node down the spine (#6). Status connectors arrive WITH
-        // the card that follows them (#4 card -> connector -> card).
+        // Rows: shell-FIRST at each land, text ROW_TEXT_GAP_S later.
+        // Timeline nodes land as whole units, node by node down the spine.
+        // Status connectors arrive WITH the card that follows them
+        // (card -> connector -> card).
         rowEls.forEach(function (r, i) {
           const land = landOf["row" + (i + 1)];
           if (mode === "timeline") {
@@ -587,9 +619,9 @@
         if (landOf.foot != null) M.textRamp(tl, footEl, landOf.foot);
         if (landOf.evidence != null) M.textRamp(tl, evEl, landOf.evidence);
 
-        // exit:"blur-recede" (T-D): the whole FIELD — an alpha layer over
-        // live footage, so the face beside it stays sharp and the cream
-        // never outlives the stage. Default "hold": compositor owns seams.
+        // exit:"blur-recede": the whole FIELD — an alpha layer over live
+        // footage, so the face beside it stays sharp and the paper never
+        // outlives the stage. Default "hold": the compositor owns the seam.
         if (String(vars.exit) === "blur-recede") {
           M.blurRecede(tl, "#nr-field", D - M.EXIT_BLUR_S);
         }

@@ -24,12 +24,11 @@
 >
   <!--
     PROJECT SNIPER · Motion template: CANVAS-PIP-LIST (16:9 talking-head longform)
-    Reference: study pair 2 "8 Doors" canvas-PiP enumeration (REFERENCE_STYLE_STUDY
-    R24; study2 sheet_42 states 505-515, t459.5-474.5): a long enumeration keeps
-    the SPEAKER PRESENT inside the cutaway — the face is demoted to a ~27%-width
-    rounded inset card left-of-center on a studio-white canvas while an accent
-    title + up to 8 small dark-gray list items stagger in on the right, one per
-    narration beat over ~15s.
+    A long spoken enumeration that keeps the SPEAKER PRESENT inside the
+    cutaway: the face is demoted to a ~27%-width rounded inset card
+    left-of-center on a studio-white canvas while an accent title and up to 8
+    small dark-gray list items stagger in on the right, one per narration beat
+    (the default at1..8 cadence spaces eight items across ~15s).
 
     CONTRACT for the PRODUCER + pip_takeover renderer:
       - This is the OPAQUE canvas BACKDROP (studio white + soft card-seat shadow
@@ -49,8 +48,8 @@
       - title / item1..8 / at1..8 / accentColor are `data-composition-variables`.
         An EMPTY itemN never appears; empty title = no title (items still land).
         atN = transcript time of the spoken beat, relative to the overlay's
-        outStart. Items land center-aligned under the title, newest one mid-fade
-        (sheet_42 grammar: item fades+rises ~250ms at atN).
+        outStart. Items land center-aligned under the title; each item fades
+        and rises over ~250ms at its atN.
       - UNSET everything renders the PREVIEW SAMPLE only (glass-rail G21
         pattern): demo content activates when title AND item1..8 are ALL unset;
         any plan that sets one field gets exactly its fields — no sample leak.
@@ -163,13 +162,13 @@
           at5: 7.8, at6: 9.6, at7: 11.4, at8: 13.2,
           accentColor: "#054BC9",
         };
-        // PREVIEW-ONLY demo content (the "8 Doors" reference beat itself,
-        // sheet_42). Activates ONLY when title AND every itemN are unset.
+        // PREVIEW-ONLY demo content (original Sniper sample copy).
+        // Activates ONLY when title AND every itemN are unset.
         const SAMPLE = {
-          title: "We call the 8 Doors",
-          item1: "How to", item2: "Why", item3: "Diagnostic", item4: "Framework",
-          item5: "Mistake", item6: "Breakdown", item7: "Reframe",
-          item8: "Consequence",
+          title: "Eight passes per edit",
+          item1: "Retakes", item2: "Silence", item3: "Filler", item4: "Pacing",
+          item5: "Captions", item6: "Graphics", item7: "Audio",
+          item8: "Review",
         };
         const HF = window.__hyperframes;
         let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
@@ -188,7 +187,7 @@
         else titleEl.remove();
 
         // Fill / prune the eight static item slots; drop empties, then stack the
-        // kept ones downward from the title (sheet_42 rhythm: pitch 78px).
+        // kept ones downward from the title (78px pitch: one line + air).
         const ITEM_TOP = 322;
         const ITEM_PITCH = 78;
         const active = [];
@@ -215,8 +214,8 @@
           tl.to(titleEl, { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: "power2.out" }, 0.12);
         }
 
-        // One item per spoken beat: fade+rise ~250ms at atN (sheet_42 grammar —
-        // the newest item reads mid-fade). Un-landed items stay INVISIBLE.
+        // One item per spoken beat: fade+rise ~250ms at atN. Un-landed items
+        // stay INVISIBLE.
         active.forEach(function (a) {
           const at = Math.max(0.15, Math.min(a.at, D - 0.35));
           tl.set(a.el, { opacity: 0, y: 16 }, 0);

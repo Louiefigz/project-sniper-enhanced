@@ -2,7 +2,7 @@
 <html
   lang="en"
   data-composition-variables='[
-    {"id":"mode","type":"enum","label":"Skin (switches per background)","default":"footage","options":[{"value":"footage","label":"Footage — white whisper, chest band"},{"value":"canvas","label":"Canvas — white pill on lime takeovers"}]},
+    {"id":"mode","type":"enum","label":"Skin (switches per background)","default":"footage","options":[{"value":"footage","label":"Footage — ink caption plate, chest band"},{"value":"canvas","label":"Canvas — amber pill on slide takeovers"}]},
     {"id":"cue1","type":"string","label":"Cue 1 (1-4 words; *asterisk* one key word for inline bold)","default":""},
     {"id":"cue2","type":"string","label":"Cue 2 (empty = end of chain)","default":""},
     {"id":"cue3","type":"string","label":"Cue 3","default":""},
@@ -18,31 +18,37 @@
   ]'
 >
   <!--
-    PROJECT SNIPER · Motion template: SLIDEWARE-CAPTION-DUAL-MODE (slideware pack #4)
-    Reference: the whisper caption preset + canvas pill skin — 4/4 studied
-    reels; every second of runtime renders through it. ZERO karaoke, ZERO
-    color-in-captions anywhere in 164.7s of reference footage.
+    PROJECT SNIPER · Motion template: SLIDEWARE-CAPTION-DUAL-MODE (short-form slide set, 4 of 4)
+    A quiet caption chain: short cues of one to four words that swap in place
+    as they are spoken. One skin for footage, one for the
+    slide takeover, so the caption keeps reading when the background changes.
     Transparent 1080x1920 overlay -> render `--format mov` (ProRes 4444).
 
-    TWO SKINS (the skin switches per background — white text vanishes on
-    lime, so takeovers get the pill):
-      - FOOTAGE: white semibold ~2.1%H, sentence case, soft shadow, NO
-        box/stroke, chest band center x0.5 y0.62. 1-4 words per cue. Inline
-        BOLD on one key word (*asterisks*) is the ONLY in-line emphasis.
-      - CANVAS: white SQUARE-corner pill (r6), charcoal bold ~1.8%H text,
-        center x0.5 at the takeover pill slot y0.78. 2-5 words. Cue 1 is
-        already ON at the cut frame (at1 = 0).
+    SNIPER DESIGN (the short-form slide set — same plates and amber as
+    slideware-takeover-deck / -staircase-lockup / -receipt-cell):
+      - FOOTAGE skin: Inter 400 white, sentence case, on a compact ink plate
+        (rgba(19,23,32,0.78), 4px corners) centred on the chest band (x0.5,
+        y0.62). The plate keeps contrast independent of the shot: white on
+        the plate over pure white footage 8.87:1 (17.93:1 on solid ink).
+      - CANVAS skin: the takeover deck's caption pill — a --lemon
+        signal-amber plate, 4px corners, --rail-cream-ink text (9.31:1),
+        centred on the deck's pill slot (x0.5, y0.78). Use it over
+        slideware-takeover-deck, where an ink plate would vanish into the
+        graphite canvas. Cue 1 is already ON at the cut frame (at1 = 0).
+      - Emphasis: one *asterisk* key word per cue is set in Inter 700
+        against the 400 body. It is the ONLY in-line emphasis — no colour,
+        no karaoke — so the caption stays quieter than the cards above it.
 
     CONTRACT for the PRODUCER compositing stage:
       - HARD REPLACE-PER-CUE: cueN instantly replaces cueN-1 at atN (0.3-1.2s
-        cadence). No fades, no karaoke, no color — emphasis beyond inline
-        bold is promoted IN PLACE to the #2 staircase-lockup shout (its own
-        entry), never carried by this whisper layer.
+        cadence). No fades, no karaoke, no colour change — emphasis beyond
+        the inline bold is promoted IN PLACE to slideware-staircase-lockup
+        (its own entry), never carried by the caption layer.
       - The last set cue HOLDS to D; the compositor owns both seams.
       - EMPTY-DEFAULTS LAW (G21): cue1..6 default EMPTY — unset renders
-        NOTHING; the demo chain activates only when ALL are unset.
+        NOTHING; the sample chain activates only when ALL are unset.
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
-        rewrites it per window; --variables never sets it — stat-card note).
+        rewrites it per window; --variables never sets it).
   -->
   <head>
     <meta charset="UTF-8" />
@@ -61,7 +67,7 @@
       }
       #acd-root { position: relative; width: 1080px; height: 1920px; }
 
-      /* FOOTAGE skin: bare whisper words on the chest band (y0.62). */
+      /* FOOTAGE skin: ink caption plate on the chest band (y0.62). */
       #acd-stage {
         position: absolute;
         left: 540px;
@@ -74,31 +80,33 @@
         position: absolute;
         left: 50%; top: 50%;
         transform: translate(-50%, -50%);
-        width: 940px;
-        font-size: 40px;                   /* ~2.1%H */
-        font-weight: 600;
+        width: max-content;
+        max-width: 940px;
+        font-size: 40px;
+        font-weight: 400;
         line-height: 1.25;
-        color: #F8F8F8;
-        text-shadow: 0 3px 14px rgba(0, 0, 0, 0.5);
+        color: #FFFFFF;
+        background: rgba(19, 23, 32, 0.78);
+        border-radius: 4px;
+        padding: 8px 20px 10px;
         text-wrap: balance;
         will-change: opacity;
       }
-      .acd-cue b { font-weight: 800; }     /* inline bold = the ONLY emphasis */
+      .acd-cue b { font-weight: 700; }     /* inline bold = the ONLY emphasis */
 
-      /* CANVAS skin: white square-corner pill at the takeover slot (y0.78);
-         charcoal bold text; shadow-free bare words never sit on lime. */
+      /* CANVAS skin: the deck's amber caption pill at the takeover slot
+         (y0.78) — same plate, type and corners as slideware-takeover-deck. */
       #acd-root.canvas #acd-stage { top: 1497px; }
       #acd-root.canvas .acd-cue {
-        width: auto;
+        max-width: none;
         white-space: nowrap;
-        background: #FCFAFB;
-        border-radius: 6px;
-        padding: 15px 28px;
-        font-size: 35px;                   /* ~1.8%H */
-        font-weight: 700;
-        color: #3A3F3D;
-        text-shadow: none;
-        box-shadow: 0 6px 22px rgba(34, 44, 0, 0.16);
+        background: var(--lemon);
+        border-radius: 4px;
+        padding: 14px 30px 16px;
+        font-size: 35px;
+        line-height: 1.2;
+        color: var(--rail-cream-ink);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
       }
     </style>
   </head>
@@ -126,8 +134,9 @@
           cue1: "", cue2: "", cue3: "", cue4: "", cue5: "", cue6: "",
           at1: 0, at2: 0.8, at3: 1.6, at4: 2.4, at5: 3.2, at6: 4.0,
         };
-        // PREVIEW-ONLY demo cue chain (activates only when ALL cues are unset).
-        const SAMPLE = { cue1: "here is the", cue2: "one *mistake*", cue3: "everyone makes" };
+        // PREVIEW-ONLY sample chain, original Sniper copy (activates only
+        // when ALL cues are unset).
+        const SAMPLE = { cue1: "cut the pause", cue2: "right *before*", cue3: "the punchline" };
         const HF = window.__hyperframes;
         let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
         const cueKeys = ["cue1", "cue2", "cue3", "cue4", "cue5", "cue6"];
@@ -165,7 +174,7 @@
         const tl = gsap.timeline({ paused: true });
 
         // HARD REPLACE-PER-CUE: each cue pops ON at its frame and the previous
-        // cue clears the SAME frame. No fades anywhere (whisper doctrine).
+        // cue clears the SAME frame. No fades anywhere on the layer.
         cues.forEach(function (c, i) {
           if (c.at > 0) {
             tl.set(c.el, { autoAlpha: 0 }, 0);

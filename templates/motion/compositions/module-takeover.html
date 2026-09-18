@@ -2,8 +2,8 @@
 <html
   lang="en"
   data-composition-variables='[
-    {"id":"eyebrow","type":"string","label":"Eyebrow microtext (mono caps + accent dot; empty = omit)","default":""},
-    {"id":"eyebrowAccent","type":"enum","label":"Eyebrow dot semantic accent","default":"process","options":[{"value":"process","label":"Process (cyan)"},{"value":"result","label":"Result (lime)"}]},
+    {"id":"eyebrow","type":"string","label":"Eyebrow microtext (mono caps + square accent marker; empty = omit)","default":""},
+    {"id":"eyebrowAccent","type":"enum","label":"Eyebrow marker semantic accent","default":"process","options":[{"value":"process","label":"Process (blue)"},{"value":"result","label":"Result (amber)"}]},
     {"id":"headlineLines","type":"string","label":"Two-line headline, pipe-separated (line 2 in --accent-result)","default":""},
     {"id":"heroLabel","type":"string","label":"Hero bar label (mono caps)","default":""},
     {"id":"heroValue","type":"string","label":"Hero bar value label (lands WITH the bar tip)","default":""},
@@ -11,7 +11,7 @@
     {"id":"compareLabel","type":"string","label":"Comparison bar label","default":""},
     {"id":"compareValue","type":"string","label":"Comparison bar value label","default":""},
     {"id":"comparePct","type":"string","label":"Comparison bar fill percent (0-100)","default":""},
-    {"id":"deltaChip","type":"string","label":"Delta chip (pops only AFTER both bars; empty = omit)","default":""},
+    {"id":"deltaChip","type":"string","label":"Delta tag (pops only AFTER both bars; empty = omit)","default":""},
     {"id":"chips","type":"string","label":"Chip row, pipe-separated (sweep 85ms L->R; empty = omit)","default":""},
     {"id":"evidenceSource","type":"string","label":"Evidence ribbon source (mono receipt, lands LAST; empty = omit)","default":""},
     {"id":"evidenceDate","type":"string","label":"Evidence ribbon date","default":""},
@@ -21,19 +21,30 @@
 >
   <!--
     PROJECT SNIPER · LONG-FORM template: MODULE-TAKEOVER (16:9, 1920x1080)
-    Reference: docs/studies/MODULE_STUDY.md §3 (ranks 1-3, 5-9, 11) + §2 T-C/T-D —
-    the DARK chapter mode of the two-mode rhythm: near-black #0c1014 canvas +
-    faint grid, content column LEFT (~58%), and the FACE-SLOT reserved as a
-    rounded PIP card on the right. LONGFORM-ONLY (operator adjudication
-    2026-07-10: face-in-PIP takeovers are legal for longform, BANNED for
-    shorts — plan_lint_module ERRORs the kind on a shorts plan).
+    The dark chapter card: a graphite canvas carrying a content column on the
+    LEFT (~58%W) and the presenter in a rounded picture-in-picture slot on the
+    RIGHT. LONGFORM-ONLY (face-in-PIP takeovers are legal for longform and
+    rejected for shorts — plan_lint_module ERRORs the kind on a shorts plan).
 
-    THE FACE HOLE (item 9): this comp renders the FRAME around a TRANSPARENT
-    hole — the canvas is masked out of the PIP rect (SVG evenodd mask) and
-    #nt-face-slot draws only the card ring (light border + shadow) around it.
-    The comp is rendered WITH ALPHA (graphics_render forces ProRes .mov for
-    this kind even at anchor "own-screen") and the renderer scales the live
-    footage into the hole UNDER it at composite time
+    SNIPER DESIGN (tokens.css module palette + type):
+      - Canvas = --module-canvas (blue graphite) with a faint 48px dot field
+        and a soft process-blue glow at the top-left, so the card reads as an
+        instrument panel rather than a flat slide.
+      - Eyebrow = --eyebrow-font (IBM Plex Mono) caps led by a square marker;
+        headline = --font-display (Bricolage Grotesque 800); line 2 takes the
+        result accent. Panels, chips and the delta tag use 4-6px corners and
+        1px hairlines.
+      - Semantic accents: --accent-result (amber) = the hero result,
+        --accent-process (blue) = process/status, --accent-compare (graphite)
+        = the comparison baseline. Each clears 3:1 on the canvas (tokens.css
+        table; plan_lint_visual contrast rule).
+
+    THE FACE HOLE: this comp renders the FRAME around a TRANSPARENT hole —
+    the canvas is masked out of the PIP rect (SVG evenodd mask) and
+    #nt-face-slot draws only the card ring (hairline border + shadow) around
+    it. The comp is rendered WITH ALPHA (graphics_render forces ProRes .mov
+    for this kind even at anchor "own-screen") and the renderer scales the
+    live footage into the hole UNDER it at composite time
     (graphics/pip_hole.py + graphics_stage._overlay_clip "pipHole" branch).
     HOLE GEOMETRY IS A CONTRACT: left 1344px / top 60px / 534x960 (~28%W x
     89%H) / r 24px — it MUST equal graphics.pip_hole.HOLE_BY_KIND
@@ -43,30 +54,27 @@
       - anchor "own-screen" (it IS a takeover: counts against the takeover
         budget, suppresses burned captions under its window) but the render
         stays an alpha overlay so the hole shows footage.
-      - Semantic dual accent (§3 rank 6): lime --accent-result = hero/results,
-        cyan --accent-process = process/status, gray --accent-compare =
-        comparison. Headline line 2 = result lime (rank 5).
-      - IN-CARD PAYOFFS (§3 rank 7-8, measured MG-1/MG-4): hero bar fills
-        HERO_FILL_S=0.4s power2.out, comparison COMPARE_FILL_S=0.8s
-        power1.out (thinner, gray), each value label lands WITH its bar tip;
-        the delta chip pops only AFTER BOTH bars; chips sweep L->R at
-        CHIP_SWEEP_S=0.085 (~85ms, 13 chips over ~1.1s).
+      - IN-CARD PAYOFFS (Sniper design parameters): the hero bar fills over
+        HERO_FILL_S=0.4s power2.out and the thinner comparison bar over
+        COMPARE_FILL_S=0.8s power1.out, so the result visibly wins the race;
+        each value label lands WITH its bar tip; the delta tag pops only AFTER
+        BOTH bars; chips sweep left to right one per CHIP_SWEEP_S=0.085s.
       - Builds are skeleton-first + eyebrow-first + in-place opacity ramps
-        (ranks 2-4, shared /motion-tokens.js helpers).
-      - moduleLands (§3 rank 1 / §5 item 4): narration-paced lands, one per
-        PRESENT module in order [headline, bars, chips, evidence]. The brain
-        picks WHICH words; graphics_copy.fill_module_lands converts to these
-        comp-relative seconds; plan_lint_motion validates them. Empty =
-        default cadence 0.2 + k*0.9 (mid of the measured 0.6-1.4s band).
+        (shared /motion-tokens.js helpers).
+      - moduleLands: narration-paced lands, one per PRESENT module in order
+        [headline, bars, chips, evidence]. The brain picks WHICH words;
+        graphics_copy.fill_module_lands converts to these comp-relative
+        seconds; plan_lint_motion validates them. Empty = default cadence
+        0.2 + k*0.9s (one module per spoken clause at a relaxed pace).
         A land-count mismatch FAILS LOUDLY (never guess a schedule).
       - UNSET content renders NOTHING (G21). The SAMPLE below activates only
         when EVERY content variable is unset (bare preview/render).
       - RENDER LENGTH is the root data-duration ATTRIBUTE (graphics_render
         rewrites it per window; --variables never sets it).
-      - exit:"blur-recede" (T-D): the GRAPHICS layer blurs+fades+recedes over
-        the final EXIT_BLUR_S while the footage in the hole stays sharp
-        (it is composited UNDER this layer). Default "hold" = hard-off on
-        the cut (compositor owns the seam).
+      - exit:"blur-recede": the GRAPHICS layer blurs+fades+recedes over the
+        final EXIT_BLUR_S while the footage in the hole stays sharp (it is
+        composited UNDER this layer). Default "hold" = hard-off on the cut
+        (compositor owns the seam).
   -->
   <head>
     <meta charset="UTF-8" />
@@ -87,27 +95,28 @@
       #nt-root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
       #nt-layer { position: absolute; inset: 0; will-change: transform, opacity, filter; }
 
-      /* Near-black canvas + faint 96px grid, MASKED so the face hole stays
-         transparent (SVG evenodd: outer frame minus the rounded PIP rect —
-         geometry contract with graphics.pip_hole.HOLE_BY_KIND). */
+      /* Graphite canvas + faint 48px dot field + a soft blue glow, MASKED so
+         the face hole stays transparent (SVG evenodd: outer frame minus the
+         rounded PIP rect — geometry contract with graphics.pip_hole). */
       #nt-canvas {
         position: absolute; inset: 0;
-        background-color: var(--module-canvas, #0c1014);
+        background-color: var(--module-canvas, #121721);
         background-image:
-          repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 96px),
-          repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 96px);
+          radial-gradient(circle at 1px 1px, rgba(241,244,246,0.07) 1.2px, transparent 1.6px),
+          radial-gradient(ellipse 1100px 700px at 8% 0%, rgba(68,123,228,0.16), transparent 70%);
+        background-size: 48px 48px, 100% 100%;
         -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080'><path fill='%23ffffff' fill-rule='evenodd' d='M0 0h1920v1080H0z M1368 60h486a24 24 0 0 1 24 24v912a24 24 0 0 1 -24 24h-486a24 24 0 0 1 -24 -24V84a24 24 0 0 1 24 -24z'/></svg>");
         mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080'><path fill='%23ffffff' fill-rule='evenodd' d='M0 0h1920v1080H0z M1368 60h486a24 24 0 0 1 24 24v912a24 24 0 0 1 -24 24h-486a24 24 0 0 1 -24 -24V84a24 24 0 0 1 24 -24z'/></svg>");
       }
       /* The PIP card RING around the transparent hole (~28%W x 89%H, r24 —
-         light border + shadow; the renderer puts the footage underneath). */
+         hairline border + shadow; the renderer puts the footage underneath). */
       #nt-face-slot {
         position: absolute;
         left: 1344px; top: 60px; width: 534px; height: 960px;
         border-radius: 24px;
-        border: 1.5px solid rgba(255, 255, 255, 0.22);
-        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+        border: 2px solid rgba(241, 244, 246, 0.16);
+        box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5),
+                    inset 0 1px 0 rgba(241, 244, 246, 0.08);
       }
 
       /* Content column left (~58%W band before the PIP gutter). */
@@ -124,33 +133,34 @@
       #nt-eyebrow {
         display: flex; align-items: center; gap: 16px;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 28px; line-height: 1;
-        letter-spacing: 5px; text-transform: uppercase;
-        color: var(--accent-process, #35b6d9);
+        font-weight: 600; font-size: 26px; line-height: 1;
+        letter-spacing: 0.2em; text-transform: uppercase;
+        color: var(--accent-process, #447BE4);
       }
       #nt-eyebrow .dot {
-        width: 13px; height: 13px; border-radius: 50%;
-        background: var(--accent-process, #35b6d9);
+        width: 12px; height: 12px; border-radius: 2px;
+        background: var(--accent-process, #447BE4);
         flex: 0 0 auto;
       }
-      #nt-eyebrow.result, #nt-eyebrow.result .dot { color: var(--accent-result, #c6f542); }
-      #nt-eyebrow.result .dot { background: var(--accent-result, #c6f542); }
+      #nt-eyebrow.result, #nt-eyebrow.result .dot { color: var(--accent-result, #CC7200); }
+      #nt-eyebrow.result .dot { background: var(--accent-result, #CC7200); }
 
       #nt-headline {
-        font-weight: 900;
-        font-size: 108px;
-        line-height: 1.04;
-        letter-spacing: -2px;
+        font-family: var(--font-display);
+        font-weight: 800;
+        font-size: 104px;
+        line-height: 1.02;
+        letter-spacing: -0.02em;
         color: #ffffff;
       }
       #nt-headline .line { display: block; will-change: opacity; }
-      #nt-headline .l2 { color: var(--accent-result, #c6f542); }
+      #nt-headline .l2 { color: var(--accent-result, #CC7200); }
 
       /* Benchmark panel — 1px hairline module; hero vs comparison bars. */
       #nt-bars {
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        border-radius: 14px;
-        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(241, 244, 246, 0.14);
+        border-radius: 6px;
+        background: rgba(241, 244, 246, 0.03);
         padding: 36px 40px;
         display: flex; flex-direction: column; gap: 30px;
       }
@@ -162,65 +172,66 @@
       }
       .bar-label {
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 24px;
-        letter-spacing: 3px; text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.62);
+        font-weight: 600; font-size: 23px;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        color: rgba(241, 244, 246, 0.66);
       }
       .bar-track {
         position: relative;
         height: 22px;
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-radius: 6px;
+        background: rgba(241, 244, 246, 0.06);
+        border-radius: 3px;
         overflow: hidden;
       }
-      .bar-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 5px; }
-      .bar-row.hero .bar-fill { background: var(--accent-result, #c6f542); }
+      .bar-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 3px; }
+      .bar-row.hero .bar-fill { background: var(--accent-result, #CC7200); }
       .bar-row.compare .bar-track { height: 14px; }
-      .bar-row.compare .bar-fill { background: var(--accent-compare, #9aa0a6); }
+      .bar-row.compare .bar-fill { background: var(--accent-compare, #7C8088); }
       .bar-value {
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 30px;
-        letter-spacing: 1px;
+        font-weight: 600; font-size: 30px;
+        letter-spacing: 0.02em;
         color: #ffffff;
         text-align: right;
         will-change: opacity;
       }
-      .bar-row.compare .bar-value { color: var(--accent-compare, #9aa0a6); font-size: 26px; }
+      .bar-row.compare .bar-value { color: rgba(241, 244, 246, 0.72); font-size: 26px; }
       #nt-delta {
         align-self: flex-start;
         display: flex; align-items: center; gap: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 10px;
-        padding: 14px 22px;
+        border: 1px solid var(--accent-result, #CC7200);
+        border-radius: 4px;
+        padding: 12px 20px;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 26px;
-        letter-spacing: 3px; text-transform: uppercase;
-        color: var(--accent-result, #c6f542);
+        font-weight: 600; font-size: 25px;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        color: #ffffff;
         will-change: transform, opacity;
       }
       #nt-delta .dot {
-        width: 11px; height: 11px; border-radius: 50%;
-        background: var(--accent-result, #c6f542);
+        width: 11px; height: 11px; border-radius: 2px;
+        background: var(--accent-result, #CC7200);
         flex: 0 0 auto;
       }
 
-      #nt-chips { display: flex; flex-wrap: wrap; gap: 16px; }
+      #nt-chips { display: flex; flex-wrap: wrap; gap: 14px; }
       .nt-chip {
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 9px;
-        padding: 14px 20px;
+        border: 1px solid rgba(241, 244, 246, 0.16);
+        border-radius: 4px;
+        background: rgba(241, 244, 246, 0.04);
+        padding: 13px 18px;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 22px;
-        letter-spacing: 3px; text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.85);
+        font-weight: 600; font-size: 21px;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        color: rgba(241, 244, 246, 0.86);
         will-change: opacity;
       }
 
       #nt-evidence {
         font-family: var(--eyebrow-font);
-        font-weight: 500; font-size: 23px; line-height: 1;
-        letter-spacing: 3.5px; text-transform: uppercase;
-        /* LL-006: brighter receipt gray (0.5 was the dimmest text in QC) */
+        font-weight: 500; font-size: 22px; line-height: 1;
+        letter-spacing: 0.14em; text-transform: uppercase;
+        /* LL-006: receipt text stays at the brighter receipt gray */
         color: var(--receipt-gray, rgba(255, 255, 255, 0.72));
       }
     </style>
@@ -266,14 +277,14 @@
         const D = parseFloat(root.dataset.duration) || 9;
         const M = window.__motionTokens;
 
-        // In-card payoff constants (§3 ranks 7-8, measured):
-        const HERO_FILL_S = 0.4;      // hero bar fill, power2.out (350-400ms)
-        const COMPARE_FILL_S = 0.8;   // comparison ~2x slower, power1.out
-        const CHIP_SWEEP_S = 0.085;   // ~1 chip per 80-90ms, L->R
+        // In-card payoff constants (Sniper design parameters, see header):
+        const HERO_FILL_S = 0.4;      // hero bar fill, power2.out
+        const COMPARE_FILL_S = 0.8;   // comparison 2x slower, power1.out
+        const CHIP_SWEEP_S = 0.085;   // one chip per ~85ms, L->R
         const DELTA_BEAT_S = 0.1;     // delta chip pops only AFTER both bars
         const LINE_STAGGER_S = 0.12;  // headline per-line ramp stagger
         const LAND_DEFAULT_START_S = 0.2;
-        const LAND_DEFAULT_GAP_S = 0.9;   // mid of the 0.6-1.4s narration band
+        const LAND_DEFAULT_GAP_S = 0.9;   // one module per spoken clause
 
         const defaults = {
           eyebrow: "", eyebrowAccent: "process", headlineLines: "",
@@ -286,16 +297,17 @@
         const CONTENT_KEYS = ["eyebrow", "headlineLines", "heroLabel", "heroValue",
           "heroPct", "compareLabel", "compareValue", "comparePct", "deltaChip",
           "chips", "evidenceSource", "evidenceDate"];
-        // PREVIEW-ONLY demo (the study's MG-1/T-C card): activates ONLY when
-        // every content variable is unset (G21 — no sample leaks into plans).
+        // PREVIEW-ONLY demo (original Sniper sample copy): activates ONLY
+        // when every content variable is unset (G21 — no sample leaks into
+        // plans).
         const SAMPLE = {
-          eyebrow: "ULTRA ORCHESTRATION",
-          headlineLines: "ONE RUN.|FOUR AGENTS.",
-          heroLabel: "GPT-5.6 SOUL", heroValue: "92.4", heroPct: "92",
-          compareLabel: "PREV BEST", compareValue: "86.1", comparePct: "86",
-          deltaChip: "+6.3 POINTS",
-          chips: "PLAN|RESEARCH|SCRIPT|AVATAR|RENDER|QC",
-          evidenceSource: "OPENAI GPT-5.6 RELEASE", evidenceDate: "JUL 09 2026",
+          eyebrow: "REVIEW PASS",
+          headlineLines: "ONE PASS.|FEWER RETAKES.",
+          heroLabel: "CLEAN TAKES", heroValue: "91%", heroPct: "91",
+          compareLabel: "FIRST DRAFT", compareValue: "74%", comparePct: "74",
+          deltaChip: "+17 POINTS",
+          chips: "SILENCE|FILLER|RETAKES|PACING|CAPTIONS|QC",
+          evidenceSource: "SAMPLE DATA", evidenceDate: "PREVIEW",
         };
         const HF = window.__hyperframes;
         let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
@@ -378,7 +390,7 @@
             .filter(Boolean).join(" \u00b7 ");
         } else { evEl.remove(); }
 
-        // ---- Narration-paced module lands (§3 rank 1 / §5 item 4) ----
+        // ---- Narration-paced module lands ----
         // One land per PRESENT module, order [headline, bars, chips,
         // evidence]. A count mismatch fails LOUDLY — never guess a schedule.
         const modules = [];
@@ -415,7 +427,7 @@
           let headAt = t0;
           if (ebText) {
             M.textRamp(tl, ebEl, t0);
-            headAt = t0 + M.EYEBROW_LEAD_S;     // eyebrow leads (rank 3)
+            headAt = t0 + M.EYEBROW_LEAD_S;     // eyebrow leads the headline
           }
           if (heads) {
             headEl.querySelectorAll(".line").forEach(function (lineEl, j) {
@@ -427,13 +439,13 @@
         if (landOf.bars != null) {
           const tB = landOf.bars;
           // Skeleton lands as ONE unit (labels + empty tracks), THEN fills
-          // (MG-1: skeleton -> hold -> bars fill; token SKELETON_GAP_S).
+          // (skeleton -> hold -> bars fill; token SKELETON_GAP_S).
           M.textRamp(tl, barsEl, tB);
           const fillAt = tB + M.SKELETON_GAP_S;
           bars.forEach(function (b) {
             tl.fromTo(b.fill, { width: "0%" },
               { width: b.pct + "%", duration: b.dur, ease: b.ease }, fillAt);
-            // Value label lands WITH the bar tip (rank 7).
+            // Value label lands WITH the bar tip.
             M.textRamp(tl, b.value, fillAt + b.dur - M.TEXT_RAMP_S);
           });
           if (str("deltaChip")) {
@@ -448,15 +460,15 @@
         if (landOf.chips != null) {
           const tC = landOf.chips;
           chipEls.forEach(function (el, k) {
-            M.textRamp(tl, el, tC + k * CHIP_SWEEP_S);   // 85ms sweep (rank 8)
+            M.textRamp(tl, el, tC + k * CHIP_SWEEP_S);   // 85ms left-to-right sweep
           });
         }
 
         if (landOf.evidence != null) {
-          M.textRamp(tl, evEl, landOf.evidence);   // receipt lands LAST (rank 9)
+          M.textRamp(tl, evEl, landOf.evidence);   // the source line lands LAST
         }
 
-        // exit:"blur-recede" (T-D): graphics layer only — the footage in the
+        // exit:"blur-recede": graphics layer only — the footage in the
         // hole is UNDER this comp, so the face stays sharp while the canvas,
         // ring and modules blur+fade+recede over the final EXIT_BLUR_S.
         if (String(vars.exit) === "blur-recede") {

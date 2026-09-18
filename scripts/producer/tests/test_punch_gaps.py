@@ -302,9 +302,9 @@ class ShoutLockupTemplateTests(unittest.TestCase):
 
     def test_tokens_css_carries_lemon_and_serif_display(self) -> None:
         css = self.TOKENS.read_text(encoding="utf-8")
-        self.assertIn("--lemon: #F5E960", css)
+        self.assertIn("--lemon: #FDA933", css)          # Sniper signal amber
         self.assertIn("--font-serif-display", css)
-        self.assertIn('font-family: "ChunkFive"', css)
+        self.assertIn('font-family: "Bricolage Grotesque"', css)  # display face
         self.assertIn("--pop-in-dur", css)
 
     def test_motion_tokens_helper(self) -> None:

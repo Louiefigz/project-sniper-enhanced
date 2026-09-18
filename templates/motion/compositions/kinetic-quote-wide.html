@@ -3,7 +3,7 @@
   lang="en"
   data-composition-variables='[
     {"id":"words","type":"string","label":"The full quote (builds word by word)","default":""},
-    {"id":"emphasisWords","type":"string","label":"Emphasis words (space/comma-separated subset, rendered yellow)","default":""},
+    {"id":"emphasisWords","type":"string","label":"Emphasis words (space/comma-separated subset, rendered in signal amber)","default":""},
     {"id":"at1","type":"number","label":"Build start time (s)","default":0.2,"min":0,"max":30,"step":0.05,"unit":"s"},
     {"id":"wordGapMs","type":"number","label":"Gap between word lands (ms)","default":130,"min":40,"max":400,"step":5,"unit":"ms"},
     {"id":"bg","type":"enum","label":"Background","default":"dark","options":[{"value":"dark","label":"Dark takeover (own-screen)"},{"value":"transparent","label":"Transparent (on-head overlay)"}]}
@@ -11,22 +11,22 @@
 >
   <!--
     PROJECT SNIPER · Motion template: KINETIC-QUOTE-WIDE (16:9 talking-head longform)
-    Reference: the pro's B&W quote cutaway (INTRO_MACHINE_VS_PRO_AUDIT §2 row 17,
-    §3 "Word-by-word quote build"; REFERENCE_STYLE_STUDY R18/R19). A
-    FULL-FRAME dark takeover:
-    big centered bold white type building WORD BY WORD at speech cadence
-    (~100-150ms/word), designated payoff words in yellow (#FFD60A), and the text
-    RE-CENTERING as words land. 16:9 sibling of kinetic-quote (9:16).
+    A FULL-FRAME quote takeover: big centered bold white type building WORD BY
+    WORD at speech cadence (100-150ms/word), designated payoff words in Sniper
+    signal amber (--lemon #FDA933, 7.1-9.7:1 across the graphite field), and the text
+    RE-CENTERING as words land so the growing line always sits balanced.
+    Background: a blue-graphite radial field (Sniper module palette).
+    16:9 sibling of kinetic-quote (9:16).
 
     CONTRACT for the PRODUCER compositing stage:
-      - anchor "own-screen" -> render `--format mp4` (opaque takeover; R19: this
-        is the seam-cover card). No self out-transition — the compositor owns
-        both seams. Background is opaque from FRAME 1.
+      - anchor "own-screen" -> render `--format mp4` (opaque takeover; it can
+        cover a seam). No self out-transition — the compositor owns both
+        seams. Background is opaque from FRAME 1.
       - words / emphasisWords / at1 / wordGapMs are `data-composition-variables`.
         wordGapMs is the land cadence (sync to the timeline map's word timings:
-        ~100-150ms for the reference read); at1 is the first word's land time
+        100-150ms keeps up with speech); at1 is the first word's land time
         relative to the overlay's outStart. Emphasis matching is
-        punctuation/case-insensitive; every occurrence of a listed word is yellow.
+        punctuation/case-insensitive; every occurrence of a listed word is amber.
       - UNSET everything renders the PREVIEW SAMPLE only (glass-rail G21
         pattern): demo content activates when words AND emphasisWords are both
         unset; setting either renders exactly what was set — no sample leak.
@@ -51,20 +51,20 @@
         width: 1920px;
         height: 1080px;
         overflow: hidden;
-        background: #101014;             /* opaque — this comp owns the whole frame.
-           Floor stays ABOVE blackdetect's 10% luma threshold: a takeover that
-           reads as pure black for its build-in trips Audit B and, worse, reads
-           as dead air — the pro's dark takeovers keep a visible lit surface
-           from frame 1 (audit §3). */
+        background: #121721;             /* opaque — this comp owns the whole frame.
+           The lit center of #kq-bg stays ABOVE blackdetect's 10% luma
+           threshold: a takeover that reads as pure black for its build-in
+           trips Audit B and reads as dead air, so the field keeps a visible
+           lit surface from frame 1. */
         font-family: var(--font);
       }
       #kq-root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
 
-      /* Full-bleed near-black + subtle vignette on a CHILD (never the root). */
+      /* Full-bleed blue graphite + subtle vignette on a CHILD (never the root). */
       #kq-bg {
         position: absolute; inset: 0;
         background: radial-gradient(ellipse 1400px 900px at 50% 46%,
-          #2a2a33 0%, #16161c 62%, #0d0d11 100%);
+          #252D3F 0%, #151A26 62%, #0E121B 100%);
       }
 
       .stage {
@@ -91,7 +91,7 @@
         text-shadow: 0 4px 26px rgba(0, 0, 0, 0.55);
         will-change: transform, opacity;
       }
-      .word.em { color: #ffd60a; }         /* payoff-word yellow (reference grammar) */
+      .word.em { color: var(--lemon, #FDA933); }   /* payoff words: Sniper signal amber */
     </style>
   </head>
   <body>
@@ -117,12 +117,12 @@
 
         // Content defaults are EMPTY (G21 — no sample leak).
         const defaults = { words: "", emphasisWords: "", at1: 0.2, wordGapMs: 130, bg: "dark" };
-        // PREVIEW-ONLY demo content (the reference quote itself). Activates ONLY
-        // when words AND emphasisWords are both unset.
-        const SAMPLE = { words: "Thinking that I needed more tactics", emphasisWords: "more tactics" };
+        // PREVIEW-ONLY demo content (original Sniper sample copy). Activates
+        // ONLY when words AND emphasisWords are both unset.
+        const SAMPLE = { words: "The edit starts when you stop recording", emphasisWords: "stop recording" };
         const HF = window.__hyperframes;
         let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
-        // bg "transparent" = the PRO on-head overlay mode (text lives ON the
+        // bg "transparent" = the on-head overlay mode (text lives ON the
         // footage; the compositor supplies any dim/scrim). Render --format mov
         // (ProRes4444 alpha). blackdetect/audit floor does not apply here — the
         // footage shows through. Default "dark" keeps the own-screen contract.
@@ -132,8 +132,8 @@
           const bgEl = document.getElementById("kq-bg");
           if (bgEl) bgEl.style.display = "none";
           // On-footage legibility: the dark mode reads against its own bg; over
-          // live footage the type needs a stroke+glow (the pro's on-head text
-          // carries a heavy stroke). Shadow stack ≈ stroke — shader-safe CSS.
+          // live footage the type needs a tight dark halo + glow. Shadow stack
+          // ≈ stroke — shader-safe CSS.
           const st = document.createElement("style");
           st.textContent = "#kq-line .word { text-shadow: 0 0 2px rgba(0,0,0,.95), 0 2px 6px rgba(0,0,0,.85), 0 4px 18px rgba(0,0,0,.6); }";
           document.head.appendChild(st);
@@ -216,7 +216,7 @@
                   tl.to(h.el, { x: xOff, duration: xDur, ease: "power2.out" }, t);
                 });
               }
-              // The word itself pops in fast (~120ms, reference cadence).
+              // The word itself pops in fast (~120ms).
               tl.set(g.el, { opacity: 0, scale: 0.8, y: 18 }, 0);
               tl.to(g.el, { opacity: 1, scale: 1, y: 0, duration: 0.12, ease: "power2.out" }, t);
             });

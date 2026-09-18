@@ -14,16 +14,16 @@
   ]'
 >
   <!--
-    PROJECT SNIPER · Motion template: ICON-BADGE (MG-3.5, R12)
+    PROJECT SNIPER · Motion template: ICON-BADGE (MG-3.5)
     Trigger it serves: a SPECIFIC named entity (or 2-4) whose brand mark is
-    recognizable — "Codex", "Gemini", "Cursor". Reference Style Study R12
-    (operator verdict, 2026-07-05): a bare recognizable mark in a small square
-    container BEATS chip+label — the pill text is redundant with the mark and the
-    spoken word. This is the icon-first sibling of `chip-row`:
+    recognizable — "Codex", "Gemini", "Cursor". Operator verdict (2026-07-05):
+    a bare recognizable mark in a small square container BEATS chip+label — the
+    pill text is redundant with the mark and the spoken word. This is the
+    icon-first sibling of `chip-row`:
       - chip-row  = entities with NO known mark (text pill IS the information).
       - icon-badge = entities WITH a recognizable mark (the mark alone carries it).
     Generic words ("AI", "the cloud") earn NO graphic at all — don't reach for
-    either template for them (R12 rule 1).
+    either template for them.
     Transparent 1080x1920 overlay -> render with `--format mov` (ProRes 4444) for alpha.
 
     CONTRACT for the PRODUCER compositing stage:
@@ -38,7 +38,7 @@
         four fits the safe width with room to spare — no 2x2 wrap needed).
       - atN is how a badge syncs to a spoken word: set it to the transcript time
         of the entity name (relative to the overlay's outStart). Entrance is a
-        quick ~160ms pop that lands on atN (R9 — never a from-nothing appearance).
+        quick ~160ms pop that lands on atN (never a from-nothing appearance).
       - OPTIONAL micro label (var `label`): one small slate line UNDER the row,
         for the rare case a single clarifying word is warranted. DEFAULT EMPTY —
         the bare marks are the doctrine; reach for the label only when a mark
@@ -118,7 +118,7 @@
         object-fit: contain;
         display: block;
       }
-      /* Optional one-line clarifier — small slate text, R12 default-empty. */
+      /* Optional one-line clarifier — small slate text, default empty. */
       #badge-label {
         font-weight: 600;
         font-size: 40px;
@@ -200,7 +200,7 @@
           active.push({ badge: badge, at: isFinite(items[i].at) ? items[i].at : 0.2 });
         });
 
-        // Optional micro label (R12): one clarifying word, default empty -> removed.
+        // Optional micro label: one clarifying word, default empty -> removed.
         const labelEl = document.getElementById("badge-label");
         const label = String(vars.label == null ? "" : vars.label).trim();
         if (label) { labelEl.textContent = label; } else { labelEl.remove(); }
@@ -208,7 +208,7 @@
         window.__timelines = window.__timelines || {};
         const tl = gsap.timeline({ paused: true });
 
-        // R9 entrance: a quick ~160ms pop that STARTS from a visible scale (0.72),
+        // Entrance: a quick ~160ms pop that STARTS from a visible scale (0.72),
         // never from nothing — each badge lands on its spoken-word time (atN). The
         // back.out overshoot is the "settle".
         active.forEach(function (a) {

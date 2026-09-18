@@ -2,19 +2,17 @@
 <html
   lang="en"
   data-composition-variables='[
-    {"id":"label","type":"string","label":"Label chip text (<= 4 words)","default":"And in that time"},
-    {"id":"text","type":"string","label":"Caption box text (the thing it points to)","default":"I built the whole content pipeline"},
+    {"id":"label","type":"string","label":"Label chip text (<= 4 words)","default":"In one afternoon"},
+    {"id":"text","type":"string","label":"Caption box text (the thing it points to)","default":"I cut the whole episode"},
     {"id":"accent","type":"color","label":"Chip + connector ink color","default":"#054BC9"}
   ]'
 >
   <!--
-    PROJECT SNIPER · Motion template: WHITEBOARD-CONNECTOR (batch 2, from the
-    edited long-form's "whiteboard board" treatment — LONGFORM_VISUAL_STUDY §3,
-    reference frame 40.0s in validate_graphics.jpg).
-    Trigger it serves: a Miro-style whiteboard beat — a labelled node joined by a
-    hand-drawn connector line down to a caption of what it produced ("And in that
-    time -> I've basically launched a YouTube comedy channel"). The operator's
-    magenta node is recolored to the Project Sniper accent; the STRUCTURE is preserved.
+    PROJECT SNIPER · Motion template: WHITEBOARD-CONNECTOR — a floating
+    whiteboard beat: a labelled node joined by a hand-drawn connector line down
+    to a caption of what it produced (e.g. "In one afternoon -> I cut the whole
+    episode"). Sniper design: white board with a faint 58px dot field, accent
+    label chip, ink caption box (#131720, white text 17.9:1).
     ALPHA 1920x1080 overlay (transparent margins around a floating white grid
     board) -> render with `--format mov` (ProRes 4444). The board floats over the
     live head; the compositor overlays at (0,0).
@@ -26,7 +24,7 @@
       - The connector is a deterministic hand-drawn elbow (pure fn of t, no
         Math.random) that STROKE-DRAWS in (SVG dashoffset, seek-safe) — same
         technique as underline-circle. accent inks the label chip fill + connector.
-      - Build order (R9 progressive disclosure): board settles -> label chip pops
+      - Build order (progressive disclosure): board settles -> label chip pops
         -> connector draws down -> caption box pops at its end -> hold -> fade at D.
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
         rewrites it per window; --variables never sets it — see stat-card note).
@@ -63,9 +61,8 @@
       #wb-grid {
         position: absolute; inset: 0;
         background-image:
-          linear-gradient(to right, #dbe1ea 0 1.5px, transparent 1.5px),
-          linear-gradient(to bottom, #dbe1ea 0 1.5px, transparent 1.5px);
-        background-size: 58px 58px, 58px 58px;
+          radial-gradient(circle at 2px 2px, #c9d1dc 1.6px, transparent 2.2px);
+        background-size: 58px 58px;
         opacity: 0.9;
       }
 
@@ -97,14 +94,14 @@
         box-shadow: 0 12px 28px rgba(5, 75, 201, 0.30);
         will-change: transform, opacity;
       }
-      /* Caption box — dark navy chip, white text (the study's dark caption chip). */
+      /* Caption box — ink chip, white text. */
       #wb-text {
         position: absolute;
         left: 300px; top: 560px;
         max-width: 960px;
         padding: 26px 40px;
-        border-radius: 20px;
-        background: #0f1730;
+        border-radius: 10px;
+        background: #131720;
         color: #ffffff;
         font-weight: 800;
         font-size: 50px;
@@ -143,8 +140,8 @@
         const D = parseFloat(root.dataset.duration) || 4;
 
         const defaults = {
-          label: "And in that time",
-          text: "I built the whole content pipeline",
+          label: "In one afternoon",
+          text: "I cut the whole episode",
           accent: "#054BC9",
         };
         const HF = window.__hyperframes;

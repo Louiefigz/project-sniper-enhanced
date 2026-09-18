@@ -9,21 +9,25 @@
 >
   <!--
     PROJECT SNIPER · LONG-FORM glass template: GLASS-TAKEOVER-BG (16:9)
-    Reference: longform-ref lf-2 full-frame stage — the "spotlight grid" the
-    camera hands the frame to during a takeover. OPAQUE 1920x1080 -> render with
+    The full-frame stage the camera hands the frame to during a long-form
+    takeover: a pale Sniper-blue field with a process-blue dot field and a soft
+    white spotlight where the face PiP lands. OPAQUE 1920x1080 -> render with
     `--format mp4` (H.264, anchor "own-screen"): it REPLACES the frame for its
     window instead of stacking on it.
 
     CONTRACT for the PRODUCER + pip_takeover renderer:
-      - This is the BACKDROP (sky base + 120px grid + soft radial glow) plus an
+      - This is the BACKDROP (pale blue base #E8EEF9 + 48px dot field + soft
+        radial glow) plus an
         OPTIONAL left content region (eyebrow + title; both empty = pure backdrop,
         the default, so the glass-rail overlay can own the left half).
       - It RESERVES the right-side region x[1180,1820] y[140,940] empty — no grid
         glyphs, no copy — because pip_takeover.py composites the shrunken face
         PiP (a rounded 4:5 card) there. Changing that rect means changing
         pip_takeover's TAKEOVER_PIP default in lock-step.
-      - The sky base is OPAQUE from frame 0 (no flash of the base video underneath
-        at the takeover seam); only the grid, glow and optional copy settle in.
+      - The base is OPAQUE from frame 0 (no flash of the base video underneath
+        at the takeover seam); only the dot field, glow and optional copy settle
+        in. Optional copy: eyebrow in --eyebrow-font + accent (#054BC9, 6.3:1 on
+        the base), title in --font-display 800 + --glass-ink (14.2:1).
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
         rewrites it per window; --variables never sets it — see stat-card note).
   -->
@@ -36,8 +40,8 @@
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       :root {
-        --sky: #ddf4ff;                 /* spotlight-grid base */
-        --grid: #74dff6;                /* thin grid lines */
+        --sky: #E8EEF9;                 /* pale Sniper-blue stage base */
+        --grid: rgba(68, 123, 228, 0.9);  /* dot colour (layer fades to 0.34) */
         --glass-ink: #0a1a4d;
         --glass-slate: #5e687d;
       }
@@ -50,14 +54,13 @@
       }
       #bg-root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
 
-      /* Thin 120px-cell grid over the sky base. */
+      /* 48px dot field over the base (the Sniper surface texture). */
       #bg-grid {
         position: absolute;
         inset: -2px;
         background-image:
-          linear-gradient(to right, var(--grid) 0 1.5px, transparent 1.5px),
-          linear-gradient(to bottom, var(--grid) 0 1.5px, transparent 1.5px);
-        background-size: 120px 120px, 120px 120px;
+          radial-gradient(circle at 2px 2px, var(--grid) 1.6px, transparent 2.2px);
+        background-size: 48px 48px;
         opacity: 0.34;
         will-change: opacity, transform;
       }
@@ -69,7 +72,7 @@
         background:
           radial-gradient(1100px 900px at 1400px 500px,
             rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.55) 34%,
-            rgba(221,244,255,0.0) 70%);
+            rgba(232,238,249,0.0) 70%);
         will-change: opacity, transform;
       }
 
@@ -85,19 +88,21 @@
         gap: 20px;
       }
       #bg-eyebrow {
-        font-weight: 700;
-        font-size: 32px;
+        font-family: var(--eyebrow-font);
+        font-weight: 600;
+        font-size: 30px;
         line-height: 1;
-        letter-spacing: 2px;
+        letter-spacing: 0.16em;
         text-transform: uppercase;
         color: var(--accent);
         will-change: transform, opacity;
       }
       #bg-title {
-        font-weight: 900;
+        font-family: var(--font-display);
+        font-weight: 800;
         font-size: 92px;
         line-height: 0.98;
-        letter-spacing: -2.5px;
+        letter-spacing: -0.025em;
         color: var(--glass-ink);
         will-change: transform, opacity;
       }
@@ -142,7 +147,7 @@
         window.__timelines = window.__timelines || {};
         const tl = gsap.timeline({ paused: true });
 
-        // Sky base is opaque from frame 0; the grid + glow settle in so the stage
+        // Base is opaque from frame 0; the dot field + glow settle in so the stage
         // "builds" rather than snapping. Deterministic, seek-safe (no fade-out —
         // an opaque backdrop holds the whole window; pip_takeover owns the seam).
         tl.set("#bg-grid", { opacity: 0 }, 0);

@@ -2,40 +2,44 @@
 <html
   lang="en"
   data-composition-variables='[
-    {"id":"title1","type":"string","label":"Card 1 title (empty = omit)","default":"Ideation"},
-    {"id":"time1","type":"string","label":"Card 1 time / sublabel","default":"8-10am"},
-    {"id":"color1","type":"color","label":"Card 1 color (semantic)","default":"#2FBF71"},
-    {"id":"title2","type":"string","label":"Card 2 title (empty = omit)","default":"Filming"},
-    {"id":"time2","type":"string","label":"Card 2 time / sublabel","default":"10-2pm"},
-    {"id":"color2","type":"color","label":"Card 2 color (semantic)","default":"#3B82F6"},
-    {"id":"title3","type":"string","label":"Card 3 title (empty = omit)","default":"Distribution"},
+    {"id":"title1","type":"string","label":"Card 1 title (empty = omit)","default":"Record"},
+    {"id":"time1","type":"string","label":"Card 1 time / sublabel","default":"9-11am"},
+    {"id":"color1","type":"color","label":"Card 1 color (semantic)","default":"#447BE4"},
+    {"id":"title2","type":"string","label":"Card 2 title (empty = omit)","default":"Edit"},
+    {"id":"time2","type":"string","label":"Card 2 time / sublabel","default":"11am-2pm"},
+    {"id":"color2","type":"color","label":"Card 2 color (semantic)","default":"#CC7200"},
+    {"id":"title3","type":"string","label":"Card 3 title (empty = omit)","default":"Publish"},
     {"id":"time3","type":"string","label":"Card 3 time / sublabel","default":"2-3pm"},
-    {"id":"color3","type":"color","label":"Card 3 color (semantic)","default":"#F2724B"},
+    {"id":"color3","type":"color","label":"Card 3 color (semantic)","default":"#7C8088"},
     {"id":"title4","type":"string","label":"Card 4 title (empty = omit)","default":""},
     {"id":"time4","type":"string","label":"Card 4 time / sublabel","default":""},
-    {"id":"color4","type":"color","label":"Card 4 color (semantic)","default":"#7C5CF0"},
+    {"id":"color4","type":"color","label":"Card 4 color (semantic)","default":"#D33B36"},
     {"id":"side","type":"enum","label":"Anchor side (opposite the subject)","default":"right","options":[{"value":"left","label":"Left"},{"value":"right","label":"Right"}]},
     {"id":"accent","type":"color","label":"Accent (unused fill fallback)","default":"#054BC9"}
   ]'
 >
   <!--
-    PROJECT SNIPER · Motion template: SCHEDULE-STACK (NEW — deep-pass correction,
-    REFERENCE_STYLE_STUDY R9 "schedule-stack" pattern + "Template corrections
-    queued" #2). Observed in ref-2: color-SEMANTIC rounded cards (green Ideation /
-    blue Filming / coral Distribution) with serif-bold titles + small time
-    sublabels, stacked on the side OPPOSITE the speaker, staggered wipe-in.
+    PROJECT SNIPER · Motion template: SCHEDULE-STACK (9:16)
     Trigger it serves: a routine / schedule / phased-plan beat — a stack of
-    time-blocked cards that reads as a day/workflow.
-    ALPHA 1080x1920 overlay -> render with `--format mov` (ProRes 4444). The stack
-    hugs one side; the face stays clear on the other (R3/R10).
+    time-blocked cards that reads as a day or a workflow. Up to four
+    colour-coded cards with a bold display title and a small mono time label,
+    stacked on the side OPPOSITE the speaker so the face stays clear.
+    ALPHA 1080x1920 overlay -> render with `--format mov` (ProRes 4444).
+
+    SNIPER DESIGN: card fills default to the Sniper module palette in order —
+    process blue #447BE4, result amber #CC7200, graphite #7C8088, warn red
+    #D33B36 (tokens.css). White card text measures 4.04 / 3.51 / 3.96 / 4.72:1
+    on those fills (WCAG large-text floor 3:1). Titles use --font-display
+    (Bricolage Grotesque 800); time labels use --eyebrow-font (IBM Plex Mono).
+    Cards have 10px corners and a soft drop shadow.
 
     CONTRACT for the PRODUCER compositing stage:
       - Up to 4 cards: titleN / timeN / colorN. An empty titleN OMITS that card and
-        the stack re-centers. colorN is the card's SEMANTIC fill (default
-        green/blue/coral/violet). side picks the anchored side (opposite the
-        subject); accent is a fallback fill only.
-      - Cards WIPE in from the anchored side, staggered (R9, ~100-170ms entrances),
-        then hold; the whole stack fades out at D. Pure fns of timeline time.
+        the stack re-centers. colorN is the card's SEMANTIC fill. side picks the
+        anchored side (opposite the subject); accent is a fallback fill only.
+      - Cards WIPE in from the anchored side, staggered 0.13s apart with a
+        0.44s settle, then hold; the whole stack fades out at D. Pure fns of
+        timeline time.
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (see stat-card note).
   -->
   <head>
@@ -65,26 +69,28 @@
         gap: 26px;
       }
       .sk-card {
-        border-radius: 26px;
+        border-radius: 10px;
         padding: 30px 34px;
         box-shadow: 0 18px 44px rgba(10, 26, 77, 0.32), inset 0 2px 0 rgba(255, 255, 255, 0.22);
         will-change: transform, opacity;
       }
       .sk-title {
-        font-family: var(--font-serif-accent, "Georgia", "Times New Roman", "Times", serif);
-        font-weight: 700;
+        font-family: var(--font-display);
+        font-weight: 800;
         font-size: 58px;
         line-height: 1.0;
-        letter-spacing: -0.01em;
+        letter-spacing: -0.02em;
         color: #FFFFFF;
         text-shadow: 0 3px 12px rgba(0, 0, 0, 0.28);
       }
       .sk-time {
-        margin-top: 8px;
-        font-weight: 700;
-        font-size: 32px;
+        margin-top: 10px;
+        font-family: var(--eyebrow-font);
+        font-weight: 600;
+        font-size: 30px;
         line-height: 1;
-        letter-spacing: 0.02em;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
         color: rgba(255, 255, 255, 0.9);
       }
     </style>
@@ -121,17 +127,17 @@
         const D = parseFloat(root.dataset.duration) || 3.5;
 
         const defaults = {
-          title1: "Ideation", time1: "8-10am", color1: "#2FBF71",
-          title2: "Filming", time2: "10-2pm", color2: "#3B82F6",
-          title3: "Distribution", time3: "2-3pm", color3: "#F2724B",
-          title4: "", time4: "", color4: "#7C5CF0",
+          title1: "Record", time1: "9-11am", color1: "#447BE4",
+          title2: "Edit", time2: "11am-2pm", color2: "#CC7200",
+          title3: "Publish", time3: "2-3pm", color3: "#7C8088",
+          title4: "", time4: "", color4: "#D33B36",
           side: "right", accent: "#054BC9",
         };
         const HF = window.__hyperframes;
         const vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
         document.documentElement.style.setProperty("--accent", vars.accent);
 
-        // Side anchor (R10): stack hugs left or right; wipe direction follows.
+        // Side anchor: stack hugs left or right; wipe direction follows.
         const right = String(vars.side) === "right";
         const stack = document.getElementById("sk-stack");
         if (right) { stack.style.right = "70px"; } else { stack.style.left = "70px"; }
@@ -158,7 +164,7 @@
         window.__timelines = window.__timelines || {};
         const tl = gsap.timeline({ paused: true });
 
-        // Cards wipe in from the anchored side, staggered (R9).
+        // Cards wipe in from the anchored side, staggered.
         const STAGGER = 0.13;
         active.forEach(function (card, i) {
           const at = i * STAGGER;

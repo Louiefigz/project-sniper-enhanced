@@ -2,9 +2,9 @@
 <html
   lang="en"
   data-composition-variables='[
-    {"id":"num","type":"string","label":"Eyebrow / section label — appears FIRST (e.g. 1 or System No.2)","default":"System No.1"},
-    {"id":"line1","type":"string","label":"Title — serif-accent, wipes in (<= 2 words)","default":"Familiarity"},
-    {"id":"line2","type":"string","label":"Qualifier — white sans, optional (<= 2 words)","default":"Rule"},
+    {"id":"num","type":"string","label":"Eyebrow / section label — appears FIRST (e.g. 1 or Part 2)","default":"Part 1"},
+    {"id":"line1","type":"string","label":"Title — serif-accent, wipes in (<= 2 words)","default":"The Setup"},
+    {"id":"line2","type":"string","label":"Qualifier — white sans, optional (<= 2 words)","default":"Basics"},
     {"id":"side","type":"enum","label":"Anchor side (the emptier side, opposite the subject)","default":"left","options":[{"value":"left","label":"Top-left"},{"value":"right","label":"Top-right"}]},
     {"id":"accent","type":"color","label":"Accent color (serif title)","default":"#054BC9"},
     {"id":"readability","type":"enum","label":"Text backing (new recipes use local plates)","default":"scrim","options":[{"value":"scrim","label":"Legacy translucent scrim"},{"value":"plates","label":"Opaque local text plates"}]}
@@ -12,30 +12,33 @@
   data-contrast-roles='{"schemaVersion":1,"treatment":"plates","roles":[{"id":"eyebrow","selector":"#marker-eyebrow","copyVariable":"num","foreground":"#FFFFFF","background":"#0a1123","fullOpacityAt":0.34},{"id":"title","selector":"#marker-title","copyVariable":"line1","foregroundVariable":"accent","background":"#f6eac6","fullOpacityAt":0.58},{"id":"qualifier","selector":"#marker-qualifier","copyVariable":"line2","foreground":"#FFFFFF","background":"#0a1123","fullOpacityAt":0.66}],"exit":{"maximumSeconds":0.42,"durationFraction":0.18,"frameReserveSeconds":0.05}}'
 >
   <!--
-    PROJECT SNIPER · Motion template: SECTION-MARKER (REBUILT for R9/R10 — deep-pass
-    correction, REFERENCE_STYLE_STUDY "Template corrections queued" #1).
-    Trigger it serves: numbered section markers (R7) — a small eyebrow, a
-    serif-accent name, an optional qualifier, pinned in the HEADROOM on the EMPTY
-    SIDE while a section is discussed. Distinct from `stinger-wipe` (full-frame
-    opaque chapter takeover): this is a small alpha overlay over the live head.
+    PROJECT SNIPER · Motion template: SECTION-MARKER (9:16 headroom marker)
+    Trigger it serves: numbered section markers — a small eyebrow, an italic
+    serif-accent name and an optional qualifier, pinned in the HEADROOM on the
+    EMPTY SIDE while a section is discussed. Distinct from `stinger-wipe`
+    (full-frame opaque chapter takeover):
+    this is a small alpha overlay over the live head.
     Transparent 1080x1920 overlay -> render with `--format mov` (ProRes 4444).
 
-    WHY THE REBUILD: the previous version was CENTERED and NUMERAL-LED (a big serif
-    numeral dropped in first, label under it). The reference exemplars anchor
-    TOP-LEFT / the emptier side (R10 placement law) and build EYEBROW-FIRST (R9):
-    small eyebrow appears -> serif-accent title WIPES in below -> qualifier settles.
-    Var IDS are UNCHANGED (num/line1/line2/accent) so existing plans/render specs
-    keep working; `side` is added. The ROLES shift per R9 (num is now the small
-    eyebrow, line1 is now the serif title) — old sample vars render faithfully as
-    "<eyebrow> / <serif title> / <qualifier>", which is the R9-correct layout.
+    LAYOUT + BUILD (Sniper design): the marker anchors TOP-LEFT or TOP-RIGHT on
+    the emptier side so it never competes with the face, and it builds
+    EYEBROW-FIRST — the small eyebrow appears, the serif-accent title WIPES in
+    below it, then the qualifier settles — so the viewer reads the section
+    number before its name. Var IDS are stable (num/line1/line2/accent, plus
+    `side` and `readability`); the ROLES are num = small eyebrow, line1 = serif
+    title, line2 = qualifier.
 
     CONTRACT for the PRODUCER compositing stage:
       - num (eyebrow) / line1 (title) / line2 (qualifier, empty = omit) / side /
         accent are `data-composition-variables`. side picks the emptier side; the
-        PRODUCER passes the side OPPOSITE the measured subject (free_space / R10).
-      - R2 two-tone: the TITLE is serif-italic (var --font-serif-accent) in the
-        accent color; eyebrow + qualifier are white sans. Entrance ~100-170ms wipes
-        (R9), never a pop-from-nothing.
+        PRODUCER passes the side OPPOSITE the measured subject (free_space).
+      - Two-tone: the TITLE is serif-italic (var --font-serif-accent) in the
+        accent color; eyebrow + qualifier are white sans. Entrances are
+        ~100-170ms-scale wipes/rises, never a pop-from-nothing.
+      - readability "plates" draws opaque local text plates declared in
+        data-contrast-roles (checked by graphics/template_text_contrast.py
+        against the reviewed source hash in producer_config MOTION["contrast"]
+        ["text_plate_sources"] — any byte change here needs that pin re-reviewed).
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (see stat-card note);
         ~2.5s convention. It builds in, holds, fades out at D.
   -->
@@ -56,7 +59,7 @@
       }
       #marker-root { position: relative; width: var(--canvas-w); height: var(--canvas-h); }
 
-      /* HEADROOM, side-anchored (R10). JS sets left/right + alignment from `side`. */
+      /* HEADROOM, side-anchored. JS sets left/right + alignment from `side`. */
       .stage {
         position: absolute;
         top: 250px;
@@ -155,9 +158,9 @@
           data-track-index="1"
           style="display:flex;flex-direction:column;gap:14px;"
         >
-          <div id="marker-eyebrow" class="eyebrow">System No.1</div>
-          <div class="title-clip"><span id="marker-title" class="title">Familiarity</span></div>
-          <div id="marker-qualifier" class="qualifier">Rule</div>
+          <div id="marker-eyebrow" class="eyebrow">Part 1</div>
+          <div class="title-clip"><span id="marker-title" class="title">The Setup</span></div>
+          <div id="marker-qualifier" class="qualifier">Basics</div>
         </div>
       </div>
     </div>
@@ -169,7 +172,7 @@
         // Single source of truth for render length: the root data-duration attr.
         const D = parseFloat(root.dataset.duration) || 2.5;
 
-        const defaults = { num: "System No.1", line1: "Familiarity", line2: "Rule", side: "left", accent: "#054BC9", readability: "scrim" };
+        const defaults = { num: "Part 1", line1: "The Setup", line2: "Basics", side: "left", accent: "#054BC9", readability: "scrim" };
         const HF = window.__hyperframes;
         const vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
         document.documentElement.style.setProperty("--accent", vars.accent);
@@ -180,7 +183,7 @@
         const line1 = String(vars.line1);
         titleEl.textContent = line1;
         // Auto-fit the serif title to the headroom width. A long 2-word title
-        // ("Batch Recording") at the base 118px + nowrap overruns the frame edge.
+        // (e.g. "Caption Styling") at the base 118px + nowrap overruns the frame edge.
         // Estimate width from char count (DETERMINISTIC — headless renders can't
         // rely on getBoundingClientRect before the serif font loads): if the
         // estimate exceeds FIT_W, shrink the font to fit; short titles stay full.
@@ -193,7 +196,7 @@
         const qual = String(vars.line2 == null ? "" : vars.line2).trim();
         if (qual) { qualEl.textContent = qual; } else { qualEl.remove(); }
 
-        // Side anchor (R10): left/right + text alignment; wipe direction follows.
+        // Side anchor: left/right + text alignment; wipe direction follows.
         const right = String(vars.side) === "right";
         const stage = document.getElementById("marker-stage");
         stage.dataset.readability = String(vars.readability);
@@ -211,7 +214,7 @@
         window.__timelines = window.__timelines || {};
         const tl = gsap.timeline({ paused: true });
 
-        // R9 build order: eyebrow first, serif title WIPES in, qualifier settles.
+        // Build order: eyebrow first, serif title WIPES in, qualifier settles.
         tl.fromTo("#marker-eyebrow", { opacity: 0, y: -12 },
           { opacity: 1, y: 0, duration: 0.34, ease: "power2.out" }, 0);
         tl.fromTo("#marker-title", { xPercent: wipeFrom, opacity: 0 },

@@ -26,12 +26,12 @@ def _plan() -> dict:
     return {"planVersion": 3, "graphicsTrack": [
         {"id": "g-00000001", "kind": "section-marker",
          "outStart": 1.0, "outEnd": 3.5, "anchor": "free-band",
-         "spec": {"num": "System No.1", "line1": "Old",
-                  "line2": "Rule", "side": "left", "accent": "#054BC9"}},
+         "spec": {"num": "Part 1", "line1": "Old",
+                  "line2": "Basics", "side": "left", "accent": "#054BC9"}},
         {"id": "g-00000002", "kind": "section-marker",
          "outStart": 4.0, "outEnd": 6.5, "anchor": "free-band",
-         "spec": {"num": "System No.2", "line1": "Keep",
-                  "line2": "Rule", "side": "right", "accent": "#F5E960"}},
+         "spec": {"num": "Part 2", "line1": "Keep",
+                  "line2": "Basics", "side": "right", "accent": "#F5E960"}},
     ], "captions": {"enabled": True}}
 
 

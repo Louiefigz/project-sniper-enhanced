@@ -14,14 +14,13 @@
 >
   <!--
     PROJECT SNIPER · Motion template: AVATAR-BIO-CARD (16:9 talking-head longform)
-    Reference: study pair 2 bio-card takeover (avatarbio_26 burst + sheet_02-03,
-    t26.5-31.5): a dark navy full-frame takeover — a circular avatar pops in
+    A credibility card: a dark navy full-frame takeover — a circular avatar pops in
     left-of-center, an accent "credential" line builds WORD-BY-WORD to its right
     with a thin white arc swooshing under it; then the composition RECOMPOSES:
     the avatar translates up-right (smaller), line 1 rides to the top-right, a
     new arc draws under the avatar's new seat, and a white block line 2 lands
-    where the avatar was. The reference's purple accent is recolored to the
-    brand accent; the STRUCTURE is preserved.
+    where the avatar was. The accent is the per-video brand token (default
+    Project Sniper #054BC9).
 
     CONTRACT for the PRODUCER compositing stage:
       - anchor "own-screen" -> render `--format mp4` (opaque takeover). The navy
@@ -39,8 +38,8 @@
         pattern): demo content activates when avatarSrc AND initials AND
         line1 AND line2 are ALL unset; any plan that sets one field gets
         exactly its fields — no sample leak.
-      - Grammar (burst-measured): avatar pops ~450ms at 0.1s; line-1 words land
-        ~130ms apart (R18 kinetic-text cadence); arc 1 draws ~500ms under the
+      - Timing (Sniper design parameters): avatar pops ~450ms at 0.1s; line-1
+        words land ~130ms apart (speech-paced kinetic text); arc 1 draws ~500ms under the
         line; at at2 the whole composition recomposes over ~600ms, arc 1
         un-draws while arc 2 draws under the avatar's new seat, and line 2
         fades+rises ~300ms as the recompose settles.
@@ -180,7 +179,7 @@
           avatarSrc: "", initials: "", line1: "", line2: "",
           at1: 0.15, at2: 3, at3: 4.2, accentColor: "#054BC9",
         };
-        // PREVIEW-ONLY demo content (the reference bio beat). Activates ONLY
+        // PREVIEW-ONLY demo content (original Sniper sample copy). Activates ONLY
         // when avatarSrc AND initials AND line1 AND line2 are ALL unset.
         const SAMPLE = {
           initials: "PS",

@@ -2,14 +2,14 @@
 <html
   lang="en"
   data-composition-variables='[
-    {"id":"layout","type":"enum","label":"Layout","default":"strip","options":[{"value":"strip","label":"Hook receipt strip (1x4, headroom)"},{"value":"grid","label":"Grid (2x3)"},{"value":"showcase","label":"Showcase (one 0.42W cell)"}]},
-    {"id":"label1","type":"string","label":"Cell 1 label chip (empty = no chip)","default":""},
-    {"id":"label2","type":"string","label":"Cell 2 label chip","default":""},
-    {"id":"label3","type":"string","label":"Cell 3 label chip","default":""},
-    {"id":"label4","type":"string","label":"Cell 4 label chip","default":""},
-    {"id":"label5","type":"string","label":"Cell 5 label chip (grid only)","default":""},
-    {"id":"label6","type":"string","label":"Cell 6 label chip (grid only)","default":""},
-    {"id":"views1","type":"string","label":"Cell 1 view count (e.g. 1.2M; empty = no cell)","default":""},
+    {"id":"layout","type":"enum","label":"Layout","default":"strip","options":[{"value":"strip","label":"Receipt strip (1x4, headroom)"},{"value":"grid","label":"Grid (2x3)"},{"value":"showcase","label":"Showcase (one 0.42W cell)"}]},
+    {"id":"label1","type":"string","label":"Cell 1 label tab (empty = no tab)","default":""},
+    {"id":"label2","type":"string","label":"Cell 2 label tab","default":""},
+    {"id":"label3","type":"string","label":"Cell 3 label tab","default":""},
+    {"id":"label4","type":"string","label":"Cell 4 label tab","default":""},
+    {"id":"label5","type":"string","label":"Cell 5 label tab (grid only)","default":""},
+    {"id":"label6","type":"string","label":"Cell 6 label tab (grid only)","default":""},
+    {"id":"views1","type":"string","label":"Cell 1 view count (e.g. 1.2M; empty = no count)","default":""},
     {"id":"views2","type":"string","label":"Cell 2 view count","default":""},
     {"id":"views3","type":"string","label":"Cell 3 view count","default":""},
     {"id":"views4","type":"string","label":"Cell 4 view count","default":""},
@@ -31,34 +31,50 @@
   ]'
 >
   <!--
-    PROJECT SNIPER · Motion template: SLIDEWARE-RECEIPT-CELL (slideware pack #3)
-    Reference: thumb cell + eye-count view chip — 4/4 studied reels, 60+ chips
-    in one reel; the signature proof stamp. Every receipt in the reference is
-    a REAL pixel source (a playing clip). Strips / grids / a single showcase.
+    PROJECT SNIPER · Motion template: SLIDEWARE-RECEIPT-CELL (short-form slide set, 3 of 4)
+    Proof cells: small 9:16 media thumbnails, each with an optional label
+    tab above and an optional view count below, so a claim ("it worked")
+    is backed by the clips themselves. Layouts: a 1x4 strip in the
+    headroom, a 2x3 grid, or one large showcase cell.
     Transparent 1080x1920 overlay -> render `--format mov` (ProRes 4444).
 
-    CELL STACK (top-down): optional label chip (olive #697257 semi-opaque,
-    r6, white Title-Case ~1.2%H, wraps 2 lines) ABOVE a 9:16 media slot
-    ABOVE-LEFT a view chip (near-black ~82% alpha pill, white eye glyph +
-    bold count ~1.4%H).
+    SNIPER DESIGN (the short-form slide set — same ink tabs, amber marker
+    and corners as slideware-takeover-deck / -staircase-lockup /
+    -caption-dual-mode):
+      - Label tab = --eyebrow-font (IBM Plex Mono 600) caps, white on an ink
+        tab (rgba(19,23,32,0.88), 4px corners) led by a square --lemon
+        marker; wraps to at most 2 lines.
+      - Media slot = 9:16, 6px corners, 1px light hairline and a soft shadow
+        over footage; "square" corners (2px, no shadow) sit flush inside a
+        slide takeover. Empty slots show a deterministic graphite placeholder
+        tinted from the Sniper palette.
+      - View count = --lemon eye glyph + Plex Mono 600 white count on an ink
+        tab, flush with the cell's left edge.
+      - Contrast holds over any footage: white on the ink tab over pure
+        white footage 12.67:1; the amber marker/glyph there 6.58:1 (9.31:1 on
+        solid ink).
+      - Cell widths (Sniper design parameters): strip 162px (~0.15W — four
+        cells plus gaps fit the 760px headroom band), grid 173px (~0.16W —
+        three per 600px row), showcase 454px (~0.42W — one clip large enough
+        to read its content).
 
     CONTRACT for the PRODUCER compositing stage:
       - A cell exists when viewsN OR labelN OR mediaN is set. mediaN is a
         web-root path under templates/motion/ (image or video file). VIDEO-IN-
         CELL: a video src becomes a muted `class="clip"` <video> so the
-        framework owns playback (reference cells PLAY live clips, never
-        stills) — this is the build list's known infra dependency; with no
-        media the cell renders a deterministic placeholder thumb.
+        framework owns playback (a receipt is a playing clip, not a still);
+        a known infra dependency. With no media the cell renders a
+        deterministic placeholder thumb.
       - ANIMATION: per-cell 0-FRAME POPS word-locked to atN (strip default
-        0.35s L->R; tighten to ~0.1s for the alternating hook-chip build), or
+        0.35s L->R; tighten to ~0.1s for a fast alternating build), or
         set every atN to 0 to arrive fully-built ON a cut.
       - EXITS: instant / ON-cut — the comp holds to D; compositor owns seams.
-      - corner: "rounded" = r10 + shadow over footage; "square" = square
-        corners for use inside lime takeovers.
+      - corner: "rounded" = 6px + shadow over footage; "square" = 2px
+        corners for use inside slide takeovers.
       - EMPTY-DEFAULTS LAW (G21): labels/views/media default EMPTY — unset
-        renders NOTHING; the demo strip activates only when ALL are unset.
+        renders NOTHING; the sample strip activates only when ALL are unset.
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
-        rewrites it per window; --variables never sets it — stat-card note).
+        rewrites it per window; --variables never sets it).
   -->
   <head>
     <meta charset="UTF-8" />
@@ -96,21 +112,38 @@
         align-items: flex-start;
         will-change: opacity;
       }
-      /* Olive label chip ABOVE the thumb (Title-Case, wraps 2 lines). */
+      /* Label tab ABOVE the thumb: mono caps + square amber marker. */
       .arc-label {
-        background: rgba(105, 114, 87, 0.88);   /* olive #697257 semi-opaque */
-        border-radius: 6px;
-        padding: 6px 12px;
+        background: rgba(19, 23, 32, 0.88);
+        border-radius: 4px;
+        /* Bottom inset is a transparent border, not padding: the clamp's
+           overflow clip stops at the padding edge, so a clamped third line
+           can never peek out under the second. */
+        padding: 6px 10px 0;
+        border-bottom: 7px solid transparent;
         margin-bottom: 8px;
         max-width: 100%;
-        font-size: 23px;                   /* ~1.2%H */
+        font-family: var(--eyebrow-font);
+        font-size: 19px;
         font-weight: 600;
-        line-height: 1.2;
+        line-height: 1.25;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
         color: #FFFFFF;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+      }
+      .arc-label::before {
+        content: "";
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        margin: 0 8px 2px 0;
+        border-radius: 2px;
+        background: var(--lemon);
+        vertical-align: middle;
       }
       /* 9:16 media slot. rounded = over footage; square = inside takeovers. */
       .arc-media {
@@ -118,9 +151,10 @@
         width: 100%;
         aspect-ratio: 9 / 16;
         overflow: hidden;
-        border-radius: 10px;
-        box-shadow: 0 8px 26px rgba(0, 0, 0, 0.35);
-        background: #191d1a;
+        border-radius: 6px;
+        border: 1px solid rgba(241, 244, 246, 0.18);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+        background: var(--module-canvas);
       }
       #arc-root.square-corners .arc-media { border-radius: 2px; box-shadow: none; }
       .arc-media img, .arc-media video {
@@ -135,21 +169,23 @@
         position: absolute; inset: 0;
         background: linear-gradient(180deg, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 100%);
       }
-      /* Eye-count view chip BELOW-LEFT of its thumb. */
+      /* View count BELOW its thumb, flush with the cell's left edge. */
       .arc-views {
         display: flex;
         align-items: center;
         gap: 8px;
         margin-top: 8px;
-        margin-left: 4px;
-        background: rgba(10, 10, 10, 0.82);     /* near-black ~82% alpha */
-        border-radius: 6px;
-        padding: 7px 14px;
+        background: rgba(19, 23, 32, 0.88);
+        border-radius: 4px;
+        padding: 6px 12px 6px 10px;
       }
-      .arc-views svg { width: 26px; height: 26px; display: block; }
+      .arc-views svg { width: 24px; height: 24px; display: block; }
+      .arc-views svg path { fill: var(--lemon); }
       .arc-views span {
-        font-size: 27px;                   /* ~1.4%H */
-        font-weight: 700;
+        font-family: var(--eyebrow-font);
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
         color: #FFFFFF;
         line-height: 1;
       }
@@ -181,10 +217,11 @@
           media1: "", media2: "", media3: "", media4: "", media5: "", media6: "",
           at1: 0.2, at2: 0.55, at3: 0.9, at4: 1.25, at5: 1.6, at6: 1.95,
         };
-        // PREVIEW-ONLY demo strip (activates only when ALL content is unset).
+        // PREVIEW-ONLY sample strip, original Sniper copy (activates only
+        // when ALL content is unset).
         const SAMPLE = {
-          label1: "Day 1", label2: "Day 7", label3: "Day 14", label4: "Day 30",
-          views1: "1.2M", views2: "847K", views3: "2.1M", views4: "3.4M",
+          label1: "Rough cut", label2: "Tight cut", label3: "Captioned", label4: "Final",
+          views1: "3.1K", views2: "9.8K", views3: "24K", views4: "61K",
         };
         const HF = window.__hyperframes;
         let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
@@ -199,21 +236,23 @@
           ? String(vars.layout) : "strip";
         root.classList.add(layout);
         if (String(vars.corner) === "square") root.classList.add("square-corners");
-        // Cell width by layout (reference: strip 0.13-0.16W, grid 0.145-0.16W,
-        // showcase 0.42W). Cap the cell count per layout.
+        // Cell width by layout (Sniper design parameters — see header) and
+        // the cell cap per layout.
         const CELL_W = { strip: 162, grid: 173, showcase: 454 }[layout];
         const MAX_CELLS = { strip: 4, grid: 6, showcase: 1 }[layout];
 
-        // Deterministic placeholder hues (no Math.random — fixed per index).
+        // Deterministic placeholder tints from the Sniper palette (graphite
+        // with process-blue / result-amber / compare-gray casts; no
+        // Math.random — fixed per index).
         const PH = [
-          "linear-gradient(160deg, #4a5a45 0%, #22281f 100%)",
-          "linear-gradient(160deg, #37474f 0%, #1a2226 100%)",
-          "linear-gradient(160deg, #5d4a4a 0%, #291f1f 100%)",
-          "linear-gradient(160deg, #40514f 0%, #1d2625 100%)",
-          "linear-gradient(160deg, #514d3d 0%, #26241c 100%)",
-          "linear-gradient(160deg, #444a5e 0%, #1e212b 100%)",
+          "linear-gradient(160deg, #26334D 0%, #121721 100%)",
+          "linear-gradient(160deg, #3D3020 0%, #15171C 100%)",
+          "linear-gradient(160deg, #353A44 0%, #14171D 100%)",
+          "linear-gradient(160deg, #1E3860 0%, #101521 100%)",
+          "linear-gradient(160deg, #45341C 0%, #17150F 100%)",
+          "linear-gradient(160deg, #2C3140 0%, #121721 100%)",
         ];
-        const EYE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#FFFFFF" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>';
+        const EYE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>';
         const VIDEO_EXT = /\.(mp4|mov|webm|m4v)$/i;
 
         const stage = document.getElementById("arc-stage");

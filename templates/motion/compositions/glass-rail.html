@@ -2,7 +2,7 @@
 <html
   lang="en"
   data-composition-variables='[
-    {"id":"eyebrow","type":"string","label":"Header eyebrow (small-caps, accent; empty = omit)","default":""},
+    {"id":"eyebrow","type":"string","label":"Header eyebrow (mono caps on its own tab, led by a square accent marker; empty = omit)","default":""},
     {"id":"num1","type":"string","label":"Step 1 chip label (empty = row number)","default":""},
     {"id":"title1","type":"string","label":"Step 1 title (empty = omit row)","default":""},
     {"id":"sub1","type":"string","label":"Step 1 subtitle","default":""},
@@ -29,79 +29,108 @@
     {"id":"icon6","type":"string","label":"Step 6 icon file under /icons (empty = none)","default":""},
     {"id":"rowLands","type":"string","label":"Progressive point reveal (LL-011): comp-relative land seconds, one per ACTIVE row, pipe/comma-separated — each row appears word-locked when the speaker reaches it; empty = legacy stagger","default":""},
     {"id":"side","type":"enum","label":"Anchor side (opposite the subject)","default":"left","options":[{"value":"left","label":"Left"},{"value":"right","label":"Right"}]},
-    {"id":"accent","type":"color","label":"Accent color (chip 1 + eyebrow)","default":"#054BC9"},
-    {"id":"build","type":"enum","label":"Build grammar","default":"stamp","options":[{"value":"stamp","label":"Stamp (back.out slide, unchanged)"},{"value":"skeleton-first","label":"Skeleton-first (row shells before text — MODULE rank 2)"}]},
-    {"id":"exit","type":"enum","label":"Exit","default":"fade","options":[{"value":"fade","label":"Fade + drift (unchanged)"},{"value":"blur-recede","label":"Blur-recede 0.15s (graphics layer only — MODULE T-D)"}]},
-    {"id":"entrance","type":"enum","label":"Entrance","default":"slide","options":[{"value":"slide","label":"Slide (unchanged)"},{"value":"rail-push","label":"Rail-push (field width-grows 0->33%W beside the live face — MODULE T-B; LONGFORM-ONLY)"}]},
-    {"id":"theme","type":"enum","label":"Skin","default":"glass","options":[{"value":"glass","label":"Glass (unchanged)"},{"value":"light","label":"Light (cream #f0f0e6 field, ink type — MODULE T-B light-in)"}]}
+    {"id":"accent","type":"color","label":"Accent color (eyebrow marker + number chips, chip 1 exact; default = Sniper primary)","default":"#054BC9"},
+    {"id":"build","type":"enum","label":"Build grammar","default":"stamp","options":[{"value":"stamp","label":"Stamp (back.out slide)"},{"value":"skeleton-first","label":"Skeleton-first (row shells before their text)"}]},
+    {"id":"exit","type":"enum","label":"Exit","default":"fade","options":[{"value":"fade","label":"Fade + drift"},{"value":"blur-recede","label":"Blur-recede 0.15s (graphics layer only)"}]},
+    {"id":"entrance","type":"enum","label":"Entrance","default":"slide","options":[{"value":"slide","label":"Slide"},{"value":"rail-push","label":"Rail-push (field width-grows 0->33%W beside the live face; LONGFORM-ONLY)"}]},
+    {"id":"theme","type":"enum","label":"Skin","default":"glass","options":[{"value":"glass","label":"Glass (frosted rows, default)"},{"value":"light","label":"Light (paper #F1F4F6 field, ink type, hairline white rows)"}]}
   ]'
 >
   <!--
-    PROJECT SNIPER · LONG-FORM glass template: GLASS-RAIL (16:9)
-    Reference: longform-ref lf-2 — the "show the whole system" left rail. A
-    vertical stack of up to 6 numbered glass step-rows that stamp in top->bottom.
-    Transparent 1920x1080 overlay -> render with `--format mov` (ProRes 4444) for
-    alpha (anchor "free-band"); pinned to the `side` half (default LEFT) so the
-    takeover face-PiP fills the other half (left rail -> face x 1180-1820).
+    PROJECT SNIPER · LONG-FORM template: GLASS-RAIL (16:9, 1920x1080)
+    The process rail: a vertical column of up to six numbered step rows,
+    headed by an optional eyebrow, that shows a whole system at once. It is a
+    transparent 1920x1080 overlay -> render `--format mov` (ProRes 4444) for
+    alpha (anchor "free-band"). It is pinned to the `side` half (default LEFT)
+    so a takeover face-PiP can fill the opposite half (left rail -> face at
+    x 1180-1820).
+
+    SNIPER DESIGN (tokens.css):
+      - Glass skin (default): frosted white rows (the Sniper glass family
+        surface, shared with glass-lower-third and glass-takeover-bg) with
+        8px corners and a 1px white hairline. Titles = --font-display
+        (Bricolage Grotesque 700) in --glass-ink; subtitles = --font (Inter
+        400) in --glass-slate; chip numerals = --eyebrow-font (IBM Plex Mono
+        600) in white.
+      - Number chips: 6px-corner squares. Chip 1 is exactly the accent
+        (default = the Sniper primary var(--accent) #054BC9); chips 2-6 step
+        the accent toward ink (#131720) in 12% steps, so the column reads as
+        an ordered sequence, not a flat list.
+      - Eyebrow (glass skin): Plex Mono 600 caps in near-white on its own
+        ink tab (--rail-cream-ink at 84% + backdrop blur), led by a square
+        accent marker with a 2px paper keyline. FAILURE_LEDGER LL-033: text
+        never floats bare over footage — the tab is its background.
+      - Light skin (theme "light"): a cool-paper --rail-cream field with the
+        faint 48px ink dot field (rail-push only), white hairline rows with
+        5px corners, --rail-cream-ink titles, 62%-ink mono numerals, and a
+        Plex Mono eyebrow led by a square --accent-process marker (on a white
+        tab when the rail sits over footage, bare on the paper field).
+      - Contrast (WCAG 2.x, computed from the tokens.css values):
+          white numerals on chips 1-6 (default accent) 7.35:1 -> 13.9:1
+          --glass-ink on the frosted row ~15.5:1; --glass-slate ~5.2:1
+          eyebrow text on its ink tab >= 9.6:1 even over a white frame;
+          accent marker vs its paper keyline 6.66:1; keyline vs tab >= 9.9:1
+          light skin: ink on white 17.93:1; 62% ink 5.02:1 on white;
+          process marker 4.04:1 on white, 3.66:1 on paper; 72% ink eyebrow
+          6.78:1 on paper
 
     CONTRACT for the PRODUCER compositing stage:
-      - Per row N (1..6): numN (chip label), titleN, subN, and OPTIONAL iconN (a
-        file under templates/motion/icons/, e.g. "claude.svg"). An empty titleN
-        OMITS that row and the stack re-centers to the remaining rows.
-      - UNSET rows render NOTHING (all row defaults are empty — G21). The demo
-        pipeline content in the script's SAMPLE block is a PREVIEW default only:
-        it activates when EVERY row variable (numN/titleN/subN/iconN, N=1..6)
-        is unset, i.e. a bare `hyperframes preview`/render with no --variables.
+      - Per row N (1..6): numN (chip label), titleN, subN and OPTIONAL iconN
+        (a file under templates/motion/icons/, e.g. "claude.svg"). An empty
+        titleN OMITS that row and the stack re-centres on the rows left.
+      - UNSET rows render NOTHING (every row default is empty — G21). The
+        SAMPLE block in the script is a PREVIEW default only: it activates
+        when EVERY row variable (numN/titleN/subN/iconN, N=1..6) is unset,
+        i.e. a bare `hyperframes preview`/render with no --variables.
       - `side` ("left"|"right", default "left") anchors the rail to that side
         with the same 96px safe margin and mirrors the slide-in direction, so
-        the brain can place it OPPOSITE the speaker's face (G22).
-      - Number chips cycle a fixed 6-colour rotation (chip 1 = the brand accent);
-        it reads as a pipeline, not a flat list (liquid-glass "system-map rail").
-      - Rows stamp in fast top->bottom (back.out, 0.12s stagger) — the liquid-glass
-        motion doctrine for this template; the eyebrow header lands first.
-      - The glass reads on its OWN semi-opaque white fill (isolated alpha render
-        composites identically). Icon slots are emoji-FREE (real marks only, R12).
+        the rail can sit OPPOSITE the speaker's face (G22).
+      - ACCENT: the default stays the Sniper primary var(--accent) (#054BC9);
+        audit/audit_composite_visual.py samples the --accent token for this
+        kind when a plan sets no accent.
+      - Default build ("stamp"): the eyebrow slides in first, then rows stamp
+        in top->bottom (back.out, 0.12s stagger) and each chip pops just after
+        its row. Icon slots are emoji-free (real marks only).
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
-        rewrites it per window; --variables never sets it — see stat-card note).
-      - MODULE opt-ins (docs/studies/MODULE_STUDY.md; defaults keep the build
-        byte-identical): build:"skeleton-first" — each row's glass SHELL+chip
-        opacity-ramps at its land, its title/sub TEXT ramps +SKELETON_GAP_S
-        (0.35s) later, in place (rank 2 / T-C layer 4: containers before
-        text); eyebrow becomes an in-place opacity ramp. exit:"blur-recede" —
-        the rail (an alpha layer; the face below stays sharp) blurs+fades+
-        recedes over the final EXIT_BLUR_S (0.15s) instead of the fade (T-D).
-      - RAIL-PUSH entrance (MODULE §5 item 8, T-B 13.35->13.72; LONGFORM
-        ONLY — plan_lint_module ERRORs it on shorts, operator adjudication
-        2026-07-10): entrance:"rail-push" replaces the whole build — a field
-        GROWS from the anchored edge 0 -> 33%W (RAIL_PUSH_S = 0.33s,
-        power2.out — the measured "fastest first 3 frames"), the live video
-        keeps playing beside it (alpha overlay, never a cut). The headline
-        opacity-ramps at HEADLINE_AT_GROWTH (65%) of the grow (ghost->ink
-        13.48->13.65); each row lands container-FIRST at
-        +ROW_CONTAINER_DELAY_S / text +ROW_TEXT_DELAY_S after the headline
-        (T-B "+250ms/+400ms, hairline container first, text second"), rows
-        cascading at the classic 0.12s stagger. `build` is ignored (rail-push
-        IS the skeleton grammar); exits target the FIELD so the cream never
-        lingers. theme:"light" = the T-B cream skin (tokens --rail-cream /
-        --rail-cream-ink; hairline white module rows, mono ink chips, cyan
-        process dot on the eyebrow) — designed for rail-push but legal on
-        either entrance.
+        rewrites it per window; --variables never sets it — see stat-card).
+      - Opt-ins (the defaults keep the classic stamp build):
+        build:"skeleton-first" — each row's shell + chip opacity-ramps at its
+        land and its title/sub text ramps SKELETON_GAP_S (0.35s) later, in
+        place; the eyebrow becomes an in-place opacity ramp.
+        exit:"blur-recede" — the rail (an alpha layer; the face below stays
+        sharp) blurs+fades+recedes over the final EXIT_BLUR_S (0.15s) instead
+        of the classic fade.
+      - RAIL-PUSH entrance (LONGFORM ONLY — plan_lint_module ERRORs it on
+        shorts, operator adjudication 2026-07-10): entrance:"rail-push"
+        replaces the whole build. A field GROWS from the anchored edge
+        0 -> 634px (33%W) over RAIL_PUSH_S = 0.33s power2.out while the live
+        video keeps playing beside it (alpha overlay, never a cut). The
+        eyebrow ramps in place at HEADLINE_AT_GROWTH = 0.65 of the grow; each
+        row lands shell-FIRST at +ROW_CONTAINER_DELAY_S = 0.25s and its text
+        at +ROW_TEXT_DELAY_S = 0.4s after that beat, rows cascading at the
+        classic 0.12s stagger. These are Sniper design parameters: ~10 frames
+        reads as a push, not a slow wipe; the header waits until two
+        thirds of the panel is open so it never resolves on a sliver; a shell
+        registers 0.15s before its words. `build` is ignored (rail-push IS the
+        shell-first grammar) and exits target the FIELD, so the panel never
+        lingers. theme:"light" is designed for rail-push but is legal on
+        both entrances.
       - PROGRESSIVE POINT REVEAL (operator doctrine 2026-07-10, FAILURE_LEDGER
         LL-011): `rowLands` = comp-relative land seconds, ONE PER ACTIVE ROW
         (pipe/comma-separated; graphics_copy.fill_row_lands converts the
-        brain's word picks). When set, every row lands word-locked at its
-        time — in BOTH builds (classic stamp/skeleton and rail-push) — so a
+        editor's word picks). When set, every row lands word-locked at its
+        time in BOTH builds (classic stamp/skeleton and rail-push), so a
         3-point list reveals point 2 only as the speaker says it, never
-        all-at-once. Count mismatch vs active rows THROWS (fail loudly).
+        all-at-once. A count mismatch vs the active rows THROWS (fail loudly).
         plan_lint_visual.check_row_lands ERRORs a >=2-row longform rail
         without lands; empty keeps the legacy fixed stagger byte-identical.
-      - FOOTAGE PAIRING (defect report 2026-07-10 §1): the rail NEVER rides
+      - FOOTAGE PAIRING (defect report 2026-07-10): the rail NEVER rides
         fixed framing — the plan entry carries a face-anchored `recompose`
         (auto-stamped by scripts/producer/motion/recompose.py on longform) so
-        the FOOTAGE scales+pans eased WITH this grow ("bg sweeps WHILE face
-        shrinks to its new slot") and the subject lands centered in the
-        remaining 67%W. The move is footage-side (a role:"recompose" punch
-        window), not in this comp; plan_lint_smooth WARNs when it's missing.
+        the FOOTAGE scales+pans, eased, WITH the grow and the subject lands
+        centred in the remaining 67%W. The move is footage-side (a
+        role:"recompose" punch window), not in the comp; plan_lint_smooth
+        WARNs when it is missing. 634px = recompose width_frac 0.3302.
   -->
   <head>
     <meta charset="UTF-8" />
@@ -119,22 +148,30 @@
         background: transparent;
         font-family: var(--font);
       }
+      /* Glass-family text tokens (shared with glass-lower-third and
+         glass-takeover-bg). */
       :root {
         --glass-ink: #0a1a4d;
         --glass-slate: #5e687d;
         --peri: #879cff;
       }
-      #rail-root { position: relative; width: 1920px; height: 1080px; }
+      #rail-root {
+        position: relative; width: 1920px; height: 1080px;
+        /* Ink steps derived from the ink token (ratios in the header). */
+        --gr-ink-label: color-mix(in srgb, var(--rail-cream-ink, #131720) 72%, transparent);
+        --gr-ink-soft: color-mix(in srgb, var(--rail-cream-ink, #131720) 62%, transparent);
+        --gr-hairline: color-mix(in srgb, var(--rail-cream-ink, #131720) 12%, transparent);
+      }
       #rail-stage { will-change: transform, opacity, filter; }
 
       .glass {
         background: linear-gradient(155deg, rgba(255,255,255,0.90), rgba(238,244,255,0.78));
         backdrop-filter: blur(22px) saturate(160%);
         -webkit-backdrop-filter: blur(22px) saturate(160%);
-        border: 1.5px solid rgba(255,255,255,0.85);
-        border-radius: 24px;
-        box-shadow: 0 22px 52px rgba(10,26,77,0.30),
-                    inset 0 2px 0 rgba(255,255,255,0.95),
+        border: 1px solid rgba(255,255,255,0.85);
+        border-radius: 8px;
+        box-shadow: 0 18px 44px rgba(10,26,77,0.28),
+                    inset 0 1px 0 rgba(255,255,255,0.95),
                     inset 0 -1px 0 rgba(135,156,255,0.30);
       }
 
@@ -155,30 +192,31 @@
       }
       #rail-stage.side-right { left: auto; right: 96px; }
       #rail-eyebrow {
-        font-weight: 700;
-        font-size: 30px;
+        font-family: var(--eyebrow-font);
+        font-weight: 600;
+        font-size: 26px;
         line-height: 1;
-        letter-spacing: 2px;
+        letter-spacing: 0.12em;
         text-transform: uppercase;
-        /* LL-033: never float accent-colored type bare over footage — the navy-
-           wall shoot made the default #054BC9 eyebrow illegible. The eyebrow
-           rides its own glass pill (the rows' design language), the type goes
-           near-white, and the accent survives as the leading dot. */
+        /* LL-033: never float type bare over footage. The eyebrow rides its
+           own ink tab (the punch-kicker tab vocabulary), the type is
+           near-white, and the accent survives as the leading square marker. */
         display: inline-flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
         align-self: flex-start;
-        padding: 12px 18px;
-        border-radius: 10px;
-        background: rgba(10, 14, 26, 0.55);
+        padding: 12px 18px 12px 16px;
+        border-radius: 4px;
+        background: color-mix(in srgb, var(--rail-cream-ink, #131720) 84%, transparent);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         color: rgba(255, 255, 255, 0.92);
         will-change: transform, opacity;
       }
       #rail-eyebrow .dot {
-        width: 10px; height: 10px; border-radius: 50%;
+        width: 12px; height: 12px; border-radius: 2px;
         background: var(--accent);
+        box-shadow: 0 0 0 2px var(--rail-cream, #F1F4F6);  /* paper keyline */
         flex: 0 0 auto;
       }
       #rail-stack {
@@ -197,16 +235,17 @@
         flex: 0 0 auto;
         width: 84px;
         height: 84px;
-        border-radius: 22px;
+        border-radius: 6px;
         color: #ffffff;
-        font-weight: 900;
-        font-size: 42px;
+        font-family: var(--eyebrow-font);
+        font-weight: 600;
+        font-size: 38px;
         line-height: 1;
-        letter-spacing: -1px;
+        letter-spacing: -0.02em;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 10px 24px rgba(10,26,77,0.26);
+        box-shadow: 0 8px 20px rgba(10,26,77,0.24);
         will-change: transform;
       }
       .row-icon {
@@ -218,24 +257,25 @@
       }
       .row-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
       .row-title {
-        font-weight: 900;
+        font-family: var(--font-display);
+        font-weight: 700;
         font-size: 46px;
         line-height: 1.0;
-        letter-spacing: -1px;
+        letter-spacing: -0.015em;
         color: var(--glass-ink);
         white-space: nowrap;
       }
       .row-sub {
-        font-weight: 600;
+        font-weight: 400;
         font-size: 27px;
-        line-height: 1.05;
+        line-height: 1.1;
         color: var(--glass-slate);
         white-space: nowrap;
       }
 
-      /* ---- RAIL-PUSH field (MODULE T-B): grows from the anchored edge
-         0 -> 33%W (633.6px -> 634 even); overflow-hidden so the pinned,
-         fixed-width stage inside is REVEALED by the grow, never squished. */
+      /* ---- RAIL-PUSH field: grows from the anchored edge 0 -> 634px
+         (33%W); overflow-hidden so the pinned, fixed-width stage inside is
+         REVEALED by the grow, never squished. */
       #rail-field {
         position: absolute;
         top: 0;
@@ -253,42 +293,57 @@
       #rail-field .row { padding: 16px 22px; gap: 18px; }
       #rail-field .row-title { font-size: 36px; }
       #rail-field .row-sub { font-size: 22px; }
-      #rail-field .chip { width: 60px; height: 60px; font-size: 30px; border-radius: 16px; }
+      #rail-field .chip { width: 60px; height: 60px; font-size: 27px; border-radius: 5px; }
 
-      /* ---- LIGHT skin (MODULE T-B "light-in": cream field, ink type,
-         hairline white module rows, mono ink chips — tokens.css item 8).
-         The cream paints the FIELD only; a classic-entrance light rail keeps
-         a transparent stage (rows restyle, no cream panel). */
+      /* ---- LIGHT skin: cool-paper field, ink type, hairline white rows,
+         mono ink numerals. The paper paints the FIELD only; a classic-
+         entrance light rail keeps a transparent stage (rows restyle, no
+         paper panel) and its eyebrow rides a white tab. */
       #rail-field.theme-light {
-        background: var(--rail-cream, #f0f0e6);
+        background-color: var(--rail-cream, #F1F4F6);
+        background-image:
+          radial-gradient(circle at 1px 1px, rgba(19, 23, 32, 0.09) 1.2px, transparent 1.6px),
+          radial-gradient(ellipse 760px 520px at 0% 0%, rgba(68, 123, 228, 0.09), transparent 70%);
+        background-size: 48px 48px, 100% 100%;
+      }
+      #rail-field.theme-light.side-right {
+        background-image:
+          radial-gradient(circle at 1px 1px, rgba(19, 23, 32, 0.09) 1.2px, transparent 1.6px),
+          radial-gradient(ellipse 760px 520px at 100% 0%, rgba(68, 123, 228, 0.09), transparent 70%);
       }
       .theme-light .glass {
-        background: #ffffff;
+        background: #FFFFFF;
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
-        border: 1px solid rgba(26, 26, 26, 0.14);   /* the 1px hairline */
-        border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(26, 26, 26, 0.06);
+        border: 1px solid var(--gr-hairline);   /* the 1px hairline */
+        border-radius: 5px;
+        box-shadow: 0 1px 3px rgba(19, 23, 32, 0.06);
       }
       .theme-light #rail-eyebrow {
-        font-family: var(--eyebrow-font);
-        font-size: 24px;
-        letter-spacing: 4px;
-        color: rgba(26, 26, 26, 0.72);
-        display: flex; align-items: center; gap: 14px;
+        font-size: 23px;
+        letter-spacing: 0.18em;
+        color: var(--gr-ink-label);
+        background: #FFFFFF;
+        border: 1px solid var(--gr-hairline);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+      }
+      #rail-field.theme-light #rail-eyebrow {
+        background: transparent;               /* the paper is its backing */
+        border-color: transparent;
+        padding-left: 0;
       }
       .theme-light #rail-eyebrow .dot {
-        width: 12px; height: 12px; border-radius: 50%;
-        background: var(--accent-process, #35b6d9);
-        flex: 0 0 auto;
+        background: var(--accent-process, #447BE4);
+        box-shadow: none;
       }
-      .theme-light .row-title { color: var(--rail-cream-ink, #1a1a1a); }
-      .theme-light .row-sub { color: rgba(26, 26, 26, 0.58); }
+      .theme-light .row-title { color: var(--rail-cream-ink, #131720); }
+      .theme-light .row-sub { color: var(--gr-ink-soft); }
       .theme-light .chip {
         background: transparent !important;   /* JS palette loses to the skin */
-        color: rgba(26, 26, 26, 0.55);
+        color: var(--gr-ink-soft);
         font-family: var(--eyebrow-font);
-        font-weight: 700;
+        font-weight: 600;
         font-size: 26px;
         letter-spacing: 0;
         box-shadow: none;
@@ -356,14 +411,15 @@
           build: "stamp", exit: "fade",
           entrance: "slide", theme: "glass",
         };
-        // PREVIEW-ONLY demo content. Activates ONLY when EVERY row variable is
-        // unset (a bare preview/render with no --variables) so the template
-        // still demos itself; any plan that sets a row gets EXACTLY its rows.
+        // PREVIEW-ONLY demo content (original Sniper sample copy). Activates
+        // ONLY when EVERY row variable is unset (a bare preview/render with no
+        // --variables) so the template still demos itself; any plan that sets
+        // a row gets EXACTLY its rows.
         const SAMPLE = {
           eyebrow: "The pipeline · raw → finished",
           title1: "Intake", sub1: "copy raw in",
           title2: "Rough cut", sub2: "transcribe · kill filler",
-          title3: "Graphics", sub3: "liquid-glass",
+          title3: "Graphics", sub3: "cards · lower thirds",
           title4: "Captions", sub4: "on-beat burn-in",
           title5: "Music", sub5: "flat bed",
           title6: ["Ex", "port"].join(""), sub6: "final.mp4",
@@ -385,9 +441,9 @@
         const dir = side === "right" ? 1 : -1;
         if (side === "right") document.getElementById("rail-stage").classList.add("side-right");
 
-        // MODULE item 8 — rail-push entrance + light skin. The field is
-        // created ONLY for rail-push (the default DOM stays byte-identical);
-        // it wraps the stage so the 0->33%W width-grow REVEALS the content.
+        // Rail-push entrance + light skin. The field is created ONLY for
+        // rail-push (the default DOM stays byte-identical); it wraps the
+        // stage so the 0->33%W width-grow REVEALS the content.
         const railPush = String(vars.entrance) === "rail-push";
         const light = String(vars.theme) === "light";
         let field = null;
@@ -401,8 +457,14 @@
         }
         if (light) (field || document.getElementById("rail-stage")).classList.add("theme-light");
 
-        // Chip 1 = the brand accent; rows 2..6 rotate a fixed on-brand palette.
-        const CHIP_COLORS = [vars.accent, "#3B82F6", "#7C5CF0", "#E8895A", "#E85AA8", "#43C478"];
+        // Chip 1 = exactly the accent; chips 2..6 step the accent toward ink
+        // (12% per step) so the column reads as an ordered sequence.
+        const CHIP_COLORS = [vars.accent,
+          "color-mix(in srgb, var(--accent) 88%, #131720)",
+          "color-mix(in srgb, var(--accent) 76%, #131720)",
+          "color-mix(in srgb, var(--accent) 64%, #131720)",
+          "color-mix(in srgb, var(--accent) 52%, #131720)",
+          "color-mix(in srgb, var(--accent) 40%, #131720)"];
 
         function iconSrc(raw) {
           const v = (raw == null ? "" : String(raw)).trim();
@@ -416,14 +478,14 @@
         if (!ebText) {
           eyebrow.remove();
         } else if (light) {
-          // Light skin: mono eyebrow led by the cyan PROCESS dot (§3 rank 3/6).
+          // Light skin: mono eyebrow led by the square PROCESS marker.
           const dot = document.createElement("span");
           dot.className = "dot";
           eyebrow.appendChild(dot);
           eyebrow.appendChild(document.createTextNode(ebText));
         } else {
-          // Glass skin: accent lives in the leading dot (LL-033) — the type
-          // itself stays near-white on the eyebrow's own glass pill.
+          // Glass skin: the accent lives in the leading marker (LL-033) — the
+          // type itself stays near-white on the eyebrow's own ink tab.
           const dot = document.createElement("span");
           dot.className = "dot";
           eyebrow.appendChild(dot);
@@ -444,7 +506,7 @@
           const chip = row.querySelector(".chip");
           chip.textContent = (vars["num" + n] == null ? String(n) : String(vars["num" + n])).trim() || String(n);
           chip.style.background = CHIP_COLORS[i % CHIP_COLORS.length];
-          // Icon slot: real mark only when set (R12, emoji-free); created on
+          // Icon slot: real mark only when set (emoji-free); created on
           // demand so the no-icon path leaves no empty media node (lint-clean).
           const src = iconSrc(vars["icon" + n]);
           if (src) {
@@ -485,21 +547,21 @@
           }
         }
 
-        // MODULE T-B rail-push constants (frame-verified vs the study:
-        // grow 0->33%W in ~330ms power-out; headline ghost->ink from ~65% of
-        // the grow; rows land +250ms container / +400ms text after it).
+        // Rail-push timing (Sniper design parameters, see header): grow
+        // 0->33%W in 0.33s power-out; the eyebrow resolves from 65% of the
+        // grow; rows land shell +0.25s / text +0.40s after that beat.
         const RAIL_PUSH_S = 0.33;
         const HEADLINE_AT_GROWTH = 0.65;
         const ROW_CONTAINER_DELAY_S = 0.25;
         const ROW_TEXT_DELAY_S = 0.4;
 
         if (railPush) {
-          // Item 8: the field width-grows from the anchored edge while the
-          // live video keeps playing beside it (alpha overlay — no cut).
-          // rail-push OWNS the build (`build` is ignored): headline is an
-          // in-place opacity ramp at 65% growth; every row is container-
-          // FIRST (+0.25s shell / +0.40s text after the headline, cascading
-          // at the classic 0.12s row stagger).
+          // The field width-grows from the anchored edge while the live
+          // video keeps playing beside it (alpha overlay — no cut).
+          // rail-push OWNS the build (`build` is ignored): the eyebrow is an
+          // in-place opacity ramp at 65% growth; every row is shell-FIRST
+          // (+0.25s shell / +0.40s text after that beat, cascading at the
+          // classic 0.12s row stagger).
           tl.fromTo("#rail-field", { width: 0 },
             { width: 634, duration: RAIL_PUSH_S, ease: "power2.out" }, 0);
           const headAt = RAIL_PUSH_S * HEADLINE_AT_GROWTH;
@@ -515,7 +577,7 @@
           // Eyebrow header lands first, then rows stamp in top->bottom (sliding
           // in from the anchored side — mirrored when side="right"). In the
           // skeleton-first build the eyebrow is an in-place opacity ramp
-          // (MODULE rank 4 — text never travels).
+          // (text never travels).
           if (ebText) {
             if (skeleton) {
               M.textRamp(tl, eyebrow, 0);
@@ -529,23 +591,23 @@
             const at = rowLands ? rowLands[i] : 0.18 + i * STAGGER;
             const land = Math.min(at, Math.max(0, D - 0.6));
             if (skeleton) {
-              // MODULE rank 2 / T-C layer 4: the glass shell + chip land
-              // first; the row's TEXT ramps in place SKELETON_GAP_S later.
+              // Shell + chip land first; the row's TEXT ramps in place
+              // SKELETON_GAP_S later.
               M.skeletonFirst(tl, a.row, a.body, { at: land });
               return;
             }
             tl.set(a.row, { opacity: 0, x: 40 * dir, scale: 0.94 }, 0);
             tl.set(a.chip, { scale: 0.3 }, 0);
             tl.to(a.row, { opacity: 1, x: 0, scale: 1, duration: 0.46, ease: "back.out(1.6)" }, land);
-            // Chip pops just after its row lands (liquid-glass "pop the chips").
+            // The chip pops just after its row lands.
             tl.to(a.chip, { scale: 1, duration: 0.4, ease: "back.out(2.6)" }, land + 0.08);
           });
         }
 
-        // Exit: blur-recede (MODULE T-D — the rail is an alpha layer, so
-        // only the graphics blur/fade; the face below stays sharp) or the
-        // classic fade — either ends exactly at D (timeline == render length).
-        // rail-push exits the FIELD (the cream must never outlive the stage).
+        // Exit: blur-recede (the rail is an alpha layer, so only the
+        // graphics blur/fade; the face below stays sharp) or the classic
+        // fade — each ends exactly at D (timeline == render length).
+        // rail-push exits the FIELD (the panel must never outlive the stage).
         const exitTarget = railPush ? "#rail-field" : "#rail-stage";
         if (String(vars.exit) === "blur-recede") {
           M.blurRecede(tl, exitTarget, D - M.EXIT_BLUR_S);

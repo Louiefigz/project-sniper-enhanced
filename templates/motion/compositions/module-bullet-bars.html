@@ -2,64 +2,83 @@
 <html
   lang="en"
   data-composition-variables='[
-    {"id":"eyebrow","type":"string","label":"Eyebrow microtext (mono caps + dot; empty = omit)","default":""},
-    {"id":"eyebrowAccent","type":"enum","label":"Eyebrow dot semantic accent","default":"ink","options":[{"value":"ink","label":"Ink (neutral)"},{"value":"process","label":"Process (cyan)"},{"value":"result","label":"Result (lime)"}]},
+    {"id":"eyebrow","type":"string","label":"Eyebrow microtext (mono caps + square marker; empty = omit)","default":""},
+    {"id":"eyebrowAccent","type":"enum","label":"Eyebrow marker semantic accent","default":"ink","options":[{"value":"ink","label":"Ink (neutral)"},{"value":"process","label":"Process (blue)"},{"value":"result","label":"Result (amber)"}]},
     {"id":"headlineLines","type":"string","label":"Thesis headline, pipe-separated lines (2 max)","default":""},
     {"id":"explainer","type":"string","label":"1-2 line gray explainer (empty = omit)","default":""},
     {"id":"axisLabel","type":"string","label":"Axis / cap label (mono, above the tracks; empty = omit)","default":""},
     {"id":"bars","type":"string","label":"Bullet bars, pipe-separated: num~value~pct (pct 0-100 of the axis; value lands WITH the tip)","default":""},
-    {"id":"threshPct","type":"number","label":"Amber threshold tick position (0-100 of the track)","default":100,"min":0,"max":100,"step":1},
-    {"id":"verdict","type":"string","label":"Verdict footnote (lime mono + dot, lands after the bars; empty = omit)","default":""},
-    {"id":"spectrum","type":"string","label":"Spectrum rail, pipe-separated 2-3 labels (BEGINNING|VOICE HELD|END; empty = omit)","default":""},
+    {"id":"threshPct","type":"number","label":"Limit tick position (red; 0-100 of the track)","default":100,"min":0,"max":100,"step":1},
+    {"id":"verdict","type":"string","label":"Verdict footnote (mono + amber square marker, lands after the bars; empty = omit)","default":""},
+    {"id":"spectrum","type":"string","label":"Spectrum rail, pipe-separated 2-3 labels (e.g. FIRST PASS|PACING HELD|FINAL; empty = omit)","default":""},
     {"id":"moduleLands","type":"string","label":"Narration-paced lands (s, comp-relative, pipe/comma) — one per PRESENT module [head, chart, verdict, spectrum]; empty = 0.2 + k*0.9","default":""},
     {"id":"exit","type":"enum","label":"Exit","default":"hold","options":[{"value":"hold","label":"Hold to end (compositor owns the seam)"},{"value":"blur-recede","label":"Blur-recede 0.15s (whole field — the face beside stays sharp)"}]}
   ]'
 >
   <!--
     PROJECT SNIPER · LONG-FORM template: MODULE-BULLET-BARS (16:9, 1920x1080)
-    Reference: docs/studies/MODULE_CARDS.md §1.2 form #12 — bullet-bar chart (CREAM
-    split-panel chassis), 94.5-104s:
-      `• VOICE CONSISTENCY / Four short generations.`; axis `0 ... 60 SEC
-      PRODUCTION CAP`; 4 lime-on-gray bullet bars 40.4/48.1/47.4/45.4 vs an
-      AMBER threshold tick at the cap; footnote `• 4 OF 4 UNDER 60 SEC`
-      (lime); spectrum rail `BEGINNING —— VOICE HELD —— END`.
-    Info pattern: measured bars vs a limit line + verdict footnote — the
-    "measurements vs a limit" proof lane (§1.4). Build: bars fill, verdict
-    footnote last (§1.2 #12). Evidence: contact sheet state 034_t0094.5.
-    (This window is also the doc's method-note frame band: found by the
-    0.5s-step contact pass.) Timing +-1 frame (~40ms); N=1 priors.
+    Measurements against a limit, on the light paper panel. A cool-paper field
+    grows out of the LEFT edge into a 720px column beside the presenter and
+    carries an eyebrow, a thesis headline, an optional explainer, a chart card
+    of bullet bars that all share one limit tick, a verdict footnote and an
+    optional spectrum rail. The presenter keeps playing, full-frame, right.
+    Information shape: "each value vs one limit, then the verdict".
+
+    SNIPER DESIGN (tokens.css light module surface; the module-rail twin):
+      - Field = --rail-cream (cool paper #F1F4F6) with a faint 48px ink dot
+        field and a faint process-blue glow in the top-left corner.
+      - Eyebrow = --eyebrow-font (IBM Plex Mono 600) caps led by a square
+        marker; headline = --font-display (Bricolage Grotesque 800) in
+        --rail-cream-ink; explainer = --font (Inter 400); every axis label,
+        row number, value, verdict and spectrum label = Plex Mono.
+      - Chart = one white card, 5px corners, 1px ink hairline. Empty tracks
+        are paper-filled; fills are --accent-result (amber: the result);
+        the shared limit tick is --accent-warn (red: limits only)
+        with a 1.5px white keyline so it stays distinct where a fill runs
+        through it.
+      - Contrast (WCAG 2.x, computed from the tokens.css values):
+          ink #131720 on paper 16.23:1, on the white card 17.93:1
+          ink 72% (eyebrow) 6.78:1 on paper; ink 62% (explainer, axis,
+            row numbers, spectrum) 4.85:1 on paper, 5.02:1 on white
+          amber fill vs its paper track 3.18:1; red tick on white 4.72:1
+          square markers: process 3.66:1 / result 3.18:1 on paper
+      - Red appears ONLY as the limit tick; amber marks the result.
 
     CONTRACT for the PRODUCER compositing stage:
       - ALPHA OVERLAY, anchor "free-band" (render --format mov). NOT
-        own-screen — the cream panel wipes in from the LEFT edge (~0.3s,
-        HARD vertical edge) and the live footage stays full-frame right; the
-        face is NEVER covered (§1.1). Settled width 720px = 37.5%W — inside
-        the §1.1 measured 33-40% band; the chart needs the wider end for bar
-        runway. Pair the plan entry with the face-anchored `recompose` move
-        (footage face lands centered in the remaining ~62%W).
-      - Bar grammar (§1.3 + STUDY §3 rank 7): chart panel + labels + empty
-        tracks + amber tick land as a SKELETON, one unit; fills start
-        +SKELETON_GAP_S (MG-1 skeleton -> hold -> fill); every fill runs
-        BAR_FILL_S=0.75 power1.out (§1.3 "bar fills 0.75-1.0s"; the #9 lime
-        fill ~0.75s); each VALUE LABEL lands WITH its bar tip (rank 7).
-        Bars all fill from the same beat — the module land is the narration
-        lock; the verdict is the payoff and lands on ITS land, after.
-      - AMBER IS RESERVED (§1.1): the threshold tick is the only amber in
-        this comp. threshPct outside [0,100] FAILS LOUDLY; pct > 100 (a bar
-        over the cap) FAILS LOUDLY too — an over-limit measurement is a
-        DIFFERENT story the brain must tell another way, not a clipped bar.
+        own-screen: the field grows from the LEFT edge with a HARD vertical
+        edge (RAIL_WIPE_S = 0.3s power2.out) and settles at RAIL_WIDTH_PX =
+        720 (37.5%W). 720px is a geometry pin: it equals producer_config's
+        recompose width_frac 0.375 for the kind — wider than module-rail's
+        634px because the bars need runway — and the face-anchored
+        `recompose` move re-centres the presenter in the remaining ~62%W.
+        The face is never covered.
+      - Chart grammar: the card, its labels, the empty tracks and the limit
+        tick land as ONE skeleton; every fill starts +SKELETON_GAP_S
+        later and runs BAR_FILL_S = 0.75s power1.out (Sniper design parameter:
+        long enough for the eye to follow the bars toward the limit, short
+        enough that the payoff lands inside one spoken clause). Each VALUE
+        label lands WITH its bar tip. All bars fill on the same beat — the
+        chart land is the narration lock; the verdict is the payoff and
+        lands on ITS OWN land, after the bars.
+      - threshPct outside [0,100] FAILS LOUDLY; a bar pct outside [0,100]
+        FAILS LOUDLY too — an over-limit value is a separate story for the
+        editor to tell with a different form, never a clipped bar.
+      - Headline: at most 2 pipe-separated lines (more FAILS LOUDLY).
       - moduleLands: one land per PRESENT module in order [head, chart,
-        verdict, spectrum]. Count mismatch FAILS LOUDLY. Empty = 0.2 + k*0.9.
-      - UNSET content renders NOTHING (G21); the SAMPLE (form #12 verbatim)
-        activates only when EVERY content variable is unset.
+        verdict, spectrum]. A count mismatch FAILS LOUDLY. Empty =
+        LAND_DEFAULT_START_S + k * LAND_DEFAULT_GAP_S (0.2 + k*0.9s: one
+        module per spoken clause at a relaxed pace).
+      - UNSET content renders NOTHING (G21). The SAMPLE below (original Sniper
+        preview copy) activates only when EVERY content variable is unset.
       - RENDER LENGTH is the root data-duration ATTRIBUTE (graphics_render
         rewrites it per window; --variables never sets it).
-      - exit:"blur-recede" (T-D) targets the WHOLE FIELD (alpha layer; the
-        cream never outlives the stage). Default "hold".
-      - Brandable via CSS vars: --rail-cream / --rail-cream-ink /
-        --accent-result / --accent-process / --accent-warn (reference values
-        are the fallbacks; amber's hex is a token default — the study fixes
-        amber's ROLE, not a value).
+      - exit:"blur-recede" targets the WHOLE FIELD (an alpha layer, so the
+        face beside it stays sharp and the paper never outlives the stage).
+        Default "hold" = hard-off on the cut (the compositor owns the seam).
+      - Re-tint through the tokens: --rail-cream / --rail-cream-ink /
+        --accent-result / --accent-process / --accent-warn (each fallback hex
+        below equals the tokens.css value).
   -->
   <head>
     <meta charset="UTF-8" />
@@ -77,9 +96,16 @@
         background: transparent;
         font-family: var(--font);
       }
-      #nbb-root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+      #nbb-root {
+        position: relative; width: 1920px; height: 1080px; overflow: hidden;
+        /* Ink steps derived from the ink token (ratios in the header). */
+        --nbb-ink: var(--rail-cream-ink, #131720);
+        --nbb-ink-label: color-mix(in srgb, var(--rail-cream-ink, #131720) 72%, transparent);
+        --nbb-ink-soft: color-mix(in srgb, var(--rail-cream-ink, #131720) 62%, transparent);
+        --nbb-hairline: color-mix(in srgb, var(--rail-cream-ink, #131720) 12%, transparent);
+      }
 
-      /* Cream field: grows 0 -> 720px (37.5%W) from the LEFT edge — hard
+      /* Paper field: grows 0 -> 720px (37.5%W) from the LEFT edge — hard
          vertical edge; overflow-hidden reveals the pinned stage. */
       #nbb-field {
         position: absolute;
@@ -87,7 +113,11 @@
         width: 720px;
         height: 1080px;
         overflow: hidden;
-        background: var(--rail-cream, #f0f0e6);
+        background-color: var(--rail-cream, #F1F4F6);
+        background-image:
+          radial-gradient(circle at 1px 1px, rgba(19, 23, 32, 0.09) 1.2px, transparent 1.6px),
+          radial-gradient(ellipse 820px 540px at 0% 0%, rgba(68, 123, 228, 0.09), transparent 70%);
+        background-size: 48px 48px, 100% 100%;
         will-change: width, opacity, filter;
       }
       #nbb-stage {
@@ -104,47 +134,48 @@
       #nbb-eyebrow {
         display: flex; align-items: center; gap: 14px;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 24px; line-height: 1;
-        letter-spacing: 4px; text-transform: uppercase;
-        color: rgba(26, 26, 26, 0.72);
+        font-weight: 600; font-size: 23px; line-height: 1;
+        letter-spacing: 0.18em; text-transform: uppercase;
+        color: var(--nbb-ink-label);
       }
       #nbb-eyebrow .dot {
-        width: 12px; height: 12px; border-radius: 50%;
-        background: var(--rail-cream-ink, #1a1a1a);
+        width: 12px; height: 12px; border-radius: 2px;
+        background: var(--nbb-ink);
         flex: 0 0 auto;
       }
-      #nbb-eyebrow.process .dot { background: var(--accent-process, #35b6d9); }
-      #nbb-eyebrow.result .dot { background: var(--accent-result, #c6f542); }
+      #nbb-eyebrow.process .dot { background: var(--accent-process, #447BE4); }
+      #nbb-eyebrow.result .dot { background: var(--accent-result, #CC7200); }
 
       #nbb-headline {
+        font-family: var(--font-display);
         font-weight: 800;
         font-size: 60px;
-        line-height: 1.06;
-        letter-spacing: -1.5px;
-        color: var(--rail-cream-ink, #1a1a1a);
+        line-height: 1.02;
+        letter-spacing: -0.02em;
+        color: var(--nbb-ink);
       }
       #nbb-headline .line { display: block; will-change: opacity; }
 
       #nbb-explainer {
-        font-weight: 500; font-size: 25px; line-height: 1.32;
-        color: rgba(26, 26, 26, 0.58);
+        font-weight: 400; font-size: 25px; line-height: 1.34;
+        color: var(--nbb-ink-soft);
       }
 
-      /* Chart panel — white hairline card; label | track | value grid. */
+      /* Chart card — white, 1px hairline; label | track | value grid. */
       #nbb-chart {
-        background: #ffffff;
-        border: 1px solid rgba(26, 26, 26, 0.12);
-        border-radius: 8px;
+        background: #FFFFFF;
+        border: 1px solid var(--nbb-hairline);
+        border-radius: 5px;
         padding: 24px 26px;
-        box-shadow: 0 2px 8px rgba(26, 26, 26, 0.05);
+        box-shadow: 0 1px 3px rgba(19, 23, 32, 0.06);
         display: flex; flex-direction: column; gap: 22px;
       }
       #nbb-axis {
         display: flex; justify-content: space-between;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 16px;
-        letter-spacing: 2px; text-transform: uppercase;
-        color: rgba(26, 26, 26, 0.5);
+        font-weight: 600; font-size: 16px;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        color: var(--nbb-ink-soft);
       }
       .bar-row {
         display: grid;
@@ -154,61 +185,63 @@
       }
       .bar-num {
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 17px;
-        color: rgba(26, 26, 26, 0.45);
+        font-weight: 600; font-size: 17px;
+        color: var(--nbb-ink-soft);
       }
       .bar-track {
         position: relative;
         height: 16px;
-        background: rgba(26, 26, 26, 0.08);
-        border-radius: 4px;
+        background: var(--rail-cream, #F1F4F6);
+        box-shadow: inset 0 0 0 1px var(--nbb-hairline);
+        border-radius: 3px;
       }
       .bar-fill {
         position: absolute; left: 0; top: 0; bottom: 0;
         width: 0;
-        border-radius: 4px;
-        background: var(--accent-result, #c6f542);
+        border-radius: 3px;
+        background: var(--accent-result, #CC7200);
       }
-      /* The amber limit tick — the ONLY amber in the comp (§1.1 reserved). */
+      /* The limit tick — the ONLY red in the comp (limits/failures only). */
       .bar-tick {
         position: absolute; top: -5px; bottom: -5px;
         width: 3px;
-        border-radius: 1.5px;
-        background: var(--accent-warn, #e8a13c);
+        border-radius: 1px;
+        background: var(--accent-warn, #D33B36);
+        box-shadow: 0 0 0 1.5px #FFFFFF;
       }
       .bar-value {
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 19px;
-        color: var(--rail-cream-ink, #1a1a1a);
+        font-weight: 600; font-size: 19px;
+        color: var(--nbb-ink);
         text-align: right;
         will-change: opacity;
       }
 
-      /* Verdict footnote — lime mono + dot (the payoff, lands after bars). */
+      /* Verdict footnote — mono caps led by an amber square (the payoff). */
       #nbb-verdict {
         display: flex; align-items: center; gap: 12px;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 20px;
-        letter-spacing: 2.5px; text-transform: uppercase;
-        color: var(--rail-cream-ink, #1a1a1a);
+        font-weight: 600; font-size: 20px;
+        letter-spacing: 0.14em; text-transform: uppercase;
+        color: var(--nbb-ink);
       }
       #nbb-verdict .dot {
-        width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto;
-        background: var(--accent-result, #c6f542);
+        width: 10px; height: 10px; border-radius: 2px; flex: 0 0 auto;
+        background: var(--accent-result, #CC7200);
       }
 
       /* Spectrum rail: mono labels joined by hairline segments. */
       #nbb-spectrum {
         display: flex; align-items: center; gap: 16px;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 16px;
-        letter-spacing: 2.5px; text-transform: uppercase;
-        color: rgba(26, 26, 26, 0.55);
+        font-weight: 600; font-size: 16px;
+        letter-spacing: 0.14em; text-transform: uppercase;
+        color: var(--nbb-ink-soft);
       }
       #nbb-spectrum .seg {
         flex: 1 1 auto;
-        height: 2px;
-        background: rgba(26, 26, 26, 0.2);
+        height: 1px;
+        background: color-mix(in srgb, var(--rail-cream-ink, #131720) 24%, transparent);
       }
     </style>
   </head>
@@ -242,10 +275,10 @@
         const D = parseFloat(root.dataset.duration) || 8;
         const M = window.__motionTokens;
 
-        // Measured constants:
-        const RAIL_WIPE_S = 0.3;      // §1.1 left-edge wipe ~0.3s
-        const RAIL_WIDTH_PX = 720;    // 37.5%W (§1.1 33-40% band, wide end)
-        const BAR_FILL_S = 0.75;      // §1.3 bar fills 0.75-1.0s (#9 ~0.75s)
+        // Sniper design parameters (see header):
+        const RAIL_WIPE_S = 0.3;      // left-edge grow, hard vertical edge
+        const RAIL_WIDTH_PX = 720;    // 37.5%W (recompose width_frac 0.375)
+        const BAR_FILL_S = 0.75;      // every bar fill, power1.out
         const LINE_STAGGER_S = 0.12;
         const LAND_DEFAULT_START_S = 0.2;
         const LAND_DEFAULT_GAP_S = 0.9;
@@ -257,16 +290,17 @@
         };
         const CONTENT_KEYS = ["eyebrow", "headlineLines", "explainer",
           "axisLabel", "bars", "verdict", "spectrum"];
-        // PREVIEW-ONLY demo — form #12 verbatim (94.5-104s).
+        // PREVIEW-ONLY demo (original Sniper sample copy). It activates ONLY
+        // when every content variable is unset (G21).
         const SAMPLE = {
-          eyebrow: "VOICE CONSISTENCY",
-          headlineLines: "Four short generations.",
-          explainer: "Each section stayed below a self-imposed 60-second production cap.",
-          axisLabel: "60 SEC PRODUCTION CAP",
-          bars: "01~40.4~67|02~48.1~80|03~47.4~79|04~45.4~76",
+          eyebrow: "RENDER TIMES",
+          headlineLines: "Four review passes.",
+          explainer: "Every pass finished inside the two-minute render budget we set.",
+          axisLabel: "120 SEC RENDER BUDGET",
+          bars: "01~84.2~70|02~96.5~80|03~91.3~76|04~88.0~73",
           threshPct: 100,
-          verdict: "4 OF 4 UNDER 60 SEC",
-          spectrum: "BEGINNING|VOICE HELD|END",
+          verdict: "4 OF 4 INSIDE BUDGET",
+          spectrum: "FIRST PASS|PACING HELD|FINAL",
         };
         const HF = window.__hyperframes;
         let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
@@ -296,7 +330,7 @@
           const lines = heads.split("|").map(function (s) { return s.trim(); });
           if (lines.length > 2) {
             throw new Error("module-bullet-bars: headlineLines is 2 lines " +
-              "max (§1.1 thesis grammar), got " + lines.length);
+              "max (thesis headline), got " + lines.length);
           }
           lines.forEach(function (line) {
             const el = document.createElement("span");
@@ -321,7 +355,7 @@
             vars.threshPct + "'");
         }
 
-        // Bars: num~value~pct rows; the amber tick rides every track.
+        // Bars: num~value~pct rows; the limit tick rides every track.
         const chartEl = document.getElementById("nbb-chart");
         const axisText = str("axisLabel");
         if (axisText) document.getElementById("nbb-axis-label").textContent = axisText;
@@ -419,7 +453,7 @@
         window.__timelines = window.__timelines || {};
         const tl = gsap.timeline({ paused: true });
 
-        // Field wipes in from the LEFT edge (hard vertical edge, §1.1).
+        // Field grows in from the LEFT edge (hard vertical edge).
         tl.fromTo("#nbb-field", { width: 0 },
           { width: RAIL_WIDTH_PX, duration: RAIL_WIPE_S, ease: "power2.out" }, 0);
 
@@ -428,21 +462,21 @@
           let headAt = t0;
           if (ebText) {
             M.textRamp(tl, ebEl, t0);
-            headAt = t0 + M.EYEBROW_LEAD_S;     // eyebrow leads (rank 3)
+            headAt = t0 + M.EYEBROW_LEAD_S;     // the eyebrow leads the headline
           }
           let lastAt = headAt;
           if (heads) {
             headEl.querySelectorAll(".line").forEach(function (lineEl, j) {
               lastAt = headAt + j * LINE_STAGGER_S;
-              M.textRamp(tl, lineEl, lastAt);   // in-place ghost-resolve
+              M.textRamp(tl, lineEl, lastAt);   // in-place opacity ramp
             });
           }
           if (expText) M.textRamp(tl, expEl, lastAt + LINE_STAGGER_S);
         }
 
-        // Chart: skeleton (panel + labels + empty tracks + amber tick) lands
-        // as ONE unit, THEN the fills start +SKELETON_GAP_S (MG-1). Fills
-        // run 0.75s power1.out; each value label lands WITH its tip (rank 7).
+        // Chart: the skeleton (card + labels + empty tracks + limit tick)
+        // lands as ONE unit, THEN the fills start +SKELETON_GAP_S. Fills run
+        // BAR_FILL_S power1.out; each value label lands WITH its tip.
         if (landOf.chart != null) {
           const tC = landOf.chart;
           M.textRamp(tl, chartEl, tC);
@@ -455,13 +489,13 @@
           });
         }
 
-        // Verdict = the payoff footnote, lands on ITS narration land (after
-        // the bars — §1.2 #12 "bars fill, verdict footnote last").
+        // Verdict = the payoff footnote; it lands on ITS narration land,
+        // after the bars.
         if (landOf.verdict != null) M.textRamp(tl, verdictEl, landOf.verdict);
         if (landOf.spectrum != null) M.textRamp(tl, specEl, landOf.spectrum);
 
-        // exit:"blur-recede" (T-D): the whole FIELD (alpha layer — the live
-        // face beside it stays sharp; cream never outlives the stage).
+        // exit:"blur-recede": the whole FIELD (alpha layer — the live face
+        // beside it stays sharp; the paper never outlives the stage).
         if (String(vars.exit) === "blur-recede") {
           M.blurRecede(tl, "#nbb-field", D - M.EXIT_BLUR_S);
         }

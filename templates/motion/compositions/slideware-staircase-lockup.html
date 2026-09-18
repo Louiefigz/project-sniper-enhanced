@@ -3,8 +3,8 @@
   lang="en"
   data-composition-variables='[
     {"id":"kicker","type":"string","label":"Kicker (sentence case; wrap payload words in *asterisks* for bold)","default":""},
-    {"id":"payload","type":"string","label":"Payload (renders ALL-CAPS in lime)","default":""},
-    {"id":"coWord","type":"string","label":"Co-word (white, lands right-below the payload)","default":""},
+    {"id":"payload","type":"string","label":"Payload (renders ALL-CAPS in the accent on an ink plate)","default":""},
+    {"id":"coWord","type":"string","label":"Co-word (paper tab, lands right-below the payload)","default":""},
     {"id":"payload2","type":"string","label":"Replace-chain payload 2 (empty = off)","default":""},
     {"id":"payload3","type":"string","label":"Replace-chain payload 3 (empty = off)","default":""},
     {"id":"band","type":"enum","label":"Vertical band","default":"headroom","options":[{"value":"headroom","label":"Headroom (section steps)"},{"value":"chest","label":"Chest (action payloads / shouts)"}]},
@@ -14,20 +14,31 @@
     {"id":"coAt","type":"number","label":"Co-word pop (s; 0.3-0.9s after payload)","default":0.75,"min":0,"max":30,"step":0.05,"unit":"s"},
     {"id":"replaceAt2","type":"number","label":"Swap to payload 2 at (s; 0 = off)","default":0,"min":0,"max":30,"step":0.05,"unit":"s"},
     {"id":"replaceAt3","type":"number","label":"Swap to payload 3 at (s; 0 = off)","default":0,"min":0,"max":30,"step":0.05,"unit":"s"},
-    {"id":"accent","type":"color","label":"Payload lime","default":"#C9FB00"}
+    {"id":"accent","type":"color","label":"Payload accent (default: Sniper signal amber --lemon)","default":"#FDA933"}
   ]'
 >
   <!--
-    PROJECT SNIPER · Motion template: SLIDEWARE-STAIRCASE-LOCKUP (slideware pack #2)
-    Reference: kicker / lime payload / co-word staircase + in-place caption
-    shout — 4/4 studied reels, ~40 sightings (extends the Punch G3 lockup with
-    a lime + extended-grotesque variant — NOT serif).
+    PROJECT SNIPER · Motion template: SLIDEWARE-STAIRCASE-LOCKUP (short-form slide set, 2 of 4)
+    A three-step keyword lockup over footage: a sentence-case kicker, a big
+    ALL-CAPS payload, and a short co-word that steps down to the RIGHT of
+    the payload, so the three rows read as a staircase. Each token pops on
+    its spoken word; the payload can be swapped in place (replace-chain).
     Transparent 1080x1920 overlay -> render `--format mov` (ProRes 4444).
 
-    HER STRUCTURE/MOTION, OUR TOKENS: white kicker (sentence case, payload
-    words bold), ALL-CAPS lime ExtraBold extended-grotesque payload (house
-    Inter 900 + scaleX 1.06 approximates the Archivo Black / Montserrat 900
-    class), white co-word offset RIGHT-BELOW. Soft dark shadow, NO box/stroke.
+    SNIPER DESIGN (the short-form slide set — same plates, paper and amber
+    as slideware-takeover-deck / -receipt-cell / -caption-dual-mode):
+      - Kicker = Inter 400 white on a small ink tab (rgba(19,23,32,0.84),
+        4px corners); *asterisk* words set in Inter 700 in the accent colour,
+        so the kicker previews the payload it introduces.
+      - Payload = --font-display (Bricolage Grotesque 800) caps in the accent
+        (default --lemon signal amber) on an ink plate (rgba(19,23,32,0.92),
+        6px corners). Each wrapped line gets its own plate.
+      - Co-word = Inter 700 --rail-cream-ink on a --rail-cream paper tab, the
+        paper surface of the slide set, stepped down to the right.
+      - Legibility comes from the plates, never from text outlines. Contrast
+        is independent of the footage: white on the kicker tab over pure
+        white footage 11.03:1; amber on the payload plate over white footage
+        7.47:1 (9.31:1 on solid ink); ink on the paper tab 16.23:1.
 
     CONTRACT for the PRODUCER compositing stage:
       - IN = 0-FRAME POP per token, word-locked to the spoken word: set
@@ -38,11 +49,12 @@
         clear ON the compositor's cut. NEVER a fade.
       - band: "headroom" = numbered-kicker section steps (center ~y0.23);
         "chest" = action payloads / caption shouts (center ~y0.63). Verdict
-        variant: payloadSize 69 and reuse the EXACT referenced string+color.
+        variant: payloadSize 69, repeating the EXACT string and colour of the
+        payload it calls back.
       - EMPTY-DEFAULTS LAW (G21): kicker/payload/coWord/payload2/payload3
-        default EMPTY — unset renders NOTHING; demo only when ALL unset.
+        default EMPTY — unset renders NOTHING; sample only when ALL unset.
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
-        rewrites it per window; --variables never sets it — stat-card note).
+        rewrites it per window; --variables never sets it).
   -->
   <head>
     <meta charset="UTF-8" />
@@ -52,7 +64,7 @@
     <script src="/vendor/gsap/gsap.min.js"></script>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      :root { --lime: #C9FB00; }
+      :root { --asl-accent: #FDA933; }     /* = --lemon; the accent var re-tints it */
       html, body {
         width: 1080px;
         height: 1920px;
@@ -75,18 +87,22 @@
       }
       #asl-root.chest #asl-stage { top: 1210px; }   /* chest band y0.58-0.68 */
 
+      /* Kicker: sentence case on a small ink tab. */
       #asl-kicker {
-        font-size: 40px;                   /* ~2.1%H, sentence case */
-        font-weight: 600;
+        max-width: 960px;
+        font-size: 40px;
+        font-weight: 400;
         line-height: 1.2;
-        color: #F8F8F8;
+        color: #FFFFFF;
         text-align: center;
-        text-shadow: 0 3px 14px rgba(0, 0, 0, 0.45);
         text-wrap: balance;
-        margin-bottom: 10px;
+        background: rgba(19, 23, 32, 0.84);
+        border-radius: 4px;
+        padding: 8px 18px 10px;
+        margin-bottom: 14px;
         will-change: opacity;
       }
-      #asl-kicker b { font-weight: 800; }
+      #asl-kicker b { font-weight: 700; color: var(--asl-accent); }
 
       /* Payload slot: replace-chain spans stack in place (no re-enter). */
       #asl-payload {
@@ -97,29 +113,39 @@
       }
       .asl-pay {
         display: block;
-        font-weight: 900;                  /* ExtraBold extended grotesque class */
-        line-height: 1.04;
-        letter-spacing: 0.015em;
+        font-family: var(--font-display);
+        font-weight: 800;
+        line-height: 1.3;                  /* leaves a thin gap between per-line plates */
+        letter-spacing: -0.01em;
         text-transform: uppercase;
-        color: var(--lime);
-        text-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
-        transform: scaleX(1.06);           /* static extended condense — GSAP never
-                                              animates transform here, no fight */
-        transform-origin: center;
+        color: var(--asl-accent);
         text-wrap: balance;
         overflow-wrap: break-word;
       }
       .asl-pay.alt { position: absolute; left: 0; top: 0; width: 100%; }
+      /* Ink plate per wrapped line (box-decoration-break: clone). */
+      .asl-plate {
+        background: rgba(19, 23, 32, 0.92);
+        border-radius: 6px;
+        padding: 0.02em 0.2em 0.07em;
+        -webkit-box-decoration-break: clone;
+        box-decoration-break: clone;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      }
 
-      /* Co-word: white, offset RIGHT-BELOW the payload landing. */
+      /* Co-word: paper tab, stepped RIGHT-BELOW the payload landing. */
       #asl-co {
         align-self: flex-end;
         margin-right: 120px;
-        margin-top: 12px;
-        font-size: 38px;                   /* ~2%H */
-        font-weight: 600;
-        color: #F8F8F8;
-        text-shadow: 0 3px 14px rgba(0, 0, 0, 0.45);
+        margin-top: 14px;
+        font-size: 38px;
+        font-weight: 700;
+        line-height: 1.2;
+        color: var(--rail-cream-ink);
+        background: var(--rail-cream);
+        border-radius: 4px;
+        padding: 7px 16px 9px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
         will-change: opacity;
       }
     </style>
@@ -151,10 +177,11 @@
           kicker: "", payload: "", coWord: "", payload2: "", payload3: "",
           band: "headroom", payloadSize: 106,
           kickerAt: 0, payloadAt: 0.35, coAt: 0.75,
-          replaceAt2: 0, replaceAt3: 0, accent: "#C9FB00",
+          replaceAt2: 0, replaceAt3: 0, accent: "#FDA933",
         };
-        // PREVIEW-ONLY demo lockup (activates only when ALL content is unset).
-        const SAMPLE = { kicker: "Step *#1:* do this every day", payload: "Post Daily", coWord: "for 30 days" };
+        // PREVIEW-ONLY sample lockup, original Sniper copy (activates only
+        // when ALL content is unset).
+        const SAMPLE = { kicker: "Pass *#1:* cut before you polish", payload: "Cut Dead Air", coWord: "then retakes" };
         const HF = window.__hyperframes;
         let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
         const contentKeys = ["kicker", "payload", "coWord", "payload2", "payload3"];
@@ -162,7 +189,7 @@
           return !(vars[k] == null ? "" : String(vars[k])).trim();
         });
         if (isPreview) vars = Object.assign({}, vars, SAMPLE);
-        document.documentElement.style.setProperty("--lime", String(vars.accent));
+        document.documentElement.style.setProperty("--asl-accent", String(vars.accent));
 
         if (String(vars.band) === "chest") root.classList.add("chest");
         const size = Math.min(152, Math.max(60, Number(vars.payloadSize) || 106));
@@ -178,8 +205,9 @@
         window.__timelines = window.__timelines || {};
         const tl = gsap.timeline({ paused: true });
 
-        // --- Kicker: sentence case, *asterisk* runs render bold (the payload
-        //     words inside the kicker). 0-frame pop at kickerAt. ---
+        // --- Kicker: sentence case, *asterisk* runs render bold in the
+        //     accent (the payload words inside the kicker). 0-frame pop at
+        //     kickerAt. ---
         const kickerEl = document.getElementById("asl-kicker");
         const kickerText = (vars.kicker == null ? "" : String(vars.kicker)).trim();
         if (kickerText) {
@@ -196,8 +224,8 @@
           kickerEl.remove();               // unset var renders NOTHING
         }
 
-        // --- Payload: ALL-CAPS lime, 0-frame pop; replace-chain swaps the
-        //     string IN PLACE (never re-enters). ---
+        // --- Payload: ALL-CAPS accent on an ink plate, 0-frame pop; the
+        //     replace-chain swaps the string IN PLACE (never re-enters). ---
         const payloadEl = document.getElementById("asl-payload");
         const payTexts = [vars.payload, vars.payload2, vars.payload3].map(function (p) {
           return (p == null ? "" : String(p)).trim();
@@ -207,7 +235,10 @@
           const el = document.createElement("span");
           el.className = "asl-pay" + (i > 0 ? " alt" : "");
           el.style.fontSize = size + "px";
-          el.textContent = t;
+          const plate = document.createElement("span");
+          plate.className = "asl-plate";
+          plate.textContent = t;
+          el.appendChild(plate);
           payloadEl.appendChild(el);
           return el;
         });

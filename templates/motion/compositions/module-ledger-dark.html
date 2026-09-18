@@ -2,18 +2,18 @@
 <html
   lang="en"
   data-composition-variables='[
-    {"id":"eyebrow","type":"string","label":"Eyebrow microtext (mono caps + accent dot; empty = omit)","default":""},
-    {"id":"eyebrowAccent","type":"enum","label":"Eyebrow dot semantic accent","default":"process","options":[{"value":"process","label":"Process (cyan)"},{"value":"result","label":"Result (lime)"}]},
+    {"id":"eyebrow","type":"string","label":"Eyebrow microtext (mono caps + square accent marker; empty = omit)","default":""},
+    {"id":"eyebrowAccent","type":"enum","label":"Eyebrow marker semantic accent","default":"process","options":[{"value":"process","label":"Process (blue)"},{"value":"result","label":"Result (amber)"}]},
     {"id":"headlineLines","type":"string","label":"Thesis headline, pipe-separated lines (2 max; line 2 in --accent-result)","default":""},
     {"id":"explainer","type":"string","label":"1-2 line gray explainer (empty = omit)","default":""},
-    {"id":"barLabel","type":"string","label":"Ledger bar label (mono caps, form #7; empty = no bar)","default":""},
+    {"id":"barLabel","type":"string","label":"Ledger bar label (mono caps; empty = no bar)","default":""},
     {"id":"barValue","type":"string","label":"Ledger bar big value","default":""},
-    {"id":"barStatus","type":"string","label":"Ledger bar live status (lime dot + mono; empty = omit)","default":""},
-    {"id":"rows","type":"string","label":"KV ledger rows, pipe-separated: key~value~TAG~accent (form #5; empty = no ledger)","default":""},
-    {"id":"grid","type":"enum","label":"Fan-out shape (form #5 chips / form #7 columns)","default":"chips","options":[{"value":"chips","label":"Numbered chip row (01 WORDS •)"},{"value":"columns","label":"Parallel-agent columns (AGENT 01 / RESEARCH, lime underline)"}]},
+    {"id":"barStatus","type":"string","label":"Ledger bar live status (result-amber square marker + mono; empty = omit)","default":""},
+    {"id":"rows","type":"string","label":"KV ledger rows, pipe-separated: key~value~TAG~accent (accent: process|result|warn; empty = no ledger)","default":""},
+    {"id":"grid","type":"enum","label":"Fan-out shape (numbered chips or parallel columns)","default":"chips","options":[{"value":"chips","label":"Numbered chip row (num + label + square marker)"},{"value":"columns","label":"Parallel columns (num over label, result-amber underline)"}]},
     {"id":"gridItems","type":"string","label":"Fan-out items, pipe-separated: num~label (empty = no fan-out)","default":""},
-    {"id":"footChip","type":"string","label":"Source footnote chip (mono + dot, lands last; empty = omit)","default":""},
-    {"id":"footAccent","type":"enum","label":"Footnote dot accent","default":"result","options":[{"value":"result","label":"Result (lime)"},{"value":"process","label":"Process (cyan)"},{"value":"warn","label":"Warn (amber — limits/failures ONLY)"}]},
+    {"id":"footChip","type":"string","label":"Source footnote chip (mono + square marker, lands last; empty = omit)","default":""},
+    {"id":"footAccent","type":"enum","label":"Footnote marker accent","default":"result","options":[{"value":"result","label":"Result (amber)"},{"value":"process","label":"Process (blue)"},{"value":"warn","label":"Warn (red — limits/failures ONLY)"}]},
     {"id":"moduleLands","type":"string","label":"Narration-paced lands (s, comp-relative, pipe/comma) — one per PRESENT module [head, bar, ledger, grid, foot]; empty = 0.2 + k*0.9","default":""},
     {"id":"exit","type":"enum","label":"Exit","default":"hold","options":[{"value":"hold","label":"Hold to end (compositor owns the seam)"},{"value":"blur-recede","label":"Blur-recede 0.15s (stage only — the canvas never flashes)"}]},
     {"id":"presenterFrame","type":"boolean","label":"Framed presenter container: mask the reserved right band into a rounded face hole + draw the card ring (compositor fills it with the speaker; forces alpha + longform own-screen)","default":false}
@@ -21,51 +21,85 @@
 >
   <!--
     PROJECT SNIPER · LONG-FORM template: MODULE-LEDGER-DARK (16:9, 1920x1080)
-    Reference: docs/studies/MODULE_CARDS.md §1.2 forms #5 + #7 — the DARK chassis
-    config/parallel-process cards:
-      #5  session ledger + fan-out chips  15.5-25.5s  (ACTIVE CODEX SESSION;
-          ledger rows `model "gpt-5.6-sol" -> VERIFIED(lime)`; thin cyan tree
-          connectors branch to 4 numbered chips `01 WORDS •` ... `04 QA •`;
-          build: rows stagger, then chips fan out)
-      #7  parallel agent grid             32.5-45.5s  (ULTRA ORCHESTRATION /
-          ONE RUN. FOUR AGENTS.(lime); ledger bar `DEFAULT PARALLELISM 4 |
-          • COORDINATING`; connector drops to 4 equal columns AGENT 01-04
-          with lime underlines; footnote chip `• OPENAI: FOUR AGENTS IN
-          PARALLEL BY DEFAULT`; columns stagger 80-120ms after a ~900ms
-          narration wait — STUDY MG-2)
-    Full-res LOOK: "full_dark_4agents" (form #7 @ ~36s). Timing +-1 frame.
+    A configuration / parallel-work card. Under a thesis headline it stacks
+    up to three body modules, each optional:
+      - a ledger BAR: one wide row of label | big value | live status;
+      - a key-value LEDGER: mono rows "key  value  -> TAG" in a hairline
+        panel, each tag coloured by its semantic accent;
+      - a FAN-OUT: numbered chips or equal parallel columns hanging from a
+        thin connector tree, for work that splits into simultaneous parts;
+    and closes with an optional source chip. Use it when the narration
+    describes a setup, its settings, or a job split across parallel steps.
+
+    SNIPER DESIGN (tokens.css module palette + type; the dark sibling of
+    module-takeover, same chassis):
+      - Canvas = --module-canvas (blue graphite) with a faint 48px dot field
+        and a soft process-blue glow at the top-left.
+      - Eyebrow = --eyebrow-font (IBM Plex Mono 600) caps behind a square
+        marker; headline = --font-display (Bricolage Grotesque 800), line 2
+        in --accent-result; explainer = --font (Inter 400). Ledger keys,
+        values, tags, chips and column numbers are Plex Mono; the bar value
+        and column labels are display type.
+      - Panels, chips and columns: 1px hairlines, 4-6px corners, square
+        markers. Semantic accents: --accent-result (amber) = results, the
+        live status and column underlines; --accent-process (blue) = process
+        tags, the connector tree and chip markers; --accent-warn (red) is
+        reserved for limits and failures.
+      - Contrast (WCAG 2.x, text on its own background; canvas #121721,
+        panel fill = 3% paper over it): headline white 17.95:1, line-2
+        amber 5.11:1, explainer 6.82:1; bar label 6.58:1, bar value
+        16.72:1, live status amber 4.76:1 on the panel; ledger keys 5.48:1,
+        values 16.72:1, tags amber 4.76:1 / blue 4.14:1 / red 3.54:1, arrow
+        4.10:1 on the panel; chip text 12.18:1 and chip numbers 4.90:1 on
+        the canvas; column numbers 4.75:1 and labels 16.72:1 on the column
+        fill; source-chip text (--receipt-gray) 9.66:1; markers amber
+        5.11:1, blue 4.44:1, red 3.80:1 on the canvas.
 
     CONTRACT for the PRODUCER compositing stage:
-      - anchor "own-screen" OPAQUE takeover (render --format mp4): near-black
-        canvas (var --module-canvas) + faint 96px grid on a full-bleed CHILD,
-        opaque from frame 0 (no base flash at the seam — statement-card law).
-      - NO FACE HOLE in this wave (MODULE_STUDY §5 item 9 precedent: "PIP
-        slot EXCLUDED ... full-frame with no face hole, entered via hard cut").
-        The content column deliberately matches module-takeover's stage
-        (left 96px, width 1130px) so the right band [1344..1878] stays clear —
-        registering this kind in graphics/pip_hole.HOLE_BY_KIND later needs
-        ONLY the mask + ring (zero content reflow). Until then the right band
-        holds canvas + grid.
-      - Semantic dual accent (STUDY §3 rank 6): lime --accent-result =
-        results/VERIFIED/underlines, cyan --accent-process = process/status/
-        connectors, gray --accent-compare = comparison. Headline line 2 =
-        result lime (rank 5). Amber reserved: limits/failures ONLY.
-      - Build grammar (§1.3): eyebrow-first (EYEBROW_LEAD_S) -> in-place
-        ghost-resolve headline lines -> ledger bar / KV rows (rows stagger
-        ROW_STAGGER_S=0.25 — the T-B "+250ms" row cadence) -> fan-out items
-        sweep GRID_STAGGER_S=0.1 (MG-2 80-120ms band) after their land (the
-        ~900ms narration wait IS the moduleLands gap) -> footnote chip lands
-        LAST (§1.3 "provenance is a first-class module").
-      - moduleLands: one land per PRESENT module in order [head, bar, ledger,
-        grid, foot]. Count mismatch FAILS LOUDLY. Empty = 0.2 + k*0.9 (the
-        module default cadence, mid of the measured 0.6-1.4s band).
-      - UNSET content renders NOTHING (G21); the SAMPLE (form #7) activates
-        only when EVERY content variable is unset.
+      - Default: an OPAQUE own-screen takeover (render --format mp4). The
+        canvas is a full-bleed CHILD, opaque from frame 0, so the seam never
+        shows the layer underneath.
+      - presenterFrame (opt-in, default false): the root gains
+        .has-presenter, the canvas is masked (SVG evenodd) into a rounded
+        face hole and #nld-face-slot draws the ring around it; the
+        compositor scales the speaker into the hole UNDER the graphics. The
+        render keeps alpha (graphics_render.format_for keys on
+        graphics.pip_hole.entry_has_hole) and the entry must be a longform
+        own-screen takeover.
+        HOLE GEOMETRY IS A CONTRACT: left 1344px / top 60px / 534x960 /
+        r 24px. It MUST equal graphics.pip_hole.HOLE_BY_KIND
+        ["module-ledger-dark"] exactly (test_module_longform pins both
+        sides). The content column keeps module-takeover's stage (left 96px,
+        width 1130px), so the right band [1344..1878] is empty with or
+        without the hole and switching the hole on never reflows content.
+      - Grammar (each FAILS LOUDLY when malformed): headlineLines is two
+        lines max; rows = "key~value[~TAG[~accent]]" with accent in
+        process|result|warn (a TAG without an accent is process); grid is
+        chips|columns; gridItems = "num~label"; footAccent is
+        process|result|warn.
+      - Build (Sniper design parameters): the eyebrow leads by
+        EYEBROW_LEAD_S; headline lines ramp in place LINE_STAGGER_S=0.12
+        apart and the explainer one stagger later; the ledger bar lands as
+        one unit; the ledger panel lands first and its rows follow
+        SKELETON_GAP_S later, ROW_STAGGER_S=0.25 apart, so each key/value
+        pair gets a beat to be read as it arrives; the connector tree lands
+        with the fan-out and its items sweep left to right
+        GRID_STAGGER_S=0.1 apart, quick enough to read as one branching
+        gesture while the order stays visible; the source chip lands LAST.
+      - moduleLands: one land per PRESENT module in order [head, bar,
+        ledger, grid, foot]. A count mismatch or a non-finite time FAILS
+        LOUDLY. Empty = the default cadence LAND_DEFAULT_START_S +
+        k*LAND_DEFAULT_GAP_S = 0.2 + k*0.9s, about one module per spoken
+        clause, which also leaves a pause before the fan-out starts.
+      - UNSET content renders NOTHING (G21). The SAMPLE below (original
+        Sniper preview copy) activates only when EVERY content variable is
+        unset; the capability probe renders it as the kind's preview.
       - RENDER LENGTH is the root data-duration ATTRIBUTE (graphics_render
         rewrites it per window; --variables never sets it).
-      - exit:"blur-recede" (T-D): the STAGE blurs+fades+recedes over the
-        final EXIT_BLUR_S; the canvas CHILD stays opaque (no base flash).
-        Default "hold" = hard-off on the cut.
+      - exit:"blur-recede": only #nld-stage-layer blurs, fades and recedes
+        over the final EXIT_BLUR_S; the canvas CHILD stays opaque, so the
+        seam never flashes. Default "hold" = hard-off on the cut (the
+        compositor owns the seam).
   -->
   <head>
     <meta charset="UTF-8" />
@@ -86,14 +120,16 @@
       #nld-root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
       #nld-stage-layer { position: absolute; inset: 0; will-change: transform, opacity, filter; }
 
-      /* Near-black canvas + faint 96px grid — full-bleed CHILD, opaque from
-         frame 0 (module-takeover twin, unmasked: no hole this wave). */
+      /* Graphite canvas + faint 48px dot field + a soft blue glow at the
+         top-left — full-bleed CHILD, opaque from frame 0 (module-takeover's
+         chassis, unmasked unless the presenter frame is on). */
       #nld-canvas {
         position: absolute; inset: 0;
-        background-color: var(--module-canvas, #0c1014);
+        background-color: var(--module-canvas, #121721);
         background-image:
-          repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 96px),
-          repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 96px);
+          radial-gradient(circle at 1px 1px, rgba(241,244,246,0.07) 1.2px, transparent 1.6px),
+          radial-gradient(ellipse 1100px 700px at 8% 0%, rgba(68,123,228,0.16), transparent 70%);
+        background-size: 48px 48px, 100% 100%;
       }
 
       /* FRAMED PRESENTER-CONTAINER (opt-in: spec.presenterFrame). When the
@@ -113,13 +149,13 @@
         position: absolute;
         left: 1344px; top: 60px; width: 534px; height: 960px;
         border-radius: 24px;
-        border: 1.5px solid rgba(255, 255, 255, 0.22);
-        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+        border: 2px solid rgba(241, 244, 246, 0.16);
+        box-shadow: 0 28px 80px rgba(0, 0, 0, 0.5),
+                    inset 0 1px 0 rgba(241, 244, 246, 0.08);
       }
 
       /* Content column — EXACTLY module-takeover's stage geometry so the
-         face-PIP band [1344..1878] stays clear for later hole registration. */
+         face-PIP band [1344..1878] stays clear with or without the hole. */
       #nld-stage {
         position: absolute;
         left: 96px; top: 0; width: 1130px; height: 1080px;
@@ -133,111 +169,114 @@
       #nld-eyebrow {
         display: flex; align-items: center; gap: 16px;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 34px; line-height: 1;
-        letter-spacing: 5px; text-transform: uppercase;
-        color: var(--accent-process, #35b6d9);
+        font-weight: 600; font-size: 34px; line-height: 1;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        color: var(--accent-process, #447BE4);
       }
       #nld-eyebrow .dot {
-        width: 13px; height: 13px; border-radius: 50%;
-        background: var(--accent-process, #35b6d9);
+        width: 13px; height: 13px; border-radius: 2px;
+        background: var(--accent-process, #447BE4);
         flex: 0 0 auto;
       }
-      #nld-eyebrow.result, #nld-eyebrow.result .dot { color: var(--accent-result, #c6f542); }
-      #nld-eyebrow.result .dot { background: var(--accent-result, #c6f542); }
+      #nld-eyebrow.result, #nld-eyebrow.result .dot { color: var(--accent-result, #CC7200); }
+      #nld-eyebrow.result .dot { background: var(--accent-result, #CC7200); }
 
       #nld-headline {
-        font-weight: 900;
+        font-family: var(--font-display);
+        font-weight: 800;
         font-size: 116px;
         line-height: 1.04;
-        letter-spacing: -2px;
+        letter-spacing: -0.02em;
         color: #ffffff;
       }
       #nld-headline .line { display: block; will-change: opacity; }
-      #nld-headline .l2 { color: var(--accent-result, #c6f542); }
+      #nld-headline .l2 { color: var(--accent-result, #CC7200); }
 
       #nld-explainer {
-        font-weight: 500; font-size: 34px; line-height: 1.35;
-        color: rgba(255, 255, 255, 0.6);
+        font-weight: 400; font-size: 34px; line-height: 1.35;
+        color: rgba(241, 244, 246, 0.62);
         max-width: 900px;
       }
 
-      /* Ledger bar (#7): one wide hairline row — label | big value | status. */
+      /* Ledger bar: one wide hairline row — label | big value | status. */
       #nld-bar {
         display: flex; align-items: center; gap: 28px;
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(241, 244, 246, 0.14);
+        border-radius: 6px;
+        background: rgba(241, 244, 246, 0.03);
         padding: 26px 32px;
       }
       #nld-bar-label {
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 24px;
-        letter-spacing: 3px; text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.62);
+        font-weight: 600; font-size: 24px;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        color: rgba(241, 244, 246, 0.62);
       }
       #nld-bar-value {
+        font-family: var(--font-display);
         font-weight: 800; font-size: 60px; line-height: 1;
-        letter-spacing: -1px;
+        letter-spacing: -0.01em;
         color: #ffffff;
       }
       #nld-bar-status {
         margin-left: auto;
         display: flex; align-items: center; gap: 12px;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 23px;
-        letter-spacing: 3px; text-transform: uppercase;
-        color: var(--accent-result, #c6f542);
+        font-weight: 600; font-size: 23px;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        color: var(--accent-result, #CC7200);
       }
       #nld-bar-status .dot {
-        width: 11px; height: 11px; border-radius: 50%;
-        background: var(--accent-result, #c6f542);
+        width: 11px; height: 11px; border-radius: 2px;
+        background: var(--accent-result, #CC7200);
         flex: 0 0 auto;
       }
 
-      /* KV session ledger (#5): mono receipts in a hairline panel. */
+      /* Key-value ledger: mono rows in a hairline panel. */
       #nld-ledger {
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(241, 244, 246, 0.14);
+        border-radius: 6px;
+        background: rgba(241, 244, 246, 0.03);
         padding: 10px 32px;
       }
       .nld-kv {
         display: flex; align-items: center; gap: 22px;
         padding: 20px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        border-bottom: 1px solid rgba(241, 244, 246, 0.08);
         will-change: opacity;
       }
       .nld-kv:last-child { border-bottom: none; }
       .kv-key {
         font-family: var(--eyebrow-font);
         font-weight: 500; font-size: 28px;
-        color: rgba(255, 255, 255, 0.55);
+        color: rgba(241, 244, 246, 0.55);
         flex: 0 0 auto;
       }
       .kv-value {
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 31px;
+        font-weight: 600; font-size: 31px;
         color: #ffffff;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
       .kv-tag {
         margin-left: auto; flex: 0 0 auto;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 21px;
-        letter-spacing: 3px; text-transform: uppercase;
-        color: var(--accent-process, #35b6d9);
+        font-weight: 600; font-size: 21px;
+        letter-spacing: 0.14em; text-transform: uppercase;
+        color: var(--accent-process, #447BE4);
       }
-      .kv-tag.result { color: var(--accent-result, #c6f542); }
-      .kv-tag.warn { color: var(--accent-warn, #e8a13c); }
-      .kv-arrow { color: rgba(255, 255, 255, 0.35); margin-right: 10px; }
+      .kv-tag.result { color: var(--accent-result, #CC7200); }
+      .kv-tag.warn { color: var(--accent-warn, #D33B36); }
+      .kv-arrow { color: rgba(241, 244, 246, 0.45); margin-right: 10px; }
 
-      /* Fan-out (#5 chips / #7 columns) under a thin cyan connector tree. */
+      /* Fan-out (numbered chips or parallel columns) under a thin
+         process-blue connector tree. */
       #nld-grid { position: relative; padding-top: 26px; }
       #nld-grid::before {                 /* horizontal tree spine */
         content: "";
         position: absolute; left: 0; right: 0; top: 0;
         height: 1px;
-        background: color-mix(in srgb, var(--accent-process, #35b6d9) 45%, transparent);
+        background: color-mix(in srgb, var(--accent-process, #447BE4) 60%, transparent);
       }
       #nld-grid-items { display: flex; gap: 22px; }
       #nld-grid.columns #nld-grid-items {
@@ -250,69 +289,70 @@
         content: "";
         position: absolute; left: 50%; top: -26px;
         width: 1px; height: 26px;
-        background: color-mix(in srgb, var(--accent-process, #35b6d9) 45%, transparent);
+        background: color-mix(in srgb, var(--accent-process, #447BE4) 60%, transparent);
       }
-      /* chips (#5): mono num + label + trailing cyan dot. */
+      /* chips: mono num + label + trailing square process marker. */
       .nld-item.chip {
         display: flex; align-items: center; gap: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 9px;
+        border: 1px solid rgba(241, 244, 246, 0.16);
+        border-radius: 4px;
         padding: 16px 22px;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 26px;
-        letter-spacing: 3px; text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.85);
+        font-weight: 600; font-size: 26px;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        color: rgba(241, 244, 246, 0.86);
       }
-      .nld-item.chip .num { color: rgba(255, 255, 255, 0.45); }
+      .nld-item.chip .num { color: rgba(241, 244, 246, 0.5); }
       .nld-item.chip .enddot {
-        width: 9px; height: 9px; border-radius: 50%;
-        background: var(--accent-process, #35b6d9);
+        width: 9px; height: 9px; border-radius: 2px;
+        background: var(--accent-process, #447BE4);
         flex: 0 0 auto;
       }
-      /* columns (#7): num / label / lime underline. */
+      /* columns: num / label / result-amber underline. */
       .nld-item.col {
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(241, 244, 246, 0.14);
+        border-radius: 5px;
+        background: rgba(241, 244, 246, 0.03);
         padding: 22px 24px 20px;
         display: flex; flex-direction: column; gap: 10px;
       }
       .nld-item.col .num {
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 19px;
-        letter-spacing: 3px; text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.45);
+        font-weight: 600; font-size: 19px;
+        letter-spacing: 0.14em; text-transform: uppercase;
+        color: rgba(241, 244, 246, 0.5);
       }
       .nld-item.col .label {
-        font-weight: 800; font-size: 32px; line-height: 1.05;
-        letter-spacing: -0.5px;
+        font-family: var(--font-display);
+        font-weight: 700; font-size: 32px; line-height: 1.05;
+        letter-spacing: -0.01em;
         color: #ffffff;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
       .nld-item.col .underline {
         margin-top: 8px;
-        height: 4px; border-radius: 2px;
-        background: var(--accent-result, #c6f542);
+        height: 4px; border-radius: 1px;
+        background: var(--accent-result, #CC7200);
       }
 
-      /* Source footnote chip (#7) — outlined, mono, lands LAST. */
+      /* Source footnote chip — outlined, mono, square marker, lands LAST. */
       #nld-foot {
         align-self: flex-start;
         display: flex; align-items: center; gap: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 8px;
+        border: 1px solid rgba(241, 244, 246, 0.16);
+        border-radius: 4px;
         padding: 14px 20px;
         font-family: var(--eyebrow-font);
-        font-weight: 700; font-size: 21px;
-        letter-spacing: 3px; text-transform: uppercase;
+        font-weight: 600; font-size: 21px;
+        letter-spacing: 0.14em; text-transform: uppercase;
         color: var(--receipt-gray, rgba(255, 255, 255, 0.72));
       }
       #nld-foot .dot {
-        width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto;
-        background: var(--accent-result, #c6f542);
+        width: 10px; height: 10px; border-radius: 2px; flex: 0 0 auto;
+        background: var(--accent-result, #CC7200);
       }
-      #nld-foot.process .dot { background: var(--accent-process, #35b6d9); }
-      #nld-foot.warn .dot { background: var(--accent-warn, #e8a13c); }
+      #nld-foot.process .dot { background: var(--accent-process, #447BE4); }
+      #nld-foot.warn .dot { background: var(--accent-warn, #D33B36); }
     </style>
   </head>
   <body>
@@ -351,12 +391,12 @@
         const D = parseFloat(root.dataset.duration) || 10;
         const M = window.__motionTokens;
 
-        // Measured build constants:
+        // Build constants (Sniper design parameters, see header):
         const LINE_STAGGER_S = 0.12;   // headline per-line ramp stagger
-        const ROW_STAGGER_S = 0.25;    // ledger rows (T-B "+250ms" cadence)
-        const GRID_STAGGER_S = 0.1;    // fan-out sweep (MG-2 80-120ms band)
+        const ROW_STAGGER_S = 0.25;    // one ledger row per quarter second
+        const GRID_STAGGER_S = 0.1;    // fan-out sweep, left to right
         const LAND_DEFAULT_START_S = 0.2;
-        const LAND_DEFAULT_GAP_S = 0.9;   // the ~900ms narration wait (MG-2)
+        const LAND_DEFAULT_GAP_S = 0.9;   // about one module per spoken clause
 
         const ACCENTS = ["process", "result", "warn"];
         const defaults = {
@@ -368,15 +408,17 @@
         };
         const CONTENT_KEYS = ["eyebrow", "headlineLines", "explainer",
           "barLabel", "barValue", "barStatus", "rows", "gridItems", "footChip"];
-        // PREVIEW-ONLY demo — form #7 (32.5-45.5s, the full-res LOOK).
+        // PREVIEW-ONLY demo (original Sniper sample copy): activates ONLY
+        // when every content variable is unset (G21 — no sample leaks into
+        // plans).
         const SAMPLE = {
-          eyebrow: "ULTRA ORCHESTRATION",
-          headlineLines: "ONE RUN.|FOUR AGENTS.",
-          barLabel: "DEFAULT PARALLELISM", barValue: "4",
-          barStatus: "COORDINATING",
+          eyebrow: "PARALLEL REVIEW",
+          headlineLines: "CHECKS RUN|SIDE BY SIDE.",
+          barLabel: "REVIEW PASSES", barValue: "4",
+          barStatus: "RUNNING",
           grid: "columns",
-          gridItems: "AGENT 01~RESEARCH|AGENT 02~SCRIPT|AGENT 03~PRODUCTION|AGENT 04~VERIFICATION",
-          footChip: "OPENAI: FOUR AGENTS IN PARALLEL BY DEFAULT",
+          gridItems: "PASS 01~PACING|PASS 02~CAPTIONS|PASS 03~LOUDNESS|PASS 04~FACT CHECK",
+          footChip: "SAMPLE PREVIEW \u00b7 NOT A REAL PROJECT",
         };
         const HF = window.__hyperframes;
         let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
@@ -417,7 +459,7 @@
           const lines = heads.split("|").map(function (s) { return s.trim(); });
           if (lines.length > 2) {
             throw new Error("module-ledger-dark: headlineLines is 2 lines " +
-              "max (§1.1 thesis grammar), got " + lines.length);
+              "max (two-line thesis limit), got " + lines.length);
           }
           lines.forEach(function (line, j) {
             const el = document.createElement("span");
@@ -442,7 +484,7 @@
           else document.getElementById("nld-bar-status").remove();
         } else { barEl.remove(); }
 
-        // KV session ledger rows (#5): key~value~TAG[~accent].
+        // Key-value ledger rows: key~value~TAG[~accent].
         const ledgerEl = document.getElementById("nld-ledger");
         const rowsRaw = str("rows");
         const kvEls = [];
@@ -479,7 +521,7 @@
           });
         } else { ledgerEl.remove(); }
 
-        // Fan-out (#5 chips / #7 columns): num~label items.
+        // Fan-out (chips or columns): num~label items.
         const gridEl = document.getElementById("nld-grid");
         const gridItemsEl = document.getElementById("nld-grid-items");
         const gridShape = str("grid") || "chips";
@@ -556,7 +598,7 @@
         const landOf = {};
         modules.forEach(function (name, k) { landOf[name] = lands[k]; });
 
-        // ---- Build (eyebrow-first + in-place ghost-resolve ramps) ----
+        // ---- Build (eyebrow-first + in-place opacity ramps) ----
         window.__timelines = window.__timelines || {};
         const tl = gsap.timeline({ paused: true });
 
@@ -565,7 +607,7 @@
           let headAt = t0;
           if (ebText) {
             M.textRamp(tl, ebEl, t0);
-            headAt = t0 + M.EYEBROW_LEAD_S;      // eyebrow leads (rank 3)
+            headAt = t0 + M.EYEBROW_LEAD_S;      // eyebrow leads the headline
           }
           let lastAt = headAt;
           if (heads) {
@@ -577,11 +619,11 @@
           if (expText) M.textRamp(tl, expEl, lastAt + LINE_STAGGER_S);
         }
 
-        // Ledger bar lands as one unit (#7 — a single wide receipt).
+        // Ledger bar lands as one unit (a single wide receipt).
         if (landOf.bar != null) M.textRamp(tl, barEl, landOf.bar);
 
-        // Session ledger: panel skeleton FIRST, rows stagger +250ms apart
-        // (#5 "rows stagger, then chips fan out"; rank 2 containers-first).
+        // Ledger: the panel skeleton lands FIRST, then the rows follow
+        // ROW_STAGGER_S apart (the container is legible before its text).
         if (landOf.ledger != null) {
           const tL = landOf.ledger;
           M.textRamp(tl, ledgerEl, tL);
@@ -590,8 +632,8 @@
           });
         }
 
-        // Fan-out: tree connector arrives WITH the module, items sweep
-        // 100ms apart (MG-2 80-120ms after the ~900ms narration wait).
+        // Fan-out: the connector tree arrives WITH the module, then the
+        // items sweep left to right GRID_STAGGER_S apart.
         if (landOf.grid != null) {
           const tG = landOf.grid;
           M.textRamp(tl, gridEl, tG);
@@ -600,11 +642,11 @@
           });
         }
 
-        // Footnote chip lands LAST (provenance module, §1.3).
+        // Footnote chip lands LAST (the source line closes the card).
         if (landOf.foot != null) M.textRamp(tl, footEl, landOf.foot);
 
-        // exit:"blur-recede" (T-D): stage only — the opaque canvas never
-        // fades, so there is no base flash at the seam (statement-card law).
+        // exit:"blur-recede": stage only — the opaque canvas never fades,
+        // so nothing underneath flashes through at the seam.
         if (String(vars.exit) === "blur-recede") {
           M.blurRecede(tl, "#nld-stage-layer", D - M.EXIT_BLUR_S);
         }

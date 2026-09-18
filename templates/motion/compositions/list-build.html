@@ -10,7 +10,7 @@
     {"id":"at3","type":"number","label":"Item 3 land time (s)","default":1.6,"min":0,"max":30,"step":0.05,"unit":"s"},
     {"id":"chip_style","type":"enum","label":"Chip glyph","default":"check","options":[{"value":"check","label":"Checkmark"},{"value":"number","label":"Number"}]},
     {"id":"accent","type":"color","label":"Accent color","default":"#054BC9"},
-    {"id":"build","type":"enum","label":"Build grammar","default":"pop","options":[{"value":"pop","label":"Pop (back.out slide, unchanged)"},{"value":"skeleton-first","label":"Skeleton-first (row shells before text — MODULE rank 2)"}]}
+    {"id":"build","type":"enum","label":"Build grammar","default":"pop","options":[{"value":"pop","label":"Pop (back.out slide, unchanged)"},{"value":"skeleton-first","label":"Skeleton-first (row shells before text — module build lane)"}]}
   ]'
 >
   <!--
@@ -27,8 +27,8 @@
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (see stat-card note) — set it
         directly per render; the framework ignores --variables for root duration.
         Make it comfortably past at3 so the last item lands + holds before the fade.
-      - MODULE opt-in (docs/studies/MODULE_STUDY.md rank 2; default keeps the pop
-        build byte-identical): build:"skeleton-first" — each row's card SHELL
+      - MODULE opt-in (Sniper module build lane, motion-tokens.js; default keeps
+        the pop build byte-identical): build:"skeleton-first" — each row's card SHELL
         + chip opacity-ramp at atN, the row TEXT ramps in place
         +SKELETON_GAP_S (0.35s) later (containers/hairlines before text).
   -->
@@ -172,8 +172,8 @@
         active.forEach(function (a) {
           const at = Math.max(0, Math.min(a.at, D - 0.5)); // keep the entrance inside the render
           if (skeleton) {
-            // MODULE rank 2: card shell + chip land, row text +0.35s later —
-            // both in-place opacity ramps (rank 4, no travel).
+            // MODULE lane: card shell + chip land, row text +0.35s later —
+            // both in-place opacity ramps (no travel).
             M.skeletonFirst(tl, a.row, a.text, { at: at });
             return;
           }

@@ -19,8 +19,7 @@
 >
   <!--
     PROJECT SNIPER · Motion template: ICON-BADGE-WIDE (16:9 talking-head longform)
-    The LANDSCAPE sibling of icon-badge (9:16). Reference: the pro's intro tool
-    montage (AG_PLACE.png t=8/10, ICON_PLACE.png) — big recognizable brand marks
+    The LANDSCAPE sibling of icon-badge (9:16): big recognizable brand marks
     placed in the GAP beside/above the speaker's head, NOT crammed in a corner:
     one to the LEFT, one ABOVE, one to the RIGHT, level and energetic.
 
@@ -39,8 +38,8 @@
       - iconN (filename under /icons, .svg optional), xN/yN (badge CENTER px on the
         1920x1080 canvas), atN (spoken-word land time rel. to outStart), size (tile
         px). Empty iconN OMITS that badge — the others keep their absolute spots.
-      - Entrance: a quick ~160ms pop that lands on atN from a visible scale (R9,
-        never from nothing), with the badge's own soft glow lifting it off video.
+      - Entrance: a quick ~160ms pop that lands on atN from a visible scale
+        (never from nothing), with the badge's own soft glow lifting it off video.
       - RENDER LENGTH is the root data-duration ATTRIBUTE (graphics_render rewrites
         it per window; --variables never sets it). Hold comfortably past last atN.
   -->
@@ -164,7 +163,7 @@
         window.__timelines = window.__timelines || {};
         const tl = gsap.timeline({ paused: true });
 
-        // R9 entrance: a ~160ms pop STARTING from a visible scale (0.7), never from
+        // Entrance: a ~160ms pop STARTING from a visible scale (0.7), never from
         // nothing; each badge lands on its spoken-word time (atN). back.out settles.
         active.forEach(function (a) {
           tl.set(a.badge, { opacity: 0, y: 18, scale: 0.7 }, 0);

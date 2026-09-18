@@ -78,10 +78,85 @@ class GuidedSetup(unittest.TestCase):
         self.python = self.pkg / "app/.venv/bin/python3"
         self.assertTrue(self.python.is_file() and not self.python.is_symlink())
         self.assertEqual(fx.write_settings(self.pkg, "codex", str(self.pkg.parent / "videos")).returncode, 0)
+        self._mark_installed(self.pkg.resolve())  # a finished installation of this folder
         for name, content in (("doctor.command", DOCTOR), ("sign-in.command", SIGN_IN)):
             (self.pkg / "install" / name).write_text(content)
         # The real editor calls this CLI; its fixture logs argv, provider and lock mode.
         self.command = str(self.pkg / "install/setup.command")
+
+    def _mark_installed(self, root: Path | None) -> None:
+        """Write (root) or remove (None) the installer's completion receipt."""
+        receipt = self.pkg / "runtime/state/receipts/installed"
+        receipt.parent.mkdir(parents=True, exist_ok=True)
+        if root is None:
+            receipt.unlink(missing_ok=True)
+        else:
+            receipt.write_text(str(root))
+
+    def _stand_in_installer(self, finishes: bool) -> None:
+        """Offline installer stand-in: records the call; writes the receipt only when it finishes."""
+        receipt = self.pkg.resolve() / "runtime/state/receipts/installed"
+        body = f'printf "%s" "{self.pkg.resolve()}" > "{receipt}"; exit 0' if finishes else "exit 1"
+        installer = self.pkg / "install/install.command"
+        installer.write_text(f'#!/bin/bash\necho installer >> "$STUB_LOG_DIR/order"\n{body}\n')
+        installer.chmod(0o755)
+
+    def _order(self) -> list[str]:
+        order = self.logs / "order"
+        return order.read_text().splitlines() if order.exists() else []
+
+    def test_interrupted_install_is_resumed_on_every_reopen(self) -> None:
+        # Settings exist (step 8 wrote them) but the install stopped at step 9 or 10.
+        self._mark_installed(None)
+        self._stand_in_installer(finishes=False)
+        for attempt in (1, 2):
+            code, output = run_terminal([self.command], self.env)
+            self.assertNotEqual(code, 0, output)
+            self.assertIn("resuming it", output)
+            self.assertEqual(self._order().count("installer"), attempt, "setup must resume the installer")
+            self.assertNotIn("Ready.", output)
+        self.assertFalse((self.logs / "codex.calls").exists(), "no editor on an unfinished install")
+
+    def test_resumed_install_that_finishes_opens_the_editor(self) -> None:
+        self._mark_installed(None)
+        self._stand_in_installer(finishes=True)
+        code, output = run_terminal([self.command], self.env)
+        self.assertEqual(code, 0, output)
+        self.assertEqual(self._order(), ["installer"])
+        self.assertTrue((self.logs / "codex.calls").exists(), "the editor opens after the install finishes")
+
+    def test_moved_install_is_resumed(self) -> None:
+        self._mark_installed(Path("/elsewhere/project-sniper"))
+        self._stand_in_installer(finishes=False)
+        code, _output = run_terminal([self.command], self.env)
+        self.assertNotEqual(code, 0)
+        self.assertEqual(self._order(), ["installer"])
+
+    def test_completed_install_does_not_rerun_the_installer(self) -> None:
+        self._stand_in_installer(finishes=False)  # would fail loudly if called
+        code, output = run_terminal([self.command], self.env)
+        self.assertEqual(code, 0, output)
+        self.assertNotIn("installer", self._order())
+
+    def test_connection_modes_never_start_the_installer(self) -> None:
+        self._mark_installed(None)
+        self._stand_in_installer(finishes=True)
+        for mode in ("--connections", "--finish-install"):
+            done = subprocess.run([self.command, mode], capture_output=True, text=True, env=self.env,
+                                  stdin=subprocess.DEVNULL, check=False)
+            self.assertNotEqual(done.returncode, 0, mode)
+            self.assertIn("Installation has not finished", done.stderr)
+        self.assertNotIn("installer", self._order())
+
+    def test_installer_marks_completion_only_after_its_last_step(self) -> None:
+        # Structural (a real install downloads); the real-install harness checks behaviour.
+        text = (fx.INSTALL_SRC / "install.command").read_text()
+        cleared, first_step = text.index("clear_receipt installed"), text.index('step "1/10')
+        built, written = text.index("\nbuild_step\n"), text.index('write_receipt installed "$PKG_ROOT"')
+        finish = text.index("setup.command\" --finish-install")
+        self.assertLess(cleared, first_step, "an interrupted run must not keep an earlier completion")
+        self.assertLess(built, written, "completion is written after the last step")
+        self.assertLess(written, finish, "the finish hand-off sees a completed install")
 
     def test_new_user_is_signed_in_checked_and_editor_opens(self) -> None:
         code, output = run_terminal([self.command], self.env)

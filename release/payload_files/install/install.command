@@ -36,6 +36,9 @@ done
 trap 'printf "\nSTOPPED: interrupted. Run install/install.command again; it redoes only what did not finish.\n" >&2; log_line "interrupted"; exit 130' INT TERM
 refuse_if_active_work "Installing now would replace tools it is using."
 mkdir -p "$RUNTIME_DIR" "$STATE_DIR" "$RECEIPTS" "$LOG_DIR"
+# "installed" is written only after the last step succeeds; an interrupted or failed
+# run leaves it absent, so install/setup.command resumes the installer next time.
+clear_receipt installed
 log_line "install started"
 # The Python environment and the app build record the folder they were made in.
 # If this folder was moved or copied since, redo exactly those two steps.
@@ -111,6 +114,7 @@ build_step() {
 }
 step "10/10  Building the app (no network needed)"
 build_step
+write_receipt installed "$PKG_ROOT"
 log_line "install finished"
 
 if [ -t 0 ] && [ -t 1 ]; then

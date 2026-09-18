@@ -10,8 +10,13 @@ case "$MODE" in
   *) fail "Double-click setup.command to connect Sniper." ;;
 esac
 
-if [ ! -f "$ENV_FILE" ]; then
-  [ -z "$MODE" ] || fail "Run install/install.command first."
+# Settings are written at step 8 of 10, so their presence does not mean the install
+# finished. The installer writes the "installed" receipt (for this folder) only after
+# its last step; without it, resume the installer, which redoes only unfinished steps.
+# The --connections and --finish-install modes never start the installer themselves.
+if [ ! -f "$ENV_FILE" ] || ! receipt_ok installed "$PKG_ROOT"; then
+  [ -z "$MODE" ] || fail "Installation has not finished. Run install/install.command first."
+  [ -f "$ENV_FILE" ] && say "The last installation did not finish (or this folder moved); resuming it."
   "$PKG_ROOT/install/install.command" || exit $?
   exec "$PKG_ROOT/install/editor.command"
 fi

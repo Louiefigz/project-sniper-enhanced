@@ -72,8 +72,9 @@ class ExternalToolsAtInstall(unittest.TestCase):
         self.bin.mkdir()
         for tool in ("ffmpeg", "ffprobe", "whisper-cli"):
             real = shutil.which(tool, path="/opt/homebrew/bin:/usr/local/bin")
-            if real:
-                (self.bin / tool).symlink_to(real)
+            if real:  # a regular wrapper FILE, never a link to the real tool
+                (self.bin / tool).write_text(f'#!/bin/sh\nexec "{real}" "$@"\n')
+                (self.bin / tool).chmod(0o755)
 
     @unittest.skipUnless(shutil.which("ffmpeg", path="/opt/homebrew/bin:/usr/local/bin"), "no ffmpeg on this Mac")
     def test_missing_tesseract_and_ytdlp_are_listed_together_with_brew_commands(self) -> None:

@@ -35,8 +35,7 @@ class StudioWrapper(unittest.TestCase):
         self.pkg = fx.make_package(self.base)
         done = fx.write_settings(self.pkg, "codex", str(self.base / "videos"), {"NODE_BIN": str(Path(REAL_NODE).resolve())})
         self.assertEqual(done.returncode, 0, done.stderr)
-        python = self.pkg / "app/.venv/bin/python3"
-        python.parent.mkdir(parents=True)
+        python = self.pkg / "app/.venv/bin/python3"  # replaces the fixture's wrapper file with a recorder
         python.write_text(FAKE_PYTHON)
         python.chmod(0o755)
         self.env = {**fx.base_env(self.pkg), "ANTHROPIC_API_KEY": "sk-test-not-a-real-key",

@@ -10,7 +10,6 @@ import os
 import pty
 import select
 import subprocess
-import sys
 import tempfile
 import time
 import unittest
@@ -75,9 +74,9 @@ class GuidedSetup(unittest.TestCase):
         self.pkg = fx.make_package(Path(self.temp.name))
         self.env = fx.base_env(self.pkg)
         self.logs = Path(self.env["STUB_LOG_DIR"])
+        # The shared fixture's regular wrapper file around this interpreter (never a link to it).
         self.python = self.pkg / "app/.venv/bin/python3"
-        self.python.parent.mkdir(parents=True)
-        self.python.symlink_to(sys.executable)
+        self.assertTrue(self.python.is_file() and not self.python.is_symlink())
         self.assertEqual(fx.write_settings(self.pkg, "codex", str(self.pkg.parent / "videos")).returncode, 0)
         for name, content in (("doctor.command", DOCTOR), ("sign-in.command", SIGN_IN)):
             (self.pkg / "install" / name).write_text(content)

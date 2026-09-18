@@ -52,7 +52,7 @@ class InstallerAndDoctorNode(unittest.TestCase):
     def test_installer_records_the_real_binary_of_a_node_in_a_nonstandard_folder(self) -> None:
         custom = self.base / "tools/nvm-like/versions/node/bin"
         custom.mkdir(parents=True)
-        (custom / "node").symlink_to(REAL_NODE)
+        (custom / "node").symlink_to(REAL_NODE)  # the link is what is tested (nvm-style); nothing writes to it
         done = self._select(str(custom))
         self.assertEqual(done.returncode, 0, done.stderr)
         recorded = done.stdout.strip().splitlines()[-1].removeprefix("NODE=")

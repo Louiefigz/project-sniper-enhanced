@@ -12,6 +12,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -30,8 +31,10 @@ me="${0##*/}"; log="$STUB_LOG_DIR/$me.calls"
 { printf 'ARGV'; printf ' [%s]' "$@"; printf '\n'
   printf 'ENV SNIPER_PROVIDER=%s SNIPER_BRAIN_PROVIDER=%s SNIPER_CLAUDE_MODEL=%s SNIPER_CODEX_MODEL=%s SNIPER_CODEX_REASONING=%s LOCK=%s\n' \
     "$SNIPER_PROVIDER" "$SNIPER_BRAIN_PROVIDER" "$SNIPER_CLAUDE_MODEL" "$SNIPER_CODEX_MODEL" "$SNIPER_CODEX_REASONING" "$SNIPER_LOCK_MODE"
+  printf 'KEYS anthropic=%s openai=%s deepgram=%s cwd=%s\n' "${ANTHROPIC_API_KEY:+set}" "${OPENAI_API_KEY:+set}" "${DEEPGRAM_API_KEY:+set}" "$PWD"
 } >> "$log"
 state="$STUB_LOG_DIR/$me.signed-in"
+[ "${1:-}" = "--setting-sources" ] && shift 2  # accepted before a subcommand, as the real CLI does
 case "$*" in
   "login status") [ -f "$state" ] && { echo "Logged in using ChatGPT"; exit 0; }; echo "Not logged in"; exit 1 ;;
   "auth status --json") [ -f "$state" ] && { echo '{"loggedIn": true}'; exit 0; }; echo '{"loggedIn": false}'; exit 1 ;;
@@ -61,6 +64,13 @@ def make_package(base: Path, name: str = "pkg") -> Path:
     for cli in ("codex", "claude"):
         (bin_dir / cli).write_text(STUB_CLI, encoding="utf-8")
         (bin_dir / cli).chmod(0o755)
+    # The app venv's interpreter (the editor's settings helper runs with it). A wrapper
+    # FILE, never a link: tests write placeholder text over installer-made paths, and a
+    # link would carry that write into the real interpreter.
+    venv_bin = pkg / "app/.venv/bin"
+    venv_bin.mkdir(parents=True)
+    (venv_bin / "python3").write_text(f'#!/bin/sh\nexec "{sys.executable}" "$@"\n', encoding="utf-8")
+    (venv_bin / "python3").chmod(0o755)
     return pkg
 
 

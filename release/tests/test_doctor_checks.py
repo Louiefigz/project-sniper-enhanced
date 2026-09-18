@@ -71,8 +71,9 @@ class DoctorChecks(unittest.TestCase):
         app = self.base / "app"
         (app / ".venv/bin").mkdir(parents=True, exist_ok=True)
         python = app / ".venv/bin/python3"
-        if not python.exists():
-            python.symlink_to(sys.executable)
+        if not python.exists():  # a regular wrapper FILE, never a link to the real interpreter
+            python.write_text(f'#!/bin/sh\nexec "{sys.executable}" "$@"\n')
+            python.chmod(0o755)
         selftest = app / "scripts/producer/headless/native_admission_selftest.py"
         if script is not None:
             selftest.parent.mkdir(parents=True, exist_ok=True)

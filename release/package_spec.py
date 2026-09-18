@@ -17,6 +17,9 @@ INCLUDE: tuple[tuple[str, str], ...] = (
     # --- Next application ---------------------------------------------------
     ("src", "the whole application surface: pages, API routes, libs, prompts"),
     ("public", "static assets served by Next"),
+    # README.md (repository root) is deliberately NOT included: it is the developer README
+    # (Palmier as a destination, developer setup). The buyer starts from START-HERE.html and
+    # the manual; the agent's contract is AGENTS.md.
     ("package.json", "root dependency manifest and the npm entry points"),
     ("package-lock.json", "root dependency closure (npm ci)"),
     ("next.config.ts", "Next configuration"),
@@ -79,7 +82,6 @@ INCLUDE: tuple[tuple[str, str], ...] = (
     (".agents/skills", "Codex adapters for the same five skills"),
     ("AGENTS.md", "repo-root instructions (rewritten self-contained for the package)"),
     ("CLAUDE.md", "Claude-route instructions"),
-    ("README.md", "developer-facing reference retained for the agent"),
 
     # --- Docs: the operational set only (release/operational-docs.json) -------
     # Computed by release/doc_closure.py: docs named in shipped code, docs linked

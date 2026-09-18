@@ -21,7 +21,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 # Where a document reference can be written down.
 SURFACES = ("src", "scripts", "schemas", ".claude", ".agents", "templates")
-ROOTS = ("AGENTS.md", "CLAUDE.md", "README.md", "docs/README.md", "docs/PIPELINE.md")
+ROOTS = ("AGENTS.md", "CLAUDE.md", "docs/README.md", "docs/PIPELINE.md")  # root README.md does not ship
 _REF = re.compile(r"(?:docs/)?[A-Za-z0-9][A-Za-z0-9._/-]*\.(?:md|json)")
 _TEXT = {".md", ".json", ".ts", ".tsx", ".js", ".mjs", ".py", ".html", ".css"}
 _MAX = 2_000_000

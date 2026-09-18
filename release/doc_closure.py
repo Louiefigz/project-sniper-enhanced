@@ -7,7 +7,7 @@ Three sources, no transitive walk into history:
   1. every `docs/...md` or `scripts/producer/docs/...md` path named in shipped
      non-test code (the runtime reads these, e.g. the Auto Edit doctrine pins);
   2. every document linked directly from a shipped instruction surface — skills,
-     commands, AGENTS.md, CLAUDE.md, README.md, docs/PIPELINE.md, docs/README.md
+     commands, AGENTS.md, CLAUDE.md, docs/PIPELINE.md, docs/README.md
      and scripts/producer/CLAUDE.md;
   3. the named workflow documents the release brief requires.
 
@@ -42,7 +42,7 @@ WITHHELD = ("STUDENT_KIT", "SHORTS_STYLE_SELECTION")  # third-party kit audit; c
 def _surfaces() -> list[Path]:
     found = [*ROOT.glob(".claude/skills/**/*.md"), *ROOT.glob(".agents/skills/**/*.md"),
              *ROOT.glob(".claude/commands/*.md")]
-    found += [ROOT / name for name in ("AGENTS.md", "CLAUDE.md", "README.md", "docs/PIPELINE.md",
+    found += [ROOT / name for name in ("AGENTS.md", "CLAUDE.md", "docs/PIPELINE.md",
                                        "docs/README.md", "scripts/producer/CLAUDE.md")]
     return [path for path in found if path.is_file()]
 

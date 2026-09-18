@@ -7,7 +7,7 @@ import type {
 const MODES = new Set<ReferenceMode>(["short", "longform"]);
 const STRATEGIES = new Set<ReferenceStrategy>(["mimic", "extend", "new-style"]);
 const TARGET_STYLES = new Set(["restrained", "punch", "slideware"]);
-const KNOWN_STYLE_NAMES = new Set(["restrained", "punch", "punch", "slideware"]);
+const KNOWN_STYLE_NAMES = new Set(["restrained", "punch", "slideware"]);
 const FIELDS = new Set(["id", "mode", "strategy", "targetStyle", "candidateStyleName"]);
 const STORED_FIELDS = new Set(["schemaVersion", "referenceId", "mode", "strategy",
   "targetStyle", "candidateStyleName", "decidedAt"]);

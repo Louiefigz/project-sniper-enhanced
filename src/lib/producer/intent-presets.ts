@@ -42,8 +42,9 @@ export const SCOPE_LANE_DEFAULTS: Record<Scope, Record<Lane, boolean>> = {
 export const PACES = ["talking-head", "client-reel", "restrained", "punch", "slideware"] as const;
 export type Pace = (typeof PACES)[number];
 
-// Measured style grammars (docs/<STYLE>_STYLE.md). target.style tells the
-// auto-edit brain WHICH grammar doc to read before authoring; target.pace
+// Built-in short-form styles, each a Sniper style specification (paths in
+// src/lib/server/auto-edit-doctrine.ts STYLE_DOCTRINE). target.style tells the
+// auto-edit brain WHICH specification to read before authoring; target.pace
 // (same name) picks the matching pacing_<style> lint profile.
 export const STYLES = ["restrained", "punch", "slideware"] as const;
 export type Style = (typeof STYLES)[number];
@@ -80,7 +81,7 @@ export interface ProjectIntent {
   /** Per-lane overrides vs the scope default (edit_scope target.lanes). */
   lanes: Partial<Record<Lane, LaneDirective>>;
   pace?: Pace;
-  /** Measured style grammar the brain must read (docs/<STYLE>_STYLE.md). */
+  /** Built-in style whose specification the brain must read before authoring. */
   style?: Style;
   /** Studied asset mechanics to apply to this edit. */
   reference?: ReferenceIntent;
@@ -170,7 +171,7 @@ export function validateLaneOverrides(v: unknown): Partial<Record<Lane, LaneDire
 const REFERENCE_KEYS = new Set([
   "id", "title", "mode", "strategy", "targetStyle", "candidateStyleName",
 ]);
-const CLOSED_STYLE_NAMES = new Set(["restrained", "punch", "punch", "slideware"]);
+const CLOSED_STYLE_NAMES = new Set(["restrained", "punch", "slideware"]);
 
 function requiredReferenceText(value: unknown, field: string, maxLength: number): string {
   if (typeof value !== "string") throw new Error(`reference.${field} must be a string`);
@@ -442,32 +443,33 @@ export const INTENT_PRESETS: IntentPreset[] = [
     ],
   },
 
-  // ── STYLE presets — the three measured grammars (style set = Styles group).
-  // will/wont cite the style docs; pace picks the matching pacing_<style>
-  // lint profile; style tells the auto-edit brain which grammar doc to read.
+  // ── STYLE presets — the three built-in Sniper style specifications (style
+  // set = Styles group). will/wont cite the specification's anchors; pace picks
+  // the matching pacing_<style> lint profile; style tells the auto-edit brain
+  // which specification to read.
   {
     id: "restrained-light",
     label: "Restrained light",
     mode: "short",
     scope: "light",
-    lanes: { motion: "off" }, // RESTRAINED_STYLE §3 Z1: ZERO punch-ins/creep (3/3)
+    lanes: { motion: "off" }, // RESTRAINED_STYLE §3 Z1: no punch-ins, zoom ramps or creep
     pace: "restrained",
     style: "restrained",
-    music: false, // RESTRAINED_STYLE §6 M1: 3/3 reels spectral-verified bed-free
+    music: false, // RESTRAINED_STYLE §6 M1: no bed; the operator may still tick Music
     will: [
-      "Whisper captions carry the reel: verbatim 1-5 word cues, white, pinned (RESTRAINED_STYLE §4)",
-      "ONE thesis graphic from t=0 — hook card approximates the pinned title chip (§5, §11)",
-      "Cuts only as erasers/reactions, snapped to caption-cue starts (§2: 0-cut reels are on-style)",
-      "pacing_restrained floors: a zero-cut 36s hold passes the lint (§9)",
-      "9:16 face-aware reframe + −14 LUFS master, TP ceiling kept (§6 M2)",
+      "Plain captions carry the pace: short verbatim cues that replace each other, white, no box (RESTRAINED_STYLE §4 CAP1-CAP2)",
+      "One thesis card from frame one — the clip's only graphic (§1 H1, §5, §11)",
+      "Cuts only to remove flubs, retakes and dead air, placed where a caption changes (§2 C2, C5)",
+      "A single uncut take is on-style — cuts are never added for rhythm (§2 C1, §9)",
+      "9:16 face-aware reframe + −14 LUFS master with the true-peak ceiling (§6 M2)",
     ],
     wont: [
-      "No zooms / punch-ins / creep — ZERO measured, ORB 0.999-1.000 (§3 Z1)",
-      "No other graphics, receipts, pills, PIP or b-roll (§7 restraint table)",
+      "No zooms, punch-ins or slow creep (§3 Z1)",
+      "No other graphics, receipts, pills, PIP or b-roll (§5, §7)",
       "No seam transitions (§7)",
-      "No karaoke / colored / boxed captions (§4 CAP2)",
-      "No music bed — the 'music likely' votes were false positives (§6 M1)",
-      "No dialogue cleanup — breath gaps stay in (§6 M3)",
+      "No karaoke, coloured or boxed captions (§4 CAP2)",
+      "No music bed unless you tick Music (§6 M1)",
+      "No dialogue cleanup — natural pauses and breaths stay (§6 M3)",
     ],
   },
   {
@@ -475,23 +477,23 @@ export const INTENT_PRESETS: IntentPreset[] = [
     label: "Punch produced",
     mode: "short",
     scope: "produced",
-    // Punch's measured grammar uses hard punch cuts, never seam effects.
+    // Every Punch seam is a hard cut; seam transitions stay off (PUNCH_STYLE §7).
     lanes: { transitions: "off" },
     pace: "punch",
     style: "punch",
-    music: false, // PUNCH_STYLE recommends a bed; operator checkbox still owns opt-in
+    music: false, // PUNCH_STYLE §6 M1 recommends a bed; the operator checkbox still owns opt-in
     audioEnhance: { preset: "voice-rnn" },
     will: [
-      "Punch-cut engine: hard tight↔wide cuts on pivot words, ~17 visible cuts/min (PUNCH_STYLE §2)",
-      "Two-layer text system: whisper captions + keyword-pop lockups promoted to headroom (§3-4)",
-      "Word-locked diagram/stack builds and receipts where beats earn them (§4)",
-      "Hook carried by a graphic from frame ~0, not cut density (§1 H2)",
-      "Dead-air stripped hard + voice-rnn cleanup; 9:16 reframe + −14 LUFS master",
+      "Cut engine: hard cuts between wide and tight framings on key words, at least 14 visual changes/min (PUNCH_STYLE §2 C1-C5)",
+      "Two text layers: keyword lockups above the face + small replace-per-cue captions below it (§4)",
+      "Word-locked list/diagram builds and blurred-footage takeovers where beats earn them (§5.4)",
+      "Hook carried by a graphic from frame zero, not by a burst of cuts (§1 H2)",
+      "Dead air stripped hard + voice-rnn cleanup; 9:16 reframe + −14 LUFS master (§2 C3)",
     ],
     wont: [
-      "No dissolves / white flashes / light leaks — energy is the hard punch cut (§2)",
-      "No karaoke captions — emphasis leaves the caption layer as lockups (§3)",
-      "No aliveness creep between cuts — locked tripod (§2 C5)",
+      "No dissolves, flashes or light leaks — every seam is a hard cut (§2 C6, §7)",
+      "No karaoke captions — emphasis is an inline accent word or a lockup (§4 CAP1, CAP3)",
+      "No slow zoom creep between cuts — the frame stays locked (§3 Z2)",
       "Music stays off until you explicitly tick Music (the style recommendation is never auto-enabled)",
       "Won't generate or source missing assets",
     ],
@@ -501,26 +503,26 @@ export const INTENT_PRESETS: IntentPreset[] = [
     label: "Slideware involved",
     mode: "short",
     scope: "full",
-    // The style's zero-zoom/zero-seam rules are operator-visible lane intent.
+    // The style's no-zoom and hard-cut rules are operator-visible lane intent (SLIDEWARE_STYLE §4 AZ1-AZ2).
     lanes: { motion: "off", transitions: "off" },
     pace: "slideware",
     style: "slideware",
-    music: false, // SLIDEWARE_STYLE recommends a bed; operator checkbox still owns opt-in
+    music: false, // SLIDEWARE_STYLE §7 AM1 recommends a bed; the operator checkbox still owns opt-in
     will: [
-      "Takeover-deck sections: full-frame lime-canvas graphics alternate with the talking head (SLIDEWARE_STYLE §3 AC3)",
-      "Frame 0 fully dressed + real receipts inside the first second (§2 AH1-AH2)",
-      "Cuts land ONLY at section boundaries — punctuation, not energy (§3 AC1)",
-      "Dual-mode captions: whisper on footage, pill skin on lime canvas, in-place lime shouts (§5)",
-      "Eye-count chips on every receipt + mock-OS CTA endcard (§9 checklist)",
-      "9:16 reframe + −14 LUFS master, TP ceiling kept (§7)",
+      "Full-frame slide sections alternate with the talking head — one graphic economy per clip (SLIDEWARE_STYLE §3 AC3)",
+      "Frame zero fully dressed + real proof inside the first 3 seconds (§2 AH1-AH2)",
+      "Cuts land only at section boundaries — the slides provide the change of view (§3 AC1)",
+      "Two caption skins: plain on footage, pill-backed on the slide canvas; bold is the only emphasis (§5 ACAP1-ACAP2)",
+      "One accent colour across every slide, lockup and pill (§1 B1, §9 checklist)",
+      "9:16 reframe + −14 LUFS master with the true-peak ceiling (§7 AM2)",
     ],
     wont: [
-      "No punch-ins / zoom steps — ZERO in 4/4 reels, the punchIns track stays empty (§4 AZ1)",
-      "No seam transitions — 27/28 cuts are hard (§4 AZ2)",
-      "No karaoke or colored whisper captions (§5 ACAP1)",
-      "Won't mix graphic economies — takeover deck OR persistent ledger, never both (§3 AC3)",
+      "No punch-ins or zoom steps — the punchIns track stays empty (§4 AZ1)",
+      "No seam transitions — every cut is hard (§4 AZ2)",
+      "No karaoke or coloured captions (§5 ACAP1)",
+      "Won't mix graphic economies — slide deck OR persistent ledger, never both (§3 AC3)",
       "Music stays off until you explicitly tick Music (the style recommendation is never auto-enabled)",
-      "Won't fake receipts — every proof is a real pixel source (§6 E3)",
+      "Won't fake evidence — every receipt shows real media, and every number shown is spoken (§6 E3)",
     ],
   },
 ];

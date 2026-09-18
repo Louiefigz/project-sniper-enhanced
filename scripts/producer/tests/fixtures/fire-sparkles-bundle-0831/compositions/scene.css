@@ -1,0 +1,133 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background: transparent;
+  font-family: sans-serif;
+}
+
+#root {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+}
+
+.card {
+  position: absolute;
+  top: 190px;
+  width: 760px;
+  height: 700px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.24);
+  border-radius: 54px;
+  box-shadow: 0 42px 100px rgba(3, 8, 26, 0.46);
+  transform-origin: 50% 60%;
+}
+
+.card-left {
+  left: 110px;
+  background:
+    radial-gradient(circle at 50% 85%, rgba(0, 210, 255, 0.34), transparent 42%),
+    linear-gradient(145deg, var(--left-color), #03205f 78%);
+}
+
+.card-right {
+  left: 1050px;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.14), transparent 38%),
+    linear-gradient(145deg, #17162b, #31145e 78%);
+}
+
+.card::after {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: inherit;
+  content: "";
+  pointer-events: none;
+}
+
+.label {
+  position: relative;
+  z-index: 5;
+  max-width: 650px;
+  margin: 66px auto 0;
+  color: #fff;
+  font-size: 72px;
+  font-weight: 830;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  text-align: center;
+  text-wrap: balance;
+  text-shadow: 0 8px 34px rgba(0, 0, 0, 0.35);
+}
+
+.micro-label {
+  position: absolute;
+  z-index: 5;
+  right: 38px;
+  bottom: 30px;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: monospace;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.fire-field,
+.sparkle-field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.flame {
+  position: absolute;
+  bottom: -90px;
+  width: 90px;
+  height: 240px;
+  border-radius: 60% 40% 58% 42%;
+  background:
+    radial-gradient(circle at 50% 78%, #fff5a0 0 11%, #ffb018 27%,
+      #ff4c18 52%, rgba(255, 48, 12, 0) 73%);
+  filter: blur(2px);
+  mix-blend-mode: screen;
+  opacity: 0.9;
+  transform-origin: 50% 100%;
+}
+
+.sparkle {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  filter: drop-shadow(0 0 16px rgba(255, 230, 123, 0.9));
+}
+
+.sparkle::before,
+.sparkle::after {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #fff, #ffe066);
+  content: "";
+}
+
+.sparkle::before {
+  width: 4px;
+  height: 100%;
+}
+
+.sparkle::after {
+  width: 100%;
+  height: 4px;
+}

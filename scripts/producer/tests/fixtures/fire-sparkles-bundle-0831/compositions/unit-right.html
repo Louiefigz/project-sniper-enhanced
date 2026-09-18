@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en" data-composition-variables='[{"id":"rightTitle","type":"string","label":"Right card title","default":"Change only this card"},{"id":"seed","type":"number","label":"Deterministic particle seed","default":424242},{"id":"sparkleCount","type":"number","label":"Sparkle count","default":22}]'>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <link rel="stylesheet" href="/tokens.css" />
+    <link rel="stylesheet" href="/compositions/scene.css" />
+    <script src="/vendor/gsap/gsap.min.js"></script>
+    <script src="/compositions/scene-common.js"></script>
+  </head>
+  <body>
+    <main id="root" data-composition-id="fire-sparkles-right" data-width="1920" data-height="1080" data-duration="6">
+      <section class="card card-right">
+        <div class="sparkle-field"></div>
+        <div class="label"></div>
+        <div class="micro-label">seeded sparkles</div>
+      </section>
+    </main>
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("root");
+        const D = parseFloat(root.dataset.duration) || 6;
+        const HF = window.__hyperframes;
+        const vars = Object.assign({
+          leftTitle: "Build it once",
+          rightTitle: "Change only this card",
+          leftColor: "#0B5FFF",
+          seed: 424242,
+          fireIntensity: 1,
+          sparkleCount: 22
+        }, HF && HF.getVariables ? HF.getVariables() : {});
+        const seededRandom = window.__seededRandom;
+        seededRandom(vars.seed);
+        window.__sniperAnimationMap = [
+          {"eventId":"right-card-in","unitId":"unit-right","elementId":"right-copy","property":"transform","startFrame":6,"endFrameExclusive":24,"easing":"power3.out"},
+          {"eventId":"sparkle-drift","unitId":"unit-right","elementId":"seeded-sparkles","property":"particles","startFrame":18,"endFrameExclusive":165,"easing":"power1.inOut"}
+        ];
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+        window.__buildFireSparkles(tl, root, vars, D);
+        tl.seek(0);
+        window.__timelines["fire-sparkles-right"] = tl;
+      })();
+    </script>
+  </body>
+</html>

@@ -49,7 +49,7 @@ def run(directory: Path, result: dict) -> None:
     attempt = authority / "attempts" / "section-marker-v2"
     attempt.mkdir(mode=0o700)
     entry = {"kind": "section-marker", "outStart": 0, "outEnd": 2.5, "anchor": "free-band",
-        "spec": {"num": "System No.1", "line1": "Current V2", "line2": "Boundary",
+        "spec": {"num": "Part 1", "line1": "Current V2", "line2": "Boundary",
                  "side": "left", "accent": "#054BC9"}}
     artifact = store_request_artifact(str(authority), {"schemaVersion": 1, "operation": "render-overlays",
         "overlays": [{"overlayId": "section-1", "entry": entry}]})

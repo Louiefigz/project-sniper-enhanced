@@ -32,8 +32,8 @@ BUILD_DIGEST = hashlib.sha256(b"attempt-build").hexdigest()
 def _entry(start: float = 0, anchor: str = "free-band") -> dict:
     return {"kind": "section-marker", "outStart": start,
             "outEnd": start + 2.5, "anchor": anchor, "spec": {
-                "num": "System No.1", "line1": "Familiarity",
-                "line2": "Rule", "side": "left", "accent": "#054BC9"}}
+                "num": "Part 1", "line1": "The Setup",
+                "line2": "Basics", "side": "left", "accent": "#054BC9"}}
 
 
 class OverlaySealTests(unittest.TestCase):
@@ -64,7 +64,7 @@ class OverlaySealTests(unittest.TestCase):
         self.assertEqual(after.intent, before.intent)
         self.assertEqual(after.key, before.key)
         self.assertEqual(after.expected_copy,
-                         ("System No.1", "Familiarity", "Rule"))
+                         ("Part 1", "The Setup", "Basics"))
 
     def test_absolute_shift_reuses_seal_but_anchor_changes_key_and_format(self) -> None:
         first_locator = prepare_overlay(self._request(_entry(0)))

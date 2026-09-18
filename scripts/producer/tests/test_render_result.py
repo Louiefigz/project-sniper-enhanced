@@ -37,8 +37,8 @@ class RenderResultTests(unittest.TestCase):
         self.attempt.mkdir(mode=0o700)
         entry = {"kind": "section-marker", "outStart": 0, "outEnd": 2.5,
                  "anchor": "free-band", "spec": {
-                     "num": "System No.1", "line1": "Familiarity",
-                     "line2": "Rule", "side": "left", "accent": "#054BC9"}}
+                     "num": "Part 1", "line1": "The Setup",
+                     "line2": "Basics", "side": "left", "accent": "#054BC9"}}
         artifact = store_request_artifact(str(self.authority), {
             "schemaVersion": 1, "operation": "render-overlays",
             "overlays": [{"overlayId": "overlay-1", "entry": entry}],

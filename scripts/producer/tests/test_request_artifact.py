@@ -19,8 +19,8 @@ from headless.request_artifact import (
 def _entry(label: str = "A") -> dict:
     return {"kind": "section-marker", "outStart": 0, "outEnd": 2.5,
             "anchor": "free-band", "spec": {
-                "num": "System No.1", "line1": label,
-                "line2": "Rule", "side": "left", "accent": "#054BC9"}}
+                "num": "Part 1", "line1": label,
+                "line2": "Basics", "side": "left", "accent": "#054BC9"}}
 
 
 def _request(label: str = "A") -> dict:

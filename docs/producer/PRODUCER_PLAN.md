@@ -332,11 +332,11 @@ resumable and independently verifiable:
    (+ optional FCPXML handoff for NLE finishing, reusing CLIPPER's writer).
 
 ### 4.3 Hook cards — placement, duration, copy (operator-specified 2026-07-04)
-- **Copy source**: grounded in the packaged Director library (resources/director) — QUEST archetypes
-  (`hook_types.py`) for the *kind*, the packaged Director hook library
-  (`hooks_catalog.py`, `format_hooks_for_prompt()`) for proven *instances* —
-  score-then-select (mirrors the pipeline's existing hook stage). Never improvised
-  from nothing (no-surface-branding doctrine).
+- **Copy source**: grounded in the packaged Director library (resources/director, rewritten
+  2026-09-18): its source-material categories and anchors for the *kind*, its reference
+  and training openings for worked *instances*, and its six opening criteria for the
+  audit — score-then-select. Never improvised from nothing (no-surface-branding
+  doctrine).
 - **Length rule (hard, lint-enforced)**: ≤ 2 lines, ≤ 8 words total. Research-consistent:
   at TikTok's official 5–10 words/s reading pace, 8 words reads in ~1–1.6s.
 - **Placement**: upper third of the universal safe box (y≈250–560), centered on
@@ -741,8 +741,8 @@ v2). Concept lifts queued:
 
 ## 11. Open questions for the operator
 
-Settled 2026-07-04: hook-card copy grounds in the packaged Director library (resources/director) (QUEST types +
-the packaged Director hook library via `format_hooks_for_prompt()`), hard-limited to ≤2 lines /
+Settled 2026-07-04: hook-card copy grounds in the packaged Director library (resources/director;
+its anchors and examples were rewritten 2026-09-18), hard-limited to ≤2 lines /
 ≤8 words (§4.3); hook cards = white container + black text.
 
 1. ~~Tool name~~ SETTLED 2026-07-05: PRODUCER stays.

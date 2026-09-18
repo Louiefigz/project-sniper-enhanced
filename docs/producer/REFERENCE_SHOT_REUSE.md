@@ -291,7 +291,7 @@ Component qualification does not waive review of the assembled scene or video.
 
 | Operator requirement | Existing evidence | Remaining acceptance check |
 | --- | --- | --- |
-| Save shot-to-catalog matches during study | `save-study` / `check-study`; cross-project Short → long-form test forbids new discovery | LF01 now retains a whole-video visual study and eight source-inspected functional candidates; new project adaptation still needs review |
+| Save shot-to-catalog matches during study | `save-study` / `check-study`; cross-project Short → long-form test forbids new discovery | The long-form study case used for this evidence was withdrawn from the product on 2026-09-18; saved study matches must be rebuilt against the packaged original library, and new project adaptation still needs review |
 | Reuse working animation before custom work | Existing route/gap checks plus retained saved inspections and decisions | New content/layout/timing still needs a source-bound strategy decision |
 | Give strategy the entire available library | Complete 39-reference/418-item local packet; no ranked-result limit; hashes checked on reuse | New experimental-item indexing/promotion remains separate; absent sources stay explicit |
 | Preserve a complete long-form study and 16:9 intent | Synthetic 900-second fixture retains 1,500 events, original lane choices, selected study and saved matches | A real 10–15-minute source/reference has not been reproduced in this implementation pass |
@@ -303,4 +303,4 @@ text; they verify orchestration and freshness, not visual quality. No new custom
 component, experimental promotion, paid strategy session or rendered reproduction
 is claimed by those tests. A real source/reference pair is needed for that review.
 
-The packaged long-form library starts with [LF01: chapter a long explanation into steps](../../resources/references/longform/cases/LF01.json), an original case with frames rendered from Sniper's own pipeline template. It illustrates a mechanism; it is not a reviewed real-source reproduction.
+The packaged long-form library starts with [LG01: a chapter timeline that fills in as the video advances](../../resources/references/longform/cases/LG01.json), an original case with frames rendered from Sniper's own templates. It illustrates a mechanism; it is not a reviewed real-source reproduction.

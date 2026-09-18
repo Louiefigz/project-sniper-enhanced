@@ -27,8 +27,8 @@ speech. All three preserve the accepted hook meaning, source cuts and words.
 
 | Comparison | What changes | What the viewer should follow |
 |---|---|---|
-| Follow-up | A03-inspired two-part upper hook: white on black, then white on red at 0.48 seconds; complete title holds 3.44 seconds | Earning trust through the follow-up; close portrait and centered karaoke remain |
-| Offer | A07/A04-inspired quiet OUTCOME + TIMEFRAME label spans the presenter-to-formula transition for 6.24 seconds | One offer develops from vague wording to specific outcome and timeframe; real dog footage illustrates the example |
+| Follow-up | Two-part upper hook (modelled on a third-party reference since withdrawn): white on black, then white on red at 0.48 seconds; complete title holds 3.44 seconds | Earning trust through the follow-up; close portrait and centered karaoke remain |
+| Offer | Quiet OUTCOME + TIMEFRAME label (modelled on third-party references since withdrawn) spans the presenter-to-formula transition for 6.24 seconds | One offer develops from vague wording to specific outcome and timeframe; real dog footage illustrates the example |
 | Membership | A06-inspired full visual stage accumulates 26 × $39 = $1,014 at the original spoken cues | The first-month goal is arithmetic, not evidence of achieved revenue; the completed relationship holds 3.44 seconds |
 
 The offer retains “Use this offer formula to get more buyers.” Its formula now
@@ -50,7 +50,7 @@ brief** prepares the local handoff; it does not run an unattended editor. See
 | Supplied source B-roll | The complete offer uses admitted real vlog footage and derived stills. Source identity, crop, trim and claim context are recorded. |
 | Official website | The complete corrected AI story includes 5.2 seconds of actual Claude guide scrolling. A guidance page is not a submitted AI request or successful product result. |
 | Public repository | The prior real GitHub capture contains 8 seconds/200 frames and 598 CSS pixels of movement. Its intake bridge was tested with synthetic primary material; a complete speech-supported GitHub Short remains unqualified. |
-| Creator identity | The prior Nate N26 metadata/rendition/frame chain is verified. An identicon was rejected as a portrait. A creator-focused Aaron Short remains unqualified without relevant admitted speech. |
+| Creator identity | The prior third-party reference metadata/rendition/frame chain was verified; that reference was withdrawn from the product on 2026-09-18. An identicon was rejected as a portrait. A creator-focused Aaron Short remains unqualified without relevant admitted speech. |
 | Recorded product navigation | This pass exports 25.4 seconds of Module's original N21 reference: HTTP node context → open menu → select Action in an app → scroll integrations. It is a reference-import test, not Aaron's footage or a newly recorded action. No API request execution is shown. |
 | Fresh authenticated recording | No usable authorized logged-in session was established. The existing public recorder uses a fresh session and rejects authenticated actions. A local recorder inspection produced no recording; this path remains unqualified. |
 | Unavailable sources | Prior actual 403/missing-target checks produce no promoted asset. Missing footage does not become invented UI, a simulated result or an unrelated logo. |

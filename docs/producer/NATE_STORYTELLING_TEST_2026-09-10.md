@@ -51,12 +51,11 @@ The existing excerpt and word transcript were reused after source derivation
 verification. No new transcription was required. The excerpt's original video
 offset is 76.715 seconds; the retained audio offset is 76.714667 seconds.
 
-Actual library images were reopened: Nate N27 overview parts 1/2, N26 part 1,
-N27-B16 and N26-B06 sequences, and N27 f001013/f001103/f001154. The primary
-transfer is N27-B09–18: keep one recognizable offer object, change its value/time
-variables, and connect those changes to the explanation. N26-B04–09 supplies the
-alternative stable-world/changed-variable pattern. The test does not establish
-coverage of every Nate reference or audience effectiveness.
+Reference images from a third-party study library were reopened for this test;
+that library was withdrawn from the product on 2026-09-18, and its case and frame identifiers are
+no longer cited. The Short keeps one recognizable offer object, changes its
+value/time variables and connects those changes to the explanation. The test does
+not establish reference coverage or audience effectiveness.
 
 The source-bound [BRIEF](../../artifacts/shorts-end-to-end-2026-09-10/projects/nate-offer-v1/BRIEF.md)
 and [STORYBOARD](../../artifacts/shorts-end-to-end-2026-09-10/projects/nate-offer-v1/STORYBOARD.md)
@@ -96,13 +95,13 @@ The existing caption grouper creates 27 groups from 65 retained word occurrences
 
 ## Other two revisions
 
-**Follow-up:** canonical `value-how-to` produces “How to earn trust with a
-follow-up.” White-on-red upper backing, centered outlined karaoke and full portrait
+**Follow-up:** the then-packaged how-to anchor (withdrawn from the product on 2026-09-18)
+produced “How to earn trust with a follow-up.” White-on-red upper backing, centered outlined karaoke and full portrait
 framing replace the earlier middle heading/displaced captions. The final HTML,
 font, GSAP, source and MP4 match the already qualified title component exactly.
 The final delivery is reused, with no new picture/audio encode.
 
-**Members:** canonical `value-how-to` produces “How to plan a $1K month.” A single
+**Members:** the same withdrawn anchor produced “How to plan a $1K month.” A single
 red-on-white upper line clears the opening hairline. The accepted 26 × $39 =
 $1,014 arithmetic and close lower presenter remain. Captions move to a black-backed
 center strip just above the divider, clearing both the diagram and the speaker.

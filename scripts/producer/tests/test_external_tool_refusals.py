@@ -10,7 +10,6 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from argparse import Namespace
 from contextlib import redirect_stdout
 from pathlib import Path
 from unittest import mock
@@ -33,12 +32,14 @@ class MissingToolTests(unittest.TestCase):
         self.addCleanup(patcher.stop)
 
     def test_study_refuses_before_any_work_without_tesseract(self) -> None:
-        out_dir = self.tmp / "study"
-        opts = Namespace(video=str(self.tmp / "ref.mp4"), out_dir=str(out_dir), fps=None, meticulous=False,
-                         semantics=False, transcript=None, skip_captions=False, text_scope="all")
-        with self.assertRaises(RuntimeError) as caught:
-            study_deep.run_deep(opts)
-        self.assertIn("brew install tesseract", str(caught.exception))
+        out_dir, video = self.tmp / "study", self.tmp / "ref.mp4"
+        video.write_bytes(b"never decoded")
+        buffer = io.StringIO()
+        with mock.patch.object(sys, "argv", ["study_deep.py", str(video), str(out_dir)]), \
+                mock.patch.object(study_deep, "run_deep") as work, redirect_stdout(buffer):
+            self.assertEqual(study_deep.main(), 1)
+        work.assert_not_called()
+        self.assertIn("brew install tesseract", buffer.getvalue())
         self.assertFalse(out_dir.exists(), "the study started work before refusing")
 
     def test_study_cli_reports_the_refusal_as_its_error_event(self) -> None:

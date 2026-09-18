@@ -110,6 +110,7 @@ def check_media() -> None:
 
 
 def check_runtime_and_build() -> None:
+    """The render runtime through the product's own installer, and the app build's files."""
     _product_paths()
     try:
         from studio.native_runtime import install_runtime  # noqa: PLC0415
@@ -154,6 +155,7 @@ def check_transcription(skip: bool) -> None:
 
 
 def check_workspace_and_port() -> None:
+    """The video workspace is writable with room for a render; who holds the port."""
     root = Path(os.environ.get("SNIPER_WORKSPACE_ROOT") or Path.home() / "ProjectSniper")
     try:
         root.mkdir(parents=True, exist_ok=True)
@@ -169,6 +171,7 @@ def check_workspace_and_port() -> None:
 
 
 def check_optional() -> None:
+    """Optional features: reported, never failing the doctor."""
     demucs = (APP / "scripts/producer/audio/.demucs-venv/bin/python3").exists()
     record("PASS" if demucs else "GATED", "audio preset: separate",
            "available" if demucs else "not installed (needs Demucs); voice, voice-strong, voice-rnn work")
@@ -189,6 +192,7 @@ def _hold_install() -> bool:
 
 
 def main() -> int:
+    """Run the checks; exit 0 only when every required one passed."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--provider-only", action="store_true")

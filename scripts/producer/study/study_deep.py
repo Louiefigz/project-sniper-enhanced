@@ -96,8 +96,6 @@ def _study_params(opts: argparse.Namespace) -> dict:
 
 def run_deep(opts: argparse.Namespace) -> dict:
     """All passes in order; writes and returns the canonical deep study."""
-    # P4 always reads on-screen text; refuse before minutes of P1-P3 work, not after.
-    require_tesseract()
     os.makedirs(opts.out_dir, exist_ok=True)
     info = probe_video(opts.video)
     meticulous = bool(getattr(opts, "meticulous", False))
@@ -175,6 +173,7 @@ def main() -> int:
         _emit("error", error=f"not a file: {opts.video}")
         return 1
     try:
+        require_tesseract()  # P4 always reads on-screen text: refuse before P1-P3 work, not after
         with use_asr_invocation(invocation_from_options(opts)):
             run_deep(opts)
     except (OSError, RuntimeError, ValueError) as exc:

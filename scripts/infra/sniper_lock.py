@@ -105,9 +105,16 @@ def _records_dir(path: Path) -> Path:
 
 
 def _write_record(path: Path, mode: str, label: str) -> Path:
-    """Note who holds the lock, for messages only; the flock is the authority."""
+    """Note who holds the lock, for messages only; the flock is the authority.
+
+    Records of processes that have exited are pruned here, so they never pile up.
+    """
     directory = _records_dir(path)
     directory.mkdir(parents=True, exist_ok=True)
+    for old in directory.glob("*.json"):
+        pid = old.stem.rsplit(".", 1)[-1]
+        if pid.isdigit() and not _pid_alive(int(pid)):
+            old.unlink(missing_ok=True)
     record = directory / f"{path.stem}.{os.getpid()}.json"
     record.write_text(json.dumps({"pid": os.getpid(), "mode": mode, "label": label,
                                   "since": time.strftime("%H:%M:%S")}), encoding="utf-8")

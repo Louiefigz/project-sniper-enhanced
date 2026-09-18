@@ -25,6 +25,10 @@ CODEX_HOME_LOCAL="$RUNTIME_DIR/codex-home"
 case ":$PATH:" in *":/opt/homebrew/bin:"*) ;; *) PATH="/opt/homebrew/bin:$PATH" ;; esac
 case ":$PATH:" in *":/usr/local/bin:"*) ;; *) PATH="$PATH:/usr/local/bin" ;; esac
 export PATH
+# The pinned Claude CLI names its Keychain login after CLAUDE_CONFIG_DIR, so
+# Sniper's login is separate from yours. This variable would override that
+# naming and point Sniper's sign-in and sign-out at your own login; never inherit it.
+unset CLAUDE_SECURESTORAGE_CONFIG_DIR
 
 say()  { printf '%s\n' "$*"; }
 step() { printf '\n== %s\n' "$*"; }
@@ -102,15 +106,74 @@ env_value() {
   sed -n "s/^$1=\"\{0,1\}\([^\"]*\)\"\{0,1\}$/\1/p" "$ENV_FILE" | tail -1
 }
 
+# A port given on the command line (SNIPER_PORT=3100 install/start.command)
+# wins over the installed settings; otherwise sniper.local.env, then sniper.env.
+# The folder is always taken from where these scripts are, never from the settings
+# file: after a move or copy the settings still name the old place, and acting on
+# it could stop or delete another install. `load_env --moved-ok` (uninstall only)
+# continues with this folder's own paths instead of refusing.
 load_env() {
+  local caller_port="${SNIPER_PORT:-}" here="$PKG_ROOT" recorded
   [ -f "$ENV_FILE" ] || fail "Not installed yet. Run install/install.command first."
   set -a; . "$ENV_FILE"
   [ -f "$RUNTIME_DIR/sniper.local.env" ] && . "$RUNTIME_DIR/sniper.local.env"
   set +a
+  recorded="$PKG_ROOT"; PKG_ROOT="$here"; APP_DIR="$here/app"; export PKG_ROOT APP_DIR
+  if [ "$recorded" != "$here" ] && [ "${1:-}" != "--moved-ok" ]; then
+    fail "This folder was moved or copied after it was installed (installed at:
+  $recorded). Run install/install.command once in its new place."
+  fi
+  [ -n "$caller_port" ] && SNIPER_PORT="$caller_port"
+  PORT="${SNIPER_PORT:-3000}"; export SNIPER_PORT="$PORT"
 }
 
 port_listener_pids() {
   lsof -nP -t -iTCP:"$PORT" -sTCP:LISTEN 2>/dev/null | sort -u
+}
+
+# Work that belongs to this install but is not the app server: background edits,
+# renders and the CLI calls they make. A process counts when its working folder or
+# its command line is inside this folder. Excluded: the app server — the supervisor's
+# process group and the group of the Next server it starts (stop.command handles
+# those) — and this script with its own parent shells. Edits and renders the app
+# launches run detached in groups of their own, so they still count.
+active_work_pids() {
+  local sup app_groups=" " self_group p group ancestors=" " a="$$" child
+  sup="$(cat "$STATE_DIR/app.pid" 2>/dev/null)"
+  if pid_is_our_supervisor "$sup"; then
+    app_groups=" $(ps -o pgid= -p "$sup" | tr -d ' ') "
+    for child in $(pgrep -P "$sup"); do app_groups="$app_groups$(ps -o pgid= -p "$child" | tr -d ' ') "; done
+  fi
+  self_group="$(ps -o pgid= -p $$ | tr -d ' ')"
+  while [ -n "$a" ] && [ "$a" != 0 ] && [ "$a" != 1 ]; do
+    ancestors="$ancestors$a "; a="$(ps -o ppid= -p "$a" 2>/dev/null | tr -d ' ')"
+  done
+  { processes_in_folder; pgrep -f -- "$(literal_pattern "$PKG_ROOT/")" 2>/dev/null
+  } | sort -un | while read -r p; do
+    case "$ancestors" in *" $p "*) continue ;; esac
+    group="$(ps -o pgid= -p "$p" 2>/dev/null | tr -d ' ')" || continue
+    [ -n "$group" ] || continue
+    [ "$group" = "$self_group" ] && continue
+    case "$app_groups" in *" $group "*) continue ;; esac
+    printf '%s\n' "$p"
+  done
+}
+# lsof prints non-ASCII bytes of a path as \xNN; decode before comparing, and
+# compare literally (a folder like "project-sniper (1)" must match itself).
+processes_in_folder() {
+  local line p="" n
+  lsof -a -d cwd -Fpn 2>/dev/null | while IFS= read -r line; do
+    case "$line" in
+      p*) p="${line#p}" ;;
+      n*) n="$(printf '%b' "${line#n}")"; case "$n/" in "$PKG_ROOT/"*) printf '%s\n' "$p" ;; esac ;;
+    esac
+  done
+}
+literal_pattern() { printf '%s' "$1" | sed 's/[][\\.*^$+?(){}|]/\\&/g'; }
+describe_pids() {  # pid... -> "name (pid N), ..."
+  local p out=""
+  for p in "$@"; do out="$out$(basename "$(ps -o comm= -p "$p" 2>/dev/null)") (pid $p), "; done
+  printf '%s' "${out%, }"
 }
 
 # A stored PID is only ours if that process is still this package's supervisor.
@@ -119,8 +182,8 @@ pid_is_our_supervisor() {
   local pid="$1" cmd
   [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null || return 1
   cmd="$(ps -o command= -p "$pid" 2>/dev/null)"
-  case "$cmd" in *"$APP_DIR/scripts/infra/next_supervisor.mjs"*|*"scripts/infra/next_supervisor.mjs"*)
-    [ "$(lsof -a -p "$pid" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p')" = "$APP_DIR" ] ;;
-    *) return 1 ;;
-  esac
+  case "$cmd" in *"scripts/infra/next_supervisor.mjs"*) ;; *) return 1 ;; esac
+  # Same folder = same inode as this install's app/. Compared by number, because
+  # lsof escapes non-ASCII characters in the path it prints.
+  [ "$(lsof -a -p "$pid" -d cwd -Fi 2>/dev/null | sed -n 's/^i//p')" = "$(stat -f %i "$APP_DIR")" ]
 }

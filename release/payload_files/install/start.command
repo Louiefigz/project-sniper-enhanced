@@ -4,7 +4,10 @@
 load_env
 PORT="${SNIPER_PORT:-3000}"
 PIDFILE="$STATE_DIR/app.pid"
-[ -f "$APP_DIR/.next/BUILD_ID" ] || fail "The app has not been built. Run install/install.command."
+# The receipt is written only after a build completes; a BUILD_ID alone can be
+# left over from an earlier build that a failed or interrupted one replaced.
+[ -f "$APP_DIR/.next/BUILD_ID" ] && [ -f "$RECEIPTS/build" ] \
+  || fail "The app has not been built. Run install/install.command."
 BUILD_ID="$(cat "$APP_DIR/.next/BUILD_ID")"
 PROBE="http://127.0.0.1:$PORT/_next/static/$BUILD_ID/_buildManifest.js"
 

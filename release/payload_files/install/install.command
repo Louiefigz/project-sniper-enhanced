@@ -26,6 +26,13 @@ require_macos
 require_safe_install_path
 mkdir -p "$RUNTIME_DIR" "$STATE_DIR" "$RECEIPTS" "$LOG_DIR"
 log_line "install started"
+# The Python environment and the app build record the folder they were made in.
+# If this folder was moved or copied since, redo exactly those two steps.
+if [ -f "$RECEIPTS/location" ] && ! receipt_ok location "$PKG_ROOT"; then
+  say "This folder was moved or copied since it was installed; redoing the steps that record its location."
+  clear_receipt venv; clear_receipt build; rm -rf "$APP_DIR/.venv"
+fi
+write_receipt location "$PKG_ROOT"
 RELEASE_JSON="$PKG_ROOT/RELEASE.json"
 pin() { python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['components'][sys.argv[2]])" "$RELEASE_JSON" "$1"; }
 
@@ -78,8 +85,10 @@ npm_root() {  # label dir receipt-name
   local key="node-$(node --version)|lock-$(sha "$2/package-lock.json")"
   if receipt_ok "$3" "$key" && [ -d "$2/node_modules" ]; then say "$1 — up to date"; return 0; fi
   clear_receipt "$3"
-  # npm ci removes any existing node_modules first, so a half-finished earlier
-  # attempt is replaced rather than trusted.
+  # Remove whatever an earlier, interrupted attempt left behind before reinstalling.
+  # npm ci alone can fail on a half-extracted tree (seen in the interruption test:
+  # ENOENT on chmod inside a partially written package).
+  rm -rf "$2/node_modules"
   ( cd "$2" && npm ci --no-audit --no-fund ) || fail "Installing $1 failed.
   Check your connection and run the installer again; it repeats this step."
   write_receipt "$3" "$key"; say "$1 — installed"
@@ -131,6 +140,8 @@ MODEL_PATH="$WHISPER_DIR/$MODEL_NAME"
 MODEL_SHA="c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d"
 MODEL_URL="${SNIPER_MODEL_URL:-https://huggingface.co/ggerganov/whisper.cpp/resolve/main/$MODEL_NAME}"
 mkdir -p "$WHISPER_DIR"
+# No model file means no completed step, whatever an earlier run recorded.
+[ -f "$MODEL_PATH" ] || clear_receipt model
 if [ ! -f "$MODEL_PATH" ]; then
   # Reuse an identical copy already on this Mac (verified by hash, cloned on APFS).
   for existing in "$HOME/.cache/hyperframes/whisper/models/$MODEL_NAME" \
@@ -165,7 +176,11 @@ write_receipt model "$MODEL_SHA"; say "Speech model verified"
 # ------------------------------------------------------------ 7. provider CLIs
 step "7/10  Pinned Codex and Claude CLIs (kept inside this folder)"
 CODEX_WANT="$(pin codex_cli_admitted)"; CLAUDE_WANT="$(pin claude_cli_admitted)"
-cli_ok() { [ -x "$CLI_BIN/$1" ] && [ "$("$CLI_BIN/$1" --version 2>/dev/null | head -1)" = "$2" ]; }
+mkdir -p "$CLAUDE_CONFIG_DIR_LOCAL" "$CODEX_HOME_LOCAL"; chmod 700 "$CLAUDE_CONFIG_DIR_LOCAL" "$CODEX_HOME_LOCAL"
+# Even --version makes the Codex CLI write into its home folder: point it at
+# Sniper's own, never at yours.
+cli_ok() { [ -x "$CLI_BIN/$1" ] && [ "$(CODEX_HOME="$CODEX_HOME_LOCAL" CLAUDE_CONFIG_DIR="$CLAUDE_CONFIG_DIR_LOCAL" \
+  "$CLI_BIN/$1" --version 2>/dev/null | head -1)" = "$2" ]; }
 if receipt_ok cli "$CODEX_WANT|$CLAUDE_WANT" && cli_ok codex "$CODEX_WANT" && cli_ok claude "$CLAUDE_WANT"; then
   say "Codex and Claude CLIs — up to date"
 else
@@ -178,8 +193,6 @@ else
   cli_ok claude "$CLAUDE_WANT" || fail "The Claude CLI does not report '$CLAUDE_WANT'."
   write_receipt cli "$CODEX_WANT|$CLAUDE_WANT"; say "Codex and Claude CLIs — installed"
 fi
-mkdir -p "$CLAUDE_CONFIG_DIR_LOCAL" "$CODEX_HOME_LOCAL"
-chmod 700 "$CLAUDE_CONFIG_DIR_LOCAL" "$CODEX_HOME_LOCAL"
 
 # ------------------------------------------------------------ 8. configuration
 step "8/10  Configuration"
@@ -212,6 +225,7 @@ HYPERFRAMES_BROWSER_PATH="$BROWSER_BIN"
 HYPERFRAMES_FFMPEG_PATH="$(command -v ffmpeg)"
 HYPERFRAMES_FFPROBE_PATH="$(command -v ffprobe)"
 HYPERFRAMES_NO_TELEMETRY="1"
+NEXT_TELEMETRY_DISABLED="1"
 HYPERFRAMES_NO_UPDATE_CHECK="1"
 HYPERFRAMES_NO_AUTO_INSTALL="1"
 WHISPER_CPP_BIN="$(command -v whisper-cli)"
@@ -242,8 +256,11 @@ if receipt_ok build "$BUILDKEY" && [ -f "$APP_DIR/.next/BUILD_ID" ]; then
   say "App build — up to date"
 else
   clear_receipt build
-  ( load_env; cd "$APP_DIR" && npm run build ) >> "$LOG_DIR/build.log" 2>&1 \
-    || fail "Building the app failed. The last lines of $LOG_DIR/build.log say why."
+  if ! ( load_env; cd "$APP_DIR" && npm run build ) >> "$LOG_DIR/build.log" 2>&1; then
+    tail -15 "$LOG_DIR/build.log" >&2
+    fail "Building the app failed (the lines above are from $LOG_DIR/build.log).
+  Run the installer again; if it fails the same way, run install/diagnostics.command."
+  fi
   [ -f "$APP_DIR/.next/BUILD_ID" ] || fail "The app build finished without a build id."
   write_receipt build "$BUILDKEY"; say "App build — done ($(cat "$APP_DIR/.next/BUILD_ID"))"
 fi

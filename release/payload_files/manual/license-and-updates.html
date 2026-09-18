@@ -37,8 +37,7 @@ that file is part of the licence, not a formality.</p>
 <h2>Updates — read this one carefully</h2>
 <div class="warn">
 <p><strong>Your purchase is the version you downloaded.</strong> It does not include bug
-fixes, compatibility updates or new versions. Later releases are part of the separate
-paid support and updates offer.</p>
+fixes, compatibility updates or new versions.</p>
 </div>
 <p>Because that is the policy, here is the honest risk, stated rather than hidden:</p>
 <table>
@@ -56,20 +55,18 @@ and a fix would be a new release you do not have rights to under this policy.</t
 <tr><td>A major macOS upgrade breaks a dependency</td><td><strong>Not handled.</strong>
 Same reason.</td></tr>
 </table>
-<p>If those risks matter to you over a period of years, the paid support and updates
-offer, not this purchase, is what covers them.</p>
 
 <h2>Refunds</h2>
 <p><strong>14 days, no conditions.</strong> Ask within 14 days of purchase and you get
 your money back. You do not have to prove anything or contact support first.</p>
-<p>One practical note: a downloaded file cannot be taken back off your Mac. A refund ends
-your right to use Sniper; deleting your copy is on you.</p>
+<p>What a refund means for the copy already on your Mac has not been settled yet; it is
+one of the open items in <code>PENDING-OWNER-DECISIONS.txt</code>.</p>
 
 <h2>Which version you have</h2>
 <pre><code>cat RELEASE.json</code></pre>
 <p>It records the version, the exact source it was built from, the platform it is
 qualified for, every component version, and — plainly — whether this build is sellable
-and what is blocking it. Quote the <code>version</code> field in any support message.</p>
+and what is blocking it. Quote the <code>version</code> field whenever you report a problem.</p>
 <p>The archive's own checksum is deliberately <em>not</em> inside the archive. It is
 published beside the download in <code>SHA256SUMS</code>, because a hash stored inside a
 file cannot verify that file.</p>
@@ -79,19 +76,30 @@ file cannot verify that file.</p>
 folder with its own <code>runtime/</code>:</p>
 <ol>
   <li>Keep the old release folder. Do not delete it when you unzip a new one.</li>
-  <li>Install the new one beside it and use it.</li>
-  <li>If the new one misbehaves, stop it and start the old one.</li>
+  <li>Install the new one beside it and use it. If you created
+  <code>runtime/sniper.local.env</code> in the old folder, copy it into the new one first.</li>
+  <li>If the new one misbehaves, run <code>install/stop.command</code> in it and
+  <code>install/start.command</code> in the old one.</li>
 </ol>
-<p>Both point at the same <code>~/ProjectSniper</code>, so your videos are shared between
-them. A project created by a newer release may use plan fields an older one does not
+<p>Both point at the same <code>~/ProjectSniper</code>, so your videos and your list of
+recent projects are shared between them. An export that was interrupted resumes only in the
+release folder that started it; in the other one, export again. A project created by a newer release may use plan fields an older one does not
 understand — if you plan to go back, copy the project folder first.</p>
 
 <h2>Backup</h2>
 <p>Back up <strong><code>~/ProjectSniper</code></strong>. That is all of your work: your
-footage, your transcripts, your edit plans, your finished videos and your approval
-receipts. The Sniper folder itself is replaceable — you can always unzip it again.</p>
-<p>Include <code>~/.project-sniper/config.json</code> if you moved your workspace
-somewhere other than the default.</p>
+footage, your transcripts, your edit plans, your finished videos, your approval receipts
+and Sniper's list of recent projects. The Sniper folder itself is replaceable — you can
+always unzip it again.</p>
+<h3>Keeping your videos somewhere else</h3>
+<p>Put this one line in <code>runtime/sniper.local.env</code> (create the file if it does
+not exist), then stop and start Sniper:</p>
+<pre><code>SNIPER_WORKSPACE_ROOT=/Volumes/Work/SniperVideos</code></pre>
+<p>Back up that folder instead of <code>~/ProjectSniper</code>.</p>
+<h3>Moving the Sniper folder</h3>
+<p>If you move or copy the Sniper folder after installing, its scripts refuse to start
+until you run <code>install/install.command</code> once in the new place. It redoes only
+the steps that record the folder's location, and keeps your settings.</p>
 
 <h2>Uninstall</h2>
 <pre><code>install/uninstall.command</code></pre>

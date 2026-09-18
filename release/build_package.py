@@ -62,15 +62,25 @@ def _stage(root: Path, stage_dir: Path, allow_pending: bool) -> tuple[StageRepor
     return report, pending
 
 
+# Mirrors PENDING-OWNER-DECISIONS.txt and the qualification report; every entry
+# must be closed by evidence, not by editing this list.
+OPEN_BLOCKERS = (
+    "licence wording not final or reviewed; refund effect on the grant and governing law unsettled (input D)",
+    "no support route or response commitment (input D)",
+    "supported platform boundary unproven: no clean-Mac install run (Z2, input R)",
+    "outside-operator install and edit not run (Z10)",
+    "authenticated delivery of these exact bytes not run (Z11)",
+    "Claude route not exercised for real: the Claude CLI on the build Mac is not signed in",
+)
+
+
 def _release_status(pending: list[str]) -> dict[str, object]:
     """Release status recorded inside and beside the archive."""
     if pending:
         return {"sellable": False,
                 "blockers": ["teacher-named identifiers remain in shipped source "
                              f"({len(pending)} paths); see PENDING-RENAME.txt"]}
-    return {"sellable": False,
-            "blockers": ["outside-operator qualification (Z10) and authenticated "
-                         "delivery (Z11) have not been run"]}
+    return {"sellable": False, "blockers": list(OPEN_BLOCKERS)}
 
 
 def build(version: str, out: Path, allow_pending: bool) -> dict[str, object]:

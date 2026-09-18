@@ -210,8 +210,14 @@ function assertAuthorityParity(fix: Fixture, ctx: AutoEditCtx): Golden {
     autoEditAuthoritySnapshot(legacy),
     "legacy managed markers must use the same completely sorted row contract",
   );
-  const golden = JSON.parse(readFileSync(path.join(
-    __dirname, "fixtures", "auto-edit-authority-golden.json"), "utf8")) as Golden;
+  const goldenFile = path.join(__dirname, "fixtures", "auto-edit-authority-golden.json");
+  // Regenerate the golden only from code, and only after the TypeScript/Python
+  // parity assertions above passed: SNIPER_UPDATE_AUTHORITY_GOLDEN=1.
+  if (process.env.SNIPER_UPDATE_AUTHORITY_GOLDEN === "1") {
+    writeFileSync(goldenFile, `${JSON.stringify(ts, null, 2)}\n`);
+    console.log("auto-edit-authority-golden.json regenerated after parity passed");
+  }
+  const golden = JSON.parse(readFileSync(goldenFile, "utf8")) as Golden;
   assert.deepEqual(ts, golden);
   return ts;
 }

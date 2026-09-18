@@ -1,6 +1,6 @@
 {
   "excluded_untracked": "docs/studies/adrian-per/ (paid-teaching-corpus study)",
-  "rc3_src_commit": "7d8d71eca1e7b7d35030ad56248f06d0178dfbb8",
+  "rc3_src_commit": "ee24cb2322d5c24719879b11378a19aa23cf4607",
   "snapshot": "2026-09-17 working tree incl. sniper-context; 6,133 captured files verified byte-identical to the live tree",
   "upstream_head": "8ebcdfc4e37a4503082cbc64839752bf241f4a08"
 }

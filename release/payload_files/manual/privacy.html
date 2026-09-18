@@ -53,6 +53,18 @@ JPEGs go to Anthropic. Needs your own paid API key and is not part of this purch
 <tr><td>Deepgram transcription</td><td><strong>Would upload your audio.</strong> Not
 selected in this install; it needs a key you would have to add yourself.</td>
 <td><code>app/scripts/asr_policy.py</code></td></tr>
+<tr><td>Installing</td><td><strong>Downloads only.</strong> The installer fetches
+packages from the npm and Python package registries, the rendering browser from Google's
+Chrome for Testing, the speech model from Hugging Face and the two provider CLIs from npm.
+It sends none of your files or text.</td><td><code>install/install.command</code></td></tr>
+<tr><td>Framework usage statistics</td><td><strong>Switched off.</strong> Next.js and
+HyperFrames both collect anonymous usage statistics by default; this install turns both
+off.</td><td><code>NEXT_TELEMETRY_DISABLED</code>, <code>HYPERFRAMES_NO_TELEMETRY</code>
+in <code>runtime/sniper.env</code></td></tr>
+<tr><td>The Codex or Claude CLI itself</td><td><strong>Talks to its provider</strong>, as
+it does anywhere you use it, including whatever usage reporting that provider's CLI does.
+That is covered by your provider's terms, not by Sniper.</td><td>your provider's
+documentation</td></tr>
 </table>
 
 <h2>What that means in practice</h2>

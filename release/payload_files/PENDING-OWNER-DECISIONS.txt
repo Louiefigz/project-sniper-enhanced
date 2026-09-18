@@ -25,12 +25,17 @@ STILL OPEN — each blocks release
   1. LICENCE WORDING (input D): LICENSE-DRAFT.txt is not final or reviewed; the
      effect of a refund on the grant and governing law are unsettled.
   2. SUPPORT ROUTE AND RESPONSE COMMITMENT (input D): no support address anywhere.
-  3. FIRST-RUN SAMPLE FOOTAGE: none is cleared for redistribution. Needed: one short
-     talking-head clip you own and are willing to ship, recorded for this purpose.
-  4. SUPPORTED PLATFORM BOUNDARY (input R): only a developer Mac on macOS 26 / Apple
+  3. SUPPORTED PLATFORM BOUNDARY (input R): only a developer Mac on macOS 26 / Apple
      silicon has run this. A clean-Mac install run is needed before any boundary is
      stated to buyers.
-  5. UPSELL SCOPE: the "everything I'm working on" clarification in decisions.md.
+
+NOT BLOCKING THIS PRODUCT
+  - Sample footage: the first run no longer needs a shipped clip. The manual has the
+    buyer record a 45-second test clip from an original script (manual/first-edits.html).
+    A shipped sample stays optional; it would need a clip you own and agree to ship.
+  - The optional paid offer recorded in decisions.md stays switched off until its own
+    terms and fulfilment are settled (including its "everything I'm working on" scope).
+    Nothing in this package mentions it or depends on it.
 
 NOT OWNER DECISIONS — acceptance still outstanding
   - Claude sign-in on this Mac: the Claude CLI here is not signed in, so no real Claude

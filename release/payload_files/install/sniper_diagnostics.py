@@ -10,6 +10,9 @@ lines by kind. Raw app-log lines can carry transcript text, prompt text or a
 token format nobody anticipated, so none is copied unless it is one of the
 supervisor's own fixed-form status lines.
 
+Paths are written relative to your home folder, and any other /Users/<name> is
+masked, so your account name does not travel with the bundle.
+
 `--include-app-log` adds the last 200 app-log lines after redaction. That is an
 explicit choice the bundle's README records, because redaction by pattern cannot
 promise to catch everything.
@@ -78,6 +81,11 @@ def redacted_tail(path: Path, count: int = 200) -> list[str]:
     return out
 
 
+def mask_home(text: str) -> str:
+    """Replace this account's home folder, then any other account's, in serialized output."""
+    return re.sub(r"/Users/[^/\s\"]+", "/Users/[you]", text.replace(str(Path.home()), "~"))
+
+
 def build(target: Path, include_app_log: bool) -> Path:
     """Write the bundle and return its folder."""
     target.mkdir(parents=True, exist_ok=False)
@@ -94,7 +102,7 @@ def build(target: Path, include_app_log: bool) -> Path:
     }
     if include_app_log:
         payload["app_log_tail_redacted"] = redacted_tail(RUNTIME / "logs" / "app.log")
-    (target / "diagnostics.json").write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    (target / "diagnostics.json").write_text(mask_home(json.dumps(payload, indent=2)) + "\n", encoding="utf-8")
     note = ("Contains: release and machine versions, the check report, install receipts, the installer's "
             "own step log and counts of app-log lines. It does not contain footage, transcripts, edit "
             "plans, logins or app-log text")

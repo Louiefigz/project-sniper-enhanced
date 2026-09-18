@@ -104,9 +104,11 @@ the steps that record the folder's location, and keeps your settings.</p>
 <h2>Uninstall</h2>
 <pre><code>install/uninstall.command</code></pre>
 <p>It asks you to type <code>REMOVE</code>, signs out the Codex or Claude login you made for
-Sniper (including the Claude login's Keychain item), then deletes only what the installer
-created: <code>runtime/</code>, the two <code>node_modules</code> folders, the Python environment,
-the app build and the render caches. Then delete the folder.</p>
+Sniper (including the Claude login's Keychain item), then deletes what the installer
+created — <code>runtime/</code> (including your own <code>runtime/sniper.local.env</code>
+settings; copy that file first if you want to keep it), the two <code>node_modules</code>
+folders, the Python environment, the app build, the render caches and the export-recovery
+history. Then delete the folder.</p>
 <p>It does <strong>not</strong> touch your videos in <code>~/ProjectSniper</code>, your
 own Node, Python, Homebrew, ffmpeg or whisper install, or your global Codex and Claude
 CLIs and their logins.</p>

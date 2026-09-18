@@ -85,8 +85,10 @@ changed. A browser window asks you to authorise with the subscription you alread
   <li><strong>Claude</strong> keeps it in your macOS Keychain as its own item, separate from
   any Claude login you already have. <code>install/uninstall.command</code> signs it out.</li>
 </ul>
-<p>Sniper accepts only a subscription login. An API-key login is refused on purpose — Sniper
-does not bill per call. To switch subscription later: <code>install/use-provider.command claude</code>
+<p>Sniper accepts only a subscription login for the editor. An API-key login is refused on
+purpose, so Producer edits never bill per call. (Frame Review, and Segmenter and Clipper on
+the Claude route, use an Anthropic API key only if you add one yourself; see the
+requirements on the start page.) To switch subscription later: <code>install/use-provider.command claude</code>
 (or <code>codex</code>), then sign in again.</p>
 
 <h3>Choosing the model</h3>

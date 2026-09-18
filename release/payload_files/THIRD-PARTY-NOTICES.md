@@ -100,5 +100,5 @@ screenshot, brand, likeness or creator name is used.
 
 **Known exception, blocking sale:** several editing-doctrine studies that still ship
 (the saved styles and some `docs/studies` files) are analyses of specific creators'
-videos or one teacher's material, with creator names removed. They are listed in
+videos or one teacher's material. Some still name creators or cite their videos. They are listed in
 `PENDING-OWNER-DECISIONS.txt`, item 5, and must be re-authored or withheld before sale.

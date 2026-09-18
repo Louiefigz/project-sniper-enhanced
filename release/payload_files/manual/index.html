@@ -44,7 +44,7 @@ purchase — see <a href="privacy.html">what leaves your Mac</a>.</td></tr>
   leaving frame are worth checking.</li>
   <li>Burn in captions that follow the words that survived the cut.</li>
   <li>Add motion, graphics, transitions, b-roll placement and claim-checking cards.</li>
-  <li>Clean up dialogue and master the audio to a broadcast level (&minus;14 LUFS).</li>
+  <li>Clean up dialogue and master the audio to a common streaming level (&minus;14 LUFS).</li>
   <li>Lay a music bed under it, ducked beneath the voice. Off by default.</li>
 </ul>
 
@@ -76,8 +76,11 @@ Leave at least 20 GB free; a full-length render uses a lot of temporary space.</
 command each. The installer tells you if they are missing.</td><td>Free</td></tr>
 <tr><td><strong>A Codex or Claude subscription</strong></td><td>This is the part that
 thinks about your edit. You use the subscription you already pay for. There is no extra
-Sniper processing fee. Sniper ignores any API key in your shell, so nothing is billed per
-call unless you deliberately add a key for the optional Frame Review.</td><td><strong>You pay
+Sniper processing fee, and Producer edits use only the subscription. Two things can bill
+per call if you add an Anthropic API key yourself: the optional Frame Review, and the AI
+steps of Segmenter and Clipper when your provider is Claude. Sniper ignores keys exported in
+your shell; it uses one only if you put it in <code>runtime/sniper.local.env</code> or
+<code>app/.env.local</code>.</td><td><strong>You pay
 your provider directly. Their plan price, model access and usage limits apply.</strong></td></tr>
 </table>
 

@@ -5,7 +5,8 @@
 ### Product changes
 - **Neutral names.** Styles, paces, presets, compositions, lint profiles and every
   document now use neutral names (`restrained`, `punch`, `slideware`, `module-*`).
-  Existing projects convert with the maintainer tool `release/normalize_project.py`.
+  Projects made with earlier development builds need converting by the maintainer; the
+  conversion tool is not part of this package.
 - **Original Director library** (`app/resources/director/`): the hook anchors, formats,
   reference openings and training pairs the Director uses. No other repository is read.
 - **Original reference library** (`app/resources/references/`): worked examples of

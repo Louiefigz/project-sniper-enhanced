@@ -245,9 +245,10 @@ say "Editor brain: $PROVIDER   ·   Video projects: $WORKSPACE"
 # ------------------------------------------------------------ 9. render runtime
 step "9/10  Rendering runtime"
 # native_runtime.py refuses to overwrite a half-built runtime ('installing/'), by
-# design. The installer is its only writer while installing: if nothing has a file
-# open there and no finished runtime sits beside it, it is left from an interrupted
-# run and is removed so this step can be redone.
+# design. Renders and the doctor can also build it, so run the installer with the
+# app stopped. If nothing has a file open there and no finished runtime sits beside
+# it, it is treated as left from an interrupted run and removed so this step can be
+# redone.
 for staging in "$APP_DIR"/templates/motion/.sniper-native-runtime/*/installing; do
   [ -d "$staging" ] || continue
   [ -d "$(dirname "$staging")/hyperframes" ] && continue
@@ -282,7 +283,8 @@ DOCTOR=$?
 say ""
 if [ "$DOCTOR" -ne 0 ]; then
   say "Installed, but the checks above report something still to do."
-  say "If the only failure is the editor brain, sign in next:"
+  say "In this candidate 'media admission sandbox' always fails (see PENDING-OWNER-DECISIONS.txt)."
+  say "If the only other failure is the editor brain, sign in next:"
 fi
 say "  install/sign-in.command         (signs in to $PROVIDER inside this folder)"
 say "Then open START-HERE.html."

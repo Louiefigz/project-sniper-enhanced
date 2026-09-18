@@ -39,11 +39,13 @@ STILL OPEN — each blocks release
      beside the release.
   5. CREATOR-DERIVED EDITING DOCTRINE: the saved styles (Restrained, Punch, Slideware)
      and several doctrine studies the editor reads are analyses of specific creators'
-     videos or one teacher's taught material. Renaming removed the names, not the
-     material. Files: docs/studies/RESTRAINED_STYLE.md, PUNCH_STYLE.md (and
+     videos or one teacher's taught material. The rename replaced the listed teacher
+     names in identifiers; other creator names, reel and video IDs and a creator
+     tagline remain in these files, and the material itself is unchanged. Files: docs/studies/RESTRAINED_STYLE.md, PUNCH_STYLE.md (and
      scripts/producer/docs/findings/PUNCH_STYLE.md), SLIDEWARE_STYLE.md, MODULE_STUDY.md,
      MODULE_CARDS.md, EDITCRAFT_LESSONS.md, SHORTFORM_LESSONS.md,
-     REFERENCE_STYLE_STUDY.md. They must be re-authored as original doctrine or
+     REFERENCE_STYLE_STUDY.md, plus creator names in comments in
+     scripts/producer/producer_config.py. They must be re-authored as original doctrine or
      withheld (dropping the saved styles) before sale.
 
 NOT BLOCKING THIS PRODUCT

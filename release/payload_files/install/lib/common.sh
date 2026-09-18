@@ -29,10 +29,12 @@ export PATH
 # Sniper's login is separate from yours. This variable would override that
 # naming and point Sniper's sign-in and sign-out at your own login; never inherit it.
 unset CLAUDE_SECURESTORAGE_CONFIG_DIR
-# Sniper runs on subscriptions. An API key exported in your shell must never be
-# billed by accident; the optional Frame Review reads one only from
-# runtime/sniper.local.env, where you would have to put it on purpose.
-unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN CLAUDE_CODE_OAUTH_TOKEN OPENAI_API_KEY
+# Sniper runs on subscriptions. A key or cloud-billing switch exported in your
+# shell must never be billed by accident. A key you deliberately put in
+# runtime/sniper.local.env or app/.env.local is still read (Frame Review, and
+# Segmenter/Clipper on the Claude route, which call the paid API).
+unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN CLAUDE_CODE_OAUTH_TOKEN OPENAI_API_KEY \
+      ANTHROPIC_BASE_URL CLAUDE_CODE_USE_BEDROCK CLAUDE_CODE_USE_VERTEX
 
 say()  { printf '%s\n' "$*"; }
 step() { printf '\n== %s\n' "$*"; }

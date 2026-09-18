@@ -20,6 +20,9 @@ render would actually use, and prints each one. It marks a line <code>FAIL</code
 for something that has to work, <code>GATED</code> for an optional feature that is not
 installed, and <code>INFO</code> for something worth knowing. If every required line
 passes, the install is fine and the problem is in the edit, not the setup.</p>
+<p>In this candidate one line always fails: <code>media admission sandbox</code>. Producer
+admits footage inside a sandbox this package does not provide yet, so no Producer edit can
+start. It is listed in <code>PENDING-OWNER-DECISIONS.txt</code>.</p>
 
 <h2>The errors you are most likely to hit</h2>
 <table>

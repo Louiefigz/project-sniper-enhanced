@@ -38,6 +38,7 @@ INCLUDE: tuple[tuple[str, str], ...] = (
     ("templates/motion/index.html", "project entry the preview/render server serves"),
     ("templates/motion/tokens.css", "brand tokens with embedded OFL faces"),
     ("templates/motion/motion-tokens.js", "shared motion constants"),
+    ("templates/motion/module-pipeline.js", "script the module-pipeline composition loads"),
     ("templates/motion/agenda-caption-layout.css", "caption layout used by comps"),
     ("templates/motion/comp_capabilities.json", "measured capability matrix (plan-time gate)"),
     ("templates/motion/compositions", "the render vocabulary"),

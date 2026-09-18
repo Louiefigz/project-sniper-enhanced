@@ -180,6 +180,7 @@ def audit_closure(root: Path) -> None:
     frames = list((app / "resources/references").rglob("*.jpg"))
     check(len(frames) > 0, "closure: packaged reference frames present", f"{len(frames)} frames")
     audit_pipeline_capture(app)
+    audit_composition_sources(app)
     segment_paths = [f"docs/producer/command-driven-editing/contracts/{name}" for name in (
         "render-effect-registry-v1.json", "program-audio-mix-registry-v1.json",
         "external-ingress-registry-v1.json", "current-render-codec-floor-calibration-v1.json",
@@ -190,6 +191,32 @@ def audit_closure(root: Path) -> None:
 
 
 _TS_LIST = r"const {name} = \[(.*?)\] as const;"
+
+_RESOLVE = """
+import glob, os, sys
+sys.path.insert(0, os.path.join(sys.argv[1], "scripts", "producer"))
+from headless.source_closure import discover_root_sources
+root = os.path.join(sys.argv[1], "templates", "motion")
+paths = sorted(glob.glob(os.path.join(root, "compositions", "*.html")))
+for path in paths:
+    try:
+        discover_root_sources(open(path, encoding="utf-8").read(), root)
+    except RuntimeError as error:
+        print("MISSING", os.path.basename(path), error)
+print("CHECKED", len(paths))
+"""
+
+
+def audit_composition_sources(app: Path) -> None:
+    """Every shipped composition's local sources resolve, using the package's own resolver."""
+    done = subprocess.run([sys.executable, "-c", _RESOLVE, str(app)],
+                          capture_output=True, text=True, check=False)
+    lines = done.stdout.splitlines()
+    missing = [line for line in lines if line.startswith("MISSING")]
+    checked = next((line.split()[1] for line in lines if line.startswith("CHECKED")), "0")
+    ok = done.returncode == 0 and not missing and checked != "0"
+    check(ok, "closure: every composition's local sources resolve",
+          f"{checked} compositions" if ok else "; ".join(missing[:4]) or done.stderr.strip()[-300:])
 
 
 def audit_pipeline_capture(app: Path) -> None:

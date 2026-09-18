@@ -1,4 +1,11 @@
-"""Pinned-worker decision parity and arithmetic without invoking any decoder."""
+"""Native color sampling rules match the retired container worker exactly.
+
+`fixtures/color_diagnostic_worker_reference.js` is the JavaScript worker that ran in
+the approved container; it is kept only as the reference implementation. Every
+case runs the same input through it (node) and through the native port
+(headless/color_diagnostic_native.py) and requires identical results. No decoder
+runs here.
+"""
 from __future__ import annotations
 
 import json
@@ -9,7 +16,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from color.metadata import source_metadata
-from headless.color_diagnostic_policy import WORKER
+from headless import color_diagnostic_native as native
+
+WORKER = Path(__file__).resolve().parent / "fixtures" / "color_diagnostic_worker_reference.js"
 from test_color_sampling import probe
 
 _NODE = r"""
@@ -32,11 +41,41 @@ if(input.action === 'metadata') {
 """
 
 
-def invoke(value: dict) -> object:
-    """Load pure worker exports; no container, FFmpeg, or media read occurs."""
+def _reference(value: dict) -> object:
+    """The container worker's own pure functions; no container, FFmpeg, or media read occurs."""
     result = subprocess.run(["node", "-e", _NODE, str(WORKER), json.dumps(value)],
                             capture_output=True, text=True, check=True, timeout=5)
     return json.loads(result.stdout)
+
+
+def _native(value: dict) -> object:
+    """The same action through the native port."""
+    action = value["action"]
+    if action == "metadata":
+        return [native.supported(item) for item in value["probes"]]
+    if action == "histogram":
+        return native.statistics(bytes([16, 16, 235, 235, 128, 128, 128, 128, 128, 128, 128, 128]), 4)
+    if action == "request":
+        try:
+            native.validate(value["request"])
+            return "accepted"
+        except native._Stop as error:
+            return str(error)
+    if action == "hdr":
+        row = native.sample_frame(None, "/inert", {"id": "one", "sourceTime": 70}, (value["probe"], 0.0))
+        return {**row, "elapsedMs": 0}
+    facts = native.frame_facts(value["text"])
+    return {"facts": facts, "supported": native.supported_frame(facts)}
+
+
+def invoke(value: dict) -> object:
+    """Both implementations; they must agree before the result is asserted."""
+    reference, ported = _reference(value), _native(value)
+    if isinstance(reference, dict) and "elapsedMs" in reference:
+        reference = {**reference, "elapsedMs": 0}
+    if reference != ported:
+        raise AssertionError(f"native port disagrees with the container worker: {reference!r} != {ported!r}")
+    return ported
 
 
 class ColorWorkerTests(unittest.TestCase):

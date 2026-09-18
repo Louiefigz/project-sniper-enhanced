@@ -14,8 +14,7 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from color.diagnostic import run_diagnostic
 from color.model import DiagnosticRequest
-from headless.color_diagnostic_policy import container_command
-from headless.container_policy import DockerRuntime
+from headless import color_diagnostic_policy as policy
 from test_color_sampling import declared, probe, sample_statistics
 
 
@@ -134,18 +133,18 @@ class ColorDiagnosticTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             run_diagnostic(self.request, self.worker)
 
-    def test_policy_retains_exact_mounts_network_memory_and_no_pull(self) -> None:
-        runtime = DockerRuntime("/fixed/docker", "/fixed/socket", "sha256:" + "a" * 64,
-                                "501:20", {"config": {"environment": []}})
-        name, command = container_command(runtime, str(self.root), "/admitted/snapshot", {
-            "sourceSha256": "b" * 64, "samples": [{"id": "one", "sourceTime": 70}], "timeoutSeconds": 120})
-        self.assertTrue(name.startswith("sniper-color-diagnostic-"))
-        for option, value in (("--network", "none"), ("--pull", "never"), ("--memory", "768m"),
-                              ("--cpus", "4"), ("--entrypoint", "/usr/bin/node")):
-            self.assertEqual(command[command.index(option) + 1], value)
-        self.assertIn("type=bind,src=/admitted/snapshot,dst=/input/media,readonly", command)
-        self.assertEqual(command.count("--mount"), 2)
-        self.assertEqual(json.loads(command[-1])["samples"][0]["sourceTime"], 70)
+    def test_policy_runs_the_native_jail_with_no_host_fallback(self) -> None:
+        runtime = type("Runtime", (), {"identity": {"policy": "sniper-native-media-jail-v1", "profileSha256": "d" * 64}})()
+        worker = {"schemaVersion": 1, "status": "complete"}
+        with patch.object(policy, "verified_runtime", return_value=runtime), \
+                patch.object(policy, "analyze", return_value=worker) as analyze:
+            envelope = policy.run_isolated("/admitted/snapshot", {"timeoutSeconds": 120})
+        analyze.assert_called_once_with("/admitted/snapshot", {"timeoutSeconds": 120})
+        self.assertEqual(envelope["worker"], worker)
+        self.assertEqual((envelope["isolation"]["network"], envelope["isolation"]["processCreation"],
+                          envelope["isolation"]["writes"], envelope["isolation"]["memoryMiB"]),
+                         ("denied", "denied", "/dev/null only", 768))
+        self.assertTrue(envelope["removal"]["canonicalAbsenceProved"])
 
 
 if __name__ == "__main__":

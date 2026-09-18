@@ -8,7 +8,6 @@ from dataclasses import replace
 from unittest import mock
 
 from headless import owned_result_wait as wait
-from headless.color_diagnostic_policy import _wait as legacy_wait
 from test_external_media_probe import _runtime
 from test_external_media_probe_wait import CONTAINER, EXITED, RUNNING
 
@@ -42,21 +41,6 @@ class OwnedResultWaitTests(unittest.TestCase):
         self.assertEqual(self.read.call_count, 2)
         self.state.assert_called_once_with(_runtime(), "/TEST/private", CONTAINER, 15.0)
         self.sleep.assert_not_called()
-
-    def test_same_absent_publication_reproduces_old_full_deadline_delay(self) -> None:
-        """Measure the old file-only loop and new terminal path using virtual time."""
-        with mock.patch("headless.color_diagnostic_policy.read_bytes", side_effect=FileNotFoundError) as read:
-            with self.assertRaisesRegex(RuntimeError, "deadline"):
-                legacy_wait(self.context.config_dir, self.context.deadline)
-        self.assertGreaterEqual(self.now - 100, 1200)
-        self.assertLess(self.now - 100, 1200.11)
-        self.assertGreaterEqual(read.call_count, 12000)
-        self.now = 100
-        self.state.return_value = {**EXITED, "OOMKilled": True, "ExitCode": 137}
-        with self.assertRaisesRegex(RuntimeError, "OOMKilled"):
-            wait.wait_owned_result(self.context, self.read)
-        self.assertEqual(self.now, 100)
-        self.assertEqual(self.read.call_count, 2)
 
     def test_exit_zero_is_not_success_or_cleanup(self) -> None:
         """Even normal exit without a publication is a failure, not approval."""

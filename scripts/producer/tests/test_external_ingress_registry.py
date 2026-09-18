@@ -60,10 +60,10 @@ class ExternalIngressRegistryTests(unittest.TestCase):
             validate_external_ingress_registry(),
             {
                 "status": "pass",
-                "familyCount": 10,
-                "releasedFamilyCount": 8,
-                "occurrenceCount": 26,
-                "ownerCount": 26,
+                "familyCount": 11,
+                "releasedFamilyCount": 9,
+                "occurrenceCount": 27,
+                "ownerCount": 27,
                 "invariantCount": 5,
             },
         )

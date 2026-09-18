@@ -33,7 +33,7 @@ const eslintConfig = defineConfig([
     // the sealed image's `node -e`, not an application ESM loader.
     files: [
       "**/*.cjs",
-      "scripts/producer/headless/color_diagnostic_worker.js",
+      "scripts/producer/tests/fixtures/color_diagnostic_worker_reference.js",
       "scripts/producer/headless/grade_observation_worker.js",
     ],
     rules: { "@typescript-eslint/no-require-imports": "off" },

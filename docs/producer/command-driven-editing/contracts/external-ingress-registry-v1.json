@@ -7,7 +7,7 @@
       "roots": ["scripts/producer"],
       "suffixes": [".py"],
       "token": "admit_external_media(",
-      "expectedOccurrenceCount": 3
+      "expectedOccurrenceCount": 4
     },
     {
       "ruleId": "external-media-sandbox-alias",
@@ -147,12 +147,14 @@
       "released": true,
       "entryPoints": [
         "src/app/api/producer/references/route.ts",
-        "src/app/api/producer/references/fetch/route.ts"
+        "src/app/api/producer/references/fetch/route.ts",
+        "scripts/producer/study/study_deep.py"
       ],
       "authorityPaths": [
         "src/app/api/_lib/reference-media-admission.ts",
         "scripts/producer/headless/admit_external_media_cli.py",
-        "src/app/api/_lib/reference-admission-verifier.ts"
+        "src/app/api/_lib/reference-admission-verifier.ts",
+        "scripts/producer/study/study_admission.py"
       ],
       "promotionPaths": [
         "src/app/api/_lib/reference-library.ts"
@@ -160,7 +162,8 @@
       "testPaths": [
         "src/lib/producer/__tests__/reference-admission-verifier.test.ts",
         "src/lib/producer/__tests__/reference-library.test.ts",
-        "scripts/producer/tests/test_reference_intake.py"
+        "scripts/producer/tests/test_reference_intake.py",
+        "scripts/producer/tests/test_study_admission.py"
       ],
       "ownership": [
         {
@@ -236,6 +239,31 @@
         }
       ],
       "notes": "VTT is bounded text, not decoder media; it uses no-follow held-descriptor copy plus a content-addressed receipt and downstream byte rehash."
+    },
+    {
+      "id": "installed-doctor-sample",
+      "classification": "sandbox-admitted-media",
+      "released": true,
+      "entryPoints": [
+        "release/payload_files/install/sniper_doctor.py"
+      ],
+      "authorityPaths": [
+        "scripts/producer/headless/native_admission_selftest.py"
+      ],
+      "promotionPaths": [],
+      "testPaths": [
+        "scripts/producer/tests/test_native_media_admission.py",
+        "scripts/producer/tests/test_native_media_jail.py"
+      ],
+      "ownership": [
+        {
+          "ruleId": "external-media-sandbox",
+          "path": "scripts/producer/headless/native_admission_selftest.py",
+          "sourceToken": "admit_external_media(str(sample), str(store))",
+          "expectedOccurrences": 1
+        }
+      ],
+      "notes": "The installed doctor admits a clip it generates itself through the production native jail and discards it; nothing is promoted."
     },
     {
       "id": "scene-package-assets",

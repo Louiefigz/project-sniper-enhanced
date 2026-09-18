@@ -50,8 +50,8 @@ class Segment:
     Within a segment the mapping is linear:
     ``t_out = out_start + (t_src - src_start) / speed``.
 
-    ``audio_lead_s`` (J-cut, LIAM move 2 — additive, default 0 = today's
-    joins): this segment's audio PRE-ROLL (source audio from before
+    ``audio_lead_s`` (J-cut, continuity mechanism CM-2 — additive, default
+    0 = today's joins): this segment's audio PRE-ROLL (source audio from before
     ``src_start``) begins this many OUTPUT seconds before its picture cut.
     It does NOT affect the source↔output picture map — cut_speed bakes the
     lead into the previous part's audio tail.
@@ -142,7 +142,8 @@ def parse_audio_lead(i: int, rng: dict, geom: tuple[float, float],
                      prev_out_len: float) -> float:
     """Validate ``cutTrack[i].audioLeadMs`` → lead SECONDS (0.0 when absent).
 
-    The J-cut contract (LIAM move 2; bands in ``AUDIO["jcut"]``): a lead is
+    The J-cut contract (EDITCRAFT_LESSONS §6.3, CM-2; bands in
+    ``AUDIO["jcut"]``): a lead is
     only legal on a segment with an incoming seam (never the first), within
     (0, ``lead_max_ms``], with real source audio before the in-point
     (``start >= lead_s * speed``) and enough previous-part audio to give up

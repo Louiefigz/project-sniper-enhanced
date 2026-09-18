@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""baseline_look — the PRO-BASELINE stage: tight chest-up recrop + warm grade.
+"""baseline_look — the BASELINE-LOOK stage: tight chest-up recrop + warm grade.
 
-Research (INTRO_MACHINE_VS_PRO_AUDIT.md §1/§6, REFERENCE_STYLE_STUDY.md R16,
-2026-07-05): the pro's "static" talking head is already an edit — a tight
-chest-up crop of the 4K frame with a warm broadcast grade — while the machine
-edit ships the raw wide framing, flat. The audit ranks this half of the
-perceived-quality gap ("instant 50% of the pro look for near-zero effort").
+Doctrine (REFERENCE_STYLE_STUDY.md R16; audit record in
+INTRO_MACHINE_VS_PRO_AUDIT.md §1/§6): even a "static" talking head is an
+edit — a tight chest-up crop of the 4K frame with a subtle warm grade —
+while an unedited cut ships the raw wide framing, flat. The audit ranked
+this as a large share of the perceived-quality gap for near-zero effort.
 This stage bakes that default: crop a window of (inW/zoom × inH/zoom) centred
 on (centerX·inW, centerY·inH) — clamped so the window never leaves the frame —
 scale it to outW×outH (lanczos), and optionally apply the fixed warm grade.
@@ -26,7 +26,7 @@ where the spec is:
     ``{"zoom": 1.28, "centerX": 0.5, "centerY": 0.44, "grade": "warm" | "none",
        "outW": 1920, "outH": 1080}``
 (centerX/Y are 0..1 fractions of the SOURCE frame; every key is optional and
-defaults to the values above — the pro-measured chest-up framing.) The
+defaults to the values above — the R16 default chest-up framing.) The
 editorial bands (zoom 1.0–1.5, centers 0.2–0.8) live in the plan lint's
 ``baselineLook`` check; the primitive enforces only wider hard-safety ranges.
 """
@@ -57,7 +57,7 @@ GRADES = ("warm", "none")
 FRAME_TOL = 1
 
 # The warm grade — fixed, deterministic, deliberately SUBTLE. Constants (R16:
-# the pro baseline is graded warm, and between events the look never moves):
+# the baseline look is subtly warm, and between events it never moves):
 #   colorbalance  midtone red +0.03 / blue -0.03, highlight red +0.02 /
 #                 blue -0.02 -> the warmth push. Shadows are untouched so
 #                 blacks stay neutral (no orange mud in the dark end).
@@ -86,7 +86,7 @@ class BaselineSpec:
     / ``center_y`` are 0..1 fractions of the SOURCE frame the window centres
     on (clamped inside the frame); ``grade`` selects the fixed warm grade or
     none; ``out_w`` × ``out_h`` is the delivery canvas the window scales to.
-    Defaults are the pro-measured chest-up framing (audit §1 baseline row).
+    Defaults are the R16 chest-up framing (Sniper design parameters).
     """
 
     zoom: float = 1.28
@@ -221,7 +221,7 @@ def _load_spec(spec: str) -> object:
 def main() -> int:
     ap = argparse.ArgumentParser(
         description="PRODUCER baseline look: tight chest-up recrop of the raw "
-                    "frame + subtle warm grade (the pro's default framing)")
+                    "frame + subtle warm grade (the R16 default framing)")
     ap.add_argument("src")
     ap.add_argument("out")
     ap.add_argument("--spec", required=True,

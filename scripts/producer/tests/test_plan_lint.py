@@ -420,7 +420,7 @@ class MotionLintTests(unittest.TestCase):
 
     def test_corrections_type_checked(self) -> None:
         plan = self._mg_plan()
-        plan["captions"]["corrections"] = {"Hermosibot": ""}
+        plan["captions"]["corrections"] = {"Snyperbot": ""}
         self.assert_fires(plan, "non-empty strings")
 
     def test_valid_punch_ins_pass(self) -> None:

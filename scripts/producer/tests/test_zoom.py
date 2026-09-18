@@ -209,7 +209,8 @@ class ZoomProposerTests(unittest.TestCase):
     def test_push_magnitude_scales_with_importance(self) -> None:
         # MEASURED_EDIT_GRAMMAR §1: push magnitude scales with the beat's importance
         # — a medium-confidence thesis pushes harder than a low-confidence one, and
-        # both stay in the measured +7-16% band (not the old flat 1.21).
+        # both stay in the +7-16% band of MOTION["zoom"]["proposer"]
+        # ["push_zoom_by_conf"] (not the old flat 1.21).
         words = _mid_sentence(("Big.", 5.0, 5.4), ("Small.", 15.0, 15.4))
         med = self._thesis("medium", [0], "Big.")
         lo = self._thesis("low", [1], "Small.")
@@ -240,7 +241,7 @@ class ZoomProposerTests(unittest.TestCase):
 
     def test_ramp_carries_smooth_ease(self) -> None:
         # MOTION_GRAMMAR_STUDY §8: every animated ramp eases (smoothstep), never the
-        # linear creep punch_in defaults to — the machine's lone ramp read mechanical.
+        # linear creep punch_in defaults to — a linear ramp reads mechanical.
         plan = {"cutTrack": [{"sourceId": "raw-1", "start": 0.0, "end": 40.0,
                               "speed": 1.0}]}
         segs = ct.compile_plan(plan).segments

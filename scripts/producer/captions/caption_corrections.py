@@ -2,7 +2,7 @@
 """caption_corrections — fix ASR mishears before captions (MG-2 corrections).
 
 Deepgram mishears a proper noun and, left alone, it becomes a burned-in caption
-misspelling ("Hermosibot" for "a published hook bank bot"). This module applies a plan's
+misspelling (e.g. "Snyperbot" for "Sniper bot"). This module applies a plan's
 ``captions.corrections`` map — ``{heard: correct}`` — to the OUTPUT-time word list
 BEFORE ``captions.build_ass`` runs (see docs/producer/PRODUCER_PLAN.md §4.5 "Caption
 corrections"). It fixes TRANSCRIPTION errors ONLY; it never paraphrases or
@@ -10,14 +10,14 @@ changes what was said, and it never reorders words in time.
 
 Matching contract:
 - **Case-insensitive, whole-word.** The key matches on a word's CORE (its text
-  with surrounding punctuation stripped), so ``"Hermosibot"`` matches the word
-  ``"Hermosibot."`` and the trailing period is re-attached to the fix. It never
+  with surrounding punctuation stripped), so ``"Snyperbot"`` matches the word
+  ``"Snyperbot."`` and the trailing period is re-attached to the fix. It never
   matches a substring inside a larger word.
-- **Multi-word keys** (``"Hermosia bot"``) match CONSECUTIVE words. Longer keys
+- **Multi-word keys** (``"Snyper bot"``) match CONSECUTIVE words. Longer keys
   are tried first so a phrase key wins over a single-word key at the same spot.
 - **Time-span split.** The corrected value's tokens split the matched span
   proportionally by character length (mirrors ``captions._split_oversized``), so
-  a 1→2 word fix ("Hermosibot" → "a published hook bank bot") keeps karaoke timing monotonic.
+  a 1→2 word fix ("Snyperbot" → "Sniper bot") keeps karaoke timing monotonic.
 
 Validation is lenient by design: a key that matches nothing is a WARNING
 (``unmatched_keys``), not an error — a plan may carry corrections for words that

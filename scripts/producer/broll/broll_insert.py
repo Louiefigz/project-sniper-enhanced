@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """broll_insert — the RECEIPTS engine: b-roll rides ON TOP, never touches audio.
 
-Research (INTRO_MACHINE_VS_PRO_AUDIT.md §2, REFERENCE_STYLE_STUDY.md R17,
-EDIT_DECISION_STUDY.md, 2026-07-05): the pro cuts to RECEIPTS — his real
-channel page, his old clips, his product sites — for 1-4s while HIS SPEECH
-AUDIO CONTINUES UNINTERRUPTED underneath. B-roll is a VIDEO-ONLY replacement
+Doctrine (REFERENCE_STYLE_STUDY.md R17, EDITCRAFT_LESSONS.md §2.5; audit
+record in INTRO_MACHINE_VS_PRO_AUDIT.md §2 and EDIT_DECISION_STUDY.md): the
+edit cuts to RECEIPTS — the speaker's real channel page, earlier clips,
+product sites — for 1-4s while THE SPEAKER'S AUDIO CONTINUES UNINTERRUPTED
+underneath. B-roll is a VIDEO-ONLY replacement
 track: for each insert window the base video's frames are replaced by the
 asset's frames, and the base audio passes through UNTOUCHED for the whole file
 (audio stream-copy — bit-identical, provable by stream md5).
@@ -33,7 +34,8 @@ file's dir, the render.py transcriptPath convention); an asset shorter than
 silently (no-fallbacks doctrine). Editorial rules (insert count cap, required
 ``reason``, title-card collisions) are plan_lint_overlays.check_broll's job.
 
-IMAGE-FOCUS OPS (LIAM-4-MOVES move 3, additive): an insert may carry a
+IMAGE-FOCUS OPS (continuity mechanism CM-3, EDITCRAFT_LESSONS.md §7.4;
+additive): an insert may carry a
 ``focusOps`` array (region highlight wipe, darken/blur-surround, signed hue
 shift per ``MOTION["hue_shift_semantics"]``) rendered INTO its branch by
 ``broll/focus_ops.py`` — all 1:1 filters, so the exact-frame-count contract
@@ -85,7 +87,7 @@ class BrollInsert:
     ``asset_start`` is the offset INTO the asset where its material begins;
     ``path`` is the manifest-resolved absolute file path (filled by
     :func:`resolve_assets` — empty until then). ``focus_ops`` are the
-    insert's parsed image-focus operators (LIAM move 3; () = none).
+    insert's parsed image-focus operators (CM-3; () = none).
     """
 
     asset_id: str
@@ -211,7 +213,7 @@ def _branch_parts(idx: int, ins: BrollInsert, prof: dict,
     zero-based, resampled to the base cadence so the enable window is covered
     frame-for-frame, then PTS-shifted onto its output window and fitted to the
     base geometry (cover-crop, or reframe.py's blurpad idiom for odd aspects).
-    Focus ops (LIAM move 3) chain AFTER the fit — their regions are frame
+    Focus ops (CM-3) chain AFTER the fit — their regions are frame
     coordinates on the fitted (base-canvas) insert, and the branch is already
     on the output clock, so their enable windows are absolute output time.
     """

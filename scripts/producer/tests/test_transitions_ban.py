@@ -1,9 +1,10 @@
 """xfade family BAN (2026-07-11, FAILURE_LEDGER LL-014).
 
 The stock ffmpeg-xfade transition sampler was operator-rejected on sight;
-longform seams use ONLY the studied reference grammar (panel sweeps,
-face-bridged recomposition, under-panel cuts, blur-recede, seam-role
-zoom-pulls). These tests pin the ban: any ``xfade:*`` kind is a hard ERROR
+longform seams use ONLY Sniper's seam grammar (panel sweeps, face-bridged
+recomposition, under-panel cuts, blur-recede, seam-role zoom-pulls —
+MODULE_STUDY §2, EDITCRAFT_LESSONS §2.7). These tests pin the ban: any
+``xfade:*`` kind is a hard ERROR
 in EVERY mode at the lint gate and a loud ValueError at the primitive.
 """
 import unittest
@@ -28,10 +29,10 @@ class XfadeBanLintTests(unittest.TestCase):
                     any("operator-rejected" in e for e in rep.errors),
                     (mode, kind, rep.errors))
 
-    def test_ban_message_names_the_studied_grammar(self) -> None:
+    def test_ban_message_names_the_seam_grammar(self) -> None:
         rep = self._lint([{"outTime": 10.0, "kind": "xfade:fade"}], "longform")
         msg = " ".join(rep.errors)
-        self.assertIn("studied", msg)
+        self.assertIn("transition grammar", msg)
         self.assertIn("panel sweep", msg)
         self.assertIn("LL-014", msg)
 
@@ -45,7 +46,7 @@ class XfadeBanLintTests(unittest.TestCase):
         cfg = plm.MOTION["transitions"]
         self.assertNotIn("xfade_kinds", cfg)
         self.assertNotIn("xfade_modes", cfg)
-        # flash/leak + the studied seam-role zoom-pull (LIAM move 1) —
+        # flash/leak + the seam-role zoom-pull (continuity mechanism CM-1) —
         # never any xfade vocabulary.
         self.assertEqual(cfg["kinds"], ("white-flash", "light-leak",
                                         "zoom-pull"))

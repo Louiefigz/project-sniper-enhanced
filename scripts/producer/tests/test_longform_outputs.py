@@ -37,10 +37,10 @@ class SrtSidecarTests(unittest.TestCase):
             self.assertEqual(lo.write_srt([], path), 0)
 
     def test_longform_sidecar_applies_plan_caption_corrections(self) -> None:
-        words = [{"word": "Hermosibot.", "start": 0.0, "end": 0.8}]
+        words = [{"word": "Snyperbot.", "start": 0.0, "end": 0.8}]
         plan = {"target": {"mode": "longform"},
                 "captions": {"burn": False,
-                             "corrections": {"Hermosibot": "Hookbank bot"}}}
+                             "corrections": {"Snyperbot": "Sniper bot"}}}
         with tempfile.TemporaryDirectory() as d:
             ctx = renderer.RenderCtx(plan, {}, d, d)
             with mock.patch.object(cc, "kept_words", return_value=words), \
@@ -48,8 +48,8 @@ class SrtSidecarTests(unittest.TestCase):
                 renderer.longform_sidecar_stage(ctx, mock.Mock())
             with open(os.path.join(d, "captions.srt"), encoding="utf-8") as fh:
                 srt = fh.read()
-        self.assertIn("Hookbank bot.", srt)
-        self.assertNotIn("Hermosibot", srt)
+        self.assertIn("Sniper bot.", srt)
+        self.assertNotIn("Snyperbot", srt)
 
     def test_longform_sidecar_honors_caption_lane_off(self) -> None:
         plan = {"target": {"mode": "longform", "scope": "produced",

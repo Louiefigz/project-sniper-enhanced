@@ -315,8 +315,8 @@ def punch_stage(ctx: RenderCtx, video: str) -> str:
 
     Reads ``plan.punchIns`` (already validated by the lint gate). Runs before
     overlays/captions/graphics so composited elements stay fixed while the
-    footage reframes under them (the pro's checklist stays put through his
-    punch-outs — INTRO_MACHINE_VS_PRO_AUDIT §3).
+    footage reframes under them (an on-screen checklist stays put through a
+    punch-out — audit record in INTRO_MACHINE_VS_PRO_AUDIT §3).
     """
     wins = ctx.plan.get("punchIns") or []
     if not wins:
@@ -547,7 +547,7 @@ def graphics_track_stage(ctx: RenderCtx, video: str,
             "--cache-dir", os.path.join(SCRIPT_DIR, "..", "..", "templates",
                                         "motion", "renders", "cache"),
             # Eye-trace placements sidecar → out_dir so Audit B finds it
-            # (audit_motion.check_eye_trace — advisory WARN, LIAM move 4).
+            # (audit_motion.check_eye_trace — advisory WARN, eye-trace CM-4).
             "--placements-out", os.path.join(ctx.out_dir,
                                              "graphics_placements.json")]
     # Verify + A3 calibration wiring (occlusion allow-vocabulary, producer

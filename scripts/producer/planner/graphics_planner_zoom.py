@@ -5,7 +5,7 @@ The zoom half of the auto-graphics planner. The two formats INVERT the zoom's
 role (REFERENCE_STYLE_STUDY.md R13), so the proposer branches on grammar:
 
 LONG-FORM — SEMANTIC (zoom carries meaning, sparse):
-* punch-IN on a thesis beat (study Rule 1: the stressed beat of a claim),
+* punch-IN on a thesis beat (R13 Rule 1: the stressed beat of a claim),
 * pull-OUT reset on a topic boundary (Rule 2: a brief out-ramp to wide, since the
   engine floors at the wide baseline and can't pull below it),
 * in→out BRACKET on the top-N thesis lines (Rule 3: the signature move, capped),
@@ -134,21 +134,21 @@ def _punch_cand(c: dict, words: list[dict], out_dur: float, zoom: float) -> dict
 
 
 def _bracket_cand(c: dict, words: list[dict], out_dur: float, zoom: float) -> dict:
-    """An in→out bracket: punch-in held, then release to wide (study Rule 3)."""
+    """An in→out bracket: punch-in held, then release to wide (R13 Rule 3)."""
     s, e = _clamp(_beat(words, c),
                   _PROP["punch_hold_s"] + _PROP["bracket_release_s"], out_dur)
     hold = round(min(_PROP["punch_hold_s"], (e - s) * 0.66), 3)   # leave a tail
     return {"outStart": s, "outEnd": e, "zoom": zoom, "bracket": True,
             "holdS": hold, "kind": "bracket", "confidence": c["confidence"],
             "trigger": "thesis", "needsOperator": True,
-            "reason": "thesis (top line) — punch-in then release to wide (study "
+            "reason": "thesis (top line) — punch-in then release to wide (R13 "
                       "Rule 3 bracket, the signature move)",
             "evidence": c["text"]}
 
 
 def _boundary_candidates(boundaries: list[dict], words: list[dict], mode: str,
                          out_dur: float) -> list[dict]:
-    """Topic boundaries → a brief pull-out reset to wide (study Rule 2)."""
+    """Topic boundaries → a brief pull-out reset to wide (R13 Rule 2)."""
     floor = MOTION["planner"]["topic_boundary_min_conf"][mode]
     rate = _MAG["ramp_rate_default"]
     out: list[dict] = []
@@ -160,7 +160,7 @@ def _boundary_candidates(boundaries: list[dict], words: list[dict], mode: str,
                     "ramp": {"direction": "out", "ratePctPerS": rate},
                     "kind": "punch-out", "confidence": c["confidence"],
                     "trigger": "topic-boundary",
-                    "reason": "topic boundary — pull-out reset to wide (study Rule "
+                    "reason": "topic boundary — pull-out reset to wide (R13 Rule "
                               "2; the engine floors at the wide baseline)",
                     "evidence": c["text"]})
     return out
@@ -222,8 +222,8 @@ def _apply_motion(cands: list[dict], face_center: tuple[float, float] | None,
     """Give every semantic candidate the pro's motion quality, in place.
 
     * Every candidate recomposes toward the face (``centerX``/``centerY`` from
-      ``face_center``) instead of scaling about the frame center — the pro's
-      big pushes carry a ~287px translation toward the face (study §1, R16).
+      ``face_center``) instead of scaling about the frame center — big
+      pushes translate toward the face (REFERENCE_STYLE_STUDY R16).
     * Every animated ramp eases (``ease:"smooth"`` smoothstep) instead of the
       linear creep ``punch_in.py`` defaults to.
     * A plain punch-in that lands MID-SHOT becomes an eased-attack push

@@ -4,7 +4,7 @@ Ask the editing agent in normal language. Supply footage or an existing project
 and the outcome you want the viewer to understand. Either name a reference or
 let the agent choose after inspecting the message, footage and reference library.
 
-- “Make a Module-style Short from this recording. Show one offer improving
+- “Make a module-card Short from this recording. Show one offer improving
   step by step. Find useful supporting shots in my footage.”
 - “Choose the best Short treatment from this recording automatically. Find a
   standalone lesson and show the example wherever possible.”
@@ -177,7 +177,7 @@ when simultaneous viewing helps. This is editorial guidance, not a new automatic
 ranking feature or a claim that export checks assess narrative quality.
 
 1. Read the actual transcript and inspect source footage and individual library
-   frames. Select a self-contained message with a supported payoff. For a module-style
+   frames. Select a self-contained message with a supported payoff. For a module-card
    treatment, inspect setup, development and payoff plus a contrasting example.
    Establish the whole-Short rhythm from the retained script and actual delivery
    before assigning shot lengths; follow the pacing step below.

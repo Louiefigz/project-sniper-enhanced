@@ -454,7 +454,7 @@ def _composite(job: AssembleJob) -> dict:
                        owned_graphics=job.owned_graphics,
                        ydif_file=ydif_file,
                        # Eye-trace placements sidecar beside the output —
-                       # Audit B reads the final.mp4 dir (LIAM move 4).
+                       # Audit B reads the final.mp4 dir (eye-trace CM-4).
                        placements_out=os.path.join(
                            out_dir, "graphics_placements.json"),
                        # Verify allow-vocabulary + the A3 calibration loop:

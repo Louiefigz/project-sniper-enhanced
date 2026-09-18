@@ -462,7 +462,8 @@ At Palmier handoff this mastered bus replaces the NLE's raw linked audio; see
 - `motion/` — `reframe`, `reframe_split`, `face_track`, `punch_in` (zoom engine),
   `baseline_look`, `transitions` (seam covers: flash/leak ONLY — the stock
   ffmpeg-xfade family was operator-rejected and REMOVED 2026-07-11
-  (FAILURE_LEDGER LL-014); longform seams use the studied reference grammar:
+  (FAILURE_LEDGER LL-014); longform seams use Sniper's seam grammar
+  (`docs/studies/MODULE_STUDY.md` §2, `EDITCRAFT_LESSONS.md` §2.7):
   panel sweeps, face-bridged recompose, under-panel cuts, blur-recede,
   seam-role zoom-pulls — `plan_lint_motion` hard-ERRORs any `xfade:*` kind in
   every mode; the SFX slot takes `true|false|"<pack-name>"` resolved

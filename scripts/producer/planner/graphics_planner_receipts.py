@@ -2,11 +2,11 @@
 """graphics_planner_receipts — the R17 b-roll receipts lane (MG-4).
 
 "Receipts beat rendered graphics" (REFERENCE_STYLE_STUDY.md R17): when speech
-names a SHOWABLE artifact — his channel, his company's site, his agency — the
-pro CUTS TO THE ARTIFACT. This module proposes brollTrack-shaped rows
-``{assetId: None, outStart, outEnd}`` with review fields; ``assetId`` is
-ALWAYS None — the operator/brain fills it from the manifest pool
-(LLM-identifier contract: the planner never invents ids).
+names a SHOWABLE artifact — the speaker's channel, their company's site,
+their agency — the edit CUTS TO THE ARTIFACT. This module proposes
+brollTrack-shaped rows ``{assetId: None, outStart, outEnd}`` with review
+fields; ``assetId`` is ALWAYS None — the operator/brain fills it from the
+manifest pool (LLM-identifier contract: the planner never invents ids).
 
 R12's generic-entity blocklist does NOT apply here: "AI agency" earns no AI
 logo, but it names the operator's real agency — a showable receipt.
@@ -14,8 +14,8 @@ logo, but it names the operator's real agency — a showable receipt.
 CONCEPT-STOCK TIER (R24, overlay-rich only — graphics_planner gates the call
 on the graphics_style axis): when speech goes abstract-conceptual
 (AI/automation/hiring/team/workflow talk with NO showable owned artifact in
-the sentence), pair 2 cuts to 1.5-3.5s concept stock. ``concept_lane``
-proposes ``brollConcept`` rows a tier BELOW receipts: {assetId: null,
+the sentence), the overlay-rich style cuts to 1.5-3.5s concept stock (R24).
+``concept_lane`` proposes ``brollConcept`` rows a tier BELOW receipts: {assetId: null,
 needsOperator: true, note: "concept-stock: <topic>"} — capped 1 per 60s,
 body-only (the hook window spends receipts and burns, never stock), and any
 receipt or own-screen cutaway on the same beat wins.
@@ -35,11 +35,12 @@ from producer_config import BROLL
 
 # --------------------------------------------------------------------------- #
 # Constants — the hold/gap numbers live in producer_config.BROLL (the
-# consolidated b-roll lane doctrine, docs/studies/EDITCRAFT_LESSONS.md 2026-07-11);
+# consolidated b-roll lane doctrine, docs/studies/EDITCRAFT_LESSONS.md §2.4);
 # module-level names kept for call sites/tests.
 # SINGULAR artifact nouns only — plurals ("AI products") are category talk,
 # not one showable artifact. Platforms are showable bare ("I started with
-# YouTube" = his channel). Data catalogs — exempt from the logic line limit.
+# YouTube" = the speaker's channel). Data catalogs — exempt from the logic
+# line limit.
 # --------------------------------------------------------------------------- #
 SHOWABLE_NOUNS = frozenset({"channel", "website", "site", "page", "app",
                             "product", "video", "clip", "board", "company",
@@ -64,8 +65,8 @@ CONCEPT_EVERY_S = BROLL["concept_every_s"]    # tier-below-receipts: 1 per 60s
 CONCEPT_CONTEXT_WORDS = 3       # evidence context around the concept noun
 
 # R17 precedence exception: multi-item STRUCTURE a single artifact can't show
-# — the pro kept the whiteboard over receipts at the intro enumeration; the
-# canvas-pip-list is the same structure with the speaker inset (R24).
+# — an enumeration keeps its whiteboard over a receipt; the canvas-pip-list is
+# the same structure with the speaker inset (R24).
 STRUCTURE_KINDS = frozenset({"whiteboard-map", "canvas-pip-list"})
 
 

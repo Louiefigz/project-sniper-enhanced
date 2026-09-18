@@ -180,8 +180,9 @@ def fill_module_lands(entry: dict, word_indices: list[int],
     """Narration-paced module builds: brain picks WHICH words, code times them.
 
     MODULE_STUDY.md §3 rank 1 / §5 item 4: a card lands its 3-6 modules
-    0.6-1.4s apart ON spoken words (MG-1/MG-3 measurements), never on a fixed
-    stagger. ``word_indices`` are the brain's picks into ``words_out`` — the
+    about 0.6-1.4s apart ON spoken words (the ``MOTION["module_lands"]``
+    guidance band), never on a fixed stagger. ``word_indices`` are the
+    brain's picks into ``words_out`` — the
     KEPT words in OUTPUT time (``graphics_planner.output_words``, i.e. the
     transcript remapped through ``compile_timeline``), so a land survives cut
     edits by arithmetic. Returns a NEW entry whose ``spec.moduleLands`` is the

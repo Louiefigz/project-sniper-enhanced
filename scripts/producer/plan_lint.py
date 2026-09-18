@@ -84,11 +84,12 @@ def _check_pauses(rng: dict, bounds: tuple[float, float], tag: str, rep: Report)
 
 
 def _check_audio_lead(i: int, cuts: list[dict], tag: str, rep: Report) -> None:
-    """``audioLeadMs`` J-cut bounds (LIAM move 2; ``AUDIO['jcut']``).
+    """``audioLeadMs`` J-cut bounds (continuity mechanism CM-2,
+    EDITCRAFT_LESSONS §6.3; ``AUDIO['jcut']``).
 
     Hard bounds run through ``compile_timeline.parse_audio_lead`` — the
     renderer's own validator, so lint and cut_speed can never drift; plus a
-    WARN outside the measured true-J-lead band (65-95 ms median).
+    WARN outside the preferred true-J-lead band (65-95 ms).
     """
     rng = cuts[i]
     if rng.get("audioLeadMs") is None:
@@ -109,9 +110,9 @@ def _check_audio_lead(i: int, cuts: list[dict], tag: str, rep: Report) -> None:
     lo, hi = AUDIO["jcut"]["lead_band_ms"]
     ms = lead_s * 1000.0
     if not (lo <= ms <= hi):
-        rep.warn(f"{tag}: audioLeadMs {ms:g} outside the measured true-J-lead "
-                 f"band [{lo},{hi}]ms (EC1/EC2 median 65-95ms) — legal but "
-                 "off the measured grammar")
+        rep.warn(f"{tag}: audioLeadMs {ms:g} outside the preferred "
+                 f"true-J-lead band [{lo},{hi}]ms (EDITCRAFT_LESSONS §6.3) — "
+                 "legal but off the J-cut grammar")
 
 
 def _check_cut_track(plan: dict, manifest: dict, preset: dict, rep: Report) -> None:
@@ -226,8 +227,8 @@ def lint(plan: dict[str, Any], manifest: dict[str, Any],
     # Slip-cover windows (same-source b-roll) must pass the cover excludes —
     # retake spans + lip-flap (FAILURE_LEDGER LL-010); plan_lint_broll owns it.
     check_slipcover(plan, manifest, rep)
-    # Image-focus ops on inserts (LIAM move 3): executor-validated shape +
-    # treatment gate (EC2 vocabulary — produced graphics only).
+    # Image-focus ops on inserts (CM-3, EDITCRAFT_LESSONS §7.4): executor-
+    # validated shape + treatment gate (produced graphics only).
     check_focus_ops(plan, rep)
     _check_music_and_misc(plan, manifest, preset, rep)
     check_audio(plan, out_dur, rep)

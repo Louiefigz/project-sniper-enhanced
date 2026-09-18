@@ -22,8 +22,9 @@ This module is pure geometry (unit-testable, no ffmpeg) except
 
 from __future__ import annotations
 
-# rect = (x, y, w, h) on the 1920x1080 longform delivery canvas — measured
-# from the reference (face PIP ~28%W x 89%H right, r~24: MODULE_STUDY §3).
+# rect = (x, y, w, h) on the 1920x1080 longform delivery canvas — Sniper
+# design parameters (presenter card ~28%W x 89%H on the right, r=24:
+# MODULE_STUDY §3 rank 11).
 # module-takeover ALWAYS wears the hole; the scoreboard/pipeline/ledger-dark
 # dark cards reserve the SAME right band [1344..1878] but only cut the hole +
 # draw the ring when the spec opts in via ``presenterFrame`` (see

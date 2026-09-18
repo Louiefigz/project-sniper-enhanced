@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """graphics_planner_gauge — the milestone GAUGE lane (widget-gauge / widget-pills).
 
-Grounded in the operator's reels (Video-472): a run of climbing quantities —
-"0 to 1k to 10k to 50k to 100k to 1M followers" — renders as a HEADROOM gauge
-with an arrow sweeping across, or a pill row. Shorts-native (widget-gauge is a
+Doctrine: docs/studies/SHORTFORM_LESSONS.md §8.2 and REFERENCE_STYLE_STUDY.md
+R6 (persistent parametric widgets): a run of climbing quantities — e.g. "from
+ten to a hundred to a thousand customers" — renders as ONE sustained HEADROOM
+gauge with an arrow sweeping across, or a pill row, instead of one card per
+number. Shorts-native (widget-gauge is a
 9:16 comp); a long expresses the same climb through other comps the brain picks.
 
 Split like every other lane (feedback: no regex for semantics — but a numeric

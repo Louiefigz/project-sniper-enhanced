@@ -1,66 +1,82 @@
 {
-  "approvedImageId": "sha256:bc56d3860d2ec1c843f7184bcecd21137aa79fe9fe19c90a67136d3052222ba8",
   "cases": [
     {
       "admissionReceiptPublished": false,
       "caseId": "malformed-codec",
-      "containerCleanupProved": true,
-      "error": "external-media decode rejected: Decoder (codec none) not found for input stream #0:0\n",
+      "error": "external-media decode rejected: DECODER_EXIT_234: DECODER_EXIT_234: [vist#0:0/none @ 0x87ac10180] Decoding requested, but no decoder found for: none\nError opening output file -.\nError opening output files: Invalid argument",
       "inputSha256": "c56d313afe5dc703f87130532e0d74f984f6215b4e4aabe7b36d034ca5b1ad5f",
+      "processCleanupProved": true,
       "status": "rejected"
     },
     {
       "admissionReceiptPublished": false,
       "caseId": "huge-dimensions",
-      "containerCleanupProved": true,
-      "error": "external-media decode rejected: DIMENSION_LIMIT",
+      "error": "external-media decode rejected: DIMENSION_LIMIT: DIMENSION_LIMIT",
       "inputSha256": "c1a746ef14c00fd142c474142245c735180e8d56bd174867ea9dcfd40e19c231",
+      "processCleanupProved": true,
       "status": "rejected"
     },
     {
       "admissionReceiptPublished": false,
       "caseId": "huge-frame-count",
-      "containerCleanupProved": true,
-      "error": "external-media decode rejected: FRAME_LIMIT",
+      "error": "external-media decode rejected: FRAME_LIMIT: FRAME_LIMIT",
       "inputSha256": "0584beb86d0a2066651e5510f3188fc85cce3ba2e136c479f7deecdbdb5c1f62",
+      "processCleanupProved": true,
       "status": "rejected"
     },
     {
       "admissionReceiptPublished": false,
       "caseId": "truncated-stream",
-      "containerCleanupProved": true,
-      "error": "external-media decode rejected: [mov,mp4,m4a,3gp,3g2,mj2 @ 0xaaaaeb9c5b30] moov atom not found\n/input/media: Invalid data found when processing input\n",
+      "error": "external-media decode rejected: DECODER_EXIT_1: DECODER_EXIT_1: [mov,mp4,m4a,3gp,3g2,mj2 @ 0xc93424000] moov atom not found\n/private/tmp/sniper-p0-adversarial-xn23mcma/truncated-stream-store/22838d0adff1e28bf508f8f7dc4c924ae35f313a8a191ace8cfde37d7dfd6eb0.media: Invalid data found when processing input",
       "inputSha256": "22838d0adff1e28bf508f8f7dc4c924ae35f313a8a191ace8cfde37d7dfd6eb0",
+      "processCleanupProved": true,
       "status": "rejected"
     },
     {
       "admissionReceiptPublished": false,
       "caseId": "decoder-timeout",
-      "containerCleanupProved": true,
-      "error": "external-media decode rejected: ETIMEDOUT",
+      "error": "external-media decode rejected: DECODE_TIMEOUT: DECODE_TIMEOUT: exceeded 90 s",
       "inputSha256": "6c5487c9b0849077cb0b65c6ee2bb1dfd0ecc89ed357248ac7fe7bd5e62afa1f",
+      "processCleanupProved": true,
       "status": "rejected"
     },
     {
       "admissionReceiptPublished": false,
       "caseId": "archive-bomb",
-      "containerCleanupProved": true,
       "error": "sealed render manifest closure is invalid",
       "inputSha256": "aba3a1549379a3efce58d22bb4c04c464ce5c66f4ac65bf9e18e0403973e5c6a",
+      "processCleanupProved": true,
       "status": "rejected"
     }
   ],
-  "generatedAt": "2026-07-30T07:57:22.545590+00:00",
+  "generatedAt": "2026-09-18T15:20:43.196763+00:00",
   "kind": "p0-adversarial-ingress-acceptance",
+  "nativeRuntime": {
+    "closureSha256": "65cff556720856c717ae824e21709efa9dc33c1d0df89579b0d9f5aca5fcf936",
+    "ffmpeg": "ffmpeg version 8.0 Copyright (c) 2000-2025 the FFmpeg developers",
+    "launcherSha256": "3cc40c6310244099d6052f9d24d430c4d79c5690c1e52fb204800b9460e96c5f",
+    "platform": {
+      "machine": "arm64",
+      "macos": "26.5.2",
+      "release": "25.5.0",
+      "system": "Darwin"
+    },
+    "policy": "sniper-native-media-jail-v1",
+    "profileSha256": "9756cd0a3a0c8e21aca5be7180e873d6fc72868183407a878dd1d2503ecfe2a1"
+  },
   "passed": true,
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "sourceClosure": {
-    "scripts/producer/headless/container_policy.py": "4756dec73b7e55ff248afe7c5ce1ea6e21a3bfebab517d6dcf356087acecfac4",
-    "scripts/producer/headless/external_media_probe.py": "9a6cacac128cc7ec7efad1cbdd315b34aa68814db0c8a955e8439df2a9b112b3",
-    "scripts/producer/headless/external_media_probe_policy.py": "558c52d933b2678ba6b916e275a8020fef66e7427d42736739ee4748b9a14f9a",
-    "scripts/producer/headless/external_media_snapshot.py": "55fce21c029f341c334974c6e109feb31f7c31be48a74368f05ca394084b6887",
-    "scripts/producer/headless/render_image_approval.json": "6b2ca0dcacef6df3d0f2e443cbf6aa91ad5ea44d27cc0d4a1dd48881f6ae9d4f",
+    "scripts/producer/headless/external_media_probe.py": "7a8acb47c24b00f69318682a92b06fb87c98e4e9267a5e88465e0aae0dbfcb91",
+    "scripts/producer/headless/external_media_probe_native.py": "2cbb46e99eb722ae63e39e9a0beda5b71d43751e7c665de6c02d475c6999384a",
+    "scripts/producer/headless/external_media_probe_policy.py": "f1849aeaca79bb60084db84c20bf97fea75706ff139b4e7eccfa44cbc5019bf2",
+    "scripts/producer/headless/external_media_snapshot.py": "e939015401608e99b6996a6e8b29c1e7e788938e38ba137e72d22f61d7bb4b35",
+    "scripts/producer/headless/native_media_jail.py": "3cc40c6310244099d6052f9d24d430c4d79c5690c1e52fb204800b9460e96c5f",
+    "scripts/producer/headless/native_media_probe.sb": "9756cd0a3a0c8e21aca5be7180e873d6fc72868183407a878dd1d2503ecfe2a1",
+    "scripts/producer/headless/native_media_runtime.py": "e0b1b4e08dc9289402130777a1616debaa35abd42f02008ac8ecbc290ac8522a",
+    "scripts/producer/headless/native_media_runtime_approval.json": "21a356a6a1db0480367a6fee2032cd84c3a2dce97d90ef2747f982cb75508486",
+    "scripts/producer/headless/native_media_sandbox.py": "6df02bb8854f6b839dd5bba496d033a94ffcceefb4e88d40c292192593160980",
     "scripts/producer/headless/sealed_archive.py": "3896610aa65f3dad589779bdf599ac1e8a1a0de19e5ef78b8fc01740879dc78f",
-    "scripts/producer/tests/live_p0_adversarial_ingress_acceptance.py": "45e6d75d0df14b809d5d4abe5b582a338dd78846f7045ad343dc4589530b17b4"
+    "scripts/producer/tests/live_p0_adversarial_ingress_acceptance.py": "185f3e3f660a822337dc4f37e74fa83d1d3d76ef9becff5f335b6a2a6ec6a4d5"
   }
 }

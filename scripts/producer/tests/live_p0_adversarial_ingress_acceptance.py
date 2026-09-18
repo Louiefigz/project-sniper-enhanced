@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Retain hostile-byte proof for the shared external-ingress sandbox."""
+"""Retain hostile-byte proof for the shared external-ingress sandbox (native jail).
+
+Schema v2 (2026-09-18): admission runs in the native macOS jail
+(headless/native_media_*), so the artifact binds the jail's runtime identity instead
+of an approved container image, and cleanup is proved by the absence of any
+process still referring to the case's snapshot store.
+"""
 from __future__ import annotations
 
 import argparse
@@ -13,12 +19,8 @@ import tarfile
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
-from headless.container_policy import (
-    command,
-    docker_env,
-    required_runtime,
-)
 from headless.external_media_probe import admit_external_media
+from headless.native_media_sandbox import verified_runtime
 from headless.external_media_probe_policy import MediaProbeLimits
 from headless.sealed_archive import verify_archive_file
 PRODUCER = Path(__file__).parents[1]
@@ -33,12 +35,16 @@ CASES = (
 )
 CLOSURE = (
     "scripts/producer/tests/live_p0_adversarial_ingress_acceptance.py",
-    "scripts/producer/headless/container_policy.py",
     "scripts/producer/headless/external_media_probe.py",
+    "scripts/producer/headless/external_media_probe_native.py",
     "scripts/producer/headless/external_media_probe_policy.py",
     "scripts/producer/headless/external_media_snapshot.py",
+    "scripts/producer/headless/native_media_jail.py",
+    "scripts/producer/headless/native_media_probe.sb",
+    "scripts/producer/headless/native_media_runtime.py",
+    "scripts/producer/headless/native_media_runtime_approval.json",
+    "scripts/producer/headless/native_media_sandbox.py",
     "scripts/producer/headless/sealed_archive.py",
-    "scripts/producer/headless/render_image_approval.json",
 )
 def _sha(path: Path) -> str:
     digest = hashlib.sha256()
@@ -149,22 +155,13 @@ def _decoder_timeout(root: Path) -> Path:
     return target
 
 
-def _containers(config_dir: str) -> list[str]:
-    runtime = required_runtime()
-    result = subprocess.run(
-        command(runtime, "ps", "-a", "--format", "{{.Names}}"),
-        stdin=subprocess.DEVNULL,
-        capture_output=True,
-        text=True,
-        env=docker_env(config_dir),
-        timeout=30,
-        check=False,
-    )
-    if result.returncode:
-        raise RuntimeError("could not enumerate retained probe containers")
-    return sorted(
-        row for row in result.stdout.splitlines()
-        if row.startswith("sniper-media-probe-"))
+def _processes(store: Path) -> list[str]:
+    """Live processes whose command line still names this case's snapshot store."""
+    result = subprocess.run(["/usr/bin/pgrep", "-f", str(store)], stdin=subprocess.DEVNULL,
+                            capture_output=True, text=True, timeout=30, check=False)
+    if result.returncode not in (0, 1):
+        raise RuntimeError("could not enumerate jailed decoder processes")
+    return sorted(result.stdout.split())
 
 
 def _media_case(
@@ -175,26 +172,25 @@ def _media_case(
 ) -> dict:
     store = root / f"{case_id}-store"
     store.mkdir()
-    with tempfile.TemporaryDirectory() as docker_config:
-        before = _containers(docker_config)
-        try:
-            admit_external_media(
-                str(source),
-                str(store),
-                limits or MediaProbeLimits(),
-            )
-        except RuntimeError as exc:
-            error = str(exc)
-        else:
-            raise RuntimeError(f"{case_id} unexpectedly entered admission")
-        after = _containers(docker_config)
+    before = _processes(store)
+    try:
+        admit_external_media(
+            str(source),
+            str(store),
+            limits or MediaProbeLimits(),
+        )
+    except RuntimeError as exc:
+        error = str(exc)
+    else:
+        raise RuntimeError(f"{case_id} unexpectedly entered admission")
+    after = _processes(store)
     return {
         "caseId": case_id,
         "inputSha256": _sha(source),
         "status": "rejected",
         "error": error,
         "admissionReceiptPublished": bool(list(store.glob("*.json"))),
-        "containerCleanupProved": before == after == [],
+        "processCleanupProved": before == after == [],
     }
 
 
@@ -234,7 +230,7 @@ def _archive_case(root: Path) -> dict:
         "status": "rejected",
         "error": error,
         "admissionReceiptPublished": False,
-        "containerCleanupProved": True,
+        "processCleanupProved": True,
     }
 
 
@@ -258,12 +254,14 @@ def run_cohort() -> dict:
             for case_id, generator, limits in generators
         ]
         results.append(_archive_case(root))
-    runtime = required_runtime()
+    identity = verified_runtime().identity
     return {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "kind": "p0-adversarial-ingress-acceptance",
         "generatedAt": datetime.now(timezone.utc).isoformat(),
-        "approvedImageId": runtime.image_id,
+        "nativeRuntime": {key: identity[key] for key in (
+            "policy", "profileSha256", "launcherSha256", "closureSha256", "platform")}
+        | {"ffmpeg": identity["tools"]["ffmpeg"]["version"]},
         "sourceClosure": {
             name: _sha(REPO / name)
             for name in CLOSURE
@@ -272,7 +270,7 @@ def run_cohort() -> dict:
         "passed": all(
             row["status"] == "rejected"
             and row["admissionReceiptPublished"] is False
-            and row["containerCleanupProved"] is True
+            and row["processCleanupProved"] is True
             for row in results
         ),
     }

@@ -8,6 +8,7 @@ pinned `requirements.lock.txt`.
 from __future__ import annotations
 
 import json
+import subprocess
 import re
 import shutil
 from pathlib import Path
@@ -77,11 +78,20 @@ def component_versions(root: Path) -> dict[str, object]:
 
 
 def source_facts(root: Path) -> dict[str, str]:
-    """Recorded provenance of the release source tree."""
+    """Recorded provenance of the release source tree, plus the commit actually built.
+
+    The commit is read from git, never typed into SOURCE.json, and a checkout with
+    uncommitted changes is refused: the recorded commit must be exactly what shipped.
+    """
     record = root / "release/SOURCE.json"
     if not record.exists():
         raise StagingError("release/SOURCE.json is missing; record the source baseline first")
-    return _read_json(record)
+    git = ["git", "-C", str(root)]
+    status = subprocess.run([*git, "status", "--porcelain"], capture_output=True, text=True, check=True).stdout
+    if status.strip():
+        raise StagingError("the release checkout has uncommitted changes; commit them before building")
+    head = subprocess.run([*git, "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
+    return {**_read_json(record), "release_checkout_commit": head}
 
 
 def _lock_lines(root: Path) -> list[str]:

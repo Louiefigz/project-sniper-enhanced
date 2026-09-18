@@ -21,7 +21,7 @@ real people or real results. Never reuse an output as copy.
 
 - Viewer start: solution_aware — they feed their tomato plants and the leaves stay pale.
 - Recording: "More fertiliser won't fix pale tomato leaves when the soil is still cold. I waited until the bed warmed up and the new leaves came in darker."
-- Format: `assumption_check`. Rejected `one_change`: the belief that more feed helps is what the speaker tests.
+- Format: `assumption_check`. Rejected `single_adjustment`: the belief that more feed helps is what the speaker tests.
 - Anchor: `assumption-more-wont`. Rejected `moment-what-changed`: the recording's point is the misplaced fix.
 - Slots: thing ← "fertiliser"; problem ← "pale tomato leaves".
 - Output: "More fertiliser won't fix pale tomato leaves"
@@ -43,7 +43,7 @@ real people or real results. Never reuse an output as copy.
 
 - Viewer start: solution_aware — they believe they already back up their files.
 - Recording: "A backup isn't a copy in the same folder. If the drive fails, both copies go with it. It has to live on a different device."
-- Format: `plain_definition`. Rejected `mistake_and_fix`: the misunderstanding of the term is the whole point.
+- Format: `plain_definition`. Rejected `error_correction`: the misunderstanding of the term is the whole point.
 - Anchor: `define-is-not`, using this entry's formula. Rejected `mistake-looks-right`: no hidden technical problem is revealed, only a definition.
 - Slots: term ← "backup"; misreading ← "a copy in the same folder".
 - Output: "A backup isn't a copy in the same folder"

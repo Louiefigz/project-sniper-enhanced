@@ -14,7 +14,7 @@ export function testDirectorPlan(input: DirectorInput, catalog: Pick<DirectorCat
       reason: "TEST only: verify literal criterion evidence; no real editorial pass.", pass: true }])) as DirectorFill["audit"] }));
   return { schemaVersion: 2, viewer: "TEST viewer", problem: "TEST source question", payoff: quote,
     awareness: { level: "problem_aware", reason: "TEST routed audience context" },
-    format: { id: "ordered_steps", reason: "TEST format resolver", alternatives: [{ id: "one_change", reason: "TEST alternative resolver" }] },
+    format: { id: "ordered_steps", reason: "TEST format resolver", alternatives: [{ id: "single_adjustment", reason: "TEST alternative resolver" }] },
     template: { anchor: "steps-toward-goal", referenceId: example.id, reason: "TEST template resolution and slot completeness",
       slots: example.slots.map((name) => ({ name, value: "TEST source-derived slot", ...quote })),
       alternatives: [{ anchor: "steps-checks-before", referenceId: "R510", reason: "TEST checklist template has no counted checks in the source" }] },

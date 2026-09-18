@@ -11,7 +11,7 @@ Authored for Project Sniper on 2026-09-18 (see `README.md`). Format IDs are the
 lower-case identifiers after `##`; the Director records one format and one or two
 rejected alternatives with a reason taken from the recording.
 
-## one_change — One change and what it does
+## single_adjustment — One change and what it does
 
 - Viewing need: the viewer wants one thing to do differently, and why.
 - The recording must contain: one concrete change plus the effect or reason the speaker gives for it.
@@ -47,7 +47,7 @@ rejected alternatives with a reason taken from the recording.
 - Usual picture: the number counting to its spoken value, then a gauge or chart that gives it scale.
 - Reject when: a number would have to be estimated, rounded further or computed by the Director, or when a goal would read as an achieved result.
 
-## mistake_and_fix — A mistake, what it costs, and the correction
+## error_correction — A mistake, what it costs, and the correction
 
 - Viewing need: the viewer wants to avoid something they may already be doing.
 - The recording must contain: the named mistake, its consequence, and the correction.

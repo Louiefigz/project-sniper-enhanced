@@ -11,7 +11,7 @@ real results. Never reuse an output as copy.
 
 - Viewer start: problem_aware — their loaves come out dense and they do not know why.
 - Recording: "If your bread comes out dense, it's usually under-proofed. Give it another hour, then press it: the dent should spring back slowly."
-- Format: `one_change`. Rejected `ordered_steps`: the press test is a check, not a second step.
+- Format: `single_adjustment`. Rejected `ordered_steps`: the press test is a check, not a second step.
 - Anchor: `situation-if-you`, using this entry's formula. Rejected `gap-cause-behind` with R504: the speaker answers in the first sentence, so a question would delay an answer the recording gives at once.
 - Slots: thing ← "bread"; symptom ← "dense"; cause ← "under-proofed".
 - Output: "If your bread comes out dense, it's usually under-proofed"
@@ -22,7 +22,7 @@ real results. Never reuse an output as copy.
 
 - Viewer start: problem_aware — they squeeze their tyres and believe the pressure is fine.
 - Recording: "The tyre felt hard when I squeezed it, but the gauge said forty psi instead of sixty. A squeeze can't tell you the pressure; check with a gauge every week."
-- Format: `mistake_and_fix`. Rejected `one_change`: trusting the squeeze is the lesson, not only the weekly gauge.
+- Format: `error_correction`. Rejected `single_adjustment`: trusting the squeeze is the lesson, not only the weekly gauge.
 - Anchor: `mistake-looks-right`. Rejected `number-took-not` with R513: sixty is the tyre's rating, not something the speaker expected.
 - Slots: thing ← "The tyre"; problem ← "the gauge said forty psi instead of sixty", written as "reads 40 psi, not 60".
 - Output: "The tyre looks right but reads 40 psi, not 60"
@@ -33,7 +33,7 @@ real results. Never reuse an output as copy.
 
 - Viewer start: problem_aware — their coffee tastes sour.
 - Recording: "Why does my coffee taste sour? The grind's too coarse, so the water runs through before it pulls out the sweeter part."
-- Format: `mistake_and_fix`. Rejected `plain_definition`: no term is being defined.
+- Format: `error_correction`. Rejected `plain_definition`: no term is being defined.
 - Anchor: `gap-cause-behind`. Rejected `assumption-more-wont` with R519: the recording never discusses adding more coffee.
 - Slots: thing ← "my coffee", written as "your coffee"; observation ← "taste sour".
 - Output: "Why does your coffee taste sour?"
@@ -55,7 +55,7 @@ real results. Never reuse an output as copy.
 
 - Viewer start: problem_aware — the home network has dead zones.
 - Recording: "Before you buy a new router, look at where the old one sits. Mine was on the floor inside a cupboard; moving it onto a shelf fixed the dead zones upstairs."
-- Format: `one_change`. Rejected `side_by_side`: the recording does not compare routers.
+- Format: `single_adjustment`. Rejected `side_by_side`: the recording does not compare routers.
 - Anchor: `situation-before-you`. Rejected `moment-what-changed`: the lesson is the check, not the story.
 - Slots: action ← "buy a new router", written as "buy a router"; thing ← "where the old one sits".
 - Output: "Before you buy a router, check where the old one sits"

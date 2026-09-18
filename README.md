@@ -446,7 +446,8 @@ The Python pipeline is also runnable on its own:
   enable it with `SNIPER_BRAIN_PROVIDER=codex`
 - whisper.cpp — `whisper-cli` plus a local model; required for no-audio-egress transcription
 - Palmier Pro (optional) — the AI-native NLE. When it's open it serves a local MCP at `http://127.0.0.1:19789/mcp`; a Claude client can drive an isolated experimental candidate. Connected hybrid delivery remains P5-blocked. Setup (incl. the Claude Desktop bridge): [`docs/palmier/PALMIER_MCP_SETUP.md`](./docs/palmier/PALMIER_MCP_SETUP.md). The repo's checked-in `.mcp.json` auto-offers this server to Claude Code.
-- tesseract — only for FRAME.IO REVIEW's optional `--mode ocr`; the default visual mode does not need it
+- tesseract — reference study reads on-screen text with it (and FRAME.IO REVIEW's optional `--mode ocr`)
+- yt-dlp — adding a reference from a YouTube, Instagram or TikTok URL
 - macOS — file selection uses a native macOS picker (`osascript`); the app won't be able to pick files on other platforms yet
 
 ## Setup
@@ -467,11 +468,12 @@ The Next.js API routes auto-detect `.venv/bin/python3` and fall back to system `
 # macOS
 brew install ffmpeg
 brew install whisper-cpp       # local-mode transcription
-brew install tesseract        # only needed for FRAME.IO REVIEW --mode ocr
+brew install tesseract        # reference study (on-screen text) and FRAME.IO REVIEW --mode ocr
+brew install yt-dlp           # adding a reference from a URL
 
 # Ubuntu/Debian
 sudo apt install ffmpeg
-sudo apt install tesseract-ocr # only needed for FRAME.IO REVIEW --mode ocr
+sudo apt install tesseract-ocr # reference study and FRAME.IO REVIEW --mode ocr
 ```
 
 Place an existing whisper.cpp model at

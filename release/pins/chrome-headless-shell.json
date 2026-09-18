@@ -1,0 +1,15 @@
+{
+  "archives": {
+    "mac-arm64": {
+      "bytes": 97532843,
+      "sha256": "1db16c16e72bedfa747ed01c207a3fe8ee7370c35f2094279eb8878c996e8c79",
+      "url": "https://storage.googleapis.com/chrome-for-testing-public/152.0.7977.30/mac-arm64/chrome-headless-shell-mac-arm64.zip"
+    },
+    "mac-x64": {
+      "bytes": 102653759,
+      "sha256": "48bf06f34412f9df5c7d3f3306d61a54a050789f395dd0129bae2234adb0033a",
+      "url": "https://storage.googleapis.com/chrome-for-testing-public/152.0.7977.30/mac-x64/chrome-headless-shell-mac-x64.zip"
+    }
+  },
+  "version": "152.0.7977.30"
+}

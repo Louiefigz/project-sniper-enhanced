@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """Check this install by asking the product's own code what it would do.
 
-    install/doctor.command [--json] [--provider-only] [--skip-transcription]
+    install/doctor.command [--json] [--provider-only] [--provider codex|claude]
+                           [--skip-transcription]
 
 Nothing is re-implemented here. Render tools come from `graphics.render_tools`,
 transcription from `local_whisper.transcribe_media`, the render runtime from
-`studio.native_runtime`, and the provider check from the same
-`admitSubscriptionInvocation` every real edit uses (via
-`scripts/infra/provider-admission.ts`). A check passes on what the tool
-actually did, never on an exit code alone.
+`studio.native_runtime`, media admission from the product's admission self-test
+(`scripts/producer/headless/native_admission_selftest.py`), and the provider
+check from the same `admitSubscriptionInvocation` every real edit uses (via
+`scripts/infra/provider-admission.ts`). A check passes on what the tool actually
+did, never on an exit code alone. Installed files are re-verified against the
+SHA-256 records the installer wrote when each step finished.
 
 Exit 0 = every required check passed. Optional features are reported as
 available / gated and never change the exit code.
@@ -19,13 +22,16 @@ import argparse
 import json
 import os
 import shutil
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
-PKG_ROOT = Path(__file__).resolve().parents[1]
-APP = PKG_ROOT / "app"
+sys.path.insert(0, str(Path(__file__).resolve().parent / "lib"))
+import doctor_setup as setup  # noqa: E402
+import install_tools  # noqa: E402
+
+PKG_ROOT = setup.PKG_ROOT
+APP = setup.APP
 RECEIPTS = PKG_ROOT / "runtime" / "state" / "receipts"
 MODEL_SHA = "c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d"
 FILTERS = ("rubberband", "zscale", "subtitles", "ass", "drawtext", "arnndn", "loudnorm", "ebur128",
@@ -39,56 +45,52 @@ def record(state: str, name: str, detail: str) -> None:
     _RESULTS.append({"state": state, "check": name, "detail": detail})
 
 
-def _run(argv: list[str], timeout: int = 60, cwd: Path | None = None) -> tuple[int, str]:
-    try:
-        done = subprocess.run(argv, capture_output=True, text=True, timeout=timeout, check=False, cwd=cwd)
-    except (OSError, subprocess.TimeoutExpired) as error:
-        return 1, type(error).__name__
-    return done.returncode, f"{done.stdout}{done.stderr}"
-
-
-def _sha(path: Path) -> str:
-    import hashlib  # noqa: PLC0415
-    with path.open("rb") as handle:
-        return hashlib.file_digest(handle, "sha256").hexdigest()
-
-
 def _product_paths() -> None:
-    for extra in (APP / "scripts", APP / "scripts/producer"):
+    for extra in (APP / "scripts", APP / "scripts/producer", APP / "scripts/infra"):
         if str(extra) not in sys.path:
             sys.path.insert(0, str(extra))
 
 
+def _tree_intact(root: Path, receipt: str, exclude: set[str]) -> str | None:
+    """None when a finished step's folder still matches its record, else what changed."""
+    if not (RECEIPTS / receipt).exists():
+        return "not installed — run install.command"
+    want = RECEIPTS / f"{receipt}.tree.json"
+    try:
+        files = json.loads(want.read_text(encoding="utf-8"))["files"]
+    except (OSError, ValueError, KeyError):
+        return "no record of the finished step — run install.command"
+    have = install_tools.tree_digests(root, exclude) if root.is_dir() else {}
+    changed = sum(1 for k, v in files.items() if have.get(k) != v) + sum(1 for k in have if k not in files)
+    return f"{changed} file(s) differ from what was installed — run install.command" if changed else None
+
+
 def check_foundations() -> None:
-    """Install path, Node, both dependency roots, tsx, venv and the pinned Python set."""
+    """Install path, Node, both dependency roots, tsx and the pinned Python set."""
     bad = [ch for ch in (",", "'", ":", "\\") if ch in str(PKG_ROOT)]
     record("FAIL" if bad else "PASS", "install path",
            f"contains {' '.join(bad)}: voice-rnn cleanup cannot run" if bad else str(PKG_ROOT))
-    code, out = _run(["node", "--version"])
-    major = out.strip().lstrip("v").split(".")[0]
-    record("PASS" if code == 0 and major.isdigit() and int(major) >= 22 else "FAIL", "node", out.strip() or "missing")
+    setup.check_node(record)
     for root, receipt in ((APP, "npm-app"), (APP / "templates/motion", "npm-motion")):
-        ok = (root / "node_modules").is_dir() and (RECEIPTS / receipt).exists()
-        record("PASS" if ok else "FAIL", f"dependencies {root.relative_to(PKG_ROOT)}",
-               "installed and receipted" if ok else "incomplete — run install.command")
+        problem = _tree_intact(root / "node_modules", receipt, {".cache"})
+        record("FAIL" if problem else "PASS", f"dependencies {root.relative_to(PKG_ROOT)}",
+               problem or "installed and verified")
     record("PASS" if (APP / "node_modules/tsx/dist/cli.mjs").exists() else "FAIL", "tsx runtime", "background edits need it")
     venv = APP / ".venv/bin/python3"
-    lock = PKG_ROOT / "install/requirements.lock.txt"
     if not venv.exists():
-        record("FAIL", "python packages", "no environment — run install.command"); return
-    wanted = dict(l.split("==", 1) for l in lock.read_text().splitlines() if "==" in l and not l.startswith("#"))
-    _, frozen = _run([str(venv), "-m", "pip", "freeze", "--disable-pip-version-check"], 120)
-    have = dict(l.split("==", 1) for l in frozen.splitlines() if "==" in l)
-    drift = [f"{k} {have.get(k, 'missing')}≠{v}" for k, v in wanted.items() if have.get(k) != v]
-    record("PASS" if not drift else "FAIL", "python packages",
-           f"{len(wanted)} pinned packages match" if not drift else "drift: " + "; ".join(drift[:4]))
+        record("FAIL", "python packages", "no environment — run install.command")
+        return
+    code, out, _ = setup.run([str(venv), "-I", str(Path(install_tools.__file__)), "venv-check",
+                              str(PKG_ROOT / "install/requirements.lock.txt")], 180)
+    record("PASS" if code == 0 else "FAIL", "python packages",
+           out.strip() if code == 0 else f"{out.strip()} — run install.command")
 
 
 def check_media() -> None:
     """ffmpeg features, and the tools a render would actually resolve."""
     ffmpeg = os.environ.get("HYPERFRAMES_FFMPEG_PATH") or shutil.which("ffmpeg") or ""
-    _, filters = _run([ffmpeg, "-hide_banner", "-filters"]) if ffmpeg else (1, "")
-    _, encoders = _run([ffmpeg, "-hide_banner", "-encoders"]) if ffmpeg else (1, "")
+    filters = setup.run([ffmpeg, "-hide_banner", "-filters"])[1] if ffmpeg else ""
+    encoders = setup.run([ffmpeg, "-hide_banner", "-encoders"])[1] if ffmpeg else ""
     names = {l.split()[1] for l in filters.splitlines() if len(l.split()) > 2}
     enc = {l.split()[1] for l in encoders.splitlines() if len(l.split()) > 2}
     missing = [f for f in FILTERS if f not in names] + [e for e in ("libx264", "aac") if e not in enc]
@@ -100,13 +102,15 @@ def check_media() -> None:
         tools = resolve_tools()
     except Exception as error:  # the resolver raises RuntimeError by design
         record("FAIL", "render tools", str(error)); return
-    pin = json.loads((PKG_ROOT / "RELEASE.json").read_text())["components"]["chrome_headless_shell"]
+    pin = setup.release()["components"]["chrome_headless_shell"]
     ok = pin in tools["browser"] and str(PKG_ROOT) in tools["browser"]
-    record("PASS" if ok else "FAIL", "render browser",
-           tools["browser"] if ok else f"expected {pin} inside this folder, resolved {tools['browser']}")
+    problem = _tree_intact(Path(tools["browser"]).parents[1], "browser", set()) if ok else None
+    record("PASS" if ok and not problem else "FAIL", "render browser",
+           (problem or tools["browser"]) if ok else f"expected {pin} inside this folder, resolved {tools['browser']}")
 
 
 def check_runtime_and_build() -> None:
+    """The render runtime through the product's own installer, and the app build's files."""
     _product_paths()
     try:
         from studio.native_runtime import install_runtime  # noqa: PLC0415
@@ -114,25 +118,8 @@ def check_runtime_and_build() -> None:
     except Exception as error:
         record("FAIL", "render runtime", f"{type(error).__name__}: {error}")
     build = APP / ".next/BUILD_ID"
-    ok = build.exists() and (RECEIPTS / "build").exists()
-    record("PASS" if ok else "FAIL", "app build", build.read_text().strip() if ok else "not built — run install.command")
-
-
-def check_admission() -> None:
-    """Can footage be admitted at all? The product admits every media file inside its
-    network-less Docker sandbox with one approved image; without it nothing can be edited."""
-    _product_paths()
-    try:
-        from headless.container_policy import attest_image, required_runtime  # noqa: PLC0415
-        runtime = required_runtime()
-        with tempfile.TemporaryDirectory(prefix="sniper-doctor-sandbox-") as control:
-            os.chmod(control, 0o700)
-            attest_image(runtime, control)
-    except Exception as error:  # the policy raises RuntimeError with the exact reason
-        record("FAIL", "media admission sandbox",
-               f"{error} — this candidate cannot admit footage; see PENDING-OWNER-DECISIONS.txt")
-        return
-    record("PASS", "media admission sandbox", f"approved image {runtime.image_id[:19]}… present")
+    problem = _tree_intact(APP / ".next", "build", {"cache"}) if build.exists() else "not built — run install.command"
+    record("FAIL" if problem else "PASS", "app build", problem or build.read_text().strip())
 
 
 def check_transcription(skip: bool) -> None:
@@ -143,14 +130,14 @@ def check_transcription(skip: bool) -> None:
         model = Path(resolve_whisper_model())
     except Exception as error:
         record("FAIL", "speech model", str(error)); return
-    if _sha(model) != MODEL_SHA:
-        record("FAIL", "speech model", f"{model} does not match the expected checksum — delete it and reinstall"); return
+    if install_tools.file_digest(model) != MODEL_SHA:
+        record("FAIL", "speech model", f"{model} does not match the expected checksum — run install.command"); return
     record("PASS", "speech model", f"{model.name} checksum verified")
     if skip:
         record("INFO", "transcription", "skipped by request"); return
     with tempfile.TemporaryDirectory(prefix="sniper-doctor-") as tmp:
         speech = Path(tmp) / "speech.aiff"
-        if _run(["say", "-o", str(speech), SPOKEN], 60)[0] != 0:
+        if setup.run(["say", "-o", str(speech), SPOKEN], 60)[0] != 0:
             record("FAIL", "transcription", "could not create the local speech sample with macOS 'say'"); return
         try:
             result = transcribe_media(LocalTranscribeRequest(path=str(speech)))
@@ -167,22 +154,8 @@ def check_transcription(skip: bool) -> None:
            else f"output unusable: {len(words)} words, {heard}/5 expected words, ordered={starts == sorted(starts)}")
 
 
-def check_provider() -> None:
-    """The selected provider, through production admission. Never prints auth output."""
-    selected = os.environ.get("SNIPER_PROVIDER") or ("codex" if os.environ.get("SNIPER_BRAIN_PROVIDER") == "codex" else "claude")
-    code, out = _run(["node", "--import", "tsx", "scripts/infra/provider-admission.ts", "--provider", selected], 90, APP)
-    try:
-        report = json.loads(out.strip().splitlines()[-1])
-    except (ValueError, IndexError):
-        record("FAIL", f"editor brain ({selected})", "the admission check did not run"); return
-    advice = {"not-signed-in-or-not-subscription": "sign in: install/sign-in.command",
-              "wrong-version": "reinstall the pinned CLI: install/install.command",
-              "cli-missing": "reinstall: install/install.command"}.get(report["reason"], report["detail"])
-    record("PASS" if report["ready"] else "FAIL", f"editor brain ({selected})",
-           f"{report['admittedVersion']} admitted and signed in" if report["ready"] else f"{report['reason']} — {advice}")
-
-
 def check_workspace_and_port() -> None:
+    """The video workspace is writable with room for a render; who holds the port."""
     root = Path(os.environ.get("SNIPER_WORKSPACE_ROOT") or Path.home() / "ProjectSniper")
     try:
         root.mkdir(parents=True, exist_ok=True)
@@ -193,11 +166,12 @@ def check_workspace_and_port() -> None:
     except OSError as error:
         record("FAIL", "workspace", f"{root} not writable: {error.strerror}")
     port = os.environ.get("SNIPER_PORT", "3000")
-    _, out = _run(["lsof", "-nP", "-t", f"-iTCP:{port}", "-sTCP:LISTEN"], 15)
+    out = setup.run(["lsof", "-nP", "-t", f"-iTCP:{port}", "-sTCP:LISTEN"], 15)[1]
     record("INFO", f"port {port}", "free" if not out.strip() else f"in use by pid {' '.join(out.split())}")
 
 
 def check_optional() -> None:
+    """Optional features: reported, never failing the doctor."""
     demucs = (APP / "scripts/producer/audio/.demucs-venv/bin/python3").exists()
     record("PASS" if demucs else "GATED", "audio preset: separate",
            "available" if demucs else "not installed (needs Demucs); voice, voice-strong, voice-rnn work")
@@ -205,16 +179,31 @@ def check_optional() -> None:
     record("GATED", "Palmier Pro mirror", "optional separate app; not configured in this package")
 
 
+def _hold_install() -> bool:
+    """Hold the install shared for this run, so no installer or uninstall runs under it."""
+    _product_paths()
+    import sniper_lock  # noqa: PLC0415
+    try:
+        sniper_lock.hold_for_process(APP, "doctor")
+    except sniper_lock.LockBusy as error:
+        record("FAIL", "install in use", str(error))
+        return False
+    return True
+
+
 def main() -> int:
+    """Run the checks; exit 0 only when every required one passed."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--provider-only", action="store_true")
+    parser.add_argument("--provider", choices=("codex", "claude"))
     parser.add_argument("--skip-transcription", action="store_true")
     args = parser.parse_args()
-    if not args.provider_only:
-        check_foundations(); check_media(); check_runtime_and_build(); check_admission()
-        check_transcription(args.skip_transcription)
-    check_provider()
+    provider = setup.check_provider_settings(record)
+    if not args.provider_only and _hold_install():
+        check_foundations(); setup.check_external_tools(record); check_media(); check_runtime_and_build()
+        setup.check_media_admission(record); check_transcription(args.skip_transcription)
+    setup.check_provider_admission(record, args.provider or provider or "claude")
     if not args.provider_only:
         check_workspace_and_port(); check_optional()
     failed = [r["check"] for r in _RESULTS if r["state"] == "FAIL"]

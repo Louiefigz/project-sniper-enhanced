@@ -6,11 +6,16 @@
 # their history, receipts or unsynced Studio work.
 . "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh" || exit 1
 load_env
+# Holding the maintenance lock exclusively means no app, editor window, doctor or
+# render that resolved the runtime is running, and none can start until this ends.
+hold_maintenance exclusive "cache cleaning" "Caches cannot be cleaned while Sniper is in use. Stop the
+  app (install/stop.command), close any Sniper editor window and let running edits finish." "$@"
 ROOT="$APP_DIR/templates/motion/.sniper-native-runtime"
 CANDIDATES=()
 for d in "$ROOT"/*/frame-cache "$ROOT"/*/long-frame-cache; do [ -d "$d" ] && CANDIDATES+=("$d"); done
 if [ ${#CANDIDATES[@]} -eq 0 ]; then say "No render caches to remove."; exit 0; fi
 
+# Also refuse for work that never took the lock (a command run by hand in this folder).
 ACTIVE="$(active_work_pids | tr '\n' ' ')"
 OPEN="$(lsof +D "$ROOT" 2>/dev/null | awk 'NR>1 {print $2}' | sort -u | tr '\n' ' ')"
 if [ -n "${ACTIVE// }${OPEN// }" ]; then

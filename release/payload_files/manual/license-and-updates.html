@@ -46,8 +46,10 @@ fixes, compatibility updates or new versions.</p>
 package installs its own pinned copies of both CLIs inside <code>runtime/</code> and
 disables their auto-updater. An update to your global CLI does not affect Sniper.</td></tr>
 <tr><td>A Python or Node package changes underneath you</td><td><strong>Handled.</strong>
-Both dependency sets and every Python package are pinned to exact versions, so a
-reinstall gets the same set this release was tested with.</td></tr>
+Both dependency sets, the two CLIs and every Python package are pinned to exact versions
+and checked against hashes recorded for this release (npm's lockfile integrity, pip's
+<code>--require-hashes</code>, the rendering browser's SHA-256), so a reinstall gets the same
+set this release was tested with or stops.</td></tr>
 <tr><td>Your provider retires the model, or changes what its sign-in check reports</td>
 <td><strong>Not handled, and not fixable by you.</strong> Sniper checks the sign-in
 response strictly. If your provider changes it, this version stops being able to sign in,
@@ -64,9 +66,11 @@ one of the open items in <code>PENDING-OWNER-DECISIONS.txt</code>.</p>
 
 <h2>Which version you have</h2>
 <pre><code>cat RELEASE.json</code></pre>
-<p>It records the version, the exact source it was built from, the platform it is
-qualified for, every component version, and — plainly — whether this build is sellable
-and what is blocking it. Quote the <code>version</code> field whenever you report a problem.</p>
+<p>It records the version, the exact source it was built from (a commit and a source-tree
+id), the platform, every component version and download checksum, and — plainly — that this
+build is not approved for sale (<code>"sellable": false</code>; the open items are in
+<code>PENDING-OWNER-DECISIONS.txt</code>). Quote the <code>version</code> field whenever you
+report a problem.</p>
 <p>The archive's own checksum is deliberately <em>not</em> inside the archive. It is
 published beside the download in <code>SHA256SUMS</code>, because a hash stored inside a
 file cannot verify that file.</p>
@@ -103,15 +107,36 @@ the steps that record the folder's location, and keeps your settings.</p>
 
 <h2>Uninstall</h2>
 <pre><code>install/uninstall.command</code></pre>
-<p>It asks you to type <code>REMOVE</code>, signs out the Codex or Claude login you made for
-Sniper (including the Claude login's Keychain item), then deletes what the installer
-created — <code>runtime/</code> (including your own <code>runtime/sniper.local.env</code>
-settings; copy that file first if you want to keep it), the two <code>node_modules</code>
-folders, the Python environment, the app build, the render caches and the export-recovery
-history. Then delete the folder.</p>
-<p>It does <strong>not</strong> touch your videos in <code>~/ProjectSniper</code>, your
-own Node, Python, Homebrew, ffmpeg or whisper install, or your global Codex and Claude
-CLIs and their logins.</p>
+<p>Stop the app first (<code>install/stop.command</code>) and let running edits finish; while
+anything still uses the folder, uninstall changes nothing and names what is using it. It asks
+you to type <code>REMOVE</code>, then:</p>
+<ol>
+  <li>stops the app if it is still recorded as running;</li>
+  <li>signs out the Codex and Claude logins you made <em>for Sniper</em>, using its own CLIs
+  (the Claude one is its own Keychain item), and checks that each is really signed out;</li>
+  <li>removes what the installer created: <code>runtime/</code> (browser, speech model, CLIs,
+  logins, logs), the two <code>node_modules</code> folders, <code>app/.venv</code>,
+  <code>app/.next</code>, and the render runtime and caches in
+  <code>app/templates/motion/.sniper-native-runtime</code>.</li>
+</ol>
+<p>If stopping the app, a sign-out or a removal fails, it says which, exits with an error and
+removes nothing more, so you can fix the cause and run it again. If a CLI is broken and cannot
+sign out, <code>install/uninstall.command --keep-logins</code> removes everything else and tells
+you what stays (the Claude login's Keychain item, whose name starts with
+<code>Claude Code-credentials-</code>).</p>
+<table>
+<tr><th>Kept on purpose</th><th>Why</th></tr>
+<tr><td><code>runtime/sniper.local.env</code> and <code>app/.env.local</code></td><td>Your own
+settings. A reinstall in this folder uses them again.</td></tr>
+<tr><td><code>app/templates/motion/.sniper-native-runtime/native-export-history</code></td><td>What
+an interrupted export needs to resume. A reinstall in this folder picks it up.</td></tr>
+</table>
+<p>To finish, delete the folder — that also deletes the kept files, so copy them first if you
+want them. Uninstall does <strong>not</strong> touch your videos in <code>~/ProjectSniper</code>
+(or your own workspace folder), your own Node, Python, Homebrew, ffmpeg, whisper, tesseract or
+yt-dlp, your global Codex and Claude CLIs, their settings (<code>~/.codex</code>,
+<code>~/.claude</code>, <code>~/.claude.json</code>) or their logins, or any Keychain item other
+than Sniper's own Claude login.</p>
 <footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>
 </div>
 </body>

@@ -66,14 +66,17 @@ purchase — see <a href="privacy.html">what leaves your Mac</a>.</td></tr>
 <table>
 <tr><th>Requirement</th><th>Detail</th><th>Cost to you</th></tr>
 <tr><td>A Mac</td><td>Apple silicon (M-series). So far Sniper has only been run on a developer
-Mac with macOS 26 on Apple silicon; that is not yet a qualified buyer baseline. Intel Macs and
-older macOS are untested, not blocked.</td><td>—</td></tr>
+Mac with macOS 26 on Apple silicon; that is not yet a qualified buyer baseline. The pinned Python
+packages need macOS 13 or newer (an Intel Mac: macOS 14 or newer); Intel Macs are untested.</td><td>—</td></tr>
 <tr><td>Disk space</td><td>About 4 GB for the install, plus room for your projects.
 Leave at least 20 GB free; a full-length render uses a lot of temporary space.</td><td>—</td></tr>
-<tr><td>Node 22 or newer</td><td>Free, from nodejs.org. Node 24 is recommended.</td><td>Free</td></tr>
+<tr><td>Node 22.13 or newer</td><td>Free, from nodejs.org. Node 24 is recommended. The floor comes
+from what this release's dependencies declare.</td><td>Free</td></tr>
 <tr><td>Python 3.12 or newer</td><td>Free, from python.org. 3.14.4 is the version tested.</td><td>Free</td></tr>
-<tr><td><code>ffmpeg</code> and <code>whisper-cpp</code></td><td>Free, one Homebrew
-command each. The installer tells you if they are missing.</td><td>Free</td></tr>
+<tr><td><code>ffmpeg</code>, <code>whisper-cpp</code>, <code>tesseract</code> and
+<code>yt-dlp</code></td><td>Free, one Homebrew command each. tesseract reads on-screen text when
+Sniper studies a reference video; yt-dlp fetches a reference from a link. The installer tells you
+if any is missing.</td><td>Free</td></tr>
 <tr><td><strong>A Codex or Claude subscription</strong></td><td>This is the part that
 thinks about your edit. You use the subscription you already pay for. There is no extra
 Sniper processing fee, and Producer edits use only the subscription. Two things can bill

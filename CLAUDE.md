@@ -195,8 +195,10 @@ cd scripts/producer && PYTHONPATH=.:tests ../../.venv/bin/python3 selftest.py
 
 `ffmpeg` and `ffprobe` must be on PATH. Local mode additionally needs `codex`,
 `whisper-cli`, and an existing whisper.cpp model; it never downloads one.
-`tesseract` must also be on PATH **only** for FRAME.IO REVIEW's `--mode ocr`
-(the default `visual` mode doesn't need it). The Next API routes auto-detect
+`tesseract` must also be on PATH for reference study (`study/study_deep.py`
+reads on-screen text and refuses to start without it) and for FRAME.IO REVIEW's
+`--mode ocr`; `yt-dlp` must be on PATH to add a reference from a URL
+(`study/fetch_reference.py`). The Next API routes auto-detect
 `.venv/bin/python3` via `src/app/api/_lib/spawn-python.ts` and fall back to system `python3`.
 
 ### Next supervision and Auto-edit durability

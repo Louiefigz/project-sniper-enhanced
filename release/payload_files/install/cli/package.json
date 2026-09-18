@@ -1,0 +1,10 @@
+{
+  "name": "project-sniper-pinned-clis",
+  "private": true,
+  "description": "The two provider CLIs Project Sniper admits, installed by install/install.command with npm ci from the reviewed package-lock.json beside this file.",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@anthropic-ai/claude-code": "2.1.247",
+    "@openai/codex": "0.144.1"
+  }
+}

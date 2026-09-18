@@ -12,7 +12,8 @@ For every detected graphic/panel-in event this reads the CHANGED REGION only
 
 Also OCRs each fingerprint state representative once (full frame), so every
 distinct on-screen state carries its readable text. tesseract is local and
-deterministic; a missing binary fails loudly (FRAME.IO REVIEW's dependency).
+deterministic; a missing executable fails loudly before the study starts
+(``require_tesseract``; reference study and FRAME.IO REVIEW's --mode ocr need it).
 """
 
 from __future__ import annotations
@@ -33,12 +34,16 @@ from study.deep_config import DEEP  # noqa: E402
 from study.deep_frames import VideoInfo, Window, decode_window  # noqa: E402
 
 
+TESSERACT_MISSING = (
+    "Reference study reads on-screen text with the tesseract program, which is not "
+    "installed (not found on PATH). Install it with: brew install tesseract — then "
+    "run the study again. (The Python package pytesseract is only its wrapper.)")
+
+
 def require_tesseract() -> None:
-    """Fail loudly before any OCR pass when the binary is absent."""
+    """Fail loudly before any study pass when the tesseract executable is absent."""
     if shutil.which("tesseract") is None:
-        raise RuntimeError(
-            "tesseract not found on PATH — P4 text extraction needs it "
-            "(brew install tesseract); same dependency as FRAME.IO REVIEW")
+        raise RuntimeError(TESSERACT_MISSING)
 
 
 def ocr_words(image: np.ndarray, psm: "int | None" = None,

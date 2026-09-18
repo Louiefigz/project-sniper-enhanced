@@ -13,11 +13,20 @@ import re
 import shutil
 from pathlib import Path
 
+from release import pins
+from release.node_floor import node_requirements
 from release.stage import StageReport, StagingError
 
 PAYLOAD = Path(__file__).resolve().parent / "payload_files"
 _APP = "app"
 _CHROME_RE = re.compile(r'CHROME_VERSION\s*=\s*"([0-9.]+)"')
+# The app's own model defaults (ai-provider.ts). The installer writes them into the
+# settings so the editor window and the app are given the same model explicitly.
+_MODEL_DEFAULTS = {
+    "claude_model_default": r'DEFAULT_CLAUDE_MODEL\s*=\s*"([^"]+)"',
+    "codex_model_default": r'safeCliValue\("SNIPER_CODEX_MODEL",\s*"([^"]+)"\)',
+    "codex_reasoning_default": r'safeCliValue\("SNIPER_CODEX_REASONING",\s*"([^"]+)"\)',
+}
 
 
 def _read_json(path: Path) -> dict:
@@ -50,8 +59,24 @@ def chrome_version(root: Path) -> str:
                        "install templates/motion dependencies before building")
 
 
+def model_defaults(root: Path) -> dict[str, str]:
+    """The app's default Claude/Codex model and Codex reasoning, read from ai-provider.ts."""
+    source = (root / "src/app/api/_lib/ai-provider.ts").read_text(encoding="utf-8")
+    found = {key: re.search(pattern, source) for key, pattern in _MODEL_DEFAULTS.items()}
+    missing = [key for key, match in found.items() if not match]
+    if missing:
+        raise StagingError(f"cannot read the app's model defaults from ai-provider.ts: {', '.join(missing)}")
+    return {key: match.group(1) for key, match in found.items()}
+
+
 def component_versions(root: Path) -> dict[str, object]:
-    """Exact component versions and pins this release was built against."""
+    """Exact component versions and pins this release was built against.
+
+    The Node floor is derived from both lockfiles (``release/node_floor.py``), the
+    browser archive hashes come from ``release/pins/`` and must match the version
+    the installed HyperFrames requires, and the CLI and Python locks are checked
+    against the admission pins before anything is written.
+    """
     root_pkg = _read_json(root / "package.json")
     motion_pkg = _read_json(root / "templates/motion/package.json")
     policy = (root / "src/app/api/_lib/subscription-policy.ts").read_text(encoding="utf-8")
@@ -59,16 +84,24 @@ def component_versions(root: Path) -> dict[str, object]:
     claude = re.search(r'claude:\s*"([^"]+)"', policy)
     if not codex or not claude:
         raise StagingError("cannot read the subscription CLI admission pins")
+    chrome = chrome_version(root)
+    node = node_requirements(root)
+    pins.check_cli_lock(PAYLOAD / "install/cli", codex.group(1), claude.group(1))
+    pins.check_python_lock(PAYLOAD / "install/requirements.lock.txt")
     return {
         "app_version": root_pkg["version"],
         "next": root_pkg["dependencies"]["next"],
         "react": root_pkg["dependencies"]["react"],
         "hyperframes_sdk": root_pkg["dependencies"]["@hyperframes/sdk"],
         "hyperframes_cli": motion_pkg["dependencies"]["hyperframes"],
-        "chrome_headless_shell": chrome_version(root),
+        "chrome_headless_shell": chrome,
+        "chrome_headless_shell_sha256": pins.browser_hashes(chrome),
         "codex_cli_admitted": codex.group(1),
         "claude_cli_admitted": claude.group(1),
-        "node_floor": "22.0.0",
+        **model_defaults(root),
+        "node_floor": node["floor"],
+        "node_floor_set_by": node["set_by"],
+        "node_unsupported_majors": node["unsupported_majors"],
         "node_recommended": "24",
         "python_floor": "3.12",
         "python_tested": "3.14.4",
@@ -78,10 +111,12 @@ def component_versions(root: Path) -> dict[str, object]:
 
 
 def source_facts(root: Path) -> dict[str, str]:
-    """Recorded provenance of the release source tree, plus the commit actually built.
+    """Recorded provenance of the release source tree, plus the commit and tree actually built.
 
-    The commit is read from git, never typed into SOURCE.json, and a checkout with
-    uncommitted changes is refused: the recorded commit must be exactly what shipped.
+    Both ids are read from git, never typed into SOURCE.json, and a checkout with
+    uncommitted or untracked changes is refused: the recorded commit must be exactly
+    what shipped. The build calls this before it writes anything. No timestamp is
+    included, so two builds of one commit stay byte-identical.
     """
     record = root / "release/SOURCE.json"
     if not record.exists():
@@ -91,7 +126,17 @@ def source_facts(root: Path) -> dict[str, str]:
     if status.strip():
         raise StagingError("the release checkout has uncommitted changes; commit them before building")
     head = subprocess.run([*git, "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
-    return {**_read_json(record), "release_checkout_commit": head}
+    tree = subprocess.run([*git, "rev-parse", "HEAD^{tree}"], capture_output=True, text=True, check=True).stdout.strip()
+    return {**_read_json(record), "release_checkout_commit": head, "release_checkout_tree": tree}
+
+
+def check_manual_node_floor(stage: Path, floor: str) -> None:
+    """The buyer pages state the Node floor the build derived, so they cannot drift from it."""
+    short = floor[:-2] if floor.endswith(".0") else floor
+    pages = ("START-HERE.html", "manual/index.html", "manual/install.html")
+    stale = [page for page in pages if f"Node {short}" not in (stage / page).read_text(encoding="utf-8")]
+    if stale:
+        raise StagingError(f"these pages do not state the derived Node floor 'Node {short}': {', '.join(stale)}")
 
 
 def _lock_lines(root: Path) -> list[str]:
@@ -129,8 +174,9 @@ def write_payload(root: Path, stage: Path, report: StageReport) -> None:
     if not PAYLOAD.exists():
         raise StagingError("release/payload_files is missing")
     for path in sorted(PAYLOAD.rglob("*")):
-        if not path.is_file() or path.name == ".DS_Store":
-            continue
+        if not path.is_file() or path.name == ".DS_Store" or "__pycache__" in path.parts \
+                or path.suffix == ".pyc":
+            continue  # byte caches from running the payload's own Python locally never ship
         relative = path.relative_to(PAYLOAD).as_posix()
         target = stage / relative
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -144,8 +190,9 @@ def write_release_json(stage: Path, version: str, components: dict[str, object],
                        status: dict[str, object]) -> None:
     """Write `RELEASE.json` inside the package.
 
-    It records version, source, platform and component versions. It deliberately
-    contains no hash of the archive that carries it.
+    It records version, source identity (commit and tree id), platform, component
+    versions and pins, and ``sellable: false``. It deliberately contains no hash of
+    the archive that carries it and no build time.
     """
     payload = {"product": "Project Sniper", "version": version,
                "components": components, **status,

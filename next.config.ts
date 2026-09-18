@@ -21,7 +21,6 @@ const nextConfig: NextConfig = {
   httpAgentOptions: {
     keepAlive: true,
   },
-  allowedDevOrigins: ["julians-mac-mini.tail8538b4.ts.net"],
 };
 
 export default nextConfig;

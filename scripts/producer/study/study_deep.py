@@ -174,6 +174,7 @@ def main() -> int:
         _emit("error", error=f"not a file: {opts.video}")
         return 1
     try:
+        require_tesseract()  # P4 always reads on-screen text: refuse before admission and P1-P3 work
         # Keep the original's sibling captions, then study only the admitted snapshot.
         opts.transcript = opts.transcript or sibling_vtt(opts.video)
         opts.video = admitted_study_input(opts.video, opts.out_dir)

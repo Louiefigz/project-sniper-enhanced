@@ -24,55 +24,75 @@ only ever published outside the archive; a hash inside a file cannot verify that
 <p>Your home folder or <code>~/Applications</code> is fine. Two constraints:</p>
 <ul>
   <li><strong>No comma, apostrophe, colon or backslash in the folder path.</strong> The
-  audio-cleanup filter embeds this folder's path and cannot handle those characters. Spaces
-  and accented letters are fine. The installer checks and tells you if the path is unusable;
-  this is a known limit, not something the installer fixes.</li>
+  audio-cleanup filter embeds this folder's path and cannot handle those characters. Any other
+  character — spaces, accents, <code>$</code>, quotes — is fine: Sniper stores its settings
+  literally. The installer checks and tells you if the path is unusable; this is a known limit,
+  not something the installer fixes.</li>
   <li>Not on a drive you unplug, and not in a folder that syncs to cloud storage — render
   caches are large and will fight the sync.</li>
 </ul>
 
-<h2>Step 2 — the four tools you install yourself</h2>
-<p>Sniper installs everything else, but it needs these first. The installer checks each one
-and stops with the exact next step if something is missing or too old.</p>
+<h2>Step 2 — the six tools you install yourself</h2>
+<p>Sniper installs everything else, but it needs these first. The installer checks each one,
+lists everything that is missing in one go, and stops with the exact next step.</p>
 <table>
-<tr><th>Tool</th><th>Version</th><th>How</th></tr>
-<tr><td>Node</td><td>22 or newer; 24 recommended</td><td><a href="https://nodejs.org">nodejs.org</a> — choose LTS</td></tr>
-<tr><td>Python</td><td>3.12 or newer (3.14.4 is the version tested)</td><td><a href="https://www.python.org/downloads/macos/">python.org</a></td></tr>
-<tr><td>ffmpeg</td><td>with libass, librubberband, libzimg, libx264</td><td><code>brew install ffmpeg</code></td></tr>
-<tr><td>whisper-cpp</td><td>any current</td><td><code>brew install whisper-cpp</code></td></tr>
+<tr><th>Tool</th><th>Version</th><th>How</th><th>Needed for</th></tr>
+<tr><td>Node</td><td>Node 22.13 or newer; 24 recommended</td><td><a href="https://nodejs.org">nodejs.org</a> — choose LTS</td><td>the app, rendering, the provider CLIs</td></tr>
+<tr><td>Python</td><td>3.12 or newer (3.14.4 is the version tested)</td><td><a href="https://www.python.org/downloads/macos/">python.org</a></td><td>the editing engine</td></tr>
+<tr><td>ffmpeg</td><td>with libass, librubberband, libzimg, libx264</td><td><code>brew install ffmpeg</code></td><td>every render</td></tr>
+<tr><td>whisper-cpp</td><td>any current</td><td><code>brew install whisper-cpp</code></td><td>local transcription</td></tr>
+<tr><td>tesseract</td><td>any current</td><td><code>brew install tesseract</code></td><td>studying a reference video (reading its on-screen text)</td></tr>
+<tr><td>yt-dlp</td><td>any current</td><td><code>brew install yt-dlp</code></td><td>adding a reference from a YouTube, Instagram or TikTok link</td></tr>
 </table>
 <p>The <code>brew</code> commands need <a href="https://brew.sh">Homebrew</a>. If you don't have
 it, the installer says so rather than failing on a missing command. If you installed ffmpeg
 some other way, the installer checks that your copy actually has every filter the renderer
 uses, and names any that are missing.</p>
+<p><strong>Node from nvm, fnm or volta:</strong> run the installer from Terminal, where that
+Node is on your PATH. The installer records the exact Node it checked and the app, the
+doctor, the provider CLIs and every render use that same one, even when you later start
+Sniper from Finder. Its path must not contain a space. Node 23 is accepted but lies outside
+the range some dependencies declare; if you upgrade or remove the Node you installed with,
+run the installer again.</p>
 
 <h2>Step 3 — run the installer and choose your subscription</h2>
 <pre><code>install/install.command --provider codex     # or: --provider claude</code></pre>
+<p>Your videos go to <code>~/ProjectSniper</code> unless you add
+<code>--workspace /path/to/folder</code>.</p>
 <p>Double-clicking it in Finder also works; it then asks which subscription to use. macOS may
 warn that a downloaded script is from an unidentified developer — right-click it and choose
 <em>Open</em>, the normal macOS prompt for a downloaded script.</p>
 <p>What it does, in order:</p>
 <ol>
-  <li>Checks the four tools above, including ffmpeg's features.</li>
-  <li>Installs the app's two dependency sets into <code>app/node_modules</code> and
-  <code>app/templates/motion/node_modules</code>.</li>
+  <li>Checks the six tools above, including ffmpeg's features.</li>
+  <li>Installs the app's dependencies into <code>app/node_modules</code> (npm checks every
+  package against the integrity hash in the lockfile).</li>
+  <li>Installs the rendering project's dependencies into
+  <code>app/templates/motion/node_modules</code>, the same way.</li>
   <li>Creates <code>app/.venv</code> from a pinned list, so you get exactly the Python package
-  versions this release was tested with.</li>
-  <li>Downloads the exact rendering browser into <code>runtime/browser</code>.</li>
+  versions this release was tested with; every download must match its recorded SHA-256.</li>
+  <li>Downloads the exact rendering browser into <code>runtime/browser</code> and checks its
+  SHA-256 against the one recorded for this release.</li>
   <li>Puts the speech model in <code>runtime/whisper</code>. If an identical copy is already on
   your Mac it reuses it; otherwise it downloads about 465 MB. The file must match its recorded
-  checksum or the install stops.</li>
-  <li>Installs the pinned Codex and Claude CLIs into <code>runtime/cli</code>.</li>
+  checksum.</li>
+  <li>Installs the pinned Codex and Claude CLIs into <code>runtime/cli</code> from a reviewed
+  lockfile (again integrity-checked by npm).</li>
   <li>Writes this install's settings to <code>runtime/sniper.env</code>.</li>
   <li>Builds the rendering runtime.</li>
   <li>Builds the app. This needs no internet connection.</li>
-  <li>Runs the checker.</li>
 </ol>
+<p>Then it runs the checker.</p>
 <div class="ok">
-<p><strong>If it stops, run it again.</strong> Each step records what it finished with. A step
-that did not finish — or whose inputs changed — is redone; a finished one is skipped. An
-interrupted model download resumes from where it stopped. Your own settings in
-<code>runtime/sniper.local.env</code> are never overwritten.</p>
+<p><strong>If it stops, run it again.</strong> Each step records what it finished with and the
+checksum of every file it produced. A step that did not finish, whose inputs changed, or
+whose files no longer match is removed and redone; a finished, intact one is skipped. You
+never have to delete anything by hand. An interrupted download resumes from where it
+stopped; a partial download that turns out wrong is fetched again from the start. Your own
+settings in <code>runtime/sniper.local.env</code> are never overwritten.</p>
+<p>The installer runs only while nothing else is using this folder: stop the app
+(<code>install/stop.command</code>), close any Sniper editor window and let running edits
+finish first. If something is still using it, the installer says what and changes nothing.</p>
 </div>
 
 <h2>Step 4 — sign in</h2>
@@ -88,8 +108,12 @@ changed. A browser window asks you to authorise with the subscription you alread
 <p>Sniper accepts only a subscription login for the editor. An API-key login is refused on
 purpose, so Producer edits never bill per call. (Frame Review, and Segmenter and Clipper on
 the Claude route, use an Anthropic API key only if you add one yourself; see the
-requirements on the start page.) To switch subscription later: <code>install/use-provider.command claude</code>
-(or <code>codex</code>), then sign in again.</p>
+requirements on the start page.) To switch subscription later: stop the app
+(<code>install/stop.command</code>), run <code>install/use-provider.command claude</code>
+(or <code>codex</code>), then sign in again. The switch applies to the whole install at once: the
+app, the editor window (<code>install/editor.command</code>) and every edit. Asking the editor
+window for the other provider without switching is refused, because the app would keep using
+the first one.</p>
 
 <h3>Choosing the model</h3>
 <p>Sniper sends an explicit model with every request. This release's defaults are Opus for
@@ -97,6 +121,10 @@ Claude and <code>gpt-5.6-sol</code> at the highest reasoning setting for Codex. 
 preference is Codex with GPT-6 Astra; to use a different Codex model, create
 <code>runtime/sniper.local.env</code> containing one line:</p>
 <pre><code>SNIPER_CODEX_MODEL=gpt-6-astra</code></pre>
+<p>That file is the one place for your own settings, and it is read as shell: put a value
+that contains <code>$</code>, a backtick, a backslash, quotes or spaces in single quotes, for
+example <code>SNIPER_WORKSPACE_ROOT='/Volumes/Work/Client $97'</code>. The editor window and the
+app both use the model you set there.</p>
 <p>Use the identifier your plan actually offers. Not every plan includes every model; if yours
 does not, the provider rejects the request and Sniper reports it rather than switching to a
 different model.</p>

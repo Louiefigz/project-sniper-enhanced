@@ -29,7 +29,7 @@ class StatementCardContractTests(unittest.TestCase):
         errors = tc.entry_errors(_entry(spec))
         self.assertTrue(any(needle in error for error in errors), errors)
 
-    def test_current_defect_requires_nateherk_variant(self) -> None:
+    def test_current_defect_requires_module_variant(self) -> None:
         self.assert_error({
             "statements": "A DECADE AS A *SOFTWARE ENGINEER*|OBSESSED WITH *AI*",
             "statementLands": 2.1, "bg": "dark", "accent": "#D7FF3F",
@@ -39,7 +39,7 @@ class StatementCardContractTests(unittest.TestCase):
         self.assert_error({"variant": "classic", "bg": "dark"},
                           "explicit non-empty spec.text")
 
-    def test_classic_rejects_unused_nateherk_fields(self) -> None:
+    def test_classic_rejects_unused_module_fields(self) -> None:
         self.assert_error({"variant": "classic", "text": "Real copy",
                            "statements": "Ignored copy"},
                           "classic does not read spec.statements")
@@ -58,19 +58,19 @@ class StatementCardContractTests(unittest.TestCase):
         self.assertEqual(tc.entry_errors(entry), [])
         self.assertEqual(tc.planned_copy(entry), ["Real copy"])
 
-    def test_nateherk_statement_sequence_passes(self) -> None:
-        entry = _entry({"variant": "nateherk",
+    def test_module_statement_sequence_passes(self) -> None:
+        entry = _entry({"variant": "module",
                         "statements": "FIRST CLAIM|SECOND CLAIM",
                         "statementLands": 2.0, "bg": "dark"})
         self.assertEqual(tc.entry_errors(entry), [])
         self.assertEqual(tc.planned_copy(entry), ["FIRST CLAIM", "SECOND CLAIM"])
 
-    def test_nateherk_requires_one_content_source(self) -> None:
-        self.assert_error({"variant": "nateherk", "text": "Used?",
+    def test_module_requires_one_content_source(self) -> None:
+        self.assert_error({"variant": "module", "text": "Used?",
                            "statements": "Actually used"}, "exactly one")
 
     def test_multi_statement_needs_explicit_lands(self) -> None:
-        self.assert_error({"variant": "nateherk",
+        self.assert_error({"variant": "module",
                            "statements": "FIRST|SECOND"},
                           "statementLands needs 1 explicit")
 

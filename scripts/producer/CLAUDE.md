@@ -334,13 +334,13 @@ should slot into the same gate (graphics / broll / motion family).
   PROVENANCE.md); comps take `iconFile: "lucide/check"` with zero changes.
 - Render: `graphics/graphics_render.py` (hyperframes + content-hash cache),
   `graphics/graphics_stage.py` (compositing; an entry may carry
-  `"takeoverBase": "blur-desat"` — G5 jaden treatment: the FOOTAGE gaussian-
+  `"takeoverBase": "blur-desat"` — G5 punch treatment: the FOOTAGE gaussian-
   blurs + desaturates under the window, 1-frame apply/restore via enable
   gating), `graphics/exit_on_cut.py` (G4 THE EXIT LAW: `"exitOnCut": true`
   clamps an entry's outEnd to the next cutTrack seam — shared by lint,
   render.py and assemble.py so they can't drift), `graphics/pip_takeover.py`
   (longform glass takeover move). Comps are HTML under
-  `templates/motion/compositions/` (jaden pack: `jaden-shout-lockup` +
+  `templates/motion/compositions/` (punch pack: `punch-shout-lockup` +
   tokens.css `--lemon`/`--font-serif-display`/pop tokens + `motion-tokens.js`).
 
 ## Incremental graphics — the render → lock → composite loop (`assemble.py`)
@@ -536,7 +536,7 @@ At Palmier handoff this mastered bus replaces the NLE's raw linked audio; see
   `build` — seeded ffmpeg synthesis into `assets/sfx/` with PROVENANCE.md;
   each name carries a `lead_s` so the renderer lands the HIT on the seam).
 - `captions/` — `captions_ass` (burned karaoke; aspect-aware geometry via
-  `caption_cfg_for_aspect`), `captions_minimal`, `captions_whisper` (the jaden
+  `caption_cfg_for_aspect`), `captions_minimal`, `captions_whisper` (the punch
   base layer, `captions.style: "whisper"` — 1-3 word sentence-case replace
   cues, no karaoke, inline amber tier-A emphasis; `CAPTIONS["WHISPER"]`),
   `overlays` (hook cards),
@@ -549,15 +549,15 @@ At Palmier handoff this mastered bus replaces the NLE's raw linked audio; see
   Audit B evidence. Caption-only changes restore the proved caption-free
   composite and rebuild only dirty shard keys.
 - **`graphics/pip_takeover.py` is UNWIRED** (the ANIMATED shrink-to-PIP,
-  NATEHERK §5 item 10) — `render.py` never calls it; `plan_lint_motion` still
+  MODULE §5 item 10) — `render.py` never calls it; `plan_lint_motion` still
   HARD-REJECTS `needsPip`/`canvas-pip-list` entries. BUT the STATIC
   face-in-PIP takeover IS wired (§5 item 9, operator-adjudicated legal for
   longform 2026-07-10, banned for shorts): hole-comps
-  (`graphics/pip_hole.py` registry — `nateherk-takeover`) render the frame
+  (`graphics/pip_hole.py` registry — `module-takeover`) render the frame
   around a transparent face hole with alpha forced by
   `graphics_render.format_for`, and `graphics_stage` scales the base footage
   into the hole at composite time (`pipHole` branch). Gates in
-  `plan_lint_nateherk.py` (longform-only + own-screen; also lints the
+  `plan_lint_module.py` (longform-only + own-screen; also lints the
   `glass-rail` `spec.entrance: "rail-push"` move, §5 item 8).
 - `broll/` — `broll_pool` (operator's pool: vision cataloging + resolve),
   `broll_insert` (receipts ride on top, never touch audio).
@@ -581,18 +581,18 @@ At Palmier handoff this mastered bus replaces the NLE's raw linked audio; see
   credibility claim→PIP/card, strong beat→push, captions). Derives obligations from
   the transcript so a forgetful brain gets caught; run in the skill's planning-
   convergence loop (SKILL step 4) alongside `plan_lint`. Reads `edit_scope`.
-- `claims_contract.py` — the **Claims Contract** (truth gate, NATEHERK_STUDY
+- `claims_contract.py` — the **Claims Contract** (truth gate, MODULE_STUDY
   §5.6): pre-render, every NUMERIC token in card copy (`graphicsTrack[].spec`
   strings + `titleCards[].text`) must be SPOKEN in the card's window —
   arithmetic string/number match (K/M/B scales, spelled cardinals via lookup),
   never regex semantics; `evidence*`/`icon*` slots exempt. The brain owns
   paraphrase faithfulness (SKILL step 4b). Same CLI shape as `hook_contract`.
-- `planner/word_lock.py` — word-locked seams (NATEHERK_STUDY T-G):
+- `planner/word_lock.py` — word-locked seams (MODULE_STUDY T-G):
   `snap_to_word_boundary` / `snap_plan_seams` move `transitions[].outTime` and
   translate `graphicsTrack[]` windows onto kept-word boundaries at plan time;
   `plan_lint_motion.check_word_lock` WARNs on seams >150ms off-boundary
   (runs when `plan_lint.py` gets the optional `[transcripts_dir]` arg).
-- Narration-paced module builds (NATEHERK_STUDY §5.4): the brain picks WHICH
+- Narration-paced module builds (MODULE_STUDY §5.4): the brain picks WHICH
   kept words a card's modules land on, `graphics_copy.fill_module_lands`
   converts them to comp-relative `spec.moduleLands` (the comp schedules its
   builds off it); `plan_lint_motion` validates lands (increasing, ≥0.25s
@@ -631,7 +631,7 @@ At Palmier handoff this mastered bus replaces the NLE's raw linked audio; see
   panel WARN 0.9s — empty-chrome staging, LL-002); WCAG accent-vs-bg
   contrast ≥3:1 for cataloged kinds (`MOTION["contrast"]["kind_bg"]`,
   LL-004); left-column own-screen holds >5s WARN (LL-005); FORM SELECTION +
-  VARIETY (NATEHERK_CARDS §1.4/§2, LL-015/LL-016): `check_form_shape`
+  VARIETY (MODULE_CARDS §1.4/§2, LL-015/LL-016): `check_form_shape`
   (transcript-armed path only — comparison-shaped info, ≥2 numeric spec
   tokens + a spoken comparative marker, on a kind outside
   `MOTION["card_form_map"]["comparison"]` WARNs) and `check_variety`

@@ -3,6 +3,7 @@ import path from "node:path";
 import { observeCutPreviewFile } from "@/app/api/producer/auto-edit/cut-preview-receipt";
 import { canonicalJson } from "./auto-edit-hash";
 import { objectValue, stringValue } from "@/lib/producer/contracts/validation";
+import { EXPANSION_LIBRARY, LONGFORM_LIBRARY, SEQUENCE_LIBRARY, SHORTS_LIBRARY } from "./reference-library-paths";
 
 export interface StrategyFilePin { path: string; sha256: string; sizeBytes: number }
 export interface StrategyReferenceRow {
@@ -62,7 +63,7 @@ function addReference(record: Record<string, unknown>, state: {
 }
 
 function longformCases(repo: string, read: (file: string) => Record<string, unknown>) {
-  const root = path.join(repo, "docs/studies/longform-visual-playbook");
+  const root = path.join(repo, LONGFORM_LIBRARY);
   const manifest = read(path.join(root, "manifest.json"));
   return records(manifest.cases, "long-form cases").map(row => {
     const file = path.resolve(repo, stringValue(row.case_path, "reference case path", 2048));
@@ -75,7 +76,7 @@ function longformCases(repo: string, read: (file: string) => Record<string, unkn
 
 /** Load complete Shorts and long-form collections with their saved catalog links. */
 export function loadReferenceStrategyLibrary(repo: string) {
-  const root = path.join(repo, "docs/studies/shorts-visual-playbook");
+  const root = path.join(repo, SHORTS_LIBRARY);
   const inputs: StrategyFilePin[] = [], state = { references: [] as StrategyReferenceRow[], files: {} as Record<string, string> };
   const read = (file: string) => {
     const held = strategyFile(file); inputs.push(held.pin);
@@ -83,10 +84,10 @@ export function loadReferenceStrategyLibrary(repo: string) {
   };
   const base = read(path.join(root, "manifest.json"));
   records(base.entries, "reference entries").forEach(row => addReference(row, state));
-  const nate = read(path.join(root, "nate-sequences/manifest.json"));
-  records(nate.cases, "Nate cases").forEach(row => addReference(row, state));
-  const authentic = read(path.join(root, "authentic-expansion/manifest.json"));
-  for (const row of records(authentic.cases, "authentic cases")) {
+  const sequences = read(path.join(repo, SEQUENCE_LIBRARY, "manifest.json"));
+  records(sequences.cases, "sequence cases").forEach(row => addReference(row, state));
+  const expansion = read(path.join(repo, EXPANSION_LIBRARY, "manifest.json"));
+  for (const row of records(expansion.cases, "expansion cases")) {
     const relative = stringValue(row.case_path, "reference case path", 2048);
     const file = path.resolve(repo, relative);
     if (!file.startsWith(`${root}${path.sep}`)) throw new Error("Reference case escapes its library");
@@ -95,7 +96,7 @@ export function loadReferenceStrategyLibrary(repo: string) {
     addReference(detail, state);
   }
   longformCases(repo, read).forEach(row => addReference(row, state, "16:9"));
-  for (const relative of ["FORMAT_FOUNDATIONS.md", "nate-sequences/CATALOG_MAP.md", "authentic-expansion/CATALOG_MAP.md", "authentic-expansion/catalog-sources.json"]) {
+  for (const relative of ["FORMAT_FOUNDATIONS.md", "sequences/CATALOG_MAP.md", "expansion/CATALOG_MAP.md", "expansion/catalog-sources.json"]) {
     const held = strategyFile(path.join(root, relative)); inputs.push(held.pin);
     state.files[`REFERENCE-${relative.replaceAll("/", "-")}`] = held.text;
   }

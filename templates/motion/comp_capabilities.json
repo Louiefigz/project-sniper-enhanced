@@ -66,7 +66,7 @@
         "meanAlpha8": 255.0
       }
     },
-    "angela-caption-dual-mode": {
+    "slideware-caption-dual-mode": {
       "aspect": "9:16",
       "canvas": [
         1080,
@@ -120,7 +120,7 @@
         "meanAlpha8": 0.6
       }
     },
-    "angela-receipt-cell": {
+    "slideware-receipt-cell": {
       "aspect": "9:16",
       "canvas": [
         1080,
@@ -202,7 +202,7 @@
         "meanAlpha8": 27.4
       }
     },
-    "angela-staircase-lockup": {
+    "slideware-staircase-lockup": {
       "aspect": "9:16",
       "canvas": [
         1080,
@@ -256,7 +256,7 @@
         "meanAlpha8": 4.6
       }
     },
-    "angela-takeover-deck": {
+    "slideware-takeover-deck": {
       "aspect": "9:16",
       "canvas": [
         1080,
@@ -1131,7 +1131,7 @@
         "meanAlpha8": 2.3
       }
     },
-    "jaden-shout-lockup": {
+    "punch-shout-lockup": {
       "aspect": "9:16",
       "canvas": [
         1080,
@@ -1418,7 +1418,7 @@
         "meanAlpha8": 15.6
       }
     },
-    "nateherk-bullet-bars": {
+    "module-bullet-bars": {
       "aspect": "16:9",
       "canvas": [
         1920,
@@ -1468,7 +1468,7 @@
         "meanAlpha8": 95.6
       }
     },
-    "nateherk-ledger-dark": {
+    "module-ledger-dark": {
       "aspect": "16:9",
       "canvas": [
         1920,
@@ -1526,7 +1526,7 @@
         "meanAlpha8": 255.0
       }
     },
-    "nateherk-pipeline": {
+    "module-pipeline": {
       "aspect": "16:9",
       "canvas": [
         1920,
@@ -1578,7 +1578,7 @@
         "meanAlpha8": 255.0
       }
     },
-    "nateherk-rail": {
+    "module-rail": {
       "aspect": "16:9",
       "canvas": [
         1920,
@@ -1632,7 +1632,7 @@
         "meanAlpha8": 84.2
       }
     },
-    "nateherk-scoreboard": {
+    "module-scoreboard": {
       "aspect": "16:9",
       "canvas": [
         1920,
@@ -1684,7 +1684,7 @@
         "meanAlpha8": 255.0
       }
     },
-    "nateherk-takeover": {
+    "module-takeover": {
       "aspect": "16:9",
       "canvas": [
         1920,

@@ -56,7 +56,7 @@ export function runPipelineScript(source, variables) {
   runInNewContext(tokens, { window }, { timeout: 1000 });
   runInNewContext(source, { window, document: fixture.document,
     gsap: { timeline: (options) => { paused = options.paused; trace.push(["timeline", options.paused]); return timeline; } } }, { timeout: 1000 });
-  if (window.__timelines["nateherk-pipeline"] !== timeline) throw new Error("TEST timeline was not registered");
+  if (window.__timelines["module-pipeline"] !== timeline) throw new Error("TEST timeline was not registered");
   return { trace, snapshot: Object.fromEntries(Object.entries(fixture.elements).map(([id, element]) => [id, snapshot(element)])),
     layout: fixture.elements["npl-root"].dataset.sniperLayout,
     roles: Object.values(fixture.elements).flatMap(descendants)

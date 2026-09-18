@@ -61,7 +61,7 @@ function doctrineFiles(repo: string): void {
   for (const relative of [
     ...PRODUCER_CORE_DOCTRINE_PATHS,
     ...PRODUCER_REFERENCED_DOCTRINE_PATHS,
-    "docs/studies/CALEB_STYLE.md",
+    "docs/studies/RESTRAINED_STYLE.md",
   ]) write(repo, relative, `DOCTRINE ${relative} — café\n`);
 }
 
@@ -132,7 +132,7 @@ function fixture(root: string): Fixture {
   write(project, "reference/reference.json", "{\"strategy\":\"mimic\"}\n");
   write(project, "reference/fingerprint.json", "{\"sha256\":\"source\"}\n");
   write(project, "reference/reference-source.json", "{\"source\":\"local\"}\n");
-  const intent = { mode: "short" as const, style: "caleb" as const, brief: "café 🎬", lanes: {} };
+  const intent = { mode: "short" as const, style: "restrained" as const, brief: "café 🎬", lanes: {} };
   write(project, "project.json", JSON.stringify({ origin: "raw", history: [], intent }));
   return { repo, transcript, frame, probe, ctx: {
     dir, scope: "produced", intent, planPath, manifestPath, transcriptsDir: source,

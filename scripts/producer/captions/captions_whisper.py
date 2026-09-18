@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""captions_whisper — the jaden ``whisper`` base caption style (G2).
+"""captions_whisper — the punch ``whisper`` base caption style (G2).
 
-Source: scripts/producer/docs/findings/JADEN_STYLE.md §4 (6-reel granular
+Source: scripts/producer/docs/findings/PUNCH_STYLE.md §4 (6-reel granular
 traces, 5/6 HIGH). The base "whisper" layer is a tiny white sentence-case sans
 slot that hard-replaces 1-3 word verbatim cues (~2 swaps/s at 255 wpm), soft
 shadow, NO box / NO stroke, centered x0.5 in the y0.60-0.64 band. Karaoke
@@ -9,7 +9,7 @@ sweep rate is ZERO (CAP1: none anywhere in 623s). Emphasis is tier-A INLINE:
 payload words (``captions.emphasisWords``) render amber from the cue's FIRST
 frame via an in-event colour override — never swept in, never a separate
 styled event (CAP3). Tier-B promotions leave the captions entirely and become
-shout-layer lockups (the ``jaden-shout-lockup`` comp) — CAP4.
+shout-layer lockups (the ``punch-shout-lockup`` comp) — CAP4.
 
 Dispatch: ``captions_ass.build_ass(words, style="whisper", cfg)`` (lazy import,
 mirroring ``captions_minimal``). Config lives in

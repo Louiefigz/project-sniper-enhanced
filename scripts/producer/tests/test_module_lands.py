@@ -1,4 +1,4 @@
-"""Narration-paced module builds (NATEHERK_STUDY §5 item 4).
+"""Narration-paced module builds (MODULE_STUDY §5 item 4).
 
 The fill seam: brain picks WHICH kept words, ``graphics_copy.fill_module_lands``
 converts to comp-relative ``spec.moduleLands``; ``plan_lint_motion`` validates
@@ -26,7 +26,7 @@ MODULE_SPEC = {
     "spectrum": "START|END",
 }
 ENTRY = {"outStart": 10.0, "outEnd": 16.0,
-         "kind": "nateherk-bullet-bars", "anchor": "free-band",
+         "kind": "module-bullet-bars", "anchor": "free-band",
          "reason": "x", "spec": MODULE_SPEC}
 
 
@@ -73,7 +73,7 @@ class ModuleLandsLintTests(unittest.TestCase):
         plan = good_plan()
         plan["graphicsTrack"] = [
             {"outStart": 5.0, "outEnd": 9.0,
-             "kind": "nateherk-bullet-bars",
+             "kind": "module-bullet-bars",
              "anchor": "free-band", "reason": "x",
              "spec": {**MODULE_SPEC, "moduleLands": lands}}]
         return plan

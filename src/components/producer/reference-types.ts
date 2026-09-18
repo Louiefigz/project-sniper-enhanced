@@ -93,9 +93,9 @@ export interface StudyActivity {
 }
 
 export const KNOWN_STYLES: Array<{ id: KnownReferenceStyle; label: string }> = [
-  { id: "caleb", label: "Caleb" },
-  { id: "jadenly", label: "Jaden" },
-  { id: "angela", label: "Angela" },
+  { id: "restrained", label: "Restrained" },
+  { id: "punch", label: "Punch" },
+  { id: "slideware", label: "Slideware" },
 ];
 
 export function suggestedMode(reference: ReferenceEntry): ReferenceMode | undefined {

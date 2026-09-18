@@ -161,15 +161,15 @@ class LayoutResultTests(unittest.TestCase):
 def pipeline_documents(patch: dict | None = None) -> dict[str, bytes]:
     """Actual pipeline source and explicit TEST-only non-preview copy."""
     spec = {"layout": "caption-safe-upper-v1", "nodes": "01~One|02~Two", **(patch or {})}
-    return {"motion/compositions/nateherk-pipeline.html":
-            (ROOT / "templates/motion/compositions/nateherk-pipeline.html").read_bytes(),
+    return {"motion/compositions/module-pipeline.html":
+            (ROOT / "templates/motion/compositions/module-pipeline.html").read_bytes(),
             "request/variables.json": canonical(spec)}
 
 
 def pipeline_fixture() -> tuple[dict, dict, dict]:
     """Closed synthetic metadata for the new profile, not actual native proof."""
     held, expected, value = fixture()
-    held.update(profile=PIPELINE_POLICY, composition="compositions/nateherk-pipeline.html")
+    held.update(profile=PIPELINE_POLICY, composition="compositions/module-pipeline.html")
     inventory = role_inventory(pipeline_documents(), PIPELINE_POLICY)
     expected["roleInventory"] = copy.deepcopy(inventory)
     value.update(policy=PIPELINE_POLICY, request=copy.deepcopy(held), roleInventory=inventory,

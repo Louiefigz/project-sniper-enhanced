@@ -45,8 +45,8 @@ assert.throws(
   /candidateStyleName is required/,
 );
 assert.throws(
-  () => validateReferenceIntent({ ...reference, candidateStyleName: "Jaden" }),
-  /outside Caleb/,
+  () => validateReferenceIntent({ ...reference, candidateStyleName: "Punch" }),
+  /outside Restrained/,
 );
 assert.throws(
   () => validateReferenceIntent({ ...reference, strategy: "mimic" }),
@@ -58,17 +58,17 @@ assert.throws(
 );
 assert.throws(
   () => validateReferenceIntent({
-    ...reference, strategy: "mimic", candidateStyleName: undefined, targetStyle: "caleb",
+    ...reference, strategy: "mimic", candidateStyleName: undefined, targetStyle: "restrained",
   }),
   /targetStyle is not allowed/,
 );
 assert.throws(
-  () => validateIntent({ ...intent, style: "caleb", reference }),
+  () => validateIntent({ ...intent, style: "restrained", reference }),
   /style must stay unset/,
 );
 const extendReference = {
-  id: "ref-caleb", title: "Caleb corpus", mode: "short" as const,
-  strategy: "extend" as const, targetStyle: "caleb" as const,
+  id: "ref-restrained", title: "Restrained corpus", mode: "short" as const,
+  strategy: "extend" as const, targetStyle: "restrained" as const,
 };
 assert.throws(
   () => validateIntent({ mode: "short", scope: "light", lanes: {}, reference: extendReference }),
@@ -76,18 +76,18 @@ assert.throws(
 );
 assert.throws(
   () => validateIntent({
-    mode: "short", scope: "light", lanes: {}, style: "caleb", pace: "angela",
+    mode: "short", scope: "light", lanes: {}, style: "restrained", pace: "slideware",
     reference: extendReference,
   }),
   /pace must equal reference\.targetStyle/,
 );
 assert.equal(validateIntent({
-  mode: "short", scope: "light", lanes: {}, style: "caleb", pace: "caleb",
+  mode: "short", scope: "light", lanes: {}, style: "restrained", pace: "restrained",
   reference: extendReference,
-}).reference?.targetStyle, "caleb");
+}).reference?.targetStyle, "restrained");
 assert.throws(
   () => validateIntent({
-    mode: "short", scope: "light", lanes: {}, style: "caleb",
+    mode: "short", scope: "light", lanes: {}, style: "restrained",
     reference: { ...extendReference, strategy: "mimic", targetStyle: undefined },
   }),
   /style must stay unset/,

@@ -25,13 +25,13 @@ _TIMING_POLICY = {
     "glass-rail": (3.0, 0.46, 1.25, 0.42),
     "icon-badge-wide": (3.0, 0.16, 1.25, 0.42),
     "statement-card": (2.5, 0.45, 1.25, 0.15),
-    "nateherk-rail": (4.0, 0.45, 1.25, 0.0),
-    "nateherk-bullet-bars": (4.0, 0.50, 1.25, 0.0),
+    "module-rail": (4.0, 0.45, 1.25, 0.0),
+    "module-bullet-bars": (4.0, 0.50, 1.25, 0.0),
     "avatar-bio-card": (5.0, 0.70, 1.50, 0.0),
     "whiteboard-connector": (3.0, 0.30, 1.25, 0.42),
-    "nateherk-ledger-dark": (4.0, 0.50, 1.25, 0.0),
-    "nateherk-scoreboard": (0.0, 0.20, 1.25, 0.0),
-    "nateherk-pipeline": (0.0, 0.20, 1.25, 0.0),
+    "module-ledger-dark": (4.0, 0.50, 1.25, 0.0),
+    "module-scoreboard": (0.0, 0.20, 1.25, 0.0),
+    "module-pipeline": (0.0, 0.20, 1.25, 0.0),
 }
 
 
@@ -57,7 +57,7 @@ def _timing_tokens(relative: str, names: tuple[str, ...]) -> dict[str, float]:
 def _scoreboard_tokens() -> dict[str, float]:
     """Keep the established scoreboard source/token observation entrypoint."""
     names = ("LAND_DEFAULT_START_S", "LAND_DEFAULT_GAP_S", "CTX_STAGGER_S", "TILE_STAGGER_S", "CHIP_SWEEP_S")
-    return _timing_tokens("compositions/nateherk-scoreboard.html", names)
+    return _timing_tokens("compositions/module-scoreboard.html", names)
 
 
 def _parts(spec: dict, key: str) -> list[str]:
@@ -111,7 +111,7 @@ def scoreboard_timing(spec: dict) -> tuple[float, float, float]:
 def pipeline_timing(spec: dict) -> tuple[float, float, float]:
     """Account for the actual last headline/node/foot ramp before readable dwell."""
     names = ("LAND_DEFAULT_START_S", "LAND_DEFAULT_GAP_S", "LINE_STAGGER_S", "NODE_STAGGER_S")
-    tokens = _timing_tokens("nateherk-pipeline.js", names)
+    tokens = _timing_tokens("module-pipeline.js", names)
     eyebrow, explainer, foot = (bool(str(spec.get(key) or "").strip())
                                 for key in ("eyebrow", "explainer", "footChip"))
     heads, nodes = (str(spec.get(key) or "").strip().split("|") if spec.get(key) else []
@@ -234,9 +234,9 @@ def visible_timing(kind: str, spec: dict) -> tuple[float, float, float, float, f
         return None
     floor, settle, dwell, exit_runway = policy
     reveal = _latest_reveal(spec)
-    if kind == "nateherk-scoreboard":
+    if kind == "module-scoreboard":
         reveal, settle, exit_runway = scoreboard_timing(spec)
-    if kind == "nateherk-pipeline":
+    if kind == "module-pipeline":
         reveal, settle, exit_runway = pipeline_timing(spec)
     return max(floor, reveal + settle + dwell + exit_runway), reveal, settle, dwell, exit_runway
 

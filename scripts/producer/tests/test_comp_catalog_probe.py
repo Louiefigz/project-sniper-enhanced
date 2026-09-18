@@ -91,10 +91,10 @@ class TestExplicitPipelineProbe(unittest.TestCase):
 
     def test_complete_pipeline_probe_has_explicit_content_and_exact_lands(self) -> None:
         """All present modules use real content, not the renderer's preview sample."""
-        html = Path(COMPOSITIONS_DIR, "nateherk-pipeline.html").read_text()
+        html = Path(COMPOSITIONS_DIR, "module-pipeline.html").read_text()
         declared = declared_variables(html)
         before = deepcopy(declared)
-        spec = probe.probe_spec("nateherk-pipeline", declared)
+        spec = probe.probe_spec("module-pipeline", declared)
         for field in ("eyebrow", "headlineLines", "explainer", "nodes", "footChip"):
             self.assertTrue(spec.get(field), field)
         self.assertEqual(len(spec["headlineLines"].split("|")), 2)
@@ -107,14 +107,14 @@ class TestExplicitPipelineProbe(unittest.TestCase):
 
     def test_real_refresh_entry_obeys_final_module_dwell_and_rejects_blank(self) -> None:
         """The actual shared gate still rejects truncation and preview-only content."""
-        html = Path(COMPOSITIONS_DIR, "nateherk-pipeline.html").read_text()
-        entry = _entry("nateherk-pipeline", html)
+        html = Path(COMPOSITIONS_DIR, "module-pipeline.html").read_text()
+        entry = _entry("module-pipeline", html)
         self.assertEqual(entry["outEnd"], 3.45)
         self.assertEqual(pipeline_timing(entry["spec"]), (2.0, 0.2, 0.0))
         self.assertEqual(entry_errors(entry, html), [])
         self.assertTrue(entry_errors({**entry, "outEnd": 3.44}, html))
         with self.assertRaisesRegex(ValueError, "no explicit content"):
-            probe.probe_duration("nateherk-pipeline", {})
+            probe.probe_duration("module-pipeline", {})
 
     def test_all_registered_refresh_entries_construct_without_gate_bypass(self) -> None:
         """Metadata preflight covers all 53 real kinds before any native work."""

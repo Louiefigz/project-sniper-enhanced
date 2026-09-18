@@ -16,7 +16,7 @@
   "fit": "upgrade:chip-row (stateful snap machine)",
   "quality": "clean: token-driven, well-guarded parsing",
   "aspectFlex": "responsive",
-  "port": "P1: seek-exact process-status rail; overlaps nateherk-pipeline territory"
+  "port": "P1: seek-exact process-status rail; overlaps module-pipeline territory"
  },
  {
   "name": "sticky-mock-swap",
@@ -527,7 +527,7 @@
   ],
   "scrubSafe": true,
   "selfContained": true,
-  "fit": "upgrade:nateherk-pipeline (traveling attention beam)",
+  "fit": "upgrade:module-pipeline (traveling attention beam)",
   "quality": "clean",
   "aspectFlex": "responsive",
   "port": "P1: 3-step process with guided attention"

@@ -73,7 +73,7 @@ def _report_repeats(cards: list[tuple[int, dict]], rep: Any,
             f"graphicsTrack[{left_i}]→[{right_i}]: consecutive graphic windows "
             f"({_out_start(left):g}s → {_out_start(right):g}s) both use {label} "
             f"{anatomy!r} — vary the anatomy without violating the beat's semantic "
-            "form mapping (LL-016/LESSON-030, NATEHERK_CARDS §2)")
+            "form mapping (LL-016/LESSON-030, MODULE_CARDS §2)")
         rep.error(message) if strict else rep.warn(message)
 
 
@@ -91,7 +91,7 @@ def _whole_plan_floor(cards: list[tuple[int, dict]], cfg: dict,
         f"{len(cards)} graphic windows use only {len(distinct)} distinct "
         f"{label} (< floor {floor} = ceil({ratio:g} × {len(cards)})) — drain "
         "compatible forms before repeating one; the reference uses 20 forms "
-        "across 23 windows (LL-016/LESSON-030, NATEHERK_CARDS §2)")
+        "across 23 windows (LL-016/LESSON-030, MODULE_CARDS §2)")
 
 
 def _duration(cards: list[tuple[int, dict]], out_dur: float | None) -> float:

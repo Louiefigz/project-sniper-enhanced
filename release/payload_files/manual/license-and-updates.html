@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Licence, updates, backup and uninstall</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <p class="kicker">Manual · 10 of 10</p>
+  <h1>Licence, updates, backup and uninstall</h1>
+  <p class="lede">The commercial terms, what version you have, and how to remove Sniper without losing your videos.</p>
+</header>
+<div class="warn">
+<p><strong>Draft terms.</strong> The wording below reflects the terms selected on
+17 September 2026, but the final legal wording has not been settled or reviewed, and this
+build is a release candidate rather than a product on sale. Nothing on this page is in
+force. <code>PENDING-OWNER-DECISIONS.txt</code> in this folder lists exactly what is
+still open.</p>
+</div>
+
+<h2>What you may do with it — selected terms</h2>
+<ul>
+  <li><strong>Make your own videos.</strong> Yes, without restriction.</li>
+  <li><strong>Make videos for paying clients.</strong> Yes. What you do with the videos
+  you produce is your business, and nothing here limits how you monetise them.</li>
+  <li><strong>Resell, share or give away Sniper itself.</strong> No.</li>
+  <li><strong>Reuse Sniper's code inside another paid product.</strong> No.</li>
+</ul>
+<p>The restrictions are about the software, not about your videos.</p>
+<p>Third-party components inside Sniper keep their own licences, which are yours to
+follow too. They are listed in <code>THIRD-PARTY-NOTICES.md</code> beside this manual —
+that file is part of the licence, not a formality.</p>
+
+<h2>Updates — read this one carefully</h2>
+<div class="warn">
+<p><strong>Your purchase is the version you downloaded.</strong> It does not include bug
+fixes, compatibility updates or new versions. Later releases are part of the separate
+paid support and updates offer.</p>
+</div>
+<p>Because that is the policy, here is the honest risk, stated rather than hidden:</p>
+<table>
+<tr><th>Risk</th><th>How exposed you are</th></tr>
+<tr><td>Your own Codex or Claude CLI auto-updates</td><td><strong>Handled.</strong> This
+package installs its own pinned copies of both CLIs inside <code>runtime/</code> and
+disables their auto-updater. An update to your global CLI does not affect Sniper.</td></tr>
+<tr><td>A Python or Node package changes underneath you</td><td><strong>Handled.</strong>
+Both dependency sets and every Python package are pinned to exact versions, so a
+reinstall gets the same set this release was tested with.</td></tr>
+<tr><td>Your provider retires the model, or changes what its sign-in check reports</td>
+<td><strong>Not handled, and not fixable by you.</strong> Sniper checks the sign-in
+response strictly. If your provider changes it, this version stops being able to sign in,
+and a fix would be a new release you do not have rights to under this policy.</td></tr>
+<tr><td>A major macOS upgrade breaks a dependency</td><td><strong>Not handled.</strong>
+Same reason.</td></tr>
+</table>
+<p>If those risks matter to you over a period of years, the paid support and updates
+offer, not this purchase, is what covers them.</p>
+
+<h2>Refunds</h2>
+<p><strong>14 days, no conditions.</strong> Ask within 14 days of purchase and you get
+your money back. You do not have to prove anything or contact support first.</p>
+<p>One practical note: a downloaded file cannot be taken back off your Mac. A refund ends
+your right to use Sniper; deleting your copy is on you.</p>
+
+<h2>Which version you have</h2>
+<pre><code>cat RELEASE.json</code></pre>
+<p>It records the version, the exact source it was built from, the platform it is
+qualified for, every component version, and — plainly — whether this build is sellable
+and what is blocking it. Quote the <code>version</code> field in any support message.</p>
+<p>The archive's own checksum is deliberately <em>not</em> inside the archive. It is
+published beside the download in <code>SHA256SUMS</code>, because a hash stored inside a
+file cannot verify that file.</p>
+
+<h2>Going back to an earlier version</h2>
+<p>There is no in-place rollback, and that is on purpose. Each release is a separate
+folder with its own <code>runtime/</code>:</p>
+<ol>
+  <li>Keep the old release folder. Do not delete it when you unzip a new one.</li>
+  <li>Install the new one beside it and use it.</li>
+  <li>If the new one misbehaves, stop it and start the old one.</li>
+</ol>
+<p>Both point at the same <code>~/ProjectSniper</code>, so your videos are shared between
+them. A project created by a newer release may use plan fields an older one does not
+understand — if you plan to go back, copy the project folder first.</p>
+
+<h2>Backup</h2>
+<p>Back up <strong><code>~/ProjectSniper</code></strong>. That is all of your work: your
+footage, your transcripts, your edit plans, your finished videos and your approval
+receipts. The Sniper folder itself is replaceable — you can always unzip it again.</p>
+<p>Include <code>~/.project-sniper/config.json</code> if you moved your workspace
+somewhere other than the default.</p>
+
+<h2>Uninstall</h2>
+<pre><code>install/uninstall.command</code></pre>
+<p>It asks you to type <code>REMOVE</code>, then deletes only what the installer created:
+<code>runtime/</code>, the two <code>node_modules</code> folders and the Python
+environment. Then delete the folder.</p>
+<p>It does <strong>not</strong> touch your videos in <code>~/ProjectSniper</code>, your
+own Node, Python, Homebrew, ffmpeg or whisper install, or your global Codex and Claude
+CLIs and their logins.</p>
+<footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>
+</div>
+</body>
+</html>

@@ -177,13 +177,13 @@ class FaceBridgeAllocationTests(unittest.TestCase):
     def test_retarget_preserves_each_chassis_renderer_contract(self) -> None:
         takeover = face_bridge._retarget_candidate(
             {"kind": "fragment-payoff", "spec": {}, "reason": "thesis"})
-        self.assertEqual(takeover["kind"], "nateherk-takeover")
+        self.assertEqual(takeover["kind"], "module-takeover")
         self.assertNotIn("presenterFrame", takeover["spec"])
         ledger = face_bridge._retarget_candidate(
             {"kind": "whiteboard-connector", "spec": {}, "reason": "flow"})
         self.assertTrue(ledger["spec"]["presenterFrame"])
         rail = face_bridge._retarget_candidate(
-            {"kind": "nateherk-bullet-bars", "spec": {}, "reason": "limit"})
+            {"kind": "module-bullet-bars", "spec": {}, "reason": "limit"})
         self.assertEqual(rail["anchor"], "beside-face")
 
 
@@ -191,10 +191,10 @@ class FaceBridgeReleaseTests(unittest.TestCase):
     def test_renderer_reuse_is_checked_across_the_complete_excerpt(self) -> None:
         cfg = {"forbidAdjacentRendererReuse": True,
                "maximumRendererUses": 2}
-        rows = [{"kind": "nateherk-rail"},
-                {"kind": "nateherk-rail"},
-                {"kind": "nateherk-takeover"},
-                {"kind": "nateherk-rail"}]
+        rows = [{"kind": "module-rail"},
+                {"kind": "module-rail"},
+                {"kind": "module-takeover"},
+                {"kind": "module-rail"}]
         errors = _renderer_errors(rows, cfg)
         self.assertTrue(any("consecutive" in error for error in errors), errors)
         self.assertTrue(any("maximum is 2" in error for error in errors), errors)

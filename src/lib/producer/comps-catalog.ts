@@ -32,12 +32,12 @@ export interface CompCatalogEntry {
   canvas: CompCanvas;
   defaultSpec: Record<string, unknown>;
   /** Sectioned entries group after a divider in the ELEMENTS panel:
-   *  "angela" = the angela reference pack (reel-study comps, all 9:16),
-   *  "nateherk" = the nateherk card pack (NATEHERK_CARDS study, all 16:9
+   *  "slideware" = the slideware reference pack (reel-study comps, all 9:16),
+   *  "module" = the module card pack (MODULE_CARDS study, all 16:9
    *  longform — cream split-panel rails overlay footage, dark cards are
    *  own-screen takeovers),
    *  "primitives" = raw building blocks. */
-  section?: "primitives" | "angela" | "nateherk";
+  section?: "primitives" | "slideware" | "module";
   /** Extra editable spec fields (graphic-properties renders them generically). */
   specFields?: SpecField[];
 }
@@ -239,17 +239,17 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     },
   },
 
-  // ---- ANGELA PACK — comps decomposed from the angela reel study (top 4 by
-  // rank). All 9:16; templates at compositions/angela-*.html. The lime accent
+  // ---- SLIDEWARE PACK — comps decomposed from the slideware reel study (top 4 by
+  // rank). All 9:16; templates at compositions/slideware-*.html. The lime accent
   // (#C9FB00) is ONE token per reel — override it once, everywhere.
   {
-    kind: "angela-takeover-deck",
+    kind: "slideware-takeover-deck",
     label: "Takeover deck",
     description:
       "Full-frame lime slide deck — header + caption pill ON at the cut, card-white sheets page carousel-style (exit-left / enter-right).",
     ownScreen: true,
     canvas: "9:16",
-    section: "angela",
+    section: "slideware",
     defaultSpec: {
       header: "For Carousel Posts",
       headerInk: "white",
@@ -267,13 +267,13 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     ],
   },
   {
-    kind: "angela-staircase-lockup",
+    kind: "slideware-staircase-lockup",
     label: "Staircase lockup",
     description:
       "Kicker / lime ALL-CAPS payload / co-word staircase — word-locked 0-frame pops, in-place replace-chain, never a fade.",
     ownScreen: false,
     canvas: "9:16",
-    section: "angela",
+    section: "slideware",
     defaultSpec: {
       kicker: "Step *#1:* do this every day",
       payload: "Post Daily",
@@ -293,13 +293,13 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     ],
   },
   {
-    kind: "angela-receipt-cell",
+    kind: "slideware-receipt-cell",
     label: "Receipt cells",
     description:
       "Proof-stamp thumb cells — olive label chip over a 9:16 media slot with an eye-count view chip; strip / grid / showcase, per-cell pops.",
     ownScreen: false,
     canvas: "9:16",
-    section: "angela",
+    section: "slideware",
     defaultSpec: {
       layout: "strip",
       label1: "Day 1", label2: "Day 7", label3: "Day 14", label4: "Day 30",
@@ -315,13 +315,13 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     ],
   },
   {
-    kind: "angela-caption-dual-mode",
+    kind: "slideware-caption-dual-mode",
     label: "Whisper captions",
     description:
       "Whisper caption chain — hard replace-per-cue, footage skin (white, chest band) or canvas pill skin (for lime takeovers); *bold* is the only emphasis.",
     ownScreen: false,
     canvas: "9:16",
-    section: "angela",
+    section: "slideware",
     defaultSpec: {
       mode: "footage",
       cue1: "here is the",
@@ -335,22 +335,22 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     ],
   },
 
-  // ---- NATEHERK PACK — the card library decomposed from the nateherk
-  // longform study (docs/studies/NATEHERK_CARDS.md; templates compositions/
-  // nateherk-*.html). All 16:9 LONGFORM. Two chassis (§1.1): the CREAM
+  // ---- MODULE PACK — the card library decomposed from the module
+  // longform study (docs/studies/MODULE_CARDS.md; templates compositions/
+  // module-*.html). All 16:9 LONGFORM. Two chassis (§1.1): the CREAM
   // split-panel (alpha rail beside the live face — NOT own-screen) and the
   // DARK takeover (own-screen full-frame). His cream/ink/lime/cyan are the
   // CSS-var fallbacks; brand tokens override (--rail-cream, --accent-result,
   // --accent-process, --accent-warn). Variety doctrine (§2): tokens repeat,
   // layouts don't — the planner should drain distinct forms before reuse.
   {
-    kind: "nateherk-rail",
+    kind: "module-rail",
     label: "Cream rail (chassis)",
     description:
       "Cream split-panel that wipes in from the left edge (33%W) beside the live face — eyebrow, thesis headline, and a modular zone: KV ledger, status/queue cards, numbered steps, checklist with OK badges, or a dated vertical timeline (contentMode).",
     ownScreen: false, // overlays footage — the face stays full-frame right
     canvas: "16:9",
-    section: "nateherk",
+    section: "module",
     defaultSpec: {
       eyebrow: "LONG-HORIZON WORK",
       headlineLines: "One thread.|Every handoff.",
@@ -361,13 +361,13 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     },
   },
   {
-    kind: "nateherk-takeover",
+    kind: "module-takeover",
     label: "Dark takeover (face PIP)",
     description:
       "Near-black takeover with the face in a rounded PIP card right — eyebrow, two-line accent headline, hero-vs-comparison bars with a delta chip, chip sweep, evidence ribbon. Longform-only (the renderer fills the face hole).",
     ownScreen: true,
     canvas: "16:9",
-    section: "nateherk",
+    section: "module",
     defaultSpec: {
       eyebrow: "ULTRA ORCHESTRATION",
       headlineLines: "ONE RUN.|FOUR AGENTS.",
@@ -383,13 +383,13 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     },
   },
   {
-    kind: "nateherk-ledger-dark",
+    kind: "module-ledger-dark",
     label: "Dark ledger + fan-out",
     description:
       "Dark config/parallel-process card — KV ledger rows with status tags (model → VERIFIED), an optional wide ledger bar, and a fan-out under a cyan connector tree: numbered chips or parallel-agent columns with lime underlines (grid).",
     ownScreen: true,
     canvas: "16:9",
-    section: "nateherk",
+    section: "module",
     defaultSpec: {
       eyebrow: "ULTRA ORCHESTRATION",
       headlineLines: "ONE RUN.|FOUR AGENTS.",
@@ -402,13 +402,13 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     },
   },
   {
-    kind: "nateherk-scoreboard",
+    kind: "module-scoreboard",
     label: "Big-number scoreboard",
     description:
       "Dark hero-metric payoff card — giant lime number, outlined stat tiles, a color-coded per-item chip strip (win/tie/loss sweep), and the amber LIMIT caveat footer that lands last.",
     ownScreen: true,
     canvas: "16:9",
-    section: "nateherk",
+    section: "module",
     defaultSpec: {
       eyebrow: "SMALL LOCAL CHECK",
       contextChips: "ONE RUN|13 TASKS|THIS MACHINE",
@@ -421,13 +421,13 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     },
   },
   {
-    kind: "nateherk-bullet-bars",
+    kind: "module-bullet-bars",
     label: "Bullet bars vs limit",
     description:
       "Cream rail with measured lime bullet bars against an amber threshold tick — measurements vs a limit, with a lime verdict footnote and an optional spectrum rail. Overlays footage (face stays full-frame right).",
     ownScreen: false, // overlays footage — same cream-chassis law as the rail
     canvas: "16:9",
-    section: "nateherk",
+    section: "module",
     defaultSpec: {
       eyebrow: "VOICE CONSISTENCY",
       headlineLines: "Four short generations.",
@@ -443,13 +443,13 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     ],
   },
   {
-    kind: "nateherk-pipeline",
+    kind: "module-pipeline",
     label: "Node pipeline",
     description:
       "Dark process-summary card — 2-8 connected pipeline tiles (num + label) with a cyan you-are-here dot on the active node; the whole chain in one glance.",
     ownScreen: true,
     canvas: "16:9",
-    section: "nateherk",
+    section: "module",
     defaultSpec: {
       eyebrow: "ONE INSTRUCTION TO FINISHED VIDEO",
       headlineLines: "The chain changed.|The outcome held.",
@@ -620,7 +620,7 @@ export const COMPS_CATALOG: CompCatalogEntry[] = [
     },
   },
   {
-    kind: "jaden-shout-lockup",
+    kind: "punch-shout-lockup",
     label: "Shout lockup",
     description: "Measured vertical kicker/payload/co-word typography with hard pops or tightly timed word appends.",
     ownScreen: false,

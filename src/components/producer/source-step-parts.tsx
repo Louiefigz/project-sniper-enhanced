@@ -5,7 +5,7 @@ import { referenceExecutionClass } from
 
 export function ReferenceSelection({ intent }: { intent: ReferenceIntent }) {
   const direction = intent.strategy === "extend"
-    ? `extend ${intent.targetStyle === "jadenly" ? "Jaden" : intent.targetStyle}`
+    ? `extend ${intent.targetStyle === "punch" ? "Punch" : intent.targetStyle}`
     : intent.strategy === "new-style"
       ? `new style · ${intent.candidateStyleName}`
       : `${referenceExecutionClass(intent.strategy)} · measured guidance`;

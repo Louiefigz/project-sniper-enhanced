@@ -4,7 +4,7 @@ Ask the editing agent in normal language. Supply footage or an existing project
 and the outcome you want the viewer to understand. Either name a reference or
 let the agent choose after inspecting the message, footage and reference library.
 
-- “Make a Nate Herk-style Short from this recording. Show one offer improving
+- “Make a Module-style Short from this recording. Show one offer improving
   step by step. Find useful supporting shots in my footage.”
 - “Choose the best Short treatment from this recording automatically. Find a
   standalone lesson and show the example wherever possible.”

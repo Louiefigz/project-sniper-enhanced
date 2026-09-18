@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>When something goes wrong</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <p class="kicker">Manual · 8 of 10</p>
+  <h1>When something goes wrong</h1>
+  <p class="lede">What to expect, what the checker tells you, and how to send something useful if you get stuck.</p>
+</header>
+<h2>First move, always</h2>
+<pre><code>install/doctor.command</code></pre>
+<p>It asks the product's own code which browser, ffmpeg, speech model and provider CLI a
+render would actually use, and prints each one. It marks a line <code>FAIL</code> only
+for something that has to work, <code>GATED</code> for an optional feature that is not
+installed, and <code>INFO</code> for something worth knowing. If every required line
+passes, the install is fine and the problem is in the edit, not the setup.</p>
+
+<h2>The errors you are most likely to hit</h2>
+<table>
+<tr><th>What you see</th><th>What it means</th><th>What to do</th></tr>
+<tr><td>Editor brain: not signed in yet</td><td>Your provider login expired, or you never
+signed in with this package's CLI.</td><td>Run the login command from
+<a href="install.html">Install</a>. It signs in to this package's own settings folder.</td></tr>
+<tr><td>This release admits only '…'; this CLI reports '…'</td><td>The CLI version does
+not match. Usually an auto-update.</td><td>Run <code>install/install.command</code> again
+— it reinstalls the exact pinned version into this package.</td></tr>
+<tr><td>no cached chrome-headless-shell found</td><td>The rendering browser is missing.
+Sniper never downloads one mid-render on purpose.</td><td>Run the installer again; step 4
+downloads it.</td></tr>
+<tr><td>local Whisper model not found</td><td>The speech model is missing or was moved.</td>
+<td>Run the installer again; step 5 re-downloads it and checks its checksum.</td></tr>
+<tr><td>Port 3000 is already in use by …</td><td>Something else holds the port. The
+message names it.</td><td>Quit that program, or start on another port:
+<code>SNIPER_PORT=3100 install/start.command</code></td></tr>
+<tr><td>The install folder path contains , ' : or \</td><td>Those characters break the
+audio-cleanup filter, which embeds this folder's path.</td><td>Move the folder somewhere
+without them. Spaces and accented letters are fine.</td></tr>
+<tr><td>A render stops and reports a problem</td><td>Working as designed. Sniper stops
+rather than shipping something it could not check.</td><td>Read the message: it names
+the lane and the reason. Most are a request to pick a style or confirm a choice.</td></tr>
+<tr><td>Not enough disk space</td><td>A long render needs tens of GB of temporary space.</td>
+<td><code>install/clean-caches.command</code> shows what can be freed and how big it is,
+and never touches your footage, plans, finals or unsynced edits.</td></tr>
+</table>
+
+<h2>What to realistically expect</h2>
+<div class="warn">
+<p>The only timing on record is Aaron's own: he fully edits a ten-minute video — motion
+graphics, cuts, trims, audio correction, b-roll — in under three hours, and estimates
+Sniper saves him about 85% of the effort versus editing it by hand. <strong>That is one
+person's report about his own work on his own machine. It is not a promise about your
+recording, your Mac or your provider plan, and no typical buyer runtime has been
+measured.</strong> Your first edit will take longer than your tenth, because you are
+learning what to ask for.</p>
+</div>
+<ul>
+  <li>Transcription is local and roughly real-time-ish on Apple silicon; a 30-minute
+  recording is minutes, not seconds.</li>
+  <li>Planning and review are provider calls. They are the slow part, and your plan's
+  rate limits apply.</li>
+  <li>Rendering is CPU and disk heavy. Expect the fans.</li>
+  <li>An edit keeps running if you close the browser tab or restart the app. It is a
+  separate background process on purpose.</li>
+</ul>
+
+<h2>Sending something useful</h2>
+<pre><code>install/diagnostics.command</code></pre>
+<p>This writes a folder to your Desktop containing the checker's report, your macOS and
+Node versions, this build's <code>RELEASE.json</code>, and the last 400 lines of the app
+log with anything key-shaped replaced by <code>[redacted]</code>. It does <strong>not</strong>
+copy your footage, your transcripts, your edit plans or your login. Open it and read it
+before you send it.</p>
+
+<div class="warn">
+<p><strong>Support is not settled for this candidate.</strong> There is no support address
+in this package because the support route and response commitment have not been decided.
+Do not treat any address you find in the source as a support channel.</p>
+</div>
+<footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>
+</div>
+</body>
+</html>

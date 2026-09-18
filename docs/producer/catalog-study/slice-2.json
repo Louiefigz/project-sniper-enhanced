@@ -568,7 +568,7 @@
   ],
   "scrubSafe": true,
   "selfContained": false,
-  "fit": "upgrade:jaden-shout-lockup",
+  "fit": "upgrade:punch-shout-lockup",
   "quality": "clean - compact, deterministic fit",
   "aspectFlex": "9:16-ok",
   "port": "P1 - punch title with impact shake; note it always self-exits (whip up), never holds"
@@ -696,7 +696,7 @@
   ],
   "scrubSafe": true,
   "selfContained": true,
-  "fit": "upgrade:nateherk-pipeline hand-drawn variant",
+  "fit": "upgrade:module-pipeline hand-drawn variant",
   "quality": "clean - pitfalls documented, sequenced build",
   "aspectFlex": "16:9-only",
   "port": "P1 - process-flow cutaway in whiteboard register; fits cream brand better than dark family"
@@ -1176,7 +1176,7 @@
   "fit": "upgrade:glass-lower-third style variant",
   "quality": "mixed - copy hardcoded",
   "aspectFlex": "16:9-only",
-  "port": "P1 - part of lt style pack; pairs with nateherk dark family"
+  "port": "P1 - part of lt style pack; pairs with module dark family"
  },
  {
   "name": "lt-kicker-name",

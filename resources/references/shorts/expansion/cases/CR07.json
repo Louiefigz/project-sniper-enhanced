@@ -1,0 +1,274 @@
+{
+  "id": "CR07",
+  "version": "2026-09-17.1",
+  "title": "Problem, solution, idea, angles — then back to the speaker",
+  "scope": "original-reference-rendered-from-project-sniper-templates",
+  "message": "A single diagram that develops from the problem to the options, so the viewer holds the whole argument in one picture.",
+  "arc": "problem -> solution -> the idea -> angles on it -> return to the speaker",
+  "execution": "Build the nodes in the order the speaker says them; light only the node being discussed; return to the presenter when the diagram is complete.",
+  "avoid": "Showing every node at once, or leaving the diagram up after the speaker moves on.",
+  "typography": "Short node labels; one headline; no paragraph text in nodes.",
+  "catalog": [
+    "module-pipeline",
+    "module-rail",
+    "list-build"
+  ],
+  "beats": [
+    {
+      "id": "CR07-B01",
+      "message_paraphrase": "Name the problem",
+      "composition": "module-pipeline",
+      "catalog_candidates": [
+        "module-pipeline"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/expansion/frames/CR07-B01-0.jpg",
+          "sha256": "a442325e0fa38ca78b1fa8ec85a13c173ab669197ff457229b26207ccab76826",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 0.6,
+          "render": {
+            "composition": "templates/motion/compositions/module-pipeline.html",
+            "variables": {
+              "headlineLines": "Why posts get|no replies",
+              "nodes": "1~Ends on a statement|2~Ask one question|3~Make it answerable|4~Reply within the hour",
+              "activeIndex": 1
+            },
+            "time_s": 0.6
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/CR07-B01-1.jpg",
+          "sha256": "fcf46f67216f18206436acea9d0d24188b84523ec781bc567487350443a4fac0",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 1.4,
+          "render": {
+            "composition": "templates/motion/compositions/module-pipeline.html",
+            "variables": {
+              "headlineLines": "Why posts get|no replies",
+              "nodes": "1~Ends on a statement|2~Ask one question|3~Make it answerable|4~Reply within the hour",
+              "activeIndex": 1
+            },
+            "time_s": 1.4
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/CR07-B01-2.jpg",
+          "sha256": "40a9e19bc5f26a174d9d9089bc83d7457c4c26600e0ad408db83777bee778b29",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 2.2,
+          "render": {
+            "composition": "templates/motion/compositions/module-pipeline.html",
+            "variables": {
+              "headlineLines": "Why posts get|no replies",
+              "nodes": "1~Ends on a statement|2~Ask one question|3~Make it answerable|4~Reply within the hour",
+              "activeIndex": 1
+            },
+            "time_s": 2.2
+          }
+        }
+      ]
+    },
+    {
+      "id": "CR07-B02",
+      "message_paraphrase": "Offer the solution",
+      "composition": "module-pipeline",
+      "catalog_candidates": [
+        "module-pipeline"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/expansion/frames/CR07-B02-0.jpg",
+          "sha256": "a0030847b3ee8162b08cd6fe23db8cf12669e9a8d7853d63e33d1163ba50e861",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 2.0,
+          "render": {
+            "composition": "templates/motion/compositions/module-pipeline.html",
+            "variables": {
+              "headlineLines": "Why posts get|no replies",
+              "nodes": "1~Ends on a statement|2~Ask one question|3~Make it answerable|4~Reply within the hour",
+              "activeIndex": 2
+            },
+            "time_s": 2.0
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/CR07-B02-1.jpg",
+          "sha256": "a0030847b3ee8162b08cd6fe23db8cf12669e9a8d7853d63e33d1163ba50e861",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 2.8,
+          "render": {
+            "composition": "templates/motion/compositions/module-pipeline.html",
+            "variables": {
+              "headlineLines": "Why posts get|no replies",
+              "nodes": "1~Ends on a statement|2~Ask one question|3~Make it answerable|4~Reply within the hour",
+              "activeIndex": 2
+            },
+            "time_s": 2.8
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/CR07-B02-2.jpg",
+          "sha256": "a0030847b3ee8162b08cd6fe23db8cf12669e9a8d7853d63e33d1163ba50e861",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 3.6,
+          "render": {
+            "composition": "templates/motion/compositions/module-pipeline.html",
+            "variables": {
+              "headlineLines": "Why posts get|no replies",
+              "nodes": "1~Ends on a statement|2~Ask one question|3~Make it answerable|4~Reply within the hour",
+              "activeIndex": 2
+            },
+            "time_s": 3.6
+          }
+        }
+      ]
+    },
+    {
+      "id": "CR07-B03",
+      "message_paraphrase": "Develop the idea",
+      "composition": "module-pipeline",
+      "catalog_candidates": [
+        "module-pipeline"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/expansion/frames/CR07-B03-0.jpg",
+          "sha256": "1e53086873d6010e5a6972f4b319beee4d7b45fca1e746a5dc7305640bf8ab76",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 3.4,
+          "render": {
+            "composition": "templates/motion/compositions/module-pipeline.html",
+            "variables": {
+              "headlineLines": "Why posts get|no replies",
+              "nodes": "1~Ends on a statement|2~Ask one question|3~Make it answerable|4~Reply within the hour",
+              "activeIndex": 3
+            },
+            "time_s": 3.4
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/CR07-B03-1.jpg",
+          "sha256": "1e53086873d6010e5a6972f4b319beee4d7b45fca1e746a5dc7305640bf8ab76",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 4.2,
+          "render": {
+            "composition": "templates/motion/compositions/module-pipeline.html",
+            "variables": {
+              "headlineLines": "Why posts get|no replies",
+              "nodes": "1~Ends on a statement|2~Ask one question|3~Make it answerable|4~Reply within the hour",
+              "activeIndex": 3
+            },
+            "time_s": 4.2
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/CR07-B03-2.jpg",
+          "sha256": "1e53086873d6010e5a6972f4b319beee4d7b45fca1e746a5dc7305640bf8ab76",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 5.0,
+          "render": {
+            "composition": "templates/motion/compositions/module-pipeline.html",
+            "variables": {
+              "headlineLines": "Why posts get|no replies",
+              "nodes": "1~Ends on a statement|2~Ask one question|3~Make it answerable|4~Reply within the hour",
+              "activeIndex": 3
+            },
+            "time_s": 5.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "CR07-B04",
+      "message_paraphrase": "Add the angles, then hand back",
+      "composition": "module-pipeline",
+      "catalog_candidates": [
+        "module-pipeline"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/expansion/frames/CR07-B04-0.jpg",
+          "sha256": "3a2d9c7126f43678db55cc4f2e034440345fb244f4d47360c717e6bceaafbfc6",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 5.0,
+          "render": {
+            "composition": "templates/motion/compositions/module-pipeline.html",
+            "variables": {
+              "headlineLines": "Why posts get|no replies",
+              "nodes": "1~Ends on a statement|2~Ask one question|3~Make it answerable|4~Reply within the hour",
+              "activeIndex": 4
+            },
+            "time_s": 5.0
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/CR07-B04-1.jpg",
+          "sha256": "3a2d9c7126f43678db55cc4f2e034440345fb244f4d47360c717e6bceaafbfc6",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 6.2,
+          "render": {
+            "composition": "templates/motion/compositions/module-pipeline.html",
+            "variables": {
+              "headlineLines": "Why posts get|no replies",
+              "nodes": "1~Ends on a statement|2~Ask one question|3~Make it answerable|4~Reply within the hour",
+              "activeIndex": 4
+            },
+            "time_s": 6.2
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/CR07-B04-2.jpg",
+          "sha256": "3a2d9c7126f43678db55cc4f2e034440345fb244f4d47360c717e6bceaafbfc6",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 7.6,
+          "render": {
+            "composition": "templates/motion/compositions/module-pipeline.html",
+            "variables": {
+              "headlineLines": "Why posts get|no replies",
+              "nodes": "1~Ends on a statement|2~Ask one question|3~Make it answerable|4~Reply within the hour",
+              "activeIndex": 4
+            },
+            "time_s": 7.6
+          }
+        }
+      ]
+    }
+  ]
+}

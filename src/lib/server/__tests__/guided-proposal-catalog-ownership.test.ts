@@ -63,9 +63,9 @@ test("inherited graphics or any expanded plan cannot bypass its original depende
   }
 });
 
-test("named Caleb base-kit conflict is not erased by graphics-off", () => {
+test("named Restrained base-kit conflict is not erased by graphics-off", () => {
   const plan = previsual();
-  Object.assign(plan.target, { style: "caleb" });
+  Object.assign(plan.target, { style: "restrained" });
   assert.equal(omittedProposalCatalog(6, plan), null);
 });
 

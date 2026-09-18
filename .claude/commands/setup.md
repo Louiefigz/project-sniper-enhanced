@@ -140,7 +140,7 @@ Confirm the machine is set up in one or two sentences, then tell them how to act
 the whole point is that they **don't run a dev server**; they just ask you:
 
 > You're all set. You don't need to start any server. Just tell me what to make — for example:
-> - "Cut a Jaden-produced short from ~/Desktop/raw-footage.mp4"
+> - "Cut a Punch-produced short from ~/Desktop/raw-footage.mp4"
 > - "Clean-cut this long recording: <path to your .mp4>"
 >
 > I'll load the `producer` skill and drive the whole pipeline (ingest → gated edit plan →

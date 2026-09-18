@@ -51,7 +51,7 @@ brief** prepares the local handoff; it does not run an unattended editor. See
 | Official website | The complete corrected AI story includes 5.2 seconds of actual Claude guide scrolling. A guidance page is not a submitted AI request or successful product result. |
 | Public repository | The prior real GitHub capture contains 8 seconds/200 frames and 598 CSS pixels of movement. Its intake bridge was tested with synthetic primary material; a complete speech-supported GitHub Short remains unqualified. |
 | Creator identity | The prior Nate N26 metadata/rendition/frame chain is verified. An identicon was rejected as a portrait. A creator-focused Aaron Short remains unqualified without relevant admitted speech. |
-| Recorded product navigation | This pass exports 25.4 seconds of Nate Herk's original N21 reference: HTTP node context → open menu → select Action in an app → scroll integrations. It is a reference-import test, not Aaron's footage or a newly recorded action. No API request execution is shown. |
+| Recorded product navigation | This pass exports 25.4 seconds of Module's original N21 reference: HTTP node context → open menu → select Action in an app → scroll integrations. It is a reference-import test, not Aaron's footage or a newly recorded action. No API request execution is shown. |
 | Fresh authenticated recording | No usable authorized logged-in session was established. The existing public recorder uses a fresh session and rejects authenticated actions. A local recorder inspection produced no recording; this path remains unqualified. |
 | Unavailable sources | Prior actual 403/missing-target checks produce no promoted asset. Missing footage does not become invented UI, a simulated result or an unrelated logo. |
 

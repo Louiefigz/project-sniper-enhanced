@@ -58,7 +58,7 @@ from graphics import graphics_stage as gs
 from graphics import stage_placement as spl
 from graphics import pip_hole as phole
 from graphics import pip_takeover as pipt
-import plan_lint_nateherk as pln
+import plan_lint_module as pln
 import ingest_scan as iscan
 import plan_lint as pl
 import plan_lint_motion as plm

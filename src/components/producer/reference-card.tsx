@@ -84,7 +84,7 @@ function ProfileSummary({ reference }: { reference: ReferenceEntry }) {
       )}
       <p className="text-[11px] text-muted-foreground">
         {mode ? <>Study suggests <span className="font-medium text-foreground">{mode === "short" ? "Short" : "Long"}</span>. You still confirm it below.</> : "The study could not make a format suggestion; choose explicitly below."}
-        {known && <> Closest measured grammar: <span className="font-medium text-foreground">{known === "jadenly" ? "Jaden" : known[0].toUpperCase() + known.slice(1)}</span>.</>}
+        {known && <> Closest measured grammar: <span className="font-medium text-foreground">{known === "punch" ? "Punch" : known[0].toUpperCase() + known.slice(1)}</span>.</>}
       </p>
     </div>
   );

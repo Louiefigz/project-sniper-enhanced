@@ -39,13 +39,13 @@ export const SCOPE_LANE_DEFAULTS: Record<Scope, Record<Lane, boolean>> = {
 // MODES["short"]["pacing_<pace>"] (dashes -> underscores). Every entry here
 // MUST have a matching pacing_* profile — the tsx test parses
 // producer_config.py so a missing/renamed profile fails loudly.
-export const PACES = ["talking-head", "client-reel", "caleb", "jadenly", "angela"] as const;
+export const PACES = ["talking-head", "client-reel", "restrained", "punch", "slideware"] as const;
 export type Pace = (typeof PACES)[number];
 
 // Measured style grammars (docs/<STYLE>_STYLE.md). target.style tells the
 // auto-edit brain WHICH grammar doc to read before authoring; target.pace
 // (same name) picks the matching pacing_<style> lint profile.
-export const STYLES = ["caleb", "jadenly", "angela"] as const;
+export const STYLES = ["restrained", "punch", "slideware"] as const;
 export type Style = (typeof STYLES)[number];
 
 /** How the editor should use one measured reference without copying its IP. */
@@ -170,7 +170,7 @@ export function validateLaneOverrides(v: unknown): Partial<Record<Lane, LaneDire
 const REFERENCE_KEYS = new Set([
   "id", "title", "mode", "strategy", "targetStyle", "candidateStyleName",
 ]);
-const CLOSED_STYLE_NAMES = new Set(["caleb", "jaden", "jadenly", "angela"]);
+const CLOSED_STYLE_NAMES = new Set(["restrained", "punch", "punch", "slideware"]);
 
 function requiredReferenceText(value: unknown, field: string, maxLength: number): string {
   if (typeof value !== "string") throw new Error(`reference.${field} must be a string`);
@@ -226,7 +226,7 @@ export function validateReferenceIntent(v: unknown, expectedMode?: Mode): Refere
   }
   if (ref.strategy === "new-style" && ref.candidateStyleName &&
       CLOSED_STYLE_NAMES.has(ref.candidateStyleName.toLowerCase())) {
-    throw new Error("reference.candidateStyleName must name a style outside Caleb, Jaden, and Angela");
+    throw new Error("reference.candidateStyleName must name a style outside Restrained, Punch, and Slideware");
   }
   if (ref.strategy !== "new-style" && ref.candidateStyleName) {
     throw new Error(`reference.candidateStyleName is not allowed for strategy ${JSON.stringify(ref.strategy)}`);
@@ -446,19 +446,19 @@ export const INTENT_PRESETS: IntentPreset[] = [
   // will/wont cite the style docs; pace picks the matching pacing_<style>
   // lint profile; style tells the auto-edit brain which grammar doc to read.
   {
-    id: "caleb-light",
-    label: "Caleb light",
+    id: "restrained-light",
+    label: "Restrained light",
     mode: "short",
     scope: "light",
-    lanes: { motion: "off" }, // CALEB_STYLE §3 Z1: ZERO punch-ins/creep (3/3)
-    pace: "caleb",
-    style: "caleb",
-    music: false, // CALEB_STYLE §6 M1: 3/3 reels spectral-verified bed-free
+    lanes: { motion: "off" }, // RESTRAINED_STYLE §3 Z1: ZERO punch-ins/creep (3/3)
+    pace: "restrained",
+    style: "restrained",
+    music: false, // RESTRAINED_STYLE §6 M1: 3/3 reels spectral-verified bed-free
     will: [
-      "Whisper captions carry the reel: verbatim 1-5 word cues, white, pinned (CALEB_STYLE §4)",
+      "Whisper captions carry the reel: verbatim 1-5 word cues, white, pinned (RESTRAINED_STYLE §4)",
       "ONE thesis graphic from t=0 — hook card approximates the pinned title chip (§5, §11)",
       "Cuts only as erasers/reactions, snapped to caption-cue starts (§2: 0-cut reels are on-style)",
-      "pacing_caleb floors: a zero-cut 36s hold passes the lint (§9)",
+      "pacing_restrained floors: a zero-cut 36s hold passes the lint (§9)",
       "9:16 face-aware reframe + −14 LUFS master, TP ceiling kept (§6 M2)",
     ],
     wont: [
@@ -471,18 +471,18 @@ export const INTENT_PRESETS: IntentPreset[] = [
     ],
   },
   {
-    id: "jadenly-produced",
-    label: "Jaden produced",
+    id: "punch-produced",
+    label: "Punch produced",
     mode: "short",
     scope: "produced",
-    // Jaden's measured grammar uses hard punch cuts, never seam effects.
+    // Punch's measured grammar uses hard punch cuts, never seam effects.
     lanes: { transitions: "off" },
-    pace: "jadenly",
-    style: "jadenly",
-    music: false, // JADEN_STYLE recommends a bed; operator checkbox still owns opt-in
+    pace: "punch",
+    style: "punch",
+    music: false, // PUNCH_STYLE recommends a bed; operator checkbox still owns opt-in
     audioEnhance: { preset: "voice-rnn" },
     will: [
-      "Punch-cut engine: hard tight↔wide cuts on pivot words, ~17 visible cuts/min (JADEN_STYLE §2)",
+      "Punch-cut engine: hard tight↔wide cuts on pivot words, ~17 visible cuts/min (PUNCH_STYLE §2)",
       "Two-layer text system: whisper captions + keyword-pop lockups promoted to headroom (§3-4)",
       "Word-locked diagram/stack builds and receipts where beats earn them (§4)",
       "Hook carried by a graphic from frame ~0, not cut density (§1 H2)",
@@ -497,17 +497,17 @@ export const INTENT_PRESETS: IntentPreset[] = [
     ],
   },
   {
-    id: "angela-involved",
-    label: "Angela involved",
+    id: "slideware-involved",
+    label: "Slideware involved",
     mode: "short",
     scope: "full",
     // The style's zero-zoom/zero-seam rules are operator-visible lane intent.
     lanes: { motion: "off", transitions: "off" },
-    pace: "angela",
-    style: "angela",
-    music: false, // ANGELA_STYLE recommends a bed; operator checkbox still owns opt-in
+    pace: "slideware",
+    style: "slideware",
+    music: false, // SLIDEWARE_STYLE recommends a bed; operator checkbox still owns opt-in
     will: [
-      "Takeover-deck sections: full-frame lime-canvas graphics alternate with the talking head (ANGELA_STYLE §3 AC3)",
+      "Takeover-deck sections: full-frame lime-canvas graphics alternate with the talking head (SLIDEWARE_STYLE §3 AC3)",
       "Frame 0 fully dressed + real receipts inside the first second (§2 AH1-AH2)",
       "Cuts land ONLY at section boundaries — punctuation, not energy (§3 AC1)",
       "Dual-mode captions: whisper on footage, pill skin on lime canvas, in-place lime shouts (§5)",

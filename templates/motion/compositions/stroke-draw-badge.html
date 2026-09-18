@@ -7,12 +7,12 @@
     {"id":"atS","type":"number","label":"Draw start (s, window-relative)","default":0.2,"min":0,"max":30,"step":0.05,"unit":"s"},
     {"id":"slotX","type":"number","label":"Badge center x (normalized)","default":0.5,"min":0.05,"max":0.95,"step":0.01},
     {"id":"slotY","type":"number","label":"Badge center y (normalized)","default":0.5,"min":0.05,"max":0.95,"step":0.01},
-    {"id":"accent","type":"color","label":"Stroke/fill color (jaden lemon default)","default":"#F5E960"}
+    {"id":"accent","type":"color","label":"Stroke/fill color (punch lemon default)","default":"#F5E960"}
   ]'
 >
   <!--
-    PROJECT SNIPER · Motion template: STROKE-DRAW-BADGE (jaden pack)
-    Reference: the Jaden save-CTA move — an icon OUTLINE stroke-draws in like
+    PROJECT SNIPER · Motion template: STROKE-DRAW-BADGE (punch pack)
+    Reference: the Punch save-CTA move — an icon OUTLINE stroke-draws in like
     a marker, then the glyph FLOODS with fill; a short label lands with the
     flood. Now a reusable comp (icon+label vars) powered by the vendored GSAP
     DrawSVGPlugin (/vendor/gsap/DrawSVGPlugin.min.js, 3.14.2 — license +
@@ -27,7 +27,7 @@
         network) so DrawSVG can stroke its real <path> geometry. Non-<path>
         shapes FAIL LOUD — no fallback drawing.
       - label: OPTIONAL one-liner under the mark (heavy white grotesque +
-        black stroke, the jaden co-word skin). Empty = omitted.
+        black stroke, the punch co-word skin). Empty = omitted.
       - EMPTY-DEFAULTS LAW (G21): icon+label default EMPTY — unset renders
         NOTHING; demo content ("youtube"/"Subscribe") only when BOTH unset.
         label without icon FAILS LOUD (a badge is the mark, not bare text).
@@ -35,7 +35,7 @@
         atS (the stroke-draw band underline-circle proved, 0.4-0.5s);
         fill FLOODS over FLOOD_S=0.18s power2.in immediately after; the label
         pops AT the flood moment via M.popIn — alpha SNAP + <=2-FRAME scale
-        settle (jaden pop law, JADEN_STYLE §5.3). atS clamps so draw+flood
+        settle (punch pop law, PUNCH_STYLE §5.3). atS clamps so draw+flood
         always resolve inside the window.
       - OUT = NONE. Holds to D; the compositor clears it on the window end /
         cut ("exitOnCut": true — §5.3 THE EXIT LAW). NEVER a fade.
@@ -64,7 +64,7 @@
       }
       #sdb-root { position: relative; width: 1080px; height: 1920px; }
 
-      /* .stage OWNS the centering transform (jaden-shout-lockup pattern);
+      /* .stage OWNS the centering transform (punch-shout-lockup pattern);
          GSAP animates only the mark's paths + the label. */
       #sdb-stage {
         position: absolute;
@@ -77,7 +77,7 @@
         gap: 26px;
       }
       /* The inlined mark. Stroke + fill both ride --accent; the soft drop
-         lifts it off real footage (jaden payload treatment). */
+         lifts it off real footage (punch payload treatment). */
       #sdb-svg {
         width: 170px;
         height: 170px;
@@ -85,7 +85,7 @@
         overflow: visible;
         filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.5));
       }
-      /* Label: heavy white grotesque + black stroke (jaden co-word skin),
+      /* Label: heavy white grotesque + black stroke (punch co-word skin),
          ~2.8%H. Falls back to synthesized 700 (tokens.css embeds 400/700). */
       #sdb-label {
         font-size: 54px;
@@ -213,7 +213,7 @@
           paths.push(el);
         });
 
-        // Optional label (jaden co-word skin) — empty removes the node.
+        // Optional label (punch co-word skin) — empty removes the node.
         const labelEl = document.getElementById("sdb-label");
         const label = (vars.label == null ? "" : String(vars.label)).trim();
         if (label) labelEl.textContent = label;

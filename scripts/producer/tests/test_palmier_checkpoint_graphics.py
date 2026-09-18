@@ -212,7 +212,7 @@ class PlacementReferenceTests(unittest.TestCase):
             entries = [
                 {**_entry((50, 20)), "takeoverBase": "blur-desat"},
                 {**_entry((50, 20)), "anchor": "focus-shift"},
-                {**_entry((50, 20)), "kind": "nateherk-takeover"},
+                {**_entry((50, 20)), "kind": "module-takeover"},
             ]
             messages = ("takeoverBase", "focus-shift", "presenter PIP")
             for entry, message in zip(entries, messages):

@@ -20,7 +20,7 @@ from graphics.form_allocation import GATE_ILLEGAL_KINDS
 from graphics.template_contract import entry_errors as template_entry_errors
 from motion.zoom_pull import lint_event as lint_zoom_pull
 from graphics.pip_hole import entry_has_hole
-from plan_lint_nateherk import check_nateherk_entry
+from plan_lint_module import check_module_entry
 from plan_lint_smooth import check_smooth
 from plan_lint_visual import check_row_lands, check_variety, check_visual
 from planner.graphics_planner_longform import own_screen_cap, resolve_style
@@ -111,10 +111,10 @@ def _check_graphic_entry(entry: tuple[int, dict],
     if hold < hold_min or hold > hold_max:
         rep.error(f"{tag}: hold {hold:.2f}s outside "
                   f"[{hold_min},{hold_max}]s")
-    # Hole-comps (NATEHERK item 9, graphics/pip_hole.py) ARE wired: the
+    # Hole-comps (MODULE item 9, graphics/pip_hole.py) ARE wired: the
     # renderer fills the comp's transparent face hole with footage. The
     # speaker stays present, so they ride hold_max_s, not the takeover
-    # ceiling. Gates (longform-only + own-screen) live in plan_lint_nateherk.
+    # ceiling. Gates (longform-only + own-screen) live in plan_lint_module.
     kind = str(g.get("kind", ""))
     hole_wired = entry_has_hole(g)
     # canvas-pip-list keeps the speaker present as a PiP inset (R24) — not a
@@ -124,12 +124,12 @@ def _check_graphic_entry(entry: tuple[int, dict],
     if pip_kept:
         # GUARDRAIL: pip_takeover.py (speaker-inset renderer) is unwired → empty
         # face hole. Block until wired; author a full-frame statement-card
-        # instead — or a hole-comp (nateherk-takeover), whose static face
+        # instead — or a hole-comp (module-takeover), whose static face
         # fill IS wired (graphics/pip_hole.py).
         rep.error(f"{tag}: needs pip_takeover (canvas-pip-list/needsPip) but that "
                   "renderer is unwired — renders an empty speaker hole; use a "
                   "full-frame statement-card")
-    check_nateherk_entry(tag, g, mode, rep)
+    check_module_entry(tag, g, mode, rep)
     if anchor == "own-screen" and hold > takeover_max and not (pip_kept or hole_wired):
         rep.error(f"{tag}: own-screen takeover {hold:.2f}s exceeds "
                   f"{takeover_max}s ({mode})")
@@ -177,7 +177,7 @@ def _check_graphic_entry(entry: tuple[int, dict],
 
 
 def _check_module_lands(tag: str, g: dict, hold: float, rep: Any) -> None:
-    """``spec.moduleLands`` — narration-paced module builds (NATEHERK_STUDY.md
+    """``spec.moduleLands`` — narration-paced module builds (MODULE_STUDY.md
     §5 item 4): the comp schedules each module's build at its land, so lands
     must be finite, strictly increasing, >= the spacing floor apart, and inside
     the hold. Absent key = no build schedule = no checks (additive field)."""
@@ -387,7 +387,7 @@ def check_graphics_track(plan: dict, out_dur: float, mode: str, rep: Any) -> Non
 
 def _check_exit_grammar(plan: dict, graphics: list[dict], mode: str,
                         rep: Any) -> None:
-    """``spec.exit`` vocabulary + the T-D blur-recede clamp rule (NATEHERK
+    """``spec.exit`` vocabulary + the T-D blur-recede clamp rule (MODULE
     §5 item 2). The math lives in graphics.exit_on_cut.exit_grammar_issues —
     the same module the renderers clamp through, so lint can't drift."""
     entries = [(i, g) for i, g in enumerate(graphics)
@@ -511,8 +511,8 @@ def _semantic_zooms(windows: list[dict], plan: dict, rep: Any) -> list[dict]:
 
 def _punch_zoom_max(plan: dict, mode: str) -> float:
     """Style-aware punch ceiling (G17). A pace profile may carry
-    ``punch_zoom_max`` (``pacing_jadenly``: 1.45 — the measured C5 step band
-    tops out at x1.44, DaG @17.0, JADEN_STYLE.md §2/§10 G17); every other
+    ``punch_zoom_max`` (``pacing_punch``: 1.45 — the measured C5 step band
+    tops out at x1.44, DaG @17.0, PUNCH_STYLE.md §2/§10 G17); every other
     pace keeps the doctrine default ``MOTION['punch_in']['zoom_max']``."""
     profile = _pacing_profile(plan.get("target") or {}, mode) or {}
     return float(profile.get("punch_zoom_max", MOTION["punch_in"]["zoom_max"]))
@@ -670,7 +670,7 @@ def check_motion(plan: dict, out_dur: float, mode: str, rep: Any) -> None:
     # LL-011 (operator doctrine, mandatory): progressive point reveal —
     # multi-item list comps on longform need per-item word-locked lands.
     check_row_lands(plan, mode, rep)
-    # LL-016 (NATEHERK_CARDS §2): produced/full longform fails on consecutive
+    # LL-016 (MODULE_CARDS §2): produced/full longform fails on consecutive
     # same-kind windows or a proportional distinct-kind floor miss.
     check_variety(plan, mode, rep, out_dur)
 
@@ -742,7 +742,7 @@ def check_transitions(plan: dict, out_dur: float, mode: str, rep: Any) -> None:
 
 
 def check_word_lock(plan: dict, words_out: list[dict], rep: Any) -> None:
-    """WARN on seams sitting off the kept-word grid (NATEHERK_STUDY.md T-G).
+    """WARN on seams sitting off the kept-word grid (MODULE_STUDY.md T-G).
 
     Every transition in the reference lands on a narration phrase boundary
     (4/4 VTT spot checks), so ``transitions[].outTime`` and
@@ -769,7 +769,7 @@ def check_word_lock(plan: dict, words_out: list[dict], rep: Any) -> None:
             rep.warn(f"{tag} {float(t):g}s sits {off * 1000:.0f}ms from the "
                      f"nearest kept-word boundary (> {tol * 1000:.0f}ms) — "
                      "word-lock the seam (planner.word_lock.snap_to_word_"
-                     "boundary; NATEHERK_STUDY T-G)")
+                     "boundary; MODULE_STUDY T-G)")
 
 
 # Editorial bounds for the plan-level ``baselineLook`` key (R16: the pro's
@@ -913,13 +913,13 @@ def _pacing_profile(target: dict, mode: str) -> dict | None:
     ``target.pace`` names a tempo profile, mapped to the mode's
     ``pacing_<pace>`` dict (dashes -> underscores): ``"talking-head"`` is the
     slow continuous-take profile (a yapping single-speaker short paces like
-    long-form, not a fast produced reel); ``"jadenly"`` is the locked-tripod
-    punch-cut profile (scripts/producer/docs/findings/JADEN_STYLE.md — ~17
-    visible cuts/min, 12s still ceiling, states-driven cadence); ``"caleb"``
-    is the SIMPLE-CUTS restraint pole (docs/studies/CALEB_STYLE.md — 0-cut reels are
+    long-form, not a fast produced reel); ``"punch"`` is the locked-tripod
+    punch-cut profile (scripts/producer/docs/findings/PUNCH_STYLE.md — ~17
+    visible cuts/min, 12s still ceiling, states-driven cadence); ``"restrained"``
+    is the SIMPLE-CUTS restraint pole (docs/studies/RESTRAINED_STYLE.md — 0-cut reels are
     on-style, retention carried by verbatim caption churn, floors
-    effectively off); ``"angela"`` is the takeover-alternation profile
-    (docs/studies/ANGELA_STYLE.md — cuts are section punctuation, zero punch-ins,
+    effectively off); ``"slideware"`` is the takeover-alternation profile
+    (docs/studies/SLIDEWARE_STYLE.md — cuts are section punctuation, zero punch-ins,
     graphics-carried cadence with a relaxed hook front-load). An
     absent/unknown pace uses the mode's default fast
     floor (unchanged legacy behavior). Pace is a separate axis from treatment:

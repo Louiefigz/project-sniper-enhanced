@@ -17,7 +17,7 @@ scrolling. Use supplied B-roll first when it already demonstrates the point.
 treatment. A deliberately simple presenter-led clip stays restrained. For
 produced edits that call for proof, examples and split-screen storytelling,
 search real B-roll and assets first; add illustrations for what those assets
-cannot usefully show. A Caleb Ralston or Nate Herk reference informs the brief,
+cannot usefully show. A Restrained Ralston or Module reference informs the brief,
 not an automatic preset or a reason to disregard the selected intensity.
 Preserve useful existing illustrations when revising a few evidence beats.
 

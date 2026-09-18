@@ -11,7 +11,7 @@ Independent audit on September 10, 2026, coordinated with the task
 “Improve Sniper Shorts direction.” Snapshot at 23:34 UTC; that task remains
 active. This audit changes documentation only and does not resume production.
 
-**Later research addendum:** the requested [Caleb/Lewis expansion](../studies/shorts-visual-playbook/authentic-expansion/README.md)
+**Later research addendum:** the requested [Restrained/Lewis expansion](../studies/shorts-visual-playbook/authentic-expansion/README.md)
 adds four sources each, bringing the current September cohort to seven each.
 Its [Format foundations guide](../studies/shorts-visual-playbook/FORMAT_FOUNDATIONS.md)
 teaches conditional format choices, pane geometry, text roles and earned exits.

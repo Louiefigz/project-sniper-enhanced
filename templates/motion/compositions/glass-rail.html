@@ -30,10 +30,10 @@
     {"id":"rowLands","type":"string","label":"Progressive point reveal (LL-011): comp-relative land seconds, one per ACTIVE row, pipe/comma-separated — each row appears word-locked when the speaker reaches it; empty = legacy stagger","default":""},
     {"id":"side","type":"enum","label":"Anchor side (opposite the subject)","default":"left","options":[{"value":"left","label":"Left"},{"value":"right","label":"Right"}]},
     {"id":"accent","type":"color","label":"Accent color (chip 1 + eyebrow)","default":"#054BC9"},
-    {"id":"build","type":"enum","label":"Build grammar","default":"stamp","options":[{"value":"stamp","label":"Stamp (back.out slide, unchanged)"},{"value":"skeleton-first","label":"Skeleton-first (row shells before text — NATEHERK rank 2)"}]},
-    {"id":"exit","type":"enum","label":"Exit","default":"fade","options":[{"value":"fade","label":"Fade + drift (unchanged)"},{"value":"blur-recede","label":"Blur-recede 0.15s (graphics layer only — NATEHERK T-D)"}]},
-    {"id":"entrance","type":"enum","label":"Entrance","default":"slide","options":[{"value":"slide","label":"Slide (unchanged)"},{"value":"rail-push","label":"Rail-push (field width-grows 0->33%W beside the live face — NATEHERK T-B; LONGFORM-ONLY)"}]},
-    {"id":"theme","type":"enum","label":"Skin","default":"glass","options":[{"value":"glass","label":"Glass (unchanged)"},{"value":"light","label":"Light (cream #f0f0e6 field, ink type — NATEHERK T-B light-in)"}]}
+    {"id":"build","type":"enum","label":"Build grammar","default":"stamp","options":[{"value":"stamp","label":"Stamp (back.out slide, unchanged)"},{"value":"skeleton-first","label":"Skeleton-first (row shells before text — MODULE rank 2)"}]},
+    {"id":"exit","type":"enum","label":"Exit","default":"fade","options":[{"value":"fade","label":"Fade + drift (unchanged)"},{"value":"blur-recede","label":"Blur-recede 0.15s (graphics layer only — MODULE T-D)"}]},
+    {"id":"entrance","type":"enum","label":"Entrance","default":"slide","options":[{"value":"slide","label":"Slide (unchanged)"},{"value":"rail-push","label":"Rail-push (field width-grows 0->33%W beside the live face — MODULE T-B; LONGFORM-ONLY)"}]},
+    {"id":"theme","type":"enum","label":"Skin","default":"glass","options":[{"value":"glass","label":"Glass (unchanged)"},{"value":"light","label":"Light (cream #f0f0e6 field, ink type — MODULE T-B light-in)"}]}
   ]'
 >
   <!--
@@ -63,15 +63,15 @@
         composites identically). Icon slots are emoji-FREE (real marks only, R12).
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
         rewrites it per window; --variables never sets it — see stat-card note).
-      - NATEHERK opt-ins (docs/studies/NATEHERK_STUDY.md; defaults keep the build
+      - MODULE opt-ins (docs/studies/MODULE_STUDY.md; defaults keep the build
         byte-identical): build:"skeleton-first" — each row's glass SHELL+chip
         opacity-ramps at its land, its title/sub TEXT ramps +SKELETON_GAP_S
         (0.35s) later, in place (rank 2 / T-C layer 4: containers before
         text); eyebrow becomes an in-place opacity ramp. exit:"blur-recede" —
         the rail (an alpha layer; the face below stays sharp) blurs+fades+
         recedes over the final EXIT_BLUR_S (0.15s) instead of the fade (T-D).
-      - RAIL-PUSH entrance (NATEHERK §5 item 8, T-B 13.35->13.72; LONGFORM
-        ONLY — plan_lint_nateherk ERRORs it on shorts, operator adjudication
+      - RAIL-PUSH entrance (MODULE §5 item 8, T-B 13.35->13.72; LONGFORM
+        ONLY — plan_lint_module ERRORs it on shorts, operator adjudication
         2026-07-10): entrance:"rail-push" replaces the whole build — a field
         GROWS from the anchored edge 0 -> 33%W (RAIL_PUSH_S = 0.33s,
         power2.out — the measured "fastest first 3 frames"), the live video
@@ -233,7 +233,7 @@
         white-space: nowrap;
       }
 
-      /* ---- RAIL-PUSH field (NATEHERK T-B): grows from the anchored edge
+      /* ---- RAIL-PUSH field (MODULE T-B): grows from the anchored edge
          0 -> 33%W (633.6px -> 634 even); overflow-hidden so the pinned,
          fixed-width stage inside is REVEALED by the grow, never squished. */
       #rail-field {
@@ -255,7 +255,7 @@
       #rail-field .row-sub { font-size: 22px; }
       #rail-field .chip { width: 60px; height: 60px; font-size: 30px; border-radius: 16px; }
 
-      /* ---- LIGHT skin (NATEHERK T-B "light-in": cream field, ink type,
+      /* ---- LIGHT skin (MODULE T-B "light-in": cream field, ink type,
          hairline white module rows, mono ink chips — tokens.css item 8).
          The cream paints the FIELD only; a classic-entrance light rail keeps
          a transparent stage (rows restyle, no cream panel). */
@@ -385,7 +385,7 @@
         const dir = side === "right" ? 1 : -1;
         if (side === "right") document.getElementById("rail-stage").classList.add("side-right");
 
-        // NATEHERK item 8 — rail-push entrance + light skin. The field is
+        // MODULE item 8 — rail-push entrance + light skin. The field is
         // created ONLY for rail-push (the default DOM stays byte-identical);
         // it wraps the stage so the 0->33%W width-grow REVEALS the content.
         const railPush = String(vars.entrance) === "rail-push";
@@ -485,7 +485,7 @@
           }
         }
 
-        // NATEHERK T-B rail-push constants (frame-verified vs the study:
+        // MODULE T-B rail-push constants (frame-verified vs the study:
         // grow 0->33%W in ~330ms power-out; headline ghost->ink from ~65% of
         // the grow; rows land +250ms container / +400ms text after it).
         const RAIL_PUSH_S = 0.33;
@@ -515,7 +515,7 @@
           // Eyebrow header lands first, then rows stamp in top->bottom (sliding
           // in from the anchored side — mirrored when side="right"). In the
           // skeleton-first build the eyebrow is an in-place opacity ramp
-          // (NATEHERK rank 4 — text never travels).
+          // (MODULE rank 4 — text never travels).
           if (ebText) {
             if (skeleton) {
               M.textRamp(tl, eyebrow, 0);
@@ -529,7 +529,7 @@
             const at = rowLands ? rowLands[i] : 0.18 + i * STAGGER;
             const land = Math.min(at, Math.max(0, D - 0.6));
             if (skeleton) {
-              // NATEHERK rank 2 / T-C layer 4: the glass shell + chip land
+              // MODULE rank 2 / T-C layer 4: the glass shell + chip land
               // first; the row's TEXT ramps in place SKELETON_GAP_S later.
               M.skeletonFirst(tl, a.row, a.body, { at: land });
               return;
@@ -542,7 +542,7 @@
           });
         }
 
-        // Exit: blur-recede (NATEHERK T-D — the rail is an alpha layer, so
+        // Exit: blur-recede (MODULE T-D — the rail is an alpha layer, so
         // only the graphics blur/fade; the face below stays sharp) or the
         // classic fade — either ends exactly at D (timeline == render length).
         // rail-push exits the FIELD (the cream must never outlive the stage).

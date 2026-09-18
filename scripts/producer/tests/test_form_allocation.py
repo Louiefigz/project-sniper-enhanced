@@ -131,10 +131,10 @@ class FormAllocationTests(unittest.TestCase):
                   "compatibleForms": ["step-sequence", "resolved-checklist"]}
                  for index, beat_id in enumerate(("one", "two"))]
         decisions = [{"beatId": row["beatId"], "decision": "graphic",
-                      "kind": "nateherk-rail",
+                      "kind": "module-rail",
                       "informationForm": "step-sequence"} for row in beats]
         result = assess_profile_form_reuse(
-            beats, decisions, "nateherk-editorial-v1")
+            beats, decisions, "module-editorial-v1")
         self.assertTrue(result["avoidableReuse"], result)
         self.assertEqual(result["maximumFeasibleDistinctForms"], 2)
         self.assertTrue(result["replacementWitnesses"], result)

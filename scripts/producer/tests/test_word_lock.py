@@ -1,4 +1,4 @@
-"""Word-locked seams (NATEHERK_STUDY T-G / §5 item 5).
+"""Word-locked seams (MODULE_STUDY T-G / §5 item 5).
 
 ``planner/word_lock.py``: snap transitions outTimes + graphic outStarts onto
 kept-word boundaries; ``plan_lint_motion.check_word_lock`` WARNs on seams

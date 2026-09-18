@@ -255,7 +255,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--reference-id", required=True)
     parser.add_argument("--mode", required=True, choices=("short", "longform"))
     parser.add_argument("--strategy", required=True, choices=STRATEGIES)
-    parser.add_argument("--target-style", choices=("caleb", "jadenly", "angela"))
+    parser.add_argument("--target-style", choices=("restrained", "punch", "slideware"))
     return parser.parse_args()
 
 

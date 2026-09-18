@@ -21,15 +21,15 @@ class StudioCompDependencyTests(unittest.TestCase):
     """Use actual native pipeline code plus isolated negative dependency cases."""
 
     def test_real_pipeline_is_inlined_and_rekeyed_for_each_instance(self) -> None:
-        html = (MOTION_ROOT / 'compositions/nateherk-pipeline.html').read_text()
-        source = parse_source_comp('nateherk-pipeline', html)
+        html = (MOTION_ROOT / 'compositions/module-pipeline.html').read_text()
+        source = parse_source_comp('module-pipeline', html)
         self.assertTrue(source.uses_motion_tokens)
-        for instance in ('gfx-04-nateherk-pipeline', 'gfx-51-nateherk-pipeline'):
+        for instance in ('gfx-04-module-pipeline', 'gfx-51-module-pipeline'):
             result = build_instance(source, InstancePlan(instance,
                 {'headlineLines': 'The actual plan', 'nodes': '01~PROMPT|02~OUTPUT'}, 5))
-            self.assertNotIn('src="/nateherk-pipeline.js"', result.html)
+            self.assertNotIn('src="/module-pipeline.js"', result.html)
             self.assertIn('nplRenderer.boot();', result.html)
-            self.assertNotIn('__timelines["nateherk-pipeline"]', result.html)
+            self.assertNotIn('__timelines["module-pipeline"]', result.html)
             self.assertEqual(result.html.count('__timelines["' + instance + '"]'), 2)
             self.assertIn('src="../assets/vendor/motion-tokens.js"', result.html)
 
@@ -65,7 +65,7 @@ class StudioCompDependencyTests(unittest.TestCase):
         self.assertEqual(run.call_args.args[0].stdin_text, '')
 
     def test_duration_binding_covers_inline_and_external_catalog_code(self) -> None:
-        for kind in ('statement-card', 'avatar-bio-card', 'nateherk-pipeline'):
+        for kind in ('statement-card', 'avatar-bio-card', 'module-pipeline'):
             source = parse_source_comp(kind, (MOTION_ROOT / 'compositions' / (kind + '.html')).read_text())
             built = build_instance(source, InstancePlan('gfx-20-' + kind, {}, 7))
             self.assertIn('root.closest("[data-composition-id]").dataset.duration', built.html)
@@ -100,9 +100,9 @@ process.stdout.write(JSON.stringify([mounted, edited, eval(expression)]));
     def test_remote_traversal_missing_and_module_scripts_fail_closed(self) -> None:
         snippets = ['<script src="https://example.invalid/x.js"></script>',
             '<script src="/../secret.js"></script>', '<script src="/missing-file.js"></script>',
-            '<script src="/nateherk-pipeline.js" async></script>',
-            '<script src="/nateherk-pipeline.js" src="/other.js"></script>',
-            '<script type="module" src="/nateherk-pipeline.js"></script>']
+            '<script src="/module-pipeline.js" async></script>',
+            '<script src="/module-pipeline.js" src="/other.js"></script>',
+            '<script type="module" src="/module-pipeline.js"></script>']
         for snippet in snippets:
             with self.subTest(snippet=snippet), self.assertRaises(StudioProjectError):
                 inline_local_body_scripts(snippet)

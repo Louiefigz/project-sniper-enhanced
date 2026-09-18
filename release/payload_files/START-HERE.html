@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project Sniper — Start Here</title>
+<link rel="stylesheet" href="manual/manual.css">
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <p class="kicker">Project Sniper</p>
+  <h1>Start here</h1>
+  <p class="lede">A video editor that runs on your Mac. You describe the result in
+  plain language; it cuts, captions, adds graphics and renders a finished video —
+  and gives you the editable project behind it.</p>
+</header>
+
+<div class="warn">
+<p><strong>This copy is a release candidate, not a finished product.</strong> It has not
+passed its installation test on a clean Mac, its full-length and Short output tests,
+or its delivery test. The licence terms in this package are a draft and are not in
+force. Read <code>RELEASE.json</code> for this build's exact status, and
+<code>PENDING-OWNER-DECISIONS.txt</code> for what is still unsettled.</p>
+</div>
+
+<h2>Three steps</h2>
+<ol>
+  <li><strong>Check what you have.</strong> A Mac with Apple silicon, Node 22+,
+  Python 3.11+, Homebrew <code>ffmpeg</code> and <code>whisper-cpp</code>, and a
+  Codex <em>or</em> Claude subscription you already pay for. The full list, with
+  what costs money, is in <a href="manual/index.html">What Sniper is</a>.</li>
+  <li><strong>Install.</strong> Open Terminal in this folder and run
+  <code>install/install.command</code> (or double-click it in Finder). It installs
+  everything into this folder's own <code>runtime/</code> directory and does not
+  change your existing Node, Python, Codex or Claude setup. Step-by-step:
+  <a href="manual/install.html">Install and first launch</a>.</li>
+  <li><strong>Make your first edit.</strong>
+  <a href="manual/first-edits.html">Your first three edits</a> walks a short sample,
+  then a full-length video, then a Short from your own recording.</li>
+</ol>
+
+<h2>The manual</h2>
+<ol>
+  <li><a href="manual/index.html">What Sniper is, what it includes, what it needs</a></li>
+  <li><a href="manual/install.html">Install, first launch, and signing in to Codex or Claude</a></li>
+  <li><a href="manual/first-edits.html">Your first three edits</a></li>
+  <li><a href="manual/directing.html">Directing the edit: scope, lanes, style, references</a></li>
+  <li><a href="manual/revisions.html">Asking for a change, and not losing work</a></li>
+  <li><a href="manual/review-and-studio.html">Reviewing the video and opening the editable project</a></li>
+  <li><a href="manual/finishing.html">Finishing somewhere else (optional)</a></li>
+  <li><a href="manual/troubleshooting.html">When something goes wrong</a></li>
+  <li><a href="manual/privacy.html">What leaves your Mac, and what never does</a></li>
+  <li><a href="manual/license-and-updates.html">Licence, updates, backup and uninstall</a></li>
+</ol>
+
+<h2>The commands, in one place</h2>
+<table>
+  <tr><th>Do this</th><th>Run this</th></tr>
+  <tr><td>Install, or resume an interrupted install</td><td><code>install/install.command</code></td></tr>
+  <tr><td>Check the install and see exactly what is wrong</td><td><code>install/doctor.command</code></td></tr>
+  <tr><td>Start the app</td><td><code>install/start.command</code></td></tr>
+  <tr><td>Stop the app</td><td><code>install/stop.command</code></td></tr>
+  <tr><td>Make a support bundle to send</td><td><code>install/diagnostics.command</code></td></tr>
+  <tr><td>Free up render cache space</td><td><code>install/clean-caches.command</code></td></tr>
+  <tr><td>Remove the install (keeps your videos)</td><td><code>install/uninstall.command</code></td></tr>
+</table>
+
+<footer class="foot">
+  <p>This manual is the whole manual — everything is in this folder and works offline.
+  Nothing here links to a website you need to log in to.</p>
+</footer>
+
+</div>
+</body>
+</html>

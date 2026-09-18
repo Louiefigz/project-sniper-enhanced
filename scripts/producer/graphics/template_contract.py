@@ -47,12 +47,12 @@ _VARIABLES_RE = re.compile(
 _ROOT_RE = re.compile(r'<[^>]*data-composition-id="[^"]*"[^>]*>')
 _DIM_RE = re.compile(r'data-(width|height)="(\d+)"')
 _STATEMENT_KIND = "statement-card"
-_VARIANTS = ("classic", "nateherk")
-# Nateherk-only statement variables.  The MEASURED catalog declares all three
+_VARIANTS = ("classic", "module")
+# Module-only statement variables.  The MEASURED catalog declares all three
 # with empty-string defaults, and an authoring surface that must round-trip
 # every declared default key (guided candidate compilation) therefore has to
 # emit them.  An exact empty string carries no content and drops nothing, so
-# only a populated value is a real classic/nateherk grammar collision.
+# only a populated value is a real classic/module grammar collision.
 _CLASSIC_UNREAD_KEYS = ("headlineLines", "statements", "statementLands")
 
 
@@ -113,12 +113,12 @@ def _classic_errors(spec: dict) -> list[str]:
     return errors
 
 
-def _nateherk_source_errors(spec: dict) -> tuple[list[str], str | None]:
+def _module_source_errors(spec: dict) -> tuple[list[str], str | None]:
     sources = [key for key in ("text", "headlineLines", "statements")
                if _nonempty(spec.get(key))]
     errors: list[str] = []
     if len(sources) != 1:
-        errors.append("nateherk requires exactly one explicit content source: "
+        errors.append("module requires exactly one explicit content source: "
                       "spec.text, spec.headlineLines, or spec.statements")
     unused = [key for key in ("text", "headlineLines", "statements")
               if key in spec and key not in sources]
@@ -128,8 +128,8 @@ def _nateherk_source_errors(spec: dict) -> tuple[list[str], str | None]:
     return errors, sources[0] if len(sources) == 1 else None
 
 
-def _nateherk_errors(spec: dict, duration: float | None) -> list[str]:
-    errors, source = _nateherk_source_errors(spec)
+def _module_errors(spec: dict, duration: float | None) -> list[str]:
+    errors, source = _module_source_errors(spec)
     if spec.get("splitText") in (True, "true", "True", 1):
         errors.append("spec.splitText is classic-only")
     if source == "headlineLines":
@@ -164,13 +164,13 @@ def _statement_sequence_errors(spec: dict, duration: float | None) -> list[str]:
 
 
 def statement_card_errors(entry: dict) -> list[str]:
-    """Validate the mutually exclusive classic/nateherk content grammars."""
+    """Validate the mutually exclusive classic/module content grammars."""
     spec = entry.get("spec")
     if not isinstance(spec, dict):
         return ["spec must be an object"]
     variant = spec.get("variant")
     if variant not in _VARIANTS:
-        return ["spec.variant must be explicitly 'classic' or 'nateherk'; "
+        return ["spec.variant must be explicitly 'classic' or 'module'; "
                 "template defaults are not planning intent"]
     duration = None
     try:
@@ -178,7 +178,7 @@ def statement_card_errors(entry: dict) -> list[str]:
     except (KeyError, TypeError, ValueError):
         pass
     return _classic_errors(spec) if variant == "classic" else \
-        _nateherk_errors(spec, duration)
+        _module_errors(spec, duration)
 
 
 def planned_copy(entry: dict, comp_html: str | None = None) -> list[str]:

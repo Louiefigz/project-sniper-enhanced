@@ -22,15 +22,15 @@ def _pipeline_errors(entry: dict, spec: dict, layout: str) -> list[str]:
     label = "upper" if layout == "caption-safe-upper-v1" else "teaching"
     errors = []
     if not 2 <= len(nodes) <= 6:
-        errors.append(f"nateherk-pipeline {label} layout requires two to six explicit nodes; never drop copy")
+        errors.append(f"module-pipeline {label} layout requires two to six explicit nodes; never drop copy")
     presenter = spec.get("presenterFrame", False)
     if entry.get("anchor") != "own-screen" or (presenter is not False and presenter != "false"):
-        errors.append(f"nateherk-pipeline {label} layout requires own-screen without a presenter hole")
+        errors.append(f"module-pipeline {label} layout requires own-screen without a presenter hole")
     exit_kind = spec.get("exit", "hold")
     if label == "upper" and exit_kind != "hold":
-        errors.append("nateherk-pipeline upper layout requires hold exit; blurred paint is unqualified")
+        errors.append("module-pipeline upper layout requires hold exit; blurred paint is unqualified")
     if label == "teaching" and exit_kind not in ("hold", "blur-recede"):
-        errors.append("nateherk-pipeline teaching layout requires hold or blur-recede exit")
+        errors.append("module-pipeline teaching layout requires hold or blur-recede exit")
     return errors
 
 
@@ -44,10 +44,10 @@ def native_layout_errors(entry: dict, spec: dict) -> list[str]:
     """
     kind = entry.get("kind")
     layout = spec.get("layout", "full-canvas")
-    if kind not in ("agenda-slide", "nateherk-pipeline") or layout == "full-canvas":
+    if kind not in ("agenda-slide", "module-pipeline") or layout == "full-canvas":
         return []
     supported = ["caption-safe-upper-v1"]
-    if kind == "nateherk-pipeline":
+    if kind == "module-pipeline":
         supported.append("teaching-full-width-v1")
     if layout not in supported:
         return [f"{kind} spec.layout must name an explicit supported native layout"]

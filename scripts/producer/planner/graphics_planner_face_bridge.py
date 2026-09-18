@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Face-bridge longform retarget for the Nate Herk editorial profile.
+"""Face-bridge longform retarget for the Module editorial profile.
 
 The generic proposer still discovers transcript moments.  This module prevents
 those moments from becoming floating glass widgets: every kept candidate is
@@ -12,28 +12,28 @@ from __future__ import annotations
 from planner import graphics_planner_style as overlay_rich
 
 _CREAM = {
-    "glass-rail": "nateherk-rail",
-    "whiteboard-list": "nateherk-rail",
-    "list-build": "nateherk-rail",
-    "glass-lower-third": "nateherk-rail",
-    "nateherk-rail": "nateherk-rail",
-    "nateherk-bullet-bars": "nateherk-bullet-bars",
+    "glass-rail": "module-rail",
+    "whiteboard-list": "module-rail",
+    "list-build": "module-rail",
+    "glass-lower-third": "module-rail",
+    "module-rail": "module-rail",
+    "module-bullet-bars": "module-bullet-bars",
 }
 _DARK = {
-    "fragment-payoff": "nateherk-takeover",
-    "kinetic-quote-wide": "nateherk-takeover",
-    "section-takeover": "nateherk-takeover",
-    "statement-card": "nateherk-takeover",
-    "whiteboard-map": "nateherk-pipeline",
-    "agenda-slide": "nateherk-pipeline",
-    "stat-card": "nateherk-scoreboard",
-    "widget-gauge": "nateherk-scoreboard",
-    "versus-split": "nateherk-takeover",
-    "whiteboard-connector": "nateherk-ledger-dark",
-    "nateherk-takeover": "nateherk-takeover",
-    "nateherk-ledger-dark": "nateherk-ledger-dark",
-    "nateherk-scoreboard": "nateherk-scoreboard",
-    "nateherk-pipeline": "nateherk-pipeline",
+    "fragment-payoff": "module-takeover",
+    "kinetic-quote-wide": "module-takeover",
+    "section-takeover": "module-takeover",
+    "statement-card": "module-takeover",
+    "whiteboard-map": "module-pipeline",
+    "agenda-slide": "module-pipeline",
+    "stat-card": "module-scoreboard",
+    "widget-gauge": "module-scoreboard",
+    "versus-split": "module-takeover",
+    "whiteboard-connector": "module-ledger-dark",
+    "module-takeover": "module-takeover",
+    "module-ledger-dark": "module-ledger-dark",
+    "module-scoreboard": "module-scoreboard",
+    "module-pipeline": "module-pipeline",
 }
 
 
@@ -46,7 +46,7 @@ def _retarget_candidate(candidate: dict) -> dict:
     if prior in _DARK:
         kind = _DARK[prior]
         spec = {**(candidate.get("spec") or {})}
-        if kind != "nateherk-takeover":
+        if kind != "module-takeover":
             spec["presenterFrame"] = True
         return {**candidate, "kind": kind, "anchor": "own-screen",
                 "spec": spec, "needsCopy": True,

@@ -38,7 +38,7 @@ Learning-loop rules encoded from the c0679 showpiece QC panel findings
   set membership — no regex semantics) but whose kind sits outside the
   comparison family ERRORs for produced/full longform and WARNs elsewhere.
   Needs ``words_out`` — wired in ``plan_lint.lint`` beside ``check_word_lock``.
-* ``check_variety`` (LL-016, variety doctrine — NATEHERK_CARDS §2): tokens
+* ``check_variety`` (LL-016, variety doctrine — MODULE_CARDS §2): tokens
   repeat, layouts don't. Produced/full longform ERRORs on adjacent repeats and
   fixed+proportional local/whole-plan floors (layers/chains exempt); lighter
   scopes WARN only on repeats.

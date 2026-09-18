@@ -1,6 +1,6 @@
 # Audit evidence
 
-Source repository: [hyperframes-student-kit](https://github.com/nateherkai/hyperframes-student-kit/tree/b1afdb1dcbcad39dd27638ea699f132fe44ce6df).
+Source repository: [hyperframes-student-kit](https://github.com/moduleai/hyperframes-student-kit/tree/b1afdb1dcbcad39dd27638ea699f132fe44ce6df).
 Pinned commit: `b1afdb1dcbcad39dd27638ea699f132fe44ce6df`.
 Audit date: September 9, 2026. Node: v23.10.0.
 

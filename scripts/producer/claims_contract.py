@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """claims_contract — the pre-render TRUTH gate on claim-bearing card copy.
 
-Closes NATEHERK_STUDY.md §1.2 gap #11 at the CHEAP point (§5 item 6): his
+Closes MODULE_STUDY.md §1.2 gap #11 at the CHEAP point (§5 item 6): his
 pipeline runs "factual claims vs source docs" only POST-render, paying a full
 render per bug; ours gates the PLAN. Mirrors ``hook_contract.py``'s shape —
 content-derived obligations, a pure check + a CLI run in the SKILL step-4
@@ -229,7 +229,7 @@ def _matches(tok: str, vals: set[float], raws: set[str]) -> bool:
 # whitelist a CTA or a claim. Data catalog — exempt from the line budget.
 STRUCTURAL_LABELS = frozenset({
     "who this is for",       # glass-rail audience eyebrow (c0679, QC-clean)
-    "claim source",          # receipt-line label (nateherk/statement ribbon)
+    "claim source",          # receipt-line label (module/statement ribbon)
     "the plan",              # agenda-slide default eyebrow
 })
 
@@ -328,7 +328,7 @@ def _check_card(tag: str, texts: list[tuple[str, str]],
                   f"card's window [{lo:.1f},{hi:.1f}]s — card numbers must "
                   "match the kept words (fix the copy or move the card; a "
                   "faithful PARAPHRASE is the brain's step-4 call, "
-                  "NATEHERK_STUDY §5.6)")
+                  "MODULE_STUDY §5.6)")
     for path, phrase in phrases:
         if _phrase_grounded(phrase, vals, raws):
             continue

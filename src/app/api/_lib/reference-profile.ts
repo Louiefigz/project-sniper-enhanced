@@ -38,9 +38,9 @@ function suggestedMode(width: number | null, height: number | null): ReferenceMo
 
 export function inferKnownStyle(video: string): ReferenceStyleProfile["suggestedKnownStyle"] {
   const parts = video.toLowerCase().split(path.sep);
-  if (parts.some((part) => part === "caleb" || part.startsWith("caleb-"))) return "caleb";
-  if (parts.some((part) => part.includes("iamjadenly") || part === "jaden")) return "jadenly";
-  if (parts.some((part) => part === "angela" || part.startsWith("angela-"))) return "angela";
+  if (parts.some((part) => part === "restrained" || part.startsWith("restrained-"))) return "restrained";
+  if (parts.some((part) => part.includes("iampunch") || part === "punch")) return "punch";
+  if (parts.some((part) => part === "slideware" || part.startsWith("slideware-"))) return "slideware";
   return null;
 }
 

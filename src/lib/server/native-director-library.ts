@@ -4,15 +4,17 @@ import { createHash } from "node:crypto";
 import { observeCutPreviewFile } from "@/app/api/producer/auto-edit/cut-preview-receipt";
 import { canonicalJsonSha256 } from "./auto-edit-hash";
 
-const KNOWLEDGE = "products/value-first-script-director/knowledge/";
+/** The packaged, original Director library (see resources/director/README.md). */
 const FILES = {
-  formats: `${KNOWLEDGE}08-short-format-library.md`,
-  hooks: "docs/frameworks/HOOK_TEMPLATE_LIBRARY.md",
-  formulas: `${KNOWLEDGE}09-hook-formula-index.md`,
-  references: `${KNOWLEDGE}06-hook-reference-bank.md`,
-  problemTraining: `${KNOWLEDGE}07-hook-training-problem-aware.md`,
-  solutionTraining: `${KNOWLEDGE}08-hook-training-solution-aware.md`,
+  formats: "formats.md",
+  hooks: "hook-anchors.md",
+  formulas: "hook-formulas.md",
+  references: "hook-references.md",
+  problemTraining: "hook-training-problem-aware.md",
+  solutionTraining: "hook-training-solution-aware.md",
 } as const;
+/** Packaged library location, relative to the application root. */
+export const PACKAGED_DIRECTOR_LIBRARY = path.join("resources", "director");
 export interface DirectorSource { name: string; sha256: string; content: string }
 export interface DirectorExample { id: string; content: string; formula: string; slots: string[]; disqualifyIf: string }
 export interface DirectorCatalog {
@@ -76,10 +78,22 @@ export function catalogFromSources(rows: DirectorSource[]): DirectorCatalog {
 
 function textHash(value: string): string { return createHash("sha256").update(value).digest("hex"); }
 
-/** SNIPER_RAG_ROOT is deployment configuration; model output cannot choose a library path. */
-export function loadDirectorCatalog(root = process.env.SNIPER_RAG_ROOT
-  ?? path.resolve(process.cwd(), "../youtube-automation/rag-system")): DirectorCatalog {
-  if (!path.isAbsolute(root)) throw new Error("SNIPER_RAG_ROOT must be absolute");
+/**
+ * The Director reads only the library packaged with the application, or an operator
+ * configured SNIPER_DIRECTOR_LIBRARY with the same six files. There is no fallback to
+ * any other repository, and model output can never choose a library path.
+ */
+export function directorLibraryRoot(env: NodeJS.ProcessEnv = process.env): string {
+  const configured = env.SNIPER_DIRECTOR_LIBRARY?.trim();
+  if (configured) {
+    if (!path.isAbsolute(configured)) throw new Error("SNIPER_DIRECTOR_LIBRARY must be absolute");
+    return configured;
+  }
+  return path.resolve(process.cwd(), PACKAGED_DIRECTOR_LIBRARY);
+}
+
+export function loadDirectorCatalog(root = directorLibraryRoot()): DirectorCatalog {
+  if (!path.isAbsolute(root)) throw new Error("Director library path must be absolute");
   const sources = Object.values(FILES).map((name) => {
     const observed = observeCutPreviewFile(path.join(root, name), 256 * 1024, true);
     return { name, sha256: observed.sha256, content: new TextDecoder("utf-8", { fatal: true }).decode(observed.bytes) };

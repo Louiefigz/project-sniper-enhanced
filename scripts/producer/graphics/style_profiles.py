@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
-FACE_BRIDGE_PROFILE = "nateherk-editorial-v1"
+FACE_BRIDGE_PROFILE = "module-editorial-v1"
 
 # Data catalog: information form -> executable renderer contract.  Several
 # forms intentionally share one modular renderer kind.  Variety lives in the
@@ -35,52 +35,52 @@ _FACE_BRIDGE_FORMS: dict[str, dict[str, Any]] = {
         "fixedSpec": {},
     },
     "status-queue": {
-        "kind": "nateherk-rail", "chassis": "cream",
+        "kind": "module-rail", "chassis": "cream",
         "shapes": ("process", "evidence", "list"),
         "required": ("eyebrow", "headlineLines", "rows", "moduleLands"),
         "fixedSpec": {"contentMode": "status"},
     },
     "dated-timeline": {
-        "kind": "nateherk-rail", "chassis": "cream",
+        "kind": "module-rail", "chassis": "cream",
         "shapes": ("chronology", "process"),
         "required": ("eyebrow", "headlineLines", "rows", "moduleLands"),
         "fixedSpec": {"contentMode": "timeline"},
     },
     "step-sequence": {
-        "kind": "nateherk-rail", "chassis": "cream",
+        "kind": "module-rail", "chassis": "cream",
         "shapes": ("process", "list"),
         "required": ("eyebrow", "headlineLines", "rows", "moduleLands"),
         "fixedSpec": {"contentMode": "steps"},
     },
     "resolved-checklist": {
-        "kind": "nateherk-rail", "chassis": "cream",
+        "kind": "module-rail", "chassis": "cream",
         "shapes": ("qa", "list", "process"),
         "required": ("eyebrow", "headlineLines", "rows", "footChip",
                      "moduleLands"),
         "fixedSpec": {"contentMode": "checklist"},
     },
     "kv-rail": {
-        "kind": "nateherk-rail", "chassis": "cream",
+        "kind": "module-rail", "chassis": "cream",
         "shapes": ("configuration", "evidence"),
         "required": ("eyebrow", "headlineLines", "rows", "moduleLands"),
         "fixedSpec": {"contentMode": "kv"},
     },
     "config-ledger": {
-        "kind": "nateherk-ledger-dark", "chassis": "dark",
+        "kind": "module-ledger-dark", "chassis": "dark",
         "shapes": ("configuration", "evidence", "credibility"),
         "required": ("eyebrow", "headlineLines", "rows", "gridItems",
                      "moduleLands"),
         "fixedSpec": {"grid": "chips", "presenterFrame": True},
     },
     "parallel-grid": {
-        "kind": "nateherk-ledger-dark", "chassis": "dark",
+        "kind": "module-ledger-dark", "chassis": "dark",
         "shapes": ("parallel-process", "process"),
         "required": ("eyebrow", "headlineLines", "barLabel", "barValue",
                      "gridItems", "footChip", "moduleLands"),
         "fixedSpec": {"grid": "columns", "presenterFrame": True},
     },
     "comparison-bars": {
-        "kind": "nateherk-takeover", "chassis": "dark",
+        "kind": "module-takeover", "chassis": "dark",
         "shapes": ("comparison",),
         "required": ("eyebrow", "headlineLines", "heroLabel", "heroValue",
                      "heroPct", "compareLabel", "compareValue", "comparePct",
@@ -88,14 +88,14 @@ _FACE_BRIDGE_FORMS: dict[str, dict[str, Any]] = {
         "fixedSpec": {},
     },
     "hero-scoreboard": {
-        "kind": "nateherk-scoreboard", "chassis": "dark",
+        "kind": "module-scoreboard", "chassis": "dark",
         "shapes": ("scale", "comparison", "limit"),
         "required": ("eyebrow", "heroValue", "heroLabel", "tiles",
                      "limitText", "moduleLands"),
         "fixedSpec": {"presenterFrame": True},
     },
     "threshold-bars": {
-        "kind": "nateherk-bullet-bars", "chassis": "cream",
+        "kind": "module-bullet-bars", "chassis": "cream",
         "anchor": "beside-face",
         "shapes": ("limit", "scale"),
         "required": ("eyebrow", "headlineLines", "axisLabel", "bars",
@@ -103,7 +103,7 @@ _FACE_BRIDGE_FORMS: dict[str, dict[str, Any]] = {
         "fixedSpec": {},
     },
     "node-pipeline": {
-        "kind": "nateherk-pipeline", "chassis": "dark",
+        "kind": "module-pipeline", "chassis": "dark",
         "shapes": ("process", "chapter", "mechanism"),
         "required": ("eyebrow", "headlineLines", "nodes", "moduleLands"),
         "fixedSpec": {"presenterFrame": True},

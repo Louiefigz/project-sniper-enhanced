@@ -169,7 +169,7 @@ class FirstLandTests(unittest.TestCase):
     def test_own_screen_early_module_land_is_clean(self) -> None:
         rep = _visual_report(self._entry(
             "own-screen", {"moduleLands": [0.2, 1.1, 2.0]},
-            kind="nateherk-takeover"))
+            kind="module-takeover"))
         self.assertEqual(rep.errors, [])
         self.assertEqual(rep.warnings, [])
 
@@ -280,7 +280,7 @@ class ContrastTests(unittest.TestCase):
 
     def test_lime_on_the_takeover_canvas_passes(self) -> None:
         rep = _visual_report(self._entry(
-            "nateherk-takeover", {"eyebrow": "ULTRA", "accent": "#c6f542"}))
+            "module-takeover", {"eyebrow": "ULTRA", "accent": "#c6f542"}))
         self.assertEqual(rep.errors, [])
 
     def test_unknown_kind_or_variant_is_skipped_never_guessed(self) -> None:
@@ -324,7 +324,7 @@ class ReceiptLineTests(unittest.TestCase):
         self.assertIn("--receipt-gray: rgba(255, 255, 255, 0.72)", css)
 
     def test_both_ribbon_comps_use_token_and_separator(self) -> None:
-        for name in ("nateherk-takeover.html", "statement-card.html"):
+        for name in ("module-takeover.html", "statement-card.html"):
             html = (_COMPS / name).read_text(encoding="utf-8")
             self.assertIn("var(--receipt-gray", html, name)
             self.assertIn('join(" \\u00b7 ")', html, name)
@@ -838,13 +838,13 @@ class CardFormMapTests(unittest.TestCase):
                                 f"{family}: comp {kind!r} has no HTML")
 
     def test_the_nate_mapping_rows_are_covered(self) -> None:
-        # NATEHERK_CARDS §1.4 — one spot check per table row we encode.
-        self.assertIn("nateherk-bullet-bars", self.MAP["comparison"])   # #9/#12
+        # MODULE_CARDS §1.4 — one spot check per table row we encode.
+        self.assertIn("module-bullet-bars", self.MAP["comparison"])   # #9/#12
         self.assertIn("versus-split", self.MAP["comparison"])
-        self.assertIn("nateherk-pipeline", self.MAP["process"])         # #18
-        self.assertIn("nateherk-ledger-dark", self.MAP["evidence"])     # #3/#5
-        self.assertIn("nateherk-bullet-bars", self.MAP["limit"])        # #12
-        self.assertIn("nateherk-scoreboard", self.MAP["scale"])         # #11
+        self.assertIn("module-pipeline", self.MAP["process"])         # #18
+        self.assertIn("module-ledger-dark", self.MAP["evidence"])     # #3/#5
+        self.assertIn("module-bullet-bars", self.MAP["limit"])        # #12
+        self.assertIn("module-scoreboard", self.MAP["scale"])         # #11
         self.assertIn("whiteboard-list", self.MAP["list"])              # #8/#10
         self.assertIn("statement-card", self.MAP["thesis"])             # #19
 
@@ -981,7 +981,7 @@ class ConsecutiveKindTests(unittest.TestCase):
                                             _vg(30, "whiteboard-list")]), [])
 
     def test_statements_chain_is_a_deliberate_swap(self) -> None:
-        # NATEHERK_CARDS #19: the kicker swaps IN PLACE on the same chassis.
+        # MODULE_CARDS #19: the kicker swaps IN PLACE on the same chassis.
         findings = _variety_findings([
             _vg(10, "statement-card"),
             _vg(20, "statement-card", {"statements": "Hold it.|DAY ONE."})])
@@ -1044,7 +1044,7 @@ class LocalKindDiversityTests(unittest.TestCase):
 
     def test_four_cards_four_kinds_passes_44s_intro_floor(self) -> None:
         graphics = [_vg(5, "statement-card"), _vg(15, "glass-rail"),
-                    _vg(25, "whiteboard-list"), _vg(35, "nateherk-pipeline")]
+                    _vg(25, "whiteboard-list"), _vg(35, "module-pipeline")]
         rep = _variety_report(graphics, out_dur=44.0)
         self.assertEqual(self._local(rep, "first minute"), [])
 
@@ -1067,7 +1067,7 @@ class LocalKindDiversityTests(unittest.TestCase):
 
     def test_four_distinct_forms_pass_just_below_duration_threshold(self) -> None:
         graphics = [_vg(4, "statement-card"), _vg(12, "glass-rail"),
-                    _vg(21, "whiteboard-list"), _vg(31, "nateherk-pipeline")]
+                    _vg(21, "whiteboard-list"), _vg(31, "module-pipeline")]
         rep = _variety_report(graphics, out_dur=39.92)
         self.assertEqual(self._local(rep, "first minute"), [])
 
@@ -1077,7 +1077,7 @@ class LocalKindDiversityTests(unittest.TestCase):
 
     def test_four_cards_two_kinds_fails_early_three_minute_window(self) -> None:
         graphics = [_vg(5, "statement-card"), _vg(15, "glass-rail"),
-                    _vg(25, "whiteboard-list"), _vg(35, "nateherk-pipeline"),
+                    _vg(25, "whiteboard-list"), _vg(35, "module-pipeline"),
                     _vg(90, "statement-card")]
         rep = _variety_report(graphics, out_dur=150.0)
         errors = self._local(rep, "first three minutes")
@@ -1087,15 +1087,15 @@ class LocalKindDiversityTests(unittest.TestCase):
 
     def test_four_cards_three_kinds_passes_early_floor(self) -> None:
         graphics = [_vg(5, "statement-card"), _vg(15, "glass-rail"),
-                    _vg(25, "whiteboard-list"), _vg(35, "nateherk-pipeline"),
-                    _vg(90, "nateherk-scoreboard"), _vg(130, "statement-card")]
+                    _vg(25, "whiteboard-list"), _vg(35, "module-pipeline"),
+                    _vg(90, "module-scoreboard"), _vg(130, "statement-card")]
         rep = _variety_report(graphics, out_dur=150.0)
         self.assertEqual(self._local(rep, "first three minutes"), [])
 
     def test_output_duration_excludes_later_card_from_early_window(self) -> None:
         graphics = [_vg(5, "statement-card"), _vg(15, "glass-rail"),
-                    _vg(25, "whiteboard-list"), _vg(35, "nateherk-pipeline"),
-                    _vg(90, "nateherk-scoreboard"), _vg(130, "statement-card")]
+                    _vg(25, "whiteboard-list"), _vg(35, "module-pipeline"),
+                    _vg(90, "module-scoreboard"), _vg(130, "statement-card")]
         rep = _variety_report(graphics, out_dur=120.0)
         self.assertEqual(self._local(rep, "first three minutes"), [])
 

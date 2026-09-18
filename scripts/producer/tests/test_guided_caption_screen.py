@@ -53,7 +53,7 @@ class ScreeningAdmissionTests(unittest.TestCase):
     def test_unsupported_simultaneity_refuses_before_first_graphic_spawn(self) -> None:
         from guided_opening_graphics import render_opening_graphics
         value = row()
-        value["entry"]["kind"] = "nateherk-pipeline"
+        value["entry"]["kind"] = "module-pipeline"
         value["entry"]["spec"]["layout"] = "full-canvas"
         context = admission_context([value])
         clock = SimpleNamespace(remaining=guard, phase=lambda _name, call: call())

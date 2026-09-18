@@ -87,7 +87,7 @@ class AbsentPlacementPathTests(unittest.TestCase):
 
     def test_registered_edge_rail_stays_at_its_authored_origin(self) -> None:
         content = (0, 0, 633, 1079)
-        entry = _entry(kind="nateherk-rail", anchor="beside-face",
+        entry = _entry(kind="module-rail", anchor="beside-face",
                        recompose={"clearX": [0.3302, 1.0]})
         with mock.patch.object(sp, "_content_bbox", return_value=content), \
              mock.patch.object(sp, "resolve_offset_v2",

@@ -163,7 +163,7 @@
         "denominator": "48",
         "numerator": "7"
       },
-      "kind": "angela-caption-dual-mode",
+      "kind": "slideware-caption-dual-mode",
       "mediaSha256": "519f3f151274c86ccea02ac46ef4649805ba6dfb68d660be477e5ce569391b2b",
       "rate": "24",
       "stream": {
@@ -182,7 +182,7 @@
         "denominator": "48000",
         "numerator": "7007"
       },
-      "kind": "angela-caption-dual-mode",
+      "kind": "slideware-caption-dual-mode",
       "mediaSha256": "70acd5c66bf36cdc94fb743eeec89a4fa95bd1696cc39b1b1a141de03bed3bd8",
       "rate": "24000/1001",
       "stream": {
@@ -201,7 +201,7 @@
         "denominator": "50",
         "numerator": "7"
       },
-      "kind": "angela-caption-dual-mode",
+      "kind": "slideware-caption-dual-mode",
       "mediaSha256": "755a2f309a76041d47f04bff1f2d8979e3f772cc51f469936579b45aeea16415",
       "rate": "25",
       "stream": {
@@ -220,7 +220,7 @@
         "denominator": "60",
         "numerator": "7"
       },
-      "kind": "angela-caption-dual-mode",
+      "kind": "slideware-caption-dual-mode",
       "mediaSha256": "9ac822031b3968219f14cc38b4840997d781d49f67da5aae5cfeef34974de2f4",
       "rate": "30",
       "stream": {
@@ -239,7 +239,7 @@
         "denominator": "60000",
         "numerator": "7007"
       },
-      "kind": "angela-caption-dual-mode",
+      "kind": "slideware-caption-dual-mode",
       "mediaSha256": "881123b5a62d71ebe0ef596419bed9a58b24e58bb2a45583db130aec9fe503c2",
       "rate": "30000/1001",
       "stream": {
@@ -258,7 +258,7 @@
         "denominator": "100",
         "numerator": "7"
       },
-      "kind": "angela-caption-dual-mode",
+      "kind": "slideware-caption-dual-mode",
       "mediaSha256": "47c6bf62f5fed950311fef0b49434322311a5d57ce7040fcbad08bdb7c698091",
       "rate": "50",
       "stream": {
@@ -277,7 +277,7 @@
         "denominator": "120",
         "numerator": "7"
       },
-      "kind": "angela-caption-dual-mode",
+      "kind": "slideware-caption-dual-mode",
       "mediaSha256": "f3fc585f1c4ac4945bb14b7c357baaf994585c8c380f3fc651da735de9bcd443",
       "rate": "60",
       "stream": {
@@ -296,7 +296,7 @@
         "denominator": "120000",
         "numerator": "7007"
       },
-      "kind": "angela-caption-dual-mode",
+      "kind": "slideware-caption-dual-mode",
       "mediaSha256": "7675c465de14797ddaeb6e181becba044381b90eebd6a2bff367b6077664cb4c",
       "rate": "60000/1001",
       "stream": {
@@ -315,7 +315,7 @@
         "denominator": "48",
         "numerator": "7"
       },
-      "kind": "angela-receipt-cell",
+      "kind": "slideware-receipt-cell",
       "mediaSha256": "d78cea9c75c4c778d593c91402bc1574efcfa8a3d050be8caf4b6170d75fa505",
       "rate": "24",
       "stream": {
@@ -334,7 +334,7 @@
         "denominator": "48000",
         "numerator": "7007"
       },
-      "kind": "angela-receipt-cell",
+      "kind": "slideware-receipt-cell",
       "mediaSha256": "b41ac9033d0bff7b2f967f4c3d479472d815402dcdb5fed7aa751045f160f1de",
       "rate": "24000/1001",
       "stream": {
@@ -353,7 +353,7 @@
         "denominator": "50",
         "numerator": "7"
       },
-      "kind": "angela-receipt-cell",
+      "kind": "slideware-receipt-cell",
       "mediaSha256": "bd85d9a4f90a4ccbdba8e6b25f4e07fee5c82a71348224a43279ea982290dc45",
       "rate": "25",
       "stream": {
@@ -372,7 +372,7 @@
         "denominator": "60",
         "numerator": "7"
       },
-      "kind": "angela-receipt-cell",
+      "kind": "slideware-receipt-cell",
       "mediaSha256": "b240101f753e123f8a94ec8310d2ef67c0691de293c12688b7befd0136682925",
       "rate": "30",
       "stream": {
@@ -391,7 +391,7 @@
         "denominator": "60000",
         "numerator": "7007"
       },
-      "kind": "angela-receipt-cell",
+      "kind": "slideware-receipt-cell",
       "mediaSha256": "fd0a5754116f0381ed4c07a17fe0091c06ab809207582c252d78a75899ddf32e",
       "rate": "30000/1001",
       "stream": {
@@ -410,7 +410,7 @@
         "denominator": "100",
         "numerator": "7"
       },
-      "kind": "angela-receipt-cell",
+      "kind": "slideware-receipt-cell",
       "mediaSha256": "71ac406a225d88bec8189df51ebd1d6be528c3bff8775cb42b3018a4e750a349",
       "rate": "50",
       "stream": {
@@ -429,7 +429,7 @@
         "denominator": "120",
         "numerator": "7"
       },
-      "kind": "angela-receipt-cell",
+      "kind": "slideware-receipt-cell",
       "mediaSha256": "5eb84c80d9eec395c8d9374bd7eff2efdc85c2eb93510119fc551f4a526c04b2",
       "rate": "60",
       "stream": {
@@ -448,7 +448,7 @@
         "denominator": "120000",
         "numerator": "7007"
       },
-      "kind": "angela-receipt-cell",
+      "kind": "slideware-receipt-cell",
       "mediaSha256": "52efde6325a44a4b5f2fd5291f52c8ad6b214c08d119c069eb7775d9b8737e28",
       "rate": "60000/1001",
       "stream": {
@@ -467,7 +467,7 @@
         "denominator": "48",
         "numerator": "7"
       },
-      "kind": "angela-staircase-lockup",
+      "kind": "slideware-staircase-lockup",
       "mediaSha256": "222835e5a65abd59e7de134a23881be3050f3f58ac66e1a043af4da68eec6d41",
       "rate": "24",
       "stream": {
@@ -486,7 +486,7 @@
         "denominator": "48000",
         "numerator": "7007"
       },
-      "kind": "angela-staircase-lockup",
+      "kind": "slideware-staircase-lockup",
       "mediaSha256": "57d27c81c734667f8d085943d000050a52865ae3344e04757dd3c3642f270898",
       "rate": "24000/1001",
       "stream": {
@@ -505,7 +505,7 @@
         "denominator": "50",
         "numerator": "7"
       },
-      "kind": "angela-staircase-lockup",
+      "kind": "slideware-staircase-lockup",
       "mediaSha256": "03f9e6b2078f3e6bdcbbd206fc0691fa813b38836a43884c92989bff8b4ac094",
       "rate": "25",
       "stream": {
@@ -524,7 +524,7 @@
         "denominator": "60",
         "numerator": "7"
       },
-      "kind": "angela-staircase-lockup",
+      "kind": "slideware-staircase-lockup",
       "mediaSha256": "e37c233f0943683f614730eb223e1ed001f6988559e10958a9212ce0890856f3",
       "rate": "30",
       "stream": {
@@ -543,7 +543,7 @@
         "denominator": "60000",
         "numerator": "7007"
       },
-      "kind": "angela-staircase-lockup",
+      "kind": "slideware-staircase-lockup",
       "mediaSha256": "89c31e3963d8982003e7a8fbcb48b32abf41a330eda5998a75e150e172cedc4e",
       "rate": "30000/1001",
       "stream": {
@@ -562,7 +562,7 @@
         "denominator": "100",
         "numerator": "7"
       },
-      "kind": "angela-staircase-lockup",
+      "kind": "slideware-staircase-lockup",
       "mediaSha256": "6ac4589e4b84d48a2e082981b0d1a1d0193ca03ef4e0f2278043d06ff8e67a46",
       "rate": "50",
       "stream": {
@@ -581,7 +581,7 @@
         "denominator": "120",
         "numerator": "7"
       },
-      "kind": "angela-staircase-lockup",
+      "kind": "slideware-staircase-lockup",
       "mediaSha256": "2c17eb147cac126eb8d32b963180a4e6e741db2e5de23e2a20d87ee10b4db900",
       "rate": "60",
       "stream": {
@@ -600,7 +600,7 @@
         "denominator": "120000",
         "numerator": "7007"
       },
-      "kind": "angela-staircase-lockup",
+      "kind": "slideware-staircase-lockup",
       "mediaSha256": "cc62fe126771f8998e873cb5de8f3305bdad29aae44362391c80c8cb06361fc0",
       "rate": "60000/1001",
       "stream": {
@@ -619,7 +619,7 @@
         "denominator": "48",
         "numerator": "7"
       },
-      "kind": "angela-takeover-deck",
+      "kind": "slideware-takeover-deck",
       "mediaSha256": "d7fd97afab877b4956addd735ef48e89be86639b22c9fdda75c18a2e6d6a0e37",
       "rate": "24",
       "stream": {
@@ -638,7 +638,7 @@
         "denominator": "48000",
         "numerator": "7007"
       },
-      "kind": "angela-takeover-deck",
+      "kind": "slideware-takeover-deck",
       "mediaSha256": "d101e9df2aae1d5a238594bbf895144c6abd5a10c49197d05b0e34b1b3b1badb",
       "rate": "24000/1001",
       "stream": {
@@ -657,7 +657,7 @@
         "denominator": "50",
         "numerator": "7"
       },
-      "kind": "angela-takeover-deck",
+      "kind": "slideware-takeover-deck",
       "mediaSha256": "3f57d07c4cd26464c735e00c0dc635740bb861d56aae38e91e6f0cdc9225651a",
       "rate": "25",
       "stream": {
@@ -676,7 +676,7 @@
         "denominator": "60",
         "numerator": "7"
       },
-      "kind": "angela-takeover-deck",
+      "kind": "slideware-takeover-deck",
       "mediaSha256": "c8cb1afdaf56d9728210bad9680ade35574d1e9b3b4df3fde4866ac2f1df5e2a",
       "rate": "30",
       "stream": {
@@ -695,7 +695,7 @@
         "denominator": "60000",
         "numerator": "7007"
       },
-      "kind": "angela-takeover-deck",
+      "kind": "slideware-takeover-deck",
       "mediaSha256": "78d3b8361d9507f26edd847e842eb86923b9f4a5bee31e294eb2be8f9b242722",
       "rate": "30000/1001",
       "stream": {
@@ -714,7 +714,7 @@
         "denominator": "100",
         "numerator": "7"
       },
-      "kind": "angela-takeover-deck",
+      "kind": "slideware-takeover-deck",
       "mediaSha256": "80d06d5ce09d2e510bf056669a491602ab68a04e5e0a87089e5cf3f3f42285ef",
       "rate": "50",
       "stream": {
@@ -733,7 +733,7 @@
         "denominator": "120",
         "numerator": "7"
       },
-      "kind": "angela-takeover-deck",
+      "kind": "slideware-takeover-deck",
       "mediaSha256": "195c3fecc22b528a6e9cb94a13053ecdb388ad04b7a02e461e2f94eb18adffd8",
       "rate": "60",
       "stream": {
@@ -752,7 +752,7 @@
         "denominator": "120000",
         "numerator": "7007"
       },
-      "kind": "angela-takeover-deck",
+      "kind": "slideware-takeover-deck",
       "mediaSha256": "36897cf1c215e858ccd4127bd9336f363cd8a64174b666be6b64730b3415e48c",
       "rate": "60000/1001",
       "stream": {
@@ -2899,7 +2899,7 @@
         "denominator": "48",
         "numerator": "7"
       },
-      "kind": "jaden-shout-lockup",
+      "kind": "punch-shout-lockup",
       "mediaSha256": "cadf92649564c37305ac5c84b6cf5ab90b0c114354ac4545ae5da2bd3adf48c9",
       "rate": "24",
       "stream": {
@@ -2918,7 +2918,7 @@
         "denominator": "48000",
         "numerator": "7007"
       },
-      "kind": "jaden-shout-lockup",
+      "kind": "punch-shout-lockup",
       "mediaSha256": "c2455bb1bd9cbbb1b8e31ac725cecb2cf497c13903d7d79425b12f3926490d7d",
       "rate": "24000/1001",
       "stream": {
@@ -2937,7 +2937,7 @@
         "denominator": "50",
         "numerator": "7"
       },
-      "kind": "jaden-shout-lockup",
+      "kind": "punch-shout-lockup",
       "mediaSha256": "ba7e2c44fdca0ecf767cf5a85c5b74698ff67daca5dcf9433103ec736e6cc4c9",
       "rate": "25",
       "stream": {
@@ -2956,7 +2956,7 @@
         "denominator": "60",
         "numerator": "7"
       },
-      "kind": "jaden-shout-lockup",
+      "kind": "punch-shout-lockup",
       "mediaSha256": "5f4aaf0d2dc61a2e100b8f6acab137a25ade4887da0ba45d4fd8dbe610e1c090",
       "rate": "30",
       "stream": {
@@ -2975,7 +2975,7 @@
         "denominator": "60000",
         "numerator": "7007"
       },
-      "kind": "jaden-shout-lockup",
+      "kind": "punch-shout-lockup",
       "mediaSha256": "2f058e15208e64e921770df1240b4385bbf1e1cd7f927e1e9b7bc69e348d5771",
       "rate": "30000/1001",
       "stream": {
@@ -2994,7 +2994,7 @@
         "denominator": "100",
         "numerator": "7"
       },
-      "kind": "jaden-shout-lockup",
+      "kind": "punch-shout-lockup",
       "mediaSha256": "6ac4589e4b84d48a2e082981b0d1a1d0193ca03ef4e0f2278043d06ff8e67a46",
       "rate": "50",
       "stream": {
@@ -3013,7 +3013,7 @@
         "denominator": "120",
         "numerator": "7"
       },
-      "kind": "jaden-shout-lockup",
+      "kind": "punch-shout-lockup",
       "mediaSha256": "2c17eb147cac126eb8d32b963180a4e6e741db2e5de23e2a20d87ee10b4db900",
       "rate": "60",
       "stream": {
@@ -3032,7 +3032,7 @@
         "denominator": "120000",
         "numerator": "7007"
       },
-      "kind": "jaden-shout-lockup",
+      "kind": "punch-shout-lockup",
       "mediaSha256": "cc62fe126771f8998e873cb5de8f3305bdad29aae44362391c80c8cb06361fc0",
       "rate": "60000/1001",
       "stream": {
@@ -3659,7 +3659,7 @@
         "denominator": "48",
         "numerator": "7"
       },
-      "kind": "nateherk-bullet-bars",
+      "kind": "module-bullet-bars",
       "mediaSha256": "77c8f800168908d8dc684463b674343be7d028d79fbc735e3c27ff53ded56822",
       "rate": "24",
       "stream": {
@@ -3678,7 +3678,7 @@
         "denominator": "48000",
         "numerator": "7007"
       },
-      "kind": "nateherk-bullet-bars",
+      "kind": "module-bullet-bars",
       "mediaSha256": "8f08ccf3879944920fc63998ee2c37338814606f065c692edd00b3b25b4997ea",
       "rate": "24000/1001",
       "stream": {
@@ -3697,7 +3697,7 @@
         "denominator": "50",
         "numerator": "7"
       },
-      "kind": "nateherk-bullet-bars",
+      "kind": "module-bullet-bars",
       "mediaSha256": "bc5250433e7cbb614e6d93f3931c784d868e7f7dbf17cd2edef0f153cbe62695",
       "rate": "25",
       "stream": {
@@ -3716,7 +3716,7 @@
         "denominator": "60",
         "numerator": "7"
       },
-      "kind": "nateherk-bullet-bars",
+      "kind": "module-bullet-bars",
       "mediaSha256": "4787777d24cb3f49ee169bba387f870e1b7dd18180495e3a431f8117af9d1fc1",
       "rate": "30",
       "stream": {
@@ -3735,7 +3735,7 @@
         "denominator": "60000",
         "numerator": "7007"
       },
-      "kind": "nateherk-bullet-bars",
+      "kind": "module-bullet-bars",
       "mediaSha256": "3f923f8d9d5be34b09be9fde54a0c46e28b648dfaab427e9e691a9b706a878cf",
       "rate": "30000/1001",
       "stream": {
@@ -3754,7 +3754,7 @@
         "denominator": "100",
         "numerator": "7"
       },
-      "kind": "nateherk-bullet-bars",
+      "kind": "module-bullet-bars",
       "mediaSha256": "44d82a14ef8117714e76c94815083e9e0bb6ecb652523bba8b7ed675df89c056",
       "rate": "50",
       "stream": {
@@ -3773,7 +3773,7 @@
         "denominator": "120",
         "numerator": "7"
       },
-      "kind": "nateherk-bullet-bars",
+      "kind": "module-bullet-bars",
       "mediaSha256": "ea6140a8cd3505c201238dea7bf425905bd62de94acc42b12b56457470b46bbb",
       "rate": "60",
       "stream": {
@@ -3792,7 +3792,7 @@
         "denominator": "120000",
         "numerator": "7007"
       },
-      "kind": "nateherk-bullet-bars",
+      "kind": "module-bullet-bars",
       "mediaSha256": "53c3834f64bf9a9a3d060622151faee009fec18134a7c6ec06bcfeeb519a2eef",
       "rate": "60000/1001",
       "stream": {
@@ -3811,7 +3811,7 @@
         "denominator": "48",
         "numerator": "7"
       },
-      "kind": "nateherk-ledger-dark",
+      "kind": "module-ledger-dark",
       "mediaSha256": "2c8af977d4d3a27efa07f338f02f30e8a7be005a82abb43767d035fc7270899e",
       "rate": "24",
       "stream": {
@@ -3830,7 +3830,7 @@
         "denominator": "48000",
         "numerator": "7007"
       },
-      "kind": "nateherk-ledger-dark",
+      "kind": "module-ledger-dark",
       "mediaSha256": "bcbf3ce9dbdbaf65da533fc0c6310bcda6079c20ca0ea57136bc6830c39de765",
       "rate": "24000/1001",
       "stream": {
@@ -3849,7 +3849,7 @@
         "denominator": "50",
         "numerator": "7"
       },
-      "kind": "nateherk-ledger-dark",
+      "kind": "module-ledger-dark",
       "mediaSha256": "be6a87c26ca1b2d475dc5958811d6af926bfd00503cc5f2b865fb45e0f52c045",
       "rate": "25",
       "stream": {
@@ -3868,7 +3868,7 @@
         "denominator": "60",
         "numerator": "7"
       },
-      "kind": "nateherk-ledger-dark",
+      "kind": "module-ledger-dark",
       "mediaSha256": "d4053203ba76242e59c006150f7d36504a50e88526d22a8c31c6cb0e42e95c1d",
       "rate": "30",
       "stream": {
@@ -3887,7 +3887,7 @@
         "denominator": "60000",
         "numerator": "7007"
       },
-      "kind": "nateherk-ledger-dark",
+      "kind": "module-ledger-dark",
       "mediaSha256": "1ed155866cbce366760db5b25400a84ee13a820dcc4f44616670d442d6f6c7ec",
       "rate": "30000/1001",
       "stream": {
@@ -3906,7 +3906,7 @@
         "denominator": "100",
         "numerator": "7"
       },
-      "kind": "nateherk-ledger-dark",
+      "kind": "module-ledger-dark",
       "mediaSha256": "dea80284d780ad309a3705b57bec97929818863699a6e2c2f5dd3f987d4a5602",
       "rate": "50",
       "stream": {
@@ -3925,7 +3925,7 @@
         "denominator": "120",
         "numerator": "7"
       },
-      "kind": "nateherk-ledger-dark",
+      "kind": "module-ledger-dark",
       "mediaSha256": "9c6e86b84943f1a93ed74055bb868658e1c8306e4e8260ffafe2d5ce6663c234",
       "rate": "60",
       "stream": {
@@ -3944,7 +3944,7 @@
         "denominator": "120000",
         "numerator": "7007"
       },
-      "kind": "nateherk-ledger-dark",
+      "kind": "module-ledger-dark",
       "mediaSha256": "b6c5b24af1f8dd3b2396d49e8e8286bd9bb82a5e39a79af68b81980945cd4901",
       "rate": "60000/1001",
       "stream": {
@@ -3963,7 +3963,7 @@
         "denominator": "48",
         "numerator": "7"
       },
-      "kind": "nateherk-pipeline",
+      "kind": "module-pipeline",
       "mediaSha256": "2c8af977d4d3a27efa07f338f02f30e8a7be005a82abb43767d035fc7270899e",
       "rate": "24",
       "stream": {
@@ -3982,7 +3982,7 @@
         "denominator": "48000",
         "numerator": "7007"
       },
-      "kind": "nateherk-pipeline",
+      "kind": "module-pipeline",
       "mediaSha256": "bcbf3ce9dbdbaf65da533fc0c6310bcda6079c20ca0ea57136bc6830c39de765",
       "rate": "24000/1001",
       "stream": {
@@ -4001,7 +4001,7 @@
         "denominator": "50",
         "numerator": "7"
       },
-      "kind": "nateherk-pipeline",
+      "kind": "module-pipeline",
       "mediaSha256": "be6a87c26ca1b2d475dc5958811d6af926bfd00503cc5f2b865fb45e0f52c045",
       "rate": "25",
       "stream": {
@@ -4020,7 +4020,7 @@
         "denominator": "60",
         "numerator": "7"
       },
-      "kind": "nateherk-pipeline",
+      "kind": "module-pipeline",
       "mediaSha256": "d4053203ba76242e59c006150f7d36504a50e88526d22a8c31c6cb0e42e95c1d",
       "rate": "30",
       "stream": {
@@ -4039,7 +4039,7 @@
         "denominator": "60000",
         "numerator": "7007"
       },
-      "kind": "nateherk-pipeline",
+      "kind": "module-pipeline",
       "mediaSha256": "1ed155866cbce366760db5b25400a84ee13a820dcc4f44616670d442d6f6c7ec",
       "rate": "30000/1001",
       "stream": {
@@ -4058,7 +4058,7 @@
         "denominator": "100",
         "numerator": "7"
       },
-      "kind": "nateherk-pipeline",
+      "kind": "module-pipeline",
       "mediaSha256": "dea80284d780ad309a3705b57bec97929818863699a6e2c2f5dd3f987d4a5602",
       "rate": "50",
       "stream": {
@@ -4077,7 +4077,7 @@
         "denominator": "120",
         "numerator": "7"
       },
-      "kind": "nateherk-pipeline",
+      "kind": "module-pipeline",
       "mediaSha256": "9c6e86b84943f1a93ed74055bb868658e1c8306e4e8260ffafe2d5ce6663c234",
       "rate": "60",
       "stream": {
@@ -4096,7 +4096,7 @@
         "denominator": "120000",
         "numerator": "7007"
       },
-      "kind": "nateherk-pipeline",
+      "kind": "module-pipeline",
       "mediaSha256": "b6c5b24af1f8dd3b2396d49e8e8286bd9bb82a5e39a79af68b81980945cd4901",
       "rate": "60000/1001",
       "stream": {
@@ -4115,7 +4115,7 @@
         "denominator": "48",
         "numerator": "7"
       },
-      "kind": "nateherk-rail",
+      "kind": "module-rail",
       "mediaSha256": "1fe126468c90fe4d0b92ddca404f4c7ba2cd2c89bd55e83f26237a948ba4c109",
       "rate": "24",
       "stream": {
@@ -4134,7 +4134,7 @@
         "denominator": "48000",
         "numerator": "7007"
       },
-      "kind": "nateherk-rail",
+      "kind": "module-rail",
       "mediaSha256": "b88b93d44c92f36c1aa61d7c82653b65fecd614f39ae37c0374da1045160fa97",
       "rate": "24000/1001",
       "stream": {
@@ -4153,7 +4153,7 @@
         "denominator": "50",
         "numerator": "7"
       },
-      "kind": "nateherk-rail",
+      "kind": "module-rail",
       "mediaSha256": "a49f3d0cb8aa4d89379c526e870cbe660a071b8542804f67b1023a82248d1a28",
       "rate": "25",
       "stream": {
@@ -4172,7 +4172,7 @@
         "denominator": "60",
         "numerator": "7"
       },
-      "kind": "nateherk-rail",
+      "kind": "module-rail",
       "mediaSha256": "e5f0f150402c4ee513f85e49cecbdd655e750f353b27db2bccb330c258346158",
       "rate": "30",
       "stream": {
@@ -4191,7 +4191,7 @@
         "denominator": "60000",
         "numerator": "7007"
       },
-      "kind": "nateherk-rail",
+      "kind": "module-rail",
       "mediaSha256": "8dc7414d2e52289789bc580320013b03a014ca02a49c7228dd34f48fc4db8d83",
       "rate": "30000/1001",
       "stream": {
@@ -4210,7 +4210,7 @@
         "denominator": "100",
         "numerator": "7"
       },
-      "kind": "nateherk-rail",
+      "kind": "module-rail",
       "mediaSha256": "7b60d86e60717d0685b806b72e68384d2dfae87dc71d24fe343cbc6c990b7bd3",
       "rate": "50",
       "stream": {
@@ -4229,7 +4229,7 @@
         "denominator": "120",
         "numerator": "7"
       },
-      "kind": "nateherk-rail",
+      "kind": "module-rail",
       "mediaSha256": "853a7e2906c5d7de8f1fa7170255d221affb6778c131cc5372767db88c99a103",
       "rate": "60",
       "stream": {
@@ -4248,7 +4248,7 @@
         "denominator": "120000",
         "numerator": "7007"
       },
-      "kind": "nateherk-rail",
+      "kind": "module-rail",
       "mediaSha256": "c7d6b6427d2cbb9a4045ba6717f2856f28af41bfc87e15d3568c757283eb671e",
       "rate": "60000/1001",
       "stream": {
@@ -4267,7 +4267,7 @@
         "denominator": "48",
         "numerator": "7"
       },
-      "kind": "nateherk-scoreboard",
+      "kind": "module-scoreboard",
       "mediaSha256": "2c8af977d4d3a27efa07f338f02f30e8a7be005a82abb43767d035fc7270899e",
       "rate": "24",
       "stream": {
@@ -4286,7 +4286,7 @@
         "denominator": "48000",
         "numerator": "7007"
       },
-      "kind": "nateherk-scoreboard",
+      "kind": "module-scoreboard",
       "mediaSha256": "bcbf3ce9dbdbaf65da533fc0c6310bcda6079c20ca0ea57136bc6830c39de765",
       "rate": "24000/1001",
       "stream": {
@@ -4305,7 +4305,7 @@
         "denominator": "50",
         "numerator": "7"
       },
-      "kind": "nateherk-scoreboard",
+      "kind": "module-scoreboard",
       "mediaSha256": "be6a87c26ca1b2d475dc5958811d6af926bfd00503cc5f2b865fb45e0f52c045",
       "rate": "25",
       "stream": {
@@ -4324,7 +4324,7 @@
         "denominator": "60",
         "numerator": "7"
       },
-      "kind": "nateherk-scoreboard",
+      "kind": "module-scoreboard",
       "mediaSha256": "d4053203ba76242e59c006150f7d36504a50e88526d22a8c31c6cb0e42e95c1d",
       "rate": "30",
       "stream": {
@@ -4343,7 +4343,7 @@
         "denominator": "60000",
         "numerator": "7007"
       },
-      "kind": "nateherk-scoreboard",
+      "kind": "module-scoreboard",
       "mediaSha256": "1ed155866cbce366760db5b25400a84ee13a820dcc4f44616670d442d6f6c7ec",
       "rate": "30000/1001",
       "stream": {
@@ -4362,7 +4362,7 @@
         "denominator": "100",
         "numerator": "7"
       },
-      "kind": "nateherk-scoreboard",
+      "kind": "module-scoreboard",
       "mediaSha256": "dea80284d780ad309a3705b57bec97929818863699a6e2c2f5dd3f987d4a5602",
       "rate": "50",
       "stream": {
@@ -4381,7 +4381,7 @@
         "denominator": "120",
         "numerator": "7"
       },
-      "kind": "nateherk-scoreboard",
+      "kind": "module-scoreboard",
       "mediaSha256": "9c6e86b84943f1a93ed74055bb868658e1c8306e4e8260ffafe2d5ce6663c234",
       "rate": "60",
       "stream": {
@@ -4400,7 +4400,7 @@
         "denominator": "120000",
         "numerator": "7007"
       },
-      "kind": "nateherk-scoreboard",
+      "kind": "module-scoreboard",
       "mediaSha256": "b6c5b24af1f8dd3b2396d49e8e8286bd9bb82a5e39a79af68b81980945cd4901",
       "rate": "60000/1001",
       "stream": {
@@ -4419,7 +4419,7 @@
         "denominator": "48",
         "numerator": "7"
       },
-      "kind": "nateherk-takeover",
+      "kind": "module-takeover",
       "mediaSha256": "64f175e7c7a74657c7be47f4b89e8b2f47bda11f1ec970cf3392e8e32bfbc212",
       "rate": "24",
       "stream": {
@@ -4438,7 +4438,7 @@
         "denominator": "48000",
         "numerator": "7007"
       },
-      "kind": "nateherk-takeover",
+      "kind": "module-takeover",
       "mediaSha256": "e04f210261f103d7c5b98a519758896bb73ba9d252c4e3a81994b329f57bad31",
       "rate": "24000/1001",
       "stream": {
@@ -4457,7 +4457,7 @@
         "denominator": "50",
         "numerator": "7"
       },
-      "kind": "nateherk-takeover",
+      "kind": "module-takeover",
       "mediaSha256": "26223817bd14a777a6b5eed8d816aef880d086770d3147de91d9c9cd13374469",
       "rate": "25",
       "stream": {
@@ -4476,7 +4476,7 @@
         "denominator": "60",
         "numerator": "7"
       },
-      "kind": "nateherk-takeover",
+      "kind": "module-takeover",
       "mediaSha256": "5b53fc9405f49a5c3cf8c2012988159ed4858925eff9ad888d8d7c199832eb34",
       "rate": "30",
       "stream": {
@@ -4495,7 +4495,7 @@
         "denominator": "60000",
         "numerator": "7007"
       },
-      "kind": "nateherk-takeover",
+      "kind": "module-takeover",
       "mediaSha256": "22d1f7aca863ab55a3dbb560760b814b84721a536dc541ca46dd01af8c2d6109",
       "rate": "30000/1001",
       "stream": {
@@ -4514,7 +4514,7 @@
         "denominator": "100",
         "numerator": "7"
       },
-      "kind": "nateherk-takeover",
+      "kind": "module-takeover",
       "mediaSha256": "d60eb8775ee417c2d1c2eada9d285a7a5bf81b67d538878b3be18f6da2b95c77",
       "rate": "50",
       "stream": {
@@ -4533,7 +4533,7 @@
         "denominator": "120",
         "numerator": "7"
       },
-      "kind": "nateherk-takeover",
+      "kind": "module-takeover",
       "mediaSha256": "3f9f7b60400cfc64b6804a5d472d85a174a9dfbbab388b3cfa771548e5418ab8",
       "rate": "60",
       "stream": {
@@ -4552,7 +4552,7 @@
         "denominator": "120000",
         "numerator": "7007"
       },
-      "kind": "nateherk-takeover",
+      "kind": "module-takeover",
       "mediaSha256": "e78b030530a6b7cfb5cc74c63aa36f08c70e3af68c2600b9ca772598ac2bd52f",
       "rate": "60000/1001",
       "stream": {

@@ -31,8 +31,8 @@ export const PRODUCER_REFERENCED_DOCTRINE_PATHS = [
   "docs/studies/LONGFORM_VISUAL_STUDY.md",
   "docs/studies/MEASURED_EDIT_GRAMMAR.md",
   "docs/studies/MOTION_GRAMMAR_STUDY.md",
-  "docs/studies/NATEHERK_CARDS.md",
-  "docs/studies/NATEHERK_STUDY.md",
+  "docs/studies/MODULE_CARDS.md",
+  "docs/studies/MODULE_STUDY.md",
   "docs/studies/PACING_RHYTHM_STUDY.md",
   "docs/producer/PRODUCER_EDGE_CASES.md",
   "docs/producer/PRODUCER_PLAN.md",
@@ -44,9 +44,9 @@ export const PRODUCER_REFERENCED_DOCTRINE_PATHS = [
 ] as const;
 
 const STYLE_DOCTRINE: Record<string, string> = {
-  caleb: "docs/studies/CALEB_STYLE.md",
-  jadenly: "scripts/producer/docs/findings/JADEN_STYLE.md",
-  angela: "docs/studies/ANGELA_STYLE.md",
+  restrained: "docs/studies/RESTRAINED_STYLE.md",
+  punch: "scripts/producer/docs/findings/PUNCH_STYLE.md",
+  slideware: "docs/studies/SLIDEWARE_STYLE.md",
 };
 const SHA256 = /^[0-9a-f]{64}$/;
 const LEARNING_DIR = ".sniper-learning";

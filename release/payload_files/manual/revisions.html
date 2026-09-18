@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Asking for a change</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <p class="kicker">Manual · 5 of 10</p>
+  <h1>Asking for a change, and not losing work</h1>
+  <p class="lede">How to get one thing fixed without the rest of the edit being rebuilt around you.</p>
+</header>
+<h2>Ask for the smallest true thing</h2>
+<p>Revisions work best when they name the defect, not the desired redesign. Compare:</p>
+<table>
+<tr><th>Works</th><th>Works badly</th></tr>
+<tr><td><em>"The caption at 0:14 is covering my face — move it up."</em></td>
+    <td><em>"Make the captions better."</em></td></tr>
+<tr><td><em>"Cut the false start at the very beginning, before 'so basically'."</em></td>
+    <td><em>"Tighten the intro."</em></td></tr>
+<tr><td><em>"The card at 1:02 says 40% but I said 'about a third'. Fix the number."</em></td>
+    <td><em>"Check the graphics."</em></td></tr>
+<tr><td><em>"Too much zooming in the second half — halve it."</em></td>
+    <td><em>"Less motion."</em></td></tr>
+</table>
+<p>A named defect gets a minimal change. A vague one gets a broader rebuild, because it
+cannot tell which part you meant.</p>
+
+<h2>What is protected when you ask for a change</h2>
+<ul>
+  <li><strong>Work you approved is not silently redone.</strong> Sniper reuses the parts
+  of the edit your change does not touch — but only while the plan, the source and the
+  tools still hash the same. If anything upstream changed, it rebuilds rather than reusing
+  something stale.</li>
+  <li><strong>An approval is bound to exact bytes.</strong> A finished video counts as
+  approved only while its plan, its asset list, its own bytes and the completed job all
+  still match. Changing the plan invalidates the approval rather than leaving it
+  attached to a different video.</li>
+  <li><strong>You are told which happened.</strong> The receipt says whether the change
+  was a bounded reuse or a larger rebuild. If a change is too broad or unsupported it
+  stops for your decision instead of guessing.</li>
+</ul>
+
+<h2>Interrupting, resuming and reopening</h2>
+<ul>
+  <li><strong>Closing the browser tab does nothing.</strong> The edit is a separate
+  background process on purpose.</li>
+  <li><strong>Restarting the app does nothing either.</strong> The edit keeps going and
+  reconnects.</li>
+  <li><strong>If the machine or the process dies</strong>, the edit becomes
+  <em>interrupted</em> and you get a <strong>Resume</strong> option that continues from
+  the last safe checkpoint rather than from the beginning.</li>
+  <li><strong>Reopening a project later</strong> — point Sniper at
+  <code>~/ProjectSniper/&lt;project&gt;/</code>. Its state is read from what is actually
+  on disk, not from a log, so a project you left months ago still reports accurately.</li>
+  <li><strong>One edit at a time per project.</strong> Keep as many projects as you like.</li>
+</ul>
+
+<h2>Confirming the change is really in the video</h2>
+<div class="warn">
+<p>A revision is not done because the tool said "done". Confirm it in the encoded output:
+<strong>play the new export and look at the moment you asked about.</strong> If you also
+adjusted graphics in the editable project, both views have to show the same thing — see
+<a href="review-and-studio.html">Reviewing the video and opening the editable project</a>.</p>
+</div>
+
+<p class="next"><strong>Next:</strong> <a href="review-and-studio.html">Reviewing the result &rarr;</a></p>
+<footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>
+</div>
+</body>
+</html>

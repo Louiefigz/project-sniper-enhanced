@@ -131,15 +131,15 @@ class TemplateUsageContractTests(unittest.TestCase):
         self.assertEqual(verdict["metrics"]["maximumFeasibleDistinctKinds"], 2)
 
     def test_profiled_plan_allocates_against_profile_compatible_kinds(self) -> None:
-        plan = _plan(kind="nateherk-rail")
+        plan = _plan(kind="module-rail")
         plan["target"].update({"graphicsStyle": "face-bridge",
-                               "visualProfile": "nateherk-editorial-v1"})
+                               "visualProfile": "module-editorial-v1"})
         beats = [{"beatId": "intro-proof", "evidence": "first proof",
-                  "compatibleKinds": ["nateherk-rail"]}]
+                  "compatibleKinds": ["module-rail"]}]
         with mock.patch.object(tuc, "semantic_beats", return_value=beats) as mocked:
             verdict = tuc.check(plan, [{"end": 10.0}], _empty_snapshot())
         self.assertTrue(verdict["ok"], verdict)
-        self.assertEqual(mocked.call_args.args[2], "nateherk-editorial-v1")
+        self.assertEqual(mocked.call_args.args[2], "module-editorial-v1")
 
 
 if __name__ == "__main__":

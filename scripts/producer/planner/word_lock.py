@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """word_lock — word-locked seams: snap plan seams onto kept-word boundaries.
 
-NATEHERK_STUDY.md T-G / §5 item 5: every transition start in the reference
+MODULE_STUDY.md T-G / §5 item 5: every transition start in the reference
 lands on a narration phrase boundary (4/4 spot checks vs the VTT: 25.7 "…about
 to see.", 67.2 "But benchmarks…", 186.0 "This is day one", 187.4 "So that
 was…"). Our graphics ENTRANCES are mostly word-anchored already (triggers are

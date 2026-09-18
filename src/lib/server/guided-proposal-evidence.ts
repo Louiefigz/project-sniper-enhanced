@@ -155,7 +155,7 @@ export function omittedProposalCatalog(version: number, plan: Record<string, unk
   if (version !== 6 && version !== 7 && version !== 8) return null;
   const target = objectValue(plan.target, "accepted catalog target"), lanes = target.lanes;
   if (!lanes || typeof lanes !== "object" || Array.isArray(lanes)
-      || (lanes as Record<string, unknown>).graphics !== "off" || target.style === "caleb") return null;
+      || (lanes as Record<string, unknown>).graphics !== "off" || target.style === "restrained") return null;
   const fields = Object.keys(plan).sort();
   if (fields.join(",") !== "cutDecisions,cutTrack,planVersion,target") return null;
   return { catalog: [] as ProposalCatalogEntry[], catalogHash: canonicalJsonSha256({

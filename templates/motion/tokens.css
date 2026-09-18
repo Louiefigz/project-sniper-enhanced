@@ -71,9 +71,9 @@
   --font-serif-accent: Georgia, "Times New Roman", Times, serif;
 }
 
-/* ---- JADEN pack additions (G1/G4, 2026-07-09) ----------------------------
+/* ---- PUNCH pack additions (G1/G4, 2026-07-09) ----------------------------
    Display-serif "shout" face for the two-tone keyword lockups
-   (scripts/producer/docs/findings/JADEN_STYLE.md §5.1: chunky rounded serif,
+   (scripts/producer/docs/findings/PUNCH_STYLE.md §5.1: chunky rounded serif,
    Cooper/Recoleta/Chunk-Five class, 6/6 reels). Embedded face: ChunkFive
    Regular — SIL OFL 1.1 (Meredith Mandel, The League of Moveable Type);
    source of truth PROJECT_SNIPER/assets/fonts/ChunkFive-Regular.otf (+ license
@@ -89,7 +89,7 @@
 }
 
 :root {
-  /* Signature lemon (JADEN_STYLE.md §5.1: ONE yellow per reel in the measured
+  /* Signature lemon (PUNCH_STYLE.md §5.1: ONE yellow per reel in the measured
      #F2D24B-#F5E960 lemon/amber family — DQr #F3EA2D · DVg #F5E960 ·
      DZ2 #f0b03a-#f5c542 · DaG ~#F5C518 · DaV #F2D24B, granular.json
      styleTokens). ONE house token; default = DVg's measured #F5E960 (the
@@ -99,7 +99,7 @@
   /* The shout serif + its fallback chain (heaviest first). */
   --font-serif-display: "ChunkFive", "Cooper Black", "Recoleta", Georgia, serif;
 
-  /* ---- Motion tokens (G4 — JADEN_STYLE.md §5.3 animation law) ----
+  /* ---- Motion tokens (G4 — PUNCH_STYLE.md §5.3 animation law) ----
      IN  = pop <= 2 frames (<=83ms measured, 4 reels HIGH; alpha is INSTANT,
            never a fade; scale settle 0.94 -> 1 at most).
      OUT = NEVER animated (6/6 HIGH: hard-off <=1-2f, ON a cut or a semantic
@@ -110,8 +110,8 @@
   --pop-scale-from: 0.94;
   --instant-out-dur: 0s;     /* THE EXIT LAW — exits are hard-off */
 
-  /* ---- NATEHERK pack (docs/studies/NATEHERK_STUDY.md §3 ranks 2-4 + §2 T-D) ----
-     A separate grammar lane from the jaden pop law above (jaden untouched).
+  /* ---- MODULE pack (docs/studies/MODULE_STUDY.md §3 ranks 2-4 + §2 T-D) ----
+     A separate grammar lane from the punch pop law above (punch untouched).
      Eyebrow-first: mono-caps microtext + colored dot precedes every headline
      by --eyebrow-lead (rank 3, band 0.08-0.5s). Text is ALWAYS an in-place
      opacity ramp (--text-ramp-dur, rank 4 — never travels more than a few
@@ -126,23 +126,23 @@
   --skeleton-gap: 0.35s;
   --exit-blur-dur: 0.15s;
 
-  /* ---- NATEHERK §5 items 8-9 (longform lane; operator-adjudicated LEGAL
-     for longform 2026-07-10, still banned for shorts — plan_lint_nateherk.py).
+  /* ---- MODULE §5 items 8-9 (longform lane; operator-adjudicated LEGAL
+     for longform 2026-07-10, still banned for shorts — plan_lint_module.py).
      Semantic dual accent (§3 rank 6, consistent across all 14 takeovers):
      lime = hero/RESULTS, cyan = PROCESS/status, gray = COMPARISON. Light
      rail skin (T-B 13.35->13.72): cream #f0f0e6 field ~33%W beside the live
      face, ink #1a1a1a type. Dark takeover canvas (§3 rank 11): near-black
-     #0c1014 + faint grid (nateherk-takeover.html). */
+     #0c1014 + faint grid (module-takeover.html). */
   --accent-result: #c6f542;
   --accent-process: #35b6d9;
   --accent-compare: #9aa0a6;
   /* Receipt/evidence line gray (FAILURE_LEDGER LL-006): 0.5 alpha was the
      dimmest text in the c0679 QC - borderline at phone size. Brighter token
-     shared by the nateherk-takeover + statement-card ribbons. */
+     shared by the module-takeover + statement-card ribbons. */
   --receipt-gray: rgba(255, 255, 255, 0.72);
   --rail-cream: #f0f0e6;
   --rail-cream-ink: #1a1a1a;
-  --nateherk-canvas: #0c1014;
+  --module-canvas: #0c1014;
 }
 
 /* ---- Hand-drawn (hw) family additions (catalog port wave A, 2026-08-28) ----

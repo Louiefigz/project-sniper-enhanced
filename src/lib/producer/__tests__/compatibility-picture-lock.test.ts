@@ -168,7 +168,7 @@ async function testStableAndVisualOnly(item: Fixture): Promise<void> {
     ...(visualPlan.target as Record<string, unknown>),
     graphicsStyle: "face-bridge",
     graphicsStyleRationale: "Evidence-dense visual treatment",
-    visualProfile: "nateherk-editorial-v1",
+    visualProfile: "module-editorial-v1",
   };
   writeFileSync(item.ctx.planPath, JSON.stringify(visualPlan));
   const visual = await mintCompatibilityPictureLock(

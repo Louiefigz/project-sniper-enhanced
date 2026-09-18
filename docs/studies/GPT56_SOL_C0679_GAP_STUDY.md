@@ -1,7 +1,7 @@
 # GPT-5.6 Sol benchmark → C0679 gap study
 
 Date: 2026-07-15
-Reference: Nate Herk, `J_jswzXhYJA`
+Reference: Module, `J_jswzXhYJA`
 Reference scope: AI-created section only, 0:00–3:07
 Candidate: `C0679_mastered.mp4`, 11:10 at 1920×1080/24fps
 
@@ -75,7 +75,7 @@ allowed to become.
 
 ## Reference view-by-view anatomy
 
-The exact payloads and animation measurements live in `NATEHERK_CARDS.md`; this
+The exact payloads and animation measurements live in `MODULE_CARDS.md`; this
 table records what each view contributes to the editing system.
 
 | Time | View | Editorial job | Why it works |
@@ -192,16 +192,16 @@ not address any of these structural symptoms.
 
 ### 1. The study existed but was not canonical
 
-`NATEHERK_STUDY.md` and `NATEHERK_CARDS.md` already captured the benchmark in
+`MODULE_STUDY.md` and `MODULE_CARDS.md` already captured the benchmark in
 unusual detail. Until this audit, none of its rules had been appended to
 `REFERENCE_STYLE_STUDY.md`, which is the producer-study skill's canonical rule
 sink. Knowledge existed as a report, not as binding doctrine.
 
 ### 2. The templates existed but the assignment was not authoritative
 
-The repository already contains `nateherk-rail`, `nateherk-takeover`,
-`nateherk-ledger-dark`, `nateherk-scoreboard`, `nateherk-bullet-bars`, and
-`nateherk-pipeline`. The source C0679 plan selected some of them. Palmier later
+The repository already contains `module-rail`, `module-takeover`,
+`module-ledger-dark`, `module-scoreboard`, `module-bullet-bars`, and
+`module-pipeline`. The source C0679 plan selected some of them. Palmier later
 replaced those selections with generic fallbacks.
 
 Template availability is not delivery. A selected form must remain the selected
@@ -229,10 +229,10 @@ graphics. The most damaging replacements include:
 
 | Graphic | Source decision | Palmier live kind |
 |---|---|---|
-| `g-evhzvx3c` | `nateherk-bullet-bars` | `fragment-payoff` |
-| `g-alq59502` | `nateherk-ledger-dark` | `glass-lower-third` |
-| `g-ulk3rqzd` | `nateherk-ledger-dark` | `glass-lower-third` |
-| `g-oawrgolp` | `nateherk-ledger-dark` | `glass-rail` |
+| `g-evhzvx3c` | `module-bullet-bars` | `fragment-payoff` |
+| `g-alq59502` | `module-ledger-dark` | `glass-lower-third` |
+| `g-ulk3rqzd` | `module-ledger-dark` | `glass-lower-third` |
+| `g-oawrgolp` | `module-ledger-dark` | `glass-rail` |
 | `g-hkrcw1wv` | `whiteboard-map` | `glass-lower-third` |
 | `g-3wq72249` | `whiteboard-list` | `glass-rail` |
 
@@ -255,7 +255,7 @@ The live plan currently fails `plan_lint.py` with errors for:
 - all eight decision/kind mismatches;
 - only two uniquely bound first-minute graphic decisions where four are needed.
 
-The linter even cites `NATEHERK_CARDS` and its 20/23 reference ratio. The system
+The linter even cites `MODULE_CARDS` and its 20/23 reference ratio. The system
 knew. The old global `.sniper-palmier-livedrive` bypass made knowing irrelevant.
 
 ### 6. The authoring workflow stalled before convergence

@@ -40,7 +40,7 @@ behavior. Do not ask Aaron to restate the decisions below.
 - Make the words and pictures tell the same story. Every visual must have a
   specific explanatory, evidential, emotional or orienting job.
 - Master both restrained, authentic delivery and more produced, fast-paced
-  explanation. Nate Herk supplies produced examples; Caleb Ralston and Lewis
+  explanation. Module supplies produced examples; Restrained Ralston and Lewis
   Mudrich supply authentic contrasts. These are references, not creator presets.
 - Vary views and information deliberately. A fast passage may develop every one
   or two seconds, but there is no universal two-second template-swap requirement.
@@ -64,9 +64,9 @@ not establish story quality, taste or legibility.
 1. [Expanded Nate library](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/docs/studies/shorts-visual-playbook/nate-sequences/README.md).
 2. [Directing guide with multiple examples per decision](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/docs/studies/shorts-visual-playbook/nate-sequences/DIRECTING_GUIDE.md).
 3. [Authentic and produced treatment library](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/docs/studies/shorts-visual-playbook/README.md).
-4. [Student-kit foundation and sources read](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/STUDENT_KIT_FOUNDATION.md).
+4. [Student-kit foundation and sources read](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/module-30-shorts-study-2026-09-10/STUDENT_KIT_FOUNDATION.md).
 5. [Style-selection study](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/docs/studies/SHORTS_STYLE_SELECTION_2026-09-10.md).
-6. [Implementation audit and proposed workflow](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/nate-herk-30-shorts-study-2026-09-10/IMPLEMENTATION_REVIEW.md).
+6. [Implementation audit and proposed workflow](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/module-30-shorts-study-2026-09-10/IMPLEMENTATION_REVIEW.md).
 7. [Evidence limits and QA](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/docs/studies/shorts-visual-playbook/nate-sequences/QA.md).
 
 Open actual images with an image-viewing tool. Reading descriptions or catalog
@@ -87,7 +87,7 @@ Do not impose long-form geometry or an example's decorative style on every Short
 
 ## What is complete
 
-The broader visual study covered 30 Nate Shorts, three Caleb reels and three
+The broader visual study covered 30 Nate Shorts, three Restrained reels and three
 Lewis reels. The original saved library contained 18 treatments: eight authentic
 and ten Nate treatments. Those ten Nate treatments came from eight videos.
 

@@ -14,7 +14,7 @@ true peak at−5.0dBTP were both acceptable, but neither makes a persistent tone
 acceptable dialogue. A short transport fixture can be unsuitable for a
 complete quality test.
 
-The second failure was an applicability bug. `nateherk-bullet-bars` normally
+The second failure was an applicability bug. `module-bullet-bars` normally
 uses a720px side rail, but this candidate explicitly requested `own-screen`.
 The compositor honored that request with a1920x1080 frame. The auditor looked
 up rail geometry by template kind before checking the explicit presentation,

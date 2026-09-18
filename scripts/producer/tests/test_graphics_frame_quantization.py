@@ -88,7 +88,7 @@ class FrameQuantizationTests(unittest.TestCase):
             "kind": "statement-card", "anchor": "free-band",
             "outStart": 7.16, "outEnd": 9.70,
             "spec": {
-                "variant": "nateherk", "statements": "FIRST|SECOND",
+                "variant": "module", "statements": "FIRST|SECOND",
                 "statementLands": 2.24, "bg": "dark", "accent": "#D7FF3F",
             },
         }

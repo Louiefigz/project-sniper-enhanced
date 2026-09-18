@@ -432,7 +432,7 @@ Known test state:
 
 - Focused motion/recompose/transition tests: 253 passing.
 - Auto-edit concurrency, loop, type-check, and targeted lint tests pass.
-- The full npm suite currently reaches an unrelated `comps-catalog-coverage.test.ts` failure caused by newly tightened Nate Herk/avatar default-spec floors. Do not misattribute that failure to critic concurrency.
+- The full npm suite currently reaches an unrelated `comps-catalog-coverage.test.ts` failure caused by newly tightened Module/avatar default-spec floors. Do not misattribute that failure to critic concurrency.
 - A disposable live Palmier smoke exists at `scripts/producer/tests/live_palmier_canonical_smoke.py`, but do not run it while the user's active CLI build is open/writing.
 
 ## Acceptance test: the first 60 seconds

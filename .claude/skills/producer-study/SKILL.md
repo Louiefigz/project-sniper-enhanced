@@ -49,7 +49,7 @@ keep individual full frames beside strips; adjacent atlas text is not one image.
 Count cases, directing beats and source frames separately from unique templates.
 
 Start cross-case direction with [Format foundations](../../../docs/studies/shorts-visual-playbook/FORMAT_FOUNDATIONS.md)
-and the [expanded Caleb/Lewis cases](../../../docs/studies/shorts-visual-playbook/authentic-expansion/README.md).
+and the [expanded Restrained/Lewis cases](../../../docs/studies/shorts-visual-playbook/authentic-expansion/README.md).
 Study message → viewing need → format → actual crop/pane geometry → development
 and readable hold → exit condition. Compare plausible alternatives, including
 different formats used by the same creator. Record why a split's two jobs need

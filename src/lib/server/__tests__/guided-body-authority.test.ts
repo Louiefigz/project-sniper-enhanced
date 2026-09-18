@@ -12,7 +12,7 @@ import { assertOpeningMediaMetadata } from "../guided-opening-media-input";
 type Fixture = ReturnType<typeof bodyAuthorityFixture>;
 test("a later body-only always-hole card rejects before the expensive verifier without narrowing opening-only acceptance", async () => {
   const f = bodyAuthorityFixture(), candidate = f.proposal.result.candidate, media = f.reads.mediaAuthority(f.proposal as never);
-  candidate.graphicsTrack[7].kind = "nateherk-takeover";
+  candidate.graphicsTrack[7].kind = "module-takeover";
   media.bindings!.graphics[7].entryHash = hash(candidate.graphicsTrack[7]);
   media.bindings!.candidatePlanHash = hash(candidate);
   const before = structuredClone({ candidate, bindings: media.bindings });

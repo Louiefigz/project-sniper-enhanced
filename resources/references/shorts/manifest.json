@@ -1,0 +1,220 @@
+{
+  "schema": "sniper-reference-library-v1",
+  "version": "2026-09-17.1",
+  "entry_count": 3,
+  "entries": [
+    {
+      "id": "A01",
+      "version": "2026-09-17.1",
+      "title": "A numbered list that builds as it is spoken",
+      "scope": "original-reference-rendered-from-project-sniper-templates",
+      "story_job": "Let the viewer count along with the speaker.",
+      "use_when": "The speaker names three short, parallel items.",
+      "do_not_use_when": "The items are long sentences, or not parallel.",
+      "catalog": [
+        "list-build"
+      ],
+      "frames": [
+        {
+          "path": "resources/references/shorts/frames/A01-0.jpg",
+          "sha256": "f458a6a9ffd32088d699713726ee606e837787ebbbbf9c32ca2d91d17ac789df",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 0.4,
+          "render": {
+            "composition": "templates/motion/compositions/list-build.html",
+            "variables": {
+              "item1": "Write the promise",
+              "item2": "Show the proof",
+              "item3": "Ask one question"
+            },
+            "time_s": 0.4
+          }
+        },
+        {
+          "path": "resources/references/shorts/frames/A01-1.jpg",
+          "sha256": "1bd6ab52d1e7a354bd1f2aad3dc47f04057da6ca6a1f60d7e575078722ed3899",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 1.1,
+          "render": {
+            "composition": "templates/motion/compositions/list-build.html",
+            "variables": {
+              "item1": "Write the promise",
+              "item2": "Show the proof",
+              "item3": "Ask one question"
+            },
+            "time_s": 1.1
+          }
+        },
+        {
+          "path": "resources/references/shorts/frames/A01-2.jpg",
+          "sha256": "8372dc63a270cac0065afc20660e8df143a15edab513244fbf98947d7f5b8465",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 2.6,
+          "render": {
+            "composition": "templates/motion/compositions/list-build.html",
+            "variables": {
+              "item1": "Write the promise",
+              "item2": "Show the proof",
+              "item3": "Ask one question"
+            },
+            "time_s": 2.6
+          }
+        }
+      ]
+    },
+    {
+      "id": "A02",
+      "version": "2026-09-17.1",
+      "title": "Before and after, side by side",
+      "scope": "original-reference-rendered-from-project-sniper-templates",
+      "story_job": "Make a change visible by putting both states in one frame.",
+      "use_when": "The speaker contrasts a before and an after with concrete details.",
+      "do_not_use_when": "The 'after' is a claim the source does not support.",
+      "catalog": [
+        "versus-split"
+      ],
+      "frames": [
+        {
+          "path": "resources/references/shorts/frames/A02-0.jpg",
+          "sha256": "84f0dd368fc31383b4243fa19cbe382795c59dc6ca6f72f200ae4f1140b072dc",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 0.3,
+          "render": {
+            "composition": "templates/motion/compositions/versus-split.html",
+            "variables": {
+              "leftTitle": "Before",
+              "rightTitle": "After",
+              "left1": "Two-hour edit",
+              "right1": "Forty minutes",
+              "left2": "Every take reviewed",
+              "right2": "Best takes first",
+              "left3": "Guessing the cut",
+              "right3": "Plan, then cut"
+            },
+            "time_s": 0.3
+          }
+        },
+        {
+          "path": "resources/references/shorts/frames/A02-1.jpg",
+          "sha256": "38c6d8be542884980df6cf42f238cf3c2e07b22c5679eb94070f28d3b65f6058",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 1.1,
+          "render": {
+            "composition": "templates/motion/compositions/versus-split.html",
+            "variables": {
+              "leftTitle": "Before",
+              "rightTitle": "After",
+              "left1": "Two-hour edit",
+              "right1": "Forty minutes",
+              "left2": "Every take reviewed",
+              "right2": "Best takes first",
+              "left3": "Guessing the cut",
+              "right3": "Plan, then cut"
+            },
+            "time_s": 1.1
+          }
+        },
+        {
+          "path": "resources/references/shorts/frames/A02-2.jpg",
+          "sha256": "2ee5d2ed11a2f7d6536d4a2b7a75524d06874591e50c288ee9fb0ee3ee12f98f",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 2.4,
+          "render": {
+            "composition": "templates/motion/compositions/versus-split.html",
+            "variables": {
+              "leftTitle": "Before",
+              "rightTitle": "After",
+              "left1": "Two-hour edit",
+              "right1": "Forty minutes",
+              "left2": "Every take reviewed",
+              "right2": "Best takes first",
+              "left3": "Guessing the cut",
+              "right3": "Plan, then cut"
+            },
+            "time_s": 2.4
+          }
+        }
+      ]
+    },
+    {
+      "id": "A03",
+      "version": "2026-09-17.1",
+      "title": "One statement with one emphasis",
+      "scope": "original-reference-rendered-from-project-sniper-templates",
+      "story_job": "Give a single line the whole screen when it is the thesis.",
+      "use_when": "The line is the point the rest of the Short supports.",
+      "do_not_use_when": "The line is setup rather than the thesis.",
+      "catalog": [
+        "statement-card"
+      ],
+      "frames": [
+        {
+          "path": "resources/references/shorts/frames/A03-0.jpg",
+          "sha256": "e316d373a83bb11cffb141a2b8fd3da072ed5001776d40a2bd060dbcc7f47b1f",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 0.3,
+          "render": {
+            "composition": "templates/motion/compositions/statement-card.html",
+            "variables": {
+              "text": "Show the result *before* the method"
+            },
+            "time_s": 0.3
+          }
+        },
+        {
+          "path": "resources/references/shorts/frames/A03-1.jpg",
+          "sha256": "4f9be008207c966a2b5de9484e0e61e7216095739ff16cb4fde4e4e7bfe13c77",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 1.2,
+          "render": {
+            "composition": "templates/motion/compositions/statement-card.html",
+            "variables": {
+              "text": "Show the result *before* the method"
+            },
+            "time_s": 1.2
+          }
+        },
+        {
+          "path": "resources/references/shorts/frames/A03-2.jpg",
+          "sha256": "4f9be008207c966a2b5de9484e0e61e7216095739ff16cb4fde4e4e7bfe13c77",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 3.0,
+          "render": {
+            "composition": "templates/motion/compositions/statement-card.html",
+            "variables": {
+              "text": "Show the result *before* the method"
+            },
+            "time_s": 3.0
+          }
+        }
+      ]
+    }
+  ]
+}

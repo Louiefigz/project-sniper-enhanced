@@ -1,0 +1,1152 @@
+{
+  "schema": "sniper-reference-sequences-v1",
+  "version": "2026-09-17.1",
+  "cases": [
+    {
+      "id": "N26",
+      "version": "2026-09-17.1",
+      "title": "Change the route, keep the destination",
+      "scope": "original-reference-rendered-from-project-sniper-templates",
+      "render_aspects": [
+        "16:9"
+      ],
+      "lesson": "When the speaker compares ways of reaching one goal, keep the goal fixed on screen and change only the route, so the viewer compares like with like.",
+      "opening": "The destination is named and placed first, before any route appears.",
+      "story_arc": "goal fixed -> first route -> its cost -> second route -> its cost -> the route the speaker recommends -> hand back to the speaker",
+      "payoff": "The recommended route is the last one drawn and the only one still lit.",
+      "catalog": [
+        "whiteboard-map",
+        "module-rail",
+        "glass-rail"
+      ],
+      "beats": [
+        {
+          "id": "N26-B01",
+          "spoken_idea": "The goal is stated",
+          "visible": "Title appears alone.",
+          "why_this_picture": "Name the destination before any option exists.",
+          "composition": "whiteboard-map",
+          "catalog_candidates": [
+            "whiteboard-map"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B01-0.jpg",
+              "sha256": "d3824aa82a51889457c3a08aff1a277a4d2bc0db5a51a7254a6f1d956df4f3b3",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 0.2,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "",
+                  "node2": "",
+                  "node3": "",
+                  "node4": ""
+                },
+                "time_s": 0.2
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B01-1.jpg",
+              "sha256": "0a008c8ac460d066f7f659f600f03b3171f5d87dfaf8c2c0e38b18ab6244e433",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 0.6,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "",
+                  "node2": "",
+                  "node3": "",
+                  "node4": ""
+                },
+                "time_s": 0.6
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B01-2.jpg",
+              "sha256": "78f090a4208ba98390209f4a61d2452bbf9a06ca8fbddacef3944b4451b230b9",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 1.0,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "",
+                  "node2": "",
+                  "node3": "",
+                  "node4": ""
+                },
+                "time_s": 1.0
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        },
+        {
+          "id": "N26-B02",
+          "spoken_idea": "First route: cold outreach",
+          "visible": "First node joins the fixed title.",
+          "why_this_picture": "One option at a time; the goal stays where it was.",
+          "composition": "whiteboard-map",
+          "catalog_candidates": [
+            "whiteboard-map"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B02-0.jpg",
+              "sha256": "6c3657528aa2ac53f441b994de45908dd08cc62cc430d051419a13b05d67dd94",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 0.4,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach"
+                },
+                "time_s": 0.4
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B02-1.jpg",
+              "sha256": "1f17924c82b6a4da3fd9ef353ed1287d73c4cf4dbd5e40e5a7fa475497163f73",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 0.8,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach"
+                },
+                "time_s": 0.8
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B02-2.jpg",
+              "sha256": "d036ea6cb4ecfefe65b7104b36957260b76671c357cb487bff736f750619b283",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 1.2,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach"
+                },
+                "time_s": 1.2
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        },
+        {
+          "id": "N26-B03",
+          "spoken_idea": "What the first route costs",
+          "visible": "Second node describes the cost.",
+          "why_this_picture": "Attach the cost to the route, not to a separate slide.",
+          "composition": "whiteboard-map",
+          "catalog_candidates": [
+            "whiteboard-map"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B03-0.jpg",
+              "sha256": "33a920da156d9889246ca300d6e85e5b31299a47259723174fa209308f91f1a4",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 1.0,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach",
+                  "node2": "Weeks of silence"
+                },
+                "time_s": 1.0
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B03-1.jpg",
+              "sha256": "83994c19387c11fb95b76d43d28edb25f2710c8b4f00cf5f2d265994eaec34c4",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 1.5,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach",
+                  "node2": "Weeks of silence"
+                },
+                "time_s": 1.5
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B03-2.jpg",
+              "sha256": "7642f7d226ab1f1da9925f5cd8f7b624d2dba7149231990ac442d9c88b45812b",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 2.0,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach",
+                  "node2": "Weeks of silence"
+                },
+                "time_s": 2.0
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        },
+        {
+          "id": "N26-B04",
+          "spoken_idea": "Second route: referrals",
+          "visible": "Third node adds the alternative.",
+          "why_this_picture": "The alternative arrives in the same frame as the first route.",
+          "composition": "whiteboard-map",
+          "catalog_candidates": [
+            "whiteboard-map"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B04-0.jpg",
+              "sha256": "eb95962755efd1c042ea9e38a666690b4c80436d7d42429015890d68dfb07abe",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 1.9,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach",
+                  "node2": "Weeks of silence",
+                  "node3": "Ask past colleagues"
+                },
+                "time_s": 1.9
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B04-1.jpg",
+              "sha256": "2f8c9731156e73b4a03bf5abe34dd8d454c32f0d97c6b2b7e6a058b7fc2c50dd",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 2.4,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach",
+                  "node2": "Weeks of silence",
+                  "node3": "Ask past colleagues"
+                },
+                "time_s": 2.4
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B04-2.jpg",
+              "sha256": "4221abdafe585a80237681794faeafd01eaf571d3c2fada1c49f6edb5d145cb8",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 2.9,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach",
+                  "node2": "Weeks of silence",
+                  "node3": "Ask past colleagues"
+                },
+                "time_s": 2.9
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        },
+        {
+          "id": "N26-B05",
+          "spoken_idea": "Keep the destination while the route changes",
+          "visible": "The fourth node completes the comparison under the unchanged title.",
+          "why_this_picture": "The title never moves, so every node reads as a way to the same goal.",
+          "composition": "whiteboard-map",
+          "catalog_candidates": [
+            "whiteboard-map"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B05-0.jpg",
+              "sha256": "afd5ab5d02de536afa8336f467c1cd69b765bbed5d6d669e3268221effaa6452",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 2.6,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach",
+                  "node2": "Weeks of silence",
+                  "node3": "Ask past colleagues",
+                  "node4": "First call this week"
+                },
+                "time_s": 2.6
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B05-1.jpg",
+              "sha256": "750ec17fb49fe23377986b9db5feef7c1732d09e2fea18928a005ee6d7ce4a54",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 3.4,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach",
+                  "node2": "Weeks of silence",
+                  "node3": "Ask past colleagues",
+                  "node4": "First call this week"
+                },
+                "time_s": 3.4
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B05-2.jpg",
+              "sha256": "05b539678642e8c2a5288c7f4f751ad32d7f6f8c997a919d0e2580755e2f4e6d",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 4.2,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach",
+                  "node2": "Weeks of silence",
+                  "node3": "Ask past colleagues",
+                  "node4": "First call this week"
+                },
+                "time_s": 4.2
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        },
+        {
+          "id": "N26-B06",
+          "spoken_idea": "The recommendation is named",
+          "visible": "Handoff text appears.",
+          "why_this_picture": "State the choice in words once the picture has made the case.",
+          "composition": "whiteboard-map",
+          "catalog_candidates": [
+            "whiteboard-map"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B06-0.jpg",
+              "sha256": "1679f43546e4f0c4fe1ed57ba0bd5fef9f33821ab97531b2dfb1fa7c9fb1e728",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 4.5,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach",
+                  "node2": "Weeks of silence",
+                  "node3": "Ask past colleagues",
+                  "node4": "First call this week",
+                  "handoffText": "Start with who already trusts you",
+                  "handoffAt": 4.4
+                },
+                "time_s": 4.5
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B06-1.jpg",
+              "sha256": "07e46eb223b8888b776993ffba12c597bb49948989cc3b30e066605bc5eea1d5",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 5.0,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach",
+                  "node2": "Weeks of silence",
+                  "node3": "Ask past colleagues",
+                  "node4": "First call this week",
+                  "handoffText": "Start with who already trusts you",
+                  "handoffAt": 4.4
+                },
+                "time_s": 5.0
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B06-2.jpg",
+              "sha256": "f5e8faf585a13f220d4c5b4e03ebd99f12992295a2dc66543aa5324900e919d1",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 5.5,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach",
+                  "node2": "Weeks of silence",
+                  "node3": "Ask past colleagues",
+                  "node4": "First call this week",
+                  "handoffText": "Start with who already trusts you",
+                  "handoffAt": 4.4
+                },
+                "time_s": 5.5
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        },
+        {
+          "id": "N26-B07",
+          "spoken_idea": "Hold the finished map",
+          "visible": "Everything is on screen; nothing moves.",
+          "why_this_picture": "Give the viewer time to read the whole comparison.",
+          "composition": "whiteboard-map",
+          "catalog_candidates": [
+            "whiteboard-map"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B07-0.jpg",
+              "sha256": "366adf566debfbfbdebb89d8018417284d917a121601cbc2e755f73ecd92c713",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 5.6,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach",
+                  "node2": "Weeks of silence",
+                  "node3": "Ask past colleagues",
+                  "node4": "First call this week",
+                  "handoffText": "Start with who already trusts you",
+                  "handoffAt": 4.4
+                },
+                "time_s": 5.6
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B07-1.jpg",
+              "sha256": "7a525f58cd1f55bffe5b06d2b7e74b80c608f72914ab1a9aa67d2bc41f2a0634",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 6.1,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach",
+                  "node2": "Weeks of silence",
+                  "node3": "Ask past colleagues",
+                  "node4": "First call this week",
+                  "handoffText": "Start with who already trusts you",
+                  "handoffAt": 4.4
+                },
+                "time_s": 6.1
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B07-2.jpg",
+              "sha256": "2b3f4d064a4105329098487e1e8426d901ff6a5e7e0d5b8fe40c6439e650076b",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 6.6,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach",
+                  "node2": "Weeks of silence",
+                  "node3": "Ask past colleagues",
+                  "node4": "First call this week",
+                  "handoffText": "Start with who already trusts you",
+                  "handoffAt": 4.4
+                },
+                "time_s": 6.6
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        },
+        {
+          "id": "N26-B08",
+          "spoken_idea": "A shorter variant for a tighter Short",
+          "visible": "Two routes only, same fixed destination.",
+          "why_this_picture": "When time is short, cut to the two routes that differ most.",
+          "composition": "whiteboard-map",
+          "catalog_candidates": [
+            "whiteboard-map"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B08-0.jpg",
+              "sha256": "e4cdceab9f6a2cd823dce4bfa3aede28f3a87f22188177cbf2b94ede28c39c2c",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 0.6,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach",
+                  "node2": "Ask past colleagues",
+                  "node3": "",
+                  "node4": ""
+                },
+                "time_s": 0.6
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B08-1.jpg",
+              "sha256": "c8ec0d419d3981aabca3db3e65a2032934ab3f8e307579ccbeb6688814c271cc",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 1.2,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach",
+                  "node2": "Ask past colleagues",
+                  "node3": "",
+                  "node4": ""
+                },
+                "time_s": 1.2
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B08-2.jpg",
+              "sha256": "8be50e1794cfefbbe3fb7b44b3e02216196448737eaabbc4c79e2f00735c5917",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 1.8,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Get the first client",
+                  "node1": "Cold outreach",
+                  "node2": "Ask past colleagues",
+                  "node3": "",
+                  "node4": ""
+                },
+                "time_s": 1.8
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        },
+        {
+          "id": "N26-B09",
+          "spoken_idea": "A different goal, same method",
+          "visible": "The mechanism reused for a different destination.",
+          "why_this_picture": "The method transfers; only the destination and routes change.",
+          "composition": "whiteboard-map",
+          "catalog_candidates": [
+            "whiteboard-map"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B09-0.jpg",
+              "sha256": "c0f4d9fec1a8bec2bc2114f68b7afafc8bef06a2f7638512567eb7e95c15d3fe",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 2.6,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Finish the first draft",
+                  "node1": "Write every day",
+                  "node2": "Write one long session",
+                  "node3": "Outline first",
+                  "node4": "Done by Friday"
+                },
+                "time_s": 2.6
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B09-1.jpg",
+              "sha256": "8886f5b8e4734252999cc14e57edca345f1ebf7161d6c9fe07eb10b9fbc71ee5",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 3.4,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Finish the first draft",
+                  "node1": "Write every day",
+                  "node2": "Write one long session",
+                  "node3": "Outline first",
+                  "node4": "Done by Friday"
+                },
+                "time_s": 3.4
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N26-B09-2.jpg",
+              "sha256": "2c715473ef70400de97c6c9b03698850f01c7a951422dc8abc418bd84ecbf169",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 4.2,
+              "render": {
+                "composition": "templates/motion/compositions/whiteboard-map.html",
+                "variables": {
+                  "title": "Finish the first draft",
+                  "node1": "Write every day",
+                  "node2": "Write one long session",
+                  "node3": "Outline first",
+                  "node4": "Done by Friday"
+                },
+                "time_s": 4.2
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        }
+      ]
+    },
+    {
+      "id": "N27",
+      "version": "2026-09-17.1",
+      "title": "Show value growing against time",
+      "scope": "original-reference-rendered-from-project-sniper-templates",
+      "render_aspects": [
+        "16:9",
+        "9:16"
+      ],
+      "lesson": "When the claim is about how much something gains over time, show the amount and the time together so the viewer sees the rate, not just the total.",
+      "opening": "The starting value appears before any growth.",
+      "story_arc": "starting value -> the number climbs -> the time bar fills -> the comparison chart settles -> hand back",
+      "payoff": "The final chart holds with the largest bar emphasised.",
+      "catalog": [
+        "count-up",
+        "widget-gauge",
+        "chart-story",
+        "stat-card"
+      ],
+      "beats": [
+        {
+          "id": "N27-B01",
+          "spoken_idea": "The number climbs",
+          "visible": "A counter rises to the stated figure.",
+          "why_this_picture": "Let the number arrive; do not start on the total.",
+          "composition": "count-up",
+          "catalog_candidates": [
+            "count-up"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/N27-B01-0.jpg",
+              "sha256": "93dbf697c48bf5136ce9bd244817e40f517bea8f06665f75759d53ccda8ef30a",
+              "dimensions": [
+                720,
+                1280
+              ],
+              "requested_time": 0.1,
+              "render": {
+                "composition": "templates/motion/compositions/count-up.html",
+                "variables": {
+                  "start": 0,
+                  "end": 43,
+                  "prefix": "",
+                  "suffix": " subscribers"
+                },
+                "time_s": 0.1
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N27-B01-1.jpg",
+              "sha256": "a23a91c29de4ba3834a96b918634ca9a40ec33633027d2498442ef725c0cfe10",
+              "dimensions": [
+                720,
+                1280
+              ],
+              "requested_time": 1.2,
+              "render": {
+                "composition": "templates/motion/compositions/count-up.html",
+                "variables": {
+                  "start": 0,
+                  "end": 43,
+                  "prefix": "",
+                  "suffix": " subscribers"
+                },
+                "time_s": 1.2
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N27-B01-2.jpg",
+              "sha256": "3ee20424d103df412a94ee91add566ffa940eb115785c307b43b17c22a249659",
+              "dimensions": [
+                720,
+                1280
+              ],
+              "requested_time": 2.8,
+              "render": {
+                "composition": "templates/motion/compositions/count-up.html",
+                "variables": {
+                  "start": 0,
+                  "end": 43,
+                  "prefix": "",
+                  "suffix": " subscribers"
+                },
+                "time_s": 2.8
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        },
+        {
+          "id": "N27-B02",
+          "spoken_idea": "Time passes on the same screen",
+          "visible": "A marker advances along a labelled bar.",
+          "why_this_picture": "Pair the gain with the time it took.",
+          "composition": "widget-gauge",
+          "catalog_candidates": [
+            "widget-gauge"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/N27-B02-0.jpg",
+              "sha256": "acd66d114709a6102688ad0039b3c5177728389272caa8debe984ef748e2372e",
+              "dimensions": [
+                720,
+                1280
+              ],
+              "requested_time": 0.4,
+              "render": {
+                "composition": "templates/motion/compositions/widget-gauge.html",
+                "variables": {
+                  "label": "Days since posting"
+                },
+                "time_s": 0.4
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N27-B02-1.jpg",
+              "sha256": "14fa89ed35fc5edcae0ab1203c28b01941c592f057764fa2604575380a4a50ee",
+              "dimensions": [
+                720,
+                1280
+              ],
+              "requested_time": 2.0,
+              "render": {
+                "composition": "templates/motion/compositions/widget-gauge.html",
+                "variables": {
+                  "label": "Days since posting"
+                },
+                "time_s": 2.0
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N27-B02-2.jpg",
+              "sha256": "caeb1770d234d333fc389b639f9b885ed96312397d810e059d59b1224b4b58d7",
+              "dimensions": [
+                720,
+                1280
+              ],
+              "requested_time": 3.9,
+              "render": {
+                "composition": "templates/motion/compositions/widget-gauge.html",
+                "variables": {
+                  "label": "Days since posting"
+                },
+                "time_s": 3.9
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        },
+        {
+          "id": "N27-B03",
+          "spoken_idea": "Compare periods",
+          "visible": "Bars grow period by period and the last is emphasised.",
+          "why_this_picture": "A comparison makes the rate readable at a glance.",
+          "composition": "chart-story",
+          "catalog_candidates": [
+            "chart-story"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/N27-B03-0.jpg",
+              "sha256": "8d50adc0f5d95b6f0442e28e957a2bcc6347255bf3b6e7a77cef967f6c0310a5",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 0.6,
+              "render": {
+                "composition": "templates/motion/compositions/chart-story.html",
+                "variables": {
+                  "data": "4, 11, 19, 43",
+                  "labels": "Day 1, Day 2, Day 4, Day 6",
+                  "emphasize": 3,
+                  "unit": ""
+                },
+                "time_s": 0.6
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N27-B03-1.jpg",
+              "sha256": "4ff617f600e36f5e73b3443e26d040060b395e2da10408b110b4a2868f433fb2",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 2.2,
+              "render": {
+                "composition": "templates/motion/compositions/chart-story.html",
+                "variables": {
+                  "data": "4, 11, 19, 43",
+                  "labels": "Day 1, Day 2, Day 4, Day 6",
+                  "emphasize": 3,
+                  "unit": ""
+                },
+                "time_s": 2.2
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N27-B03-2.jpg",
+              "sha256": "c5c199e6cc5b8bfec087adfb4a6f674045bbac168f2d67271110452ee477db07",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 4.6,
+              "render": {
+                "composition": "templates/motion/compositions/chart-story.html",
+                "variables": {
+                  "data": "4, 11, 19, 43",
+                  "labels": "Day 1, Day 2, Day 4, Day 6",
+                  "emphasize": 3,
+                  "unit": ""
+                },
+                "time_s": 4.6
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        }
+      ]
+    },
+    {
+      "id": "N10",
+      "version": "2026-09-17.1",
+      "title": "Mark the one word that carries the point",
+      "scope": "original-reference-rendered-from-project-sniper-templates",
+      "render_aspects": [
+        "9:16"
+      ],
+      "lesson": "When a sentence on screen has one word that matters, draw attention to that word after the sentence has been read, not before.",
+      "opening": "The full sentence appears unmarked.",
+      "story_arc": "sentence read -> emphasis drawn on one word -> hold",
+      "payoff": "The emphasised word is the last thing that changes.",
+      "catalog": [
+        "marker-highlight",
+        "underline-circle",
+        "hw-callout-circle"
+      ],
+      "beats": [
+        {
+          "id": "N10-B01",
+          "spoken_idea": "Read the sentence first",
+          "visible": "The line appears plain.",
+          "why_this_picture": "The viewer needs the whole thought before the emphasis means anything.",
+          "composition": "marker-highlight",
+          "catalog_candidates": [
+            "marker-highlight"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/N10-B01-0.jpg",
+              "sha256": "66ecaade2fd11e08a1a6fa8d0b678e30b96d362fb0b0a11ef3d5c6969cc84ebf",
+              "dimensions": [
+                720,
+                1280
+              ],
+              "requested_time": 0.3,
+              "render": {
+                "composition": "templates/motion/compositions/marker-highlight.html",
+                "variables": {
+                  "text": "The first line does the heavy lifting",
+                  "emphasisWord": "first line"
+                },
+                "time_s": 0.3
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N10-B01-1.jpg",
+              "sha256": "3efad2c8fe04ab4fcd44c87b1b6e9ea2b24409072709f55fdf4549521b97c56b",
+              "dimensions": [
+                720,
+                1280
+              ],
+              "requested_time": 0.6,
+              "render": {
+                "composition": "templates/motion/compositions/marker-highlight.html",
+                "variables": {
+                  "text": "The first line does the heavy lifting",
+                  "emphasisWord": "first line"
+                },
+                "time_s": 0.6
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N10-B01-2.jpg",
+              "sha256": "3efad2c8fe04ab4fcd44c87b1b6e9ea2b24409072709f55fdf4549521b97c56b",
+              "dimensions": [
+                720,
+                1280
+              ],
+              "requested_time": 0.85,
+              "render": {
+                "composition": "templates/motion/compositions/marker-highlight.html",
+                "variables": {
+                  "text": "The first line does the heavy lifting",
+                  "emphasisWord": "first line"
+                },
+                "time_s": 0.85
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        },
+        {
+          "id": "N10-B14",
+          "spoken_idea": "Focus the relevant detail",
+          "visible": "A highlight is drawn behind the key phrase.",
+          "why_this_picture": "Emphasis arrives after reading, on the phrase the speaker stresses.",
+          "composition": "marker-highlight",
+          "catalog_candidates": [
+            "marker-highlight"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/N10-B14-0.jpg",
+              "sha256": "ee9602ee1f0835f074723bf21d3672a360c9ea221a4435017fe1058365bb266d",
+              "dimensions": [
+                720,
+                1280
+              ],
+              "requested_time": 1.0,
+              "render": {
+                "composition": "templates/motion/compositions/marker-highlight.html",
+                "variables": {
+                  "text": "The first line does the heavy lifting",
+                  "emphasisWord": "first line"
+                },
+                "time_s": 1.0
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N10-B14-1.jpg",
+              "sha256": "f7dbe05dfef53fd8f2a043d97aae4e9844c27e8a80de91d8d0e74492d8f4fdb6",
+              "dimensions": [
+                720,
+                1280
+              ],
+              "requested_time": 1.6,
+              "render": {
+                "composition": "templates/motion/compositions/marker-highlight.html",
+                "variables": {
+                  "text": "The first line does the heavy lifting",
+                  "emphasisWord": "first line"
+                },
+                "time_s": 1.6
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N10-B14-2.jpg",
+              "sha256": "e757e986d78749532f470c10726580c6a9ba182ce6e3cd6928cbc24a635b14fa",
+              "dimensions": [
+                720,
+                1280
+              ],
+              "requested_time": 3.2,
+              "render": {
+                "composition": "templates/motion/compositions/marker-highlight.html",
+                "variables": {
+                  "text": "The first line does the heavy lifting",
+                  "emphasisWord": "first line"
+                },
+                "time_s": 3.2
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        }
+      ]
+    },
+    {
+      "id": "N04",
+      "version": "2026-09-17.1",
+      "title": "Zoom to the control that matters",
+      "scope": "original-reference-rendered-from-project-sniper-templates",
+      "render_aspects": [
+        "16:9"
+      ],
+      "lesson": "When the speaker refers to one part of a busy screen, move the view to that part instead of asking the viewer to find it.",
+      "opening": "The whole screen is shown briefly so the viewer knows where they are.",
+      "story_arc": "whole screen -> push in on the relevant control -> hold on it",
+      "payoff": "The control fills the frame, with a halo marking it.",
+      "catalog": [
+        "ui-focus-zoom",
+        "marker-highlight"
+      ],
+      "beats": [
+        {
+          "id": "N04-B13",
+          "spoken_idea": "Focus a relevant control",
+          "visible": "The view pushes in on one region of the screen.",
+          "why_this_picture": "Establish the whole screen, then move to the part being discussed.",
+          "composition": "ui-focus-zoom",
+          "catalog_candidates": [
+            "ui-focus-zoom"
+          ],
+          "source_frames": [
+            {
+              "path": "resources/references/shorts/sequences/frames/N04-B13-0.jpg",
+              "sha256": "a85d206ff3150c9f8c946454f8b461cecd0dc901b34f04404490b03d05309625",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 0.3,
+              "render": {
+                "composition": "templates/motion/compositions/ui-focus-zoom.html",
+                "variables": {
+                  "anchorX": 57,
+                  "anchorY": 63,
+                  "zoom": 1.9,
+                  "zoomAt": 1.2
+                },
+                "time_s": 0.3
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N04-B13-1.jpg",
+              "sha256": "0c5bbb7ab903ef1dac2ef09330cad3238b8140a0ffa1cacb23d0ae95af275d9d",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 1.6,
+              "render": {
+                "composition": "templates/motion/compositions/ui-focus-zoom.html",
+                "variables": {
+                  "anchorX": 57,
+                  "anchorY": 63,
+                  "zoom": 1.9,
+                  "zoomAt": 1.2
+                },
+                "time_s": 1.6
+              }
+            },
+            {
+              "path": "resources/references/shorts/sequences/frames/N04-B13-2.jpg",
+              "sha256": "52179acf8ad05984cdcf7327c4217882246cfccfb2ba6a98a4ded437a3e26749",
+              "dimensions": [
+                1280,
+                720
+              ],
+              "requested_time": 3.6,
+              "render": {
+                "composition": "templates/motion/compositions/ui-focus-zoom.html",
+                "variables": {
+                  "anchorX": 57,
+                  "anchorY": 63,
+                  "zoom": 1.9,
+                  "zoomAt": 1.2
+                },
+                "time_s": 3.6
+              }
+            }
+          ],
+          "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+          "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+        }
+      ]
+    }
+  ]
+}

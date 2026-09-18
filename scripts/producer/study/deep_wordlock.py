@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """deep_wordlock — P5: every event's distance to the nearest word boundary.
 
-The NATEHERK finding (word-locked seams) as a MEASUREMENT: for each detected
+The MODULE finding (word-locked seams) as a MEASUREMENT: for each detected
 event, how far is it from the nearest spoken-word boundary? A pro edit reads
 median |dt| near zero with most events inside 150ms; a sloppy one drifts.
 Boundary arithmetic is REUSED from ``planner/word_lock.py`` (the exact code

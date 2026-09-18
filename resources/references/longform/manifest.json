@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "scope": "original-long-form-references",
+  "cases": [
+    {
+      "id": "LF01",
+      "aspect": "16:9",
+      "case_path": "resources/references/longform/cases/LF01.json"
+    }
+  ]
+}

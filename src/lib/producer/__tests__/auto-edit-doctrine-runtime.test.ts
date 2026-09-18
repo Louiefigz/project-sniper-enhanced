@@ -70,9 +70,9 @@ function fixture(root: string): { repo: string; ctx: AutoEditCtx } {
     writeFileSync(destination, `PINNED ${relative}\n`);
   }
   for (const relative of [
-    "docs/studies/CALEB_STYLE.md",
-    "scripts/producer/docs/findings/JADEN_STYLE.md",
-    "docs/studies/ANGELA_STYLE.md",
+    "docs/studies/RESTRAINED_STYLE.md",
+    "scripts/producer/docs/findings/PUNCH_STYLE.md",
+    "docs/studies/SLIDEWARE_STYLE.md",
   ]) {
     const destination = path.join(repo, relative);
     mkdirSync(path.dirname(destination), { recursive: true });
@@ -184,12 +184,12 @@ function testSelectedStyleDoctrineIsPinned(root: string): void {
   const { repo, ctx } = fixture(path.join(root, "style"));
   const styled: AutoEditCtx = {
     ...ctx,
-    intent: { ...ctx.intent!, mode: "short", style: "caleb" },
+    intent: { ...ctx.intent!, mode: "short", style: "restrained" },
   };
   const doctrine = captureAutoEditDoctrine(styled, "style-run", repo);
   assert.equal(
-    readFileSync(doctrine.files["docs/studies/CALEB_STYLE.md"], "utf8"),
-    "PINNED docs/studies/CALEB_STYLE.md\n",
+    readFileSync(doctrine.files["docs/studies/RESTRAINED_STYLE.md"], "utf8"),
+    "PINNED docs/studies/RESTRAINED_STYLE.md\n",
   );
 }
 
@@ -198,8 +198,8 @@ function testPromotedReferenceTeachingsArePinned(root: string): void {
   const doctrine = captureAutoEditDoctrine(ctx, "reference-teachings-run", repo);
   for (const relative of [
     "docs/studies/EDITCRAFT_LESSONS.md",
-    "docs/studies/NATEHERK_CARDS.md",
-    "docs/studies/NATEHERK_STUDY.md",
+    "docs/studies/MODULE_CARDS.md",
+    "docs/studies/MODULE_STUDY.md",
     "docs/studies/REFERENCE_STYLE_STUDY.md",
     "docs/studies/SHORTFORM_LESSONS.md",
     "scripts/producer/docs/findings/REFERENCE_EVIDENCE_IS_NOT_TEMPLATE_AUTHORITY.md",

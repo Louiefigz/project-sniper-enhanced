@@ -42,8 +42,8 @@ _MAX_CHARS = 10
 
 # Own-screen 16:9 hold-to-cut kinds with all-scalar specs and no asset defaults.
 OWN_SCREEN_KINDS = frozenset({
-    "statement-card", "whiteboard-list", "nateherk-pipeline",
-    "nateherk-scoreboard", "nateherk-ledger-dark", "nateherk-bullet-bars",
+    "statement-card", "whiteboard-list", "module-pipeline",
+    "module-scoreboard", "module-ledger-dark", "module-bullet-bars",
     "agenda-slide", "kinetic-quote-wide", "chart-story", "section-takeover",
     "whiteboard-map"})
 

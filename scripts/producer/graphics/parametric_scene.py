@@ -159,7 +159,7 @@ tl.seek(0);window.__timelines["parametric-{suffix}"]=tl;}})();</script>
 
 def _html(brief: dict, variables: list[dict], suffix: str) -> str:
     canvas = brief["canvas"]
-    background = ("var(--nateherk-canvas)"
+    background = ("var(--module-canvas)"
                   if brief["renderMode"] == "takeover-opaque"
                   else "transparent")
     head = _html_head(canvas, background).replace(

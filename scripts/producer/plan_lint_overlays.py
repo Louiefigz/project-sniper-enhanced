@@ -37,14 +37,14 @@ def _overlaps(span: tuple[float, float], spans: list[tuple[float, float]]) -> bo
 
 
 def _short_hook_required(target: dict, rep: Any) -> bool:
-    """Respect graphics ownership while preserving an explicit Caleb base kit."""
+    """Respect graphics ownership while preserving an explicit Restrained base kit."""
     if target.get("mode") != "short":
         return False
     owned = lane_required(target, "graphics")
-    named_thesis = target.get("style") == "caleb"
+    named_thesis = target.get("style") == "restrained"
     directive = (target.get("lanes") or {}).get("graphics")
     if named_thesis and (directive == "off" or resolve_scope(target) == "trim"):
-        rep.error("target.style='caleb' requires a frame-one thesis hook, "
+        rep.error("target.style='restrained' requires a frame-one thesis hook, "
                   "but explicit graphics-off or trim scope forbids that request; "
                   "resolve the operator intent conflict")
         return False

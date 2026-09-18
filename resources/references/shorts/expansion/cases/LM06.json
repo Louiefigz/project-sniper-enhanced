@@ -1,0 +1,151 @@
+{
+  "id": "LM06",
+  "version": "2026-09-17.1",
+  "title": "Replace the headline on the same page",
+  "scope": "original-reference-rendered-from-project-sniper-templates",
+  "message": "When the speaker corrects a common belief, keep the page and swap only the line, so the change itself is the point.",
+  "arc": "the common belief -> the swap -> the corrected line holds",
+  "execution": "Hold the first line long enough to read, swap on the spoken turn, then underline the word that changed the meaning.",
+  "avoid": "Cutting to a new card; the continuity of the page is what makes it a correction.",
+  "typography": "Two lines of equal size; the underline is the only accent.",
+  "catalog": [
+    "line-swap",
+    "statement-card"
+  ],
+  "beats": [
+    {
+      "id": "LM06-B01",
+      "message_paraphrase": "The belief",
+      "composition": "line-swap",
+      "catalog_candidates": [
+        "line-swap"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/expansion/frames/LM06-B01-0.jpg",
+          "sha256": "fa9cfedfb2dd90d2c78186aa9c1887a08f00303039ace9ffda9a50fe81ee9783",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 0.3,
+          "render": {
+            "composition": "templates/motion/compositions/line-swap.html",
+            "variables": {
+              "lineA": "You need a bigger audience",
+              "lineB": "You need a clearer offer",
+              "underlineWord": "clearer",
+              "swapAt": 1.5
+            },
+            "time_s": 0.3
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/LM06-B01-1.jpg",
+          "sha256": "c20141d244be5fa7f28bb63a93de78d671faa32411f659f2e9a3a65cfc872dfd",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 0.8,
+          "render": {
+            "composition": "templates/motion/compositions/line-swap.html",
+            "variables": {
+              "lineA": "You need a bigger audience",
+              "lineB": "You need a clearer offer",
+              "underlineWord": "clearer",
+              "swapAt": 1.5
+            },
+            "time_s": 0.8
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/LM06-B01-2.jpg",
+          "sha256": "c20141d244be5fa7f28bb63a93de78d671faa32411f659f2e9a3a65cfc872dfd",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 1.3,
+          "render": {
+            "composition": "templates/motion/compositions/line-swap.html",
+            "variables": {
+              "lineA": "You need a bigger audience",
+              "lineB": "You need a clearer offer",
+              "underlineWord": "clearer",
+              "swapAt": 1.5
+            },
+            "time_s": 1.3
+          }
+        }
+      ]
+    },
+    {
+      "id": "LM06-B02",
+      "message_paraphrase": "The correction",
+      "composition": "line-swap",
+      "catalog_candidates": [
+        "line-swap"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/expansion/frames/LM06-B02-0.jpg",
+          "sha256": "f8d07d16f72e15bb1f914a86c2bd4bb5fcb05c565b1329097f77b0da73c1da60",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 1.6,
+          "render": {
+            "composition": "templates/motion/compositions/line-swap.html",
+            "variables": {
+              "lineA": "You need a bigger audience",
+              "lineB": "You need a clearer offer",
+              "underlineWord": "clearer",
+              "swapAt": 1.5
+            },
+            "time_s": 1.6
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/LM06-B02-1.jpg",
+          "sha256": "c25495da35d5d7964a72d2263f215de878fd096e3ffd945cc362078f882ed8a2",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 2.2,
+          "render": {
+            "composition": "templates/motion/compositions/line-swap.html",
+            "variables": {
+              "lineA": "You need a bigger audience",
+              "lineB": "You need a clearer offer",
+              "underlineWord": "clearer",
+              "swapAt": 1.5
+            },
+            "time_s": 2.2
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/LM06-B02-2.jpg",
+          "sha256": "2b54ef32c7ca76ae99a7be7d384b31193a0e5dd5154f0e3f5f3e038047958193",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 3.2,
+          "render": {
+            "composition": "templates/motion/compositions/line-swap.html",
+            "variables": {
+              "lineA": "You need a bigger audience",
+              "lineB": "You need a clearer offer",
+              "underlineWord": "clearer",
+              "swapAt": 1.5
+            },
+            "time_s": 3.2
+          }
+        }
+      ]
+    }
+  ]
+}

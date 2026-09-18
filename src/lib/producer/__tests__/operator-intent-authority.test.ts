@@ -36,20 +36,20 @@ assert.throws(
 
 const allFields: ProjectIntent = {
   ...stored,
-  pace: "jadenly",
-  style: "jadenly",
+  pace: "punch",
+  style: "punch",
   reference: {
     id: "reference-1",
     title: "Measured reference",
     mode: "longform",
     strategy: "extend",
-    targetStyle: "jadenly",
+    targetStyle: "punch",
   },
 };
 const fieldMutations: Array<[keyof ProjectIntent, unknown]> = [
   ["brief", "Different direction"],
-  ["pace", "caleb"],
-  ["style", "caleb"],
+  ["pace", "restrained"],
+  ["style", "restrained"],
   ["reference", { ...allFields.reference, id: "reference-2" }],
   ["music", true],
   ["audioEnhance", { preset: "voice-rnn" }],

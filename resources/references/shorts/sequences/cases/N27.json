@@ -1,0 +1,226 @@
+{
+  "id": "N27",
+  "version": "2026-09-17.1",
+  "title": "Show value growing against time",
+  "scope": "original-reference-rendered-from-project-sniper-templates",
+  "render_aspects": [
+    "16:9",
+    "9:16"
+  ],
+  "lesson": "When the claim is about how much something gains over time, show the amount and the time together so the viewer sees the rate, not just the total.",
+  "opening": "The starting value appears before any growth.",
+  "story_arc": "starting value -> the number climbs -> the time bar fills -> the comparison chart settles -> hand back",
+  "payoff": "The final chart holds with the largest bar emphasised.",
+  "catalog": [
+    "count-up",
+    "widget-gauge",
+    "chart-story",
+    "stat-card"
+  ],
+  "beats": [
+    {
+      "id": "N27-B01",
+      "spoken_idea": "The number climbs",
+      "visible": "A counter rises to the stated figure.",
+      "why_this_picture": "Let the number arrive; do not start on the total.",
+      "composition": "count-up",
+      "catalog_candidates": [
+        "count-up"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/sequences/frames/N27-B01-0.jpg",
+          "sha256": "93dbf697c48bf5136ce9bd244817e40f517bea8f06665f75759d53ccda8ef30a",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 0.1,
+          "render": {
+            "composition": "templates/motion/compositions/count-up.html",
+            "variables": {
+              "start": 0,
+              "end": 43,
+              "prefix": "",
+              "suffix": " subscribers"
+            },
+            "time_s": 0.1
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/N27-B01-1.jpg",
+          "sha256": "a23a91c29de4ba3834a96b918634ca9a40ec33633027d2498442ef725c0cfe10",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 1.2,
+          "render": {
+            "composition": "templates/motion/compositions/count-up.html",
+            "variables": {
+              "start": 0,
+              "end": 43,
+              "prefix": "",
+              "suffix": " subscribers"
+            },
+            "time_s": 1.2
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/N27-B01-2.jpg",
+          "sha256": "3ee20424d103df412a94ee91add566ffa940eb115785c307b43b17c22a249659",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 2.8,
+          "render": {
+            "composition": "templates/motion/compositions/count-up.html",
+            "variables": {
+              "start": 0,
+              "end": 43,
+              "prefix": "",
+              "suffix": " subscribers"
+            },
+            "time_s": 2.8
+          }
+        }
+      ],
+      "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+      "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+    },
+    {
+      "id": "N27-B02",
+      "spoken_idea": "Time passes on the same screen",
+      "visible": "A marker advances along a labelled bar.",
+      "why_this_picture": "Pair the gain with the time it took.",
+      "composition": "widget-gauge",
+      "catalog_candidates": [
+        "widget-gauge"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/sequences/frames/N27-B02-0.jpg",
+          "sha256": "acd66d114709a6102688ad0039b3c5177728389272caa8debe984ef748e2372e",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 0.4,
+          "render": {
+            "composition": "templates/motion/compositions/widget-gauge.html",
+            "variables": {
+              "label": "Days since posting"
+            },
+            "time_s": 0.4
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/N27-B02-1.jpg",
+          "sha256": "14fa89ed35fc5edcae0ab1203c28b01941c592f057764fa2604575380a4a50ee",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 2.0,
+          "render": {
+            "composition": "templates/motion/compositions/widget-gauge.html",
+            "variables": {
+              "label": "Days since posting"
+            },
+            "time_s": 2.0
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/N27-B02-2.jpg",
+          "sha256": "caeb1770d234d333fc389b639f9b885ed96312397d810e059d59b1224b4b58d7",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 3.9,
+          "render": {
+            "composition": "templates/motion/compositions/widget-gauge.html",
+            "variables": {
+              "label": "Days since posting"
+            },
+            "time_s": 3.9
+          }
+        }
+      ],
+      "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+      "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+    },
+    {
+      "id": "N27-B03",
+      "spoken_idea": "Compare periods",
+      "visible": "Bars grow period by period and the last is emphasised.",
+      "why_this_picture": "A comparison makes the rate readable at a glance.",
+      "composition": "chart-story",
+      "catalog_candidates": [
+        "chart-story"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/sequences/frames/N27-B03-0.jpg",
+          "sha256": "8d50adc0f5d95b6f0442e28e957a2bcc6347255bf3b6e7a77cef967f6c0310a5",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 0.6,
+          "render": {
+            "composition": "templates/motion/compositions/chart-story.html",
+            "variables": {
+              "data": "4, 11, 19, 43",
+              "labels": "Day 1, Day 2, Day 4, Day 6",
+              "emphasize": 3,
+              "unit": ""
+            },
+            "time_s": 0.6
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/N27-B03-1.jpg",
+          "sha256": "4ff617f600e36f5e73b3443e26d040060b395e2da10408b110b4a2868f433fb2",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 2.2,
+          "render": {
+            "composition": "templates/motion/compositions/chart-story.html",
+            "variables": {
+              "data": "4, 11, 19, 43",
+              "labels": "Day 1, Day 2, Day 4, Day 6",
+              "emphasize": 3,
+              "unit": ""
+            },
+            "time_s": 2.2
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/N27-B03-2.jpg",
+          "sha256": "c5c199e6cc5b8bfec087adfb4a6f674045bbac168f2d67271110452ee477db07",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 4.6,
+          "render": {
+            "composition": "templates/motion/compositions/chart-story.html",
+            "variables": {
+              "data": "4, 11, 19, 43",
+              "labels": "Day 1, Day 2, Day 4, Day 6",
+              "emphasize": 3,
+              "unit": ""
+            },
+            "time_s": 4.6
+          }
+        }
+      ],
+      "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+      "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+    }
+  ]
+}

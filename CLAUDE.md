@@ -73,7 +73,7 @@ an approved final; manual control/review happens in the Studio review lane
 (`/produce-studio`), and that exact visual/audio master may still be mirrored
 explicitly to Palmier Pro as an optional legacy export.**
 The intent card offers: **Short (9:16)** with a style
-(**Caleb light · Jaden produced · Angela involved** + generics), or **Long (16:9)**
+(**Restrained light · Punch produced · Slideware involved** + generics), or **Long (16:9)**
 with a **checklist of items** — full workflow or just certain lanes (motion,
 graphics, transitions, captions, broll, credibility + music/audio-enhance).
 The brain authors `edit_plan.json` (the determinism boundary). On every plan

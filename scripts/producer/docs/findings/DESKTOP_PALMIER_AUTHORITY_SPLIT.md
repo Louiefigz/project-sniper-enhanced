@@ -42,7 +42,7 @@ without rebuilding or replaying verified work.
 
 ## Reference mechanics that changed the quality target
 
-The Nate Herk reference (`J_jswzXhYJA`, 5:23) is not smooth because it uses a
+The Module reference (`J_jswzXhYJA`, 5:23) is not smooth because it uses a
 large number of stock transitions. The study found:
 
 - 20 distinct card forms across 23 graphic windows;

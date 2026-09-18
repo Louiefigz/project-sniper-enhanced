@@ -3,8 +3,8 @@ import { buildReferenceStyleProfile } from "../../../app/api/_lib/reference-prof
 
 const profile = buildReferenceStyleProfile({
   id: "ref_test",
-  title: "Jaden sample",
-  video: "/tmp/iamjadenly/sample.mp4",
+  title: "Punch sample",
+  video: "/tmp/iampunch/sample.mp4",
   sha256: "a".repeat(64),
   deep: {
     source: { width: 1080, height: 1920, fps: 30, durationS: 60 },
@@ -31,7 +31,7 @@ const profile = buildReferenceStyleProfile({
 
 assert.equal(profile.schemaVersion, 1);
 assert.equal(profile.suggestedMode, "short");
-assert.equal(profile.suggestedKnownStyle, "jadenly");
+assert.equal(profile.suggestedKnownStyle, "punch");
 assert.equal(profile.source.sha256, "a".repeat(64));
 assert.equal(profile.mechanics.eventCounts.cut, 2);
 assert.equal(profile.mechanics.eventRatesPerMin.cut, 2);

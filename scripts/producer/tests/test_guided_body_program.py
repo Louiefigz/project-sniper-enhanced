@@ -67,7 +67,7 @@ class GuidedBodyProgramTests(unittest.TestCase):
         pipeline's necessary 3.45s completion floor, not measurement noise.
         This detached old view is never used for planning or current gates.
         """
-        kinds = ("nateherk-pipeline", "agenda-slide")
+        kinds = ("module-pipeline", "agenda-slide")
         rows = [row for row in treatment["beats"] if row["kind"] in kinds]
         self.assertEqual([row["kind"] for row in rows], list(kinds))
         for row in rows:

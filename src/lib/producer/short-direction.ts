@@ -41,7 +41,7 @@ export const AUTOMATIC_SHORT_DIRECTION: ShortDirectionRequest = {
 
 /** Suggestions locate reference mechanics; they are not whole-video presets. */
 export const SHORT_DIRECTION_SUGGESTIONS = [
-  "Nate Herk — visual storytelling with a developing example",
+  "Module — visual storytelling with a developing example",
   "Presenter-led — close portrait and centered karaoke captions",
   "Formula or comparison — show the current version and the improvement",
   "Screen demonstration — focus on the actual operation and result",

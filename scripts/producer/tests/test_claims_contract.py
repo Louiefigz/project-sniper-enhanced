@@ -1,6 +1,6 @@
 """claims_contract tests — the pre-render truth gate on numeric card copy.
 
-NATEHERK_STUDY §1.2#11 / §5 item 6: every numeric token in a card's copy must
+MODULE_STUDY §1.2#11 / §5 item 6: every numeric token in a card's copy must
 be SPOKEN in the card's window — arithmetic string/number match (scales,
 spelled cardinals by lookup), never regex semantics. evidence*/icon* exempt.
 """

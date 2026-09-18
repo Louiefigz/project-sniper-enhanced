@@ -117,12 +117,12 @@ const PRODUCER_CONFIG = readFileSync(
   assert.deepEqual(
     Object.keys(byId).sort(),
     [
-      "angela-involved",
-      "caleb-light",
-      "jadenly-produced",
       "light-short",
       "longform-produced",
       "produced-short",
+      "punch-produced",
+      "restrained-light",
+      "slideware-involved",
       "trim-only",
     ],
   );
@@ -142,26 +142,26 @@ const PRODUCER_CONFIG = readFileSync(
   assert.equal(byId["trim-only"].mode, null, "trim-only follows the Short|Long toggle");
 
   // STYLE presets — pace/style pair up; music remains operator-opt-in.
-  // Caleb light: captions carry the reel; motion waived (CALEB_STYLE §3 Z1);
+  // Restrained light: captions carry the reel; motion waived (RESTRAINED_STYLE §3 Z1);
   // no bed (§6 M1); no dialogue cleanup (§6 M3: breath gaps stay).
-  assert.deepEqual(activeSet("light", byId["caleb-light"].lanes), ["captions"]);
-  assert.equal(byId["caleb-light"].pace, "caleb");
-  assert.equal(byId["caleb-light"].style, "caleb");
-  assert.equal(byId["caleb-light"].music, false);
-  assert.equal(byId["caleb-light"].audioEnhance, undefined);
-  // Jaden recommends a bed, but selecting the style must not enable one.
-  assert.deepEqual(activeSet("produced", byId["jadenly-produced"].lanes),
+  assert.deepEqual(activeSet("light", byId["restrained-light"].lanes), ["captions"]);
+  assert.equal(byId["restrained-light"].pace, "restrained");
+  assert.equal(byId["restrained-light"].style, "restrained");
+  assert.equal(byId["restrained-light"].music, false);
+  assert.equal(byId["restrained-light"].audioEnhance, undefined);
+  // Punch recommends a bed, but selecting the style must not enable one.
+  assert.deepEqual(activeSet("produced", byId["punch-produced"].lanes),
     LANES.filter((lane) => lane !== "transitions"));
-  assert.equal(byId["jadenly-produced"].pace, "jadenly");
-  assert.equal(byId["jadenly-produced"].style, "jadenly");
-  assert.equal(byId["jadenly-produced"].music, false);
-  // Angela has the same explicit-checkbox safety contract.
-  assert.equal(byId["angela-involved"].scope, "full");
-  assert.deepEqual(activeSet("full", byId["angela-involved"].lanes),
+  assert.equal(byId["punch-produced"].pace, "punch");
+  assert.equal(byId["punch-produced"].style, "punch");
+  assert.equal(byId["punch-produced"].music, false);
+  // Slideware has the same explicit-checkbox safety contract.
+  assert.equal(byId["slideware-involved"].scope, "full");
+  assert.deepEqual(activeSet("full", byId["slideware-involved"].lanes),
     LANES.filter((lane) => lane !== "motion" && lane !== "transitions"));
-  assert.equal(byId["angela-involved"].pace, "angela");
-  assert.equal(byId["angela-involved"].style, "angela");
-  assert.equal(byId["angela-involved"].music, false);
+  assert.equal(byId["slideware-involved"].pace, "slideware");
+  assert.equal(byId["slideware-involved"].style, "slideware");
+  assert.equal(byId["slideware-involved"].music, false);
   for (const s of STYLES) {
     const p = INTENT_PRESETS.find((x) => x.style === s);
     assert.ok(p, `no preset carries style "${s}"`);
@@ -220,7 +220,7 @@ const PRODUCER_CONFIG = readFileSync(
   assert.throws(() => validateIntent({ ...good, lanes: { broll: ["b1"] } }), /asset lists/);
   assert.throws(() => validateIntent({ ...good, pace: "fast" }), /pace/);
   assert.throws(() => validateIntent({ ...good, style: "mrbeast" }), /style/);
-  assert.deepEqual(validateIntent({ ...good, style: "caleb", pace: "caleb" }).style, "caleb");
+  assert.deepEqual(validateIntent({ ...good, style: "restrained", pace: "restrained" }).style, "restrained");
   assert.throws(() => validateIntent({ ...good, audioEnhance: { preset: "loud" } }), /audioEnhance/);
   assert.throws(() => validateIntent({ ...good, music: "yes" }), /music/);
   assert.throws(() => validateIntent({ mode: "reel", scope: "light", lanes: {} }), /mode/);

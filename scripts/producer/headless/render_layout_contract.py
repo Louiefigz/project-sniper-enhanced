@@ -17,7 +17,7 @@ from headless.sealed_archive import verify_archive_file
 POLICY = "sealed-agenda-css-layout-v1"
 PIPELINE_POLICY = "sealed-pipeline-css-layout-v1"
 COMPOSITIONS = {POLICY: "compositions/agenda-slide.html",
-                PIPELINE_POLICY: "compositions/nateherk-pipeline.html"}
+                PIPELINE_POLICY: "compositions/module-pipeline.html"}
 SCOPE = "actual-css-range-envelopes-not-glyph-pixel-legibility-or-approval"
 CLI_SHA256 = "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78"
 MAX_RESULT_BYTES = 16 * 1024 * 1024

@@ -118,7 +118,7 @@ function roleGeometry(row, root) {
 
 function observeNative(pipeline) {
   const root = document.getElementById(pipeline ? "npl-root" : "ag-root");
-  if (!root || root.dataset.compositionId !== (pipeline ? "nateherk-pipeline" : "agenda-slide") || root.dataset.sniperLayout !== "caption-safe-upper-v1") throw new Error("unsupported native layout");
+  if (!root || root.dataset.compositionId !== (pipeline ? "module-pipeline" : "agenda-slide") || root.dataset.sniperLayout !== "caption-safe-upper-v1") throw new Error("unsupported native layout");
   if (root.parentElement !== document.body || document.body.parentElement !== document.documentElement || document.documentElement.parentElement !== null) throw new Error("unsupported outer DOM ancestry");
   const canvas = box(root.getBoundingClientRect());
   if (JSON.stringify(canvas) !== "[0,0,1920,1080]" || innerWidth !== 1920 || innerHeight !== 1080 || devicePixelRatio !== 1) throw new Error("unsupported native DOM canvas");

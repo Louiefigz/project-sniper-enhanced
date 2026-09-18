@@ -6,7 +6,7 @@
     {"id":"label","type":"string","label":"Stat label","default":"in software"},
     {"id":"count_up","type":"boolean","label":"Animate the number counting up","default":true},
     {"id":"accent","type":"color","label":"Accent color","default":"#054BC9"},
-    {"id":"build","type":"enum","label":"Build grammar","default":"pop","options":[{"value":"pop","label":"Pop (back.out, unchanged)"},{"value":"skeleton-first","label":"Skeleton-first (shell before content — NATEHERK rank 2)"}]},
+    {"id":"build","type":"enum","label":"Build grammar","default":"pop","options":[{"value":"pop","label":"Pop (back.out, unchanged)"},{"value":"skeleton-first","label":"Skeleton-first (shell before content — MODULE rank 2)"}]},
     {"id":"eyebrow","type":"string","label":"Eyebrow microtext (mono caps + colored dot; empty = omit)","default":""},
     {"id":"evidenceSource","type":"string","label":"Evidence ribbon source (mono receipt, lands last; empty = omit)","default":""},
     {"id":"evidenceDate","type":"string","label":"Evidence ribbon date","default":""}
@@ -28,7 +28,7 @@
         prefix/suffix/comma-format ("$12k/mo" -> counts the 12). value with no digits
         just renders statically. Numbers are verbatim from the transcript (never
         invented) — MG plan §4 lint cross-checks spec values appear in the transcript.
-      - NATEHERK opt-ins (docs/studies/NATEHERK_STUDY.md; all default OFF — the pop
+      - MODULE opt-ins (docs/studies/MODULE_STUDY.md; all default OFF — the pop
         build is byte-identical without them): build:"skeleton-first" — the
         card SHELL opacity-ramps at 0, content (value/bar/label + count-up
         start) ramps +SKELETON_GAP_S (0.35s, rank 2); eyebrow — mono caps +
@@ -103,7 +103,7 @@
         text-align: center;
         max-width: var(--safe-width);
       }
-      /* NATEHERK slots (mono caps, wide tracking — study layout system). */
+      /* MODULE slots (mono caps, wide tracking — study layout system). */
       .eyebrow {
         display: flex; align-items: center; gap: 14px;
         font-family: var(--eyebrow-font);
@@ -171,7 +171,7 @@
         labelEl.textContent = vars.label;
         document.documentElement.style.setProperty("--accent", vars.accent);
 
-        // NATEHERK slots — empty defaults REMOVE the nodes (no stray flex
+        // MODULE slots — empty defaults REMOVE the nodes (no stray flex
         // gaps: the classic card layout stays byte-identical without them).
         const ebText = (vars.eyebrow == null ? "" : String(vars.eyebrow)).trim();
         const ebEl = document.getElementById("stat-eyebrow");
@@ -213,7 +213,7 @@
         let contentAt = 0;
 
         if (skeleton) {
-          // NATEHERK rank 2: shell opacity-ramps at 0; first content +0.35s.
+          // MODULE rank 2: shell opacity-ramps at 0; first content +0.35s.
           contentAt = M.SKELETON_GAP_S;
           const firstContent = ebText ? ebEl : valueEl;
           M.skeletonFirst(tl, "#stat-card-el", firstContent, { at: 0 });
@@ -252,7 +252,7 @@
           );
         }
 
-        // Evidence ribbon lands LAST in the build (NATEHERK rank 9).
+        // Evidence ribbon lands LAST in the build (MODULE rank 9).
         if (evSource) {
           M.textRamp(tl, evEl,
             Math.min(contentAt + countDur + M.EYEBROW_LEAD_S, D - 0.6));

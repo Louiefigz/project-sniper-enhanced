@@ -79,7 +79,7 @@ passages, priority filters, speaker attribution, and editorial notes.
 missing, and installs only the gaps — asking first before anything big (Homebrew packages, the
 ~465 MB local speech model). Nothing installs without your yes; if everything is already present
 it just reports all-green. When it finishes, you don't start a server — you just ask for an edit:
-*"cut a Jaden-produced short from this footage."*
+*"cut a Punch-produced short from this footage."*
 
 Everything below is the same setup done by hand, for anyone who prefers to run it themselves.
 
@@ -98,7 +98,7 @@ is inside **Claude Code desktop**:
    jobs do not require Palmier. Setup + Claude Desktop bridge:
    [`docs/palmier/PALMIER_MCP_SETUP.md`](./docs/palmier/PALMIER_MCP_SETUP.md).
 3. **Open this project folder in Claude Code desktop** and just ask — e.g.
-   *"cut a Jaden-produced short from this footage"* or *"clean-cut this long recording."*
+   *"cut a Punch-produced short from this footage"* or *"clean-cut this long recording."*
    Claude loads the **`producer`** skill and chooses the requested destination:
    deterministic rendered file, approved one-clip mirror, or an explicitly
    experimental isolated Palmier candidate.
@@ -259,9 +259,9 @@ specific composition directly.
 <summary>All 53 registered motion compositions</summary>
 
 ```text
-agenda-slide                 angela-caption-dual-mode
-angela-receipt-cell          angela-staircase-lockup
-angela-takeover-deck         avatar-bio-card
+agenda-slide                 slideware-caption-dual-mode
+slideware-receipt-cell          slideware-staircase-lockup
+slideware-takeover-deck         avatar-bio-card
 blur-tease                   canvas-pip-list
 chart-story                  chip-row
 color-wash                   container-shape
@@ -270,13 +270,13 @@ fragment-payoff              glass-lower-third
 glass-rail                   glass-takeover-bg
 glitch-hit                   hw-callout-circle
 hw-scribble-transition       icon-badge
-icon-badge-wide              jaden-shout-lockup
+icon-badge-wide              punch-shout-lockup
 kinetic-quote                kinetic-quote-wide
 line-swap                    list-build
 logo-card                    marker-highlight
-nateherk-bullet-bars         nateherk-ledger-dark
-nateherk-pipeline            nateherk-rail
-nateherk-scoreboard          nateherk-takeover
+module-bullet-bars         module-ledger-dark
+module-pipeline            module-rail
+module-scoreboard          module-takeover
 schedule-stack               section-marker
 section-takeover             stat-card
 statement-card               stinger-wipe
@@ -400,7 +400,7 @@ cap study media at 2 GiB / 60 minutes and require at least 5 GiB of free disk.
 - **Reference-inspired study** — use this asset's measured mechanics as
   profile guidance for the next edit. This is not a verified mimic claim; P6
   remains 0/7.
-- **Extend a style** — add evidence to the closed Caleb/Jaden/Angela short-form
+- **Extend a style** — add evidence to the closed Restrained/Punch/Slideware short-form
   grammar selected by the operator.
 - **New style** — name a provisional candidate tied to this reference; it does
   not silently become a global preset.

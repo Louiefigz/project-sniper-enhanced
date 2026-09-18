@@ -6,8 +6,8 @@ import type {
 
 const MODES = new Set<ReferenceMode>(["short", "longform"]);
 const STRATEGIES = new Set<ReferenceStrategy>(["mimic", "extend", "new-style"]);
-const TARGET_STYLES = new Set(["caleb", "jadenly", "angela"]);
-const KNOWN_STYLE_NAMES = new Set(["caleb", "jaden", "jadenly", "angela"]);
+const TARGET_STYLES = new Set(["restrained", "punch", "slideware"]);
+const KNOWN_STYLE_NAMES = new Set(["restrained", "punch", "punch", "slideware"]);
 const FIELDS = new Set(["id", "mode", "strategy", "targetStyle", "candidateStyleName"]);
 const STORED_FIELDS = new Set(["schemaVersion", "referenceId", "mode", "strategy",
   "targetStyle", "candidateStyleName", "decidedAt"]);
@@ -35,13 +35,13 @@ export function parseReferenceDecision(body: Record<string, unknown>, decidedAt 
   if (strategy === "extend" && !targetStyle) throw new Error("extend requires targetStyle");
   if (strategy === "extend" && body.mode !== "short") throw new Error("extend is shorts-only");
   if (targetStyle && !TARGET_STYLES.has(targetStyle)) {
-    throw new Error("targetStyle must be caleb, jadenly, or angela");
+    throw new Error("targetStyle must be restrained, punch, or slideware");
   }
   if (strategy === "new-style" && !candidateStyleName) {
     throw new Error("new-style requires candidateStyleName");
   }
   if (strategy === "new-style" && candidateStyleName && KNOWN_STYLE_NAMES.has(candidateStyleName.toLowerCase())) {
-    throw new Error("new-style candidate must be outside Caleb, Jaden, and Angela; use extend instead");
+    throw new Error("new-style candidate must be outside Restrained, Punch, and Slideware; use extend instead");
   }
   if (strategy !== "extend" && targetStyle) throw new Error("targetStyle is extend-only");
   if (strategy !== "new-style" && candidateStyleName) {

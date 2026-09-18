@@ -63,16 +63,16 @@ SEAM_EVIDENCE_WORDS = 3         # kept words quoted either side of a seam
 # explicit compatible comparison form for that beat.
 # The closing contrast beat is the body's only slot left for an eighth distinct
 # kind (template_usage: 8 feasible for 8 windows once chart-story is excluded);
-# nateherk-takeover is the compatible comparison form the scale beat cannot
+# module-takeover is the compatible comparison form the scale beat cannot
 # take (scoreboard is its only form). It sits at ~78 s, after the opening's
 # ~62 s approval end, so the body compositor (pipHole) renders it, not the
 # first opening profile, which refuses hole comps.
-KIND_OVERRIDES = {("comparison", "contrast"): "nateherk-takeover"}
+KIND_OVERRIDES = {("comparison", "contrast"): "module-takeover"}
 
 # plan_lint_motion caps own-screen takeovers at
 # max(MOTION["takeover_max_count"]["longform"], own_screen_cap(out_dur)) = 3
 # for a 95s output, and all eight beats owe a graphic, so five cards ride
-# "free-band". nateherk-bullet-bars is pinned to own-screen because a
+# "free-band". module-bullet-bars is pinned to own-screen because a
 # free-band rail sits in motion.recompose's registered geometry and would owe
 # a synced measured transform the motion lane (off here) cannot author.
 ANCHOR_BY_BEAT = {
@@ -104,13 +104,13 @@ _CARDS: dict[tuple[str, str], dict] = {
                      "statement-card's single-sentence chassis.",
     },
     ("comparison", "limitation"): {
-        "kind": "nateherk-bullet-bars",
+        "kind": "module-bullet-bars",
         "values": {"eyebrow": "Prompts only", "eyebrowAccent": "ink",
                    "headlineLines": "Most teams try to run this|using only "
                                     "prompts",
                    "explainer": "That gives you a draft and the draft stalls",
                    "verdict": "the draft stalls"},
-        "alternatives": ["nateherk-scoreboard", "nateherk-takeover"],
+        "alternatives": ["module-scoreboard", "module-takeover"],
         "reason": "The speaker names the ceiling of the prompt-only approach, "
                   "so the card has to show the limit rather than restate it.",
         "selection": "'using only prompts' sets a bounded approach against a "
@@ -118,15 +118,15 @@ _CARDS: dict[tuple[str, str], dict] = {
                      "paints a ceiling instead of a total.",
     },
     ("process", "maturity-stage"): {
-        "kind": "nateherk-pipeline",
+        "kind": "module-pipeline",
         "values": {"eyebrow": "This stage", "eyebrowAccent": "result",
                    "headlineLines": "At this stage your content system|is a "
                                     "folder",
                    "explainer": "Ideas go in and nothing ever comes back",
-                   # nateherk-pipeline nodes are `num~label` pairs; every token spoken.
+                   # module-pipeline nodes are `num~label` pairs; every token spoken.
                    "nodes": "Ideas~go in|nothing~ever|comes~back",
                    "footChip": "nothing comes back", "footAccent": "result"},
-        "alternatives": ["nateherk-rail", "whiteboard-map"],
+        "alternatives": ["module-rail", "whiteboard-map"],
         "reason": "The stage description is a flow that dead-ends, so the "
                   "card draws the flow the speaker says never completes.",
         "selection": "'At this stage your content system' names a stage in a "
@@ -134,7 +134,7 @@ _CARDS: dict[tuple[str, str], dict] = {
                      "form that shows ideas entering and nothing leaving.",
     },
     ("evidence", "building-proof"): {
-        "kind": "nateherk-ledger-dark",
+        "kind": "module-ledger-dark",
         "values": {"eyebrow": "The exact engine", "eyebrowAccent": "process",
                    "headlineLines": "We're building the exact engine|we use "
                                     "daily",
@@ -152,7 +152,7 @@ _CARDS: dict[tuple[str, str], dict] = {
                      "chassis that lists what the engine actually does.",
     },
     ("scale", "number"): {
-        "kind": "nateherk-scoreboard",
+        "kind": "module-scoreboard",
         "values": {"eyebrow": "Every hour", "eyebrowAccent": "process",
                    "contextChips": "footage|viewer|guardrails",
                    "heroValue": "1,000", "heroLabel": "hours of footage",
@@ -188,7 +188,7 @@ _CARDS: dict[tuple[str, str], dict] = {
                    "num3": "", "title3": "You review the output",
                    "sub3": "and ship what earns it",
                    "num4": "", "num5": ""},
-        "alternatives": ["nateherk-pipeline", "whiteboard-map"],
+        "alternatives": ["module-pipeline", "whiteboard-map"],
         "reason": "'Finally' closes an ordered sequence, so the card lays the "
                   "three steps out in the order the speaker says them.",
         "selection": "The pipeline form is already spent on the earlier stage "
@@ -196,14 +196,14 @@ _CARDS: dict[tuple[str, str], dict] = {
                      "agenda rather than a flow diagram.",
     },
     ("comparison", "contrast"): {
-        "kind": "nateherk-takeover",
+        "kind": "module-takeover",
         "values": {"eyebrow": "The whole idea", "eyebrowAccent": "result",
                    "headlineLines": "The build is a system|instead of a scramble",
                    "heroValue": "a system",
                    "heroLabel": "instead of a scramble",
                    "chips": "system|scramble|machine",
                    "compareLabel": "behind the machine"},
-        "alternatives": ["nateherk-scoreboard", "nateherk-bullet-bars"],
+        "alternatives": ["module-scoreboard", "module-bullet-bars"],
         "reason": "The closing line sets the built system against the "
                   "scramble it replaces, so the card holds both sides.",
         "selection": "'instead of a scramble' is a direct contrast, and with "

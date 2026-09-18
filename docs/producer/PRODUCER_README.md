@@ -18,7 +18,7 @@ or blur-pad fallback; it is not continuous subject tracking.
 **The shape of every job** (canonical: [`PIPELINE.md`](../PIPELINE.md)): you
 **give the Producer skill footage and a brief** (or use the optional intent
 card) — a **Short** in
-one of the studied styles (**Caleb light · Jaden produced · Angela involved**)
+one of the studied styles (**Restrained light · Punch produced · Slideware involved**)
 or a **Long** with a **checklist of exactly the items you want** (full workflow
 or just some of: motion, graphics, transitions, captions, b-roll, credibility,
 music, dialogue cleanup). Use **HyperFrames Studio** for graphics review and

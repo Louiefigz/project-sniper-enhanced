@@ -331,7 +331,7 @@ class WorkingCheckpointTests(unittest.TestCase):
                 "cutTrack": [{"sourceId": "src", "start": 0, "end": 4}],
                 "faceBBoxNorm": [0.47, 0.28, 0.16, 0.20],
                 "graphicsTrack": [{
-                    "kind": "nateherk-rail", "anchor": "free-band",
+                    "kind": "module-rail", "anchor": "free-band",
                     "outStart": 1.0, "outEnd": 3.0, "spec": {},
                     "reason": "Cream rail proves the edit stages."}]}
         prepared = prepare_checkpoint_plan(plan, render_graphics=False)
@@ -351,7 +351,7 @@ class WorkingCheckpointTests(unittest.TestCase):
 
     def test_cream_rail_without_measured_face_blocks_checkpoint(self):
         plan = {**self.plan, "graphicsTrack": [{
-            "kind": "nateherk-bullet-bars", "anchor": "free-band",
+            "kind": "module-bullet-bars", "anchor": "free-band",
             "outStart": 0, "outEnd": 1, "spec": {}, "reason": "proof"}]}
         with self.assertRaisesRegex(PalmierError, "faceBBoxNorm"):
             prepare_checkpoint_plan(plan, render_graphics=False)

@@ -113,7 +113,7 @@ class SemanticBeatTests(unittest.TestCase):
         self.assertIn("chart-story", MOTION["card_form_map"]["comparison"])
         self.assertNotIn("chart-story", beat["compatibleKinds"], beat)     # "Pro versus manual" speaks no number
         self.assertNotIn("count-up", beat["compatibleKinds"], beat)
-        self.assertIn("nateherk-scoreboard", beat["compatibleKinds"], beat)
+        self.assertIn("module-scoreboard", beat["compatibleKinds"], beat)
         spoken = sorted(words + [{"word": "12", "start": 10.38, "end": 10.48}], key=lambda w: w["start"])
         spoken_beat = next(row for row in isc.semantic_beats(spoken, 44.0) if row["shape"] == "comparison")
         self.assertIn("chart-story", spoken_beat["compatibleKinds"], spoken_beat)
@@ -122,7 +122,7 @@ class SemanticBeatTests(unittest.TestCase):
         beats = isc.semantic_beats(_words(), 44.0)
         years = next(beat for beat in beats if "ten years" in beat["evidence"])
         self.assertEqual(years["shape"], "scale")
-        self.assertIn("nateherk-scoreboard", years["compatibleKinds"])
+        self.assertIn("module-scoreboard", years["compatibleKinds"])
 
     def test_proposal_keeps_semantic_beats_when_style_retarget_prunes_cards(self) -> None:
         plan = _base_plan()

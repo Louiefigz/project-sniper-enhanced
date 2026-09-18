@@ -181,7 +181,7 @@ class WindowEmissionTests(unittest.TestCase):
 
     def test_each_rail_uses_its_own_measured_face_window(self) -> None:
         first = rail_entry(start=10.0)
-        second = rail_entry(start=30.0, kind="nateherk-rail", spec={})
+        second = rail_entry(start=30.0, kind="module-rail", spec={})
         plan = longform_plan(graphicsTrack=[first, second])
         zones = [
             {"faceBBoxNorm": [0.40, 0.20, 0.16, 0.24]},
@@ -207,8 +207,8 @@ class WindowEmissionTests(unittest.TestCase):
     def test_stamp_defaults_every_registered_free_band_rail(self) -> None:
         plan = longform_plan(graphicsTrack=[
             rail_entry(),
-            rail_entry(start=20.0, kind="nateherk-rail", spec={}),
-            rail_entry(start=30.0, kind="nateherk-bullet-bars", spec={}),
+            rail_entry(start=20.0, kind="module-rail", spec={}),
+            rail_entry(start=30.0, kind="module-bullet-bars", spec={}),
             {"outStart": 40.0, "outEnd": 46.0, "kind": "statement-card",
              "anchor": "own-screen", "reason": "beat", "spec": {}}])
         self.assertEqual(rc.stamp_recompose(plan), 3)
@@ -379,7 +379,7 @@ class SmoothLintTests(unittest.TestCase):
             self.assertTrue(any(needle in e for e in errs), (needle, errs))
 
     def test_layout_family_discipline_warns_over_cap(self) -> None:
-        kinds = ("glass-rail", "nateherk-takeover", "glass-lower-third",
+        kinds = ("glass-rail", "module-takeover", "glass-lower-third",
                  "statement-card", "whiteboard-list")   # 5 families > cap 3
         graphics = [{"outStart": 6.0 + i * 8, "outEnd": 10.0 + i * 8,
                      "kind": k, "anchor": "own-screen", "reason": "x",

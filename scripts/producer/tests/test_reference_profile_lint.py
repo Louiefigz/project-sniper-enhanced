@@ -89,25 +89,25 @@ class ReferenceIdentityTests(unittest.TestCase):
 
     def test_mimic_rejects_closed_style_injection(self) -> None:
         value = plan()
-        value["target"]["style"] = "caleb"
+        value["target"]["style"] = "restrained"
         errors = rpl.lint(value, profile(), EXPECTED)["errors"]
         self.assertTrue(any("target.style" in error for error in errors))
 
     def test_extend_requires_exact_closed_style(self) -> None:
         value = plan()
         value["target"]["referenceStrategy"] = "extend"
-        expected = rpl.Expected("ref-123", "short", "extend", "caleb")
+        expected = rpl.Expected("ref-123", "short", "extend", "restrained")
         self.assertTrue(any("target.style" in error for error in rpl.lint(value, profile(), expected)["errors"]))
-        value["target"]["style"] = "caleb"
-        value["target"]["pace"] = "caleb"
+        value["target"]["style"] = "restrained"
+        value["target"]["pace"] = "restrained"
         self.assertTrue(rpl.lint(value, profile(), expected)["ok"])
 
     def test_extend_rejects_contradictory_pace(self) -> None:
         value = plan()
         value["target"].update({
-            "referenceStrategy": "extend", "style": "caleb", "pace": "angela",
+            "referenceStrategy": "extend", "style": "restrained", "pace": "slideware",
         })
-        expected = rpl.Expected("ref-123", "short", "extend", "caleb")
+        expected = rpl.Expected("ref-123", "short", "extend", "restrained")
         errors = rpl.lint(value, profile(), expected)["errors"]
         self.assertTrue(any("target.pace" in error for error in errors))
 

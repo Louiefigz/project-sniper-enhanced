@@ -22,7 +22,7 @@ from test_guided_caption_graphic_observation import H, intent, request
 from test_guided_caption_screen import admission_context
 
 ROOT = Path(__file__).resolve().parents[3]
-COMPOSITION = "compositions/nateherk-pipeline.html"
+COMPOSITION = "compositions/module-pipeline.html"
 
 
 def pipeline_intent(changes: dict | None = None) -> object:
@@ -30,7 +30,7 @@ def pipeline_intent(changes: dict | None = None) -> object:
     original = intent()
     spec = {"layout": "caption-safe-upper-v1", "nodes": "01~One|02~Two", "eyebrow": "",
         "headlineLines": "", "explainer": "", "footChip": "", "presenterFrame": False, "exit": "hold"}
-    entry = {"kind": "nateherk-pipeline", "anchor": "own-screen", "spec": {**spec, **(changes or {})}}
+    entry = {"kind": "module-pipeline", "anchor": "own-screen", "spec": {**spec, **(changes or {})}}
     return replace(original, row={**original.row, "order": 2, "entry": entry})
 
 

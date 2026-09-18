@@ -21,9 +21,9 @@ const SCOPE_LANES: Record<string, string> = {
   full: `full = produced with every owed lane covered. Same planners and judgment; where an asset is missing for an owed beat, do NOT fake one — note it in your final summary (generation is roadmap).`,
 };
 const STYLE_DOCS: Record<string, string> = {
-  caleb: "docs/studies/CALEB_STYLE.md",
-  jadenly: "scripts/producer/docs/findings/JADEN_STYLE.md",
-  angela: "docs/studies/ANGELA_STYLE.md",
+  restrained: "docs/studies/RESTRAINED_STYLE.md",
+  punch: "scripts/producer/docs/findings/PUNCH_STYLE.md",
+  slideware: "docs/studies/SLIDEWARE_STYLE.md",
 };
 const SHELL_SAFE_TOKEN = /^[A-Za-z0-9_@%+=:,./-]+$/;
 function shellToken(value: string): string {
@@ -131,7 +131,7 @@ function graphicsStyleStep(ctx: AutoEditCtx): string[] {
     ctx.planPath, ctx.transcriptsDir, ctx.manifestPath, "--out", advice,
   ]);
   return [
-    `2a. GRAPHICS STYLE AUTHORITY — if target.mode is longform, first run ${verbatimBashCommand(command)} and READ ${advice}. Copy its recommendedTargetFields exactly into target, and delete every target key named by removeTargetFields, before running graphics_planner.py. This deterministic advisor chooses from "cutaway-only", "overlay-rich", and "face-bridge" using kept-transcript semantic density, information-shape variety, scope, and presenter tracking. face-bridge requires visualProfile="nateherk-editorial-v1" and means continuous presenter presence plus evidence-dense two-chassis cards, never floating overlays. An explicit operator-selected reference contract may override the recommendation only when its measured mechanics directly contradict the advice; persist that evidence in target.graphicsStyleRationale. Never inherit the old cutaway-only default silently; plan_lint fails a missing choice or rationale.`,
+    `2a. GRAPHICS STYLE AUTHORITY — if target.mode is longform, first run ${verbatimBashCommand(command)} and READ ${advice}. Copy its recommendedTargetFields exactly into target, and delete every target key named by removeTargetFields, before running graphics_planner.py. This deterministic advisor chooses from "cutaway-only", "overlay-rich", and "face-bridge" using kept-transcript semantic density, information-shape variety, scope, and presenter tracking. face-bridge requires visualProfile="module-editorial-v1" and means continuous presenter presence plus evidence-dense two-chassis cards, never floating overlays. An explicit operator-selected reference contract may override the recommendation only when its measured mechanics directly contradict the advice; persist that evidence in target.graphicsStyleRationale. Never inherit the old cutaway-only default silently; plan_lint fails a missing choice or rationale.`,
   ];
 }
 

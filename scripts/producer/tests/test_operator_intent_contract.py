@@ -76,21 +76,21 @@ class OperatorIntentContractTests(unittest.TestCase):
     def test_pace_style_and_reference_identity_match(self) -> None:
         expected = copy.deepcopy(EXPECTED)
         expected.update({
-            "pace": "jadenly",
-            "style": "jadenly",
+            "pace": "punch",
+            "style": "punch",
             "reference": {"id": "reference-1", "strategy": "extend"},
         })
         plan = copy.deepcopy(PLAN)
         plan["target"].update({
-            "pace": "jadenly",
-            "style": "jadenly",
+            "pace": "punch",
+            "style": "punch",
             "referenceId": "reference-1",
             "referenceStrategy": "extend",
         })
         self.assertTrue(contract.evaluate(plan, expected)["ok"])
         for field, value in (
-            ("pace", "caleb"),
-            ("style", "caleb"),
+            ("pace", "restrained"),
+            ("style", "restrained"),
             ("referenceId", "reference-2"),
             ("referenceStrategy", "mimic"),
         ):

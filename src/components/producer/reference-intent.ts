@@ -7,9 +7,9 @@ import {
 } from "@/lib/producer/intent-presets";
 
 const STYLE_PRESETS = {
-  caleb: "caleb-light",
-  jadenly: "jadenly-produced",
-  angela: "angela-involved",
+  restrained: "restrained-light",
+  punch: "punch-produced",
+  slideware: "slideware-involved",
 } as const;
 
 function allMimicLanesAvailable(intent: ProjectIntent): boolean {

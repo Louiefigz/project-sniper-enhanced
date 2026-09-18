@@ -94,7 +94,7 @@ class DeterminismAndBoundsTests(_Live):
         for name in ("local:icon-badge", "local:chip-row", "mirror:push-in"):
             self.assertEqual(self.refs(self.search(name, limit=1)), [name])
         self.assertEqual(self.refs(self.search("comparison card", limit=3)),
-                         ["local:nateherk-takeover", "mirror:social-proof-card", "mirror:card-resize"])
+                         ["local:module-takeover", "mirror:social-proof-card", "mirror:card-resize"])
 
     def test_same_query_twice_is_identical_and_limits_are_explicit(self) -> None:
         """Verify same query twice is identical and limits are explicit."""

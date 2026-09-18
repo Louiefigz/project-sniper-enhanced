@@ -14,7 +14,7 @@ from graphics.comp_catalog_probe import probe_duration, probe_spec
 from graphics.template_contract import declared_variables, entry_errors
 
 ROOT = Path(__file__).resolve().parents[3]
-SCOREBOARD = ROOT / "templates/motion/compositions/nateherk-scoreboard.html"
+SCOREBOARD = ROOT / "templates/motion/compositions/module-scoreboard.html"
 SPEC = {"eyebrow": "Every hour", "contextChips": "footage|viewer|guardrails",
         "heroValue": "1,000", "heroLabel": "hours of footage",
         "tiles": "survive~the tricks|lose~a viewer|guardrails~matter",
@@ -24,7 +24,7 @@ SPEC = {"eyebrow": "Every hour", "contextChips": "footage|viewer|guardrails",
 
 def entry(spec: dict, duration: float) -> dict:
     """One TEST-only card, not a creator plan or editorial approval."""
-    return {"kind": "nateherk-scoreboard", "outStart": 0, "outEnd": duration, "spec": spec}
+    return {"kind": "module-scoreboard", "outStart": 0, "outEnd": duration, "spec": spec}
 
 
 def actual_ramps(cases: list[dict]) -> list[float]:
@@ -96,10 +96,10 @@ class ScoreboardTimingTests(unittest.TestCase):
     def test_probe_and_test_authoring_use_the_same_required_hold(self) -> None:
         from _guided_longform_treatment import minimum_hold_s
         beat = {"shape": "scale", "trigger": "number", "minimumGraphicHoldS": 1.8}
-        self.assertAlmostEqual(minimum_hold_s("nateherk-scoreboard", beat), 4.35)
+        self.assertAlmostEqual(minimum_hold_s("module-scoreboard", beat), 4.35)
         declared = declared_variables(SCOREBOARD.read_text())
-        spec = probe_spec("nateherk-scoreboard", declared)
-        self.assertEqual(visual.visual_entry_errors(entry(spec, probe_duration("nateherk-scoreboard", spec))), [])
+        spec = probe_spec("module-scoreboard", declared)
+        self.assertEqual(visual.visual_entry_errors(entry(spec, probe_duration("module-scoreboard", spec))), [])
 
     def test_validation_does_not_retime_or_remove_content(self) -> None:
         before = copy.deepcopy(SPEC)

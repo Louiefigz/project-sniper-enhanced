@@ -42,7 +42,7 @@ def _sync_plan() -> dict:
         "graphicsTrack": [
             {"kind": "statement-card", "outStart": 1.0, "outEnd": 4.2,
              "anchor": "own-screen", "reason": "thesis takeover",
-             "spec": {"variant": "nateherk",
+             "spec": {"variant": "module",
                       "statements": "More tactics|One system",
                       "statementLands": 1.2}},
             {"kind": "text-element-wide", "outStart": 2.0, "outEnd": 4.5,
@@ -189,7 +189,7 @@ class StudioSyncTests(unittest.TestCase):
         _patch_slot_attr(
             index, "gfx-01", "data-variable-values",
             '{"statementLands":1.0,"statements":"More tactics|One engine",'
-            '"variant":"nateherk"}')
+            '"variant":"module"}')
         report = compute_report(load_state(studio))
         diff = next(d for d in report.entry_diffs if d.slot == "gfx-01")
         changes = {c.key: (c.old, c.new) for c in diff.value_changes}

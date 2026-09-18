@@ -1,6 +1,6 @@
 """Own-screen versus rail applicability; no media or whole-QC approval.
 
-Pc8XlW placed nateherk-bullet-bars on the complete native canvas, as authored.
+Pc8XlW placed module-bullet-bars on the complete native canvas, as authored.
 Its registered free-band geometry must not override that explicit presentation.
 """
 from __future__ import annotations
@@ -20,7 +20,7 @@ from planner.eye_trace import placement_row
 from producer_config import MOTION
 
 
-def _graphic(kind: str = "nateherk-bullet-bars") -> dict:
+def _graphic(kind: str = "module-bullet-bars") -> dict:
     """Actual failed row's identity and clock; TEST-only placement inputs."""
     return {"kind": kind, "anchor": "own-screen", "outStart": 13.546866666666666,
             "outEnd": 18.7187, "spec": {}}
@@ -84,7 +84,7 @@ class PlacementApplicabilityTests(unittest.TestCase):
         before = [hashlib.sha256(path.read_bytes()).hexdigest() for path in paths]
         plan, placements, report = [json.loads(path.read_text()) for path in paths]
         self.assertEqual(len(plan["graphicsTrack"]), 8)
-        self.assertEqual(plan["graphicsTrack"][1]["kind"], "nateherk-bullet-bars")
+        self.assertEqual(plan["graphicsTrack"][1]["kind"], "module-bullet-bars")
         self.assertEqual(placements[1]["placedBBox"], [0, 0, 1920, 1080])
         self.assertTrue(all(item["anchor"] == "own-screen" for item in plan["graphicsTrack"]))
         original_plan = copy.deepcopy(plan)

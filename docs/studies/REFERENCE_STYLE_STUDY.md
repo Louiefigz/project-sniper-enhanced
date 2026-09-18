@@ -343,10 +343,10 @@ brand-accent wash or white flash (extends R15: wash color follows the brand;
 plain white-flash-cut is a legal seam cover). The outro (~last 60s) is
 treatment-free — stop spending graphics after the last content beat.
 
-## Study pair 3 — GPT-5.6 Sol AI segment (Nate Herk, 2026-07-15)
+## Study pair 3 — GPT-5.6 Sol AI segment (Module, 2026-07-15)
 
 Exact reference: `J_jswzXhYJA`, AI-produced section 0:00–3:07. The full card
-catalog and frame evidence live in `NATEHERK_CARDS.md`; the direct C0679
+catalog and frame evidence live in `MODULE_CARDS.md`; the direct C0679
 comparison lives in `GPT56_SOL_C0679_GAP_STUDY.md`. A new 5fps sweep, every-state
 contact-sheet review, zoom map, and 12fps entrance bursts reconfirm the earlier
 study. The reusable rules below close the earlier documentation gap: this

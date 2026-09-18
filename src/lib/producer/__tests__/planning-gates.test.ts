@@ -106,19 +106,19 @@ assert.match(baseCommands[7].script, /planner[/\\]geometry_feasibility\.py$/);
 const referenceInput: GateBundleInput = {
   ...baseInput,
   reference: {
-    profilePath: "/references/caleb/style_profile.json",
+    profilePath: "/references/restrained/style_profile.json",
     intent: {
-      id: "ref-caleb",
-      title: "Measured Caleb edit",
+      id: "ref-restrained",
+      title: "Measured Restrained edit",
       mode: "short",
       strategy: "extend",
-      targetStyle: "caleb",
+      targetStyle: "restrained",
     },
   },
 };
 const referenceCommand = planningGateCommands(referenceInput).at(-1)!;
 assert.equal(referenceCommand.gate, "reference_lint");
-assert.deepEqual(referenceCommand.args.slice(-2), ["--target-style", "caleb"]);
+assert.deepEqual(referenceCommand.args.slice(-2), ["--target-style", "restrained"]);
 
 function jsonResult(value: unknown, exit = 0) {
   return { stdout: JSON.stringify(value), stderr: "", exit, processGroupStopped: true };

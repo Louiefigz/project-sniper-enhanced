@@ -115,7 +115,7 @@ def visual_change_times(plan: dict) -> list[float]:
 
 _AT_KEY = re.compile(r"^at\d+$")
 
-# NATEHERK-pack land carriers (§5 items 2/4): ``spec.moduleLands`` (narration-
+# MODULE-pack land carriers (§5 items 2/4): ``spec.moduleLands`` (narration-
 # paced module builds — a list of comp-relative seconds, validated by
 # plan_lint_motion) and ``spec.statementLands`` (statement-card v2 swap times,
 # a number or "a,b" string per the comp contract). Each land is a REAL discrete
@@ -147,7 +147,7 @@ def _staged_land_times(graphics: list[dict]) -> list[float]:
 
     A staged comp's ``spec.atN`` keys are its element land times relative to
     the entry's outStart (the whiteboard/list/map/kinetic contract), and the
-    NATEHERK-pack ``spec.moduleLands`` / ``spec.statementLands`` carry the same
+    MODULE-pack ``spec.moduleLands`` / ``spec.statementLands`` carry the same
     meaning (narration-paced module builds / statement swaps). Each land is a
     REAL discrete on-screen change (PRO_INTRO_ENVELOPE: pro graphics carry
     2-6 build states), so pacing counts them — an entry-start-only model reads

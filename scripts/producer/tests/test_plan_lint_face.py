@@ -105,7 +105,7 @@ class PipHoleFaceCxTests(unittest.TestCase):
         return plan
 
     def test_live_hole_without_face_cx_warns(self) -> None:
-        entry = {"outStart": 10.0, "outEnd": 14.0, "kind": "nateherk-takeover",
+        entry = {"outStart": 10.0, "outEnd": 14.0, "kind": "module-takeover",
                  "anchor": "own-screen", "spec": {}, "reason": "credibility"}
         (v,) = plf.check_pip_hole_face_cx(self._longform(entry))
         self.assertEqual((v.gate, v.severity), ("pip_hole_face_cx", "WARN"))
@@ -113,26 +113,26 @@ class PipHoleFaceCxTests(unittest.TestCase):
         self.assertIn("stamp_face_cx", v.evidence)
 
     def test_measured_face_cx_and_inactive_hole_silent(self) -> None:
-        stamped = {"outStart": 10.0, "outEnd": 14.0, "kind": "nateherk-takeover",
+        stamped = {"outStart": 10.0, "outEnd": 14.0, "kind": "module-takeover",
                    "anchor": "own-screen", "spec": {}, "faceCx": 0.62}
         self.assertEqual(plf.check_pip_hole_face_cx(self._longform(stamped)), [])
         # A registered kind whose hole is NOT live (no presenterFrame opt-in)
         # never fills the hole, so faceCx is irrelevant.
-        opaque = {"outStart": 10.0, "outEnd": 14.0, "kind": "nateherk-scoreboard",
+        opaque = {"outStart": 10.0, "outEnd": 14.0, "kind": "module-scoreboard",
                   "anchor": "free-band", "spec": {}}
         self.assertEqual(plf.check_pip_hole_face_cx(self._longform(opaque)), [])
 
     def test_stamp_face_cx_writes_the_entry_key(self) -> None:
         plan = _short_plan(faceBBoxNorm=[0.2, 0.1, 0.4, 0.3])
-        entry = {"kind": "nateherk-takeover", "spec": {}}
+        entry = {"kind": "module-takeover", "spec": {}}
         self.assertEqual(plf.stamp_face_cx(entry, plan), 0.4)  # 0.2 + 0.4/2
         self.assertEqual(entry["faceCx"], 0.4)                 # the renderer's key
-        own = {"kind": "nateherk-takeover", "faceBBoxNorm": [0.5, 0.1, 0.3, 0.3]}
+        own = {"kind": "module-takeover", "faceBBoxNorm": [0.5, 0.1, 0.3, 0.3]}
         self.assertEqual(plf.stamp_face_cx(own, plan), 0.65)   # entry bbox wins
 
     def test_stamp_face_cx_fails_closed_without_a_face_box(self) -> None:
         with self.assertRaises(ValueError):
-            plf.stamp_face_cx({"kind": "nateherk-takeover"}, _short_plan())
+            plf.stamp_face_cx({"kind": "module-takeover"}, _short_plan())
 
 
 class GraphicBrollOverlapTests(unittest.TestCase):

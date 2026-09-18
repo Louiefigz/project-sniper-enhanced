@@ -51,7 +51,7 @@ def screen_intent_preflight(inputs: OpeningInputs, rows: list[dict]) -> None:
         return
     for row in rows:
         entry = row["entry"]
-        if entry.get("kind") in ("agenda-slide", "nateherk-pipeline") \
+        if entry.get("kind") in ("agenda-slide", "module-pipeline") \
                 and (entry.get("spec") or {}).get("layout") == "caption-safe-upper-v1" \
                 and not supported_layout(row, inputs.documents["authority"]):
             raise RuntimeError("explicit caption layout exceeds the supported native observation class")

@@ -36,7 +36,7 @@ def native_observation_class(entry: dict) -> tuple[str, str, str] | None:
             or entry["spec"].get("layout") != "caption-safe-upper-v1":
         return None
     classes = {"agenda-slide": (GRAPHIC_POLICY, POLICY, "compositions/agenda-slide.html"),
-        "nateherk-pipeline": (PIPELINE_GRAPHIC_POLICY, PIPELINE_POLICY, "compositions/nateherk-pipeline.html")}
+        "module-pipeline": (PIPELINE_GRAPHIC_POLICY, PIPELINE_POLICY, "compositions/module-pipeline.html")}
     return classes.get(entry.get("kind"))
 
 

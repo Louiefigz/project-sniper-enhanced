@@ -1,5 +1,5 @@
 /* PROJECT SNIPER — shared motion tokens (G4).
-   Source: scripts/producer/docs/findings/JADEN_STYLE.md §5.3 (frame-verified
+   Source: scripts/producer/docs/findings/PUNCH_STYLE.md §5.3 (frame-verified
    across 6 reels): text pop-in <= 1-2 frames (<=83ms), NO fade, NO slide;
    EXIT — THE LAW: never animated out, hard-off <=1-2f (exactly ON the next cut
    or an instant pop at the semantic boundary). CSS twins live in tokens.css
@@ -18,8 +18,8 @@
    parent own any static centering translate. Deterministic + seek-safe:
    sets/fromTo only, no wall clocks, no randomness.
 
-   NATEHERK pack (docs/studies/NATEHERK_STUDY.md §3 ranks 2-4 + §2 T-D) — a SEPARATE
-   grammar lane from the jaden pop law above; nothing here changes
+   MODULE pack (docs/studies/MODULE_STUDY.md §3 ranks 2-4 + §2 T-D) — a SEPARATE
+   grammar lane from the punch pop law above; nothing here changes
    popIn/instantOut. Tokens (CSS twins: --text-ramp-dur / --eyebrow-lead /
    --skeleton-gap / --exit-blur-dur in tokens.css):
      TEXT_RAMP_S    0.20  in-place opacity ramp; text NEVER travels more than
@@ -37,7 +37,7 @@
   var POP_SCALE_FROM = 0.94;       // subtle settle; NEVER an alpha fade
   var INSTANT_OUT_S = 0;           // exits are hard-off, THE LAW
 
-  // ---- NATEHERK pack tokens (NATEHERK_STUDY.md §3 ranks 2-4, §2 T-D) ----
+  // ---- MODULE pack tokens (MODULE_STUDY.md §3 ranks 2-4, §2 T-D) ----
   var TEXT_RAMP_S = 0.2;
   var EYEBROW_LEAD_S = 0.25;
   var SKELETON_GAP_S = 0.35;
@@ -60,7 +60,7 @@
     tl.set(target, { autoAlpha: 0 }, Math.max(0, Number(at) || 0));
   }
 
-  /** NATEHERK rank 4 — in-place opacity ramp: alpha 0 -> 1 over TEXT_RAMP_S
+  /** MODULE rank 4 — in-place opacity ramp: alpha 0 -> 1 over TEXT_RAMP_S
       at `at`. NO travel (the study's phase-correlation shows zero drift; all
       headlines are ghost->ink ramps). immediateRender stays DEFAULT (true):
       the from-state hides the target from t=0 until its ramp — one ramp per
@@ -71,7 +71,7 @@
       { autoAlpha: 1, duration: TEXT_RAMP_S, ease: "power2.out" }, t);
   }
 
-  /** NATEHERK rank 2 — skeleton-first build: the container/hairline shell
+  /** MODULE rank 2 — skeleton-first build: the container/hairline shell
       ramps at `opts.at` (default 0), its content ramps at +`opts.gapS`
       (default SKELETON_GAP_S = 0.35 — MG-1: panel skeleton lands as one unit,
       holds, THEN fills). Both are in-place opacity ramps (rank 4). */
@@ -83,7 +83,7 @@
     textRamp(tl, contentEl, at + gap);
   }
 
-  /** NATEHERK T-D — graphics-layer-only exit: blur + fade + slight recede
+  /** MODULE T-D — graphics-layer-only exit: blur + fade + slight recede
       (scale -> 0.98) over EXIT_BLUR_S ending exactly at `at + EXIT_BLUR_S`.
       Comps schedule it at D - EXIT_BLUR_S so the exit completes on the seam
       (the exitOnCut clamp point). `blurPx` optional (default EXIT_BLUR_PX). */

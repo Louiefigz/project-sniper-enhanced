@@ -13,7 +13,7 @@ deterministic pipelines:
 
 Every rule below carries its evidence stamp and, where it touches code, the
 exact config key / lint / LESSON-id it is encoded as. Conflicts with our
-already-measured grammars (NATEHERK / jadenly / caleb / angela / the
+already-measured grammars (MODULE / punch / restrained / slideware / the
 production envelope) are adjudicated in §10 — **the meta-rule R12 (§9)
 governs every adjudication**.
 
@@ -39,7 +39,7 @@ cross-check 2026-07-11); screen-share footage runs **0.6 cuts/min** with
 retention carried by cursor motion + a persistent PIP + demo audio. Never
 apply one lane's pacing lint to the other.
 
-**Camera-hold legality (Caleb C4 reconfirmed at longform scale):** a 157s
+**Camera-hold legality (Restrained C4 reconfirmed at longform scale):** a 157s
 zero-cut hold is legal ONLY while another layer churns (cursor, PIP, demo
 audio, pills). A bare hold that long is never legal on presenter footage.
 
@@ -250,8 +250,8 @@ per segment; music-STOP at a major pivot = jolt (his 2:30 hits −56 LUFS on
 the pillar transition); slow fade-out = segment-closing signal; drop/quiet
 the bed under the pitch/CTA (his 4:50–5:33 runs −21..−27 LUFS); sync a
 music hit to the problem→solution pivot; prefer stems when available.
-**LONGFORM ONLY** — jadenly shorts keep a constant bed (6/6 zero-gap),
-caleb has none (§10.9).
+**LONGFORM ONLY** — punch shorts keep a constant bed (6/6 zero-gap),
+restrained has none (§10.9).
 
 **Encoded:** `AUDIO["sfx_classes"]` + `["sfx_trim_to_entrance"]` +
 `["sfx_fade_in_handle"]`; `MODES["longform"]["music_segments"]`;
@@ -273,7 +273,7 @@ previous-shot focal xy as a `resolve_offset_v2` input + Audit B WARN);
 LESSON-015.
 
 ### 7.2 Entrance causality (EC2 R5, GENERALIZED — adjudicates 9:02–9:24 vs
-jadenly instant-pop vs caleb frame-0 pins)
+punch instant-pop vs restrained frame-0 pins)
 Every graphic entrance needs a cause the viewer can perceive: (a) animated
 move-in, (b) instant pop PAIRED with an SFX (shutter/pop) or a hot bed, or
 (c) present from frame 0. **A silent unexplained mid-video pop is the only
@@ -283,7 +283,7 @@ start at t=0 (longform produced lane).
 lint spec); LESSON-016. Roadmap: the inDur=0 check in `plan_lint_motion`.
 
 ### 7.3 Stills vs frozen cards (EC2 R6, SPLIT RULE — adjudicates taught
-6:12–6:25 vs NATEHERK pixel-frozen holds)
+6:12–6:25 vs MODULE pixel-frozen holds)
 Photos/screenshots inserted as b-roll get slow scale/position drift (pro
 hold band **0.5–1%/s**) or perspective moves; DESIGNED cards/dioramas stay
 **pixel-frozen** and get aliveness from build cadence instead. Never
@@ -324,7 +324,7 @@ explanation on graphics. Matches his own taught rule (3:31) and our
 envelope doctrine. **Encoded:** LESSON-020.
 
 ### 8.3 Blur-teased roadmap (EC2 R8, promoted LOW → MEDIUM)
-2nd independent sighting (jadenly H1 + editcraft2 0:10.5: four blurred
+2nd independent sighting (punch H1 + editcraft2 0:10.5: four blurred
 pillar labels, revealed one per chapter with column recalls at 0:25.5,
 2:29, 8:31, 10:27): open with the video's full roadmap as a curiosity
 object with payload labels blurred/withheld, reveal progressively. Pattern
@@ -350,7 +350,7 @@ expected experience is the #1 retention killer**. The Sam pole (0.65
 cuts/min, pauses kept, zero graphics) and the MrBeast pole (~2s cuts) BOTH
 win. This is the doctrine behind `target.pace` / `target.treatment`: "use
 b-roll as much as possible" and "strip all pauses" apply only to the
-stimulation lane; caleb-lane restraint is not under-editing. **Any future
+stimulation lane; restrained-lane restraint is not under-editing. **Any future
 taught-rule conflict gets adjudicated through this selector first.**
 **Encoded:** LESSON-021 (contractually binds the authoring brain); it is
 the adjudicator used throughout §10.
@@ -362,11 +362,11 @@ the adjudicator used throughout §10.
 | 10.1 | EC1 literal-first "conceptual = cinematic self-footage, **never stock**" + R10 "stock = the lazy version" vs the R24 **concept-stock lane** (`graphics_planner_receipts.concept_lane`) | Via R12: the concept-stock lane is a *style-gated* (overlay-rich only), lowest-tier, 1/60s-capped lane — the editcraft/cinematic-education grammar simply never activates it. `BROLL["priority"]` now records the ladder (motion-graphics > purpose-shot > stock) so the brain prefers a HyperFrames comp or graded self-footage before any stock fill. Lane kept, caps unchanged. |
 | 10.2 | EC1 montage-burst hold **0.6–0.7s** vs intro envelope `receipt_montage_state_s` **(0.8, 1.5)** | Different devices measured on different corpora: the envelope band is per-receipt holds in the hook's receipt montage; the 0.6–0.7s band is pitch/proof burst shots. Default unchanged; the burst band lives separately in `BROLL["burst"]["longform"]["hold_s"]`. |
 | 10.3 | EC1 body is HEAVILY edited (cards ~1/min, b-roll, montage bursts) vs `MODES["longform"]["broll_min_spacing_s"]` comment "front-loaded in the opening only" | Already corrected by the 2026-07-07 whole-video envelope measure (memory: production_envelope). The comment is stale doctrine, the NUMBER (10s spacing) is compatible with ~1 card/min bodies. Number unchanged; doctrine recorded here. |
-| 10.4 | EC1 **list cards 8–12s** / comparison cards 9–10.5s vs `MOTION["hold_max_s"]["longform"]`=11.0 / `takeover_max_s`=10.5 | Ceilings KEPT (pinned to the NATEHERK-measured reference + `tests/test_nateherk_longform.py`). A comparison card (10.5s) fits exactly; a 12s list card is legal in the editcraft grammar only with per-item progressive lands (LL-011) and requires a conscious knob raise — the band is recorded in `BROLL["hold_bands_s"]` so the brain knows the pro range. Not a measured-error correction: two references disagree, the tighter gate stands until an operator style pack asks for the looser one. |
-| 10.5 | EC2 R4 music segment architecture vs jadenly constant bed (6/6 zero-gap) / caleb no bed (3/3) | Mode+pace-scoped: encoded LONGFORM-ONLY (`MODES["longform"]["music_segments"]`); shorts style packs keep their `music` flags. Exactly R12. |
+| 10.4 | EC1 **list cards 8–12s** / comparison cards 9–10.5s vs `MOTION["hold_max_s"]["longform"]`=11.0 / `takeover_max_s`=10.5 | Ceilings KEPT (pinned to the MODULE-measured reference + `tests/test_module_longform.py`). A comparison card (10.5s) fits exactly; a 12s list card is legal in the editcraft grammar only with per-item progressive lands (LL-011) and requires a conscious knob raise — the band is recorded in `BROLL["hold_bands_s"]` so the brain knows the pro range. Not a measured-error correction: two references disagree, the tighter gate stands until an operator style pack asks for the looser one. |
+| 10.5 | EC2 R4 music segment architecture vs punch constant bed (6/6 zero-gap) / restrained no bed (3/3) | Mode+pace-scoped: encoded LONGFORM-ONLY (`MODES["longform"]["music_segments"]`); shorts style packs keep their `music` flags. Exactly R12. |
 | 10.6 | EC2 R1 eye-trace placement vs current free-space-only placement (`planner/free_space.py` places into the emptiest legal region with no memory of the previous shot) | Additive: advisory `MOTION["eye_trace"]` + LESSON-015 bind the brain now; wiring previous-shot focal xy into `resolve_offset_v2` + an Audit B WARN is the named roadmap. No behavior changed. |
-| 10.7 | EC2 R5 entrance causality vs jadenly instant-pop (≤83ms) and caleb frame-0 pins | Not a conflict — R5 was GENERALIZED to adjudicate them: pop+SFX/hot-bed and frame-0 are both legal causes. Only the silent mid-video pop is illegal (longform produced lane lint spec recorded). |
-| 10.8 | EC2 R6 drift-on-stills vs NATEHERK pixel-frozen holds | SPLIT RULE as given: stills/screenshots drift 0.5–1%/s; designed cards stay pixel-frozen. `BROLL["still_drift_pct_per_s"]` applies to photo b-roll only — the card grammar is untouched. |
+| 10.7 | EC2 R5 entrance causality vs punch instant-pop (≤83ms) and restrained frame-0 pins | Not a conflict — R5 was GENERALIZED to adjudicate them: pop+SFX/hot-bed and frame-0 are both legal causes. Only the silent mid-video pop is illegal (longform produced lane lint spec recorded). |
+| 10.8 | EC2 R6 drift-on-stills vs MODULE pixel-frozen holds | SPLIT RULE as given: stills/screenshots drift 0.5–1%/s; designed cards stay pixel-frozen. `BROLL["still_drift_pct_per_s"]` applies to photo b-roll only — the card grammar is untouched. |
 | 10.9 | EC1 seam vocabulary (zoom pulls at a-roll↔b-roll seams, flash at graphic seams, ~0.3/min) vs `plan_lint_smooth` WARNing on flash/leak in longform | Compatible: the lint already treats flashes as a WARN-worthy rarity; the measured 0.3/min sits far under `max_per_min` 2.0. `seam_roles` records WHICH seam type each cover is legal at (advisory); lint stays as-is. |
 | 10.10 | EC1 tutorial PIP (persistent webcam bubble over screen-share) vs shorts PIP ban (operator-adjudicated 2026-07-10: static face-in-PIP takeover = longform only) | Aligned: the tutorial PIP is a LONGFORM screen-share device, encoded under `MODES["longform"]` only. The shorts ban stands. |
 

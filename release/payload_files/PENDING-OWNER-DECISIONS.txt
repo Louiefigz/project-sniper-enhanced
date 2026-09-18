@@ -1,0 +1,47 @@
+PENDING OWNER DECISIONS — why this build is not sellable
+========================================================
+Recorded 2026-09-17. This file exists so the package never implies a decision that
+has not been made. It is for the owner; a buyer never receives a build that still
+has this file in it.
+
+SETTLED on 2026-09-17 (already reflected in the manual and LICENSE-DRAFT.txt)
+  - Price: $97 once. No additional Sniper processing fee.
+  - Both Codex and Claude are supported routes.
+  - Licence scope: own videos and paid client videos allowed; no reselling,
+    sharing or giving away Sniper; no reuse of its code in another paid product.
+  - Base update rights: N1, the purchased release only.
+  - Refunds: 14 days, unconditional.
+
+STILL OPEN — each blocks release
+  1. LICENCE WORDING (input D). LICENSE-DRAFT.txt states the selected terms but is
+     not final or reviewed. Also unsettled: the effect of a refund on the grant,
+     and governing law.
+  2. SUPPORT ROUTE AND RESPONSE COMMITMENT (input D). There is deliberately no
+     support address anywhere in this package. The manual says so plainly instead
+     of inventing one.
+  3. YUNET MODEL RIGHTS. app/assets/models/face_detection_yunet_2023mar.onnx has no
+     recorded licence. Clear it, or replace it — the code already falls back to a
+     bundled OpenCV cascade when the model is absent.
+  4. MUSIC BED (audit D7). assets/music/default-bed.mp3 is withheld: provenance not
+     recorded, and the historical 111 Hz hum report has not been rechecked against
+     the actual file and a final render. Supply a cleared, listened-to bed, or
+     confirm the lane ships without one.
+  5. FIRST-RUN SAMPLE FOOTAGE. No clip is cleared for redistribution, so none is
+     shipped. Either clear a short clip, or accept that the buyer's first edit
+     uses their own footage (which is what the manual currently instructs).
+  6. TEACHER-NAMED IDENTIFIERS IN SHIPPED SOURCE. See PENDING-RENAME.txt. The
+     accepted decision forbids teacher names in the distributed product; the style
+     and composition identifiers still carry them. This is implementation work with
+     a saved-settings migration, not a new permission question.
+  7. SUPPORTED PLATFORM BOUNDARY (input R). Qualified: macOS 26 on Apple silicon,
+     because that is the only machine anything has been run on. Intel Macs and
+     older macOS are untested rather than excluded. Decide whether to state the
+     narrow boundary or fund testing to widen it.
+  8. UPSELL SCOPE. "Everything I'm working on" needs the clarification recorded in
+     decisions.md before the $197 offer copy can be written.
+
+NOT owner decisions — implementation work still outstanding
+  - Outside-operator install test on a clean Mac (Z10).
+  - Full-length and Short output qualification with playback (Z4, Z5, Z6).
+  - Authenticated delivery of these exact bytes (Z11). Note: the SamCart digital-file
+    UI shows a 1 GB upload maximum; this archive is well inside that.

@@ -145,7 +145,7 @@ Preserve expression, gestures and useful pauses when they carry the lesson.
 
 **Open the saved creator references during planning.** Use
 [the Shorts visual library](../../../docs/studies/shorts-visual-playbook/README.md)
-to find the relevant Nate Herk, Caleb Ralston or Lewis Mudrich treatment. Open
+to find the relevant Module, Restrained Ralston or Lewis Mudrich treatment. Open
 the chosen full-frame image and timestamped sequence with an image-viewing tool,
 then read the paired description. Reading a description or catalog source does
 not count as viewing the reference. Record its stable ID/version, image paths,
@@ -448,8 +448,8 @@ The in-house branch remains:
 
 1. **In**: raw footage enters through the local ingest CLI (or the optional
    `/producer` tab). Capture the ask up front in the project's stored intent —
-   **Short (9:16)** with a **style** (Caleb light /
-   Jaden produced / Angela involved, + generics), or **Long (16:9)** with a
+   **Short (9:16)** with a **style** (Restrained light /
+   Punch produced / Slideware involved, + generics), or **Long (16:9)** with a
    **checklist of items** (lanes: motion · graphics · transitions · captions ·
    broll · credibility, + music/audio-enhance) — full workflow or just certain
    items. Honor `project.json` `intent` as the operator's answer to the
@@ -494,7 +494,7 @@ Aggregate profile rates never override the pack's twice-reviewed window grammar.
 
 - `mimic` is a legacy identifier for reference-inspired mechanics guidance on
   this edit only; never report it as a verified style match.
-- `extend` may extend only the selected closed Caleb/Jaden/Angela short grammar;
+- `extend` may extend only the selected closed Restrained/Punch/Slideware short grammar;
   read that grammar's canonical doc as well.
 - `new-style` is a provisional, reference-bound candidate. Never add its label
   to the closed style enum or claim that one asset defines a global grammar.
@@ -536,7 +536,7 @@ framing. render.py runs under `.venv/bin/python3` (PIL/cv2 deps).
 **MANDATORY OPERATOR QUESTION ROUND (operator directive 2026-07-24, BOTH
 formats).** Every NEW video request — short OR longform — opens with ONE
 question round BEFORE any paid or expensive step, covering ALL of:
-1. **Style** — simple/trim · light · jadenly · caleb · angela · (or another
+1. **Style** — simple/trim · light · punch · restrained · slideware · (or another
    named grammar) · **auto** (brain + advisor pick from content).
 2. **Graphics involvement** — none · lean (only beats that earn it) · full
    stack · **auto**.
@@ -767,7 +767,7 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
    This code-owned decision uses kept-transcript semantic density, information-
    shape variety, scope, and presenter tracking; do not silently substitute a
    familiar style. `face-bridge` always carries
-   `visualProfile:"nateherk-editorial-v1"`: it is the benchmark-derived
+   `visualProfile:"module-editorial-v1"`: it is the benchmark-derived
    two-chassis grammar (cream evidence rail beside the live face; dark editorial
    canvas with the presenter in a fixed PIP hole), not another overlay preset.
    `python3 scripts/producer/graphics_planner.py <plan.json> <transcripts_dir>
@@ -999,8 +999,8 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
        stamps `faceBBoxNorm` plan-wide when the plan carries none, so this step
        runs standalone instead of erroring on an un-measured plan (pass `--face
        x,y,w,h` instead if you already have the box). It then auto-stamps every
-       registered occluding rail (`glass-rail`, `nateherk-rail`, and
-       `nateherk-bullet-bars`) with a face-anchored `recompose` and emits the
+       registered occluding rail (`glass-rail`, `module-rail`, and
+       `module-bullet-bars`) with a face-anchored `recompose` and emits the
        synced `role:"recompose"` punch windows that re-center the subject in
        the non-panel space, eased WITH the rail growth (defect 1:
        "bg sweeps WHILE face shrinks to its new slot"). It fails loud only when
@@ -1036,7 +1036,7 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
        Mixed transition + clean-hook decisions are valid. Stock xfade/wipe/
        slide/dissolve vocabulary is operator-rejected (LL-014).
      - `claims_contract.py <plan> <transcripts_dir> <manifest>` — the **Claims
-       Contract** (truth gate, NATEHERK_STUDY §5.6): every NUMERIC token in a
+       Contract** (truth gate, MODULE_STUDY §5.6): every NUMERIC token in a
        card's copy (`graphicsTrack[].spec` strings + `titleCards[].text`) must
        appear in the transcript within the card's window — arithmetic
        string/number match ($/% edges, K/M/B scales, spelled cardinals), never
@@ -1090,11 +1090,11 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
        twice in a row — vary anatomy, reuse tokens (LESSON-029/030). NOTE: the
        speaker-inset "PIP" takeover has two forms — the **animated** shrink
        (`pip_takeover.py`) is NOT wired, but the **static face-in-hole** takeover
-       (`pip_hole` / `nateherk-takeover`) IS wired for LONGFORM
+       (`pip_hole` / `module-takeover`) IS wired for LONGFORM
        (`graphics_stage.py`). So do not author an animated
        `needsPip`/`canvas-pip-list` entry (plan_lint hard-rejects it); for a
        static credibility beat use a full-frame statement-card or the wired
-       `nateherk-takeover` hole comp. On LONGFORM
+       `module-takeover` hole comp. On LONGFORM
        talking-head, a named tool gets a full-frame CUTAWAY card or b-roll, not a
        corner chip (R14 drops chips over the face).
      - **Transitions** — "Do we cover this energy cut?" Are montage/energy beats
@@ -1103,7 +1103,7 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
        what was ACTUALLY said (the words may have been trimmed — update the card to
        the kept words), spelled correctly, no ASR mishears.
      - **Claims — VERIFY every claim-bearing card against the transcript/source
-       BEFORE render** (NATEHERK_STUDY §1.2#11 + §5.6 — his pipeline caught
+       BEFORE render** (MODULE_STUDY §1.2#11 + §5.6 — his pipeline caught
        false claims only AFTER paying for a full render; we catch them on the
        plan). For each card whose copy states a fact (a number, a result, a
        comparison, a capability): quote the kept transcript words it restates

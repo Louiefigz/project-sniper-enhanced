@@ -255,10 +255,10 @@ class AuditCheckTests(unittest.TestCase):
 
     def test_registered_rail_must_be_flush_to_its_authored_edge(self) -> None:
         plan = {**self._PLAN, "graphicsTrack": [{
-            "kind": "nateherk-rail", "anchor": "beside-face",
+            "kind": "module-rail", "anchor": "beside-face",
             "spec": {},
         }]}
-        good = _row(None, kind="nateherk-rail", anchor="beside-face",
+        good = _row(None, kind="module-rail", anchor="beside-face",
                     region="fixed-canvas", placedBBox=[0, 0, 633, 1079],
                     canvas=[1920, 1080])
         self.assertEqual([r.status for r in self._run([good], plan)],

@@ -78,50 +78,50 @@ class ShortHookIntentTests(unittest.TestCase):
                                   "outStart": 0, "outEnd": 2.5, "role": "hook"}]
         self.assertIn("style='hook'", " ".join(self.errors(value)))
 
-    def test_caleb_style_retains_named_light_thesis_hook(self) -> None:
+    def test_restrained_style_retains_named_light_thesis_hook(self) -> None:
         """The explicit style, not graphics scope default, names the base kit."""
-        value = plan("light", style="caleb", pace="caleb", lanes={"motion": "off"})
+        value = plan("light", style="restrained", pace="restrained", lanes={"motion": "off"})
         self.assertIn("style='hook'", " ".join(self.errors(value)))
         value["titleCards"] = [card()]
         self.assertEqual(self.errors(value), [])
 
     def test_pace_alone_does_not_infer_named_style(self) -> None:
-        """A cadence selection is not a request for the complete Caleb style."""
-        self.assertEqual(self.errors(plan("light", pace="caleb")), [])
+        """A cadence selection is not a request for the complete Restrained style."""
+        self.assertEqual(self.errors(plan("light", pace="restrained")), [])
 
-    def test_caleb_explicit_graphics_off_is_conflict_even_with_card(self) -> None:
+    def test_restrained_explicit_graphics_off_is_conflict_even_with_card(self) -> None:
         """Do not silently waive style or add a title against explicit off."""
-        value = plan("light", style="caleb", lanes={"graphics": "off"})
+        value = plan("light", style="restrained", lanes={"graphics": "off"})
         self.assertIn("operator intent conflict", " ".join(self.errors(value)))
         value["titleCards"] = [card()]
         self.assertIn("operator intent conflict", " ".join(self.errors(value)))
 
-    def test_caleb_trim_is_explicit_scope_conflict(self) -> None:
+    def test_restrained_trim_is_explicit_scope_conflict(self) -> None:
         """A selected style cannot force engagement artwork into trim scope."""
         self.assertIn("operator intent conflict",
-                      " ".join(self.errors(plan("trim", style="caleb"))))
+                      " ".join(self.errors(plan("trim", style="restrained"))))
 
-    def test_caleb_operator_hook_must_actually_be_supplied(self) -> None:
+    def test_restrained_operator_hook_must_actually_be_supplied(self) -> None:
         """Operator-owned is not off, but cannot assert a nonexistent hook."""
-        value = plan("light", style="caleb", lanes={"graphics": "operator"})
+        value = plan("light", style="restrained", lanes={"graphics": "operator"})
         self.assertIn("style='hook'", " ".join(self.errors(value)))
         value["titleCards"] = [card()]
         self.assertEqual(self.errors(value), [])
 
-    def test_caleb_unknown_lane_or_scope_cannot_bypass_validation(self) -> None:
+    def test_restrained_unknown_lane_or_scope_cannot_bypass_validation(self) -> None:
         """Malformed ownership retains the shared resolver's hard rejection."""
-        for value in (plan("unknown", style="caleb"),
-                      plan("light", style="caleb", lanes={"graphics": "typo"})):
+        for value in (plan("unknown", style="restrained"),
+                      plan("light", style="restrained", lanes={"graphics": "typo"})):
             with self.assertRaises(ValueError):
                 self.errors(value)
 
-    def test_other_named_style_does_not_infer_caleb_exception(self) -> None:
+    def test_other_named_style_does_not_infer_restrained_exception(self) -> None:
         """This narrow compatibility exception does not open other style rules."""
-        self.assertEqual(self.errors(plan("light", style="jadenly")), [])
+        self.assertEqual(self.errors(plan("light", style="punch")), [])
 
     def test_longform_never_gains_short_hook_requirement(self) -> None:
         """Mode-specific missing-hook behavior is unchanged."""
-        self.assertEqual(self.errors(plan("produced", mode="longform", style="caleb")), [])
+        self.assertEqual(self.errors(plan("produced", mode="longform", style="restrained")), [])
 
     def test_supplied_cards_keep_text_hold_and_window_checks_when_off(self) -> None:
         """Waived missing-card ownership does not weaken authored card safety."""

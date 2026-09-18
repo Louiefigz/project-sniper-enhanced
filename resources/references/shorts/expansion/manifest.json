@@ -1,0 +1,16 @@
+{
+  "version": "2026-09-17.1",
+  "case_count": 2,
+  "cases": [
+    {
+      "id": "CR07",
+      "title": "Problem, solution, idea, angles — then back to the speaker",
+      "case_path": "resources/references/shorts/expansion/cases/CR07.json"
+    },
+    {
+      "id": "LM06",
+      "title": "Replace the headline on the same page",
+      "case_path": "resources/references/shorts/expansion/cases/LM06.json"
+    }
+  ]
+}

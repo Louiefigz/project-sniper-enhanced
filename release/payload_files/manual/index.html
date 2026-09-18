@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What Project Sniper is</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <p class="kicker">Manual · 1 of 10</p>
+  <h1>What Sniper is, what it includes, what it needs</h1>
+  <p class="lede">Read this before you install, so there are no surprises about what it does and what it costs to run.</p>
+</header>
+<h2>What it does</h2>
+<p>You give Sniper a recording and describe the result. It transcribes the recording
+locally, decides the cuts, writes an edit plan, checks that plan against its own rules,
+renders the video, inspects the rendered frames, and either fixes what it finds or
+tells you what it could not do. You get a finished <code>final.mp4</code> and the
+editable project behind it.</p>
+
+<h2>What is included</h2>
+<table>
+<tr><th>Tool</th><th>What it is for</th></tr>
+<tr><td><strong>Producer</strong></td><td>The main editor. Raw footage in, finished
+video out. Vertical Shorts (9:16) and full-length landscape videos (16:9).</td></tr>
+<tr><td><strong>Segmenter</strong></td><td>Chops a long recording into rough clips for
+another editor. Deliberately rough: clips snap to the nearest keyframe and may overlap
+by a frame or two, because nothing is re-encoded and nothing is quality-lost.</td></tr>
+<tr><td><strong>Clipper</strong></td><td>Tightens one clip word by word and exports a
+frame-accurate Final Cut Pro timeline (FCPXML).</td></tr>
+<tr><td><strong>Frame Review</strong></td><td>A separate spell-check for text on screen.
+<span class="tag">needs your own paid API key</span> This one is not covered by your
+purchase — see <a href="privacy.html">what leaves your Mac</a>.</td></tr>
+</table>
+
+<h3>What Producer can do to a video</h3>
+<ul>
+  <li>Cut dead air, filler and bad takes, and tighten the pacing.</li>
+  <li>Reframe landscape footage to vertical, anchoring on a detected face when there is
+  a stable one, otherwise centre-cropping or blur-padding. This is a fixed frame per shot,
+  not continuous subject tracking — shots with several faces, fast movement or someone
+  leaving frame are worth checking.</li>
+  <li>Burn in captions that follow the words that survived the cut.</li>
+  <li>Add motion, graphics, transitions, b-roll placement and claim-checking cards.</li>
+  <li>Clean up dialogue and master the audio to a broadcast level (&minus;14 LUFS).</li>
+  <li>Lay a music bed under it, ducked beneath the voice. Off by default.</li>
+</ul>
+
+<h3>What it does not do</h3>
+<ul>
+  <li>It is not a one-button machine. A complete, unattended creator project has not
+  been qualified end to end. You direct it and you review the result.</li>
+  <li>It does not copy another creator's style. It can measure a video you point it at
+  and use the measurements as guidance. Reproducing a look is not a capability this
+  release claims — the internal test cohort for that is 0 of 7.</li>
+  <li>It does not promise a view count, a growth rate or a fixed number of clips per
+  recording. Choosing which moment is worth cutting is an editorial judgement.</li>
+  <li>It does not guarantee a turnaround time. See
+  <a href="troubleshooting.html">what to expect</a> for the only timing figures that
+  have actually been measured.</li>
+</ul>
+
+<h2>What you need</h2>
+<table>
+<tr><th>Requirement</th><th>Detail</th><th>Cost to you</th></tr>
+<tr><td>A Mac</td><td>Apple silicon (M-series). The only qualified baseline is macOS 26
+on Apple silicon. Intel Macs and older macOS are untested, not blocked.</td><td>—</td></tr>
+<tr><td>Disk space</td><td>About 4 GB for the install, plus room for your projects.
+Leave at least 20 GB free; a full-length render uses a lot of temporary space.</td><td>—</td></tr>
+<tr><td>Node 22 or newer</td><td>Free, from nodejs.org. Node 24 is recommended.</td><td>Free</td></tr>
+<tr><td>Python 3.11 or newer</td><td>Free, from python.org.</td><td>Free</td></tr>
+<tr><td><code>ffmpeg</code> and <code>whisper-cpp</code></td><td>Free, one Homebrew
+command each. The installer tells you if they are missing.</td><td>Free</td></tr>
+<tr><td><strong>A Codex or Claude subscription</strong></td><td>This is the part that
+thinks about your edit. You use the subscription you already pay for. There is no extra
+Sniper processing fee, and Sniper has no API-key billing path.</td><td><strong>You pay
+your provider directly. Their plan price, model access and usage limits apply.</strong></td></tr>
+</table>
+
+<div class="note">
+<p><strong>About the subscription.</strong> Sniper works with <em>either</em> Codex or
+Claude. Aaron, who built it, recommends Codex with GPT-6 Astra based on his own edits —
+that is his preference from his own work, not a measured comparison, and not every plan
+includes every model. Both routes are supported and documented.</p>
+</div>
+
+<div class="warn">
+<p><strong>An unusual requirement, stated plainly.</strong> This release only accepts one
+exact version of each provider CLI. The installer downloads those exact versions into
+this package and points Sniper at them, so your own <code>codex</code> or
+<code>claude</code> installation is left alone and an auto-update to it cannot break
+Sniper. The exact versions are in <code>RELEASE.json</code>.</p>
+</div>
+<footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>
+</div>
+</body>
+</html>

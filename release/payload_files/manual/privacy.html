@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What leaves your Mac</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <p class="kicker">Manual · 9 of 10</p>
+  <h1>What leaves your Mac, and what never does</h1>
+  <p class="lede">Checked against the code in this package, path by path. Read this before you edit anything confidential.</p>
+</header>
+<div class="ok">
+<p><strong>Your video file never leaves your Mac.</strong> No raw recording, no rendered
+video and no audio file is uploaded by the supported editing workflow. The code refuses
+to route video to a third party.</p>
+</div>
+
+<div class="warn">
+<p><strong>Text is not the only thing that leaves.</strong> During the visual review step,
+Sniper extracts still frames from the video it just rendered and sends those images to
+your provider so it can look at the result. That is how it catches a graphic in the wrong
+place or an unreadable caption. <strong>Still images of your footage do leave your
+machine.</strong> An earlier version of this manual said only text was sent. That was
+wrong, and this page is the correction.</p>
+</div>
+
+<h2>Path by path</h2>
+<table>
+<tr><th>What</th><th>Where it goes</th><th>Where that is in the code</th></tr>
+<tr><td>Your recording, and every rendered video</td><td><strong>Stays local.</strong>
+Nowhere.</td><td>"No full-video egress" invariant, <code>app/CLAUDE.md</code></td></tr>
+<tr><td>Speech-to-text</td><td><strong>Stays local.</strong> This install uses
+whisper.cpp on your Mac. It never downloads a model silently and never falls back to a
+paid service.</td><td><code>app/scripts/local_whisper.py</code></td></tr>
+<tr><td>Transcript and edit plan</td><td><strong>Sent</strong> to the provider you chose
+(Codex or Claude) as text.</td><td><code>app/src/app/api/producer/auto-edit/</code></td></tr>
+<tr><td>Still frames from the rendered candidate</td><td><strong>Sent</strong> to the
+provider you chose, for the visual review. Codex receives them as image attachments;
+Claude is given the frame paths and reads them.</td>
+<td><code>app/src/app/api/_lib/codex-cli.ts</code> (<code>--image</code>);
+<code>app/src/app/api/producer/auto-edit/rendered-review-prompt.ts</code>
+("Inspect EVERY listed frame visually")</td></tr>
+<tr><td>Still frames from a reference video you supply</td><td><strong>Sent</strong>, only
+on the explicit reference-proposal route.</td>
+<td><code>app/src/lib/server/guided-proposal-compiler.ts</code></td></tr>
+<tr><td>Frame Review (the text spell-check)</td><td><strong>Sent</strong> — selected still
+JPEGs go to Anthropic. Needs your own paid API key and is not part of this purchase.</td>
+<td><code>app/scripts/frameio/claude_client.py</code></td></tr>
+<tr><td>Deepgram transcription</td><td><strong>Would upload your audio.</strong> Not
+selected in this install; it needs a key you would have to add yourself.</td>
+<td><code>app/scripts/asr_policy.py</code></td></tr>
+</table>
+
+<h2>What that means in practice</h2>
+<ul>
+  <li>The words you said go to your provider. So do pictures of your finished frames.</li>
+  <li>Your provider's own data policy for your plan governs what happens to them. Sniper
+  does not change it and cannot see it.</li>
+  <li>If a recording is confidential enough that a still frame of it must not be sent,
+  do not run the graphics or visual-review lanes on it. A trim-only edit still sends the
+  transcript.</li>
+  <li>The app itself binds to <code>127.0.0.1</code> only — it is not reachable from
+  another machine on your network, and it has no login because nothing else can reach it.</li>
+</ul>
+
+<h2>Where your files live</h2>
+<pre><code>~/ProjectSniper/&lt;project&gt;/
+  source/     your footage and its transcripts
+  producer/   edit_plan.json, base_final.mp4, final.mp4
+  segments/   Segmenter exports
+  clipper/    Clipper timelines</code></pre>
+<p>That folder is outside this package, so updating or moving the app never touches your
+projects. You can move it and point Sniper at the new location — see
+<a href="license-and-updates.html">Licence, updates, backup and uninstall</a>.</p>
+<footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>
+</div>
+</body>
+</html>

@@ -71,15 +71,15 @@ _MECHANISM_CUES = ("how it works", "works by", "pipeline", "loop", "cycle",
                    "connects", "transcript", "word timed", "word-timed")
 _ASSET_FORMS = frozenset({"icon-badge-wide", "logo-card"})
 _TRIGGER_FORMS = {
-    "audience-list": ("glass-rail", "nateherk-rail", "whiteboard-list",
+    "audience-list": ("glass-rail", "module-rail", "whiteboard-list",
                       "canvas-pip-list", "list-build"),
-    "tool-list": ("glass-rail", "nateherk-rail", "whiteboard-list",
+    "tool-list": ("glass-rail", "module-rail", "whiteboard-list",
                   "canvas-pip-list", "list-build"),
-    "credibility": ("avatar-bio-card", "nateherk-ledger-dark",
+    "credibility": ("avatar-bio-card", "module-ledger-dark",
                     "whiteboard-connector"),
-    "building-proof": ("angela-receipt-cell", "nateherk-ledger-dark",
+    "building-proof": ("slideware-receipt-cell", "module-ledger-dark",
                        "whiteboard-connector"),
-    "exact-proof": ("angela-receipt-cell", "nateherk-ledger-dark",
+    "exact-proof": ("slideware-receipt-cell", "module-ledger-dark",
                     "whiteboard-connector"),
 }
 

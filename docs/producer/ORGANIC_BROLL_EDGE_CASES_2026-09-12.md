@@ -61,7 +61,7 @@ judge; it is not an automated semantic guarantee.
 
 | ID | Priority | Trigger / failure | Required behavior | Current coverage |
 | --- | --- | --- | --- | --- |
-| E01 | P0 | “Nate Herk style” is mistaken for a request to show Nate | Separate reference creator from depicted subject; retrieve mechanics without importing identity assets | Documented direction/reference separation; no general entity-role contract |
+| E01 | P0 | “Module style” is mistaken for a request to show Nate | Separate reference creator from depicted subject; retrieve mechanics without importing identity assets | Documented direction/reference separation; no general entity-role contract |
 | E02 | P0 | ASR says “clod”; aliases, pronouns or similar creator names are ambiguous | Resolve from surrounding speech and attributable official accounts/links; ask only if a material ambiguity remains | Editorial; no canonical brand/person resolver |
 | E03 | P0 | ChatGPT, OpenAI and another OpenAI product are treated as interchangeable | Bind the actual product/entity named and the correct mark/page/version | Existing logo resolver can supply candidates; no native brand identity qualification |
 | E04 | P0 | Correct brand, wrong visual job: a homepage is used to explain a product operation | Show the relevant operation/result or explicitly identify the missing demonstration | Before/action/result and claim-limit fields exist; semantic fit is editorial |

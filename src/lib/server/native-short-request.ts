@@ -1,5 +1,6 @@
 /** Prepare a local brief for the edit brain without invoking a provider. */
 import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { SHORTS_LIBRARY } from "./reference-library-paths";
 import path from "node:path";
 import { canonicalJson, canonicalJsonSha256, fileSha256 } from "./auto-edit-hash";
 import { loadDirectorCatalog, directorCatalogHash } from "./native-director-library";
@@ -41,9 +42,9 @@ export function nativeShortSupportingInventory(manifestPath: string, manifest: A
 
 /** Available reference cases are retrieval context; the brain must inspect the actual frames. */
 function referenceInventory(repo: string) {
-  const root = path.join(repo, "docs/studies/shorts-visual-playbook");
-  const files = ["FORMAT_FOUNDATIONS.md", "authentic-expansion/CATALOG_MAP.md", "entries/A02.md",
-    "nate-sequences/cases/N27.md", "nate-sequences/cases/N26.md", "authentic-expansion/cases/CR07.md"];
+  const root = path.join(repo, SHORTS_LIBRARY);
+  const files = ["FORMAT_FOUNDATIONS.md", "expansion/CATALOG_MAP.md", "entries/A02.md",
+    "sequences/cases/N27.md", "sequences/cases/N26.md", "expansion/cases/CR07.md"];
   return files.map((file) => ({ ...observed(path.join(root, file)), purpose: file.includes("FORMAT")
     ? "Choose the viewing need and format; follow linked cases and contrasting examples"
     : "Starting reference context; inspect its cited individual images before adapting" }));

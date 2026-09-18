@@ -10,7 +10,7 @@ Two shorts studies folded into the PRODUCER's deterministic pipelines:
 
 Every rule carries its evidence stamp (timestamps / frame refs from the
 source reports) and its encoding. Conflicts with our measured shorts
-grammars (jadenly / caleb / angela / talking-head) are adjudicated in §9 —
+grammars (punch / restrained / slideware / talking-head) are adjudicated in §9 —
 the EC2 R12 audience-experience selector (see `EDITCRAFT_LESSONS.md` §9)
 governs all of them. **SF2 is a THIRD PACE POLE** and is encoded as its own
 pacing profile; its motion budget never bleeds into desk talking-head
@@ -30,19 +30,19 @@ A shorts hook zone is a **5-element simultaneous stack**: zoom-OUT reveal
 at t=0, 2-line mixed-typography text lockup, blur/treatment layer BEHIND
 the text, ~1.2s riser SFX resolving exactly at body start, and **NO
 captions** (delete auto-caption cues under the hook). CORROBORATED for the
-text-owns-the-hook part (Jaden H2/T1, Caleb H1); zoom-out + riser are
+text-owns-the-hook part (Punch H2/T1, Restrained H1); zoom-out + riser are
 **promo-pole additions**.
 
 ### 1.2 Hook typography (SF1, MEASURED)
 The lockup is two-tier — plain white bold line + payload word in accent
-style (bold-italic + glow; blue here, yellow in Jaden — **accent color is
+style (bold-italic + glow; blue here, yellow in Punch — **accent color is
 a skin choice, the two-tier structure is the invariant**). ~5–7%H per
-line, chest band, never covering the face. CORROBORATED (Jaden T1).
+line, chest band, never covering the face. CORROBORATED (Punch T1).
 
 ### 1.3 Hook = one continuous shot (SF2, cross-creator HIGH)
 ZERO cuts in the hook; all hook energy lives in staged text + one zoom
 move. Frame-verified 0 cuts in reel 0–4.4s with ~6 text events. Agrees
-Jaden H2 (6/6), Caleb H2 (3/3). Plan the hook camera move at the SHOOT
+Punch H2 (6/6), Restrained H2 (3/3). Plan the hook camera move at the SHOOT
 (pan-up/reveal) so the edit can stage word-group reveals over it
 (SF2 1:01–1:17).
 
@@ -76,7 +76,7 @@ zoom-out scale band + frame-zero cap, lockup invariant, riser),
 Auto-captions at max 10 chars/line, single line, 0-frame gap → 1–3 word
 cues; styled once at TRACK level: serif-adjacent font, white, ~3.3%H,
 stroke 1, center-x, MID-FRAME (~0.55–0.60H), plain preset (no karaoke).
-**CONFIRMS the Jaden/Caleb mid-frame whisper band as the 3rd independent
+**CONFIRMS the Punch/Restrained mid-frame whisper band as the 3rd independent
 source** — karaoke remains off-style in every measured shorts grammar.
 Our `CAPTIONS["WHISPER"]` (2.2%H, band 0.60–0.64) is a sibling SKIN of the
 same family — defaults unchanged (§9.5).
@@ -96,7 +96,7 @@ in the monolithic path).
 ### 2.3 Whisper caption spec (SF2)
 White mixed-case (italic here), 1–3 word groups, replace every ~0.5–1.0s,
 floated into per-shot open space near chest/shoulder — total on-screen
-churn measured **92.9 states/min** (top of Jaden 51–89 / Caleb 72.5–87
+churn measured **92.9 states/min** (top of Punch 51–89 / Restrained 72.5–87
 bands). No karaoke, no box (3rd corroboration). **Encoded:**
 `pacing_client_reel["state_changes_per_min"]`.
 
@@ -106,7 +106,7 @@ preset on action phrases, partial-blur zoom on outcome phrases,
 delay-up-slide on secondary hook lines; everything else stays whisper
 captions. **YELLOW = PAYLOAD WORD ONLY: exactly 3 accent words in 30s**
 (the location, the outcome, the CTA verb) via character-level styling.
-Cross-creator HIGH (Jaden T1 yellow lockups; whisper tier-A amber).
+Cross-creator HIGH (Punch T1 yellow lockups; whisper tier-A amber).
 **Encoded:** `pacing_client_reel["accent_words_per_30s"] = 3`; LESSON-023.
 
 ## 3. Cut grammar
@@ -114,7 +114,7 @@ Cross-creator HIGH (Jaden T1 yellow lockups; whisper tier-A amber).
 ### 3.1 Silence-chop density ≠ punch-cut density (SF1, MEASURED)
 A raw talking take chopped to zero dead air yields **~26 seam cuts/min**
 (7 segments/14s from a 2:16 take, ~8–9x compression) — but these seams are
-MASKED (J-cuts, b-roll, punch-ins), unlike Jaden's felt punch-cuts. **Do
+MASKED (J-cuts, b-roll, punch-ins), unlike Punch's felt punch-cuts. **Do
 not conflate masked-seam density with punch-cut density when linting
 pace.** The pacing lint counts DISCRETE VISIBLE changes — a masked seam
 under b-roll is one change, not two. Doc + LESSON-024 context.
@@ -123,8 +123,8 @@ under b-roll is one change, not two. Doc + LESSON-024 context.
 On every retained seam, the next clip's audio starts 3–4 frames early on a
 second audio track; start the early audio on a phrase start read from the
 waveform — never mid-sentence. Apply ONLY in clean/invisible-seam
-treatments; **OFF for punch-cut grammar** (Jaden — cuts ARE the energy)
-and **restraint grammar** (Caleb keeps breath gaps, zero J/L).
+treatments; **OFF for punch-cut grammar** (Punch — cuts ARE the energy)
+and **restraint grammar** (Restrained keeps breath gaps, zero J/L).
 **Encoded:** doc + adjudication §9.3 (the cut engine renders butt joins
 with a 15ms audio crossfade today; J-cut leads are a named roadmap for the
 clean-seam treatment).
@@ -165,7 +165,7 @@ change.
   burst (composite Add) + riser SFX, placed EXACTLY on the hook's promise
   resolution ("until we showed up", reel ~3.1–4.5s) — **not on every
   cut**. Agrees MEASURED_EDIT_GRAMMAR "flash covers energy beats"; never
-  import into jaden/caleb paces (their measured transition count is zero).
+  import into punch/restrained paces (their measured transition count is zero).
 - Motion budget: **2 zoom-outs + 1 punch-in + 1 overlay per 30s** — this
   is the whole per-reel allowance.
 - **CTA grammar** (SF2 17:08): end the client reel with the client's offer
@@ -181,13 +181,13 @@ budget keys); LESSON-024.
 
 - **Text-entrance recipe** (SF1, TAUGHT): keyframe rise over 20 frames
   (~0.67s @30fps), ease-out cubic, ~4-frame smoothing handle, optional
-  glow. **CONFLICT with measured top-tier grammars** (Jaden pop ≤83ms,
-  nateherk in-place opacity 120–250ms, Caleb zero animation) — legal only
+  glow. **CONFLICT with measured top-tier grammars** (Punch pop ≤83ms,
+  module in-place opacity 120–250ms, Restrained zero animation) — legal only
   under a flashy/promo treatment; calibrated presets keep pop/opacity
   tokens (§9.4).
 - **Light-leak/film-burn seam cover** (SF1, TAUGHT): Add-composite overlay
   into the next clip. Matches the LONG-FORM cut-cover family; OFF-style
-  for jadenly (C2: 21/21 hard cuts) and caleb shorts. Only in
+  for punch (C2: 21/21 hard cuts) and restrained shorts. Only in
   produced/flashy shorts treatment.
 - **Music at platform** (SF1, operational): for IG distribution, prefer
   trending audio added in-app at post time (or a free-copyright track)
@@ -230,7 +230,7 @@ budget keys); LESSON-024.
 
 SF2's SCOPE GUARD verbatim: "this is a THIRD PACE POLE (produced outdoor
 client-reel/commercial) — 2 zoom-outs + 1 punch-in + 1 overlay per 30s
-CONFLICTS with measured jaden (zero transitions) and caleb (zero zoom);
+CONFLICTS with measured punch (zero transitions) and restrained (zero zoom);
 keep it as its own pacing profile, do not bleed its motion budget into
 desk talking-head presets."
 
@@ -243,13 +243,13 @@ the budget keys are advisory doctrine the brain/skill reads.
 
 | # | conflict | adjudication |
 |---|---|---|
-| 9.1 | SF2 client-reel motion budget (2 zoom-outs + 1 punch + 1 overlay + 1 energy peak / 30s) vs jadenly (zero transitions, punch-cut energy) and caleb (zero zooms) | New third pace pole `pacing_client_reel`; budgets scoped to it, selected only by `target.pace`. R12: different audience expectation (commercial/promo vs desk talking-head). Nothing bleeds. |
+| 9.1 | SF2 client-reel motion budget (2 zoom-outs + 1 punch + 1 overlay + 1 energy peak / 30s) vs punch (zero transitions, punch-cut energy) and restrained (zero zooms) | New third pace pole `pacing_client_reel`; budgets scoped to it, selected only by `target.pace`. R12: different audience expectation (commercial/promo vs desk talking-head). Nothing bleeds. |
 | 9.2 | SF1 b-roll burst (3 cutaways in ~4s) vs `MODES["short"]["broll_min_spacing_s"]` = 8.0 | Spacing default KEPT for lone purposeful inserts (it was never lint-enforced — advisory cadence). Bursts are a beat-attached exception (EC1: bursts attach to montage/proof beats, not positions), recorded in `BROLL["burst"]["short"]`. |
-| 9.3 | SF1 J-cut law ("on every retained seam") vs jaden punch-cut grammar and caleb breath-gap grammar | AXIS, not law (as the study itself flags): clean/invisible-seam treatments only; OFF elsewhere. Cut engine unchanged (15ms equal-power crossfade stays); J-cut audio leads = named roadmap for the clean-seam treatment. |
-| 9.4 | SF1 text-entrance 20-frame rise (taught) vs measured pop ≤83ms / 120–250ms opacity / caleb zero animation | Treatment-gated: legal only under flashy/promo treatment; calibrated comp presets keep their pop/opacity tokens. Not added to any default. |
+| 9.3 | SF1 J-cut law ("on every retained seam") vs punch punch-cut grammar and restrained breath-gap grammar | AXIS, not law (as the study itself flags): clean/invisible-seam treatments only; OFF elsewhere. Cut engine unchanged (15ms equal-power crossfade stays); J-cut audio leads = named roadmap for the clean-seam treatment. |
+| 9.4 | SF1 text-entrance 20-frame rise (taught) vs measured pop ≤83ms / 120–250ms opacity / restrained zero animation | Treatment-gated: legal only under flashy/promo treatment; calibrated comp presets keep their pop/opacity tokens. Not added to any default. |
 | 9.5 | SF1 caption spec (~3.3%H, band 0.55–0.60H, serif-adjacent) vs `CAPTIONS["WHISPER"]` (2.2%H, band 0.60–0.64, Inter) | Skin variance inside one family; third independent corroboration of the mid-frame whisper band + no-karaoke. WHISPER defaults unchanged; a future "SF1 skin" may override per-plan. |
 | 9.6 | Karaoke off-style in every measured grammar (SF1/SF2/R11) vs `MODES["short"]["captions_style"]` default `"karaoke"` | Default KEPT: it is the operator's base/brand default with its own evidence line (TikTok official pacing); every measured style pack overrides to whisper/minimal via `captions.style`. Flagged so the operator can flip the default deliberately — not silently by a bake. |
-| 9.7 | SF1 hook riser + zoom-out (5-element stack) vs jaden/caleb hooks (text-owns-the-hook, no riser/zoom) | The lockup/text part is the cross-style INVARIANT (corroborated); zoom-out + riser are promo-pole additions gated behind produced/flashy treatment (`hook_stack` records both tiers). |
+| 9.7 | SF1 hook riser + zoom-out (5-element stack) vs punch/restrained hooks (text-owns-the-hook, no riser/zoom) | The lockup/text part is the cross-style INVARIANT (corroborated); zoom-out + riser are promo-pole additions gated behind produced/flashy treatment (`hook_stack` records both tiers). |
 | 9.8 | SF2 text-behind-subject (magic-mask sandwich) vs `feedback_pro_graphics_are_cutaways` (never panels over face) | Condition-scoped as the study itself adjudicates: legal only in wide OUTDOOR scenes, subject <~30% of frame, real depth; tight talking-head keeps the cutaway/zone doctrine. |
 | 9.9 | SF1 hook captions OFF vs shorts `captions_burn: True` | Compatible: captions still burn for the body; the hook zone's cues are deleted (designed lockup instead). `hook_stack["captions_in_hook"] = False` + LESSON-022; renderer wiring for cue deletion under designed-text windows is the named gate roadmap. |
 

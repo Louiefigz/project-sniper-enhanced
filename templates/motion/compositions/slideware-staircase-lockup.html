@@ -1,0 +1,255 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[
+    {"id":"kicker","type":"string","label":"Kicker (sentence case; wrap payload words in *asterisks* for bold)","default":""},
+    {"id":"payload","type":"string","label":"Payload (renders ALL-CAPS in lime)","default":""},
+    {"id":"coWord","type":"string","label":"Co-word (white, lands right-below the payload)","default":""},
+    {"id":"payload2","type":"string","label":"Replace-chain payload 2 (empty = off)","default":""},
+    {"id":"payload3","type":"string","label":"Replace-chain payload 3 (empty = off)","default":""},
+    {"id":"band","type":"enum","label":"Vertical band","default":"headroom","options":[{"value":"headroom","label":"Headroom (section steps)"},{"value":"chest","label":"Chest (action payloads / shouts)"}]},
+    {"id":"payloadSize","type":"number","label":"Payload size (px; 106=standard 5.5%H, 150=hero, 69=verdict)","default":106,"min":60,"max":152,"step":2,"unit":"px"},
+    {"id":"kickerAt","type":"number","label":"Kicker pop (s)","default":0,"min":0,"max":30,"step":0.05,"unit":"s"},
+    {"id":"payloadAt","type":"number","label":"Payload pop (s)","default":0.35,"min":0,"max":30,"step":0.05,"unit":"s"},
+    {"id":"coAt","type":"number","label":"Co-word pop (s; 0.3-0.9s after payload)","default":0.75,"min":0,"max":30,"step":0.05,"unit":"s"},
+    {"id":"replaceAt2","type":"number","label":"Swap to payload 2 at (s; 0 = off)","default":0,"min":0,"max":30,"step":0.05,"unit":"s"},
+    {"id":"replaceAt3","type":"number","label":"Swap to payload 3 at (s; 0 = off)","default":0,"min":0,"max":30,"step":0.05,"unit":"s"},
+    {"id":"accent","type":"color","label":"Payload lime","default":"#C9FB00"}
+  ]'
+>
+  <!--
+    PROJECT SNIPER · Motion template: SLIDEWARE-STAIRCASE-LOCKUP (slideware pack #2)
+    Reference: kicker / lime payload / co-word staircase + in-place caption
+    shout — 4/4 studied reels, ~40 sightings (extends the Punch G3 lockup with
+    a lime + extended-grotesque variant — NOT serif).
+    Transparent 1080x1920 overlay -> render `--format mov` (ProRes 4444).
+
+    HER STRUCTURE/MOTION, OUR TOKENS: white kicker (sentence case, payload
+    words bold), ALL-CAPS lime ExtraBold extended-grotesque payload (house
+    Inter 900 + scaleX 1.06 approximates the Archivo Black / Montserrat 900
+    class), white co-word offset RIGHT-BELOW. Soft dark shadow, NO box/stroke.
+
+    CONTRACT for the PRODUCER compositing stage:
+      - IN = 0-FRAME POP per token, word-locked to the spoken word: set
+        kickerAt/payloadAt/coAt to transcript times (tokens stagger 0.3-0.9s).
+        No fades, no slides — the token is simply ON from its frame.
+      - OUT = instant in-place replace (payload2/payload3 + replaceAt2/3,
+        chain cadence 0.31-1.0s — the swap does NOT re-enter) or instant
+        clear ON the compositor's cut. NEVER a fade.
+      - band: "headroom" = numbered-kicker section steps (center ~y0.23);
+        "chest" = action payloads / caption shouts (center ~y0.63). Verdict
+        variant: payloadSize 69 and reuse the EXACT referenced string+color.
+      - EMPTY-DEFAULTS LAW (G21): kicker/payload/coWord/payload2/payload3
+        default EMPTY — unset renders NOTHING; demo only when ALL unset.
+      - RENDER LENGTH is the root `data-duration` ATTRIBUTE (graphics_render
+        rewrites it per window; --variables never sets it — stat-card note).
+  -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>SNIPER · slideware-staircase-lockup</title>
+    <link rel="stylesheet" href="/tokens.css" />
+    <script src="/vendor/gsap/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      :root { --lime: #C9FB00; }
+      html, body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: transparent;           /* alpha overlay — the frame owns nothing */
+        font-family: var(--font);
+      }
+      #asl-root { position: relative; width: 1080px; height: 1920px; }
+
+      /* .stage OWNS the centering transform; GSAP only toggles token alpha. */
+      #asl-stage {
+        position: absolute;
+        left: 540px;
+        top: 440px;                        /* headroom center; chest overrides */
+        transform: translate(-50%, -50%);
+        width: 960px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      #asl-root.chest #asl-stage { top: 1210px; }   /* chest band y0.58-0.68 */
+
+      #asl-kicker {
+        font-size: 40px;                   /* ~2.1%H, sentence case */
+        font-weight: 600;
+        line-height: 1.2;
+        color: #F8F8F8;
+        text-align: center;
+        text-shadow: 0 3px 14px rgba(0, 0, 0, 0.45);
+        text-wrap: balance;
+        margin-bottom: 10px;
+        will-change: opacity;
+      }
+      #asl-kicker b { font-weight: 800; }
+
+      /* Payload slot: replace-chain spans stack in place (no re-enter). */
+      #asl-payload {
+        position: relative;
+        width: 100%;
+        text-align: center;
+        will-change: opacity;
+      }
+      .asl-pay {
+        display: block;
+        font-weight: 900;                  /* ExtraBold extended grotesque class */
+        line-height: 1.04;
+        letter-spacing: 0.015em;
+        text-transform: uppercase;
+        color: var(--lime);
+        text-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+        transform: scaleX(1.06);           /* static extended condense — GSAP never
+                                              animates transform here, no fight */
+        transform-origin: center;
+        text-wrap: balance;
+        overflow-wrap: break-word;
+      }
+      .asl-pay.alt { position: absolute; left: 0; top: 0; width: 100%; }
+
+      /* Co-word: white, offset RIGHT-BELOW the payload landing. */
+      #asl-co {
+        align-self: flex-end;
+        margin-right: 120px;
+        margin-top: 12px;
+        font-size: 38px;                   /* ~2%H */
+        font-weight: 600;
+        color: #F8F8F8;
+        text-shadow: 0 3px 14px rgba(0, 0, 0, 0.45);
+        will-change: opacity;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="asl-root"
+      data-composition-id="slideware-staircase-lockup"
+      data-width="1080"
+      data-height="1920"
+      data-start="0"
+      data-duration="3"
+    >
+      <div id="asl-stage">
+        <div id="asl-kicker" class="clip" data-start="0" data-duration="60" data-track-index="1"></div>
+        <div id="asl-payload" class="clip" data-start="0" data-duration="60" data-track-index="2"></div>
+        <div id="asl-co" class="clip" data-start="0" data-duration="60" data-track-index="3"></div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        const root = document.getElementById("asl-root");
+        const D = parseFloat(root.dataset.duration) || 3;
+
+        // Content defaults are EMPTY (G21 — unset renders NOTHING).
+        const defaults = {
+          kicker: "", payload: "", coWord: "", payload2: "", payload3: "",
+          band: "headroom", payloadSize: 106,
+          kickerAt: 0, payloadAt: 0.35, coAt: 0.75,
+          replaceAt2: 0, replaceAt3: 0, accent: "#C9FB00",
+        };
+        // PREVIEW-ONLY demo lockup (activates only when ALL content is unset).
+        const SAMPLE = { kicker: "Step *#1:* do this every day", payload: "Post Daily", coWord: "for 30 days" };
+        const HF = window.__hyperframes;
+        let vars = Object.assign({}, defaults, HF && HF.getVariables ? HF.getVariables() : {});
+        const contentKeys = ["kicker", "payload", "coWord", "payload2", "payload3"];
+        const isPreview = contentKeys.every(function (k) {
+          return !(vars[k] == null ? "" : String(vars[k])).trim();
+        });
+        if (isPreview) vars = Object.assign({}, vars, SAMPLE);
+        document.documentElement.style.setProperty("--lime", String(vars.accent));
+
+        if (String(vars.band) === "chest") root.classList.add("chest");
+        const size = Math.min(152, Math.max(60, Number(vars.payloadSize) || 106));
+
+        const clampAt = function (raw, fallback) {
+          const v = isFinite(Number(raw)) ? Number(raw) : fallback;
+          return Math.max(0, Math.min(v, Math.max(0, D - 0.1)));
+        };
+        const kickerAt = clampAt(vars.kickerAt, 0);
+        const payloadAt = clampAt(vars.payloadAt, 0.35);
+        const coAt = clampAt(vars.coAt, 0.75);
+
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // --- Kicker: sentence case, *asterisk* runs render bold (the payload
+        //     words inside the kicker). 0-frame pop at kickerAt. ---
+        const kickerEl = document.getElementById("asl-kicker");
+        const kickerText = (vars.kicker == null ? "" : String(vars.kicker)).trim();
+        if (kickerText) {
+          kickerText.split(/(\*[^*]+\*)/).forEach(function (chunk) {
+            if (!chunk) return;
+            const isBold = chunk.charAt(0) === "*" && chunk.charAt(chunk.length - 1) === "*";
+            const node = isBold ? document.createElement("b") : document.createTextNode(chunk);
+            if (isBold) node.textContent = chunk.slice(1, -1);
+            kickerEl.appendChild(node);
+          });
+          tl.set(kickerEl, { autoAlpha: 0 }, 0);
+          tl.set(kickerEl, { autoAlpha: 1 }, kickerAt);
+        } else {
+          kickerEl.remove();               // unset var renders NOTHING
+        }
+
+        // --- Payload: ALL-CAPS lime, 0-frame pop; replace-chain swaps the
+        //     string IN PLACE (never re-enters). ---
+        const payloadEl = document.getElementById("asl-payload");
+        const payTexts = [vars.payload, vars.payload2, vars.payload3].map(function (p) {
+          return (p == null ? "" : String(p)).trim();
+        });
+        const paySpans = payTexts.map(function (t, i) {
+          if (!t) return null;
+          const el = document.createElement("span");
+          el.className = "asl-pay" + (i > 0 ? " alt" : "");
+          el.style.fontSize = size + "px";
+          el.textContent = t;
+          payloadEl.appendChild(el);
+          return el;
+        });
+        if (paySpans.some(Boolean)) {
+          tl.set(payloadEl, { autoAlpha: 0 }, 0);
+          tl.set(payloadEl, { autoAlpha: 1 }, payloadAt);
+          const rep2 = clampAt(vars.replaceAt2, 0);
+          const rep3 = clampAt(vars.replaceAt3, 0);
+          if (paySpans[1]) tl.set(paySpans[1], { autoAlpha: 0 }, 0);
+          if (paySpans[2]) tl.set(paySpans[2], { autoAlpha: 0 }, 0);
+          if (paySpans[1] && rep2 > 0) {   // instant in-place replace, no fade
+            tl.set(paySpans[0], { autoAlpha: 0 }, rep2);
+            tl.set(paySpans[1], { autoAlpha: 1 }, rep2);
+            if (paySpans[2] && rep3 > rep2) {
+              tl.set(paySpans[1], { autoAlpha: 0 }, rep3);
+              tl.set(paySpans[2], { autoAlpha: 1 }, rep3);
+            }
+          }
+        } else {
+          payloadEl.remove();              // unset var renders NOTHING
+        }
+
+        // --- Co-word: 0-frame pop, 0.3-0.9s after the payload. ---
+        const coEl = document.getElementById("asl-co");
+        const coText = (vars.coWord == null ? "" : String(vars.coWord)).trim();
+        if (coText) {
+          coEl.textContent = coText;
+          tl.set(coEl, { autoAlpha: 0 }, 0);
+          tl.set(coEl, { autoAlpha: 1 }, Math.max(coAt, payloadAt));
+        } else {
+          coEl.remove();                   // unset var renders NOTHING
+        }
+
+        // Keep the paused timeline non-empty even for a single-token lockup
+        // (an all-set timeline has zero tween duration; the render must span D).
+        tl.set({}, {}, Math.max(0, D - 0.01));
+
+        // No self exit — OUT is an instant clear ON the compositor's cut
+        // (window end) or the in-place replace above. NEVER fade.
+        tl.seek(0);
+        window.__timelines["slideware-staircase-lockup"] = tl;
+      })();
+    </script>
+  </body>
+</html>

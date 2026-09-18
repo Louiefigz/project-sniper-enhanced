@@ -211,7 +211,7 @@ export interface EditPlan {
     graphicsStyle?: "cutaway-only" | "overlay-rich" | "face-bridge";
     graphicsStyleRationale?: string;
     /** Executable grammar contract used by planner, renderer, Palmier, and QC. */
-    visualProfile?: "nateherk-editorial-v1";
+    visualProfile?: "module-editorial-v1";
   };
   planVersion?: number;
 }

@@ -9,7 +9,7 @@ import { assertIntentMatches } from "../../../app/api/producer/auto-edit/operato
 import type { AssetManifest } from "../types";
 
 test("requested treatment survives stored intent, launch, plan target and gate authority", () => {
-  const shortDirection = { selection: "requested", request: "Nate Herk — develop the same offer", supportingVideo: "source-first" };
+  const shortDirection = { selection: "requested", request: "Module — develop the same offer", supportingVideo: "source-first" };
   const intent = validateIntent({ mode: "short", scope: "produced", lanes: {}, shortDirection });
   const body = buildAutoEditRequest("/tmp/producer", intent);
   const parsed = parseAutoEditIntent(body)!;
@@ -70,10 +70,10 @@ test("style preset selection preserves source and placement restrictions", () =>
   for (const sources of ["provided-only", "local-only", "public-web"] as const) {
     const current = { selection: "auto" as const, supportingVideo: "off" as const,
       mediaPolicy: { placement: "off" as const, sources } };
-    const result = shortDirectionForStyle("Nate Herk", current);
+    const result = shortDirectionForStyle("Module", current);
     assert.deepEqual(result.mediaPolicy, current.mediaPolicy);
     assert.equal(result.supportingVideo, "off");
-    assert.equal(result.request, "Nate Herk");
+    assert.equal(result.request, "Module");
     assert.deepEqual(parseShortDirection(result, "short"), result);
   }
 });

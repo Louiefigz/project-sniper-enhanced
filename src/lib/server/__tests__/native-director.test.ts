@@ -10,10 +10,15 @@ import { stageNativeDirector, readNativeDirector, assertDirectorSource } from ".
 import type { ProposalEvidence } from "../guided-proposal-evidence";
 import { testDirectorPlan, nativeDirectorTestBrain, directorSourceFixture } from "./_native-director-fixture";
 
-test("Director reads all canonical sources, including solution-aware training absent from the old index", () => {
+test("Director reads all six packaged sources, including solution-aware training", () => {
   const catalog = loadDirectorCatalog();
-  assert.equal(catalog.formats.length, 11); assert.equal(catalog.anchors.length, 190);
-  assert.equal(catalog.examples.length, 326); assert.equal(catalog.examples.filter((row) => row.formula).length, 234);
+  // Exact counts of the packaged original library (resources/director); a change to the
+  // library must change these deliberately.
+  assert.equal(catalog.formats.length, 11); assert.equal(catalog.anchors.length, 48);
+  assert.equal(catalog.examples.length, 40); assert.equal(catalog.examples.filter((row) => row.formula).length, 24);
+  assert.equal(new Set(catalog.anchors.map((row) => row.category)).size, 12);
+  assert.ok(catalog.examples.some((row) => row.id.startsWith("T") && Number(row.id.slice(1)) >= 9),
+    "solution-aware training pairs are loaded");
   assert.ok(catalog.examples.find((row) => row.id === "T003")?.content.includes("Output:"));
   assert.equal(directorCatalogHash(catalogFromSources(catalog.sources)), directorCatalogHash(catalog));
   const changed = structuredClone(catalog.sources); changed[0].content += "changed";

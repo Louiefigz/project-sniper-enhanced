@@ -56,7 +56,7 @@ Agent-selected transition effects come from the HyperFrames catalog by default,
 including an unspecific request such as "we need a transition here." Agent-selected
 graphics and animation templates are catalog-first too: inspect the complete
 catalog and choose the mechanism for the narration, using current native SDK
-authoring. Do not silently substitute old Sniper/Nateherk/Jaden presets or a
+authoring. Do not silently substitute old Sniper/Module/Punch presets or a
 hand-built equivalent because it is familiar. Those studies are references only.
 User-supplied designs, including Claude-created presentation/animation designs,
 are an explicit alternative to incorporate and animate as requested.
@@ -111,9 +111,9 @@ raw footage
 │                                                              │
 │  SHORT (9:16)                LONG (16:9)                     │
 │  pick a STYLE:               pick your ITEMS (checklist):    │
-│   · Caleb light               ☑ motion      ☑ captions       │
-│   · Jaden produced            ☑ graphics    ☑ broll          │
-│   · Angela involved           ☑ transitions ☑ credibility    │
+│   · Restrained light               ☑ motion      ☑ captions       │
+│   · Punch produced            ☑ graphics    ☑ broll          │
+│   · Slideware involved           ☑ transitions ☑ credibility    │
 │   (+ generics: Light short,   ☑ music bed   ☑ audio enhance  │
 │    Produced short, Trim only, → full workflow = all checked  │
 │    talking-head pace)         → or just certain items        │
@@ -171,9 +171,9 @@ profile):
 
 | Preset | Scope | Grammar doc |
 |---|---|---|
-| **Caleb light** | light | `docs/studies/CALEB_STYLE.md` — restraint pole, whisper cues |
-| **Jaden produced** | produced | `docs/studies/JADEN_STYLE.md` — breath-gap punch-cuts, two-layer text |
-| **Angela involved** | full | `docs/studies/ANGELA_STYLE.md` — lime takeover-deck slideware |
+| **Restrained light** | light | `docs/studies/RESTRAINED_STYLE.md` — restraint pole, whisper cues |
+| **Punch produced** | produced | `docs/studies/PUNCH_STYLE.md` — breath-gap punch-cuts, two-layer text |
+| **Slideware involved** | full | `docs/studies/SLIDEWARE_STYLE.md` — lime takeover-deck slideware |
 
 Plus the generic presets (**Light short · Produced short · Trim only**) and the
 **talking-head pace** toggle (slow, sustained graphics — paces like longform).
@@ -222,7 +222,7 @@ produces two layers of evidence:
 
 Aspect supplies only a **Short/Long suggestion**. The operator must confirm the
 mode and persist one strategy in `reference.json`: `mimic`, `extend` (a closed
-Caleb/Jaden/Angela short grammar), or `new-style` (a provisional name tied to
+Restrained/Punch/Slideware short grammar), or `new-style` (a provisional name tied to
 this reference). Auto-edit accepts the reference only when the submitted intent
 still matches that server-side decision. The authored plan must carry
 `target.referenceId`, `target.referenceStrategy`, and the confirmed mode; the

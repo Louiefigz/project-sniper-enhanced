@@ -1,7 +1,7 @@
 # C0679: native HyperFrames direction after operator rejection
 
 Aaron's September 9 instruction replaces the inherited visual approach. He has
-rejected the Nateherk/Jaden-derived, predominantly full-screen card treatment.
+rejected the Module/Punch-derived, predominantly full-screen card treatment.
 This is a channel built around Aaron teaching on camera. Old edits are case
 studies, not a visual-plan baseline. Existing source footage, accepted cut
 decisions, transcript evidence and independently verified audio may be reused.

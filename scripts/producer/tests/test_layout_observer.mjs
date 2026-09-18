@@ -180,7 +180,7 @@ test("unknown wrapper ancestors are not accepted as the native profile", () => {
 function pipelineFixture() {
   const fixture = domFixture(), [first, second, link] = fixture.nodes;
   fixture.nodes.splice(3, 1);
-  fixture.root.id = "npl-root"; fixture.root.dataset.compositionId = "nateherk-pipeline";
+  fixture.root.id = "npl-root"; fixture.root.dataset.compositionId = "module-pipeline";
   fixture.root.classList = { contains: () => false };
   for (const [node, role, text] of [[first, "node-1", "01TEST one"], [second, "node-2", "02TEST two"], [link, "connector-1", ""]]) {
     node.id = ""; node.dataset.sniperProtectedRole = role; node.textContent = text;
@@ -202,7 +202,7 @@ function pipelineFixture() {
 const inspectPipeline = (fixture) => JSON.parse(JSON.stringify(vm.runInNewContext(browserExpression(PIPELINE_POLICY), fixture.context)));
 
 test("separate pipeline policy cannot be selected by an agenda request or unknown token", () => {
-  const value = { ...request(), profile: PIPELINE_POLICY, composition: "compositions/nateherk-pipeline.html" };
+  const value = { ...request(), profile: PIPELINE_POLICY, composition: "compositions/module-pipeline.html" };
   assert.deepEqual(parseRequest(encoded(value)).value, value);
   for (const patch of [{ profile: POLICY }, { composition: "compositions/agenda-slide.html" }, { profile: "__proto__" }, { profile: {} }]) {
     assert.throws(() => parseRequest(encoded({ ...value, ...patch })));

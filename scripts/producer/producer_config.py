@@ -178,8 +178,8 @@ MODES = {
             "max_still_gap_s": 16.0,       # 13s bare stretches are on-style
             "hook_front_load": 1.3,        # still front-load, but relaxed
         },
-        # JADENLY tempo (scripts/producer/docs/findings/JADEN_STYLE.md — 6
-        # iamjadenly reels, granular frame-verified traces 2026-07-09,
+        # PUNCH tempo (scripts/producer/docs/findings/PUNCH_STYLE.md — 6
+        # iampunch reels, granular frame-verified traces 2026-07-09,
         # 55.9-150.7s each): locked-tripod punch-cut shorts. Eye-verified
         # VISIBLE cuts median 17.2/min (range 10.4-20.4) — scdet undercounts
         # these same-background punch cuts ~2x (fingerprint counts said 9.9;
@@ -194,18 +194,18 @@ MODES = {
         # on-screen STATE (51-89 distinct states/min, 6/6 reels). The hook is
         # carried by a graphic from frame ~0, not by cut density (4/6 reels
         # open with <=1 cut in the first 10s). Selected by
-        # ``target.pace == "jadenly"``.
-        "pacing_jadenly": {
+        # ``target.pace == "punch"``.
+        "pacing_punch": {
             "min_changes_per_min": 14.0,   # floor below the 17.2/min visible-
-                                           # cut median (JADEN_STYLE.md §2 C1)
+                                           # cut median (PUNCH_STYLE.md §2 C1)
             "max_still_gap_s": 12.0,       # measured no-change max 10.9s —
                                            # admits the legal outro hold (§2 C8)
             "hook_front_load": 1.3,        # front-load lives in the graphics/
-                                           # state layer (JADEN_STYLE.md §1 H2)
+                                           # state layer (PUNCH_STYLE.md §1 H2)
             # Advisory doctrine (the brain/skill reads these; the pacing lint
             # only reads the three keys above): tempo between cuts comes from
             # caption/graphic STATE churn, and every reel runs a music bed
-            # (JADEN_STYLE.md §6: integrated -14.5..-14.7 LUFS, zero silence
+            # (PUNCH_STYLE.md §6: integrated -14.5..-14.7 LUFS, zero silence
             # gaps, bed ~3±1 LU under the dialogue median in speech gaps,
             # NEVER beat-synced — the timing authority is speech).
             "state_changes_per_min": 70.0, # measured 51-89 states/min (6/6)
@@ -213,12 +213,12 @@ MODES = {
             # Style-aware punch ceiling (G17): the measured C5 step band is
             # +12..45% face-height (biggest legal punch x1.44, DaG @17.0 on
             # the promise; the x1.92 Daf outlier is NOT admitted). Read by
-            # plan_lint_motion when target.pace == "jadenly"; other paces
+            # plan_lint_motion when target.pace == "punch"; other paces
             # keep MOTION["punch_in"]["zoom_max"] = 1.25. Stays inside the
             # punch_in.py primitive's hard ceiling (ZOOM_MAX_HARD 1.55).
             "punch_zoom_max": 1.45,
         },
-        # CALEB tempo (docs/studies/CALEB_STYLE.md — 3 caleb reels, granular traces +
+        # RESTRAINED tempo (docs/studies/RESTRAINED_STYLE.md — 3 restrained reels, granular traces +
         # fresh-pixel spot-checks 2026-07-09, 36.5-62.9s each): the SIMPLE-CUTS
         # / podcast-clip RESTRAINT pole. Cuts are ERASERS (one mid-clause jump
         # cut to splice out a flub) or 0.25-0.9s listener-reaction cutaways —
@@ -226,7 +226,7 @@ MODES = {
         # cuts/min, and the 10.25 is 4 cutaway PAIRS over one unbroken take).
         # Zero zooms in all three reels (ORB scale 0.999-1.000). Retention is
         # carried ENTIRELY by verbatim caption churn (72.5-87 cues/min, 3/3 —
-        # inside the jadenly 51-89 states/min band, but the churn lives in the
+        # inside the punch 51-89 states/min band, but the churn lives in the
         # CAPTION layer, which the pacing lint's cut+graphic counter cannot
         # see) plus ONE static thesis graphic pinned from frame 0 (title chip
         # held the whole reel, or a ~7.4s cold-open card) and the speaker's own
@@ -234,10 +234,10 @@ MODES = {
         # measured zero-cut zero-graphic-entrance stretch is 36.5s (a whole
         # reel, DWASWqDkqEU). So the lint floors are effectively OFF — a
         # compliant plan still clears hook_front_load because the thesis
-        # graphic enters at t=0. Selected by ``target.pace == "caleb"``.
-        "pacing_caleb": {
+        # graphic enters at t=0. Selected by ``target.pace == "restrained"``.
+        "pacing_restrained": {
             "min_changes_per_min": 0.0,    # measured floor IS zero cuts
-                                           # (CALEB_STYLE.md §2 C1: 0/1/8)
+                                           # (RESTRAINED_STYLE.md §2 C1: 0/1/8)
             "max_still_gap_s": 40.0,       # longest zero-change hold = 36.5s,
                                            # an entire reel (§2 C4)
             "hook_front_load": 1.0,        # cadence is FLAT — hook only ~8%
@@ -249,11 +249,11 @@ MODES = {
             # 0.25-1.4s each, and there is NO music bed — all three reels'
             # "music likely" heuristic votes were spectral-verified FALSE
             # POSITIVES (compressed podcast/cab mastering fooled the
-            # crest/floor votes; CALEB_STYLE.md §6).
+            # crest/floor votes; RESTRAINED_STYLE.md §6).
             "state_changes_per_min": 80.0, # caption cues 72.5-87/min (3/3)
             "music": False,                # 3/3 spectral-verified: no bed
         },
-        # ANGELA tempo (docs/studies/ANGELA_STYLE.md — 4 @personalbrandlaunch reels,
+        # SLIDEWARE tempo (docs/studies/SLIDEWARE_STYLE.md — 4 @personalbrandlaunch reels,
         # granular frame-verified traces 2026-07-09, 35.97-46.74s each):
         # takeover-alternation shorts. Hard cuts are SECTION punctuation
         # (talking-head <-> full-frame lime-canvas takeovers), never energy:
@@ -268,20 +268,20 @@ MODES = {
         # stretches were camera holds carried by slide carousels. The hook is
         # graphics-carried: frame 0 fully dressed 4/4, cuts in the first 10s
         # {0, 0, 1, 2} — cut density is LOWEST in the hook. Selected by
-        # ``target.pace == "angela"``.
-        "pacing_angela": {
+        # ``target.pace == "slideware"``.
+        "pacing_slideware": {
             "min_changes_per_min": 16.0,   # floor below the leanest reel's
                                            # cuts+graphics rate ~23/min
-                                           # (ANGELA_STYLE.md §9)
+                                           # (SLIDEWARE_STYLE.md §9)
             "max_still_gap_s": 8.0,        # measured no-change max ~5.8s —
                                            # the graphic churn never rests
             "hook_front_load": 1.3,        # hook density lives in graphics,
-                                           # not cuts (ANGELA_STYLE.md §2 AH3)
+                                           # not cuts (SLIDEWARE_STYLE.md §2 AH3)
             # Advisory doctrine (the brain/skill reads these; the pacing lint
             # only reads the three keys above): pick ONE graphic economy
             # (takeover deck OR persistent ledger), captions dual-mode with a
             # pill skin on lime canvas, receipts always carry eye-count
-            # chips, mock-OS CTA at the end (ANGELA_STYLE.md §9 checklist).
+            # chips, mock-OS CTA at the end (SLIDEWARE_STYLE.md §9 checklist).
             "state_changes_per_min": 65.0, # measured 54-87 state-events/min (4/4)
             "music": True,                 # 4/4 carry a bed ~3-4 LU under
                                            # speech; -14.3..-14.6 LUFS masters
@@ -297,7 +297,7 @@ MODES = {
         # momentum lives in a word-locked proof MONTAGE (4-5 process clips in
         # ~6s) + whisper-caption churn measured 92.9 states/min. Motion budget
         # for the WHOLE 30s: 2 zoom-outs + 1 punch-in + 1 overlay burst — a
-        # budget that CONFLICTS with jadenly (zero transitions) and caleb
+        # budget that CONFLICTS with punch (zero transitions) and restrained
         # (zero zooms), so it lives in its own profile and never bleeds into
         # desk talking-head presets (SF2 SCOPE GUARD). Selected by
         # ``target.pace == "client-reel"``.
@@ -331,7 +331,7 @@ MODES = {
         # HOOK STACK (docs/studies/SHORTFORM_LESSONS.md §1, SF1 taught+measured +
         # SF2 frame-verified, 2026-07-11). Advisory doctrine the brain/skill
         # reads when authoring a produced short's hook zone. The TEXT LOCKUP
-        # tier is the cross-style INVARIANT (Jaden H2/T1 + Caleb H1 + SF1/SF2
+        # tier is the cross-style INVARIANT (Punch H2/T1 + Restrained H1 + SF1/SF2
         # = 4 sources); the zoom-out + riser tier is a PROMO-POLE addition —
         # only under a flashy/produced client-reel treatment.
         "hook_stack": {
@@ -478,7 +478,7 @@ MODES = {
                           "cutaway_share": 0.39},
             "screen-share": {
                 "cuts_per_min": 0.6,
-                # CAMERA-HOLD LEGALITY (Caleb C4 reconfirmed at longform
+                # CAMERA-HOLD LEGALITY (Restrained C4 reconfirmed at longform
                 # scale): a 157s zero-cut hold is legal ONLY while another
                 # layer churns — a bare hold that long is NEVER legal on
                 # presenter footage.
@@ -509,8 +509,8 @@ MODES = {
         # riser+hit at the section card; a music-STOP is a deliberate jolt
         # at a major pivot (his 2:30 hits -56 LUFS), a slow fade-out is the
         # segment-closing signal; drop/duck the bed under the pitch/CTA
-        # (his 4:50-5:33 runs -21..-27 LUFS). LONGFORM ONLY — jadenly shorts
-        # keep a constant bed (6/6 zero-gap), caleb has none. Advisory
+        # (his 4:50-5:33 runs -21..-27 LUFS). LONGFORM ONLY — punch shorts
+        # keep a constant bed (6/6 zero-gap), restrained has none. Advisory
         # doctrine (the brain plans segments; audio_mix executes the bed).
         "music_segments": {"mood_per_segment": True,
                            "new_track_per_chapter": True,
@@ -742,14 +742,14 @@ CAPTIONS = {
         "accent": "#FFD400",
         "accent_font": "Georgia",
     },
-    # WHISPER — the jaden base caption layer (G2; scripts/producer/docs/
-    # findings/JADEN_STYLE.md §4 CAP2/CAP3, 5/6 reels HIGH). Tiny white
+    # WHISPER — the punch base caption layer (G2; scripts/producer/docs/
+    # findings/PUNCH_STYLE.md §4 CAP2/CAP3, 5/6 reels HIGH). Tiny white
     # sentence-case sans cues, 1-3 words, hard replace-per-cue (no fade, no
     # karaoke sweep — CAP1: zero sweeps in 623s), soft shadow with NO box and
     # NO outline stroke, centered x0.5 in the y0.60-0.64 band. Emphasis is
     # tier-A INLINE amber: payload words tint from the cue's FIRST frame
     # (CAP3 — never swept in); tier-B promotions live in the SHOUT layer
-    # (jaden-shout-lockup comp), not here. Rendered by captions_whisper.py.
+    # (punch-shout-lockup comp), not here. Rendered by captions_whisper.py.
     "WHISPER": {
         "font": "Inter",
         "font_size": 42,                # 2.2%H of 1920 — measured 2.1-2.3%H
@@ -901,7 +901,7 @@ AUDIO = {
     # RISER-BRIDGE (docs/studies/SHORTFORM_LESSONS.md §1.6, SF1 taught+measured):
     # ~1.2s riser under a short's hook, ENDING exactly where the body
     # starts, level pulled well down. Optional produced-treatment slot —
-    # no coverage in the measured jaden/caleb corpora.
+    # no coverage in the measured punch/restrained corpora.
     "riser_bridge_s": 1.2,
 }
 
@@ -1137,8 +1137,8 @@ MOTION = {
     "eye_trace": {"audit": "warn", "jolt_flag_key": "deliberateJolt",
                   "bias_weight": 0.05, "warn_dist_frac": 0.45},
     # ENTRANCE CAUSALITY (docs/studies/EDITCRAFT_LESSONS.md §7.2, EC2 R5 —
-    # generalized; adjudicates taught move-ins vs jadenly instant-pop vs
-    # caleb frame-0 pins): every graphic entrance needs a cause the viewer
+    # generalized; adjudicates taught move-ins vs punch instant-pop vs
+    # restrained frame-0 pins): every graphic entrance needs a cause the viewer
     # can perceive. A silent unexplained mid-video pop is the ONLY illegal
     # state. Lint spec (longform produced lane, roadmap in
     # plan_lint_motion): entries with inDur=0 must carry an sfx slot or
@@ -1185,7 +1185,7 @@ MOTION = {
                              "yellow": (35.0, 157.0),
                              "green": (92.0, 68.0)}},
     },
-    # Narration-paced module builds (NATEHERK_STUDY.md §3 rank 1 / §5 item 4):
+    # Narration-paced module builds (MODULE_STUDY.md §3 rank 1 / §5 item 4):
     # a card lands 3-6 modules timed to SPOKEN WORDS, not a fixed stagger —
     # measured: MG-1 benchmark card builds over ~2s (52.4-59.5), MG-3 timeline
     # nodes 1.2-1.4s apart (= narration beats), MG-2 agent cards stagger after
@@ -1245,7 +1245,7 @@ MOTION = {
         "kind_bg": {
             "statement-card": {"": "#0a1123", "dark": "#0a1123",
                                "cream": "#f6eac6"},
-            "nateherk-takeover": {"": "#0c1014"},
+            "module-takeover": {"": "#0c1014"},
             "whiteboard-list": {"": "#f7f5f0", "cream": "#f6eac6"},
         },
     },
@@ -1257,7 +1257,7 @@ MOTION = {
         "kinds": ("whiteboard-list",),
         "max_hold_s": 5.0,
     },
-    # CARD FORM SELECTION (docs/studies/NATEHERK_CARDS.md §1.4 mapping table,
+    # CARD FORM SELECTION (docs/studies/MODULE_CARDS.md §1.4 mapping table,
     # FAILURE_LEDGER LL-015 / LESSON-029): the card form follows the beat's
     # INFORMATION SHAPE. Planner-facing DATA: info-shape -> the form family
     # (comp kinds) that renders it. The brain classifies the beat's shape;
@@ -1265,35 +1265,35 @@ MOTION = {
     # card) is a defect. Every kind here must exist as a comp under
     # templates/motion/compositions/ (tested). Roadmap forms join their
     # families when built (dated-timeline -> chronology, ui-diff -> evidence,
-    # scanner-lanes -> qa — NATEHERK_CARDS §4). Data catalog — exempt from
+    # scanner-lanes -> qa — MODULE_CARDS §4). Data catalog — exempt from
     # the line budget.
     "card_form_map": {
         # numbers vs a baseline / hero-vs-comparison hierarchy (Nate #9/#11)
-        "comparison": ("nateherk-bullet-bars", "nateherk-scoreboard",
-                       "nateherk-takeover", "versus-split", "chart-story"),
+        "comparison": ("module-bullet-bars", "module-scoreboard",
+                       "module-takeover", "versus-split", "chart-story"),
         # change over time — the trend hole ledger/scoreboard cannot draw
         # (catalog wave B; decline-chart / mk-line-graph join when ported)
         "trend": ("chart-story",),
         # ordered or parallel steps — pipeline tiles / steps rail (#8/#17/#18)
-        "process": ("nateherk-pipeline", "nateherk-rail", "glass-rail",
+        "process": ("module-pipeline", "module-rail", "glass-rail",
                     "agenda-slide", "whiteboard-map", "list-build"),
         # receipts / KV ledgers / tool-identity + authorization (#3/#5/#13)
-        "evidence": ("angela-receipt-cell", "nateherk-ledger-dark",
+        "evidence": ("slideware-receipt-cell", "module-ledger-dark",
                      "whiteboard-connector", "logo-card", "icon-badge",
                      "icon-badge-wide"),
         # speaker authority / biography / earned identity proof
-        "credibility": ("avatar-bio-card", "nateherk-ledger-dark",
+        "credibility": ("avatar-bio-card", "module-ledger-dark",
                         "whiteboard-connector", "logo-card"),
         # a new chapter or promised roadmap, not a generic thesis card
         "chapter": ("section-takeover", "agenda-slide", "whiteboard-map",
-                    "nateherk-pipeline"),
+                    "module-pipeline"),
         # measurements vs a LIMIT — threshold tick + amber footer (#11/#12)
-        "limit": ("nateherk-bullet-bars", "nateherk-scoreboard"),
+        "limit": ("module-bullet-bars", "module-scoreboard"),
         # a single hero metric / gauge (#9 boxed callout, #11 hero number)
-        "scale": ("nateherk-scoreboard", "stat-card", "widget-gauge",
+        "scale": ("module-scoreboard", "stat-card", "widget-gauge",
                   "count-up"),
         # multi-point lists / checklists (#8/#10; LL-011 row lands apply)
-        "list": ("glass-rail", "nateherk-rail", "whiteboard-list",
+        "list": ("glass-rail", "module-rail", "whiteboard-list",
                  "canvas-pip-list", "agenda-slide", "list-build"),
         # pure thesis — no data, just the sentence (#19); line-swap is the
         # setup-then-subvert masked replacement beat (catalog wave B)
@@ -1315,7 +1315,7 @@ MOTION = {
         "comparative_words": ("versus", "vs", "than", "compared"),
         "strict_scopes": ("produced", "full"),
     },
-    # VARIETY (docs/studies/NATEHERK_CARDS.md §2, LL-016 / LESSON-030): variety
+    # VARIETY (docs/studies/MODULE_CARDS.md §2, LL-016 / LESSON-030): variety
     # lives in STRUCTURE, not palette — tokens repeat, layouts don't (the
     # reference uses 20 distinct forms across 23 graphic windows; repeats
     # only statement x2 / screenshare x3). plan_lint_visual.check_variety:
@@ -1346,9 +1346,9 @@ MOTION = {
         # Caption/whisper LAYER kinds: a caption layer is furniture riding
         # under the cards, not an information-bearing layout — exempt from
         # the consecutive-repeat WARN and the diversity denominator.
-        "layer_kinds": ("angela-caption-dual-mode",),
+        "layer_kinds": ("slideware-caption-dual-mode",),
     },
-    # Word-locked seams (NATEHERK_STUDY.md T-G / §5 item 5): every transition
+    # Word-locked seams (MODULE_STUDY.md T-G / §5 item 5): every transition
     # in the reference lands on a narration phrase boundary (4/4 VTT spot
     # checks: 25.7 / 67.2 / 186.0 / 187.4). Seams further than this from the
     # nearest KEPT-word boundary draw a lint WARN; the planner snaps them at
@@ -1395,8 +1395,8 @@ MOTION = {
         "geometry": {
             "glass-rail": {"width_frac": 0.3302, "side": "spec",
                            "default_side": "left"},  # 634 / 1920
-            "nateherk-rail": {"width_frac": 0.3302, "side": "left"},
-            "nateherk-bullet-bars": {"width_frac": 0.375,
+            "module-rail": {"width_frac": 0.3302, "side": "left"},
+            "module-bullet-bars": {"width_frac": 0.375,
                                      "side": "left"},  # 720 / 1920
         },
     },
@@ -1428,10 +1428,10 @@ MOTION = {
     # Data catalog (O(1) lookup) — exempt from the logic line limit.
     "layout_families": {
         "glass-rail": "rail",
-        "nateherk-takeover": "takeover",
+        "module-takeover": "takeover",
         "glass-takeover-bg": "takeover",
         "section-takeover": "takeover",
-        "angela-takeover-deck": "takeover",
+        "slideware-takeover-deck": "takeover",
         "glass-lower-third": "lower-third",
         "statement-card": "statement",
         "kinetic-quote-wide": "statement",

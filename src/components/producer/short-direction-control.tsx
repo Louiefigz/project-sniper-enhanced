@@ -59,7 +59,7 @@ function RequestedDirection({ current, onChange }: {
   return <div className="space-y-2">
     <label className="block text-xs">Describe the style or name a reference
       <input className="mt-1 w-full rounded border border-border bg-background p-2 text-sm"
-        maxLength={800} value={current.request ?? ""} placeholder="For example: Nate Herk, show one offer improving step by step"
+        maxLength={800} value={current.request ?? ""} placeholder="For example: Module, show one offer improving step by step"
         onChange={(event) => onChange({ ...current, request: event.target.value })} />
     </label>
     <div className="flex flex-wrap gap-1.5">{SHORT_DIRECTION_SUGGESTIONS.map((request) =>

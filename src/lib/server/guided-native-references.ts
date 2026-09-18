@@ -4,6 +4,7 @@ import { writeFileSync } from "node:fs";
 import { observeCutPreviewFile, readCutPreviewObject } from "@/app/api/producer/auto-edit/cut-preview-receipt";
 import { objectValue, stringValue, sha256 } from "@/lib/producer/contracts/validation";
 import { createHumanCutIndex, humanCutDirectory } from "./human-cut-acceptance-store";
+import { SEQUENCE_LIBRARY } from "./reference-library-paths";
 
 export interface NativeReferenceSelection { caseId: string; beatId: string }
 export interface NativeReference {
@@ -12,7 +13,7 @@ export interface NativeReference {
   images: Array<{ file: string; sha256: string; sizeBytes: number }>;
   scope: "research-reference-not-production-asset-or-qualified-template";
 }
-const LIBRARY = "docs/studies/shorts-visual-playbook/nate-sequences";
+const LIBRARY = SEQUENCE_LIBRARY;
 const INDEX = "native-references.json";
 const SCOPE = "research-reference-not-production-asset-or-qualified-template" as const;
 

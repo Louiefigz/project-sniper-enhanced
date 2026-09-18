@@ -39,7 +39,7 @@ function suggestedMode(width: number | null, height: number | null): ReferenceMo
 export function inferKnownStyle(video: string): ReferenceStyleProfile["suggestedKnownStyle"] {
   const parts = video.toLowerCase().split(path.sep);
   if (parts.some((part) => part === "restrained" || part.startsWith("restrained-"))) return "restrained";
-  if (parts.some((part) => part.includes("iampunch") || part === "punch")) return "punch";
+  if (parts.some((part) => part.includes("the punch reference") || part === "punch")) return "punch";
   if (parts.some((part) => part === "slideware" || part.startsWith("slideware-"))) return "slideware";
   return null;
 }

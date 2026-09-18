@@ -28,6 +28,16 @@ DROP_LINE = (
 )
 # Ordered phrase rules (case-sensitive; longest first).
 PHRASES: tuple[tuple[str, str], ...] = (
+    ("Restrained Ralston or Lewis Mudrich", "Restrained or expansion-case"),
+    ("four Restrained Ralston and four Lewis Mudrich", "four Restrained and four expansion"),
+    ("Restrained/Lewis cases", "expansion cases"), ("Restrained/Lewis expansion", "reference expansion"),
+    ("(a) Kallaway-grade kinetic", "(a) dense kinetic"),
+    ("Nate cases", "sequence cases"), ("Nate IDs", "sequence IDs"), ("Nate N26", "sequence N26"),
+    ("Nate N27", "sequence N27"), ("Nate offer", "module offer"), ("Nate storytelling", "module storytelling"),
+    ("Nate test", "module test"), ("Nate render", "module render"), ("Nate poses", "module poses"),
+    ("to show Nate", "to show the reference creator"), ("Nate was the requested", "The module reference was the requested"),
+    ("Nate's GitHub account image", "The reference creator's account image"),
+    ("For a Nate", "For a module-style"),
     ("Trevor / World Pet Health's", "a client's"),
     ("World Pet Health", "a client"), ("WorldPet Health", "a client"), ("WorldPet", "a client"),
     ("Trevor Odom's", "a reviewer's"), ("Trevor Odom", "a reviewer"),
@@ -71,13 +81,23 @@ def scrub(text: str) -> str:
     return text
 
 
+def shipped(files_from: str | None) -> list:
+    """Code/skill surfaces plus, when given, the operational docs list (JSON array)."""
+    import json  # noqa: PLC0415
+    paths = [p for p in candidates() if not p.relative_to(ROOT).as_posix().startswith("docs/")]
+    if files_from:
+        paths += [ROOT / rel for rel in json.loads(open(files_from, encoding="utf-8").read())]
+    return sorted(set(paths))
+
+
 def main(argv: list[str] | None = None) -> int:
-    """Scrub every shipped-surface text file."""
+    """Scrub every shipped text file."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--files-from", help="JSON list of shipped docs (operational set)")
     args = parser.parse_args(argv)
     changed = 0
-    for path in candidates():
+    for path in shipped(args.files_from):
         if path.suffix.lower() not in TEXT:
             continue
         try:

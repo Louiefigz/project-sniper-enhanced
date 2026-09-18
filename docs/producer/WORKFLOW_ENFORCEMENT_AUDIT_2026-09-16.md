@@ -2,7 +2,7 @@
 
 Status: mandatory wiring implemented; focused and real-media qualification passed.
 Repository-wide verification results are recorded below. This is not approval of
-Trevor's video, a production deployment, or a ten-minute editorial benchmark.
+a client video, a production deployment, or a ten-minute editorial benchmark.
 
 Aaron requested mandatory long-export wiring and an audit of critical workflows
 that depend on instructions. Scope: Producer native and compatibility editing,

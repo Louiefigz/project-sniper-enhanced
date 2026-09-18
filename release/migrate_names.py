@@ -73,9 +73,22 @@ def candidates() -> list[Path]:
     return sorted(found)
 
 
+_URL = re.compile(r"https?://\S+")
+
+
 def convert(text: str) -> str:
-    """Apply the whole mapping to one blob of text."""
-    return _FINDER.sub(lambda match: _REPLACE[match.group(0)], text)
+    """Apply the whole mapping to one blob of text, leaving URLs untouched.
+
+    A URL names someone else's resource; rewriting it produces a link to a
+    different (or nonexistent) repository rather than removing the name.
+    """
+    parts, last = [], 0
+    for url in _URL.finditer(text):
+        parts.append(_FINDER.sub(lambda match: _REPLACE[match.group(0)], text[last:url.start()]))
+        parts.append(url.group(0))
+        last = url.end()
+    parts.append(_FINDER.sub(lambda match: _REPLACE[match.group(0)], text[last:]))
+    return "".join(parts)
 
 
 def rewrite(path: Path, dry_run: bool) -> int:

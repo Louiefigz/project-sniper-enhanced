@@ -332,8 +332,8 @@ resumable and independently verifiable:
    (+ optional FCPXML handoff for NLE finishing, reusing CLIPPER's writer).
 
 ### 4.3 Hook cards — placement, duration, copy (operator-specified 2026-07-04)
-- **Copy source**: grounded in the RAG hook stack — QUEST archetypes
-  (`hook_types.py`) for the *kind*, Hormozi's 121-hook swipe file
+- **Copy source**: grounded in the packaged Director library (resources/director) — QUEST archetypes
+  (`hook_types.py`) for the *kind*, the packaged Director hook library
   (`hooks_catalog.py`, `format_hooks_for_prompt()`) for proven *instances* —
   score-then-select (mirrors the pipeline's existing hook stage). Never improvised
   from nothing (no-surface-branding doctrine).
@@ -731,7 +731,7 @@ v2). Concept lifts queued:
    Directly relevant to productizing PRODUCER for Project Sniper users.
 3. **Style packs as preset files** — their presets/ folder (signature-style.md,
    captions-style.md + build.py) formalizes what we do as doctrine-in-docs;
-   adopt when IG-minimal/Kallaway-kinetic get a third sibling.
+   adopt when IG-minimal/kinetic get a third sibling.
 4. **to-premiere / NLE escape hatch** — export the edit_plan as an NLE timeline
    (we already have CLIPPER's FCPXML writer in-repo to lift from) so a human
    editor can take over any cut. High leverage, low effort.
@@ -741,8 +741,8 @@ v2). Concept lifts queued:
 
 ## 11. Open questions for the operator
 
-Settled 2026-07-04: hook-card copy grounds in the RAG hook stack (QUEST types +
-Hormozi 121 swipe file via `format_hooks_for_prompt()`), hard-limited to ≤2 lines /
+Settled 2026-07-04: hook-card copy grounds in the packaged Director library (resources/director) (QUEST types +
+the packaged Director hook library via `format_hooks_for_prompt()`), hard-limited to ≤2 lines /
 ≤8 words (§4.3); hook cards = white container + black text.
 
 1. ~~Tool name~~ SETTLED 2026-07-05: PRODUCER stays.

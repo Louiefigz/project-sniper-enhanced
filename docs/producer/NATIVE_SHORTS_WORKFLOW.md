@@ -177,7 +177,7 @@ when simultaneous viewing helps. This is editorial guidance, not a new automatic
 ranking feature or a claim that export checks assess narrative quality.
 
 1. Read the actual transcript and inspect source footage and individual library
-   frames. Select a self-contained message with a supported payoff. For a Nate
+   frames. Select a self-contained message with a supported payoff. For a module-style
    treatment, inspect setup, development and payoff plus a contrasting example.
    Establish the whole-Short rhythm from the retained script and actual delivery
    before assigning shot lengths; follow the pacing step below.

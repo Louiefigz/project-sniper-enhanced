@@ -74,7 +74,7 @@ loudness-floor + crest evidence) — my frame review called them speech-led. The
 style pack includes a LOW bed; music remains opt-in per operator doctrine, but
 when they ask for IG-minimal, recommend the bed.
 
-## Style pack: "IG-minimal" (to sit beside "Kallaway-kinetic")
+## Style pack: "IG-minimal" (to sit beside "kinetic")
 caption=minimal chest-anchored · accents=yellow two-tone · graphics=headroom
 widgets + chest assets · takeovers=focus-shift-blur · base cuts sparse
 (4-7 cuts/min measured) · LOW music bed (measured present in all refs;

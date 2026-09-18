@@ -17,7 +17,7 @@ scrolling. Use supplied B-roll first when it already demonstrates the point.
 treatment. A deliberately simple presenter-led clip stays restrained. For
 produced edits that call for proof, examples and split-screen storytelling,
 search real B-roll and assets first; add illustrations for what those assets
-cannot usefully show. A Restrained Ralston or Module reference informs the brief,
+cannot usefully show. A Restrained or Module reference informs the brief,
 not an automatic preset or a reason to disregard the selected intensity.
 Preserve useful existing illustrations when revising a few evidence beats.
 
@@ -78,15 +78,16 @@ Do not force real inserts into a brief that explicitly requests a simple clip
 or disables those lanes. No finite check guarantees zero future misses; record
 the evidence and enforce the existing review verdict before production.
 
-For World Pet Health pricing, distinct jobs are: identify Trevor/business with
-real imagery; show the actual community/offer/current member count on Skool;
-focus verified audience counts on their own platform; use an honest diagram
-for the proposed price trigger or value relationship. A captured page that
-shows 11 members and $9 need not prove the $100k goal to serve the current-state
-shot. Relevant Trevor/dog footage can ground the business physically. Use the
-real Kit/Kajabi marks when those named tools need identification. Verify exact
-profile ownership, metric scope and capture date; do not combine cross-platform
-followers into a claim of unique people or alter counts to fit the speech.
+For a talk about a business's pricing, the distinct jobs are: identify the speaker
+and the business with real imagery; show the actual community, offer or current
+member count on the platform where it lives; focus verified audience counts on
+their own platform; use an honest diagram for the proposed price trigger or value
+relationship. A captured page showing today's member count and price need not
+prove a stated future goal to serve as the current-state shot. The speaker's own
+footage of their work can ground the business physically. Use the real marks of
+named tools when those tools need identification. Verify exact profile ownership,
+metric scope and capture date; do not combine cross-platform followers into a
+claim of unique people or alter counts to fit the speech.
 
 ## Choose the shot before recording
 

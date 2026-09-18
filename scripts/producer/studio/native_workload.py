@@ -16,7 +16,7 @@ def workload_budget(canvas: dict) -> dict:
     seconds = frames / rate
     if seconds > 900:
         raise ValueError('Native long export currently admits up to 15 minutes')
-    # The measured Trevor capture was 12.7 fps. Four fps leaves headroom;
+    # The slowest measured client capture was 12.7 fps. Four fps leaves headroom;
     # independent resource and no-progress limits still terminate stalled jobs.
     picture = math.ceil(frames / 4) + 600
     return {'pictureSeconds': picture, 'ownerSeconds': picture + 600,

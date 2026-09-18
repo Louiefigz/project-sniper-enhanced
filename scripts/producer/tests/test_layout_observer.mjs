@@ -1,4 +1,5 @@
 // Pure Node/VM metadata tests. Fake DOM rectangles are not browser observations.
+import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
@@ -70,7 +71,10 @@ test("missing actual visibility cannot be dressed as safe", () => {
 });
 
 test("only the exact installed CLI bytes accept the narrow instrumentation", () => {
-  const path = "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js";
+  // Resolve the installed SDK in the checkout under test, never one machine's
+  // absolute path: an absolute literal silently read a different checkout.
+  const path = fileURLToPath(new URL(
+    "../../../templates/motion/node_modules/hyperframes/dist/cli.js", import.meta.url));
   const source = readFileSync(path, "utf8"), patched = instrument(source);
   assert.ok(patched.includes("__sniperLayoutCdp = await getCdpSession(page)"));
   assert.ok(patched.includes("ensureFrameWritten(await currentEncoder.writeFrame(buffer), i2, currentEncoder);\n            __sniperLayout.commit(i2, buffer);"));

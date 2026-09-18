@@ -1,6 +1,6 @@
 # SLIDEWARE_STYLE.md — THE SLIDEWARE STYLE grammar (4-reel granular synthesis)
 
-**Creator:** slideware (IG **@personalbrandlaunch**, social-media-marketing educator).
+**Creator:** slideware (IG **a reference account**, social-media-marketing educator).
 **Corpus:** 4 reels, 35.97–46.74s, all 1080x1920 9:16 @30fps, total **164.7s /
 28 hard cuts / ~150 graphic+text events**. Sets: locked-tripod desk (Daix,
 Dadm) and handheld outdoor deck (DaiA, DagN) — same grammar in both.

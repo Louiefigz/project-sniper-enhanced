@@ -274,7 +274,7 @@ outputs, and a small integration handoff; do not stop at a design document.
 
 The current live project is:
 
-`/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER`
+`/Users/maintainer/ProjectSniperSource`
 
 Your responsibility is **shared-program audio finishing**: supported local
 dialogue cleanup, per-section dialogue gain, existing approved music ducking,

@@ -12,7 +12,11 @@ const {performance} = require('node:perf_hooks');
 
 const root = path.resolve(__dirname, '../../..');
 const puppeteer = require(path.join(root, 'templates/motion/node_modules/puppeteer-core'));
-const chrome = '/Users/aaronfigueroa/.cache/puppeteer/chrome-headless-shell/mac_arm-143.0.7499.42/chrome-headless-shell-mac-arm64/chrome-headless-shell';
+// Use the browser this install actually pins. An absolute literal here bound the
+// harness to one machine's cache and to a build the release no longer uses.
+const chrome = process.env.HYPERFRAMES_BROWSER_PATH
+  || process.env.PRODUCER_HEADLESS_SHELL_PATH;
+if (!chrome) throw new Error('set HYPERFRAMES_BROWSER_PATH to the pinned chrome-headless-shell');
 const appOrigin = 'http://localhost:3327';
 const started = performance.now();
 const artifacts = fs.mkdtempSync(path.join(os.tmpdir(), 'sniper-native-headless-'));

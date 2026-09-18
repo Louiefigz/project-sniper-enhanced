@@ -64,8 +64,8 @@ The user values action and dislikes repeated permission questions. Existing auth
 
 ## Workspace and browser
 
-- Workspace root: `/Users/aaronfigueroa/development/demos/YT-Automation`
-- Actual working repository: `/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER`
+- Workspace root: `/Users/maintainer/workspace`
+- Actual working repository: `/Users/maintainer/ProjectSniperSource`
 - Current browser URL: `http://127.0.0.1:4005/one-short/index.html`
 - Existing server on port 4005 serves `artifacts/img7138-journey-shorts-2026-09-15/review/`.
 - CUA binding in the current persistent session: `reviewTab`, selected via `cua.getTab('1', {browser:'2'})`.
@@ -114,7 +114,7 @@ Actual idea: obtaining an AI editor is a starting point. Aaron describes the wor
 
 ### Source assembly (all at 1×)
 
-Original `/Users/aaronfigueroa/Downloads/IMG_7138.MOV`.
+Original `/Users/maintainer/Downloads/IMG_7138.MOV`.
 
 | Original seconds | Output frames | Purpose |
 |---|---:|---|

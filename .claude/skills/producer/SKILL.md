@@ -143,14 +143,16 @@ through several actions. Choose from the retained story, source performance and
 available evidence; creator names are references, not whole-video presets.
 Preserve expression, gestures and useful pauses when they carry the lesson.
 
-**Open the saved creator references during planning.** Use
-[the Shorts visual library](../../../docs/studies/shorts-visual-playbook/README.md)
-to find the relevant Module, Restrained Ralston or Lewis Mudrich treatment. Open
-the chosen full-frame image and timestamped sequence with an image-viewing tool,
+**Open the packaged references during planning.** Use
+[the Shorts reference library](../../../resources/references/README.md) and its
+[format foundations](../../../resources/references/shorts/FORMAT_FOUNDATIONS.md)
+to find the mechanism the retained speech needs. Open the chosen case's frames
+with an image-viewing tool,
 then read the paired description. Reading a description or catalog source does
 not count as viewing the reference. Record its stable ID/version, image paths,
 story fit and deliberate adaptations in the existing storyboard/review notes.
-For produced Shorts, use the linked complete Nate cases and directing guide:
+For produced Shorts, use the complete sequence cases and
+[directing guide](../../../resources/references/shorts/sequences/DIRECTING_GUIDE.md):
 inspect the setup, development and payoff, plus at least one alternative example
 of the main story job. Record why each picture supports its speech, the actual
 attention target, why a move or hold is useful, and what persists across shots.
@@ -164,7 +166,7 @@ workflow requirement, not a claim that automatic reference retrieval is coded.
 
 **Native prebuild strategy is required, including technical samples shown as
 creative examples.** Write or revise the actual BRIEF and scene plan before
-assembling HTML. Use [format foundations](../../../docs/studies/shorts-visual-playbook/FORMAT_FOUNDATIONS.md)
+assembling HTML. Use [format foundations](../../../resources/references/shorts/FORMAT_FOUNDATIONS.md)
 to connect the message to the viewing need, format, framing, development and exit;
 adapt the reference's function rather than replicating its font or pixels.
 Establish viewer/problem/promise/payoff; compare reference
@@ -211,10 +213,10 @@ do not rewrite it to fit a formula or attach a false hook anchor. Check the narr
 title-to-speech/visual promise and actual readability. See
 [native title copy and layout](../../../docs/producer/NATIVE_TITLE_CARD_TEMPLATE_2026-09-10.md).
 
-**Use the Script Director's template flow before native scene planning.** Reuse
-the [Director Shorts lane](../../../../youtube-automation/.claude/skills/script-director/SKILL.md)
-and its canonical format library, unified hook anchors, R/T reference and training
-banks, and formula/slot/disqualification index. The native backend now runs
+**Use the Director's template flow before native scene planning.** It reads the
+packaged [Director library](../../../resources/director/README.md): its format
+library, hook anchors, R/T reference and training pairs, and the
+formula/slot/disqualification index. The native backend now runs
 `stageNativeDirector` from `src/lib/server/native-director-store.ts` during V9
 input preparation, before the scene worker: viewer/payoff/awareness → format
 alternatives → one template and rejected alternatives → 2–3 fills of that same
@@ -224,8 +226,9 @@ slots, invented recorded words, failed selected conditions or a rejected/stale
 critique stop this path. Store the actual plan and its library provenance;
 reference IDs added after drafting are not retrieval. Use existing source material
 and delegated decisions; do not repeat an interview already completed here.
-The implementation reads the RAG libraries through `SNIPER_RAG_ROOT` (or the
-monorepo sibling), freezes them per attempt, and reuses those bytes for cold reads.
+The implementation reads the packaged library (or an operator-configured
+`SNIPER_DIRECTOR_LIBRARY` with the same six files), freezes it per attempt, and
+reuses those bytes for cold reads. It never reads another repository.
 The main UI's legacy proposal default is unchanged; this is the native backend
 stage, not a claim that a generated hook has passed visual or audience testing.
 
@@ -326,13 +329,10 @@ strategy after assembly. Review continuous motion and the explanation a new
 viewer would take away, as well as technical validity. These are directing
 requirements, not proof of measured retention. The shared author/reviewer instructions in `src/lib/producer/visual-storytelling.ts` carry these failure classes into existing automated revision gates. Native agent-led edits must resolve the same material issues against the current candidate before handoff; a CLI check, strategy approval or contact sheet alone does not clear motion and comprehension review.
 
-This guidance distills the completed 14-skill student-kit audit, particularly
-`short-form-edit`, `video-storytelling` and `hyperframes-video-beats`. Provenance
-and exclusions are in `docs/producer/HYPERFRAMES_STUDENT_KIT_FULL_AUDIT_2026-09-09.md`
-(background research, not an additional required headless input). Search the
-existing whole catalog for suitable mechanisms and keep current-runtime
-compatibility authoritative. Extend our motion cards; import neither the kit's
-older runtime nor its fixed layouts, mandatory extra renders or duplicate editor.
+Search the existing whole catalog for suitable mechanisms and keep
+current-runtime compatibility authoritative. Extend our own motion cards rather
+than importing another toolkit's runtime, fixed layouts, mandatory extra renders
+or duplicate editor.
 The legacy short-form scaffold is not the new shorts workflow.
 
 For source examples of restrained versus produced Shorts and catalog fit, read
@@ -653,7 +653,7 @@ high-energy sentence alone does not establish a suitable short.
 **Aaron's selection preference:** show the ranked strongest moments before
 trimming or producing a short. Include source timestamps and watchable source
 previews, exact hook/payoff excerpts, estimated edited length, why each works,
-and a brief student-kit visual-storytelling idea. Recommend a favorite, then
+and a brief visual-storytelling idea. Recommend a favorite, then
 wait for his selection. Reuse a moment he already chose; an explicit request
 to choose and proceed overrides this default. Ranking alone is not selection.
 
@@ -748,10 +748,10 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
        it drops the silence (keeping each breath + protected pauses), the re-take
        spans, and an abandoned cold-open fragment, so the cut opens on the clean
        take. Pick the window to end on a complete thought (not mid-sentence).
-   - Hook copy: ground in the RAG hook stack — QUEST archetypes + Hormozi 121
-     swipe file at
-     `../youtube-automation/rag-system/src/catalogs/hooks_catalog.py` (read the
-     catalog entries; generate 3–5 candidates in proven patterns; score; pick).
+   - Hook copy: ground in the packaged Director library at
+     `resources/director/` (read its hook anchors, formulas and reference
+     openings; generate 3–5 candidates built from the speaker's own words;
+     score; pick).
      Hard limit ≤2 lines / ≤8 words (lint enforces). Phase 1: the hook goes in
      the plan's `titleCards` and in your summary to the operator — rendering
      the card itself is Phase 2.

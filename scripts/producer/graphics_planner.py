@@ -28,7 +28,7 @@ graphics_planner_longform.
 graphics_style axis (the R14 contradiction, pair-2 study): "cutaway-only",
 "overlay-rich" (pair-2: fragment-payoff burns, headroom
 icon stacks, section-takeover chapter cards, gate-legal long-list cutaways,
-R24 concept stock), or "face-bridge" (two-chassis Nate editorial grammar) —
+R24 concept stock), or "face-bridge" (two-chassis module editorial grammar) —
 see graphics_planner_style and graphics_planner_face_bridge. Produced/full longform must
 persist an explicit target.graphicsStyle plus rationale; lighter scopes retain
 the legacy default. Longform only; the shorts path never branches on it.

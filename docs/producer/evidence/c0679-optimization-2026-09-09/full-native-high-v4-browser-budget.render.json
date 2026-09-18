@@ -50,7 +50,7 @@
     "-f",
     "/private/tmp/sniper-studio-realm-transport-20260909.sPtXXP/localhost-only.sb",
     "/opt/homebrew/Cellar/node/23.10.0_1/bin/node",
-    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js",
+    "/Users/maintainer/ProjectSniperSource/templates/motion/node_modules/hyperframes/dist/cli.js",
     "render",
     ".",
     "--fps",

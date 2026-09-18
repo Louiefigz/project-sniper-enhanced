@@ -179,7 +179,7 @@ MODES = {
             "hook_front_load": 1.3,        # still front-load, but relaxed
         },
         # PUNCH tempo (scripts/producer/docs/findings/PUNCH_STYLE.md — 6
-        # iampunch reels, granular frame-verified traces 2026-07-09,
+        # the punch reference reels, granular frame-verified traces 2026-07-09,
         # 55.9-150.7s each): locked-tripod punch-cut shorts. Eye-verified
         # VISIBLE cuts median 17.2/min (range 10.4-20.4) — scdet undercounts
         # these same-background punch cuts ~2x (fingerprint counts said 9.9;
@@ -253,7 +253,7 @@ MODES = {
             "state_changes_per_min": 80.0, # caption cues 72.5-87/min (3/3)
             "music": False,                # 3/3 spectral-verified: no bed
         },
-        # SLIDEWARE tempo (docs/studies/SLIDEWARE_STYLE.md — 4 @personalbrandlaunch reels,
+        # SLIDEWARE tempo (docs/studies/SLIDEWARE_STYLE.md — 4 a reference account reels,
         # granular frame-verified traces 2026-07-09, 35.97-46.74s each):
         # takeover-alternation shorts. Hard cuts are SECTION punctuation
         # (talking-head <-> full-frame lime-canvas takeovers), never energy:
@@ -1268,7 +1268,7 @@ MOTION = {
     # scanner-lanes -> qa — MODULE_CARDS §4). Data catalog — exempt from
     # the line budget.
     "card_form_map": {
-        # numbers vs a baseline / hero-vs-comparison hierarchy (Nate #9/#11)
+        # numbers vs a baseline / hero-vs-comparison hierarchy (module #9/#11)
         "comparison": ("module-bullet-bars", "module-scoreboard",
                        "module-takeover", "versus-split", "chart-story"),
         # change over time — the trend hole ledger/scoreboard cannot draw
@@ -1326,7 +1326,7 @@ MOTION = {
     # Beyond
     # 60s the first min(output,180s) grows from >=5 windows / >=4 forms to
     # >=8 / >=6 at 180s, while retaining proportional diversity. The whole plan
-    # keeps its >=6 / ceil(.5*N) floor. Nate measures 20/23 ~ .87 distinct, so
+    # keeps its >=6 / ceil(.5*N) floor. module measures 20/23 ~ .87 distinct, so
     # every shipped floor remains deliberately permissive relative to it.
     "variety": {
         "min_windows": 6,
@@ -1390,7 +1390,7 @@ MOTION = {
                                  # only when the miss is <=4% of frame width;
                                  # larger misses still force a layout change.
         # Source-derived settled occlusion geometry for every free-band rail.
-        # ``side: spec`` means the comp exposes spec.side; fixed-side Nate
+        # ``side: spec`` means the comp exposes spec.side; fixed-side module
         # chassis are measured from their shipped 1920px composition CSS.
         "geometry": {
             "glass-rail": {"width_frac": 0.3302, "side": "spec",

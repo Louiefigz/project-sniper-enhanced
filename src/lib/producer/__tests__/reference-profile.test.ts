@@ -4,7 +4,7 @@ import { buildReferenceStyleProfile } from "../../../app/api/_lib/reference-prof
 const profile = buildReferenceStyleProfile({
   id: "ref_test",
   title: "Punch sample",
-  video: "/tmp/iampunch/sample.mp4",
+  video: "/tmp/the punch reference/sample.mp4",
   sha256: "a".repeat(64),
   deep: {
     source: { width: 1080, height: 1920, fps: 30, durationS: 60 },

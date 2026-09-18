@@ -14,7 +14,10 @@ from headless.render_layout_contract import (
 from headless.render_layout_result import validate_observation
 from headless.render_layout_worker import parse_worker_request
 
-ROOT = Path("/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER")
+# Resolve the repository under test, never an absolute path on one machine:
+# an absolute literal here silently read a different checkout than the one
+# being tested.
+ROOT = Path(__file__).resolve().parents[3]
 
 
 def request() -> dict:

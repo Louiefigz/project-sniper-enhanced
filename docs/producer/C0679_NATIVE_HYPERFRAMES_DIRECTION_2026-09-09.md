@@ -318,7 +318,6 @@ Production is investigating the SDK's supported streaming route with the same
 quality and retained source-frame cache. This failed attempt remains part of
 delivery time; its source hashes were stable. Evidence: `full-native-high-v1.render.json`.
 
-See [source-motion framing review](../../../youtube-automation/docs/findings/PRESENTER_FRAMING_REQUIRES_SOURCE_MOTION_REVIEW.md)
 for the actual failure and a way to preserve panel padding while reframing.
 
 ### Two operating modes, one editing engine

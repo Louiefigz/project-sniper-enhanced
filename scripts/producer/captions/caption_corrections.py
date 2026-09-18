@@ -2,7 +2,7 @@
 """caption_corrections — fix ASR mishears before captions (MG-2 corrections).
 
 Deepgram mishears a proper noun and, left alone, it becomes a burned-in caption
-misspelling ("Hermosibot" for "Hormozi bot"). This module applies a plan's
+misspelling ("Hermosibot" for "a published hook bank bot"). This module applies a plan's
 ``captions.corrections`` map — ``{heard: correct}`` — to the OUTPUT-time word list
 BEFORE ``captions.build_ass`` runs (see docs/producer/PRODUCER_PLAN.md §4.5 "Caption
 corrections"). It fixes TRANSCRIPTION errors ONLY; it never paraphrases or
@@ -17,7 +17,7 @@ Matching contract:
   are tried first so a phrase key wins over a single-word key at the same spot.
 - **Time-span split.** The corrected value's tokens split the matched span
   proportionally by character length (mirrors ``captions._split_oversized``), so
-  a 1→2 word fix ("Hermosibot" → "Hormozi bot") keeps karaoke timing monotonic.
+  a 1→2 word fix ("Hermosibot" → "a published hook bank bot") keeps karaoke timing monotonic.
 
 Validation is lenient by design: a key that matches nothing is a WARNING
 (``unmatched_keys``), not an error — a plan may carry corrections for words that

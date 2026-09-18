@@ -24,7 +24,7 @@ test("live driver defaults to help and forbids old/creator paths or weaker profi
   assert.equal(parseBodyLiveMode([]), "help"); assert.equal(parseBodyLiveMode(["--run"]), "run");
   assert.equal(parseBodyLiveMode(["--run-captioned"]), "run-captioned");
   assert.equal(parseBodyLiveMode(["--check-controls"]), "check-controls");
-  for (const args of [["/Users/aaronfigueroa/Downloads/C0679.MP4"], ["--run", "/tmp/run14"], ["--program=longform-96"], ["--run", "--no-gates"]]) {
+  for (const args of [["/Users/maintainer/Downloads/C0679.MP4"], ["--run", "/tmp/run14"], ["--program=longform-96"], ["--run", "--no-gates"]]) {
     assert.throws(() => parseBodyLiveMode(args), /existing projects are forbidden/);
   }
   const help = await bodyLiveMain(["--help"]);

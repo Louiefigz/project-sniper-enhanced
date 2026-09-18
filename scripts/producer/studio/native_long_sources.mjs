@@ -16,7 +16,7 @@ export function longStoragePlan(rows, canvas, sampleCount) {
   }
   const sourceBytes=[...entries.values()].reduce((sum,value)=>sum+value,0);
   const sampleBytes=canvas.width*canvas.height*sampleCount;
-  // Includes picture, AAC candidate and review copies at >2× Trevor's observed bytes/frame.
+  // Includes picture, AAC candidate and review copies at >2× the largest observed client recording's bytes/frame.
   const outputBytes=Math.ceil(canvas.totalFrames*canvas.width*canvas.height*.25);
   const plannedBytes=sourceBytes*2+sampleBytes+outputBytes+1024**3;
   assert.ok(Number.isSafeInteger(plannedBytes)&&plannedBytes>=0,'Unsafe long disk plan');

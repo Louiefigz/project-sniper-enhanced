@@ -71,17 +71,17 @@ Validation so far: 142/142 Python tests in 1.369s for placement/contrast/composi
 The existing test-only harness `scripts/producer/tests/live_section_marker_plate_smoke.py` has **not run**. It plans two fresh 2.5-second normal V2 overlays, six real composites, actual placement evidence and Audit B under a 120-second soft work budget. Coordinate with the opening owners before capturing sources; inspect actual frames and retain failures. Silent synthetic fixtures cannot establish overall audio/delivery quality.
 
 ```bash
-cd /Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER
+cd /Users/maintainer/ProjectSniperSource
 env \
   PATH=/opt/homebrew/Cellar/ffmpeg/8.0_1/bin:/usr/bin:/bin \
   SNIPER_DOCKER_PATH=/Applications/Docker.app/Contents/Resources/bin/docker \
-  SNIPER_DOCKER_SOCKET=/Users/aaronfigueroa/.docker/run/docker.sock \
+  SNIPER_DOCKER_SOCKET=/Users/maintainer/.docker/run/docker.sock \
   SNIPER_RENDER_IMAGE_ID=sha256:bc56d3860d2ec1c843f7184bcecd21137aa79fe9fe19c90a67136d3052222ba8 \
   SNIPER_RENDER_UID_GID=501:20 \
   SNIPER_PROOF_FFMPEG_PATH=/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffmpeg \
   SNIPER_PROOF_FFPROBE_PATH=/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffprobe \
   SNIPER_NODE_PATH=/opt/homebrew/Cellar/node/23.10.0_1/bin/node \
-  HYPERFRAMES_BROWSER_PATH=/Users/aaronfigueroa/.cache/puppeteer/chrome-headless-shell/mac_arm-143.0.7499.42/chrome-headless-shell-mac-arm64/chrome-headless-shell \
+  HYPERFRAMES_BROWSER_PATH=/Users/maintainer/.cache/puppeteer/chrome-headless-shell/mac_arm-143.0.7499.42/chrome-headless-shell-mac-arm64/chrome-headless-shell \
   HYPERFRAMES_FFMPEG_PATH=/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffmpeg \
   HYPERFRAMES_FFPROBE_PATH=/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffprobe \
   PYTHONPATH=scripts/producer:scripts/producer/tests \
@@ -104,7 +104,7 @@ env PYTHONPATH=scripts/producer:scripts/producer/tests .venv/bin/python -m unitt
 - Native Studio headless UI copy→Master→full reload→painted copy→import v2→second copy v3→Undo/import v4 passed in 33.003s. Evidence: `/private/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-native-headless-fpCYqw/result.json`. Fixture: `/private/tmp/sniper-ui-qualification.KsUcgq/studio-ui-synthetic-10/producer`. Harnesses: `tests/studio_native_ui_regression.cjs` and `tests/studio_native_ui_repeat.cjs`. Preserve all older fixtures. Manual desktop retest after Mac unlock is separate and pending. Optional blocked telemetry/captions/render-history requests were explicitly reported, not made green by enabling network.
 - Elements keeps opaque sandboxing. Fixed runtimes/CSS are inlined after HTTP-200 external assets still failed script execution; referenced local icons/images use strict embedding. Actual previews were checked. Do not claim the failed external-CSS approach as a realized bandwidth optimization. Existing user colors were not migrated.
 - F2 full-source private observation has real synthetic admitted-worker evidence, but no grade application/public default release: `/private/tmp/sniper-grade-project-live-a9ev1378/synthetic/producer/.sniper-grade-observations/e716fa8b-56a4-4d1e-a49a-16a447b004d4` (2.930s caller, 2.910s service, 150ms cleanup; 180 decoded frames over 90s). Source changes make this historical execution evidence, not automatically reusable current authority. Existing five-sample Color UI remains limited screening, not full-source proof.
-- Newly accessible user source `/Users/aaronfigueroa/Downloads/C0679.MP4`: parent observed 10,280,473,262 bytes, 834.335s, 3840×2160 H.264/yuv420p, tv range, BT.709 primaries/matrix but **transfer `iec61966-2-4`**, 24000/1001, 20,004 frames, stereo 48k PCM. No full hash/decode/copy was performed during the catalog run. Current private full-source F2 class requires BT.709 transfer and ≤8GiB, so this original does not meet that narrow class. This is **not whole-editor ineligibility**. A separately qualified large-source/xvYCC path is required; do not guess HDR/Log, silently proxy-convert, or pretend existing sample diagnostics prove its grade. Existing mezzanine color contract code is not qualification on this file.
+- Newly accessible user source `/Users/maintainer/Downloads/C0679.MP4`: parent observed 10,280,473,262 bytes, 834.335s, 3840×2160 H.264/yuv420p, tv range, BT.709 primaries/matrix but **transfer `iec61966-2-4`**, 24000/1001, 20,004 frames, stereo 48k PCM. No full hash/decode/copy was performed during the catalog run. Current private full-source F2 class requires BT.709 transfer and ≤8GiB, so this original does not meet that narrow class. This is **not whole-editor ineligibility**. A separately qualified large-source/xvYCC path is required; do not guess HDR/Log, silently proxy-convert, or pretend existing sample diagnostics prove its grade. Existing mezzanine color contract code is not qualification on this file.
 
 ## Recommended resumption order
 

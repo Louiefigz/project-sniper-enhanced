@@ -3585,7 +3585,7 @@ may be synthesized. Synthetic media/critic results remain explicitly TEST-only.
 
 - Run14's 617.7-second synthetic opening success is historical mechanism evidence;
   it is not a finished creator video or throughput/quality guarantee.
-- C0679 is admitted at `/Users/aaronfigueroa/ProjectSniper-qual-2026-09-07/c0679-20260907`.
+- C0679 is admitted at `/Users/maintainer/ProjectSniper-qual-2026-09-07/c0679-20260907`.
   Its current 725.665-second previsual cut is not human-approved; ASR timing anomalies
   still require source-grounded review, not automatic word deletion to satisfy gates.
 - No new render, approval, complete-output benchmark, or full-suite PASS is implied

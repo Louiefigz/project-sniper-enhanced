@@ -4,7 +4,7 @@
   "scope": "memory-reduction-hash-framing-only-not-native-gamut-or-two-hour-proof",
   "measurementsDate": "2026-09-08",
   "benchmarkCommand": "env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=scripts/producer:scripts/producer/tests /usr/bin/time -p .venv/bin/python -B scripts/producer/tests/benchmark_source_gamut_reducer.py",
-  "workingDirectory": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER",
+  "workingDirectory": "/Users/maintainer/ProjectSniperSource",
   "rawOutputEncoding": "stdoutUtf8 is the entire original one-line JSON output plus final newline; JSON string escaping is storage only.",
   "baselineProvenance": "Copied verbatim from the previously retained successful tool output; baseline was not rerun or reconstructed from summary metrics.",
   "afterProvenance": "Captured verbatim from the separately authorized successful post-optimization tool output.",

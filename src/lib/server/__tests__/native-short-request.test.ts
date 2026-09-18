@@ -98,7 +98,7 @@ test("prepared request binds the real writer and cold reader to style and transc
     assert.deepEqual(readNativeShortProject(project.directory), f.plan);
     const instructions = JSON.parse(readFileSync(packet, "utf8")).editorialInstructions;
     assert.ok(readFileSync(path.join(project.directory, "BRIEF.md"), "utf8").includes(instructions));
-    const changed = structuredClone(f.plan); changed.request = { selection: "requested", request: "Nate", supportingVideo: "source-first" };
+    const changed = structuredClone(f.plan); changed.request = { selection: "requested", request: "module", supportingVideo: "source-first" };
     refreshNativePrebuildReviewFixture(changed);
     assert.throws(() => writeNativeShortProject(changed, path.join(f.directory, "substituted")), /prepared style request/);
     writeFileSync(f.transcript, "changed transcript");

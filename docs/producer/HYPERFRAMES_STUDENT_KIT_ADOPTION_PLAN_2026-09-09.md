@@ -4,7 +4,7 @@ Date: September 9, 2026. Status: editorial guidance adopted in the canonical
 Producer prompt; asset integration remains planned. No kit runtime or card
 installed or admitted by this adoption.
 
-The second, full audit is complete: see [findings, all-skill dispositions, helper tests and catalog evidence](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/docs/producer/HYPERFRAMES_STUDENT_KIT_FULL_AUDIT_2026-09-09.md). Its pinned source is `b1afdb1dcbcad39dd27638ea699f132fe44ce6df`. This plan incorporates that audit; implementation and current-runtime asset qualification remain separate work.
+The second, full audit is complete: see [findings, all-skill dispositions, helper tests and catalog evidence](/Users/maintainer/ProjectSniperSource/docs/producer/HYPERFRAMES_STUDENT_KIT_FULL_AUDIT_2026-09-09.md). Its pinned source is `b1afdb1dcbcad39dd27638ea699f132fe44ce6df`. This plan incorporates that audit; implementation and current-runtime asset qualification remain separate work.
 
 ## Decision and scope
 

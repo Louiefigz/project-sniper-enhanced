@@ -117,9 +117,9 @@ the screenshot uses that wording. Color choice does not determine hook structure
 
 These corrections are now in the [three revised exports](http://127.0.0.1:3993/).
 Follow-up reuses the byte-identical verified title component; the offer is now a
-24.52-second Nate-style visual story; members retains its accepted arithmetic.
+24.52-second module-style visual story; members retains its accepted arithmetic.
 All three use canonical filled hooks, upper contrasting backing and centered
-source-timed karaoke. The [test report](NATE_STORYTELLING_TEST_2026-09-10.md)
+source-timed karaoke. The [test report](MODULE_STORYTELLING_TEST_2026-09-10.md)
 records actual references, rendering, output checks, reuse and remaining limits.
 Local template filling is implemented; broader live Director qualification remains
 declined. No component or export carries a fabricated independent-review receipt.

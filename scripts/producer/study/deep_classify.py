@@ -222,7 +222,7 @@ def classify_run(ctx: ClassifyCtx, start: int, end: int,
 
     Face + chrome channels run FIRST: a rail push or takeover changes most
     of the frame AND ramps the luma, so a global fade verdict would swallow
-    the compound move the channels can separate (the Nate rail-in failure).
+    the compound move the channels can separate (the module rail-in failure).
     """
     rw = _decode_span(ctx, start, end)
     events = [e for e in (_face_event(ctx, fv)

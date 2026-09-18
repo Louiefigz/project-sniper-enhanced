@@ -12,7 +12,7 @@ HARD_DUPLICATES = {
     "a", "an", "and", "but", "for", "i", "if", "is", "it", "maybe", "of",
     "or", "she", "so", "that", "the", "they", "this", "to", "we", "you",
 }
-SUBORDINATE_MARKERS = {"although", "because", "unless", "whereas"}
+SUBORDIMODULE_MARKERS = {"although", "because", "unless", "whereas"}
 NOUN_PHRASE_LEADS = {"a", "all", "an", "every", "few", "many", "most", "no",
                      "our", "some", "the", "their", "these", "those", "your"}
 NOUN_PHRASE_TAILS = {"accounts", "audience", "brands", "businesses", "clients",
@@ -174,7 +174,7 @@ def inspect_output(plan: dict, sources: dict[str, SourceEvidence], epsilon: floa
         duplicates.append({"word": word, "at": round(current[1]["start"], 4),
                            "severity": severity})
     tokens = [row[0] for row in output]
-    incomplete = bool(tokens and tokens[-1] in SUBORDINATE_MARKERS)
+    incomplete = bool(tokens and tokens[-1] in SUBORDIMODULE_MARKERS)
     incomplete = incomplete or (len(tokens) >= 3 and tokens[-3] == "because"
                                 and tokens[-2] in NOUN_PHRASE_LEADS
                                 and tokens[-1] in NOUN_PHRASE_TAILS)

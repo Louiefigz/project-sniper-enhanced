@@ -1,10 +1,10 @@
 {
   "classification": "codec-floor-equivalent-not-pixel-identical",
   "command": [
-    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/.venv/bin/python3",
-    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_full_path_baseline.py",
+    "/Users/maintainer/ProjectSniperSource/.venv/bin/python3",
+    "/Users/maintainer/ProjectSniperSource/scripts/producer/current_full_path_baseline.py",
     "--project",
-    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14"
+    "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14"
   ],
   "executionObserved": {
     "classification": "current-full-path-baseline",
@@ -308,16 +308,16 @@
         "receiptHash": "6aaf2c09760ebd3d44c808635dd32fc96ef009bbefd415659306e27b3584f366",
         "schemaVersion": 1,
         "source": {
-          "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/current-render-codec-floor-calibration-v1/sources/sha256/cb/cbd60508ceed6af23291ac4dadf5127207142c2d4df7a4e5cdb857032d5a8cc8.media",
+          "path": "/Users/maintainer/ProjectSniperSource/artifacts/current-render-codec-floor-calibration-v1/sources/sha256/cb/cbd60508ceed6af23291ac4dadf5127207142c2d4df7a4e5cdb857032d5a8cc8.media",
           "sha256": "cbd60508ceed6af23291ac4dadf5127207142c2d4df7a4e5cdb857032d5a8cc8",
           "sizeBytes": 54640334,
           "storageClass": "content-addressed-retained-calibration-source-v1"
         },
         "sourceFiles": {
-          "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/audio/master.py": "99be06acb30ddd34b55ad7ead2cd5917600b10a7feddd483c43a58464c1009f0",
-          "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_render_calibration_source.py": "8efa02e1393890ed51b99185e9a1d9c8503e811eb41af45138e9035afc79ec96",
-          "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_render_oracle.py": "40e23935a9db1d417bc17f8476f710585f9639532af4f7a5bf5793858a01ac66",
-          "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_render_oracle_calibrate.py": "868ea1bdd583351e523734cbc203a19f926353180fee32133e42a034f2eb6517"
+          "/Users/maintainer/ProjectSniperSource/scripts/producer/audio/master.py": "99be06acb30ddd34b55ad7ead2cd5917600b10a7feddd483c43a58464c1009f0",
+          "/Users/maintainer/ProjectSniperSource/scripts/producer/current_render_calibration_source.py": "8efa02e1393890ed51b99185e9a1d9c8503e811eb41af45138e9035afc79ec96",
+          "/Users/maintainer/ProjectSniperSource/scripts/producer/current_render_oracle.py": "40e23935a9db1d417bc17f8476f710585f9639532af4f7a5bf5793858a01ac66",
+          "/Users/maintainer/ProjectSniperSource/scripts/producer/current_render_oracle_calibrate.py": "868ea1bdd583351e523734cbc203a19f926353180fee32133e42a034f2eb6517"
         },
         "tools": {
           "ffmpeg": {
@@ -330,7 +330,7 @@
             "sha256": "96f53c2099a3f59fc20efb424dd36d5510373f735cf9af50479c2f4d458695af"
           },
           "oracle": {
-            "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_render_oracle.py",
+            "path": "/Users/maintainer/ProjectSniperSource/scripts/producer/current_render_oracle.py",
             "sha256": "40e23935a9db1d417bc17f8476f710585f9639532af4f7a5bf5793858a01ac66"
           },
           "python": {
@@ -350,7 +350,7 @@
       "decodedAudioMatch": true,
       "forcedFull": {
         "fileSha256": "4cbf03bd649d661a5ad74b8173a9788c4f1d6f2594dbc9423c0733c96913a4a3",
-        "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/final.mp4",
+        "path": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render/final.mp4",
         "pcmBytes": 322551808,
         "pcmSha256": "85defcc487d5080cca07fc7e173accaffd4a97e8e0237018839b5eceb7de3c21",
         "pictureFrameMd5Sha256": "04bc414e97743417dcebf56b73b1d1a69ff2f3559253529a77f475de4c5f8608",
@@ -375,7 +375,7 @@
       },
       "incremental": {
         "fileSha256": "5ac3838a6565f730efe1c9dfcbc72f00aaef9340b6cfe75c9096d54660901f7c",
-        "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/.baseline-repeat-evidence/p0-current-lf14/first-run-final.mp4",
+        "path": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/.baseline-repeat-evidence/p0-current-lf14/first-run-final.mp4",
         "pcmBytes": 322551808,
         "pcmSha256": "85defcc487d5080cca07fc7e173accaffd4a97e8e0237018839b5eceb7de3c21",
         "pictureFrameMd5Sha256": "2c14250c95e8ed329f13647507b9bbbd9b3b1d699ee537f9be958a9042695874",
@@ -434,7 +434,7 @@
           "sha256": "96f53c2099a3f59fc20efb424dd36d5510373f735cf9af50479c2f4d458695af"
         },
         "oracle": {
-          "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_render_oracle.py",
+          "path": "/Users/maintainer/ProjectSniperSource/scripts/producer/current_render_oracle.py",
           "sha256": "40e23935a9db1d417bc17f8476f710585f9639532af4f7a5bf5793858a01ac66"
         }
       }
@@ -760,67 +760,67 @@
                     "warn": 2
                   },
                   "exitCode": 0,
-                  "final": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/final.mp4",
+                  "final": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render/final.mp4",
                   "frames": [
                     {
                       "kind": "cover",
                       "label": "cover",
                       "note": "Frame 1 is the thumbnail + loop start: settled (not mid-word)? Hook card inside the safe box, centered ~x495?",
-                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cover_t000.200.jpg",
+                      "path": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cover_t000.200.jpg",
                       "timestamp": 0.2
                     },
                     {
                       "kind": "cut",
                       "label": "cut0_before",
                       "note": "Cut 1 before: intended continuity, no flash, duplicate frame, jump-back, or frozen outgoing/incoming shot?",
-                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cut0_before_t663.062.jpg",
+                      "path": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cut0_before_t663.062.jpg",
                       "timestamp": 663.062
                     },
                     {
                       "kind": "cut",
                       "label": "cut0_seam",
                       "note": "Cut 1 seam: intended continuity, no flash, duplicate frame, jump-back, or frozen outgoing/incoming shot?",
-                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cut0_seam_t663.162.jpg",
+                      "path": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cut0_seam_t663.162.jpg",
                       "timestamp": 663.162
                     },
                     {
                       "kind": "cut",
                       "label": "cut0_after",
                       "note": "Cut 1 after: intended continuity, no flash, duplicate frame, jump-back, or frozen outgoing/incoming shot?",
-                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cut0_after_t663.262.jpg",
+                      "path": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cut0_after_t663.262.jpg",
                       "timestamp": 663.262
                     },
                     {
                       "kind": "caption",
                       "label": "caption1",
                       "note": "Captions legible + fully on-canvas, in the lower band; subject framing sane (no chopped forehead / readable screen)?",
-                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/caption1_t209.991.jpg",
+                      "path": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/caption1_t209.991.jpg",
                       "timestamp": 209.991
                     },
                     {
                       "kind": "caption",
                       "label": "caption2",
                       "note": "Captions legible + fully on-canvas, in the lower band; subject framing sane (no chopped forehead / readable screen)?",
-                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/caption2_t419.982.jpg",
+                      "path": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/caption2_t419.982.jpg",
                       "timestamp": 419.982
                     },
                     {
                       "kind": "caption",
                       "label": "caption3",
                       "note": "Captions legible + fully on-canvas, in the lower band; subject framing sane (no chopped forehead / readable screen)?",
-                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/caption3_t629.973.jpg",
+                      "path": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/caption3_t629.973.jpg",
                       "timestamp": 629.973
                     },
                     {
                       "kind": "final",
                       "label": "final",
                       "note": "Tail frame clean? Loop-friendly back to the cover?",
-                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/final_t839.814.jpg",
+                      "path": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/final_t839.814.jpg",
                       "timestamp": 839.8140000000001
                     }
                   ],
                   "mode": "longform",
-                  "outDir": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render",
+                  "outDir": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render",
                   "overall": "warn"
                 },
                 "documentSha256": "00290f220747df6f8d926ca9921d83f20c04a4e2e0973bad8534f8e473f7a91b",
@@ -1183,67 +1183,67 @@
                     "warn": 2
                   },
                   "exitCode": 0,
-                  "final": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/final.mp4",
+                  "final": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render/final.mp4",
                   "frames": [
                     {
                       "kind": "cover",
                       "label": "cover",
                       "note": "Frame 1 is the thumbnail + loop start: settled (not mid-word)? Hook card inside the safe box, centered ~x495?",
-                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cover_t000.200.jpg",
+                      "path": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cover_t000.200.jpg",
                       "timestamp": 0.2
                     },
                     {
                       "kind": "cut",
                       "label": "cut0_before",
                       "note": "Cut 1 before: intended continuity, no flash, duplicate frame, jump-back, or frozen outgoing/incoming shot?",
-                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cut0_before_t663.062.jpg",
+                      "path": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cut0_before_t663.062.jpg",
                       "timestamp": 663.062
                     },
                     {
                       "kind": "cut",
                       "label": "cut0_seam",
                       "note": "Cut 1 seam: intended continuity, no flash, duplicate frame, jump-back, or frozen outgoing/incoming shot?",
-                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cut0_seam_t663.162.jpg",
+                      "path": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cut0_seam_t663.162.jpg",
                       "timestamp": 663.162
                     },
                     {
                       "kind": "cut",
                       "label": "cut0_after",
                       "note": "Cut 1 after: intended continuity, no flash, duplicate frame, jump-back, or frozen outgoing/incoming shot?",
-                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cut0_after_t663.262.jpg",
+                      "path": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/cut0_after_t663.262.jpg",
                       "timestamp": 663.262
                     },
                     {
                       "kind": "caption",
                       "label": "caption1",
                       "note": "Captions legible + fully on-canvas, in the lower band; subject framing sane (no chopped forehead / readable screen)?",
-                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/caption1_t209.991.jpg",
+                      "path": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/caption1_t209.991.jpg",
                       "timestamp": 209.991
                     },
                     {
                       "kind": "caption",
                       "label": "caption2",
                       "note": "Captions legible + fully on-canvas, in the lower band; subject framing sane (no chopped forehead / readable screen)?",
-                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/caption2_t419.982.jpg",
+                      "path": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/caption2_t419.982.jpg",
                       "timestamp": 419.982
                     },
                     {
                       "kind": "caption",
                       "label": "caption3",
                       "note": "Captions legible + fully on-canvas, in the lower band; subject framing sane (no chopped forehead / readable screen)?",
-                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/caption3_t629.973.jpg",
+                      "path": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/caption3_t629.973.jpg",
                       "timestamp": 629.973
                     },
                     {
                       "kind": "final",
                       "label": "final",
                       "note": "Tail frame clean? Loop-friendly back to the cover?",
-                      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/final_t839.814.jpg",
+                      "path": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render/audit_frames/final_t839.814.jpg",
                       "timestamp": 839.8140000000001
                     }
                   ],
                   "mode": "longform",
-                  "outDir": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/p0-current-baselines-20260729/lf14/render",
+                  "outDir": "/Users/maintainer/ProjectSniperSource/artifacts/p0-current-baselines-20260729/lf14/render",
                   "overall": "warn"
                 },
                 "documentSha256": "00290f220747df6f8d926ca9921d83f20c04a4e2e0973bad8534f8e473f7a91b",
@@ -1295,27 +1295,27 @@
   "toolAuthority": {
     "entrypoints": [
       {
-        "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_full_path_baseline.py",
+        "path": "/Users/maintainer/ProjectSniperSource/scripts/producer/current_full_path_baseline.py",
         "sha256": "a9386565c55b335ed6f38db31938ca719b30c0275ca57f9ff97866afcba393df"
       },
       {
-        "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/render.py",
+        "path": "/Users/maintainer/ProjectSniperSource/scripts/producer/render.py",
         "sha256": "d65acaa1125664c4ce38dae7c4a50f47003878f3e465cb84f43c33517e213535"
       },
       {
-        "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/assemble.py",
+        "path": "/Users/maintainer/ProjectSniperSource/scripts/producer/assemble.py",
         "sha256": "b8d60e3dc335ba1049efb8b3738e45f0c303d53827965ea25ba205462b1468ff"
       },
       {
-        "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/audit/audit_render.py",
+        "path": "/Users/maintainer/ProjectSniperSource/scripts/producer/audit/audit_render.py",
         "sha256": "792552cfb33d34e50c40a3a42e4548c555a78f5dda0ebc466a68066545ae915f"
       },
       {
-        "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/current_render_oracle.py",
+        "path": "/Users/maintainer/ProjectSniperSource/scripts/producer/current_render_oracle.py",
         "sha256": "40e23935a9db1d417bc17f8476f710585f9639532af4f7a5bf5793858a01ac66"
       },
       {
-        "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/baseline_repeat_equivalence.py",
+        "path": "/Users/maintainer/ProjectSniperSource/scripts/producer/baseline_repeat_equivalence.py",
         "sha256": "8f00cd45c60f93c1ea881953c6363a7612054430eff5919f9ee393328c76f93c"
       }
     ],

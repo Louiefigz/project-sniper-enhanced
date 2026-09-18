@@ -1,12 +1,11 @@
 # PUNCH_STYLE.md — THE PUNCH STYLE grammar (6-reel granular synthesis)
 
-**Creator:** iampunch (Punch Young, content strategist, ~299K IG).
 **Corpus:** 6 reels, 55.9–150.7s, all 1080x1920 9:16 locked-tripod talking-head,
 total 623.1s / 166 eye-verified cuts / ~146 graphic+text events.
 **Method:** per-reel granular traces — fingerprint index + scdet re-detect +
 whisper word timestamps + ORB/face-bbox zoom traces + RMS/onset audio passes,
 every cut and graphic event verified by eye on 1fps/8fps/12fps frame sheets.
-Dense event logs: `~/ProjectSniper/_references/iampunch/<id>.study/granular.json`
+Dense event logs: `~/ProjectSniper/_references/punch/<id>.study/granular.json`
 (**on disk for DQr/DVg/Daf only** — the DZ2/DaG/DaV logs were session-local and
 never persisted; their claims below were re-verified from fresh pixels).
 

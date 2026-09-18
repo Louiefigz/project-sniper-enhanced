@@ -7013,7 +7013,7 @@
   "sourceDigest": "21238087cb191e08b891c4c04a4b8dd401f10ab602e55f139d82555ee89fc50f",
   "tools": {
     "browser": {
-      "path": "/Users/aaronfigueroa/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-152.0.7928.2/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+      "path": "/Users/maintainer/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-152.0.7928.2/chrome-headless-shell-mac-arm64/chrome-headless-shell",
       "sha256": "3985a87c5905cf9ecd25d49638822cf071a517f5d976ef8c5e8fe2c6d5496cae"
     },
     "ffmpeg": {

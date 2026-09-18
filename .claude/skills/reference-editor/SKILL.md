@@ -36,13 +36,13 @@ planning; it does not replace the detailed visual study or qualify a style match
   constants. Use this mode when the operator prioritizes close catalog matches.
   Save selected actual creator frames with timestamped context sequences and
   paired story/layout/type/timing notes. Follow the existing
-  [Shorts visual library](../../../docs/studies/shorts-visual-playbook/README.md):
+  [Shorts reference library](../../../resources/references/README.md):
   retain source URL/time/hash, a stable reference ID, what was visually reviewed,
   the exact inspected candidate source and any adaptation gap. Keep observed
   behavior separate from proposed improvements. The Producer must open selected
   images during planning and compare the same targets during native preview QA;
   a prose description is not a substitute for looking at the reference.
-  Use [Format foundations](../../../docs/studies/shorts-visual-playbook/FORMAT_FOUNDATIONS.md)
+  Use [Format foundations](../../../resources/references/shorts/FORMAT_FOUNDATIONS.md)
   to extract the message, viewing need, format choice, actual framing, meaningful
   development and exit condition. Compare a complete case with a plausible
   alternative, including within one creator's work. Transfer the function and

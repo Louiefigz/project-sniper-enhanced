@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """deep_chrome — CHROME-REGION channel: designed panels/rails/takeovers.
 
-The Nate rail-in conflation (one 19-frame "pan" swallowing a lower-third
+The module rail-in conflation (one 19-frame "pan" swallowing a lower-third
 fade-OUT + a rail sweep-IN + a face glide) is separated by REGION: designed
 chrome is a connected cluster of FLAT blocks (low texture std) carrying glyph
 edges, and each cluster gets its OWN timeline inside the run window:

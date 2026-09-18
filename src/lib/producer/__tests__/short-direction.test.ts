@@ -56,13 +56,13 @@ test("media source restrictions survive all request paths without broadening leg
 
 test("empty, conflicting and malformed style requests never become silent automatic selection", () => {
   for (const input of [null, [], { selection: "requested", request: " ", supportingVideo: "source-first" },
-    { selection: "auto", request: "Nate", supportingVideo: "source-first" },
+    { selection: "auto", request: "module", supportingVideo: "source-first" },
     { selection: "auto", supportingVideo: "web" }, { selection: "auto", supportingVideo: "off", extra: true }]) {
     assert.throws(() => parseShortDirection(input, "short"));
   }
   assert.throws(() => parseShortDirection({ selection: "auto", supportingVideo: "off" }, "longform"), /only for short/);
   assert.equal(parseShortDirection(undefined, "short"), undefined, "Old saved jobs retain their prior identity");
-  for (const input of [{ selection: ["requested"], request: "Nate", supportingVideo: "off" },
+  for (const input of [{ selection: ["requested"], request: "module", supportingVideo: "off" },
     { selection: "auto", supportingVideo: ["off"] }]) assert.throws(() => parseShortDirection(input, "short"));
 });
 

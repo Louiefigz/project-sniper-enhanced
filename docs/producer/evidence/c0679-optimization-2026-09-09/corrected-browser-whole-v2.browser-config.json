@@ -1,7 +1,7 @@
 {
   "video": "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/renders/full-native-high-v10-lossless-av-color.mp4",
-  "chrome": "/Users/aaronfigueroa/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-152.0.7928.2/chrome-headless-shell-mac-arm64/chrome-headless-shell",
-  "puppeteerDir": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/puppeteer-core",
+  "chrome": "/Users/maintainer/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-152.0.7928.2/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "puppeteerDir": "/Users/maintainer/ProjectSniperSource/templates/motion/node_modules/puppeteer-core",
   "output": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/corrected-browser-whole-v2.browser.json",
   "playback": true
 }

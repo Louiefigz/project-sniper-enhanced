@@ -4,11 +4,11 @@
   "attempt": "A",
   "status": "baseline-handoff-finalized-with-explicit-unresolved-studio-and-perceptual-limitations",
   "scope": "External handoff only; the saved Attempt A package is unchanged. This is not an all-checks-pass or user-approval declaration.",
-  "package": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-native-hyperframes-2026-09-09",
+  "package": "/Users/maintainer/ProjectSniperSource/artifacts/c0679-native-hyperframes-2026-09-09",
   "packageManifestSha256": "1cc0c92dfc15530afb57c2f6d33caf62061a6034d648e43b69d2d64069c5f7c5",
   "runtimeManifestSha256": "8a668d99fbf9cc4af344022edade544728d5c873b28a629dc5ddc8ed113970f4",
   "packageFiles": 8614,
-  "output": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-native-hyperframes-2026-09-09/output/C0679-native.mp4",
+  "output": "/Users/maintainer/ProjectSniperSource/artifacts/c0679-native-hyperframes-2026-09-09/output/C0679-native.mp4",
   "outputSha256": "eef61c5a2a410d869c79c13c6fb9ba69f52690377d0a99c3fbd53db3ffa50181",
   "outputBytes": 875427947,
   "verification": {

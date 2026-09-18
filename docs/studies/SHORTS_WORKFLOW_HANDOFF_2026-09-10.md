@@ -20,10 +20,10 @@ phase. This handoff alone does not restart production, the canceled caption
 repair, or the proposed temporary RAM-reserve exception.
 
 Workspace:
-`/Users/aaronfigueroa/development/demos/YT-Automation`
+`/Users/maintainer/workspace`
 
 Sniper is a separate Git repository inside that workspace:
-`/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER`
+`/Users/maintainer/ProjectSniperSource`
 
 Read the applicable AGENTS.md and relevant skills. Preserve existing uncommitted
 work. Do not confuse a documentation or skill change with shipped application
@@ -61,13 +61,13 @@ not establish story quality, taste or legibility.
 
 ## Read this evidence first
 
-1. [Expanded Nate library](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/docs/studies/shorts-visual-playbook/nate-sequences/README.md).
-2. [Directing guide with multiple examples per decision](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/docs/studies/shorts-visual-playbook/nate-sequences/DIRECTING_GUIDE.md).
-3. [Authentic and produced treatment library](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/docs/studies/shorts-visual-playbook/README.md).
-4. [Student-kit foundation and sources read](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/module-30-shorts-study-2026-09-10/STUDENT_KIT_FOUNDATION.md).
-5. [Style-selection study](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/docs/studies/SHORTS_STYLE_SELECTION_2026-09-10.md).
-6. [Implementation audit and proposed workflow](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/module-30-shorts-study-2026-09-10/IMPLEMENTATION_REVIEW.md).
-7. [Evidence limits and QA](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/docs/studies/shorts-visual-playbook/nate-sequences/QA.md).
+1. [Expanded Nate library](/Users/maintainer/ProjectSniperSource/docs/studies/shorts-visual-playbook/nate-sequences/README.md).
+2. [Directing guide with multiple examples per decision](/Users/maintainer/ProjectSniperSource/docs/studies/shorts-visual-playbook/nate-sequences/DIRECTING_GUIDE.md).
+3. [Authentic and produced treatment library](/Users/maintainer/ProjectSniperSource/docs/studies/shorts-visual-playbook/README.md).
+4. [Student-kit foundation and sources read](/Users/maintainer/ProjectSniperSource/artifacts/module-30-shorts-study-2026-09-10/STUDENT_KIT_FOUNDATION.md).
+5. [Style-selection study](/Users/maintainer/ProjectSniperSource/docs/studies/SHORTS_STYLE_SELECTION_2026-09-10.md).
+6. [Implementation audit and proposed workflow](/Users/maintainer/ProjectSniperSource/artifacts/module-30-shorts-study-2026-09-10/IMPLEMENTATION_REVIEW.md).
+7. [Evidence limits and QA](/Users/maintainer/ProjectSniperSource/docs/studies/shorts-visual-playbook/nate-sequences/QA.md).
 
 Open actual images with an image-viewing tool. Reading descriptions or catalog
 code does not count as viewing the creator references. Use individual full frames
@@ -75,9 +75,9 @@ for small text and controls; use sequences for before/action/after context.
 
 Relevant planning skills:
 
-- [Producer](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/.claude/skills/producer/SKILL.md).
-- [Producer study](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/.claude/skills/producer-study/SKILL.md).
-- [Reference editor](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/.claude/skills/reference-editor/SKILL.md).
+- [Producer](/Users/maintainer/ProjectSniperSource/.claude/skills/producer/SKILL.md).
+- [Producer study](/Users/maintainer/ProjectSniperSource/.claude/skills/producer-study/SKILL.md).
+- [Reference editor](/Users/maintainer/ProjectSniperSource/.claude/skills/reference-editor/SKILL.md).
 
 For actual HyperFrames authoring/inspection, first read the installed HyperFrames
 entry skill, then the routed creative, registry, core and motion guidance needed
@@ -103,8 +103,8 @@ Each beat records the spoken idea, actual picture, change, layout, picture funct
 why it fits the words, observed camera action, inferred purpose, pacing, continuity,
 catalog candidate, required adaptation/assets, transfer conditions and cautions.
 
-[Structured manifest](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/docs/studies/shorts-visual-playbook/nate-sequences/manifest.json)
-and [catalog map](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/docs/studies/shorts-visual-playbook/nate-sequences/CATALOG_MAP.md)
+[Structured manifest](/Users/maintainer/ProjectSniperSource/docs/studies/shorts-visual-playbook/nate-sequences/manifest.json)
+and [catalog map](/Users/maintainer/ProjectSniperSource/docs/studies/shorts-visual-playbook/nate-sequences/CATALOG_MAP.md)
 make those records searchable. Case JSON and Markdown sit beside the saved frames.
 Original media, caption sidecars, context sheets and inspection receipts remain
 under the linked study artifacts; reuse them before downloading or transcribing.
@@ -188,16 +188,16 @@ artifact/illustration proposals, a hook adapter without YouTube title-formula
 retrieval, and opening checks that do not judge curiosity or earned payoff.
 Verify the current versions before changing these paths:
 
-- [Graphics rules](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/planner/graphics_planner_rules.py).
-- [Graphics planner](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/graphics_planner.py).
-- [Artifact proposals](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/planner/graphics_planner_receipts.py).
-- [Illustration proposals](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/planner/graphics_planner_illustration.py).
-- [Short hook adapter](/Users/aaronfigueroa/development/demos/YT-Automation/youtube-automation/rag-system/src/scriptwriter/short/hook_adapter.py).
-- [YouTube title formulas](/Users/aaronfigueroa/development/demos/YT-Automation/youtube-automation/rag-system/src/catalogs/youtube_title_formulas.py).
-- [Hook/overlay lint](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/plan_lint_overlays.py).
-- [Managed native preview](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/studio/managed_preview.py).
-- [Legacy review generator](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/studio/studio_review.py).
-- [Native preflight](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/studio/native_preflight.py).
+- [Graphics rules](/Users/maintainer/ProjectSniperSource/scripts/producer/planner/graphics_planner_rules.py).
+- [Graphics planner](/Users/maintainer/ProjectSniperSource/scripts/producer/graphics_planner.py).
+- [Artifact proposals](/Users/maintainer/ProjectSniperSource/scripts/producer/planner/graphics_planner_receipts.py).
+- [Illustration proposals](/Users/maintainer/ProjectSniperSource/scripts/producer/planner/graphics_planner_illustration.py).
+- [Short hook adapter](/Users/maintainer/workspace/youtube-automation/rag-system/src/scriptwriter/short/hook_adapter.py).
+- [YouTube title formulas](/Users/maintainer/workspace/youtube-automation/rag-system/src/catalogs/youtube_title_formulas.py).
+- [Hook/overlay lint](/Users/maintainer/ProjectSniperSource/scripts/producer/plan_lint_overlays.py).
+- [Managed native preview](/Users/maintainer/ProjectSniperSource/scripts/producer/studio/managed_preview.py).
+- [Legacy review generator](/Users/maintainer/ProjectSniperSource/scripts/producer/studio/studio_review.py).
+- [Native preflight](/Users/maintainer/ProjectSniperSource/scripts/producer/studio/native_preflight.py).
 
 When implementation is the requested next phase, trace the decisions through the
 existing plan model, asset bindings, assembly and read/review paths. A prose plan
@@ -219,7 +219,7 @@ Do not describe per-shot cropping as continuous head tracking.
   Inspect its actual inputs; do not invent missing controls or claim qualification.
 
 Original footage:
-[WildFireVlog3.mp4](/Users/aaronfigueroa/Downloads/WildFireVlog3.mp4).
+[WildFireVlog3.mp4](/Users/maintainer/Downloads/WildFireVlog3.mp4).
 Deepgram was accepted for the original transcription work; reuse existing results.
 Higgsfield was discussed as a later option, not the current default acquisition route.
 The previously open Studio URL was localhost port 3990, project wildfire-follow-up;

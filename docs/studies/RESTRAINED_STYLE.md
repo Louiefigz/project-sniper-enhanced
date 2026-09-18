@@ -206,7 +206,7 @@ authored fast, zero smoothing — same T10/E14 speed-over-polish family as
 punch. Do NOT replicate the typo; DO replicate verbatim-over-groomed.
 
 **CAP7 — Footnote/asterisk aside. [1x — LOW-CONFIDENCE]**
-DaeF: "And then Trevor\*" + "\*my content director" at 1.4%H below the cue,
+DaeF: "And then [name]\*" + "\*my content director" at 1.4%H below the cue,
 entering/exiting with it — an editorial aside as a mini-caption.
 
 ---
@@ -308,7 +308,7 @@ cutaways. Restraint is not a cheaper punch — it is a different instrument.
 | C2 utility jump cut hidden under a cue swap | 1x | DaN ~29.82s |
 | C3 reaction-cutaway pairs, cue-start snapped | 1 reel (4 pairs) | DaeF |
 | CAP5 deliberate caption blackout on a performance beat | 1x | DWA 21.28–22.0s |
-| CAP7 footnote/asterisk mini-caption | 1x | DaeF ("Trevor\*") |
+| CAP7 footnote/asterisk mini-caption | 1x | DaeF ("[name]\*") |
 | G2 cold-open thesis card ~7.4s, instant out | 1x | DaeF 0–7.37s |
 | CAP4b 0.30s fade-out into silence (vs instant) | 1x | DWA 20.984–21.284 |
 | DaeF caption top-anchor y=0.588 (vs DaN 0.615 / DWA 0.458) | 1 reel each | per-reel pins |
@@ -417,7 +417,7 @@ graphic events/reel, music bed) — it calibrates `produced`/`full` shorts, not
   cues. Our broll/insert lane is full-frame FOOTAGE without cue-start
   snapping or a B-cam pairing concept. (1 reel, LOW-CONFIDENCE — park unless
   podcast-clip sources land.)
-- **CG5 · footnote mini-caption.** The "Trevor\*" asterisk aside (CAP7).
+- **CG5 · footnote mini-caption.** The "[name]\*" asterisk aside (CAP7).
   (1x, LOW-CONFIDENCE — spec only, park.)
 
 Pipeline (non-catalog) notes already encoded: pacing credit for caption-state

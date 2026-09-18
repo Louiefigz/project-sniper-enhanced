@@ -111,7 +111,7 @@ test("canonical JSON key order cannot change executable motion on cold reconstru
 test("requested style, canonical title and source inspection cannot be silently substituted", () => {
   const f = fixture();
   try {
-    const changed = structuredClone(f.input); changed.request = { selection: "requested", request: "Nate", supportingVideo: "source-first" };
+    const changed = structuredClone(f.input); changed.request = { selection: "requested", request: "module", supportingVideo: "source-first" };
     assert.throws(() => assembleNativeShortHtml(changed), /changed the requested/);
     changed.request = f.input.request; changed.strategy.supportingSearch.searchedSourceFiles = [];
     assert.throws(() => assembleNativeShortHtml(changed), /inspect the supplied source/);

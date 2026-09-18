@@ -44,7 +44,7 @@ remain available at port 3991; the title palette comparison remains at port 3992
 
 ## Source, references and planning
 
-The source is `/Users/aaronfigueroa/Downloads/WildFireVlog3.mp4`:
+The source is `/Users/maintainer/Downloads/WildFireVlog3.mp4`:
 1920×1080, 25 fps, 825.84 seconds, SHA-256
 `1fc683881182c422303a2d191965ee39cfcd7ca22ea001691af12e1a69cac7a5`.
 The existing excerpt and word transcript were reused after source derivation

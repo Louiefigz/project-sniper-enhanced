@@ -13,7 +13,7 @@ from pathlib import Path
 
 PREPARATION = Path(__file__).resolve().parent
 RECOVERY = PREPARATION.parent
-LIVE = Path('/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER')
+LIVE = Path('/Users/maintainer/ProjectSniperSource')
 sys.path.insert(0, str(RECOVERY))
 sys.path.insert(0, str(LIVE / 'scripts/producer'))
 

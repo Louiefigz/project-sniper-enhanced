@@ -8,7 +8,7 @@ The operator wants quality short- and long-form editing through Project Sniper's
 
 Implement both guided cut-first and one-request autopilot policies on one engine. One request is supported as a product goal; one indivisible model call or unreviewed render is not the architecture. Autopilot uses the same internal gates and authorized system approvals. Guided mode provides a playable, fast-paced opening plus its transition into the body, human treatment/intro decisions, scoped revisions, then full generation. Do not force a human interruption at every internal stage of autopilot.
 
-The user explicitly authorized implementation, testing, quality control, timing, and adversarial agents. They supplied `/Users/aaronfigueroa/Downloads/C0679.MP4` for real long-form testing. They did not authorize deleting prior work, weakening quality gates, invented approvals, or publishing videos externally.
+The user explicitly authorized implementation, testing, quality control, timing, and adversarial agents. They supplied `/Users/maintainer/Downloads/C0679.MP4` for real long-form testing. They did not authorize deleting prior work, weakening quality gates, invented approvals, or publishing videos externally.
 
 **No full enhanced ten-minute creator video has passed this workflow. No two-hour throughput or equal/better overall audiovisual quality has been established.** Many bounded mechanisms passed; public guided/opening/full-delivery integration is unfinished. Do not call the goal complete based on unit tests, intercepted UI fixtures, catalog renders or synthetic media.
 
@@ -30,7 +30,7 @@ Read applicable repository instructions yourself. Before an actual creative/prov
 Real nested Git repository:
 
 ```text
-/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER
+/Users/maintainer/ProjectSniperSource
 ```
 
 The parent YT-Automation directory is not the repository for this work. The nested worktree has a very large mixture of pre-existing user changes and this task's changes (thousands of status lines). Do not reset, clean, checkout files wholesale, commit everything, or infer ownership from Git status alone. No commit was made for this handoff. Use `apply_patch` for edits. Use targeted `rg`; do not dump the whole dirty diff.
@@ -38,7 +38,7 @@ The parent YT-Automation directory is not the repository for this work. The nest
 Use the nested repo's `.venv/bin/python`, **not** the parent Flask project's venv or a resolved Homebrew base Python. The venv imports cv2/numpy/scipy; realpath-ing the launch path bypasses the venv. For producer tests use `PYTHONPATH=scripts/producer:scripts/producer/tests`. TypeScript uses `node --import tsx --test`, not an assumed Jest runner or `npx tsx`.
 
 ```bash
-cd /Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER
+cd /Users/maintainer/ProjectSniperSource
 node --import tsx --test src/lib/producer/__tests__/guided-opening-client.test.ts
 PYTHONPATH=scripts/producer:scripts/producer/tests .venv/bin/python -m unittest scripts.producer.tests.test_audit_glitch_scan -v
 npm run type-check
@@ -51,14 +51,14 @@ Last known UI processes (reobserve before use; not proof of present liveness): i
 Actual local headless Chrome used:
 
 ```text
-/Users/aaronfigueroa/.cache/puppeteer/chrome-headless-shell/mac_arm-143.0.7499.42/chrome-headless-shell-mac-arm64/chrome-headless-shell
+/Users/maintainer/.cache/puppeteer/chrome-headless-shell/mac_arm-143.0.7499.42/chrome-headless-shell-mac-arm64/chrome-headless-shell
 ```
 
-Actual Docker controls used previously: `/usr/local/bin/docker`; socket `/Users/aaronfigueroa/.docker/run/docker.sock`; sealed image `sha256:bc56d3860d2ec1c843f7184bcecd21137aa79fe9fe19c90a67136d3052222ba8`; UID/GID 501:20; tag `sniper-hyperframes-g2:0.7.33-sealed-v3`. Revalidate current hashes and use the owner's exact command/environment. Environment variables are not populated automatically in a new shell.
+Actual Docker controls used previously: `/usr/local/bin/docker`; socket `/Users/maintainer/.docker/run/docker.sock`; sealed image `sha256:bc56d3860d2ec1c843f7184bcecd21137aa79fe9fe19c90a67136d3052222ba8`; UID/GID 501:20; tag `sniper-hyperframes-g2:0.7.33-sealed-v3`. Revalidate current hashes and use the owner's exact command/environment. Environment variables are not populated automatically in a new shell.
 
 ## 4. Raw source and ZIP: do not rediscover or misclassify
 
-`/Users/aaronfigueroa/Downloads/C0679.MP4` is **now readable**. Earlier macOS access denials in the log are historical. A small actual read and a 0.119-second FFprobe read succeeded. Observed:
+`/Users/maintainer/Downloads/C0679.MP4` is **now readable**. Earlier macOS access denials in the log are historical. A small actual read and a 0.119-second FFprobe read succeeded. Observed:
 
 - 10,280,473,262 bytes (about 10.28 GB / 9.58 GiB).
 - 834.335 seconds, approximately 13m54s.
@@ -68,7 +68,7 @@ Actual Docker controls used previously: `/usr/local/bin/docker`; socket `/Users/
 
 No full-source hash/decode, admission, copy, trim, grading or creative provider job has yet been performed on this newly accessible original. Keep it unchanged and create an isolated test project. The current private F2 diagnostic rejects both >8 GiB and this transfer class. Existing `qualification_mezzanine_color_contract` includes an explicit xvYCC→BT.709 path, but that is not qualification for this actual source or permission to silently make a derived proxy the source authority. Qualify a real large-source/xvYCC class; do not exclude the user's normal recording just to make speed numbers pass. Account for input-transform history and any lossy intermediate explicitly.
 
-ZIP: `/Users/aaronfigueroa/Downloads/video-editor-client 2.zip`.
+ZIP: `/Users/maintainer/Downloads/video-editor-client 2.zip`.
 Previously extracted reference: `/private/tmp/project-sniper-video-editor-compare/video-editor`.
 
 Already audited; do not restart a generic ZIP comparison. Plan §11 records adopt/defer decisions. Useful transfers: deterministic graphics diagnostics inside existing proof system, source-aware grading analysis/proposals, shared motion/SFX events, parametric schemas, same-math color preview. Do not copy default house-LUT/voice-gain mastering, second audio authority, unsafe eval or per-video full custom HTML authoring. ZIP grade analyzer's existing 10 tests passed, but its capped sampling only covers roughly the first 50 seconds; whole-timeline diagnosis was necessary. Its audio helper's cut/media-start/rate mapping and its graphics helper's decode-exit handling are inadequate as shipped. New upstream CLI/batch capabilities remain a compatibility spike, not an assumed upgrade.
@@ -155,7 +155,7 @@ Actual headless UI lifecycle passed before that amendment: context metadata/play
 ```bash
 node --import tsx scripts/producer/tests/guided_opening_ui_regression.cjs \
   http://localhost:3327 \
-  /Users/aaronfigueroa/.cache/puppeteer/chrome-headless-shell/mac_arm-143.0.7499.42/chrome-headless-shell-mac-arm64/chrome-headless-shell \
+  /Users/maintainer/.cache/puppeteer/chrome-headless-shell/mac_arm-143.0.7499.42/chrome-headless-shell-mac-arm64/chrome-headless-shell \
   /private/tmp/sniper-opening-preparation-vnq54_d3
 ```
 

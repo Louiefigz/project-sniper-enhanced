@@ -3,7 +3,7 @@
 Date: 2026-07-10. Source video: 323s, 1920x1080@30 (`_references/module/J_jswzXhYJA.webm`,
 transcript `J_jswzXhYJA.en.vtt`; en-orig byte-identical, cmp-verified).
 Evidence base: (a) transcript extraction of his self-narrated pipeline (0:00–3:07 is the AI
-video narrating its own build; 3:07+ is Nate's cost/effort commentary), (b) frame-level visual
+video narrating its own build; 3:07+ is the module reference's cost/effort commentary), (b) frame-level visual
 study — 7 contact sheets covering all 82 visual states + 21 burst grids at 12–24fps + phase-
 correlation drift measurement on hold windows, preserved at
 `_references/module/J_jswzXhYJA.study/` (working copies in the session scratchpad

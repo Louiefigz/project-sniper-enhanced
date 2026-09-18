@@ -12,10 +12,10 @@
     "The fallback Promise rejected with the script Event; its unhandled rejection produced Event: Event."
   ],
   "sourceEvidence": {
-    "cli": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js",
+    "cli": "/Users/maintainer/ProjectSniperSource/templates/motion/node_modules/hyperframes/dist/cli.js",
     "cliSha256": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
     "fallbackStartLine": 115167,
-    "studioSourceMap": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/studio/index.js.map",
+    "studioSourceMap": "/Users/maintainer/ProjectSniperSource/templates/motion/node_modules/hyperframes/dist/studio/index.js.map",
     "studioSourceMapSha256": "affde3a8437a3173aed1559bc8011b3d1096c94d4064f8f0633acb76e1d4245e",
     "studioSource": "../src/utils/gsapSoftReload.ts",
     "studioSourceSha256": "9e4606979dad8d9c2102c316f42392ab8449ae5b7d1c52f85a8bf2ff649f1b45",

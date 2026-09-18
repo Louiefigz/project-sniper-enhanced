@@ -293,7 +293,7 @@ captions so the face, gesture and decisive detail stay readable.
 
 ## Review the assembled Short before polishing it
 
-Apply Ralston's payoff criteria to this journey's actual promise: alignment,
+Apply the payoff criteria to this journey's actual promise: alignment,
 actionable clarity (including usable understanding or a decision), insight depth
 and cognitive resolution. Identify the words or visible action that earns each
 judgment; a `payoff` label or plausible strategy summary is not evidence.
@@ -312,13 +312,10 @@ editorial review can apply this playbook without a paid Director invocation.
 
 ## Sources and current working example
 
-- [Ralston Select workbook](../../../youtube-automation/rag-system/rag-sources/ralston-select/How%20to%20Make%20Educational%20Content%20Curriculum%20%7C%20Workbook.md):
   short-form playbook, lines 939–1199; payoff criteria, lines 1357–1424. The raw
   workbook permits realizations, reframes, next steps and tactics; preserve this
   breadth when applying it to a journey.
-- [Trevor Odom's short-form feedback](../../../youtube-automation/rag-system/rag-sources/ralston-select/feedback-sessions/shortform-feedback-session-01-trevor-odom.md):
   concept versus clip, and promise → progression → payoff.
-- [Script Director Shorts lane](../../../youtube-automation/.claude/skills/script-director/SKILL.md):
   payoff, source and format responsibilities when authoring new speech.
 - [IMG_7138 paper assemblies](../../artifacts/img7138-editorial-audit-2026-09-15/JOURNEY-ASSEMBLIES.md):
   local review material, not a packaged skill dependency or finished export.

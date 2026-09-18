@@ -37,19 +37,19 @@ the reference-editor qualification requirements remain authoritative for packs.
 
 For reusable planning evidence, preserve actual creator full frames and sampled
 before/after sequences beside their detailed descriptions. Use
-[the Shorts visual library](../../../docs/studies/shorts-visual-playbook/README.md)
+[the Shorts reference library](../../../resources/references/README.md)
 for the current examples and stable IDs. Include the story job, spoken/caption
 cue, visual anatomy, typography, timing confidence, when to use/avoid, candidate
 source and specific adaptation. Record actual visual inspection separately from
 code inspection. Never label a proposed catalog adaptation as a verified replica.
-Use the library's complete Nate cases for produced-story examples, preserving
+Use the library's complete sequence cases for produced-story examples, preserving
 the setup and payoff around individual treatments. Compare multiple examples of
 each directing decision. Resolve selected images to source frame indices/PTS and
 keep individual full frames beside strips; adjacent atlas text is not one image.
 Count cases, directing beats and source frames separately from unique templates.
 
-Start cross-case direction with [Format foundations](../../../docs/studies/shorts-visual-playbook/FORMAT_FOUNDATIONS.md)
-and the [expanded Restrained/Lewis cases](../../../docs/studies/shorts-visual-playbook/authentic-expansion/README.md).
+Start cross-case direction with [Format foundations](../../../resources/references/shorts/FORMAT_FOUNDATIONS.md)
+and the [expansion cases](../../../resources/references/shorts/expansion/CATALOG_MAP.md).
 Study message → viewing need → format → actual crop/pane geometry → development
 and readable hold → exit condition. Compare plausible alternatives, including
 different formats used by the same creator. Record why a split's two jobs need

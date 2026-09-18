@@ -6,7 +6,7 @@
 > rationale only. The "DRAFT" line below is the original 2026-07-05 header.
 >
 > Status: DRAFT — operator review. 2026-07-05.
-> Extends PRODUCER_PLAN.md. Reference styles: (a) Kallaway-grade kinetic
+> Extends PRODUCER_PLAN.md. Reference styles: (a) dense kinetic
 > talking-head (long-form YouTube, operator-supplied script excerpt);
 > (b) INSTAGRAM SHORT-FORM layout study (operator-supplied screenshots — lost
 > to macOS thumbnail-drag purge ×3; re-save to Desktop/folder to restore).
@@ -40,7 +40,7 @@ If a sentence has none of these, the speaker's face IS the graphic. Silence of
 graphics is a design choice, not a failure — over-decorating is the #1 way this
 goes wrong (research: visual variety helps retention; noise fatigues it).
 
-### The Kallaway grammar (from the supplied intro script, annotated)
+### The kinetic grammar (from the supplied intro script, annotated)
 
 | Script beat | Graphic that carries it |
 |---|---|
@@ -58,7 +58,7 @@ holds just long enough to read.
 ## 1.5 The treatment map + editor notes (operator input channel, 2026-07-05)
 
 A video is not uniformly decorated — it has **treatment zones** (operator
-observation from the Kallaway reference: the dense kinetic treatment is mostly
+observation from the kinetic reference: the dense kinetic treatment is mostly
 the FIRST MINUTE; later sections lean on b-roll; others on templated graphics;
 some stay clean). Every produce run therefore builds a **treatment map**:
 
@@ -77,7 +77,7 @@ some stay clean). Every produce run therefore builds a **treatment map**:
 **Where the map comes from — EDITOR NOTES, a first-class input.** The operator
 gives freeform direction, exactly like briefing a human editor:
 
-> "Make the first 45 seconds pop hard — full Kallaway. The Hormozi-bot section
+> "Make the first 45 seconds pop hard — full kinetic. The coaching-bot section
 > should use b-roll from the folder. Keep the last third clean, just captions.
 > Stat cards whenever I say numbers."
 
@@ -157,7 +157,7 @@ because it TOOK OVER instead of stacking).
 
 ## 2.2 The visual-tactics catalog (operator, 2026-07-05 — "tactics we can save and use")
 
-Named, reusable cutaway tactics — the visual analog of the Hormozi hooks
+Named, reusable cutaway tactics — the visual analog of the hook swipe files
 swipe file (`hooks_catalog.py`): the brain picks BY NAME from proven tactics,
 never improvises unnamed moves. Grows as references land; eventually a
 `tactics_catalog` data module. Seed entries from the operator's IG study
@@ -190,7 +190,7 @@ additional tactics + exact styling.
 
 | Parameter | SHORTS | LONG-FORM |
 |---|---|---|
-| Graphic cadence | Near-continuous is allowed (Kallaway intro style); every trigger is a candidate | Front-load the first 30–60s dense; body follows pattern-interrupt doctrine (one per 10–15s early, oscillating bursts, no static stretch > 60–90s) |
+| Graphic cadence | Near-continuous is allowed (kinetic intro style); every trigger is a candidate | Front-load the first 30–60s dense; body follows pattern-interrupt doctrine (one per 10–15s early, oscillating bursts, no static stretch > 60–90s) |
 | Hold time | ≥ 1.0s per readable element; word-chips can be faster in a build | ≥ 1.5s; longer holds fit calmer pace |
 | Full-frame takeovers | ≤ 2.5s, never during the hook card, max ~2 per short | Chapter transitions + intro thesis only |
 | Concurrency | ≤ 2 graphic layers + captions | ≤ 2 |
@@ -307,7 +307,7 @@ Author `tokens.css` + 3 templates (stat-card, list-build, kinetic-quote).
 Hand-compose graphics for ONE existing short — c1 has a natural triple-list
 ("post more, save time, make more money") and a stat ("ten years in software")
 — composite manually, deliver for review. **Exit: operator watches a
-Kallaway-ized version of an approved short and calibrates taste.**
+kinetic version of an approved short and calibrates taste.**
 
 **MG-2 — Pipeline integration.**
 `graphicsTrack` + `treatmentMap` schema + lint rules (incl. zone-budget
@@ -357,12 +357,12 @@ yields motion graphics with zero extra operator input.**
 
 1. ~~Brand tokens~~ SETTLED 2026-07-05 (rec adopted): accent = the Project Sniper
    badge blue, pixel-sampled from real footage into tokens.css. Fonts Inter.
-2. **Kallaway screenshots** — two drop attempts expired (macOS deletes
+2. **kinetic reference screenshots** — two drop attempts expired (macOS deletes
    thumbnail-drag temp files the instant the drag ends). Reliable path: save
    to Desktop/a folder, tell the session where; it sweeps them into permanent
    reference storage. They calibrate exact card styling/spacing/animation feel.
 3. ~~Pilot pick~~ SETTLED (rec adopted): c1 is the MG-1 pilot (in progress).
-4. How loud should the style be? Kallaway is maximalist; a dialed-back variant
+4. How loud should the style be? Kinetic is maximalist; a dialed-back variant
    (fewer takeovers, more lower-thirds) may fit Project Sniper's visual system better. MG-1
    review answers this empirically.
 

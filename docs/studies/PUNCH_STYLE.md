@@ -1,4 +1,4 @@
-# PUNCH_STYLE.md — the iampunch shorts grammar (measured)
+# PUNCH_STYLE.md — the punch shorts grammar (measured)
 
 > **SUPERSEDED 2026-07-09** by
 > `scripts/producer/docs/findings/PUNCH_STYLE.md` — the 6-reel GRANULAR
@@ -9,14 +9,13 @@
 > tolerance (the longest true no-cut+no-graphic stretch is 10.9s). The
 > fingerprint tables below remain valid as fingerprint-level data.
 
-**Creator:** iampunch (Punch Young, Content Strategist, ~299K IG)
 **Corpus:** 6 reels, 55.9–150.7s each, all 1080x1920 9:16 talking-head, desk +
 laptop + TV-glow set, locked tripod.
 **Evidence:**
 
 | Level | Source |
 |---|---|
-| Fingerprints (ALL 6 reels) | `_references/iampunch/<id>.study/report.md` — scdet cuts, shot lengths, state timeline (fps=2.0), LUFS/crest/silence audio pass |
+| Fingerprints (ALL 6 reels) | `_references/punch/<id>.study/report.md` — scdet cuts, shot lengths, state timeline (fps=2.0), LUFS/crest/silence audio pass |
 | Deep frame trace (DVgWXuXDXdN ONLY) | 1fps contact grids + 8fps hook grid (0–10s) + 12fps ±0.55s bursts around all 22 cuts, verified by eye; zoom from face-bbox traces + background-patch SSIM |
 
 Reel IDs: `DVgWXuXDXdN` (150.7s), `DQrbyYRDZGh` (140.9s), `DZ2u2o8qEjV`

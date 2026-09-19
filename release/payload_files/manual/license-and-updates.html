@@ -66,7 +66,8 @@ one of the open items in <code>PENDING-OWNER-DECISIONS.txt</code>.</p>
 <h2>Which version you have</h2>
 <pre><code>cat RELEASE.json</code></pre>
 <p>It records the version, the exact source it was built from (a commit and a source-tree
-id), the platform, every component version and download checksum, and — plainly — that this
+id), the platform, the component versions, the rendering browser's checksums and the checksum of
+Sniper's tools list (<code>install/deps/osx-arm64.lock</code> holds each tool's), and — plainly — that this
 build is not approved for sale (<code>"sellable": false</code>; the open items are in
 <code>PENDING-OWNER-DECISIONS.txt</code>). Quote the <code>version</code> field whenever you
 report a problem.</p>

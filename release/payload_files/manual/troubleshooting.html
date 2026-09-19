@@ -65,9 +65,9 @@ network and run <code>install/diagnostics.command</code>.</td></tr>
 <td>A file in <code>~/.project-sniper</code> was changed or removed.</td><td>Nothing to do: the
 installer puts the tools back from the checked downloads.</td></tr>
 <tr><td><code>Sniper's own tools are not installed yet.</code> or <code>Sniper's own Node cannot be used: …</code></td>
-<td><code>~/.project-sniper</code> was removed or damaged.</td><td>Double-click
-<code>install/setup.command</code> (or run <code>install/install.command</code>); it reinstalls
-them.</td></tr>
+<td><code>~/.project-sniper</code> was removed or damaged.</td><td>Ask your agent to run
+<code>./sniper setup</code> (or double-click <code>install/install.command</code>); it checks every
+tool file and reinstalls what is missing or changed.</td></tr>
 <tr><td><code>Another Sniper installer is setting up the same tools; waiting …</code></td><td>Two
 Sniper folders are being set up at once; they share the same tools.</td><td>Nothing to do: the
 second one continues when the first has finished.</td></tr>

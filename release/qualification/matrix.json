@@ -1,6 +1,6 @@
 {
   "schema": "sniper-qualification-matrix-v1",
-  "about": "Sale-readiness evidence for one exact archive. Read by python -m release.sale_gate. Seeded 2026-09-18 from the rc3-era rows; filled for the rc4 final candidate from evidence/final (matrix-spec-bae842a.json). the lead maintainer fills status, archive_sha256, evidence and depends_on (each file with its sha256).",
+  "about": "Sale-readiness evidence for one exact archive. Read by python -m release.sale_gate. Seeded 2026-09-18 from the rc3-era rows; filled for the rc4 final candidate from evidence/final (matrix-spec-bae842a.json). the lead maintainer fills status, archive_sha256, evidence and depends_on (each file with its sha256). Requirements R1, R2, R3, R5, R6, LOCK, Z3-CODEX, Z3-CLAUDE, Z7 and Z9 were rewritten for the 2026-09-19 owner direction (no UI; the buyer's own agent); each row keeps its previous text in requirement_change. No row was removed.",
   "rows": [
     {
       "id": "Z1",
@@ -187,7 +187,7 @@
     },
     {
       "id": "R1",
-      "requirement": "Build and launch: start/stop/restart from Finder PATH, occupied and overridden ports, foreign PIDs never signalled",
+      "requirement": "Buyer entry point: ./sniper from Finder PATH runs Sniper's commands with Sniper's own tools and settings under the shared maintenance lock; before setup, after an interrupted setup and in a moved or copied folder it refuses and names the fix",
       "scope": "installed package, developer Mac",
       "required": true,
       "status": "PASS",
@@ -203,11 +203,15 @@
         }
       ],
       "depends_on": [],
-      "note": "Finder PATH, empty HOME: start/stop/restart; an occupied port 3000 is refused naming the holder and SNIPER_PORT overrides it; restart on the override; the foreign listener is left running (installer/10, 18 §5, §7)."
+      "note": "Finder PATH, empty HOME: start/stop/restart; an occupied port 3000 is refused naming the holder and SNIPER_PORT overrides it; restart on the override; the foreign listener is left running (installer/10, 18 §5, §7).",
+      "requirement_change": {
+        "previous_requirement": "Build and launch: start/stop/restart from Finder PATH, occupied and overridden ports, foreign PIDs never signalled",
+        "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting."
+      }
     },
     {
       "id": "R2",
-      "requirement": "One provider choice drives the editor window, app, doctor and every edit (no CLI/provider/brain/model mismatch)",
+      "requirement": "No Sniper-side provider: Sniper keeps no provider or model setting, installs no Codex or Claude, starts neither, and a key in the caller's shell never reaches its tools; the buyer's own agent is the only brain",
       "scope": "installed package, developer Mac",
       "required": true,
       "status": "PASS",
@@ -223,18 +227,27 @@
         }
       ],
       "depends_on": [],
-      "note": "One settings pair drives everything: the doctor reports the provider for the app, the editor window and every edit; use-provider switches both settings; an editor window on the other provider is refused (installer/18 §8b; 10). Real edits through a signed-in provider are Z3."
+      "note": "One settings pair drives everything: the doctor reports the provider for the app, the editor window and every edit; use-provider switches both settings; an editor window on the other provider is refused (installer/18 §8b; 10). Real edits through a signed-in provider are Z3.",
+      "requirement_change": {
+        "previous_requirement": "One provider choice drives the editor window, app, doctor and every edit (no CLI/provider/brain/model mismatch)",
+        "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting."
+      }
     },
     {
       "id": "R3",
-      "requirement": "Doctor admits the selected provider through production admission after a sign-in made with Sniper's own wrapper, for Codex and for Claude",
-      "scope": "real sign-in, both providers",
+      "requirement": "The buyer's own Codex and Claude Code, signed in to their own subscriptions and opened on the Sniper folder, run ./sniper setup and ./sniper doctor to a passing install (Codex: with approval to run outside its sandbox)",
+      "scope": "buyer's own agent, both providers",
       "required": true,
       "status": "BLOCKED",
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Claude: the owner's sign-in through install/sign-in.command on the qualification install is pending. Codex: sign-in deferred by the owner (Claude only for now)."
+      "note": "Claude: the owner's sign-in through install/sign-in.command on the qualification install is pending. Codex: sign-in deferred by the owner (Claude only for now).",
+      "requirement_change": {
+        "previous_requirement": "Doctor admits the selected provider through production admission after a sign-in made with Sniper's own wrapper, for Codex and for Claude",
+        "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting.",
+        "previous_scope": "real sign-in, both providers"
+      }
     },
     {
       "id": "R4",
@@ -258,7 +271,7 @@
     },
     {
       "id": "R5",
-      "requirement": "Every install step (npm app, npm motion, venv, browser, model, CLIs, runtime, app build) repairs itself on rerun after interruption, partial download or corruption",
+      "requirement": "Every install step (Sniper's own tools, npm app, npm motion, venv, browser, model, configuration, render runtime) repairs itself on rerun after interruption, partial download or corruption",
       "scope": "installed package, developer Mac",
       "required": true,
       "status": "PASS",
@@ -278,11 +291,15 @@
         }
       ],
       "depends_on": [],
-      "note": "Every step, including Sniper's own tools, interrupted (kill -9 / Ctrl-C) or corrupted and rerun once: 23 cases end installed with the completion receipt for this folder; F2 resume from setup after settings were written."
+      "note": "Every step, including Sniper's own tools, interrupted (kill -9 / Ctrl-C) or corrupted and rerun once: 23 cases end installed with the completion receipt for this folder; F2 resume from setup after settings were written.",
+      "requirement_change": {
+        "previous_requirement": "Every install step (npm app, npm motion, venv, browser, model, CLIs, runtime, app build) repairs itself on rerun after interruption, partial download or corruption",
+        "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting."
+      }
     },
     {
       "id": "R6",
-      "requirement": "Prerequisites are checked with exact next steps; downloads are hash-verified (pip lock, CLI lock, browser SHA-256, model SHA-256); Node floor derived from the lockfiles",
+      "requirement": "Prerequisites are checked with exact next steps; downloads are hash-verified (tool lock, pip lock, npm locks, browser SHA-256, model SHA-256); macOS floor measured from the shipped binaries",
       "scope": "installed package, developer Mac",
       "required": true,
       "status": "PASS",
@@ -302,7 +319,11 @@
         }
       ],
       "depends_on": [],
-      "note": "Refusals before any download (older macOS, home path with a space, no connection, stopped download that resumes); tampered pip, npm, browser and tool downloads each refused; no user-installed prerequisite is needed (installer/11 with developer tools hidden). The Intel refusal is untested (reads hardware)."
+      "note": "Refusals before any download (older macOS, home path with a space, no connection, stopped download that resumes); tampered pip, npm, browser and tool downloads each refused; no user-installed prerequisite is needed (installer/11 with developer tools hidden). The Intel refusal is untested (reads hardware).",
+      "requirement_change": {
+        "previous_requirement": "Prerequisites are checked with exact next steps; downloads are hash-verified (pip lock, CLI lock, browser SHA-256, model SHA-256); Node floor derived from the lockfiles",
+        "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting."
+      }
     },
     {
       "id": "R7",
@@ -326,7 +347,7 @@
     },
     {
       "id": "LOCK",
-      "requirement": "Installer, provider switch, uninstall, cache cleaning and runtime construction are mutually exclusive with each other, the doctor and active edits/renders",
+      "requirement": "Installer, uninstall, cache cleaning and runtime construction are mutually exclusive with each other, the doctor, ./sniper commands and active edits/renders",
       "scope": "installed package, developer Mac",
       "required": true,
       "status": "PASS",
@@ -346,7 +367,11 @@
         }
       ],
       "depends_on": [],
-      "note": "Installer, provider switch, uninstall and cache cleaning are refused while the app, a doctor, another installer, a render-runtime user or an unlocked edit in the folder is running; the doctor may share; the lock is free after Ctrl-C."
+      "note": "Installer, provider switch, uninstall and cache cleaning are refused while the app, a doctor, another installer, a render-runtime user or an unlocked edit in the folder is running; the doctor may share; the lock is free after Ctrl-C.",
+      "requirement_change": {
+        "previous_requirement": "Installer, provider switch, uninstall, cache cleaning and runtime construction are mutually exclusive with each other, the doctor and active edits/renders",
+        "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting."
+      }
     },
     {
       "id": "ADMISSION",
@@ -403,25 +428,33 @@
     },
     {
       "id": "Z3-CODEX",
-      "requirement": "A complete real edit through the Codex subscription route, primary agent route and advertised UI route",
+      "requirement": "A complete real edit through the buyer's own Codex opened on the Sniper folder, on the buyer's own subscription (the only buyer route)",
       "scope": "real edit",
       "required": true,
       "status": "BLOCKED",
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Codex sign-in deferred by the owner. Also: in Codex's workspace-write sandbox, Producer's media check cannot start its own sandbox and the video folder is not writable (codex-route/01); PENDING item 8."
+      "note": "Codex sign-in deferred by the owner. Also: in Codex's workspace-write sandbox, Producer's media check cannot start its own sandbox and the video folder is not writable (codex-route/01); PENDING item 8.",
+      "requirement_change": {
+        "previous_requirement": "A complete real edit through the Codex subscription route, primary agent route and advertised UI route",
+        "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting."
+      }
     },
     {
       "id": "Z3-CLAUDE",
-      "requirement": "A complete real edit through the Claude subscription route, primary agent route and advertised UI route",
+      "requirement": "A complete real edit through the buyer's own Claude Code opened on the Sniper folder, on the buyer's own subscription (the only buyer route)",
       "scope": "real edit",
       "required": true,
       "status": "BLOCKED",
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Waiting for the owner's Claude sign-in on the qualification install; the primary agent route's non-interactive run with pre-approved tools was refused by this session's safety check (owner to drive install/editor.command or allow it)."
+      "note": "Waiting for the owner's Claude sign-in on the qualification install; the primary agent route's non-interactive run with pre-approved tools was refused by this session's safety check (owner to drive install/editor.command or allow it).",
+      "requirement_change": {
+        "previous_requirement": "A complete real edit through the Claude subscription route, primary agent route and advertised UI route",
+        "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting."
+      }
     },
     {
       "id": "Z4",
@@ -458,14 +491,18 @@
     },
     {
       "id": "Z7",
-      "requirement": "Segmenter and Clipper AI calls run through the selected subscription adapter; paid features separately gated and opt-in; no silent paid fallback",
+      "requirement": "Segmenter and Clipper run from the buyer's own agent through ./sniper with no Sniper-side provider call; paid features separately gated and opt-in; no silent paid fallback",
       "scope": "source + installed package",
       "required": true,
       "status": "NOT RUN",
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Code and tests: Segmenter and Clipper call the subscription CLI only (no SDK or key route); a saved Deepgram key authorizes no paid transcription (installer/16). Real Segmenter/Clipper runs through the signed-in provider are pending."
+      "note": "Code and tests: Segmenter and Clipper call the subscription CLI only (no SDK or key route); a saved Deepgram key authorizes no paid transcription (installer/16). Real Segmenter/Clipper runs through the signed-in provider are pending.",
+      "requirement_change": {
+        "previous_requirement": "Segmenter and Clipper AI calls run through the selected subscription adapter; paid features separately gated and opt-in; no silent paid fallback",
+        "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting."
+      }
     },
     {
       "id": "PRIVACY",
@@ -480,14 +517,18 @@
     },
     {
       "id": "Z9",
-      "requirement": "Manual, agent instructions (AGENTS.md, CLAUDE.md, both skill trees, overrides) and in-app text match the code for both providers",
+      "requirement": "Manual, agent instructions (AGENTS.md, CLAUDE.md, both skill trees, commands) and printed messages match the code for both agents",
       "scope": "package content",
       "required": true,
       "status": "NOT RUN",
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Two independent docs reviews (24 contradictions) fixed in 69955bf/980526b; the fixes of review 2 are not yet independently re-read."
+      "note": "Two independent docs reviews (24 contradictions) fixed in 69955bf/980526b; the fixes of review 2 are not yet independently re-read.",
+      "requirement_change": {
+        "previous_requirement": "Manual, agent instructions (AGENTS.md, CLAUDE.md, both skill trees, overrides) and in-app text match the code for both providers",
+        "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting."
+      }
     },
     {
       "id": "Z10",

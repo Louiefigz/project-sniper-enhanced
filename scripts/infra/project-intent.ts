@@ -50,8 +50,8 @@ function projectRoot(dir: string): string {
   if (found && existsSync(path.join(found, "project.json"))) return found;
   const root = found ?? clean;
   if (!existsSync(path.join(root, "source", "asset_manifest.json"))) {
-    throw new Error(`${root} is not an ingested project: run scripts/producer/ingest.py for it first `
-      + "(it writes source/asset_manifest.json).");
+    throw new Error(`${root} is not an ingested project: run scripts/producer/ingest.py <footage> `
+      + `--out ${path.join(root, "source", "asset_manifest.json")} first.`);
   }
   writeProjectJson(root, { origin: "raw", history: [] });
   return root;

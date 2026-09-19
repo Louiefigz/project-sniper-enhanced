@@ -4,8 +4,8 @@ argument-hint: <producer-dir-or-source-request>
 ---
 
 > **Not available in the packaged release.** Palmier Pro is not configured in the
-> buyer package (no MCP server is declared). If this folder sits beside a
-> `runtime/` folder and `install/`, stop: tell the operator Palmier is not
+> buyer package (no MCP server is declared). If this folder contains
+> `install/`, stop: tell the operator Palmier is not
 > available and use `/produce` plus `/produce-studio` instead.
 >
 > **LEGACY.** Palmier is now an optional legacy export. The default

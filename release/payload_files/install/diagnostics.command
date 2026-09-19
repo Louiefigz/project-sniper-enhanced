@@ -1,6 +1,6 @@
 #!/bin/bash
 # Project Sniper — write a private-by-construction support bundle to your Desktop.
-#   install/diagnostics.command [--include-app-log]
+#   install/diagnostics.command
 # Works on a broken or unfinished install too: that is when it is needed.
 . "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh" || exit 1
 [ -f "$ENV_FILE" ] && load_env --moved-ok

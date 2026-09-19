@@ -18,7 +18,8 @@ the video workspace folder if it is missing (and writes a probe file there), and
 render runtime from the shipped patches if that is missing.
 
 If it says Sniper is not set up yet, or a line says to run the installer, run `./sniper setup`.
-It downloads Sniper's own tools and the speech model (about 2 GB) and takes several minutes:
+It downloads Sniper's own tools, packages, rendering browser and speech model (about 1.2 GB)
+and takes several minutes:
 run it in the background, tell them what it is doing, and report its last lines when it ends.
 It asks nothing and never touches their own Codex, Claude, Node, Python or Homebrew. If your
 sandbox blocks its downloads or its writes to `~/.project-sniper`, ask them to approve running

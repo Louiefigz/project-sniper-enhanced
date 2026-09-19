@@ -201,7 +201,7 @@ def _run_suite(app: Path) -> tuple[list[dict], dict]:
     work = Path(tempfile.mkdtemp(prefix="sniper-package-selftest-"))
     try:
         rows_path, nonce = work / "rows.json", secrets.token_hex(16)
-        # The documented command (AGENTS.md "Checks"): cd scripts/producer && PYTHONPATH=.:tests …
+        # The documented command (AGENTS.md "Checks"): ./sniper /bin/sh -c 'cd scripts/producer && PYTHONPATH=.:tests …'
         # Tests that start the engine's own CLIs rely on that PYTHONPATH, as the product's
         # launchers set it for the CLIs they start (e.g. cut-repair-route-runner.ts).
         producer = app / "scripts" / "producer"

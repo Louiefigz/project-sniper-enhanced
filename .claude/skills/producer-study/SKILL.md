@@ -68,7 +68,7 @@ reference timestamps, exact typography or a rejected format into universal prese
 ```bash
 ./sniper python3 scripts/producer/study/study_video.py <ref> <outdir>   # cuts/min, states, audio, music
 # ZOOM MAP is 3 steps: extract frames at a known fps, face series, then the map:
-ffmpeg -i <ref> -vf fps=5 <frames>/f_%06d.jpg
+./sniper ffmpeg -i <ref> -vf fps=5 <frames>/f_%06d.jpg
 ./sniper python3 scripts/producer/study/study_zoom_faces.py <frames> <faces.json> --fps 5
 ./sniper python3 scripts/producer/study/study_zoom.py <ref> <frames> <faces.json> <outdir>  # punch-in cuts + animated ramps, magnitudes
 # PAIR only (transcribe BOTH in one session — same keyword set, else tokenization noise):

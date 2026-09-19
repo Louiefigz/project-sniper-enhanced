@@ -16,8 +16,10 @@ The agent route, which every Short and long-form edit now takes:
 
 1. Every engine command runs through `./sniper` from the Sniper folder (its own tools,
    settings and maintenance lock). Setup is `./sniper setup`; `./sniper doctor` checks it.
-2. Ingest (`scripts/producer/ingest.py`), then save the operator's request as the stored
-   intent: `./sniper node --import tsx scripts/infra/project-intent.ts <project> --intent …`.
+2. Ingest into the project's `source/` folder
+   (`./sniper python3 scripts/producer/ingest.py <footage> --out <project>/source/asset_manifest.json`),
+   then save the operator's request as the stored intent:
+   `./sniper node --import tsx scripts/infra/project-intent.ts <project> --intent …`.
 3. The agent authors `edit_plan.json` under the Producer skill, runs the full gate bundle and
    converges the plan with independent critics that are fresh subagents, not the author.
 4. Delivery approval from the deterministic gates:

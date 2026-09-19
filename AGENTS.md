@@ -27,7 +27,7 @@ revisions and context handoffs.
   them with another Python, Node or ffmpeg on this Mac. Project folders go under
   `$(./sniper workspace)`.
 - **Setting up.** If `./sniper` says Sniper is not set up, run `./sniper setup` (it downloads
-  about 2 GB and takes several minutes; run it in the background, tell the operator what it
+  about 1.2 GB and takes several minutes; run it in the background, tell the operator what it
   is doing and report its last lines). `./sniper doctor` checks the install and names the fix
   for anything wrong.
 - **Codex's sandbox.** Sniper decodes every video it edits inside its own macOS sandbox, and
@@ -56,11 +56,15 @@ revisions and context handoffs.
 The full account, path by path, is `manual/privacy.html`. In short: what you read and write
 in this conversation (transcripts, plans, still frames you or a reviewer look at) goes to
 your provider under the operator's account, like any conversation. Sniper's own commands send
-nothing anywhere, except that reference links are downloaded with `yt-dlp` (Chrome cookies are
-read only when the operator asks for that fetch) and Studio's page loads one GSAP file from
-`cdn.jsdelivr.net`. Studio is served from Sniper's adapted runtime, whose analytics are
-switched off. Open Studio only through Sniper (`install/studio.command`), never with the
-stock `hyperframes preview`, which would send HeyGen's analytics. Instructions are not a
+nothing anywhere, except: reference links are downloaded with `yt-dlp` (Chrome cookies are
+read only when the operator asks for that fetch); public-web b-roll capture, when a Short's
+media sources are set to public web, loads the pages the plan names
+(`scripts/producer/studio/web_capture.py`); a brand icon that is not already shipped is
+downloaded by name from `cdn.simpleicons.org` (`scripts/producer/planner/icon_library.py`);
+and Studio's page loads one GSAP file from `cdn.jsdelivr.net`. Studio is served from Sniper's adapted runtime, whose analytics are
+switched off. Open Studio only through Sniper (`install/studio.command` for a Producer edit,
+`./sniper python3 scripts/producer/studio/managed_preview.py open <project>` for a native
+project), never with the stock `hyperframes preview`, which would send HeyGen's analytics. Instructions are not a
 privacy boundary: do not attach or upload video or audio files to the conversation; work
 from transcripts, plans and still frames.
 
@@ -102,7 +106,8 @@ then read the files it identifies. Discovery alone neither reads them nor comple
 - At video handoff, give the operator both the encoded video and the matching editable
   Studio project (`install/studio.command open <project>/producer`), and keep both current
   after an adjustment.
-- Run the applicable gates and QC (`audit/audit_render.py`) before claiming anything is complete.
+- Run the applicable gates and QC (`./sniper python3 scripts/producer/audit/audit_render.py <out_dir>`)
+  before claiming anything is complete.
 
 ## Not available in this package
 
@@ -123,12 +128,14 @@ then read the files it identifies. Discovery alone neither reads them nor comple
 ## Checks
 
 ```bash
-npm run type-check
-npm run lint
-npm test
-cd scripts/producer && PYTHONPATH=.:tests ../../.venv/bin/python3 selftest.py
+./sniper npm run type-check
+./sniper npm run lint
+./sniper npm test
+./sniper /bin/sh -c 'cd scripts/producer && PYTHONPATH=.:tests python3 -B selftest.py'
 ```
 
-In an installed package, run each through `./sniper` (for example `./sniper npm test`). The
+(The Python suite needs `PYTHONPATH`, which `./sniper` clears for every other command, and
+runs from `scripts/producer`.) In a developer checkout (no `install/`), `./sniper` runs them
+with your own tools. The
 Python suite is stdlib `unittest`, not pytest. Both suites must stay green. If a
 change cannot be verified this way, say so rather than claiming success.

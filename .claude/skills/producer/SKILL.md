@@ -505,7 +505,7 @@ identity/mode/strategy errors must be fixed before rendering.
 |---|---|
 | Ingest + transcripts (multi-source), CLIPPER→MP4 cut render, speed, 9:16 face/center/blurpad reframe, karaoke captions, −14 LUFS master, cover frame | ✅ Phase 1 |
 | Hook cards (white container/black Inter, frame 1, `overlays.py` — wired into render) | ✅ Phase 2 (2026-07-04) |
-| Audit B post-render QC (`audit/audit_render.py <out_dir>` — run it on EVERY render before presenting; exit 1 = fix before delivery) | ✅ Phase 2 |
+| Audit B post-render QC (`scripts/producer/audit/audit_render.py <out_dir>` — run it on EVERY render before presenting; exit 1 = fix before delivery) | ✅ Phase 2 |
 | Music: `plan.music` is applied at assemble time by `audio/music_stage.py` (bed pre-norm, loop/trim, ducking under dialogue, −14 LUFS re-master; `audio/audio_mix.py` is the engine). One starter bed ships (`assets/music/default-bed.mp3`), registered in the manifest at ingest | ✅ wired / one starter bed |
 | Long-form: breathing-room cut + SRT sidecar + chapters (`longform_outputs.py`) | ✅ Phase 3 (2026-07-04) |
 | First-class range captions: stable-word `CaptionTrackV1`, repeated-occurrence corrections, semantic chapters, bounded/cacheable RGBA shards, SRT + regenerable Palmier projection, caption-free composite reuse, font-byte/safe-bound proof | ✅ P3 released (2026-07-29) |
@@ -678,7 +678,10 @@ Both share the cut spine (retake/pause/outtake — the PRODUCE LONGFORM doctrine
 below) and the mode's base reframe (captions only where the scope or the operator turns
 that lane on); only the engaging lanes differ.
 
-1. **Ingest** — `./sniper python3 scripts/producer/ingest.py <project_dir> --out <work>/asset_manifest.json`.
+1. **Ingest** — `./sniper python3 scripts/producer/ingest.py <footage file or folder> --out "$(./sniper workspace)/<slug>/source/asset_manifest.json"`.
+   The project is `$(./sniper workspace)/<slug>/`: the manifest and transcripts in `source/`,
+   renders in `producer/`. Then save the request as its stored intent
+   (`scripts/infra/project-intent.ts <project>`, AGENTS.md), which reads `source/asset_manifest.json`.
    Use local Whisper for new transcripts under the subscription/local-only
    policy. Check local runtime/model availability first; a missing local
    dependency is not permission to call Deepgram, OpenAI, or another paid API.
@@ -1164,8 +1167,9 @@ that lane on); only the engaging lanes differ.
    **Studio review lane (the DEFAULT manual-control path after
    render/assemble):** `scripts/producer/studio/studio_review.py open
    <producer_dir>` generates `<producer_dir>/studio/` from `edit_plan.json` +
-   `base_final.mp4` and serves it in HyperFrames Studio (pinned CLI, browser
-   opens) for hand/agent adjustment of the graphics layer; then
+   `base_final.mp4` and serves it in HyperFrames Studio (pinned CLI; it prints the local
+   `studio: http://127.0.0.1:…` address and opens no browser — open it for the operator
+   with `open <url>`) for hand/agent adjustment of the graphics layer; then
    `studio_review.py sync <producer_dir> --apply` folds the Studio edits back
    into `edit_plan.json` (baseline-diff gated: only NEW gate failures the
    edit introduces block, so legacy plans still take edits; backup written)
@@ -1379,12 +1383,12 @@ adjudication, template proof and compilation. Verified mimic is not released
 - **Costs**: use subscription-backed agent tools and local processing by
   default. No paid API, credit purchase, overage, or silent provider fallback
   without explicit user approval. An API key, environment variable, CLI login,
-  or installed SDK is not spending permission. Verify subscription admission
-  before CLI inference; unknown authentication or exhausted usage stops that
-  invocation. CLI authentication alone does not prove no subscription overage.
-  Never invoke an optional paid-ASR authorization flag on the user's behalf
-  under a no-paid request. Text Review (Anthropic API, the operator's own key)
-  is the only in-app feature that bills an API key; it is never a fallback. Local model downloads still need network/installation
+  or installed SDK is not spending permission. If the operator's subscription
+  refuses (sign-in, usage limit), report it and stop. Never invoke an optional
+  paid-ASR authorization flag on the user's behalf under a no-paid request.
+  Deepgram transcription (the operator's own Deepgram key, only when explicitly
+  authorized for that edit) is the one optional paid feature; it is never a
+  fallback. Local model downloads still need network/installation
   permission; don't claim all compute or third-party media is universally free.
 - During a creator edit, do not ad-hoc modify renderer/transcriber code to
   force a result. Application-development requests are separate. Preserve

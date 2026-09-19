@@ -78,4 +78,4 @@ NOT OWNER DECISIONS — acceptance still outstanding
   - Human playback, listening and Studio checks of those edits.
   - Clean-Mac install and an outside operator following the manual.
   - Authenticated delivery of the exact bytes.
-  - Listen to app/assets/music/default-bed.mp3 once (60 s). It is measured clean, not heard.
+  - Listen to assets/music/default-bed.mp3 once (60 s). It is measured clean, not heard.

@@ -31,7 +31,8 @@ and the line says why. What this candidate does and does not do yet is listed in
 <tr><th>What you see</th><th>What it means</th><th>What to do</th></tr>
 <tr><td><code>Sniper is not set up yet (or this folder moved). Run: ./sniper setup</code></td><td>Setup has
 not finished in this folder, or the folder was moved or copied since.</td><td>Ask your agent to run
-<code>./sniper setup</code>; it redoes only what is unfinished.</td></tr>
+<code>./sniper setup</code>; it redoes only what is unfinished. A <code>projects</code> folder inside
+Sniper moves with it: the moved or copied folder uses its own.</td></tr>
 <tr><td><code>sandbox initialization failed</code> or <code>Operation not permitted</code> (Codex)</td><td>Codex
 ran a Sniper step inside its own sandbox; Sniper's video check starts its own macOS sandbox, which cannot
 start inside another one.</td><td>Approve running that step outside Codex's sandbox when Codex asks. The

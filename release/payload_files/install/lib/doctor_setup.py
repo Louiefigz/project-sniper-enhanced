@@ -79,14 +79,14 @@ def check_node(record: Record) -> None:
     found = shutil.which("node") or ""
     if os.path.realpath(found) != os.path.realpath(pinned):
         record("FAIL", "node", f"PATH finds {found or 'no node'}, not the installed {pinned}; "
-               "the CLIs and workers would run a different Node — run install/install.command")
+               "Sniper's commands and renders would run a different Node — run ./sniper setup")
         return
     _, out, _ = run([pinned, "--version"], 30)
     prefix = os.environ.get("SNIPER_DEPS_PREFIX", "")
     if not prefix or not os.path.realpath(pinned).startswith(f"{os.path.realpath(prefix)}/"):
         record("FAIL", "node", f"{pinned} is not Sniper's own Node — run install/install.command")
         return
-    record("PASS", "node", f"{out.strip()} at {pinned} (needs {floor}+); the CLIs and workers use it")
+    record("PASS", "node", f"{out.strip()} at {pinned} (needs {floor}+); Sniper's commands and renders use it")
 
 
 def check_runtime_tools(record: Record) -> None:

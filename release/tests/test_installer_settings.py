@@ -75,6 +75,23 @@ class SettingsRoundTrip(unittest.TestCase):
                 self.assertIn("SNIPER_WORKSPACE_ROOT", done.stderr)
                 self.assertFalse((self.pkg / "runtime/sniper.env").exists(), "a partial file was written")
 
+    def test_a_workspace_inside_the_folder_moves_with_it(self) -> None:
+        """A moved or copied folder set up again uses its own projects/, not the old folder's."""
+        env = self.pkg / "runtime/sniper.env"
+        env.parent.mkdir(parents=True, exist_ok=True)
+        old = self.base / "Old place" / "project-sniper"
+        outside = self.base / "Shared videos"
+        here = self.pkg.resolve()   # PKG_ROOT is the folder's physical path (pwd -P)
+        for kept, expected in ((old / "projects", here / "projects"),
+                               (old / "projects/client A", here / "projects/client A"),
+                               (outside, outside)):
+            with self.subTest(str(kept)):
+                env.write_text(f'PKG_ROOT="{old}"\nSNIPER_WORKSPACE_ROOT="{kept}"\n')
+                done = fx.write_settings(self.pkg, "")
+                self.assertEqual(done.returncode, 0, done.stderr)
+                self.assertEqual(self._loaded()["SNIPER_WORKSPACE_ROOT"], str(expected))
+        self.assertFalse(old.exists(), "setup never recreates the folder it was moved from")
+
     def test_rc3_format_file_is_still_read_for_the_upgrade(self) -> None:
         env = self.pkg / "runtime/sniper.env"
         env.parent.mkdir(parents=True, exist_ok=True)

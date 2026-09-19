@@ -7,10 +7,24 @@
 # There is no provider setting: you talk to Sniper through your own Codex or Claude Code,
 # signed in to your own subscription, and Sniper's commands never call either of them.
 
+# The workspace kept from the last setup. One inside this folder moves with the folder: after
+# a move or a copy it names the same place under the new location, never the old folder
+# (which a move leaves behind and a copy still uses).
+kept_workspace() {
+  local workspace old_root
+  workspace="$(settings_value SNIPER_WORKSPACE_ROOT)" || return 0
+  old_root="$(settings_value PKG_ROOT)"
+  if [ -z "$old_root" ] || [ "$old_root" = "$PKG_ROOT" ]; then printf '%s' "$workspace"; return 0; fi
+  case "$workspace" in
+    "$old_root"|"$old_root"/*) printf '%s' "$PKG_ROOT${workspace#"$old_root"}" ;;
+    *) printf '%s' "$workspace" ;;
+  esac
+}
+
 write_settings() {
   local workspace
   # Projects live inside this folder by default, where Codex's own sandbox lets it write.
-  workspace="${WORKSPACE_ARG:-$(settings_value SNIPER_WORKSPACE_ROOT)}"; workspace="${workspace:-$PKG_ROOT/projects}"
+  workspace="${WORKSPACE_ARG:-$(kept_workspace)}"; workspace="${workspace:-$PKG_ROOT/projects}"
   case "$workspace" in /*) ;; *) fail "The video workspace must be an absolute folder path: $workspace" ;; esac
   mkdir -p "$workspace" || fail "Cannot create the video workspace at $workspace"
   settings_write "$ENV_FILE" \

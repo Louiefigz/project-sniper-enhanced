@@ -1,5 +1,11 @@
 # Qualification report — project-sniper-0.1.0-rc3
 
+> **Superseded by rc4 (2026-09-19).** This is the rc3 report, kept for history. The rc4 state — final candidate
+> `bae842a` (ZIP SHA-256 `7fed9cfd…`), its results and open items — is in
+> `outputs/project-sniper-release-rc4-2026-09-18/evidence/final/INDEPENDENT_REVIEW_RESPONSE.md` and
+> `release/qualification/matrix.json` (read by `python -m release.sale_gate`). Both rc3 blockers below are
+> resolved in rc4 (native media admission; original styles and doctrine).
+
 Built 2026-09-18 UTC from the isolated release checkout (commit `3744f6a`). The checkout is a verified snapshot of
 the live tree at upstream `8ebcdfc` plus its 2026-09-17 working tree: 6,133 captured files, byte-identical to the
 live files at capture time. rc2 and its evidence are unchanged in `../project-sniper-release-2026-09-17/`.

@@ -15,6 +15,7 @@ export const GUIDED_SOURCE_COLOR_CLEANUP_TS_FILES = Object.freeze([
   "src/app/api/_lib/plan-refit-transaction.ts",
   "src/app/api/_lib/project-mutation.ts",
   "src/app/api/_lib/projects-registry.ts",
+  "src/app/api/_lib/provider-media-jail.ts",
   "src/app/api/_lib/reference-admission-verifier.ts",
   "src/app/api/_lib/reference-decision.ts",
   "src/app/api/_lib/reference-frame-policy.ts",

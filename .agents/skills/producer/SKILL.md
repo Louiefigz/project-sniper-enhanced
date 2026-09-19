@@ -20,7 +20,8 @@ For an interactive Codex video-editing request, the primary path is this skill
 Sniper web UI is optional. Follow the canonical cut-first, bounded-review,
 render/QC and subscription/local-only rules. Apply the canonical "Visual
 storytelling" section to produced/full visual plans and creative revisions.
-For the deterministic review lane, open Studio through `studio/studio_review.py`;
+For the deterministic review lane, open Studio through `../install/studio.command` in the
+packaged app (`studio/studio_review.py` directly in a developer checkout);
 use `docs/producer/STUDIO_REVIEW_LANE.md` for sync, manifest and receipt handling.
 An explicitly selected native HyperFrames project follows the canonical native
 routing exception and its approved project direction. The owning interactive

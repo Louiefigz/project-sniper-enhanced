@@ -44,10 +44,13 @@ Clipper is for. It tightens one clip word by word and exports FCPXML, which Fina
 opens as an actual timeline with your cuts as edits.</p>
 
 <h2>Segmenter: rough clips for your own editing</h2>
-<p>Segmenter splits a long recording into clips and does not re-encode anything, so there
-is no quality loss. The trade-off is that clips snap to the nearest keyframe at or before
-the intended start, so adjacent clips can overlap by a frame or two. That is intentional:
-they are raw material for you to trim, not finished cuts.</p>
+<p>Segmenter splits a long recording into clips without re-encoding it, so there is no
+quality loss. Each clip keeps about five seconds of extra footage before and after its
+section and starts on the nearest keyframe at or before that, so neighbouring clips overlap
+by those handles (ten seconds or more). That is intentional: they are raw material for you
+to trim, not finished cuts. With several camera angles, Segmenter instead cuts each clip
+frame-accurately in sync, re-encoding at the joins (or the whole clip if a join does not
+validate).</p>
 
 <h2>Palmier Pro</h2>
 <p><span class="tag">not configured in this package</span></p>

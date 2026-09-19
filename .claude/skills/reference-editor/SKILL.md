@@ -69,7 +69,8 @@ bar.
 
 ## 1. Intake and provenance
 
-For a URL, choose a dedicated directory under `~/ProjectSniper/_references/`
+For a URL, choose a dedicated directory under `_references/` in the operator's video workspace
+(`${SNIPER_WORKSPACE_ROOT:-$HOME/ProjectSniper}/_references/`)
 and run:
 
 ```bash

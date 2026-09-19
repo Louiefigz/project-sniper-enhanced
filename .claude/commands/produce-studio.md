@@ -9,6 +9,12 @@ manual-control path after render/assemble. Full reference:
 
 The operator's request is: $ARGUMENTS
 
+In the packaged app, run every step below as `../install/studio.command <subcommand>
+<producer_dir> [options]` (open, status, sync, rebuild, stop, context): the same tool with this
+install's settings, and its `sync` prints the matching `install/studio.command rebuild` step.
+In a developer checkout (no `../install/`), call `scripts/producer/studio/studio_review.py`
+directly.
+
 The loop: `scripts/producer/studio/studio_review.py open <producer_dir>`
 generates the review project from `edit_plan.json` + `base_final.mp4` and
 serves it in Studio (the browser opens); the operator edits graphic

@@ -53,8 +53,17 @@ zimg but not rubberband (osxexperts also re-uses one download URL, so a pin woul
 1. **Before anything else, with only macOS's own tools** (bash, curl, tar, shasum/openssl, codesign,
    lockf): Sniper's Python does not exist yet, and the maintenance lock's helper runs on it.
 2. Refuses up front, before downloading: an Intel Mac (`sysctl hw.optional.arm64`), a macOS older than
-   the lock's `min-macos` (13.0: Node needs 12, the pinned Python wheels 13), a home folder whose path has
-   whitespace.
+   the lock's `min-macos` (13.5), a home folder whose path has whitespace. The floor is the highest of
+   the packages' `__osx` metadata, the pinned Python wheels (13; opencv) and what the installed binaries
+   themselves say: `python -m release.runtime_tools measure <runtime folder>` reads the `LC_BUILD_VERSION`
+   of all 452 Mach-O files and records it in `measured-min-macos.json`. Node 24.21.0's `bin/node` and
+   `libnode` are built for 13.5 although its package declares `__osx >=11.0`; the build refuses a lock
+   below its measured floor, or a measurement taken for other packages.
+   Parts outside this lock, measured the same way on the qualification install: the app's npm
+   packages need at most 13.3 (onnxruntime-node); pip picks the macOS 11/12 builds of numpy and scipy
+   on an older Mac (the requirements lock pins those too); the pinned Codex CLI 0.144.1 also carries a
+   zsh built for macOS 15, used only by its optional `shell_zsh_fork` feature — the Codex route has not
+   been run on macOS 13.5–14.
 3. Downloads every lock row with curl into `~/.project-sniper/pkgs/` — resumable (`-C -`), each file
    checked against its SHA-256 before use; a wrong file is deleted and reported; a partial one resumes.
    `SNIPER_TOOLS_BASE_URL` serves the same paths from a mirror (installer tests).

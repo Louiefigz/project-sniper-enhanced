@@ -89,4 +89,6 @@ Homebrew or system copy instead. API routes that start Python import `spawnPytho
 
 `npm run type-check`, `npm run lint`, `npm test`, `npm run build`, and the Python suite
 (`cd scripts/producer && PYTHONPATH=.:tests ../../.venv/bin/python3 selftest.py`). If a
-change cannot be verified this way, say so instead of claiming success.
+change cannot be verified this way, say so instead of claiming success. In an installed
+package, `npm run build` replaces the installer's recorded build and the doctor then reports
+the app build as changed; rebuild there with `../install/install.command` instead.

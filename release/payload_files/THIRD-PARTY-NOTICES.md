@@ -164,10 +164,12 @@ screenshot, brand, likeness or creator name is used.
 | Development test screenshots (`scripts/producer/tests/.artifacts/`) | Not product. |
 
 **Known exceptions, blocking sale:**
-- Several editing-doctrine studies that still ship (the saved styles and some
-  `docs/studies` files) are analyses of specific creators' videos or one teacher's material.
-  Some still name creators or cite their videos. They are listed in
-  `PENDING-OWNER-DECISIONS.txt`, item 5, and must be re-authored or withheld before sale.
+- Several shipped studies measure the owner's own footage against edits of the owner's
+  videos by editors the owner hired, some case records name the owner, and a few
+  failure-ledger lessons describe a client's video. The owner has to confirm these may ship
+  (`PENDING-OWNER-DECISIONS.txt`, item 6). The saved styles and the editing doctrine that
+  were built from other creators' videos or a teacher's material are rewritten as Sniper's
+  own and no longer name creators.
 - GSAP licence scope is not cleared. It is not yet confirmed that the GSAP Standard
   License allows shipping these files in a paid download, or that Project Sniper's editing
   surfaces fall outside its competing-tool restriction. A written answer from the publisher

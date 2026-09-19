@@ -26,8 +26,10 @@ editable project behind it.</p>
 <tr><td><strong>Producer</strong></td><td>The main editor. Raw footage in, finished
 video out. Vertical Shorts (9:16) and full-length landscape videos (16:9).</td></tr>
 <tr><td><strong>Segmenter</strong></td><td>Chops a long recording into rough clips for
-another editor. Deliberately rough: clips snap to the nearest keyframe and may overlap
-by a frame or two, because nothing is re-encoded and nothing is quality-lost.</td></tr>
+another editor. Deliberately rough: each clip keeps about five seconds of extra footage
+before and after, and starts on the nearest keyframe before that, so neighbouring clips
+overlap by those handles. A single recording is not re-encoded, so nothing is quality-lost;
+several camera angles are cut frame-accurately instead, re-encoding at the joins.</td></tr>
 <tr><td><strong>Clipper</strong></td><td>Tightens one clip word by word and exports a
 frame-accurate Final Cut Pro timeline (FCPXML).</td></tr>
 <tr><td><strong>Text Review</strong></td><td>A separate spell-check for text on screen.
@@ -67,8 +69,8 @@ subscription, and it runs only when you tick its opt-in — see
 <h2>What you need</h2>
 <table>
 <tr><th>Requirement</th><th>Detail</th><th>Cost to you</th></tr>
-<tr><td>A Mac</td><td>Apple silicon (M1 or later) with macOS 13 or newer — the oldest macOS
-Sniper's own tools and pinned Python packages support. So far Sniper has only been run on a
+<tr><td>A Mac</td><td>Apple silicon (M1 or later) with macOS 13.5 or newer — the oldest macOS
+Sniper's own tools run on (its Node needs 13.5; its Python packages, 13). So far Sniper has only been run on a
 developer Mac with macOS 26 on Apple silicon; that is not yet a qualified buyer baseline. Intel
 Macs cannot run Sniper's tools.</td><td>—</td></tr>
 <tr><td>Disk space</td><td>About 4 GB for the install and its tools (about 1.2 GB of that in

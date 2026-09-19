@@ -1156,7 +1156,8 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
    (graphics/motion/transitions — render.py wires them from the populated tracks);
    for **clean-cut** those tracks are empty and no-op, so this same chain ships
    the bare cut. Renders land in the project's `producer/` dir under
-   `~/ProjectSniper/<slug>/`.
+   `<workspace>/<slug>/`, where the workspace is `$SNIPER_WORKSPACE_ROOT` (the video folder
+   chosen at install, set in the packaged app's settings; `~/ProjectSniper` when unset).
    **Studio review lane (the DEFAULT manual-control path after
    render/assemble):** `scripts/producer/studio/studio_review.py open
    <producer_dir>` generates `<producer_dir>/studio/` from `edit_plan.json` +

@@ -1,6 +1,6 @@
 {
  "micromamba": "2.9.0",
- "min_macos": "13.0",
+ "min_macos": "13.5",
  "packages": [
   {
    "build": "h4e30115_10",

@@ -1,6 +1,6 @@
 # sniper-runtime-lock-v1 — written by python -m release.runtime_tools; do not edit
 # platform osx-arm64
-# min-macos 13.0
+# min-macos 13.5
 # tools python=3.14.4 nodejs=24.21.0 whisper.cpp=1.9.3 tesseract=5.5.3 yt-dlp=2026.8.19 git=2.55.0
 # kind sha256 bytes path source
 micromamba 500f5074feb8d02c4296ef9921c3650ed2874171805a9fbb8fbb53896433646b 6648894 tools/micromamba-2.9.0-0.tar.bz2 https://conda.anaconda.org/conda-forge/osx-arm64/micromamba-2.9.0-0.tar.bz2

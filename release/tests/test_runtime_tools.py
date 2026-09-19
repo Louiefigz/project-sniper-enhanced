@@ -12,7 +12,10 @@ from __future__ import annotations
 
 import hashlib
 import io
+import json
+import re
 import shutil
+import struct
 import subprocess
 import sys
 import tarfile
@@ -21,7 +24,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from release import runtime_tools
+from release import macho_floor, runtime_tools
 from release.tests import _fixture as fx
 
 STUB_MICROMAMBA = r'''#!/bin/bash
@@ -169,7 +172,9 @@ class Preconditions(unittest.TestCase):
 
     def test_an_older_macos_is_refused(self) -> None:
         lock = self.pkg / "install/deps/osx-arm64.lock"
-        lock.write_text(lock.read_text().replace("# min-macos 13.0", "# min-macos 99.0"))
+        text = lock.read_text()
+        self.assertEqual(text.count("\n# min-macos "), 1)
+        lock.write_text(re.sub(r"\n# min-macos \S+\n", "\n# min-macos 99.0\n", text))
         done = fx.bash(self.pkg, "require_macos && echo supported")
         self.assertNotIn("supported", done.stdout)
         self.assertIn("Sniper's tools need macOS 99.0", done.stderr)
@@ -227,6 +232,95 @@ class BuildSideLock(unittest.TestCase):
         with mock.patch.object(runtime_tools, "shipped_files", return_value={"install/deps/f": (folder / "f", "0" * 64)}):
             with self.assertRaisesRegex(runtime_tools.LockError, "does not match its pin"):
                 runtime_tools.check()
+
+
+    def test_a_lock_below_the_floor_measured_from_its_binaries_is_refused(self) -> None:
+        _, rows = runtime_tools.read_lock()
+        record = Path(tempfile.mkdtemp()) / "measured.json"
+        self.addCleanup(shutil.rmtree, record.parent)
+        record.write_text(json.dumps({"conda_rows_sha256": runtime_tools.conda_rows_sha256(rows),
+                                      "min_macos": "99.0", "set_by": ["bin/node"], "macho_files": 1}))
+        with mock.patch.object(runtime_tools, "MEASURED", record):
+            with self.assertRaisesRegex(runtime_tools.LockError, "bin/node need macOS 99.0"):
+                runtime_tools.check()
+
+    def test_a_floor_measured_for_other_packages_does_not_count(self) -> None:
+        record = Path(tempfile.mkdtemp()) / "measured.json"
+        self.addCleanup(shutil.rmtree, record.parent)
+        record.write_text(json.dumps({"conda_rows_sha256": "0" * 64, "min_macos": "11.0", "set_by": [], "macho_files": 1}))
+        for measured in (record, record.parent / "absent.json"):
+            with mock.patch.object(runtime_tools, "MEASURED", measured):
+                with self.assertRaisesRegex(runtime_tools.LockError, "no macOS floor has been measured"):
+                    runtime_tools.check()
+
+    def test_measuring_refuses_a_runtime_of_other_packages(self) -> None:
+        prefix = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, prefix)
+        (prefix / "conda-meta").mkdir()
+        (prefix / "conda-meta/other.json").write_text(json.dumps({"sha256": "1" * 64}))
+        with mock.patch.object(runtime_tools, "MEASURED", prefix / "measured.json"):
+            with self.assertRaisesRegex(runtime_tools.LockError, "not an install of this lock"):
+                runtime_tools.measure(prefix)
+            self.assertFalse((prefix / "measured.json").exists())
+
+
+def _macho(cputype: int, floor: tuple[int, int] | None, legacy: bool = False) -> bytes:
+    """A minimal 64-bit Mach-O file whose one load command names its macOS floor."""
+    encoded = (floor[0] << 16) | (floor[1] << 8) if floor else 0
+    if floor is None:
+        command = struct.pack("<II", 0x19, 8)                                   # an unrelated command
+    elif legacy:
+        command = struct.pack("<IIII", 0x24, 16, encoded, 0)                    # LC_VERSION_MIN_MACOSX
+    else:
+        command = struct.pack("<IIIIII", 0x32, 24, 1, encoded, 0, 0)            # LC_BUILD_VERSION, macOS
+    return b"\xcf\xfa\xed\xfe" + struct.pack("<iiIIIII", cputype, 0, 2, 1, len(command), 0, 0) + command
+
+
+def _fat(*slices: bytes) -> bytes:
+    cputypes = [struct.unpack_from("<i", s, 4)[0] for s in slices]
+    offset, table, body = 8 + 20 * len(slices), b"", b""
+    for cputype, data in zip(cputypes, slices):
+        table += struct.pack(">iiIII", cputype, 0, offset + len(body), len(data), 0)
+        body += data
+    return b"\xca\xfe\xba\xbe" + struct.pack(">I", len(slices)) + table + body
+
+
+class MachOFloor(unittest.TestCase):
+    """The macOS floor read from the files themselves (release/macho_floor.py)."""
+
+    def _write(self, name: str, data: bytes) -> Path:
+        path = self.folder / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(data)
+        return path
+
+    def setUp(self) -> None:
+        self.folder = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.folder)
+
+    def test_arm64_files_name_their_floor_either_way(self) -> None:
+        self.assertEqual(macho_floor.file_floor(self._write("a", _macho(0x0100000C, (13, 5)))), "13.5")
+        self.assertEqual(macho_floor.file_floor(self._write("b", _macho(0x0100000C, (12, 0), legacy=True))), "12.0")
+        self.assertIsNone(macho_floor.file_floor(self._write("c", _macho(0x0100000C, None))))
+
+    def test_only_the_arm64_code_counts(self) -> None:
+        self.assertIsNone(macho_floor.file_floor(self._write("x86", _macho(0x01000007, (10, 15)))))
+        fat = _fat(_macho(0x01000007, (10, 15)), _macho(0x0100000C, (14, 0)))
+        self.assertEqual(macho_floor.file_floor(self._write("fat", fat)), "14.0")
+
+    def test_other_files_are_not_mistaken_for_binaries(self) -> None:
+        java = b"\xca\xfe\xba\xbe\x00\x00\x00\x34" + b"\x00" * 40      # a Java class file shares the magic
+        self.assertIsNone(macho_floor.file_floor(self._write("A.class", java)))
+        self.assertIsNone(macho_floor.file_floor(self._write("cut", _macho(0x0100000C, (13, 5))[:40])))
+        self.assertIsNone(macho_floor.file_floor(self._write("t.txt", b"#!/bin/bash\n")))
+
+    def test_a_folder_reports_its_newest_floor_and_the_files_that_set_it(self) -> None:
+        self._write("bin/node", _macho(0x0100000C, (13, 5)))
+        self._write("lib/libnode.dylib", _macho(0x0100000C, (13, 5)))
+        self._write("bin/python", _macho(0x0100000C, (11, 0)))
+        self._write("share/readme", b"text")
+        (self.folder / "bin/link").symlink_to("node")
+        self.assertEqual(macho_floor.folder_floor(self.folder), ("13.5", ["bin/node", "lib/libnode.dylib"], 3))
 
 
 if __name__ == "__main__":

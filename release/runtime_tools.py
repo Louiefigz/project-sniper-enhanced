@@ -2,7 +2,12 @@
 
     python -m release.runtime_tools solve        # specs.txt -> install/deps/osx-arm64.lock (+ .json)
     python -m release.runtime_tools pin-ffmpeg   # record a fresh build of the Sniper ffmpeg
+    python -m release.runtime_tools measure ~/.project-sniper/runtimes/<id>   # the binaries' macOS floor
     python -m release.runtime_tools check        # what the package build runs
+
+A package's metadata can understate the macOS it needs (conda-forge's nodejs 24.21.0 declares
+``__osx >=11.0``, but its bin/node is built for 13.5), so the lock's ``min-macos`` also covers
+the floor measured from every Mach-O file of an installed runtime of the same packages.
 
 Buyers never install Node, Python, ffmpeg, whisper.cpp, tesseract or yt-dlp themselves.
 The installer (install/lib/runtime_tools.sh) downloads exactly the rows of the lock with
@@ -32,11 +37,14 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+from release import macho_floor
+
 HERE = Path(__file__).resolve().parent
 DEPS = HERE / "runtime_deps"
 DIST = DEPS / "dist"
 SPECS = DEPS / "specs.txt"
 FFMPEG_PIN = DEPS / "sniper-ffmpeg.json"
+MEASURED = DEPS / "measured-min-macos.json"
 LOCK = HERE / "payload_files/install/deps/osx-arm64.lock"
 LOCK_JSON = LOCK.with_suffix(".json")
 CHANNEL = "https://conda.anaconda.org/conda-forge"
@@ -198,6 +206,46 @@ def pin_ffmpeg() -> None:
     print(f"pinned {artifact.name} {pin['artifact']['sha256']}")
 
 
+def conda_rows_sha256(rows: list[dict[str, str]]) -> str:
+    """SHA-256 of the lock's conda rows: the package set a measured floor belongs to."""
+    text = "\n".join(f"{row['sha256']} {row['path']}" for row in rows if row["kind"] == "conda")
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def measure(prefix: Path) -> None:
+    """Measure the macOS floor of ``prefix`` (an installed runtime of this lock's packages) and
+    raise the lock's ``min-macos`` to it when the binaries need more than the metadata says."""
+    header, rows = read_lock()
+    wanted = {row["sha256"] for row in rows if row["kind"] == "conda"}
+    installed = {json.loads(meta.read_text(encoding="utf-8")).get("sha256")
+                 for meta in (prefix / "conda-meta").glob("*.json")}
+    if wanted - installed:
+        raise LockError(f"{prefix} is not an install of this lock: {len(wanted - installed)} of its "
+                        "packages are missing (install/install.command installs it)")
+    floor, set_by, count = macho_floor.folder_floor(prefix)
+    if not count:
+        raise LockError(f"{prefix} has no Mach-O files to measure")
+    MEASURED.write_text(json.dumps({"conda_rows_sha256": conda_rows_sha256(rows), "min_macos": floor,
+                                    "set_by": set_by, "macho_files": count}, indent=1) + "\n", encoding="utf-8")
+    new = max(header["min-macos"], floor, key=macho_floor.version_key)
+    LOCK.write_text(LOCK.read_text(encoding="utf-8").replace(
+        f"# min-macos {header['min-macos']}\n", f"# min-macos {new}\n", 1), encoding="utf-8")
+    record = json.loads(LOCK_JSON.read_text(encoding="utf-8"))
+    record["min_macos"] = new
+    LOCK_JSON.write_text(json.dumps(record, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    print(f"{count} Mach-O files; the newest macOS any needs is {floor} ({', '.join(set_by)}); lock min-macos {new}")
+
+
+def _check_measured_floor(header: dict[str, str], rows: list[dict[str, str]]) -> None:
+    measured = json.loads(MEASURED.read_text(encoding="utf-8")) if MEASURED.exists() else {}
+    if measured.get("conda_rows_sha256") != conda_rows_sha256(rows):
+        raise LockError("no macOS floor has been measured for this lock's packages; install them and run "
+                        "python -m release.runtime_tools measure ~/.project-sniper/runtimes/<id>")
+    if macho_floor.version_key(header["min-macos"]) < macho_floor.version_key(measured["min_macos"]):
+        raise LockError(f"the lock says macOS {header['min-macos']} but {', '.join(measured['set_by'])} "
+                        f"need macOS {measured['min_macos']}")
+
+
 def shipped_files() -> dict[str, tuple[Path, str]]:
     """Package path -> (source file, sha256) for every runtime file the package carries."""
     pin = json.loads(FFMPEG_PIN.read_text(encoding="utf-8"))
@@ -218,6 +266,7 @@ def check() -> dict[str, object]:
         expected = f"{CHANNEL}/{row['path'].split('/', 1)[1]}"   # conda-forge/<subdir>/<file> under the channel
         if urllib.parse.unquote(row["source"]) != expected:
             raise LockError(f"conda row does not name its conda-forge file: {row['path']}")
+    _check_measured_floor(header, rows)
     pin = json.loads(FFMPEG_PIN.read_text(encoding="utf-8"))
     local = next(row for row in rows if row["kind"] == "local")
     if local["sha256"] != pin["artifact"]["sha256"]:
@@ -234,10 +283,14 @@ def check() -> dict[str, object]:
 def main(argv: list[str] | None = None) -> int:
     """CLI entry point."""
     parser = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
-    parser.add_argument("command", choices=("solve", "pin-ffmpeg", "check"))
+    parser.add_argument("command", choices=("solve", "pin-ffmpeg", "measure", "check"))
+    parser.add_argument("prefix", nargs="?", type=Path, help="measure: an installed runtime folder")
     args = parser.parse_args(argv)
+    if (args.command == "measure") != (args.prefix is not None):
+        parser.error("measure takes the installed runtime folder; the other commands take nothing")
     try:
-        {"solve": solve, "pin-ffmpeg": pin_ffmpeg, "check": lambda: print(json.dumps(check(), indent=1))}[args.command]()
+        {"solve": solve, "pin-ffmpeg": pin_ffmpeg, "measure": lambda: measure(args.prefix),
+         "check": lambda: print(json.dumps(check(), indent=1))}[args.command]()
     except LockError as error:
         print(f"refused: {error}", file=sys.stderr)
         return 2

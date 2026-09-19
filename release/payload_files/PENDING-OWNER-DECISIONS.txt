@@ -39,7 +39,9 @@ STILL OPEN — each blocks release
   2. SUPPORT ROUTE AND RESPONSE COMMITMENT (input D): no support address anywhere.
   3. SUPPORTED PLATFORM BOUNDARY (input R): only a developer Mac on macOS 26 / Apple
      silicon has run this. A clean-Mac install is needed before any boundary is
-     stated to buyers.
+     stated to buyers. The installer admits macOS 13.5 or later, the floor measured from
+     Sniper's own binaries; the pinned Codex CLI carries a zsh built for macOS 15 (used only
+     by an optional Codex feature), so the Codex route on macOS 13.5-14 is untested.
   4. GSAP (the animation library every motion template uses): the licence neither
      clearly permits nor clearly forbids shipping it in a paid download or running it
      under Studio's timeline editor. A clarification request to the publisher is
@@ -52,7 +54,8 @@ STILL OPEN — each blocks release
      owner's own project (C0679), which name the owner, and the failure-ledger lessons
      that describe a client's video content.
   7. APPLE DEVELOPER ID: nothing in the package is signed with a Developer ID or notarized.
-     Buyers approve install/setup.command once (right-click > Open), and may have to approve
+     Buyers approve install/setup.command once (right-click > Open on macOS 13.5-14; on
+     macOS 15 or later, System Settings > Privacy & Security > Open Anyway), and may have to approve
      other .command files the first time they open them (to be seen on a clean Mac);
      Sniper's ffmpeg is installed without the download
      quarantine instead of being notarized. Enrolling in the Apple Developer Program lets

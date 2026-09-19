@@ -8,9 +8,11 @@ Sniper installs, signs in and repairs itself with its own scripts in `../install
 command only checks and explains. Be calm and plain-spoken; run the check yourself and
 report back instead of pasting commands at them.
 
-## Step 1 — Run the doctor (read-only)
+## Step 1 — Run the doctor (it only checks)
 
-Run `../install/doctor.command` from this folder and read its report. It changes nothing.
+Run `../install/doctor.command` from this folder and read its report. It installs and removes
+nothing: it only creates the video workspace folder if it is missing (and writes a probe file
+there), and rebuilds the render runtime from the shipped patches if that is missing.
 If there is no `../install/` folder, this is a developer checkout, not the packaged app:
 point them to `CLAUDE.md` § Engineering reference instead and stop.
 

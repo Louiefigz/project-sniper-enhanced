@@ -27,14 +27,16 @@ force. Read <code>RELEASE.json</code> for this build's exact status, and
 
 <h2>Three steps</h2>
 <ol>
-  <li><strong>Check what you have.</strong> A Mac with Apple silicon (M1 or later) on macOS 13 or later,
+  <li><strong>Check what you have.</strong> A Mac with Apple silicon (M1 or later) on macOS 13.5 or later,
   an internet connection for the first setup, about 4 GB for Sniper and its tools plus at least 20 GB
   free while rendering (the checks refuse less), and a
   Codex <em>or</em> Claude subscription you already pay for. You do not install Node, Python, ffmpeg or
   anything else yourself: Sniper downloads and checks its own. The full list, with what costs money,
   is in <a href="manual/index.html">What Sniper is</a>.</li>
-  <li><strong>Install.</strong> Double-click <code>install/setup.command</code> in Finder (the first time,
-  right-click it and choose <em>Open</em>). It installs Sniper and its own tools, walks you through
+  <li><strong>Install.</strong> Double-click <code>install/setup.command</code> in Finder. It is not yet signed, so
+  the first time macOS stops it: on macOS 13.5–14, right-click it and choose <em>Open</em>; on macOS 15
+  or later, open System Settings › Privacy &amp; Security and click <em>Open Anyway</em> next to the
+  message about <code>setup.command</code> (the macOS 15 route has not yet been seen on a clean Mac). It installs Sniper and its own tools, walks you through
   subscription sign-in, offers a private Deepgram key prompt, checks the installation and opens your
   configured editor. No Cursor, Homebrew or settings-file editing is needed. Sniper keeps its tools in
   <code>~/.project-sniper</code> and everything else inside this folder; your own Node, Python, Homebrew,

@@ -15,8 +15,10 @@
 - **Checked on every run.** The installer and the doctor re-check every file of the tools
   against what was installed and that each tool runs; a changed file is reinstalled from the
   checked downloads. An interrupted download resumes.
-- **Apple silicon, macOS 13 or later.** Setup stops before downloading anything on an Intel Mac
-  or an older macOS. Only macOS 26 has been tested so far.
+- **Apple silicon, macOS 13.5 or later.** That is what the tools' own binaries need (Sniper's Node
+  is built for 13.5, though its package says 11); the release measures it from every installed
+  binary. Setup stops before downloading anything on an Intel Mac or an older macOS. Only macOS 26
+  has been tested so far.
 - Folders of the same release share one copy of the tools; uninstalling the last one removes it.
 - Setup now signs you in first, then offers the optional Deepgram key.
 

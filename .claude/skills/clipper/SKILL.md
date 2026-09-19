@@ -27,8 +27,12 @@ produced short/long, hand off to `producer`.
 
 ## Where output goes
 
+In the operator's video workspace — `$SNIPER_WORKSPACE_ROOT`, which the packaged app's settings
+set (the folder chosen at install; `~/ProjectSniper` when unset) — in the `clipper/` folder the
+app's Clipper also uses:
+
 ```
-~/ProjectSniper/<slug>/clipper/
+<workspace>/<slug>/clipper/
   transcript.json        # the word-level ASR result you worked from
   keep_ranges.json       # your raw KEEP decisions (editorial)
   keep_ranges.clean.json # frame-snapped + media-clamped (feeds BOTH outputs)
@@ -45,7 +49,7 @@ commands from the repo root.
 
 ```bash
 SLUG="<slug>"; CLIP="<absolute path to the clip>"
-OUT="$HOME/ProjectSniper/$SLUG/clipper"; mkdir -p "$OUT"
+OUT="${SNIPER_WORKSPACE_ROOT:-$HOME/ProjectSniper}/$SLUG/clipper"; mkdir -p "$OUT"
 ```
 
 ### 2. Transcribe word-level locally (no paid fallback)
@@ -146,6 +150,7 @@ short.
 - Accepted inputs: mp4/mov/webm/mkv/avi/m4v; local audio requires the supported
   separate-lav/isolated-stereo path above. Unsupported local input fails closed.
 - Prerequisites: Sniper's own tools, `.venv` and the local Whisper model, all put
-  in place by the installer. When missing, `/setup` checks and explains; the repair
-  is `install/install.command` (the operator closes this window first).
+  in place by the installer. When missing, run `../install/doctor.command` (Claude Code's
+  `/setup` does the same) and explain its report; the repair is `install/install.command`
+  (the operator closes this window first).
 - Use subscription-backed agent reasoning; no API/credit fallback by default.

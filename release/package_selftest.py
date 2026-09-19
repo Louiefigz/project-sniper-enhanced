@@ -172,8 +172,11 @@ def classify(rows: list[dict], package_app: Path, withheld: Withheld, summary: d
     if summary is not None:
         failures.extend(_reconcile(rows, summary))
     counts = {key: sum(row["outcome"] == key for row in rows) for key in ("pass", "fail", "error", "skip", "xfail")}
+    # Skips come from each test's own condition (a tool or opt-in it needs); listed so a reviewer
+    # can see what did not run inside the package, not only how many.
+    skipped = [{"id": row["id"], "reason": row["detail"]} for row in rows if row["outcome"] == "skip"]
     return {"counts": counts, "total": len(rows), "toleratedWithheldEvidence": tolerated,
-            "gateFailures": failures, "passed": not failures and counts["pass"] > 0}
+            "skipped": skipped, "gateFailures": failures, "passed": not failures and counts["pass"] > 0}
 
 
 def _load_run(path: Path, nonce: str, returncode: int) -> tuple[list[dict], dict]:
@@ -198,9 +201,13 @@ def _run_suite(app: Path) -> tuple[list[dict], dict]:
     work = Path(tempfile.mkdtemp(prefix="sniper-package-selftest-"))
     try:
         rows_path, nonce = work / "rows.json", secrets.token_hex(16)
-        done = subprocess.run([str(python), "-B", "-c", _RUNNER, str(rows_path), nonce],
-                              cwd=app / "scripts" / "producer",
-                              env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}, check=False)
+        # The documented command (AGENTS.md "Checks"): cd scripts/producer && PYTHONPATH=.:tests …
+        # Tests that start the engine's own CLIs rely on that PYTHONPATH, as the product's
+        # launchers set it for the CLIs they start (e.g. cut-repair-route-runner.ts).
+        producer = app / "scripts" / "producer"
+        done = subprocess.run([str(python), "-B", "-c", _RUNNER, str(rows_path), nonce], cwd=producer,
+                              env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1",
+                                   "PYTHONPATH": f"{producer}:{producer / 'tests'}"}, check=False)
         return _load_run(rows_path, nonce, done.returncode)
     finally:
         shutil.rmtree(work, ignore_errors=True)

@@ -112,6 +112,8 @@ def parse_tools(value: object) -> dict:
         raise ValueError("picture transform tool versions are outside the tested class")
     refs = {key: file_reference(row[key], 512 * 1024 ** 2)
             for key in ("ffmpeg", "libavfilter", "libzimg")}
-    if len({ref["path"] for ref in refs.values()}) != 3:
+    # A static ffmpeg (Sniper's own build) carries libavfilter inside the executable, so those
+    # two roles may name the same file; zimg is always a separate library.
+    if refs["libzimg"]["path"] in {refs["ffmpeg"]["path"], refs["libavfilter"]["path"]}:
         raise ValueError("picture transform tool roles cannot alias one path")
     return {**refs, "ffmpegVersion": "8.0", "zimgVersion": "3.0.6"}

@@ -7,6 +7,7 @@ Outputs stay in a new retained private test root, with no network/provider use.
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import struct
 import time
@@ -15,7 +16,23 @@ from pathlib import Path
 
 from _source_picture_transform_fixture import held_test_file, transform_fixture
 from color.source_picture_transform import PictureTransformPlan, compile_source_picture_transform
+from headless.native_macho import dependency_paths
 from headless.process_runner import ProcessRequest, run_text
+
+
+def _conversion_libraries(ffmpeg: str) -> tuple[Path, Path]:
+    """The libavfilter and libzimg this ffmpeg actually loads (the product's Mach-O reader).
+
+    Homebrew's ffmpeg links a shared libavfilter; Sniper's own build carries libavfilter inside
+    the ffmpeg executable, which is then what holds that code. zimg must be 3.0.6 wherever it
+    lives: a Homebrew Cellar folder, or a conda prefix whose records name zimg 3.0.6.
+    """
+    images = [Path(path) for path in dependency_paths((ffmpeg,)).images]
+    libavfilter = next((path for path in images if path.name.startswith("libavfilter.")), Path(ffmpeg))
+    zimg = next(path for path in images if path.name.startswith("libzimg."))
+    if "/zimg/3.0.6/" not in str(zimg) and not list((zimg.parent.parent / "conda-meta").glob("zimg-3.0.6-*.json")):
+        raise RuntimeError(f"TEST zimg at {zimg} is not 3.0.6, outside compiler class")
+    return libavfilter, zimg
 
 
 class RampRun:
@@ -27,13 +44,12 @@ class RampRun:
         self.calls = []
         self.ffmpeg = str(Path(shutil.which("ffmpeg")).resolve(strict=True))
         self.ffprobe = str(Path(shutil.which("ffprobe")).resolve(strict=True))
-        prefix = Path(self.ffmpeg).parent.parent
-        zimg = Path("/opt/homebrew/Cellar/zimg/3.0.6/lib/libzimg.2.dylib")
+        libavfilter, zimg = _conversion_libraries(self.ffmpeg)
         self.tools = {"ffmpeg": held_test_file(Path(self.ffmpeg)),
-            "libavfilter": held_test_file(prefix / "lib/libavfilter.11.dylib"),
+            "libavfilter": held_test_file(libavfilter),
             "libzimg": held_test_file(zimg), "ffmpegVersion": "8.0", "zimgVersion": "3.0.6"}
         version = self.run((self.ffmpeg, "-version"), "installed-version")
-        if not version.startswith("ffmpeg version 8.0 "):
+        if not re.match(r"ffmpeg version 8\.0[ .]", version):   # 8.0 and its bug-fix releases
             raise RuntimeError("TEST FFmpeg changed version outside compiler class")
 
     def guard(self) -> None:

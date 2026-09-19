@@ -34,6 +34,14 @@ INSTALL_TOOLS="$PKG_ROOT/install/lib/install_tools.py"
 # its own PATH from the settings (load_env).
 PATH=/usr/bin:/bin:/usr/sbin:/sbin
 export PATH
+# Settings for your own Python, Node or libraries would steer Sniper's instead (a
+# DYLD_LIBRARY_PATH to Homebrew would load Homebrew's libraries into Sniper's ffmpeg;
+# NODE_OPTIONS could load code into every Sniper process). They never reach Sniper.
+unset PYTHONHOME PYTHONPATH PYTHONSTARTUP PYTHONUSERBASE NODE_OPTIONS NODE_PATH \
+      DYLD_LIBRARY_PATH DYLD_FALLBACK_LIBRARY_PATH DYLD_INSERT_LIBRARIES DYLD_FRAMEWORK_PATH \
+      CONDA_PREFIX CONDA_DEFAULT_ENV CONDA_SHLVL MAMBA_ROOT_PREFIX CONDARC MAMBARC \
+      FONTCONFIG_FILE FONTCONFIG_PATH TESSDATA_PREFIX
+# (A certificate bundle you set, e.g. for a company proxy, is kept: downloads need it.)
 # The pinned Claude CLI names its Keychain login after CLAUDE_CONFIG_DIR, so
 # Sniper's login is separate from yours. This variable would override that
 # naming and point Sniper's sign-in and sign-out at your own login; never inherit it.

@@ -174,6 +174,17 @@ class Preconditions(unittest.TestCase):
         self.assertNotIn("supported", done.stdout)
         self.assertIn("Sniper's tools need macOS 99.0", done.stderr)
 
+    def test_your_own_python_node_and_library_settings_never_reach_sniper(self) -> None:
+        env = {**fx.base_env(self.pkg), "PYTHONPATH": "/x", "PYTHONHOME": "/x", "NODE_OPTIONS": "--require /x.js",
+               "DYLD_LIBRARY_PATH": "/opt/homebrew/lib", "DYLD_INSERT_LIBRARIES": "/x.dylib",
+               "CONDA_PREFIX": "/x", "TESSDATA_PREFIX": "/x", "SSL_CERT_FILE": "/company/ca.pem"}
+        done = fx.bash(self.pkg, 'env | sort', env)
+        names = {line.split("=", 1)[0] for line in done.stdout.splitlines()}
+        self.assertFalse(names & {"PYTHONPATH", "PYTHONHOME", "NODE_OPTIONS", "DYLD_LIBRARY_PATH",
+                                  "DYLD_INSERT_LIBRARIES", "CONDA_PREFIX", "TESSDATA_PREFIX"}, names)
+        self.assertIn("SSL_CERT_FILE=/company/ca.pem", done.stdout)   # a proxy's certificate is kept
+        self.assertIn("PATH=/usr/bin:/bin:/usr/sbin:/sbin", done.stdout.splitlines())
+
     def test_this_mac_meets_the_real_lock(self) -> None:
         self.assertEqual(fx.bash(self.pkg, "require_macos && echo supported").stdout.strip(), "supported")
 

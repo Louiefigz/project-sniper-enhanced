@@ -50,6 +50,12 @@ REQUIRED = (
     "install/lib/steps.sh", "install/lib/configure.sh", "install/lib/install_tools.py",
     "install/lib/doctor_setup.py",
     "install/setup.command", "install/lib/deepgram_setup.py",
+    # Sniper's own tools: the bootstrap, the lock it follows, the shipped ffmpeg and its source.
+    "install/lib/download.sh", "install/lib/runtime_tools.sh", "install/lib/runtime_tools_install.sh",
+    "install/deps/osx-arm64.lock", "install/deps/osx-arm64.json",
+    "install/deps/sniper-ffmpeg-8.0.3-1-osx-arm64.tar.xz",
+    "third-party/sources/README.md", "third-party/sources/ffmpeg-8.0.3.tar.xz",
+    "third-party/sources/rubberband-4.0.0.tar.bz2",
     "install/cli/package.json", "install/cli/package-lock.json",
     "app/scripts/infra/sniper_lock.py",
     "app/scripts/infra/provider-admission.ts",
@@ -281,6 +287,21 @@ def audit_runtime_inputs(root: Path) -> None:
     installed = pinned["dependencies"]["hyperframes"]
     check(installed == rows.get("sdkVersion"), "patch set matches the pinned SDK",
           f"lockfile {installed} vs patch set {rows.get('sdkVersion')}")
+    audit_shipped_tools(root)
+
+
+def audit_shipped_tools(root: Path) -> None:
+    """The lock's shipped ('local') file is in the package byte for byte; every row is well formed."""
+    import hashlib  # noqa: PLC0415
+    rows = [line.split() for line in (root / "install/deps/osx-arm64.lock").read_text().splitlines()
+            if line and not line.startswith("#")]
+    check(all(len(row) == 5 and re.fullmatch(r"[0-9a-f]{64}", row[1]) for row in rows),
+          "tool lock rows well formed", f"{len(rows)} rows")
+    for kind, sha, size, name, _ in (row for row in rows if row[0] == "local"):
+        shipped = root / "install/deps" / name
+        actual = hashlib.sha256(shipped.read_bytes()).hexdigest() if shipped.is_file() else "missing"
+        check(actual == sha and shipped.stat().st_size == int(size), f"shipped tool matches the lock: {name}",
+              f"{actual[:16]}… vs lock {sha[:16]}…")
 
 
 def main(argv: list[str]) -> int:

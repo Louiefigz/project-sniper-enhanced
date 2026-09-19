@@ -42,18 +42,17 @@ fixes, compatibility updates or new versions.</p>
 <p>Because that is the policy, here is the honest risk, stated rather than hidden:</p>
 <table>
 <tr><th>Risk</th><th>How exposed you are</th></tr>
-<tr><td>Your own Codex or Claude CLI auto-updates</td><td><strong>Handled.</strong> This
-package installs its own pinned copies of both CLIs inside <code>runtime/</code> and
-disables their auto-updater. An update to your global CLI does not affect Sniper.</td></tr>
+<tr><td>Your Codex or Claude Code updates itself</td><td><strong>Mostly handled, not
+guaranteed.</strong> Sniper does not pin either: your agent reads Sniper's instructions and runs
+Sniper's own tools, which do not change when your agent does. A future agent version that reads
+instructions differently could behave differently; a fix would be a new release.</td></tr>
 <tr><td>A Python or Node package changes underneath you</td><td><strong>Handled.</strong>
-Both dependency sets, the two CLIs and every Python package are pinned to exact versions
+Sniper's own tools, both JavaScript dependency sets and every Python package are pinned to exact versions
 and checked against hashes recorded for this release (npm's lockfile integrity, pip's
 <code>--require-hashes</code>, the rendering browser's SHA-256), so a reinstall gets the same
 set this release was tested with or stops.</td></tr>
-<tr><td>Your provider retires the model, or changes what its sign-in check reports</td>
-<td><strong>Not handled, and not fixable by you.</strong> Sniper checks the sign-in
-response strictly. If your provider changes it, this version stops being able to sign in,
-and a fix would be a new release you do not have rights to under this policy.</td></tr>
+<tr><td>Your provider retires a model</td><td><strong>Yours to choose.</strong> Sniper does not
+pick the model; use whatever your Codex or Claude Code offers.</td></tr>
 <tr><td>A major macOS upgrade breaks a dependency</td><td><strong>Not handled.</strong>
 Same reason.</td></tr>
 </table>
@@ -80,26 +79,31 @@ file cannot verify that file.</p>
 folder with its own <code>runtime/</code>:</p>
 <ol>
   <li>Keep the old release folder. Do not delete it when you unzip a new one.</li>
-  <li>Install the new one beside it and use it. If you created
-  <code>runtime/sniper.local.env</code> in the old folder, copy it into the new one first.</li>
-  <li>If the new one misbehaves, run <code>install/stop.command</code> in it and
-  <code>install/start.command</code> in the old one.</li>
+  <li>Before setting up the new one, decide where your projects live: either move the old
+  folder's <code>projects</code> folder somewhere outside both (for example
+  <code>~/SniperProjects</code>) and set up each release with
+  <code>install/install.command --workspace ~/SniperProjects</code>, or copy the projects you need
+  into the new folder's <code>projects</code>. If you created <code>runtime/sniper.local.env</code>
+  in the old folder, copy it into the new one first.</li>
+  <li>Set up the new one beside the old one and open it in your agent. If it misbehaves, open the
+  old folder in your agent instead.</li>
 </ol>
-<p>Both point at the same <code>~/ProjectSniper</code>, so your videos and your list of
-recent projects are shared between them. An export that was interrupted resumes only in the
+<p>Two releases set up with the same <code>--workspace</code> share your videos. An export that was interrupted resumes only in the
 release folder that started it; in the other one, export again. A project created by a newer release may use plan fields an older one does not
 understand — if you plan to go back, copy the project folder first.</p>
 
 <h2>Backup</h2>
-<p>Back up <strong><code>~/ProjectSniper</code></strong>. That is all of your work: your
-footage, your transcripts, your edit plans, your finished videos, your approval receipts
-and Sniper's list of recent projects. The Sniper folder itself is replaceable — you can
-always unzip it again.</p>
+<p>Back up your <strong>projects folder</strong>: <code>projects</code> inside the Sniper folder,
+or the folder you chose at setup (<code>./sniper workspace</code> prints it). That is all of your
+work: your footage, your transcripts, your edit plans and your finished videos. The rest of the
+Sniper folder is replaceable — you can always unzip it again.</p>
 <h3>Keeping your videos somewhere else</h3>
-<p>Put this one line in <code>runtime/sniper.local.env</code> (create the file if it does
-not exist), then stop and start Sniper:</p>
+<p>Run setup once with <code>install/install.command --workspace /Volumes/Work/SniperVideos</code>,
+or put this one line in <code>runtime/sniper.local.env</code> (create the file if it does not
+exist):</p>
 <pre><code>SNIPER_WORKSPACE_ROOT=/Volumes/Work/SniperVideos</code></pre>
-<p>Back up that folder instead of <code>~/ProjectSniper</code>.</p>
+<p>Back up that folder instead. With Codex, writing outside the Sniper folder needs its
+approval.</p>
 <h3>Moving the Sniper folder</h3>
 <p>If you move or copy the Sniper folder after installing, its scripts refuse to start
 until you run <code>install/install.command</code> once in the new place. It redoes only
@@ -107,38 +111,28 @@ the steps that record the folder's location, and keeps your settings.</p>
 
 <h2>Uninstall</h2>
 <pre><code>install/uninstall.command</code></pre>
-<p>Stop the app first (<code>install/stop.command</code>) and let running edits finish; while
-anything still uses the folder, uninstall changes nothing and names what is using it. It asks
-you to type <code>REMOVE</code>, then:</p>
-<ol>
-  <li>stops the app if it is still recorded as running;</li>
-  <li>signs out the Codex and Claude logins you made <em>for Sniper</em>, using its own CLIs
-  (the Claude one is its own Keychain item), and checks that each is really signed out;</li>
-  <li>removes what the installer created: <code>runtime/</code> (browser, speech model, CLIs,
-  logins, logs), the two <code>node_modules</code> folders, <code>app/.venv</code>,
-  <code>app/.next</code>, and the render runtime and caches in
-  <code>app/templates/motion/.sniper-native-runtime</code>.</li>
-</ol>
-<p>If stopping the app, a sign-out or a removal fails, it says which, exits with an error and
-removes nothing more, so you can fix the cause and run it again. If a CLI is broken and cannot
-sign out, <code>install/uninstall.command --keep-logins</code> removes everything else and tells
-you what stays (the Claude login's Keychain item, whose name starts with
-<code>Claude Code-credentials-</code>).</p>
+<p>Let running edits finish first; while a Sniper command still uses the folder, uninstall
+changes nothing and names what is using it. It asks you to type <code>REMOVE</code>, then removes
+what the installer created: <code>runtime/</code> (browser, speech model, the Deepgram connection,
+logs, receipts), the two <code>node_modules</code> folders, <code>.venv</code>, and the render
+runtime and caches in <code>templates/motion/.sniper-native-runtime</code>. If a removal fails, it
+says which and exits with an error, so you can fix the cause and run it again. There is nothing
+to sign out: Sniper never signed in to anything.</p>
 <table>
 <tr><th>Kept on purpose</th><th>Why</th></tr>
-<tr><td><code>runtime/sniper.local.env</code> and <code>app/.env.local</code></td><td>Your own
-settings. A reinstall in this folder uses them again.</td></tr>
-<tr><td><code>app/templates/motion/.sniper-native-runtime/native-export-history</code></td><td>What
+<tr><td><code>runtime/sniper.local.env</code></td><td>Your own settings. A reinstall in this folder
+uses them again.</td></tr>
+<tr><td>Your projects (<code>projects</code>, or your chosen folder)</td><td>Your work.</td></tr>
+<tr><td><code>templates/motion/.sniper-native-runtime/native-export-history</code></td><td>What
 an interrupted export needs to resume. A reinstall in this folder picks it up.</td></tr>
 </table>
 <p>Uninstall also removes Sniper's own tools from <code>~/.project-sniper</code>, unless another
 Sniper folder of the same release still uses them (it then says which one).</p>
-<p>To finish, delete the folder — that also deletes the kept files, so copy them first if you
-want them. Uninstall does <strong>not</strong> touch your videos in <code>~/ProjectSniper</code>
-(or your own workspace folder), your own Node, Python, Homebrew, conda, ffmpeg, whisper, tesseract or
-yt-dlp, your global Codex and Claude CLIs, their settings (<code>~/.codex</code>,
-<code>~/.claude</code>, <code>~/.claude.json</code>) or their logins, or any Keychain item other
-than Sniper's own Claude login.</p>
+<p>To finish, delete the folder — that also deletes the kept files <strong>including your
+projects if they are in its <code>projects</code> folder</strong>, so move them first. Uninstall does
+<strong>not</strong> touch your videos, your own Node, Python, Homebrew, conda, ffmpeg, whisper,
+tesseract or yt-dlp, or your own Codex or Claude Code, their settings (<code>~/.codex</code>,
+<code>~/.claude</code>, <code>~/.claude.json</code>) or their logins.</p>
 <footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>
 </div>
 </body>

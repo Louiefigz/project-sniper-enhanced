@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Install and first launch</title>
+<title>Install and first use</title>
 <link rel="stylesheet" href="manual.css">
 </head>
 <body>
 <div class="wrap">
 <header class="top">
   <p class="kicker">Manual · 2 of 10</p>
-  <h1>Install, first launch, and signing in</h1>
-  <p class="lede">Most of the time is downloads. The installer is safe to run again: it redoes only what did not finish.</p>
+  <h1>Install and first use</h1>
+  <p class="lede">You use Sniper from your own Codex or Claude Code: open the Sniper folder there and ask. Setup is mostly downloads, and it is safe to run again: it redoes only what did not finish.</p>
 </header>
 <h2>Step 0 — check the download is the file it should be</h2>
 <p>Beside the download there is a checksum file. Compare it with the archive you received:</p>
@@ -31,6 +31,8 @@ only ever published outside the archive; a hash inside a file cannot verify that
   <li>Not on a drive you unplug, and not in a folder that syncs to cloud storage — render
   caches are large and will fight the sync.</li>
 </ul>
+<p>This folder is the one you open in Codex or Claude Code. Your video projects go in its
+<code>projects</code> folder unless you choose another (see Step 3).</p>
 
 <h2>Step 2 — nothing to install first</h2>
 <p>Sniper brings its own tools. The first setup downloads them from
@@ -40,12 +42,12 @@ file against the SHA-256 recorded for this release before using it, and installs
 <table>
 <tr><th>Tool</th><th>Version</th><th>Needed for</th></tr>
 <tr><td>Python</td><td>3.14.4</td><td>the editing engine</td></tr>
-<tr><td>Node</td><td>24.21.0 (LTS)</td><td>the app, rendering, the Codex and Claude CLIs</td></tr>
+<tr><td>Node</td><td>24.21.0 (LTS)</td><td>rendering and Sniper's own scripts</td></tr>
 <tr><td>ffmpeg and ffprobe</td><td>8.0.3, Sniper's own build</td><td>every render</td></tr>
 <tr><td>whisper.cpp</td><td>1.9.3</td><td>local transcription</td></tr>
 <tr><td>tesseract</td><td>5.5.3</td><td>studying a reference video (reading its on-screen text)</td></tr>
 <tr><td>yt-dlp</td><td>2026.08.19</td><td>adding a reference from a YouTube, Instagram or TikTok link</td></tr>
-<tr><td>git</td><td>2.55.0</td><td>the Codex and Claude CLIs (so macOS never asks to install developer tools)</td></tr>
+<tr><td>git</td><td>2.55.0</td><td>nothing any more (left in this release's tool set; removed in a later update)</td></tr>
 </table>
 <p>About 300 MB is downloaded once; the tools take about 1.2 GB on disk. Your own Homebrew,
 Python, Node or conda are not used or changed, even when they come first on your PATH. Sniper
@@ -63,46 +65,48 @@ sources in <code>third-party/sources/</code> (GPL) and the build recipe inside t
 (<code>share/sniper-ffmpeg/</code>). Setup checks its SHA-256 and
 installs it the same way as the downloaded tools. It is not yet signed with an Apple Developer ID.</p>
 
-<h2>Step 3 — open guided setup</h2>
-<p>Double-click <code>install/setup.command</code> in Finder. It installs Sniper and its tools
-if needed, then guides you through subscription sign-in, the optional Deepgram connection and the
-readiness checks. When they pass it opens Sniper’s configured Codex or Claude editor. Press Enter at
-the subscription choice to use Codex. You do not need Cursor or a code editor.</p>
-<p>For a scripted installation you can still run:</p>
-<pre><code>install/install.command --provider codex     # or: --provider claude</code></pre>
-<p>Your videos go to <code>~/ProjectSniper</code> unless you add
-<code>--workspace /path/to/folder</code>.</p>
-<p>Double-clicking it in Finder also works; it then asks which subscription to use. macOS may
-warn that a downloaded script is from an unidentified developer, because Sniper is not yet
-signed. On macOS 13.5–14, right-click it and choose <em>Open</em>. On macOS 15 or later that no
-longer works: after the warning, open System Settings › Privacy &amp; Security and click
+<h2>Step 3 — open the folder in Codex or Claude Code and say “Set up Sniper”</h2>
+<p>You need your own Codex (a ChatGPT plan) or Claude Code (a Claude plan), desktop app or command
+line, signed in as usual. Sniper installs no copy of either and never asks you to sign in to
+anything: it runs on the subscription you already use. Open this folder there and ask:</p>
+<pre><code>Set up Sniper.</code></pre>
+<p>Your agent runs <code>./sniper setup</code> (the same as <code>install/install.command</code>),
+which takes several minutes, mostly downloads. It asks your permission before running commands, as
+it always does. <strong>With Codex</strong>, it may also ask to run a step outside its own sandbox:
+setup downloads into <code>~/.project-sniper</code>, and Sniper's video check starts its own macOS
+sandbox, which cannot start inside Codex's. Approve those; Sniper's check still runs in its own
+sandbox.</p>
+<p>If you prefer not to let your agent install, double-click <code>install/setup.command</code> in
+Finder instead: it does the same in a Terminal window. It is not yet signed, so the first time
+macOS stops it. On macOS 13.5–14, right-click it and choose <em>Open</em>. On macOS 15 or later that
+no longer works: after the warning, open System Settings › Privacy &amp; Security and click
 <em>Open Anyway</em> next to the message about the script. Neither route has yet been seen on a
 clean Mac.</p>
-<p>What it does, in order:</p>
+<p>Your projects go in this folder's <code>projects</code> folder, where Codex can work without extra
+approvals. To keep them somewhere else, run setup once with
+<code>install/install.command --workspace /path/to/folder</code> (Codex will then ask before it
+writes there).</p>
+<p>What setup does, in order:</p>
 <ol>
   <li>Installs Sniper's own tools (above) — or, when they are already there, checks every one of
   their files against what was installed and that each tool runs, including every ffmpeg feature
   the renderer uses.</li>
-  <li>Installs the app's dependencies into <code>app/node_modules</code> (npm checks every
-  package against the integrity hash in the lockfile).</li>
-  <li>Installs the rendering project's dependencies into
-  <code>app/templates/motion/node_modules</code>, the same way.</li>
-  <li>Creates <code>app/.venv</code> from a pinned list, so you get exactly the Python package
+  <li>Installs the JavaScript dependencies Sniper's scripts use into <code>node_modules</code> (npm
+  checks every package against the integrity hash in the lockfile).</li>
+  <li>Installs the rendering project's dependencies into <code>templates/motion/node_modules</code>,
+  the same way.</li>
+  <li>Creates <code>.venv</code> from a pinned list, so you get exactly the Python package
   versions this release was tested with; every download must match its recorded SHA-256.</li>
   <li>Downloads the exact rendering browser into <code>runtime/browser</code> and checks its
   SHA-256 against the one recorded for this release.</li>
   <li>Puts the speech model in <code>runtime/whisper</code>. If an identical copy is already on
   your Mac it reuses it; otherwise it downloads about 465 MB. The file must match its recorded
   checksum.</li>
-  <li>Installs the pinned Codex and Claude CLIs into <code>runtime/cli</code> from a reviewed
-  lockfile (again integrity-checked by npm).</li>
   <li>Writes this install's settings to <code>runtime/sniper.env</code>.</li>
   <li>Builds the rendering runtime.</li>
-  <li>Builds the app. This needs no internet connection.</li>
 </ol>
-<p>In a Terminal window it continues into sign-in, then the optional Deepgram connection (offered
-each time until you connect a key or choose Remove; Skip just moves on), then the checker. A noninteractive installation leaves
-these for you to finish by double-clicking <code>install/setup.command</code>.</p>
+<p>Then it runs the checker (<code>./sniper doctor</code>). In a Terminal window it first offers the
+optional Deepgram connection (Step 4).</p>
 <div class="ok">
 <p><strong>If it stops, run it again.</strong> Each step records what it finished with and the
 checksum of every file it produced. A step that did not finish, whose inputs changed, or
@@ -110,70 +114,40 @@ whose files no longer match is removed and redone; a finished, intact one is ski
 never have to delete anything by hand. An interrupted download resumes from where it
 stopped; a partial download that turns out wrong is fetched again from the start. Your own
 settings in <code>runtime/sniper.local.env</code> are never overwritten.</p>
-<p>The installer runs only while nothing else is using this folder: stop the app
-(<code>install/stop.command</code>), close any Sniper editor window and let running edits
-finish first. If something is still using it, the installer says what and changes nothing.</p>
+<p>Setup runs only while no Sniper command is running: let running edits and renders finish
+first. If something is still using this folder, setup says what and changes nothing.</p>
 </div>
 
-<h2>Step 4 — sign in, then connect Deepgram (optional)</h2>
-<p>Setup signs you in first. If you only need to repeat sign-in:</p>
-<pre><code>install/sign-in.command</code></pre>
-<p>This signs in to the subscription you chose, using this package's own copy of the CLI and
-its own settings folder. Your existing Codex or Claude setup and login are not used or
-changed. A browser window asks you to authorise with the subscription you already pay for.</p>
-<ul>
-  <li><strong>Codex</strong> keeps this login in <code>runtime/codex-home</code>.</li>
-  <li><strong>Claude</strong> keeps it in your macOS Keychain as its own item, separate from
-  any Claude login you already have. <code>install/uninstall.command</code> signs it out.</li>
-</ul>
-<p>Sniper accepts only a subscription login for the editor. An API-key login is refused on
-purpose, so no edit bills per call. (Only the optional Text Review uses an Anthropic API
-key, and only if you add one yourself and tick its opt-in; see the requirements on the start
-page.) To switch subscription later: stop the app
-(<code>install/stop.command</code>), run <code>install/use-provider.command claude</code>
-(or <code>codex</code>), then sign in again. The switch applies to the whole install at once: the
-app, the editor window (<code>install/editor.command</code>) and every edit. Asking the editor
-window for the other provider without switching is refused, because the app would keep using
-the first one.</p>
-
-<p>Next, setup asks whether you want to connect Deepgram. Choose <em>Connect/replace key</em>,
-create a key at <a href="https://console.deepgram.com/">Deepgram Console</a>, and paste it at
-the hidden prompt. Setup checks the key with Deepgram before saving it. A failed check
-keeps any previous key. You can retry or skip and use the included local transcription.</p>
-<p>Deepgram is optional and billed separately by Deepgram. Using it sends audio to
-Deepgram. The connection check sends no audio and does not prove your balance or every
-model permission. Connecting does not authorize paid transcription: approve it for the
-specific edit when you ask your editor to use Deepgram.</p>
-<p>The key is saved in <code>runtime/deepgram.env</code>, readable only by your Mac account,
-and loaded by Sniper’s launchers. It is not part of the source or diagnostic bundle.
-Reopen <code>install/setup.command</code> to replace or remove it without editing files.
-Removal disconnects this install; revoke the key in Deepgram Console to invalidate it.</p>
-<h3>Choosing the model</h3>
-<p>Sniper sends an explicit model with every request. This release's defaults are Opus for
-Claude and <code>gpt-5.6-sol</code> with reasoning <code>xhigh</code> for Codex
-(<code>SNIPER_CODEX_REASONING</code> in the file below changes it). Aaron's own preference is Codex with GPT-6 Astra; to use a different Codex model, create
-<code>runtime/sniper.local.env</code> containing one line:</p>
-<pre><code>SNIPER_CODEX_MODEL=gpt-6-astra</code></pre>
-<p>That file is the one place for your own settings, and it is read as shell: put a value
-that contains <code>$</code>, a backtick, a backslash, quotes or spaces in single quotes, for
-example <code>SNIPER_WORKSPACE_ROOT='/Volumes/Work/Client $97'</code>. The editor window and the
-app both use the model you set there.</p>
-<p>Use the identifier your plan actually offers. Not every plan includes every model; if yours
-does not, the provider rejects the request and Sniper reports it rather than switching to a
-different model.</p>
+<h2>Step 4 — connect Deepgram (optional)</h2>
+<p>Local transcription is included and needs no key. If you also want Deepgram, double-click
+<code>install/setup.command</code> in Finder (or run it in Terminal) and choose
+<em>Connect/replace key</em>. Create a key at <a href="https://console.deepgram.com/">Deepgram
+Console</a> and paste it at the hidden prompt — in that Terminal window, never into a conversation
+with your agent. Setup checks the key with Deepgram before saving it. A failed check keeps any
+previous key. You can retry or skip.</p>
+<p>Deepgram is billed separately by Deepgram. Using it sends audio to Deepgram. The connection check
+sends no audio and does not prove your balance or every model permission. Connecting does not
+authorize paid transcription: approve it for the specific edit when you ask your agent to use
+Deepgram.</p>
+<p>The key is saved in <code>runtime/deepgram.env</code>, readable only by your Mac account, and
+loaded by Sniper's commands. It is not part of the diagnostic bundle. Reopen
+<code>install/setup.command</code> to replace or remove it without editing files. Removal
+disconnects this install; revoke the key in Deepgram Console to invalidate it.</p>
+<h3>Which model</h3>
+<p>Whatever you use in your Codex or Claude Code. Sniper does not choose or send a model; its
+instructions and skills work with either app. Your own settings for Sniper's commands (for
+example a different video folder, <code>SNIPER_WORKSPACE_ROOT='/Volumes/Work/Client $97'</code>) go
+in <code>runtime/sniper.local.env</code>, which is read as shell: put a value that contains
+<code>$</code>, a backtick, a backslash, quotes or spaces in single quotes.</p>
 
 <h2>Step 5 — make your first edit</h2>
-<p>Guided setup opens the configured editor only after all required checks pass. Say
-“Help me make my first edit from my own video.” Next time, double-click
-<code>install/editor.command</code>. This opens Sniper’s terminal editor using the installed
-settings and connection; launching an unrelated Codex desktop window does not load them.</p>
-<p>If you prefer the browser app, the existing check/start commands are:</p>
-<pre><code>install/doctor.command
-install/start.command</code></pre>
-<p>The checker asks the product's own code what it would use, runs a short real transcription
-of speech it generates on your Mac, and signs in the way a real edit does, without running an
-edit. <code>start.command</code> waits until the app is serving <em>this</em> build, then opens
-<code>http://127.0.0.1:3000</code>. If the port is busy it names the program holding it.</p>
+<p>With the Sniper folder open in Codex or Claude Code, say “Help me make my first edit from my own
+video.” Your agent reads Sniper's instructions and skills from this folder and runs Sniper's
+commands through <code>./sniper</code>, which uses Sniper's own tools whatever else is on your Mac.</p>
+<p>To check the install at any time, ask your agent to run <code>./sniper doctor</code> (or
+double-click <code>install/doctor.command</code>). The checker asks the product's own code what it
+would use, admits a generated video sample through Sniper's own sandbox and runs a short real
+transcription of speech it generates on your Mac, without running an edit.</p>
 
 <p class="next"><strong>Next:</strong> <a href="first-edits.html">Your first three edits &rarr;</a></p>
 <footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>

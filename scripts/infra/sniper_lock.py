@@ -55,13 +55,13 @@ class LockBusy(RuntimeError):
 def state_dir(app_root: Path) -> Path:
     """Where the locks live: ``runtime/state`` in a package, else beside the runtime cache.
 
-    A package is recognised by its layout (``<pkg>/app`` next to
-    ``<pkg>/install/lib/common.sh``); a developer checkout has no ``runtime/``
-    folder, so its locks sit in the git-ignored render-runtime cache instead.
+    A package is recognised by its installer (``install/lib/common.sh`` in the app
+    folder, which is the package folder itself); a developer checkout has no
+    installer or ``runtime/`` folder, so its locks sit in the git-ignored
+    render-runtime cache instead.
     """
-    package = app_root.parent
-    if app_root.name == "app" and (package / "install/lib/common.sh").is_file():
-        return package / "runtime" / "state"
+    if (app_root / "install/lib/common.sh").is_file():
+        return app_root / "runtime" / "state"
     return app_root / "templates/motion/.sniper-native-runtime/.locks"
 
 

@@ -4,7 +4,34 @@
 doc (skills, CLAUDE.md, READMEs) points here. If another doc contradicts this
 one, this one wins — fix the other doc.
 
-## Latest operator direction — September 9, 2026
+## Latest operator direction — September 19, 2026: no UI, the buyer's own agent
+
+Buyers use Sniper only by opening its folder in their **own Codex or Claude Code**, signed in
+to their own subscription. There is no Sniper web UI, no Sniper-installed copy of Codex or
+Claude and no Sniper sign-in; the Auto Edit controller that spawned the provider CLI and the
+guided checkpoint/Native Director routes belong to the retired web app and are not buyer
+routes. Where this document or another describes them, the agent route below governs.
+
+The agent route, which every Short and long-form edit now takes:
+
+1. Every engine command runs through `./sniper` from the Sniper folder (its own tools,
+   settings and maintenance lock). Setup is `./sniper setup`; `./sniper doctor` checks it.
+2. Ingest (`scripts/producer/ingest.py`), then save the operator's request as the stored
+   intent: `./sniper node --import tsx scripts/infra/project-intent.ts <project> --intent …`.
+3. The agent authors `edit_plan.json` under the Producer skill, runs the full gate bundle and
+   converges the plan with independent critics that are fresh subagents, not the author.
+4. Delivery approval from the deterministic gates:
+   `./sniper node --import tsx scripts/infra/mint-delivery-approval.ts <project>/producer`.
+5. Render/assemble or the native exporter, then Audit B on the exact output and the Audit C
+   rendered review by a fresh subagent (Producer skill steps 7–7.5).
+6. Hand off the encoded video and the matching Studio project (`install/studio.command`).
+
+On this route, **final** means the output of step 5 whose Audit B passed and whose Audit C
+review found no unresolved material issue, recorded in the conversation's handoff with the
+measurements. The controller's `.sniper-qc-approved.json` promotion receipt is not produced
+here and is not required. Human playback review remains the operator's.
+
+## Operator direction — September 9, 2026
 
 **September 16 long export reliability:** new eligible native landscape edits
 use the [shared long exporter](producer/NATIVE_LONG_EXPORT.md), including early
@@ -19,7 +46,8 @@ The public `studio/native_export.py` command selects the declared Short/Long
 adapter. Shared owner and native SDK entry points enforce that route, current
 recorded prebuild review and long seam checks. Compatible long attempts are
 discovered automatically, including across output parents. The compatibility
-HTTP render/assemble URLs enter the saved-plan Auto Edit review/QC controller.
+HTTP render/assemble URLs entered the saved-plan Auto Edit review/QC controller (retired web
+app; not a buyer route since September 19).
 See the [workflow enforcement audit](producer/WORKFLOW_ENFORCEMENT_AUDIT_2026-09-16.md)
 for tested boundaries, intentional compatibility changes and remaining limits.
 
@@ -97,9 +125,8 @@ That budget is an acceptance target, not a measured delivery estimate.
 
 **Primary interactive path:** give the brief to the Producer skill in Codex or
 Claude Code, use the existing local stage CLIs, and review/adjust graphics in
-HyperFrames Studio. The custom `/producer` page is optional compatibility UI,
-not a prerequisite. Preserve the same stored intent, admission, independent
-review, approval and whole-output QC on both paths. Use subscription-backed
+HyperFrames Studio. There is no `/producer` page for buyers (September 19). Preserve the
+stored intent, admission, independent review, approval and whole-output QC. Use subscription-backed
 agent tools and local processing; no paid fallback without explicit approval.
 
 ```
@@ -289,8 +316,9 @@ another isolated candidate. The render/QC loop caps at three candidates.
 Missing evidence or a system-level block fails closed instead of approving or
 blindly retrying.
 
-Only an all-pass candidate is promoted to `<producer>/final.mp4`. Promotion
-writes `.sniper-qc-approved.json` last, binding the approved plan hash, manifest
+In the retired app's controller, only an all-pass candidate was promoted to
+`<producer>/final.mp4` (the agent route's final is defined at the top of this document).
+Promotion wrote `.sniper-qc-approved.json` last, binding the approved plan hash, manifest
 hash, final bytes, QC round, and review artifacts. Project status and resume do
 not treat an unapproved candidate or arbitrary `final.mp4` as finished.
 

@@ -14,9 +14,10 @@
   <p class="lede">What to expect, what the checker tells you, and how to send something useful if you get stuck.</p>
 </header>
 <h2>First move, always</h2>
-<pre><code>install/doctor.command</code></pre>
-<p>It asks the product's own code which browser, ffmpeg, speech model and provider CLI a
-render would actually use, and prints each one. It marks a line <code>FAIL</code> only
+<p>Ask your agent to run <code>./sniper doctor</code> (or double-click
+<code>install/doctor.command</code>).</p>
+<p>It asks the product's own code which browser, ffmpeg and speech model a render would actually
+use, and prints each one. It marks a line <code>FAIL</code> only
 for something that has to work, <code>GATED</code> for an optional feature that is not
 installed, and <code>INFO</code> for something worth knowing. If every required line
 passes, the install is fine and the problem is in the edit, not the setup.</p>
@@ -28,16 +29,17 @@ and the line says why. What this candidate does and does not do yet is listed in
 <h2>The errors you are most likely to hit</h2>
 <table>
 <tr><th>What you see</th><th>What it means</th><th>What to do</th></tr>
-<tr><td><code>editor brain (codex)  not-signed-in-or-not-subscription</code> (or <code>claude</code>)</td><td>Your provider login expired, or you never
-signed in with this package's CLI.</td><td>Run <code>install/sign-in.command</code>. It signs in to this package's own settings.</td></tr>
-<tr><td><code>wrong-version — reinstall the pinned CLI</code></td><td>The CLI in this folder
-does not report the exact version this release admits.</td><td>Run <code>install/install.command</code> again
-— it reinstalls the exact pinned version into this package.</td></tr>
-<tr><td><code>Sniper cannot be installed, repaired or switched while it is in use.</code> followed by
-<code>In use by: …</code></td><td>The app, an editor window, a running edit or render, or the
-doctor is using this folder. The line names each one.</td><td>Stop the app
-(<code>install/stop.command</code>), close the editor window, let edits finish, then run it again.
-Nothing was changed.</td></tr>
+<tr><td><code>Sniper is not set up yet (or this folder moved). Run: ./sniper setup</code></td><td>Setup has
+not finished in this folder, or the folder was moved or copied since.</td><td>Ask your agent to run
+<code>./sniper setup</code>; it redoes only what is unfinished.</td></tr>
+<tr><td><code>sandbox initialization failed</code> or <code>Operation not permitted</code> (Codex)</td><td>Codex
+ran a Sniper step inside its own sandbox; Sniper's video check starts its own macOS sandbox, which cannot
+start inside another one.</td><td>Approve running that step outside Codex's sandbox when Codex asks. The
+check still runs in Sniper's own sandbox.</td></tr>
+<tr><td><code>Sniper cannot be installed or repaired while one of its commands is running.</code>
+followed by <code>In use by: …</code></td><td>A Sniper command (an edit or render, or the doctor) is
+using this folder. The line names each one.</td><td>Let it finish, then run it again. Nothing was
+changed.</td></tr>
 <tr><td><code>This Mac has an Intel processor. …</code></td><td>Sniper's own tools are built for
 Apple silicon only.</td><td>Sniper needs a Mac with an M1 or later chip. Nothing was downloaded or
 changed.</td></tr>
@@ -68,22 +70,16 @@ them.</td></tr>
 <tr><td><code>Another Sniper installer is setting up the same tools; waiting …</code></td><td>Two
 Sniper folders are being set up at once; they share the same tools.</td><td>Nothing to do: the
 second one continues when the first has finished.</td></tr>
-<tr><td><code>This install's editor brain is codex. An editor window on claude would disagree …</code></td>
-<td>You asked the editor window for the provider this install does not use.</td><td>Switch the whole
-install: <code>install/stop.command</code>, then <code>install/use-provider.command claude</code>.</td></tr>
 <tr><td><code>no cached chrome-headless-shell found</code></td><td>The rendering browser is missing.
-Sniper never downloads one mid-render on purpose.</td><td>Run the installer again; step 5/10
-downloads it and checks its SHA-256.</td></tr>
+Sniper never downloads one mid-render on purpose.</td><td>Run <code>./sniper setup</code> again; step
+5/8 downloads it and checks its SHA-256.</td></tr>
 <tr><td><code>WHISPER_CPP_MODEL does not exist: …</code></td><td>The speech model is missing or was moved.</td>
-<td>Run the installer again; step 6/10 re-downloads it and checks its checksum.</td></tr>
+<td>Run <code>./sniper setup</code> again; step 6/8 re-downloads it and checks its checksum.</td></tr>
 <tr><td><code>kernel memory pressure is warning</code> (or <code>critical</code>), <code>system memory
 headroom is below policy</code>, <code>physical memory occupied by the compressor exceeds policy</code></td>
 <td>macOS reports the Mac is short of memory, so Sniper does not start a render rather than
 slow the Mac down or fail part-way.</td><td>Quit other large apps (browsers with many tabs, other
 video or design apps), wait a moment, and run the step again.</td></tr>
-<tr><td><code>Port 3000 is already in use by: …</code></td><td>Something else holds the port. The
-message names it.</td><td>Quit that program, or start on another port:
-<code>SNIPER_PORT=3100 install/start.command</code></td></tr>
 <tr><td><code>The folder path contains one of  ,  '  :  \ …</code></td><td>Those characters break the
 audio-cleanup filter, which embeds this folder's path.</td><td>Move the folder somewhere
 without them. Spaces, accents, <code>$</code> and quotes are fine.</td></tr>
@@ -91,7 +87,7 @@ without them. Spaces, accents, <code>$</code> and quotes are fine.</td></tr>
 rather than shipping something it could not check.</td><td>Read the message: it names
 the lane and the reason. Most are a request to pick a style or confirm a choice.</td></tr>
 <tr><td>Not enough disk space</td><td>A long render needs tens of GB of temporary space.</td>
-<td>Stop the app, then <code>install/clean-caches.command</code> shows what can be freed and how
+<td>Let running edits finish, then <code>install/clean-caches.command</code> shows what can be freed and how
 big it is, and never touches your footage, plans, finals or unsynced edits.</td></tr>
 </table>
 
@@ -108,22 +104,20 @@ learning what to ask for.</p>
 <ul>
   <li>Transcription is local and roughly real-time-ish on Apple silicon; a 30-minute
   recording is minutes, not seconds.</li>
-  <li>Planning and review are provider calls. They are the slow part, and your plan's
-  rate limits apply.</li>
+  <li>Planning and review happen in your conversation with your agent. They are the slow part,
+  and your plan's rate limits apply.</li>
   <li>Rendering is CPU and disk heavy. Expect the fans.</li>
-  <li>An edit keeps running if you close the browser tab or restart the app. It is a
-  separate background process on purpose.</li>
+  <li>Keep the conversation open while a render runs; if a step stops, ask your agent to run it
+  again — finished stages are reused.</li>
 </ul>
 
 <h2>Sending something useful</h2>
 <pre><code>install/diagnostics.command</code></pre>
 <p>This writes a folder to your Desktop containing structured facts only: this build's
-<code>RELEASE.json</code>, your macOS, Node and Python versions, the checker's report, the
-installer's own step log, and <em>counts</em> of app-log lines by kind. It does
-<strong>not</strong> copy app-log text, footage, transcripts, edit plans or logins. If support
-asks for more, <code>install/diagnostics.command --include-app-log</code> adds the last 200
-app-log lines after redaction — pattern redaction cannot promise to catch everything, so read
-them before you send them.</p>
+<code>RELEASE.json</code>, your macOS, Node and Python versions, the checker's report and the
+installer's own step log. It does <strong>not</strong> copy footage, transcripts, edit plans, keys
+or logins, and your conversation with your agent stays in your agent. Read it before you send
+it.</p>
 
 <div class="warn">
 <p><strong>Support is not settled for this candidate.</strong> There is no support address

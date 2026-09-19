@@ -7,7 +7,7 @@
 set -o pipefail
 
 PKG_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
-APP_DIR="$PKG_ROOT/app"
+APP_DIR="$PKG_ROOT"   # the app is the package folder itself: the folder you open in Codex or Claude Code
 RUNTIME_DIR="$PKG_ROOT/runtime"
 STATE_DIR="$RUNTIME_DIR/state"
 RECEIPTS="$STATE_DIR/receipts"
@@ -15,16 +15,11 @@ LOG_DIR="$RUNTIME_DIR/logs"
 ENV_FILE="$RUNTIME_DIR/sniper.env"
 LOCAL_ENV="$RUNTIME_DIR/sniper.local.env"
 RELEASE_JSON="$PKG_ROOT/RELEASE.json"
-PORT="${SNIPER_PORT:-3000}"
 SCRIPT_PATH="$(cd "$(dirname "$0")" 2>/dev/null && pwd -P)/$(basename "$0")"
 
-CLI_PREFIX="$RUNTIME_DIR/cli"
-CLI_BIN="$CLI_PREFIX/node_modules/.bin"
 RUNTIME_BIN="$RUNTIME_DIR/bin"
 BROWSER_CACHE="$RUNTIME_DIR/browser"
 WHISPER_DIR="$RUNTIME_DIR/whisper"
-CLAUDE_CONFIG_DIR_LOCAL="$RUNTIME_DIR/claude-config"
-CODEX_HOME_LOCAL="$RUNTIME_DIR/codex-home"
 LOCK_TOOL="$APP_DIR/scripts/infra/sniper_lock.py"
 INSTALL_TOOLS="$PKG_ROOT/install/lib/install_tools.py"
 
@@ -47,15 +42,8 @@ unset PYTHONHOME PYTHONPATH PYTHONSTARTUP PYTHONUSERBASE NODE_OPTIONS NODE_PATH 
 # image reader, Homebrew's and Sniper's alike) rewrites /tmp paths and then cannot find them.
 [ -n "${TMPDIR:-}" ] || TMPDIR="$(/usr/bin/getconf DARWIN_USER_TEMP_DIR)"
 export TMPDIR
-# The pinned Claude CLI names its Keychain login after CLAUDE_CONFIG_DIR, so
-# Sniper's login is separate from yours. This variable would override that
-# naming and point Sniper's sign-in and sign-out at your own login; never inherit it.
-unset CLAUDE_SECURESTORAGE_CONFIG_DIR
-# Sniper runs on subscriptions. A key or cloud-billing switch exported in your
-# shell must never be billed by accident. A key you deliberately put in
-# runtime/sniper.local.env or app/.env.local is still read, by Text Review only:
-# the one optional paid feature, which calls Anthropic's API after an opt-in per
-# run. Segmenter and Clipper use your subscription like everything else.
+# Sniper's own tools never call a provider: your Codex or Claude Code does the thinking on your
+# subscription. A key or cloud-billing switch exported in your shell is not passed to them.
 unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN CLAUDE_CODE_OAUTH_TOKEN OPENAI_API_KEY \
       ANTHROPIC_BASE_URL CLAUDE_CODE_USE_BEDROCK CLAUDE_CODE_USE_VERTEX
 
@@ -102,7 +90,7 @@ require_macos() {
 
 # The voice-rnn dialogue-cleanup preset embeds this folder's path in an ffmpeg
 # filtergraph, where , ' : and \ are syntax; the product refuses to run it from
-# such a path (app/scripts/producer/audio/audio_enhance.py). That is the only
+# such a path (scripts/producer/audio/audio_enhance.py). That is the only
 # reason a character is refused: settings are stored literally (lib/settings.sh).
 require_safe_install_path() {
   case "$PKG_ROOT" in
@@ -144,8 +132,8 @@ print(" ".join(map(str, value)) if isinstance(value, list) else value)' "$RELEAS
 
 # hold_maintenance MODE LABEL BUSY-MESSAGE [this script's arguments...]
 # Re-run this script while holding the install's maintenance lock
-# (app/scripts/infra/sniper_lock.py): exclusive for installing, switching
-# provider, cleaning and removing; shared for anything that uses the install.
+# (scripts/infra/sniper_lock.py): exclusive for installing, cleaning and
+# removing; shared for anything that uses the install (every ./sniper command).
 # The lock is held until this script and everything it started have exited.
 hold_maintenance() {
   local mode="$1" label="$2" busy="$3" py
@@ -167,17 +155,16 @@ hold_maintenance() {
 . "$PKG_ROOT/install/lib/runtime_tools.sh"
 
 # Load this install's settings: the installer's data file (literally), then your
-# own runtime/sniper.local.env (shell syntax, by design). A port given on the
-# command line (SNIPER_PORT=3100 install/start.command) wins over both.
+# own runtime/sniper.local.env (shell syntax, by design).
 # The folder is always taken from where these scripts are, never from the settings
 # file: after a move or copy the settings still name the old place, and acting on
 # it could stop or delete another install. `load_env --moved-ok` (uninstall only)
 # continues with this folder's own paths instead of refusing.
 load_env() {
-  local caller_port="${SNIPER_PORT:-}" here="$PKG_ROOT" recorded provider brain
-  [ -f "$ENV_FILE" ] || fail "Not installed yet. Run install/install.command first."
+  local here="$PKG_ROOT" recorded
+  [ -f "$ENV_FILE" ] || fail "Sniper is not set up yet. Run install/install.command first
+  (or ask your Codex or Claude Code: set up Sniper)."
   settings_load "$ENV_FILE"
-  provider="${SNIPER_PROVIDER:-}"; brain="${SNIPER_BRAIN_PROVIDER:-}"
   if [ -f "$LOCAL_ENV" ]; then
     set -a; . "$LOCAL_ENV" || fail "runtime/sniper.local.env has an error (it is read as shell)."; set +a
   fi
@@ -186,14 +173,11 @@ load_env() {
   if [ -f "$RUNTIME_DIR/deepgram.env" ]; then
     settings_load "$RUNTIME_DIR/deepgram.env" || fail "Reopen install/setup.command to repair the Deepgram connection."
   fi
-  recorded="$PKG_ROOT"; PKG_ROOT="$here"; APP_DIR="$here/app"; export PKG_ROOT APP_DIR
+  recorded="$PKG_ROOT"; PKG_ROOT="$here"; APP_DIR="$here"; export PKG_ROOT APP_DIR
   if [ "$recorded" != "$here" ] && [ "${1:-}" != "--moved-ok" ]; then
     fail "This folder was moved or copied after it was installed (installed at:
   $recorded). Run install/install.command once in its new place."
   fi
-  [ "${1:-}" = "--moved-ok" ] || check_provider_settings "$provider" "$brain"
-  [ -n "$caller_port" ] && SNIPER_PORT="$caller_port"
-  PORT="${SNIPER_PORT:-3000}"; export SNIPER_PORT="$PORT"
 }
 
 # The Node among Sniper's own tools must still be there (someone may have removed

@@ -33,9 +33,9 @@ class StudioWrapper(unittest.TestCase):
         self.base = Path(tempfile.mkdtemp(prefix="sniper-studio-"))
         self.addCleanup(shutil.rmtree, self.base, ignore_errors=True)
         self.pkg = fx.make_package(self.base)
-        done = fx.write_settings(self.pkg, "codex", str(self.base / "videos"), {"NODE_BIN": str(Path(REAL_NODE).resolve())})
+        done = fx.write_settings(self.pkg, str(self.base / "videos"), {"NODE_BIN": str(Path(REAL_NODE).resolve())})
         self.assertEqual(done.returncode, 0, done.stderr)
-        python = self.pkg / "app/.venv/bin/python3"  # replaces the fixture's wrapper file with a recorder
+        python = self.pkg / ".venv/bin/python3"  # replaces the fixture's wrapper file with a recorder
         python.write_text(FAKE_PYTHON)
         python.chmod(0o755)
         self.env = {**fx.base_env(self.pkg), "ANTHROPIC_API_KEY": "sk-test-not-a-real-key",
@@ -55,7 +55,7 @@ class StudioWrapper(unittest.TestCase):
         pkg = self.pkg.resolve()
         self.assertIn(f"WRAPPER={pkg}/install/studio.command", calls)
         self.assertIn("LOCK=shared", calls)
-        self.assertIn(f"PWD={pkg}/app", calls)
+        self.assertIn(f"PWD={pkg}\n", calls)   # the package folder is the app folder
         self.assertIn(f"PATH_FIRST={pkg}/runtime/bin", calls)
 
     def test_unknown_subcommand_is_refused(self) -> None:

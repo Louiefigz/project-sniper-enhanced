@@ -7,7 +7,7 @@
 #   install/studio.command rebuild <project>/producer   rebuild the video from the updated plan
 #   install/studio.command stop    <project>/producer   shut the preview server down
 #
-# Runs app/scripts/producer/studio/studio_review.py with this install's settings
+# Runs scripts/producer/studio/studio_review.py with this install's settings
 # (its Node, browser, ffmpeg and PATH, and no API keys from your shell), which
 # running the environment's Python directly would skip.
 . "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh" || exit 1

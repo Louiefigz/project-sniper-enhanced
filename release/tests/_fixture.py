@@ -1,10 +1,9 @@
 """A minimal extracted-package layout for exercising the real installer scripts.
 
-It copies the shipped ``install/`` folder and the shared lock helper exactly as the
-build ships them, adds a RELEASE.json with the fields the scripts read, and puts
-stub ``codex``/``claude`` CLIs where the installer would. The stubs never reach a
-network or a real login: they record their argv and the provider environment,
-and their login/logout behaviour is scripted per test through files.
+It copies the shipped ``install/`` folder, the ``sniper`` command and the shared lock
+helper exactly as the build ships them (flat: the package folder is the app folder),
+and adds a RELEASE.json with the fields the scripts read. There is no Codex or Claude
+anywhere: buyers use their own, and nothing Sniper ships calls either.
 
 Sniper's own tools are stand-ins too: ``make_runtime`` lays out the private folder
 (``<home>/.project-sniper/runtimes/<lock id>/``) the real lock names, as wrapper FILES —
@@ -24,33 +23,8 @@ ROOT = Path(__file__).resolve().parents[2]
 INSTALL_SRC = ROOT / "release/payload_files/install"
 LOCK_SRC = ROOT / "scripts/infra/sniper_lock.py"
 FINDER_PATH = "/usr/bin:/bin:/usr/sbin:/sbin"
-COMPONENTS = {"node_floor": "22.13.0",
-              "claude_model_default": "opus", "codex_model_default": "gpt-5.6-sol",
-              "codex_reasoning_default": "xhigh",
-              "codex_cli_admitted": "codex-cli 0.144.1", "claude_cli_admitted": "2.1.247 (Claude Code)",
-              "chrome_headless_shell": "152.0.7977.30"}
-
-STUB_CLI = r'''#!/bin/bash
-# Test stand-in for a provider CLI: records what it was asked, never signs anything in or out.
-me="${0##*/}"; log="$STUB_LOG_DIR/$me.calls"
-{ printf 'ARGV'; printf ' [%s]' "$@"; printf '\n'
-  printf 'ENV SNIPER_PROVIDER=%s SNIPER_BRAIN_PROVIDER=%s SNIPER_CLAUDE_MODEL=%s SNIPER_CODEX_MODEL=%s SNIPER_CODEX_REASONING=%s LOCK=%s\n' \
-    "$SNIPER_PROVIDER" "$SNIPER_BRAIN_PROVIDER" "$SNIPER_CLAUDE_MODEL" "$SNIPER_CODEX_MODEL" "$SNIPER_CODEX_REASONING" "$SNIPER_LOCK_MODE"
-  printf 'KEYS anthropic=%s openai=%s deepgram=%s cwd=%s\n' "${ANTHROPIC_API_KEY:+set}" "${OPENAI_API_KEY:+set}" "${DEEPGRAM_API_KEY:+set}" "$PWD"
-} >> "$log"
-state="$STUB_LOG_DIR/$me.signed-in"
-[ "${1:-}" = "--setting-sources" ] && shift 2  # accepted before a subcommand, as the real CLI does
-case "$*" in
-  "login status") [ -f "$state" ] && { echo "Logged in using ChatGPT"; exit 0; }; echo "Not logged in"; exit 1 ;;
-  "auth status --json") [ -f "$state" ] && { echo '{"loggedIn": true}'; exit 0; }; echo '{"loggedIn": false}'; exit 1 ;;
-  "logout"|"auth logout")
-    [ -f "$STUB_LOG_DIR/$me.logout-fails" ] && { echo "network error: could not reach the sign-out service" >&2; exit 1; }
-    rm -f "$state"; echo "Logged out"; exit 0 ;;
-  "--version") [ "$me" = codex ] && echo "codex-cli 0.144.1" || echo "2.1.247 (Claude Code)"; exit 0 ;;
-esac
-exit 0
-'''
-
+SNIPER_SRC = ROOT / "sniper"
+COMPONENTS = {"node_floor": "22.13.0", "chrome_headless_shell": "152.0.7977.30"}
 
 # Stand-ins for Sniper's own tools: what each prints when asked for its version.
 FFMPEG_STUB = r"""case "$*" in
@@ -92,8 +66,9 @@ def make_package(base: Path, name: str = "pkg") -> Path:
     """Create ``base/name`` laid out like an extracted archive; return its root."""
     pkg = base / name
     shutil.copytree(INSTALL_SRC, pkg / "install")
-    (pkg / "app/scripts/infra").mkdir(parents=True)
-    shutil.copyfile(LOCK_SRC, pkg / "app/scripts/infra/sniper_lock.py")
+    shutil.copy2(SNIPER_SRC, pkg / "sniper")
+    (pkg / "scripts/infra").mkdir(parents=True)
+    shutil.copyfile(LOCK_SRC, pkg / "scripts/infra/sniper_lock.py")
     (pkg / "RELEASE.json").write_text(json.dumps({"version": "0.1.0-test", "components": COMPONENTS,
                                                   "sellable": False}), encoding="utf-8")
     runtime_bin = pkg / "runtime/bin"
@@ -101,15 +76,10 @@ def make_package(base: Path, name: str = "pkg") -> Path:
     for tool in RUNTIME_BIN_TOOLS:   # the installer links these; here they are stand-in files
         _wrapper(runtime_bin / tool, TOOL_STUBS[tool])
     make_runtime(base / "home")
-    bin_dir = pkg / "runtime/cli/node_modules/.bin"
-    bin_dir.mkdir(parents=True)
-    for cli in ("codex", "claude"):
-        (bin_dir / cli).write_text(STUB_CLI, encoding="utf-8")
-        (bin_dir / cli).chmod(0o755)
-    # The app venv's interpreter (the editor's settings helper runs with it). A wrapper
+    # The app venv's interpreter (the lock helper and the doctor run with it). A wrapper
     # FILE, never a link: tests write placeholder text over installer-made paths, and a
     # link would carry that write into the real interpreter.
-    venv_bin = pkg / "app/.venv/bin"
+    venv_bin = pkg / ".venv/bin"
     venv_bin.mkdir(parents=True)
     (venv_bin / "python3").write_text(f'#!/bin/sh\nexec "{sys.executable}" "$@"\n', encoding="utf-8")
     (venv_bin / "python3").chmod(0o755)
@@ -124,7 +94,7 @@ def bash(pkg: Path, script: str, env: dict[str, str] | None = None, timeout: int
 
 
 def base_env(pkg: Path) -> dict[str, str]:
-    """An empty-HOME, Finder-PATH environment, plus where the stub CLIs log."""
+    """An empty-HOME, Finder-PATH environment, plus a folder where test stubs log."""
     home = pkg.parent / "home"
     home.mkdir(exist_ok=True)
     logs = pkg.parent / "stub-logs"
@@ -133,7 +103,7 @@ def base_env(pkg: Path) -> dict[str, str]:
             "STUB_LOG_DIR": str(logs), "TMPDIR": os.environ.get("TMPDIR", "/tmp")}
 
 
-def write_settings(pkg: Path, provider: str, workspace: str, extra: dict[str, str] | None = None
+def write_settings(pkg: Path, workspace: str, extra: dict[str, str] | None = None
                    ) -> subprocess.CompletedProcess:
     """Run the installer's own configuration functions with test values for earlier steps."""
     tools = runtime_prefix(pkg.parent / "home") / "bin"
@@ -141,9 +111,9 @@ def write_settings(pkg: Path, provider: str, workspace: str, extra: dict[str, st
               "TOOL_FFPROBE": str(tools / "ffprobe"), "TOOL_WHISPER_CLI": str(tools / "whisper-cli"),
               "BROWSER_BIN": str(pkg / "runtime/browser/chrome-headless-shell"),
               "MODEL_PATH": str(pkg / "runtime/whisper/ggml-small.en.bin"),
-              "PROVIDER_ARG": provider, "WORKSPACE_ARG": workspace, **(extra or {})}
+              "WORKSPACE_ARG": workspace, **(extra or {})}
     assign = "".join(f'{key}="${{T_{key}}}"\n' for key in values)
     env = {**base_env(pkg), **{f"T_{key}": value for key, value in values.items()}}
-    script = assign + ('deps_paths && mkdir -p "$RUNTIME_DIR" && choose_provider && write_settings '
+    script = assign + ('deps_paths && mkdir -p "$RUNTIME_DIR" && write_settings '
                        '&& verify_settings && echo configured\n')
     return bash(pkg, script, env)

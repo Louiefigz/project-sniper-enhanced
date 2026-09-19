@@ -21,10 +21,16 @@ SETTLED on 2026-09-17 (reflected in the manual and LICENSE-DRAFT.txt)
     zscale and rubberband filters), shipped in the package with its source.
   - Until it is signed, the bundled ffmpeg is installed like the downloaded tools, without
     the download quarantine (decided 2026-09-18); the pages say it is not yet signed.
-  - The Codex editor window runs like Claude Code's (decided 2026-09-19): without Codex's own
-    sandbox, asking before any command outside a read-only set. Inside Codex's sandbox,
-    Producer's media check cannot start its own macOS sandbox (macOS does not nest them) and
-    the video folder is not writable; the media check keeps its own sandbox.
+  - No UI (decided 2026-09-19): buyers use Sniper only by opening its folder in their own
+    Codex or Claude Code, on their own subscription and whatever version they have. Sniper
+    installs no copy of either and has no sign-in, no web app and no editor launcher.
+  - Codex's sandbox (decided 2026-09-19): projects live inside the Sniper folder by default,
+    so normal work stays inside Codex's sandbox; Sniper's video check cannot start its own
+    macOS sandbox inside Codex's, so Codex asks the buyer to approve that step outside it.
+    The check itself stays sandboxed.
+  - Left out of this release (decided 2026-09-19): Text Review, Clipper's dual-camera/lav
+    Final Cut export, and the guided checkpoint and Native Director routes (they needed the
+    retired app).
 
 RESOLVED BY IMPLEMENTATION in rc4 (no owner action needed)
   - Footage admission: a native macOS sandbox, checked by install/doctor.command.
@@ -33,7 +39,7 @@ RESOLVED BY IMPLEMENTATION in rc4 (no owner action needed)
     specifications and the module, editcraft, short-form and reference-style
     doctrine are rewritten as original Sniper material, with a provenance record.
   - Director and reference libraries, motion palette and type: original.
-  - Segmenter and Clipper use the subscription CLI; no API-key route remains.
+  - Segmenter and Clipper are driven by the buyer's own agent; no API-key route remains.
 
 STILL OPEN — each blocks release
   1. LICENCE WORDING (input D): LICENSE-DRAFT.txt is not final or reviewed. The
@@ -44,8 +50,8 @@ STILL OPEN — each blocks release
   3. SUPPORTED PLATFORM BOUNDARY (input R): only a developer Mac on macOS 26 / Apple
      silicon has run this. A clean-Mac install is needed before any boundary is
      stated to buyers. The installer admits macOS 13.5 or later, the floor measured from
-     Sniper's own binaries; the pinned Codex CLI carries a zsh built for macOS 15 (used only
-     by an optional Codex feature), so the Codex route on macOS 13.5-14 is untested.
+     Sniper's own binaries. Buyers' own Codex or Claude Code have their own macOS
+     requirements, which Sniper does not control.
   4. GSAP (the animation library every motion template uses): the licence neither
      clearly permits nor clearly forbids shipping it in a paid download or running it
      under Studio's timeline editor. A clarification request to the publisher is
@@ -66,9 +72,9 @@ STILL OPEN — each blocks release
      the maintainer sign and notarize both before sale.
 
 NOT OWNER DECISIONS — acceptance still outstanding
-  - Complete edits in both provider routes (Short and long-form, with a revision),
-    signed in through Sniper's own sign-in.
-    The Codex editor window has not yet been run signed in.
+  - Complete edits through both Codex and Claude Code opened on the Sniper folder (Short and
+    long-form, with a revision), accepted in the qualification record kept outside this
+    package.
   - Human playback, listening and Studio checks of those edits.
   - Clean-Mac install and an outside operator following the manual.
   - Authenticated delivery of the exact bytes.

@@ -41,8 +41,8 @@ use_runtime_tools() {
 }
 
 # runtime/bin: links to exactly the executables validated above. It comes first on
-# the generated PATH, so the pinned CLIs' "#!/usr/bin/env node", npm scripts and
-# every worker the app spawns by name run these — never a different copy that
+# the generated PATH, so "#!/usr/bin/env node" scripts, npm scripts and every
+# worker a Sniper command spawns by name run these — never a different copy that
 # happens to sit in the same folder as one of them.
 link_runtime_bin() {
   rm -rf "$RUNTIME_BIN.tmp" && mkdir -p "$RUNTIME_BIN.tmp" || fail "Cannot create $RUNTIME_BIN"
@@ -144,35 +144,4 @@ model_step() {
   done
   [ -f "$MODEL_PATH" ] || download_verified "$url" "$MODEL_PATH" "$MODEL_SHA" "the speech model (about 465 MB)"
   write_receipt model "$MODEL_SHA"; say "Speech model verified"
-}
-
-cli_ok() {  # name expected-version-line
-  local out
-  [ -x "$CLI_BIN/$1" ] || return 1
-  out="$(PATH="$RUNTIME_BIN:$PATH" CODEX_HOME="$CODEX_HOME_LOCAL" CLAUDE_CONFIG_DIR="$CLAUDE_CONFIG_DIR_LOCAL" \
-    "$CLI_BIN/$1" --version 2>/dev/null)" || return 1
-  [ "$(first_line "$out")" = "$2" ]
-}
-
-# The two CLIs come from install/cli/package-lock.json, whose integrity hashes
-# npm ci checks for every tarball (the CLIs' native binaries included).
-cli_step() {
-  local codex_want claude_want key why lockdir="$PKG_ROOT/install/cli" record="$RECEIPTS/cli.tree.json"
-  codex_want="$(release_value components.codex_cli_admitted)"; claude_want="$(release_value components.claude_cli_admitted)"
-  mkdir -p "$CLAUDE_CONFIG_DIR_LOCAL" "$CODEX_HOME_LOCAL"; chmod 700 "$CLAUDE_CONFIG_DIR_LOCAL" "$CODEX_HOME_LOCAL"
-  key="$codex_want|$claude_want|lock-$(sha "$lockdir/package-lock.json")|node-$NODE_VERSION@$NODE_BIN"
-  if receipt_ok cli "$key"; then
-    why="$(tree_check "$CLI_PREFIX/node_modules" "$record")" && cli_ok codex "$codex_want" \
-      && cli_ok claude "$claude_want" && { say "Codex and Claude CLIs — up to date (verified)"; return 0; }
-    say "Codex and Claude CLIs — changed since they were installed (${why:-a CLI no longer reports its pinned version}); reinstalling"
-  fi
-  clear_receipt cli
-  rm -rf "$CLI_PREFIX" && mkdir -p "$CLI_PREFIX" || fail "Cannot create $CLI_PREFIX"
-  cp "$lockdir/package.json" "$lockdir/package-lock.json" "$CLI_PREFIX/" || fail "install/cli is incomplete."
-  ( cd "$CLI_PREFIX" && npm_cli ci --no-audit --no-fund --silent ) \
-    || fail "Installing the pinned CLIs failed. Run the installer again."
-  cli_ok codex "$codex_want" || fail "The Codex CLI does not report '$codex_want'."
-  cli_ok claude "$claude_want" || fail "The Claude CLI does not report '$claude_want'."
-  tree_record "$CLI_PREFIX/node_modules" "$record"
-  write_receipt cli "$key"; say "Codex and Claude CLIs — installed ($codex_want; $claude_want)"
 }

@@ -1,7 +1,8 @@
-"""Run guided setup in a real terminal with offline subscription/doctor stand-ins.
+"""Run guided setup in a real terminal with an offline doctor stand-in.
 
-The real connection UI, settings loader, editor launcher and maintenance locks run.
-No provider login, account, API request or paid call is made by these tests.
+The real connection UI, settings loader and maintenance locks run. Setup never signs in
+to or opens Codex or Claude: buyers use their own. No account, API request or paid call
+is made by these tests.
 """
 from __future__ import annotations
 
@@ -19,17 +20,10 @@ from release.tests import _fixture as fx
 
 DOCTOR = '''#!/bin/bash
 echo "doctor $*" >> "$STUB_LOG_DIR/order"
-if [ "$1" = --provider-only ]; then
-  [ -f "$STUB_LOG_DIR/signed-in" ]; exit $?
-fi
 [ "${FAIL_DOCTOR:-0}" = 0 ] || { echo 'FAIL: sample admission'; exit 1; }
 echo 'All required checks passed.'
 '''
-SIGN_IN = '''#!/bin/bash
-echo sign-in >> "$STUB_LOG_DIR/order"
-[ "${FAIL_SIGN_IN:-0}" = 0 ] || exit 1
-touch "$STUB_LOG_DIR/signed-in"
-'''
+RETIRED = ("editor.command", "sign-in.command", "use-provider.command", "start.command", "stop.command")
 
 
 def run_terminal(argv: list[str], env: dict[str, str]) -> tuple[int, str]:
@@ -66,7 +60,7 @@ def run_terminal(argv: list[str], env: dict[str, str]) -> tuple[int, str]:
 
 
 class GuidedSetup(unittest.TestCase):
-    """Success launches after validation; failures never claim readiness or launch."""
+    """Setup finishes the install, offers Deepgram and checks; failures never claim readiness."""
 
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory(prefix="sniper-guided-")
@@ -75,13 +69,11 @@ class GuidedSetup(unittest.TestCase):
         self.env = fx.base_env(self.pkg)
         self.logs = Path(self.env["STUB_LOG_DIR"])
         # The shared fixture's regular wrapper file around this interpreter (never a link to it).
-        self.python = self.pkg / "app/.venv/bin/python3"
+        self.python = self.pkg / ".venv/bin/python3"
         self.assertTrue(self.python.is_file() and not self.python.is_symlink())
-        self.assertEqual(fx.write_settings(self.pkg, "codex", str(self.pkg.parent / "videos")).returncode, 0)
+        self.assertEqual(fx.write_settings(self.pkg, str(self.pkg.parent / "videos")).returncode, 0)
         self._mark_installed(self.pkg.resolve())  # a finished installation of this folder
-        for name, content in (("doctor.command", DOCTOR), ("sign-in.command", SIGN_IN)):
-            (self.pkg / "install" / name).write_text(content)
-        # The real editor calls this CLI; its fixture logs argv, provider and lock mode.
+        (self.pkg / "install/doctor.command").write_text(DOCTOR)
         self.command = str(self.pkg / "install/setup.command")
 
     def _mark_installed(self, root: Path | None) -> None:
@@ -115,15 +107,14 @@ class GuidedSetup(unittest.TestCase):
             self.assertIn("resuming the installation", output)
             self.assertEqual(self._order().count("installer"), attempt, "setup must resume the installer")
             self.assertNotIn("Ready.", output)
-        self.assertFalse((self.logs / "codex.calls").exists(), "no editor on an unfinished install")
 
-    def test_resumed_install_that_finishes_opens_the_editor(self) -> None:
+    def test_resumed_install_that_finishes_hands_over_to_the_installer(self) -> None:
+        # The real installer offers Deepgram and runs the doctor itself at its end.
         self._mark_installed(None)
         self._stand_in_installer(finishes=True)
         code, output = run_terminal([self.command], self.env)
         self.assertEqual(code, 0, output)
         self.assertEqual(self._order(), ["installer"])
-        self.assertTrue((self.logs / "codex.calls").exists(), "the editor opens after the install finishes")
 
     def test_moved_install_is_resumed(self) -> None:
         self._mark_installed(Path("/elsewhere/project-sniper"))
@@ -141,11 +132,13 @@ class GuidedSetup(unittest.TestCase):
     def test_connection_modes_never_start_the_installer(self) -> None:
         self._mark_installed(None)
         self._stand_in_installer(finishes=True)
-        for mode in ("--connections", "--finish-install"):
-            done = subprocess.run([self.command, mode], capture_output=True, text=True, env=self.env,
-                                  stdin=subprocess.DEVNULL, check=False)
-            self.assertNotEqual(done.returncode, 0, mode)
-            self.assertIn("Installation has not finished", done.stderr)
+        done = subprocess.run([self.command, "--connections"], capture_output=True, text=True, env=self.env,
+                              stdin=subprocess.DEVNULL, check=False)
+        self.assertNotEqual(done.returncode, 0)
+        self.assertIn("Installation has not finished", done.stderr)
+        done = subprocess.run([self.command, "--finish-install"], capture_output=True, text=True, env=self.env,
+                              stdin=subprocess.DEVNULL, check=False)
+        self.assertNotEqual(done.returncode, 0, "the retired finish hand-off is refused")
         self.assertNotIn("installer", self._order())
 
     def test_installer_marks_completion_only_after_its_last_step(self) -> None:
@@ -155,11 +148,11 @@ class GuidedSetup(unittest.TestCase):
         # refuses (test_missing_tools_resume_the_installer). Everything after it is covered here.
         text = (fx.INSTALL_SRC / "install.command").read_text()
         cleared, verified = text.index("clear_receipt installed"), text.index("\nverify_runtime_tools\n")
-        built, written = text.index("\nbuild_step\n"), text.index('write_receipt installed "$PKG_ROOT"')
-        finish = text.index("setup.command\" --finish-install")
+        built, written = text.index("studio/native_runtime.py\" --repair"), text.index('write_receipt installed "$PKG_ROOT"')
+        offer = text.index("setup.command\" --connections --if-needed")
         self.assertLess(cleared, verified, "an interrupted run must not keep an earlier completion")
         self.assertLess(built, written, "completion is written after the last step")
-        self.assertLess(written, finish, "the finish hand-off sees a completed install")
+        self.assertLess(written, offer, "the Deepgram offer sees a completed install")
 
     def test_missing_tools_resume_the_installer(self) -> None:
         # A finished install whose private tools were removed (or never finished) is not complete.
@@ -174,40 +167,26 @@ class GuidedSetup(unittest.TestCase):
         done = fx.bash(self.pkg, "install_complete && echo complete || echo incomplete", self.env)
         self.assertEqual(done.stdout.strip(), "complete", done.stderr)
 
-    def test_new_user_is_signed_in_checked_and_editor_opens(self) -> None:
+    def test_new_user_is_offered_deepgram_checked_and_sent_to_their_own_agent(self) -> None:
         code, output = run_terminal([self.command], self.env)
         self.assertEqual(code, 0, output)
         self.assertIn("Deepgram (optional)", output)
-        self.assertIn("Ready.", output)
-        self.assertEqual((self.logs / "order").read_text().splitlines(),
-                         ["doctor --provider-only", "sign-in", "doctor "])
-        self.assertIn("LOCK=shared", (self.logs / "codex.calls").read_text())
+        self.assertIn("Ready. Open this folder in Codex or Claude Code", output)
+        self.assertEqual(self._order(), ["doctor "])
 
-    def test_existing_login_is_not_repeated(self) -> None:
-        (self.logs / "signed-in").touch()
-        code, output = run_terminal([self.command], self.env)
-        self.assertEqual(code, 0, output)
-        self.assertIn("Already signed in.", output)
-        self.assertNotIn("\nsign-in\n", (self.logs / "order").read_text())
-
-    def test_sign_in_failure_does_not_launch_or_claim_ready(self) -> None:
-        code, output = run_terminal([self.command], {**self.env, "FAIL_SIGN_IN": "1"})
-        self.assertNotEqual(code, 0)
-        self.assertIn("Reopen install/setup.command", output)
-        self.assertNotIn("Ready.", output)
-        self.assertFalse((self.logs / "codex.calls").exists())
-
-    def test_doctor_failure_does_not_launch_or_claim_ready(self) -> None:
+    def test_doctor_failure_does_not_claim_ready(self) -> None:
         code, output = run_terminal([self.command], {**self.env, "FAIL_DOCTOR": "1"})
         self.assertNotEqual(code, 0)
         self.assertIn("Setup is not ready yet.", output)
-        self.assertFalse((self.logs / "codex.calls").exists())
+        self.assertNotIn("Ready.", output)
 
-    def test_installer_finish_never_opens_editor_under_exclusive_lock(self) -> None:
-        code, output = run_terminal([self.command, "--finish-install"], self.env)
-        self.assertEqual(code, 0, output)
-        self.assertIn("double-click install/editor.command", output)
-        self.assertFalse((self.logs / "codex.calls").exists())
+    def test_setup_never_signs_in_to_or_opens_a_provider(self) -> None:
+        for name in RETIRED:
+            self.assertFalse((fx.INSTALL_SRC / name).exists(), f"{name} is retired")
+        for script in sorted(fx.INSTALL_SRC.glob("*.command")):
+            text = script.read_text()
+            for name in RETIRED:
+                self.assertNotIn(name, text, f"{script.name} still names {name}")
 
     def test_noninteractive_setup_does_not_read_secrets(self) -> None:
         result = subprocess.run([self.command], input="not-a-key\n", text=True,

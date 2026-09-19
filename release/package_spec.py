@@ -14,8 +14,10 @@ from __future__ import annotations
 # SHIP — application, runtime inputs and the agent instruction chain
 # --------------------------------------------------------------------------
 INCLUDE: tuple[tuple[str, str], ...] = (
-    # --- Next application ---------------------------------------------------
-    ("src", "the whole application surface: pages, API routes, libs, prompts"),
+    # --- TypeScript sources ---------------------------------------------------
+    # There is no web UI for buyers; Sniper's TypeScript commands (native export, delivery
+    # approval, the stored-intent writer) import these as libraries.
+    ("src", "the TypeScript sources Sniper's commands import (the web pages are unused)"),
     ("public", "static assets served by Next"),
     # README.md (repository root) is deliberately NOT included: it is the developer README
     # (Palmier as a destination, developer setup). The buyer starts from START-HERE.html and
@@ -82,6 +84,7 @@ INCLUDE: tuple[tuple[str, str], ...] = (
     (".agents/skills", "Codex adapters for the same five skills"),
     ("AGENTS.md", "repo-root instructions (rewritten self-contained for the package)"),
     ("CLAUDE.md", "Claude-route instructions"),
+    ("sniper", "the command the buyer's own Codex or Claude Code runs Sniper's tools through"),
 
     # --- Docs: the operational set only (release/operational-docs.json) -------
     # Computed by release/doc_closure.py: docs named in shipped code, docs linked
@@ -104,8 +107,6 @@ INCLUDE: tuple[tuple[str, str], ...] = (
     ("broll/README.md", "explains that the operator supplies b-roll"),
     ("broll/broll_catalog.json", "empty-by-design catalog the lane reads"),
 
-    # --- Config template ----------------------------------------------------
-    (".env.local.example", "safe configuration template, no secrets"),
 )
 
 # --------------------------------------------------------------------------

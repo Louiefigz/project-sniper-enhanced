@@ -32,11 +32,6 @@ overlap by those handles. A single recording is not re-encoded, so nothing is qu
 several camera angles are cut frame-accurately instead, re-encoding at the joins.</td></tr>
 <tr><td><strong>Clipper</strong></td><td>Tightens one clip word by word and exports a
 frame-accurate Final Cut Pro timeline (FCPXML).</td></tr>
-<tr><td><strong>Text Review</strong></td><td>A separate spell-check for text on screen.
-<span class="tag">optional · needs your own paid API key</span> It sends still frames to
-Anthropic and Anthropic bills your key; it is not covered by your purchase or your
-subscription, and it runs only when you tick its opt-in — see
-<a href="privacy.html">what leaves your Mac</a>.</td></tr>
 </table>
 
 <h3>What Producer can do to a video</h3>
@@ -82,18 +77,18 @@ other large apps before a render.</td><td>—</td></tr>
 full-length render uses a lot of temporary space.</td><td>—</td></tr>
 <tr><td>An internet connection for setup</td><td>Setup downloads Sniper's own tools (Python, Node,
 whisper.cpp, tesseract, yt-dlp, git — about 300 MB, each file checked against its recorded SHA-256),
-the rendering browser, the speech model and the app's packages; Sniper's own ffmpeg comes in this
+the rendering browser, the speech model and the JavaScript packages Sniper's scripts use; Sniper's own ffmpeg comes in this
 download. Nothing needs to be
 installed beforehand: no Homebrew, Xcode, Python or Node.</td><td>Free</td></tr>
-<tr><td><strong>A Codex or Claude subscription</strong></td><td>This is the part that
-thinks about your edit. You use the subscription you already pay for. There is no extra
-Sniper processing fee: Producer, Segmenter and Clipper all run on that subscription, with
-no API-key route and no fallback to one. Two optional things can bill
-per use, each on a key of your own: Text Review (an Anthropic API key, and only when you tick its
-opt-in) and Deepgram transcription (a Deepgram key, and only when you approve it for an edit).
-Sniper ignores keys exported in your shell; it reads one only from
-<code>runtime/sniper.local.env</code> or <code>app/.env.local</code>.</td><td><strong>You pay
-your provider directly. Their plan price, model access and usage limits apply.</strong></td></tr>
+<tr><td><strong>Your own Codex or Claude Code</strong></td><td>This is the part that
+thinks about your edit: you open the Sniper folder in Codex (ChatGPT plan) or Claude Code (Claude
+plan), desktop app or command line, signed in as you already use it, and ask. There is no extra
+Sniper processing fee and no Sniper sign-in. Sniper's own commands never call a provider. One
+optional thing can bill per use, on a key of your own: Deepgram transcription (a Deepgram key,
+and only when you approve it for an edit). If your Codex or Claude Code is itself signed in with
+an API key rather than a plan, your conversation with it bills that key, as it always
+would.</td><td><strong>You pay your provider directly. Their plan price, model access and usage
+limits apply.</strong></td></tr>
 </table>
 
 <div class="note">
@@ -103,13 +98,12 @@ that is his preference from his own work, not a measured comparison, and not eve
 includes every model. Both routes are supported and documented.</p>
 </div>
 
-<div class="warn">
-<p><strong>An unusual requirement, stated plainly.</strong> This release only accepts one
-exact version of each provider CLI. The installer installs those exact versions inside this
-folder, and you sign in to them with <code>install/sign-in.command</code>, which keeps its own
-settings. Your own <code>codex</code> or <code>claude</code> installation and login are left
-alone, and an auto-update to them cannot break Sniper. The exact versions are in
-<code>RELEASE.json</code>.</p>
+<div class="note">
+<p><strong>Your agent, your version.</strong> Sniper does not install or pin Codex or Claude
+Code: it works through whichever version you have. Its instructions and skills live in this folder,
+and every tool they run goes through <code>./sniper</code>, which uses Sniper's own tools
+whatever else is on your Mac. Full qualification edits through each are tracked outside this package;
+<code>PENDING-OWNER-DECISIONS.txt</code> lists what is still open.</p>
 </div>
 <footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>
 </div>

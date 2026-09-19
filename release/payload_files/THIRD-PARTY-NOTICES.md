@@ -17,7 +17,7 @@ HyperFrames publishes no NOTICE file (checked 2026-09-18), so there is no upstre
 text to reproduce. The software is provided "AS IS", without warranties or conditions of
 any kind. Project Sniper's modifications are not endorsed by HeyGen, Inc.
 
-1. **Catalog mirror, unmodified** — `app/vendor/hyperframes-catalog/`. A read-only copy
+1. **Catalog mirror, unmodified** — `vendor/hyperframes-catalog/`. A read-only copy
    of the HyperFrames registry item sources, written by the HyperFrames CLI 0.7.33 on
    2026-08-28; Project Sniper does not edit these files (not re-verified against upstream
    bytes for this release: the lock records counts, not hashes). This archive contains
@@ -27,9 +27,9 @@ any kind. Project Sniper's modifications are not endorsed by HeyGen, Inc.
    `compositions/assets/` (fonts and the HyperFrames logo), `compositions/lib/` (a
    script library) and the texture images in `compositions/components/`. Provenance,
    including the one registry item that failed to mirror, is in
-   `app/vendor/hyperframes-catalog/hyperframes-catalog-lock.json`.
+   `vendor/hyperframes-catalog/hyperframes-catalog-lock.json`.
 2. **Adapted HyperFrames runtime, modified by Project Sniper** —
-   `app/scripts/producer/studio/runtime/patches.json` holds 40 byte patches whose text
+   `scripts/producer/studio/runtime/patches.json` holds 40 byte patches whose text
    contains portions of seven files of the installed `hyperframes` 0.8.31 npm package
    (`dist/cli.js`, `dist/hyperframe.runtime.iife.js`, `dist/hyperframe-runtime.js`,
    `dist/hyperframe.manifest.json`, `dist/native-capture-library.mjs` derived from
@@ -38,19 +38,19 @@ any kind. Project Sniper's modifications are not endorsed by HeyGen, Inc.
    `native_runtime.py` applies the patches to a separate copy under
    `templates/motion/.sniper-native-runtime/`; the installed package itself is not
    changed. The modification notice for each file is
-   `app/scripts/producer/studio/runtime/NOTICE`. It sits beside the patches, not inside
+   `scripts/producer/studio/runtime/NOTICE`. It sits beside the patches, not inside
    the patched files, because every adapted file is hash-checked before use.
    `frame-source-transport.mjs` and `native-export-guard.mjs` in that folder are
    Project Sniper's own files.
 3. **Seven ported compositions, modified by Project Sniper** —
-   `app/templates/motion/compositions/` `chart-story`, `count-up`, `hw-callout-circle`,
+   `templates/motion/compositions/` `chart-story`, `count-up`, `hw-callout-circle`,
    `hw-scribble-transition`, `line-swap`, `marker-highlight` and `ui-focus-zoom` are
    derived from HyperFrames catalog items. Each file's header names its upstream item,
    carries the copyright line and licence reference, and states what Project Sniper
    changed. No other composition is recorded as derived from third-party code.
 
 ### GSAP 3.14.2 core, SplitText and DrawSVGPlugin — GSAP Standard "No Charge" License
-`app/templates/motion/vendor/gsap/`, unmodified. Copyright GreenSock, as stated in each
+`templates/motion/vendor/gsap/`, unmodified. Copyright GreenSock, as stated in each
 file's `@license` header. Licensed by Webflow under the GSAP Standard "No Charge" License
 at <https://gsap.com/standard-license>. Since GSAP 3.13 that licence permits commercial use
 of the whole toolkit, including these plugins, at no charge. It is subject to restrictions.
@@ -58,20 +58,20 @@ One of them forbids use in no-code visual animation tools that compete with Webf
 visual animation building capabilities without Webflow's prior written consent. The
 licence also forbids removing the files' proprietary notices. These files remain subject
 to those terms. The verbatim upstream README is kept beside them. Full provenance:
-`app/templates/motion/PROVENANCE.md`. Project Sniper copies `gsap.min.js` and
+`templates/motion/PROVENANCE.md`. Project Sniper copies `gsap.min.js` and
 `SplitText.min.js` into the review projects it creates on your computer.
 
 ### Fonts — SIL Open Font License 1.1
 Each font keeps its own copyright line; the full licence text is in the file named.
-- **Inter 4.1** — `app/assets/fonts/Inter-Regular.ttf`, `Inter-Bold.ttf`, and the Inter
-  faces embedded in `app/templates/motion/tokens.css`. Copyright 2016 The Inter Project
+- **Inter 4.1** — `assets/fonts/Inter-Regular.ttf`, `Inter-Bold.ttf`, and the Inter
+  faces embedded in `templates/motion/tokens.css`. Copyright 2016 The Inter Project
   Authors (<https://github.com/rsms/inter>). Licence: `licenses/SIL-OFL-1.1-Inter.txt`
-  (also `app/assets/fonts/Inter-OFL.txt`).
-- **Caveat 2.000** (latin subset) — `app/assets/fonts/Caveat-700-latin.woff2` and the face
+  (also `assets/fonts/Inter-OFL.txt`).
+- **Caveat 2.000** (latin subset) — `assets/fonts/Caveat-700-latin.woff2` and the face
   embedded in `tokens.css`. Copyright 2014 The Caveat Project Authors
   (<https://github.com/googlefonts/caveat>). Licence: `licenses/SIL-OFL-1.1-Caveat.txt`
-  (also `app/assets/fonts/Caveat-OFL.txt`).
-- **Bricolage Grotesque, Archivo, IBM Plex Mono** — `app/src/app/fonts/`, the app's
+  (also `assets/fonts/Caveat-OFL.txt`).
+- **Bricolage Grotesque, Archivo, IBM Plex Mono** — `src/app/fonts/`, the app's
   interface fonts, vendored from the npm packages
   `@fontsource-variable/bricolage-grotesque@5.3.0`, `@fontsource-variable/archivo@5.3.0`
   and `@fontsource/ibm-plex-mono@5.3.0` so the app builds without contacting Google Fonts.
@@ -82,18 +82,18 @@ Each font keeps its own copyright line; the full licence text is in the file nam
   `licenses/SIL-OFL-1.1-Archivo.txt`, `licenses/SIL-OFL-1.1-IBM-Plex-Mono.txt`.
 
 ### Lucide icons — ISC License
-`app/templates/motion/icons/lucide/`: 55 glyphs from `lucide-static` 0.525.0, recoloured to
+`templates/motion/icons/lucide/`: 55 glyphs from `lucide-static` 0.525.0, recoloured to
 the Sniper accent; each file keeps its `@license` header. Copyright (c) for portions of
 Lucide are held by Cole Bemis 2013-2022 as part of Feather (MIT); all other copyright
 (c) for Lucide is held by Lucide Contributors 2022. Licence text:
 `licenses/ISC-Lucide.txt` (the `lucide-static` 0.525.0 LICENSE file).
 
 ### Simple Icons brand marks — CC0 1.0, trademarks reserved by their owners
-`app/templates/motion/icons/*.svg` (anthropic, claude, claude-color, codex, cursor, figma,
+`templates/motion/icons/*.svg` (anthropic, claude, claude-color, codex, cursor, figma,
 gemini, gemini-color, github, instagram, notion, openai, openai-color, perplexity, tiktok,
 x, youtube): icon drawings from Simple Icons (<https://simpleicons.org>), dedicated to the
 public domain under CC0 1.0 (`licenses/CC0-1.0-Simple-Icons.md`), recoloured. Sources and
-fetch dates: `app/templates/motion/icons/manifest.json` and `icons/PROVENANCE.md`.
+fetch dates: `templates/motion/icons/manifest.json` and `icons/PROVENANCE.md`.
 **Trademark caveat:** CC0 covers the drawings only. Every mark is a trademark of its
 owner. Project Sniper uses a mark only to identify a product a speaker names. That use
 implies no endorsement or affiliation. If you publish a video containing a mark, you are
@@ -103,27 +103,27 @@ agreement to keep it went unanswered. The `openai`, `codex` and `openai-color` f
 the drawing from Simple Icons 15.0.0 (path data identical, checked 2026-09-18).
 
 ### Starter music bed — original, no third-party rights
-`app/assets/music/default-bed.mp3` is synthesized from sine tones and filtered noise by
-`app/scripts/producer/audio/default_bed.py`, which regenerates it. It replaced an earlier
+`assets/music/default-bed.mp3` is synthesized from sine tones and filtered noise by
+`scripts/producer/audio/default_bed.py`, which regenerates it. It replaced an earlier
 synthesized bed that failed the product's own hum check (a 111 Hz line). The current bed
 passes that check; it has been measured, not yet listened to by a person. It is available
 to an edit only when you turn music on; your own licensed track in a project's `music/`
 folder works the same way.
 
 ### Sound effects and sample screenshot — original
-`app/assets/sfx/` is synthesized by `app/scripts/producer/audio/sfx_library.py` (see the
-`PROVENANCE.md` beside the files). `app/templates/motion/assets/sample-screen.png` is a
+`assets/sfx/` is synthesized by `scripts/producer/audio/sfx_library.py` (see the
+`PROVENANCE.md` beside the files). `templates/motion/assets/sample-screen.png` is a
 dashboard mock generated locally with Pillow, not any real product's interface.
 
 ### RNNoise model "beguiling-drafter" (2018-08-30)
-`app/scripts/producer/audio/models/bd.rnnn`, from
+`scripts/producer/audio/models/bd.rnnn`, from
 <https://github.com/GregorR/rnnoise-models>. The upstream README states that the models
 are not creative work and are not subject to copyright; only that repository's `tools/`
 directory carries a licence. The verbatim upstream README is kept alongside the model as
 `README.upstream.md`, and the file's SHA-256 is recorded in the `PROVENANCE.md` beside it.
 
 ### YuNet face-detection model — MIT License
-`app/assets/models/face_detection_yunet_2023mar.onnx`, used for face-aware vertical framing.
+`assets/models/face_detection_yunet_2023mar.onnx`, used for face-aware vertical framing.
 Copyright (c) 2020 Shiqi Yu. From OpenCV Zoo (`models/face_detection_yunet/`), whose README
 states that all files in that directory are MIT-licensed. The shipped file's SHA-256
 (`8f2383e4…d2552fa4`, 232,589 bytes) matches the upstream Git LFS record for
@@ -131,7 +131,7 @@ states that all files in that directory are MIT-licensed. The shipped file's SHA
 `licenses/MIT-YuNet-face-detection.txt`.
 
 ### Director library and reference library — original to Project Sniper
-`app/resources/director/` and `app/resources/references/` were written for Project Sniper.
+`resources/director/` and `resources/references/` were written for Project Sniper.
 The reference frames are rendered from Project Sniper's own motion templates; each frame
 records the composition, variables and time that produced it. No third-party footage,
 screenshot, brand, likeness or creator name is used.
@@ -140,12 +140,10 @@ screenshot, brand, likeness or creator name is used.
 
 | Component | Publisher | Licence |
 |---|---|---|
-| Node dependencies of `app/` and `app/templates/motion/` | various, via npm | each package's own; `npm ci` installs them from the lockfiles |
+| Node dependencies of the Sniper folder and `templates/motion/` | various, via npm | each package's own; `npm ci` installs them from the lockfiles |
 | `hyperframes` CLI and SDK 0.8.31 | HeyGen | Apache-2.0 (`licenses/Apache-2.0-hyperframes.txt`). Its Studio web bundle contains its own copy of GSAP 3.15.0 under the GSAP Standard "No Charge" License. |
 | `chrome-headless-shell` | The Chromium Authors, via Chrome for Testing | BSD-3-Clause and the Chromium licence set |
 | `ggml-small.en.bin` speech model | whisper.cpp project | MIT |
-| `@openai/codex` CLI | OpenAI | its own published terms |
-| `@anthropic-ai/claude-code` CLI | Anthropic | its own published terms |
 | Sniper's own tools: Python 3.14.4, Node 24.21.0, whisper.cpp 1.9.3, tesseract 5.5.3 (with its language data), yt-dlp 2026.08.19, git 2.55.0, micromamba 2.9.0, and the libraries they and Sniper's ffmpeg use (86 packages in all) | conda-forge, <https://conda-forge.org> | each package's own; the complete list with every licence is `install/deps/osx-arm64.json`. They are downloaded by the installer from conda.anaconda.org, not redistributed in this package. |
 
 ## Shipped in this package: Sniper's ffmpeg build
@@ -158,7 +156,7 @@ screenshot, brand, likeness or creator name is used.
 
 | Material | Why |
 |---|---|
-| Development reference libraries built from other creators' videos | Replaced by Sniper's own libraries in `app/resources/director` and `app/resources/references`; no creator's footage or frames ship. |
+| Development reference libraries built from other creators' videos | Replaced by Sniper's own libraries in `resources/director` and `resources/references`; no creator's footage or frames ship. |
 | HyperFrames catalog media, fonts, logo, texture images and script library | The catalog search reads only item HTML; these files' individual terms were not verified. |
 | ChunkFive font | No longer used by any template. |
 | create-next-app sample icons and logos in `public/` | Unused; the app's favicon is Project Sniper's own. |

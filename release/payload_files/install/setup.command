@@ -1,35 +1,37 @@
 #!/bin/bash
-# Guided first-run connections. Also safe to reopen to replace/remove a key.
-# The connection writer holds an exclusive maintenance lock in a child process.
-# That lock is released before launching an editor; edits must not inherit it.
+# Project Sniper — set up by double-click, and connect or change the optional Deepgram key.
+#
+#   install/setup.command                 install (or finish an interrupted install), offer Deepgram, check
+#   install/setup.command --connections   connect, replace or remove the Deepgram key
+#
+# You can also ask your Codex or Claude Code, with this folder open, to "set up Sniper":
+# it runs install/install.command. The Deepgram key is entered here, in a Terminal window,
+# so it never goes into a conversation. The connection writer holds an exclusive
+# maintenance lock in a child process.
 . "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh" || exit 1
 
 MODE="${1:-}"
 case "$MODE" in
-  ''|--finish-install|--connections) ;;
-  *) fail "Double-click setup.command to connect Sniper." ;;
+  ''|--connections) ;;
+  *) fail "Double-click install/setup.command to set up Sniper." ;;
 esac
 
-# Settings are written at step 8 of 10, so their presence does not mean the install
-# finished. The installer writes the "installed" receipt (for this folder) only after
-# its last step; without it — or without Sniper's own tools — resume the installer,
-# which redoes only unfinished steps.
-# The --connections and --finish-install modes never start the installer themselves.
+# The installer writes the "installed" receipt (for this folder) only after its last step;
+# without it — or without Sniper's own tools — resume the installer, which redoes only
+# unfinished steps. It offers the Deepgram connection itself when it runs in a Terminal.
 if ! install_complete; then
   [ -z "$MODE" ] || fail "Installation has not finished. Run install/install.command first."
   [ -f "$ENV_FILE" ] && say "The last installation did not finish, this folder moved, or Sniper's own tools are missing;
   resuming the installation."
-  "$PKG_ROOT/install/install.command" || exit $?
-  exec "$PKG_ROOT/install/editor.command"
+  exec "$PKG_ROOT/install/install.command"
 fi
 
 load_env
 
-# Only this short-lived child owns the connection-write lock. The installer may
-# already own it; the existing lock helper verifies inherited descriptors.
+# Only this short-lived child owns the connection-write lock.
 if [ "$MODE" = --connections ]; then
-  hold_maintenance exclusive "connection setup" "Close Sniper's editor and stop the app with
-  install/stop.command before changing connections. Then reopen install/setup.command." "$@"
+  hold_maintenance exclusive "connection setup" "A Sniper command is running. Let it finish, then reopen
+  install/setup.command." "$@"
   PYTHON_BIN="$(sniper_python)" || fail "Run install/install.command to repair Python."
   shift
   exec "$PYTHON_BIN" "$PKG_ROOT/install/lib/deepgram_setup.py" "$@"
@@ -39,25 +41,8 @@ if [ ! -t 0 ]; then
   fail "Setup needs a Terminal window. Double-click install/setup.command."
 fi
 
-say "Welcome to Project Sniper"
-say "We will sign you in, offer optional Deepgram transcription, and check your setup."
-
-step "Sign in to your $SNIPER_PROVIDER subscription"
-if "$PKG_ROOT/install/doctor.command" --provider-only >/dev/null 2>&1; then
-  say "Already signed in."
-else
-  say "Follow the sign-in instructions in your browser, then return here."
-  "$PKG_ROOT/install/sign-in.command" || {
-    say "Sign-in or its check did not finish. Reopen install/setup.command to retry."
-    exit 1
-  }
-fi
-
-if [ "$MODE" = --finish-install ]; then
-  "$PKG_ROOT/install/setup.command" --connections --if-needed || exit $?
-else
-  "$PKG_ROOT/install/setup.command" --connections || exit $?
-fi
+say "Project Sniper is installed."
+"$PKG_ROOT/install/setup.command" --connections || exit $?
 load_env
 
 step "Check this installation"
@@ -65,10 +50,4 @@ step "Check this installation"
   say "Setup is not ready yet. Follow the failed checks above, then reopen install/setup.command."
   exit 1
 }
-say "Ready. Tell Sniper: Help me make my first edit from my own video."
-if [ "$MODE" = --finish-install ]; then
-  say "Next, double-click install/editor.command to open your configured $SNIPER_PROVIDER editor."
-  exit 0
-fi
-say "Opening your configured $SNIPER_PROVIDER editor."
-exec "$PKG_ROOT/install/editor.command"
+say "Ready. Open this folder in Codex or Claude Code and ask for your first edit."

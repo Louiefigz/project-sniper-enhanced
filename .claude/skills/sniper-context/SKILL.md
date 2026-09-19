@@ -14,8 +14,8 @@ The report locates context; it does not replace reading or applying it.
 2. From the app folder (the Project Sniper root), run:
 
    ```bash
-   python3 -B scripts/producer/context.py
-   python3 -B scripts/producer/context.py --project /absolute/project --workflow native-long
+   ./sniper python3 -B scripts/producer/context.py
+   ./sniper python3 -B scripts/producer/context.py --project /absolute/project --workflow native-long
    ```
 
    Pass a project only when selected by the user or established task context.

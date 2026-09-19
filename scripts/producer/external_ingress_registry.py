@@ -99,8 +99,9 @@ def _matching_owners(
     ]
 
 
-# The package build ships release/payload_files/<x> (the installer and doctor) as <x> beside
-# app/, so inside an installed package such a path is looked up there (release/payload.py).
+# The package build ships release/payload_files/<x> (the installer and doctor) as <x> at the
+# package root, which is also the app folder, so inside an installed package such a path is
+# looked up there (release/payload.py).
 _PAYLOAD_PREFIX = "release/payload_files/"
 
 
@@ -109,7 +110,7 @@ def located(root: Path, relative: str) -> Path:
     path = root / relative
     if path.exists() or not relative.startswith(_PAYLOAD_PREFIX) or (root / "release").exists():
         return path
-    return root.parent / relative[len(_PAYLOAD_PREFIX):]
+    return root / relative[len(_PAYLOAD_PREFIX):]
 
 
 def _missing_family_paths(

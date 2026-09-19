@@ -90,20 +90,8 @@ class DoctorChecks(unittest.TestCase):
         self.assertEqual(rows["Sniper's own tools"][0], "FAIL")
         self.assertIn("not installed", rows["Sniper's own tools"][1])
 
-    def test_provider_settings_must_agree(self) -> None:
-        cases = {("codex", "codex"): "PASS", ("claude", "legacy"): "PASS",
-                 ("claude", "codex"): "FAIL", ("codex", "legacy"): "FAIL", ("", "codex"): "FAIL"}
-        for (provider, brain), want in cases.items():
-            with self.subTest(provider=provider, brain=brain):
-                self.rows.clear()
-                env = {"SNIPER_PROVIDER": provider, "SNIPER_BRAIN_PROVIDER": brain, "SNIPER_CODEX_MODEL": "gpt-5.6-sol",
-                       "SNIPER_CLAUDE_MODEL": "opus", "SNIPER_CODEX_REASONING": "xhigh"}
-                with mock.patch.dict(os.environ, env):
-                    doctor_setup.check_provider_settings(self._record)
-                self.assertEqual(self.rows[0][0], want)
-
     def _admission(self, script: str | None, timeout: int = 60) -> tuple[str, str]:
-        app = self.base / "app"
+        app = self.base   # the package folder is the app folder
         (app / ".venv/bin").mkdir(parents=True, exist_ok=True)
         python = app / ".venv/bin/python3"
         if not python.exists():  # a regular wrapper FILE, never a link to the real interpreter

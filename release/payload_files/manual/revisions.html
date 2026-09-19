@@ -46,15 +46,13 @@ cannot tell which part you meant.</p>
 
 <h2>Interrupting, resuming and reopening</h2>
 <ul>
-  <li><strong>Closing the browser tab does nothing.</strong> The edit is a separate
-  background process on purpose.</li>
-  <li><strong>Restarting the app does nothing either.</strong> The edit keeps going and
-  reconnects.</li>
-  <li><strong>If the machine or the process dies</strong>, the edit becomes
-  <em>interrupted</em> and you get a <strong>Resume</strong> option that continues from
-  the last safe checkpoint rather than from the beginning.</li>
-  <li><strong>Reopening a project later</strong> — point Sniper at
-  <code>~/ProjectSniper/&lt;project&gt;/</code>. Its state is read from what is actually
+  <li><strong>Keep the conversation open while a render runs.</strong> Your agent runs each step
+  as a command; closing its window or the Mac sleeping can stop a step part-way.</li>
+  <li><strong>If a step stops</strong>, ask your agent to run it again. Finished stages are
+  reused when their inputs have not changed, and a long export picks up a compatible earlier
+  attempt, so it does not start from the beginning.</li>
+  <li><strong>Reopening a project later</strong> — open the Sniper folder in your agent and name
+  the project in <code>projects/&lt;project&gt;/</code>. Its state is read from what is actually
   on disk, not from a log, so a project you left months ago still reports accurately.</li>
   <li><strong>One edit at a time per project.</strong> Keep as many projects as you like.</li>
 </ul>

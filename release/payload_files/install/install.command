@@ -1,43 +1,42 @@
 #!/bin/bash
 # Project Sniper — Mac installer.
 #
-#   install/install.command [--provider codex|claude] [--workspace FOLDER]
+#   install/install.command [--workspace FOLDER]
 #
-# Installs everything Sniper needs. Its own tools (Python, Node, ffmpeg, whisper.cpp,
-# tesseract, yt-dlp, git) go to ~/.project-sniper/runtimes/, downloaded and checked
-# against this release's lock (install/deps/). The app's dependencies and Python
-# environment go under app/, and the rendering browser, speech model and pinned
-# provider CLIs under runtime/. It does not use or change your own Node, Python,
-# Homebrew, conda, Codex or Claude installation, or your existing Codex/Claude login.
+# Installs everything Sniper's commands need. Its own tools (Python, Node, ffmpeg,
+# whisper.cpp, tesseract, yt-dlp, git) go to ~/.project-sniper/runtimes/, downloaded and
+# checked against this release's lock (install/deps/). The Python environment and the
+# JavaScript dependencies go in this folder, the rendering browser and speech model under
+# runtime/. You talk to Sniper through your own Codex or Claude Code; this installs no
+# copy of either and never touches your own Node, Python, Homebrew, conda, Codex or
+# Claude installation or login.
 #
 # Safe to run again. Each step records what it finished with and the SHA-256 of
 # what it produced; a step is redone when its inputs changed, it never finished,
 # or its output no longer verifies. Your settings in runtime/sniper.local.env are
-# never touched. It runs only while nothing else uses this install (the app, an
-# editor window, an edit or render, the doctor, cleanup or uninstall).
+# never touched. It runs only while nothing else uses this install (a ./sniper
+# command, an edit or render, the doctor, cleanup or uninstall).
 
 . "$(dirname "${BASH_SOURCE[0]}")/lib/common.sh" || exit 1
 . "$PKG_ROOT/install/lib/steps.sh" || exit 1
 . "$PKG_ROOT/install/lib/configure.sh" || exit 1
 
-usage() { fail "Unknown option: $1  (usage: install.command [--provider codex|claude] [--workspace FOLDER])"; }
+usage() { fail "Unknown option: $1  (usage: install.command [--workspace FOLDER])"; }
 require_macos
 require_safe_install_path
 # Step 1 comes before the maintenance lock: that lock's helper runs on Sniper's own Python,
 # which this step installs (with only macOS's own tools). The rerun under the lock skips it.
 if [ "${SNIPER_LOCKED_PID:-}" != "$$" ]; then
   say "Project Sniper installer — $PKG_ROOT"
-  step "1/10  Sniper's own tools (Python, Node, ffmpeg, Whisper, Tesseract, yt-dlp)"
+  step "1/8  Sniper's own tools (Python, Node, ffmpeg, Whisper, Tesseract, yt-dlp)"
   ensure_runtime_tools
 fi
-hold_maintenance exclusive "installer" "Sniper cannot be installed, repaired or switched while it is in use.
-  Stop the app (install/stop.command), close any Sniper editor window and let running edits
-  finish, then run this again." "$@"
+hold_maintenance exclusive "installer" "Sniper cannot be installed or repaired while one of its commands is
+  running. Let running edits and renders finish, then run this again." "$@"
 
-PROVIDER_ARG=""; WORKSPACE_ARG=""
+WORKSPACE_ARG=""
 while [ $# -gt 0 ]; do
   case "$1" in
-    --provider) PROVIDER_ARG="${2:-}"; shift 2 ;;
     --workspace) WORKSPACE_ARG="${2:-}"; shift 2 ;;
     *) usage "$1" ;;
   esac
@@ -46,14 +45,14 @@ trap 'printf "\nSTOPPED: interrupted. Run install/install.command again; it redo
 refuse_if_active_work "Installing now would replace tools it is using."
 mkdir -p "$RUNTIME_DIR" "$STATE_DIR" "$RECEIPTS" "$LOG_DIR"
 # "installed" is written only after the last step succeeds; an interrupted or failed
-# run leaves it absent, so install/setup.command resumes the installer next time.
+# run leaves it absent, so ./sniper refuses to run and setup resumes the installer.
 clear_receipt installed
 log_line "install started"
-# The Python environment and the app build record the folder they were made in.
-# If this folder was moved or copied since, redo exactly those two steps.
+# The Python environment records the folder it was made in. If this folder was moved
+# or copied since, redo that step.
 if [ -f "$RECEIPTS/location" ] && ! receipt_ok location "$PKG_ROOT"; then
-  say "This folder was moved or copied since it was installed; redoing the steps that record its location."
-  clear_receipt venv; clear_receipt build; rm -rf "$APP_DIR/.venv"
+  say "This folder was moved or copied since it was installed; redoing the step that records its location."
+  clear_receipt venv; rm -rf "$APP_DIR/.venv"
 fi
 write_receipt location "$PKG_ROOT"
 
@@ -62,30 +61,26 @@ verify_runtime_tools
 use_runtime_tools
 link_runtime_bin
 
-# ------------------------------------------------------- 2-7. dependencies and downloads
-step "2/10  Application dependencies"
-npm_step "app dependencies" "$APP_DIR" npm-app
-step "3/10  Rendering-project dependencies"
+# ------------------------------------------------------- 2-6. dependencies and downloads
+step "2/8  JavaScript dependencies (for Sniper's scripts)"
+npm_step "JavaScript dependencies" "$APP_DIR" npm-app
+step "3/8  Rendering-project dependencies"
 npm_step "rendering-project dependencies" "$APP_DIR/templates/motion" npm-motion
-step "4/10  Python environment from the pinned, hash-checked list"
+step "4/8  Python environment from the pinned, hash-checked list"
 python_step
-step "5/10  Rendering browser"
+step "5/8  Rendering browser"
 browser_step
-step "6/10  Speech model"
+step "6/8  Speech model"
 model_step
-step "7/10  Pinned Codex and Claude CLIs (kept inside this folder)"
-cli_step
 
-# ------------------------------------------------------------ 8. configuration
-step "8/10  Configuration"
-choose_provider
+# ------------------------------------------------------------ 7. configuration
+step "7/8  Configuration"
 write_settings
 verify_settings
-[ -f "$APP_DIR/.env.local" ] || cp "$APP_DIR/.env.local.example" "$APP_DIR/.env.local"
-say "Editor brain: $PROVIDER   ·   Video projects: $SNIPER_WORKSPACE_ROOT"
+say "Video projects: $SNIPER_WORKSPACE_ROOT"
 
-# ------------------------------------------------------------ 9. render runtime
-step "9/10  Rendering runtime"
+# ------------------------------------------------------------ 8. render runtime
+step "8/8  Rendering runtime"
 # native_runtime.py builds under runtime-build.lock and removes what an interrupted
 # build left; --repair also rebuilds a finished runtime that no longer verifies.
 # This installer holds the maintenance lock exclusively, so no render uses it now.
@@ -93,33 +88,12 @@ RUNTIME_RESULT="$( load_env; cd "$APP_DIR" && PYTHONPATH="$APP_DIR/scripts/produ
     "$APP_DIR/scripts/producer/studio/native_runtime.py" --repair )" \
   || fail "The rendering runtime did not build from its shipped patch set."
 say "Rendering runtime — ${RUNTIME_RESULT%%$'\t'*}"
-
-# ------------------------------------------------------------ 10. production app
-build_step() {
-  local key why record="$RECEIPTS/build.tree.json"
-  key="$(release_value version)|node-$NODE_VERSION@$NODE_BIN|deps-$(sha "$RECEIPTS/npm-app.tree.json")"
-  if receipt_ok build "$key" && [ -f "$APP_DIR/.next/BUILD_ID" ]; then
-    why="$(tree_check "$APP_DIR/.next" "$record" cache)" && { say "App build — up to date (verified)"; return 0; }
-    say "App build — changed since it was built ($why); rebuilding"
-  fi
-  clear_receipt build
-  if ! ( load_env; cd "$APP_DIR" && npm_cli run build ) >> "$LOG_DIR/build.log" 2>&1; then
-    tail -15 "$LOG_DIR/build.log" >&2
-    fail "Building the app failed (the lines above are from $LOG_DIR/build.log).
-  Run the installer again; if it fails the same way, run install/diagnostics.command."
-  fi
-  [ -f "$APP_DIR/.next/BUILD_ID" ] || fail "The app build finished without a build id."
-  tree_record "$APP_DIR/.next" "$record" cache
-  write_receipt build "$key"; say "App build — done ($(cat "$APP_DIR/.next/BUILD_ID"))"
-}
-step "10/10  Building the app (no network needed)"
-build_step
 write_receipt installed "$PKG_ROOT"
 log_line "install finished"
 
+# In a Terminal window, offer the optional Deepgram connection (it needs a hidden prompt).
 if [ -t 0 ] && [ -t 1 ]; then
-  "$PKG_ROOT/install/setup.command" --finish-install
-  exit $?
+  "$PKG_ROOT/install/setup.command" --connections --if-needed || exit $?
 fi
 
 say ""
@@ -128,7 +102,8 @@ DOCTOR=$?
 say ""
 if [ "$DOCTOR" -ne 0 ]; then
   say "Installed, but the checks above report something still to do."
-  say "If the editor brain is among the failures, sign in next:"
+  exit "$DOCTOR"
 fi
-say "Double-click install/setup.command to sign in, connect Deepgram if you want it, and finish setup."
-exit "$DOCTOR"
+say "Sniper is ready. In Codex or Claude Code, with this folder open, ask for your first edit,"
+say "for example: Make a trim-only clean cut of ~/Movies/test-clip.mp4."
+exit 0

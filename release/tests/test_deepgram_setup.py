@@ -147,14 +147,14 @@ class DeepgramStorage(unittest.TestCase):
     def test_launcher_reads_key_after_install_repair_and_keeps_local_asr(self) -> None:
         setup.save_connection(self.path, KEY)
         for _ in range(2):
-            done = fx.write_settings(self.pkg, "codex", str(self.pkg.parent / "videos"))
+            done = fx.write_settings(self.pkg, str(self.pkg.parent / "videos"))
             self.assertEqual(done.returncode, 0, done.stderr)
             done = fx.bash(self.pkg, 'load_env; printf "%s|%s" "$DEEPGRAM_API_KEY" "$SNIPER_TRANSCRIBE_PROVIDER"')
             self.assertEqual(done.returncode, 0, done.stderr)
             self.assertEqual(done.stdout, KEY + "|local-whisper")
 
     def test_disconnect_overrides_legacy_manual_key(self) -> None:
-        self.assertEqual(fx.write_settings(self.pkg, "codex", str(self.pkg.parent / "videos")).returncode, 0)
+        self.assertEqual(fx.write_settings(self.pkg, str(self.pkg.parent / "videos")).returncode, 0)
         (self.pkg / "runtime/sniper.local.env").write_text(f"DEEPGRAM_API_KEY={KEY}\n")
         setup.save_connection(self.path, "")
         done = fx.bash(self.pkg, 'load_env; printf "key:%s" "$DEEPGRAM_API_KEY"')
@@ -168,7 +168,7 @@ class DeepgramStorage(unittest.TestCase):
         spec.loader.exec_module(diagnostics)
         target = self.pkg.parent / "support"
         with patch.object(diagnostics, "_run", return_value="{}"):
-            diagnostics.build(target, False)
+            diagnostics.build(target)
         self.assertNotIn(KEY, "".join(p.read_text() for p in target.iterdir()))
         self.assertFalse((target / "deepgram.env").exists())
 

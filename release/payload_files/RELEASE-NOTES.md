@@ -2,6 +2,24 @@
 
 ## 0.1.0-rc4 — release candidate, not for sale
 
+### You use Sniper from your own Codex or Claude Code
+- **Open the Sniper folder in your Codex or Claude Code and ask.** There is no Sniper app,
+  no web page, no copy of Codex or Claude installed by Sniper and nothing to sign in to: your
+  own agent, on your own subscription and whatever version you have, reads Sniper's
+  instructions and skills from the folder and does the editorial thinking.
+- **`./sniper`** runs every Sniper command with Sniper's own tools and settings, whatever else
+  is on your Mac. `./sniper setup` installs or repairs; `./sniper doctor` checks.
+- **Set up from the conversation.** Say “Set up Sniper”; your agent runs the installer. Double-
+  clicking `install/setup.command` still works, and is where the optional Deepgram key is
+  entered (a hidden prompt, never a chat).
+- **Projects live in the Sniper folder** (`projects/`) by default, where Codex's own sandbox lets
+  it write. Codex asks you to approve running Sniper's video check outside its sandbox (macOS
+  does not nest sandboxes); the check itself stays sandboxed.
+- **Not in this release** (they needed the retired app): Text Review, Clipper's dual-camera/lav
+  Final Cut export, and the guided checkpoint and Director routes.
+- Full qualification edits through each are tracked in the qualification record kept
+  outside this package; `PENDING-OWNER-DECISIONS.txt` lists what is still open.
+
 ### Sniper installs its own tools
 - **Nothing to install first.** Setup downloads Sniper's own Python 3.14.4, Node 24.21.0,
   whisper.cpp 1.9.3, tesseract 5.5.3, yt-dlp 2026.08.19 and git 2.55.0 from conda-forge (about
@@ -21,7 +39,7 @@
   binary. Setup stops before downloading anything on an Intel Mac or an older macOS. Only macOS 26
   has been tested so far.
 - Folders of the same release share one copy of the tools; uninstalling the last one removes it.
-- Setup now signs you in first, then offers the optional Deepgram key.
+- git is still in the tool set but nothing uses it any more; it goes at the next tool update.
 
 ### Footage admission without Docker
 - **Every video Producer edits is checked on your Mac, in a macOS sandbox.** Before a
@@ -32,26 +50,16 @@
   Docker is no longer needed.
 - Not covered: Segmenter, Clipper and the quick measurements of a reference video read the
   file directly with Sniper's own ffmpeg and Whisper, outside that sandbox.
-- `install/doctor.command` admits a generated sample on your Mac and confirms the
+- `./sniper doctor` admits a generated sample on your Mac and confirms the
   sandbox refuses a network connection and another file's contents, and stops a
   decode above its memory limit.
 
 ### What leaves your Mac
-- Segmenter and Clipper now use your Codex or Claude subscription, like Producer. The
-  API-key route and the Anthropic SDK are gone.
-- The visual review of a rendered edit sends still frames, with that reviewer's tools
-  switched off. The provider CLI runs in a sandbox that hides your project folder
-  except those frames.
-- Two optional features bill your own keys: Text Review (your Anthropic key and an opt-in
-  for each run) and Deepgram transcription (your Deepgram key and explicit approval for each
-  run). Setup can save a Deepgram key, and saving it approves nothing.
-
-### Guided setup
-- Double-click `install/setup.command`. It installs Sniper and its own tools, signs in to
-  your subscription, connects Deepgram (optional, hidden prompt), runs the doctor and opens
-  the editor window.
-- Signing in, signing out and the editor window use only Sniper's own Claude settings,
-  never your personal `~/.claude` settings or CLAUDE.md files.
+- What your agent reads and sends in your conversation (transcripts, plans, still frames of the
+  rendered edit that it or a reviewer looks at) goes to its provider under your account. Sniper's
+  own commands call no provider and upload no video.
+- One optional feature bills your own key: Deepgram transcription (your Deepgram key and explicit
+  approval for each run). Saving a key approves nothing.
 
 ### Original material
 - The three saved styles and the editing doctrine are rewritten as Sniper's own
@@ -68,25 +76,21 @@
 
 ## 0.1.0-rc4 (installer and configuration)
 
-- **One provider everywhere.** `editor.command` refuses a provider other than the one
-  the install uses, and passes the same model settings to the editor window as the app
-  uses. Switch the whole install with `use-provider.command` (app stopped).
 - **Settings stored literally.** `runtime/sniper.env` is data, never run as shell, so
   folder names with `$`, quotes, backticks or accents read back exactly. Only a comma,
   apostrophe, colon or backslash in the install folder is refused (audio-cleanup limit).
-- **One Node.** The app, doctor, CLIs and renders all use Sniper's own Node, also when
+- **One Node.** Every Sniper command, the doctor and renders use Sniper's own Node, also when
   started from Finder. The build refuses a Node below the floor (22.13) derived from the
   dependencies.
-- **Every download checked.** Python packages install with `--require-hashes`; the two
-  CLIs from a reviewed lockfile with `npm ci`; the rendering browser against a SHA-256
+- **Every download checked.** Python packages install with `--require-hashes`; JavaScript
+  dependencies from reviewed lockfiles with `npm ci`; the rendering browser against a SHA-256
   recorded at build time.
 - **Reruns repair.** Each step re-verifies the files it produced; anything missing,
   partial or changed is redone without manual cleanup.
-- **One thing at a time.** The installer, provider switch, cache cleaning and uninstall
-  refuse to start while the app, an editor window, the doctor or a render is running, and
-  say what is in use (a real lock).
-- **Truthful uninstall.** A failed stop or sign-out stops the removal and says so; your
-  settings and export-recovery history are kept.
+- **One thing at a time.** Setup, cache cleaning and uninstall refuse to start while a
+  `./sniper` command, the doctor or a render is running, and say what is in use (a real lock).
+- **Truthful uninstall.** A failed removal stops and says so; your settings, projects and
+  export-recovery history are kept.
 - **Studio through `install/studio.command`**, with this install's settings.
 - The doctor checks tesseract and yt-dlp (reference features) and runs a real media
   admission sample instead of checking for Docker.

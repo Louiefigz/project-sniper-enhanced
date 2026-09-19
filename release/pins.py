@@ -3,9 +3,6 @@
 * ``release/pins/chrome-headless-shell.json`` (written by ``release.pin_browser``
   from an actual download) must name exactly the browser build the shipped
   HyperFrames requires; its per-platform SHA-256 goes into RELEASE.json.
-* ``install/cli/package.json`` must pin exactly the admitted CLI versions, and its
-  ``package-lock.json`` must agree with it and carry an integrity hash for every
-  package, so ``npm ci`` installs nothing unreviewed.
 * ``install/requirements.lock.txt`` must carry at least one ``--hash=sha256:`` for
   every requirement, so ``pip install --require-hashes`` accepts nothing else.
 
@@ -36,28 +33,6 @@ def browser_hashes(version: str) -> dict[str, str]:
     if set(hashes) != {"mac-arm64", "mac-x64"} or not all(_SHA256.match(h) for h in hashes.values()):
         raise StagingError("browser pin must hold a SHA-256 for mac-arm64 and mac-x64")
     return dict(sorted(hashes.items()))
-
-
-def check_cli_lock(folder: Path, codex_admitted: str, claude_admitted: str) -> None:
-    """The shipped CLI manifest and lock install exactly the admitted versions, all integrity-pinned."""
-    want = {"@openai/codex": codex_admitted.split()[-1], "@anthropic-ai/claude-code": claude_admitted.split()[0]}
-    try:
-        manifest = json.loads((folder / "package.json").read_text(encoding="utf-8"))
-        lock = json.loads((folder / "package-lock.json").read_text(encoding="utf-8"))
-    except (OSError, ValueError) as error:
-        raise StagingError(f"install/cli manifest or lock is missing or unreadable: {error}") from error
-    if manifest.get("dependencies") != want:
-        raise StagingError(f"install/cli/package.json must pin exactly {want}")
-    root = lock.get("packages", {}).get("", {})
-    if lock.get("lockfileVersion") != 3 or root.get("dependencies") != want:
-        raise StagingError("install/cli/package-lock.json does not match install/cli/package.json; regenerate it")
-    for name, version in want.items():
-        if lock["packages"].get(f"node_modules/{name}", {}).get("version") != version:
-            raise StagingError(f"install/cli/package-lock.json does not resolve {name} to {version}")
-    unpinned = [name for name, row in lock["packages"].items()
-                if name and not (str(row.get("integrity", "")).startswith("sha512-") and row.get("resolved"))]
-    if unpinned:
-        raise StagingError(f"install/cli/package-lock.json entries without an integrity hash: {unpinned[:4]}")
 
 
 def check_python_lock(lock: Path) -> None:

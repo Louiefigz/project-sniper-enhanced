@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """Check this install by asking the product's own code what it would do.
 
-    install/doctor.command [--json] [--provider-only] [--provider codex|claude]
-                           [--skip-transcription]
+    install/doctor.command [--json] [--skip-transcription]
 
 Nothing is re-implemented here. Render tools come from `graphics.render_tools`,
 transcription from `local_whisper.transcribe_media`, the render runtime from
-`studio.native_runtime`, media admission from the product's admission self-test
-(`scripts/producer/headless/native_admission_selftest.py`), and the provider
-check from the same `admitSubscriptionInvocation` every real edit uses (via
-`scripts/infra/provider-admission.ts`). A check passes on what the tool actually
-did, never on an exit code alone. Installed files are re-verified against the
+`studio.native_runtime`, and media admission from the product's admission self-test
+(`scripts/producer/headless/native_admission_selftest.py`). Your Codex or Claude Code is
+not checked: it is yours, signed in to your own subscription, and Sniper's commands never
+call it. A check passes on what the tool actually did, never on an exit code alone. Installed files are re-verified against the
 SHA-256 records the installer wrote when each step finished.
 
 Exit 0 = every required check passed. Optional features are reported as
@@ -71,11 +69,12 @@ def check_foundations() -> None:
     record("FAIL" if bad else "PASS", "install path",
            f"contains {' '.join(bad)}: voice-rnn cleanup cannot run" if bad else str(PKG_ROOT))
     setup.check_node(record)
-    for root, receipt in ((APP, "npm-app"), (APP / "templates/motion", "npm-motion")):
+    for root, receipt, label in ((APP, "npm-app", "JavaScript dependencies"),
+                                 (APP / "templates/motion", "npm-motion", "rendering-project dependencies")):
         problem = _tree_intact(root / "node_modules", receipt, {".cache"})
-        record("FAIL" if problem else "PASS", f"dependencies {root.relative_to(PKG_ROOT)}",
-               problem or "installed and verified")
-    record("PASS" if (APP / "node_modules/tsx/dist/cli.mjs").exists() else "FAIL", "tsx runtime", "background edits need it")
+        record("FAIL" if problem else "PASS", label, problem or "installed and verified")
+    record("PASS" if (APP / "node_modules/tsx/dist/cli.mjs").exists() else "FAIL", "tsx runtime",
+           "Sniper's TypeScript commands need it")
     venv = APP / ".venv/bin/python3"
     if not venv.exists():
         record("FAIL", "python packages", "no environment — run install.command")
@@ -109,17 +108,14 @@ def check_media() -> None:
            (problem or tools["browser"]) if ok else f"expected {pin} inside this folder, resolved {tools['browser']}")
 
 
-def check_runtime_and_build() -> None:
-    """The render runtime through the product's own installer, and the app build's files."""
+def check_runtime() -> None:
+    """The render runtime through the product's own installer."""
     _product_paths()
     try:
         from studio.native_runtime import install_runtime  # noqa: PLC0415
         record("PASS", "render runtime", f"verified from the shipped patch set: {install_runtime().name}")
     except Exception as error:
         record("FAIL", "render runtime", f"{type(error).__name__}: {error}")
-    build = APP / ".next/BUILD_ID"
-    problem = _tree_intact(APP / ".next", "build", {"cache"}) if build.exists() else "not built — run install.command"
-    record("FAIL" if problem else "PASS", "app build", problem or build.read_text().strip())
 
 
 def check_transcription(skip: bool) -> None:
@@ -154,9 +150,9 @@ def check_transcription(skip: bool) -> None:
            else f"output unusable: {len(words)} words, {heard}/5 expected words, ordered={starts == sorted(starts)}")
 
 
-def check_workspace_and_port() -> None:
-    """The video workspace is writable with room for a render; who holds the port."""
-    root = Path(os.environ.get("SNIPER_WORKSPACE_ROOT") or Path.home() / "ProjectSniper")
+def check_workspace() -> None:
+    """The video workspace is writable with room for a render, and ./sniper is in place."""
+    root = Path(os.environ.get("SNIPER_WORKSPACE_ROOT") or PKG_ROOT / "projects")
     try:
         root.mkdir(parents=True, exist_ok=True)
         (root / ".sniper-doctor-probe").write_text("ok"); (root / ".sniper-doctor-probe").unlink()
@@ -165,9 +161,10 @@ def check_workspace_and_port() -> None:
                + ("" if free >= 20 else "; long-form renders need at least 20 GB"))
     except OSError as error:
         record("FAIL", "workspace", f"{root} not writable: {error.strerror}")
-    port = os.environ.get("SNIPER_PORT", "3000")
-    out = setup.run(["lsof", "-nP", "-t", f"-iTCP:{port}", "-sTCP:LISTEN"], 15)[1]
-    record("INFO", f"port {port}", "free" if not out.strip() else f"in use by pid {' '.join(out.split())}")
+    wrapper = PKG_ROOT / "sniper"
+    ok = wrapper.is_file() and os.access(wrapper, os.X_OK)
+    record("PASS" if ok else "FAIL", "./sniper", "runs Sniper's commands for your Codex or Claude Code" if ok
+           else f"{wrapper} is missing or not executable — this folder is incomplete")
 
 
 def check_optional() -> None:
@@ -175,8 +172,6 @@ def check_optional() -> None:
     demucs = (APP / "scripts/producer/audio/.demucs-venv/bin/python3").exists()
     record("PASS" if demucs else "GATED", "audio preset: separate",
            "available" if demucs else "not installed (needs Demucs); voice, voice-strong, voice-rnn work")
-    record("GATED", "Text Review", "optional; your own paid Anthropic API key and an opt-in per run — "
-           "not part of this purchase")
     record("GATED", "Palmier Pro mirror", "optional separate app; not configured in this package")
 
 
@@ -196,17 +191,12 @@ def main() -> int:
     """Run the checks; exit 0 only when every required one passed."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true")
-    parser.add_argument("--provider-only", action="store_true")
-    parser.add_argument("--provider", choices=("codex", "claude"))
     parser.add_argument("--skip-transcription", action="store_true")
     args = parser.parse_args()
-    provider = setup.check_provider_settings(record)
-    if not args.provider_only and _hold_install():
-        check_foundations(); setup.check_runtime_tools(record); check_media(); check_runtime_and_build()
+    if _hold_install():
+        check_foundations(); setup.check_runtime_tools(record); check_media(); check_runtime()
         setup.check_media_admission(record); check_transcription(args.skip_transcription)
-    setup.check_provider_admission(record, args.provider or provider or "claude")
-    if not args.provider_only:
-        check_workspace_and_port(); check_optional()
+    check_workspace(); check_optional()
     failed = [r["check"] for r in _RESULTS if r["state"] == "FAIL"]
     if args.json:
         print(json.dumps({"ok": not failed, "failed": failed, "checks": _RESULTS}))

@@ -14,53 +14,55 @@ revisions and context handoffs.
 
 ## The product contract
 
-- **The editor brain is the operator's own subscription.** Sniper uses the Codex CLI
-  (ChatGPT subscription) or the Claude Code CLI (Claude subscription) that its installer
-  pinned in `../runtime/cli/`, each with its own login state (`../runtime/codex-home`,
-  `../runtime/claude-config`). The operator's own `codex`/`claude` installation and login
-  are not used.
-- **One provider per install.** `SNIPER_PROVIDER` (`codex|claude`) and
-  `SNIPER_BRAIN_PROVIDER` (`codex|legacy`) in `../runtime/sniper.env` select it; every
-  app call — Producer, Segmenter and Clipper — uses that provider and its configured model
-  (`SNIPER_CODEX_MODEL`, `SNIPER_CLAUDE_MODEL`). If the two settings disagree the app
-  refuses. Switch with `../install/use-provider.command codex|claude`, never by hand-editing
-  one of them.
-- **No API-key billing in the editing workflow.** Producer, Segmenter and Clipper have no
-  API-key or SDK route and none may be added. The provider CLI must pass the admission in
-  `src/app/api/_lib/subscription-policy.ts` (exact pinned version, subscription sign-in).
-  Do not relax it, and do not change a global CLI to make a check pass. An API key,
-  environment variable or other login is not permission to spend. If the subscription
-  refuses (sign-in, usage limit), report it and stop; never switch provider, key or route.
-- **Separately optional paid features, used only when the operator explicitly asks:**
-  - *Text Review* (`/frameio-review`) sends still frames to Anthropic's API on the
-    operator's own `ANTHROPIC_API_KEY` (from `../runtime/sniper.local.env`); the app refuses
-    a run without the operator's explicit opt-in.
-  - *Deepgram transcription* uploads audio to Deepgram and bills the operator's own
-    Deepgram key. Transcription is local Whisper by default and no app route uses Deepgram;
-    it runs only from a transcription script call with the paired
-    `--provider deepgram --authorize-paid-asr deepgram` flags (`scripts/asr_policy.py`).
-    Add them only when the operator explicitly authorizes Deepgram for the current edit. A
-    saved key, an environment variable or a failed local run is never that authorization.
-    The operator connects, replaces or removes the key with `../install/setup.command`,
-    which saves it privately to `../runtime/deepgram.env`; if a key is missing, point them
-    there.
-  - Nothing falls back to either of these. Never ask the operator to paste a key into the
-    conversation, and never display or copy a key file.
+- **You are the editor.** The operator opened this folder in their own Codex or Claude Code,
+  signed in to their own subscription. There is no Sniper web app, no Sniper copy of Codex
+  or Claude and no Sniper sign-in: you do the editorial thinking in this conversation, and
+  Sniper's commands do the media work on this Mac. Nothing Sniper runs calls a provider.
+- **Run every Sniper command through `./sniper`, from this folder.** It finds Sniper's own
+  Python, Node, ffmpeg, Whisper and rendering browser, loads the install's settings and holds
+  the install's lock while the command runs. Commands in the skills and docs are written
+  bare; translate them: `python3 scripts/x.py` → `./sniper python3 scripts/x.py`,
+  `.venv/bin/python3 scripts/x.py` → `./sniper python3 scripts/x.py`,
+  `node --import tsx scripts/x.ts` → `./sniper node --import tsx scripts/x.ts`. Never run
+  them with another Python, Node or ffmpeg on this Mac. Project folders go under
+  `$(./sniper workspace)`.
+- **Setting up.** If `./sniper` says Sniper is not set up, run `./sniper setup` (it downloads
+  about 2 GB and takes several minutes; run it in the background, tell the operator what it
+  is doing and report its last lines). `./sniper doctor` checks the install and names the fix
+  for anything wrong.
+- **Codex's sandbox.** Sniper decodes every video it edits inside its own macOS sandbox, and
+  macOS does not let a sandbox start inside another one. If a Sniper command fails with
+  `sandbox initialization failed` or `Operation not permitted` while your own sandbox is on,
+  ask the operator to approve running that same command outside your sandbox. Never skip,
+  weaken or work around Sniper's own media check.
+- **No API-key billing.** Your conversation runs on the operator's subscription. Sniper has
+  no API-key route for editing and none may be added. An API key, environment variable or
+  other login is not permission to spend. If the subscription refuses (sign-in, usage limit),
+  report it and stop.
+- **Deepgram transcription is the one optional paid feature, used only when the operator
+  explicitly asks.** It uploads audio to Deepgram and bills the operator's own Deepgram key.
+  Transcription is local Whisper by default; Deepgram runs only from a transcription script
+  call with the paired `--provider deepgram --authorize-paid-asr deepgram` flags
+  (`scripts/asr_policy.py`). Add them only when the operator explicitly authorizes Deepgram
+  for the current edit. A saved key, an environment variable or a failed local run is never
+  that authorization. The operator connects, replaces or removes the key by double-clicking
+  `install/setup.command` (a hidden prompt in Terminal); if a key is missing, point them
+  there. Never ask the operator to paste a key into the conversation, and never display or
+  copy a key file. Nothing falls back to Deepgram.
 - **No Docker.** The supported route runs natively on macOS.
 
 ## What leaves this Mac
 
-The full account, path by path, is `../manual/privacy.html`. In short: transcript and plan
-text, and still frames of the rendered edit (the rendered review runs in Auto Edit,
-trim-only jobs included), go to the selected provider. Reference links are downloaded with
-`yt-dlp`; Chrome cookies are read only when the operator ticks the box for that fetch.
-Studio is served from Sniper's adapted runtime, whose analytics are switched off; its page
-still loads one GSAP file from `cdn.jsdelivr.net`. Open Studio only through Sniper
-(`studio/managed_preview.py` / `../install/studio.command`), never with the stock
-`hyperframes preview`, which would send HeyGen's analytics.
-Instructions are not a privacy boundary: when you run with file tools, do not attach or
-upload video or audio files to the conversation; work from transcripts, plans and still
-frames.
+The full account, path by path, is `manual/privacy.html`. In short: what you read and write
+in this conversation (transcripts, plans, still frames you or a reviewer look at) goes to
+your provider under the operator's account, like any conversation. Sniper's own commands send
+nothing anywhere, except that reference links are downloaded with `yt-dlp` (Chrome cookies are
+read only when the operator asks for that fetch) and Studio's page loads one GSAP file from
+`cdn.jsdelivr.net`. Studio is served from Sniper's adapted runtime, whose analytics are
+switched off. Open Studio only through Sniper (`install/studio.command`), never with the
+stock `hyperframes preview`, which would send HeyGen's analytics. Instructions are not a
+privacy boundary: do not attach or upload video or audio files to the conversation; work
+from transcripts, plans and still frames.
 
 ## Where the doctrine lives
 
@@ -77,8 +79,8 @@ frames.
 | `CLAUDE.md` § Engineering reference | Layout and invariants, for changes to the application itself. |
 
 Start or resume with the context skill (`$sniper-context` in Codex, `/sniper-context` in
-Claude Code) or `python3 -B scripts/producer/context.py --project /absolute/project`, then
-read the files it identifies. Discovery alone neither reads them nor completes a review.
+Claude Code) or `./sniper python3 -B scripts/producer/context.py --project /absolute/project`,
+then read the files it identifies. Discovery alone neither reads them nor completes a review.
 
 ## Producer work
 
@@ -90,9 +92,17 @@ read the files it identifies. Discovery alone neither reads them nor completes a
   from proposed final speech and keep the exact source selections for any proposed deletion.
 - Honour the requested duration, destination and scope. A trim-only request must not gain
   graphics, motion, music or any other treatment nobody asked for.
+- Save the operator's request as the project's stored intent before planning:
+  `./sniper node --import tsx scripts/infra/project-intent.ts <project> --intent '<json>'`
+  (render and delivery read it and refuse without it).
+- Before rendering an auto-graphics plan, mint its delivery approval from the deterministic
+  gates: `./sniper node --import tsx scripts/infra/mint-delivery-approval.ts <project>/producer`.
+- Independent reviews (plan critics, the rendered review of still frames) are run by you as
+  fresh subagents that did not author the plan, as the Producer skill describes.
 - At video handoff, give the operator both the encoded video and the matching editable
-  Studio project, and keep both current after an adjustment.
-- Run the applicable gates and QC before claiming anything is complete.
+  Studio project (`install/studio.command open <project>/producer`), and keep both current
+  after an adjustment.
+- Run the applicable gates and QC (`audit/audit_render.py`) before claiming anything is complete.
 
 ## Not available in this package
 
@@ -103,6 +113,12 @@ read the files it identifies. Discovery alone neither reads them nor completes a
 - The `separate` dialogue-cleanup preset needs software this package does not ship.
 - Reproducing another creator's look is not a claimed capability. The reference library
   and reference studies are guidance, never replication.
+- **Not in this release** (they needed the retired web app): Text Review, Clipper's
+  dual-camera/lav Final Cut export, and the guided checkpoint and Native Director routes
+  (`guided-*`, `native-director-*`). Skill and doc sections about them do not apply; use the
+  native HyperFrames route or an ordinary plan instead. Docs that tell you to POST to an
+  `/api/...` URL or open a `localhost` page do not apply either: use the command-line
+  equivalent named above, or say the step is unavailable.
 
 ## Checks
 
@@ -113,5 +129,6 @@ npm test
 cd scripts/producer && PYTHONPATH=.:tests ../../.venv/bin/python3 selftest.py
 ```
 
-The Python suite is stdlib `unittest`, not pytest. Both suites must stay green. If a
+In an installed package, run each through `./sniper` (for example `./sniper npm test`). The
+Python suite is stdlib `unittest`, not pytest. Both suites must stay green. If a
 change cannot be verified this way, say so rather than claiming success.

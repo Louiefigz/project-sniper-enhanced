@@ -13,21 +13,15 @@
   <h1>Your first three edits</h1>
   <p class="lede">A short test clip you record, then a full-length video, then a vertical Short from your own recording. Do them in this order.</p>
 </header>
-<h2>Two ways to drive it — pick one</h2>
-<p><strong>By asking (the main way).</strong> Open your editor brain in the <code>app</code>
-folder and describe what you want. Sniper's editing instructions live in that folder, so it
-picks them up automatically.</p>
-<pre><code>install/editor.command</code></pre>
-<p>That opens the subscription you chose, inside the <code>app</code> folder, using this
-package's own sign-in and settings.</p>
-<p><strong>By clicking.</strong> Run <code>install/start.command</code> and use the page
-at <code>http://127.0.0.1:3000</code>. The page is optional — it prepares the same
-request the conversation does.</p>
+<h2>How you drive it</h2>
+<p>Open the Sniper folder in your own Codex or Claude Code and describe what you want. Sniper's
+editing instructions and skills live in that folder, so your agent picks them up automatically,
+and it runs Sniper's tools through <code>./sniper</code>. There is no app to open.</p>
 
 <div class="note">
 <p><strong>Every video Producer edits is checked first.</strong> Before a Producer edit reads a file, it
 copies it into the project and decodes it in a macOS sandbox (Segmenter and Clipper read your file
-directly, without this check). <code>install/doctor.command</code> shows this working on
+directly, without this check). <code>./sniper doctor</code> shows this working on
 its <em>media admission (real sample)</em> line; if that line fails, fix it before your first edit.</p>
 </div>
 
@@ -62,7 +56,7 @@ and bad takes, nothing else. No graphics, no music, no captions.</code></pre>
 <p><strong>What should happen:</strong> it transcribes locally, proposes the cuts, checks
 them, renders, inspects the result, and gives you a path. <strong>Where the result
 is:</strong></p>
-<pre><code>~/ProjectSniper/test-clip-&lt;date&gt;/producer/final.mp4</code></pre>
+<pre><code>projects/test-clip-&lt;date&gt;/producer/final.mp4</code></pre>
 <p><strong>Review it:</strong> open it and watch the whole thing with the sound on. The
 two-second pause should be gone, and only the correct "lazy dog" line should remain. Listen
 for a word clipped at a cut. That is the one defect a trim-only edit can introduce, and

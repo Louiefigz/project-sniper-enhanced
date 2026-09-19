@@ -499,10 +499,11 @@ transcript hashes, admitted-source receipt, library provenance and starting
 reference documents. Its inspection statuses are pending until the agent does
 the work. Bind `SHORT-REQUEST.json`'s path/hash to `requestPacket` in the plan.
 
-For an ordinary app request, save the intent through `POST /api/producer/intent`
-and prepare with `POST /api/producer/native-short`, whose body contains only
-`{dir}`. Preparation reads the stored resolved intent; passing a replacement
-intent in that request is rejected. Native Shorts with an explicit direction
+Save the intent with `./sniper node --import tsx scripts/infra/project-intent.ts <project>
+--intent '<json>'` and prepare with `./sniper node --import tsx scripts/producer/native-short.ts
+prepare <project>/producer` (the retired app's `POST /api/producer/intent` and
+`POST /api/producer/native-short` did the same). Preparation reads the stored resolved intent;
+it takes no replacement intent. Native Shorts with an explicit direction
 and automatic supporting placement retain scouting when the separate B-roll
 inventory is empty. The agent may find useful footage inside the admitted main
 source. Source restrictions, scope limits and off/operator lanes remain binding.

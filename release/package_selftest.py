@@ -219,12 +219,12 @@ def _write(out: Path, result: dict) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("package", type=Path, help="installed package root (contains app/ and app/.venv)")
+    parser.add_argument("package", type=Path, help="installed package root (the app folder, with its .venv)")
     parser.add_argument("--withheld", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
     args.out.unlink(missing_ok=True)  # an earlier pass must never stand for this run
-    app = args.package / "app"
+    app = args.package   # the package folder is the app folder
     try:
         rows, summary = _run_suite(app)
     except GateInfrastructureError as error:

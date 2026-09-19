@@ -18,15 +18,7 @@ from release.node_floor import node_requirements
 from release.stage import StageReport, StagingError
 
 PAYLOAD = Path(__file__).resolve().parent / "payload_files"
-_APP = "app"
 _CHROME_RE = re.compile(r'CHROME_VERSION\s*=\s*"([0-9.]+)"')
-# The app's own model defaults (ai-provider.ts). The installer writes them into the
-# settings so the editor window and the app are given the same model explicitly.
-_MODEL_DEFAULTS = {
-    "claude_model_default": r'DEFAULT_CLAUDE_MODEL\s*=\s*"([^"]+)"',
-    "codex_model_default": r'safeCliValue\("SNIPER_CODEX_MODEL",\s*"([^"]+)"\)',
-    "codex_reasoning_default": r'safeCliValue\("SNIPER_CODEX_REASONING",\s*"([^"]+)"\)',
-}
 
 
 def _read_json(path: Path) -> dict:
@@ -59,34 +51,18 @@ def chrome_version(root: Path) -> str:
                        "install templates/motion dependencies before building")
 
 
-def model_defaults(root: Path) -> dict[str, str]:
-    """The app's default Claude/Codex model and Codex reasoning, read from ai-provider.ts."""
-    source = (root / "src/app/api/_lib/ai-provider.ts").read_text(encoding="utf-8")
-    found = {key: re.search(pattern, source) for key, pattern in _MODEL_DEFAULTS.items()}
-    missing = [key for key, match in found.items() if not match]
-    if missing:
-        raise StagingError(f"cannot read the app's model defaults from ai-provider.ts: {', '.join(missing)}")
-    return {key: match.group(1) for key, match in found.items()}
-
-
 def component_versions(root: Path) -> dict[str, object]:
     """Exact component versions and pins this release was built against.
 
     The Node floor is derived from both lockfiles (``release/node_floor.py``), the
     browser archive hashes come from ``release/pins/`` and must match the version
-    the installed HyperFrames requires, and the CLI and Python locks are checked
-    against the admission pins before anything is written.
+    the installed HyperFrames requires, and the Python lock is checked before anything
+    is written. No Codex or Claude version is recorded: buyers use their own.
     """
     root_pkg = _read_json(root / "package.json")
     motion_pkg = _read_json(root / "templates/motion/package.json")
-    policy = (root / "src/app/api/_lib/subscription-policy.ts").read_text(encoding="utf-8")
-    codex = re.search(r'codex:\s*"([^"]+)"', policy)
-    claude = re.search(r'claude:\s*"([^"]+)"', policy)
-    if not codex or not claude:
-        raise StagingError("cannot read the subscription CLI admission pins")
     chrome = chrome_version(root)
     node = node_requirements(root)
-    pins.check_cli_lock(PAYLOAD / "install/cli", codex.group(1), claude.group(1))
     pins.check_python_lock(PAYLOAD / "install/requirements.lock.txt")
     runtime = _checked_runtime(node)
     return {
@@ -97,9 +73,6 @@ def component_versions(root: Path) -> dict[str, object]:
         "hyperframes_cli": motion_pkg["dependencies"]["hyperframes"],
         "chrome_headless_shell": chrome,
         "chrome_headless_shell_sha256": pins.browser_hashes(chrome),
-        "codex_cli_admitted": codex.group(1),
-        "claude_cli_admitted": claude.group(1),
-        **model_defaults(root),
         "node_floor": node["floor"],
         "node_floor_set_by": node["set_by"],
         **runtime,
@@ -143,13 +116,23 @@ def source_facts(root: Path) -> dict[str, str]:
     return {**_read_json(record), "release_checkout_commit": head, "release_checkout_tree": tree}
 
 
+# Launchers and a web page that no longer exist: buyers talk to Sniper through their own
+# Codex or Claude Code (owner decision 2026-09-19).
+_RETIRED = ("editor.command", "sign-in.command", "use-provider.command", "start.command",
+            "stop.command", "127.0.0.1:3000", "localhost:3000")
+
+
 def check_buyer_pages(stage: Path) -> None:
-    """No buyer page asks for a tool Sniper now installs itself (a Homebrew instruction is the tell)."""
+    """No buyer page asks for a tool Sniper installs itself, or for a launcher or page that is gone."""
     pages = [stage / "START-HERE.html", *sorted((stage / "manual").glob("*.html"))]
     stale = [page.relative_to(stage).as_posix() for page in pages
              if "brew install" in page.read_text(encoding="utf-8")]
     if stale:
         raise StagingError(f"these pages still ask buyers to install tools with Homebrew: {', '.join(stale)}")
+    retired = [f"{page.relative_to(stage).as_posix()} ({word})" for page in pages
+               for word in _RETIRED if word in page.read_text(encoding="utf-8")]
+    if retired:
+        raise StagingError(f"these pages name a launcher or page that no longer exists: {', '.join(retired)}")
 
 
 def _lock_lines(root: Path) -> list[str]:
@@ -161,29 +144,20 @@ def _lock_lines(root: Path) -> list[str]:
             if line.strip() and not line.startswith("#")]
 
 
-def _move_app_tree(stage: Path, report: StageReport) -> None:
-    """Relocate the staged product under `app/` and re-key the staged file list."""
-    app = stage / _APP
-    app.mkdir(parents=True, exist_ok=True)
-    for entry in sorted(stage.iterdir()):
-        if entry.name == _APP:
-            continue
-        shutil.move(str(entry), str(app / entry.name))
-    report.files = [f"{_APP}/{path}" for path in report.files]
-
-
 def write_payload(root: Path, stage: Path, report: StageReport) -> None:
-    """Move the product under `app/` and add every buyer-facing file.
+    """Add every buyer-facing file beside the product, which stays at the package root.
+
+    The package folder is the app folder: the folder buyers open in Codex or Claude Code,
+    with AGENTS.md, CLAUDE.md, the skills and ./sniper at its top.
 
     Args:
         root: Release source root.
         stage: Staging tree already holding the allow-listed product.
-        report: Staging report; its file list is re-keyed and extended.
+        report: Staging report; its file list is extended.
 
     Raises:
-        StagingError: A required payload file is missing.
+        StagingError: A required payload file is missing, or would replace a product file.
     """
-    _move_app_tree(stage, report)
     if not PAYLOAD.exists():
         raise StagingError("release/payload_files is missing")
     for path in sorted(PAYLOAD.rglob("*")):
@@ -192,6 +166,8 @@ def write_payload(root: Path, stage: Path, report: StageReport) -> None:
             continue  # byte caches from running the payload's own Python locally never ship
         relative = path.relative_to(PAYLOAD).as_posix()
         target = stage / relative
+        if target.exists():
+            raise StagingError(f"the buyer file {relative} would replace a product file of the same name")
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(path, target)
         target.chmod(0o755 if target.suffix in {".sh", ".command"} else 0o644)
@@ -235,7 +211,7 @@ def apply_overrides(stage: Path, report: StageReport) -> None:
     contract); the mechanism returns when `payload_overrides/` is absent.
 
     Args:
-        stage: Staging tree, after `write_payload` has moved the product to app/.
+        stage: Staging tree, after `write_payload` has added the buyer files.
         report: Staging report; overridden paths must already be staged.
 
     Raises:
@@ -262,7 +238,7 @@ _INSTALL_MADE = frozenset({"node_modules", "templates/motion/node_modules", ".ve
 def withheld_records(root: Path, skipped: list[tuple[str, str]], shipped: list[str]) -> list[dict]:
     """The complete withheld manifest: what the release source has that the package does not.
 
-    Three kinds, all package-relative (the same paths as under app/):
+    Three kinds, all package-relative (the package root is the app folder):
     files skipped inside allow-listed folders; whole folders the spec withholds
     (except folders the install itself creates); and every tracked source file that
     is not shipped (for example retained contracts that are not runtime inputs).

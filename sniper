@@ -1,0 +1,37 @@
+#!/bin/bash
+# Project Sniper — run one of Sniper's commands with Sniper's own tools and settings.
+#
+#   ./sniper setup                  install or repair Sniper (install/install.command)
+#   ./sniper doctor                 check this install (install/doctor.command)
+#   ./sniper workspace              print the folder your video projects go in
+#   ./sniper <command> [args...]    run a command here, e.g. ./sniper python3 scripts/producer/context.py
+#
+# Your Codex or Claude Code runs Sniper's commands through this file, from this folder.
+# It finds Sniper's own Python, Node, ffmpeg, Whisper and the rendering browser, loads the
+# install's settings, and holds the install's maintenance lock (shared) while the command
+# runs, so the installer never replaces a tool underneath it. It never calls Codex or
+# Claude: they are your editor, on your own subscription.
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+if [ ! -f "$here/install/lib/common.sh" ]; then
+  # A developer checkout (no installer): run here with the developer's own environment.
+  cd "$here" || exit 1
+  case "${1:-}" in
+    workspace) printf '%s\n' "${SNIPER_WORKSPACE_ROOT:-$HOME/ProjectSniper}"; exit 0 ;;
+    setup|doctor) echo "This is a developer checkout; see CLAUDE.md § Engineering reference." >&2; exit 64 ;;
+    '') echo "usage: ./sniper setup | doctor | workspace | <command> [args...]" >&2; exit 64 ;;
+  esac
+  exec "$@"
+fi
+case "${1:-}" in
+  setup) shift; exec "$here/install/install.command" "$@" ;;
+  doctor) shift; exec "$here/install/doctor.command" "$@" ;;
+  '') echo "usage: ./sniper setup | doctor | workspace | <command> [args...]" >&2; exit 64 ;;
+esac
+. "$here/install/lib/common.sh" || exit 1
+install_complete || fail "Sniper is not set up yet (or this folder moved). Run: ./sniper setup"
+load_env
+if [ "$1" = workspace ]; then printf '%s\n' "$SNIPER_WORKSPACE_ROOT"; exit 0; fi
+hold_maintenance shared "sniper ${1##*/}" "Sniper is being installed, repaired, cleaned or removed right now;
+  run this again when that has finished." "$@"
+cd "$APP_DIR" || exit 1
+exec "$@"

@@ -11,7 +11,7 @@ from pathlib import Path
 
 from release.package_selftest import Withheld, classify, main
 
-APP = Path("/pkg/app")
+APP = Path("/pkg")
 WITHHELD = Withheld(frozenset({"docs/producer/command-driven-editing/contracts/p4-live-exit-closure-v1.json"}),
                     ("templates/motion/container",))
 
@@ -30,9 +30,9 @@ class PackageSelftestGateTests(unittest.TestCase):
     def test_declared_test_failing_on_a_withheld_file_is_tolerated(self) -> None:
         result = classify([row("test_x.A.test_ok", "pass"),
                            row("test_p4_exit_closure_artifact.P.t", "error",
-                               "/pkg/app/docs/producer/command-driven-editing/contracts/p4-live-exit-closure-v1.json"),
+                               "/pkg/docs/producer/command-driven-editing/contracts/p4-live-exit-closure-v1.json"),
                            row("test_render_layout_transport.L.t", "error",
-                               "/pkg/app/templates/motion/container/layout_observer_browser.mjs")], APP, WITHHELD)
+                               "/pkg/templates/motion/container/layout_observer_browser.mjs")], APP, WITHHELD)
         self.assertTrue(result["passed"])
         self.assertEqual(len(result["toleratedWithheldEvidence"]), 2)
 
@@ -44,14 +44,14 @@ class PackageSelftestGateTests(unittest.TestCase):
 
     def test_declared_test_missing_a_shipped_file_fails_the_gate(self) -> None:
         result = classify([row("test_x.A.test_ok", "pass"),
-                           row("test_p4_exit_closure_artifact.P.t", "error", "/pkg/app/scripts/producer/render.py")],
+                           row("test_p4_exit_closure_artifact.P.t", "error", "/pkg/scripts/producer/render.py")],
                           APP, WITHHELD)
         self.assertFalse(result["passed"])
 
     def test_a_fixture_error_is_matched_to_its_declared_class(self) -> None:
         result = classify([row("test_x.A.test_ok", "pass"),
                            row("setUpClass (test_p4_exit_closure_artifact.P)", "error",
-                               "/pkg/app/docs/producer/command-driven-editing/contracts/p4-live-exit-closure-v1.json")],
+                               "/pkg/docs/producer/command-driven-editing/contracts/p4-live-exit-closure-v1.json")],
                           APP, WITHHELD)
         self.assertTrue(result["passed"])
 
@@ -59,7 +59,7 @@ class PackageSelftestGateTests(unittest.TestCase):
         # The old gate matched traceback text; only the structured terminal exception counts now.
         failing = {"id": "test_p4_exit_closure_artifact.P.t", "outcome": "fail",
                    "detail": "FileNotFoundError: [Errno 2] No such file or directory: "
-                             "'/pkg/app/docs/producer/command-driven-editing/contracts/p4-live-exit-closure-v1.json'"
+                             "'/pkg/docs/producer/command-driven-editing/contracts/p4-live-exit-closure-v1.json'"
                              "\nDuring handling of the above exception, another exception occurred:\nAssertionError: x",
                    "exc": {"type": "builtins.AssertionError", "errno": None, "filename": None}}
         self.assertFalse(classify([row("test_x.A.test_ok", "pass"), failing], APP, WITHHELD)["passed"])
@@ -67,7 +67,7 @@ class PackageSelftestGateTests(unittest.TestCase):
     def test_undeclared_failure_fails_the_gate_even_on_a_withheld_path(self) -> None:
         result = classify([row("test_x.A.test_ok", "pass"),
                            row("test_ingest_admission.I.t", "error",
-                               "/pkg/app/docs/producer/command-driven-editing/contracts/p4-live-exit-closure-v1.json")],
+                               "/pkg/docs/producer/command-driven-editing/contracts/p4-live-exit-closure-v1.json")],
                           APP, WITHHELD)
         self.assertFalse(result["passed"])
         self.assertEqual(result["gateFailures"][0]["id"], "test_ingest_admission.I.t")
@@ -82,7 +82,7 @@ class PackageSelftestRunTests(unittest.TestCase):
     def setUp(self) -> None:
         self.base = Path(tempfile.mkdtemp(prefix="sniper-gate-test-"))
         self.addCleanup(shutil.rmtree, self.base, ignore_errors=True)
-        self.tests = self.base / "app/scripts/producer/tests"
+        self.tests = self.base / "scripts/producer/tests"
         self.tests.mkdir(parents=True)
         self.withheld = self.base / "withheld.json"
         self.withheld.write_text("[]")
@@ -91,7 +91,7 @@ class PackageSelftestRunTests(unittest.TestCase):
         self._python(f'exec "{sys.executable}" "$@"')
 
     def _python(self, body: str) -> None:
-        python = self.base / "app/.venv/bin/python3"
+        python = self.base / ".venv/bin/python3"
         python.parent.mkdir(parents=True, exist_ok=True)
         python.write_text("#!/bin/sh\n" + body + "\n")
         python.chmod(0o755)
@@ -145,7 +145,7 @@ class PackageSelftestRunTests(unittest.TestCase):
         self.assertIn("not this run", result["infrastructureError"])
 
     def _declared_artifact_test(self, body: str) -> None:
-        withheld = self.base / "app/docs/withheld.json"  # absent from the fake package, listed as withheld
+        withheld = self.base / "docs/withheld.json"  # absent from the fake package, listed as withheld
         self.withheld.write_text(json.dumps([{"path": "docs/withheld.json", "reason": "retained evidence"}]))
         (self.tests / "test_p4_exit_closure_artifact.py").write_text(
             "import unittest\nfrom pathlib import Path\nEVIDENCE = Path(" + repr(str(withheld)) + ")\n"
@@ -184,7 +184,7 @@ class PackageSelftestRunTests(unittest.TestCase):
         self.withheld.write_text("[]")
         (self.tests / "test_p4_exit_closure_artifact.py").write_text(
             "import unittest\nfrom pathlib import Path\nclass P(unittest.TestCase):\n"
-            "    def test_fresh(self):\n        Path(" + repr(str(self.base / "app/scripts/x.py")) + ").read_text()\n")
+            "    def test_fresh(self):\n        Path(" + repr(str(self.base / "scripts/x.py")) + ").read_text()\n")
         self.assertEqual(self._gate(PASSING)[0], 1)
 
     def test_rows_that_disagree_with_unittest_totals_fail_the_gate(self) -> None:

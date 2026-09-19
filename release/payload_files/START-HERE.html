@@ -27,31 +27,30 @@ force. Read <code>RELEASE.json</code> for this build's exact status, and
 
 <h2>Three steps</h2>
 <ol>
-  <li><strong>Check what you have.</strong> Any Mac with Apple silicon (M1 or later) that has had its free macOS updates (macOS 13.5 or newer),
-  an internet connection for the first setup, about 4 GB for Sniper and its tools plus at least 20 GB
-  free while rendering (the checks refuse less), and a
-  Codex <em>or</em> Claude subscription you already pay for. You do not install Node, Python, ffmpeg or
-  anything else yourself: Sniper downloads and checks its own. The full list, with what costs money,
-  is in <a href="manual/index.html">What Sniper is</a>.</li>
-  <li><strong>Install.</strong> Double-click <code>install/setup.command</code> in Finder. It is not yet signed, so
-  the first time macOS stops it: on macOS 13.5–14, right-click it and choose <em>Open</em>; on macOS 15
-  or later, open System Settings › Privacy &amp; Security and click <em>Open Anyway</em> next to the
-  message about <code>setup.command</code> (the macOS 15 route has not yet been seen on a clean Mac). It installs Sniper and its own tools, walks you through
-  subscription sign-in, offers a private Deepgram key prompt, checks the installation and opens your
-  configured editor. No Cursor, Homebrew or settings-file editing is needed. Sniper keeps its tools in
-  <code>~/.project-sniper</code>, your videos in <code>~/ProjectSniper</code> (or the folder you choose),
-  its Claude login as its own Keychain item, and everything else inside this folder; your own Node, Python, Homebrew,
-  Codex or Claude setup and login are not used or changed. Step-by-step:
-  <a href="manual/install.html">Install and first launch</a>.</li>
-  <li><strong>Make your first edit.</strong>
-  <a href="manual/first-edits.html">Your first three edits</a> walks a short test clip you record yourself,
-  then a full-length video, then a Short from your own recording.</li>
+  <li><strong>Check what you have.</strong> Any Mac with Apple silicon (M1 or later) that has had its
+  free macOS updates (macOS 13.5 or newer), an internet connection for the first setup, about 4 GB
+  for Sniper and its tools plus at least 20 GB free while rendering (the checks refuse less), and
+  your own <strong>Codex</strong> (ChatGPT plan) <em>or</em> <strong>Claude Code</strong> (Claude
+  plan), signed in as you already use it. You do not install Node, Python, ffmpeg or anything else
+  yourself: Sniper downloads and checks its own. The full list, with what costs money, is in
+  <a href="manual/index.html">What Sniper is</a>.</li>
+  <li><strong>Open this folder in Codex or Claude Code and say “Set up Sniper”.</strong> Your agent
+  installs Sniper's tools (several minutes, mostly downloads), asking your permission as it goes, and
+  checks the result. There is nothing to sign in to and no app to open: you talk to Sniper through
+  your own agent, on your own subscription. Sniper keeps its tools in <code>~/.project-sniper</code>
+  and everything else, including your video projects (in <code>projects</code>), inside this folder;
+  your own Node, Python, Homebrew, Codex or Claude setup and login are not used or changed. You can
+  also double-click <code>install/setup.command</code> instead. Step-by-step:
+  <a href="manual/install.html">Install and first use</a>.</li>
+  <li><strong>Make your first edit.</strong> Ask your agent. <a href="manual/first-edits.html">Your
+  first three edits</a> walks a short test clip you record yourself, then a full-length video, then a
+  Short from your own recording.</li>
 </ol>
 
 <h2>The manual</h2>
 <ol>
   <li><a href="manual/index.html">What Sniper is, what it includes, what it needs</a></li>
-  <li><a href="manual/install.html">Install, first launch, and signing in to Codex or Claude</a></li>
+  <li><a href="manual/install.html">Install and first use, from your own Codex or Claude Code</a></li>
   <li><a href="manual/first-edits.html">Your first three edits</a></li>
   <li><a href="manual/directing.html">Directing the edit: scope, lanes, style, references</a></li>
   <li><a href="manual/revisions.html">Asking for a change, and not losing work</a></li>
@@ -63,25 +62,21 @@ force. Read <code>RELEASE.json</code> for this build's exact status, and
 </ol>
 
 <h2>The commands, in one place</h2>
+<p>You rarely need these: your agent runs them. Each works from Finder or Terminal too.</p>
 <table>
-  <tr><th>Do this</th><th>Run this</th></tr>
-  <tr><td>Guided setup, or connect/change/remove a Deepgram key</td><td><code>install/setup.command</code></td></tr>
-  <tr><td>Install, or resume an interrupted install</td><td><code>install/install.command</code></td></tr>
-  <tr><td>Check the install and see exactly what is wrong</td><td><code>install/doctor.command</code></td></tr>
-  <tr><td>Sign in to Codex or Claude for Sniper</td><td><code>install/sign-in.command</code></td></tr>
-  <tr><td>Edit by asking (opens your editor brain)</td><td><code>install/editor.command</code></td></tr>
-  <tr><td>Switch between Codex and Claude (stop the app first)</td><td><code>install/use-provider.command codex</code></td></tr>
+  <tr><th>Do this</th><th>Ask your agent, or run</th></tr>
+  <tr><td>Set up, or resume an interrupted setup</td><td><code>./sniper setup</code> (or double-click <code>install/setup.command</code>)</td></tr>
+  <tr><td>Check the install and see exactly what is wrong</td><td><code>./sniper doctor</code></td></tr>
+  <tr><td>Connect, change or remove a Deepgram key (in Terminal, never in a chat)</td><td><code>install/setup.command</code></td></tr>
   <tr><td>Review and adjust a finished edit in Studio</td><td><code>install/studio.command open &lt;project&gt;/producer</code></td></tr>
-  <tr><td>Start the app</td><td><code>install/start.command</code></td></tr>
-  <tr><td>Stop the app</td><td><code>install/stop.command</code></td></tr>
   <tr><td>Make a support bundle to send</td><td><code>install/diagnostics.command</code></td></tr>
   <tr><td>Free up render cache space</td><td><code>install/clean-caches.command</code></td></tr>
   <tr><td>Remove the install (keeps your videos)</td><td><code>install/uninstall.command</code></td></tr>
 </table>
 
 <footer class="foot">
-  <p>This manual is included and can be read offline. Subscription sign-in and optional
-  Deepgram connection require internet access and your own accounts.</p>
+  <p>This manual is included and can be read offline. Setup, your Codex or Claude Code, and the
+  optional Deepgram connection need internet access and your own accounts.</p>
 </footer>
 
 </div>

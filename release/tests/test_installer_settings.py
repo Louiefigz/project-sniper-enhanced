@@ -48,7 +48,7 @@ class SettingsRoundTrip(unittest.TestCase):
             with self.subTest(label):
                 workspace = str(self.base / "videos" / name)
                 tools = str(self.base / f"tools {name}")
-                done = fx.write_settings(self.pkg, "codex", workspace, {
+                done = fx.write_settings(self.pkg, workspace, {
                     "NODE_BIN": f"{tools}/node", "TOOL_FFMPEG": f"{tools}/ffmpeg",
                     "TOOL_WHISPER_CLI": f"{tools}/whisper-cli"})
                 self.assertEqual(done.returncode, 0, done.stderr)
@@ -62,14 +62,14 @@ class SettingsRoundTrip(unittest.TestCase):
 
     def test_budget_dollar_97_is_not_budget7(self) -> None:
         workspace = str(self.base / "Budget$97")
-        self.assertEqual(fx.write_settings(self.pkg, "codex", workspace).returncode, 0)
+        self.assertEqual(fx.write_settings(self.pkg, workspace).returncode, 0)
         self.assertEqual(self._loaded()["SNIPER_WORKSPACE_ROOT"], workspace)
         self.assertFalse((self.base / "Budget7").exists())
 
     def test_control_characters_are_refused_with_a_clear_message(self) -> None:
         for label, bad in {"newline": "two\nlines", "tab": "tab\there", "escape": "esc\x1b[0m"}.items():
             with self.subTest(label):
-                done = fx.write_settings(self.pkg, "codex", str(self.base / bad))
+                done = fx.write_settings(self.pkg, str(self.base / bad))
                 self.assertNotEqual(done.returncode, 0)
                 self.assertIn("control", done.stderr)
                 self.assertIn("SNIPER_WORKSPACE_ROOT", done.stderr)

@@ -110,15 +110,14 @@ class ExternalIngressRegistryTests(unittest.TestCase):
 
 
 class PackagedInstallerPathTests(unittest.TestCase):
-    """release/payload_files/<x> is <x> beside app/ in a package, and only there."""
+    """release/payload_files/<x> is <x> at the package root (the app folder) in a package, and only there."""
 
     def test_installer_path_is_found_where_the_package_puts_it(self) -> None:
         with tempfile.TemporaryDirectory() as folder:
             package = Path(folder)
-            (package / "app").mkdir()
             (package / "install").mkdir()
             (package / "install/sniper_doctor.py").write_text("")
-            found = located(package / "app", "release/payload_files/install/sniper_doctor.py")
+            found = located(package, "release/payload_files/install/sniper_doctor.py")
             self.assertEqual(found, package / "install/sniper_doctor.py")
 
     def test_the_source_tree_never_looks_outside_itself(self) -> None:

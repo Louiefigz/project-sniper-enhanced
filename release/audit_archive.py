@@ -20,22 +20,19 @@ import zipfile
 from pathlib import Path
 
 REQUIRED = (
-    "app/AGENTS.md", "app/CLAUDE.md", "app/docs/PIPELINE.md",
-    "app/package.json", "app/package-lock.json", "app/requirements.txt",
-    "app/templates/motion/package.json", "app/templates/motion/package-lock.json",
-    "app/templates/motion/comp_capabilities.json",
-    "app/scripts/producer/studio/native_runtime.py",
-    "app/scripts/producer/studio/runtime/patches.json",
-    "app/scripts/producer/studio/runtime/native-export-guard.mjs",
-    "app/scripts/producer/studio/runtime/frame-source-transport.mjs",
-    "app/scripts/producer/studio/studio_review.py",
-    "app/scripts/producer/audio/models/bd.rnnn",
-    "app/scripts/producer/selftest.py",
-    "app/src/app/api/_lib/subscription-policy.ts",
-    "app/vendor/hyperframes-catalog/catalog-index.json",
-    "app/.env.local.example",
-    "install/install.command", "install/doctor.command", "install/start.command",
-    "install/stop.command", "install/uninstall.command",
+    "AGENTS.md", "CLAUDE.md", "sniper", "docs/PIPELINE.md",
+    "install/install.command", "install/doctor.command", "install/uninstall.command",
+    "package.json", "package-lock.json", "requirements.txt",
+    "templates/motion/package.json", "templates/motion/package-lock.json",
+    "templates/motion/comp_capabilities.json",
+    "scripts/producer/studio/native_runtime.py",
+    "scripts/producer/studio/runtime/patches.json",
+    "scripts/producer/studio/runtime/native-export-guard.mjs",
+    "scripts/producer/studio/runtime/frame-source-transport.mjs",
+    "scripts/producer/studio/studio_review.py",
+    "scripts/producer/audio/models/bd.rnnn",
+    "scripts/producer/selftest.py",
+    "vendor/hyperframes-catalog/catalog-index.json",
     "install/diagnostics.command", "install/clean-caches.command",
     "install/sniper_doctor.py", "install/requirements.lock.txt",
     "install/lib/common.sh",
@@ -44,7 +41,6 @@ REQUIRED = (
     "RELEASE.json", "RELEASE-NOTES.md", "THIRD-PARTY-NOTICES.md",
     "LICENSE-DRAFT.txt", "licenses/Apache-2.0-hyperframes.txt",
     "licenses/MIT-YuNet-face-detection.txt",
-    "install/sign-in.command", "install/editor.command", "install/use-provider.command",
     "install/sniper_diagnostics.py", "install/studio.command",
     "install/lib/settings.sh", "install/lib/tools.sh", "install/lib/processes.sh",
     "install/lib/steps.sh", "install/lib/configure.sh", "install/lib/install_tools.py",
@@ -56,21 +52,23 @@ REQUIRED = (
     "install/deps/sniper-ffmpeg-8.0.3-1-osx-arm64.tar.xz",
     "third-party/sources/README.md", "third-party/sources/ffmpeg-8.0.3.tar.xz",
     "third-party/sources/rubberband-4.0.0.tar.bz2",
-    "install/cli/package.json", "install/cli/package-lock.json",
-    "app/scripts/infra/sniper_lock.py",
-    "app/scripts/infra/provider-admission.ts",
-    "app/src/app/fonts/archivo-latin-wght-normal.woff2",
-    "app/resources/director/formats.md", "app/resources/director/hook-anchors.md",
-    "app/resources/director/hook-formulas.md", "app/resources/director/hook-references.md",
-    "app/resources/director/hook-training-problem-aware.md",
-    "app/resources/director/hook-training-solution-aware.md",
-    "app/resources/references/shorts/manifest.json",
-    "app/resources/references/shorts/sequences/manifest.json",
-    "app/resources/references/shorts/sequences/cases/SQ01.json",
-    "app/resources/references/shorts/expansion/manifest.json",
-    "app/resources/references/longform/manifest.json",
-    "app/docs/audits/INTRO_MACHINE_VS_PRO_AUDIT.md",
+    "scripts/infra/sniper_lock.py",
+    "src/app/fonts/archivo-latin-wght-normal.woff2",
+    "resources/director/formats.md", "resources/director/hook-anchors.md",
+    "resources/director/hook-formulas.md", "resources/director/hook-references.md",
+    "resources/director/hook-training-problem-aware.md",
+    "resources/director/hook-training-solution-aware.md",
+    "resources/references/shorts/manifest.json",
+    "resources/references/shorts/sequences/manifest.json",
+    "resources/references/shorts/sequences/cases/SQ01.json",
+    "resources/references/shorts/expansion/manifest.json",
+    "resources/references/longform/manifest.json",
+    "docs/audits/INTRO_MACHINE_VS_PRO_AUDIT.md",
 )
+# Launchers and pinned CLIs that no longer exist: buyers use their own Codex or Claude Code.
+RETIRED = ("install/editor.command", "install/sign-in.command", "install/use-provider.command",
+           "install/start.command", "install/stop.command", "install/cli/package.json",
+           "install/lib/editor_settings.py")
 REQUIRED_SKILLS = ("producer", "segmenter", "clipper", "reference-editor", "producer-study")
 FORBIDDEN = (
     (r"(?:^|/)\.env$", "environment file"),
@@ -136,9 +134,11 @@ def audit_entries(archive: Path) -> str:
               "absent" if not hits else f"{len(hits)} present, e.g. {hits[0]}")
     for path in REQUIRED:
         check(path in names, f"present: {path}", "yes" if path in names else "MISSING")
+    for path in RETIRED:
+        check(path not in names, f"absent (retired): {path}", "absent" if path not in names else "PRESENT")
     for skill in REQUIRED_SKILLS:
         for root in (".claude", ".agents"):
-            path = f"app/{root}/skills/{skill}/SKILL.md"
+            path = f"{root}/skills/{skill}/SKILL.md"
             check(path in names, f"present: {path}", "yes" if path in names else "MISSING")
     return top
 
@@ -156,12 +156,12 @@ def audit_extraction(root: Path) -> None:
         except (UnicodeDecodeError, OSError):
             continue
         relative = path.relative_to(root).as_posix()
-        if relative.startswith("app/docs/") or relative.startswith("app/scripts/producer/docs/"):
+        if relative.startswith("docs/") or relative.startswith("scripts/producer/docs/"):
             continue  # engine findings quote historical absolute paths as evidence
         named = {m.group(1).lower() for m in _HOME.finditer(text)} & accounts
         if named:
             _findings.append(f"real account name in a home path in {relative}")
-        if relative in {"app/AGENTS.md", "app/CLAUDE.md"} and _SIBLING.search(text):
+        if relative in {"AGENTS.md", "CLAUDE.md"} and _SIBLING.search(text):
             _findings.append(f"link outside the package in {relative}")
 
 
@@ -172,7 +172,7 @@ _SIBLING_TEXT = re.compile(r"\.\./youtube-automation|SNIPER_RAG_ROOT|value-first
 def audit_closure(root: Path) -> None:
     """Dependency closure: what shipped code reads is in the archive, and nothing
     shipped points outside it. Reported separately from archive shape."""
-    app = root / "app"
+    app = root   # the package folder is the app folder
     named: set[str] = set()
     for pattern in ("src/**/*.ts", "scripts/**/*.py"):
         for path in app.glob(pattern):
@@ -279,11 +279,11 @@ def audit_pipeline_capture(app: Path) -> None:
 def audit_runtime_inputs(root: Path) -> None:
     """Prove the render runtime can be rebuilt from the shipped patch inputs alone."""
     import json  # noqa: PLC0415
-    manifest = root / "app/scripts/producer/studio/runtime/patches.json"
+    manifest = root / "scripts/producer/studio/runtime/patches.json"
     rows = json.loads(manifest.read_text())
     check(bool(rows.get("files")), "runtime patch set", f"{len(rows.get('files', []))} patched files")
     check("sdkVersion" in rows, "runtime pins the SDK version", str(rows.get("sdkVersion")))
-    pinned = json.loads((root / "app/templates/motion/package.json").read_text())
+    pinned = json.loads((root / "templates/motion/package.json").read_text())
     installed = pinned["dependencies"]["hyperframes"]
     check(installed == rows.get("sdkVersion"), "patch set matches the pinned SDK",
           f"lockfile {installed} vs patch set {rows.get('sdkVersion')}")

@@ -400,7 +400,7 @@ Do not bypass a blocked checkpoint with an ordinary render or a new request ID.
 For the Desktop-native branch, progress is deliberately incremental:
 
 1. Ingest/transcribe and author a **cut-only previsual**. Run the transcript cut
-   gate, then `.venv/bin/python3 scripts/producer/palmier/desktop_cli.py begin <producer_dir>
+   gate, then `./sniper python3 scripts/producer/palmier/desktop_cli.py begin <producer_dir>
    <cut_plan.json> <asset_manifest.json> --stage cut`. Execute and read back the
    cut immediately. Do not wait for graphics planning.
 2. In the same retained conversation, author the full visual plan while the cut
@@ -456,7 +456,7 @@ The in-house branch remains:
    only ships after the bounded plan review + deterministic gates + isolated
    render-candidate QC. **Palmier Pro is an OPTIONAL, post-approval, one-way
    exact-master MIRROR — NOT the destination the plan is "pushed into."** When the
-   operator wants a flat NLE mirror, `python3 scripts/producer/palmier/push.py
+   operator wants a flat NLE mirror, `./sniper python3 scripts/producer/palmier/push.py
    <edit_plan.json> <asset_manifest.json> [--name X] [--export]` mirrors the
    already-approved master into Palmier as ONE byte-identical clip
    (graphics/motion/transitions are **baked into that master**, not rebuilt as
@@ -510,7 +510,7 @@ identity/mode/strategy errors must be fixed before rendering.
 | Long-form: breathing-room cut + SRT sidecar + chapters (`longform_outputs.py`) | ✅ Phase 3 (2026-07-04) |
 | First-class range captions: stable-word `CaptionTrackV1`, repeated-occurrence corrections, semantic chapters, bounded/cacheable RGBA shards, SRT + regenerable Palmier projection, caption-free composite reuse, font-byte/safe-bound proof | ✅ P3 released (2026-07-29) |
 | Governed project-scoped custom motion: exact `ScenePackageV1` + content-addressed bundle, production `scene_package_cli.py`, unit/full render proofs, rights/readability admission, local repair closures, and baked-regenerable Palmier unit readback. Direct Codex/Claude Code workflow only; no Ask Editor UI, local-mode OS network-denial, OS/model-isolation, continuous-reframe, or animated-PIP claim. | ✅ P4 released (2026-07-29) |
-| Live app: `/producer` page — the GUI authors plans **headlessly** via a detached auto-edit worker + bounded plan-review/QC controller (no longer a hand-authored scaffold). The controller spawns the `claude`/`codex` CLI as the brain, then runs the same gates + a fresh independent critic this skill describes. See `docs/producer/AUTO_EDIT_LANE.md`. | ✅ wired |
+| Retired web app (`/producer` page, detached auto-edit worker + plan-review/QC controller that spawned the provider CLI): **not in this release** — buyers drive Sniper from their own Codex or Claude Code; you author, gate and review as this skill describes, with fresh subagents as critics. See `docs/producer/AUTO_EDIT_LANE.md` only for the semantics this lane mirrors. | retired |
 | MG-2 (2026-07-05): graphicsTrack + treatmentMap + visual-state doctrine lint, motion_triggers.py (candidate detection), visual_state.py (zone classification), graphics_stage.py (cached hyperframes compositing, own-screen ASS suppression), audioGain, captions.corrections — ALL wired into render.py | ✅ Phase MG-2 |
 | MG-4 (2026-07-05): `graphics_planner.py` — auto-graphics PROPOSER. Kept words → triggers → doctrine-legal, R12-filtered, density-trimmed ranked graphics proposal + treatmentMap suggestion (you review, operator vetoes; never auto-injects) | ✅ Phase MG-4 |
 | Longform edit brain (2026-07-05): `retake_scan.py` (raw-only retake PROPOSER — near-duplicate re-deliveries → keep-later table + cut ranges, evidence-quoted) + `pause_scan.py` (inter-sentence pause-tightening + protected-pause flags). Doctrine from `docs/studies/EDIT_DECISION_STUDY.md` + `docs/studies/LONGFORM_VISUAL_STUDY.md`. You review; operator vetoes; never auto-injects | ✅ Phase 3+ |
@@ -524,7 +524,7 @@ CONTENT'S FOCAL SUBJECT (human → face; screen w/ corner human → blurpad;
 ambiguous → ask). GRAPHICS follow the VISUAL STATE: screen-share = screen is the
 star, NO overlay graphics (own-screen cutaways only); talking head = graphics
 AROUND the face (never covering, bbox + margin excluded), text proportionate to
-framing. render.py runs under `.venv/bin/python3` (PIL/cv2 deps).
+framing. render.py runs through `./sniper python3` (PIL/cv2 deps).
 
 **MANDATORY OPERATOR QUESTION ROUND (operator directive 2026-07-24, BOTH
 formats).** Every NEW video request — short OR longform — opens with ONE
@@ -675,9 +675,10 @@ endpoint or a measured retention/turnaround guarantee.
 - **produced** runs EVERY step (the full engaging stack).
 
 Both share the cut spine (retake/pause/outtake — the PRODUCE LONGFORM doctrine
-below) and the mode's base reframe + captions; only the engaging lanes differ.
+below) and the mode's base reframe (captions only where the scope or the operator turns
+that lane on); only the engaging lanes differ.
 
-1. **Ingest** — `python3 scripts/producer/ingest.py <project_dir> --out <work>/asset_manifest.json`.
+1. **Ingest** — `./sniper python3 scripts/producer/ingest.py <project_dir> --out <work>/asset_manifest.json`.
    Use local Whisper for new transcripts under the subscription/local-only
    policy. Check local runtime/model availability first; a missing local
    dependency is not permission to call Deepgram, OpenAI, or another paid API.
@@ -756,7 +757,7 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
    once the cutTrack exists, let the machine PROPOSE the graphics + zooms instead
    of hand-authoring every one (this wrapper also runs the two-track zoom proposer
    — semantic punches + aliveness creeps — via `graphics_planner_zoom.py`):
-   `python3 scripts/producer/graphics_style_advisor.py <plan.json>
+   `./sniper python3 scripts/producer/graphics_style_advisor.py <plan.json>
    <transcripts_dir> <manifest.json> --out graphics_style_advice.json`, then copy
    its `recommendedTargetFields` and remove every key in `removeTargetFields`.
    This code-owned decision uses kept-transcript semantic density, information-
@@ -765,7 +766,7 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
    `visualProfile:"module-editorial-v1"`: it is the benchmark-derived
    two-chassis grammar (cream evidence rail beside the live face; dark editorial
    canvas with the presenter in a fixed PIP hole), not another overlay preset.
-   `python3 scripts/producer/graphics_planner.py <plan.json> <transcripts_dir>
+   `./sniper python3 scripts/producer/graphics_planner.py <plan.json> <transcripts_dir>
    <manifest.json> [--visual-state states.json] [--out proposal.json]`.
    It remaps the KEPT words to output time, runs the trigger detectors, maps each
    trigger to a doctrine-legal template (R12 enforced in code: generic entities
@@ -786,7 +787,7 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
    - **Catalog-first discovery — search the WHOLE recorded catalog BEFORE
      choosing forms**, reusing suitable catalog mechanics before hand-building
      equivalents. Run
-     `.venv/bin/python3 scripts/producer/graphics/catalog_discovery_cli.py
+     `./sniper python3 scripts/producer/graphics/catalog_discovery_cli.py
      --format text search "<what the beat needs>" --declared-aspect <9:16|16:9>`
      (add `--status integrated-measured` to see only kinds proposable today),
      then `… lookup <name>` for the selected candidates. Declared aspect is a
@@ -894,7 +895,7 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
    scout. A chip-row fallback does not complete a promised real-identity shot.
 3.9 **Pace the plan — close still-gaps UPSTREAM, not in QC.** Once the cutTrack +
    the accepted graphics/zooms are merged, run the rhythm coordinator:
-   `python3 scripts/producer/planner/pacing.py <plan.json>`. It unions every
+   `./sniper python3 scripts/producer/planner/pacing.py <plan.json>`. It unions every
    visual-change source (cut boundaries, graphics, b-roll, title cards,
    transitions, and SEMANTIC punches — the aliveness creep is background motion,
    NOT a discrete change) into one timeline and reports `changesPerMin`, the
@@ -969,7 +970,7 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
      bytes.
    **REVIEW PACKET — build once per round; critics READ it instead of
    re-deriving the transcript.** After the 4a gates, run
-   `python3 scripts/producer/review_packet.py <plan> <transcripts_dir>
+   `./sniper python3 scripts/producer/review_packet.py <plan> <transcripts_dir>
    <manifest> --out <work>/review_packet.json`. One hash-bound JSON binds:
    plan + manifest content with exact byte hashes, the compiled cut-segment
    table with the brain's rationales, every KEPT word remapped to output time
@@ -1123,10 +1124,10 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
    existing until the wall clears is the worst part of the operator's wait;
    a draft fixes the experienced answer without touching governance. Run
    `draft_render.py <edit_plan.json> <asset_manifest.json> <producer_dir>`
-   (under `.venv/bin/python3`): it reuses `render.py` into
+   (through `./sniper python3`): it reuses `render.py` into
    `<producer_dir>/draft/` with the SAME delivery-approval gate the final
    render enforces. Produced/full plans need the LESSON-039 receipt for the
-   draft render to pass — mint it via `node --import tsx
+   draft render to pass — mint it via `./sniper node --import tsx
    scripts/infra/mint-delivery-approval.ts <producer_dir>` (deterministic
    gates only) — but that pre-wall mint is **draft-scoped and single-use**:
    `draft_render.py` CONSUMES it (it deletes
@@ -1150,7 +1151,7 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
    measured recompose/motion → captions/color/audio. Read back after each risky
    or dependency-producing batch. For file output, run
    `render.py <edit_plan.json> <asset_manifest.json> <out_dir>`
-   (under `.venv/bin/python3`) IS the render entry point (it exists; it is the
+   (through `./sniper python3`) IS the render entry point (it exists; it is the
    pipeline orchestrator). It runs the stage chain — `compile_timeline.py` →
    `cut_speed.py` → `motion/reframe.py` (shorts) → `captions/captions_ass.py` +
    `audio/master.py` — and writes `<out_dir>/final.mp4` + `timeline_map.json`.
@@ -1158,8 +1159,8 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
    (graphics/motion/transitions — render.py wires them from the populated tracks);
    for **clean-cut** those tracks are empty and no-op, so this same chain ships
    the bare cut. Renders land in the project's `producer/` dir under
-   `<workspace>/<slug>/`, where the workspace is `$SNIPER_WORKSPACE_ROOT` (the video folder
-   chosen at install, set in the packaged app's settings; `~/ProjectSniper` when unset).
+   `<workspace>/<slug>/`, where the workspace is `$(./sniper workspace)` (the `projects`
+   folder inside Sniper, or the folder chosen at install).
    **Studio review lane (the DEFAULT manual-control path after
    render/assemble):** `scripts/producer/studio/studio_review.py open
    <producer_dir>` generates `<producer_dir>/studio/` from `edit_plan.json` +
@@ -1240,7 +1241,7 @@ long-form: **the pro editor kept 94.7% of the raw words** — the edit was
 this doctrine BEFORE authoring the cutTrack:
 
 **(a) Run the retake scanner FIRST.**
-`python3 scripts/producer/retake_scan.py <raw.transcript.json> --pauses --out proposal.json`
+`./sniper python3 scripts/producer/retake_scan.py <raw.transcript.json> --pauses --out proposal.json`
 It finds near-duplicate re-deliveries (the same line said twice) and proposes
 which take to KEEP and which span to CUT. Present the retake table to the
 operator: default is **keep the LATER take** (the study's later take won 3/3);
@@ -1336,9 +1337,8 @@ numbers are in `docs/studies/MOTION_GRAMMAR_STUDY.md`.
   utterance level (CLIPPER doctrine: HOOK→MEAT→PAYOFF, mic-bleed dedup) →
   keep-ranges JSON → `render_cut.py <src> <ranges.json> <out.mp4>`. This is a
   clean-cut of one source; add the produced stack only if asked.
-- **SEGMENT**: point the operator at the SNIPER UI (localhost:3000) or drive
-  `scripts/transcribe.py` + a segmentation pass by hand; rough clips are the
-  existing stream-copy flow — do not rebuild it.
+- **SEGMENT**: use the `segmenter` skill (local transcription + your segmentation pass +
+  the stream-copy export); rough clips are the existing stream-copy flow — do not rebuild it.
 - **AUDIT** (Phase 2): until audit scripts land, do a manual pass: extract
   frames at title/caption moments, check safe box, measure ebur128.
 

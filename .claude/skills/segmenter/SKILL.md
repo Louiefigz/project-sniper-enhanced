@@ -27,9 +27,9 @@ single finished cut, hand off to `producer`.
 
 ## Where output goes
 
-Everything lands in a per-recording folder in the operator's video workspace —
-`$SNIPER_WORKSPACE_ROOT`, which the packaged app's settings set (the folder chosen at install;
-`~/ProjectSniper` when unset) — in the same `segments/` folder the app's Segmenter uses:
+Everything lands in a per-recording folder in the operator's video projects folder —
+`$(./sniper workspace)`: the `projects` folder inside Sniper, or the folder chosen at install —
+in a `segments/` folder:
 
 ```
 <workspace>/<slug>/segments/
@@ -48,7 +48,7 @@ Pick `<slug>` from the input filename + a short descriptor, kebab-case
 
 ```bash
 SLUG="<slug>"; VIDEO="<absolute path to the recording>"
-OUT="${SNIPER_WORKSPACE_ROOT:-$HOME/ProjectSniper}/$SLUG/segments"; mkdir -p "$OUT"
+OUT="$(./sniper workspace)/$SLUG/segments"; mkdir -p "$OUT"
 ```
 
 ### 2. Transcribe locally (no paid fallback)
@@ -58,7 +58,7 @@ variable, or missing local model is not permission to use a paid service. Do not
 source credential files for local transcription.
 
 ```bash
-.venv/bin/python3 scripts/transcribe.py "$VIDEO" --provider local-whisper > "$OUT/transcript.raw.jsonl" 2> "$OUT/transcribe.log"
+./sniper python3 scripts/transcribe.py "$VIDEO" --provider local-whisper > "$OUT/transcript.raw.jsonl" 2> "$OUT/transcribe.log"
 tail -n 1 "$OUT/transcript.raw.jsonl" > "$OUT/transcript.json"
 ```
 
@@ -106,7 +106,7 @@ the parts about pricing"), follow those over the default coaching-show doctrine.
 unzip it into the project's `segments/` folder.
 
 ```bash
-.venv/bin/python3 scripts/segmenter/export_mp4.py "$VIDEO" "$(cat "$OUT/segments.json")" "$OUT/clips.zip"
+./sniper python3 scripts/segmenter/export_mp4.py "$VIDEO" "$(cat "$OUT/segments.json")" "$OUT/clips.zip"
 unzip -o -q "$OUT/clips.zip" -d "$OUT"
 ```
 
@@ -133,8 +133,8 @@ they contain. Keep it short.
 
 - Accepted inputs: mp4/mov/webm/mkv/avi/m4v (video) or common audio files.
 - Prerequisites: Sniper's own tools, `.venv` and the local Whisper model, all put
-  in place by the installer. If anything is missing, run `../install/doctor.command`
+  in place by `./sniper setup`. If anything is missing, run `./sniper doctor`
   (Claude Code's `/setup` does the same) and explain its report; the repair is
-  `install/install.command` (the operator closes this window first).
+  `./sniper setup`.
 - Use subscription-backed agent reasoning. No paid API or credit fallback is
   authorized by a local transcription or segmentation request.

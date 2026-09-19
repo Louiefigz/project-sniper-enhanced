@@ -29,7 +29,7 @@ Non-negotiable execution contract:
 1. Read Palmier with `get_projects` and `get_timeline`; never navigate or mutate
    an unbound project.
 2. Ingest/transcribe, author and gate the cut-only previsual, then start the
-   candidate-scoped lease with `.venv/bin/python3
+   candidate-scoped lease with `./sniper python3
    scripts/producer/palmier/desktop_cli.py begin`.
    Land the cut before planning the entire visual treatment.
 3. Continue in this retained session. Build the full plan from the template

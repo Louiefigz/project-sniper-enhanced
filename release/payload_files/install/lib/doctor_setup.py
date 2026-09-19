@@ -1,4 +1,4 @@
-"""Doctor checks for how this install is set up: Node, provider settings, Sniper's own tools, admission.
+"""Doctor checks for how this install is set up: Node, Sniper's own tools, media admission.
 
 Imported by ``install/sniper_doctor.py``, which owns the result list and output.
 Each check calls ``record(state, name, detail)``; nothing here prints.
@@ -13,11 +13,9 @@ from pathlib import Path
 from typing import Callable
 
 PKG_ROOT = Path(__file__).resolve().parents[2]
-APP = PKG_ROOT / "app"
+APP = PKG_ROOT   # the app is the package folder itself
 ADMISSION_SELFTEST = APP / "scripts/producer/headless/native_admission_selftest.py"
 ADMISSION_TIMEOUT_S = 600
-BRAIN_FOR = {"codex": "codex", "claude": "legacy"}
-REASONING = {"none", "minimal", "low", "medium", "high", "xhigh", "max", "ultra"}
 # Sniper's own tools (install/lib/runtime_tools.sh): name, arguments that make it report
 # itself, and what refuses to run without it.
 RUNTIME_TOOLS = (("ffmpeg", ["-hide_banner", "-version"], "every render"),
@@ -25,9 +23,9 @@ RUNTIME_TOOLS = (("ffmpeg", ["-hide_banner", "-version"], "every render"),
                  ("whisper-cli", ["--help"], "local transcription"),
                  ("tesseract", ["--version"], "reference study (reading on-screen text)"),
                  ("yt-dlp", ["--version"], "adding a reference from a URL"),
-                 ("node", ["--version"], "the app, rendering and the editor CLIs"),
+                 ("node", ["--version"], "rendering and Sniper's scripts"),
                  ("python3", ["--version"], "the editing engine"),
-                 ("git", ["--version"], "the editor CLIs"))
+                 ("git", ["--version"], "Sniper's tool set (unused since Sniper stopped installing its own Codex/Claude; dropped at the next tool refresh)"))
 # What the tools write after installation; must match deps_tree_excludes in runtime_tools.sh.
 RUNTIME_EXCLUDES = {"var/cache/fontconfig", ".sniper-users", "name:__pycache__", "file:.sniper-runtime-complete"}
 Record = Callable[[str, str, str], None]
@@ -91,20 +89,6 @@ def check_node(record: Record) -> None:
     record("PASS", "node", f"{out.strip()} at {pinned} (needs {floor}+); the CLIs and workers use it")
 
 
-def check_provider_settings(record: Record) -> str:
-    """Provider, app brain and models agree; returns the configured provider."""
-    provider = os.environ.get("SNIPER_PROVIDER", "")
-    brain = os.environ.get("SNIPER_BRAIN_PROVIDER", "")
-    reasoning = os.environ.get("SNIPER_CODEX_REASONING", "")
-    model = os.environ.get("SNIPER_CODEX_MODEL" if provider == "codex" else "SNIPER_CLAUDE_MODEL", "")
-    if BRAIN_FOR.get(provider) != brain or not model or reasoning not in REASONING:
-        record("FAIL", "editor brain settings", f"provider '{provider}', app brain '{brain}', model '{model}' "
-               "disagree — run install/use-provider.command codex|claude")
-        return provider
-    record("PASS", "editor brain settings", f"{provider} for the app, the editor window and every edit; model {model}")
-    return provider
-
-
 def check_runtime_tools(record: Record) -> None:
     """Sniper's own tools: exactly as installed, found first on the app's PATH, and each runs."""
     import install_tools  # noqa: PLC0415  (same folder; stdlib only)
@@ -146,7 +130,7 @@ def _last_json_object(text: str) -> dict | None:
 def check_media_admission(record: Record) -> None:
     """Run a generated sample through the product's real media admission.
 
-    PASS only when app/scripts/producer/headless/native_admission_selftest.py exists,
+    PASS only when scripts/producer/headless/native_admission_selftest.py exists,
     exits 0 and prints a JSON object whose "ok" is true. Anything else FAILS.
     """
     name = "media admission (real sample)"
@@ -162,19 +146,3 @@ def check_media_admission(record: Record) -> None:
         return
     detail = (result or {}).get("detail") or (err.strip().splitlines() or ["no result"])[-1]
     record("FAIL", name, f"exit {code}: {detail}")
-
-
-def check_provider_admission(record: Record, provider: str) -> None:
-    """The provider, through production admission. Never prints auth output."""
-    node = os.environ.get("SNIPER_NODE_PATH") or "node"
-    code, out, _ = run([node, "--import", "tsx", "scripts/infra/provider-admission.ts", "--provider", provider], 90, APP)
-    try:
-        report = json.loads(out.strip().splitlines()[-1])
-    except (ValueError, IndexError):
-        record("FAIL", f"editor brain ({provider})", f"the admission check did not run (exit {code})")
-        return
-    advice = {"not-signed-in-or-not-subscription": f"sign in: install/sign-in.command {provider}",
-              "wrong-version": "reinstall the pinned CLI: install/install.command",
-              "cli-missing": "reinstall: install/install.command"}.get(report["reason"], report["detail"])
-    record("PASS" if report["ready"] else "FAIL", f"editor brain ({provider})",
-           f"{report['admittedVersion']} admitted and signed in" if report["ready"] else f"{report['reason']} — {advice}")

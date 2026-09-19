@@ -14,7 +14,7 @@
   <p class="lede">Every finished edit gives you two things: the video, and the project behind its graphics layer. Check both.</p>
 </header>
 <h2>1. Watch the video</h2>
-<pre><code>~/ProjectSniper/&lt;project&gt;/producer/final.mp4</code></pre>
+<pre><code>projects/&lt;project&gt;/producer/final.mp4</code></pre>
 <p>Open it and watch the whole thing with the sound on. Not a scrub, not a screenshot, not
 a look at the first ten seconds. The defects that matter — a clipped word at a join, a
 caption that lags, a graphic that leaves before it is readable — only show up in
@@ -33,7 +33,7 @@ playback.</p>
 <h2>2. Open the editable project</h2>
 <p>The graphics layer is a real editable project, not a flattened picture. This is the
 manual-control surface:</p>
-<pre><code>install/studio.command open ~/ProjectSniper/&lt;project&gt;/producer</code></pre>
+<pre><code>install/studio.command open projects/&lt;project&gt;/producer</code></pre>
 <p>That builds the review project from the edit plan plus the graphics-free video, and
 opens it in HyperFrames Studio in your browser. You move panels, change timing, adjust
 what a card says. Always go through <code>install/studio.command</code>: it runs Studio with
@@ -45,16 +45,16 @@ render your deliverable. Your footage is never re-encoded in a browser.</p>
 </div>
 
 <h3>Folding your Studio edits back in</h3>
-<pre><code>install/studio.command sync ~/ProjectSniper/&lt;project&gt;/producer --apply</code></pre>
+<pre><code>install/studio.command sync projects/&lt;project&gt;/producer --apply</code></pre>
 <p>This writes your changes into the edit plan, after checking them and taking a backup.
 It then <strong>prints the exact rebuild command</strong> to run, which is:</p>
-<pre><code>install/studio.command rebuild ~/ProjectSniper/&lt;project&gt;/producer</code></pre>
+<pre><code>install/studio.command rebuild projects/&lt;project&gt;/producer</code></pre>
 <p>Run it to rebuild the video; only the stages your change invalidated are redone.</p>
 <pre><code># see where the lane currently is and what to do next
-install/studio.command status ~/ProjectSniper/&lt;project&gt;/producer
+install/studio.command status projects/&lt;project&gt;/producer
 
 # shut the preview server down when you are finished
-install/studio.command stop ~/ProjectSniper/&lt;project&gt;/producer</code></pre>
+install/studio.command stop projects/&lt;project&gt;/producer</code></pre>
 <div class="warn">
 <p><strong>Two things to know.</strong> First, syncing is not approval — after your
 graphics change, the checks and reviews run again before the result counts as finished.
@@ -75,11 +75,10 @@ one. Rebuild, then watch it again.</p>
 <tr><td><code>producer/edit_plan.json</code></td><td>The edit itself, as data</td><td><strong>Yes</strong> — this is the edit; it can rebuild the video</td></tr>
 <tr><td><code>producer/final.mp4</code></td><td>The approved video</td><td><strong>Yes</strong></td></tr>
 <tr><td><code>producer/base_final.mp4</code></td><td>The video without graphics</td><td>Optional; speeds up rebuilds</td></tr>
-<tr><td><code>producer/.sniper-qc-approved.json</code></td><td>The approval receipt bound to those exact bytes</td><td><strong>Yes</strong> — without it the video is not "approved" any more</td></tr>
 <tr><td>Render caches</td><td>Regenerable working files</td><td>No — <code>install/clean-caches.command</code> lists and removes only these, and the kept downloads of Sniper's own tools (about 290 MB; without them, repairing the tools downloads them again)</td></tr>
 </table>
-<p>Back up <code>~/ProjectSniper</code>. That is the whole of your work; the app folder is
-replaceable.</p>
+<p>Back up your <code>projects</code> folder (or the folder you chose at setup). That is the whole
+of your work; everything else in the Sniper folder is replaceable.</p>
 
 <p class="next"><strong>Next:</strong> <a href="finishing.html">Finishing somewhere else &rarr;</a></p>
 <footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>

@@ -19,25 +19,35 @@ you; read the code for the rest.
 
 ### The tools
 
-Next.js 16 + a Python engine, four tools behind one shell:
+Buyers use Sniper only through their own Codex or Claude Code opened on this folder: the
+skills are the product, `./sniper` runs the engine with Sniper's own tools, and the agent is
+the brain. The Next.js app under `src/` (pages and API routes) is the retired web UI; its
+libraries are still imported by Sniper's TypeScript commands (`scripts/infra/*.ts`, the
+native export), so it ships and must keep type-checking, but no buyer route serves it.
+Three tools:
 
-- **Producer** (`/producer`, the main tool): footage → intent card → brain-authored
-  `edit_plan.json` → deterministic gates and independent plan review → isolated render
-  candidates → deterministic and visual QC → approved final. Engine: `scripts/producer/`
-  (module map: `scripts/producer/CLAUDE.md`).
-- **Segmenter** (`/segmenter`): long recording → local Whisper → the selected
-  subscription brain picks segments → ffmpeg **stream-copies** rough clips from one
-  recording (multicam cuts are frame-accurate and re-encode at the joins) → zip.
-- **Clipper** (`/clipper`): one clip → local Whisper → the selected brain marks filler at
-  the utterance level → word-level editor → **FCPXML** for Final Cut Pro.
-- **Text Review** (`/frameio-review`, optional paid add-on): MP4 → ffmpeg frames → pHash
-  dedup → Anthropic vision on the operator's own API key → flag list, `results.json`,
-  `report.html`. Not a pipeline stage.
+- **Producer** (the main tool): footage → stored intent → agent-authored
+  `edit_plan.json` → deterministic gates and independent plan review (fresh subagents) →
+  delivery approval (`scripts/infra/mint-delivery-approval.ts`) → render → deterministic and
+  visual QC → final. Engine: `scripts/producer/` (module map: `scripts/producer/CLAUDE.md`).
+- **Segmenter**: long recording → local Whisper → the agent picks segments → ffmpeg
+  **stream-copies** rough clips from one recording (multicam cuts are frame-accurate and
+  re-encode at the joins) → zip.
+- **Clipper**: one clip → local Whisper → the agent marks filler at the utterance level →
+  **FCPXML** for Final Cut Pro.
+- Text Review (`scripts/frameio/`, the retired `/frameio-review` page) is not in this release.
 
 ### Layout
 
-- Pages: `src/app/(tools)/{segmenter,clipper,producer,frameio-review}/page.tsx`.
-- API: `src/app/api/{segmenter,clipper,producer,frameio-review}/*`; shared helpers in
+- `sniper` (repository root): the command the agent runs every engine command through. In a
+  package it loads `install/lib/common.sh` settings and the maintenance lock; in a developer
+  checkout (no `install/`) it just runs the command here.
+- `scripts/infra/project-intent.ts` writes a project's stored intent (the retired app's
+  `POST /api/producer/intent`); `scripts/infra/mint-delivery-approval.ts` mints the delivery
+  approval from the deterministic gates.
+- Retired web UI (kept compiling; not a buyer route): pages
+  `src/app/(tools)/{segmenter,clipper,producer,frameio-review}/page.tsx`; API
+  `src/app/api/{segmenter,clipper,producer,frameio-review}/*`; shared helpers in
   `src/app/api/_lib/`. Every provider call goes through `_lib/ai-provider.ts` (provider,
   model, filtered environment), `_lib/subscription-invocation.ts` (admission) and
   `_lib/codex-cli.ts` or a Claude process module; Segmenter and Clipper use
@@ -61,15 +71,16 @@ Text Review's `--mode ocr`) and `yt-dlp` (adding a reference from a link,
 `study/fetch_reference.py`). In the packaged app these, Node, Python and git are Sniper's own:
 the installer puts them in `~/.project-sniper/runtimes/<lock id>/` from
 `install/deps/osx-arm64.lock` (ffmpeg is Sniper's build with zscale and rubberband), and the
-settings' PATH finds them before anything on the Mac. Never install or point Sniper at a
+`./sniper` puts them first on PATH. Never install or point Sniper at a
 Homebrew or system copy instead. API routes that start Python import `spawnPython` /
 `pythonInterpreter` / `SCRIPTS_DIR` from `src/app/api/_lib/spawn-python.ts`.
 
 ### Invariants — do not "fix" these
 
-- **Subscription only.** No SDK client or API key for Producer, Segmenter or Clipper;
-  no fallback between providers or to a paid route. `subscription-policy.ts` pins one CLI
-  version per provider.
+- **Subscription only.** The buyer's own Codex or Claude Code is the brain; nothing Sniper
+  runs calls a provider, and no SDK client or API key route may be added for editing. (The
+  retired app's provider modules — `ai-provider.ts`, `subscription-policy.ts` — stay because
+  shipped commands import them; they are not a buyer route.)
 - **Segmenter export is stream-copy** (`scripts/segmenter/export_mp4.py`): `-ss` before
   `-i`, cuts snap to the keyframe at or before the padded start, adjacent clips may
   overlap. Do not re-encode or tighten. Clipper's FCPXML path is frame-accurate by design.
@@ -82,13 +93,12 @@ Homebrew or system copy instead. API routes that start Python import `spawnPytho
   Text Review's `<tmpdir>/frameio-*` cache swept after an hour).
 - **No general UI cache.** Only the Producer control files (`.sniper-auto-edit-job.json`,
   `.sniper-auto-edit.log`, `.sniper-run-state.json`) persist between steps.
-- **Auto Edit runs in a detached worker** (`auto-edit/worker.ts`) and resumes only from
-  hash-current checkpoints; the npm scripts go through `scripts/infra/next_supervisor.mjs`.
+- **Auto Edit** (the retired app's detached worker, `auto-edit/worker.ts`) resumed only from
+  hash-current checkpoints; it is not a buyer route and its `.sniper-qc-approved.json` is not
+  produced on the agent route.
 
 ### Verification
 
 `npm run type-check`, `npm run lint`, `npm test`, `npm run build`, and the Python suite
 (`cd scripts/producer && PYTHONPATH=.:tests ../../.venv/bin/python3 selftest.py`). If a
-change cannot be verified this way, say so instead of claiming success. In an installed
-package, `npm run build` replaces the installer's recorded build and the doctor then reports
-the app build as changed; rebuild there with `../install/install.command` instead.
+change cannot be verified this way, say so instead of claiming success.

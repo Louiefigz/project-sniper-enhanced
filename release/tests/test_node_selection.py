@@ -1,4 +1,4 @@
-"""F8 (install side): one validated Node, recorded by its real path, refused when too old.
+"""The installer and the doctor use Sniper's own Node, whatever Node this Mac has on PATH.
 
 Run: .venv/bin/python -m unittest release.tests.test_node_selection
 """
@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import os
 import shutil
-import subprocess
 import sys
 import tempfile
 import unittest
@@ -20,84 +19,77 @@ import doctor_setup  # noqa: E402
 
 
 def _stub_node(folder: Path, version: str) -> Path:
-    """A 'node' that reports a version and, for `-p ...execPath`, its own real path.
-
-    A regular file (never a link to a real Node), so the tests do not depend on which
-    Node this Mac happens to run.
-    """
+    """A 'node' that reports a version: a regular file, never a link to a real Node."""
     folder.mkdir(parents=True, exist_ok=True)
     stub = folder / "node"
-    stub.write_text(f'#!/bin/bash\ncase "$1" in\n  -p) /usr/bin/readlink -f "$0" ;;\n  *) echo v{version} ;;\nesac\n')
+    stub.write_text(f"#!/bin/bash\necho v{version}\n")
     stub.chmod(0o755)
     return stub
 
 
 class InstallerAndDoctorNode(unittest.TestCase):
-    """The installer's select_node and the doctor's node check, with real and stub Nodes."""
+    """use_runtime_tools and the doctor's node check, with stand-in Nodes."""
 
     def setUp(self) -> None:
         self.base = Path(tempfile.mkdtemp(prefix="sniper-node-"))
         self.addCleanup(shutil.rmtree, self.base, ignore_errors=True)
         self.pkg = fx.make_package(self.base)
+        self.prefix = fx.runtime_prefix(self.base / "home")
 
-    def _select(self, path_prefix: str) -> subprocess.CompletedProcess:
+    def _use(self, path_prefix: str) -> tuple[int, str]:
         env = {**fx.base_env(self.pkg), "PATH": f"{path_prefix}:{fx.FINDER_PATH}"}
-        return fx.bash(self.pkg, '. "$FIXTURE_PKG/install/lib/steps.sh"; select_node && printf "NODE=%s\\n" "$NODE_BIN"', env)
+        done = fx.bash(self.pkg, '. "$FIXTURE_PKG/install/lib/steps.sh"; deps_paths; use_runtime_tools '
+                                 '&& printf "NODE=%s\\nNPM=%s\\nPY=%s\\n" "$NODE_BIN" "$NPM_BIN" "$PYTHON_BIN"', env)
+        return done.returncode, done.stdout + done.stderr
 
-    def test_installer_refuses_a_node_that_reports_22_0_0(self) -> None:
-        stub = _stub_node(self.base / "oldnode", "22.0.0").parent
-        done = self._select(str(stub))
-        self.assertNotEqual(done.returncode, 0)
-        self.assertIn("older than 22.13.0", done.stdout + done.stderr)
+    def test_installer_uses_sniper_node_even_with_node_23_first_on_path(self) -> None:
+        other = _stub_node(self.base / "homebrew-like/bin", "23.10.0").parent
+        code, output = self._use(str(other))
+        self.assertEqual(code, 0, output)
+        self.assertIn(f"NODE={self.prefix}/bin/node", output)
+        self.assertIn(f"NPM={self.prefix}/bin/npm", output)
+        self.assertIn(f"PY={self.prefix}/bin/python3", output)
+        self.assertIn("Node 24.21.0", output)
+        self.assertNotIn("23.10.0", output)
 
-    def test_installer_records_the_real_binary_of_a_node_in_a_nonstandard_folder(self) -> None:
-        real = _stub_node(self.base / "tools/nvm-like/versions/node/v24.1.0/bin", "24.1.0")
-        custom = self.base / "tools/fnm-like/multishell/bin"
-        custom.mkdir(parents=True)
-        (custom / "node").symlink_to(real)  # the per-shell link is what is tested; it points at a stub
-        done = self._select(str(custom))
-        self.assertEqual(done.returncode, 0, done.stderr)
-        recorded = done.stdout.strip().splitlines()[-1].removeprefix("NODE=")
-        self.assertEqual(recorded, os.path.realpath(real))
+    def test_installer_refuses_a_private_node_older_than_the_floor(self) -> None:
+        _stub_node(self.prefix / "bin", "22.0.0")
+        code, output = self._use("")
+        self.assertNotEqual(code, 0)
+        self.assertIn("Sniper's own Node cannot be used", output)
+        self.assertIn("older than 22.13.0", output)
 
-    def test_installer_refuses_node_23_with_the_exact_fix(self) -> None:
-        stub = _stub_node(self.base / "node23", "23.10.0")
-        done = self._select(str(stub.parent))
-        said = " ".join((done.stdout + done.stderr).split())
-        self.assertNotEqual(done.returncode, 0)
-        self.assertIn(f"Node 23.10.0 ({os.path.realpath(stub)}) is not supported", said)
-        self.assertIn("Install Node 24 (LTS) from https://nodejs.org", said)
-        self.assertIn("run 'brew upgrade node' instead", said)  # keg-only node@24 would not be on PATH
-
-    def test_doctor_fails_node_23(self) -> None:
-        stub = _stub_node(self.base / "node23", "23.10.0")
+    def _doctor(self, pinned: Path, path: Path, prefix: Path | None = None) -> tuple[str, str, str]:
         rows: list[tuple[str, str, str]] = []
-        with mock.patch.dict(os.environ, {"SNIPER_NODE_PATH": str(stub), "PATH": str(stub.parent)}), \
+        with mock.patch.dict(os.environ, {"SNIPER_NODE_PATH": str(pinned), "PATH": str(path),
+                                          "SNIPER_DEPS_PREFIX": str(prefix or self.prefix)}), \
                 mock.patch.object(doctor_setup, "PKG_ROOT", self.pkg):
             doctor_setup.check_node(lambda *row: rows.append(row))
-        self.assertEqual(rows[0][0], "FAIL")
-        self.assertIn(f"v23.10.0 at {stub} is not supported", rows[0][2])
-        self.assertIn("brew upgrade node", rows[0][2])
+        return rows[0]
+
+    def test_doctor_passes_sniper_node(self) -> None:
+        node = self.prefix / "bin/node"
+        state, _, detail = self._doctor(node, node.parent)
+        self.assertEqual(state, "PASS", detail)
+        self.assertIn("v24.21.0", detail)
+
+    def test_doctor_fails_a_node_outside_sniper_tools(self) -> None:
+        stub = _stub_node(self.base / "elsewhere", "24.1.0")
+        state, _, detail = self._doctor(stub, stub.parent)
+        self.assertEqual(state, "FAIL")
+        self.assertIn("is not Sniper's own Node", detail)
 
     def test_doctor_fails_a_node_that_reports_22_0_0(self) -> None:
-        stub = _stub_node(self.base / "oldnode", "22.0.0")
-        rows: list[tuple[str, str, str]] = []
-        with mock.patch.dict(os.environ, {"SNIPER_NODE_PATH": str(stub), "PATH": str(stub.parent)}), \
-                mock.patch.object(doctor_setup, "PKG_ROOT", self.pkg):
-            doctor_setup.check_node(lambda *row: rows.append(row))
-        self.assertEqual(rows[0][0], "FAIL")
-        self.assertIn("older than 22.13.0", rows[0][2])
+        stub = _stub_node(self.prefix / "bin", "22.0.0")
+        state, _, detail = self._doctor(stub, stub.parent)
+        self.assertEqual(state, "FAIL")
+        self.assertIn("older than 22.13.0", detail)
 
     def test_doctor_fails_when_path_finds_a_different_node(self) -> None:
-        pinned = _stub_node(self.base / "pinned", "24.1.0")
         other = _stub_node(self.base / "other", "24.0.0")
-        rows: list[tuple[str, str, str]] = []
-        with mock.patch.dict(os.environ, {"SNIPER_NODE_PATH": str(pinned),
-                                          "PATH": str(other.parent)}), \
-                mock.patch.object(doctor_setup, "PKG_ROOT", self.pkg):
-            doctor_setup.check_node(lambda *row: rows.append(row))
-        self.assertEqual(rows[0][0], "FAIL")
-        self.assertIn("different Node", rows[0][2])
+        state, _, detail = self._doctor(self.prefix / "bin/node", other.parent)
+        self.assertEqual(state, "FAIL")
+        self.assertIn("different Node", detail)
 
     def test_version_comparison_is_numeric_not_textual(self) -> None:
         done = fx.bash(self.pkg, 'for p in "22.13.0 22.13.0" "22.100.0 22.13.0" "24.0.0 22.13.0" "22.12.9 22.13.0" '

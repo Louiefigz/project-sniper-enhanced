@@ -150,13 +150,29 @@ class GuidedSetup(unittest.TestCase):
 
     def test_installer_marks_completion_only_after_its_last_step(self) -> None:
         # Structural (a real install downloads); the real-install harness checks behaviour.
+        # Step 1 (Sniper's own tools) runs before the maintenance lock, so it cannot clear the
+        # receipt; an interruption there leaves the tools unmarked, which install_complete
+        # refuses (test_missing_tools_resume_the_installer). Everything after it is covered here.
         text = (fx.INSTALL_SRC / "install.command").read_text()
-        cleared, first_step = text.index("clear_receipt installed"), text.index('step "1/10')
+        cleared, verified = text.index("clear_receipt installed"), text.index("\nverify_runtime_tools\n")
         built, written = text.index("\nbuild_step\n"), text.index('write_receipt installed "$PKG_ROOT"')
         finish = text.index("setup.command\" --finish-install")
-        self.assertLess(cleared, first_step, "an interrupted run must not keep an earlier completion")
+        self.assertLess(cleared, verified, "an interrupted run must not keep an earlier completion")
         self.assertLess(built, written, "completion is written after the last step")
         self.assertLess(written, finish, "the finish hand-off sees a completed install")
+
+    def test_missing_tools_resume_the_installer(self) -> None:
+        # A finished install whose private tools were removed (or never finished) is not complete.
+        prefix = fx.runtime_prefix(Path(self.env["HOME"]))
+        for damage in ("marker", "tool"):
+            with self.subTest(damage=damage):
+                fx.make_runtime(Path(self.env["HOME"]))
+                (prefix / ".sniper-runtime-complete" if damage == "marker" else prefix / "bin/ffmpeg").unlink()
+                done = fx.bash(self.pkg, "install_complete && echo complete || echo incomplete", self.env)
+                self.assertEqual(done.stdout.strip(), "incomplete", done.stderr)
+        fx.make_runtime(Path(self.env["HOME"]))
+        done = fx.bash(self.pkg, "install_complete && echo complete || echo incomplete", self.env)
+        self.assertEqual(done.stdout.strip(), "complete", done.stderr)
 
     def test_new_user_is_signed_in_checked_and_editor_opens(self) -> None:
         code, output = run_terminal([self.command], self.env)

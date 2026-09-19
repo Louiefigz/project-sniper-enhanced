@@ -35,10 +35,14 @@ def _content(rel: str) -> str:
 
 
 def _digest(folder: Path) -> str:
-    """One hash over every file name and content under a folder (global-state check)."""
+    """One hash over every file name and content under a folder (global-state check).
+
+    Sniper's own tools folder (~/.project-sniper) is not the owner's state: uninstall removes
+    it on purpose, and the uninstall tests assert that separately.
+    """
     digest = hashlib.sha256()
     for path in sorted(folder.rglob("*")):
-        if path.is_file():
+        if path.is_file() and ".project-sniper" not in path.relative_to(folder).parts[:1]:
             digest.update(str(path.relative_to(folder)).encode() + path.read_bytes())
     return digest.hexdigest()
 
@@ -98,10 +102,24 @@ class Lifecycle(unittest.TestCase):
         for rel in KEPT:
             self.assertEqual((self.pkg / rel).read_text(), _content(rel), rel)
         self.assertTrue((self.base / "videos").is_dir(), "the video workspace was touched")
+        self.assertFalse(fx.runtime_prefix(Path(self.env["HOME"])).exists(), "Sniper's own tools were left behind")
+        self.assertIn("Removed Sniper's own tools", done.stdout)
         claude = (self.logs / "claude.calls").read_text()
         self.assertIn("[--setting-sources] [] [auth] [status] [--json]", claude)
         self.assertIn("[--setting-sources] [] [auth] [logout]", claude)
         self.assertNotIn(f"cwd={self.env['HOME']}", claude, "your home settings folder must not be the working folder")
+
+    def test_uninstall_keeps_tools_another_install_uses(self) -> None:
+        other = fx.make_package(self.base, "other")   # same HOME: both use one tools folder
+        self.assertEqual(fx.write_settings(other, "codex", str(self.base / "videos")).returncode, 0)
+        for pkg in (self.pkg, other):
+            self.assertEqual(fx.bash(pkg, "deps_paths && deps_register", self.env).returncode, 0)
+        done = self._run("uninstall.command", "--yes")
+        self.assertEqual(done.returncode, 0, done.stderr)
+        prefix = fx.runtime_prefix(Path(self.env["HOME"]))
+        self.assertTrue((prefix / "bin/ffmpeg").exists(), "tools another install uses were removed")
+        self.assertIn("another Sniper install uses them", done.stdout)
+        self.assertEqual([p.read_text() for p in (prefix / ".sniper-users").iterdir()], [str(other.resolve())])
 
     def test_claude_sign_in_reads_no_setting_sources_from_your_home(self) -> None:
         # Sign-in ends with the doctor's provider check; this test is about the login call only.

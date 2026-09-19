@@ -20,7 +20,8 @@ lock_rows() {  # kind... — the lock rows of those kinds
 download_all() {
   local kind sha bytes path source n=0 total url
   total="$(lock_rows micromamba conda | wc -l | tr -d ' ')"
-  say "Downloading Sniper's tools: $total files, each checked against its SHA-256."
+  say "Fetching Sniper's tools: $total files; any not already here is downloaded, and each is checked"
+  say "  against the SHA-256 recorded for this release before it is used."
   while read -r kind sha bytes path source; do
     n=$((n + 1))
     url="${SNIPER_TOOLS_BASE_URL:+$SNIPER_TOOLS_BASE_URL/$path}"; url="${url:-$source}"

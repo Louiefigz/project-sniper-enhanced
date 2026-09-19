@@ -5,9 +5,14 @@ build ships them, adds a RELEASE.json with the fields the scripts read, and puts
 stub ``codex``/``claude`` CLIs where the installer would. The stubs never reach a
 network or a real login: they record their argv and the provider environment,
 and their login/logout behaviour is scripted per test through files.
+
+Sniper's own tools are stand-ins too: ``make_runtime`` lays out the private folder
+(``<home>/.project-sniper/runtimes/<lock id>/``) the real lock names, as wrapper FILES —
+python3 runs this interpreter, the others print a version — plus the completion marker.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
@@ -19,9 +24,9 @@ ROOT = Path(__file__).resolve().parents[2]
 INSTALL_SRC = ROOT / "release/payload_files/install"
 LOCK_SRC = ROOT / "scripts/infra/sniper_lock.py"
 FINDER_PATH = "/usr/bin:/bin:/usr/sbin:/sbin"
-COMPONENTS = {"node_floor": "22.13.0", "node_recommended": "24", "node_unsupported_majors": [23],
+COMPONENTS = {"node_floor": "22.13.0",
               "claude_model_default": "opus", "codex_model_default": "gpt-5.6-sol",
-              "codex_reasoning_default": "xhigh", "python_tested": "3.14.4",
+              "codex_reasoning_default": "xhigh",
               "codex_cli_admitted": "codex-cli 0.144.1", "claude_cli_admitted": "2.1.247 (Claude Code)",
               "chrome_headless_shell": "152.0.7977.30"}
 
@@ -47,6 +52,42 @@ exit 0
 '''
 
 
+# Stand-ins for Sniper's own tools: what each prints when asked for its version.
+FFMPEG_STUB = r"""case "$*" in
+  *-filters*) printf 'Filters:\n'; for f in rubberband zscale subtitles ass drawtext arnndn loudnorm ebur128 afftdn \
+      acompressor alimiter sidechaincompress aresample amix overlay crop; do printf ' ... %s A->A x\n' "$f"; done ;;
+  *-encoders*) printf 'Encoders:\n V....D libx264 H.264\n A....D aac AAC\n' ;;
+  *) echo 'ffmpeg version 8.0.3' ;;
+esac"""
+TOOL_STUBS = {"node": "echo v24.21.0", "npm": "echo 11.19.0", "ffmpeg": FFMPEG_STUB,
+              "ffprobe": "echo 'ffprobe version 8.0.3'", "whisper-cli": "echo 'usage: whisper-cli'",
+              "tesseract": """case "$1" in --list-langs) printf 'List of available languages (2):\neng\nosd\n' ;;
+  *) echo 'tesseract 5.5.3' ;; esac""",
+              "yt-dlp": "echo 2026.08.19", "git": "echo 'git version 2.55.0'"}
+RUNTIME_BIN_TOOLS = ("node", "ffmpeg", "ffprobe", "whisper-cli", "tesseract", "yt-dlp")
+
+
+def _wrapper(path: Path, body: str) -> None:
+    path.write_text(f"#!/bin/bash\n{body}\n", encoding="utf-8")
+    path.chmod(0o755)
+
+
+def runtime_prefix(home: Path, lock: Path = INSTALL_SRC / "deps/osx-arm64.lock") -> Path:
+    """Where the installer puts Sniper's own tools for ``lock``, under ``home``."""
+    return home / ".project-sniper/runtimes" / hashlib.sha256(lock.read_bytes()).hexdigest()[:16]
+
+
+def make_runtime(home: Path) -> Path:
+    """Stand-in private tools folder, marked complete; returns its path."""
+    prefix = runtime_prefix(home)
+    (prefix / "bin").mkdir(parents=True, exist_ok=True)
+    for name, body in TOOL_STUBS.items():
+        _wrapper(prefix / "bin" / name, body)
+    _wrapper(prefix / "bin/python3", f'exec "{sys.executable}" "$@"')
+    (prefix / ".sniper-runtime-complete").write_text(prefix.name, encoding="utf-8")
+    return prefix
+
+
 def make_package(base: Path, name: str = "pkg") -> Path:
     """Create ``base/name`` laid out like an extracted archive; return its root."""
     pkg = base / name
@@ -57,8 +98,9 @@ def make_package(base: Path, name: str = "pkg") -> Path:
                                                   "sellable": False}), encoding="utf-8")
     runtime_bin = pkg / "runtime/bin"
     runtime_bin.mkdir(parents=True)
-    (runtime_bin / "node").write_text('#!/bin/bash\necho v24.0.0\n', encoding="utf-8")
-    (runtime_bin / "node").chmod(0o755)
+    for tool in RUNTIME_BIN_TOOLS:   # the installer links these; here they are stand-in files
+        _wrapper(runtime_bin / tool, TOOL_STUBS[tool])
+    make_runtime(base / "home")
     bin_dir = pkg / "runtime/cli/node_modules/.bin"
     bin_dir.mkdir(parents=True)
     for cli in ("codex", "claude"):
@@ -94,12 +136,14 @@ def base_env(pkg: Path) -> dict[str, str]:
 def write_settings(pkg: Path, provider: str, workspace: str, extra: dict[str, str] | None = None
                    ) -> subprocess.CompletedProcess:
     """Run the installer's own configuration functions with test values for earlier steps."""
-    values = {"NODE_BIN": "/opt/homebrew/bin/node", "TOOL_FFMPEG": "/opt/homebrew/bin/ffmpeg",
-              "TOOL_FFPROBE": "/opt/homebrew/bin/ffprobe", "TOOL_WHISPER_CLI": "/opt/homebrew/bin/whisper-cli",
+    tools = runtime_prefix(pkg.parent / "home") / "bin"
+    values = {"NODE_BIN": str(tools / "node"), "TOOL_FFMPEG": str(tools / "ffmpeg"),
+              "TOOL_FFPROBE": str(tools / "ffprobe"), "TOOL_WHISPER_CLI": str(tools / "whisper-cli"),
               "BROWSER_BIN": str(pkg / "runtime/browser/chrome-headless-shell"),
               "MODEL_PATH": str(pkg / "runtime/whisper/ggml-small.en.bin"),
               "PROVIDER_ARG": provider, "WORKSPACE_ARG": workspace, **(extra or {})}
     assign = "".join(f'{key}="${{T_{key}}}"\n' for key in values)
     env = {**base_env(pkg), **{f"T_{key}": value for key, value in values.items()}}
-    script = assign + 'mkdir -p "$RUNTIME_DIR" && choose_provider && write_settings && verify_settings && echo configured\n'
+    script = assign + ('deps_paths && mkdir -p "$RUNTIME_DIR" && choose_provider && write_settings '
+                       '&& verify_settings && echo configured\n')
     return bash(pkg, script, env)

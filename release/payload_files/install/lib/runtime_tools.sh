@@ -102,10 +102,10 @@ deps_unregister_and_prune() {
 # Inside the maintenance lock: every file is exactly as installed, and each tool runs.
 # A changed or missing file makes this reinstall the folder from the verified downloads.
 verify_runtime_tools() {
-  local why python="$DEPS_PREFIX/bin/python3"
+  local why=""
   deps_paths
   if deps_ready && [ -f "$DEPS_RECORD" ] \
-      && why="$("$python" -I -B "$INSTALL_TOOLS" tree-check "$DEPS_PREFIX" "$DEPS_RECORD" $(deps_tree_excludes))"; then
+      && why="$("$DEPS_PREFIX/bin/python3" -I -B "$INSTALL_TOOLS" tree-check "$DEPS_PREFIX" "$DEPS_RECORD" $(deps_tree_excludes))"; then
     deps_check_tools || fail "Sniper's own tools do not run: $DEPS_TOOL_PROBLEM. Run the installer again."
     say "Sniper's own tools — verified ($why)"
   else

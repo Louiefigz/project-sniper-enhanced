@@ -61,32 +61,37 @@ class FfmpegFeatureCheck(unittest.TestCase):
         self.assertEqual(done.stdout, "codex-cli 0.144.1")
 
 
-class ExternalToolsAtInstall(unittest.TestCase):
-    """check_external_tools (installer step 1) on a Mac without the reference tools."""
+class SnipersOwnToolsRun(unittest.TestCase):
+    """deps_check_tools: every one of Sniper's own tools runs, with the features Sniper uses."""
 
     def setUp(self) -> None:
         self.base = Path(tempfile.mkdtemp(prefix="sniper-tools-"))
         self.addCleanup(shutil.rmtree, self.base, ignore_errors=True)
         self.pkg = fx.make_package(self.base)
-        self.bin = self.base / "bin"
-        self.bin.mkdir()
-        for tool in ("ffmpeg", "ffprobe", "whisper-cli"):
-            real = shutil.which(tool, path="/opt/homebrew/bin:/usr/local/bin")
-            if real:  # a regular wrapper FILE, never a link to the real tool
-                (self.bin / tool).write_text(f'#!/bin/sh\nexec "{real}" "$@"\n')
-                (self.bin / tool).chmod(0o755)
+        self.bin = fx.runtime_prefix(self.base / "home") / "bin"
 
-    @unittest.skipUnless(shutil.which("ffmpeg", path="/opt/homebrew/bin:/usr/local/bin"), "no ffmpeg on this Mac")
-    def test_missing_tesseract_and_ytdlp_are_listed_together_with_brew_commands(self) -> None:
-        # common.sh appends Homebrew's folders to PATH, so the test narrows PATH after sourcing it.
-        done = fx.bash(self.pkg, f'. "$FIXTURE_PKG/install/lib/steps.sh"; PATH="{self.bin}"; check_external_tools')
-        self.assertEqual(done.returncode, 1)
-        out = done.stdout + done.stderr
-        self.assertIn("tesseract is required for reference study", out)
-        self.assertIn("brew install tesseract", out)
-        self.assertIn("yt-dlp is required for adding a reference from a URL", out)
-        self.assertIn("brew install yt-dlp", out)
-        self.assertIn("Missing: tesseract yt-dlp.", out)
+    def _check(self) -> str:
+        done = fx.bash(self.pkg, 'deps_paths; deps_check_tools && echo ok || echo "problem: $DEPS_TOOL_PROBLEM"')
+        return done.stdout.strip()
+
+    def _replace(self, tool: str, body: str) -> None:
+        (self.bin / tool).write_text(f"#!/bin/bash\n{body}\n")   # a stand-in file, never a real tool
+
+    def test_all_present_passes(self) -> None:
+        self.assertEqual(self._check(), "ok")
+
+    def test_tesseract_without_english_data_is_named(self) -> None:
+        self._replace("tesseract", 'case "$1" in --list-langs) printf "List:\\nosd\\n" ;; *) echo 5.5.3 ;; esac')
+        self.assertEqual(self._check(), "problem: tesseract has no English data")
+
+    def test_a_tool_that_does_not_start_is_named(self) -> None:
+        self._replace("yt-dlp", "exit 1")
+        self.assertEqual(self._check(), "problem: yt-dlp does not start")
+
+    def test_an_ffmpeg_without_a_renderer_filter_is_refused(self) -> None:
+        self._replace("ffmpeg", 'case "$*" in *-encoders*) printf "E:\\n V libx264 x\\n A aac x\\n" ;; '
+                                '*-filters*) printf "F:\\n ... crop A->A x\\n" ;; *) echo ffmpeg version 8 ;; esac')
+        self.assertIn("problem: ffmpeg lacks rubberband zscale", self._check())
 
 
 if __name__ == "__main__":

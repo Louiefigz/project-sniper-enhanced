@@ -119,10 +119,40 @@ class PayloadCopy(unittest.TestCase):
         stage = base / "stage"
         stage.mkdir()
         report = StageReport()
-        with mock.patch.object(payload, "PAYLOAD", source), mock.patch.object(payload, "_lock_lines"):
+        with mock.patch.object(payload, "PAYLOAD", source), mock.patch.object(payload, "_lock_lines"), \
+                mock.patch.object(payload.runtime_tools, "check"), \
+                mock.patch.object(payload.runtime_tools, "shipped_files", return_value={}):
             payload.write_payload(base, stage, report)
         self.assertEqual(sorted(report.files), ["install/sniper_doctor.py"])
         self.assertFalse(list(stage.rglob("*.pyc")))
+
+    def _payload_with_runtime(self, base: Path, check=None) -> tuple[Path, StageReport]:
+        source, stage, built = base / "payload_files", base / "stage", base / "built.tar.xz"
+        (source / "install").mkdir(parents=True)
+        (source / "install/setup.command").write_text("#!/bin/bash\n")
+        built.write_bytes(b"ffmpeg build")
+        stage.mkdir()
+        report = StageReport()
+        with mock.patch.object(payload, "PAYLOAD", source), mock.patch.object(payload, "_lock_lines"), \
+                mock.patch.object(payload.runtime_tools, "check", side_effect=check), \
+                mock.patch.object(payload.runtime_tools, "shipped_files",
+                                  return_value={"install/deps/ffmpeg.tar.xz": (built, "x")}):
+            payload.write_payload(base, stage, report)
+        return stage, report
+
+    def test_the_ffmpeg_build_and_its_source_are_staged_after_their_check(self) -> None:
+        base = Path(tempfile.mkdtemp(prefix="sniper-payload-"))
+        self.addCleanup(shutil.rmtree, base, ignore_errors=True)
+        stage, report = self._payload_with_runtime(base)
+        self.assertIn("install/deps/ffmpeg.tar.xz", report.files)
+        self.assertEqual((stage / "install/deps/ffmpeg.tar.xz").read_bytes(), b"ffmpeg build")
+        self.assertEqual((stage / "install/deps/ffmpeg.tar.xz").stat().st_mode & 0o777, 0o644)
+
+    def test_a_runtime_that_does_not_verify_refuses_the_build(self) -> None:
+        base = Path(tempfile.mkdtemp(prefix="sniper-payload-"))
+        self.addCleanup(shutil.rmtree, base, ignore_errors=True)
+        with self.assertRaisesRegex(StagingError, "tool runtime does not verify: artifact changed"):
+            self._payload_with_runtime(base, check=payload.runtime_tools.LockError("artifact changed"))
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-"""Doctor checks added in rc4: external tools (F3), provider settings (F1) and the real
+"""Doctor checks added in rc4: Sniper's own tools, provider settings (F1) and the real
 media-admission sample interface (another workstream supplies the self-test).
 
 Run: .venv/bin/python -m unittest release.tests.test_doctor_checks
@@ -17,6 +17,7 @@ from release.tests import _fixture as fx
 
 sys.path.insert(0, str(fx.INSTALL_SRC / "lib"))
 import doctor_setup  # noqa: E402
+import install_tools  # noqa: E402
 
 SELFTESTS = {
     "ok": 'import json; print(json.dumps({"ok": True, "detail": "sample admitted"}))',
@@ -38,22 +39,56 @@ class DoctorChecks(unittest.TestCase):
     def _record(self, *row: str) -> None:
         self.rows.append(row)
 
-    def test_missing_tesseract_and_ytdlp_fail_with_brew_commands(self) -> None:
-        empty = self.base / "bin"
-        empty.mkdir()
-        with mock.patch.dict(os.environ, {"PATH": str(empty)}):
-            doctor_setup.check_external_tools(self._record)
-        by_name = {name: (state, detail) for state, name, detail in self.rows}
-        self.assertEqual(by_name["tesseract"][0], "FAIL")
-        self.assertIn("brew install tesseract", by_name["tesseract"][1])
-        self.assertIn("reference study", by_name["tesseract"][1])
-        self.assertEqual(by_name["yt-dlp"][0], "FAIL")
-        self.assertIn("brew install yt-dlp", by_name["yt-dlp"][1])
+    def _installed(self, record: bool = True) -> Path:
+        """Stand-in tools, recorded the way the installer records them."""
+        prefix = fx.make_runtime(self.base / "home")
+        if record:
+            install_tools.tree_record(prefix, prefix.parent / f"{prefix.name}.tree.json", doctor_setup.RUNTIME_EXCLUDES)
+        return prefix
 
-    @unittest.skipUnless(shutil.which("tesseract") and shutil.which("yt-dlp"), "tools not on this Mac")
-    def test_present_tools_pass(self) -> None:
-        doctor_setup.check_external_tools(self._record)
-        self.assertEqual({n: s for s, n, _ in self.rows}, {"whisper-cli": "PASS", "tesseract": "PASS", "yt-dlp": "PASS"})
+    def _tools(self, prefix: Path, path_first: Path | None = None) -> dict[str, tuple[str, str]]:
+        """Run check_runtime_tools; name -> (state, detail)."""
+        path = f"{path_first}:{prefix / 'bin'}" if path_first else str(prefix / "bin")
+        with mock.patch.dict(os.environ, {"PATH": path, "SNIPER_DEPS_PREFIX": str(prefix)}):
+            doctor_setup.check_runtime_tools(self._record)
+        return {name: (state, detail) for state, name, detail in self.rows}
+
+    def test_intact_tools_found_first_pass(self) -> None:
+        rows = self._tools(self._installed())
+        self.assertEqual({n: s for n, (s, _) in rows.items()},
+                         {n: "PASS" for n in ("Sniper's own tools", "ffmpeg", "ffprobe", "whisper-cli",
+                                              "tesseract", "yt-dlp", "node", "python3", "git")})
+        self.assertIn("files verified", rows["Sniper's own tools"][1])
+
+    def test_a_changed_tool_file_fails_and_names_the_fix(self) -> None:
+        prefix = self._installed()
+        (prefix / "bin/git").write_text("#!/bin/bash\necho tampered\n")
+        rows = self._tools(prefix)
+        self.assertEqual(rows["Sniper's own tools"][0], "FAIL")
+        self.assertIn("1 file(s) differ", rows["Sniper's own tools"][1])
+        self.assertIn("install/install.command", rows["Sniper's own tools"][1])
+
+    def test_what_the_tools_write_themselves_is_not_a_change(self) -> None:
+        prefix = self._installed()
+        for rel in ("var/cache/fontconfig/x.cache", "lib/python3/__pycache__/m.pyc", ".sniper-users/abc"):
+            (prefix / rel).parent.mkdir(parents=True, exist_ok=True)
+            (prefix / rel).write_text("written at run time")
+        self.assertEqual(self._tools(prefix)["Sniper's own tools"][0], "PASS")
+
+    def test_a_tool_found_first_elsewhere_fails(self) -> None:
+        other = self.base / "homebrew-like/bin"   # a stand-in file first on PATH, never a real tool
+        other.mkdir(parents=True)
+        (other / "ffmpeg").write_text("#!/bin/bash\necho ffmpeg version 7\n")
+        (other / "ffmpeg").chmod(0o755)
+        rows = self._tools(self._installed(), path_first=other)
+        self.assertEqual(rows["ffmpeg"][0], "FAIL")
+        self.assertIn(f"PATH finds {other / 'ffmpeg'}, not Sniper's own", rows["ffmpeg"][1])
+        self.assertEqual(rows["ffprobe"][0], "PASS")
+
+    def test_no_record_means_not_installed(self) -> None:
+        rows = self._tools(self._installed(record=False))
+        self.assertEqual(rows["Sniper's own tools"][0], "FAIL")
+        self.assertIn("not installed", rows["Sniper's own tools"][1])
 
     def test_provider_settings_must_agree(self) -> None:
         cases = {("codex", "codex"): "PASS", ("claude", "legacy"): "PASS",

@@ -1,28 +1,51 @@
 {
   "schema": "sniper-qualification-matrix-v1",
-  "about": "Sale-readiness evidence for one exact archive. Read by python -m release.sale_gate. Seeded 2026-09-18 from the rc3-era rows with nothing marked PASS; the lead maintainer fills status, archive_sha256, evidence and depends_on (each file with its sha256).",
+  "about": "Sale-readiness evidence for one exact archive. Read by python -m release.sale_gate. Seeded 2026-09-18 from the rc3-era rows; filled for the rc4 final candidate from evidence/final (matrix-spec-bae842a.json). the lead maintainer fills status, archive_sha256, evidence and depends_on (each file with its sha256).",
   "rows": [
     {
       "id": "Z1",
       "requirement": "Archive shape, withheld paths and runtime dependency closure of the exact archive (release.audit_archive on a fresh extraction into a path with a space and an accent)",
       "scope": "package test on the frozen archive",
       "required": true,
-      "status": "NOT RUN",
-      "archive_sha256": null,
-      "evidence": [],
-      "depends_on": [],
-      "note": "rc3 passed 98/0 on bd330827; no rc4 archive has been audited."
+      "status": "PASS",
+      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "evidence": [
+        {
+          "path": "final/21-archive-audit-Z1.log",
+          "sha256": "683ac98c6a5067609a4728d94e96a35d3a57bf0e440ea4edfccb1391b0ead3b1"
+        }
+      ],
+      "depends_on": [
+        {
+          "path": "final/build-bae842a/SHA256SUMS",
+          "sha256": "bd2b9b75176b04c9b8cd67327fd1aedaa6c2d4cb9ca8a390d565cf00104e1ad8"
+        },
+        {
+          "path": "final/build-bae842a/withheld.json",
+          "sha256": "4a8fa5db9da339593312118190ce73283cec1d9811efdcc7dbdaa9bef85a87ef"
+        }
+      ],
+      "note": "bae842a ZIP 7fed9cfd: 122 checks passed, 0 failed, on a fresh extraction into a path with a space and an accent; includes Sniper's own tools lock, the shipped ffmpeg byte for byte and the runtime closure."
     },
     {
       "id": "B2",
       "requirement": "No teacher-derived or third-party-creator doctrine, names, IDs or taglines ship (content provenance, not just names)",
       "scope": "package content + written provenance inventory",
       "required": true,
-      "status": "BLOCKED",
-      "archive_sha256": null,
-      "evidence": [],
+      "status": "NOT RUN",
+      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "evidence": [
+        {
+          "path": "final/22-package-provenance-scan.log",
+          "sha256": "9444e48f8e96e011bf5c4838f960d5fa90a16dfa98211fb4ff5852aa870466e6"
+        },
+        {
+          "path": "final/PROVENANCE_INVENTORY_RC4.md",
+          "sha256": "bbe955c61122e3d7aac3c3fe13419e55f20f855d5e3b4334ccffffd8854f5378"
+        }
+      ],
       "depends_on": [],
-      "note": "Creator-derived styles and studies still ship (rc3 independent review blocker 1); needs re-authoring or an owner decision."
+      "note": "Automated: the provenance scan of the extracted bae842a package finds 0 creator IDs/handles, 0 creator or teacher names, 0 client names; the rc4 streams rewrote every creator- or teacher-derived style, doctrine and library as original (PROVENANCE_INVENTORY_RC4.md). A content-provenance check by a person (not a name scan) has not been done; owner material (PENDING item 6) is a separate open decision."
     },
     {
       "id": "B1-B7",
@@ -33,7 +56,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "rc3 reviewer flagged reused case IDs and the 'not adapted' wording for a person's check."
+      "note": "The libraries are rewritten as original with provenance rows (PROVENANCE_INVENTORY_RC4.md); a person has not checked the rationale."
     },
     {
       "id": "B3",
@@ -44,7 +67,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "YuNet cleared in rc3; the full inventory has not been redone for rc4."
+      "note": "THIRD-PARTY-NOTICES updated for rc4 (Sniper's GPL ffmpeg with its sources in third-party/sources, the downloaded conda-forge runtime, 40 HyperFrames patches across 7 files); a component-by-component licence check by a person is not done; GSAP is its own blocked row."
     },
     {
       "id": "B4",
@@ -55,40 +78,101 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Measured clean in rc3, never heard."
+      "note": "The music bed is measured clean; nobody has listened to it."
     },
     {
       "id": "BUILD-DET",
       "requirement": "Two builds of the release commit produce identical SHA256SUMS",
       "scope": "build",
       "required": true,
-      "status": "NOT RUN",
-      "archive_sha256": null,
-      "evidence": [],
-      "depends_on": [],
-      "note": "Run release.build_package twice into fresh folders and compare."
+      "status": "PASS",
+      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "evidence": [
+        {
+          "path": "final/20-build-twice.log",
+          "sha256": "50079fb90cf21832a15b95b3ccb4e5a00341961486a6640b59c70a4b2cdea8e2"
+        }
+      ],
+      "depends_on": [
+        {
+          "path": "final/build-bae842a/SHA256SUMS",
+          "sha256": "bd2b9b75176b04c9b8cd67327fd1aedaa6c2d4cb9ca8a390d565cf00104e1ad8"
+        }
+      ],
+      "note": "Two builds of bae842a into fresh folders: identical SHA256SUMS (7fed9cfd…) and identical withheld.json."
     },
     {
       "id": "SUITES",
       "requirement": "Source suites (tsc, lint, build, npm test stages, Python selftest) pass on the release commit, failures classified by runtime reachability",
       "scope": "source tests",
       "required": true,
-      "status": "NOT RUN",
-      "archive_sha256": null,
-      "evidence": [],
+      "status": "FAIL",
+      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "evidence": [
+        {
+          "path": "final/30-ts-typecheck-lint-build-bae842a.log",
+          "sha256": "3c9866e1891f3bf527d236064e6617543261c850b935416421741a416dfe60c5"
+        },
+        {
+          "path": "final/31-ts-npm-test-stages-bae842a.log",
+          "sha256": "cbc5fa219675a4a2603a1367dd3c8ba9c19ada99a6482deae19133f12207f5b1"
+        },
+        {
+          "path": "final/32-npm-test-literal-bae842a.log",
+          "sha256": "517650ae1cf8eedbf44ae91185f6008ff390e3151abe951a8892fb85fb2cab4a"
+        },
+        {
+          "path": "final/10-py-selftest-3.14-bae842a.log",
+          "sha256": "747a22da975dede33733a1026c836c63606cbf61d338477e1d9d32543d036fab"
+        },
+        {
+          "path": "final/10-py-selftest-3.12-bae842a.log",
+          "sha256": "7606f1618d4425990b6f58549c807f1a326e296cc11f2774051ffb413e36f20c"
+        },
+        {
+          "path": "final/11-py-retained-evidence-in-src-bae842a.log",
+          "sha256": "dab1e6362a9e34a6854f3772ce7a0a3f7717997280b652705b5a6c4541544d02"
+        },
+        {
+          "path": "final/12-py-failure-classification-bae842a.md",
+          "sha256": "2799f8cbd0893057703db71e7ba9d4131767274cd52b02535a4ba42fa3003a04"
+        },
+        {
+          "path": "final/03-maintainer-evidence-regeneration.log",
+          "sha256": "91bb71aed0d3b4517fb5544ceba1ecf062023247088cdf4aaf6f32a94c450069"
+        }
+      ],
       "depends_on": [],
-      "note": "rc3 figures are for 15dac37/3744f6a only."
+      "note": "bae842a: tsc, lint, build exit 0; all 495 npm-test files pass one by one and the literal npm test passes (Node 24.21.0). Python 7,670 tests on 3.14.4 and 3.12.9: the same 7 retained-evidence freshness checks fail on both. 3 are path/interpreter-bound proofs that are fresh in the generating checkout; 4 (rate matrix, system inventory, P0 container ingress cohort, P0 render parity) are container-era or absent maintainer evidence, unverified and preserved. None is buyer-reachable (12-py-failure-classification). Stays FAIL until those four are regenerated or retired by the maintainer."
     },
     {
       "id": "PKG-SELFTEST",
       "requirement": "In-package test suite for shipped features passes inside an installed package with the install's own settings",
       "scope": "package test",
       "required": true,
-      "status": "NOT RUN",
-      "archive_sha256": null,
-      "evidence": [],
-      "depends_on": [],
-      "note": "rc3 had 13 package failures including a production observer input (F4)."
+      "status": "PASS",
+      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "evidence": [
+        {
+          "path": "final/qualification-install/40-package-gate-final.json",
+          "sha256": "8f16524582a7879bdd8b2781812e09caea1ced9516f0c917cd78eec585672d3f"
+        },
+        {
+          "path": "final/qualification-install/40-package-gate-final.log",
+          "sha256": "2d1d93a727bee57d54efd0b49897de11d4e1ddbfa4540740b317d5b5f1905ec9"
+        },
+        {
+          "path": "final/qualification-install/01-install.log",
+          "sha256": "44dce10a1a809c5e91957ad88f13393eeb3faed6f216850b659728c0f31dff28"
+        }
+      ],
+      "depends_on": [
+        {
+          "path": "final/build-bae842a/withheld.json",
+          "sha256": "4a8fa5db9da339593312118190ce73283cec1d9811efdcc7dbdaa9bef85a87ef"
+        }
+      ],
+      "note": "Installed bae842a package at the real HOME, launched through the install's own load_env from a cleared environment, with the build's withheld manifest: 7,637 pass, 0 fail, 13 declared withheld-evidence errors tolerated structurally, 16 opt-in skips listed; 0 gate failures."
     },
     {
       "id": "Z2",
@@ -99,29 +183,47 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Needs a clean Mac (owner input R)."
+      "note": "Needs a clean supported Mac (owner input R). The isolation run (installer/11) hides this Mac's developer tools with a Seatbelt profile and is NOT a clean-Mac test."
     },
     {
       "id": "R1",
       "requirement": "Build and launch: start/stop/restart from Finder PATH, occupied and overridden ports, foreign PIDs never signalled",
       "scope": "installed package, developer Mac",
       "required": true,
-      "status": "NOT RUN",
-      "archive_sha256": null,
-      "evidence": [],
+      "status": "PASS",
+      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "evidence": [
+        {
+          "path": "final/installer/10-fresh-repeat-start.log",
+          "sha256": "3231e9b815bfb2158a86995e51b045ba32768437863cbb678ef0b74a6adfbbbe"
+        },
+        {
+          "path": "final/installer/18-lifecycle.log",
+          "sha256": "014a4c279985c3ac81766a534acccbd025b39f6783f33fd44011cc4146524df2"
+        }
+      ],
       "depends_on": [],
-      "note": ""
+      "note": "Finder PATH, empty HOME: start/stop/restart; an occupied port 3000 is refused naming the holder and SNIPER_PORT overrides it; restart on the override; the foreign listener is left running (installer/10, 18 §5, §7)."
     },
     {
       "id": "R2",
       "requirement": "One provider choice drives the editor window, app, doctor and every edit (no CLI/provider/brain/model mismatch)",
       "scope": "installed package, developer Mac",
       "required": true,
-      "status": "NOT RUN",
-      "archive_sha256": null,
-      "evidence": [],
+      "status": "PASS",
+      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "evidence": [
+        {
+          "path": "final/installer/18-lifecycle.log",
+          "sha256": "014a4c279985c3ac81766a534acccbd025b39f6783f33fd44011cc4146524df2"
+        },
+        {
+          "path": "final/installer/10-fresh-repeat-start.log",
+          "sha256": "3231e9b815bfb2158a86995e51b045ba32768437863cbb678ef0b74a6adfbbbe"
+        }
+      ],
       "depends_on": [],
-      "note": ""
+      "note": "One settings pair drives everything: the doctor reports the provider for the app, the editor window and every edit; use-provider switches both settings; an editor window on the other provider is refused (installer/18 §8b; 10). Real edits through a signed-in provider are Z3."
     },
     {
       "id": "R3",
@@ -132,73 +234,172 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Needs the owner's interactive sign-in through install/sign-in.command for each provider."
+      "note": "Claude: the owner's sign-in through install/sign-in.command on the qualification install is pending. Codex: sign-in deferred by the owner (Claude only for now)."
     },
     {
       "id": "R4",
       "requirement": "Speech model hash-verified and local transcription works through the product path",
       "scope": "installed package, developer Mac",
       "required": true,
-      "status": "NOT RUN",
-      "archive_sha256": null,
-      "evidence": [],
+      "status": "PASS",
+      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "evidence": [
+        {
+          "path": "final/qualification-install/01-install.log",
+          "sha256": "44dce10a1a809c5e91957ad88f13393eeb3faed6f216850b659728c0f31dff28"
+        },
+        {
+          "path": "final/installer/10-fresh-repeat-start.log",
+          "sha256": "3231e9b815bfb2158a86995e51b045ba32768437863cbb678ef0b74a6adfbbbe"
+        }
+      ],
       "depends_on": [],
-      "note": ""
+      "note": "Speech model SHA-256 verified; the doctor's local transcription through the product path hears 5/5 expected words (real-HOME install and the fresh empty-HOME install)."
     },
     {
       "id": "R5",
       "requirement": "Every install step (npm app, npm motion, venv, browser, model, CLIs, runtime, app build) repairs itself on rerun after interruption, partial download or corruption",
       "scope": "installed package, developer Mac",
       "required": true,
-      "status": "NOT RUN",
-      "archive_sha256": null,
-      "evidence": [],
+      "status": "PASS",
+      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "evidence": [
+        {
+          "path": "final/installer/14-repair-every-step.log",
+          "sha256": "8222031a29965937a2071d94635607b476006c215fa906d1acf2cb903aef4c50"
+        },
+        {
+          "path": "final/installer/15-setup-resume-F2.log",
+          "sha256": "9f01d5822e54d8bc7b964c22a87a4ad8cbbc99101db9872020c232ee87bcd4a7"
+        },
+        {
+          "path": "final/installer/18-lifecycle.log",
+          "sha256": "014a4c279985c3ac81766a534acccbd025b39f6783f33fd44011cc4146524df2"
+        }
+      ],
       "depends_on": [],
-      "note": ""
+      "note": "Every step, including Sniper's own tools, interrupted (kill -9 / Ctrl-C) or corrupted and rerun once: 23 cases end installed with the completion receipt for this folder; F2 resume from setup after settings were written."
     },
     {
       "id": "R6",
       "requirement": "Prerequisites are checked with exact next steps; downloads are hash-verified (pip lock, CLI lock, browser SHA-256, model SHA-256); Node floor derived from the lockfiles",
       "scope": "installed package, developer Mac",
       "required": true,
-      "status": "NOT RUN",
-      "archive_sha256": null,
-      "evidence": [],
+      "status": "PASS",
+      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "evidence": [
+        {
+          "path": "final/installer/12-refusals-before-install.log",
+          "sha256": "b68b1057031fdd4baf6347d19a7e49e22bf29a1a94dbe4d0f13b9e0915b92141"
+        },
+        {
+          "path": "final/installer/20-download-tamper.log",
+          "sha256": "5bd0ae772fa6ec3e22fcea95626449018e21c42c3ee868f82904abea08a2a078"
+        },
+        {
+          "path": "final/installer/11-isolation-no-developer-tools.log",
+          "sha256": "01e1424a46ce7c7f45c071dadf00d0669b56dbf31825b3a9ca8000b44fc3f97a"
+        }
+      ],
       "depends_on": [],
-      "note": ""
+      "note": "Refusals before any download (older macOS, home path with a space, no connection, stopped download that resumes); tampered pip, npm, browser and tool downloads each refused; no user-installed prerequisite is needed (installer/11 with developer tools hidden). The Intel refusal is untested (reads hardware)."
     },
     {
       "id": "R7",
       "requirement": "Lifecycle: move/copy, rollback between release folders, cancellation, cache cleaning, uninstall that reports failures truthfully and keeps user settings/recovery data; global Codex/Claude state unchanged",
       "scope": "installed package, developer Mac",
       "required": true,
-      "status": "NOT RUN",
-      "archive_sha256": null,
-      "evidence": [],
+      "status": "PASS",
+      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "evidence": [
+        {
+          "path": "final/installer/18-lifecycle.log",
+          "sha256": "014a4c279985c3ac81766a534acccbd025b39f6783f33fd44011cc4146524df2"
+        },
+        {
+          "path": "final/qualification-install/00-uninstall-superseded-69955bf.log",
+          "sha256": "1b77686448067bdf91912d791319e0b330c8109f5276c73afe54b8bae04e59f9"
+        }
+      ],
       "depends_on": [],
-      "note": ""
+      "note": "Move/copy refused then reinstalled in place; rollback between two release folders sharing HOME and workspace; installer Ctrl-C; cache cleaning keeps runtime and export history; uninstall stops truthfully when a sign-out fails and keeps settings and recovery data; global Codex/Claude state unchanged (names and hashes); real-HOME uninstall keeps the owner's ~/.project-sniper config and projects files."
     },
     {
       "id": "LOCK",
       "requirement": "Installer, provider switch, uninstall, cache cleaning and runtime construction are mutually exclusive with each other, the doctor and active edits/renders",
       "scope": "installed package, developer Mac",
       "required": true,
-      "status": "NOT RUN",
-      "archive_sha256": null,
-      "evidence": [],
+      "status": "PASS",
+      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "evidence": [
+        {
+          "path": "final/installer/10-fresh-repeat-start.log",
+          "sha256": "3231e9b815bfb2158a86995e51b045ba32768437863cbb678ef0b74a6adfbbbe"
+        },
+        {
+          "path": "final/installer/18-lifecycle.log",
+          "sha256": "014a4c279985c3ac81766a534acccbd025b39f6783f33fd44011cc4146524df2"
+        },
+        {
+          "path": "final/installer/18b-process-scan.log",
+          "sha256": "042e1431cb319b12adb3ae7af7995cb899d953d0576e366b2e18b676a30ff440"
+        }
+      ],
       "depends_on": [],
-      "note": ""
+      "note": "Installer, provider switch, uninstall and cache cleaning are refused while the app, a doctor, another installer, a render-runtime user or an unlocked edit in the folder is running; the doctor may share; the lock is free after Ctrl-C."
     },
     {
       "id": "ADMISSION",
       "requirement": "The doctor's 'media admission (real sample)' check passes on the buyer's Mac through the qualified admission path",
       "scope": "installed package",
       "required": true,
-      "status": "BLOCKED",
-      "archive_sha256": null,
-      "evidence": [],
+      "status": "PASS",
+      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "evidence": [
+        {
+          "path": "final/qualification-install/01-install.log",
+          "sha256": "44dce10a1a809c5e91957ad88f13393eeb3faed6f216850b659728c0f31dff28"
+        },
+        {
+          "path": "final/installer/10-fresh-repeat-start.log",
+          "sha256": "3231e9b815bfb2158a86995e51b045ba32768437863cbb678ef0b74a6adfbbbe"
+        }
+      ],
       "depends_on": [],
-      "note": "Depends on the native admission workstream (native_admission_selftest.py) and the sandbox decision."
+      "note": "The doctor's media admission (real sample) passes through the native jail on this developer Mac: real-HOME install and fresh empty-HOME install (reads, network and memory limits enforced). A buyer's Mac is Z2."
+    },
+    {
+      "id": "RUNTIME-TOOLS",
+      "requirement": "Buyers install no prerequisites: setup downloads, verifies and installs Sniper's own pinned Node, Python, ffmpeg/ffprobe, whisper.cpp, tesseract and yt-dlp into a Sniper-owned location; system tools and logins are untouched; conflicting tools on PATH are not used",
+      "scope": "installed package, developer Mac (developer tools hidden, not removed); clean Mac is Z2",
+      "required": true,
+      "status": "PASS",
+      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "evidence": [
+        {
+          "path": "final/installer/10-fresh-repeat-start.log",
+          "sha256": "3231e9b815bfb2158a86995e51b045ba32768437863cbb678ef0b74a6adfbbbe"
+        },
+        {
+          "path": "final/installer/11-isolation-no-developer-tools.log",
+          "sha256": "01e1424a46ce7c7f45c071dadf00d0669b56dbf31825b3a9ca8000b44fc3f97a"
+        },
+        {
+          "path": "final/qualification-install/01-install.log",
+          "sha256": "44dce10a1a809c5e91957ad88f13393eeb3faed6f216850b659728c0f31dff28"
+        },
+        {
+          "path": "final/installer/20-download-tamper.log",
+          "sha256": "5bd0ae772fa6ec3e22fcea95626449018e21c42c3ee868f82904abea08a2a078"
+        }
+      ],
+      "depends_on": [
+        {
+          "path": "archive:project-sniper-0.1.0-rc4/install/deps/osx-arm64.lock",
+          "sha256": "1b9950c26431f8353190f1be3bfee1dbf23611d05e173aa2b3e08663d82b1562"
+        }
+      ],
+      "note": "Buyers install no tools: setup downloads a SHA-256-locked conda-forge set (Python 3.14.4, Node 24.21.0, whisper.cpp, tesseract, yt-dlp, git; 87 files) and installs Sniper's own ffmpeg from the package, into ~/.project-sniper, verified file by file on every run. Real download from conda.anaconda.org (installer/10, real-HOME 01). With this Mac's developer tools hidden and conflicting stand-ins first on PATH: no stand-in ran, 0 Homebrew paths in settings, 0 of 29 decoder libraries from Homebrew (11; not a clean Mac). macOS floor 13.5 measured from the 452 installed binaries."
     },
     {
       "id": "Z3-CODEX",
@@ -209,7 +410,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Blocked by media admission and provider access."
+      "note": "Codex sign-in deferred by the owner. Also: in Codex's workspace-write sandbox, Producer's media check cannot start its own sandbox and the video folder is not writable (codex-route/01); PENDING item 8."
     },
     {
       "id": "Z3-CLAUDE",
@@ -220,7 +421,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Blocked by media admission and the Claude sign-in."
+      "note": "Waiting for the owner's Claude sign-in on the qualification install; the primary agent route's non-interactive run with pre-approved tools was refused by this session's safety check (owner to drive install/editor.command or allow it)."
     },
     {
       "id": "Z4",
@@ -231,7 +432,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": ""
+      "note": "Long-form real edit pending the Claude sign-in (footage prepared: 10-minute excerpt of the owner's recording)."
     },
     {
       "id": "Z5",
@@ -242,7 +443,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": ""
+      "note": "Short real edit pending the Claude sign-in (footage prepared)."
     },
     {
       "id": "Z6",
@@ -253,29 +454,29 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": ""
+      "note": "Needs a person to play the outputs with sound and open the Studio projects."
     },
     {
       "id": "Z7",
       "requirement": "Segmenter and Clipper AI calls run through the selected subscription adapter; paid features separately gated and opt-in; no silent paid fallback",
       "scope": "source + installed package",
       "required": true,
-      "status": "BLOCKED",
+      "status": "NOT RUN",
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Segmenter/Clipper still instantiate the paid SDK on the Claude route (other workstream)."
+      "note": "Code and tests: Segmenter and Clipper call the subscription CLI only (no SDK or key route); a saved Deepgram key authorizes no paid transcription (installer/16). Real Segmenter/Clipper runs through the signed-in provider are pending."
     },
     {
       "id": "PRIVACY",
       "requirement": "The stated privacy boundary is enforced in code (rendered critics' file access, trim-only review, downloads/cookies/captures disclosed)",
       "scope": "source + package",
       "required": true,
-      "status": "BLOCKED",
+      "status": "NOT RUN",
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "rc3 finding F7."
+      "note": "Enforced in code and tested: Studio buyer-route test (fresh browser context, no PostHog request, patch present in the served runtime, the disclosed jsDelivr file accounted for) passes in both Python runs and the package gate. The privacy statements were corrected after two docs reviews (docs-reviews/); the corrected text awaits the independent review of bae842a."
     },
     {
       "id": "Z9",
@@ -286,7 +487,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": ""
+      "note": "Two independent docs reviews (24 contradictions) fixed in 69955bf/980526b; the fixes of review 2 are not yet independently re-read."
     },
     {
       "id": "Z10",
@@ -297,7 +498,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Needs a person and a clean Mac (owner input)."
+      "note": "Needs an outside operator and a clean Mac (owner input)."
     },
     {
       "id": "Z11",
@@ -308,7 +509,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "No delivery channel has been exercised."
+      "note": "No delivery channel exercised; the package is not signed or notarized (PENDING item 7)."
     },
     {
       "id": "LICENCE",
@@ -319,7 +520,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Owner input D."
+      "note": "Owner input D; the package now also distributes a GPL-3.0-or-later program (Sniper's ffmpeg) that the licence must not appear to restrict."
     },
     {
       "id": "SUPPORT",
@@ -330,7 +531,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Owner input D."
+      "note": "Owner input D: no support route exists."
     },
     {
       "id": "GSAP",
@@ -341,7 +542,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "rc3 finding F9."
+      "note": "rc3 finding F9: the publisher clarification is drafted, not sent."
     },
     {
       "id": "REVIEW",
@@ -352,7 +553,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": ""
+      "note": "Candidate bae842a / 7fed9cfd with this matrix and INDEPENDENT_REVIEW_RESPONSE.md is ready for a fresh independent review."
     }
   ]
 }

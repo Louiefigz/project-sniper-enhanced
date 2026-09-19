@@ -60,6 +60,13 @@ STILL OPEN — each blocks release
      Sniper's ffmpeg is installed without the download
      quarantine instead of being notarized. Enrolling in the Apple Developer Program lets
      the maintainer sign and notarize both before sale.
+  8. CODEX EDITOR WINDOW AND SNIPER'S MEDIA SANDBOX: inside Codex's own sandbox (the
+     workspace-write mode an interactive Codex session uses), Producer's media check cannot
+     start its macOS sandbox (macOS does not nest them) and Codex cannot write the video
+     folder. Reproduced with the pinned Codex CLI's sandbox command; not yet run with a
+     signed-in Codex. Decide how the Codex editor window should run those steps (Codex's
+     own approval for each one, or a wider Codex permission) before Codex buyers are told
+     the editor window is the main way to edit. The app's own Auto Edit is not affected.
 
 NOT OWNER DECISIONS — acceptance still outstanding
   - Complete edits in both provider routes (Short and long-form, with a revision),

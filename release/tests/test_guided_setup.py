@@ -112,7 +112,7 @@ class GuidedSetup(unittest.TestCase):
         for attempt in (1, 2):
             code, output = run_terminal([self.command], self.env)
             self.assertNotEqual(code, 0, output)
-            self.assertIn("resuming it", output)
+            self.assertIn("resuming the installation", output)
             self.assertEqual(self._order().count("installer"), attempt, "setup must resume the installer")
             self.assertNotIn("Ready.", output)
         self.assertFalse((self.logs / "codex.calls").exists(), "no editor on an unfinished install")

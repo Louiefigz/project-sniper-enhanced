@@ -145,6 +145,7 @@ short.
 
 - Accepted inputs: mp4/mov/webm/mkv/avi/m4v; local audio requires the supported
   separate-lav/isolated-stereo path above. Unsupported local input fails closed.
-- Prerequisites: ffmpeg, `.venv`, installed local Whisper runtime/model. Use
-  `/setup` with the user's installation authorization when missing.
+- Prerequisites: Sniper's own tools, `.venv` and the local Whisper model, all put
+  in place by the installer. When missing, `/setup` checks and explains; the repair
+  is `install/install.command` (the operator closes this window first).
 - Use subscription-backed agent reasoning; no API/credit fallback by default.

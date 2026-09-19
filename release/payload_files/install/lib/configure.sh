@@ -24,7 +24,8 @@ write_settings() {
   mkdir -p "$workspace" || fail "Cannot create the video workspace at $workspace"
   settings_write "$ENV_FILE" \
     "PKG_ROOT=$PKG_ROOT" "APP_DIR=$APP_DIR" \
-    "PATH=$RUNTIME_BIN:$CLI_BIN:$DEPS_PREFIX/bin:/usr/bin:/bin:/usr/sbin:/sbin" "SNIPER_DEPS_PREFIX=$DEPS_PREFIX" \
+    "PATH=$RUNTIME_BIN:$CLI_BIN:$APP_DIR/.venv/bin:$DEPS_PREFIX/bin:/usr/bin:/bin:/usr/sbin:/sbin" \
+    "SNIPER_DEPS_PREFIX=$DEPS_PREFIX" \
     "SNIPER_PROVIDER=$PROVIDER" "SNIPER_BRAIN_PROVIDER=$BRAIN" \
     "SNIPER_CLAUDE_MODEL=$(release_value components.claude_model_default)" \
     "SNIPER_CODEX_MODEL=$(release_value components.codex_model_default)" \
@@ -51,8 +52,12 @@ verify_settings() {
     found="$(settings_load "$ENV_FILE" && command -v "$tool")"
     [ "$found" = "$RUNTIME_BIN/$tool" ] || fail "The settings' PATH finds $tool at '$found', not Sniper's own. Please report this."
   done
-  for tool in python3 git npm; do
+  for tool in git npm; do
     found="$(settings_load "$ENV_FILE" && command -v "$tool")"
     [ "$found" = "$DEPS_PREFIX/bin/$tool" ] || fail "The settings' PATH finds $tool at '$found', not Sniper's own. Please report this."
   done
+  # A plain "python3" (the editor's commands, scripts' #!/usr/bin/env python3) is the app's
+  # environment: Sniper's own Python with the pinned packages the engine imports.
+  found="$(settings_load "$ENV_FILE" && command -v python3)"
+  [ "$found" = "$APP_DIR/.venv/bin/python3" ] || fail "The settings' PATH finds python3 at '$found', not the app's environment. Please report this."
 }

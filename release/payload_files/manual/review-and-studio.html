@@ -76,7 +76,7 @@ one. Rebuild, then watch it again.</p>
 <tr><td><code>producer/final.mp4</code></td><td>The approved video</td><td><strong>Yes</strong></td></tr>
 <tr><td><code>producer/base_final.mp4</code></td><td>The video without graphics</td><td>Optional; speeds up rebuilds</td></tr>
 <tr><td><code>producer/.sniper-qc-approved.json</code></td><td>The approval receipt bound to those exact bytes</td><td><strong>Yes</strong> — without it the video is not "approved" any more</td></tr>
-<tr><td>Render caches</td><td>Regenerable working files</td><td>No — <code>install/clean-caches.command</code> lists and removes only these</td></tr>
+<tr><td>Render caches</td><td>Regenerable working files</td><td>No — <code>install/clean-caches.command</code> lists and removes only these, and the kept downloads of Sniper's own tools (about 290 MB; without them, repairing the tools downloads them again)</td></tr>
 </table>
 <p>Back up <code>~/ProjectSniper</code>. That is the whole of your work; the app folder is
 replaceable.</p>

@@ -506,7 +506,7 @@ identity/mode/strategy errors must be fixed before rendering.
 | Ingest + transcripts (multi-source), CLIPPER→MP4 cut render, speed, 9:16 face/center/blurpad reframe, karaoke captions, −14 LUFS master, cover frame | ✅ Phase 1 |
 | Hook cards (white container/black Inter, frame 1, `overlays.py` — wired into render) | ✅ Phase 2 (2026-07-04) |
 | Audit B post-render QC (`audit/audit_render.py <out_dir>` — run it on EVERY render before presenting; exit 1 = fix before delivery) | ✅ Phase 2 |
-| Music machinery (`audio/audio_mix.py <master> <track> <out> --also-without` — bed pre-norm, loop/trim, ducking, both variants). NOT yet wired into render.py; run as a post-step. No music library exists yet | ✅ machinery / 🔜 library |
+| Music: `plan.music` is applied at assemble time by `audio/music_stage.py` (bed pre-norm, loop/trim, ducking under dialogue, −14 LUFS re-master; `audio/audio_mix.py` is the engine). One starter bed ships (`assets/music/default-bed.mp3`), registered in the manifest at ingest | ✅ wired / one starter bed |
 | Long-form: breathing-room cut + SRT sidecar + chapters (`longform_outputs.py`) | ✅ Phase 3 (2026-07-04) |
 | First-class range captions: stable-word `CaptionTrackV1`, repeated-occurrence corrections, semantic chapters, bounded/cacheable RGBA shards, SRT + regenerable Palmier projection, caption-free composite reuse, font-byte/safe-bound proof | ✅ P3 released (2026-07-29) |
 | Governed project-scoped custom motion: exact `ScenePackageV1` + content-addressed bundle, production `scene_package_cli.py`, unit/full render proofs, rights/readability admission, local repair closures, and baked-regenerable Palmier unit readback. Direct Codex/Claude Code workflow only; no Ask Editor UI, local-mode OS network-denial, OS/model-isolation, continuous-reframe, or animated-PIP claim. | ✅ P4 released (2026-07-29) |
@@ -1364,7 +1364,8 @@ adjudication, template proof and compilation. Verified mimic is not released
 - **Honest reporting** — if a stage failed or a check is unverifiable
   (e.g. LUFS on synthetic audio), say so with numbers, not vibes.
 - **Music: NONE by default.** Only when the operator explicitly asks. Source =
-  an operator-provided track; this package includes no music-generation
+  an operator-provided track or the one bundled starter bed
+  (`assets/music/default-bed.mp3`); this package includes no music-generation
   service. If a treatment zone's convention wants a bed, RECOMMEND and ask —
   never add unrequested music.
 - **Visual generation: HyperFrames templates are the engine.** This package

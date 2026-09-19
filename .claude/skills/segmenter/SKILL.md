@@ -130,7 +130,8 @@ they contain. Keep it short.
 ## Notes
 
 - Accepted inputs: mp4/mov/webm/mkv/avi/m4v (video) or common audio files.
-- Prerequisites: ffmpeg, `.venv`, installed local Whisper runtime/model. Use
-  `/setup` with the user's installation authorization if anything is missing.
+- Prerequisites: Sniper's own tools, `.venv` and the local Whisper model, all put
+  in place by the installer. If anything is missing, `/setup` checks and explains;
+  the repair is `install/install.command` (the operator closes this window first).
 - Use subscription-backed agent reasoning. No paid API or credit fallback is
   authorized by a local transcription or segmentation request.

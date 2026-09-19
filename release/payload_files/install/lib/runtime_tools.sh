@@ -59,7 +59,7 @@ ensure_runtime_tools() {
   mkdir -p "$DEPS_HOME/runtimes" && chmod 700 "$DEPS_HOME" || fail "Cannot create $DEPS_HOME"
   lockfile="$DEPS_HOME/install.lock"   # one tools install at a time, whichever release it is for
   say "Setting up Sniper's own tools in $DEPS_PREFIX"
-  say "  (about 310 MB to download once; about 1.2 GB on disk; nothing outside that folder changes)."
+  say "  (about 300 MB to download once; about 1.2 GB on disk; nothing outside that folder changes)."
   rc=0; /usr/bin/lockf -k -t 0 "$lockfile" /bin/bash "$PKG_ROOT/install/lib/runtime_tools_install.sh" || rc=$?
   if [ "$rc" = 75 ]; then
     say "Another Sniper installer is setting up the same tools; waiting for it to finish."

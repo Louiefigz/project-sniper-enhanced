@@ -22,8 +22,8 @@
 
 ### Footage admission without Docker
 - **Every media file is checked on your Mac, in a macOS sandbox.** Before any edit
-  reads a file, Sniper copies it into the project and fully decodes it with your
-  ffmpeg inside a sandbox. That sandbox has no network, cannot write files, cannot
+  reads a file, Sniper copies it into the project and fully decodes it with
+  Sniper's own ffmpeg inside a sandbox. That sandbox has no network, cannot write files, cannot
   start other programs, reads only that one file and the decoder's own libraries,
   and cannot see other processes. A memory and CPU watchdog stops a runaway decode.
   Docker is no longer needed.

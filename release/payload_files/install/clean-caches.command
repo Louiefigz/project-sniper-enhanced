@@ -45,7 +45,7 @@ $(printf '%s\n' "$UNFINISHED" | sed 's/^/    /')
   one, delete its folder, then run this again."
 fi
 
-say "Candidates (regenerable render caches only):"
+say "Candidates (regenerable caches only):"
 for d in "${CANDIDATES[@]}"; do say "  $(du -sh "$d" 2>/dev/null | cut -f1)  $d"; done
 say ""
 say "Never removed by this script: Sniper's installed tools, your footage, edit plans, final.mp4 files, exports,"

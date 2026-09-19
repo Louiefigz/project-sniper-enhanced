@@ -29,6 +29,10 @@ For each line that did not pass, say in one sentence what it is and which script
 - They want the other subscription → `install/stop.command`, then
   `install/use-provider.command codex|claude`, then `install/sign-in.command`.
 
+The installer and the provider switch refuse while this editor window is open (it holds the
+install in use), so tell the operator to close this window first and run those scripts from
+Finder or Terminal, then reopen `install/editor.command`.
+
 Do not install another Codex or Claude CLI, do not run `npm install` or `pip install` in
 this folder, do not change `../runtime/sniper.env`, and do not add or copy API keys. The
 editing workflow needs no API key. Text Review is the one optional paid add-on (the

@@ -51,7 +51,7 @@ file against the SHA-256 recorded for this release before using it, and installs
 Python, Node or conda are not used or changed, even when they come first on your PATH. Sniper
 folders of the same release share one copy of the tools; uninstalling the last of them removes it.
 If the download stops, run setup again: it resumes and checks what arrived.</p>
-<p><strong>Which Macs.</strong> Apple silicon (M1 or later) with macOS 12 or later — the oldest
+<p><strong>Which Macs.</strong> Apple silicon (M1 or later) with macOS 13 or later — the oldest
 macOS these tools support. So far only macOS 26 has actually been tested. On an Intel Mac or an
 older macOS, setup stops before downloading anything and says why.</p>
 <p><strong>Your home folder path must not contain a space</strong> (macOS account names never do):
@@ -96,9 +96,9 @@ warn that a downloaded script is from an unidentified developer — right-click 
   <li>Builds the rendering runtime.</li>
   <li>Builds the app. This needs no internet connection.</li>
 </ol>
-<p>In a Terminal window it continues into guided connection setup and sign-in, then runs
-the checker. A noninteractive installation leaves connections for you to finish by
-double-clicking <code>install/setup.command</code>.</p>
+<p>In a Terminal window it continues into sign-in, then the optional Deepgram connection (offered
+only if you have not answered it before), then the checker. A noninteractive installation leaves
+these for you to finish by double-clicking <code>install/setup.command</code>.</p>
 <div class="ok">
 <p><strong>If it stops, run it again.</strong> Each step records what it finished with and the
 checksum of every file it produced. A step that did not finish, whose inputs changed, or

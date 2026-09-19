@@ -11,7 +11,7 @@ The report locates context; it does not replace reading or applying it.
 
 1. Preserve the user's current objective, selected project, scope and accepted
    decisions. Read applicable global/workspace/project instructions first.
-2. From the Project Sniper Git root, run:
+2. From the app folder (the Project Sniper root), run:
 
    ```bash
    python3 -B scripts/producer/context.py
@@ -31,7 +31,8 @@ The report locates context; it does not replace reading or applying it.
    their applicable references; avoid dumping unrelated documents. A path marked
    readable is only available, not already read. State markers are historical
    claims; inspect the actual brief, plan, bindings and handoff to establish state.
-4. For video or motion work, read the installed **hyperframes** entry skill and
+4. For video or motion work, read the **hyperframes** entry skill if one is installed
+   (the packaged app ships none; the inventory says which exist) and
    the owning workflow/domain skills it selects. The inventory lists installed
    skill locations separately from archived vendor references. Native routes in
    `docs/PIPELINE.md` supersede the old graphics-only vendor boundary. Generic

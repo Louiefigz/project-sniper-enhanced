@@ -42,6 +42,11 @@ unset PYTHONHOME PYTHONPATH PYTHONSTARTUP PYTHONUSERBASE NODE_OPTIONS NODE_PATH 
       CONDA_PREFIX CONDA_DEFAULT_ENV CONDA_SHLVL MAMBA_ROOT_PREFIX CONDARC MAMBARC \
       FONTCONFIG_FILE FONTCONFIG_PATH TESSDATA_PREFIX
 # (A certificate bundle you set, e.g. for a company proxy, is kept: downloads need it.)
+# macOS gives every login session a private temporary folder (TMPDIR). A launcher started with a
+# cleared environment has none, so temporary files land under /tmp — and Leptonica (tesseract's
+# image reader, Homebrew's and Sniper's alike) rewrites /tmp paths and then cannot find them.
+[ -n "${TMPDIR:-}" ] || TMPDIR="$(/usr/bin/getconf DARWIN_USER_TEMP_DIR)"
+export TMPDIR
 # The pinned Claude CLI names its Keychain login after CLAUDE_CONFIG_DIR, so
 # Sniper's login is separate from yours. This variable would override that
 # naming and point Sniper's sign-in and sign-out at your own login; never inherit it.

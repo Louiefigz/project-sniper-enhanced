@@ -185,6 +185,15 @@ class Preconditions(unittest.TestCase):
         self.assertIn("SSL_CERT_FILE=/company/ca.pem", done.stdout)   # a proxy's certificate is kept
         self.assertIn("PATH=/usr/bin:/bin:/usr/sbin:/sbin", done.stdout.splitlines())
 
+    def test_a_cleared_environment_gets_the_users_own_temporary_folder(self) -> None:
+        env = {key: value for key, value in fx.base_env(self.pkg).items() if key != "TMPDIR"}
+        done = fx.bash(self.pkg, 'printf "%s" "$TMPDIR"', env)
+        own = subprocess.run(["/usr/bin/getconf", "DARWIN_USER_TEMP_DIR"], capture_output=True, text=True).stdout.strip()
+        self.assertEqual(done.stdout, own)
+        self.assertFalse(done.stdout.startswith("/tmp"))
+        kept = fx.bash(self.pkg, 'printf "%s" "$TMPDIR"', {**env, "TMPDIR": "/Volumes/scratch/t/"})
+        self.assertEqual(kept.stdout, "/Volumes/scratch/t/")
+
     def test_this_mac_meets_the_real_lock(self) -> None:
         self.assertEqual(fx.bash(self.pkg, "require_macos && echo supported").stdout.strip(), "supported")
 

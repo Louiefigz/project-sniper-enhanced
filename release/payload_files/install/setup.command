@@ -17,7 +17,8 @@ esac
 # The --connections and --finish-install modes never start the installer themselves.
 if ! install_complete; then
   [ -z "$MODE" ] || fail "Installation has not finished. Run install/install.command first."
-  [ -f "$ENV_FILE" ] && say "The last installation did not finish (or this folder moved); resuming it."
+  [ -f "$ENV_FILE" ] && say "The last installation did not finish, this folder moved, or Sniper's own tools are missing;
+  resuming the installation."
   "$PKG_ROOT/install/install.command" || exit $?
   exec "$PKG_ROOT/install/editor.command"
 fi

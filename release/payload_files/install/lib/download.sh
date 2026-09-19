@@ -39,7 +39,12 @@ download_verified() {
   fi
   case "$rc" in
     0) mv "$part" "$target"; return 0 ;;
-    2) fail "Downloading $label stopped before it finished (curl error $CURL_RC); the $(stat -f %z "$part" 2>/dev/null || echo 0)
+    2) if [ "$(stat -f %z "$part" 2>/dev/null || echo 0)" = 0 ]; then
+         rm -f "$part"
+         fail "Could not download $label: no connection to its server (curl error $CURL_RC).
+  Check your internet connection, then run the installer again."
+       fi
+       fail "Downloading $label stopped before it finished (curl error $CURL_RC); the $(stat -f %z "$part")
   bytes received are kept. Run the installer again when your connection is stable; it resumes." ;;
   esac
   rm -f "$part"

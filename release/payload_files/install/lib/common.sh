@@ -96,7 +96,8 @@ require_macos() {
   own tools are built for Apple silicon (M1 or later) only, so it cannot be installed on this Mac."
   have="$(/usr/bin/sw_vers -productVersion)"; need="$(deps_header min-macos)" || need=12.0
   version_ge "$have" "$need" || fail "This Mac runs macOS $have; Sniper's tools need macOS $need or
-  later. Update macOS (System Settings > General > Software Update), then run this again."
+  later. Update macOS (Software Update: System Settings > General, or System Preferences on
+  macOS 12 and earlier), then run this again."
 }
 
 # The voice-rnn dialogue-cleanup preset embeds this folder's path in an ffmpeg

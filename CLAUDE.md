@@ -26,8 +26,8 @@ Next.js 16 + a Python engine, four tools behind one shell:
   candidates → deterministic and visual QC → approved final. Engine: `scripts/producer/`
   (module map: `scripts/producer/CLAUDE.md`).
 - **Segmenter** (`/segmenter`): long recording → local Whisper → the selected
-  subscription brain picks segments → ffmpeg **stream-copies** rough clips (single or
-  multicam) → zip.
+  subscription brain picks segments → ffmpeg **stream-copies** rough clips from one
+  recording (multicam cuts are frame-accurate and re-encode at the joins) → zip.
 - **Clipper** (`/clipper`): one clip → local Whisper → the selected brain marks filler at
   the utterance level → word-level editor → **FCPXML** for Final Cut Pro.
 - **Text Review** (`/frameio-review`, optional paid add-on): MP4 → ffmpeg frames → pHash

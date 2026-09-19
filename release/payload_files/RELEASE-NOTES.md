@@ -23,12 +23,14 @@
 - Setup now signs you in first, then offers the optional Deepgram key.
 
 ### Footage admission without Docker
-- **Every media file is checked on your Mac, in a macOS sandbox.** Before any edit
-  reads a file, Sniper copies it into the project and fully decodes it with
-  Sniper's own ffmpeg inside a sandbox. That sandbox has no network, cannot write files, cannot
+- **Every video Producer edits is checked on your Mac, in a macOS sandbox.** Before a
+  Producer edit (or a deep reference study) reads a file, Sniper copies it into the project and
+  fully decodes it with Sniper's own ffmpeg inside a sandbox. That sandbox has no network, cannot write files, cannot
   start other programs, reads only that one file and the decoder's own libraries,
   and cannot see other processes. A memory and CPU watchdog stops a runaway decode.
   Docker is no longer needed.
+- Not covered: Segmenter, Clipper and the quick measurements of a reference video read the
+  file directly with Sniper's own ffmpeg and Whisper, outside that sandbox.
 - `install/doctor.command` admits a generated sample on your Mac and confirms the
   sandbox refuses a network connection and another file's contents, and stops a
   decode above its memory limit.
@@ -39,9 +41,9 @@
 - The visual review of a rendered edit sends still frames, with that reviewer's tools
   switched off. The provider CLI runs in a sandbox that hides your project folder
   except those frames.
-- Text Review is the only feature that uses an API key. It needs your own Anthropic key
-  and an opt-in for each run. Deepgram transcription needs explicit approval for each
-  run. Setup can save a Deepgram key, and saving it approves nothing.
+- Two optional features bill your own keys: Text Review (your Anthropic key and an opt-in
+  for each run) and Deepgram transcription (your Deepgram key and explicit approval for each
+  run). Setup can save a Deepgram key, and saving it approves nothing.
 
 ### Guided setup
 - Double-click `install/setup.command`. It installs Sniper and its own tools, signs in to
@@ -80,7 +82,8 @@
 - **Reruns repair.** Each step re-verifies the files it produced; anything missing,
   partial or changed is redone without manual cleanup.
 - **One thing at a time.** The installer, provider switch, cache cleaning and uninstall
-  wait for the app, editor windows, the doctor and renders to finish, using a real lock.
+  refuse to start while the app, an editor window, the doctor or a render is running, and
+  say what is in use (a real lock).
 - **Truthful uninstall.** A failed stop or sign-out stops the removal and says so; your
   settings and export-recovery history are kept.
 - **Studio through `install/studio.command`**, with this install's settings.

@@ -29,11 +29,12 @@ any kind. Project Sniper's modifications are not endorsed by HeyGen, Inc.
    including the one registry item that failed to mirror, is in
    `app/vendor/hyperframes-catalog/hyperframes-catalog-lock.json`.
 2. **Adapted HyperFrames runtime, modified by Project Sniper** —
-   `app/scripts/producer/studio/runtime/patches.json` holds 34 byte patches whose text
-   contains portions of five files of the installed `hyperframes` 0.8.31 npm package
+   `app/scripts/producer/studio/runtime/patches.json` holds 40 byte patches whose text
+   contains portions of seven files of the installed `hyperframes` 0.8.31 npm package
    (`dist/cli.js`, `dist/hyperframe.runtime.iife.js`, `dist/hyperframe-runtime.js`,
-   `dist/hyperframe.manifest.json`, and `dist/native-capture-library.mjs` derived from
-   the patched `cli.js`). Project Sniper modified these files. On your computer,
+   `dist/hyperframe.manifest.json`, `dist/native-capture-library.mjs` derived from
+   the patched `cli.js`, and the Studio page files `dist/studio/assets/index-CfQexXc6.js`
+   and `dist/studio/index.js`, patched to switch Studio's analytics off). Project Sniper modified these files. On your computer,
    `native_runtime.py` applies the patches to a separate copy under
    `templates/motion/.sniper-native-runtime/`; the installed package itself is not
    changed. The modification notice for each file is

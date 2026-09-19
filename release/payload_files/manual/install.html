@@ -59,7 +59,8 @@ the tools live there because Studio needs a Node path without spaces, and this f
 <p><strong>Sniper's ffmpeg.</strong> The renderer needs two ffmpeg filters (zscale and rubberband)
 that no ready-made Mac build carries, so Sniper builds ffmpeg itself from the unmodified FFmpeg 8.0.3
 and Rubber Band 4.0.0 sources. It ships in this download (<code>install/deps/</code>), with those
-sources and the build recipe in <code>third-party/sources/</code> (GPL). Setup checks its SHA-256 and
+sources in <code>third-party/sources/</code> (GPL) and the build recipe inside the ffmpeg archive
+(<code>share/sniper-ffmpeg/</code>). Setup checks its SHA-256 and
 installs it the same way as the downloaded tools. It is not yet signed with an Apple Developer ID.</p>
 
 <h2>Step 3 — open guided setup</h2>

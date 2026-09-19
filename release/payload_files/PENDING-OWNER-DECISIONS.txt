@@ -10,8 +10,8 @@ SETTLED on 2026-09-17 (reflected in the manual and LICENSE-DRAFT.txt)
     sharing or giving away Sniper; no reuse of its code in another paid product.
   - Base update rights: N1, the purchased release only.
   - Refunds: 14 days, unconditional.
-  - Media admission runs natively on macOS with no mandatory Docker (route B of
-    DECISION-SANDBOX-RUNTIME.md).
+  - Media admission runs natively on macOS with no mandatory Docker (route B of the
+    maintainer's sandbox-runtime decision record, not shipped).
   - The saved styles and the editing doctrine are re-authored as original material.
   - HyperFrames Studio's analytics are switched off by default (decided 2026-09-18);
     its page still loads one GSAP file from cdn.jsdelivr.net, which the privacy page says.

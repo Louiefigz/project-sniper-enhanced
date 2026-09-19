@@ -25,8 +25,9 @@ at <code>http://127.0.0.1:3000</code>. The page is optional — it prepares the 
 request the conversation does.</p>
 
 <div class="note">
-<p><strong>Every video is checked first.</strong> Before any edit reads a file, Producer copies it into
-the project and decodes it in a macOS sandbox. <code>install/doctor.command</code> shows this working on
+<p><strong>Every video Producer edits is checked first.</strong> Before a Producer edit reads a file, it
+copies it into the project and decodes it in a macOS sandbox (Segmenter and Clipper read your file
+directly, without this check). <code>install/doctor.command</code> shows this working on
 its <em>media admission (real sample)</em> line; if that line fails, fix it before your first edit.</p>
 </div>
 

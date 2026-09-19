@@ -589,8 +589,10 @@ choices do not determine how freely the source may be rearranged.
     `produced`→`produced`). The tiers below describe what each scope RUNS:
   - **clean-cut / trim** — editorial ONLY: take/retake selection (`retake_scan.py`) +
     silence/pause tightening (`pause_scan.py`) + outtake/false-start removal.
-    Plus the mode's base format: 9:16 reframe for shorts, basic captions (karaoke
-    burn for shorts, SRT sidecar for long-form). NO graphics, NO motion
+    Plus the mode's base format: the 9:16 reframe for shorts. Captions are a lane the
+    trim scope leaves OFF (`edit_scope.py`); author them only when the operator turns
+    that lane on (`target.lanes.captions`), otherwise the intent contract rejects the
+    plan. NO graphics, NO motion
     zooms/creeps, NO seam transitions, NO kinetic burns. It SKIPS step 2.5
     (detect), step 3.5 (graphics + zoom/motion proposal), transitions, and every
     hyperframes render — fast + cheap. The operator's words: "just removing
@@ -668,8 +670,8 @@ endpoint or a measured retention/turnaround guarantee.
   6 → 7 → 7.5 → 8, and **SKIPS step 2.5 (detect) and step 3.5 (graphics +
   zoom/motion proposal)**. Author the plan with `graphicsTrack`/`punchIns`/
   `transitions`/`treatmentMap` empty — render.py skips empty tracks, so you ship
-  the cut + the mode's base reframe + basic captions and nothing else (no motion,
-  no seam covers, no hyperframes renders).
+  the cut + the mode's base reframe and nothing else (captions only when the operator
+  turned that lane on; no motion, no seam covers, no hyperframes renders).
 - **produced** runs EVERY step (the full engaging stack).
 
 Both share the cut spine (retake/pause/outtake — the PRODUCE LONGFORM doctrine
@@ -717,7 +719,7 @@ below) and the mode's base reframe + captions; only the engaging lanes differ.
      with no automatic filler removal or speed change. Apply the cleanup and
      story-selection defaults below only to work that requests those edits.
    - Set `target.treatment` (default `produced`). For **clean-cut**, author ONLY
-     `cutTrack` + `reframe` + `captions` and leave `graphicsTrack`/`punchIns`/
+     `cutTrack` + `reframe` (+ `captions` only when the operator turned that lane on) and leave `graphicsTrack`/`punchIns`/
      `transitions`/`treatmentMap` empty — then skip 2.5/3.5 and go straight to
      the gate.
    - For standalone Short selection, choose **hook + matching payoff**; apply

@@ -23,7 +23,7 @@ revisions and context handoffs.
   `SNIPER_BRAIN_PROVIDER` (`codex|legacy`) in `../runtime/sniper.env` select it; every
   app call — Producer, Segmenter and Clipper — uses that provider and its configured model
   (`SNIPER_CODEX_MODEL`, `SNIPER_CLAUDE_MODEL`). If the two settings disagree the app
-  refuses. Switch with `install/use-provider.command codex|claude`, never by hand-editing
+  refuses. Switch with `../install/use-provider.command codex|claude`, never by hand-editing
   one of them.
 - **No API-key billing in the editing workflow.** Producer, Segmenter and Clipper have no
   API-key or SDK route and none may be added. The provider CLI must pass the admission in
@@ -56,7 +56,7 @@ trim-only jobs included), go to the selected provider. Reference links are downl
 `yt-dlp`; Chrome cookies are read only when the operator ticks the box for that fetch.
 Studio is served from Sniper's adapted runtime, whose analytics are switched off; its page
 still loads one GSAP file from `cdn.jsdelivr.net`. Open Studio only through Sniper
-(`studio/managed_preview.py` / `install/studio.command`), never with the stock
+(`studio/managed_preview.py` / `../install/studio.command`), never with the stock
 `hyperframes preview`, which would send HeyGen's analytics.
 Instructions are not a privacy boundary: when you run with file tools, do not attach or
 upload video or audio files to the conversation; work from transcripts, plans and still

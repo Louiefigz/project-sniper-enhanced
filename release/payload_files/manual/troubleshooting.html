@@ -38,23 +38,33 @@ does not report the exact version this release admits.</td><td>Run <code>install
 doctor is using this folder. The line names each one.</td><td>Stop the app
 (<code>install/stop.command</code>), close the editor window, let edits finish, then run it again.
 Nothing was changed.</td></tr>
-<tr><td><code>Node … or newer is required; …</code></td><td>The Node on your PATH is missing or too
-old, or its path contains a space.</td><td>Install Node 24 LTS from nodejs.org. If you use nvm, fnm or
-volta, run the installer from Terminal.</td></tr>
-<tr><td><code>Node 23… is not supported by this release</code></td><td>Node 23 is outside the range this
-release's dependencies declare, and its processes were seen hanging on exit. The message names
-the Node that was found.</td><td>Install Node 24 LTS from nodejs.org. If that Node came from Homebrew
-(its path starts with <code>/opt/homebrew</code>), run <code>brew upgrade node</code> instead, because
-Homebrew's Node stays first on your PATH. With nvm, fnm or volta, select Node 24 there. Then run the
-installer again from Terminal.</td></tr>
-<tr><td><code>The Node this install was set up with cannot be used: …</code></td><td>The Node the
-installer recorded was removed or upgraded (for example by <code>brew upgrade</code>).</td><td>Run
-<code>install/install.command</code> again; it sets up with the Node you have now.</td></tr>
-<tr><td><code>tesseract is required for reference study …</code> or <code>Reference study reads on-screen
-text with the tesseract program, which is not installed</code></td><td>Studying a reference needs the
-tesseract program.</td><td><code>brew install tesseract</code></td></tr>
-<tr><td><code>yt-dlp is not installed (not found on PATH). Install it: brew install yt-dlp</code></td>
-<td>Adding a reference from a link needs yt-dlp.</td><td><code>brew install yt-dlp</code></td></tr>
+<tr><td><code>This Mac has an Intel processor. …</code></td><td>Sniper's own tools are built for
+Apple silicon only.</td><td>Sniper needs a Mac with an M1 or later chip. Nothing was downloaded or
+changed.</td></tr>
+<tr><td><code>This Mac runs macOS … ; Sniper's tools need macOS 13 or later.</code></td><td>The tools and
+Python packages Sniper installs need macOS 13 or newer.</td><td>Update macOS (System Settings &gt;
+General &gt; Software Update), then run setup again. Nothing was downloaded.</td></tr>
+<tr><td><code>Your home folder path contains a space …</code></td><td>Sniper keeps its tools in your home
+folder, and Studio cannot use a Node whose path has a space. macOS account folders never have one,
+so this means the home folder was renamed.</td><td>Use a Mac account whose home folder has no space
+in its path.</td></tr>
+<tr><td><code>Downloading [n/N] … stopped before it finished (curl error …)</code></td><td>The internet
+connection dropped while setup was downloading Sniper's tools.</td><td>Run setup again when your
+connection is stable; it resumes where it stopped and checks every file.</td></tr>
+<tr><td><code>… produced the wrong file (checksum mismatch); it was deleted.</code></td><td>A downloaded
+file did not match the SHA-256 recorded for this release — usually a network filter or proxy that
+changed it on the way.</td><td>Run setup again. If it happens again on the same file, try another
+network and run <code>install/diagnostics.command</code>.</td></tr>
+<tr><td><code>Sniper's own tools — changed since they were installed …; reinstalling them.</code></td>
+<td>A file in <code>~/.project-sniper</code> was changed or removed.</td><td>Nothing to do: the
+installer puts the tools back from the checked downloads.</td></tr>
+<tr><td><code>Sniper's own tools are not installed yet.</code> or <code>Sniper's own Node cannot be used: …</code></td>
+<td><code>~/.project-sniper</code> was removed or damaged.</td><td>Double-click
+<code>install/setup.command</code> (or run <code>install/install.command</code>); it reinstalls
+them.</td></tr>
+<tr><td><code>Another Sniper installer is setting up the same tools; waiting …</code></td><td>Two
+Sniper folders are being set up at once; they share the same tools.</td><td>Nothing to do: the
+second one continues when the first has finished.</td></tr>
 <tr><td><code>This install's editor brain is codex. An editor window on claude would disagree …</code></td>
 <td>You asked the editor window for the provider this install does not use.</td><td>Switch the whole
 install: <code>install/stop.command</code>, then <code>install/use-provider.command claude</code>.</td></tr>

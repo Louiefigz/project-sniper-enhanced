@@ -92,8 +92,11 @@ You connect, replace or remove the key privately with <code>install/setup.comman
 <td>A transcription run needs the paired paid-transcription switches for that one run
 (<code>app/scripts/asr_policy.py</code>); nothing falls back to it</td></tr>
 <tr><td>Installing and setup</td><td><strong>Downloads, and one optional key check.</strong>
-Packages from the npm and Python registries, the rendering browser from Google's Chrome for
-Testing, the speech model from Hugging Face and the two provider CLIs from npm. If you connect
+Sniper's own tools (Python, Node, whisper.cpp, tesseract, yt-dlp, git and the libraries its ffmpeg
+uses) from conda-forge's server <code>conda.anaconda.org</code>, packages from the npm and Python
+registries, the rendering browser from Google's Chrome for Testing, the speech model from Hugging
+Face and the two provider CLIs from npm. Like any download, each request shows those servers this
+Mac's address and which file it wants. If you connect
 Deepgram during setup, the key is checked once against Deepgram's HTTPS authentication
 endpoint; no audio or other media is sent. None of your files or text is sent.</td>
 <td><code>install/install.command</code></td></tr>

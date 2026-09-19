@@ -27,16 +27,17 @@ force. Read <code>RELEASE.json</code> for this build's exact status, and
 
 <h2>Three steps</h2>
 <ol>
-  <li><strong>Check what you have.</strong> A Mac with Apple silicon, Node 22.13 or newer (not 23; 24 recommended),
-  Python 3.12+, <code>ffmpeg</code>, <code>whisper-cpp</code>, <code>tesseract</code> and
-  <code>yt-dlp</code>, and a
-  Codex <em>or</em> Claude subscription you already pay for. The full list, with
-  what costs money, is in <a href="manual/index.html">What Sniper is</a>.</li>
-  <li><strong>Install.</strong> Open Terminal in this folder and run
-  <code>install/setup.command</code> (or double-click it in Finder). It installs Sniper,
-  offers a private Deepgram key prompt, walks you through subscription sign-in, checks the
-  installation and opens your configured editor. No Cursor or settings-file editing is needed. Everything it installs stays inside this folder;
-  your own Node, Python, Codex or Claude setup and login are not changed. Step-by-step:
+  <li><strong>Check what you have.</strong> A Mac with Apple silicon (M1 or later) on macOS 12 or later,
+  an internet connection for the first setup, about 4 GB of free space for Sniper and its tools, and a
+  Codex <em>or</em> Claude subscription you already pay for. You do not install Node, Python, ffmpeg or
+  anything else yourself: Sniper downloads and checks its own. The full list, with what costs money,
+  is in <a href="manual/index.html">What Sniper is</a>.</li>
+  <li><strong>Install.</strong> Double-click <code>install/setup.command</code> in Finder (the first time,
+  right-click it and choose <em>Open</em>). It installs Sniper and its own tools, walks you through
+  subscription sign-in, offers a private Deepgram key prompt, checks the installation and opens your
+  configured editor. No Cursor, Homebrew or settings-file editing is needed. Sniper keeps its tools in
+  <code>~/.project-sniper</code> and everything else inside this folder; your own Node, Python, Homebrew,
+  Codex or Claude setup and login are not used or changed. Step-by-step:
   <a href="manual/install.html">Install and first launch</a>.</li>
   <li><strong>Make your first edit.</strong>
   <a href="manual/first-edits.html">Your first three edits</a> walks a short test clip you record yourself,

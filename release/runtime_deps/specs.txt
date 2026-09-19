@@ -1,0 +1,26 @@
+# Sniper's private tool runtime: macOS on Apple silicon (osx-arm64), from conda-forge.
+# The tools are pinned exactly; their libraries are resolved once by
+#   python -m release.runtime_tools solve
+# and frozen, with every package's SHA-256, in release/payload_files/install/deps/osx-arm64.lock.
+# The installer installs exactly that lock; nothing is resolved on a buyer's Mac.
+python=3.14.4
+nodejs=24.21.0
+whisper.cpp=1.9.3
+tesseract=5.5.3
+yt-dlp=2026.8.19
+# git keeps the provider CLIs from reaching /usr/bin/git, which on a Mac without the
+# Xcode command-line tools opens an "install developer tools" dialog.
+git=2.55.0
+# Libraries the Sniper ffmpeg links (release/runtime_deps/sniper-ffmpeg.json).
+libass
+x264
+zimg
+freetype
+fontconfig
+harfbuzz
+fribidi
+lame
+libopus
+libdav1d7
+openssl
+libcxx

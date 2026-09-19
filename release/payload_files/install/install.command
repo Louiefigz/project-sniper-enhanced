@@ -3,10 +3,12 @@
 #
 #   install/install.command [--provider codex|claude] [--workspace FOLDER]
 #
-# Installs what Sniper needs inside this folder: the app's dependencies and
-# Python environment under app/, and the rendering browser, speech model and
-# pinned provider CLIs under runtime/. It does not change your own Node, Python,
-# Homebrew, Codex or Claude installation, or your existing Codex/Claude login.
+# Installs everything Sniper needs. Its own tools (Python, Node, ffmpeg, whisper.cpp,
+# tesseract, yt-dlp, git) go to ~/.project-sniper/runtimes/, downloaded and checked
+# against this release's lock (install/deps/). The app's dependencies and Python
+# environment go under app/, and the rendering browser, speech model and pinned
+# provider CLIs under runtime/. It does not use or change your own Node, Python,
+# Homebrew, conda, Codex or Claude installation, or your existing Codex/Claude login.
 #
 # Safe to run again. Each step records what it finished with and the SHA-256 of
 # what it produced; a step is redone when its inputs changed, it never finished,
@@ -21,6 +23,13 @@
 usage() { fail "Unknown option: $1  (usage: install.command [--provider codex|claude] [--workspace FOLDER])"; }
 require_macos
 require_safe_install_path
+# Step 1 comes before the maintenance lock: that lock's helper runs on Sniper's own Python,
+# which this step installs (with only macOS's own tools). The rerun under the lock skips it.
+if [ "${SNIPER_LOCKED_PID:-}" != "$$" ]; then
+  say "Project Sniper installer — $PKG_ROOT"
+  step "1/10  Sniper's own tools (Python, Node, ffmpeg, Whisper, Tesseract, yt-dlp)"
+  ensure_runtime_tools
+fi
 hold_maintenance exclusive "installer" "Sniper cannot be installed, repaired or switched while it is in use.
   Stop the app (install/stop.command), close any Sniper editor window and let running edits
   finish, then run this again." "$@"
@@ -48,18 +57,9 @@ if [ -f "$RECEIPTS/location" ] && ! receipt_ok location "$PKG_ROOT"; then
 fi
 write_receipt location "$PKG_ROOT"
 
-say "Project Sniper installer — $PKG_ROOT"
-
-# ---------------------------------------------------------------- 1. prerequisites
-step "1/10  Checking the tools you install yourself"
-select_node
-PYTHON_BIN="$(find_python)" || {
-  say "Python 3.12 or newer is required (numpy and scipy in this release need 3.12)."
-  say "  Download it from https://www.python.org/downloads/macos/"
-  fail "Python 3.12+ is missing."; }
-PY_VER="$("$PYTHON_BIN" -c 'import sys;print(".".join(map(str,sys.version_info[:3])))')"
-say "Python $PY_VER — ok (this release was tested with $(release_value components.python_tested))"
-check_external_tools
+# ---------------------------------------------------------------- 1. Sniper's own tools
+verify_runtime_tools
+use_runtime_tools
 link_runtime_bin
 
 # ------------------------------------------------------- 2-7. dependencies and downloads
@@ -130,5 +130,5 @@ if [ "$DOCTOR" -ne 0 ]; then
   say "Installed, but the checks above report something still to do."
   say "If the editor brain is among the failures, sign in next:"
 fi
-say "Double-click install/setup.command to connect Deepgram, sign in and finish setup."
+say "Double-click install/setup.command to sign in, connect Deepgram if you want it, and finish setup."
 exit "$DOCTOR"

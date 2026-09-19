@@ -58,7 +58,11 @@ Next.js 16 + a Python engine, four tools behind one shell:
 `ffmpeg`/`ffprobe`, `whisper-cli` with an existing model (never downloaded by a job),
 `tesseract` (reference study reads on-screen text and refuses to start without it; also
 Text Review's `--mode ocr`) and `yt-dlp` (adding a reference from a link,
-`study/fetch_reference.py`). API routes that start Python import `spawnPython` /
+`study/fetch_reference.py`). In the packaged app these, Node, Python and git are Sniper's own:
+the installer puts them in `~/.project-sniper/runtimes/<lock id>/` from
+`install/deps/osx-arm64.lock` (ffmpeg is Sniper's build with zscale and rubberband), and the
+settings' PATH finds them before anything on the Mac. Never install or point Sniper at a
+Homebrew or system copy instead. API routes that start Python import `spawnPython` /
 `pythonInterpreter` / `SCRIPTS_DIR` from `src/app/api/_lib/spawn-python.ts`.
 
 ### Invariants — do not "fix" these

@@ -2,7 +2,7 @@
 # The installer's configuration step: which provider, and the settings file.
 # Sourced by install/install.command (and by the installer tests, which call these
 # exact functions), never executed directly. Expects the variables the earlier
-# steps set: NODE_BIN, TOOL_*, BROWSER_BIN, MODEL_PATH, PROVIDER_ARG, WORKSPACE_ARG.
+# steps set: DEPS_PREFIX, NODE_BIN, TOOL_*, BROWSER_BIN, MODEL_PATH, PROVIDER_ARG, WORKSPACE_ARG.
 
 choose_provider() {
   PROVIDER="$(settings_value SNIPER_PROVIDER)"
@@ -24,7 +24,7 @@ write_settings() {
   mkdir -p "$workspace" || fail "Cannot create the video workspace at $workspace"
   settings_write "$ENV_FILE" \
     "PKG_ROOT=$PKG_ROOT" "APP_DIR=$APP_DIR" \
-    "PATH=$RUNTIME_BIN:$CLI_BIN:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" \
+    "PATH=$RUNTIME_BIN:$CLI_BIN:$DEPS_PREFIX/bin:/usr/bin:/bin:/usr/sbin:/sbin" "SNIPER_DEPS_PREFIX=$DEPS_PREFIX" \
     "SNIPER_PROVIDER=$PROVIDER" "SNIPER_BRAIN_PROVIDER=$BRAIN" \
     "SNIPER_CLAUDE_MODEL=$(release_value components.claude_model_default)" \
     "SNIPER_CODEX_MODEL=$(release_value components.codex_model_default)" \
@@ -42,11 +42,17 @@ write_settings() {
 }
 
 # The settings just written must load back exactly (the loader, not the writer,
-# is what every launcher uses), and their PATH must find the validated Node.
+# is what every launcher uses), and their PATH must find Sniper's own tools first.
 verify_settings() {
-  local workspace node
+  local workspace tool found
   workspace="$(settings_load "$ENV_FILE" && printf '%s' "$SNIPER_WORKSPACE_ROOT")" || fail "The settings just written do not load."
   [ "$workspace" = "$SNIPER_WORKSPACE_ROOT" ] || fail "The settings did not read back exactly. Please report this."
-  node="$(settings_load "$ENV_FILE" && command -v node)"
-  [ "$node" = "$RUNTIME_BIN/node" ] || fail "The settings' PATH does not find the validated Node first. Please report this."
+  for tool in node ffmpeg ffprobe whisper-cli tesseract yt-dlp; do
+    found="$(settings_load "$ENV_FILE" && command -v "$tool")"
+    [ "$found" = "$RUNTIME_BIN/$tool" ] || fail "The settings' PATH finds $tool at '$found', not Sniper's own. Please report this."
+  done
+  for tool in python3 git npm; do
+    found="$(settings_load "$ENV_FILE" && command -v "$tool")"
+    [ "$found" = "$DEPS_PREFIX/bin/$tool" ] || fail "The settings' PATH finds $tool at '$found', not Sniper's own. Please report this."
+  done
 }

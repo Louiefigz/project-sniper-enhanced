@@ -131,9 +131,11 @@ settings. A reinstall in this folder uses them again.</td></tr>
 <tr><td><code>app/templates/motion/.sniper-native-runtime/native-export-history</code></td><td>What
 an interrupted export needs to resume. A reinstall in this folder picks it up.</td></tr>
 </table>
+<p>Uninstall also removes Sniper's own tools from <code>~/.project-sniper</code>, unless another
+Sniper folder of the same release still uses them (it then says which one).</p>
 <p>To finish, delete the folder — that also deletes the kept files, so copy them first if you
 want them. Uninstall does <strong>not</strong> touch your videos in <code>~/ProjectSniper</code>
-(or your own workspace folder), your own Node, Python, Homebrew, ffmpeg, whisper, tesseract or
+(or your own workspace folder), your own Node, Python, Homebrew, conda, ffmpeg, whisper, tesseract or
 yt-dlp, your global Codex and Claude CLIs, their settings (<code>~/.codex</code>,
 <code>~/.claude</code>, <code>~/.claude.json</code>) or their logins, or any Keychain item other
 than Sniper's own Claude login.</p>

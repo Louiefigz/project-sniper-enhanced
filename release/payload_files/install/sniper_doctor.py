@@ -202,7 +202,7 @@ def main() -> int:
     args = parser.parse_args()
     provider = setup.check_provider_settings(record)
     if not args.provider_only and _hold_install():
-        check_foundations(); setup.check_external_tools(record); check_media(); check_runtime_and_build()
+        check_foundations(); setup.check_runtime_tools(record); check_media(); check_runtime_and_build()
         setup.check_media_admission(record); check_transcription(args.skip_transcription)
     setup.check_provider_admission(record, args.provider or provider or "claude")
     if not args.provider_only:

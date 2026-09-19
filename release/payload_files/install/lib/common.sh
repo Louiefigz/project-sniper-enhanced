@@ -28,11 +28,11 @@ CODEX_HOME_LOCAL="$RUNTIME_DIR/codex-home"
 LOCK_TOOL="$APP_DIR/scripts/infra/sniper_lock.py"
 INSTALL_TOOLS="$PKG_ROOT/install/lib/install_tools.py"
 
-# A double-clicked .command can start with a minimal PATH that omits Homebrew.
-# Add the standard Homebrew locations AFTER whatever the caller has, so a Node
-# from nvm, fnm or volta that Terminal puts first is still the one found.
-case ":$PATH:" in *":/opt/homebrew/bin:"*) ;; *) PATH="$PATH:/opt/homebrew/bin" ;; esac
-case ":$PATH:" in *":/usr/local/bin:"*) ;; *) PATH="$PATH:/usr/local/bin" ;; esac
+# These scripts use macOS's own utilities only. Sniper brings its own Node, Python and media
+# tools (lib/runtime_tools.sh), so nothing from Homebrew, nvm or another PATH entry may stand
+# in for them — or for tar, stat or awk, whose GNU versions behave differently. The app gets
+# its own PATH from the settings (load_env).
+PATH=/usr/bin:/bin:/usr/sbin:/sbin
 export PATH
 # The pinned Claude CLI names its Keychain login after CLAUDE_CONFIG_DIR, so
 # Sniper's login is separate from yours. This variable would override that
@@ -56,7 +56,12 @@ log_line() {
   printf '%s %s %s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" "$(basename "$0")" "$*" >> "$LOG_DIR/install.log"
 }
 
-sha() { shasum -a 256 "$1" | awk '{print $1}'; }
+# SHA-256 of a file. shasum is a Perl script; openssl is the fallback should Perl be absent.
+sha() {
+  local out
+  out="$(/usr/bin/shasum -a 256 "$1" 2>/dev/null)" || out="$(/usr/bin/openssl dgst -sha256 -r "$1")" || return 1
+  printf '%s' "${out%% *}"
+}
 
 # A completion receipt records exactly what a finished step was built from.
 # A step is skipped only when its receipt matches the current inputs AND its
@@ -69,10 +74,16 @@ write_receipt() {  # name value
 }
 clear_receipt() { rm -f "$RECEIPTS/$1" "$RECEIPTS/$1.tree.json"; }
 
+# Sniper's own tools are built for Apple silicon and name the oldest macOS they run on.
+# (sysctl, not uname: a Terminal running under Rosetta reports x86_64 on Apple silicon.)
 require_macos() {
+  local have need
   [ "$(uname -s)" = "Darwin" ] || fail "Project Sniper runs on macOS only."
-  [ "$(uname -m)" = "arm64" ] || warn "This Mac is $(uname -m). Only Apple silicon has been
-  tested; this Mac is outside the tested set."
+  [ "$(/usr/sbin/sysctl -in hw.optional.arm64)" = 1 ] || fail "This Mac has an Intel processor. Sniper's
+  own tools are built for Apple silicon (M1 or later) only, so it cannot be installed on this Mac."
+  have="$(/usr/bin/sw_vers -productVersion)"; need="$(deps_header min-macos)" || need=12.0
+  version_ge "$have" "$need" || fail "This Mac runs macOS $have; Sniper's tools need macOS $need or
+  later. Update macOS (System Settings > General > Software Update), then run this again."
 }
 
 # The voice-rnn dialogue-cleanup preset embeds this folder's path in an ffmpeg
@@ -88,8 +99,9 @@ require_safe_install_path() {
   esac
 }
 
-# The Python that runs Sniper's own helpers: the app's environment once it
-# exists, otherwise a Python 3.12+ from this Mac (the lock helper is stdlib only).
+# The Python that runs Sniper's own helpers: the app's environment once it exists,
+# otherwise the Python among Sniper's own tools. Never /usr/bin/python3, which on a Mac
+# without Apple's developer tools opens an "install developer tools" dialog.
 sniper_python() {
   if [ -x "$APP_DIR/.venv/bin/python3" ] && python_ok "$APP_DIR/.venv/bin/python3"; then
     printf '%s' "$APP_DIR/.venv/bin/python3"; return 0
@@ -97,10 +109,17 @@ sniper_python() {
   find_python
 }
 
+# Installed and still whole enough to use: settings, the installer's completion receipt
+# for this folder, and Sniper's own tools (someone may have removed ~/.project-sniper).
+install_complete() {
+  [ -f "$ENV_FILE" ] && receipt_ok installed "$PKG_ROOT" || return 1
+  deps_paths && deps_ready
+}
+
 # One value from RELEASE.json ("components.node_floor" style dotted keys).
 release_value() {
   local py
-  py="$(sniper_python)" || fail "Python 3.12 or newer is required to read RELEASE.json."
+  py="$(sniper_python)" || fail "Sniper's own tools are not installed yet. Run install/install.command."
   "$py" -c 'import json,sys
 value = json.load(open(sys.argv[1], encoding="utf-8"))
 for key in sys.argv[2].split("."):
@@ -118,7 +137,8 @@ hold_maintenance() {
   local mode="$1" label="$2" busy="$3" py
   shift 3
   [ "${SNIPER_LOCKED_PID:-}" = "$$" ] && return 0
-  py="$(sniper_python)" || fail "Python 3.12 or newer is required (see the manual's install page)."
+  py="$(sniper_python)" || fail "Sniper's own tools are not installed yet. Run install/install.command
+  (or double-click install/setup.command)."
   [ -f "$LOCK_TOOL" ] || fail "This folder is incomplete: $LOCK_TOOL is missing."
   mkdir -p "$STATE_DIR" || fail "Cannot create $STATE_DIR"
   export SNIPER_LOCKED_PID=$$
@@ -129,6 +149,8 @@ hold_maintenance() {
 . "$PKG_ROOT/install/lib/settings.sh"
 . "$PKG_ROOT/install/lib/tools.sh"
 . "$PKG_ROOT/install/lib/processes.sh"
+. "$PKG_ROOT/install/lib/download.sh"
+. "$PKG_ROOT/install/lib/runtime_tools.sh"
 
 # Load this install's settings: the installer's data file (literally), then your
 # own runtime/sniper.local.env (shell syntax, by design). A port given on the
@@ -160,11 +182,11 @@ load_env() {
   PORT="${SNIPER_PORT:-3000}"; export SNIPER_PORT="$PORT"
 }
 
-# The Node this install was set up with must still be there and still be new
-# enough; a Homebrew upgrade or an nvm uninstall removes it.
+# The Node among Sniper's own tools must still be there (someone may have removed
+# ~/.project-sniper); the installer puts it back.
 require_installed_node() {
   local problem
   problem="$(node_problem "${SNIPER_NODE_PATH:-}" "$(release_value components.node_floor)")"
-  [ -z "$problem" ] || fail "The Node this install was set up with cannot be used: $problem.
-  Run install/install.command again; it sets up with the Node on your PATH now."
+  [ -z "$problem" ] || fail "Sniper's own Node cannot be used: $problem.
+  Run install/install.command again; it reinstalls Sniper's tools."
 }

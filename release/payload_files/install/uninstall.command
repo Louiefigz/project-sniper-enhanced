@@ -11,7 +11,8 @@
 #
 # Kept on purpose, so a reinstall in this folder picks them up: your own settings
 # (runtime/sniper.local.env, app/.env.local) and the export-recovery history
-# (app/templates/motion/.sniper-native-runtime/native-export-history). Never
+# (app/templates/motion/.sniper-native-runtime/native-export-history). Sniper's own
+# tools in ~/.project-sniper are removed when no other Sniper install uses them. Never
 # touched: your video projects, your own Node/Python/Homebrew/ffmpeg/whisper, your
 # global Codex and Claude CLIs, ~/.codex, ~/.claude, ~/.claude.json and any
 # Keychain item other than Sniper's own Claude login.
@@ -41,6 +42,7 @@ say "  and the render runtime and caches in app/templates/motion/.sniper-native-
 say "It keeps, so a reinstall here picks them up: runtime/sniper.local.env and"
 say "app/.env.local (your settings) and .sniper-native-runtime/native-export-history"
 say "(what an interrupted export needs to resume)."
+say "It also removes Sniper's own tools (~/.project-sniper) unless another Sniper install uses them."
 say "It does NOT touch your video projects ($WORKSPACE), your own Node, Python,"
 say "Homebrew, ffmpeg or whisper install, or your own Codex/Claude CLI and login."
 if [ "$YES" != 1 ]; then printf 'Type REMOVE to continue: '; read -r answer
@@ -106,6 +108,7 @@ if [ ${#LEFT[@]} -gt 0 ]; then
 $(printf '    %s\n' "${LEFT[@]}")
   Run this again after closing whatever uses them."
 fi
+deps_unregister_and_prune
 log_line "uninstalled"
 say "Removed. Kept: your settings (runtime/sniper.local.env and app/.env.local, if you made"
 say "them) and the export-recovery history. Run install/install.command to reinstall here, or"

@@ -145,7 +145,13 @@ screenshot, brand, likeness or creator name is used.
 | `ggml-small.en.bin` speech model | whisper.cpp project | MIT |
 | `@openai/codex` CLI | OpenAI | its own published terms |
 | `@anthropic-ai/claude-code` CLI | Anthropic | its own published terms |
-| `ffmpeg`, `whisper-cpp`, Node, Python | you install these yourself | their own licences |
+| Sniper's own tools: Python 3.14.4, Node 24.21.0, whisper.cpp 1.9.3, tesseract 5.5.3 (with its language data), yt-dlp 2026.08.19, git 2.55.0, micromamba 2.9.0, and the libraries they and Sniper's ffmpeg use (86 packages in all) | conda-forge, <https://conda-forge.org> | each package's own; the complete list with every licence is `install/deps/osx-arm64.json`. They are downloaded by the installer from conda.anaconda.org, not redistributed in this package. |
+
+## Shipped in this package: Sniper's ffmpeg build
+
+| Component | Publisher | Licence |
+|---|---|---|
+| `ffmpeg` and `ffprobe` 8.0.3 (`install/deps/sniper-ffmpeg-8.0.3-1-osx-arm64.tar.xz`), built by Project Sniper from unmodified FFmpeg 8.0.3 and Rubber Band Library 4.0.0 | the FFmpeg developers; Particular Programs Ltd (Rubber Band) | GNU GPL version 3 or later as configured (FFmpeg itself is LGPL-2.1-or-later; Rubber Band is GPL-2.0-or-later). The complete corresponding source and the build recipe are in `third-party/sources/` and inside the archive under `share/sniper-ffmpeg/`, with the GPL text. They run as separate programs and do not change the licence of Project Sniper's own code. |
 
 ## Not shipped
 

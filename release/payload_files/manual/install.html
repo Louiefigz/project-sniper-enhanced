@@ -32,33 +32,40 @@ only ever published outside the archive; a hash inside a file cannot verify that
   caches are large and will fight the sync.</li>
 </ul>
 
-<h2>Step 2 — the six tools you install yourself</h2>
-<p>Sniper installs everything else, but it needs these first. The installer checks each one,
-lists everything that is missing in one go, and stops with the exact next step.</p>
+<h2>Step 2 — nothing to install first</h2>
+<p>Sniper brings its own tools. The first setup downloads them from
+<a href="https://conda-forge.org">conda-forge</a> (the open-source package collection), checks every
+file against the SHA-256 recorded for this release before using it, and installs them into
+<code>~/.project-sniper</code>. You do not need Homebrew, Xcode, Python, Node or any of these:</p>
 <table>
-<tr><th>Tool</th><th>Version</th><th>How</th><th>Needed for</th></tr>
-<tr><td>Node</td><td>Node 22.13 or newer, not 23; 24 (LTS) recommended</td><td><a href="https://nodejs.org">nodejs.org</a> — choose LTS</td><td>the app, rendering, the provider CLIs</td></tr>
-<tr><td>Python</td><td>3.12 or newer (3.14.4 is the version tested)</td><td><a href="https://www.python.org/downloads/macos/">python.org</a></td><td>the editing engine</td></tr>
-<tr><td>ffmpeg</td><td>with libass, librubberband, libzimg, libx264</td><td><code>brew install ffmpeg</code></td><td>every render</td></tr>
-<tr><td>whisper-cpp</td><td>any current</td><td><code>brew install whisper-cpp</code></td><td>local transcription</td></tr>
-<tr><td>tesseract</td><td>any current</td><td><code>brew install tesseract</code></td><td>studying a reference video (reading its on-screen text)</td></tr>
-<tr><td>yt-dlp</td><td>any current</td><td><code>brew install yt-dlp</code></td><td>adding a reference from a YouTube, Instagram or TikTok link</td></tr>
+<tr><th>Tool</th><th>Version</th><th>Needed for</th></tr>
+<tr><td>Python</td><td>3.14.4</td><td>the editing engine</td></tr>
+<tr><td>Node</td><td>24.21.0 (LTS)</td><td>the app, rendering, the Codex and Claude CLIs</td></tr>
+<tr><td>ffmpeg and ffprobe</td><td>8.0.3, Sniper's own build</td><td>every render</td></tr>
+<tr><td>whisper.cpp</td><td>1.9.3</td><td>local transcription</td></tr>
+<tr><td>tesseract</td><td>5.5.3</td><td>studying a reference video (reading its on-screen text)</td></tr>
+<tr><td>yt-dlp</td><td>2026.08.19</td><td>adding a reference from a YouTube, Instagram or TikTok link</td></tr>
+<tr><td>git</td><td>2.55.0</td><td>the Codex and Claude CLIs (so macOS never asks to install developer tools)</td></tr>
 </table>
-<p>The <code>brew</code> commands need <a href="https://brew.sh">Homebrew</a>. If you don't have
-it, the installer says so rather than failing on a missing command. If you installed ffmpeg
-some other way, the installer checks that your copy actually has every filter the renderer
-uses, and names any that are missing.</p>
-<p><strong>Node from nvm, fnm or volta:</strong> run the installer from Terminal, where that
-Node is on your PATH. The installer records the exact Node it checked and the app, the
-doctor, the provider CLIs and every render use that same one, even when you later start
-Sniper from Finder. Its path must not contain a space. Node 23 is refused: it lies outside the
-range this release's dependencies declare, and its processes were seen hanging on exit. If you
-upgrade or remove the Node you installed with, run the installer again.</p>
+<p>About 300 MB is downloaded once; the tools take about 1.2 GB on disk. Your own Homebrew,
+Python, Node or conda are not used or changed, even when they come first on your PATH. Sniper
+folders of the same release share one copy of the tools; uninstalling the last of them removes it.
+If the download stops, run setup again: it resumes and checks what arrived.</p>
+<p><strong>Which Macs.</strong> Apple silicon (M1 or later) with macOS 12 or later — the oldest
+macOS these tools support. So far only macOS 26 has actually been tested. On an Intel Mac or an
+older macOS, setup stops before downloading anything and says why.</p>
+<p><strong>Your home folder path must not contain a space</strong> (macOS account names never do):
+the tools live there because Studio needs a Node path without spaces, and this folder may have them.</p>
+<p><strong>Sniper's ffmpeg.</strong> The renderer needs two ffmpeg filters (zscale and rubberband)
+that no ready-made Mac build carries, so Sniper builds ffmpeg itself from the unmodified FFmpeg 8.0.3
+and Rubber Band 4.0.0 sources. It ships in this download (<code>install/deps/</code>), with those
+sources and the build recipe in <code>third-party/sources/</code> (GPL). Setup checks its SHA-256 and
+installs it the same way as the downloaded tools. It is not yet signed with an Apple Developer ID.</p>
 
 <h2>Step 3 — open guided setup</h2>
-<p>Double-click <code>install/setup.command</code> in Finder. It installs Sniper if needed,
-then guides you through optional Deepgram connection, subscription sign-in and the readiness
-checks. When they pass it opens Sniper’s configured Codex or Claude editor. Press Enter at
+<p>Double-click <code>install/setup.command</code> in Finder. It installs Sniper and its tools
+if needed, then guides you through subscription sign-in, the optional Deepgram connection and the
+readiness checks. When they pass it opens Sniper’s configured Codex or Claude editor. Press Enter at
 the subscription choice to use Codex. You do not need Cursor or a code editor.</p>
 <p>For a scripted installation you can still run:</p>
 <pre><code>install/install.command --provider codex     # or: --provider claude</code></pre>
@@ -69,7 +76,9 @@ warn that a downloaded script is from an unidentified developer — right-click 
 <em>Open</em>, the normal macOS prompt for a downloaded script.</p>
 <p>What it does, in order:</p>
 <ol>
-  <li>Checks the six tools above, including ffmpeg's features.</li>
+  <li>Installs Sniper's own tools (above) — or, when they are already there, checks every one of
+  their files against what was installed and that each tool runs, including every ffmpeg feature
+  the renderer uses.</li>
   <li>Installs the app's dependencies into <code>app/node_modules</code> (npm checks every
   package against the integrity hash in the lockfile).</li>
   <li>Installs the rendering project's dependencies into
@@ -102,20 +111,8 @@ settings in <code>runtime/sniper.local.env</code> are never overwritten.</p>
 finish first. If something is still using it, the installer says what and changes nothing.</p>
 </div>
 
-<h2>Step 4 — connect Deepgram and sign in</h2>
-<p>Setup asks whether you want to connect Deepgram. Choose <em>Connect/replace key</em>,
-create a key at <a href="https://console.deepgram.com/">Deepgram Console</a>, and paste it at
-the hidden prompt. Setup checks the key with Deepgram before saving it. A failed check
-keeps any previous key. You can retry or skip and use the included local transcription.</p>
-<p>Deepgram is optional and billed separately by Deepgram. Using it sends audio to
-Deepgram. The connection check sends no audio and does not prove your balance or every
-model permission. Connecting does not authorize paid transcription: approve it for the
-specific edit when you ask your editor to use Deepgram.</p>
-<p>The key is saved in <code>runtime/deepgram.env</code>, readable only by your Mac account,
-and loaded by Sniper’s launchers. It is not part of the source or diagnostic bundle.
-Reopen <code>install/setup.command</code> to replace or remove it without editing files.
-Removal disconnects this install; revoke the key in Deepgram Console to invalidate it.</p>
-<p>Setup signs you in next. If you only need to repeat sign-in:</p>
+<h2>Step 4 — sign in, then connect Deepgram (optional)</h2>
+<p>Setup signs you in first. If you only need to repeat sign-in:</p>
 <pre><code>install/sign-in.command</code></pre>
 <p>This signs in to the subscription you chose, using this package's own copy of the CLI and
 its own settings folder. Your existing Codex or Claude setup and login are not used or
@@ -135,6 +132,18 @@ app, the editor window (<code>install/editor.command</code>) and every edit. Ask
 window for the other provider without switching is refused, because the app would keep using
 the first one.</p>
 
+<p>Next, setup asks whether you want to connect Deepgram. Choose <em>Connect/replace key</em>,
+create a key at <a href="https://console.deepgram.com/">Deepgram Console</a>, and paste it at
+the hidden prompt. Setup checks the key with Deepgram before saving it. A failed check
+keeps any previous key. You can retry or skip and use the included local transcription.</p>
+<p>Deepgram is optional and billed separately by Deepgram. Using it sends audio to
+Deepgram. The connection check sends no audio and does not prove your balance or every
+model permission. Connecting does not authorize paid transcription: approve it for the
+specific edit when you ask your editor to use Deepgram.</p>
+<p>The key is saved in <code>runtime/deepgram.env</code>, readable only by your Mac account,
+and loaded by Sniper’s launchers. It is not part of the source or diagnostic bundle.
+Reopen <code>install/setup.command</code> to replace or remove it without editing files.
+Removal disconnects this install; revoke the key in Deepgram Console to invalidate it.</p>
 <h3>Choosing the model</h3>
 <p>Sniper sends an explicit model with every request. This release's defaults are Opus for
 Claude and <code>gpt-5.6-sol</code> at the highest reasoning setting for Codex. Aaron's own

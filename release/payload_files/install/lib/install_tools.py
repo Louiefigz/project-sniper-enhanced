@@ -7,7 +7,9 @@
 
 A tree record holds the SHA-256 of every regular file (and the target of every
 symlink) under a folder, taken when the step finished; ``--exclude`` names folders
-(relative to it) that the product itself rewrites later, such as ``.next/cache``.
+(relative to it) that the product itself rewrites later, such as ``.next/cache``;
+``--exclude-name`` skips every folder with that name (``__pycache__``) and
+``--exclude-file`` one file (a completion marker written after the record).
 `tree-check` re-hashes the folder and exits 1 naming what changed, so a corrupted, truncated or half-removed
 dependency folder is reinstalled instead of trusted. `venv-check` compares the
 installed distributions with the lock and re-hashes every file pip recorded in
@@ -39,18 +41,25 @@ def _entries(root: Path, exclude: set[str]) -> dict[str, Path | str]:
     """Relative path -> file to hash, or 'link:<target>' for a symlink.
 
     ``exclude`` holds folder paths relative to ``root`` (e.g. ``cache`` for
-    ``.next/cache``) whose contents legitimately change after the step finished.
+    ``.next/cache``) whose contents legitimately change after the step finished,
+    ``name:<folder name>`` entries skipped wherever they occur, and ``file:<path>``
+    entries for single files.
     """
+    names = {item[5:] for item in exclude if item.startswith("name:")}
+    single = {item[5:] for item in exclude if item.startswith("file:")}
     found: dict[str, Path | str] = {}
     for current, dirs, files in os.walk(root):
         base = Path(current)
-        dirs[:] = sorted(d for d in dirs if (base / d).relative_to(root).as_posix() not in exclude)
+        dirs[:] = sorted(d for d in dirs if d not in names
+                         and (base / d).relative_to(root).as_posix() not in exclude)
         for name in dirs:
             if (base / name).is_symlink():
                 found[(base / name).relative_to(root).as_posix()] = "link:" + os.readlink(base / name)
         for name in sorted(files):
             path = base / name
             relative = path.relative_to(root).as_posix()
+            if relative in single:
+                continue
             found[relative] = "link:" + os.readlink(path) if path.is_symlink() else path
     return found
 
@@ -91,6 +100,7 @@ def tree_check(root: Path, record: Path, exclude: set[str]) -> int:
     missing = sorted(k for k in want if k not in have)
     added = sorted(k for k in have if k not in want)
     if not (changed or missing or added):
+        print(f"{len(have)} files verified")
         return 0
     example = (changed or missing or added)[0]
     print(f"{len(changed)} changed, {len(missing)} missing, {len(added)} unexpected (e.g. {example})")
@@ -158,12 +168,15 @@ def main(argv: list[str] | None = None) -> int:
         cmd.add_argument("root", type=Path)
         cmd.add_argument("record", type=Path)
         cmd.add_argument("--exclude", action="append", default=[])
+        cmd.add_argument("--exclude-name", action="append", default=[])
+        cmd.add_argument("--exclude-file", action="append", default=[])
     sub.add_parser("venv-check").add_argument("lock", type=Path)
     args = parser.parse_args(argv)
     if args.action == "venv-check":
         return venv_check(args.lock)
     handler = tree_record if args.action == "tree-record" else tree_check
-    return handler(args.root, args.record, set(args.exclude))
+    exclude = {*args.exclude, *(f"name:{n}" for n in args.exclude_name), *(f"file:{f}" for f in args.exclude_file)}
+    return handler(args.root, args.record, exclude)
 
 
 if __name__ == "__main__":

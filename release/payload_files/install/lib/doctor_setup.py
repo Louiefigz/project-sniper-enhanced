@@ -1,4 +1,4 @@
-"""Doctor checks for how this install is set up: Node, provider settings, tools, admission.
+"""Doctor checks for how this install is set up: Node, provider settings, Sniper's own tools, admission.
 
 Imported by ``install/sniper_doctor.py``, which owns the result list and output.
 Each check calls ``record(state, name, detail)``; nothing here prints.
@@ -18,10 +18,18 @@ ADMISSION_SELFTEST = APP / "scripts/producer/headless/native_admission_selftest.
 ADMISSION_TIMEOUT_S = 600
 BRAIN_FOR = {"codex": "codex", "claude": "legacy"}
 REASONING = {"none", "minimal", "low", "medium", "high", "xhigh", "max", "ultra"}
-# tool, Homebrew formula, the feature that refuses to run without it
-EXTERNAL = (("whisper-cli", "whisper-cpp", "local transcription"),
-            ("tesseract", "tesseract", "reference study (reading on-screen text)"),
-            ("yt-dlp", "yt-dlp", "adding a reference from a URL"))
+# Sniper's own tools (install/lib/runtime_tools.sh): name, arguments that make it report
+# itself, and what refuses to run without it.
+RUNTIME_TOOLS = (("ffmpeg", ["-hide_banner", "-version"], "every render"),
+                 ("ffprobe", ["-hide_banner", "-version"], "every render"),
+                 ("whisper-cli", ["--help"], "local transcription"),
+                 ("tesseract", ["--version"], "reference study (reading on-screen text)"),
+                 ("yt-dlp", ["--version"], "adding a reference from a URL"),
+                 ("node", ["--version"], "the app, rendering and the editor CLIs"),
+                 ("python3", ["--version"], "the editing engine"),
+                 ("git", ["--version"], "the editor CLIs"))
+# What the tools write after installation; must match deps_tree_excludes in runtime_tools.sh.
+RUNTIME_EXCLUDES = {"var/cache/fontconfig", ".sniper-users", "name:__pycache__", "file:.sniper-runtime-complete"}
 Record = Callable[[str, str, str], None]
 
 
@@ -76,12 +84,9 @@ def check_node(record: Record) -> None:
                "the CLIs and workers would run a different Node — run install/install.command")
         return
     _, out, _ = run([pinned, "--version"], 30)
-    components = release()["components"]
-    major = out.strip().lstrip("v").split(".")[0]
-    if major.isdigit() and int(major) in components.get("node_unsupported_majors", []):
-        record("FAIL", "node", f"{out.strip()} at {pinned} is not supported by this release — install Node "
-               f"{components['node_recommended']} (LTS) from nodejs.org (Homebrew: brew upgrade node), "
-               "then run install/install.command")
+    prefix = os.environ.get("SNIPER_DEPS_PREFIX", "")
+    if not prefix or not os.path.realpath(pinned).startswith(f"{prefix}/"):
+        record("FAIL", "node", f"{pinned} is not Sniper's own Node — run install/install.command")
         return
     record("PASS", "node", f"{out.strip()} at {pinned} (needs {floor}+); the CLIs and workers use it")
 
@@ -100,13 +105,30 @@ def check_provider_settings(record: Record) -> str:
     return provider
 
 
-def check_external_tools(record: Record) -> None:
-    """Executables Sniper does not install, each tied to the feature that needs it."""
-    for tool, formula, feature in EXTERNAL:
-        path = shutil.which(tool)
-        works = path is not None and run([path, "--help" if tool == "whisper-cli" else "--version"], 30)[0] == 0
-        record("PASS" if works else "FAIL", tool,
-               path if works else f"not found or not working — needed for {feature}: brew install {formula}")
+def check_runtime_tools(record: Record) -> None:
+    """Sniper's own tools: exactly as installed, found first on the app's PATH, and each runs."""
+    import install_tools  # noqa: PLC0415  (same folder; stdlib only)
+    prefix = Path(os.environ.get("SNIPER_DEPS_PREFIX", "/nonexistent"))
+    fix = "run install/install.command (it reinstalls Sniper's tools)"
+    try:
+        want = json.loads((prefix.parent / f"{prefix.name}.tree.json").read_text(encoding="utf-8"))["files"]
+    except (OSError, ValueError, KeyError):
+        record("FAIL", "Sniper's own tools", f"not installed at {prefix} — {fix}")
+        return
+    have = install_tools.tree_digests(prefix, RUNTIME_EXCLUDES) if prefix.is_dir() else {}
+    changed = sum(1 for k, v in want.items() if have.get(k) != v) + sum(1 for k in have if k not in want)
+    record("FAIL" if changed else "PASS", "Sniper's own tools",
+           f"{changed} file(s) differ from what was installed — {fix}" if changed
+           else f"{len(want)} files verified in {prefix}")
+    for tool, args, feature in RUNTIME_TOOLS:
+        found = shutil.which(tool) or ""
+        real = os.path.realpath(found) if found else ""
+        if not real.startswith(f"{prefix}/"):
+            record("FAIL", tool, f"PATH finds {found or 'nothing'}, not Sniper's own — needed for {feature}: {fix}")
+            continue
+        code, out, err = run([found, *args], 60)
+        first = ((out or err).strip().splitlines() or [""])[0][:80]
+        record("PASS" if code == 0 else "FAIL", tool, f"{first} ({real})" if code == 0 else f"does not run: {first} — {fix}")
 
 
 def _last_json_object(text: str) -> dict | None:

@@ -67,19 +67,17 @@ subscription, and it runs only when you tick its opt-in — see
 <h2>What you need</h2>
 <table>
 <tr><th>Requirement</th><th>Detail</th><th>Cost to you</th></tr>
-<tr><td>A Mac</td><td>Apple silicon (M-series). So far Sniper has only been run on a developer
-Mac with macOS 26 on Apple silicon; that is not yet a qualified buyer baseline. The pinned Python
-packages need macOS 13 or newer (an Intel Mac: macOS 14 or newer); Intel Macs are untested.</td><td>—</td></tr>
-<tr><td>Disk space</td><td>About 4 GB for the install, plus room for your projects.
-Leave at least 20 GB free; a full-length render uses a lot of temporary space.</td><td>—</td></tr>
-<tr><td>Node 22.13 or newer, except Node 23</td><td>Free, from nodejs.org. Node 24 (LTS) is
-recommended. The floor comes from what this release's dependencies declare; Node 23 is outside
-their range and is refused.</td><td>Free</td></tr>
-<tr><td>Python 3.12 or newer</td><td>Free, from python.org. 3.14.4 is the version tested.</td><td>Free</td></tr>
-<tr><td><code>ffmpeg</code>, <code>whisper-cpp</code>, <code>tesseract</code> and
-<code>yt-dlp</code></td><td>Free, one Homebrew command each. tesseract reads on-screen text when
-Sniper studies a reference video; yt-dlp fetches a reference from a link. The installer tells you
-if any is missing.</td><td>Free</td></tr>
+<tr><td>A Mac</td><td>Apple silicon (M1 or later) with macOS 13 or newer — the oldest macOS
+Sniper's own tools and pinned Python packages support. So far Sniper has only been run on a
+developer Mac with macOS 26 on Apple silicon; that is not yet a qualified buyer baseline. Intel
+Macs cannot run Sniper's tools.</td><td>—</td></tr>
+<tr><td>Disk space</td><td>About 4 GB for the install and its tools (about 1.2 GB of that in
+<code>~/.project-sniper</code>), plus room for your projects. Leave at least 20 GB free; a
+full-length render uses a lot of temporary space.</td><td>—</td></tr>
+<tr><td>An internet connection for setup</td><td>Setup downloads Sniper's own tools (Python, Node,
+ffmpeg, whisper.cpp, tesseract, yt-dlp, git — about 300 MB, each file checked against its recorded
+SHA-256), the rendering browser, the speech model and the app's packages. Nothing needs to be
+installed beforehand: no Homebrew, Xcode, Python or Node.</td><td>Free</td></tr>
 <tr><td><strong>A Codex or Claude subscription</strong></td><td>This is the part that
 thinks about your edit. You use the subscription you already pay for. There is no extra
 Sniper processing fee: Producer, Segmenter and Clipper all run on that subscription, with

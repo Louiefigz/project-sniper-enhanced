@@ -13,7 +13,7 @@ import re
 import shutil
 from pathlib import Path
 
-from release import pins
+from release import pins, runtime_tools
 from release.node_floor import node_requirements
 from release.stage import StageReport, StagingError
 
@@ -88,6 +88,7 @@ def component_versions(root: Path) -> dict[str, object]:
     node = node_requirements(root)
     pins.check_cli_lock(PAYLOAD / "install/cli", codex.group(1), claude.group(1))
     pins.check_python_lock(PAYLOAD / "install/requirements.lock.txt")
+    runtime = _checked_runtime(node)
     return {
         "app_version": root_pkg["version"],
         "next": root_pkg["dependencies"]["next"],
@@ -101,13 +102,25 @@ def component_versions(root: Path) -> dict[str, object]:
         **model_defaults(root),
         "node_floor": node["floor"],
         "node_floor_set_by": node["set_by"],
-        "node_unsupported_majors": node["unsupported_majors"],
-        "node_recommended": "24",
-        "python_floor": "3.12",
-        "python_tested": "3.14.4",
+        **runtime,
         "whisper_model": "ggml-small.en.bin",
-        "supported_platform": "macOS on Apple silicon (arm64); only a developer Mac on macOS 26 has run it",
+        "supported_platform": f"macOS {runtime['runtime_min_macos']} or later on Apple silicon (arm64), "
+                              "the floor Sniper's own tools declare; only a developer Mac on macOS 26 has run it",
     }
+
+
+def _checked_runtime(node: dict) -> dict[str, object]:
+    """Sniper's own tools (release/runtime_tools.py); their Node must satisfy every dependency."""
+    try:
+        runtime = runtime_tools.check()
+    except runtime_tools.LockError as error:
+        raise StagingError(f"Sniper's tool runtime does not verify: {error}") from error
+    version = tuple(int(part) for part in str(runtime["runtime_tools"]["nodejs"]).split("."))
+    floor = tuple(int(part) for part in str(node["floor"]).split("."))
+    if version < floor or version[0] in node["unsupported_majors"]:
+        raise StagingError(f"Sniper's own Node {runtime['runtime_tools']['nodejs']} does not satisfy the "
+                           f"dependencies (floor {node['floor']}, excluded majors {node['unsupported_majors']})")
+    return runtime
 
 
 def source_facts(root: Path) -> dict[str, str]:
@@ -130,13 +143,13 @@ def source_facts(root: Path) -> dict[str, str]:
     return {**_read_json(record), "release_checkout_commit": head, "release_checkout_tree": tree}
 
 
-def check_manual_node_floor(stage: Path, floor: str) -> None:
-    """The buyer pages state the Node floor the build derived, so they cannot drift from it."""
-    short = floor[:-2] if floor.endswith(".0") else floor
-    pages = ("START-HERE.html", "manual/index.html", "manual/install.html")
-    stale = [page for page in pages if f"Node {short}" not in (stage / page).read_text(encoding="utf-8")]
+def check_buyer_pages(stage: Path) -> None:
+    """No buyer page asks for a tool Sniper now installs itself (a Homebrew instruction is the tell)."""
+    pages = [stage / "START-HERE.html", *sorted((stage / "manual").glob("*.html"))]
+    stale = [page.relative_to(stage).as_posix() for page in pages
+             if "brew install" in page.read_text(encoding="utf-8")]
     if stale:
-        raise StagingError(f"these pages do not state the derived Node floor 'Node {short}': {', '.join(stale)}")
+        raise StagingError(f"these pages still ask buyers to install tools with Homebrew: {', '.join(stale)}")
 
 
 def _lock_lines(root: Path) -> list[str]:
@@ -182,6 +195,16 @@ def write_payload(root: Path, stage: Path, report: StageReport) -> None:
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(path, target)
         target.chmod(0o755 if target.suffix in {".sh", ".command"} else 0o644)
+        report.files.append(relative)
+    try:
+        runtime_tools.check()
+    except runtime_tools.LockError as error:
+        raise StagingError(f"Sniper's tool runtime does not verify: {error}") from error
+    for relative, (source, _) in sorted(runtime_tools.shipped_files().items()):
+        target = stage / relative   # Sniper's ffmpeg build and its complete corresponding source
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, target)
+        target.chmod(0o644)
         report.files.append(relative)
     _lock_lines(root)
 

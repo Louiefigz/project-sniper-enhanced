@@ -89,7 +89,8 @@ def _tool(name: str) -> str:
         if os.path.isabs(candidate) and os.path.isfile(candidate) and os.access(candidate, os.X_OK):
             return os.path.realpath(candidate)
     where = configured or " or ".join(candidates)
-    raise NativeRuntimeError(f"{name} is not an executable at {where}; install ffmpeg (brew install ffmpeg)")
+    raise NativeRuntimeError(f"{name} is not an executable at {where}; run install/install.command "
+                             "(it repairs Sniper's own tools)")
 
 
 def _ancestors(paths: frozenset[str]) -> list[str]:

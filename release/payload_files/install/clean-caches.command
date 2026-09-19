@@ -13,6 +13,8 @@ hold_maintenance exclusive "cache cleaning" "Caches cannot be cleaned while Snip
 ROOT="$APP_DIR/templates/motion/.sniper-native-runtime"
 CANDIDATES=()
 for d in "$ROOT"/*/frame-cache "$ROOT"/*/long-frame-cache; do [ -d "$d" ] && CANDIDATES+=("$d"); done
+# The downloaded archives of Sniper's own tools: only needed to repair them without the internet.
+deps_paths; [ -d "$DEPS_HOME/pkgs" ] && CANDIDATES+=("$DEPS_HOME/pkgs")
 if [ ${#CANDIDATES[@]} -eq 0 ]; then say "No render caches to remove."; exit 0; fi
 
 # Also refuse for work that never took the lock (a command run by hand in this folder).
@@ -46,9 +48,16 @@ fi
 say "Candidates (regenerable render caches only):"
 for d in "${CANDIDATES[@]}"; do say "  $(du -sh "$d" 2>/dev/null | cut -f1)  $d"; done
 say ""
-say "Never removed by this script: your footage, edit plans, final.mp4 files, exports,"
+say "Never removed by this script: Sniper's installed tools, your footage, edit plans, final.mp4 files, exports,"
 say "export attempts and their history, approval receipts and unsynced Studio edits."
 if [ "${1:-}" != "--yes" ]; then printf 'Type CLEAN to remove the caches listed above: '; read -r answer
   [ "$answer" = "CLEAN" ] || { say "Nothing was removed."; exit 0; }; fi
-for d in "${CANDIDATES[@]}"; do rm -rf "$d"; done
+for d in "${CANDIDATES[@]}"; do
+  if [ "$d" = "$DEPS_HOME/pkgs" ]; then   # not while any Sniper install is setting up its tools
+    /usr/bin/lockf -k -t 0 "$DEPS_HOME/install.lock" /bin/rm -rf "$d" \
+      || warn "Sniper's tools are being installed right now; $d was kept."
+  else
+    rm -rf "$d"
+  fi
+done
 say "Caches removed. The next render rebuilds what it needs."

@@ -36,8 +36,9 @@ from study.deep_frames import VideoInfo, Window, decode_window  # noqa: E402
 
 TESSERACT_MISSING = (
     "Reference study reads on-screen text with the tesseract program, which is not "
-    "installed (not found on PATH). Install it with: brew install tesseract — then "
-    "run the study again. (The Python package pytesseract is only its wrapper.)")
+    "installed (not found on PATH). Sniper installs its own: run install/install.command "
+    "(it repairs Sniper's tools), then run the study again. (The Python package "
+    "pytesseract is only its wrapper.)")
 
 
 def require_tesseract() -> None:

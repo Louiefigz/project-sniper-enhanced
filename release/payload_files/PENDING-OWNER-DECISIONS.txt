@@ -15,6 +15,12 @@ SETTLED on 2026-09-17 (reflected in the manual and LICENSE-DRAFT.txt)
   - The saved styles and the editing doctrine are re-authored as original material.
   - HyperFrames Studio's analytics are switched off by default (decided 2026-09-18);
     its page still loads one GSAP file from cdn.jsdelivr.net, which the privacy page says.
+  - Sniper installs its own tools (decided 2026-09-18): buyers do not install Node, Python,
+    ffmpeg, whisper.cpp, tesseract or yt-dlp. Setup downloads pinned, SHA-256-checked
+    conda-forge builds into ~/.project-sniper; ffmpeg is Sniper's own build (it needs the
+    zscale and rubberband filters), shipped in the package with its source.
+  - Until it is signed, the bundled ffmpeg is installed like the downloaded tools, without
+    the download quarantine (decided 2026-09-18); the pages say it is not yet signed.
 
 RESOLVED BY IMPLEMENTATION in rc4 (no owner action needed)
   - Footage admission: a native macOS sandbox, checked by install/doctor.command.
@@ -27,7 +33,9 @@ RESOLVED BY IMPLEMENTATION in rc4 (no owner action needed)
 
 STILL OPEN — each blocks release
   1. LICENCE WORDING (input D): LICENSE-DRAFT.txt is not final or reviewed. The
-     effect of a refund on the grant and the governing law are unsettled.
+     effect of a refund on the grant and the governing law are unsettled. The package now
+     also distributes a GPL-3.0-or-later program (Sniper's ffmpeg build, with its complete
+     source in third-party/sources/); the reviewed licence must not appear to restrict it.
   2. SUPPORT ROUTE AND RESPONSE COMMITMENT (input D): no support address anywhere.
   3. SUPPORTED PLATFORM BOUNDARY (input R): only a developer Mac on macOS 26 / Apple
      silicon has run this. A clean-Mac install is needed before any boundary is
@@ -43,6 +51,12 @@ STILL OPEN — each blocks release
      may ship. Also decide whether to ship or withhold two dated case records of the
      owner's own project (C0679), which name the owner, and the failure-ledger lessons
      that describe a client's video content.
+  7. APPLE DEVELOPER ID: nothing in the package is signed with a Developer ID or notarized.
+     Buyers approve install/setup.command once (right-click > Open), and may have to approve
+     other .command files the first time they open them (to be seen on a clean Mac);
+     Sniper's ffmpeg is installed without the download
+     quarantine instead of being notarized. Enrolling in the Apple Developer Program lets
+     the maintainer sign and notarize both before sale.
 
 NOT OWNER DECISIONS — acceptance still outstanding
   - Complete edits in both provider routes (Short and long-form, with a revision),

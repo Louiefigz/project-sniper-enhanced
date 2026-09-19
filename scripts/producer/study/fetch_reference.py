@@ -237,8 +237,8 @@ def fetch(url: str, out_dir: str, cookies_browser: str,
     """Download url; browser cookies are used only with explicit permission."""
     ytdlp = resolve_ytdlp()
     if not ytdlp:
-        _emit("error", message="yt-dlp is not installed (not found on PATH). "
-              "Install it: brew install yt-dlp")
+        _emit("error", message="yt-dlp is not installed (not found on PATH). Sniper installs "
+              "its own: run install/install.command (it repairs Sniper's tools)")
         return 1
 
     os.makedirs(out_dir, exist_ok=True)

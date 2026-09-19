@@ -1,5 +1,6 @@
 #!/bin/bash
-# The executables Sniper uses but does not install: finding and validating them.
+# Validating the executables Sniper uses. Since rc4 they are all Sniper's own
+# (lib/runtime_tools.sh); nothing is looked up on this Mac's PATH.
 # Sourced by lib/common.sh, never executed directly.
 
 # version_ge A B — true when dotted version A >= B (numeric, missing parts = 0).
@@ -43,17 +44,14 @@ node_problem() {  # path floor
 }
 
 python_ok() {
-  "$1" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 12) else 1)' >/dev/null 2>&1
+  "$1" -I -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 12) else 1)' >/dev/null 2>&1
 }
 
+# Sniper's own Python (lib/runtime_tools.sh), once installed; never a Python from this Mac.
 find_python() {
-  local candidate
-  for candidate in python3.14 python3.13 python3.12 python3; do
-    if command -v "$candidate" >/dev/null 2>&1 && python_ok "$(command -v "$candidate")"; then
-      command -v "$candidate"; return 0
-    fi
-  done
-  return 1
+  [ -n "${DEPS_PREFIX:-}" ] || deps_paths
+  [ -x "$DEPS_PREFIX/bin/python3" ] && python_ok "$DEPS_PREFIX/bin/python3" || return 1
+  printf '%s' "$DEPS_PREFIX/bin/python3"
 }
 
 # Every filter and encoder the render chain actually uses, checked on the
@@ -80,25 +78,4 @@ $enc
 $e
 "*) ;; *) printf '%s ' "$e" ;; esac
   done
-}
-
-# Tools a feature needs, with the Homebrew formula that provides each and the
-# feature that refuses to run without it. The doctor checks the same list.
-#   tool        formula      needed by
-EXTERNAL_TOOLS="ffmpeg:ffmpeg:every render
-ffprobe:ffmpeg:every render
-whisper-cli:whisper-cpp:local transcription
-tesseract:tesseract:reference study (on-screen text reading)
-yt-dlp:yt-dlp:adding a reference from a URL"
-
-# The executable a tool name resolves to, only if it actually runs.
-tool_runs() {  # name
-  local path
-  path="$(command -v "$1")" || return 1
-  case "$1" in
-    ffmpeg|ffprobe) "$path" -version >/dev/null 2>&1 ;;
-    whisper-cli) "$path" --help >/dev/null 2>&1 ;;
-    *) "$path" --version >/dev/null 2>&1 ;;
-  esac || return 1
-  printf '%s' "$path"
 }

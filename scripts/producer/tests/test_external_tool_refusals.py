@@ -39,7 +39,7 @@ class MissingToolTests(unittest.TestCase):
                 mock.patch.object(study_deep, "run_deep") as work, redirect_stdout(buffer):
             self.assertEqual(study_deep.main(), 1)
         work.assert_not_called()
-        self.assertIn("brew install tesseract", buffer.getvalue())
+        self.assertIn("run install/install.command", buffer.getvalue())
         self.assertFalse(out_dir.exists(), "the study started work before refusing")
 
     def test_study_cli_reports_the_refusal_as_its_error_event(self) -> None:
@@ -50,7 +50,7 @@ class MissingToolTests(unittest.TestCase):
                               env={"PATH": str(self.empty_bin), "HOME": str(self.tmp)}, check=False)
         events = [json.loads(line) for line in done.stdout.splitlines() if line.startswith("{")]
         self.assertEqual(done.returncode, 1)
-        self.assertTrue(any("brew install tesseract" in str(e.get("error", "")) for e in events), done.stdout)
+        self.assertTrue(any("run install/install.command" in str(e.get("error", "")) for e in events), done.stdout)
 
     def test_reference_url_refuses_without_ytdlp(self) -> None:
         buffer = io.StringIO()
@@ -59,7 +59,7 @@ class MissingToolTests(unittest.TestCase):
                                          str(self.tmp / "ref"), "chrome")
         events = [json.loads(line) for line in buffer.getvalue().splitlines() if line.startswith("{")]
         self.assertEqual(code, 1)
-        self.assertTrue(any(e.get("event") == "error" and "brew install yt-dlp" in e.get("message", "")
+        self.assertTrue(any(e.get("event") == "error" and "run install/install.command" in e.get("message", "")
                             for e in events), buffer.getvalue())
         self.assertFalse((self.tmp / "ref").exists(), "the fetch created output before refusing")
 

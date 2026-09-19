@@ -12,9 +12,10 @@ esac
 
 # Settings are written at step 8 of 10, so their presence does not mean the install
 # finished. The installer writes the "installed" receipt (for this folder) only after
-# its last step; without it, resume the installer, which redoes only unfinished steps.
+# its last step; without it — or without Sniper's own tools — resume the installer,
+# which redoes only unfinished steps.
 # The --connections and --finish-install modes never start the installer themselves.
-if [ ! -f "$ENV_FILE" ] || ! receipt_ok installed "$PKG_ROOT"; then
+if ! install_complete; then
   [ -z "$MODE" ] || fail "Installation has not finished. Run install/install.command first."
   [ -f "$ENV_FILE" ] && say "The last installation did not finish (or this folder moved); resuming it."
   "$PKG_ROOT/install/install.command" || exit $?
@@ -38,13 +39,7 @@ if [ ! -t 0 ]; then
 fi
 
 say "Welcome to Project Sniper"
-say "We will connect optional transcription, sign you in, and check your setup."
-if [ "$MODE" = --finish-install ]; then
-  "$PKG_ROOT/install/setup.command" --connections --if-needed || exit $?
-else
-  "$PKG_ROOT/install/setup.command" --connections || exit $?
-fi
-load_env
+say "We will sign you in, offer optional Deepgram transcription, and check your setup."
 
 step "Sign in to your $SNIPER_PROVIDER subscription"
 if "$PKG_ROOT/install/doctor.command" --provider-only >/dev/null 2>&1; then
@@ -56,6 +51,13 @@ else
     exit 1
   }
 fi
+
+if [ "$MODE" = --finish-install ]; then
+  "$PKG_ROOT/install/setup.command" --connections --if-needed || exit $?
+else
+  "$PKG_ROOT/install/setup.command" --connections || exit $?
+fi
+load_env
 
 step "Check this installation"
 "$PKG_ROOT/install/doctor.command" || {

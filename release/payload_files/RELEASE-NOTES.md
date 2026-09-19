@@ -2,6 +2,24 @@
 
 ## 0.1.0-rc4 — release candidate, not for sale
 
+### Sniper installs its own tools
+- **Nothing to install first.** Setup downloads Sniper's own Python 3.14.4, Node 24.21.0,
+  whisper.cpp 1.9.3, tesseract 5.5.3, yt-dlp 2026.08.19 and git 2.55.0 from conda-forge (about
+  300 MB), checks every file against the SHA-256 recorded for this release, and installs them
+  into `~/.project-sniper`. Homebrew, Xcode, Python and Node are no longer needed, and your own
+  copies are never used or changed — even when they come first on your PATH.
+- **Sniper's own ffmpeg 8.0.3.** The renderer needs the zscale and rubberband filters, which no
+  ready-made Mac build carries, so Sniper builds ffmpeg from the unmodified FFmpeg and Rubber Band
+  sources. It ships in `install/deps/` with its complete source in `third-party/sources/` (GPL).
+  It is not yet signed with an Apple Developer ID.
+- **Checked on every run.** The installer and the doctor re-check every file of the tools
+  against what was installed and that each tool runs; a changed file is reinstalled from the
+  checked downloads. An interrupted download resumes.
+- **Apple silicon, macOS 13 or later.** Setup stops before downloading anything on an Intel Mac
+  or an older macOS. Only macOS 26 has been tested so far.
+- Folders of the same release share one copy of the tools; uninstalling the last one removes it.
+- Setup now signs you in first, then offers the optional Deepgram key.
+
 ### Footage admission without Docker
 - **Every media file is checked on your Mac, in a macOS sandbox.** Before any edit
   reads a file, Sniper copies it into the project and fully decodes it with your
@@ -24,10 +42,9 @@
   run. Setup can save a Deepgram key, and saving it approves nothing.
 
 ### Guided setup
-- Double-click `install/setup.command`. It connects Deepgram (optional, hidden prompt),
-  signs in to your subscription, runs the doctor and opens the editor window.
-  Prerequisites (Node, Python, ffmpeg, whisper-cpp, tesseract, yt-dlp) are still
-  installed beforehand.
+- Double-click `install/setup.command`. It installs Sniper and its own tools, signs in to
+  your subscription, connects Deepgram (optional, hidden prompt), runs the doctor and opens
+  the editor window.
 - Signing in, signing out and the editor window use only Sniper's own Claude settings,
   never your personal `~/.claude` settings or CLAUDE.md files.
 
@@ -52,9 +69,9 @@
 - **Settings stored literally.** `runtime/sniper.env` is data, never run as shell, so
   folder names with `$`, quotes, backticks or accents read back exactly. Only a comma,
   apostrophe, colon or backslash in the install folder is refused (audio-cleanup limit).
-- **One Node.** The minimum Node (22.13) is derived from the dependencies. The installer
-  records the exact Node it checked; the app, doctor, CLIs and renders all use it, also
-  when started from Finder (nvm, fnm and volta work when you install from Terminal).
+- **One Node.** The app, doctor, CLIs and renders all use Sniper's own Node, also when
+  started from Finder. The build refuses a Node below the floor (22.13) derived from the
+  dependencies.
 - **Every download checked.** Python packages install with `--require-hashes`; the two
   CLIs from a reviewed lockfile with `npm ci`; the rendering browser against a SHA-256
   recorded at build time.

@@ -10,12 +10,6 @@
 MODEL_NAME="ggml-small.en.bin"
 MODEL_SHA="c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d"
 
-brew_hint() {
-  if command -v brew >/dev/null 2>&1; then say "  Install it with:   brew install $1"
-  else say "  Homebrew is not installed. Either install Homebrew from https://brew.sh and run
-  'brew install $1', or install $1 another way and make sure it is on your PATH."; fi
-}
-
 tree_record() {  # dir record [excluded-subfolder]
   "$PYTHON_BIN" "$INSTALL_TOOLS" tree-record "$1" "$2" ${3:+--exclude "$3"} >/dev/null \
     || fail "Could not record the finished contents of $1."
@@ -28,68 +22,22 @@ tree_check() {  # dir record [excluded-subfolder]; prints what changed
 # so npm itself and every package script run on it.
 npm_cli() { PATH="$RUNTIME_BIN:$PATH" "$NPM_BIN" "$@"; }
 
-node_missing() {  # floor reason
-  say "Node $1 or newer is required; $2."
-  say "  Download the LTS version (Node $(release_value components.node_recommended)) from https://nodejs.org."
-  say "  If your Node comes from nvm, fnm or volta, run this installer from Terminal, where"
-  say "  that Node is on your PATH; the app then uses the same Node when started from Finder."
-  fail "Node is missing or not usable."
-}
-
-node_unsupported() {  # version path
-  local recommended; recommended="$(release_value components.node_recommended)"
-  say "Node $1 ($2) is not supported by this release. Its dependencies exclude Node ${1%%.*},"
-  say "  and Node ${1%%.*} processes were seen hanging on exit. Install Node $recommended (LTS) from"
-  say "  https://nodejs.org. If this Node came from Homebrew, run 'brew upgrade node' instead: Homebrew's"
-  say "  Node stays first on your PATH. If it comes from nvm, fnm or volta, select Node $recommended"
-  say "  there and run the installer from Terminal."
-  fail "Node $1 is not supported."
-}
-
-# Choose the ONE Node this install uses and record the real binary it runs
-# (process.execPath), so a shim or a per-shell symlink resolves to a durable file.
-select_node() {
-  local floor found problem unsupported
-  floor="$(release_value components.node_floor)"
-  found="$(command -v node)" || node_missing "$floor" "none was found on PATH"
-  problem="$(node_problem "$found" "$floor")"
-  case "$problem" in *"older than"*|*"does not report"*) node_missing "$floor" "$problem" ;; esac
-  NODE_BIN="$("$found" -p 'require("fs").realpathSync(process.execPath)' 2>/dev/null)" \
-    || node_missing "$floor" "$found did not run"
-  problem="$(node_problem "$NODE_BIN" "$floor")"
-  [ -z "$problem" ] || node_missing "$floor" "$problem"
-  NODE_VERSION="$(node_version_of "$NODE_BIN")"
-  unsupported=" $(release_value components.node_unsupported_majors) "
-  case "$unsupported" in *" ${NODE_VERSION%%.*} "*) node_unsupported "$NODE_VERSION" "$NODE_BIN" ;; esac
-  NPM_BIN="$(dirname "$NODE_BIN")/npm"
-  [ -x "$NPM_BIN" ] || NPM_BIN="$(command -v npm)" || fail "npm was not found next to $NODE_BIN or on PATH."
-  say "Node $NODE_VERSION — ok ($NODE_BIN; this release needs $floor or newer)"
-}
-
-# Every external tool must be present and actually run; all missing ones are listed at once.
-check_external_tools() {
-  local line name formula feature path missing=""
-  while IFS= read -r line; do
-    name="${line%%:*}"; formula="${line#*:}"; feature="${formula#*:}"; formula="${formula%%:*}"
-    if path="$(tool_runs "$name")"; then
-      eval "TOOL_$(printf '%s' "$name" | tr 'a-z-' 'A-Z_')=\$path"
-      continue
-    fi
-    say "$name is required for $feature and was not found on your PATH (or did not run)."
-    brew_hint "$formula"
-    missing="$missing $name"
-  done <<EOF
-$EXTERNAL_TOOLS
-EOF
-  [ -z "$missing" ] || fail "Missing:$missing. Install them, then run the installer again."
-  MISSING="$(ffmpeg_missing_features "$TOOL_FFMPEG")"
-  if [ -n "$MISSING" ]; then
-    say "Your ffmpeg ($TOOL_FFMPEG) lacks features the renderer uses: $MISSING"
-    say "  The Homebrew build includes them. Other builds must be configured with"
-    say "  libass, libfreetype, librubberband, libzimg and libx264."
-    fail "ffmpeg is missing required features."
-  fi
-  say "ffmpeg, whisper-cli, tesseract and yt-dlp — ok"
+# The executables this install uses: Sniper's own (lib/runtime_tools.sh), just verified by
+# verify_runtime_tools. Whatever Node, Python or ffmpeg this Mac has elsewhere is not used.
+use_runtime_tools() {
+  local bin="$DEPS_PREFIX/bin" problem ffmpeg_version
+  NODE_BIN="$bin/node"
+  problem="$(node_problem "$NODE_BIN" "$(release_value components.node_floor)")"
+  [ -z "$problem" ] || fail "Sniper's own Node cannot be used: $problem. Run the installer again."
+  NODE_VERSION="$(node_version_of "$NODE_BIN")"; NPM_BIN="$bin/npm"
+  PYTHON_BIN="$bin/python3"
+  PY_VER="$("$PYTHON_BIN" -I -c 'import sys;print(".".join(map(str,sys.version_info[:3])))')" \
+    || fail "Sniper's own Python does not start. Run the installer again."
+  TOOL_FFMPEG="$bin/ffmpeg"; TOOL_FFPROBE="$bin/ffprobe"; TOOL_WHISPER_CLI="$bin/whisper-cli"
+  TOOL_TESSERACT="$bin/tesseract"; TOOL_YT_DLP="$bin/yt-dlp"
+  ffmpeg_version="$(first_line "$("$TOOL_FFMPEG" -hide_banner -version 2>/dev/null)")"
+  say "Node $NODE_VERSION, Python $PY_VER, ${ffmpeg_version%% Copyright*}, whisper.cpp, tesseract, yt-dlp and git"
+  say "  — Sniper's own, in $DEPS_PREFIX"
 }
 
 # runtime/bin: links to exactly the executables validated above. It comes first on
@@ -138,49 +86,6 @@ python_step() {
   the SHA-256 recorded for this release. Check your connection and run the installer again."
   why="$("$venv" -I "$INSTALL_TOOLS" venv-check "$lock")" || fail "The new Python environment does not verify: $why"
   write_receipt venv "$key"; say "Python environment — installed ($why)"
-}
-
-# fetch_part URL PART SHA256 — 0: PART is complete and correct; 1: it is complete
-# but wrong; 2: the transfer stopped part-way (a connection problem; PART keeps what
-# arrived); 3: the server refused to continue an existing PART (HTTP error, e.g. 416
-# for a partial file longer than the real one) without adding a byte.
-fetch_part() {
-  local before=0 after=0 rc=0
-  [ -f "$2" ] && before="$(stat -f %z "$2")"
-  curl -fL --retry 3 --retry-delay 2 -C - -o "$2" "$1" || rc=$?
-  CURL_RC="$rc"
-  if [ "$rc" = 0 ]; then
-    [ "$(sha "$2")" = "$3" ] && return 0
-    return 1
-  fi
-  [ -f "$2" ] && [ "$(sha "$2")" = "$3" ] && return 0   # already complete: the server said 416
-  [ -f "$2" ] && after="$(stat -f %z "$2")"
-  case "$rc" in 22|33|36) [ "$before" -gt 0 ] && [ "$after" = "$before" ] && return 3 ;; esac
-  return 2
-}
-
-# download_verified URL TARGET SHA256 LABEL — resumable; the file appears at
-# TARGET only once its SHA-256 matches. A resumed partial file that proves wrong or
-# cannot be resumed is discarded and fetched once more from the start, in the same
-# run; a fresh download that is wrong is deleted and reported.
-download_verified() {
-  local url="$1" target="$2" want="$3" label="$4" part="$2.part" rc resumed=0
-  if [ -f "$target" ] && [ "$(sha "$target")" = "$want" ]; then return 0; fi
-  rm -f "$target"
-  if [ -f "$part" ]; then resumed=1; say "Resuming $label from $(stat -f %z "$part") bytes."; else say "Downloading $label."; fi
-  fetch_part "$url" "$part" "$want"; rc=$?
-  if [ "$resumed" = 1 ] && { [ "$rc" = 1 ] || [ "$rc" = 3 ]; }; then
-    rm -f "$part"; say "The partial download was not usable; downloading $label again from the beginning."
-    fetch_part "$url" "$part" "$want"; rc=$?
-  fi
-  case "$rc" in
-    0) mv "$part" "$target"; return 0 ;;
-    2) fail "Downloading $label stopped before it finished (curl error $CURL_RC); the $(stat -f %z "$part" 2>/dev/null || echo 0)
-  bytes received are kept. Run the installer again when your connection is stable; it resumes." ;;
-  esac
-  rm -f "$part"
-  fail "Downloading $label produced the wrong file (checksum mismatch); it was deleted.
-  Run the installer again to download it afresh."
 }
 
 browser_runs() {

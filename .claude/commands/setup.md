@@ -20,8 +20,10 @@ For each line that did not pass, say in one sentence what it is and which script
 
 - Not installed, outdated, or a step failed → `install/install.command` (it repeats only
   unfinished steps).
-- A free Homebrew tool is missing (`ffmpeg`, `whisper-cpp`, `tesseract`, `yt-dlp`) → the
-  one-line `brew install …` the doctor prints. Ask before running any system install.
+- One of Sniper's own tools is missing, changed or not the one PATH finds (`Sniper's own
+  tools`, `ffmpeg`, `whisper-cli`, `tesseract`, `yt-dlp`, `node`, `python3`, `git`) →
+  `install/install.command`; it reinstalls them into `~/.project-sniper` from checked
+  downloads. Never install these with Homebrew or any other system installer instead.
 - Not signed in → `install/sign-in.command`. The operator runs it and signs in themselves
   in the browser window it opens; never sign in, sign out or handle credentials for them.
 - They want the other subscription → `install/stop.command`, then

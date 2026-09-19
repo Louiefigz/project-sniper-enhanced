@@ -103,7 +103,7 @@ def _write_set(version: str, work: Path, allow_pending: bool, source: dict[str, 
             + "\n".join(sorted(pending)) + "\n", encoding="utf-8")
     top = f"project-sniper-{version}"
     components = payload.component_versions(ROOT)
-    payload.check_manual_node_floor(stage_dir, str(components["node_floor"]))
+    payload.check_buyer_pages(stage_dir)
     payload.write_release_json(stage_dir, version, components, {"source": source, **_release_status(pending)})
     manifest = archive.file_manifest(stage_dir)
     target = target_dir / f"{top}-mac.zip"

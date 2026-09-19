@@ -29,10 +29,13 @@ case "${1:-}" in
 esac
 . "$here/install/lib/common.sh" || exit 1
 if ! install_complete; then
-  # An installer or repair clears the completion receipt while it runs: say it is busy,
-  # rather than sending the agent to start a second setup the lock would refuse.
-  if [ -n "$(lsof -t -- "$STATE_DIR/maintenance.lock" 2>/dev/null)" ]; then
-    printf 'STOPPED: %s\n' "Sniper is being set up or repaired right now. Run this again when that has finished." >&2
+  # Setup clears the completion receipt while it runs, and sets up Sniper's own tools under
+  # ~/.project-sniper/install.lock before it takes this folder's lock: while either is held, say
+  # the install is busy, rather than sending the agent to start a second setup that would
+  # only wait or be refused.
+  if [ -n "$(lsof -t -- "$STATE_DIR/maintenance.lock" "$DEPS_HOME/install.lock" 2>/dev/null)" ]; then
+    printf 'STOPPED: %s\n' "Another Sniper command (setup, a repair, the doctor or a removal) is using this install
+  right now. Run this again when it has finished; if it then says Sniper is not set up, run ./sniper setup." >&2
     exit 75
   fi
   fail "Sniper is not set up yet (or this folder moved). Run: ./sniper setup"

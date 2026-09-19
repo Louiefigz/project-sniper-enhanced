@@ -42,16 +42,21 @@ class SniperCommand(unittest.TestCase):
         self.assertIn("Run: ./sniper setup", done.stderr)
 
     def test_while_setup_runs_it_says_busy_instead_of_not_set_up(self) -> None:
-        lock = self.pkg / "runtime/state/maintenance.lock"
-        lock.parent.mkdir(parents=True, exist_ok=True)
-        holder = subprocess.Popen(["/bin/sh", "-c", 'exec 9>>"$0"; echo held; sleep 30', str(lock)],
-                                  stdout=subprocess.PIPE, text=True)
-        self.addCleanup(holder.kill)
-        self.assertEqual(holder.stdout.readline().strip(), "held")
-        done = self._sniper("/usr/bin/true")
-        self.assertEqual(done.returncode, 75, done.stderr)
-        self.assertIn("being set up or repaired right now", done.stderr)
-        self.assertNotIn("./sniper setup", done.stderr)
+        """Either lock setup holds (this folder's, or the shared tools lock of step 1)."""
+        for lock in (self.pkg / "runtime/state/maintenance.lock",
+                     Path(self.env["HOME"]) / ".project-sniper/install.lock"):
+            with self.subTest(lock.name):
+                lock.parent.mkdir(parents=True, exist_ok=True)
+                holder = subprocess.Popen(["/bin/sh", "-c", 'exec 9>>"$0"; echo held; exec sleep 30', str(lock)],
+                                          stdout=subprocess.PIPE, text=True)
+                try:
+                    self.assertEqual(holder.stdout.readline().strip(), "held")
+                    done = self._sniper("/usr/bin/true")
+                    self.assertEqual(done.returncode, 75, done.stderr)
+                    self.assertIn("is using this install", done.stderr)
+                finally:
+                    holder.kill(); holder.wait()
+        self.assertIn("Run: ./sniper setup", self._sniper("/usr/bin/true").stderr, "free again: not set up")
 
     def test_workspace_prints_the_project_folder(self) -> None:
         self._install()

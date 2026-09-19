@@ -1168,7 +1168,7 @@ that lane on); only the engaging lanes differ.
    render/assemble):** `scripts/producer/studio/studio_review.py open
    <producer_dir>` generates `<producer_dir>/studio/` from `edit_plan.json` +
    `base_final.mp4` and serves it in HyperFrames Studio (pinned CLI; it prints the local
-   `studio: http://127.0.0.1:…` address and opens no browser — open it for the operator
+   `studio: http://localhost:<port>/#project/studio` address and opens no browser — open it for the operator
    with `open <url>`) for hand/agent adjustment of the graphics layer; then
    `studio_review.py sync <producer_dir> --apply` folds the Studio edits back
    into `edit_plan.json` (baseline-diff gated: only NEW gate failures the

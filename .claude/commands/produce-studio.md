@@ -17,7 +17,7 @@ directly.
 
 The loop: `scripts/producer/studio/studio_review.py open <producer_dir>`
 generates the review project from `edit_plan.json` + `base_final.mp4` and
-serves it in Studio, printing its local `studio: http://127.0.0.1:…` address (no browser
+serves it in Studio, printing its local `studio: http://localhost:<port>/#project/studio` address (no browser
 opens by itself: open it for the operator with `open <url>`); the operator edits graphic
 panels/timing on the timeline; `studio_review.py sync <producer_dir> --apply`
 folds those edits back into `edit_plan.json` (baseline-diff gated: only NEW

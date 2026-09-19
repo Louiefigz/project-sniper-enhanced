@@ -117,6 +117,15 @@ class Lifecycle(unittest.TestCase):
         kept = fx.bash(self.pkg, 'printf %s "$(kept_workspace)"')
         self.assertEqual(kept.stdout, str(self.base / "videos"), kept.stderr)
 
+    def test_uninstall_names_the_folder_the_buyers_own_settings_choose(self) -> None:
+        mine = self.base / "My videos"
+        (self.pkg / "runtime/sniper.local.env").write_text(f'SNIPER_WORKSPACE_ROOT="{mine}"\n')
+        done = self._run("uninstall.command", "--yes")
+        self.assertEqual(done.returncode, 0, done.stderr)
+        self.assertIn(f"does NOT touch your video projects ({mine})", done.stdout)
+        kept = fx.bash(self.pkg, 'printf %s "$(kept_workspace)"')
+        self.assertEqual(kept.stdout, str(self.base / "videos"), "the kept record is the installer's own value")
+
     def test_projects_inside_the_sniper_folder_are_kept(self) -> None:
         inside = self.pkg / "projects"
         self.assertEqual(fx.write_settings(self.pkg, str(inside)).returncode, 0)

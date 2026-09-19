@@ -99,6 +99,6 @@ Homebrew or system copy instead. API routes that start Python import `spawnPytho
 
 ### Verification
 
-`npm run type-check`, `npm run lint`, `npm test`, `npm run build`, and the Python suite
-(`cd scripts/producer && PYTHONPATH=.:tests ../../.venv/bin/python3 selftest.py`). If a
-change cannot be verified this way, say so instead of claiming success.
+`npm run type-check`, `npm run lint`, `npm test`, `npm run build`, and the Python suite, each
+through `./sniper` as AGENTS.md § Checks shows (in a developer checkout `./sniper` runs them
+with your own tools). If a change cannot be verified this way, say so instead of claiming success.

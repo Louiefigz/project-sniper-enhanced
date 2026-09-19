@@ -245,7 +245,8 @@ def _failed_launch(proc: subprocess.Popen, deadline: float, publication: tuple) 
 def launch_preview(cli: str, studio_dir: str, port: int, open_browser: bool = True) -> ServerRecord:
     """Keep an owned foreground PID; publish only exact SDK-confirmed readiness.
 
-    Browser auto-open stays on. Failed, reused or fallback-port launches do not
+    ``open_browser`` passes the CLI's own auto-open through (the managed lifecycle
+    passes False: it prints the URL instead). Failed, reused or fallback-port launches do not
     become records; only this call's own child is stopped on startup failure.
     """
     deadline = time.monotonic() + _STARTUP_SECONDS

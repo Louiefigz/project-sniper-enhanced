@@ -23,6 +23,11 @@ for arg in "$@"; do
   case "$arg" in --yes) YES=1 ;; *) fail "Unknown option: $arg" ;; esac
 done
 WORKSPACE="$(kept_workspace)"; WORKSPACE="${WORKSPACE:-$PKG_ROOT/projects}"
+# runtime/sniper.local.env may point the workspace elsewhere; it is kept and still wins on a
+# reinstall, so name that folder (the kept record stays the installer's own value).
+SHOWN="$WORKSPACE"
+[ -f "$ENV_FILE" ] && [ -f "$LOCAL_ENV" ] && [ -n "${SNIPER_WORKSPACE_ROOT:-}" ] \
+  && [ "$SNIPER_WORKSPACE_ROOT" != "$(settings_value SNIPER_WORKSPACE_ROOT 2>/dev/null)" ] && SHOWN="$SNIPER_WORKSPACE_ROOT"
 RUNTIME_CACHE="$APP_DIR/templates/motion/.sniper-native-runtime"
 REMOVE=("$APP_DIR/node_modules" "$APP_DIR/templates/motion/node_modules" "$APP_DIR/.venv" "$APP_DIR/.next")
 for entry in "$RUNTIME_DIR"/* "$RUNTIME_DIR"/state/* "$RUNTIME_CACHE"/*; do
@@ -41,7 +46,7 @@ say "It keeps, so a reinstall here picks them up: runtime/sniper.local.env (your
 say "runtime/workspace.env (which folder your video projects are in) and"
 say ".sniper-native-runtime/native-export-history (what an interrupted export needs to resume)."
 say "It also removes Sniper's own tools (~/.project-sniper) unless another Sniper install uses them."
-say "It does NOT touch your video projects ($WORKSPACE), your own Node, Python,"
+say "It does NOT touch your video projects ($SHOWN), your own Node, Python,"
 say "Homebrew, ffmpeg or whisper install, or your own Codex or Claude Code and their logins."
 if [ "$YES" != 1 ]; then printf 'Type REMOVE to continue: '; read -r answer
   [ "$answer" = "REMOVE" ] || { say "Nothing was removed."; exit 0; }; fi

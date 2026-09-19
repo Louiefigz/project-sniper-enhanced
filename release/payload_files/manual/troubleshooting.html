@@ -33,13 +33,17 @@ and the line says why. What this candidate does and does not do yet is listed in
 not finished in this folder, or the folder was moved or copied since.</td><td>Ask your agent to run
 <code>./sniper setup</code>; it redoes only what is unfinished. A <code>projects</code> folder inside
 Sniper moves with it: the moved or copied folder uses its own.</td></tr>
+<tr><td><code>Another Sniper command (setup, a repair, the doctor or a removal) is using this install right now.</code></td>
+<td>Setup has not finished and something is working on the install: usually setup itself, still
+running.</td><td>Let it finish, then run your command again. If it then says Sniper is not set up,
+run <code>./sniper setup</code>.</td></tr>
 <tr><td><code>sandbox initialization failed</code> or <code>Operation not permitted</code> (Codex)</td><td>Codex
 ran a Sniper step inside its own sandbox; Sniper's video check starts its own macOS sandbox, which cannot
 start inside another one.</td><td>Approve running that step outside Codex's sandbox when Codex asks. The
 check still runs in Sniper's own sandbox.</td></tr>
 <tr><td><code>Sniper cannot be installed or repaired while one of its commands is running.</code>
-followed by <code>In use by: …</code></td><td>A Sniper command (an edit or render, or the doctor) is
-using this folder. The line names each one.</td><td>Let it finish, then run it again. Nothing was
+followed by <code>In use by: …</code></td><td>A Sniper command (an edit or render, the doctor, or another
+installer) is using this folder. The line names each one.</td><td>Let it finish, then run it again. Nothing was
 changed.</td></tr>
 <tr><td><code>This Mac has an Intel processor. …</code></td><td>Sniper's own tools are built for
 Apple silicon only.</td><td>Sniper needs a Mac with an M1 or later chip. Nothing was downloaded or

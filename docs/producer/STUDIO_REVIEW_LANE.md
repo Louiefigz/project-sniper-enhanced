@@ -87,7 +87,7 @@ solely to repair a preview-launch failure.
 PY=.venv/bin/python3
 REVIEW=scripts/producer/studio/studio_review.py
 
-$PY $REVIEW open    <producer_dir>            # generate/refresh + serve + open browser
+$PY $REVIEW open    <producer_dir>            # generate/refresh + serve (no browser opens; open the printed studio: URL)
 # ... operator edits panels/timing in Studio (persists to project files) ...
 $PY $REVIEW sync    <producer_dir>            # dry-run diff of Studio edits vs plan
 $PY $REVIEW sync    <producer_dir> --apply    # fold edits into edit_plan.json (gated)

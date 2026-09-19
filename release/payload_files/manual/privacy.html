@@ -78,9 +78,9 @@ icons shipped with Sniper, your agent fetches that one icon by name from
 <code>cdn.simpleicons.org</code>, which reveals the name and your IP address to that CDN. Nothing of
 yours is sent. (The generic Lucide icons all ship with Sniper; only re-downloading them on
 purpose with <code>icon_lucide.py vendor</code> contacts <code>unpkg.com</code>.)</td><td>Only that
-command downloads, one named icon at a time (<code>scripts/producer/planner/icon_library.py</code>,
-its <code>fetch</code> and <code>resolve</code>); plan checks and renders read icons already on this
-Mac and never download</td></tr>
+command downloads, one named icon at a time (<code>scripts/producer/planner/icon_library.py</code>:
+<code>resolve</code> only for a brand not yet on this Mac, <code>fetch</code> every time it is run);
+plan checks and renders read icons already on this Mac and never download</td></tr>
 <tr><td>Deepgram transcription <span class="tag">optional, paid</span></td><td><strong>Uploads
 your audio</strong> to Deepgram, billed by Deepgram on your own key — only when you
 explicitly authorize Deepgram for a transcription. Local transcription is the default, and a

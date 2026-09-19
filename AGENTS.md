@@ -59,8 +59,9 @@ your provider under the operator's account, like any conversation. Sniper's own 
 nothing anywhere, except: reference links are downloaded with `yt-dlp` (Chrome cookies are
 read only when the operator asks for that fetch); public-web b-roll capture, when a Short's
 media sources are set to public web, loads the pages the plan names
-(`scripts/producer/studio/web_capture.py`); a brand icon that is not already shipped is
-downloaded by name from `cdn.simpleicons.org` (`scripts/producer/planner/icon_library.py`);
+(`scripts/producer/studio/web_capture.py`); `scripts/producer/planner/icon_library.py` downloads
+brand icons by name from `cdn.simpleicons.org` (`resolve` only for a mapped brand not yet on this
+Mac, `fetch` every time it is run);
 and Studio's page loads one GSAP file from `cdn.jsdelivr.net`. Studio is served from Sniper's adapted runtime, whose analytics are
 switched off. Open Studio only through Sniper (`install/studio.command` for a Producer edit,
 `./sniper python3 scripts/producer/studio/managed_preview.py open <project>` for a native

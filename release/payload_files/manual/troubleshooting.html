@@ -76,6 +76,11 @@ Sniper never downloads one mid-render on purpose.</td><td>Run the installer agai
 downloads it and checks its SHA-256.</td></tr>
 <tr><td><code>WHISPER_CPP_MODEL does not exist: …</code></td><td>The speech model is missing or was moved.</td>
 <td>Run the installer again; step 6/10 re-downloads it and checks its checksum.</td></tr>
+<tr><td><code>kernel memory pressure is warning</code> (or <code>critical</code>), <code>system memory
+headroom is below policy</code>, <code>physical memory occupied by the compressor exceeds policy</code></td>
+<td>macOS reports the Mac is short of memory, so Sniper does not start a render rather than
+slow the Mac down or fail part-way.</td><td>Quit other large apps (browsers with many tabs, other
+video or design apps), wait a moment, and run the step again.</td></tr>
 <tr><td><code>Port 3000 is already in use by: …</code></td><td>Something else holds the port. The
 message names it.</td><td>Quit that program, or start on another port:
 <code>SNIPER_PORT=3100 install/start.command</code></td></tr>

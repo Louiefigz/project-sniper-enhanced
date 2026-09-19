@@ -30,8 +30,14 @@ cd "$APP_DIR" || exit 1
 # DEEPGRAM_API_KEY stays, for a Deepgram run the operator explicitly authorizes.
 NO_KEYS=(env -u ANTHROPIC_API_KEY -u ANTHROPIC_AUTH_TOKEN -u OPENAI_API_KEY -u CLAUDE_CODE_OAUTH_TOKEN)
 case "$SNIPER_PROVIDER" in
-  codex)  exec "${NO_KEYS[@]}" "$CLI_BIN/codex" -c 'forced_login_method="chatgpt"' --model="$SNIPER_CODEX_MODEL" \
-            -c "model_reasoning_effort=\"$SNIPER_CODEX_REASONING\"" ;;
+  codex)
+    # Like Claude Code's window: Codex asks you before any command outside its read-only set
+    # (ls, cat, sed…) instead of running it in Codex's own sandbox. Inside that sandbox Producer's
+    # media check cannot start its macOS sandbox (macOS does not nest them) and the video folder
+    # is not writable; Sniper's own sandbox still wraps every video it decodes.
+    exec "${NO_KEYS[@]}" "$CLI_BIN/codex" -c 'forced_login_method="chatgpt"' --model="$SNIPER_CODEX_MODEL" \
+      -c "model_reasoning_effort=\"$SNIPER_CODEX_REASONING\"" \
+      --sandbox danger-full-access --ask-for-approval untrusted ;;
   claude)
     # Project and local settings only, and no CLAUDE.md from the folders above the app
     # (your ~/CLAUDE.md or ~/.claude/CLAUDE.md when the package sits in your home folder).

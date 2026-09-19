@@ -58,6 +58,18 @@ class EditorProvider(unittest.TestCase):
         self.assertIn("LOCK=shared", calls)
         self.assertEqual(self._calls("claude"), "")
 
+    def test_codex_window_asks_before_commands_instead_of_nesting_sandboxes(self) -> None:
+        # Inside Codex's own sandbox Producer's media check cannot apply its macOS sandbox
+        # (codex-route evidence); the window runs unsandboxed but asks before each command.
+        self._install("codex")
+        done = self._editor()
+        self.assertEqual(done.returncode, 0, done.stderr)
+        calls = self._calls("codex")
+        self.assertIn("[--sandbox] [danger-full-access]", calls)
+        self.assertIn("[--ask-for-approval] [untrusted]", calls)
+        for never in ("[never]", "[on-failure]", "[--dangerously-bypass-approvals-and-sandbox]", "[--full-auto]"):
+            self.assertNotIn(never, calls)
+
     def test_explicit_claude_on_a_codex_install_is_refused_not_half_obeyed(self) -> None:
         self._install("codex")
         done = self._editor("claude")

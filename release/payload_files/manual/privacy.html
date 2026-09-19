@@ -135,7 +135,12 @@ can read the transcript, the rules and the project. What the code allows today:<
   could read files in those folders, including video files (whether its unrestricted file
   reader also reaches other folders was not verified).</li>
   <li>The editor window you open with <code>install/editor.command</code> is the same CLI
-  with its ordinary tools, working in the app folder.</li>
+  with its ordinary tools, working in the app folder, and it asks you before running commands:
+  Claude Code before each command you have not allowed, Codex before any command outside a small
+  read-only set (such as <code>ls</code> or <code>cat</code>). In this window Codex does not use its
+  own sandbox: inside it, Producer's video check cannot start its macOS sandbox and Codex cannot
+  write your video folder. The video check's own sandbox still applies to every video it decodes.
+  The Codex window has not yet been run with a signed-in Codex.</li>
 </ul>
 <p>The macOS video/audio sandbox cannot wrap these sessions: the provider CLI sandboxes its
 own tool commands, and macOS does not allow a sandbox inside a sandbox. If a still frame of a

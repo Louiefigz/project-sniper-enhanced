@@ -81,13 +81,17 @@ class SaleGate(unittest.TestCase):
         with self.assertRaises(sale_gate.MatrixError):
             self._gate(self._row(status="PASS-ish"))
 
-    def test_the_seeded_matrix_marks_nothing_pass_and_is_not_sellable(self) -> None:
+    def test_the_committed_matrix_binds_every_pass_to_evidence_and_is_not_sellable(self) -> None:
         rows = sale_gate.load_matrix(sale_gate.MATRIX)
         self.assertTrue(rows)
-        self.assertEqual({row["status"] for row in rows} - {"NOT RUN", "BLOCKED"}, set())
+        for row in (row for row in rows if row["status"] == "PASS"):
+            self.assertRegex(row["archive_sha256"] or "", r"^[0-9a-f]{64}$", row["id"])
+            self.assertTrue(row["evidence"], row["id"])
+        self.assertTrue(any(row["status"] != "PASS" for row in rows if row["required"]))
         verdict = sale_gate.evaluate(sale_gate.MATRIX, self.archive, self.evidence)
         self.assertFalse(verdict["sellable"])
-        self.assertEqual(len(verdict["missing"]), len(rows))
+        # Its PASS rows name the real candidate archive, so none counts for this stand-in.
+        self.assertEqual(len(verdict["missing"]), sum(1 for row in rows if row["required"]))
 
 
 if __name__ == "__main__":

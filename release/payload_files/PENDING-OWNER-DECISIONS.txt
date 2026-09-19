@@ -21,6 +21,10 @@ SETTLED on 2026-09-17 (reflected in the manual and LICENSE-DRAFT.txt)
     zscale and rubberband filters), shipped in the package with its source.
   - Until it is signed, the bundled ffmpeg is installed like the downloaded tools, without
     the download quarantine (decided 2026-09-18); the pages say it is not yet signed.
+  - The Codex editor window runs like Claude Code's (decided 2026-09-19): without Codex's own
+    sandbox, asking before any command outside a read-only set. Inside Codex's sandbox,
+    Producer's media check cannot start its own macOS sandbox (macOS does not nest them) and
+    the video folder is not writable; the media check keeps its own sandbox.
 
 RESOLVED BY IMPLEMENTATION in rc4 (no owner action needed)
   - Footage admission: a native macOS sandbox, checked by install/doctor.command.
@@ -60,17 +64,11 @@ STILL OPEN — each blocks release
      Sniper's ffmpeg is installed without the download
      quarantine instead of being notarized. Enrolling in the Apple Developer Program lets
      the maintainer sign and notarize both before sale.
-  8. CODEX EDITOR WINDOW AND SNIPER'S MEDIA SANDBOX: inside Codex's own sandbox (the
-     workspace-write mode an interactive Codex session uses), Producer's media check cannot
-     start its macOS sandbox (macOS does not nest them) and Codex cannot write the video
-     folder. Reproduced with the pinned Codex CLI's sandbox command; not yet run with a
-     signed-in Codex. Decide how the Codex editor window should run those steps (Codex's
-     own approval for each one, or a wider Codex permission) before Codex buyers are told
-     the editor window is the main way to edit. The app's own Auto Edit is not affected.
 
 NOT OWNER DECISIONS — acceptance still outstanding
   - Complete edits in both provider routes (Short and long-form, with a revision),
     signed in through Sniper's own sign-in.
+    The Codex editor window has not yet been run signed in.
   - Human playback, listening and Studio checks of those edits.
   - Clean-Mac install and an outside operator following the manual.
   - Authenticated delivery of the exact bytes.

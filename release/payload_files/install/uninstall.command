@@ -8,7 +8,8 @@
 # removed and it exits 1, so you can let it finish and run this again.
 #
 # Kept on purpose, so a reinstall in this folder picks them up: your own settings
-# (runtime/sniper.local.env), your video projects (projects/ by default) and the
+# (runtime/sniper.local.env), your video projects (projects/ by default), which folder
+# they are in (runtime/workspace.env) and the
 # export-recovery history (templates/motion/.sniper-native-runtime/native-export-history).
 # Sniper's own tools in ~/.project-sniper are removed when no other Sniper install uses
 # them. Never touched: your own Node/Python/Homebrew/ffmpeg/whisper, and your own Codex or
@@ -21,12 +22,12 @@ YES=0
 for arg in "$@"; do
   case "$arg" in --yes) YES=1 ;; *) fail "Unknown option: $arg" ;; esac
 done
-WORKSPACE="${SNIPER_WORKSPACE_ROOT:-$PKG_ROOT/projects}"
+WORKSPACE="$(kept_workspace)"; WORKSPACE="${WORKSPACE:-$PKG_ROOT/projects}"
 RUNTIME_CACHE="$APP_DIR/templates/motion/.sniper-native-runtime"
 REMOVE=("$APP_DIR/node_modules" "$APP_DIR/templates/motion/node_modules" "$APP_DIR/.venv" "$APP_DIR/.next")
 for entry in "$RUNTIME_DIR"/* "$RUNTIME_DIR"/state/* "$RUNTIME_CACHE"/*; do
   case "$entry" in
-    "$RUNTIME_DIR/sniper.local.env"|"$RUNTIME_DIR/state"|"$RUNTIME_DIR"/state/*.lock) continue ;;
+    "$RUNTIME_DIR/sniper.local.env"|"$KEPT_WORKSPACE"|"$RUNTIME_DIR/state"|"$RUNTIME_DIR"/state/*.lock) continue ;;
     "$RUNTIME_CACHE/native-export-history"|"$RUNTIME_CACHE/.locks") continue ;;
   esac
   [ -e "$entry" ] || [ -L "$entry" ] && REMOVE+=("$entry")
@@ -36,8 +37,9 @@ say "This removes what the installer created inside this folder:"
 say "  runtime/ (rendering browser, speech model, logs, receipts, the Deepgram connection)"
 say "  node_modules, templates/motion/node_modules, .venv,"
 say "  and the render runtime and caches in templates/motion/.sniper-native-runtime"
-say "It keeps, so a reinstall here picks them up: runtime/sniper.local.env (your settings)"
-say "and .sniper-native-runtime/native-export-history (what an interrupted export needs to resume)."
+say "It keeps, so a reinstall here picks them up: runtime/sniper.local.env (your settings),"
+say "runtime/workspace.env (which folder your video projects are in) and"
+say ".sniper-native-runtime/native-export-history (what an interrupted export needs to resume)."
 say "It also removes Sniper's own tools (~/.project-sniper) unless another Sniper install uses them."
 say "It does NOT touch your video projects ($WORKSPACE), your own Node, Python,"
 say "Homebrew, ffmpeg or whisper install, or your own Codex or Claude Code and their logins."
@@ -47,6 +49,7 @@ if [ "$YES" != 1 ]; then printf 'Type REMOVE to continue: '; read -r answer
 # A background edit or render would fail half-way if its tools were removed underneath it.
 refuse_if_active_work "Nothing was removed."
 
+settings_write "$KEPT_WORKSPACE" "PKG_ROOT=$PKG_ROOT" "SNIPER_WORKSPACE_ROOT=$WORKSPACE"
 rm -rf "${REMOVE[@]}" 2>/dev/null
 LEFT=()
 for path in "${REMOVE[@]}"; do [ -e "$path" ] || [ -L "$path" ] && LEFT+=("$path"); done
@@ -58,6 +61,6 @@ fi
 deps_unregister_and_prune
 log_line "uninstalled"
 say "Removed. Kept: your settings (runtime/sniper.local.env, if you made one), your video projects"
-say "and the export-recovery history. Run install/install.command to reinstall here. Deleting this"
+say "and which folder they are in, and the export-recovery history. Run install/install.command to reinstall here. Deleting this"
 say "folder also deletes what was kept — including your projects if they are in projects/ —"
 say "so move them first."

@@ -107,6 +107,16 @@ class Lifecycle(unittest.TestCase):
         self.assertFalse(fx.runtime_prefix(Path(self.env["HOME"])).exists(), "Sniper's own tools were left behind")
         self.assertIn("Removed Sniper's own tools", done.stdout)
 
+    def test_a_reinstall_uses_the_same_projects_folder(self) -> None:
+        """A chosen workspace survives uninstall: the reinstall's settings name it again."""
+        done = self._run("uninstall.command", "--yes")
+        self.assertEqual(done.returncode, 0, done.stderr)
+        self.assertFalse((self.pkg / "runtime/sniper.env").exists())
+        self.assertIn("runtime/workspace.env", done.stdout)
+        # What setup's write_settings starts from when no --workspace is given:
+        kept = fx.bash(self.pkg, 'printf %s "$(kept_workspace)"')
+        self.assertEqual(kept.stdout, str(self.base / "videos"), kept.stderr)
+
     def test_projects_inside_the_sniper_folder_are_kept(self) -> None:
         inside = self.pkg / "projects"
         self.assertEqual(fx.write_settings(self.pkg, str(inside)).returncode, 0)

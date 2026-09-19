@@ -7,20 +7,6 @@
 # There is no provider setting: you talk to Sniper through your own Codex or Claude Code,
 # signed in to your own subscription, and Sniper's commands never call either of them.
 
-# The workspace kept from the last setup. One inside this folder moves with the folder: after
-# a move or a copy it names the same place under the new location, never the old folder
-# (which a move leaves behind and a copy still uses).
-kept_workspace() {
-  local workspace old_root
-  workspace="$(settings_value SNIPER_WORKSPACE_ROOT)" || return 0
-  old_root="$(settings_value PKG_ROOT)"
-  if [ -z "$old_root" ] || [ "$old_root" = "$PKG_ROOT" ]; then printf '%s' "$workspace"; return 0; fi
-  case "$workspace" in
-    "$old_root"|"$old_root"/*) printf '%s' "$PKG_ROOT${workspace#"$old_root"}" ;;
-    *) printf '%s' "$workspace" ;;
-  esac
-}
-
 write_settings() {
   local workspace
   # Projects live inside this folder by default, where Codex's own sandbox lets it write.
@@ -39,6 +25,7 @@ write_settings() {
     "WHISPER_CPP_BIN=$TOOL_WHISPER_CLI" "WHISPER_CPP_MODEL=$MODEL_PATH" \
     "SNIPER_TRANSCRIBE_PROVIDER=local-whisper" "SNIPER_STUDIO_COMMAND=$PKG_ROOT/install/studio.command"
   SNIPER_WORKSPACE_ROOT="$workspace"
+  rm -f "$KEPT_WORKSPACE"   # the settings hold it again
 }
 
 # The settings just written must load back exactly (the loader, not the writer,

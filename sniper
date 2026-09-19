@@ -28,7 +28,15 @@ case "${1:-}" in
   '') echo "usage: ./sniper setup | doctor | workspace | <command> [args...]" >&2; exit 64 ;;
 esac
 . "$here/install/lib/common.sh" || exit 1
-install_complete || fail "Sniper is not set up yet (or this folder moved). Run: ./sniper setup"
+if ! install_complete; then
+  # An installer or repair clears the completion receipt while it runs: say it is busy,
+  # rather than sending the agent to start a second setup the lock would refuse.
+  if [ -n "$(lsof -t -- "$STATE_DIR/maintenance.lock" 2>/dev/null)" ]; then
+    printf 'STOPPED: %s\n' "Sniper is being set up or repaired right now. Run this again when that has finished." >&2
+    exit 75
+  fi
+  fail "Sniper is not set up yet (or this folder moved). Run: ./sniper setup"
+fi
 load_env
 if [ "$1" = workspace ]; then printf '%s\n' "$SNIPER_WORKSPACE_ROOT"; exit 0; fi
 hold_maintenance shared "sniper ${1##*/}" "Sniper is being installed, repaired, cleaned or removed right now;

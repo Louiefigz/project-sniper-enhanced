@@ -41,6 +41,18 @@ class SniperCommand(unittest.TestCase):
         self.assertNotEqual(done.returncode, 0)
         self.assertIn("Run: ./sniper setup", done.stderr)
 
+    def test_while_setup_runs_it_says_busy_instead_of_not_set_up(self) -> None:
+        lock = self.pkg / "runtime/state/maintenance.lock"
+        lock.parent.mkdir(parents=True, exist_ok=True)
+        holder = subprocess.Popen(["/bin/sh", "-c", 'exec 9>>"$0"; echo held; sleep 30', str(lock)],
+                                  stdout=subprocess.PIPE, text=True)
+        self.addCleanup(holder.kill)
+        self.assertEqual(holder.stdout.readline().strip(), "held")
+        done = self._sniper("/usr/bin/true")
+        self.assertEqual(done.returncode, 75, done.stderr)
+        self.assertIn("being set up or repaired right now", done.stderr)
+        self.assertNotIn("./sniper setup", done.stderr)
+
     def test_workspace_prints_the_project_folder(self) -> None:
         self._install()
         done = self._sniper("workspace")

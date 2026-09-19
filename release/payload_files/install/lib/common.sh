@@ -14,6 +14,7 @@ RECEIPTS="$STATE_DIR/receipts"
 LOG_DIR="$RUNTIME_DIR/logs"
 ENV_FILE="$RUNTIME_DIR/sniper.env"
 LOCAL_ENV="$RUNTIME_DIR/sniper.local.env"
+KEPT_WORKSPACE="$RUNTIME_DIR/workspace.env"   # which folder the projects are in, kept by uninstall
 RELEASE_JSON="$PKG_ROOT/RELEASE.json"
 SCRIPT_PATH="$(cd "$(dirname "$0")" 2>/dev/null && pwd -P)/$(basename "$0")"
 

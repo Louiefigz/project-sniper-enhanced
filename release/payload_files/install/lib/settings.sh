@@ -44,6 +44,22 @@ settings_write() {
     || fail "Could not write $file"
 }
 
+# The workspace kept from the last setup (runtime/sniper.env, or after an uninstall the
+# record it keeps in runtime/workspace.env). One inside this folder moves with the folder:
+# after a move or a copy it names the same place under the new location, never the old
+# folder (which a move leaves behind and a copy still uses).
+kept_workspace() {
+  local file="$ENV_FILE" workspace old_root
+  [ -f "$file" ] || file="$KEPT_WORKSPACE"
+  workspace="$(settings_value SNIPER_WORKSPACE_ROOT "$file")" || return 0
+  old_root="$(settings_value PKG_ROOT "$file")"
+  if [ -z "$old_root" ] || [ "$old_root" = "$PKG_ROOT" ]; then printf '%s' "$workspace"; return 0; fi
+  case "$workspace" in
+    "$old_root"|"$old_root"/*) printf '%s' "$PKG_ROOT${workspace#"$old_root"}" ;;
+    *) printf '%s' "$workspace" ;;
+  esac
+}
+
 # Print one KEY's literal value from a settings file without running anything.
 # A file without the v1 header came from rc3, which wrapped values in double
 # quotes without escaping; strip exactly that one pair.

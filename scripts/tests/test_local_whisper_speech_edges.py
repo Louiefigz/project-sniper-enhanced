@@ -20,20 +20,27 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from local_whisper_speech_edges import (  # noqa: E402
-    MIN_WORD_S, SpeechEdgeError, measure_silences, tighten_speech_edges)
+    MIN_WORD_S, SpeechEdgeError, frame_levels, measure_silences, tighten_speech_edges)
 
 FFMPEG = os.environ.get("HYPERFRAMES_FFMPEG_PATH") or shutil.which("ffmpeg") or "ffmpeg"
 
 
-def _wav(path: Path, plan: list[tuple[float, bool]]) -> None:
-    """Write 16 kHz mono PCM: each (seconds, speaking) becomes tone or silence."""
+def _wav(path: Path, plan: list[tuple[float, bool]], quiet_db: float | None = None) -> None:
+    """Write 16 kHz mono PCM: each (seconds, speaking) becomes tone or room tone.
+
+    Speech is a tone at ``quiet_db`` (default full level); the gaps are quiet noise, as a
+    real room is — digital silence would let any threshold pass.
+    """
+    speech = f"volume={quiet_db}dB," if quiet_db is not None else ""
     parts, filters = [], []
     for index, (seconds, speaking) in enumerate(plan):
         source = (f"sine=frequency=220:duration={seconds}:sample_rate=16000" if speaking
-                  else f"anullsrc=r=16000:cl=mono:d={seconds}")
+                  else f"anoisesrc=r=16000:d={seconds}:a=0.004:c=pink")
         parts += ["-f", "lavfi", "-i", source]
-        filters.append(f"[{index}:a]")
-    graph = "".join(filters) + f"concat=n={len(plan)}:v=0:a=1[out]"
+        filters.append(f"[{index}:a]{speech if speaking else ''}anull[a{index}];")
+    graph = ("".join(filters)
+             + "".join(f"[a{i}]" for i in range(len(plan)))
+             + f"concat=n={len(plan)}:v=0:a=1[out]")
     done = subprocess.run([FFMPEG, "-nostdin", "-y", "-hide_banner", "-loglevel", "error",
                            *parts, "-filter_complex", graph, "-map", "[out]",
                            "-ac", "1", "-ar", "16000", str(path)],
@@ -114,6 +121,26 @@ class SpeechEdges(unittest.TestCase):
         self.assertIn("reason", report)
         self.assertEqual([(w["start"], w["end"]) for w in refined[0]["words"]],
                          [(0.0, 1.0), (1.0, 2.0)])
+
+    def test_quiet_speech_over_room_tone_is_not_called_silence(self) -> None:
+        """The failure this replaced: a word peaking ~-32 dB over a ~-39 dB floor.
+
+        A fixed -30 dB gate calls it silence, and the trim built on that deleted the word.
+        """
+        _wav(self.wav, [(1.0, True), (0.5, False), (0.6, True), (0.5, False)], quiet_db=-32.0)
+        _levels, gate = frame_levels(str(self.wav))
+        self.assertLess(gate, -32.0, "the gate must sit below quietly spoken words")
+        spans = measure_silences(str(self.wav))
+        spoken = [(1.5, 2.1)]
+        for start, end in spans:
+            for speech_start, speech_end in spoken:
+                overlap = min(end, speech_end) - max(start, speech_start)
+                self.assertLess(overlap, 0.12, f"silence {start:.2f}-{end:.2f} covers quiet speech")
+
+    def test_the_gate_is_never_louder_than_the_old_constant(self) -> None:
+        _wav(self.wav, [(0.6, True), (0.4, False), (0.6, True)])   # loud room tone
+        _levels, gate = frame_levels(str(self.wav))
+        self.assertLessEqual(gate, -30.0)
 
     def test_a_broken_ffmpeg_is_reported_not_swallowed(self) -> None:
         os.environ["HYPERFRAMES_FFMPEG_PATH"] = str(self.dir / "not-ffmpeg")

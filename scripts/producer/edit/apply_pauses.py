@@ -50,12 +50,24 @@ def measured_silence(media_path: str) -> list[tuple[float, float]]:
         return []
 
 
-def _within_silence(drop: tuple[float, float],
+def _measured_drops(gap: tuple[float, float], residual: float,
                     silence: list[tuple[float, float]]) -> list[tuple[float, float]]:
-    """The parts of one pause drop that measured silence covers."""
-    start, end = drop
-    return [(max(start, s), min(end, e)) for s, e in silence
-            if min(end, e) - max(start, s) > 0]
+    """What to remove from one proposed pause, from the silence measured in the audio.
+
+    The transcript's own gap bounds are unreliable in both directions — whisper pads word
+    ends and starts words late — so the measured silence, not the gap, decides the cut:
+    every measured span the gap touches is removed except ``residual`` seconds of breath
+    at its start. A gap that touches no measured silence is not cut at all.
+    """
+    start, end = gap
+    drops = []
+    for span_start, span_end in silence:
+        if min(end, span_end) - max(start, span_start) <= 0:
+            continue
+        cut_start = span_start + residual
+        if span_end > cut_start:
+            drops.append((cut_start, span_end))
+    return drops
 
 
 @dataclass
@@ -123,14 +135,17 @@ def _drop_intervals(proposal: dict, retakes: list[dict] | None,
         if t.get("protected"):
             continue
         at_s = float(t["at_s"])
-        start = max(at_s + float(t.get("residual_s", 0.0)), w0)
-        end = min(at_s + float(t["gap_s"]), w1)
-        if end <= start:
-            continue
+        residual = float(t.get("residual_s", 0.0))
         if silence is None:
-            drops.append((start, end))
-        else:                       # a pause cut may only remove measured silence
-            drops.extend(_within_silence((start, end), silence))
+            start, end = max(at_s + residual, w0), min(at_s + float(t["gap_s"]), w1)
+            if end > start:
+                drops.append((start, end))
+            continue
+        # a pause cut removes measured silence, and all of it but the breath
+        for start, end in _measured_drops((at_s, at_s + float(t["gap_s"])), residual, silence):
+            start, end = max(start, w0), min(end, w1)
+            if end > start:
+                drops.append((start, end))
     for r in retakes or []:
         start = max(float(r["cutStartS"]), w0)
         end = min(float(r["cutEndS"]), w1)

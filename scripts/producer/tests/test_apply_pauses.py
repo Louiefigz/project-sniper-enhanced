@@ -99,7 +99,7 @@ class PauseCutsStayInsideMeasuredSilence(unittest.TestCase):
     """A transcript gap can hold the first moment of the next word (whisper starts
     words late). With measured silence, a pause cut can only remove silence."""
 
-    def test_a_cut_is_clamped_to_the_silence_that_was_measured(self) -> None:
+    def test_a_cut_stops_where_speech_was_measured_again(self) -> None:
         # gap 3.0-8.0 by the transcript, but the audio is only silent 3.0-7.0:
         # speech resumes at 7.0, so nothing after 7.0 may be cut.
         track = ap.cut_track_from_pauses(
@@ -108,6 +108,15 @@ class PauseCutsStayInsideMeasuredSilence(unittest.TestCase):
         self.assertAlmostEqual(track[0]["end"], 3.35, places=3)
         self.assertAlmostEqual(track[1]["start"], 7.0, places=3,
                                msg="the cut stopped where speech was measured again")
+
+    def test_the_whole_measured_pause_goes_even_when_the_gap_understates_it(self) -> None:
+        """whisper pads a word's end, so the transcript gap can start late: the
+        measured silence (2.5-9.0) is what gets removed, less the breath."""
+        track = ap.cut_track_from_pauses(
+            _proposal(_trim(3.0, 5.0)), "raw-1", (0.0, 20.0),
+            ap.CutOptions(silence=[(2.5, 9.0)]))
+        self.assertAlmostEqual(track[0]["end"], 2.85, places=3, msg="breath kept from 2.5")
+        self.assertAlmostEqual(track[1]["start"], 9.0, places=3, msg="all measured silence gone")
 
     def test_a_gap_with_no_measured_silence_is_not_cut_at_all(self) -> None:
         track = ap.cut_track_from_pauses(

@@ -85,3 +85,48 @@ class PauseTimingDiagnosticsTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class MeasuredSilenceProposals(unittest.TestCase):
+    """propose_measured builds trims from the audio, naming words from the transcript."""
+
+    def _utts(self):
+        from edit.study_edit_diff import Utt, Word
+        # whisper-style: touching bounds that hide the real pauses entirely
+        words = [Word("So", 0.0, 0.5, "so"), Word("listen.", 0.5, 1.0, "listen"),
+                 Word("This", 1.0, 3.0, "this"), Word("matters.", 3.0, 3.5, "matters")]
+        return [Utt(0, 0.0, 1.0, "So listen.", words[:2]),
+                Utt(1, 1.0, 3.5, "This matters.", words[2:])]
+
+    def test_a_measured_pause_is_proposed_although_the_transcript_shows_no_gap(self):
+        from edit.pause_scan import propose_measured
+        report = propose_measured(self._utts(), [(1.2, 2.6)], threshold=0.35, residual=0.15)
+        self.assertEqual(report["proposedTrimCount"], 1)
+        trim = report["proposedTrims"][0]
+        self.assertAlmostEqual(trim["at_s"], 1.2, places=3)
+        self.assertAlmostEqual(trim["gap_s"], 1.4, places=3)
+        self.assertAlmostEqual(trim["trim_s"], 1.25, places=3)
+        self.assertEqual((trim["after"], trim["before"]), ("listen.", "This"))
+        self.assertEqual(report["timingDiagnostics"]["evidenceKind"], "measured-silence")
+        self.assertTrue(report["timingDiagnostics"]["acousticSilenceQualified"])
+
+    def test_a_short_measured_pause_is_left_alone(self):
+        from edit.pause_scan import propose_measured
+        report = propose_measured(self._utts(), [(1.2, 1.4)], threshold=0.35, residual=0.15)
+        self.assertEqual(report["proposedTrimCount"], 0)
+
+    def test_silence_outside_the_speech_is_not_a_pause(self):
+        from edit.pause_scan import propose_measured
+        report = propose_measured(self._utts(), [(3.6, 9.0)], threshold=0.35, residual=0.15)
+        self.assertEqual(report["gapsOverThreshold"], 0, "the tail is the window's job")
+
+    def test_the_protected_pause_doctrine_still_applies(self):
+        from edit.study_edit_diff import Utt, Word
+        from edit.pause_scan import propose_measured
+        words = [Word("Why", 0.0, 0.4, "why"), Word("bother?", 0.4, 1.0, "bother"),
+                 Word("Because", 2.2, 2.8, "because")]
+        utts = [Utt(0, 0.0, 1.0, "Why bother?", words[:2]),
+                Utt(1, 2.2, 2.8, "Because", words[2:])]
+        report = propose_measured(utts, [(1.0, 2.2)], threshold=0.35, residual=0.15)
+        self.assertEqual(report["proposedTrimCount"], 0)
+        self.assertEqual(report["protectedCount"], 1, "a pause after a question breathes")

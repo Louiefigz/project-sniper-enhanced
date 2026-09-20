@@ -740,7 +740,9 @@ that lane on); only the engaging lanes differ.
      - DON'T hand-author a single raw segment — that leaves dead air AND false
        starts in (the take often opens with re-taken/abandoned lines; starting the
        cut there shows the subject sliding into frame). Run BOTH edit-brain tools:
-       `edit/pause_scan.py <raw.transcript.json> --out pauses.json` and
+       `edit/pause_scan.py <raw.transcript.json> --out pauses.json --mode short|longform
+       --media <the source file>` (with `--media` the pauses come from silence MEASURED in
+       the audio, which is the only evidence that survives whisper's padded word bounds) and
        `retake_scan.py <raw.transcript.json> --out retakes.json`, then
        `edit/apply_pauses.py pauses.json --source <id> --window START END
        --media <the source file> [--speed 1.1] --retakes retakes.json` to FOLD both

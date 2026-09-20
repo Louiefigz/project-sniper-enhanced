@@ -51,6 +51,7 @@ THESIS_MIN_CONTENT_WORDS = 2
 THESIS_PROTECT_MULT = 1.4
 _SENT_END = ".?!"
 MIN_DIAGNOSTIC_PAIRS = 20
+NEIGHBOUR_TOLERANCE_S = 0.05   # a word may end a frame or two into the measured silence
 HIGH_TOUCHING_PAIR_FRACTION = 0.95
 
 
@@ -141,6 +142,65 @@ def timing_diagnostics(utts: list[Utt]) -> dict:
     }
 
 
+def _neighbours(words: list[Word], utts: list[Utt],
+                span: tuple[float, float]) -> tuple[Word, Word, Utt] | None:
+    """(word before the silence, word after it, the earlier word's utterance)."""
+    start, end = span
+    # A padded word can still be "open" when the silence begins, so the word BEFORE the
+    # pause is the last one that had finished; the word AFTER is the first still to end.
+    before = [w for w in words if w.end <= start + NEIGHBOUR_TOLERANCE_S]
+    after = [w for w in words if w.end > end]
+    if not before or not after:
+        return None
+    a, b = before[-1], after[0]
+    owner = next((u for u in utts if a in u.words), utts[-1])
+    return a, b, owner
+
+
+def propose_measured(utts: list[Utt], spans: list[tuple[float, float]],
+                     threshold: float | None = None,
+                     residual: float | None = None) -> dict:
+    """Propose pause tightening from silence MEASURED in the audio.
+
+    The transcript only names the words either side: whisper pads word ends and starts
+    words late, so its gaps both hide real pauses and overstate others. Each measured
+    span at or over ``threshold`` becomes a trim down to the kept breath, with the same
+    protected-pause doctrine applied to the words around it.
+    """
+    threshold = _LF["pause_gap_threshold_s"] if threshold is None else threshold
+    residual = _LF["pause_keep_residual_s"] if residual is None else residual
+    words = flat_words(utts)
+    trims: list[PauseTrim] = []
+    for span in spans:
+        gap = round(span[1] - span[0], 3)
+        found = _neighbours(words, utts, span)
+        if gap < threshold or found is None:      # a span outside the speech is the head/tail
+            continue
+        a, b, owner = found
+        kind, protected, reason = _classify(a, gap, owner, threshold)
+        trims.append(PauseTrim(
+            at_s=round(span[0], 3), gap_s=gap,
+            trim_s=0.0 if protected else round(max(0.0, gap - residual), 3),
+            residual_s=residual if not protected else gap,
+            kind=kind, protected=protected, after=a.text, before=b.text, reason=reason))
+    proposed = [t for t in trims if not t.protected]
+    protected = [t for t in trims if t.protected]
+    diagnostics = {**timing_diagnostics(utts), "evidenceKind": "measured-silence",
+                   "acousticSilenceQualified": True, "measuredSilenceSpans": len(spans),
+                   "measuredSilenceS": round(sum(e - s for s, e in spans), 3)}
+    diagnostics["warnings"] = [w for w in diagnostics["warnings"]
+                               if w["code"] != "high_touching_boundary_rate"]
+    return {
+        "timingDiagnostics": diagnostics, "thresholdS": threshold, "keepResidualS": residual,
+        "gapsOverThreshold": len(trims), "proposedTrimCount": len(proposed),
+        "proposedTrimTotalS": round(sum(t.trim_s for t in proposed), 1),
+        "protectedCount": len(protected),
+        "totalRecoverableS": round(sum(max(0.0, t.gap_s - residual) for t in trims), 1),
+        "proposedTrims": [asdict(t) for t in sorted(proposed, key=lambda t: t.trim_s, reverse=True)],
+        "protectedPauses": [asdict(t) for t in protected],
+    }
+
+
 def propose(utts: list[Utt], threshold: float | None = None,
             residual: float | None = None,
             recover_floor: float | None = None) -> dict:
@@ -190,20 +250,42 @@ def _speech_edges(raw_path: str) -> dict | None:
     return edges if isinstance(edges, dict) and edges.get("applied") else None
 
 
-def scan(raw_path: str, threshold: float | None = None,
-         residual: float | None = None, mode: str = "longform") -> dict:
+@dataclass
+class ScanOptions:
+    """What a scan needs beyond the transcript path."""
+
+    threshold: float | None = None
+    residual: float | None = None
+    mode: str = "longform"
+    #: The source media. Given, the proposal is built from silence measured in it.
+    media: str | None = None
+
+
+def scan(raw_path: str, options: ScanOptions | None = None) -> dict:
     """Load a raw transcript and return the pause-tightening proposal.
 
     A transcript whose word bounds were pulled in to measured speech
     (``local_whisper_speech_edges``) carries that record; its gaps are then
     measured silence, not merely absent timestamps, and the proposal says so.
     """
-    gap_default, residual_default, recover = mode_defaults(mode)
-    report = propose(load(raw_path), gap_default if threshold is None else threshold,
-                     residual_default if residual is None else residual, recover)
-    report["mode"] = mode
+    options = options or ScanOptions()
+    gap_default, residual_default, recover = mode_defaults(options.mode)
+    threshold = gap_default if options.threshold is None else options.threshold
+    residual = residual_default if options.residual is None else options.residual
+    utts = load(raw_path)
+    if options.media:
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
+            os.path.abspath(__file__)))))                 # scripts/ — shared modules
+        from local_whisper_speech_edges import SpeechEdgeError, measure_silences
+        try:
+            report = propose_measured(utts, measure_silences(options.media), threshold, residual)
+        except SpeechEdgeError as exc:
+            raise SystemExit(f"pause_scan: --media could not be measured: {exc}")
+    else:
+        report = propose(utts, threshold, residual, recover)
+    report["mode"] = options.mode
     edges = _speech_edges(raw_path)
-    if edges:
+    if edges and not options.media:
         report["timingDiagnostics"] = {
             **report["timingDiagnostics"], "evidenceKind": "measured-speech-edges",
             "acousticSilenceQualified": True, "speechEdges": edges,
@@ -221,8 +303,10 @@ def main() -> int:
     ap.add_argument("--residual", type=float, help="override kept breath (s)")
     ap.add_argument("--mode", choices=sorted(MODES), default="longform",
                     help="which mode's pause numbers to use (default longform)")
+    ap.add_argument("--media", help="the source media: propose from silence measured in it "
+                    "instead of from the transcript's (padded) word gaps")
     args = ap.parse_args()
-    report = scan(args.raw, args.threshold, args.residual, args.mode)
+    report = scan(args.raw, ScanOptions(args.threshold, args.residual, args.mode, args.media))
     if args.out:
         json.dump(report, open(args.out, "w"), indent=2)
     summary = {k: report[k] for k in (

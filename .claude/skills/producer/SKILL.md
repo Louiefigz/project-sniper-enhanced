@@ -1014,6 +1014,11 @@ that lane on); only the engaging lanes differ.
        resolve upstream, never skip recompose. (Prefer own-screen full-frame
        cutaways over beside-face rails per the pro doctrine; recompose is the
        fallback when a rail IS used.)
+     - `transcript_cut_contract.py <plan> <transcripts_dir> <manifest> [--previsual]` — the
+       cut gate. It refuses a cut that lands inside a word, and weighs the SOURCE AUDIO: when
+       a source's media is readable it measures the silence itself, and a boundary the audio
+       measures as silent is admitted (whisper mis-times words into silence) and recorded in
+       the receipt as `admittedByMeasuredSilence`. A cut into audible speech is still refused.
      - `plan_lint.py <plan> <manifest>` — editorial/motion legality. Its pacing
        WARNs (produced only) are the same signal as 3.9: fix each gap or justify it.
        LONGFORM adds the SMOOTH grammar gate (`plan_lint_smooth`): 0-frame

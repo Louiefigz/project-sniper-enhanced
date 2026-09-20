@@ -41,8 +41,11 @@ def _word_receipt(word: dict | None) -> dict | None:
 def _boundary_receipt(tag: str, at: float, edge: str,
                       source: SourceEvidence, errors: list[str]) -> dict:
     inside = _inside_word(at, source.words)
+    # A boundary inside a word is a cut into speech — unless the audio itself was measured
+    # silent there, which means the word is mis-timed, not that speech is being cut.
+    admitted = bool(inside) and source.measured_silent(at, at, BOUNDARY_EPS_S)
     before, after = _neighbors(at, source.words)
-    if inside:
+    if inside and not admitted:
         errors.append(f"{tag}: {edge} {at:.3f}s cuts through word {inside['word']!r} "
                       f"[{inside['start']:.3f},{inside['end']:.3f}]")
     if edge == "start" and at > BOUNDARY_EPS_S:
@@ -56,7 +59,8 @@ def _boundary_receipt(tag: str, at: float, edge: str,
             errors.append(f"{tag}: end has {silence:.3f}s after its last kept word "
                           f"(max {MAX_SEAM_SILENCE_S}s)")
     return {"at": round(at, 4), "before": _word_receipt(before),
-            "after": _word_receipt(after), "insideWord": _word_receipt(inside)}
+            "after": _word_receipt(after), "insideWord": _word_receipt(inside),
+            **({"admittedByMeasuredSilence": True} if admitted else {})}
 
 
 def _validate_cuts(plan: dict, sources: dict[str, SourceEvidence], errors: list[str]
@@ -182,16 +186,22 @@ def _validate_removals(plan: dict, sources: dict[str, SourceEvidence],
                     f"cutDecisions.removals[{index}] covers more than one removed gap")
                 continue
             used.add(index)
-            gap_words = [word for word in source.words
-                         if word["start"] >= start - BOUNDARY_EPS_S
-                         and word["end"] <= end + BOUNDARY_EPS_S]
+            claimed = [word for word in source.words
+                       if word["start"] >= start - BOUNDARY_EPS_S
+                       and word["end"] <= end + BOUNDARY_EPS_S]
+            # A word the audio measures as silent throughout was never spoken there:
+            # removing that span removes silence, not the word (which whisper mis-timed).
+            gap_words = [word for word in claimed
+                         if not source.measured_silent(word["start"], word["end"])]
+            mistimed = len(claimed) - len(gap_words)
             before, _ = _neighbors(start, source.words)
             _, after = _neighbors(end, source.words)
             _validate_decision(f"cutDecisions.removals[{index}]", decision,
                                gap_words, before, after, errors)
             receipts.append({"sourceId": source_id, "start": round(start, 4),
                              "end": round(end, 4), "kind": decision.get("kind"),
-                             "removedWords": len(gap_words)})
+                             "removedWords": len(gap_words),
+                             **({"mistimedWordsInMeasuredSilence": mistimed} if mistimed else {})})
     for index in range(len(decisions)):
         if index not in used:
             errors.append(
@@ -270,6 +280,10 @@ def check(plan_path: str, transcripts_dir: str, manifest_path: str,
         "cutDecisionsDigest": stable_hash(plan.get("cutDecisions") or {}),
         "cuts": len(plan.get("cutTrack") or []), "seams": seams, "removals": removals,
         "outputQuality": output_quality,
+        "audioEvidence": {source_id: {"gateDbfs": source.silence_gate_dbfs,
+                                      "silenceSpans": len(source.silence)}
+                          for source_id, source in sorted(sources.items())
+                          if source.silence_gate_dbfs is not None},
     }
     if approval_path:
         _check_approval(approval_path, receipt, errors)

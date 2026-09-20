@@ -5,6 +5,7 @@ import hashlib
 import json
 import math
 import os
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -20,6 +21,40 @@ class SourceEvidence:
     duration: float
     transcript_path: str
     words: list[dict]
+    #: Silence measured in the source audio, when it could be read. A word's timing is
+    #: whisper's guess; this is the audio itself, and the cut gate weighs both.
+    silence: tuple[tuple[float, float], ...] = ()
+    #: The dBFS gate that measurement used (None when nothing was measured).
+    silence_gate_dbfs: float | None = None
+
+    def measured_silent(self, start: float, end: float, margin: float = 0.0) -> bool:
+        """True when [start, end] lies inside one measured silence, with ``margin`` spare."""
+        return any(span_start <= start - margin and end + margin <= span_end
+                   for span_start, span_end in self.silence)
+
+
+def _measure_source_silence(source: dict, manifest_path: str
+                            ) -> tuple[tuple[tuple[float, float], ...], float | None]:
+    """Silence measured in this source's own audio, or nothing when it cannot be read.
+
+    The gate's other evidence is the transcript, whose word bounds whisper pads (and
+    starts late). Where the two disagree the audio decides, so it is read here when it
+    is reachable; when it is not, the gate behaves exactly as it did before.
+    """
+    media = source.get("path")
+    if not isinstance(media, str) or not media:
+        return (), None
+    if not os.path.isabs(media):
+        media = os.path.join(os.path.dirname(os.path.abspath(manifest_path)), media)
+    if not os.path.isfile(media):
+        return (), None
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # scripts/
+    try:
+        from local_whisper_speech_edges import SpeechEdgeError, frame_levels, measure_silences
+        _levels, gate = frame_levels(media)
+        return tuple(measure_silences(media)), round(gate, 2)
+    except (ImportError, SpeechEdgeError, OSError, ValueError):
+        return (), None
 
 
 @dataclass(frozen=True)
@@ -195,6 +230,7 @@ def source_evidence(manifest: dict, manifest_path: str, transcripts_dir: str,
         correction_problem = _correction_problem(payload, source, path, (authority[-1]["hash"], manifest_path))
         if correction_problem:
             errors.append(f"{tag}: {correction_problem}")
+        silence, gate = _measure_source_silence(source, manifest_path)
         sources[source_id] = SourceEvidence(
-            source_id, duration, path, _load_words(payload, tag, errors))
+            source_id, duration, path, _load_words(payload, tag, errors), silence, gate)
     return sources, authority

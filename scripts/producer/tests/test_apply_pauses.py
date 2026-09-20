@@ -140,6 +140,13 @@ class PauseCutsStayInsideMeasuredSilence(unittest.TestCase):
         self.assertIn(4.4, ends, "up to where the transcript says it ends")
         self.assertIn(8.0, starts, "the rest of the measured silence still goes")
 
+    def test_a_sliver_of_silence_is_not_worth_a_cut(self) -> None:
+        """Going around a claimed word can leave 10-40ms scraps; they are not cuts."""
+        track = ap.cut_track_from_pauses(
+            _proposal(_trim(3.0, 5.0)), "raw-1", (0.0, 20.0),
+            ap.CutOptions(silence=[(3.0, 8.0)], words=[(3.4, 7.99)]))
+        self.assertEqual(len(track), 1, "the 10ms scrap left over is not removed")
+
     def test_retake_drops_are_content_decisions_and_are_not_clamped(self) -> None:
         track = ap.cut_track_from_pauses(
             _proposal(), "raw-1", (0.0, 20.0),

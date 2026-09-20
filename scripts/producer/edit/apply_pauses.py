@@ -35,6 +35,7 @@ import sys
 from dataclasses import dataclass
 
 MIN_SEG_S = 0.05                  # drop degenerate slivers
+MIN_DROP_S = 0.05                 # and never declare a removal shorter than one
 LEAD_FRAGMENT_S = 1.6             # a leading kept span this short, orphaned before
 LEAD_DROP_S = 2.0                 # a drop this large, is an abandoned cold-open
 
@@ -157,7 +158,7 @@ def _drop_intervals(proposal: dict, retakes: list[dict] | None,
         if end > start:
             drops.append((start, end))
     merged: list[tuple[float, float]] = []
-    for start, end in sorted(drops):
+    for start, end in sorted(d for d in drops if d[1] - d[0] >= MIN_DROP_S):
         if merged and start <= merged[-1][1]:
             merged[-1] = (merged[-1][0], max(merged[-1][1], end))
         else:

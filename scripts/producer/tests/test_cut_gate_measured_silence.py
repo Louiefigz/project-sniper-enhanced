@@ -33,7 +33,7 @@ class BoundaryInsideAWord(unittest.TestCase):
     def test_measured_silence_admits_the_boundary_and_says_so(self):
         errors = []
         receipt = _boundary_receipt("cutTrack[1]", 9.40, "end",
-                                    _source(((9.28, 9.72),)), errors)
+                                    _source(((9.28, 9.72),)), errors)   # silence AFTER it
         self.assertEqual(errors, [], "the audio was silent there")
         self.assertTrue(receipt["admittedByMeasuredSilence"])
         self.assertEqual(receipt["insideWord"]["word"], "asking", "still recorded, not hidden")
@@ -44,11 +44,16 @@ class BoundaryInsideAWord(unittest.TestCase):
                           _source(((3.0, 3.4), (10.5, 11.0))), errors)
         self.assertTrue(any("cuts through word 'asking'" in e for e in errors), errors)
 
-    def test_a_boundary_at_the_very_edge_of_silence_is_not_admitted(self):
+    def test_only_the_removed_side_counts(self):
+        """A kept range ENDS where silence begins: silence before an `end` boundary is the
+        kept side and proves nothing about what the cut swallows."""
         errors = []
-        _boundary_receipt("cutTrack[1]", 9.40, "end", _source(((9.395, 9.405),)), errors)
-        self.assertTrue(any("cuts through word" in e for e in errors),
-                        "the margin keeps a boundary off the lip of a silence")
+        _boundary_receipt("cutTrack[1]", 9.40, "end", _source(((9.00, 9.40),)), errors)
+        self.assertTrue(any("cuts through word 'asking'" in e for e in errors), errors)
+        ok = []
+        receipt = _boundary_receipt("cutTrack[2]", 9.40, "start", _source(((9.00, 9.40),)), ok)
+        self.assertEqual(ok, [], "for a `start`, the silence before it is what was removed")
+        self.assertTrue(receipt["admittedByMeasuredSilence"])
 
 
 class RemovalOverAMistimedWord(unittest.TestCase):

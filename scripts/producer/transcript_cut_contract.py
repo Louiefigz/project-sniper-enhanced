@@ -13,6 +13,7 @@ from transcript_cut_quality import inspect_output
 from transcript_timing_review import ReviewInput, consume as consume_timing_reviews
 
 BOUNDARY_EPS_S, GAP_MATCH_EPS_S = 0.015, 0.05
+SILENCE_PROBE_S = 0.04   # how far into the removed side the audio must measure silent
 MAX_SEAM_SILENCE_S, MIN_REMOVAL_S = 0.75, 0.04
 REMOVAL_KINDS = {"dead_air", "false_start", "retake", "filler", "content", "other"}
 PREVISUAL_KEYS = {"planVersion", "target", "cutTrack", "cutDecisions"}
@@ -42,8 +43,11 @@ def _boundary_receipt(tag: str, at: float, edge: str,
                       source: SourceEvidence, errors: list[str]) -> dict:
     inside = _inside_word(at, source.words)
     # A boundary inside a word is a cut into speech — unless the audio itself was measured
-    # silent there, which means the word is mis-timed, not that speech is being cut.
-    admitted = bool(inside) and source.measured_silent(at, at, BOUNDARY_EPS_S)
+    # silent on the REMOVED side of it, which means the word is mis-timed, not that speech
+    # is being cut. A kept range ends where silence begins and starts where it ends, so the
+    # side to check is the one the cut swallows: after an `end`, before a `start`.
+    removed_side = (at, at + SILENCE_PROBE_S) if edge == "end" else (at - SILENCE_PROBE_S, at)
+    admitted = bool(inside) and source.measured_silent(*removed_side)
     before, after = _neighbors(at, source.words)
     if inside and not admitted:
         errors.append(f"{tag}: {edge} {at:.3f}s cuts through word {inside['word']!r} "

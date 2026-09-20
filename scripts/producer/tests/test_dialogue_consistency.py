@@ -164,13 +164,19 @@ class DialogueConsistencyTests(unittest.TestCase):
         invalid = [None, [], {}, [None], [{**first, "start": True}],
                    [{**first, "start": "0"}], [{**first, "end": np.inf}],
                    [{**first, "end": np.nan}], [{**first, "end": 10**1000}],
-                   [{**first, "start": -1}], [{**first, "end": 4.0001}],
+                   [{**first, "start": -1}], [{**first, "end": 4.5}],
                    [{**first, "start": 2}], [{**first, "label": " "}],
                    [{**first, "end": 0.00001}], [second, first],
                    [first, {**second, "start": 1.9}]]
         for value in invalid:
             rows = _rows(_stereo(), {"audioReviewSections": value})
             self.assertEqual(rows["audio_dialogue_consistency"].status, "fail", repr(value))
+
+    def test_a_section_a_frame_past_the_audio_is_encode_rounding_not_a_defect(self) -> None:
+        """timeline_map is the plan's clock; the file is its frame-quantised encode."""
+        first, _second = _sections()["audioReviewSections"]
+        rows = _rows(_stereo(), {"audioReviewSections": [{**first, "end": 4.0001}]})
+        self.assertNotEqual(rows["audio_dialogue_consistency"].status, "fail")
 
     def test_gaps_are_allowed_and_final_partial_section_is_measured(self) -> None:
         plan = {"audioReviewSections": [{"start": 0, "end": 1, "label": "intro"},

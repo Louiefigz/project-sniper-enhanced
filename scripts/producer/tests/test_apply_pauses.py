@@ -128,6 +128,18 @@ class PauseCutsStayInsideMeasuredSilence(unittest.TestCase):
         track = ap.cut_track_from_pauses(_proposal(_trim(3.0, 5.0)), "raw-1", (0.0, 20.0))
         self.assertAlmostEqual(track[1]["start"], 8.0, places=3)
 
+    def test_a_cut_never_crosses_a_word_the_transcript_claims(self) -> None:
+        """A mis-timed word can sit inside measured silence; the cut goes around it, so the
+        cut gate's mid-word rule holds without weakening it."""
+        track = ap.cut_track_from_pauses(
+            _proposal(_trim(3.0, 5.0)), "raw-1", (0.0, 20.0),
+            ap.CutOptions(silence=[(3.0, 8.0)], words=[(4.0, 4.4)]))
+        starts = [round(s["start"], 3) for s in track]
+        ends = [round(s["end"], 3) for s in track]
+        self.assertIn(4.0, starts, "the claimed word's time is kept as its own segment")
+        self.assertIn(4.4, ends, "up to where the transcript says it ends")
+        self.assertIn(8.0, starts, "the rest of the measured silence still goes")
+
     def test_retake_drops_are_content_decisions_and_are_not_clamped(self) -> None:
         track = ap.cut_track_from_pauses(
             _proposal(), "raw-1", (0.0, 20.0),

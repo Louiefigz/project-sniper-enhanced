@@ -78,6 +78,9 @@ class CutOptions:
     retakes: list[dict] | None = None
     #: Silence measured in the source audio; pause cuts are clamped to it.
     silence: list[tuple[float, float]] | None = None
+    #: Word intervals from the transcript; a pause cut never crosses one, so the cut
+    #: gate's mid-word rule holds even where a mis-timed word sits in measured silence.
+    words: list[tuple[float, float]] | None = None
 
 
 def cut_track_from_pauses(proposal: dict, source_id: str, window: tuple[float, float],
@@ -95,7 +98,7 @@ def cut_track_from_pauses(proposal: dict, source_id: str, window: tuple[float, f
     w0, w1 = window
     segs: list[dict] = []
     cursor = w0
-    for start, end in _drop_intervals(proposal, options.retakes, window, options.silence):
+    for start, end in _drop_intervals(proposal, options.retakes, window, options):
         if start > cursor:
             segs.append(_seg(source_id, cursor, start, speed))
         cursor = max(cursor, end)
@@ -125,11 +128,12 @@ def _drop_lead_fragment(segs: list[dict]) -> list[dict]:
 
 def _drop_intervals(proposal: dict, retakes: list[dict] | None,
                     window: tuple[float, float],
-                    silence: list[tuple[float, float]] | None = None
-                    ) -> list[tuple[float, float]]:
+                    options: CutOptions | None = None) -> list[tuple[float, float]]:
     """Merged, time-ordered source spans to DROP inside ``window`` — pause silence
     (gap past the kept breath) + whole retake cut spans, clamped to the window."""
     w0, w1 = window
+    silence = options.silence if options else None
+    words = options.words if options else None
     drops: list[tuple[float, float]] = []
     for t in proposal.get("proposedTrims", []):
         if t.get("protected"):
@@ -142,10 +146,11 @@ def _drop_intervals(proposal: dict, retakes: list[dict] | None,
                 drops.append((start, end))
             continue
         # a pause cut removes measured silence, and all of it but the breath
-        for start, end in _measured_drops((at_s, at_s + float(t["gap_s"])), residual, silence):
-            start, end = max(start, w0), min(end, w1)
-            if end > start:
-                drops.append((start, end))
+        for piece in _measured_drops((at_s, at_s + float(t["gap_s"])), residual, silence):
+            for start, end in (_outside_words(piece, words) if words else [piece]):
+                start, end = max(start, w0), min(end, w1)
+                if end > start:
+                    drops.append((start, end))
     for r in retakes or []:
         start = max(float(r["cutStartS"]), w0)
         end = min(float(r["cutEndS"]), w1)
@@ -158,6 +163,24 @@ def _drop_intervals(proposal: dict, retakes: list[dict] | None,
         else:
             merged.append((start, end))
     return merged
+
+
+def _outside_words(drop: tuple[float, float],
+                   words: list[tuple[float, float]]) -> list[tuple[float, float]]:
+    """The parts of a drop no transcript word claims (a cut never crosses a word)."""
+    pieces = [drop]
+    for word_start, word_end in words:
+        nxt: list[tuple[float, float]] = []
+        for start, end in pieces:
+            if word_end <= start or word_start >= end:
+                nxt.append((start, end))
+                continue
+            if word_start > start:
+                nxt.append((start, min(end, word_start)))
+            if word_end < end:
+                nxt.append((max(start, word_end), end))
+        pieces = nxt
+    return [(start, end) for start, end in pieces if end > start]
 
 
 def _seg(source_id: str, start: float, end: float, speed: float) -> dict:
@@ -180,6 +203,8 @@ def main() -> None:
     ap.add_argument("--speed", type=float, default=1.0)
     ap.add_argument("--media", help="the source media: pause cuts are then clamped to "
                     "silence measured in it, so a late word start is never cut into")
+    ap.add_argument("--transcript", help="the source transcript: a pause cut then never "
+                    "crosses a word the transcript claims, wherever it thinks the word is")
     ap.add_argument("--retakes", help="retake_scan proposal JSON — also drop its "
                     "cut spans (false starts / re-takes)")
     ap.add_argument("--out")
@@ -192,12 +217,19 @@ def main() -> None:
             retakes = json.load(f).get("retakes", [])
     window = (a.window[0], a.window[1])
     silence = measured_silence(a.media) if a.media else None
+    words = None
+    if a.transcript:
+        with open(a.transcript) as f:
+            payload = json.load(f)
+        words = [(float(w["start"]), float(w["end"]))
+                 for u in payload.get("transcript", []) for w in u.get("words", [])]
     track = cut_track_from_pauses(proposal, a.source, window,
-                                  CutOptions(a.speed, retakes, silence))
+                                  CutOptions(a.speed, retakes, silence, words))
     out = {"cutTrack": track,
            "removedS": removed_seconds(track, window),
            "segments": len(track),
            "pauseCutsClampedToMeasuredSilence": silence is not None,
+           "pauseCutsKeptOutOfClaimedWords": words is not None,
            "silenceSpansMeasured": len(silence) if silence is not None else None}
     if a.out:
         with open(a.out, "w") as f:

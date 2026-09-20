@@ -745,7 +745,8 @@ that lane on); only the engaging lanes differ.
        the audio, which is the only evidence that survives whisper's padded word bounds) and
        `retake_scan.py <raw.transcript.json> --out retakes.json`, then
        `edit/apply_pauses.py pauses.json --source <id> --window START END
-       --media <the source file> [--speed 1.1] --retakes retakes.json` to FOLD both
+       --media <the source file> --transcript <raw.transcript.json> [--speed 1.1]
+       --retakes retakes.json` to FOLD both
        into a clean cutTrack — **always pass `--media`**: whisper starts words late, so a
        transcript gap can hold the first moment of the next word, and without the measured
        silence a pause cut deletes speech (it did: one word, past every gate) —

@@ -54,6 +54,17 @@
   sandbox refuses a network connection and another file's contents, and stops a
   decode above its memory limit.
 
+### Local transcription measures where speech really stops
+- **Pauses are cut from measured silence, not from missing timestamps.** whisper.cpp times its
+  words end to end, so a transcript alone shows no gaps and the silence-trimming brain had
+  nothing to propose on a locally transcribed take. Sniper now measures each word's real
+  speech edges with its own ffmpeg and pulls the word bounds in to them: bounds only ever
+  move inward, no word is reordered, dropped or re-spelled, and a word measured as entirely
+  silent is left exactly as it was. On a 22-second take this exposed 7.3 seconds of real
+  silence that was previously invisible.
+- If the measurement cannot run, or its result would fail the transcript timing checks, the
+  unrefined transcript is kept and the result says so (`provenance.speechEdges`).
+
 ### What leaves your Mac
 - What your agent reads and sends in your conversation (transcripts, plans, still frames of the
   rendered edit that it or a reviewer looks at) goes to its provider under your account. Sniper's

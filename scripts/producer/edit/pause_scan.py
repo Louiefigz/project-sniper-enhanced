@@ -173,9 +173,33 @@ def propose(utts: list[Utt], threshold: float | None = None,
     }
 
 
-def scan(raw_path: str) -> dict:
-    """Load a raw transcript and return the pause-tightening proposal."""
-    return propose(load(raw_path))
+def _speech_edges(raw_path: str) -> dict | None:
+    """The transcript's own record of measured speech edges, when it has one."""
+    try:
+        with open(raw_path, encoding="utf-8") as handle:
+            edges = json.load(handle).get("provenance", {}).get("speechEdges")
+    except (OSError, ValueError, AttributeError):
+        return None
+    return edges if isinstance(edges, dict) and edges.get("applied") else None
+
+
+def scan(raw_path: str, threshold: float | None = None,
+         residual: float | None = None) -> dict:
+    """Load a raw transcript and return the pause-tightening proposal.
+
+    A transcript whose word bounds were pulled in to measured speech
+    (``local_whisper_speech_edges``) carries that record; its gaps are then
+    measured silence, not merely absent timestamps, and the proposal says so.
+    """
+    report = propose(load(raw_path), threshold, residual)
+    edges = _speech_edges(raw_path)
+    if edges:
+        report["timingDiagnostics"] = {
+            **report["timingDiagnostics"], "evidenceKind": "measured-speech-edges",
+            "acousticSilenceQualified": True, "speechEdges": edges,
+            "warnings": [w for w in report["timingDiagnostics"]["warnings"]
+                         if w["code"] != "high_touching_boundary_rate"]}
+    return report
 
 
 def main() -> int:
@@ -186,7 +210,7 @@ def main() -> int:
     ap.add_argument("--threshold", type=float, help="override gap threshold (s)")
     ap.add_argument("--residual", type=float, help="override kept breath (s)")
     args = ap.parse_args()
-    report = propose(load(args.raw), args.threshold, args.residual)
+    report = scan(args.raw, args.threshold, args.residual)
     if args.out:
         json.dump(report, open(args.out, "w"), indent=2)
     summary = {k: report[k] for k in (

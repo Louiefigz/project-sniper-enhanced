@@ -51,7 +51,7 @@ class ApplyPausesTests(unittest.TestCase):
 
     def test_speed_and_source_ride_onto_every_segment(self) -> None:
         track = ap.cut_track_from_pauses(
-            _proposal(_trim(3.0, 5.0)), "raw-9", (0.0, 20.0), speed=1.1)
+            _proposal(_trim(3.0, 5.0)), "raw-9", (0.0, 20.0), ap.CutOptions(speed=1.1))
         self.assertTrue(all(s["sourceId"] == "raw-9" for s in track))
         self.assertTrue(all(s["speed"] == 1.1 for s in track))
 
@@ -67,7 +67,7 @@ class ApplyRetakesTests(unittest.TestCase):
         # a re-take of [5,10] is removed; content resumes at the clean take
         track = ap.cut_track_from_pauses(
             _proposal(), "raw-1", (0.0, 20.0),
-            retakes=[{"cutStartS": 5.0, "cutEndS": 10.0}])
+            ap.CutOptions(retakes=[{"cutStartS": 5.0, "cutEndS": 10.0}]))
         self.assertEqual([(s["start"], s["end"]) for s in track],
                          [(0.0, 5.0), (10.0, 20.0)])
 
@@ -75,7 +75,7 @@ class ApplyRetakesTests(unittest.TestCase):
         # a pause-trim gap overlapping a retake span collapses to one drop
         track = ap.cut_track_from_pauses(
             _proposal(_trim(4.0, 3.0)), "raw-1", (0.0, 20.0),
-            retakes=[{"cutStartS": 5.0, "cutEndS": 11.0}])
+            ap.CutOptions(retakes=[{"cutStartS": 5.0, "cutEndS": 11.0}]))
         # keep [0,4.35] (breath), drop 4.35..11, keep [11,20]
         self.assertEqual(len(track), 2)
         self.assertAlmostEqual(track[0]["end"], 4.35, places=2)
@@ -84,8 +84,8 @@ class ApplyRetakesTests(unittest.TestCase):
     def test_abandoned_cold_open_fragment_dropped(self) -> None:
         # a ~1.35s lead ("If") orphaned before a 5s settle + retake → dropped
         track = ap.cut_track_from_pauses(
-            _proposal(_trim(1.0, 5.0)), "raw-1", (0.0, 40.0), speed=1.1,
-            retakes=[{"cutStartS": 6.0, "cutEndS": 12.0}])
+            _proposal(_trim(1.0, 5.0)), "raw-1", (0.0, 40.0),
+            ap.CutOptions(speed=1.1, retakes=[{"cutStartS": 6.0, "cutEndS": 12.0}]))
         self.assertEqual(track[0]["start"], 12.0)          # cold-open dropped
 
     def test_short_cold_open_kept_when_no_big_drop(self) -> None:
@@ -93,6 +93,38 @@ class ApplyRetakesTests(unittest.TestCase):
         track = ap.cut_track_from_pauses(
             _proposal(_trim(1.4, 0.5)), "raw-1", (0.0, 20.0))
         self.assertEqual(track[0]["start"], 0.0)           # kept — deliberate
+
+
+class PauseCutsStayInsideMeasuredSilence(unittest.TestCase):
+    """A transcript gap can hold the first moment of the next word (whisper starts
+    words late). With measured silence, a pause cut can only remove silence."""
+
+    def test_a_cut_is_clamped_to_the_silence_that_was_measured(self) -> None:
+        # gap 3.0-8.0 by the transcript, but the audio is only silent 3.0-7.0:
+        # speech resumes at 7.0, so nothing after 7.0 may be cut.
+        track = ap.cut_track_from_pauses(
+            _proposal(_trim(3.0, 5.0)), "raw-1", (0.0, 20.0),
+            ap.CutOptions(silence=[(3.0, 7.0)]))
+        self.assertAlmostEqual(track[0]["end"], 3.35, places=3)
+        self.assertAlmostEqual(track[1]["start"], 7.0, places=3,
+                               msg="the cut stopped where speech was measured again")
+
+    def test_a_gap_with_no_measured_silence_is_not_cut_at_all(self) -> None:
+        track = ap.cut_track_from_pauses(
+            _proposal(_trim(3.0, 5.0)), "raw-1", (0.0, 20.0), ap.CutOptions(silence=[]))
+        self.assertEqual(len(track), 1, "no measured silence means nothing to remove")
+        self.assertEqual(ap.removed_seconds(track, (0.0, 20.0)), 0.0)
+
+    def test_without_measured_silence_the_old_behaviour_is_unchanged(self) -> None:
+        track = ap.cut_track_from_pauses(_proposal(_trim(3.0, 5.0)), "raw-1", (0.0, 20.0))
+        self.assertAlmostEqual(track[1]["start"], 8.0, places=3)
+
+    def test_retake_drops_are_content_decisions_and_are_not_clamped(self) -> None:
+        track = ap.cut_track_from_pauses(
+            _proposal(), "raw-1", (0.0, 20.0),
+            ap.CutOptions(retakes=[{"cutStartS": 5.0, "cutEndS": 10.0}], silence=[]))
+        self.assertAlmostEqual(track[0]["end"], 5.0, places=3)
+        self.assertAlmostEqual(track[1]["start"], 10.0, places=3)
 
 
 if __name__ == "__main__":

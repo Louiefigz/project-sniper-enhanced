@@ -39,6 +39,22 @@ def _ffmpeg() -> str:
     return os.environ.get("HYPERFRAMES_FFMPEG_PATH") or "ffmpeg"
 
 
+def audio_end(wav_path: str, offset: float = 0.0) -> float | None:
+    """Where the audio itself ends, on the transcript's timeline (None if unmeasurable).
+
+    whisper's last token can run past the end of the file (23.48 s on a 22.33 s
+    take), which then reads as a cut beyond the media.
+    """
+    probe = os.environ.get("HYPERFRAMES_FFPROBE_PATH") or "ffprobe"
+    try:
+        proc = subprocess.run([probe, "-v", "error", "-show_entries", "format=duration",
+                               "-of", "default=nw=1:nk=1", wav_path],
+                              capture_output=True, text=True, check=False)
+        return float(proc.stdout.strip()) + offset if proc.returncode == 0 else None
+    except (OSError, ValueError):
+        return None
+
+
 def measure_silences(wav_path: str, offset: float = 0.0) -> list[tuple[float, float]]:
     """Silence intervals in ``wav_path``, shifted onto the transcript's timeline.
 
@@ -115,7 +131,7 @@ def tighten_speech_edges(transcript: list[dict], wav_path: str,
         is then returned untouched.
     """
     report = {"method": "ffmpeg-silencedetect", "noiseDb": NOISE_DB,
-              "minSilenceS": MIN_SILENCE_S, "applied": False}
+              "minSilenceS": MIN_SILENCE_S, "clampedToAudioEnd": True, "applied": False}
     try:
         spans = measure_silences(wav_path, offset)
     except SpeechEdgeError as exc:
@@ -125,6 +141,12 @@ def tighten_speech_edges(transcript: list[dict], wav_path: str,
         return transcript, {**report, "reason": "no silence measured" if words else "no words"}
     before = [(float(w["start"]), float(w["end"])) for w in words]
     removed = sum(_tighten(word, spans) for word in words)
+    limit = audio_end(wav_path, offset)        # nothing can be spoken after the audio ends
+    if limit is not None:
+        for word in words:
+            if word["end"] > limit >= word["start"] + MIN_WORD_S:
+                removed += word["end"] - limit
+                word["end"] = round(limit, 3)
     for (start, end), word in zip(before, words):        # only ever pulled inward
         if word["start"] < start or word["end"] > end or word["end"] <= word["start"]:
             for (old_start, old_end), item in zip(before, words):

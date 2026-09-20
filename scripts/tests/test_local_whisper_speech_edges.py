@@ -99,6 +99,14 @@ class SpeechEdges(unittest.TestCase):
         self.assertTrue(spans, "silence was not measured")
         self.assertAlmostEqual(spans[0][0], 11.0, delta=0.12)
 
+    def test_a_word_cannot_end_after_the_audio_does(self) -> None:
+        """whisper's last token can run past the file; it is pulled back to the end."""
+        _wav(self.wav, [(1.0, True), (0.5, False), (1.0, True)])
+        transcript = _transcript([("one", 0.0, 1.0), ("two", 1.5, 4.0)])
+        refined, report = tighten_speech_edges(transcript, str(self.wav))
+        self.assertTrue(report["applied"], report)
+        self.assertLessEqual(refined[0]["words"][-1]["end"], 2.51)
+
     def test_without_a_measurement_the_transcript_is_untouched(self) -> None:
         transcript = _transcript([("one", 0.0, 1.0), ("two", 1.0, 2.0)])
         refined, report = tighten_speech_edges(transcript, str(self.dir / "missing.wav"))

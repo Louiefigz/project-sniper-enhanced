@@ -14,25 +14,62 @@ A gap trim ``{at_s, gap_s, residual_s}`` means: keep up to ``at_s + residual_s``
 (the breath), then resume at ``at_s + gap_s`` (past the removed silence). The
 window's own bounds are the first/last segment edges.
 
+``--media`` makes every pause drop SAFE: whisper's word starts can be late (a word
+whose audio has already begun is timestamped 0.1s later), so a transcript gap can
+contain the first moment of the next word — and cutting it deletes speech. With the
+source media, each pause drop is intersected with silence MEASURED in that audio, so
+a pause cut can only ever remove audio that was actually silent. Retake drops are
+content decisions and are not clamped.
+
 CLI:
     apply_pauses.py <pauses.json> --source raw-1 --window START END
-        [--speed S] [--out cuttrack.json]
+        [--media SOURCE.mov] [--speed S] [--out cuttrack.json]
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
+from dataclasses import dataclass
 
 MIN_SEG_S = 0.05                  # drop degenerate slivers
 LEAD_FRAGMENT_S = 1.6             # a leading kept span this short, orphaned before
 LEAD_DROP_S = 2.0                 # a drop this large, is an abandoned cold-open
 
 
+def measured_silence(media_path: str) -> list[tuple[float, float]]:
+    """Silence intervals measured in ``media_path`` (empty when unmeasurable)."""
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__)))))                    # scripts/ — shared modules
+    from local_whisper_speech_edges import SpeechEdgeError, measure_silences
+    try:
+        return measure_silences(media_path)
+    except SpeechEdgeError:
+        return []
+
+
+def _within_silence(drop: tuple[float, float],
+                    silence: list[tuple[float, float]]) -> list[tuple[float, float]]:
+    """The parts of one pause drop that measured silence covers."""
+    start, end = drop
+    return [(max(start, s), min(end, e)) for s, e in silence
+            if min(end, e) - max(start, s) > 0]
+
+
+@dataclass
+class CutOptions:
+    """What the fold needs beyond the proposal and the window."""
+
+    speed: float = 1.0
+    retakes: list[dict] | None = None
+    #: Silence measured in the source audio; pause cuts are clamped to it.
+    silence: list[tuple[float, float]] | None = None
+
+
 def cut_track_from_pauses(proposal: dict, source_id: str, window: tuple[float, float],
-                          speed: float = 1.0,
-                          retakes: list[dict] | None = None) -> list[dict]:
+                          options: CutOptions | None = None) -> list[dict]:
     """Clean-cut cutTrack for ``[window]`` from the edit brain's proposals.
 
     Drops two kinds of source span and keeps the rest as content segments: the
@@ -41,10 +78,12 @@ def cut_track_from_pauses(proposal: dict, source_id: str, window: tuple[float, f
     given — every re-taken take's ``[cutStartS, cutEndS]`` span, so a false-start
     opening is removed instead of stitched onto the clean take. Overlapping drops
     merge. Returns ``[{sourceId, start, end, speed}]`` in time order."""
+    options = options or CutOptions()
+    speed = options.speed
     w0, w1 = window
     segs: list[dict] = []
     cursor = w0
-    for start, end in _drop_intervals(proposal, retakes, window):
+    for start, end in _drop_intervals(proposal, options.retakes, window, options.silence):
         if start > cursor:
             segs.append(_seg(source_id, cursor, start, speed))
         cursor = max(cursor, end)
@@ -73,7 +112,9 @@ def _drop_lead_fragment(segs: list[dict]) -> list[dict]:
 
 
 def _drop_intervals(proposal: dict, retakes: list[dict] | None,
-                    window: tuple[float, float]) -> list[tuple[float, float]]:
+                    window: tuple[float, float],
+                    silence: list[tuple[float, float]] | None = None
+                    ) -> list[tuple[float, float]]:
     """Merged, time-ordered source spans to DROP inside ``window`` — pause silence
     (gap past the kept breath) + whole retake cut spans, clamped to the window."""
     w0, w1 = window
@@ -84,8 +125,12 @@ def _drop_intervals(proposal: dict, retakes: list[dict] | None,
         at_s = float(t["at_s"])
         start = max(at_s + float(t.get("residual_s", 0.0)), w0)
         end = min(at_s + float(t["gap_s"]), w1)
-        if end > start:
+        if end <= start:
+            continue
+        if silence is None:
             drops.append((start, end))
+        else:                       # a pause cut may only remove measured silence
+            drops.extend(_within_silence((start, end), silence))
     for r in retakes or []:
         start = max(float(r["cutStartS"]), w0)
         end = min(float(r["cutEndS"]), w1)
@@ -118,6 +163,8 @@ def main() -> None:
     ap.add_argument("--window", nargs=2, type=float, required=True,
                     metavar=("START", "END"))
     ap.add_argument("--speed", type=float, default=1.0)
+    ap.add_argument("--media", help="the source media: pause cuts are then clamped to "
+                    "silence measured in it, so a late word start is never cut into")
     ap.add_argument("--retakes", help="retake_scan proposal JSON — also drop its "
                     "cut spans (false starts / re-takes)")
     ap.add_argument("--out")
@@ -129,10 +176,14 @@ def main() -> None:
         with open(a.retakes) as f:
             retakes = json.load(f).get("retakes", [])
     window = (a.window[0], a.window[1])
-    track = cut_track_from_pauses(proposal, a.source, window, a.speed, retakes)
+    silence = measured_silence(a.media) if a.media else None
+    track = cut_track_from_pauses(proposal, a.source, window,
+                                  CutOptions(a.speed, retakes, silence))
     out = {"cutTrack": track,
            "removedS": removed_seconds(track, window),
-           "segments": len(track)}
+           "segments": len(track),
+           "pauseCutsClampedToMeasuredSilence": silence is not None,
+           "silenceSpansMeasured": len(silence) if silence is not None else None}
     if a.out:
         with open(a.out, "w") as f:
             json.dump(out, f, indent=1)

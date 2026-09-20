@@ -129,6 +129,12 @@ MODES = {
         "silence_gap_s": 0.7,
         "silence_gap_aggressive_s": 0.3,
         "cut_pad_s": 0.15,              # 0.1-0.3s window
+        # Pause-tightening for a SHORT: the long-form numbers (1.2s gaps) describe a
+        # lecture, and a 20-60s short rarely holds one. Tighten measurably dead air
+        # to a short breath instead; the brain still protects emphasis beats.
+        "pause_gap_threshold_s": 0.35,
+        "pause_keep_residual_s": 0.15,
+        "pause_recover_floor_s": 0.25,
         "filler_removal": "all",        # um/uh/false starts all go
         # Delivery speed. Research: 1.05-1.15 safe; ≤1.25 for authority voice.
         "speech_speed": 1.1,

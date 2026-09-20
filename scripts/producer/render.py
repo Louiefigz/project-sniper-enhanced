@@ -1053,6 +1053,17 @@ def render(ctx: RenderCtx, audit: bool = True) -> dict:
     return report
 
 
+def publish_plan(plan_path: str, out_dir: str) -> None:
+    """Keep the rendered plan beside its output — unless it is already that file.
+
+    The agent route authors ``<project>/producer/edit_plan.json`` and renders into
+    ``<project>/producer``, so the copy would be onto itself (SameFileError).
+    """
+    target = os.path.join(os.path.abspath(out_dir), "edit_plan.json")
+    if os.path.abspath(plan_path) != target:
+        shutil.copy(plan_path, target)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="PRODUCER render orchestrator")
     ap.add_argument("plan_path")
@@ -1112,7 +1123,7 @@ def main() -> None:
                         producer_dir=args.approval_dir or args.out_dir,
                         audio_clock_policy=args.audio_clock_policy,
                         plan_path=os.path.abspath(args.plan_path))
-        shutil.copy(args.plan_path, os.path.join(args.out_dir, "edit_plan.json"))
+        publish_plan(args.plan_path, args.out_dir)
         report = render(ctx, audit=not args.no_audit)
         emit(status="done", **report)
     except (OSError, json.JSONDecodeError, KeyError,

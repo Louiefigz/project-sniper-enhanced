@@ -414,7 +414,7 @@ def _warn_off_profile(segments: list[Segment], id_to_path: dict[str, str],
             continue
         seen.add(seg.source_id)
         v = probe_video(id_to_path[seg.source_id])
-        w, h = int(v["width"]), int(v["height"])
+        w, h = display_dims(v)   # phone portrait is landscape pixels + a rotation flag
         if abs(w / h - target_ar) > 0.01:
             emit(stage="cut_speed", status="warn", reason="letterbox",
                  sourceId=seg.source_id, source_res=[w, h],

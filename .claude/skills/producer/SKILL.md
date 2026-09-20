@@ -743,7 +743,10 @@ that lane on); only the engaging lanes differ.
        `edit/pause_scan.py <raw.transcript.json> --out pauses.json` and
        `retake_scan.py <raw.transcript.json> --out retakes.json`, then
        `edit/apply_pauses.py pauses.json --source <id> --window START END
-       [--speed 1.1] --retakes retakes.json` to FOLD both into a clean cutTrack —
+       --media <the source file> [--speed 1.1] --retakes retakes.json` to FOLD both
+       into a clean cutTrack — **always pass `--media`**: whisper starts words late, so a
+       transcript gap can hold the first moment of the next word, and without the measured
+       silence a pause cut deletes speech (it did: one word, past every gate) —
        it drops the silence (keeping each breath + protected pauses), the re-take
        spans, and an abandoned cold-open fragment, so the cut opens on the clean
        take. Pick the window to end on a complete thought (not mid-sentence).

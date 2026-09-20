@@ -34,6 +34,13 @@ from producer_config import MODES
 from edit.study_edit_diff import FILLERS, Utt, Word, _is_filler, flat_words, load
 
 _LF = MODES["longform"]
+
+
+def mode_defaults(mode: str) -> tuple[float, float, float]:
+    """(gap threshold, kept breath, recover floor) for ``short`` or ``longform``."""
+    preset = MODES[mode]
+    return (preset["pause_gap_threshold_s"], preset["pause_keep_residual_s"],
+            preset["pause_recover_floor_s"])
 # Emphasis-pause protection (doctrine, not tuned per-video): a pause right after
 # a question always breathes; a pause after a SHORT declarative thesis breathes
 # only when it is clearly deliberate (≥ this multiple of the trim threshold) AND
@@ -184,14 +191,17 @@ def _speech_edges(raw_path: str) -> dict | None:
 
 
 def scan(raw_path: str, threshold: float | None = None,
-         residual: float | None = None) -> dict:
+         residual: float | None = None, mode: str = "longform") -> dict:
     """Load a raw transcript and return the pause-tightening proposal.
 
     A transcript whose word bounds were pulled in to measured speech
     (``local_whisper_speech_edges``) carries that record; its gaps are then
     measured silence, not merely absent timestamps, and the proposal says so.
     """
-    report = propose(load(raw_path), threshold, residual)
+    gap_default, residual_default, recover = mode_defaults(mode)
+    report = propose(load(raw_path), gap_default if threshold is None else threshold,
+                     residual_default if residual is None else residual, recover)
+    report["mode"] = mode
     edges = _speech_edges(raw_path)
     if edges:
         report["timingDiagnostics"] = {
@@ -209,12 +219,14 @@ def main() -> int:
     ap.add_argument("--top", type=int, default=10, help="print this many biggest trims")
     ap.add_argument("--threshold", type=float, help="override gap threshold (s)")
     ap.add_argument("--residual", type=float, help="override kept breath (s)")
+    ap.add_argument("--mode", choices=sorted(MODES), default="longform",
+                    help="which mode's pause numbers to use (default longform)")
     args = ap.parse_args()
-    report = scan(args.raw, args.threshold, args.residual)
+    report = scan(args.raw, args.threshold, args.residual, args.mode)
     if args.out:
         json.dump(report, open(args.out, "w"), indent=2)
     summary = {k: report[k] for k in (
-        "thresholdS", "gapsOverThreshold", "proposedTrimCount",
+        "mode", "thresholdS", "gapsOverThreshold", "proposedTrimCount",
         "proposedTrimTotalS", "protectedCount", "totalRecoverableS", "timingDiagnostics")}
     summary["top"] = [
         {"at": t["at_s"], "gap": t["gap_s"], "trim": t["trim_s"],

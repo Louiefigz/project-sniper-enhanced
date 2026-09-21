@@ -23,6 +23,7 @@ from local_whisper_speech_edges import (  # noqa: E402
     MIN_WORD_S, SpeechEdgeError, frame_levels, measure_silences, tighten_speech_edges)
 
 FFMPEG = os.environ.get("HYPERFRAMES_FFMPEG_PATH") or shutil.which("ffmpeg") or "ffmpeg"
+ROOM_TONE_AMPLITUDE = 0.0005      # ≈ -66 dBFS: a quiet room, well under quiet speech
 
 
 def _wav(path: Path, plan: list[tuple[float, bool]], quiet_db: float | None = None) -> None:
@@ -35,7 +36,7 @@ def _wav(path: Path, plan: list[tuple[float, bool]], quiet_db: float | None = No
     parts, filters = [], []
     for index, (seconds, speaking) in enumerate(plan):
         source = (f"sine=frequency=220:duration={seconds}:sample_rate=16000" if speaking
-                  else f"anoisesrc=r=16000:d={seconds}:a=0.004:c=pink")
+                  else f"anoisesrc=r=16000:d={seconds}:a={ROOM_TONE_AMPLITUDE}:c=pink")
         parts += ["-f", "lavfi", "-i", source]
         filters.append(f"[{index}:a]{speech if speaking else ''}anull[a{index}];")
     graph = ("".join(filters)
@@ -123,15 +124,16 @@ class SpeechEdges(unittest.TestCase):
                          [(0.0, 1.0), (1.0, 2.0)])
 
     def test_quiet_speech_over_room_tone_is_not_called_silence(self) -> None:
-        """The failure this replaced: a word peaking ~-32 dB over a ~-39 dB floor.
+        """The failure this replaced: a quietly spoken word read as silence by a fixed gate.
 
-        A fixed -30 dB gate calls it silence, and the trim built on that deleted the word.
+        A -30 dB constant calls it silence and the trim built on that deletes the word; a
+        gate measured from this file's own floor sits below the speech instead.
         """
-        _wav(self.wav, [(1.0, True), (0.5, False), (0.6, True), (0.5, False)], quiet_db=-32.0)
+        _wav(self.wav, [(2.0, True), (0.5, False), (2.0, True), (0.5, False)], quiet_db=-20.0)
         _levels, gate = frame_levels(str(self.wav))
         self.assertLess(gate, -32.0, "the gate must sit below quietly spoken words")
         spans = measure_silences(str(self.wav))
-        spoken = [(1.5, 2.1)]
+        spoken = [(2.5, 4.5)]
         for start, end in spans:
             for speech_start, speech_end in spoken:
                 overlap = min(end, speech_end) - max(start, speech_start)
@@ -141,6 +143,17 @@ class SpeechEdges(unittest.TestCase):
         _wav(self.wav, [(0.6, True), (0.4, False), (0.6, True)])   # loud room tone
         _levels, gate = frame_levels(str(self.wav))
         self.assertLessEqual(gate, -30.0)
+
+    def test_audio_that_cannot_be_gated_is_refused_not_guessed_at(self) -> None:
+        """The 10-minute qualification lesson: floor -51.2, gate -43.2, median frame -46.2.
+
+        A file whose own median sits at its gate is not a take with pauses in it — the
+        measurement is calling speech silence. It must refuse, not report 54% silence.
+        """
+        _wav(self.wav, [(2.0, True), (0.3, False), (2.0, True)], quiet_db=-60.0)
+        with self.assertRaises(SpeechEdgeError) as caught:
+            measure_silences(str(self.wav))
+        self.assertIn("cannot be gated safely", str(caught.exception))
 
     def test_a_broken_ffmpeg_is_reported_not_swallowed(self) -> None:
         os.environ["HYPERFRAMES_FFMPEG_PATH"] = str(self.dir / "not-ffmpeg")

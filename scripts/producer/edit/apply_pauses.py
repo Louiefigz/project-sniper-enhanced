@@ -40,35 +40,69 @@ LEAD_FRAGMENT_S = 1.6             # a leading kept span this short, orphaned bef
 LEAD_DROP_S = 2.0                 # a drop this large, is an abandoned cold-open
 
 
+def _require_declared_media(media_path: str, manifest_path: str, source_id: str) -> None:
+    """Refuse a --media that is not the file the manifest records for ``source_id``.
+
+    Measuring one recording and cutting another produces cut points with no relation to
+    the audio, and the receipt would still say they were clamped to measured silence.
+    """
+    with open(manifest_path) as handle:
+        sources = json.load(handle).get("sources") or []
+    declared = next((s.get("path") for s in sources if str(s.get("id")) == source_id), None)
+    if declared is None:
+        raise SystemExit(f"apply_pauses: the manifest has no source {source_id!r}")
+    if os.path.realpath(declared) != os.path.realpath(media_path):
+        raise SystemExit(
+            f"apply_pauses: --media is not the media the manifest records for {source_id!r}.\n"
+            f"  manifest: {declared}\n  --media : {media_path}")
+
+
 def measured_silence(media_path: str) -> list[tuple[float, float]]:
-    """Silence intervals measured in ``media_path`` (empty when unmeasurable)."""
+    """Silence intervals measured in ``media_path``.
+
+    Raises:
+        SystemExit: The audio could not be measured. An unmeasurable file must not read
+            as "no silence here" — that is indistinguishable from a take with no pauses,
+            and the receipt would still claim the cuts were clamped to measurement.
+    """
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
         os.path.abspath(__file__)))))                    # scripts/ — shared modules
     from local_whisper_speech_edges import SpeechEdgeError, measure_silences
     try:
         return measure_silences(media_path)
-    except SpeechEdgeError:
-        return []
+    except SpeechEdgeError as exc:
+        raise SystemExit(f"apply_pauses: --media could not be measured: {exc}")
 
 
 def _measured_drops(gap: tuple[float, float], residual: float,
                     silence: list[tuple[float, float]]) -> list[tuple[float, float]]:
-    """What to remove from one proposed pause, from the silence measured in the audio.
+    """What to remove from one proposed pause: measured silence, INSIDE the approved gap.
 
-    The transcript's own gap bounds are unreliable in both directions — whisper pads word
-    ends and starts words late — so the measured silence, not the gap, decides the cut:
-    every measured span the gap touches is removed except ``residual`` seconds of breath
-    at its start. A gap that touches no measured silence is not cut at all.
+    The cut may never exceed what the brain proposed. An earlier version removed each
+    touched span whole, on the reasoning that a transcript gap understates the real pause;
+    one measured span covering two gaps then removed both — including a protected emphasis
+    beat between them — turning a 0.25s approved trim into a 4.38s cut. The proposal is the
+    authority on WHAT may go; the measurement only narrows it to what is really silent.
     """
     start, end = gap
     drops = []
     for span_start, span_end in silence:
-        if min(end, span_end) - max(start, span_start) <= 0:
-            continue
-        cut_start = span_start + residual
-        if span_end > cut_start:
-            drops.append((cut_start, span_end))
+        cut_start = max(span_start, start) + residual
+        cut_end = min(span_end, end)
+        if cut_end > cut_start:
+            drops.append((cut_start, cut_end))
     return drops
+
+
+def _protected_spans(proposal: dict) -> list[tuple[float, float]]:
+    """Beats the brain marked KEEP — no cut may touch them, whatever the audio measures."""
+    spans = []
+    for trim in [*proposal.get("protectedPauses", []), *proposal.get("proposedTrims", [])]:
+        if not trim.get("protected"):
+            continue
+        at_s = float(trim["at_s"])
+        spans.append((at_s, at_s + float(trim["gap_s"])))
+    return spans
 
 
 @dataclass
@@ -135,6 +169,7 @@ def _drop_intervals(proposal: dict, retakes: list[dict] | None,
     w0, w1 = window
     silence = options.silence if options else None
     words = options.words if options else None
+    protected = _protected_spans(proposal)
     drops: list[tuple[float, float]] = []
     for t in proposal.get("proposedTrims", []):
         if t.get("protected"):
@@ -146,12 +181,14 @@ def _drop_intervals(proposal: dict, retakes: list[dict] | None,
             if end > start:
                 drops.append((start, end))
             continue
-        # a pause cut removes measured silence, and all of it but the breath
+        # a pause cut removes measured silence inside the approved gap, less the breath,
+        # and never touches a protected beat
         for piece in _measured_drops((at_s, at_s + float(t["gap_s"])), residual, silence):
-            for start, end in (_outside_words(piece, words) if words else [piece]):
-                start, end = max(start, w0), min(end, w1)
-                if end > start:
-                    drops.append((start, end))
+            for piece2 in _outside_words(piece, protected):
+                for start, end in (_outside_words(piece2, words) if words else [piece2]):
+                    start, end = max(start, w0), min(end, w1)
+                    if end > start:
+                        drops.append((start, end))
     for r in retakes or []:
         start = max(float(r["cutStartS"]), w0)
         end = min(float(r["cutEndS"]), w1)
@@ -168,7 +205,7 @@ def _drop_intervals(proposal: dict, retakes: list[dict] | None,
 
 def _outside_words(drop: tuple[float, float],
                    words: list[tuple[float, float]]) -> list[tuple[float, float]]:
-    """The parts of a drop no transcript word claims (a cut never crosses a word)."""
+    """The parts of a drop that none of ``words`` covers (also used for protected beats)."""
     pieces = [drop]
     for word_start, word_end in words:
         nxt: list[tuple[float, float]] = []
@@ -204,6 +241,8 @@ def main() -> None:
     ap.add_argument("--speed", type=float, default=1.0)
     ap.add_argument("--media", help="the source media: pause cuts are then clamped to "
                     "silence measured in it, so a late word start is never cut into")
+    ap.add_argument("--manifest", help="the asset manifest: --media must be the file it "
+                    "records for --source, so cuts cannot be measured against another take")
     ap.add_argument("--transcript", help="the source transcript: a pause cut then never "
                     "crosses a word the transcript claims, wherever it thinks the word is")
     ap.add_argument("--retakes", help="retake_scan proposal JSON — also drop its "
@@ -217,6 +256,8 @@ def main() -> None:
         with open(a.retakes) as f:
             retakes = json.load(f).get("retakes", [])
     window = (a.window[0], a.window[1])
+    if a.media and a.manifest:
+        _require_declared_media(a.media, a.manifest, a.source)
     silence = measured_silence(a.media) if a.media else None
     words = None
     if a.transcript:

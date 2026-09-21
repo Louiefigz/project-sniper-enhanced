@@ -12,12 +12,17 @@ and never touches the text: it only replaces whisper's padding with the silence 
 was really there. A word the measurement says is entirely silent is left exactly as it
 was (mis-timed tokens are not this module's to decide).
 
-**The gate is measured, not chosen.** A fixed threshold (ffmpeg ``silencedetect``'s
-usual ``-30dB``) calls a quietly spoken word silence: in the qualification take the word
-"point." peaks near −31.6 dB over a −39 dB floor, and a trim built on that gate deleted
-it. So each file's own noise floor is measured (its quietest frames) and speech is
-anything ``FLOOR_MARGIN_DB`` above that, bounded so no take can gate louder than the old
-constant or quieter than ``MIN_GATE_DB``.
+**The gate is measured, not chosen.** A fixed threshold (ffmpeg ``silencedetect``'s usual
+``-30dB``) calls a quietly spoken word silence: in the qualification take the word "point."
+peaks near −31.6 dB, and a trim built on that gate deleted it. So each file's own noise
+floor is measured (the 10th-percentile frame — −69.8 dBFS on that take) and speech is
+anything ``FLOOR_MARGIN_DB`` above it, bounded to [``MIN_GATE_DB``, ``MAX_GATE_DB``].
+
+**Two guards, because a measured gate can still be wrong.** A silence run only STARTS well
+below the gate and ends at it (hysteresis), so a quiet syllable inside a phrase cannot open
+one. And a file whose own median frame sits at its gate is refused outright: on a real
+10-minute lesson (floor −51.2, gate −43.2, median −46.2) the gate lay inside ordinary
+speech and called 54% of the take silent. Refusing beats reporting that.
 """
 
 from __future__ import annotations
@@ -29,11 +34,16 @@ from typing import Iterable
 
 FRAME_S = 0.02          # frame length for the level measurement
 MIN_SILENCE_S = 0.08    # measure short gaps too; the trim brain keeps its own threshold
-MIN_WORD_S = 0.04       # never shrink a word below this
-FLOOR_MARGIN_DB = 8.0   # speech is this far above the file's own noise floor
+MIN_WORD_S = 0.039      # never shrink a word below this (under 0.04 by a float's width)
+FLOOR_MARGIN_DB = 8.0   # a frame this far above the floor is speech: the gate CLOSES here
+OPEN_MARGIN_DB = 3.0    # ...and only re-opens this close to the floor: hysteresis, so a
+                        # quiet syllable inside a phrase cannot start a "silence"
 MAX_GATE_DB = -30.0     # never gate louder than ffmpeg silencedetect's usual constant
 MIN_GATE_DB = -55.0     # nor quieter than this, whatever the floor measures
 FLOOR_PERCENTILE = 10   # the quietest tenth of the take is taken to be its floor
+# A file whose own median frame sits at or below its gate is not a take with pauses in it:
+# the measurement is describing speech as silence. Refuse rather than report nonsense.
+MEDIAN_HEADROOM_DB = 3.0
 
 
 class SpeechEdgeError(RuntimeError):
@@ -81,6 +91,12 @@ def frame_levels(path: str) -> tuple[list[float], float]:
     levels = (20 * np.log10(rms)).tolist()
     floor = float(np.percentile(levels, FLOOR_PERCENTILE))
     gate = min(MAX_GATE_DB, max(MIN_GATE_DB, floor + FLOOR_MARGIN_DB))
+    median = float(np.median(levels))
+    if median <= gate + MEDIAN_HEADROOM_DB:
+        raise SpeechEdgeError(
+            f"this audio cannot be gated safely: its median frame ({median:.1f} dBFS) sits at "
+            f"the silence gate ({gate:.1f} dBFS, floor {floor:.1f}). Measuring it would call "
+            "speech silence.")
     return levels, gate
 
 
@@ -101,10 +117,11 @@ def measure_silences(path: str, offset: float = 0.0) -> list[tuple[float, float]
         SpeechEdgeError: The audio could not be read or measured.
     """
     levels, gate = frame_levels(path)
+    open_at = gate - (FLOOR_MARGIN_DB - OPEN_MARGIN_DB)   # a run STARTS only well under the gate
     spans: list[tuple[float, float]] = []
     run_start: int | None = None
     for index, level in enumerate([*levels, math.inf]):      # a sentinel closes the last run
-        if level < gate:
+        if level < (gate if run_start is not None else open_at):
             run_start = index if run_start is None else run_start
             continue
         if run_start is not None and (index - run_start) * FRAME_S >= MIN_SILENCE_S:

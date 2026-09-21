@@ -109,14 +109,26 @@ class PauseCutsStayInsideMeasuredSilence(unittest.TestCase):
         self.assertAlmostEqual(track[1]["start"], 7.0, places=3,
                                msg="the cut stopped where speech was measured again")
 
-    def test_the_whole_measured_pause_goes_even_when_the_gap_understates_it(self) -> None:
-        """whisper pads a word's end, so the transcript gap can start late: the
-        measured silence (2.5-9.0) is what gets removed, less the breath."""
+    def test_a_cut_never_exceeds_the_approved_gap(self) -> None:
+        """Superseded behaviour: the cut used to swallow the whole measured span, so one
+        span covering two gaps removed both — a 0.25s approved trim became 4.38s and took a
+        protected beat with it. The proposal bounds WHAT may go; measurement only narrows it.
+        """
         track = ap.cut_track_from_pauses(
             _proposal(_trim(3.0, 5.0)), "raw-1", (0.0, 20.0),
             ap.CutOptions(silence=[(2.5, 9.0)]))
-        self.assertAlmostEqual(track[0]["end"], 2.85, places=3, msg="breath kept from 2.5")
-        self.assertAlmostEqual(track[1]["start"], 9.0, places=3, msg="all measured silence gone")
+        self.assertAlmostEqual(track[0]["end"], 3.35, places=3, msg="breath kept from the gap")
+        self.assertAlmostEqual(track[1]["start"], 8.0, places=3, msg="never past the gap end")
+
+    def test_a_protected_beat_is_never_cut_even_inside_measured_silence(self) -> None:
+        proposal = _proposal(_trim(10.4, 0.40, residual_s=0.15))
+        proposal["protectedPauses"] = [_trim(12.0, 2.60, protected=True)]
+        track = ap.cut_track_from_pauses(
+            proposal, "raw-1", (0.0, 20.0), ap.CutOptions(silence=[(10.15, 14.68)]))
+        kept = sum(s["end"] - s["start"] for s in track)
+        self.assertAlmostEqual(20.0 - kept, 0.25, places=3, msg="only the approved trim")
+        self.assertTrue(any(s["start"] <= 12.0 and s["end"] >= 14.6 for s in track),
+                        "the protected beat survived")
 
     def test_a_gap_with_no_measured_silence_is_not_cut_at_all(self) -> None:
         track = ap.cut_track_from_pauses(

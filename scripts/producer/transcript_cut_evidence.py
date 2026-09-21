@@ -15,6 +15,12 @@ from cut_preview_io import read_bytes
 from transcript_source_authority import verify_result
 
 
+#: Re-exported from the shared measurement so the gate and the applier cannot drift.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from local_whisper_speech_edges import (  # noqa: E402
+    PEAK_HEADROOM_DB, SILENCE_MARGIN_S)
+
+
 @dataclass(frozen=True)
 class SourceEvidence:
     source_id: str
@@ -26,15 +32,30 @@ class SourceEvidence:
     silence: tuple[tuple[float, float], ...] = ()
     #: The dBFS gate that measurement used (None when nothing was measured).
     silence_gate_dbfs: float | None = None
+    #: Per-frame levels of the source audio, so a span's own loudness can be checked
+    #: rather than trusting that it fell inside a silence run.
+    frame_levels: tuple[float, ...] = ()
+    frame_s: float = 0.02
 
-    def measured_silent(self, start: float, end: float, margin: float = 0.0) -> bool:
-        """True when [start, end] lies inside one measured silence, with ``margin`` spare."""
-        return any(span_start <= start - margin and end + margin <= span_end
-                   for span_start, span_end in self.silence)
+    def measured_silent(self, start: float, end: float,
+                        margin: float = SILENCE_MARGIN_S) -> bool:
+        """True when the audio says nothing was spoken in [start, end].
+
+        Delegates to the SAME rule the cut applier uses (``Measurement.unspoken``): if the
+        two ever differ, every plan the applier writes is refused by this gate.
+        """
+        if self.silence_gate_dbfs is None:
+            return any(span_start <= start - margin and end + margin <= span_end
+                       for span_start, span_end in self.silence)
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from local_whisper_speech_edges import Measurement
+        return Measurement(tuple(self.silence), tuple(self.frame_levels),
+                           self.silence_gate_dbfs, self.frame_s).unspoken(start, end, margin)
 
 
 def _measure_source_silence(source: dict, manifest_path: str
-                            ) -> tuple[tuple[tuple[float, float], ...], float | None]:
+                            ) -> tuple[tuple[tuple[float, float], ...], float | None,
+                                       tuple[float, ...]]:
     """Silence measured in this source's own audio, or nothing when it cannot be read.
 
     The gate's other evidence is the transcript, whose word bounds whisper pads (and
@@ -43,18 +64,18 @@ def _measure_source_silence(source: dict, manifest_path: str
     """
     media = source.get("path")
     if not isinstance(media, str) or not media:
-        return (), None
+        return (), None, ()
     if not os.path.isabs(media):
         media = os.path.join(os.path.dirname(os.path.abspath(manifest_path)), media)
     if not os.path.isfile(media):
-        return (), None
+        return (), None, ()
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # scripts/
     try:
         from local_whisper_speech_edges import SpeechEdgeError, frame_levels, measure_silences
-        _levels, gate = frame_levels(media)
-        return tuple(measure_silences(media)), round(gate, 2)
+        levels, gate = frame_levels(media)
+        return tuple(measure_silences(media)), round(gate, 2), tuple(levels)
     except (ImportError, SpeechEdgeError, OSError, ValueError):
-        return (), None
+        return (), None, ()
 
 
 @dataclass(frozen=True)
@@ -230,7 +251,7 @@ def source_evidence(manifest: dict, manifest_path: str, transcripts_dir: str,
         correction_problem = _correction_problem(payload, source, path, (authority[-1]["hash"], manifest_path))
         if correction_problem:
             errors.append(f"{tag}: {correction_problem}")
-        silence, gate = _measure_source_silence(source, manifest_path)
+        silence, gate, levels = _measure_source_silence(source, manifest_path)
         sources[source_id] = SourceEvidence(
-            source_id, duration, path, _load_words(payload, tag, errors), silence, gate)
+            source_id, duration, path, _load_words(payload, tag, errors), silence, gate, levels)
     return sources, authority

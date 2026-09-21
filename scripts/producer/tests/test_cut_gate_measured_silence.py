@@ -11,17 +11,20 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from transcript_cut_contract import _boundary_receipt, _validate_decision  # noqa: E402
-from transcript_cut_evidence import SourceEvidence  # noqa: E402
+from transcript_cut_contract import (  # noqa: E402
+    _boundary_receipt, _straddling_words, _validate_decision)
+from transcript_cut_evidence import PEAK_HEADROOM_DB, SourceEvidence  # noqa: E402
 
 WORDS = [{"word": "be", "start": 9.00, "end": 9.20},
          {"word": "asking", "start": 9.29, "end": 9.47},
          {"word": "what", "start": 9.72, "end": 9.90}]
 
 
-def _source(silence=()):
+def _source(silence=(), levels=None, gate=-55.0):
+    """Evidence with optional per-frame levels; default levels are far below the gate."""
+    frames = levels if levels is not None else tuple([-70.0] * 1200)
     return SourceEvidence("raw-1", 22.33, "t.json", WORDS, silence,
-                          -55.0 if silence else None)
+                          gate if silence else None, frames)
 
 
 class BoundaryInsideAWord(unittest.TestCase):
@@ -69,7 +72,7 @@ class RemovalOverAMistimedWord(unittest.TestCase):
         self.assertTrue(any("dead_air cannot hide" in e for e in errors), errors)
 
     def test_a_word_the_audio_measures_as_silent_is_not_a_removed_word(self):
-        source = _source(((9.28, 9.72),))
+        source = _source(((9.20, 9.80),))   # a mis-timed word sits well inside the silence
         claimed = WORDS[1:2]
         gap_words = [w for w in claimed if not source.measured_silent(w["start"], w["end"])]
         self.assertEqual(gap_words, [], "the mis-timed word is not counted as removed speech")
@@ -80,3 +83,35 @@ class RemovalOverAMistimedWord(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PartlyRemovedWords(unittest.TestCase):
+    """A word half inside a removal belonged to neither check: `claimed` requires
+    containment, and the boundary rule suppresses its own error once admitted."""
+
+    def test_a_word_is_found_when_it_only_overlaps_the_gap(self):
+        found = _straddling_words(_source(), 9.40, 9.80)
+        self.assertEqual([w["word"] for w in found], ["asking", "what"])
+
+    def test_a_word_fully_inside_the_gap_is_not_straddling(self):
+        found = _straddling_words(_source(), 9.00, 10.00)
+        self.assertEqual(found, [], "those are `claimed` words, counted elsewhere")
+
+
+class MeasuredSilentNeedsMarginAndLevel(unittest.TestCase):
+    """Containment in a silence run is not proof a word was never spoken there."""
+
+    def test_a_window_that_merely_dips_under_the_gate_is_not_silent(self):
+        loud = tuple([-55.0 + PEAK_HEADROOM_DB] * 1200)     # right at the gate
+        source = _source(((9.20, 9.80),), levels=loud)
+        self.assertFalse(source.measured_silent(9.29, 9.47),
+                         "a window peaking at the gate is not measured silence")
+
+    def test_a_window_well_under_the_gate_is_silent(self):
+        source = _source(((9.20, 9.80),), levels=tuple([-70.0] * 1200))
+        self.assertTrue(source.measured_silent(9.29, 9.47))
+
+    def test_an_exact_touch_does_not_count(self):
+        source = _source(((9.29, 9.47),))
+        self.assertFalse(source.measured_silent(9.29, 9.47),
+                         "the span must extend past the window, not just meet it")

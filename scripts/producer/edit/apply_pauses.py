@@ -57,6 +57,23 @@ def _require_declared_media(media_path: str, manifest_path: str, source_id: str)
             f"  manifest: {declared}\n  --media : {media_path}")
 
 
+def _measurement(media_path: str):
+    """The shared audio measurement for ``media_path`` (cached for one run)."""
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__)))))                    # scripts/ — shared modules
+    from local_whisper_speech_edges import SpeechEdgeError, measure
+    global _MEASUREMENT
+    if _MEASUREMENT is None:
+        try:
+            _MEASUREMENT = measure(media_path)
+        except SpeechEdgeError as exc:
+            raise SystemExit(f"apply_pauses: --media could not be measured: {exc}")
+    return _MEASUREMENT
+
+
+_MEASUREMENT = None
+
+
 def measured_silence(media_path: str) -> list[tuple[float, float]]:
     """Silence intervals measured in ``media_path``.
 
@@ -67,11 +84,9 @@ def measured_silence(media_path: str) -> list[tuple[float, float]]:
     """
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
         os.path.abspath(__file__)))))                    # scripts/ — shared modules
-    from local_whisper_speech_edges import SpeechEdgeError, measure_silences
-    try:
-        return measure_silences(media_path)
-    except SpeechEdgeError as exc:
-        raise SystemExit(f"apply_pauses: --media could not be measured: {exc}")
+    # The confidently-quiet runs, not the hysteresis spans: a cut may only remove audio
+    # the cut gate will also clear as unspoken.
+    return _measurement(media_path).quiet_spans()
 
 
 def _measured_drops(gap: tuple[float, float], residual: float,
@@ -263,8 +278,14 @@ def main() -> None:
     if a.transcript:
         with open(a.transcript) as f:
             payload = json.load(f)
-        words = [(float(w["start"]), float(w["end"]))
-                 for u in payload.get("transcript", []) for w in u.get("words", [])]
+        claimed = [(float(w["start"]), float(w["end"]))
+                   for u in payload.get("transcript", []) for w in u.get("words", [])]
+        # Only words the audio does NOT clear as unspoken block a cut. That is the cut
+        # gate's own rule (SourceEvidence.measured_silent), so a plan written here is not
+        # refused there for cutting across a word whose claimed span is really silence.
+        words = claimed if not a.media else [
+            window for window in claimed
+            if not _measurement(a.media).unspoken(*window, margin=0.0)]
     track = cut_track_from_pauses(proposal, a.source, window,
                                   CutOptions(a.speed, retakes, silence, words))
     out = {"cutTrack": track,

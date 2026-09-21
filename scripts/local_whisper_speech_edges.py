@@ -30,6 +30,7 @@ from __future__ import annotations
 import math
 import os
 import subprocess
+from dataclasses import dataclass
 from typing import Iterable
 
 FRAME_S = 0.02          # frame length for the level measurement
@@ -46,8 +47,81 @@ FLOOR_PERCENTILE = 10   # the quietest tenth of the take is taken to be its floo
 MEDIAN_HEADROOM_DB = 3.0
 
 
+#: A window must be silent this far beyond its own bounds before it counts as unspoken —
+#: whisper's bounds are approximate, so an exact touch proves nothing.
+SILENCE_MARGIN_S = 0.02
+#: ...and its loudest frame must sit this far under the gate, so a window that merely dips
+#: below the threshold is not mistaken for absence of speech.
+PEAK_HEADROOM_DB = 3.0
+
+
 class SpeechEdgeError(RuntimeError):
     """The audio could not be read or measured."""
+
+
+@dataclass(frozen=True)
+class Measurement:
+    """What the audio itself says, shared by everything that acts on it.
+
+    The cut applier and the cut gate must agree on "nothing was spoken here": if the
+    applier cuts on a looser rule than the gate accepts, every plan it writes is refused.
+    """
+
+    spans: tuple[tuple[float, float], ...]
+    levels: tuple[float, ...]
+    gate: float
+    frame_s: float = FRAME_S
+
+    def peak_dbfs(self, start: float, end: float) -> float | None:
+        """The loudest frame strictly inside [start, end].
+
+        Edge frames straddle the window's bounds, so a window ending at a speech onset
+        contains that onset; they are dropped when the window can spare them.
+        """
+        if not self.levels:
+            return None
+        first = max(0, int(start / self.frame_s))
+        last = min(len(self.levels), int(end / self.frame_s) + 1)
+        if last - first > 2:
+            first, last = first + 1, last - 1
+        window = self.levels[first:last]
+        return max(window) if window else None
+
+    def quiet_spans(self) -> list[tuple[float, float]]:
+        """Runs the audio clears as unspoken — the gate less ``PEAK_HEADROOM_DB``.
+
+        ``spans`` is where a silence RUN was detected (hysteresis, for reading pauses);
+        this is where every frame is far enough under the gate that a cut there cannot be
+        removing speech. Cuts clamp to these, so what the applier removes is exactly what
+        the cut gate will clear.
+        """
+        threshold = self.gate - PEAK_HEADROOM_DB
+        spans: list[tuple[float, float]] = []
+        run_start: int | None = None
+        for index, level in enumerate([*self.levels, math.inf]):
+            if level <= threshold:
+                run_start = index if run_start is None else run_start
+                continue
+            if run_start is not None and (index - run_start) * self.frame_s >= MIN_SILENCE_S:
+                spans.append((run_start * self.frame_s, index * self.frame_s))
+            run_start = None
+        return spans
+
+    def unspoken(self, start: float, end: float,
+                 margin: float = SILENCE_MARGIN_S) -> bool:
+        """True when the audio says nothing was spoken in [start, end]."""
+        inside = any(span_start <= start - margin and end + margin <= span_end
+                     for span_start, span_end in self.spans)
+        if not inside:
+            return False
+        peak = self.peak_dbfs(start, end)
+        return peak is None or peak <= self.gate - PEAK_HEADROOM_DB
+
+
+def measure(path: str, offset: float = 0.0) -> Measurement:
+    """Measure one source once: its silence runs, its frame levels and its gate."""
+    levels, gate = frame_levels(path)
+    return Measurement(tuple(measure_silences(path, offset)), tuple(levels), gate)
 
 
 def _ffmpeg() -> str:

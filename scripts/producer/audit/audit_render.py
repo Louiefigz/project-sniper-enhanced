@@ -281,6 +281,9 @@ def write_reports(report: AuditReport) -> tuple[str, str]:
         json.dump(report_to_dict(report), handle, indent=2)
     with open(md_path, "w") as handle:
         handle.write(render_markdown(report))
+    if report.final_sha256 is not None:
+        from revision_ledger import record_audit
+        record_audit(report.final_path, report.final_sha256, report_to_dict(report))
     return json_path, md_path
 
 

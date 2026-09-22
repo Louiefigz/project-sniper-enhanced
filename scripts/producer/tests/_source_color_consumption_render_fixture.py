@@ -6,11 +6,12 @@ observations around the actual cut/master/recorder control flow.
 """
 from __future__ import annotations
 
-from contextlib import ExitStack
+from contextlib import ExitStack, nullcontext
 from copy import deepcopy
 from fractions import Fraction
 import subprocess
-from unittest.mock import patch
+from pathlib import Path
+from unittest.mock import Mock, patch
 
 from audio import master, render_audio_master as audio, audio_mix_picture
 from audio.audio_mix_picture import PictureSource
@@ -33,11 +34,15 @@ class SourceColorRenderFixture:
 
     def cut_leaves(self, stack: ExitStack) -> dict:
         """Run real options/part builders while stubbing every native/probe observation."""
+        Path(self.ctx.out_dir).mkdir(parents=True, exist_ok=True)
         paths = {row["path"]: None for row in self.ctx.manifest["sources"]}
         values = {"observe_cut_source_set": paths, "decide_profile": cut.Profile(1920, 1080, Fraction(24), "yuv420p"),
                   "_warn_off_profile": None, "run_ff": None, "_clamp_part_audio": 6,
                   "concat_parts": None, "probe_video_frames": 18, "probe_duration": .75,
                   "assert_cut_sources_stable": None, "cut_source_receipts": [], "emit": None}
+        recorder = Mock()
+        recorder.publish.return_value = {"TEST": "native leaves stubbed"}
+        stack.enter_context(patch.object(cut, "execution_scope", return_value=nullcontext(recorder)))
         result = {name: stack.enter_context(patch.object(cut, name, return_value=value)) for name, value in values.items()}
         stack.enter_context(patch.object(render, "write_manifestation", side_effect=self.fixture.manifestation))
         stack.enter_context(patch.object(render, "probe_video", return_value={"r_frame_rate": "24/1"}))
@@ -76,9 +81,13 @@ class SourceColorRenderFixture:
         stack.enter_context(patch.object(master, "_run", return_value=subprocess.CompletedProcess([], 0, "", "")))
         stack.enter_context(patch.object(master.os.path, "isfile", return_value=True))
         values = {"verify_source_bus": None, "_observe_final_audio": ({}, 0, ""),
-            "build_pass2_afilter": ("TEST", None), "run_audio": None, "_audio_clock": {},
+            "select_pass2_filter": master.MasterFilterSelection("TEST", None, {"TEST": True}),
+            "run_audio": None, "_audio_clock": {},
             "file_sha256": "e" * 64, "finalize_master": {
                 "status": "done", "out": self.ctx.out_dir + "/final.mp4", "warnings": []}}
+        recorder = Mock()
+        recorder.publish.return_value = {"TEST": "native leaves stubbed"}
+        stack.enter_context(patch.object(cut, "execution_scope", return_value=nullcontext(recorder)))
         result = {name: stack.enter_context(patch.object(audio, name, return_value=value)) for name, value in values.items()}
         result["seal_audio_record"] = stack.enter_context(patch.object(audio, "seal_audio_record", side_effect=self.seal))
         stack.enter_context(patch.object(audio, "observe_picture_source", side_effect=self.observed))

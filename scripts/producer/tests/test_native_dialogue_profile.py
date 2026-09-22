@@ -55,7 +55,7 @@ class NativeDialogueProfileTests(unittest.TestCase):
         master.write_bytes(b"float fixture")
         with patch.object(delivery, "exact_float_audio_clock", return_value={}), \
                 patch.object(delivery, "_observe_final_audio", return_value=({}, 0, "")), \
-                patch.object(delivery, "render_float_master", return_value=(master, "chain", None)) as render, \
+                patch.object(delivery, "render_float_master", return_value=(master, "chain", None, {"TEST": True})) as render, \
                 patch.object(delivery, "measure_delivery", return_value={"qualified": True}):
             delivery._master(self.request, {}, ("ffmpeg", "ffprobe"))
         self.assertIs(render.call_args.args[0].profile, NATIVE_SHORT_MASTERING_PROFILE)

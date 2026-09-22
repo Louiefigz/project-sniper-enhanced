@@ -36,7 +36,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # run-by-path: producer pkg root on sys.path
 from audio.audio_enhance import run_audio_enhance
 from audio.audio_gain import apply_gain, overlap_error, parse_windows
-from audio.master import (MASTERING_POLICY_VERSION, build_pass2_afilter,
+from audio.master import (MASTERING_POLICY_VERSION, select_pass2_filter,
                           dead_channel_prefix, measure_loudness)
 from fingerprints import file_sha256, fingerprint_record, write_json_atomic
 from producer_config import ENCODE
@@ -74,23 +74,23 @@ def _run_ff(cmd: list[str], what: str) -> None:
         raise RuntimeError(f"{what} failed: {proc.stderr.strip()[-400:]}")
 
 
-def _remaster_audio(src: str, out: str) -> str | None:
+def _remaster_audio(src: str, out: str) -> tuple[str | None, dict]:
     """Two-pass loudnorm on ``src``'s audio → ``out`` (video stream copied).
 
     Reuses master.py's mastering intelligence via its public
-    ``build_pass2_afilter`` seam (linear / static-gain / dynamic dispatch) —
-    never duplicates the private helpers. Returns the builder's warning note.
+    ``select_pass2_filter`` seam (linear / static-gain / dynamic dispatch).
+    Returns the warning note and actual processing decision.
     """
     prefix, _warn = dead_channel_prefix(src)   # mastered bus: normally None
     measured = measure_loudness(src, prefix)
-    afilter, note = build_pass2_afilter(src, prefix, measured)
+    selected = select_pass2_filter(src, prefix, measured)
     cmd = ["ffmpeg", "-y", "-hide_banner", "-nostats", "-i", src,
-           "-map", "0:v:0", "-c:v", "copy", "-map", "0:a:0", "-af", afilter,
+           "-map", "0:v:0", "-c:v", "copy", "-map", "0:a:0", "-af", selected.chain,
            "-c:a", ENCODE["acodec"], "-b:a", ENCODE["audio_bitrate"],
            "-ar", str(ENCODE["audio_rate"]), "-ac", str(ENCODE["audio_channels"]),
            "-movflags", ENCODE["movflags"], out]
     _run_ff(cmd, "audio-only re-master")
-    return note
+    return selected.note, selected.evidence
 
 
 def rebuild_audio_bus(base: str, plan: dict, work: str) -> tuple[str, dict]:
@@ -123,9 +123,13 @@ def rebuild_audio_bus(base: str, plan: dict, work: str) -> tuple[str, dict]:
             raise RuntimeError(f"audio-only gain failed: {rep['stderr'][-300:]}")
         src, steps["gain_windows"] = out, len(windows)
     mastered = os.path.join(work, "bus_mastered.mp4")
-    note = _remaster_audio(src, mastered)
+    note, steps["mastering_decision"] = _remaster_audio(src, mastered)
     if note:
         steps["remaster_note"] = note
+    write_json_atomic(os.path.join(work, "audio_rebuild.json"), {
+        "schemaVersion": 1, "kind": "audio-base-processing-observation",
+        "scope": "processing-observation-not-delivery-approval",
+        "completedBaseSha256": file_sha256(mastered), **steps})
     return mastered, steps
 
 

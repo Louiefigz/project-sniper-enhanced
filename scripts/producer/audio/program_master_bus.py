@@ -55,7 +55,7 @@ def audio_program_input_hash(bus: SourceAudioBus, mix: ProgramMix) -> str:
         "tools": bus.admission.tools, "code": list(bus.admission.code)})
 
 
-def _render_master(bus: SourceAudioBus, mix: ProgramMix, directory: Path) -> tuple[Path, str, str | None]:
+def _render_master(bus: SourceAudioBus, mix: ProgramMix, directory: Path) -> tuple[Path, str, str | None, dict]:
     """Reuse shared mastering dispatch; materialize float once, with no AAC here."""
     float_audio_clock(mix.path, bus)
     source = FloatMasterInput(mix.path, bus.samples, mix.measured,
@@ -73,7 +73,7 @@ def build_program_master(bus: SourceAudioBus, plan: dict) -> ProgramMaster:
     directory = Path(tempfile.mkdtemp(prefix=".program-master-v2-", dir=bus.directory))
     mix = build_program_mix(bus, plan, directory)
     _mix_stable(mix, bus)
-    path, chain, note = _render_master(bus, mix, directory)
+    path, chain, note, decision = _render_master(bus, mix, directory)
     before = file_hash(path)
     clock = float_audio_clock(str(path), bus)
     measured = measure_delivery(str(path))
@@ -84,7 +84,7 @@ def build_program_master(bus: SourceAudioBus, plan: dict) -> ProgramMaster:
             "kind": "ordinary-program-master-failed", "approved": False,
             "path": str(path), "measuredSha256": before, "measurement": measured})
         raise RuntimeError(f"full-program master unqualified; retained candidate: {path}; {measured}")
-    body = {"schemaVersion": 2, "kind": "ordinary-program-master",
+    body = {"schemaVersion": 3, "kind": "ordinary-program-master",
         "scope": "full-program-audio-not-delivery-approval", "audioClockPolicy": SOURCE_FLOAT_POLICY_V2,
         "sourceBusReceiptHash": bus.receipt["receiptHash"],
         "audioProgramInputHash": audio_program_input_hash(bus, mix),
@@ -92,7 +92,8 @@ def build_program_master(bus: SourceAudioBus, plan: dict) -> ProgramMaster:
         "audioDeliveryPolicyVersion": AUDIO_DELIVERY_POLICY_VERSION,
         "audioMixPolicyVersion": AUDIO_MIX_POLICY_VERSION,
         "frameRate": bus.frame_rate, "videoFrames": bus.frames, "totalSamples": bus.samples,
-        "masteringFilter": chain, "masteringNote": note, "detectorReference": mix.detector_reference,
+        "masteringFilter": chain, "masteringNote": note, "masteringDecision": decision,
+        "detectorReference": mix.detector_reference,
         "music": mix.music, "finishing": mix.finishing, "premaster": {"path": mix.path, "sha256": mix.sha256},
         "masteredAudio": {"path": str(path), "sha256": before, "sizeBytes": path.stat().st_size, **clock},
         "wholeProgramMeasurement": measured}

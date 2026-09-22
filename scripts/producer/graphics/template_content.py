@@ -16,9 +16,14 @@ _ASSET_NUMBERED_RE = re.compile(r"(?:icon|media)\d*\Z")
 _TIMING_CONTROLS = frozenset({"moduleLands", "rowLands", "statementLands"})
 
 
+def is_timing_control(key: str, row: dict) -> bool:
+    """True only for an established control declared with its string type."""
+    return key in _TIMING_CONTROLS and row.get("type") == "string"
+
+
 def is_content_string(key: str, row: dict) -> bool:
     """True when a declared string is presumed to paint visible copy."""
-    if row.get("type") != "string" or key in _TIMING_CONTROLS:
+    if row.get("type") != "string" or is_timing_control(key, row):
         return False
     return key not in _ASSET_EXACT and _ASSET_NUMBERED_RE.fullmatch(key) is None
 

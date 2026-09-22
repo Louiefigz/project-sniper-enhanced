@@ -4,7 +4,9 @@ MODULE_STUDY §1.2#11 / §5 item 6: every numeric token in a card's copy must
 be SPOKEN in the card's window — arithmetic string/number match (scales,
 spelled cardinals by lookup), never regex semantics. evidence*/icon* exempt.
 """
+import copy
 import unittest
+from unittest.mock import patch
 
 from _common import *  # noqa: F401,F403
 import claims_contract as cc
@@ -46,6 +48,10 @@ class TokenValueTests(unittest.TestCase):
     def test_claim_tokens_skip_digit_bearing_names(self) -> None:
         text = "GPT-5.6 scored 92% on 9:16 at #c6f542 v2"
         self.assertEqual(cc.claim_tokens(text), ["92%", "9:16"])
+
+    def test_each_painted_unit_preserves_its_numeric_claim(self) -> None:
+        """Recognize numbers separated by the renderer's visible-unit syntax."""
+        self.assertEqual(cc.claim_tokens("92%|450M\n10x"), ["92%", "450M", "10x"])
 
 
 class ClaimsMatchTests(unittest.TestCase):
@@ -123,6 +129,75 @@ class ClaimsMatchTests(unittest.TestCase):
         errs = _errors(plan, _words("made five thousand dollars in thirty days"))
         self.assertEqual(len(errs), 1, errs)
         self.assertIn("titleCards[0]", errs[0])
+
+
+class TimingControlClaimsTests(unittest.TestCase):
+    """Reveal schedules never substitute for, or become, visible claims."""
+
+    def _statement_plan(self, timing: object = "2.58") -> dict:
+        """Use the registered module grammar and an actual string control."""
+        plan = _plan({"variant": "module", "statements": "Review it|Catch it",
+                      "statementLands": timing})
+        plan["graphicsTrack"][0]["kind"] = "statement-card"
+        return plan
+
+    def test_declared_timing_is_not_spoken_copy_and_plan_is_unchanged(self) -> None:
+        """Check the real statement control without mutating authored input."""
+        plan = self._statement_plan()
+        before = copy.deepcopy(plan)
+        self.assertEqual(_errors(plan, _words("review it and catch it")), [])
+        self.assertEqual(plan, before)
+
+    def test_each_catalog_timing_control_uses_the_shared_classification(self) -> None:
+        """Exercise every actual declaration without depending on its defaults."""
+        controls = [(kind, key) for kind, row in cc.template_catalog().items()
+                    for key, variable in row["variables"].items()
+                    if cc.is_timing_control(key, variable)]
+        for kind, key in controls:
+            plan = _plan({key: "2.58"})
+            plan["graphicsTrack"][0]["kind"] = kind
+            with self.subTest(kind=kind, key=key):
+                self.assertEqual(_errors(plan, _words("nothing numeric")), [])
+        self.assertEqual({key for _, key in controls},
+                         {"moduleLands", "rowLands", "statementLands"})
+
+    def test_visible_numeric_claim_is_still_rejected(self) -> None:
+        """A valid reveal time cannot hide an unspoken painted number."""
+        plan = self._statement_plan()
+        plan["graphicsTrack"][0]["spec"]["statements"] = "Review 92|Catch it"
+        errors = _errors(plan, _words("review it and catch it"))
+        self.assertTrue(any("'92'" in error for error in errors), errors)
+
+    def test_unknown_and_nested_controls_remain_checked(self) -> None:
+        """Only the selected template's top-level control receives exclusion."""
+        plans = [_plan({"statementLands": "2.58"}),
+                 self._statement_plan(), self._statement_plan()]
+        plans[1]["graphicsTrack"][0]["kind"] = "unknown-composition"
+        plans[2]["graphicsTrack"][0]["spec"]["nested"] = {"statementLands": "92"}
+        for plan in plans:
+            with self.subTest(plan=plan):
+                self.assertTrue(_errors(plan, _words("review it and catch it")))
+
+    def test_changed_declaration_is_not_silently_exempted(self) -> None:
+        """Require the expected source-declared control type."""
+        catalog = {"statement-card": {"variables": {
+            "statementLands": {"type": "number"}}}}
+        with patch.object(cc, "template_catalog", return_value=catalog):
+            self.assertTrue(_errors(self._statement_plan(),
+                                    _words("review it and catch it")))
+
+    def test_timing_alone_cannot_ground_unspoken_visible_copy(self) -> None:
+        """A spoken number in a control supplies no coverage for unrelated copy."""
+        plan = self._statement_plan("92")
+        self.assertTrue(_errors(plan, _words("we have ninety two examples")))
+
+    def test_malformed_schedule_is_still_rejected_by_template_gate(self) -> None:
+        """Keep timing validation separate and mandatory."""
+        from graphics.template_contract import entry_errors
+
+        plan = self._statement_plan("not-a-time")
+        self.assertTrue(any("statementLands" in error
+                            for error in entry_errors(plan["graphicsTrack"][0])))
 
 
 if __name__ == "__main__":

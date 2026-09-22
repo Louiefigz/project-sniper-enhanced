@@ -187,18 +187,15 @@ def _check_module_lands(tag: str, g: dict, hold: float, rep: Any) -> None:
     # "" is the same authored fact as an absent key: no build schedule.
     if lands is None or lands == "":
         return
-    if not isinstance(lands, list) or not lands:
-        rep.error(f"{tag}: spec.moduleLands must be a non-empty array of "
-                  "comp-relative seconds")
+    from graphics.template_visual_contract import parse_module_lands
+    try:
+        lands = parse_module_lands(lands)
+    except ValueError as error:
+        rep.error(f"{tag}: spec.{error}")
         return
     gap = MOTION["module_lands"]["min_spacing_s"]
     prev = None
     for k, t in enumerate(lands):
-        if isinstance(t, bool) or not isinstance(t, (int, float)) \
-                or not math.isfinite(float(t)):
-            rep.error(f"{tag}: spec.moduleLands[{k}] must be a finite number "
-                      f"(got {t!r})")
-            return
         if not (0.0 <= float(t) <= hold + 0.05):
             rep.error(f"{tag}: spec.moduleLands[{k}] {float(t):g}s is outside "
                       f"the hold [0,{hold:.2f}]s — a module must land while "

@@ -253,6 +253,9 @@ def _publish(candidate: _AssemblyCandidate, master: Any, qualified: _QualifiedCa
     publish_files(Path(job.out).absolute().parent, entries, candidate.before,
                   lambda: _candidate_current(candidate, master, qualified))
     provenance = bound_json(Path(job.out + ".assembled.json").absolute())
+    from revision_ledger import record_render, record_audit
+    record_render(job.out, job.plan, provenance)
+    record_audit(job.out, qualified.report.final_sha256, report_to_dict(qualified.report))
     return {"out": job.out, "planHash": provenance["planHash"], "authorityHash": provenance["authorityHash"],
         "audioClockPolicy": SOURCE_FLOAT_POLICY_V2, "programAudio": pointer,
         "programDeliveryReceipt": {"path": delivery["deliveryReceiptPath"], "receiptHash": delivery["deliveryReceiptHash"]},

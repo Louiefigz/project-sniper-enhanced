@@ -33,9 +33,11 @@ from headless.container_renderer import (
 )
 from graphics.template_contract import (
     composition_dimensions,
+    declared_variables,
     resolved_assets,
     validate_entry,
 )
+from graphics.template_visual_contract import module_land_variables
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PIPELINE_ROOT = os.environ.get(
     "SNIPER_PIPELINE_ROOT", os.path.abspath(
@@ -273,6 +275,7 @@ def _render_entry(entry: dict, cache_dir: str | None,
     validate_entry(entry, comp_html)
     if quantized is not entry:
         validate_entry(quantized, comp_html)
+    variables = module_land_variables(spec, declared_variables(comp_html))
     dimensions = composition_dimensions(comp_html)
     cache_dir = cache_dir or DEFAULT_CACHE_DIR
     os.makedirs(cache_dir, exist_ok=True)
@@ -284,16 +287,16 @@ def _render_entry(entry: dict, cache_dir: str | None,
                 PIPELINE_ROOT, CompositionInput(
                     relative, comp_html, render_intent={
                         "fps": rate.token}, duration=duration),
-                spec, seal_dir)
+                variables, seal_dir)
             key = _sealed_hash(kind, snapshot, rate.token)
             work = _RenderWork(entry, fmt, dimensions, duration, key, relative,
-                               "", comp_html, spec, snapshot, capability_probe,
+                               "", comp_html, variables, snapshot, capability_probe,
                                rate.token)
             return _materialize_work(work, cache_dir, ext)
     key = content_hash(kind, spec, duration, comp_html, rate.token)
     temp_rel = os.path.join("compositions", f"_gs-{key}.html")
     work = _RenderWork(entry, fmt, dimensions, duration, key, temp_rel,
-                       os.path.join(MOTION_DIR, temp_rel), comp_html, spec, None,
+                       os.path.join(MOTION_DIR, temp_rel), comp_html, variables, None,
                        capability_probe, rate.token)
     return _materialize_work(work, cache_dir, ext)
 

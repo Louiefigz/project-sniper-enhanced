@@ -142,6 +142,17 @@ def _land_values(val: object) -> list[float]:
     return []
 
 
+def _schedule_values(key: str, value: object) -> list[float]:
+    """Invalid module schedules contribute no claimed visual changes."""
+    if key != "moduleLands":
+        return _land_values(value)
+    from graphics.template_visual_contract import parse_module_lands
+    try:
+        return parse_module_lands(value)
+    except ValueError:
+        return []
+
+
 def _staged_land_times(graphics: list[dict]) -> list[float]:
     """Internal build-state lands of staged comps, in output time.
 
@@ -165,7 +176,7 @@ def _staged_land_times(graphics: list[dict]) -> list[float]:
             if _AT_KEY.match(str(key)) and isinstance(val, (int, float)):
                 rel.append(float(val))
         for key in _LAND_KEYS:
-            rel.extend(_land_values(spec.get(key)))
+            rel.extend(_schedule_values(key, spec.get(key)))
         for r in rel:
             t = float(start) + r
             if t < end:

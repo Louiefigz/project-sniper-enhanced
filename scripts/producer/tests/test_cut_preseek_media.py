@@ -17,15 +17,15 @@ from fingerprints import file_sha256
 
 
 class CutPreseekMediaTests(unittest.TestCase):
-    """Real AAC/HEVC cuts include fractional clocks, short windows and J-cuts."""
+    """Real AAC/H.264 cuts cover clocks and seams using the mandatory shipped encoder."""
 
     def _source(self, root: Path, fps: str) -> Path:
         """Create bounded moving picture and audio; no user footage is modified."""
         source = root / "source.mp4"
         command = ["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i",
                    f"testsrc2=s=320x180:r={fps}:d=15", "-f", "lavfi", "-i",
-                   "sine=f=443:r=48000:d=15", "-c:v", "libx265", "-preset", "ultrafast",
-                   "-x265-params", "pools=1:frame-threads=1:log-level=error",
+                   "sine=f=443:r=48000:d=15", "-c:v", "libx264", "-preset", "ultrafast",
+                   "-threads", "1",
                    "-g", "120", "-pix_fmt", "yuv420p", "-c:a", "aac", str(source)]
         subprocess.run(command, check=True, capture_output=True, timeout=60)
         return source

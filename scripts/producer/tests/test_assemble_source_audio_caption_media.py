@@ -8,6 +8,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from dataclasses import replace
 from unittest.mock import patch
 
 import cv2
@@ -104,6 +105,33 @@ class CaptionSourceAudioMediaTests(unittest.TestCase):
         self.assertTrue(master['wholeProgramMeasurement']['audioDecodeSucceeded'])
         self.assertEqual(master['detectorReference']['appliedTo'], 'sidechain-only')
         verify_delivered_cuts(str(self.output), self.job.out, self.plan)
+
+    def test_zz_caption_music_revision_reuses_base_and_requires_current_full_review(self) -> None:
+        """A combined real revision rebuilds finishing without touching cut/reframe."""
+        from revision_ledger import current_observations
+        before_base = file_hash(self.base)
+        before_execution = file_hash(self.output / "cut_execution.json")
+        revised = copy.deepcopy(self.plan)
+        revised['music']['gapDb'] = 14
+        words = [stable_word_id('raw-1', index) for index in (0, 1)]
+        revised['captionsTrack'] = upsert_caption_range(revised['captionsTrack'], {
+            'wordIds': words, 'styleId': 'karaoke', 'mode': 'karaoke-word', 'placement': 'top-center'})
+        plan_path = self.output / 'revision-plan.json'
+        plan_path.write_text(json.dumps(revised))
+        target = self.output / 'revised.mp4'
+        job = replace(self.job, plan=revised, plan_path=str(plan_path), out=str(target))
+        with (self.root / 'revision.log').open('w') as log, contextlib.redirect_stdout(log), \
+                patch('assemble_base_rebuild._run_renderer', side_effect=AssertionError('base must be reused')):
+            _plan, state = assemble.ensure_base(str(self.base), str(plan_path), revised,
+                job.fingerprint_path, assemble.BaseManifest(job.manifest, SOURCE_FLOAT_POLICY_V2))
+            self.assertEqual(state, 'current')
+            result = assemble.assemble(job)
+        self.assertTrue(result['delivery']['qualified'])
+        self.assertEqual(file_hash(self.base), before_base)
+        self.assertEqual(file_hash(self.output / "cut_execution.json"), before_execution)
+        records = current_observations(str(target))
+        self.assertEqual({row['event'] for row in records}, {'render-completed', 'deterministic-audit'})
+        self.assertTrue(all(row['fullReviewRequired'] and not row['reviewCarryForward'] for row in records))
 
     def test_early_and_late_captions_are_visible_in_decoded_final(self) -> None:
         differences = {}

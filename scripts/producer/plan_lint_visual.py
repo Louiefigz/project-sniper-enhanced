@@ -53,6 +53,7 @@ from graphics.variety_contract import check_variety, strict_scope
 from planner import motion_triggers as mt
 from producer_config import MOTION
 from plan_lint_contrast import check_contrast, contrast_ratio, luminance
+from graphics.template_visual_contract import parse_module_lands
 
 def _declared_first_land(spec: dict) -> float | None:
     """Earliest DECLARED comp-relative land: moduleLands[0] / min atN.
@@ -61,11 +62,14 @@ def _declared_first_land(spec: dict) -> float | None:
     module-lands / comp checks' job, so non-numerics are ignored here.
     """
     lands: list[float] = []
-    for lkey in ("moduleLands", "rowLands"):
-        seq = spec.get(lkey)
-        if isinstance(seq, (list, tuple)) and seq and isinstance(
-                seq[0], (int, float)) and not isinstance(seq[0], bool):
-            lands.append(float(seq[0]))
+    try:
+        lands.append(parse_module_lands(spec.get("moduleLands"))[0])
+    except ValueError:
+        pass  # The module schedule validator reports malformed values.
+    seq = spec.get("rowLands")
+    if isinstance(seq, (list, tuple)) and seq and isinstance(
+            seq[0], (int, float)) and not isinstance(seq[0], bool):
+        lands.append(float(seq[0]))
     for key, val in spec.items():
         if (str(key).startswith("at") and str(key)[2:].isdigit()
                 and isinstance(val, (int, float))

@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from transcript_cut_contract import (  # noqa: E402
-    _boundary_receipt, _straddling_words, _validate_decision)
+    Boundary, _boundary_receipt, _straddling_words, _validate_decision)
 from transcript_cut_evidence import PEAK_HEADROOM_DB, SourceEvidence  # noqa: E402
 
 WORDS = [{"word": "be", "start": 9.00, "end": 9.20},
@@ -30,12 +30,12 @@ def _source(silence=(), levels=None, gate=-55.0):
 class BoundaryInsideAWord(unittest.TestCase):
     def test_without_audio_a_boundary_inside_a_word_is_still_refused(self):
         errors = []
-        _boundary_receipt("cutTrack[1]", 9.40, "end", _source(), errors)
+        _boundary_receipt(Boundary("cutTrack[1]", 9.40, "end"), _source(), errors)
         self.assertTrue(any("cuts through word 'asking'" in e for e in errors), errors)
 
     def test_measured_silence_admits_the_boundary_and_says_so(self):
         errors = []
-        receipt = _boundary_receipt("cutTrack[1]", 9.40, "end",
+        receipt = _boundary_receipt(Boundary("cutTrack[1]", 9.40, "end"),
                                     _source(((9.28, 9.72),)), errors)   # silence AFTER it
         self.assertEqual(errors, [], "the audio was silent there")
         self.assertTrue(receipt["admittedByMeasuredSilence"])
@@ -43,7 +43,7 @@ class BoundaryInsideAWord(unittest.TestCase):
 
     def test_audible_speech_is_refused_even_with_audio_measured(self):
         errors = []
-        _boundary_receipt("cutTrack[1]", 9.40, "end",
+        _boundary_receipt(Boundary("cutTrack[1]", 9.40, "end"),
                           _source(((3.0, 3.4), (10.5, 11.0))), errors)
         self.assertTrue(any("cuts through word 'asking'" in e for e in errors), errors)
 
@@ -51,10 +51,10 @@ class BoundaryInsideAWord(unittest.TestCase):
         """A kept range ENDS where silence begins: silence before an `end` boundary is the
         kept side and proves nothing about what the cut swallows."""
         errors = []
-        _boundary_receipt("cutTrack[1]", 9.40, "end", _source(((9.00, 9.40),)), errors)
+        _boundary_receipt(Boundary("cutTrack[1]", 9.40, "end"), _source(((9.00, 9.40),)), errors)
         self.assertTrue(any("cuts through word 'asking'" in e for e in errors), errors)
         ok = []
-        receipt = _boundary_receipt("cutTrack[2]", 9.40, "start", _source(((9.00, 9.40),)), ok)
+        receipt = _boundary_receipt(Boundary("cutTrack[2]", 9.40, "start"), _source(((9.00, 9.40),)), ok)
         self.assertEqual(ok, [], "for a `start`, the silence before it is what was removed")
         self.assertTrue(receipt["admittedByMeasuredSilence"])
 

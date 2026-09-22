@@ -9,6 +9,8 @@ import unittest
 
 from _common import *  # noqa: F401,F403
 from producer_config import MOTION
+from graphics.template_visual_contract import module_land_variables
+from plan_lint_visual import check_first_land
 
 
 def _w(t: float) -> dict:
@@ -84,6 +86,31 @@ class ModuleLandsLintTests(unittest.TestCase):
     def test_valid_lands_pass(self) -> None:
         self.assertEqual(self._errors(self._plan([0.0, 0.8, 2.0, 3.9])), [])
 
+    def test_declared_string_schedules_keep_all_lint_constraints(self) -> None:
+        for lands in ("0|0.8|2|3.9", "0, .8, 2e0, 3.9"):
+            self.assertEqual(self._errors(self._plan(lands)), [])
+        for lands in ("0|5", "0|0.1", "2|1", "0|NaN", "0|1tail", "0|1|", "0|1_0"):
+            with self.subTest(lands=lands):
+                self.assertTrue(self._errors(self._plan(lands)))
+
+    def test_string_schedule_cannot_hide_empty_chrome(self) -> None:
+        for lands in ([2, 3], "2|3", "2,3"):
+            plan = self._plan(lands)
+            plan["graphicsTrack"][0]["anchor"] = "own-screen"
+            report = pl.Report()
+            check_first_land(plan, report)
+            self.assertTrue(any("empty chrome" in error for error in report.errors))
+
+    def test_array_transport_is_lossless_and_does_not_mutate_authored_input(self) -> None:
+        spec = {"moduleLands": [0, 0.8, 2.441234567890123], "label": "Unchanged"}
+        variables = module_land_variables(spec, {"moduleLands": {"type": "string"}})
+        self.assertEqual([float(value) for value in variables["moduleLands"].split("|")],
+                         spec["moduleLands"])
+        self.assertEqual(variables["label"], spec["label"])
+        self.assertIsInstance(spec["moduleLands"], list)
+        with self.assertRaises(ValueError):
+            module_land_variables({"moduleLands": [False, 1]}, {"moduleLands": {"type": "string"}})
+
     def test_absent_key_is_additive_no_checks(self) -> None:
         plan = self._plan([0.0])
         del plan["graphicsTrack"][0]["spec"]["moduleLands"]
@@ -107,6 +134,7 @@ class ModuleLandsLintTests(unittest.TestCase):
         self.assertTrue(self._errors(self._plan([float("nan")])))
         self.assertTrue(self._errors(self._plan("nope")))
         self.assertTrue(self._errors(self._plan([])))
+        self.assertTrue(self._errors(self._plan([0, 10 ** 1000])))
 
 
 if __name__ == "__main__":

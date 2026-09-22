@@ -17,7 +17,7 @@ _KEYS = {"schemaVersion", "kind", "scope", "audioClockPolicy", "sourceBusReceipt
     "audioProgramInputHash", "masteringPolicyVersion", "audioDeliveryPolicyVersion", "frameRate",
     "videoFrames", "totalSamples", "masteringFilter", "masteringNote", "detectorReference", "music",
     "premaster", "masteredAudio", "wholeProgramMeasurement", "receiptHash", "audioMixPolicyVersion",
-    "finishing"}
+    "finishing", "masteringDecision"}
 _AUDIO_KEYS = {"path", "sha256", "sizeBytes", "codec", "sampleFormat", "sampleRate", "channels",
                "startPts", "timeBase", "samples"}
 
@@ -32,7 +32,7 @@ def _bound_artifact(value: dict, bus: SourceAudioBus) -> Path:
 
 def _validate_record(record: dict, bus: SourceAudioBus) -> None:
     """Validate exact role/clock/policy fields, not just a self-computable digest."""
-    expected = {"schemaVersion": 2, "kind": "ordinary-program-master",
+    expected = {"schemaVersion": 3, "kind": "ordinary-program-master",
         "scope": "full-program-audio-not-delivery-approval", "audioClockPolicy": "source-float-v2",
         "sourceBusReceiptHash": bus.receipt["receiptHash"], "frameRate": bus.frame_rate,
         "videoFrames": bus.frames, "totalSamples": bus.samples,

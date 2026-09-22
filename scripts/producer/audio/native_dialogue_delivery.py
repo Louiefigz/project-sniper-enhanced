@@ -67,8 +67,8 @@ def _master(request: NativeDialogueDelivery, receipt: dict, tools: tuple[str, st
     if code or measured is None:
         raise RuntimeError("Native premaster decode failed: " + error)
     source = FloatMasterInput(str(request.premaster), request.samples, measured, ffmpeg, request.profile)
-    master, chain, note = render_float_master(source, request.directory)
-    receipt.update(masteringFilter=chain, masteringNote=note,
+    master, chain, note, decision = render_float_master(source, request.directory)
+    receipt.update(masteringFilter=chain, masteringNote=note, masteringDecision=decision,
         masteringPolicyVersion=MASTERING_POLICY_VERSION,
         masterClock=exact_float_audio_clock(str(master), ffprobe, request.samples),
         masterDelivery=measure_delivery(str(master)), masterSha256=file_sha256(str(master)))
@@ -140,6 +140,8 @@ def _reuse(request: NativeDialogueDelivery, receipt: dict, tools: tuple[str, str
     shutil.copyfile(master, destination)
     for key in ("masteringFilter", "masteringNote", "masteringPolicyVersion", "masterSha256"):
         receipt[key] = prior[key]
+    if "masteringDecision" in prior:
+        receipt["masteringDecision"] = prior["masteringDecision"]
     receipt.update(masterClock=exact_float_audio_clock(str(destination), ffprobe, request.samples),
         masterDelivery=measure_delivery(str(destination)), reusedAudioReceiptSha256=prior_hash,
         additionalAacEncodes=0, masteringProfile=effective_profile.receipt())
@@ -166,7 +168,7 @@ def _reuse(request: NativeDialogueDelivery, receipt: dict, tools: tuple[str, str
 def _retain_attempt(request: NativeDialogueDelivery, receipt: dict, attempt: dict) -> None:
     """Persist failed and passing lossless/AAC evidence without overwriting another attempt."""
     (request.directory / "receipt.json").write_text(json.dumps(attempt, indent=2, allow_nan=False) + "\n")
-    for key in ("masteringProfile", "masteringFilter", "masteringNote", "masteringPolicyVersion",
+    for key in ("masteringProfile", "masteringFilter", "masteringNote", "masteringDecision", "masteringPolicyVersion",
                 "premasterClock", "masterClock", "masterDelivery", "masterSha256", "picture",
                 "audioClock", "signal", "delivery", "candidateSha256", "aacEncodingPolicy",
                 "audioQuality", "audioReviewRequired"):

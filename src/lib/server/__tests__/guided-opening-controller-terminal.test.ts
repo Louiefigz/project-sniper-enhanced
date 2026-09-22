@@ -5,17 +5,26 @@ import path from "node:path";
 import test, { type TestContext } from "node:test";
 import { observeOpeningControllerCleanup, releaseOpeningControllerLease } from "../guided-opening-controller-lifecycle";
 import { openingControllerTerminalFixture } from "./_guided-opening-controller-terminal-fixture";
-import { launchOpeningControllerFixture, mockOpeningControllerIdentity } from "./_guided-opening-controller-lifecycle-fixture";
+import { completedMediaFixtureStart, launchOpeningControllerFixture, mockOpeningControllerIdentity } from "./_guided-opening-controller-lifecycle-fixture";
 import { replaceReadIntegrationArchive } from "./_guided-source-color-read-integration-fixture";
 
 function fixture(t: TestContext) {
   mockOpeningControllerIdentity(t);
-  const startedAt = new Date(); startedAt.setUTCSeconds(0, 0);
+  const startedAt = completedMediaFixtureStart();
   return openingControllerTerminalFixture(t, { start: input => launchOpeningControllerFixture(input.dir, input.before, {
     sourceColor: input.sourceColor, token: input.token, requestId: "a8b9ce05-29ec-4bba-93cf-982d811ed137",
-    origin: { clockHash: "a".repeat(64), startedAt: startedAt.toISOString() },
+    origin: { clockHash: "a".repeat(64), startedAt },
   }) });
 }
+
+test("completed synthetic media never publishes a future activation at a minute boundary", () => {
+  const minute = Date.parse("2026-09-22T12:00:00.000Z");
+  for (const offset of [0, 1, 999, 2_999, 3_000, 59_999]) {
+    const observed = minute + offset, origin = Date.parse(completedMediaFixtureStart(observed));
+    assert(origin + 3_000 <= observed);
+    assert(observed - origin < 63_000);
+  }
+});
 
 test("same original preclaim owner releases only after actual final cleanup is authenticated", async t => {
   const f = await fixture(t); f.parent.guard();

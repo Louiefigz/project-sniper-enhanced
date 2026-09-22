@@ -71,10 +71,12 @@ class MasteringProfilesTests(unittest.TestCase):
             source = float_master.FloatMasterInput("original.wav", 522240, measured(), "ffmpeg", profile)
             with patch.object(float_master, "measured_chain", return_value=-15) as observe, \
                     patch.object(float_master, "run_audio") as run:
-                _, chain, _ = float_master.render_float_master(source, Path("unused"))
+                _, chain, _, decision = float_master.render_float_master(source, Path("unused"))
             self.assertEqual(observe.call_count, count)
             self.assertTrue(chain.endswith("aresample=48000,atrim=end_sample=522240,asetpts=PTS-STARTPTS"))
             self.assertIn("pcm_f32le", run.call_args.args[0])
+            self.assertEqual(decision["profile"], profile.receipt())
+            self.assertTrue(chain.startswith(decision["filter"] + ",aresample="))
         default = float_master.FloatMasterInput("original.wav", 1, measured(), "ffmpeg")
         self.assertIs(default.profile, LEGACY_MASTERING_PROFILE)
 

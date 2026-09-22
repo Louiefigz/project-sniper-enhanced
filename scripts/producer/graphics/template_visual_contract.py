@@ -65,24 +65,40 @@ def _parts(spec: dict, key: str) -> list[str]:
     return [part.strip() for part in str(spec.get(key) or "").split("|") if part.strip()]
 
 
+def parse_module_lands(raw: object) -> list[float]:
+    """Read the template's explicit schedule without partial numeric coercion."""
+    values = re.split(r"[|,]", raw) if isinstance(raw, str) else raw
+    if not isinstance(values, list) or not values or any(isinstance(value, bool) for value in values):
+        raise ValueError("moduleLands requires a non-empty array or delimited string of finite times")
+    decimal = r"[ \t\r\n]*[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?[ \t\r\n]*"
+    if any(not isinstance(value, (str, int, float)) or
+           isinstance(value, str) and not re.fullmatch(decimal, value) for value in values):
+        raise ValueError("moduleLands requires complete ASCII decimal times")
+    try:
+        result = [float(value) for value in values]
+    except (TypeError, ValueError, OverflowError) as error:
+        raise ValueError("moduleLands contains an invalid time") from error
+    if any(not math.isfinite(value) or value < 0 for value in result) or result != sorted(set(result)):
+        raise ValueError("moduleLands must be finite, nonnegative and strictly increasing")
+    return result
+
+
 def _module_lands(raw: object, count: int, tokens: dict, label: str) -> list[float]:
     """Validate every explicit land; malformed schedules cannot become defaults."""
     if raw is None or raw == "":
         return [tokens["LAND_DEFAULT_START_S"] + index * tokens["LAND_DEFAULT_GAP_S"] for index in range(count)]
-    values = re.split(r"[|,]", raw) if isinstance(raw, str) else raw
-    if not isinstance(values, list) or len(values) != count or any(isinstance(value, bool) for value in values):
+    result = parse_module_lands(raw)
+    if len(result) != count:
         raise ValueError(f"{label} moduleLands requires exactly {count} finite times")
-    decimal = r"[ \t\r\n]*[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?[ \t\r\n]*"
-    if any(not isinstance(value, (str, int, float)) or
-           isinstance(value, str) and not re.fullmatch(decimal, value) for value in values):
-        raise ValueError(f"{label} moduleLands requires complete ASCII decimal times")
-    try:
-        result = [float(value) for value in values]
-    except (TypeError, ValueError) as error:
-        raise ValueError(f"{label} moduleLands contains an invalid time") from error
-    if any(not math.isfinite(value) or value < 0 for value in result) or result != sorted(set(result)):
-        raise ValueError(f"{label} moduleLands must be finite, nonnegative and increasing")
     return result
+
+
+def module_land_variables(spec: dict, declared: dict) -> dict:
+    """Serialize an authored numeric array to the template's declared string."""
+    raw = spec.get("moduleLands")
+    if not isinstance(raw, list) or declared.get("moduleLands", {}).get("type") != "string":
+        return spec
+    return {**spec, "moduleLands": "|".join(str(value) for value in parse_module_lands(raw))}
 
 
 def scoreboard_timing(spec: dict) -> tuple[float, float, float]:
@@ -180,7 +196,9 @@ def _paired_at_values(spec: dict) -> list[float]:
 
 def _latest_reveal(spec: dict) -> float:
     values = _paired_at_values(spec)
-    for key in ("rowLands", "moduleLands", "statementLands"):
+    if spec.get("moduleLands") not in (None, ""):
+        values.extend(parse_module_lands(spec["moduleLands"]))
+    for key in ("rowLands", "statementLands"):
         values.extend(_series(spec.get(key)))
     if str(spec.get("line2", "")).strip():
         value = _number(spec.get("at3", spec.get("at2")))

@@ -154,6 +154,21 @@ class StudioUiFixtureTests(unittest.TestCase):
             _run([str(_FACTORY), str(self.workspace), "../escape"])
         self.assertEqual(registry.read_bytes(), original)
 
+    def test_changed_base_or_source_cannot_enter_studio_import(self) -> None:
+        """The real bridge rejects byte changes even with an unchanged plan."""
+        targets = [self.producer / "base_final.mp4",
+                   self.producer.parent / "source/raw-1.mp4"]
+        for target in targets:
+            with self.subTest(target=target.name):
+                original = target.read_bytes()
+                try:
+                    target.write_bytes(original + b"changed synthetic test bytes")
+                    with self.assertRaises(subprocess.CalledProcessError) as raised:
+                        _run([__file__, "--validate", str(self.producer)])
+                    self.assertIn("base is stale", raised.exception.stderr)
+                finally:
+                    target.write_bytes(original)
+
 
 if __name__ == "__main__":
     if len(sys.argv) == 3 and sys.argv[1] == "--validate":

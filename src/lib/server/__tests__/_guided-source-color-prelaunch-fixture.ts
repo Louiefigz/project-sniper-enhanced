@@ -8,16 +8,16 @@ import { autoEditJobPath } from "../auto-edit-job-persistence";
 import { holdSourceColorPrelaunch, type SourceColorPrelaunchInput } from "../guided-source-color-prelaunch-owner";
 import { stageGuidedSourceColor } from "../guided-source-color-staging";
 import { openingControllerPrelaunchFixture } from "./_guided-opening-controller-terminal-fixture";
-import { launchOpeningControllerFixture, mockOpeningControllerIdentity } from "./_guided-opening-controller-lifecycle-fixture";
+import { completedMediaFixtureStart, launchOpeningControllerFixture, mockOpeningControllerIdentity } from "./_guided-opening-controller-lifecycle-fixture";
 
 /** All preclaim metadata is original before the claim/staging hold; no sealed parent is rebound. */
 export function prelaunchFixture(t: TestContext) {
   mockOpeningControllerIdentity(t);
   t.mock.method(childProcess, "spawn", () => { throw new Error("TEST native subprocess forbidden"); });
-  const at = new Date(); at.setUTCSeconds(0, 0);
+  const startedAt = completedMediaFixtureStart();
   const f = openingControllerPrelaunchFixture(t, { start: input => launchOpeningControllerFixture(input.dir, input.before, {
     sourceColor: input.sourceColor, token: input.token, requestId: "a8b9ce05-29ec-4bba-93cf-982d811ed137",
-    origin: { clockHash: "a".repeat(64), startedAt: at.toISOString() },
+    origin: { clockHash: "a".repeat(64), startedAt },
   }) });
   const input: SourceColorPrelaunchInput = { controller: f.parent.lifecycle, claim: f.entered.bound,
     projectLease: f.parent.lease, staging: f.staging };

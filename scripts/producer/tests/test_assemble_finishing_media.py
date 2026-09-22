@@ -103,6 +103,9 @@ class CallerShapedFinishingTests(unittest.TestCase):
         self.assertTrue(self.result["delivery"]["qualified"])
         self.assertFalse(self.result["programMasterReused"])
         receipt = bound_json(Path(self._pointer()["programMasterReceiptPath"]))
+        self.assertEqual(receipt["schemaVersion"], 3)
+        self.assertIn(receipt["masteringDecision"]["branch"], {"linear", "static", "dynamic"})
+        self.assertTrue(receipt["masteringFilter"].startswith(receipt["masteringDecision"]["filter"]))
         finishing = receipt["finishing"]
         self.assertEqual(finishing["settings"]["audioGain"], [{"outStart": 1.0, "outEnd": 1.5, "dB": 6.0}])
         self.assertEqual(finishing["settings"]["audioEnhance"], {"preset": "voice"})

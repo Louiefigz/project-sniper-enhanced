@@ -55,7 +55,8 @@ def _tool(name: str) -> dict:
 def _code_closure() -> list[dict]:
     root = os.path.dirname(os.path.abspath(__file__))
     names = [
-        "render.py", "cut_speed.py", "cut_manifestation_authority.py",
+        "render.py", "cut_speed.py", "cut_reframe.py", "cut_encode_plan.py", "cut_decode.py",
+        "cut_execution.py", "cut_manifestation_authority.py",
         "audio/master.py", "motion/baseline_look.py",
         "motion/face_track.py", "motion/reframe.py",
         "motion/reframe_split.py",

@@ -324,6 +324,7 @@ def _render_sidecars(base_dir: str, out_dir: str,
         required += (SOURCE_BUS_POINTER,)
     optional = (
         "captions.srt", "chapters.txt", MANIFESTATION_NAME, DELIVERY_NAME,
+        "cut_reframe.json", "cut_execution.json",
     )
     missing = [name for name in required
                if not os.path.isfile(os.path.join(base_dir, name))]
@@ -502,6 +503,8 @@ def _finalize_assemble(job: AssembleJob, summary: dict) -> dict:
             "duck_depth": mix.get("duck_depth"),
         }
     provenance = write_assembled_sidecar(job.out, job.plan)
+    from revision_ledger import record_render
+    record_render(job.out, job.plan, provenance)
     summary["planHash"] = provenance["planHash"]
     summary["authorityHash"] = provenance["authorityHash"]
     lineage = seal_assembled_delivery(job.base, job.out, job.plan)

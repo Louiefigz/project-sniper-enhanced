@@ -11,7 +11,7 @@ from pathlib import Path
 from audio.audio_mix_delivery import _observe_final_audio, render_qualified_mix
 from audio.audio_mix_picture import observe_picture_source, verify_picture_copy
 from audio.program_audio_clock import aac_audio_clock as _audio_clock
-from audio.master import (MASTERING_POLICY_VERSION, MasterSpec, build_pass2_afilter,
+from audio.master import (MASTERING_POLICY_VERSION, MasterSpec, select_pass2_filter,
                           encode_picture_only, finalize_master)
 from audio.render_audio_authority import SOURCE_FLOAT_POLICY_V2, run_audio, seal_audio_record
 from audio.render_audio_bus import SourceAudioBus, verify_source_bus
@@ -32,10 +32,10 @@ def _encode_audio(candidate: str, context: tuple) -> dict:
         measured, code, error = _observe_final_audio(bus.path)
         if code or measured is None:
             raise RuntimeError("source-float premaster full decode failed: " + error)
-        chain, note = build_pass2_afilter(bus.path, None, measured)
+        selected = select_pass2_filter(bus.path, None, measured)
         # Compensated mastering must preserve the held sample count. Trim only
         # oversampling-filter flush; no `async` or guessed AAC priming removal.
-        audio_filter = f"{chain},aresample=48000,atrim=end_sample={bus.samples},asetpts=PTS-STARTPTS"
+        audio_filter = f"{selected.chain},aresample=48000,atrim=end_sample={bus.samples},asetpts=PTS-STARTPTS"
         run_audio([bus.admission.tools["ffmpeg"]["path"], "-nostdin", "-v", "error", "-xerror",
             "-err_detect", "explode", "-n", "-i", picture.path, "-i", bus.path,
             "-map", "0:v:0", "-c:v", "copy", "-map", "1:a:0", "-af", audio_filter,
@@ -45,7 +45,8 @@ def _encode_audio(candidate: str, context: tuple) -> dict:
         proof = verify_picture_copy(picture, candidate)
         clock = _audio_clock(candidate, bus)
         verify_source_bus(bus, plan)
-        return {"ok": True, "stderr": "", "mastering_note": note, "filter": audio_filter,
+        return {"ok": True, "stderr": "", "mastering_note": selected.note, "filter": audio_filter,
+                "mastering_decision": selected.evidence,
                 "mastering_policy_version": MASTERING_POLICY_VERSION,
                 "picture": proof, "audioClock": clock}
     except (OSError, ValueError, RuntimeError, KeyError, subprocess.SubprocessError) as exc:
@@ -133,5 +134,6 @@ def _completed_master(spec: MasterSpec, result: dict, context: tuple) -> dict:
     bus, receipt = context
     warnings = [result["mastering_note"]] if result["mastering_note"] else []
     return {**finalize_master(spec, warnings), "audio_clock_policy": bus.admission.policy,
+            "mastering_decision": result["mastering_decision"],
             "source_audio_receipt": str(Path(bus.directory) / "master-receipt.json"),
             "source_audio_receipt_hash": receipt["receiptHash"], "delivery": result["delivery"]}

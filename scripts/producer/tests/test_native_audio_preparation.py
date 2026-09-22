@@ -35,6 +35,7 @@ class EarlyMasterTests(unittest.TestCase):
         master = request.directory / 'program-master.wav'
         master.write_bytes(b'TEST mastered PCM')
         receipt.update(premasterClock={}, masterClock={}, masteringFilter='TEST', masteringNote=None,
+            masteringDecision={'TEST processing evidence': True},
             masteringPolicyVersion=MASTERING_POLICY_VERSION, masterDelivery={'qualified': True},
             masterSha256=file_hash(master))
         return master
@@ -74,6 +75,7 @@ class EarlyMasterTests(unittest.TestCase):
         render.assert_not_called()
         self.assertEqual(result.read_bytes(), b'TEST mastered PCM')
         self.assertEqual(receipt['preparedMasterReceiptSha256'], request.prepared_master[1])
+        self.assertEqual(receipt['masteringDecision'], {'TEST processing evidence': True})
 
     def test_changed_source_profile_sections_and_clock_fail_before_copy(self) -> None:
         """Reject changed source, profile, section mapping or sample count before reuse."""

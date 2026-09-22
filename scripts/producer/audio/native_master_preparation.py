@@ -111,6 +111,8 @@ def reuse_prepared_master(request: NativeDialogueDelivery, receipt: dict,
     _read_preparation(request)
     _stable_input(request)
     receipt.update({key: record[key] for key in MASTER_FIELDS})
+    if "masteringDecision" in record:
+        receipt["masteringDecision"] = record["masteringDecision"]
     receipt.update(masterClock=exact_float_audio_clock(str(destination), tools[1], request.samples),
                    preparedMasterReceiptSha256=request.prepared_master[1])
     return destination

@@ -52,7 +52,8 @@ def _encode(candidate: str, context: tuple) -> dict:
         return {"ok": True, "stderr": "", "picture": picture_proof, "audioClock": audio_clock,
                 "localSignal": local_signal,
                 "expectedCandidateSha256": local_signal["candidateSha256"],
-                "mastering_note": master.receipt["masteringNote"]}
+                "mastering_note": master.receipt["masteringNote"],
+                "mastering_decision": master.receipt.get("masteringDecision")}
     except (OSError, ValueError, RuntimeError, KeyError, subprocess.SubprocessError) as error:
         return {"ok": False, "stderr": str(error), "localSignal": getattr(error, "evidence", None)}
 

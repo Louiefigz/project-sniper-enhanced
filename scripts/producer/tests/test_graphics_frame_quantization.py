@@ -100,6 +100,15 @@ class FrameQuantizationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "at least one timeline frame"):
             render.timeline_padded_entry(_chip(1.001, 1.002), 30.0)
 
+    def test_module_array_reaches_renderer_as_declared_string_without_plan_change(self) -> None:
+        entry = {"kind": "module-pipeline", "anchor": "own-screen",
+                 "outStart": 0, "outEnd": 4,
+                 "spec": {"headlineLines": "First", "footChip": "Second",
+                          "moduleLands": [0, 2], "exit": "hold"}}
+        work = self._work(entry)
+        self.assertEqual(work.spec["moduleLands"], "0.0|2.0")
+        self.assertEqual(work.entry["spec"]["moduleLands"], [0, 2])
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

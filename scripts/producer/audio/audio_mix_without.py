@@ -10,7 +10,7 @@ from fractions import Fraction
 from audio.audio_mix_delivery import measure_delivery, render_qualified_mix
 from audio.audio_mix_picture import packet_signature as _packet_signature
 from audio.channel_normalization import ChannelAuthority, ChannelNormalizationError
-from audio.master import build_pass2_afilter, measure_loudness
+from audio.master import select_pass2_filter, measure_loudness
 from fingerprints import file_sha256
 from producer_config import ENCODE
 
@@ -110,13 +110,14 @@ def _render_candidate(plan: WithoutDeliveryPlan, candidate: str) -> dict:
         command += ["-i", plan.source_path]
     command += ["-map", "0:v:0", "-c:v", "copy", "-map",
                 "0:a:0" if plan.copy_aac else "1:a:0"]
-    note = None
+    note, decision = None, None
     if plan.copy_aac:
         command += ["-c:a", "copy"]
     else:
-        chain, note = build_pass2_afilter(
+        selected = select_pass2_filter(
             plan.source_path, None, measure_loudness(plan.source_path))
-        command += ["-af", chain, "-c:a", ENCODE["acodec"],
+        note, decision = selected.note, selected.evidence
+        command += ["-af", selected.chain, "-c:a", ENCODE["acodec"],
                     "-b:a", ENCODE["audio_bitrate"], "-ar", str(ENCODE["audio_rate"]),
                     "-ac", "2", "-t", f"{plan.duration:.6f}"]
     time_base = Fraction(_probe(plan.picture_path)["video"]["time_base"])
@@ -131,7 +132,8 @@ def _render_candidate(plan: WithoutDeliveryPlan, candidate: str) -> dict:
         proof = _verify_media(plan, candidate)
     except ChannelNormalizationError as exc:
         return {"ok": False, "stderr": str(exc)}
-    return {"ok": True, "stderr": "", "media": proof, "mastering_note": note}
+    return {"ok": True, "stderr": "", "media": proof, "mastering_note": note,
+            "mastering_decision": decision}
 
 
 def _sources_stable(plan: WithoutDeliveryPlan) -> bool:

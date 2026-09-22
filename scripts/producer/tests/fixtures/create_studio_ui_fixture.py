@@ -19,6 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from fingerprints import file_sha256, fingerprint_record
 from fingerprint_io import write_json_atomic
+from base_reuse import observe_inputs, seal_binding
 from graphics.template_contract import validate_entry
 from graphics_planner import output_words
 from plan_lint import lint
@@ -124,11 +125,15 @@ def _base_media(source: Path, producer: Path, plan: dict) -> None:
     ], check=True, capture_output=True, timeout=45)
 
 
-def _project_documents(producer: Path, plan: dict, manifest: dict) -> None:
+def _project_documents(producer: Path, plan: dict, manifest: dict, inputs: dict) -> None:
     """Write initial draft metadata only after the declared base exists."""
     _write(producer / "edit_plan.json", plan)
     _write(producer / "base_plan.json", plan)
-    _write(producer / "base.fingerprint.json", fingerprint_record(plan))
+    receipt = {**fingerprint_record(plan),
+               "manifestPath": str(producer / "asset_manifest.json"),
+               "baseReuse": seal_binding(str(producer / "base_final.mp4"),
+                                         plan, inputs, "legacy-v1")}
+    _write(producer / "base.fingerprint.json", receipt)
     _write(producer / "asset_manifest.json", manifest)
     _write(producer.parent / "source" / "asset_manifest.json", manifest)
     _write(producer.parent / "project.json", {
@@ -149,8 +154,11 @@ def create(workspace: Path, name: str = "studio-ui-synthetic") -> dict:
     _source_media(source / "raw-1.mp4")
     plan, manifest = _plan(), _manifest(source)
     warnings = validate_fixture_plan(plan, manifest, producer)
+    inputs = observe_inputs(manifest)
     _base_media(source, producer, plan)
-    _project_documents(producer, plan, manifest)
+    if observe_inputs(manifest) != inputs:
+        raise RuntimeError("synthetic source changed while rendering its base")
+    _project_documents(producer, plan, manifest, inputs)
     _register(workspace, producer)
     return {"project": str(project), "producerDir": str(producer),
             "syntheticTestOnly": True, "planErrors": [], "planWarnings": warnings,

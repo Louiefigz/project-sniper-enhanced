@@ -37,8 +37,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) 
 from producer_config import AUDIO, ENCODE
 from audio.master_picture_options import (MasterSpec, _filter_quote, _subtitles_filter,
                                           _video_opts, inter_available)
-from audio.mastering_filter import (MasterFilterInput, STATIC_MIN_I, STATIC_TRIM_TOL_LU,
-                                    build_master_filter, with_prefix as _with_prefix)
+from audio.mastering_filter import (MasterFilterInput, MasterFilterSelection,
+                                    STATIC_MIN_I, STATIC_TRIM_TOL_LU,
+                                    select_master_filter, with_prefix as _with_prefix)
 from audio.mastering_profile import LEGACY_MASTERING_PROFILE
 from producer_config import MASTERING_POLICY_VERSION as MASTERING_POLICY_VERSION
 
@@ -128,8 +129,16 @@ def _audio_filter(src: str, prefix: Optional[str], measured: Optional[dict],
                   measure_chain: Optional[Callable[[str], Optional[float]]] = None,
                   ) -> tuple[str, Optional[str]]:
     """Keep the existing default mastering contract over the shared DSP builder."""
+    selected = select_pass2_filter(src, prefix, measured, measure_chain)
+    return selected.chain, selected.note
+
+
+def select_pass2_filter(src: str, prefix: Optional[str], measured: Optional[dict],
+                       measure_chain: Optional[Callable[[str], Optional[float]]] = None,
+                       ) -> MasterFilterSelection:
+    """Select the existing DSP and retain its exact processing observations."""
     callback = measure_chain if measure_chain is not None else partial(_measure_chain_lufs, src)
-    return build_master_filter(MasterFilterInput(prefix, measured, callback))
+    return select_master_filter(MasterFilterInput(prefix, measured, callback))
 
 
 def build_pass2_afilter(src: str, prefix: Optional[str], measured: Optional[dict],
@@ -214,20 +223,22 @@ def master(spec: MasterSpec) -> dict:
     if spec.ass and not _inter_available():
         warnings.append(f"font '{CAP_FONT}' not installed — libass substituting "
                         "a system sans via fontconfig")
-    afilter = None
+    afilter, decision = None, None
     if audio:
         prefix, ch_warn = dead_channel_prefix(spec.src)
         if ch_warn:
             warnings.append(ch_warn)
         measured = measure_loudness(spec.src, prefix)
-        afilter, note = _audio_filter(spec.src, prefix, measured)
-        if note:
-            warnings.append(note)
+        selected = select_pass2_filter(spec.src, prefix, measured)
+        afilter, decision = selected.chain, selected.evidence
+        if selected.note:
+            warnings.append(selected.note)
     result = _encode(spec, audio, afilter)
     if result.returncode != 0 or not os.path.exists(spec.out):
         return {"status": "error", "error": "encode failed",
-                "ffmpeg": result.stderr[-1200:], "warnings": warnings}
-    return _finalize(spec, audio, warnings)
+                "ffmpeg": result.stderr[-1200:], "warnings": warnings,
+                "mastering_decision": decision}
+    return {**_finalize(spec, audio, warnings), "mastering_decision": decision}
 
 
 def encode_picture_only(spec: MasterSpec, picture_guard: Callable[[], None] | None = None) -> dict:

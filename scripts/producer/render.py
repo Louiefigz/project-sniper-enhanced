@@ -30,6 +30,7 @@ from fractions import Fraction
 from typing import Callable, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from cut_reframe import FusedReframe
     from guided_presenter_base import PresenterBaseContext
     from guided_source_color_base_context import SourceColorBaseContext
 
@@ -114,6 +115,7 @@ class RenderCtx:
     audio_admission: AudioAdmission | None = None
     source_audio_bus: SourceAudioBus | None = None
     base_reuse_inputs: dict | None = None
+    fused_reframe: FusedReframe | None = None
     presenter_base: PresenterBaseContext | None = None  # Internal live owner; never a CLI flag.
     source_color_base: SourceColorBaseContext | None = None  # Internal lifetime, not a persisted proof.
 
@@ -170,21 +172,17 @@ def cut_stage(ctx: RenderCtx) -> str:
         return mezz
     parts_dir = os.path.join(ctx.work_dir, "cut-parts")
     os.makedirs(parts_dir, exist_ok=True)
-    if picture_guard is None:
-        proof = render_cut_speed(ctx.plan, ctx.manifest, mezz, parts_dir)
-    else:
-        options = CutSpeedOptions(parts_dir, before_encode=picture_guard)
-        if ctx.source_color_base is not None:
-            options = replace(options, picture_consumption=ctx.source_color_base.consumption)
-        proof = render_cut_speed_opts(ctx.plan, ctx.manifest, mezz,
-                                     options)
-        picture_guard()
+    proof = _render_cut(ctx, (mezz, parts_dir), picture_guard)
     parts = [os.path.join(parts_dir, f"part_{row.index:04d}.mp4")
              for row in tmap.segments]
     inputs = ManifestationInputs(
         ctx.plan, os.path.join(ctx.out_dir, "timeline_map.json"), parts, mezz,
         probe_video(mezz)["r_frame_rate"], proof)
     receipt = write_manifestation(inputs)
+    if "executionReceipt" in proof:
+        from fingerprint_io import write_json_atomic
+        write_json_atomic(os.path.join(ctx.out_dir, "cut_execution.json"),
+                          proof["executionReceipt"], 2)
     if ctx.source_color_base is not None:
         ctx.source_color_base.consumption.join_cut_manifestation(receipt, tuple(parts), mezz)
     if ctx.audio_admission is not None:
@@ -194,6 +192,24 @@ def cut_stage(ctx: RenderCtx) -> str:
          receiptHash=receipt["receiptHash"], parts=len(parts))
     emit(status="stage_done", stage="cut_speed", out=mezz)
     return mezz
+
+
+def _render_cut(ctx: RenderCtx, paths: tuple[str, str],
+                picture_guard: Callable[[], None] | None) -> dict:
+    """Select the safe encode shape while retaining original picture guards."""
+    mezz, parts_dir = paths
+    from cut_reframe import select_fusion
+    ctx.fused_reframe = select_fusion(ctx, picture_guard is not None)
+    if picture_guard is None and ctx.fused_reframe is None:
+        return render_cut_speed(ctx.plan, ctx.manifest, mezz, parts_dir)
+    options = CutSpeedOptions(parts_dir, before_encode=picture_guard, reframe=ctx.fused_reframe)
+    if ctx.source_color_base is not None:
+        options = replace(options, picture_consumption=ctx.source_color_base.consumption)
+    proof = render_cut_speed_opts(ctx.plan, ctx.manifest, mezz,
+                                 options)
+    if picture_guard is not None:
+        picture_guard()
+    return proof
 
 
 def _strip_rationale(entries: list[dict]) -> list[dict]:
@@ -435,12 +451,10 @@ def _reframe_manual_stage(ctx: RenderCtx, mezz: str, framed: str) -> str:
 
 @timed_stage("reframe")
 def reframe_stage(ctx: RenderCtx, mezz: str) -> str:
-    """Stage 2: 9:16 reframe (shorts). Longform/none passes through.
-
-    ``reframe.layout == 'split'`` (or a fill-mode manual ``crop``) dispatches
-    to the manual-geometry renderer; layout absent + no crop = the original
-    strategy path, byte-for-byte unchanged.
-    """
+    """Reframe with the selected layout, manual crop or measured face windows."""
+    if ctx.fused_reframe is not None:
+        from cut_reframe import finish_fused_reframe
+        return finish_fused_reframe(ctx, mezz)
     mode = ctx.plan["target"]["mode"]
     cfg = ctx.plan.get("reframe") or {}
     if cfg.get("layout", "fill") == "split" or cfg.get("crop") is not None:
@@ -936,6 +950,8 @@ def _checkpoint_full_render(ctx: RenderCtx) -> None:
         return
     final = os.path.join(ctx.out_dir, "final.mp4")
     record = write_assembled_sidecar(final, ctx.plan)
+    from revision_ledger import record_render
+    record_render(final, ctx.plan, record)
     emit(status="final_provenance", planHash=record["planHash"],
          authorityHash=record["authorityHash"])
 

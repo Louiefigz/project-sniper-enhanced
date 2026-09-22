@@ -181,7 +181,13 @@ in `docs/producer/PRODUCER_PLAN.md`. This file is the code map.
 
 1. **cut+speed** → `cut_speed.py` — trims the cutTrack's ranges, applies per-seg
    `speed`, concatenates to a mezzanine. Executes the cutTrack; does NOT detect
-   silence (that's the edit brain, below).
+   silence (that's the edit brain, below). `cut_encode_plan.py` owns typed jobs
+   and filter planning. `cut_reframe.py` fuses known center/portrait crops before
+   scaling for eligible large sources; tracked/manual/split/protected cases keep
+   the existing reframe pass. `cut_decode.py` selects qualified native HEVC decode
+   and records explicit software fallback; libx264 remains the encoder.
+   `cut_execution.py` writes full argv, frame-clock, source/tool/code identities
+   and completed part observations in `cut_execution.json`.
 2. **channels / baseline** → `motion/baseline_look.py` — chest-up recrop + warm grade.
 3. **face_track → reframe** → `motion/face_track.py`, `motion/reframe.py` — 9:16
    face-aware vertical cut (shorts).
@@ -351,9 +357,11 @@ graphics, our graphics are output-space overlays → the base cleanly separates:
 
 1. **BASE** — `render.py --skip-graphics <plan> <manifest> <base_dir>` masters the
    whole pipeline EXCEPT the graphics composite → `base_dir/final.mp4` +
-   `base.fingerprint.json` (a hash of every base-shaping plan field). Rendered once.
+   `base.fingerprint.json` (base-shaping plan digests plus full source/transcript
+   and completed-base byte identities, checked by `base_reuse.py`). Rendered once.
 2. **ASSEMBLE** — `assemble.py <base.mp4> <plan> <out.mp4> [--fingerprint …]`
-   renders each `graphicsTrack` entry (content-hash cached) and overlays them onto
+   defaults `--fingerprint` beside the selected base. It renders each
+   `graphicsTrack` entry (content-hash cached) and overlays them onto
    the base in ONE ffmpeg pass (audio stream-copied from the mastered base). An
    ordinary graphic edit rerenders only that clip and the composite; graphics that
    change long-form recomposition or legacy-caption suppression correctly rebuild
@@ -366,8 +374,9 @@ transitions stay video-side — their flash frames are baked into the picture) a
 `audioFingerprint` ({audioEnhance, audioGain}). `base.fingerprint.json` records
 all three; when the `base_plan.json` snapshot sits beside it (every writer
 stores both), `recorded_fingerprints` RECOMPUTES the prints from the snapshot,
-so old bases survive hash-function changes and pre-split files gain their
-prints. Hashing goes through `json_canon` (integral floats → ints, bools kept):
+for diagnostic plan compatibility. A snapshot cannot upgrade an old base into
+byte-bound authority: missing/stale `baseReuse` evidence requires a rebuild, and
+`--resume` cannot bless unproven intermediates. Hashing goes through `json_canon` (integral floats → ints, bools kept):
 the editor's save-plan writes via JS `JSON.stringify`, which collapses `30.0`
 → `30` — without canonicalization a zero-change UI save flipped the base
 fingerprint into a spurious ~3 min rebuild (fixed 2026-07-09; the graphics
@@ -380,7 +389,18 @@ split of the final label; PRE-encode frames, same 0.08 threshold;
 (2026-07-09): `graphics_stage._probe_frames` counts PACKETS, not decoded frames
 (identical 2598 on our H.264 MP4s, 0.085s vs 16.5s), and the composite encodes
 with `ENCODE["composite_preset"]` = veryfast (16.9s→9.4s; CRF 12 still governs
-quality — VideoToolbox rejected: slower AND loses CRF).
+quality — the rejected VideoToolbox path was ENCODING, which loses CRF;
+qualified native DECODING is separate and keeps the libx264 encode).
+
+**Execution and review observations** (2026-09-22): `audio/mastering_filter.py`
+records the selected branch, exact applied gain/filter, measured dry runs and
+whether that selected filter converged, exhausted its budget or was unmeasured.
+Program-master receipts use schema 3; source-float base authority is unchanged.
+`revision_ledger.py` writes immutable output-bound render and deterministic-audit
+observations beside ordinary outputs. These never grant or inherit editorial
+approval; every changed output still requires full review. Keep these hooks at
+publication boundaries, outside the shared fingerprint primitives and frozen
+headless build catalogs.
 
 **The graphics/base boundary is explicit, not mode-wide.**
 `graphics_base_effects.py` projects only long-form rail/recompose geometry and

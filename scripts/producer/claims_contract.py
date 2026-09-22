@@ -19,7 +19,9 @@ slots are exempt here: a source receipt ("CLAIM SOURCE … JUL 09 2026") cites
 the source, not the narration, and icon slots hold filenames.
 
 Checked copy: every string in each ``graphicsTrack[].spec`` (nested lists/
-objects included) plus ``titleCards[].text``. Numeric leaves of a dict that
+objects included) plus ``titleCards[].text``. Source-declared top-level timing
+controls are excluded through the template's shared content contract; they
+are not painted copy. Numeric leaves of a dict that
 declares a prefix/suffix affix slot (count-up's start/end) are checked as
 their PAINTED string forms ("250%") — a hero number carried as a JSON number
 must not slip past the gate just because it is not a string (review F2);
@@ -63,6 +65,8 @@ from typing import Any
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from planner import motion_triggers as mt  # noqa: E402
+from graphics.template_content import is_timing_control  # noqa: E402
+from graphics.template_contract import template_catalog  # noqa: E402
 
 # A claim may be spoken slightly outside the card's hold — same proximity band
 # as hook_contract.COVER_NEAR_S (a graphic covers a beat within 3s of it).
@@ -109,7 +113,7 @@ def claim_tokens(text: str) -> list[str]:
     Digit-bearing NAMES ('GPT-5.6', '#c6f542', 'v2') are entities, not
     claims — the brain's semantic pass owns those."""
     out = []
-    for tok in str(text).split():
+    for tok in " ".join(_units(text)).split():
         if not any(c.isdigit() for c in tok):
             continue
         bare = tok.strip(_EDGE_PUNCT)
@@ -341,13 +345,23 @@ def _check_card(tag: str, texts: list[tuple[str, str]],
                   "claims_contract.STRUCTURAL_LABELS)")
 
 
+def _claim_spec(entry: dict, catalog: dict) -> dict:
+    """Exclude only source-declared top-level timing controls from claims."""
+    spec = entry.get("spec") or {}
+    declared = catalog.get(str(entry.get("kind", "")), {}).get("variables", {})
+    return {key: value for key, value in spec.items()
+            if not is_timing_control(key, declared.get(key, {}))}
+
+
 def check_claims_contract(plan: dict, words_out: list[dict], rep: Any) -> None:
     """Fail (``rep.error``) every claim-bearing card whose numeric copy does
     not appear in the transcript within its window. Pure; plan untouched."""
-    for i, g in enumerate(plan.get("graphicsTrack") or []):
+    graphics = plan.get("graphicsTrack") or []
+    catalog = template_catalog() if graphics else {}
+    for i, g in enumerate(graphics):
         s = float(g.get("outStart", 0.0))
         e = float(g.get("outEnd", s))
-        _check_card(f"graphicsTrack[{i}]", _spec_strings(g.get("spec") or {}),
+        _check_card(f"graphicsTrack[{i}]", _spec_strings(_claim_spec(g, catalog)),
                     (words_out, s, e), rep)
     for i, c in enumerate(plan.get("titleCards") or []):
         s = float(c.get("outStart", 0.0))

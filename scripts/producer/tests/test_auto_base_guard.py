@@ -50,9 +50,10 @@ class AutoBaseGuardTest(unittest.TestCase):
         self.assertFalse(os.path.exists(os.path.join(self.dir, "base_final.mp4")))
 
     def test_matching_video_fingerprint_keeps_the_base(self):
+        from test_base_reuse import bound_record
         self._write("edit_plan.json", PLAN)
         self._write("base_final.mp4", "fake-bytes")
-        self._write("base.fingerprint.json", fingerprint_record(PLAN))
+        self._write("base.fingerprint.json", bound_record(os.path.join(self.dir, "base_final.mp4"), PLAN))
         # audio-only change must ALSO keep the base (fast path stays valid)
         audio_plan = dict(PLAN, audioGain=[{"outStart": 0, "outEnd": 1, "dB": 2}])
         self._write("edit_plan.json", audio_plan)
@@ -71,14 +72,12 @@ class AutoBaseGuardTest(unittest.TestCase):
         self.assertFalse(os.path.exists(os.path.join(self.dir, "base_final.mp4")))
         self.assertTrue(os.path.exists(os.path.join(self.dir, "base_final.prev.mp4")))
 
-    def test_snapshot_recompute_wins_over_stored_prints(self):
-        # base_plan.json beside the fingerprint = the recorded prints are
-        # RECOMPUTED from it; stored (stale) prints must not cause a quarantine.
+    def test_snapshot_recompute_cannot_invent_source_byte_evidence(self):
         self._write("edit_plan.json", PLAN)
         self._write("base_final.mp4", "fake-bytes")
         self._write("base.fingerprint.json", {"videoFingerprint": "bogus"})
         self._write("base_plan.json", PLAN)
-        self.assertEqual(guard(self.dir)["action"], "none")
+        self.assertEqual(guard(self.dir)["action"], "quarantined")
 
     def test_live_lock_refuses(self):
         self._write("edit_plan.json", PLAN)

@@ -69,9 +69,11 @@ class AudioCommitCrashTests(unittest.TestCase):
         self.new_plan = _plan(
             audioGain=[{"outStart": 1.0, "outEnd": 2.0, "dB": 3.0}])
         self.fp = os.path.join(d, "base.fingerprint.json")
+        from test_base_reuse import bound_record
+        record = bound_record(self.base, self.old_plan)
+        self.manifest_path = record["manifestPath"]
         with open(self.fp, "w") as f:   # what render.py's base bookkeeping writes
-            json.dump({**fpr.fingerprint_record(self.old_plan),
-                       "outputDuration": 19.0, "manifestPath": "/m.json"}, f)
+            json.dump({**record, "outputDuration": 19.0}, f)
         with open(os.path.join(d, "base_plan.json"), "w") as f:
             json.dump(self.old_plan, f)
 
@@ -126,7 +128,7 @@ class AudioCommitCrashTests(unittest.TestCase):
                          fpr.video_fingerprint(self.new_plan))
         self.assertEqual(rec["audioFingerprint"],
                          fpr.audio_fingerprint(self.new_plan))
-        self.assertEqual(rec["manifestPath"], "/m.json")   # extras preserved
+        self.assertEqual(rec["manifestPath"], self.manifest_path)   # extras preserved
         self.assertEqual(rec["outputDuration"], 19.0)
         with redirect_stdout(io.StringIO()):
             self.assertEqual(asm._base_state(self.base, self.new_plan, self.fp),

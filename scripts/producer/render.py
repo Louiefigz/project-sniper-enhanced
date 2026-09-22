@@ -50,7 +50,7 @@ from cut_manifestation_authority import (
 )
 from cut_speed import (CutSpeedOptions, probe_duration, probe_video, probe_video_frames,
                        render_cut_speed, render_cut_speed_opts)
-from edit_scope import lane_required
+from edit_scope import caption_burn_enabled, lane_required
 from graphics.exit_on_cut import apply_exit_on_cut
 from graphics.graphics_stage import suppress_captions
 from graphics_base_effects import legacy_caption_suppression_windows
@@ -113,6 +113,7 @@ class RenderCtx:
     audio_clock_policy: str = LEGACY_AUDIO_POLICY
     audio_admission: AudioAdmission | None = None
     source_audio_bus: SourceAudioBus | None = None
+    base_reuse_inputs: dict | None = None
     presenter_base: PresenterBaseContext | None = None  # Internal live owner; never a CLI flag.
     source_color_base: SourceColorBaseContext | None = None  # Internal lifetime, not a persisted proof.
 
@@ -658,7 +659,7 @@ def _explicit_caption_stage(ctx: RenderCtx, tmap: TimelineMap,
                             mode: str, cap_cfg: dict) -> str | None:
     from captions.caption_render import project_render_captions
     projection = project_render_captions(ctx, tmap)
-    burn = cap_cfg.get("burn", MODES[mode]["captions_burn"])
+    burn = caption_burn_enabled(ctx.plan)
     if not burn:
         emit(status="stage_skipped", stage="captions", reason="burn off",
              captionTrack=True)
@@ -703,7 +704,7 @@ def captions_stage(ctx: RenderCtx, tmap: TimelineMap) -> str | None:
     from captions.caption_plan_pipeline import has_explicit_caption_track
     if has_explicit_caption_track(ctx.plan):
         return _explicit_caption_stage(ctx, tmap, mode, cap_cfg)
-    if not cap_cfg.get("burn", MODES[mode]["captions_burn"]):
+    if not caption_burn_enabled(ctx.plan):
         emit(status="stage_skipped", stage="captions", reason="burn off")
         return None
     words = corrected_caption_words(ctx, tmap, emit)
@@ -876,6 +877,8 @@ def _write_base_artifacts(ctx: RenderCtx, tmap: TimelineMap, report: dict) -> No
     from guided_source_color_base_context import hold_source_color_base_guard
     source_guard = hold_source_color_base_guard(ctx)
     rec = fingerprint_record(ctx.plan, ctx.audio_clock_policy)
+    from base_reuse import completed_base_binding
+    rec["baseReuse"] = completed_base_binding(ctx)
     if ctx.audio_clock_policy == SOURCE_FLOAT_POLICY_V2:
         from audio.render_audio_cache import write_source_bus_pointer
         if ctx.source_audio_bus is None:
@@ -970,6 +973,8 @@ def render(ctx: RenderCtx, audit: bool = True) -> dict:
     emit(stage="audio_policy", status="admitted" if ctx.audio_admission else "legacy",
          policy=ctx.audio_clock_policy, sourceFinalClockParity="pending-output-QC" if ctx.audio_admission else "unqualified")
     gate(ctx)
+    from base_reuse import prepare_base_inputs
+    prepare_base_inputs(ctx)
     tmap = compile_stage(ctx)
     cut_mezzanine = source_color_stage(source_guard, cut_stage, (ctx,))
     mezz = source_color_stage(source_guard, channels_stage, (ctx, cut_mezzanine))

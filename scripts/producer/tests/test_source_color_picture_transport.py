@@ -155,6 +155,7 @@ class SourceColorBaseCacheGuardTests(unittest.TestCase):
         stack.enter_context(patch("guided_source_color_base_context.hold_source_color_base_guard",
                                   side_effect=lambda _ctx: (self.guard(), self.guard)[1]))
         stack.enter_context(patch.object(render, "fingerprint_record", return_value={"fingerprint": "TEST"}))
+        stack.enter_context(patch("base_reuse.completed_base_binding", return_value={"TEST": "memory-only"}))
         stack.enter_context(patch.object(Path, "resolve", return_value=root))
         stack.enter_context(patch.object(cache, "_inside", return_value=root / "bus/bus-receipt.json"))
         stack.enter_context(patch.object(cache, "bound_json", return_value=bus.receipt))

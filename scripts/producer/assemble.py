@@ -145,19 +145,20 @@ def _ydif_dup_ratio(path: str,
 
 
 def _check_staleness(plan: dict, fingerprint_path: str | None) -> None:
-    """Warn loudly if the base was rendered from a different (non-graphics) plan."""
+    """Refuse missing/stale plan evidence before any legacy composite work."""
     if not fingerprint_path or not os.path.exists(fingerprint_path):
-        return
+        raise RuntimeError("base is unverifiable: provide --fingerprint or rebuild with --auto-base")
     recorded = recorded_fingerprints(fingerprint_path).get("fingerprint")
     now = base_fingerprint(plan)
-    if recorded and recorded != now:
+    if recorded != now:
         emit(status="base_stale", recorded=recorded, current=now,
              warning="the plan's non-graphics fields changed since the base was "
                      "rendered — re-run `render.py --skip-graphics` before assembling")
+        raise RuntimeError("base is stale: rebuild with --auto-base before assembling")
 
 
 def _base_state(base: str, plan: dict, fingerprint_path: str | None,
-                audio_clock_policy: str = "legacy-v1") -> str:
+                audio_clock_policy: str | BaseManifest = "legacy-v1") -> str:
     """'current' | 'audio_stale' | 'stale' | 'missing' | 'unverifiable'.
 
     audio_stale = the VIDEO fingerprint still matches but the audio bus fields
@@ -169,6 +170,9 @@ def _base_state(base: str, plan: dict, fingerprint_path: str | None,
         return "missing"
     if not fingerprint_path or not os.path.exists(fingerprint_path):
         return "unverifiable"
+    options = (audio_clock_policy if isinstance(audio_clock_policy, BaseManifest)
+               else BaseManifest(None, audio_clock_policy))
+    audio_clock_policy = options.audio_clock_policy
     rec = recorded_fingerprints(fingerprint_path)
     from audio.master import MASTERING_POLICY_VERSION
     if type(rec.get("masteringPolicyVersion")) is not int \
@@ -176,12 +180,13 @@ def _base_state(base: str, plan: dict, fingerprint_path: str | None,
         return "stale"
     if rec.get("audioClockPolicy", "legacy-v1") != audio_clock_policy:
         return "stale"
-    if rec.get("fingerprint") == base_fingerprint(plan):
+    from base_reuse import binding_current, plan_digests
+    if not binding_current(base, rec, options.path):
+        return "stale"
+    expected = plan_digests(plan, audio_clock_policy)
+    if rec["baseReuse"].get("planDigest") == expected["planDigest"]:
         return "current"
-    if audio_clock_policy == "source-float-v2" and _finishing_invariant_current(plan, fingerprint_path):
-        return "current"
-    if rec.get("videoFingerprint") and \
-            rec["videoFingerprint"] == video_fingerprint(plan):
+    if rec["baseReuse"].get("videoDigest") == expected["videoDigest"]:
         return "audio_stale"
     return "stale"
 
@@ -354,7 +359,7 @@ def ensure_base(base: str, plan_path: str, plan: dict,
     manifest = options.path
     if options.audio_clock_policy == "legacy-v1":
         _settle_audio_intent(base, fingerprint_path)
-    state = _base_state(base, plan, fingerprint_path, options.audio_clock_policy)
+    state = _base_state(base, plan, fingerprint_path, options)
     if state == "current":
         emit(status="base_current", path=base)
         return plan, state
@@ -561,6 +566,8 @@ def assemble(job: AssembleJob) -> dict:
         from audio.assemble_source_audio import assemble_source_audio
         return assemble_source_audio(job)
     _settle_audio_intent(job.base, job.fingerprint_path)
+    if _base_state(job.base, job.plan, job.fingerprint_path, BaseManifest(job.manifest)) != "current":
+        raise RuntimeError("base source/output identity is missing or stale; rebuild with --auto-base")
     _check_staleness(job.plan, job.fingerprint_path)
     reuse = _reuse_composite(job)
     invalidate_assembled_sidecar(job.out)

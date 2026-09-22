@@ -148,8 +148,6 @@ def _build_entries(plan: dict, base_duration: float, scope_styles: bool = False)
     """Validate + transform every graphicsTrack entry into review clips."""
     effective, clamped = apply_exit_on_cut(plan)
     authored = plan.get("graphicsTrack") or []
-    if not effective:
-        raise StudioProjectError("plan has no graphicsTrack entries to review")
     sources: dict[str, tuple[SourceComp, str]] = {}
     clips, instances, icon_rows = [], {}, []
     for i, entry in enumerate(effective):
@@ -238,7 +236,7 @@ def _write_project(request: GenerateRequest, built: _Built,
                 "exitClampedCount": built.clamped})
     return {"status": "generated", "dir": out_dir,
             "entries": len(built.clips), "exitClamped": built.clamped,
-            "tracks": max(c.track for c in built.clips)}
+            "tracks": max((c.track for c in built.clips), default=0)}
 
 
 def generate_project(request: GenerateRequest) -> dict:
@@ -252,7 +250,8 @@ def generate_project(request: GenerateRequest) -> dict:
         plan = json.load(handle)
     base = _probe_base(request.base_video)
     built = _build_entries(plan, base.duration, scope_styles=True)
-    built = dataclasses.replace(built, instances=normalize_instances(built.instances))
+    if built.instances:
+        built = dataclasses.replace(built, instances=normalize_instances(built.instances))
     return _write_project(request, built, base)
 
 

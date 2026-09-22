@@ -144,7 +144,8 @@ def clear_audio_intent(fingerprint_path: str) -> None:
 
 
 def update_base_records(fingerprint_path: str, plan: dict,
-                        mastering_policy: object = MASTERING_POLICY_VERSION) -> None:
+                        mastering_policy: object = MASTERING_POLICY_VERSION,
+                        base: str | None = None) -> None:
     """Refresh base.fingerprint.json (split prints; outputDuration/manifestPath
     preserved) + the base_plan.json snapshot after an audio-only bus rebuild.
 
@@ -156,6 +157,9 @@ def update_base_records(fingerprint_path: str, plan: dict,
         with open(fingerprint_path) as f:
             rec = json.load(f)
     rec.update(fingerprint_record(plan))
+    if base is not None:
+        from base_reuse import refresh_audio_binding
+        rec["baseReuse"] = refresh_audio_binding(rec, plan, base)
     # Recovery must describe the policy that actually produced these bytes.
     # An old intent has no policy proof; do not bless it with current code.
     rec["masteringPolicyVersion"] = mastering_policy
@@ -182,7 +186,7 @@ def commit_audio_base(base: str, new_base: str, plan: dict,
          "oldBaseHash": file_sha256(base) if os.path.exists(base) else None,
          "plan": plan, "masteringPolicyVersion": MASTERING_POLICY_VERSION})
     os.replace(new_base, base)
-    update_base_records(fingerprint_path, plan)
+    update_base_records(fingerprint_path, plan, base=base)
     clear_audio_intent(fingerprint_path)
 
 
@@ -213,7 +217,7 @@ def recover_audio_intent(base: str, fingerprint_path: str) -> str | None:
     if current == intent.get("newBaseHash") and current is not None \
             and isinstance(intent.get("plan"), dict):
         update_base_records(fingerprint_path, intent["plan"],
-                            intent.get("masteringPolicyVersion"))
+                            intent.get("masteringPolicyVersion"), base)
         clear_audio_intent(fingerprint_path)
         return "finalized"
     clear_audio_intent(fingerprint_path)

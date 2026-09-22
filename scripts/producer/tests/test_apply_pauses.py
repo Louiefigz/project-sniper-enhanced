@@ -167,5 +167,49 @@ class PauseCutsStayInsideMeasuredSilence(unittest.TestCase):
         self.assertAlmostEqual(track[1]["start"], 10.0, places=3)
 
 
+class MeasuredMediaBindingTests(unittest.TestCase):
+    """A pause measurement must belong to the source this invocation cuts."""
+
+    def test_media_without_manifest_is_refused_before_measurement(self) -> None:
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as directory:
+            proposal = os.path.join(directory, "pauses.json")
+            with open(proposal, "w") as handle:
+                json.dump(_proposal(), handle)
+            args = ["apply_pauses", proposal, "--source", "raw-1", "--window",
+                    "0", "10", "--media", "/unrelated.mov"]
+            with patch.object(sys, "argv", args), patch.object(ap, "_measurement") as measure:
+                with self.assertRaisesRegex(SystemExit, "requires --manifest"):
+                    ap.main()
+                measure.assert_not_called()
+
+    def test_relative_manifest_path_is_bound_to_manifest_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            manifest = os.path.join(directory, "asset_manifest.json")
+            with open(manifest, "w") as handle:
+                json.dump({"sources": [{"id": "raw-1", "path": "source.mov"}]}, handle)
+            ap._require_declared_media(os.path.join(directory, "source.mov"), manifest, "raw-1")
+            with self.assertRaisesRegex(SystemExit, "not the media"):
+                ap._require_declared_media("/unrelated.mov", manifest, "raw-1")
+
+    def test_duplicate_source_id_is_not_an_authority(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            manifest = os.path.join(directory, "asset_manifest.json")
+            with open(manifest, "w") as handle:
+                json.dump({"sources": [{"id": "raw-1", "path": "/a.mov"},
+                                       {"id": "raw-1", "path": "/b.mov"}]}, handle)
+            with self.assertRaisesRegex(SystemExit, "uniquely identify"):
+                ap._require_declared_media("/a.mov", manifest, "raw-1")
+
+    def test_measurement_is_not_reused_for_another_recording(self) -> None:
+        from unittest.mock import patch
+        # _measurement adds scripts/ to sys.path for its ordinary run-by-path import.
+        sys.path.insert(0, str(Path(ap.__file__).resolve().parents[2]))
+        with patch("local_whisper_speech_edges.measure", side_effect=["a", "b"]) as measure:
+            self.assertEqual(ap._measurement("a.mov"), "a")
+            self.assertEqual(ap._measurement("b.mov"), "b")
+            self.assertEqual(measure.call_count, 2)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

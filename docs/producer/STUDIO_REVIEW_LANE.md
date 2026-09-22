@@ -8,6 +8,12 @@ track 0, every `graphicsTrack` entry as a timed, panel-editable clip above it.
 The operator (or an agent through the bridge) adjusts graphics there; the
 edits are diffed back into `edit_plan.json`; `assemble.py` recomposites.
 
+A trim-only plan with no graphics also opens in this view. It shows the exact
+graphics-free base and an empty graphics layer; it does not invent a treatment.
+Cut changes still belong in `edit_plan.json`, followed by a base rebuild and
+Studio regeneration. The base clip is playback context, not an editable cut
+timeline. Unsynced Studio edits retain the same overwrite protection.
+
 **The render boundary is unchanged.** `hyperframes render` remains the only
 render use of HyperFrames (`graphics/graphics_render.py`); footage stays
 ffmpeg; Studio never renders the deliverable and footage never re-encodes in

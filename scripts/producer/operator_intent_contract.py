@@ -18,7 +18,9 @@ import json
 from pathlib import Path
 from typing import Any
 
-from edit_scope import LANES, lane_required, resolve_lanes, resolve_scope
+from edit_scope import (
+    LANES, caption_burn_enabled, lane_required, resolve_lanes, resolve_scope,
+)
 from intro_transition_contract import (
     authored_transition_seams,
     intro_seams,
@@ -48,15 +50,16 @@ def _captions_present(plan: dict, mode: str) -> bool:
         track, _ = authority
         authored = track["defaultPolicy"] != "off" or bool(track["groups"])
         if mode == "short":
-            return authored and (plan.get("captions") or {}).get("burn") is True
+            return authored and caption_burn_enabled(plan)
         return authored
+    if caption_burn_enabled(plan):
+        return True
     if mode == "longform":
         try:
             return lane_required(plan.get("target") or {}, "captions")
         except ValueError:
             return False
-    captions = plan.get("captions")
-    return isinstance(captions, dict) and captions.get("burn") is True
+    return False
 
 
 def _check_unsupported_tracks(plan: dict, errors: list[str]) -> None:

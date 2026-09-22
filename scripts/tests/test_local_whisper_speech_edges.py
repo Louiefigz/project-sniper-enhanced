@@ -15,12 +15,16 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import wave
 from pathlib import Path
+from unittest.mock import patch
+
+import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from local_whisper_speech_edges import (  # noqa: E402
-    MIN_WORD_S, SpeechEdgeError, frame_levels, measure_silences, tighten_speech_edges)
+    MIN_WORD_S, SpeechEdgeError, frame_levels, measure, measure_silences, tighten_speech_edges)
 
 FFMPEG = os.environ.get("HYPERFRAMES_FFMPEG_PATH") or shutil.which("ffmpeg") or "ffmpeg"
 ROOM_TONE_AMPLITUDE = 0.0005      # ≈ -66 dBFS: a quiet room, well under quiet speech
@@ -114,6 +118,15 @@ class SpeechEdges(unittest.TestCase):
         refined, report = tighten_speech_edges(transcript, str(self.wav))
         self.assertTrue(report["applied"], report)
         self.assertLessEqual(refined[0]["words"][-1]["end"], 2.51)
+        self.assertTrue(report["clampedToAudioEnd"])
+
+    def test_wholly_late_word_does_not_claim_a_successful_clamp(self) -> None:
+        """A token after the recording needs alignment, not a fabricated timestamp."""
+        _wav(self.wav, [(1.0, True), (0.5, False), (1.0, True)])
+        transcript = _transcript([("one", 0.0, 1.0), ("two", 3.0, 4.0)])
+        refined, report = tighten_speech_edges(transcript, str(self.wav))
+        self.assertFalse(report["clampedToAudioEnd"])
+        self.assertEqual(refined[0]["words"][-1]["start"], 3.0)
 
     def test_without_a_measurement_the_transcript_is_untouched(self) -> None:
         transcript = _transcript([("one", 0.0, 1.0), ("two", 1.0, 2.0)])
@@ -160,6 +173,42 @@ class SpeechEdges(unittest.TestCase):
         self.addCleanup(os.environ.pop, "HYPERFRAMES_FFMPEG_PATH", None)
         with self.assertRaises(SpeechEdgeError):
             measure_silences(str(self.wav))
+
+    def _add_dc_offset(self, offset: float) -> None:
+        """Add constant sample bias without changing the fixture's AC signal."""
+        with wave.open(str(self.wav), "rb") as handle:
+            params = handle.getparams()
+            samples = np.frombuffer(handle.readframes(handle.getnframes()), "<i2")
+        biased = samples.astype("int32") + int(offset * 32768)
+        self.assertLess(int(abs(biased).max()), 32768)
+        with wave.open(str(self.wav), "wb") as handle:
+            handle.setparams(params)
+            handle.writeframes(biased.astype("<i2").tobytes())
+
+    def test_dc_bias_does_not_change_measured_pauses_or_quiet_words(self) -> None:
+        """A camera's DC bias must not masquerade as a loud acoustic noise floor."""
+        _wav(self.wav, [(2.0, True), (0.5, False), (2.0, True)], quiet_db=-27.0)
+        original = measure(str(self.wav))
+        self._add_dc_offset(-0.0027)
+        biased = measure(str(self.wav))
+        self.assertEqual(biased.spans, original.spans)
+        self.assertEqual(biased.gate, original.gate)
+        self.assertTrue(biased.unspoken(2.1, 2.4))
+        self.assertFalse(biased.unspoken(3.0, 3.5))
+        self.assertGreater(biased.peak_dbfs(3.0, 3.5), biased.gate)
+
+    def test_dc_bias_does_not_admit_ungateable_audio(self) -> None:
+        """Removing bias is not permission to lower the speech safety margins."""
+        _wav(self.wav, [(2.0, True), (0.3, False), (2.0, True)], quiet_db=-60.0)
+        self._add_dc_offset(-0.0027)
+        with self.assertRaisesRegex(SpeechEdgeError, "cannot be gated safely"):
+            measure(str(self.wav))
+
+    def test_a_constant_signal_is_still_refused(self) -> None:
+        """DC alone contains neither words nor safely distinguishable pauses."""
+        with patch("local_whisper_speech_edges._pcm", return_value=np.full(16000, .02)):
+            with self.assertRaisesRegex(SpeechEdgeError, "cannot be gated safely"):
+                frame_levels("unused.wav")
 
 
 if __name__ == "__main__":

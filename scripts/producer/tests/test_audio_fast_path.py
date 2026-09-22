@@ -160,7 +160,8 @@ class DispatchMatrixTests(unittest.TestCase):
         self.tmp.cleanup()
 
     def _write_fp(self, plan: dict, legacy: bool = False) -> None:
-        rec = fpr.fingerprint_record(plan)
+        from test_base_reuse import bound_record
+        rec = bound_record(self.base, plan)
         if legacy:
             rec = {"fingerprint": rec["fingerprint"]}
         with open(self.fp, "w") as f:

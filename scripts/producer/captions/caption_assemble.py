@@ -24,7 +24,7 @@ from captions.caption_shards import materialize_caption_shards
 from compile_timeline import TimelineMap
 from fingerprints import file_sha256, write_json_atomic
 from media_probe import _fps_fraction, probe_video, probe_video_frames
-from producer_config import MODES
+from edit_scope import caption_burn_enabled
 
 CAPTION_FREE_NAME = ".caption-free-composite.mp4"
 CAPTION_FREE_AUTHORITY_NAME = ".caption-free-composite.json"
@@ -216,9 +216,7 @@ def project_caption_track(job: object, emit: Callable[..., None]) -> dict | None
     shards = materialize_caption_shards(plan, compilation, out_dir)
     artifacts = write_caption_artifacts(
         plan, compilation, out_dir, shards.manifest)
-    mode = (plan.get("target") or {}).get("mode")
-    fallback = MODES.get(mode, {}).get("captions_burn", False)
-    burn = bool((plan.get("captions") or {}).get("burn", fallback))
+    burn = caption_burn_enabled(plan)
     if burn and not compilation["cues"]:
         raise RuntimeError(
             "captions.burn is on but CaptionTrackV1 compiled no cues")

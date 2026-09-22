@@ -1,6 +1,6 @@
 {
   "schema": "sniper-qualification-matrix-v1",
-  "about": "Sale-readiness evidence for one exact archive. Read by python -m release.sale_gate. Seeded 2026-09-18 from the rc3-era rows; filled for the rc4 final candidate from evidence/final (matrix-spec-bae842a.json). the lead maintainer fills status, archive_sha256, evidence and depends_on (each file with its sha256). Requirements R1, R2, R3, R5, R6, LOCK, Z3-CODEX, Z3-CLAUDE, Z7 and Z9 were rewritten for the 2026-09-19 owner direction (no UI; the buyer's own agent); each row keeps its previous text in requirement_change. No row was removed.",
+  "about": "Current qualification snapshot for frozen source 55902aa and exact archive e9d6c9533ed63f77c4fd556d7de10ef610b53e1775ae5a48192b69474c03dbad. All 33 rows are refreshed from matrix-spec-55902aa.json; running/unperformed checks stay NOT RUN or BLOCKED. No old candidate PASS is inherited. This external maintainer matrix is not a modified release archive.",
   "rows": [
     {
       "id": "Z1",
@@ -8,24 +8,24 @@
       "scope": "package test on the frozen archive",
       "required": true,
       "status": "PASS",
-      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "archive_sha256": "e9d6c9533ed63f77c4fd556d7de10ef610b53e1775ae5a48192b69474c03dbad",
       "evidence": [
         {
           "path": "final/21-archive-audit-Z1.log",
-          "sha256": "683ac98c6a5067609a4728d94e96a35d3a57bf0e440ea4edfccb1391b0ead3b1"
+          "sha256": "26a5e2a13702ac771d9b84a21ddf8075df1dccc735f41c245095f2e2d579455e"
         }
       ],
       "depends_on": [
         {
-          "path": "final/build-bae842a/SHA256SUMS",
-          "sha256": "bd2b9b75176b04c9b8cd67327fd1aedaa6c2d4cb9ca8a390d565cf00104e1ad8"
+          "path": "final/build-final-55902aa/SHA256SUMS",
+          "sha256": "2a2f144dd2903f0ebe1dea7e86c9f19bdd04228e2dde0098e7e36a476bbaeb89"
         },
         {
-          "path": "final/build-bae842a/withheld.json",
-          "sha256": "4a8fa5db9da339593312118190ce73283cec1d9811efdcc7dbdaa9bef85a87ef"
+          "path": "final/build-final-55902aa/withheld.json",
+          "sha256": "23b3ec90a926264398ac97aa7903a6ec175667fd2176b80e66125ded25910068"
         }
       ],
-      "note": "bae842a ZIP 7fed9cfd: 122 checks passed, 0 failed, on a fresh extraction into a path with a space and an accent; includes Sniper's own tools lock, the shipped ffmpeg byte for byte and the runtime closure."
+      "note": "Fresh extraction of the 55902aa archive into a path with a space and accent: 120 checks passed, zero failed."
     },
     {
       "id": "B2",
@@ -33,19 +33,15 @@
       "scope": "package content + written provenance inventory",
       "required": true,
       "status": "NOT RUN",
-      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "archive_sha256": "e9d6c9533ed63f77c4fd556d7de10ef610b53e1775ae5a48192b69474c03dbad",
       "evidence": [
         {
           "path": "final/22-package-provenance-scan.log",
-          "sha256": "9444e48f8e96e011bf5c4838f960d5fa90a16dfa98211fb4ff5852aa870466e6"
-        },
-        {
-          "path": "final/PROVENANCE_INVENTORY_RC4.md",
-          "sha256": "bbe955c61122e3d7aac3c3fe13419e55f20f855d5e3b4334ccffffd8854f5378"
+          "sha256": "d5c701dd8b3bf2433d92686af4c0a240cf7c226c704d377b1d45f4199f83fca8"
         }
       ],
       "depends_on": [],
-      "note": "Automated: the provenance scan of the extracted bae842a package finds 0 creator IDs/handles, 0 creator or teacher names, 0 client names; the rc4 streams rewrote every creator- or teacher-derived style, doctrine and library as original (PROVENANCE_INVENTORY_RC4.md). A content-provenance check by a person (not a name scan) has not been done; owner material (PENDING item 6) is a separate open decision."
+      "note": "Current automated name scan is clear of creator/teacher/client hits. Human content-provenance review is unperformed; owner material remains an open decision."
     },
     {
       "id": "B1-B7",
@@ -56,7 +52,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "The libraries are rewritten as original with provenance rows (PROVENANCE_INVENTORY_RC4.md); a person has not checked the rationale."
+      "note": "Human review of the packaged libraries and provenance rationale has not been completed for this archive."
     },
     {
       "id": "B3",
@@ -67,7 +63,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "THIRD-PARTY-NOTICES updated for rc4 (Sniper's GPL ffmpeg with its sources in third-party/sources, the downloaded conda-forge runtime, 40 HyperFrames patches across 7 files); a component-by-component licence check by a person is not done; GSAP is its own blocked row."
+      "note": "Component-specific licence/notice review by a person remains unperformed; do not inherit the old candidate status."
     },
     {
       "id": "B4",
@@ -78,7 +74,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "The music bed is measured clean; nobody has listened to it."
+      "note": "No person has listened to the shipped music bed in this qualification run."
     },
     {
       "id": "BUILD-DET",
@@ -86,93 +82,60 @@
       "scope": "build",
       "required": true,
       "status": "PASS",
-      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "archive_sha256": "e9d6c9533ed63f77c4fd556d7de10ef610b53e1775ae5a48192b69474c03dbad",
       "evidence": [
         {
           "path": "final/20-build-twice.log",
-          "sha256": "50079fb90cf21832a15b95b3ccb4e5a00341961486a6640b59c70a4b2cdea8e2"
+          "sha256": "22b787cfa49c98e036a1762874d6d4e65179612109464737cf31f8b4d36778ef"
         }
       ],
       "depends_on": [
         {
-          "path": "final/build-bae842a/SHA256SUMS",
-          "sha256": "bd2b9b75176b04c9b8cd67327fd1aedaa6c2d4cb9ca8a390d565cf00104e1ad8"
+          "path": "final/build-final-55902aa/SHA256SUMS",
+          "sha256": "2a2f144dd2903f0ebe1dea7e86c9f19bdd04228e2dde0098e7e36a476bbaeb89"
         }
       ],
-      "note": "Two builds of bae842a into fresh folders: identical SHA256SUMS (7fed9cfd…) and identical withheld.json."
+      "note": "Two clean builds of 55902aa produced identical ZIP SHA256SUMS and withheld manifests."
     },
     {
       "id": "SUITES",
       "requirement": "Source suites (tsc, lint, build, npm test stages, Python selftest) pass on the release commit, failures classified by runtime reachability",
       "scope": "source tests",
       "required": true,
-      "status": "FAIL",
-      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "status": "NOT RUN",
+      "archive_sha256": "e9d6c9533ed63f77c4fd556d7de10ef610b53e1775ae5a48192b69474c03dbad",
       "evidence": [
         {
-          "path": "final/30-ts-typecheck-lint-build-bae842a.log",
-          "sha256": "3c9866e1891f3bf527d236064e6617543261c850b935416421741a416dfe60c5"
+          "path": "final/30-ts-typecheck-lint-build-55902aa.log",
+          "sha256": "95168b261c6de6fa1c74adbf8b077438b0f84372792e392a1c507e5c52eaa730"
         },
         {
-          "path": "final/31-ts-npm-test-stages-bae842a.log",
-          "sha256": "cbc5fa219675a4a2603a1367dd3c8ba9c19ada99a6482deae19133f12207f5b1"
-        },
-        {
-          "path": "final/32-npm-test-literal-bae842a.log",
-          "sha256": "517650ae1cf8eedbf44ae91185f6008ff390e3151abe951a8892fb85fb2cab4a"
-        },
-        {
-          "path": "final/10-py-selftest-3.14-bae842a.log",
-          "sha256": "747a22da975dede33733a1026c836c63606cbf61d338477e1d9d32543d036fab"
-        },
-        {
-          "path": "final/10-py-selftest-3.12-bae842a.log",
-          "sha256": "7606f1618d4425990b6f58549c807f1a326e296cc11f2774051ffb413e36f20c"
-        },
-        {
-          "path": "final/11-py-retained-evidence-in-src-bae842a.log",
-          "sha256": "dab1e6362a9e34a6854f3772ce7a0a3f7717997280b652705b5a6c4541544d02"
-        },
-        {
-          "path": "final/12-py-failure-classification-bae842a.md",
-          "sha256": "2799f8cbd0893057703db71e7ba9d4131767274cd52b02535a4ba42fa3003a04"
-        },
-        {
-          "path": "final/03-maintainer-evidence-regeneration.log",
-          "sha256": "91bb71aed0d3b4517fb5544ceba1ecf062023247088cdf4aaf6f32a94c450069"
+          "path": "final/33-release-tests-55902aa-host.log",
+          "sha256": "f56703b5d0d9e80d1ee3a8f0b97d9586b5bc7ddf7c2f835755bd641e3f05c4d9"
         }
       ],
       "depends_on": [],
-      "note": "bae842a: tsc, lint, build exit 0; all 495 npm-test files pass one by one and the literal npm test passes (Node 24.21.0). Python 7,670 tests on 3.14.4 and 3.12.9: the same 7 retained-evidence freshness checks fail on both. 3 are path/interpreter-bound proofs that are fresh in the generating checkout; 4 (rate matrix, system inventory, P0 container ingress cohort, P0 render parity) are container-era or absent maintainer evidence, unverified and preserved. None is buyer-reachable (12-py-failure-classification). Stays FAIL until those four are regenerated or retired by the maintainer."
+      "note": "Current frozen source type-check/lint/build and 139 release tests pass. Individual TS stages are still running; literal npm test and both Python selftests follow. Overall source qualification remains pending."
     },
     {
       "id": "PKG-SELFTEST",
       "requirement": "In-package test suite for shipped features passes inside an installed package with the install's own settings",
       "scope": "package test",
       "required": true,
-      "status": "PASS",
-      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "status": "FAIL",
+      "archive_sha256": "e9d6c9533ed63f77c4fd556d7de10ef610b53e1775ae5a48192b69474c03dbad",
       "evidence": [
         {
           "path": "final/qualification-install/40-package-gate-final.json",
-          "sha256": "8f16524582a7879bdd8b2781812e09caea1ced9516f0c917cd78eec585672d3f"
+          "sha256": "8077092efefc5befde68aa7d02ca2f180ac05b4240cb17114de203cfe5a44f51"
         },
         {
           "path": "final/qualification-install/40-package-gate-final.log",
-          "sha256": "2d1d93a727bee57d54efd0b49897de11d4e1ddbfa4540740b317d5b5f1905ec9"
-        },
-        {
-          "path": "final/qualification-install/01-install.log",
-          "sha256": "44dce10a1a809c5e91957ad88f13393eeb3faed6f216850b659728c0f31dff28"
+          "sha256": "3ed80d5dc08f26d9bd436e1d0d35ad0a7e31ad81c29f06dc1616858e26d9aeb4"
         }
       ],
-      "depends_on": [
-        {
-          "path": "final/build-bae842a/withheld.json",
-          "sha256": "4a8fa5db9da339593312118190ce73283cec1d9811efdcc7dbdaa9bef85a87ef"
-        }
-      ],
-      "note": "Installed bae842a package at the real HOME, launched through the install's own load_env from a cleared environment, with the build's withheld manifest: 7,637 pass, 0 fail, 13 declared withheld-evidence errors tolerated structurally, 16 opt-in skips listed; 0 gate failures."
+      "depends_on": [],
+      "note": "Current installed-package gate: 7696 total, 7665 pass, 16 skip, 13 declared withheld-artifact errors and two untolerated Studio command assertion failures. No failures waived."
     },
     {
       "id": "Z2",
@@ -183,27 +146,18 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Needs a clean supported Mac (owner input R). The isolation run (installer/11) hides this Mac's developer tools with a Seatbelt profile and is NOT a clean-Mac test."
+      "note": "A clean supported Mac and real download/quarantine/opening exercise are unavailable in this developer-Mac run."
     },
     {
       "id": "R1",
       "requirement": "Buyer entry point: ./sniper from Finder PATH runs Sniper's commands with Sniper's own tools and settings under the shared maintenance lock; before setup, after an interrupted setup and in a moved or copied folder it refuses and names the fix",
       "scope": "installed package, developer Mac",
       "required": true,
-      "status": "PASS",
-      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
-      "evidence": [
-        {
-          "path": "final/installer/10-fresh-repeat-start.log",
-          "sha256": "3231e9b815bfb2158a86995e51b045ba32768437863cbb678ef0b74a6adfbbbe"
-        },
-        {
-          "path": "final/installer/18-lifecycle.log",
-          "sha256": "014a4c279985c3ac81766a534acccbd025b39f6783f33fd44011cc4146524df2"
-        }
-      ],
+      "status": "NOT RUN",
+      "archive_sha256": null,
+      "evidence": [],
       "depends_on": [],
-      "note": "Finder PATH, empty HOME: start/stop/restart; an occupied port 3000 is refused naming the holder and SNIPER_PORT overrides it; restart on the override; the foreign listener is left running (installer/10, 18 §5, §7).",
+      "note": "Fresh/repeat Finder-PATH entry checks pass; interrupted and moved/copy lifecycle scenarios are still running. Do not infer the full row from initial setup.",
       "requirement_change": {
         "previous_requirement": "Build and launch: start/stop/restart from Finder PATH, occupied and overridden ports, foreign PIDs never signalled",
         "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting."
@@ -214,20 +168,11 @@
       "requirement": "No Sniper-side provider: Sniper keeps no provider or model setting, installs no Codex or Claude, starts neither, and a key in the caller's shell never reaches its tools; the buyer's own agent is the only brain",
       "scope": "installed package, developer Mac",
       "required": true,
-      "status": "PASS",
-      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
-      "evidence": [
-        {
-          "path": "final/installer/18-lifecycle.log",
-          "sha256": "014a4c279985c3ac81766a534acccbd025b39f6783f33fd44011cc4146524df2"
-        },
-        {
-          "path": "final/installer/10-fresh-repeat-start.log",
-          "sha256": "3231e9b815bfb2158a86995e51b045ba32768437863cbb678ef0b74a6adfbbbe"
-        }
-      ],
+      "status": "NOT RUN",
+      "archive_sha256": null,
+      "evidence": [],
       "depends_on": [],
-      "note": "One settings pair drives everything: the doctor reports the provider for the app, the editor window and every edit; use-provider switches both settings; an editor window on the other provider is refused (installer/18 §8b; 10). Real edits through a signed-in provider are Z3.",
+      "note": "Fresh installed no-provider behavior is under current harness qualification; lifecycle/provider/key isolation scenarios have not all finished.",
       "requirement_change": {
         "previous_requirement": "One provider choice drives the editor window, app, doctor and every edit (no CLI/provider/brain/model mismatch)",
         "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting."
@@ -242,7 +187,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Claude: the owner's sign-in through install/sign-in.command on the qualification install is pending. Codex: sign-in deferred by the owner (Claude only for now).",
+      "note": "Codex drove current setup and media tools outside its nested sandbox successfully. Matching buyer-owned Claude Code setup/doctor verification is still unperformed.",
       "requirement_change": {
         "previous_requirement": "Doctor admits the selected provider through production admission after a sign-in made with Sniper's own wrapper, for Codex and for Claude",
         "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting.",
@@ -255,43 +200,34 @@
       "scope": "installed package, developer Mac",
       "required": true,
       "status": "PASS",
-      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "archive_sha256": "e9d6c9533ed63f77c4fd556d7de10ef610b53e1775ae5a48192b69474c03dbad",
       "evidence": [
         {
-          "path": "final/qualification-install/01-install.log",
-          "sha256": "44dce10a1a809c5e91957ad88f13393eeb3faed6f216850b659728c0f31dff28"
+          "path": "final/qualification-install/01-install-55902aa.log",
+          "sha256": "a25a72bc3d2f6d7a6e82180ac7d7b9fc8cf9363cdcf3a29022335574bd1c4af9"
         },
         {
           "path": "final/installer/10-fresh-repeat-start.log",
-          "sha256": "3231e9b815bfb2158a86995e51b045ba32768437863cbb678ef0b74a6adfbbbe"
+          "sha256": "a5e38970d7f93027ebb0eaab629e278f4adec80ecd164ee9add831df70196a60"
+        },
+        {
+          "path": "final/realedits/run-55902aa/corrected-plan/final-word-comparison.json",
+          "sha256": "3bf1d2c6d45655bac4610f3deedc63cead29f02c684e8281fc57570cd63acfbe"
         }
       ],
       "depends_on": [],
-      "note": "Speech model SHA-256 verified; the doctor's local transcription through the product path hears 5/5 expected words (real-HOME install and the fresh empty-HOME install)."
+      "note": "Current real-HOME setup and fresh empty-HOME harness verify the model and hear 5/5 expected words through local transcription. Current final trim ASR also preserves all 63 normalized words; long-form alignment remains a separate open issue."
     },
     {
       "id": "R5",
       "requirement": "Every install step (Sniper's own tools, npm app, npm motion, venv, browser, model, configuration, render runtime) repairs itself on rerun after interruption, partial download or corruption",
       "scope": "installed package, developer Mac",
       "required": true,
-      "status": "PASS",
-      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
-      "evidence": [
-        {
-          "path": "final/installer/14-repair-every-step.log",
-          "sha256": "8222031a29965937a2071d94635607b476006c215fa906d1acf2cb903aef4c50"
-        },
-        {
-          "path": "final/installer/15-setup-resume-F2.log",
-          "sha256": "9f01d5822e54d8bc7b964c22a87a4ad8cbbc99101db9872020c232ee87bcd4a7"
-        },
-        {
-          "path": "final/installer/18-lifecycle.log",
-          "sha256": "014a4c279985c3ac81766a534acccbd025b39f6783f33fd44011cc4146524df2"
-        }
-      ],
+      "status": "NOT RUN",
+      "archive_sha256": null,
+      "evidence": [],
       "depends_on": [],
-      "note": "Every step, including Sniper's own tools, interrupted (kill -9 / Ctrl-C) or corrupted and rerun once: 23 cases end installed with the completion receipt for this folder; F2 resume from setup after settings were written.",
+      "note": "Current interruption/corruption repair scenarios are running; no old candidate PASS is inherited.",
       "requirement_change": {
         "previous_requirement": "Every install step (npm app, npm motion, venv, browser, model, CLIs, runtime, app build) repairs itself on rerun after interruption, partial download or corruption",
         "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting."
@@ -302,24 +238,11 @@
       "requirement": "Prerequisites are checked with exact next steps; downloads are hash-verified (tool lock, pip lock, npm locks, browser SHA-256, model SHA-256); macOS floor measured from the shipped binaries",
       "scope": "installed package, developer Mac",
       "required": true,
-      "status": "PASS",
-      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
-      "evidence": [
-        {
-          "path": "final/installer/12-refusals-before-install.log",
-          "sha256": "b68b1057031fdd4baf6347d19a7e49e22bf29a1a94dbe4d0f13b9e0915b92141"
-        },
-        {
-          "path": "final/installer/20-download-tamper.log",
-          "sha256": "5bd0ae772fa6ec3e22fcea95626449018e21c42c3ee868f82904abea08a2a078"
-        },
-        {
-          "path": "final/installer/11-isolation-no-developer-tools.log",
-          "sha256": "01e1424a46ce7c7f45c071dadf00d0669b56dbf31825b3a9ca8000b44fc3f97a"
-        }
-      ],
+      "status": "NOT RUN",
+      "archive_sha256": null,
+      "evidence": [],
       "depends_on": [],
-      "note": "Refusals before any download (older macOS, home path with a space, no connection, stopped download that resumes); tampered pip, npm, browser and tool downloads each refused; no user-installed prerequisite is needed (installer/11 with developer tools hidden). The Intel refusal is untested (reads hardware).",
+      "note": "Current prerequisites/refusals and interrupted tool-download resume pass; tamper scenarios have not all finished. Intel hardware refusal remains untested.",
       "requirement_change": {
         "previous_requirement": "Prerequisites are checked with exact next steps; downloads are hash-verified (pip lock, CLI lock, browser SHA-256, model SHA-256); Node floor derived from the lockfiles",
         "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting."
@@ -330,44 +253,22 @@
       "requirement": "Lifecycle: move/copy, rollback between release folders, cancellation, cache cleaning, uninstall that reports failures truthfully and keeps user settings/recovery data; global Codex/Claude state unchanged",
       "scope": "installed package, developer Mac",
       "required": true,
-      "status": "PASS",
-      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
-      "evidence": [
-        {
-          "path": "final/installer/18-lifecycle.log",
-          "sha256": "014a4c279985c3ac81766a534acccbd025b39f6783f33fd44011cc4146524df2"
-        },
-        {
-          "path": "final/qualification-install/00-uninstall-superseded-69955bf.log",
-          "sha256": "1b77686448067bdf91912d791319e0b330c8109f5276c73afe54b8bae04e59f9"
-        }
-      ],
+      "status": "NOT RUN",
+      "archive_sha256": null,
+      "evidence": [],
       "depends_on": [],
-      "note": "Move/copy refused then reinstalled in place; rollback between two release folders sharing HOME and workspace; installer Ctrl-C; cache cleaning keeps runtime and export history; uninstall stops truthfully when a sign-out fails and keeps settings and recovery data; global Codex/Claude state unchanged (names and hashes); real-HOME uninstall keeps the owner's ~/.project-sniper config and projects files."
+      "note": "Current lifecycle, rollback, uninstall and global-state comparisons have not all finished."
     },
     {
       "id": "LOCK",
       "requirement": "Installer, uninstall, cache cleaning and runtime construction are mutually exclusive with each other, the doctor, ./sniper commands and active edits/renders",
       "scope": "installed package, developer Mac",
       "required": true,
-      "status": "PASS",
-      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
-      "evidence": [
-        {
-          "path": "final/installer/10-fresh-repeat-start.log",
-          "sha256": "3231e9b815bfb2158a86995e51b045ba32768437863cbb678ef0b74a6adfbbbe"
-        },
-        {
-          "path": "final/installer/18-lifecycle.log",
-          "sha256": "014a4c279985c3ac81766a534acccbd025b39f6783f33fd44011cc4146524df2"
-        },
-        {
-          "path": "final/installer/18b-process-scan.log",
-          "sha256": "042e1431cb319b12adb3ae7af7995cb899d953d0576e366b2e18b676a30ff440"
-        }
-      ],
+      "status": "NOT RUN",
+      "archive_sha256": null,
+      "evidence": [],
       "depends_on": [],
-      "note": "Installer, provider switch, uninstall and cache cleaning are refused while the app, a doctor, another installer, a render-runtime user or an unlocked edit in the folder is running; the doctor may share; the lock is free after Ctrl-C.",
+      "note": "Current shared command lock refused concurrent maintenance and released correctly. Full lifecycle/process-scan checks are still running.",
       "requirement_change": {
         "previous_requirement": "Installer, provider switch, uninstall, cache cleaning and runtime construction are mutually exclusive with each other, the doctor and active edits/renders",
         "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting."
@@ -379,52 +280,30 @@
       "scope": "installed package",
       "required": true,
       "status": "PASS",
-      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
+      "archive_sha256": "e9d6c9533ed63f77c4fd556d7de10ef610b53e1775ae5a48192b69474c03dbad",
       "evidence": [
         {
-          "path": "final/qualification-install/01-install.log",
-          "sha256": "44dce10a1a809c5e91957ad88f13393eeb3faed6f216850b659728c0f31dff28"
+          "path": "final/qualification-install/01-install-55902aa.log",
+          "sha256": "a25a72bc3d2f6d7a6e82180ac7d7b9fc8cf9363cdcf3a29022335574bd1c4af9"
         },
         {
           "path": "final/installer/10-fresh-repeat-start.log",
-          "sha256": "3231e9b815bfb2158a86995e51b045ba32768437863cbb678ef0b74a6adfbbbe"
+          "sha256": "a5e38970d7f93027ebb0eaab629e278f4adec80ecd164ee9add831df70196a60"
         }
       ],
       "depends_on": [],
-      "note": "The doctor's media admission (real sample) passes through the native jail on this developer Mac: real-HOME install and fresh empty-HOME install (reads, network and memory limits enforced). A buyer's Mac is Z2."
+      "note": "Current real-HOME and fresh empty-HOME doctor admit and decode the real sample through the native jail on this developer Mac. Clean buyer Mac remains Z2."
     },
     {
       "id": "RUNTIME-TOOLS",
       "requirement": "Buyers install no prerequisites: setup downloads, verifies and installs Sniper's own pinned Node, Python, ffmpeg/ffprobe, whisper.cpp, tesseract and yt-dlp into a Sniper-owned location; system tools and logins are untouched; conflicting tools on PATH are not used",
       "scope": "installed package, developer Mac (developer tools hidden, not removed); clean Mac is Z2",
       "required": true,
-      "status": "PASS",
-      "archive_sha256": "7fed9cfd620302d7a617f26273241594af9bea8a62b3ecd5f4fff42e1e13c251",
-      "evidence": [
-        {
-          "path": "final/installer/10-fresh-repeat-start.log",
-          "sha256": "3231e9b815bfb2158a86995e51b045ba32768437863cbb678ef0b74a6adfbbbe"
-        },
-        {
-          "path": "final/installer/11-isolation-no-developer-tools.log",
-          "sha256": "01e1424a46ce7c7f45c071dadf00d0669b56dbf31825b3a9ca8000b44fc3f97a"
-        },
-        {
-          "path": "final/qualification-install/01-install.log",
-          "sha256": "44dce10a1a809c5e91957ad88f13393eeb3faed6f216850b659728c0f31dff28"
-        },
-        {
-          "path": "final/installer/20-download-tamper.log",
-          "sha256": "5bd0ae772fa6ec3e22fcea95626449018e21c42c3ee868f82904abea08a2a078"
-        }
-      ],
-      "depends_on": [
-        {
-          "path": "archive:project-sniper-0.1.0-rc4/install/deps/osx-arm64.lock",
-          "sha256": "1b9950c26431f8353190f1be3bfee1dbf23611d05e173aa2b3e08663d82b1562"
-        }
-      ],
-      "note": "Buyers install no tools: setup downloads a SHA-256-locked conda-forge set (Python 3.14.4, Node 24.21.0, whisper.cpp, tesseract, yt-dlp, git; 87 files) and installs Sniper's own ffmpeg from the package, into ~/.project-sniper, verified file by file on every run. Real download from conda.anaconda.org (installer/10, real-HOME 01). With this Mac's developer tools hidden and conflicting stand-ins first on PATH: no stand-in ran, 0 Homebrew paths in settings, 0 of 29 decoder libraries from Homebrew (11; not a clean Mac). macOS floor 13.5 measured from the 452 installed binaries."
+      "status": "NOT RUN",
+      "archive_sha256": null,
+      "evidence": [],
+      "depends_on": [],
+      "note": "Current setup installs and verifies pinned tools. Developer-tools-hidden run used no conflicting stand-ins and mapped 0/29 Homebrew decoder libraries; nested admission refusal was checked separately outside that profile. Full tamper/lifecycle qualification is still running. This is not a clean Mac."
     },
     {
       "id": "Z3-CODEX",
@@ -432,10 +311,23 @@
       "scope": "real edit",
       "required": true,
       "status": "BLOCKED",
-      "archive_sha256": null,
-      "evidence": [],
+      "archive_sha256": "e9d6c9533ed63f77c4fd556d7de10ef610b53e1775ae5a48192b69474c03dbad",
+      "evidence": [
+        {
+          "path": "final/realedits/run-55902aa/corrected-plan/render-review.md",
+          "sha256": "22320e360517487bd951a045ede33843e53829e37c0daf68c21cb9b5d976eec7"
+        },
+        {
+          "path": "final/realedits/run-55902aa/corrected-plan/browser-playback-review.json",
+          "sha256": "31ddd8d82359981283c3075537b9f23d9ebd6c854ac7f57d5487581a3024014c"
+        },
+        {
+          "path": "final/realedits/run-55902aa/corrected-plan/studio-open.log",
+          "sha256": "e3c5e38da65919534757605b062b4700ef4317c59778cfeed8f14dbbcf5c507f"
+        }
+      ],
       "depends_on": [],
-      "note": "Codex sign-in deferred by the owner. Also: in Codex's workspace-write sandbox, Producer's media check cannot start its own sandbox and the video folder is not writable (codex-route/01); PENDING item 8.",
+      "note": "Current trim was rebuilt through Codex and installed ./sniper with host execution. Gates, 34-check audit, independent frame/text review and browser transport pass, but matching editable Studio refuses no-graphics plans and listening is pending. Complete real-edit handoff is blocked.",
       "requirement_change": {
         "previous_requirement": "A complete real edit through the Codex subscription route, primary agent route and advertised UI route",
         "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting."
@@ -450,7 +342,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Waiting for the owner's Claude sign-in on the qualification install; the primary agent route's non-interactive run with pre-approved tools was refused by this session's safety check (owner to drive install/editor.command or allow it).",
+      "note": "No current-archive real edit through the buyer-owned Claude Code route was run in this pickup.",
       "requirement_change": {
         "previous_requirement": "A complete real edit through the Claude subscription route, primary agent route and advertised UI route",
         "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting."
@@ -461,11 +353,24 @@
       "requirement": "Long-form job: trim-only and produced treatments, captions, graphics, reference guidance, audio, enabled music; a revision and re-export",
       "scope": "real edit",
       "required": true,
-      "status": "NOT RUN",
-      "archive_sha256": null,
-      "evidence": [],
+      "status": "BLOCKED",
+      "archive_sha256": "e9d6c9533ed63f77c4fd556d7de10ef610b53e1775ae5a48192b69474c03dbad",
+      "evidence": [
+        {
+          "path": "final/realedits/run-55902aa/longform-diagnostic-summary.json",
+          "sha256": "6f809b82943b384bd53c6e8685067fadb6e81ac834e9339e159423e544a41b81"
+        },
+        {
+          "path": "final/realedits/run-55902aa/longform-gpu-quality.json",
+          "sha256": "58fbea960fe42b476945584c4759c3fa97619d37bae9e1e7470731ff500e11c9"
+        },
+        {
+          "path": "final/realedits/run-55902aa/longform-cpu-quality.json",
+          "sha256": "26db3b19f4937dc270eac8135fcbe7696c7117e204e34685a43ac8510426f2be"
+        }
+      ],
       "depends_on": [],
-      "note": "Long-form real edit pending the Claude sign-in (footage prepared: 10-minute excerpt of the owner's recording)."
+      "note": "Fresh GPU and CPU local transcription pass timing quality, but quiet audio refuses speech-edge refinement. Historical tiny_word_rate failure was not reproduced or fixed; long-form edit/revision requests remain unrun."
     },
     {
       "id": "Z5",
@@ -473,21 +378,47 @@
       "scope": "real edit",
       "required": true,
       "status": "NOT RUN",
-      "archive_sha256": null,
-      "evidence": [],
+      "archive_sha256": "e9d6c9533ed63f77c4fd556d7de10ef610b53e1775ae5a48192b69474c03dbad",
+      "evidence": [
+        {
+          "path": "final/realedits/run-55902aa/corrected-plan/render-review.md",
+          "sha256": "22320e360517487bd951a045ede33843e53829e37c0daf68c21cb9b5d976eec7"
+        },
+        {
+          "path": "final/realedits/run-55902aa/corrected-plan/browser-playback-review.json",
+          "sha256": "31ddd8d82359981283c3075537b9f23d9ebd6c854ac7f57d5487581a3024014c"
+        },
+        {
+          "path": "final/realedits/run-55902aa/corrected-plan/studio-open.log",
+          "sha256": "e3c5e38da65919534757605b062b4700ef4317c59778cfeed8f14dbbcf5c507f"
+        }
+      ],
       "depends_on": [],
-      "note": "Short real edit pending the Claude sign-in (footage prepared)."
+      "note": "Current trim-only Short is rendered and technically reviewed. Produced treatment and revision (requests 2–3) remain unrun; Studio trim handoff and listening are incomplete."
     },
     {
       "id": "Z6",
       "requirement": "Full encoded outputs played with sound, speech/content fidelity and visible defects reviewed; matching editable project opened in live Studio",
       "scope": "editorial (person)",
       "required": true,
-      "status": "NOT RUN",
-      "archive_sha256": null,
-      "evidence": [],
+      "status": "BLOCKED",
+      "archive_sha256": "e9d6c9533ed63f77c4fd556d7de10ef610b53e1775ae5a48192b69474c03dbad",
+      "evidence": [
+        {
+          "path": "final/realedits/run-55902aa/corrected-plan/render-review.md",
+          "sha256": "22320e360517487bd951a045ede33843e53829e37c0daf68c21cb9b5d976eec7"
+        },
+        {
+          "path": "final/realedits/run-55902aa/corrected-plan/browser-playback-review.json",
+          "sha256": "31ddd8d82359981283c3075537b9f23d9ebd6c854ac7f57d5487581a3024014c"
+        },
+        {
+          "path": "final/realedits/run-55902aa/corrected-plan/studio-open.log",
+          "sha256": "e3c5e38da65919534757605b062b4700ef4317c59778cfeed8f14dbbcf5c507f"
+        }
+      ],
       "depends_on": [],
-      "note": "Needs a person to play the outputs with sound and open the Studio projects."
+      "note": "Current trim plays and seeks to completion in the local browser, and sampled frames/text pass independent review. No listening occurred. The supported Studio opener exits 1 for no graphicsTrack entries, so the matching editable project is unavailable."
     },
     {
       "id": "Z7",
@@ -498,7 +429,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Code and tests: Segmenter and Clipper call the subscription CLI only (no SDK or key route); a saved Deepgram key authorizes no paid transcription (installer/16). Real Segmenter/Clipper runs through the signed-in provider are pending.",
+      "note": "Real current-archive Segmenter and Clipper runs are unperformed; current paid-feature harness cases are still running.",
       "requirement_change": {
         "previous_requirement": "Segmenter and Clipper AI calls run through the selected subscription adapter; paid features separately gated and opt-in; no silent paid fallback",
         "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting."
@@ -513,18 +444,31 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Enforced in code and tested: Studio buyer-route test (fresh browser context, no PostHog request, patch present in the served runtime, the disclosed jsDelivr file accounted for) passes in both Python runs and the package gate. The privacy statements were corrected after two docs reviews (docs-reviews/); the corrected text awaits the independent review of bae842a."
+      "note": "Current full privacy-boundary review has not been completed. This run used local media and ASR, no paid ASR or media upload; that alone does not qualify the entire product privacy row."
     },
     {
       "id": "Z9",
       "requirement": "Manual, agent instructions (AGENTS.md, CLAUDE.md, both skill trees, commands) and printed messages match the code for both agents",
       "scope": "package content",
       "required": true,
-      "status": "NOT RUN",
-      "archive_sha256": null,
-      "evidence": [],
+      "status": "FAIL",
+      "archive_sha256": "e9d6c9533ed63f77c4fd556d7de10ef610b53e1775ae5a48192b69474c03dbad",
+      "evidence": [
+        {
+          "path": "final/realedits/run-55902aa/corrected-plan/render-review.md",
+          "sha256": "22320e360517487bd951a045ede33843e53829e37c0daf68c21cb9b5d976eec7"
+        },
+        {
+          "path": "final/realedits/run-55902aa/corrected-plan/studio-open.log",
+          "sha256": "e3c5e38da65919534757605b062b4700ef4317c59778cfeed8f14dbbcf5c507f"
+        },
+        {
+          "path": "final/qualification-install/40-package-gate-final.json",
+          "sha256": "8077092efefc5befde68aa7d02ca2f180ac05b4240cb17114de203cfe5a44f51"
+        }
+      ],
       "depends_on": [],
-      "note": "Two independent docs reviews (24 contradictions) fixed in 69955bf/980526b; the fixes of review 2 are not yet independently re-read.",
+      "note": "Current trim-only request exposed default captions despite passing intent gate, and the required editable Studio route rejects plans without graphics. Two package command-expectation tests also fail. Full instructions/printed-message parity is not established.",
       "requirement_change": {
         "previous_requirement": "Manual, agent instructions (AGENTS.md, CLAUDE.md, both skill trees, overrides) and in-app text match the code for both providers",
         "why": "2026-09-19 owner direction: buyers use Sniper only from their own Codex or Claude Code on their own subscription; no web UI, no Sniper copy of Codex/Claude, no Sniper sign-in or provider setting."
@@ -539,7 +483,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Needs an outside operator and a clean Mac (owner input)."
+      "note": "Requires an outside operator using only the shipped manual on a clean Mac with their own account and footage; unavailable in this session."
     },
     {
       "id": "Z11",
@@ -550,7 +494,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "No delivery channel exercised; the package is not signed or notarized (PENDING item 7)."
+      "note": "No authenticated tester delivery was exercised. No outgoing tester message or ZIP was sent; signing/notarization and delivery decisions remain open."
     },
     {
       "id": "LICENCE",
@@ -561,7 +505,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Owner input D; the package now also distributes a GPL-3.0-or-later program (Sniper's ffmpeg) that the licence must not appear to restrict."
+      "note": "Owner/legal wording, refund/governing-law and client-project terms remain open; this technical run does not resolve them."
     },
     {
       "id": "SUPPORT",
@@ -572,7 +516,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Owner input D: no support route exists."
+      "note": "A real support route and response commitment still require owner input."
     },
     {
       "id": "GSAP",
@@ -583,7 +527,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "rc3 finding F9: the publisher clarification is drafted, not sent."
+      "note": "Visual-builder restriction requires publisher terms/clarification resolution; no new legal determination was made."
     },
     {
       "id": "REVIEW",
@@ -594,7 +538,7 @@
       "archive_sha256": null,
       "evidence": [],
       "depends_on": [],
-      "note": "Candidate bae842a / 7fed9cfd with this matrix and INDEPENDENT_REVIEW_RESPONSE.md is ready for a fresh independent review."
+      "note": "No fresh independent review of the full frozen archive and completed qualification report; package failures and other substantive findings remain open. Trim plan/render critics do not satisfy archive review."
     }
   ]
 }

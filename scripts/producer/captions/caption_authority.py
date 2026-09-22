@@ -28,7 +28,8 @@ from captions.caption_plan_pipeline import (
 )
 from captions.caption_shard_contract import validate_caption_shard_manifest
 from fingerprints import file_sha256, write_json_atomic
-from producer_config import ENCODE, MODES
+from edit_scope import caption_burn_enabled
+from producer_config import ENCODE
 
 AUTHORITY_NAME = "caption_authority.json"
 COMPILATION_NAME = "caption_compilation.json"
@@ -197,9 +198,7 @@ def write_caption_artifacts(plan: dict, compilation: dict,
     if isinstance(chapters, dict):
         write_json_atomic(paths["chaptersJson"], chapters, indent=2)
         _text_atomic(paths["chaptersText"], build_semantic_chapters(chapters))
-    mode = (plan.get("target") or {}).get("mode")
-    fallback = MODES.get(mode, {}).get("captions_burn", False)
-    burn = bool((plan.get("captions") or {}).get("burn", fallback))
+    burn = caption_burn_enabled(plan)
     receipt = _receipt(plan, compilation, paths, {
         "burn": burn, "shards": shards,
     })

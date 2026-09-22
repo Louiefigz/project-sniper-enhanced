@@ -261,9 +261,10 @@ def _publish(candidate: _AssemblyCandidate, master: Any, qualified: _QualifiedCa
 
 def assemble_source_audio(job: Any) -> dict:
     """Run the existing compositor/caption stages on an isolated v2 candidate."""
-    from assemble import _assemble_captioned, _base_state
+    from assemble import BaseManifest, _assemble_captioned, _base_state
     preparation = load_held_program_preparation(job)
-    if _base_state(job.base, job.plan, job.fingerprint_path, SOURCE_FLOAT_POLICY_V2) != "current":
+    if _base_state(job.base, job.plan, job.fingerprint_path,
+                   BaseManifest(job.manifest, SOURCE_FLOAT_POLICY_V2)) != "current":
         raise RuntimeError("source-float assembly requires a current v2 base; request --auto-base")
     if not job.manifest:
         raise RuntimeError("source-float assembly requires its admitted source manifest")

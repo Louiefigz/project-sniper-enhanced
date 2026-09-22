@@ -116,3 +116,16 @@ def lane_required(target: dict | None, lane: str) -> bool:
     ``"operator"`` and operator assets discharge ownership before authoring.
     """
     return resolve_lanes(target).get(lane) == "auto"
+
+
+def caption_burn_enabled(plan: dict) -> bool:
+    """Resolve the actual renderer burn setting, including legacy mode defaults.
+
+    Scope does not rewrite authored renderer settings. The intent gate uses
+    this same decision to reject burns that contradict a disabled lane.
+    """
+    from producer_config import MODES
+
+    mode = (plan.get("target") or {}).get("mode")
+    default = MODES.get(mode, {}).get("captions_burn", False)
+    return bool((plan.get("captions") or {}).get("burn", default))

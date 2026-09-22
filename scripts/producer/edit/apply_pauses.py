@@ -33,6 +33,10 @@ import json
 import os
 import sys
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from local_whisper_speech_edges import Measurement
 
 MIN_SEG_S = 0.05                  # drop degenerate slivers
 MIN_DROP_S = 0.05                 # and never declare a removal shorter than one
@@ -40,38 +44,37 @@ LEAD_FRAGMENT_S = 1.6             # a leading kept span this short, orphaned bef
 LEAD_DROP_S = 2.0                 # a drop this large, is an abandoned cold-open
 
 
-def _require_declared_media(media_path: str, manifest_path: str, source_id: str) -> None:
+def _require_declared_media(media_path: str, manifest_path: str | None, source_id: str) -> None:
     """Refuse a --media that is not the file the manifest records for ``source_id``.
 
     Measuring one recording and cutting another produces cut points with no relation to
     the audio, and the receipt would still say they were clamped to measured silence.
     """
+    if not manifest_path:
+        raise SystemExit("apply_pauses: --media requires --manifest to bind the measured source")
     with open(manifest_path) as handle:
         sources = json.load(handle).get("sources") or []
-    declared = next((s.get("path") for s in sources if str(s.get("id")) == source_id), None)
-    if declared is None:
-        raise SystemExit(f"apply_pauses: the manifest has no source {source_id!r}")
+    matches = [s.get("path") for s in sources if str(s.get("id")) == source_id]
+    if len(matches) != 1 or not isinstance(matches[0], str) or not matches[0]:
+        raise SystemExit(f"apply_pauses: the manifest must uniquely identify source {source_id!r}")
+    declared = matches[0]
+    if not os.path.isabs(declared):
+        declared = os.path.join(os.path.dirname(os.path.abspath(manifest_path)), declared)
     if os.path.realpath(declared) != os.path.realpath(media_path):
         raise SystemExit(
             f"apply_pauses: --media is not the media the manifest records for {source_id!r}.\n"
             f"  manifest: {declared}\n  --media : {media_path}")
 
 
-def _measurement(media_path: str):
-    """The shared audio measurement for ``media_path`` (cached for one run)."""
+def _measurement(media_path: str) -> Measurement:
+    """Measure this source once per invocation; never reuse another file's audio."""
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
         os.path.abspath(__file__)))))                    # scripts/ — shared modules
     from local_whisper_speech_edges import SpeechEdgeError, measure
-    global _MEASUREMENT
-    if _MEASUREMENT is None:
-        try:
-            _MEASUREMENT = measure(media_path)
-        except SpeechEdgeError as exc:
-            raise SystemExit(f"apply_pauses: --media could not be measured: {exc}")
-    return _MEASUREMENT
-
-
-_MEASUREMENT = None
+    try:
+        return measure(media_path)
+    except SpeechEdgeError as exc:
+        raise SystemExit(f"apply_pauses: --media could not be measured: {exc}")
 
 
 def measured_silence(media_path: str) -> list[tuple[float, float]]:
@@ -247,7 +250,8 @@ def removed_seconds(cut_track: list[dict], window: tuple[float, float]) -> float
     return round((window[1] - window[0]) - kept, 3)
 
 
-def main() -> None:
+def _arguments() -> argparse.Namespace:
+    """Parse explicit proposal/source inputs before any media measurement."""
     ap = argparse.ArgumentParser()
     ap.add_argument("pauses")
     ap.add_argument("--source", required=True)
@@ -263,7 +267,12 @@ def main() -> None:
     ap.add_argument("--retakes", help="retake_scan proposal JSON — also drop its "
                     "cut spans (false starts / re-takes)")
     ap.add_argument("--out")
-    a = ap.parse_args()
+    return ap.parse_args()
+
+
+def main() -> None:
+    """Apply the approved proposal using the exact declared source measurement."""
+    a = _arguments()
     with open(a.pauses) as f:
         proposal = json.load(f)
     retakes = None
@@ -271,9 +280,10 @@ def main() -> None:
         with open(a.retakes) as f:
             retakes = json.load(f).get("retakes", [])
     window = (a.window[0], a.window[1])
-    if a.media and a.manifest:
+    if a.media:
         _require_declared_media(a.media, a.manifest, a.source)
-    silence = measured_silence(a.media) if a.media else None
+    measurement = _measurement(a.media) if a.media else None
+    silence = measurement.quiet_spans() if measurement is not None else None
     words = None
     if a.transcript:
         with open(a.transcript) as f:
@@ -285,7 +295,7 @@ def main() -> None:
         # refused there for cutting across a word whose claimed span is really silence.
         words = claimed if not a.media else [
             window for window in claimed
-            if not _measurement(a.media).unspoken(*window, margin=0.0)]
+            if not measurement.unspoken(*window, margin=0.0)]
     track = cut_track_from_pauses(proposal, a.source, window,
                                   CutOptions(a.speed, retakes, silence, words))
     out = {"cutTrack": track,

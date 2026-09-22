@@ -23,6 +23,11 @@ below the gate and ends at it (hysteresis), so a quiet syllable inside a phrase 
 one. And a file whose own median frame sits at its gate is refused outright: on a real
 10-minute lesson (floor −51.2, gate −43.2, median −46.2) the gate lay inside ordinary
 speech and called 54% of the take silent. Refusing beats reporting that.
+
+Levels exclude the recording's constant DC offset: it is not acoustic energy.
+The lesson's -0.002699 sample bias alone contributes -51.4 dBFS, raising its
+apparent noise floor from -64.7 to -51.2. Subtract one whole-recording mean,
+never a per-frame mean or a gain change; all safety margins remain unchanged.
 """
 
 from __future__ import annotations
@@ -160,6 +165,7 @@ def frame_levels(path: str) -> tuple[list[float], float]:
     usable = len(samples) - len(samples) % size
     if usable < size:
         raise SpeechEdgeError("the audio is shorter than one measurement frame")
+    samples = samples.astype("float64") - np.mean(samples, dtype="float64")
     frames = samples[:usable].reshape(-1, size)
     rms = np.sqrt(np.maximum((frames ** 2).mean(axis=1), 1e-20))
     levels = (20 * np.log10(rms)).tolist()
@@ -259,7 +265,8 @@ def tighten_speech_edges(transcript: list[dict], path: str,
     """
     report = {"method": "measured-noise-floor", "frameS": FRAME_S,
               "floorMarginDb": FLOOR_MARGIN_DB, "minSilenceS": MIN_SILENCE_S,
-              "clampedToAudioEnd": True, "applied": False}
+              "dcRemoval": "whole-recording-mean",
+              "clampedToAudioEnd": False, "applied": False}
     try:
         _levels, gate = frame_levels(path)
         spans = measure_silences(path, offset)
@@ -277,6 +284,7 @@ def tighten_speech_edges(transcript: list[dict], path: str,
             if word["end"] > limit >= word["start"] + MIN_WORD_S:
                 removed += word["end"] - limit
                 word["end"] = round(limit, 3)
+        report["clampedToAudioEnd"] = all(word["end"] <= round(limit, 3) for word in words)
     for (start, end), word in zip(before, words):        # only ever pulled inward
         if word["start"] < start or word["end"] > end or word["end"] <= word["start"]:
             for (old_start, old_end), item in zip(before, words):

@@ -70,7 +70,10 @@ from producer_config import AUDIO, ENCODE  # noqa: E402
 
 # Fast input-seek lands a keyframe at-or-before (src_start - this); the decoder
 # then rolls forward and the in-filter trim discards up to the exact boundary.
-PRESEEK_PAD_S = 10.0
+PRESEEK_PAD_S = 2.0
+# Retimed audio is seek-context-sensitive. Keep its qualified decode history;
+# reduced pre-roll changes float PCM at 1.25x even when picture packets match.
+RETIMED_PRESEEK_PAD_S = 10.0
 AUDIO_RATE = ENCODE["audio_rate"]        # 48000
 AUDIO_CH = ENCODE["audio_channels"]      # 2
 # Stage-1 duration assertion (frames). We assert on the VIDEO timeline
@@ -270,7 +273,8 @@ def encode_segment(seg: Segment, job: EncodeJob, out_path: str,
     picture_guard = job.before_encode
     from guided_source_color_consumption_hooks import capture_cut
     consumption = capture_cut((seg, job, out_path, frames_before))
-    pre_seek = max(0.0, seg.src_start - PRESEEK_PAD_S)
+    pad = PRESEEK_PAD_S if seg.speed == 1.0 else max(PRESEEK_PAD_S, RETIMED_PRESEEK_PAD_S)
+    pre_seek = max(0.0, seg.src_start - pad)
     out_len = (seg.src_end - seg.src_start) / seg.speed
     own_len = out_len - (job.tail.lead_s if job.tail else 0.0)
     src_has_audio = job.source_channels is not None

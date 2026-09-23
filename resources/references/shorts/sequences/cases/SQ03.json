@@ -1,0 +1,260 @@
+{
+  "id": "SQ03",
+  "version": "2026-09-18.1",
+  "title": "Rank every part on one axis before naming the largest",
+  "scope": "original-reference-rendered-from-project-sniper-templates",
+  "render_aspects": [
+    "16:9"
+  ],
+  "lesson": "When a total is broken into parts, put every part on one axis first and name the largest only after the viewer can see that it is the largest.",
+  "opening": "The headline names the total being broken down, with a one-line key to the parts.",
+  "story_arc": "The hour → four parts on one axis → the verdict on the part worth fixing.",
+  "payoff": "The viewer sees which part is largest before the speaker says so.",
+  "catalog": [
+    "module-bullet-bars",
+    "module-ledger-dark",
+    "module-takeover"
+  ],
+  "beats": [
+    {
+      "id": "SQ03-B01",
+      "spoken_idea": "Here is where one hour of editing goes.",
+      "visible": "The headline and the key, before any bar.",
+      "why_this_picture": "Naming the total first tells the viewer what the bars will add up to.",
+      "composition": "module-bullet-bars",
+      "catalog_candidates": [
+        "module-bullet-bars"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ03-B01-0.jpg",
+          "sha256": "cf694b75fc5ca11c33838b3a3e5a0b6fb3d63472a4a9c55345878a48807b1a6e",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 0.3,
+          "render": {
+            "composition": "templates/motion/compositions/module-bullet-bars.html",
+            "variables": {
+              "eyebrow": "One edit, timed",
+              "headlineLines": "Where the hour goes|when I edit a Short",
+              "explainer": "1 cutting · 2 captions · 3 export · 4 colour",
+              "axisLabel": "MINUTES",
+              "bars": "1~22 min~100|2~18 min~82|3~12 min~55|4~8 min~36",
+              "verdict": "Captions take almost as long as cutting",
+              "spectrum": ""
+            },
+            "time_s": 0.3
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ03-B01-1.jpg",
+          "sha256": "f5a996e4346fa8e775773af366569232c34fc2262e7b6cd0680ec6d68f20a6d1",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 0.6,
+          "render": {
+            "composition": "templates/motion/compositions/module-bullet-bars.html",
+            "variables": {
+              "eyebrow": "One edit, timed",
+              "headlineLines": "Where the hour goes|when I edit a Short",
+              "explainer": "1 cutting · 2 captions · 3 export · 4 colour",
+              "axisLabel": "MINUTES",
+              "bars": "1~22 min~100|2~18 min~82|3~12 min~55|4~8 min~36",
+              "verdict": "Captions take almost as long as cutting",
+              "spectrum": ""
+            },
+            "time_s": 0.6
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ03-B01-2.jpg",
+          "sha256": "1fe282293e2ae446f9fee5750e22afaa144f46f0ebe748132581ba71fafbc5ff",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 1.0,
+          "render": {
+            "composition": "templates/motion/compositions/module-bullet-bars.html",
+            "variables": {
+              "eyebrow": "One edit, timed",
+              "headlineLines": "Where the hour goes|when I edit a Short",
+              "explainer": "1 cutting · 2 captions · 3 export · 4 colour",
+              "axisLabel": "MINUTES",
+              "bars": "1~22 min~100|2~18 min~82|3~12 min~55|4~8 min~36",
+              "verdict": "Captions take almost as long as cutting",
+              "spectrum": ""
+            },
+            "time_s": 1.0
+          }
+        }
+      ],
+      "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+      "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+    },
+    {
+      "id": "SQ03-B02",
+      "spoken_idea": "Twenty-two minutes cutting, eighteen on captions, twelve exporting, eight on colour.",
+      "visible": "Four numbered bars grow on one axis, each value landing with its bar tip; a one-line key names the parts.",
+      "why_this_picture": "A shared axis makes the ranking visible without any extra labels.",
+      "composition": "module-bullet-bars",
+      "catalog_candidates": [
+        "module-bullet-bars"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ03-B02-0.jpg",
+          "sha256": "cbb0f18b40ba111935ef61e79f9ebfa35cc1629e15ec3fa28a1a5811ad763464",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 1.2,
+          "render": {
+            "composition": "templates/motion/compositions/module-bullet-bars.html",
+            "variables": {
+              "eyebrow": "One edit, timed",
+              "headlineLines": "Where the hour goes|when I edit a Short",
+              "explainer": "1 cutting · 2 captions · 3 export · 4 colour",
+              "axisLabel": "MINUTES",
+              "bars": "1~22 min~100|2~18 min~82|3~12 min~55|4~8 min~36",
+              "verdict": "Captions take almost as long as cutting",
+              "spectrum": ""
+            },
+            "time_s": 1.2
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ03-B02-1.jpg",
+          "sha256": "edc7d015c8815f47b4260d719272026ce99d633aebcc1039f16866896f4477f7",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 1.8,
+          "render": {
+            "composition": "templates/motion/compositions/module-bullet-bars.html",
+            "variables": {
+              "eyebrow": "One edit, timed",
+              "headlineLines": "Where the hour goes|when I edit a Short",
+              "explainer": "1 cutting · 2 captions · 3 export · 4 colour",
+              "axisLabel": "MINUTES",
+              "bars": "1~22 min~100|2~18 min~82|3~12 min~55|4~8 min~36",
+              "verdict": "Captions take almost as long as cutting",
+              "spectrum": ""
+            },
+            "time_s": 1.8
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ03-B02-2.jpg",
+          "sha256": "a1074e635bb4702222a9529f41f883415fa55bf1acb2297df6e39721e8ed3718",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 2.6,
+          "render": {
+            "composition": "templates/motion/compositions/module-bullet-bars.html",
+            "variables": {
+              "eyebrow": "One edit, timed",
+              "headlineLines": "Where the hour goes|when I edit a Short",
+              "explainer": "1 cutting · 2 captions · 3 export · 4 colour",
+              "axisLabel": "MINUTES",
+              "bars": "1~22 min~100|2~18 min~82|3~12 min~55|4~8 min~36",
+              "verdict": "Captions take almost as long as cutting",
+              "spectrum": ""
+            },
+            "time_s": 2.6
+          }
+        }
+      ],
+      "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+      "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+    },
+    {
+      "id": "SQ03-B03",
+      "spoken_idea": "Captions take almost as long as the cut itself.",
+      "visible": "The verdict line lands under the finished bars.",
+      "why_this_picture": "The verdict names what the bars already show, so it confirms rather than asserts.",
+      "composition": "module-bullet-bars",
+      "catalog_candidates": [
+        "module-bullet-bars"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ03-B03-0.jpg",
+          "sha256": "a1074e635bb4702222a9529f41f883415fa55bf1acb2297df6e39721e8ed3718",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 2.2,
+          "render": {
+            "composition": "templates/motion/compositions/module-bullet-bars.html",
+            "variables": {
+              "eyebrow": "One edit, timed",
+              "headlineLines": "Where the hour goes|when I edit a Short",
+              "explainer": "1 cutting · 2 captions · 3 export · 4 colour",
+              "axisLabel": "MINUTES",
+              "bars": "1~22 min~100|2~18 min~82|3~12 min~55|4~8 min~36",
+              "verdict": "Captions take almost as long as cutting",
+              "spectrum": ""
+            },
+            "time_s": 2.2
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ03-B03-1.jpg",
+          "sha256": "a1074e635bb4702222a9529f41f883415fa55bf1acb2297df6e39721e8ed3718",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 2.9,
+          "render": {
+            "composition": "templates/motion/compositions/module-bullet-bars.html",
+            "variables": {
+              "eyebrow": "One edit, timed",
+              "headlineLines": "Where the hour goes|when I edit a Short",
+              "explainer": "1 cutting · 2 captions · 3 export · 4 colour",
+              "axisLabel": "MINUTES",
+              "bars": "1~22 min~100|2~18 min~82|3~12 min~55|4~8 min~36",
+              "verdict": "Captions take almost as long as cutting",
+              "spectrum": ""
+            },
+            "time_s": 2.9
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ03-B03-2.jpg",
+          "sha256": "a1074e635bb4702222a9529f41f883415fa55bf1acb2297df6e39721e8ed3718",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 4.2,
+          "render": {
+            "composition": "templates/motion/compositions/module-bullet-bars.html",
+            "variables": {
+              "eyebrow": "One edit, timed",
+              "headlineLines": "Where the hour goes|when I edit a Short",
+              "explainer": "1 cutting · 2 captions · 3 export · 4 colour",
+              "axisLabel": "MINUTES",
+              "bars": "1~22 min~100|2~18 min~82|3~12 min~55|4~8 min~36",
+              "verdict": "Captions take almost as long as cutting",
+              "spectrum": ""
+            },
+            "time_s": 4.2
+          }
+        }
+      ],
+      "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+      "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+    }
+  ]
+}

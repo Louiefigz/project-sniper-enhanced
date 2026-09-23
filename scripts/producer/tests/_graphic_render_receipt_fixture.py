@@ -59,9 +59,9 @@ def _canonical(value: object) -> bytes:
 
 def _composition_html() -> str:
     variables = [
-        {"id": "num", "type": "string", "default": "System No.1"},
-        {"id": "line1", "type": "string", "default": "Familiarity"},
-        {"id": "line2", "type": "string", "default": "Rule"},
+        {"id": "num", "type": "string", "default": "Part 1"},
+        {"id": "line1", "type": "string", "default": "The Setup"},
+        {"id": "line2", "type": "string", "default": "Basics"},
         {
             "id": "side",
             "type": "enum",

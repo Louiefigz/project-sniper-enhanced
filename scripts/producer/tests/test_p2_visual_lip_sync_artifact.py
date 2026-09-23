@@ -9,7 +9,7 @@ from tests.live_p2_visual_lip_sync_acceptance import build_artifact
 
 ARTIFACT = (
     Path(__file__).resolve().parents[1]
-    / "artifacts" / "p2-visual-lip-sync-controlled-media-v1.json")
+    / "artifacts" / "p2-visual-lip-sync-controlled-media-2026-09-23.json")
 
 
 class VisualLipSyncArtifactTests(unittest.TestCase):

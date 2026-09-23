@@ -66,7 +66,7 @@ class GradeWaitFileTests(unittest.TestCase):
             self.read()
         self.path.unlink()
         self.path.write_bytes(b" " * (64 * 1024 + 1))
-        with self.assertRaisesRegex(RuntimeError, "bounded regular"):
+        with self.assertRaisesRegex(RuntimeError, "exceeds byte limit: 65537 > 65536"):
             self.read()
 
     def test_linked_result_parent_and_changed_file_reject(self) -> None:

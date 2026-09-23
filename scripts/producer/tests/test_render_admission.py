@@ -1,4 +1,4 @@
-"""Attempt-only admission binding for closed render artifacts."""
+"""Ledger binding units with inert source DTOs; no executable admission claim."""
 
 from __future__ import annotations
 
@@ -12,6 +12,7 @@ from unittest import mock
 
 from _common import pl  # noqa: F401
 from _current_build_release_fixture import current_manifest
+from _retired_r0_artifact_fixture import inert_artifact_sources, store_test_artifact
 from headless import render_admission as admission_module
 from headless import render_admission_artifact as artifact_module
 from headless.admission_registry import (
@@ -50,9 +51,9 @@ def _request(label: str = "A") -> dict:
         "outEnd": 2.5,
         "anchor": "free-band",
         "spec": {
-            "num": "System No.1",
+            "num": "Part 1",
             "line1": label,
-            "line2": "Rule",
+            "line2": "Basics",
             "side": "left",
             "accent": "#054BC9",
         },
@@ -66,6 +67,9 @@ def _request(label: str = "A") -> dict:
 
 class RenderAdmissionTests(unittest.TestCase):
     def setUp(self) -> None:
+        # This class checks storage/ledger semantics with inert source DTOs.
+        # Actual retired-lane admission is covered outside this TEST context.
+        self.enterContext(inert_artifact_sources())
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name).resolve()
@@ -96,7 +100,7 @@ class RenderAdmissionTests(unittest.TestCase):
             "current_render_build_manifest",
             return_value=BUILD,
         ):
-            return store_render_admission_artifact(
+            return store_test_artifact(
                 RenderArtifactRequest(
                     str(target),
                     "authority-mp4-v1",
@@ -262,7 +266,7 @@ class RenderAdmissionTests(unittest.TestCase):
         resolved = load_admitted_render(reference, "boot-b")
         self.assertEqual(resolved.admission.trace_state.boot_id, "boot-a")
 
-    def test_load_uses_retained_source_and_not_live_templates(self) -> None:
+    def test_ledger_resolution_uses_only_injected_retained_metadata(self) -> None:
         artifact = self._artifact()
         admit_render_artifact(self._metadata(), artifact, "boot-a")
         with mock.patch(

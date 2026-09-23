@@ -26,7 +26,7 @@ class NativeAacEncodingTests(unittest.TestCase):
         """Create small stand-ins; every codec and measurement call is mocked."""
         scratch = tempfile.TemporaryDirectory()
         self.addCleanup(scratch.cleanup)
-        self.root = Path(scratch.name)
+        self.root = Path(scratch.name).resolve()
         picture, premaster = self.root / "picture.mp4", self.root / "premaster.wav"
         picture.write_bytes(b"picture fixture")
         premaster.write_bytes(b"lossless fixture")

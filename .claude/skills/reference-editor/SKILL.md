@@ -13,9 +13,18 @@ identity, words, claims, logos, footage, screenshots, music, or branding.
 guidance. Verified mimic is not released (P6 is 0/7). The safe output is an
 audited exact MP4 or its approved flat mirror; editable Palmier application is
 an isolated, production-shaped experiment whose connected hybrid path remains
-P5-blocked.
+P5-blocked. Palmier Pro is not configured in the packaged release, so its steps
+below do not apply there. Fetching a reference link downloads it with `yt-dlp`;
+Chrome cookies are read only with the operator's explicit per-fetch permission.
 
 ## Choose the workflow
+
+When applying a particular shot/style explicitly requested by the operator,
+persist its shot-to-catalog decisions through the shared
+[reference-shot reuse map](../../../docs/producer/REFERENCE_SHOT_REUSE.md).
+Research-only library enrichment and ordinary inspiration do not require a
+project-bound map. The map preserves inspected choices for Short and Long native
+planning; it does not replace the detailed visual study or qualify a style match.
 
 - **Research for a close functional match:** study complete narrative coverage,
   align spoken/caption cues with the visuals, inspect important motion windows,
@@ -29,13 +38,13 @@ P5-blocked.
   constants. Use this mode when the operator prioritizes close catalog matches.
   Save selected actual creator frames with timestamped context sequences and
   paired story/layout/type/timing notes. Follow the existing
-  [Shorts visual library](../../../docs/studies/shorts-visual-playbook/README.md):
+  [Shorts reference library](../../../resources/references/README.md):
   retain source URL/time/hash, a stable reference ID, what was visually reviewed,
   the exact inspected candidate source and any adaptation gap. Keep observed
   behavior separate from proposed improvements. The Producer must open selected
   images during planning and compare the same targets during native preview QA;
   a prose description is not a substitute for looking at the reference.
-  Use [Format foundations](../../../docs/studies/shorts-visual-playbook/FORMAT_FOUNDATIONS.md)
+  Use [Format foundations](../../../resources/references/shorts/FORMAT_FOUNDATIONS.md)
   to extract the message, viewing need, format choice, actual framing, meaningful
   development and exit condition. Compare a complete case with a plausible
   alternative, including within one creator's work. Transfer the function and
@@ -60,11 +69,12 @@ bar.
 
 ## 1. Intake and provenance
 
-For a URL, choose a dedicated directory under `~/ProjectSniper/_references/`
+For a URL, choose a dedicated directory under `_references/` in the operator's video workspace
+(`$(./sniper workspace)/_references/`)
 and run:
 
 ```bash
-.venv/bin/python3 scripts/producer/study/fetch_reference.py \
+./sniper python3 scripts/producer/study/fetch_reference.py \
   --url <URL> --out-dir <REFERENCE_DIR>
 ```
 
@@ -77,9 +87,9 @@ video path printed by intake.
 Run the deep extractor at source cadence, not the ordinary 30 fps cap:
 
 ```bash
-.venv/bin/python3 scripts/producer/study/study_deep.py \
+./sniper python3 scripts/producer/study/study_deep.py \
   <VIDEO> <STUDY_DIR> --meticulous --transcript <TIMED_TRANSCRIPT>
-.venv/bin/python3 scripts/producer/study/reference_style_cli.py prepare \
+./sniper python3 scripts/producer/study/reference_style_cli.py prepare \
   <VIDEO> <STUDY_DIR>/deep_study.json <STUDY_DIR>/reference-review
 ```
 
@@ -98,9 +108,9 @@ style pack.
 Initialize the two bound receipts:
 
 ```bash
-.venv/bin/python3 scripts/producer/study/reference_style_cli.py init-review \
+./sniper python3 scripts/producer/study/reference_style_cli.py init-review \
   <WORKLIST> mechanics <STUDY_DIR>/mechanics-review.json
-.venv/bin/python3 scripts/producer/study/reference_style_cli.py init-review \
+./sniper python3 scripts/producer/study/reference_style_cli.py init-review \
   <WORKLIST> editorial <STUDY_DIR>/editorial-review.json
 ```
 
@@ -133,14 +143,14 @@ and transcript evidence. The compiler refuses unresolved disagreement.
 Read the existing catalog first:
 
 ```bash
-.venv/bin/python3 scripts/producer/graphics/template_contract_cli.py --catalog
+./sniper python3 scripts/producer/graphics/template_contract_cli.py --catalog
 ```
 
 After both reviews agree, initialize the bound registry instead of hand-copying
 item ids or hashes:
 
 ```bash
-.venv/bin/python3 scripts/producer/study/reference_style_cli.py init-templates \
+./sniper python3 scripts/producer/study/reference_style_cli.py init-templates \
   <WORKLIST> <MECHANICS_REVIEW> <EDITORIAL_REVIEW> \
   <STUDY_DIR>/template-registry.json [--adjudication <ADJUDICATION_REVIEW>]
 ```
@@ -163,7 +173,7 @@ Do not create cosmetic aliases to fake variety. One renderer earns one name.
 Fill every generated registry row with its verified binding, then run:
 
 ```bash
-.venv/bin/python3 scripts/producer/study/reference_style_cli.py compile \
+./sniper python3 scripts/producer/study/reference_style_cli.py compile \
   <WORKLIST> <MECHANICS_REVIEW> <EDITORIAL_REVIEW> <TEMPLATE_REGISTRY> \
   <DEEP_STUDY> <STUDY_DIR>/reference_style_pack.json \
   [--adjudication <ADJUDICATION_REVIEW>]
@@ -190,9 +200,9 @@ Every planned reference-derived row must retain its evidence binding:
 Run both reference gates before unlocking Palmier:
 
 ```bash
-.venv/bin/python3 scripts/producer/reference_profile_lint.py <PLAN> <PROFILE> \
+./sniper python3 scripts/producer/reference_profile_lint.py <PLAN> <PROFILE> \
   --reference-id <ID> --mode <short|longform> --strategy mimic
-.venv/bin/python3 scripts/producer/reference_style_pack_lint.py \
+./sniper python3 scripts/producer/reference_style_pack_lint.py \
   <PLAN> <STYLE_PACK> --reference-id <ID>
 ```
 

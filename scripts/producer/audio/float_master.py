@@ -12,7 +12,7 @@ from functools import partial
 from pathlib import Path
 
 from audio.audio_mix_delivery import _observe_final_audio
-from audio.mastering_filter import MasterFilterInput, build_master_filter
+from audio.mastering_filter import MasterFilterInput, select_master_filter
 from audio.mastering_profile import LEGACY_MASTERING_PROFILE, MasteringProfile
 from audio.render_audio_authority import run_audio
 
@@ -38,16 +38,17 @@ def measured_chain(path: str, samples: int, chain: str) -> float | None:
     return integrated if math.isfinite(integrated) else None
 
 
-def render_float_master(source: FloatMasterInput, directory: Path) -> tuple[Path, str, str | None]:
+def render_float_master(source: FloatMasterInput, directory: Path) -> tuple[Path, str, str | None, dict]:
     """Materialize shared measured mastering as float; never encode AAC here."""
     if type(source.samples) is not int or source.samples < 1:
         raise ValueError("Float master requires an exact positive sample clock")
     request = MasterFilterInput(None, source.measured,
         partial(measured_chain, source.path, source.samples), source.profile)
-    chain, note = build_master_filter(request)
+    selected = select_master_filter(request)
+    chain = selected.chain
     chain += f",aresample=48000,atrim=end_sample={source.samples},asetpts=PTS-STARTPTS"
     path = directory / "program-master.wav"
     run_audio([source.ffmpeg, "-nostdin", "-v", "error", "-xerror", "-err_detect", "explode",
         "-n", "-i", source.path, "-map", "0:a:0", "-af", chain,
         "-c:a", "pcm_f32le", str(path)])
-    return path, chain, note
+    return path, chain, selected.note, selected.evidence

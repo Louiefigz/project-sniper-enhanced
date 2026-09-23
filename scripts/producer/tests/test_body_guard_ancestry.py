@@ -128,20 +128,30 @@ class BodyGuardAncestryTests(unittest.TestCase):
         self.assertEqual(self.clock.remaining.call_count, 2)
 
     def test_shared_ancestry_reduces_syscalls_without_skipping_file_checks(self) -> None:
-        original = os.lstat
+        # Count every lstat, however it is spelled: Python 3.12's Path.lstat() calls
+        # os.stat(path, follow_symlinks=False), Python 3.14's calls os.lstat(path).
+        original_lstat, original_stat = os.lstat, os.stat
         calls: list[str] = []
 
-        def counted(value: str | Path, *args: object, **kwargs: object) -> os.stat_result:
+        def counted_lstat(value: str | Path, *args: object, **kwargs: object) -> os.stat_result:
             calls.append(os.fspath(value))
-            return original(value, *args, **kwargs)
+            return original_lstat(value, *args, **kwargs)
 
-        with patch.object(os, "lstat", counted):
+        def counted_stat(value: str | Path, *args: object, **kwargs: object) -> os.stat_result:
+            if kwargs.get("follow_symlinks") is False:
+                calls.append(os.fspath(value))
+            return original_stat(value, *args, **kwargs)
+
+        def counting():
+            return patch.multiple(os, lstat=counted_lstat, stat=counted_stat)
+
+        with counting():
             for row in self.rows:
                 real_directory(row.path.parent)
                 row.path.lstat()
         old_count = len(calls)
         calls.clear()
-        with patch.object(os, "lstat", counted):
+        with counting():
             assert_body_files(self.rows, self.clock)
         new_count = len(calls)
         self.assertLess(new_count * 5, old_count)

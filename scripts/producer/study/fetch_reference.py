@@ -77,13 +77,18 @@ def _terminate_active(_signum, _frame) -> None:
     raise SystemExit(143)
 
 
+# Where Homebrew puts yt-dlp, for a developer's Next server whose PATH omits it.
+# An installed package puts the installer-validated yt-dlp on PATH itself.
+YTDLP_FALLBACKS = ("/opt/homebrew/bin/yt-dlp", "/usr/local/bin/yt-dlp")
+
+
 def resolve_ytdlp() -> str | None:
     """The yt-dlp binary: PATH first, then the common Homebrew/local locations
     (the Next dev server's PATH may omit /opt/homebrew/bin)."""
     found = shutil.which("yt-dlp")
     if found:
         return found
-    for candidate in ("/opt/homebrew/bin/yt-dlp", "/usr/local/bin/yt-dlp"):
+    for candidate in YTDLP_FALLBACKS:
         if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
             return candidate
     return None
@@ -232,8 +237,8 @@ def fetch(url: str, out_dir: str, cookies_browser: str,
     """Download url; browser cookies are used only with explicit permission."""
     ytdlp = resolve_ytdlp()
     if not ytdlp:
-        _emit("error", message="yt-dlp is not installed (not found on PATH). "
-              "Install it: brew install yt-dlp")
+        _emit("error", message="yt-dlp is not installed (not found on PATH). Sniper installs "
+              "its own: run install/install.command (it repairs Sniper's tools)")
         return 1
 
     os.makedirs(out_dir, exist_ok=True)

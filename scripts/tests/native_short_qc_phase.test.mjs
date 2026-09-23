@@ -37,22 +37,22 @@ const change=(file,mutate)=>{const row=read(file);mutate(row);fs.writeFileSync(f
 async function completeChunks(f, planned) {
   const results=[];
   for(let index=0;index<planned.chunkCount;index++){
-    const result=await captureNativeShortQcChunk(f.request,{index,expectedScheduleSha256:planned.scheduleSha256},{sdk:f.sdk});
+    const result=await captureNativeShortQcChunk(f.request,{index,expectedScheduleSha256:planned.scheduleSha256},{sdk:f.sdk,encode:f.encode});
     assert.equal(result.status,'native-qc-chunk-complete',result.error);results.push(result);
   }
   return results;
 }
 
 test('phases preserve exact existing forward/reverse occurrences, seeds and four-frame session bound',()=>withPicture(async f=>{
-  const first=f.calls.frames.length,original=await runNativeShortCapture(f.request,{sdk:f.sdk});
+  const first=f.calls.frames.length,original=await runNativeShortCapture(f.request,{sdk:f.sdk,encode:f.encode});
   assert.equal(original.status,'native-references-and-seek-states-pass',original.error);
   const originalCalls=f.calls.frames.slice(first);newOutput(f);
-  const before=f.calls.frames.length,planned=await planNativeShortQc(f.request,{sdk:f.sdk});
+  const before=f.calls.frames.length,planned=await planNativeShortQc(f.request,{sdk:f.sdk,encode:f.encode});
   assert.ok(planned.chunkCount>1&&planned.chunkCount<=128);
   const schedule=read(scheduleFile(f));
   assert.ok(schedule.chunks.every(chunk=>chunk.length>0&&chunk.length<=48));
   await completeChunks(f,planned);
-  const result=await finishNativeShortQc(f.request,planned.scheduleSha256,{sdk:f.sdk});
+  const result=await finishNativeShortQc(f.request,planned.scheduleSha256,{sdk:f.sdk,encode:f.encode});
   assert.equal(result.status,'native-references-and-seek-states-pass');
   const receipt=read(path.join(f.request.output,'native-frames.json'));
   assert.deepEqual(receipt.frames.map(row=>row.frame),nativeCaptureQcPoints(f.plan,true,4));
@@ -63,10 +63,10 @@ test('phases preserve exact existing forward/reverse occurrences, seeds and four
 }));
 
 test('schedule digest is mandatory and altered schedules fail before any browser',()=>withPicture(async f=>{
-  const plan=await planNativeShortQc(f.request,{sdk:f.sdk}),count=f.calls.sessions.length;
-  await assert.rejects(()=>captureNativeShortQcChunk(f.request,{index:0},{sdk:f.sdk}),/SHA256/);
+  const plan=await planNativeShortQc(f.request,{sdk:f.sdk,encode:f.encode}),count=f.calls.sessions.length;
+  await assert.rejects(()=>captureNativeShortQcChunk(f.request,{index:0},{sdk:f.sdk,encode:f.encode}),/SHA256/);
   change(scheduleFile(f),row=>row.chunks[0][0].frames.reverse());
-  await assert.rejects(()=>captureNativeShortQcChunk(f.request,{index:0,expectedScheduleSha256:plan.scheduleSha256},{sdk:f.sdk}),/digest differs/);
+  await assert.rejects(()=>captureNativeShortQcChunk(f.request,{index:0,expectedScheduleSha256:plan.scheduleSha256},{sdk:f.sdk,encode:f.encode}),/digest differs/);
   assert.equal(f.calls.sessions.length,count);
 }));
 
@@ -77,8 +77,8 @@ test('sequential cache admission retains new timing receipts without changing ex
     return {success:true,errors:[],durationMs:++admissions,phaseBreakdown:{cacheHits:1,cacheMisses:0},
       extracted:[{videoId:videos[0].id,outputDir:cached.entry,framePaths:cached.framePaths,totalFrames:cached.names.length}]};
   };
-  const plan=await planNativeShortQc(f.request,{sdk:f.sdk});await completeChunks(f,plan);
-  const result=await finishNativeShortQc(f.request,plan.scheduleSha256,{sdk:f.sdk});
+  const plan=await planNativeShortQc(f.request,{sdk:f.sdk,encode:f.encode});await completeChunks(f,plan);
+  const result=await finishNativeShortQc(f.request,plan.scheduleSha256,{sdk:f.sdk,encode:f.encode});
   assert.equal(result.status,'native-references-and-seek-states-pass');
   const receipt=read(path.join(f.request.output,'native-frames.json'));
   assert.equal(admissions,plan.chunkCount+2);
@@ -87,28 +87,28 @@ test('sequential cache admission retains new timing receipts without changing ex
 },80));
 
 test('even a newly supplied digest cannot authorize a reduced schedule',()=>withPicture(async f=>{
-  await planNativeShortQc(f.request,{sdk:f.sdk});
+  await planNativeShortQc(f.request,{sdk:f.sdk,encode:f.encode});
   change(scheduleFile(f),row=>row.chunks.pop());
-  const result=await captureNativeShortQcChunk(f.request,{index:0,expectedScheduleSha256:nativeCaptureHash(scheduleFile(f))},{sdk:f.sdk});
+  const result=await captureNativeShortQcChunk(f.request,{index:0,expectedScheduleSha256:nativeCaptureHash(scheduleFile(f))},{sdk:f.sdk,encode:f.encode});
   assert.equal(result.status,'failed');assert.match(result.error,/schedule changed/);
 }));
 
 test('changed source bytes between plan and chunk fail without a passing receipt',()=>withPicture(async f=>{
-  const plan=await planNativeShortQc(f.request,{sdk:f.sdk});
+  const plan=await planNativeShortQc(f.request,{sdk:f.sdk,encode:f.encode});
   fs.appendFileSync(path.join(f.request.project,'assets/source.mp4'),' changed');
-  const result=await captureNativeShortQcChunk(f.request,{index:0,expectedScheduleSha256:plan.scheduleSha256},{sdk:f.sdk});
+  const result=await captureNativeShortQcChunk(f.request,{index:0,expectedScheduleSha256:plan.scheduleSha256},{sdk:f.sdk,encode:f.encode});
   assert.equal(result.status,'failed');
   assert.equal(fs.existsSync(path.join(f.request.output,'native-frames.json')),false);
 }));
 
 test('interrupted session keeps failed evidence, runs disposal and cannot finish',()=>withPicture(async f=>{
-  const plan=await planNativeShortQc(f.request,{sdk:f.sdk});
+  const plan=await planNativeShortQc(f.request,{sdk:f.sdk,encode:f.encode});
   f.failFrame=read(scheduleFile(f)).chunks[0][0].frames[0];
-  const result=await captureNativeShortQcChunk(f.request,{index:0,expectedScheduleSha256:plan.scheduleSha256},{sdk:f.sdk});
+  const result=await captureNativeShortQcChunk(f.request,{index:0,expectedScheduleSha256:plan.scheduleSha256},{sdk:f.sdk,encode:f.encode});
   assert.equal(result.status,'failed');assert.match(result.error,/TEST screenshot decode failure/);
   const receipt=read(chunkFile(f,0));
   assert.equal(receipt.sessions[0].sessionClosed,true);assert.equal(receipt.sessions[0].serverClosed,true);
-  await assert.rejects(()=>finishNativeShortQc(f.request,plan.scheduleSha256,{sdk:f.sdk}),/incomplete/);
+  await assert.rejects(()=>finishNativeShortQc(f.request,plan.scheduleSha256,{sdk:f.sdk,encode:f.encode}),/incomplete/);
   assert.equal(fs.existsSync(path.join(f.request.output,'native-frames.json')),false);
 }));
 
@@ -125,33 +125,33 @@ for(const [name,mutate] of [
   ['empty original-media contract',row=>{row.sessions[0].originalMedia.contract=[];}],
   ['wrong schedule binding',row=>{row.scheduleSha256='f'.repeat(64);}],
 ])test(`finish rejects ${name}`,()=>withPicture(async f=>{
-  const plan=await planNativeShortQc(f.request,{sdk:f.sdk});await completeChunks(f,plan);
+  const plan=await planNativeShortQc(f.request,{sdk:f.sdk,encode:f.encode});await completeChunks(f,plan);
   change(chunkFile(f,0),mutate);
-  await assert.rejects(()=>finishNativeShortQc(f.request,plan.scheduleSha256,{sdk:f.sdk}));
+  await assert.rejects(()=>finishNativeShortQc(f.request,plan.scheduleSha256,{sdk:f.sdk,encode:f.encode}));
   assert.equal(fs.existsSync(path.join(f.request.output,'native-frames.json')),false);
 },80));
 
 test('finish rejects missing chunks and does not infer completion from JPEG files',()=>withPicture(async f=>{
-  const plan=await planNativeShortQc(f.request,{sdk:f.sdk});
-  await captureNativeShortQcChunk(f.request,{index:0,expectedScheduleSha256:plan.scheduleSha256},{sdk:f.sdk});
-  await assert.rejects(()=>finishNativeShortQc(f.request,plan.scheduleSha256,{sdk:f.sdk}),/ENOENT/);
+  const plan=await planNativeShortQc(f.request,{sdk:f.sdk,encode:f.encode});
+  await captureNativeShortQcChunk(f.request,{index:0,expectedScheduleSha256:plan.scheduleSha256},{sdk:f.sdk,encode:f.encode});
+  await assert.rejects(()=>finishNativeShortQc(f.request,plan.scheduleSha256,{sdk:f.sdk,encode:f.encode}),/ENOENT/);
 }));
 
 for(const target of ['frame','seed'])test(`finish rejects changed ${target} image bytes`,()=>withPicture(async f=>{
-  const plan=await planNativeShortQc(f.request,{sdk:f.sdk});await completeChunks(f,plan);
+  const plan=await planNativeShortQc(f.request,{sdk:f.sdk,encode:f.encode});await completeChunks(f,plan);
   const chunk=read(chunkFile(f,0));
   const row=target==='frame'?chunk.frames[0]:chunk.sessions[0].reverseSeed;
   fs.appendFileSync(row.path,' changed');
-  await assert.rejects(()=>finishNativeShortQc(f.request,plan.scheduleSha256,{sdk:f.sdk}),/image bytes changed/);
+  await assert.rejects(()=>finishNativeShortQc(f.request,plan.scheduleSha256,{sdk:f.sdk,encode:f.encode}),/image bytes changed/);
 },80));
 
 test('plan/chunk/finish destinations are exclusive',()=>withPicture(async f=>{
-  const plan=await planNativeShortQc(f.request,{sdk:f.sdk});
-  await assert.rejects(()=>planNativeShortQc(f.request,{sdk:f.sdk}),/EEXIST/);
+  const plan=await planNativeShortQc(f.request,{sdk:f.sdk,encode:f.encode});
+  await assert.rejects(()=>planNativeShortQc(f.request,{sdk:f.sdk,encode:f.encode}),/EEXIST/);
   await completeChunks(f,plan);
-  await assert.rejects(()=>captureNativeShortQcChunk(f.request,{index:0,expectedScheduleSha256:plan.scheduleSha256},{sdk:f.sdk}),/EEXIST/);
-  await finishNativeShortQc(f.request,plan.scheduleSha256,{sdk:f.sdk});
-  await assert.rejects(()=>finishNativeShortQc(f.request,plan.scheduleSha256,{sdk:f.sdk}),/EEXIST/);
+  await assert.rejects(()=>captureNativeShortQcChunk(f.request,{index:0,expectedScheduleSha256:plan.scheduleSha256},{sdk:f.sdk,encode:f.encode}),/EEXIST/);
+  await finishNativeShortQc(f.request,plan.scheduleSha256,{sdk:f.sdk,encode:f.encode});
+  await assert.rejects(()=>finishNativeShortQc(f.request,plan.scheduleSha256,{sdk:f.sdk,encode:f.encode}),/EEXIST/);
 },80));
 
 test('strict CLI rejects missing digest, extra plan options and invalid chunk index',()=>withPicture(async f=>{
@@ -164,26 +164,26 @@ test('strict CLI rejects missing digest, extra plan options and invalid chunk in
 
 test('valid legacy absent forward authority explicitly selects unchanged full replay without a schedule',()=>withPicture(async f=>{
   change(path.join(f.request.output,'batched-picture.json'),row=>{delete row.forwardQc;});
-  const before=f.calls.frames.length,result=await planNativeShortQc(f.request,{sdk:f.sdk});
+  const before=f.calls.frames.length,result=await planNativeShortQc(f.request,{sdk:f.sdk,encode:f.encode});
   assert.deepEqual(result,{status:'native-qc-phases-ineligible',reason:'forward-evidence-unavailable'});
   assert.equal(fs.existsSync(scheduleFile(f)),false);assert.equal(f.calls.frames.length,before);
-  const replay=await runNativeShortCapture(f.request,{sdk:f.sdk});
+  const replay=await runNativeShortCapture(f.request,{sdk:f.sdk,encode:f.encode});
   assert.equal(replay.status,'native-references-and-seek-states-pass',replay.error);
   assert.deepEqual(f.calls.frames.slice(before),nativeCaptureQcPoints(f.plan,true,4));
 },20));
 
 test('one-frame sessions validate forward evidence before explicitly selecting unchanged full replay',()=>withPicture(async f=>{
-  const before=f.calls.frames.length,result=await planNativeShortQc(f.request,{sdk:f.sdk});
+  const before=f.calls.frames.length,result=await planNativeShortQc(f.request,{sdk:f.sdk,encode:f.encode});
   assert.deepEqual(result,{status:'native-qc-phases-ineligible',reason:'single-frame-session'});
   assert.equal(fs.existsSync(scheduleFile(f)),false);assert.equal(f.calls.frames.length,before);
-  const replay=await runNativeShortCapture(f.request,{sdk:f.sdk});
+  const replay=await runNativeShortCapture(f.request,{sdk:f.sdk,encode:f.encode});
   assert.equal(replay.status,'native-references-and-seek-states-pass',replay.error);
   assert.deepEqual(f.calls.frames.slice(before),nativeCaptureQcPoints(f.plan,true,1));
 },20,1));
 
 for(const maximum of [4,1])test(`malformed present authority cannot select a compatibility fallback at max ${maximum}`,()=>withPicture(async f=>{
   change(path.join(f.request.output,'batched-picture.json'),row=>{row.forwardQc=null;});
-  await assert.rejects(()=>planNativeShortQc(f.request,{sdk:f.sdk}),/authority differs/);
+  await assert.rejects(()=>planNativeShortQc(f.request,{sdk:f.sdk,encode:f.encode}),/authority differs/);
   assert.equal(fs.existsSync(scheduleFile(f)),false);
 },20,maximum));
 
@@ -193,6 +193,6 @@ for(const [name,mutate] of [
   ['empty legacy receipt',row=>{for(const key of Object.keys(row))delete row[key];}],
 ])test(`${name} cannot select a compatibility fallback`,()=>withPicture(async f=>{
   change(path.join(f.request.output,'batched-picture.json'),mutate);
-  await assert.rejects(()=>planNativeShortQc(f.request,{sdk:f.sdk}));
+  await assert.rejects(()=>planNativeShortQc(f.request,{sdk:f.sdk,encode:f.encode}));
   assert.equal(fs.existsSync(scheduleFile(f)),false);
 },20));

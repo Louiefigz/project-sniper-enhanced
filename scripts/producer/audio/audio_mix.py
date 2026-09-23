@@ -64,7 +64,7 @@ from typing import Optional
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # run-by-path: producer pkg root on sys.path
 from producer_config import AUDIO, ENCODE, AUDIO_MIX_POLICY_VERSION
 from audio.master import (
-    MASTERING_POLICY_VERSION, build_pass2_afilter, has_audio, measure_integrated_lufs,
+    MASTERING_POLICY_VERSION, select_pass2_filter, has_audio, measure_integrated_lufs,
 )
 from audio.channel_normalization import (
     ChannelNormalizationError,
@@ -279,11 +279,11 @@ def _render_mix_master(job: MixMasterJob, out_path: str) -> dict:
     except ChannelNormalizationError as exc:
         return _mix_failure(str(exc))
     measured = _measure_mix(video_in, bed_ducked_wav, video_dur)
-    afilter, note = build_pass2_afilter(
+    selected = select_pass2_filter(
         video_in, None, measured,
         partial(_measure_mix_chain_lufs, video_in, bed_ducked_wav, video_dur))
     fc = (f"{_MIX};[mix]atrim=0:{video_dur:.6f},asetpts=PTS-STARTPTS,"
-          f"{afilter}[aout]")
+          f"{selected.chain}[aout]")
     cmd = ["ffmpeg", "-y", "-hide_banner", "-nostats", "-i", video_in, "-i", bed_ducked_wav]
     picture_index = 0
     if job.picture.path != video_in:
@@ -300,7 +300,8 @@ def _render_mix_master(job: MixMasterJob, out_path: str) -> dict:
         picture_proof = verify_picture_copy(job.picture, out_path) if ok else None
     except ChannelNormalizationError as exc:
         return _mix_failure(str(exc))
-    return {"ok": ok, "linear": note is None, "mastering_note": note,
+    return {"ok": ok, "linear": selected.note is None, "mastering_note": selected.note,
+            "mastering_decision": selected.evidence,
             "mastering_policy_version": MASTERING_POLICY_VERSION,
             "picture": picture_proof,
             "stderr": "" if ok else res.stderr[-800:]}

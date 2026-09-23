@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """exit_on_cut — THE EXIT LAW as a first-class compositing rule (G4).
 
-Source: scripts/producer/docs/findings/JADEN_STYLE.md §5.3 [6/6 HIGH]:
-graphics are NEVER animated out — hard-off <= 1-2 frames, either (a) exactly
-ON the next cut or (b) an instant pop at the semantic boundary. House comps
+Specification: scripts/producer/docs/findings/PUNCH_STYLE.md §5.3 (animation
+law): graphics are NEVER animated out — they go hard-off either (a) exactly
+ON the next cut or (b) instantly at a sentence boundary. House comps
 already hold to their window end (no self fade-out); this module supplies (a):
 a ``graphicsTrack`` entry may opt in with ``"exitOnCut": true`` and its
 ``outEnd`` is CLAMPED to the first cutTrack seam after ``outStart`` — the
@@ -22,9 +22,9 @@ treatment rendered by ``graphics_stage``): plan value must be in
 ``TAKEOVER_BASES`` and is illegal under an opaque own-screen takeover or a
 focus-shift anchor (which already blurs the base).
 
-And the ``spec.exit`` vocabulary (NATEHERK_STUDY.md §2 T-D / §5 item 2): a
+And the ``spec.exit`` vocabulary (MODULE_STUDY.md §2 T-D / §5 item 2): a
 comp may exit via a graphics-layer-only blur+fade+recede (``"blur-recede"``,
-``EXIT_BLUR_S`` = 0.15s ≈ 4 frames @30fps — measured 67.12→67.28). The
+``EXIT_BLUR_S`` = 0.15s ≈ 4 frames @30fps — a Sniper design parameter). The
 renderers clamp BEFORE rendering (``apply_exit_on_cut`` runs ahead of
 ``graphics_render``), so the comp re-times its exit to the clamped window and
 the blur ends exactly on the seam — lint's job (``exit_grammar_issues``) is
@@ -38,8 +38,8 @@ from __future__ import annotations
 from compile_timeline import compile_plan
 from graphics.placement_context import bind_plan_face_bbox
 
-# G5 vocabulary: full-frame gaussian-blur + desaturate of the FOOTAGE as a
-# takeover background (JADEN_STYLE.md §5.4 E4 — 8 instances / 4 reels HIGH).
+# G5 vocabulary: gaussian-blur + desaturate of the FOOTAGE under a graphic's
+# window, a quiet ground for text (PUNCH_STYLE.md §5.4 E4, §10 G5).
 TAKEOVER_BASES = ("blur-desat",)
 
 # spec.exit vocabulary — the union of the comps' exit enums ("hold" =

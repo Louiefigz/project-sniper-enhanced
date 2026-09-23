@@ -10,9 +10,9 @@ import template_usage_contract as tuc
 def _snapshot(fragment_projects: int = 0) -> dict:
     projects = []
     for index in range(4):
-        uses = {"statement-card": 1} if index < 3 else {"fragment-payoff": 1}
+        uses = {"chart-story": 1} if index < 3 else {"ui-focus-zoom": 1}
         if index < fragment_projects:
-            uses["fragment-payoff"] = 1
+            uses["ui-focus-zoom"] = 1
         projects.append({"projectId": f"project-{index}",
                          "approvedAt": f"2026-07-0{index + 1}T00:00:00.000Z",
                          "planHash": str(index) * 64, "uses": uses})
@@ -36,9 +36,9 @@ def _empty_snapshot() -> dict:
     return {**core, "digest": tuc._stable_hash(core)}
 
 
-def _plan(reason: str | None = None, kind: str = "statement-card") -> dict:
+def _plan(reason: str | None = None, kind: str = "chart-story") -> dict:
     decision = {"beatId": "intro-proof", "decision": "graphic", "kind": kind,
-                "alternativesConsidered": ["fragment-payoff"]}
+                "alternativesConsidered": ["ui-focus-zoom"]}
     if reason is not None:
         decision["reuseReason"] = reason
     return {"target": {"mode": "longform", "scope": "produced"},
@@ -47,7 +47,7 @@ def _plan(reason: str | None = None, kind: str = "statement-card") -> dict:
 
 def _beat() -> list[dict]:
     return [{"beatId": "intro-proof", "evidence": "five tips stay consistent",
-             "compatibleKinds": ["statement-card", "fragment-payoff"]}]
+             "compatibleKinds": ["chart-story", "ui-focus-zoom"]}]
 
 
 class TemplateUsageContractTests(unittest.TestCase):
@@ -75,8 +75,8 @@ class TemplateUsageContractTests(unittest.TestCase):
         self.assertEqual(grounded["metrics"]["checkedReuses"], 1)
 
     def test_underused_choice_needs_no_reuse_waiver(self) -> None:
-        plan = _plan(kind="fragment-payoff")
-        plan["graphicsDecisions"][0]["alternativesConsidered"] = ["statement-card"]
+        plan = _plan(kind="ui-focus-zoom")
+        plan["graphicsDecisions"][0]["alternativesConsidered"] = ["chart-story"]
         self.assertTrue(self.check(plan, _snapshot())["ok"])
 
     def test_no_compatible_underused_form_creates_no_fake_obligation(self) -> None:
@@ -84,7 +84,7 @@ class TemplateUsageContractTests(unittest.TestCase):
 
     def test_snapshot_tampering_fails_closed(self) -> None:
         snapshot = copy.deepcopy(_snapshot())
-        snapshot["counts"]["statement-card"]["projects"] = 1
+        snapshot["counts"]["chart-story"]["projects"] = 1
         verdict = self.check(_plan(), snapshot)
         self.assertFalse(verdict["ok"])
         self.assertIn("digest", " ".join(verdict["errors"]))
@@ -97,14 +97,14 @@ class TemplateUsageContractTests(unittest.TestCase):
     def test_empty_history_still_blocks_globally_avoidable_reuse(self) -> None:
         beats = [
             {"beatId": "one", "evidence": "first proof",
-             "compatibleKinds": ["statement-card", "fragment-payoff"]},
+             "compatibleKinds": ["chart-story", "ui-focus-zoom"]},
             {"beatId": "two", "evidence": "second proof",
-             "compatibleKinds": ["fragment-payoff", "statement-card"]},
+             "compatibleKinds": ["ui-focus-zoom", "chart-story"]},
         ]
         plan = {"target": {"mode": "longform", "scope": "produced"},
                 "graphicsDecisions": [
                     {"beatId": row["beatId"], "decision": "graphic",
-                     "kind": "statement-card"} for row in beats]}
+                     "kind": "chart-story"} for row in beats]}
         verdict = self.check(plan, _empty_snapshot(), beats)
         self.assertFalse(verdict["ok"], verdict)
         self.assertIn("replacement witness", " ".join(verdict["errors"]))
@@ -113,13 +113,13 @@ class TemplateUsageContractTests(unittest.TestCase):
     def test_unavoidable_reuse_passes_global_allocation_gate(self) -> None:
         beats = [
             {"beatId": "one", "evidence": "first proof",
-             "compatibleKinds": ["statement-card"]},
+             "compatibleKinds": ["chart-story"]},
             {"beatId": "two", "evidence": "second proof",
-             "compatibleKinds": ["statement-card"]},
+             "compatibleKinds": ["chart-story"]},
             {"beatId": "three", "evidence": "third proof",
-             "compatibleKinds": ["fragment-payoff"]},
+             "compatibleKinds": ["ui-focus-zoom"]},
         ]
-        choices = ["statement-card", "statement-card", "fragment-payoff"]
+        choices = ["chart-story", "chart-story", "ui-focus-zoom"]
         plan = {"target": {"mode": "longform", "scope": "produced"},
                 "graphicsDecisions": [
                     {"beatId": row["beatId"], "decision": "graphic",
@@ -130,16 +130,12 @@ class TemplateUsageContractTests(unittest.TestCase):
         self.assertEqual(verdict["metrics"]["selectedDistinctKinds"], 2)
         self.assertEqual(verdict["metrics"]["maximumFeasibleDistinctKinds"], 2)
 
-    def test_profiled_plan_allocates_against_profile_compatible_kinds(self) -> None:
-        plan = _plan(kind="nateherk-rail")
+    def test_profiled_plan_cannot_reenable_retired_forms(self) -> None:
+        plan = _plan(kind="module-rail")
         plan["target"].update({"graphicsStyle": "face-bridge",
-                               "visualProfile": "nateherk-editorial-v1"})
-        beats = [{"beatId": "intro-proof", "evidence": "first proof",
-                  "compatibleKinds": ["nateherk-rail"]}]
-        with mock.patch.object(tuc, "semantic_beats", return_value=beats) as mocked:
-            verdict = tuc.check(plan, [{"end": 10.0}], _empty_snapshot())
-        self.assertTrue(verdict["ok"], verdict)
-        self.assertEqual(mocked.call_args.args[2], "nateherk-editorial-v1")
+                              "visualProfile": "module-editorial-v1"})
+        with self.assertRaisesRegex(ValueError, "retired"):
+            tuc.check(plan, [{"end": 10.0}], _empty_snapshot())
 
 
 if __name__ == "__main__":

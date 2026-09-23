@@ -10,6 +10,8 @@ const RUNTIMES: Record<string, { source: string; type: string }> = {
   drawSvg: { source: "/vendor/gsap/DrawSVGPlugin.min.js", type: "text/javascript; charset=utf-8" },
   motionTokens: { source: "/motion-tokens.js", type: "text/javascript; charset=utf-8" },
   tokens: { source: "/tokens.css", type: "text/css; charset=utf-8" },
+  modulePipeline: { source: "/module-pipeline.js", type: "text/javascript; charset=utf-8" },
+  agendaCaptionLayout: { source: "/agenda-caption-layout.css", type: "text/css; charset=utf-8" },
 };
 const IMAGE_TYPES: Record<string, string> = {
   ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg",

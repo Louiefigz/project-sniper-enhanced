@@ -48,10 +48,10 @@ class StudioPendingEditTests(unittest.TestCase):
         fixture.tmp = temporary.name
         fixture.base = str(Path(temporary.name) / "TEST-inert-base.mp4")
         Path(fixture.base).write_bytes(b"TEST inert base; never decoded")
-        probe = ReviewBase(1920, 1080, 12.0, 30.0, "", False)
+        probe = ReviewBase(1080, 1920, 12.0, 30.0, "", False)
         for target, value in (("studio.studio_project._probe_base", probe),
                               ("studio.index_semantics.probe_media", SimpleNamespace(
-                                  width=1920, height=1080, duration=12.0, fps=30.0,
+                                  width=1080, height=1920, duration=12.0, fps=30.0,
                                   rotation=0, audio_present=False))):
             context = patch(target, return_value=value)
             context.start()
@@ -59,7 +59,33 @@ class StudioPendingEditTests(unittest.TestCase):
         source, studio = fixture._build()
         self.root, self.studio = Path(source), Path(studio)
         self.index = self.studio / "index.html"
-        self.instance = self.studio / "compositions/gfx-02-text-element-wide.html"
+        self.instance = self.studio / "compositions/gfx-02-marker-highlight.html"
+
+    def _retained_split_text_head(self) -> None:
+        """Seal an inert TEST historical head at generation, never execute its script.
+
+        Current admitted ports stay intact. The synthetic historical dependency
+        is an original generator input and manifest field, not a later DOM edit.
+        """
+        self.assertEqual(unsynced_changes(str(self.studio)), [])
+        request = studio_project.GenerateRequest(str(self.root / "edit_plan.json"),
+                                                str(self.root / "base_final.mp4"), str(self.studio))
+        build_index, write_json = studio_project.build_index_html, studio_project.write_json
+
+        def historical_index(base: object, clips: list, title: str, needed: bool) -> str:
+            return build_index(base, clips, title, True)
+
+        def historical_manifest(path: str, data: dict) -> None:
+            if Path(path).name == "studio.manifest.json":
+                data = {**data, "indexNeedsSplitText": True}
+            write_json(path, data)
+
+        with patch.object(studio_project, "build_index_html", side_effect=historical_index), \
+                patch.object(studio_project, "write_json", side_effect=historical_manifest):
+            studio_project.generate_project(request)
+        self.assertIn('src="assets/vendor/SplitText.min.js"', self.index.read_text())
+        self.assertEqual(unsynced_changes(str(self.studio)), [])
+        self.assertTrue(compute_report(load_state(str(self.studio))).clean)
 
     def _snapshot(self) -> dict:
         """Record all original TEST-owned bytes, including plan and private sidecars."""
@@ -100,7 +126,7 @@ class StudioPendingEditTests(unittest.TestCase):
         mutations = (original + "<script>void 'TEST never executed';</script>",
                      original.replace("<body>", '<body style="color: red;">'),
                      original.replace("Callout copy", "Changed TEST copy"),
-                     original.replace("&quot;default&quot;: 72", "&quot;default&quot;: 96"))
+                     original.replace("&quot;default&quot;: 1", "&quot;default&quot;: 1.5"))
         self._timing()
         for changed in mutations:
             with self.subTest(change=changed[-80:]):
@@ -116,7 +142,7 @@ class StudioPendingEditTests(unittest.TestCase):
                    original.replace("background: #111", "background: #112"),
                    original.replace("studio review", "Changed TEST title"),
                    original.replace('lang="en"', 'lang="fr"'),
-                   original.replace('data-width="1920"', 'data-width="1919"', 1),
+                   original.replace('data-width="1080"', 'data-width="1079"', 1),
                    original.replace("console.error('Sniper Studio", "console.error('Sniper  Studio"))
         for changed in changes:
             with self.subTest(change=changed[-100:]):
@@ -151,7 +177,7 @@ class StudioPendingEditTests(unittest.TestCase):
         """Remove only authenticated bindings; later sync uses the surviving baseline."""
         fixtures._remove_slot(str(self.index), "gfx-02")
         before = self.index.read_text()
-        original_binding = '["gfx-02", "gfx-02-text-element-wide", "compositions/gfx-02-text-element-wide.html"], '
+        original_binding = '["gfx-02", "gfx-02-marker-highlight", "compositions/gfx-02-marker-highlight.html"], '
         self.assertIn(original_binding, before)
         code, output = fixtures._run_main([str(self.studio), "--apply"])
         self.assertEqual(code, 0, output)
@@ -174,8 +200,9 @@ class StudioPendingEditTests(unittest.TestCase):
         self.instance.write_text(self.instance.read_text() + MARKER)
         self._refused()
 
-    def test_last_split_text_deletion_preserves_original_head_choice(self) -> None:
-        """A deleted last user does not turn its original head script into a later edit."""
+    def test_deletion_preserves_original_head_choice(self) -> None:
+        """Deleting a slot never drops an authenticated historical head dependency."""
+        self._retained_split_text_head()
         fixtures._remove_slot(str(self.index), "gfx-01")
         saved_head = self.index.read_text().split("</head>")[0]
         code, output = fixtures._run_main([str(self.studio), "--apply"])
@@ -193,13 +220,14 @@ class StudioPendingEditTests(unittest.TestCase):
         path = self.studio / "studio.manifest.json"
         original = json.loads(path.read_text())
         self._timing()
-        for value in (False, 0, 1, "true", None, {}):
+        for value in (True, 0, 1, "true", None, {}):
             with self.subTest(value=value):
                 path.write_text(json.dumps({**original, "indexNeedsSplitText": value}))
                 self._refused()
 
     def test_missing_original_head_record_after_deletion_is_not_guessed(self) -> None:
         """An already-rebaselined old deletion has no inferred recovery or migration."""
+        self._retained_split_text_head()
         fixtures._remove_slot(str(self.index), "gfx-01")
         code, output = fixtures._run_main([str(self.studio), "--apply"])
         self.assertEqual(code, 0, output)
@@ -248,7 +276,7 @@ class StudioPendingEditTests(unittest.TestCase):
         request = studio_project.GenerateRequest(str(self.root / "edit_plan.json"),
                                                 str(self.root / "base_final.mp4"), str(self.studio))
         built = studio_project._build_entries(fixtures._sync_plan(), 12.0)
-        probe = ReviewBase(1920, 1080, 12.0, 30.0, "", False)
+        probe = ReviewBase(1080, 1920, 12.0, 30.0, "", False)
         with patch.object(studio_project, "GENERATOR_VERSION", "studio-project-v1"):
             studio_project._write_project(request, built, probe)
         self.assertNotIn("indexNeedsSplitText", json.loads((self.studio / "studio.manifest.json").read_text()))
@@ -259,7 +287,7 @@ class StudioPendingEditTests(unittest.TestCase):
         manifest = json.loads((self.studio / "studio.manifest.json").read_text())
         self.assertEqual(manifest["generator"], "studio-project-v1")
         self.assertNotIn("compositionNormalizer", manifest)
-        self.assertIs(manifest["indexNeedsSplitText"], True)
+        self.assertIs(manifest["indexNeedsSplitText"], False)
 
     def test_index_processing_instructions_and_extra_doctypes_stay_pending(self) -> None:
         """No ignored HTMLParser callback may erase an unsupported saved addition."""

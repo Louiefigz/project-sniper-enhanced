@@ -9,7 +9,7 @@ from tests.p4_exit_media import source_closure, toolchain
 
 ARTIFACT = REPO / (
     "docs/producer/command-driven-editing/contracts/"
-    "p5-24-overlay-one-pass-v1.json")
+    "p5-24-overlay-one-pass-2026-09-23.json")
 
 
 class P5CompositorArtifactTests(unittest.TestCase):

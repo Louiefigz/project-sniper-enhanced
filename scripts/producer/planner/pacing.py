@@ -115,7 +115,7 @@ def visual_change_times(plan: dict) -> list[float]:
 
 _AT_KEY = re.compile(r"^at\d+$")
 
-# NATEHERK-pack land carriers (§5 items 2/4): ``spec.moduleLands`` (narration-
+# MODULE-pack land carriers (§5 items 2/4): ``spec.moduleLands`` (narration-
 # paced module builds — a list of comp-relative seconds, validated by
 # plan_lint_motion) and ``spec.statementLands`` (statement-card v2 swap times,
 # a number or "a,b" string per the comp contract). Each land is a REAL discrete
@@ -142,12 +142,23 @@ def _land_values(val: object) -> list[float]:
     return []
 
 
+def _schedule_values(key: str, value: object) -> list[float]:
+    """Invalid module schedules contribute no claimed visual changes."""
+    if key != "moduleLands":
+        return _land_values(value)
+    from graphics.template_visual_contract import parse_module_lands
+    try:
+        return parse_module_lands(value)
+    except ValueError:
+        return []
+
+
 def _staged_land_times(graphics: list[dict]) -> list[float]:
     """Internal build-state lands of staged comps, in output time.
 
     A staged comp's ``spec.atN`` keys are its element land times relative to
     the entry's outStart (the whiteboard/list/map/kinetic contract), and the
-    NATEHERK-pack ``spec.moduleLands`` / ``spec.statementLands`` carry the same
+    MODULE-pack ``spec.moduleLands`` / ``spec.statementLands`` carry the same
     meaning (narration-paced module builds / statement swaps). Each land is a
     REAL discrete on-screen change (PRO_INTRO_ENVELOPE: pro graphics carry
     2-6 build states), so pacing counts them — an entry-start-only model reads
@@ -165,7 +176,7 @@ def _staged_land_times(graphics: list[dict]) -> list[float]:
             if _AT_KEY.match(str(key)) and isinstance(val, (int, float)):
                 rel.append(float(val))
         for key in _LAND_KEYS:
-            rel.extend(_land_values(spec.get(key)))
+            rel.extend(_schedule_values(key, spec.get(key)))
         for r in rel:
             t = float(start) + r
             if t < end:

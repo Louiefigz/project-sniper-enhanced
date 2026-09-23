@@ -53,7 +53,7 @@
     "PATH": "/opt/homebrew/Cellar/node/23.10.0_1/bin:/opt/homebrew/Cellar/ffmpeg/8.0_1/bin:/usr/bin:/bin",
     "TMPDIR": "/private/tmp",
     "LC_ALL": "C",
-    "HYPERFRAMES_BROWSER_PATH": "/Users/aaronfigueroa/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-152.0.7928.2/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+    "HYPERFRAMES_BROWSER_PATH": "/Users/maintainer/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-152.0.7928.2/chrome-headless-shell-mac-arm64/chrome-headless-shell",
     "HYPERFRAMES_FFMPEG_PATH": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffmpeg",
     "HYPERFRAMES_FFPROBE_PATH": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffprobe",
     "PRODUCER_LOW_MEMORY_MODE": "true",
@@ -71,7 +71,7 @@
     "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/run-playback.py": "69e7ffa13c2ed4893c7d75bac1ad5018ade6e2932b6834fb2054d4d37637600c",
     "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/post-cleanup-playback-v1/config.json": "145b7574794428ef046d26634231782328084bc6280e2a06aaa1e04d10341811",
     "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/render_native_bounded.py": "1897b79e5d5d35066f5da535d98653aa37f6a97221bb530b8e40090f362d6905",
-    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/native_work_lease.py": "bcea94536ba8d1aaf37288066042fad11e819a6e0a6d10d33376e4194ea5cbee"
+    "/Users/maintainer/ProjectSniperSource/scripts/producer/native_work_lease.py": "bcea94536ba8d1aaf37288066042fad11e819a6e0a6d10d33376e4194ea5cbee"
   },
   "jobKind": "studio-playback-observation",
   "probeOnlyTiming": true,
@@ -255,7 +255,7 @@
     "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/run-playback.py": "69e7ffa13c2ed4893c7d75bac1ad5018ade6e2932b6834fb2054d4d37637600c",
     "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/bounded-playback-preparation/post-cleanup-playback-v1/config.json": "145b7574794428ef046d26634231782328084bc6280e2a06aaa1e04d10341811",
     "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/render_native_bounded.py": "1897b79e5d5d35066f5da535d98653aa37f6a97221bb530b8e40090f362d6905",
-    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/scripts/producer/native_work_lease.py": "bcea94536ba8d1aaf37288066042fad11e819a6e0a6d10d33376e4194ea5cbee"
+    "/Users/maintainer/ProjectSniperSource/scripts/producer/native_work_lease.py": "bcea94536ba8d1aaf37288066042fad11e819a6e0a6d10d33376e4194ea5cbee"
   },
   "additionalFilesStable": true,
   "outputBytes": 621966,

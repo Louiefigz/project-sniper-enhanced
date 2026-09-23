@@ -7,6 +7,7 @@ CLI (run with the project venv, from anywhere)::
         [--declared-aspect 16:9|9:16] [--status <status>] [--tag <tag>]
         [--limit N] [--format json|text]
     catalog_discovery_cli.py lookup <name|mirror:name|local:kind> [--format ...]
+    catalog_discovery_cli.py inventory
 
 Read-only: never executes catalog HTML, renders, fetches or writes. Exit 0 on
 an answer (an empty search IS an answer), 1 when a lookup finds nothing, 2 on
@@ -22,7 +23,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from graphics.catalog_discovery import (  # noqa: E402
     ASPECTS, DEFAULT_LIMIT, STATUSES, TYPES, SearchFilters, load_catalog,
-    lookup_item, search_catalog,
+    inventory_catalog, lookup_item, search_catalog,
 )
 
 _TEXT_WIDTH = 110
@@ -42,6 +43,7 @@ def _parser() -> argparse.ArgumentParser:
     search.add_argument("--limit", type=int, default=DEFAULT_LIMIT)
     lookup = commands.add_parser("lookup", help="exact item by name or ref")
     lookup.add_argument("name")
+    commands.add_parser("inventory", help="complete unranked strategy inventory")
     return parser
 
 
@@ -118,6 +120,11 @@ def _provenance_lines(provenance: dict) -> list[str]:
 def render_text(result: dict) -> str:
     """Concise human-readable form of a search or lookup result."""
     lines = _provenance_lines(result["provenance"]) + [f"scope: {result['scope']}"]
+    if "items" in result:
+        lines.append(f"complete inventory: {result['total']} items; no execution approval")
+        lines.extend(f"{row['ref']} — {row['title']} [{row['integration']['status']}]"
+                     for row in result["items"])
+        return "\n".join(lines)
     if "results" in result:
         lines.append(f"search {result['query']!r} → {result['total']} match(es), "
                      f"showing {result['returned']}"
@@ -142,6 +149,8 @@ def render_text(result: dict) -> str:
 def execute(args: argparse.Namespace) -> tuple[dict, int]:
     """Execute one parsed command; return (result, exit code)."""
     catalog = load_catalog()
+    if args.command == "inventory":
+        return inventory_catalog(catalog), 0
     if args.command == "lookup":
         result = lookup_item(catalog, args.name)
         return result, 0 if result["found"] else 1

@@ -64,7 +64,7 @@ First verify the catalog is genuinely current, exact runtime controls still matc
 node --import tsx src/lib/server/__tests__/_guided-opening-media-fixture.ts --run-worker --cleanup-cas-faults
 ```
 
-It requires explicit `SNIPER_DOCKER_PATH`, `SNIPER_DOCKER_SOCKET`, `SNIPER_RENDER_IMAGE_ID`, `SNIPER_RENDER_UID_GID`, and `SNIPER_RUNTIME_REPO_ROOT`. Prior controls were `/Applications/Docker.app/Contents/Resources/bin/docker`, `/Users/aaronfigueroa/.docker/run/docker.sock`, `sha256:bc56d3860d2ec1c843f7184bcecd21137aa79fe9fe19c90a67136d3052222ba8`, `501:20`, and the actual repo root. These are historical identities to reobserve, not permission to substitute an arbitrary runtime or repin approval. The fixture uses actual synthetic picture/tone impulses and TEST-only transcript/compiler/critics/human decision; never call it creator/listening evidence.
+It requires explicit `SNIPER_DOCKER_PATH`, `SNIPER_DOCKER_SOCKET`, `SNIPER_RENDER_IMAGE_ID`, `SNIPER_RENDER_UID_GID`, and `SNIPER_RUNTIME_REPO_ROOT`. Prior controls were `/Applications/Docker.app/Contents/Resources/bin/docker`, `/Users/maintainer/.docker/run/docker.sock`, `sha256:bc56d3860d2ec1c843f7184bcecd21137aa79fe9fe19c90a67136d3052222ba8`, `501:20`, and the actual repo root. These are historical identities to reobserve, not permission to substitute an arbitrary runtime or repin approval. The fixture uses actual synthetic picture/tone impulses and TEST-only transcript/compiler/critics/human decision; never call it creator/listening evidence.
 
 The actual TS production sequence is guarded input construction → durable pre-spawn claim → actual owned media process → separately journal-held actual return → protected exact cleanup/CAS → actual strong readback under the original remaining budget. `--cleanup-cas-faults` adds three distinct actual cleanup attempts (held-start mutation, held-output mutation, backward time at the second CAS) before a fourth clean attempt, without rerendering media or restoring failed evidence. This fault cohort is wired but **not executed** yet.
 
@@ -93,7 +93,7 @@ This quality agent and the server owner have no live child process, renderer or 
 
 ## Creator source now readable, not qualified
 
-Main's read-only ffprobe now succeeds in0.119 s for `/Users/aaronfigueroa/Downloads/C0679.MP4`: 10,280,473,262 bytes; duration834.335 s; H2643840×2160, yuv420p, limited/tv range,24000/1001,20004 frames, start0; matrix/primaries bt709, transfer `iec61966-2-4`; stereo48 kHz PCM_s16be and a data stream.
+Main's read-only ffprobe now succeeds in0.119 s for `/Users/maintainer/Downloads/C0679.MP4`: 10,280,473,262 bytes; duration834.335 s; H2643840×2160, yuv420p, limited/tv range,24000/1001,20004 frames, start0; matrix/primaries bt709, transfer `iec61966-2-4`; stereo48 kHz PCM_s16be and a data stream.
 
 No full source hash, complete decode, admission, model or render job was run. This is a large xvYCC-class source, **not** the already-qualified small normal-SDR fixture class. Current F2 rejects its >8 GiB size and transfer; the explicit xvYCC mezzanine contract exists but is not qualified for this file. Do not infer a LUT, label it ordinary BT709 SDR solely from matrix/primaries, or silently downscale/reencode it to fit admission. The old91.967 s derivative is not raw footage or a ten-minute benchmark.
 

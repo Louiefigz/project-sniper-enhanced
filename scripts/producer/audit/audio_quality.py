@@ -254,7 +254,12 @@ def _ending_result(samples: np.ndarray, plan: dict) -> CheckResult:
 
 def check_audio_quality(final_path: str, plan: dict) -> list[CheckResult]:
     """Run objective rendered-audio QC and return Audit B ``CheckResult`` rows."""
-    results = [_timing_result(final_path)]
+    return [_timing_result(final_path), *check_audio_program_quality(final_path, plan)]
+
+
+def check_audio_program_quality(final_path: str, plan: dict) -> list[CheckResult]:
+    """Share signal checks with early float preparation; final mux still needs A/V QC."""
+    results: list[CheckResult] = []
     samples = _decode_stereo(final_path)
     if samples is None or not len(samples):
         results.append(CheckResult("audio_quality_decode", FAIL,

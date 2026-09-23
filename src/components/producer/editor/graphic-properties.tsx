@@ -17,8 +17,8 @@ interface Props {
 // The primary human-editable text key for a graphic, probed in priority order
 // (quotes use `words`, lower-thirds `titleBase`, statement cards `text`,
 // whiteboard lists `title`, section markers `line1`, stat cards `value`,
-// gauges `label`; angela pack: decks `header`, lockups `payload`, captions
-// `cue1`, receipt cells `label1`; nateherk pack: cards `headlineLines`
+// gauges `label`; slideware pack: decks `header`, lockups `payload`, captions
+// `cue1`, receipt cells `label1`; module pack: cards `headlineLines`
 // (pipe-separated thesis lines), scoreboard `heroValue`). null = no free
 // text to edit (e.g. icon-badge).
 const TEXT_KEYS = ["words", "titleBase", "text", "title", "line1", "value", "label",

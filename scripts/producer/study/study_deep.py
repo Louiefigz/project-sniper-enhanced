@@ -27,6 +27,7 @@ P6 semantics     — OPT-IN (--semantics): schema-forced per-event agent
 
 CLI: study_deep.py <video> <out_dir> [--fps N] [--meticulous] [--semantics]
                    [--transcript words.json|captions.vtt] [--skip-captions]
+                   [--text-scope all|states]
 """
 
 from __future__ import annotations
@@ -46,7 +47,8 @@ from study.deep_frames import probe_video  # noqa: E402
 from study.deep_semantics import run_semantics  # noqa: E402
 from study.deep_signals import collect_signals, freeze_runs  # noqa: E402
 from study.deep_text import graphics_text, require_tesseract, states_text  # noqa: E402
-from study.deep_wordlock import load_words, word_lock_stats  # noqa: E402
+from study.deep_wordlock import load_words, sibling_vtt, word_lock_stats  # noqa: E402
+from study.study_admission import admitted_study_input  # noqa: E402
 from study.study_transcribe import (add_asr_arguments, invocation_from_options,  # noqa: E402
                                     use_asr_invocation)
 
@@ -72,13 +74,25 @@ def _fingerprint(video: str, out_dir: str) -> dict:
 def _text_pass(video: str, info, job: tuple,
                opts: argparse.Namespace) -> dict:
     """P4: graphics OCR + state OCR + caption stats."""
+    scope = getattr(opts, "text_scope", "all")
+    if scope not in ("all", "states"):
+        raise ValueError("text_scope must be all or states")
     require_tesseract()
     events, fingerprint = job
-    text = {"graphics": graphics_text(video, info, events, opts.eff_fps),
+    text = {"graphics": graphics_text(video, info, events, opts.eff_fps) if scope == "all" else [],
             "states": states_text(fingerprint)}
+    if scope == "states":
+        text["graphicsSkipped"] = "--text-scope states; per-event OCR timing is unmeasured"
     text["captions"] = ({"detected": False, "skipped": "--skip-captions"}
                         if opts.skip_captions else caption_stats(video, info))
     return text
+
+
+def _study_params(opts: argparse.Namespace) -> dict:
+    """Record the extraction scope alongside its sampling configuration."""
+    return {"fps": opts.eff_fps, "semantics": bool(opts.semantics),
+            "meticulous": bool(getattr(opts, "meticulous", False)),
+            "textScope": getattr(opts, "text_scope", "all")}
 
 
 def run_deep(opts: argparse.Namespace) -> dict:
@@ -111,15 +125,13 @@ def run_deep(opts: argparse.Namespace) -> dict:
     deep = {
         "video": os.path.abspath(opts.video),
         "generatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "params": {"fps": opts.eff_fps, "semantics": bool(opts.semantics),
-                   "meticulous": meticulous},
+        "params": _study_params(opts),
         "source": {"width": info.width, "height": info.height,
                    "fps": info.fps, "durationS": info.duration},
         "fingerprint": {"path": fingerprint_path},
         "signals": sig.to_json(),
         "freezes": freeze_runs(sig),
-        "events": detected["events"],
-        "unclassifiedRuns": detected["unclassifiedRuns"],
+        "events": detected["events"], "unclassifiedRuns": detected["unclassifiedRuns"],
         "text": text,
         "wordLock": word_lock,
         "semantics": semantics,
@@ -152,6 +164,9 @@ def main() -> int:
                              "sibling <stem>*.vtt is auto-discovered)")
     parser.add_argument("--skip-captions", action="store_true",
                         help="skip the full-video caption OCR sampling pass")
+    parser.add_argument("--text-scope", choices=("all", "states"), default="all",
+                        help="states reads every visual state but skips repeated per-event OCR; "
+                             "all motion events and transcript word-lock remain measured")
     add_asr_arguments(parser)
     opts = parser.parse_args()
 
@@ -159,6 +174,10 @@ def main() -> int:
         _emit("error", error=f"not a file: {opts.video}")
         return 1
     try:
+        require_tesseract()  # P4 always reads on-screen text: refuse before admission and P1-P3 work
+        # Keep the original's sibling captions, then study only the admitted snapshot.
+        opts.transcript = opts.transcript or sibling_vtt(opts.video)
+        opts.video = admitted_study_input(opts.video, opts.out_dir)
         with use_asr_invocation(invocation_from_options(opts)):
             run_deep(opts)
     except (OSError, RuntimeError, ValueError) as exc:

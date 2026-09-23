@@ -21,7 +21,7 @@ class NativeRuntimeTests(unittest.TestCase):
     def test_cold_cache_is_explicit_and_requires_bounded_batches(self):
         """Existing export requests cannot silently trigger additional extraction work."""
         from argparse import Namespace
-        self.assertEqual(source_cache_mode(Namespace(cached_native_batches=False)), 'existing-only')
+        self.assertEqual(source_cache_mode(Namespace(cached_native_batches=False)), 'acquire-sdk-preflight')
         self.assertEqual(source_cache_mode(Namespace(cached_native_batches=True,
                          acquire_source_cache=True)), 'acquire-sequential-sdr')
         with self.assertRaisesRegex(ValueError, '--cached-native-batches'):
@@ -98,7 +98,7 @@ class NativeRuntimeTests(unittest.TestCase):
     def test_reverse_tolerance_does_not_admit_a_missing_word_or_changed_state(self):
         """Small edge rounding is allowed; meaningful text loss and state drift fail."""
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
+            root = Path(directory).resolve()
             original = Image.new('RGB', (1080, 1920), 'black')
             original.save(root / 'a.png')
             edge = original.copy(); edge.putpixel((100, 100), (1, 1, 1)); edge.save(root / 'b.png')

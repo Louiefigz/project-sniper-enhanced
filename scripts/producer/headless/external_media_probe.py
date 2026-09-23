@@ -1,4 +1,12 @@
-"""Networkless, nonroot, bounded full-decode admission for external media."""
+"""Networkless, bounded full-decode admission for external media.
+
+Production admission runs natively: ``probe_external_media_snapshot`` decodes
+inside the macOS Seatbelt jail (external_media_probe_native.py). The container
+implementation below (``probe_external_media_snapshot_in_container``) produced
+the historical ``sniper-external-media-probe-v3`` receipts; it is kept so those
+receipts and the maintainer's container acceptance lanes stay reproducible, and
+no product path calls it.
+"""
 from __future__ import annotations
 
 import json
@@ -35,9 +43,12 @@ from headless.external_media_snapshot import (
     verify_external_media_snapshot,
 )
 from headless.network_probe import probe_container
+from headless.external_media_probe_native import native_admission_receipt
 
 CONTAINER_ID = re.compile(r"^[0-9a-f]{64}$")
-POLICY_VERSION = "sniper-external-media-probe-v3"  # v3: 4-CPU / 4-thread validation decode (2026-09-07)
+# Historical container receipts (v3: 4-CPU / 4-thread validation decode, 2026-09-07).
+CONTAINER_POLICY_VERSION = "sniper-external-media-probe-v3"
+POLICY_VERSION = CONTAINER_POLICY_VERSION
 MAX_RESULT_BYTES = 64 * 1024
 _STATE_INTERVAL_SECONDS = 2.0
 
@@ -249,7 +260,15 @@ def probe_external_media_snapshot(
     snapshot: ExternalMediaSnapshot,
     limits: MediaProbeLimits = MediaProbeLimits(),
 ) -> dict:
-    """Attest the approved image and fully decode one immutable snapshot."""
+    """Fully decode one immutable snapshot inside the native jail; no receipt on failure."""
+    return native_admission_receipt(snapshot, limits)
+
+
+def probe_external_media_snapshot_in_container(
+    snapshot: ExternalMediaSnapshot,
+    limits: MediaProbeLimits = MediaProbeLimits(),
+) -> dict:
+    """Historical container admission (approved image); not called by the product."""
     verify_external_media_snapshot(snapshot)
     runtime = required_runtime()
     with tempfile.TemporaryDirectory(prefix=".sniper-media-probe-") as config_dir:
@@ -259,7 +278,7 @@ def probe_external_media_snapshot(
     verify_external_media_snapshot(snapshot)
     return {
         "schemaVersion": 1,
-        "policy": POLICY_VERSION,
+        "policy": CONTAINER_POLICY_VERSION,
         "snapshot": {
             "path": snapshot.path,
             "sha256": snapshot.sha256,

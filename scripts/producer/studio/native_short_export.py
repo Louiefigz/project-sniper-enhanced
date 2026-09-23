@@ -13,19 +13,33 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from audio.mastering_profile import MASTERING_PROFILE_IDENTITIES, NATIVE_SHORT_MASTERING_PROFILE
 from audio.dialogue_cleanup import cleanup_model_binding
 from audio.native_audio_finishing import native_finishing_request
-from cut_preview_io import real_directory, write_new
+from cut_preview_io import bound_json, real_directory, write_new
 from studio.native_run_config import local_environment
 from studio.native_runtime import REPO, digest, install_runtime
 from studio.native_short_delivery import clock
 from studio.native_short_pipeline import NativeShortPipeline
-from studio.native_short_resume import prepare_reverification
+from studio.native_short_resume import prepare_reverification, render_stage_for_attempt
+from studio.native_reference_reuse import bind_reference_map, implementation_files, reference_snapshot
 from studio.native_run import utc
+from studio.native_selected_sources import prepared_source_pins
+from studio.native_export_history import attempt_reservation, register_attempt
+from studio.native_short_autoresume import recover_automatically
+
+
+def prebuild_review_pins(plan: dict) -> dict[str, str]:
+    """Retain original reviewer receipt/evidence through all owned render and reuse phases."""
+    ref = plan.get('prebuildReview')
+    if not ref:
+        return {}
+    review = bound_json(Path(ref['path']), ref['sha256'])
+    return {ref['path']: ref['sha256'], **{row['path']: row['sha256'] for row in review['evidence']}}
 
 
 def assert_admitted_pins(project: Path, plan: dict, manifest: dict, pins: dict) -> None:
     """A changed admitted file cannot become a new accepted hash while pins are collected."""
     expected = [(str(project / row['file']), row['sha256']) for row in manifest['files']]
     expected += [(asset['path'], asset['sha256']) for asset in plan['assets']]
+    expected += list(prebuild_review_pins(plan).items())
     if plan['strategy']['schemaVersion'] >= 3:
         report = json.loads((project / 'ASSET-USE-REPORT.json').read_text())
         expected += [(row['path'], row['sha256']) for row in report['originEvidenceFiles']]
@@ -48,6 +62,7 @@ def input_pins(project: Path, runtime: Path, tools: dict) -> dict[str, str]:
     paths = [project / row['file'] for row in manifest['files']]
     paths.append(project / 'PROJECT-MANIFEST.json')
     plan = json.loads((project / 'SHORT-PROJECT.json').read_text())
+    paths += [Path(file) for file in prebuild_review_pins(plan)]
     paths += [Path(asset['path']) for asset in plan['assets']]
     if plan['strategy']['schemaVersion'] >= 3:
         asset_use = json.loads((project / 'ASSET-USE-REPORT.json').read_text())
@@ -70,20 +85,26 @@ def input_pins(project: Path, runtime: Path, tools: dict) -> dict[str, str]:
     paths += [REPO / 'src/app/api/producer/ai-edit/caption-text-contract-v1.ts']
     paths += list((REPO / 'src/lib/producer/contracts').glob('*.ts'))
     paths += [runtime / 'dist' / name for name in ('cli.js', 'native-capture-library.mjs',
-              'hyperframe.runtime.iife.js', 'hyperframe.manifest.json', 'frame-source-transport.mjs')]
+              'hyperframe.runtime.iife.js', 'hyperframe.manifest.json', 'frame-source-transport.mjs',
+              'native-render-sdk.mjs', 'native-export-guard.mjs')]
     paths += list((REPO / 'scripts/producer/audio').glob('*.py'))
     paths += list((REPO / 'scripts/producer/audit').glob('*.py'))
+    paths += implementation_files()
+    from graphics.visual_source_project import source_implementation_files
+    paths += source_implementation_files()
     samples = clock(plan['canvas']).sample_at_frame(plan['canvas']['totalFrames'])
     finishing = native_finishing_request(plan.get('audioFinishing'), samples)
     model = cleanup_model_binding(finishing.enhance_chain) if finishing else None
     if model:
         paths.append(Path(model['path']))
     paths += [REPO / 'scripts/producer' / name for name in (
+        'guided_opening_picture.py', 'guided_opening_mux.py', 'guided_picture_decode.py',
         'producer_config.py', 'fingerprints.py', 'cut_preview_io.py', 'native_work_lease.py',
         'headless/durable_files.py', 'headless/process_runner.py', 'graphics/render_tools.py',
         'edit/exact_timing.py', 'stage_timing.py', 'palmier/process_deadline.py')]
     paths.append(Path(sys.executable).resolve())
     pins = {str(file): digest(file) for file in set(paths) if file.is_file()}
+    pins.update(prepared_source_pins(plan))
     assert_admitted_pins(project, plan, manifest, pins)
     return pins
 
@@ -93,9 +114,12 @@ def prepare(args: argparse.Namespace) -> tuple[dict, dict]:
     cache_mode = source_cache_mode(args)
     project, output = args.project.resolve(strict=True), args.output.absolute()
     validate_options(args, project, output)
+    reference_map = getattr(args, 'reference_map', None)
+    reference_map = reference_map.absolute() if reference_map else None
+    reference_snapshot(project, reference_map, 'short')
     tools, environment = local_environment()
     subprocess.run([tools['node'], '--import', 'tsx', str(REPO / 'scripts/producer/native-short.ts'),
-                    'check', str(project)], cwd=REPO, env=environment, check=True, timeout=60)
+                    'check-export', str(project)], cwd=REPO, env=environment, check=True, timeout=60)
     canvas = json.loads((project / 'SHORT-PROJECT.json').read_text())['canvas']
     rate = clock(canvas).fps.fraction
     if not 1 <= rate <= 60 or not 0 < canvas['totalFrames'] / rate <= 180:
@@ -109,13 +133,32 @@ def prepare(args: argparse.Namespace) -> tuple[dict, dict]:
                'captureMode': 'cached-native-batches' if args.cached_native_batches else 'sdk-streaming',
                'sourceCacheMode': cache_mode,
                'audioProfile': args.audio_profile,
-               'pictureDonor': None, 'pins': pins, 'audioDonor': None}
-    if getattr(args, 'verify_from', None):
+               'pictureDonor': None, 'pins': pins, 'audioDonor': None, 'preparedMaster': None}
+    with attempt_reservation(request):
+        request = select_and_publish(args, request, reference_map)
+    return request, environment
+
+
+def select_and_publish(args: argparse.Namespace, request: dict, reference_map: Path | None) -> dict:
+    """Reserve discovery and immutable publication before another invocation can start."""
+    resume = getattr(args, 'resume_from', None)
+    if resume:
+        attempt = resume.absolute()
+        request = prepare_reverification(request, render_stage_for_attempt(attempt), attempt)
+    elif getattr(args, 'verify_from', None):
         request = prepare_reverification(request, args.verify_from.absolute())
     else:
         add_donors(args, request)
+        request = bind_reference_map(request, reference_map)
+        if not args.audio_donor and not args.picture_donor and not getattr(args, "preview_only", False) and getattr(args, "preview_reviews", None):
+            request = recover_automatically(request)
+    from studio.native_motion_previews import bind_preview_options
+    request = bind_preview_options(request, args)
+    output = Path(request['output'])
     output.mkdir(mode=0o700)
-    return request, environment
+    write_new(output / 'export-request.json', request)
+    register_attempt(request)
+    return request
 
 
 def validate_options(args: argparse.Namespace, project: Path, output: Path) -> None:
@@ -124,13 +167,16 @@ def validate_options(args: argparse.Namespace, project: Path, output: Path) -> N
     if output.exists() or output.is_symlink() or output.is_relative_to(project) \
             or project.is_relative_to(output):
         raise ValueError('Export needs a new directory outside the authored project')
-    if getattr(args, 'verify_from', None) and any((args.cache, args.audio_donor,
+    recovering = getattr(args, 'verify_from', None) or getattr(args, 'resume_from', None)
+    if getattr(args, 'verify_from', None) and getattr(args, 'resume_from', None):
+        raise ValueError('Use only one of --verify-from and --resume-from')
+    if recovering and any((args.cache, args.audio_donor,
             args.picture_donor, args.cached_native_batches, args.acquire_source_cache,
             args.audio_profile != NATIVE_SHORT_MASTERING_PROFILE.identity,
             getattr(args, 'render_only', False))):
-        raise ValueError('--verify-from preserves the sealed route, cache and audio policy; omit render options')
-    if args.picture_donor and not args.cached_native_batches:
-        raise ValueError('Picture reuse requires the explicit cached native batch route')
+        raise ValueError('--verify-from/--resume-from preserves the sealed route, cache and audio policy; omit render options')
+    if recovering and getattr(args, 'reference_map', None):
+        raise ValueError('--verify-from/--resume-from preserves the original reference map; omit --reference-map')
 
 
 def add_donors(args: argparse.Namespace, request: dict) -> None:
@@ -140,8 +186,10 @@ def add_donors(args: argparse.Namespace, request: dict) -> None:
         request['audioDonor'] = str(donor)
         request['pins'][str(donor)] = digest(donor)
     if args.picture_donor:
-        from studio.native_short_picture_reuse import picture_reuse_pins
+        from studio.native_short_picture_reuse import picture_reuse_pins, read_record
         donor = args.picture_donor.resolve(strict=True)
+        if read_record(donor / 'export-request.json').get('captureMode') != request['captureMode']:
+            raise ValueError('Picture donor requires its original explicit capture route')
         request['pictureDonor'] = str(donor)
         request['pins'].update(picture_reuse_pins(Path(request['project']), donor))
 
@@ -149,7 +197,7 @@ def add_donors(args: argparse.Namespace, request: dict) -> None:
 def source_cache_mode(args: argparse.Namespace) -> str:
     """Cold extraction is opt-in and cannot silently change the selected picture route."""
     if not getattr(args, 'acquire_source_cache', False):
-        return 'existing-only'
+        return 'acquire-sdk-preflight'
     if not args.cached_native_batches:
         raise ValueError('Source cache acquisition requires --cached-native-batches')
     return 'acquire-sequential-sdr'
@@ -159,9 +207,6 @@ def execute(args: argparse.Namespace) -> bool:
     """Separate reusable media generation from independently owned complete verification."""
     invocation = (time.monotonic(), utc())
     request, environment = prepare(args)
-    output = Path(request['output'])
-    request_file = output / 'export-request.json'
-    write_new(request_file, request)
     pipeline = NativeShortPipeline(request, environment, args.unused_ram_advisory)
     return pipeline.execute(args.render_only, invocation)
 
@@ -172,22 +217,28 @@ def main() -> None:
     parser.add_argument('project', type=Path)
     parser.add_argument('output', type=Path)
     parser.add_argument('--cache', type=Path)
+    parser.add_argument('--reference-map', type=Path,
+                        help='Bind checked planning decisions for an explicit reference-shot/style request')
     stage = parser.add_mutually_exclusive_group()
     stage.add_argument('--render-only', action='store_true',
                        help='Seal completed media for later verification; does not qualify delivery')
     stage.add_argument('--verify-from', type=Path,
-                       help='Verify a sealed render-stage.json in a new directory without re-encoding')
+                       help='Reuse sealed media and compatible completed capture; run all remaining QC')
+    stage.add_argument('--resume-from', type=Path,
+                       help='Resume an explicit attempt, including a later compatible capture, into a fresh directory')
     parser.add_argument('--audio-donor', type=Path)
     parser.add_argument('--audio-profile', choices=MASTERING_PROFILE_IDENTITIES, default=NATIVE_SHORT_MASTERING_PROFILE.identity,
                         help='Explicit delivery profile; audio reuse also requires the current recorded AAC encoding policy')
     parser.add_argument('--picture-donor', type=Path,
-                        help='Reuse a verified completed batch picture stage; all final audio/picture QC still runs')
+                        help='Reuse an admitted completed SDK or batch picture; all final audio/picture QC still runs')
     parser.add_argument('--cached-native-batches', action='store_true',
                         help='Opt-in bounded native browser sessions; exact existing source-frame cache required')
     parser.add_argument('--acquire-source-cache', action='store_true',
                         help='With cached batches, acquire exact original-size SDR source PNGs sequentially through the pinned SDK')
     parser.add_argument('--unused-ram-advisory', action='store_true',
-                        help='Explicit operator-authorized Short exception; all live tree/swap caps remain')
+                        help='Compatibility flag for explicit fixed policies; adaptive defaults already treat unused RAM as advisory')
+    from studio.native_motion_previews import preview_options
+    preview_options(parser)
     args = parser.parse_args()
     raise SystemExit(0 if execute(args) else 1)
 

@@ -26,7 +26,8 @@ from guided_presenter_caption_picture import (
 )
 
 
-def observe_picture(path: Path, expected: tuple[str, int, tuple[int, int]], tools: dict) -> dict:
+def observe_picture(path: Path, expected: tuple[str, int, tuple[int, int]], tools: dict,
+                    native_srgb: bool = False) -> dict:
     """Require exact decoded count, canvas, zero-origin CFR and complete decode."""
     rate, frames, canvas = expected
     before = file_hash(path)
@@ -35,9 +36,14 @@ def observe_picture(path: Path, expected: tuple[str, int, tuple[int, int]], tool
     if len(videos) != 1:
         raise RuntimeError("opening picture does not have exactly one video stream")
     row = videos[0]
+    side_data = row.get("side_data_list", [])
+    native_color = native_srgb and row.get("color_transfer") == "iec61966-2-1" \
+        and row.get("color_primaries") == row.get("color_space") == "bt709" \
+        and row.get("color_range") == "tv"
+    allowed_side_data = native_color and all(item == {"side_data_type": "ICC Profile"} for item in side_data)
     if Fraction(row["r_frame_rate"]) != Fraction(rate) or Fraction(row["avg_frame_rate"]) != Fraction(rate) \
             or (row["width"], row["height"]) != canvas \
-            or row.get("sample_aspect_ratio") != "1:1" or row.get("side_data_list") \
+            or row.get("sample_aspect_ratio") != "1:1" or (side_data and not allowed_side_data) \
             or row.get("tags", {}).get("rotate", "0") != "0":
         raise RuntimeError("opening actual picture differs from its exact clock/canvas authority")
     decode_picture_frames(path, tools["ffmpeg"]["path"], frames)

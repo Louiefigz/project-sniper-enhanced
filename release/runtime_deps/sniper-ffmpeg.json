@@ -1,0 +1,122 @@
+{
+  "name": "sniper-ffmpeg",
+  "version": "8.0.3",
+  "build": 1,
+  "platform": "osx-arm64",
+  "min_macos": "11.0",
+  "work_dir": "/private/tmp/sniper-ffmpeg-build",
+  "why": "The renderer needs ffmpeg's zscale (libzimg) and rubberband (librubberband) filters. conda-forge's ffmpeg has neither and conda-forge has no arm64 rubberband; no other pinned, trusted macOS arm64 build carries both.",
+  "sources": {
+    "ffmpeg": {
+      "file": "ffmpeg-8.0.3.tar.xz",
+      "url": "https://ffmpeg.org/releases/ffmpeg-8.0.3.tar.xz",
+      "sha256": "6136812ea6d4e68bdba27e33c2a94382711cdf4f8602ffef056ff792bd6f9818",
+      "signature_url": "https://ffmpeg.org/releases/ffmpeg-8.0.3.tar.xz.asc",
+      "signing_key": "FCF986EA15E6E293A5644F10B4322F04D67658D8",
+      "signing_key_url": "https://ffmpeg.org/ffmpeg-devel.asc",
+      "license": "LGPL-2.1-or-later; GPL-3.0-or-later as configured here (--enable-gpl --enable-version3)"
+    },
+    "rubberband": {
+      "file": "rubberband-4.0.0.tar.bz2",
+      "url": "https://breakfastquay.com/files/releases/rubberband-4.0.0.tar.bz2",
+      "sha256": "af050313ee63bc18b35b2e064e5dce05b276aaf6d1aa2b8a82ced1fe2f8028e9",
+      "license": "GPL-2.0-or-later"
+    }
+  },
+  "build_packages": [
+    "pkg-config",
+    "meson",
+    "ninja",
+    "make",
+    "dav1d-dev",
+    "expat",
+    "zlib"
+  ],
+  "rubberband_options": [
+    "--buildtype=release",
+    "-Ddefault_library=static",
+    "-Dfft=vdsp",
+    "-Dresampler=builtin",
+    "-Djni=disabled",
+    "-Dladspa=disabled",
+    "-Dlv2=disabled",
+    "-Dvamp=disabled",
+    "-Dcmdline=disabled",
+    "-Dtests=disabled"
+  ],
+  "configure": [
+    "--enable-gpl",
+    "--enable-version3",
+    "--disable-ffplay",
+    "--disable-doc",
+    "--disable-debug",
+    "--enable-stripping",
+    "--disable-shared",
+    "--enable-static",
+    "--enable-libx264",
+    "--enable-libass",
+    "--enable-libfreetype",
+    "--enable-libfontconfig",
+    "--enable-libharfbuzz",
+    "--enable-libfribidi",
+    "--enable-libzimg",
+    "--enable-librubberband",
+    "--enable-libmp3lame",
+    "--enable-libopus",
+    "--enable-libdav1d",
+    "--enable-openssl",
+    "--enable-videotoolbox",
+    "--enable-audiotoolbox",
+    "--enable-neon",
+    "--disable-sdl2",
+    "--disable-xlib",
+    "--disable-libxcb",
+    "--disable-indev=avfoundation",
+    "--disable-avfoundation"
+  ],
+  "required_filters": [
+    "rubberband",
+    "zscale",
+    "subtitles",
+    "ass",
+    "drawtext",
+    "arnndn",
+    "loudnorm",
+    "ebur128",
+    "afftdn",
+    "acompressor",
+    "alimiter",
+    "sidechaincompress",
+    "aresample",
+    "amix",
+    "overlay",
+    "crop"
+  ],
+  "required_encoders": [
+    "libx264",
+    "aac",
+    "prores_ks",
+    "qtrle",
+    "png",
+    "flac",
+    "alac",
+    "pcm_f32le",
+    "libmp3lame"
+  ],
+  "required_decoders": [
+    "h264",
+    "hevc",
+    "prores",
+    "vp9",
+    "libdav1d",
+    "opus",
+    "aac",
+    "mp3",
+    "png"
+  ],
+  "artifact": {
+    "file": "sniper-ffmpeg-8.0.3-1-osx-arm64.tar.xz",
+    "sha256": "ec6056f9903fd16b5f18bd87b6e4313ce70406841acc44ed63097dcb4a15c787",
+    "bytes": 14539216
+  }
+}

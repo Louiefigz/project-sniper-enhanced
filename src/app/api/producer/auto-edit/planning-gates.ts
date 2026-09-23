@@ -1,6 +1,7 @@
 import path from "path";
 import { SCRIPTS_DIR } from "../../_lib/spawn-python";
 import type { AutoEditIntent, AutoEditScope } from "./stream";
+import { validateIntent, validateReferenceIntent } from "@/lib/producer/intent-presets";
 import {
   parsePlanningGateVerdict,
   planningGateTimeoutMs,
@@ -48,6 +49,7 @@ export function gateBundleOperatorIntent(
   if (!intent?.mode || intent.lanes === undefined) {
     throw new Error("validated stored operator intent requires mode and lanes");
   }
+  validateIntent({ ...intent, scope });
   return {
     mode: intent.mode,
     scope,
@@ -70,6 +72,7 @@ function gateScript(filename: string): string {
 function referenceCommand(input: GateBundleInput): PlanningGateCommand | null {
   if (!input.reference) return null;
   const { intent, profilePath } = input.reference;
+  validateReferenceIntent(intent);
   const args = [
     input.planPath,
     profilePath,
@@ -77,9 +80,6 @@ function referenceCommand(input: GateBundleInput): PlanningGateCommand | null {
     "--mode", intent.mode,
     "--strategy", intent.strategy,
   ];
-  if (intent.strategy === "extend" && intent.targetStyle) {
-    args.push("--target-style", intent.targetStyle);
-  }
   return { gate: "reference_lint", script: gateScript("reference_profile_lint.py"), args };
 }
 

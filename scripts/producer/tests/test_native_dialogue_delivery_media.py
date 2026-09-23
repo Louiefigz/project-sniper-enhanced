@@ -25,7 +25,7 @@ class NativeDialogueDeliveryMediaTests(unittest.TestCase):
         """Create a small real picture and known float audio without model calls."""
         scratch = tempfile.TemporaryDirectory(prefix="native-dialogue-media-")
         self.addCleanup(scratch.cleanup)
-        self.root = Path(scratch.name).resolve()
+        self.root = Path(scratch.name).resolve().resolve()
         picture, premaster = self.root / "picture.mp4", self.root / "premaster.wav"
         run_audio(["ffmpeg", "-nostdin", "-v", "error", "-n", "-f", "lavfi", "-i",
             "testsrc2=size=64x64:rate=25:duration=4", "-an", "-c:v", "libx264",
@@ -117,7 +117,7 @@ class NativeDialogueDeliveryMediaTests(unittest.TestCase):
         prior.write_text("[]")
         request = replace(self.request, prior_receipt=prior)
         with self.assertLogs("audio.native_dialogue_delivery", level="ERROR"), \
-                self.assertRaisesRegex(ValueError, "incomplete or malformed"):
+                self.assertRaisesRegex(RuntimeError, "must be an object"):
             finish_native_dialogue(request)
         receipt = json.loads((request.directory / "receipt.json").read_text())
         self.assertEqual(receipt["status"], "failed")

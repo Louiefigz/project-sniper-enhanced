@@ -44,7 +44,14 @@ def request(phase: str = "opening") -> dict:
 
 
 def mocked_render(stack: ExitStack) -> tuple:
-    """Mock external/media sinks only; keep actual deadline/request code running."""
+    """Inert observer projection; real current-entry gate and owner clock run.
+
+    The layout DTO exercises ownership only. It is not evidence that the
+    catalog item supports the retired agenda observation profile.
+    """
+    projected = observer.observation_request(intent_record(intent()))
+    stack.enter_context(patch.object(observer, "observation_request", return_value=projected))
+    stack.enter_context(patch.object(observer, "graphic_policy", return_value=observer.GRAPHIC_POLICY))
     documents = {"motion/compositions/agenda-slide.html": b"TEST not rendered"}
     for name, value in (("sealed_documents", documents), ("role_inventory", []),
                         ("required_runtime", SimpleNamespace(image_id="sha256:" + H)),
@@ -55,6 +62,17 @@ def mocked_render(stack: ExitStack) -> tuple:
     returned = stack.enter_context(patch.object(observer, "read_observation", return_value=({}, {"status": "observed"})))
     render = stack.enter_context(patch.object(observer, "render_to", return_value=runtime_return()))
     return render, returned
+
+
+def owner_intent() -> OpeningGraphicIntent:
+    """Current catalog metadata for isolated owner-clock tests; never rendered."""
+    original = intent()
+    row = copy.deepcopy(original.row)
+    row["entry"] = {"kind": "line-swap", "outStart": 0, "outEnd": 4,
+                    "anchor": "own-screen", "spec": {
+                        "lineA": "First", "lineB": "Second", "underlineWord": ""}}
+    return OpeningGraphicIntent(row, original.rate, original.snapshot,
+                                original.dimensions, ("First", "Second"), original.key)
 
 
 class ObservedRequestTests(unittest.TestCase):
@@ -114,7 +132,7 @@ class ObservedOwnerTests(unittest.TestCase):
                 self.assertEqual(value.snapshot, intent().snapshot)
                 return runtime_return()
             render.side_effect = actual_boundary
-            result, metadata = observer.render_observed_graphic(intent(), Path("/TEST/new.mp4"), (clock, runtime, "TEST-name"))
+            result, metadata = observer.render_observed_graphic(owner_intent(), Path("/TEST/new.mp4"), (clock, runtime, "TEST-name"))
         self.assertFalse(result["cached"])
         self.assertEqual(metadata["request"]["totalFrames"], 120)
         self.assertEqual(clock.events[-1]["status"], "complete")
@@ -130,7 +148,7 @@ class ObservedOwnerTests(unittest.TestCase):
                 clock.end = time.monotonic() - 1
             render.side_effect = late
             with self.assertRaisesRegex(RuntimeError, "deadline"):
-                observer.render_observed_graphic(intent(), Path("/TEST/new.mp4"), (clock, runtime, "TEST-name"))
+                observer.render_observed_graphic(owner_intent(), Path("/TEST/new.mp4"), (clock, runtime, "TEST-name"))
         self.assertEqual(clock.events[-1]["status"], "failed")
         self.assertEqual(render.call_count, 1)
         read.assert_not_called()
@@ -143,7 +161,7 @@ class ObservedOwnerTests(unittest.TestCase):
             _render, read = mocked_render(stack)
             read.return_value = {}, {"status": "unqualified"}
             with self.assertRaisesRegex(RuntimeError, "unqualified"):
-                observer.render_observed_graphic(intent(), Path("/TEST/new.mp4"), (clock, runtime, "TEST-name"))
+                observer.render_observed_graphic(owner_intent(), Path("/TEST/new.mp4"), (clock, runtime, "TEST-name"))
         self.assertEqual(clock.events[-1]["status"], "failed")
 
     def test_existing_active_timer_cannot_be_replaced(self) -> None:
@@ -153,7 +171,7 @@ class ObservedOwnerTests(unittest.TestCase):
         with ExitStack() as stack:
             render, _read = mocked_render(stack)
             with wall_budget(clock.end), self.assertRaisesRegex(RuntimeError, "active wall timer"):
-                observer.render_observed_graphic(intent(), Path("/TEST/new.mp4"), (clock, runtime, "TEST-name"))
+                observer.render_observed_graphic(owner_intent(), Path("/TEST/new.mp4"), (clock, runtime, "TEST-name"))
             render.assert_not_called()
 
     def test_changed_actual_return_never_borrows_disk_runtime_or_layout(self) -> None:
@@ -170,7 +188,7 @@ class ObservedOwnerTests(unittest.TestCase):
                 mutate(returned)
                 render.return_value = returned
                 with self.assertRaisesRegex(RuntimeError, "actual renderer return"):
-                    observer.render_observed_graphic(intent(), Path("/TEST/new.mp4"), (clock, runtime, "TEST-name"))
+                    observer.render_observed_graphic(owner_intent(), Path("/TEST/new.mp4"), (clock, runtime, "TEST-name"))
                 read.assert_not_called()
             self.assertEqual(clock.events[-1]["status"], "failed")
 
@@ -187,7 +205,7 @@ class ObservedOwnerTests(unittest.TestCase):
                     **copy.deepcopy(returned), "retainedInputArchive": {"TEST": "not actual"}}}
             stack.enter_context(patch.object(observer, "_asset", side_effect=late_asset))
             with self.assertRaisesRegex(RuntimeError, "actual renderer return"):
-                observer.render_observed_graphic(intent(), Path("/TEST/new.mp4"), (clock, runtime, "TEST-name"))
+                observer.render_observed_graphic(owner_intent(), Path("/TEST/new.mp4"), (clock, runtime, "TEST-name"))
             read.assert_not_called()
         self.assertEqual(clock.events[-1]["status"], "failed")
 

@@ -75,7 +75,7 @@ def _fixed_edge_error(graphic: dict, row: dict) -> str | None:
     canvas and assumes the rail's pixels live in the remaining edge band —
     that band is the invariant to verify, using the registry's own
     ``width_frac``/``side`` numbers. Flush-to-edge was the old expectation,
-    but it only describes FIELD rails (nateherk-rail's cream field measures
+    but it only describes FIELD rails (module-rail's cream field measures
     [0, 0, 633, 1079]); glass-rail's anatomy is floating glass pills with
     comp-internal margins and vertical centering, so a correct delivery
     (measured 4K: pills at [52, 750, 1214, 1496], band bound 1268) can never

@@ -139,11 +139,13 @@ async function testApproval(root: string): Promise<void> {
   assert.equal(run.job.finalHash, fileSha256(path.join(fix.ctx.dir, "final.mp4")));
 }
 
-async function testRepair(root: string): Promise<void> {
-  const fix = fixture(path.join(root, "repair"), "repair");
-  const run = runtime(fix, "repair", 1);
-  const dependencies = passDeps(fix, [review("revise", "COMPOSITION_BAD"), review("pass")]);
+async function testRepair(root: string, issueCode = "COMPOSITION_BAD"): Promise<void> {
+  const token = `repair-${issueCode}`;
+  const fix = fixture(path.join(root, token), token);
+  const run = runtime(fix, token, 1);
+  const dependencies = passDeps(fix, [review("pass"), review("revise", issueCode)]);
   dependencies.revise = async (_ctx, critique) => {
+    assert.ok(critique.materialIssues.some((issue) => issue.code.endsWith(issueCode)));
     writeFileSync(fix.ctx.planPath, '{"planVersion":2,"repaired":true}');
     return {
       provider: "codex", ms: 1,
@@ -159,6 +161,7 @@ async function testRepair(root: string): Promise<void> {
   assert.equal(run.job.checkpoint, "plan_authored");
   assert.equal(run.job.planningRound, 0);
   assert.equal(existsSync(path.join(fix.ctx.dir, "final.mp4")), false);
+  assert.equal(existsSync(approvalPath(fix.ctx.dir)), false);
 }
 
 async function testCapAndMissingEvidence(root: string): Promise<void> {
@@ -384,6 +387,9 @@ async function main(): Promise<void> {
   try {
     await testApproval(root);
     await testRepair(root);
+    // Passing technical QC and the other critic cannot outvote an editorial defect.
+    for (const code of ["REPEATED_FOOTAGE", "PRODUCT_CONTEXT", "BEAT_COVERAGE",
+      "PRESENTER_HANDOFF", "PRODUCT_READABILITY"]) await testRepair(root, code);
     await testMutationsWaitForRenderCheckpoint(root);
     await testCapAndMissingEvidence(root);
     await testAuditFailureCannotBeOutvoted(root);

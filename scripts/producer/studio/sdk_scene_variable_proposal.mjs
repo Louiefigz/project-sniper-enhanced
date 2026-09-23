@@ -11,7 +11,7 @@ const SUPPORTED_BUNDLE_RUNTIMES = ["0.7.33", "0.8.31"];
 const KEYS = ["html", "originalHtmlSha256", "scene", "bundle", "unitId", "elementId",
   "variable", "expectedValue", "value", "expectedSceneVersion"];
 const SCENE_KEYS = ["schemaVersion", "sceneId", "version", "timing", "canvas", "renderMode",
-  "composition", "elements", "renderUnits", "captionPolicy", "dependencies", "provenance"];
+  "composition", "elements", "renderUnits", "captionPolicy", "dependencies", "provenance", "visualSources"];
 const MANIFEST_KEYS = ["schemaVersion", "bundleId", "fullEntry", "unitEntries", "supportedCanvases",
   "supportedFps", "variables", "assetIds", "seed", "runtime"];
 const sha = value => createHash("sha256").update(value).digest("hex");

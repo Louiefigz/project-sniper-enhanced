@@ -170,7 +170,7 @@ class TimingReviewSafetyTests(unittest.TestCase):
         file.write_bytes(raw)
         supplied = self.fixture.root / "too-large.json"
         supplied.write_bytes(b" " * (1024 * 1024 + 1))
-        with self.assertRaisesRegex(RuntimeError, "bounded regular file"):
+        with self.assertRaisesRegex(RuntimeError, "exceeds byte limit: 1048577 > 1048576"):
             execute("record", self.fixture.paths, supplied)
 
     def test_symlink_hardlink_and_fifo_records_fail_without_blocking(self) -> None:

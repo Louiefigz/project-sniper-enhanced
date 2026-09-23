@@ -474,7 +474,6 @@ Installed HyperFrames 0.8.31 supports complete child-composition exports, but it
 local render CLI has no master-interval replacement or resume option. Extracted
 source-frame caching does not cache completed graphic frames. Internal
 distributed chunks are not a qualified cross-edit reuse route. The
-[SDK source finding](../../../youtube-automation/docs/findings/HYPERFRAMES_REVISION_RENDER_SCOPE.md)
 records the exact boundary; use scoped previews for fixes and batch accepted
 visual changes before a required complete master export.
 

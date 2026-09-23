@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
-"""eye_trace — gaze-continuity placement bias + audit math (LIAM move 4).
+"""eye_trace — gaze-continuity placement bias + audit math (eye-trace, CM-4).
 
-EDITCRAFT_LESSONS.md §7.1 (EC2 R1 taught 9:26-9:57): at a hard cut or a
-graphic insertion the incoming focal point should land near the outgoing
-frame's gaze point; violations only as deliberate FLAGGED jolts.
+docs/studies/EDITCRAFT_LESSONS.md §7.1: at a hard cut or a graphic insertion
+the incoming focal point should land near the outgoing frame's gaze point
+when legibility and fit leave a choice; violations only as deliberate
+FLAGGED jolts.
 
-MEASURED NULL (LIAM-4-MOVES move 4, 2026-07-11; n=24 large graphic
-entrances 2D + n=299 small horizontal): face→graphic-landing correlation
-rx=+0.05 / ry=−0.16, mean 2D distance 0.351 normalized screen units vs a
-shuffled null of 0.348 (0% improvement) — the pros land graphics at
-DESIGNED ANCHORS, not at the face. So this module is deliberately weak:
+TIE-BREAKER BY DESIGN: designed anchors, emptiness and fit legality always
+win first — a graphic belongs where it can be read, and gaze continuity only
+chooses between otherwise-equal regions. So this module is deliberately weak:
 
 * ``region_bias`` is an ADDITIVE near-tie breaker on the free-space region
   score (never overrides emptiness/fit legality) — weight in
@@ -25,8 +24,9 @@ anchor — the a-roll face persists across the graphic's entrance); else
 None (no gaze known → bias and audit both skip, since gaze is advisory).
 
 DISTANCE METRIC: Euclidean in normalized screen units (x/canvas_w,
-y/canvas_h) — the SAME metric the measurement used (mean 0.351), so the
-config threshold compares like-for-like. Max possible distance = √2.
+y/canvas_h) — the same units as the config threshold
+(``warn_dist_frac``), so they compare like-for-like. Max possible
+distance = √2.
 
 Pure module: no cv2/ffmpeg — unit-tested in tests/test_eye_trace.py.
 """
@@ -81,8 +81,8 @@ def dist_frac(point_px: tuple, gaze: tuple, canvas: tuple) -> float:
     """Normalized 2D distance from a canvas-px point to the gaze point.
 
     ``point_px`` = (x, y) px; ``gaze`` = normalized (x, y); ``canvas`` =
-    (w, h) px. Euclidean in normalized screen units — the measurement's
-    metric (pro cloud mean 0.351, shuffled null 0.348).
+    (w, h) px. Euclidean in normalized screen units — the metric
+    ``MOTION["eye_trace"]["warn_dist_frac"]`` is expressed in.
     """
     w, h = canvas
     dx = point_px[0] / w - gaze[0]
@@ -147,7 +147,7 @@ def evaluate_rows(rows: list) -> tuple[int, list[dict]]:
     when no gaze was known / no landed bbox), ``deliberateJolt`` (the
     entry's ``jolt_flag_key`` flag) and identity fields. A row violates
     when its distance exceeds ``warn_dist_frac`` AND it is not a flagged
-    deliberate jolt. Advisory by design (measured null): the caller maps
+    deliberate jolt. Advisory by design (a tie-breaker rule): the caller maps
     violations to WARN, never FAIL. ``audit: "off"`` short-circuits.
     """
     if CFG.get("audit") == "off":

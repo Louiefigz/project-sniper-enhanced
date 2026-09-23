@@ -3,8 +3,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import {pathToFileURL} from 'node:url';
+import {assertNativeCaptureOwner} from './runtime/native-export-guard.mjs';
 import {reuseNativeForwardQc} from './native_forward_qc.mjs';
 import {capturePoints,checkTypography,visualState} from './native_short_capture_checks.mjs';
+import {encodeSamples} from './native_long_capture.mjs';
 import {createNativeCaptureContext,prepareNativeCaptureContext,withNativeCaptureSession,captureNativeFrame,
   nativeCaptureHash,nativeCaptureBatches,nativeCaptureEvidence,nativeCaptureFailure,NATIVE_CAPTURE_BATCH_FRAMES} from './native_short_capture_context.mjs';
 
@@ -73,6 +75,7 @@ export async function runNativeShortCapture(request, dependencies={}) {
     assert.equal(receipt.failedSceneStates.length,0,JSON.stringify(receipt.failedSceneStates));
     assert.equal(context.sourceHtmlSha256,nativeCaptureHash(path.join(request.project,'index.html')));
     receipt.transport={sessions:receipt.sessions.map(row=>row.transport),errors:0};
+    await encodeSamples(context,receipt,dependencies.encode);
     receipt.status='native-references-and-seek-states-pass';
   }catch(error){receipt.error=nativeCaptureFailure(error);}
   finally{
@@ -83,6 +86,7 @@ export async function runNativeShortCapture(request, dependencies={}) {
 }
 
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){
+  assertNativeCaptureOwner(process.argv[2]);
   const result=await runNativeShortCapture(JSON.parse(fs.readFileSync(process.argv[2],'utf8')));
   if(result.status!=='native-references-and-seek-states-pass')process.exitCode=1;
 }

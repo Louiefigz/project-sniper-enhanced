@@ -17,6 +17,7 @@ from graphics.render_rate import RenderRate, normalize_render_rate
 from graphics.template_contract import composition_dimensions, planned_copy, validate_entry
 from guided_opening_frames import full_program_frames
 from guided_opening_inputs import OpeningInputs
+from producer_config import MOTION
 
 
 @dataclass(frozen=True)
@@ -69,6 +70,9 @@ def inspect_full_program_graphics(inputs: OpeningInputs, guard: Callable[[], Non
         item = read_graphic_template(row, inputs.documents["authority"]["frameRate"])
         if item.dimensions != canvas:
             raise RuntimeError("guided body own-screen asset does not match the original full canvas")
+        mode = "longform" if canvas[0] >= canvas[1] else "short"
+        if item.frames / item.rate.numeric + 1e-9 < MOTION["hold_min_s"][mode]:
+            raise RuntimeError("guided graphic is shorter than the minimum readable hold")
         if item.path in templates and templates[item.path] != item.sha256:
             raise RuntimeError("guided body template changed during preflight")
         templates[item.path] = item.sha256

@@ -19,7 +19,7 @@ SPEC = {"eyebrow": "THIS STAGE", "headlineLines": "The content system|is a folde
 
 def entry(spec: dict, duration: float) -> dict:
     """One TEST card; never a creator plan or approval."""
-    return {"kind": "nateherk-pipeline", "outStart": 0, "outEnd": duration, "spec": spec}
+    return {"kind": "module-pipeline", "outStart": 0, "outEnd": duration, "spec": spec}
 
 
 def actual_ramp_ends(cases: list[dict]) -> list[float]:
@@ -27,7 +27,7 @@ def actual_ramp_ends(cases: list[dict]) -> list[float]:
     script = """
 import {readFileSync} from 'node:fs';
 import {runPipelineScript} from './scripts/producer/tests/_pipeline_dom_fixture.mjs';
-const source=readFileSync('./templates/motion/nateherk-pipeline.js','utf8');
+const source=readFileSync('./templates/motion/module-pipeline.js','utf8');
 const cases=JSON.parse(readFileSync(0,'utf8'));
 process.stdout.write(JSON.stringify(cases.map(spec=>Math.max(...runPipelineScript(source,spec)
   .trace.filter(row=>row[0]==='textRamp').map(row=>row[2]+row[3])))));

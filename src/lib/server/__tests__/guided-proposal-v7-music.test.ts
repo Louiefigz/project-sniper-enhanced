@@ -16,6 +16,9 @@ import type { AcceptedGuidedCut } from "../guided-raw-treatment-store";
 import type { ProposalEvidence } from "../guided-proposal-evidence";
 import type { AutoEditCtx } from "@/app/api/producer/auto-edit/stream";
 
+/** TEST ONLY scalar catalog configuration; no rendered or source observation claim. */
+const GRAPHIC_SPEC = { text: "TEST crop", emphasisWord: "crop", style: "highlight", drawAt: 0.2, accent: "#054BC9", exit: "hold" };
+
 type Row = Record<string, unknown>;
 const RAW = "Use the admitted TEST music bed beneath the unchanged dialogue.";
 
@@ -33,7 +36,7 @@ function operation(patch: Row = {}): Row {
 
 /** TEST ONLY closed request; real source and execution checks belong to the caller. */
 function proposal(patch: Row = {}): Row {
-  return { schemaVersion: 7, summary: "TEST ONLY full-program music contract.", graphicsStyle: "cutaway-only",
+  return { schemaVersion: 7, summary: "TEST ONLY full-program music contract.", graphicsStyle: "catalog-first",
     graphicsStyleRationale: "TEST ONLY retain all accepted picture and source decisions.",
     clauses: [{ start: 0, end: RAW.length, quote: RAW, disposition: "supported", rationale: "TEST ONLY explicit bed selection.", operationIndices: [0] }],
     beats: [{ startAnchor: 0, endAnchorExclusive: 1, purpose: "opening", summary: "TEST ONLY whole program.", supportsBeatIndices: [] }],
@@ -240,15 +243,15 @@ test("mixed music/crop/captions/graphics keep original indices and exact indepen
   const captions = operation({ type: "captions-full-program", music: null,
     captions: { schemaVersion: 1, preset: "producer-config-line-v1", coverage: "all-kept-transcript-words", suppression: "none" },
     reason: "TEST ONLY caption every kept word with the explicitly requested line preset." });
-  const graphic = operation({ type: "catalog-graphic", music: null, beatIndex: 0, catalogKind: "TEST-portrait-card",
-    variables: [{ name: "title", value: "TEST crop" }], startAnchor: 0, endAnchorExclusive: 1,
+  const graphic = operation({ type: "catalog-graphic", music: null, beatIndex: 0, catalogKind: "marker-highlight",
+    variables: Object.entries(GRAPHIC_SPEC).map(([name, value]) => ({ name, value })), startAnchor: 0, endAnchorExclusive: 1,
     presentation: { schemaVersion: 1, anchor: "own-screen", placement: "full-canvas", compositeMode: "normal",
       baseTreatment: "preserve", rationale: "TEST ONLY explicit full native portrait canvas." } });
   const output = proposal({ operations: [operation(), crop, captions, graphic],
     clauses: [{ start: 0, end: raw.length, quote: raw, disposition: "supported",
       rationale: "TEST ONLY four expressly specified independent operations.", operationIndices: [0, 1, 2, 3] }] });
   const evidence = { ...f.evidence, target: plan.target, musicPolicy: guidedMusicPolicy(plan, f.manifest),
-    catalog: [{ kind: "TEST-portrait-card", canvas: [1080, 1920], defaults: { title: "TEST" }, fields: ["title"] }] };
+    catalog: [{ kind: "marker-highlight", canvas: [1080, 1920], defaults: GRAPHIC_SPEC, fields: Object.keys(GRAPHIC_SPEC) }] };
   const cut = { ...f.cut, plan: { ...f.cut.plan, value: plan } };
   const result = buildTreatmentCandidate({ cut, evidence, output, rawIntent: raw });
   assert.deepEqual(result.blockers, []); assert.ok(result.candidate);

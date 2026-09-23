@@ -38,18 +38,18 @@
         "src/app/api/producer/assemble/route.ts",
         "src/app/api/producer/render/route.ts"
       ],
-      "role": "Create an editor-ready base and assemble the approved final MP4.",
+      "role": "Enter the saved-plan Auto Edit review/QC controller before rendering or final promotion.",
       "modePolicy": "mode-aware",
       "short": {
         "status": "compatibility",
-        "behavior": "Renders short-safe captions/layout and reuses the base only when compatibility fingerprints permit.",
+        "behavior": "Accepts only a saved project, then requires stored intent, current planning review/gates and rendered QC through the same controller as the GUI. Inline plans and review overrides are rejected.",
         "blockers": [
           "Graphics-only short repairs can still re-enter a monolithic graphics composite."
         ]
       },
       "longform": {
         "status": "compatibility",
-        "behavior": "Supports retained graphics-only and audio-only paths over the editor-ready base.",
+        "behavior": "Routes the saved long-form plan through independent review, deterministic gates, isolated rendering and final QC promotion; retained media reuse remains fingerprint-bound.",
         "blockers": [
           "Whole-cut video fingerprints and incomplete cross-lane dependencies prevent a fully qualified dirty graph."
         ]
@@ -726,6 +726,7 @@
       "src/lib/producer/__tests__/ask-edit-cut-repair-route.test.ts"
     ],
     "render-and-assemble": [
+      "src/lib/producer/__tests__/reviewed-render-entry.test.ts",
       "src/lib/server/__tests__/current-render-graph-command.test.ts",
       "src/lib/producer/__tests__/gui-render-authority.test.ts"
     ],

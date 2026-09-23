@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import os
 import signal
+import threading
 import tempfile
 import time
 import unittest
@@ -159,7 +160,12 @@ class GradeObservationCleanupTests(unittest.TestCase):
             events.append("cancelled")
             raise RuntimeError("owner work deadline")
         def remove(*_args):
-            os.kill(os.getpid(), signal.SIGUSR1)
+            # The production grade worker is single-threaded, so the owner's
+            # process-directed USR1 can only land on its main thread. Direct it
+            # there: in this shared test process, threads left by earlier tests
+            # could otherwise take the signal and handle it after cleanup
+            # (reproduced: 248/300 runs with four stray threads, 0/300 without).
+            signal.pthread_kill(threading.main_thread().ident, signal.SIGUSR1)
             events.append("exact absence observed")
             return {"canonicalAbsenceProved": True}
         try:

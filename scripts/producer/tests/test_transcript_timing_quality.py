@@ -68,7 +68,7 @@ class TranscriptTimingQualityTests(unittest.TestCase):
             / "short/source/raw-1.transcript.json"
         )
         fresh = Path(
-            "/Users/aaronfigueroa/ProjectSniper/"
+            "/Users/maintainer/ProjectSniper/"
             "img-7134-20260731/source/raw-1.transcript.json")
         if not donor.is_file():
             self.skipTest("real acceptance donor transcript is not retained")

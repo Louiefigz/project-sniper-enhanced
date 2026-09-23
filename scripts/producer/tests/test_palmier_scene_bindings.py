@@ -13,7 +13,7 @@ from palmier.scene_bindings import (
     build_scene_bindings,
     scene_binding_delta,
 )
-from tests.scene_fixtures import fire_sparkles_scene
+from tests.scene_fixtures import bind_test_scene_source, fire_sparkles_scene
 
 BUNDLE_HASH = "b" * 64
 ANIMATION_HASH = "c" * 64
@@ -80,6 +80,7 @@ class PalmierSceneBindingTests(unittest.TestCase):
         new_right = self._media("right-v2.mov", b"new-right-copy-media")
         after_scene = fire_sparkles_scene(BUNDLE_HASH, "Repaired right copy")
         after_scene["version"] = 2
+        bind_test_scene_source(after_scene)
         after = self._bindings(after_scene, right=new_right)
         delta = scene_binding_delta(before, after)
         self.assertEqual(delta["preservedBindingIds"],
@@ -97,6 +98,7 @@ class PalmierSceneBindingTests(unittest.TestCase):
         moved["timing"]["startFrame"] += 300
         moved["timing"]["endFrameExclusive"] += 300
         moved["timing"]["timelineMapHash"] = "d" * 64
+        bind_test_scene_source(moved)
         after = self._bindings(moved)
         delta = scene_binding_delta(before, after)
         self.assertEqual(delta["preservedBindingIds"], [])
@@ -134,6 +136,7 @@ class PalmierSceneBindingTests(unittest.TestCase):
     def test_mixed_granularity_is_explicitly_rejected(self) -> None:
         scene = fire_sparkles_scene(BUNDLE_HASH)
         scene["renderUnits"][0]["palmierGranularity"] = "scene"
+        bind_test_scene_source(scene)
         with self.assertRaisesRegex(SceneBindingError, "mixed"):
             self._bindings(scene)
 
@@ -141,6 +144,7 @@ class PalmierSceneBindingTests(unittest.TestCase):
         scene = fire_sparkles_scene(BUNDLE_HASH)
         for unit in scene["renderUnits"]:
             unit["palmierGranularity"] = "scene"
+        bind_test_scene_source(scene)
         receipt = self._receipt(self.left, None, 1, "3" * 64)
         result = build_scene_bindings(
             SceneBindingInput(scene, (receipt,)))

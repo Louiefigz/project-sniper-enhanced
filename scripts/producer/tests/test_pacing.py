@@ -179,7 +179,7 @@ class CheckPacingTests(unittest.TestCase):
         self.assertEqual(rep2.warnings, [])                 # on-style → silent
 
     def _graphics_carried_short(self) -> dict:
-        # An angela-grammar short (docs/studies/ANGELA_STYLE.md): dense graphics
+        # A slideware-style short (docs/studies/SLIDEWARE_STYLE.md §9): dense graphics
         # (~29 changes/min, max gap 3s) on a single uncut take, but the hook
         # is only ~1.42x denser than the body — the hook lives in the
         # graphics layer, not in cut density (§2 AH3).
@@ -192,9 +192,9 @@ class CheckPacingTests(unittest.TestCase):
             "graphicsTrack": [{"outStart": t} for t in hook + body],
         }
 
-    def test_angela_pace_relaxes_the_front_load_only(self) -> None:
+    def test_slideware_pace_relaxes_the_front_load_only(self) -> None:
         # Default (fast) pace fires ONLY the front-load warning (1.42x < 1.5);
-        # target.pace="angela" clears it (floor 1.3) while KEEPING the rate
+        # target.pace="slideware" clears it (floor 1.3) while KEEPING the rate
         # (16/min) and still-gap (8s) floors — the profile relaxes the hook
         # axis, not the density axes.
         fast = self._graphics_carried_short()
@@ -203,7 +203,7 @@ class CheckPacingTests(unittest.TestCase):
         self.assertTrue(any("front-load" in w for w in rep.warnings), rep.warnings)
 
         ang = self._graphics_carried_short()
-        ang["target"]["pace"] = "angela"
+        ang["target"]["pace"] = "slideware"
         rep2 = pl.Report()
         plm.check_pacing(ang, 35.0, "short", rep2)
         self.assertEqual(rep2.warnings, [])                 # on-style → silent
@@ -357,7 +357,7 @@ class StagedLandTimesTests(unittest.TestCase):
         self.assertEqual(pac.visual_change_times(plan), [1.0])
 
     def test_module_lands_count_as_changes(self) -> None:
-        # NATEHERK §5.4: narration-paced module builds are real on-screen
+        # MODULE §5.4: narration-paced module builds are real on-screen
         # changes — the rhythm model must not read a building takeover as
         # dead air (list form, the plan_lint_motion-validated shape).
         plan = {"graphicsTrack": [{"outStart": 10.0, "outEnd": 21.0,

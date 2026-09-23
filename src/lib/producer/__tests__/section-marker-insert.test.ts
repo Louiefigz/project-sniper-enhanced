@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { createElement } from "react";
@@ -8,7 +8,7 @@ import { useGraphicEdits } from "../../../components/producer/editor/use-graphic
 import { COMPS_CATALOG } from "../comps-catalog";
 import type { EditPlan } from "../edit-plan";
 
-const marker = COMPS_CATALOG.find((entry) => entry.kind === "section-marker")!;
+const marker = COMPS_CATALOG.find((entry) => entry.kind === "marker-highlight")!;
 
 function editor(initial: EditPlan) {
   const planRef = { current: initial };
@@ -31,11 +31,10 @@ function editor(initial: EditPlan) {
   return { planRef, edits };
 }
 
-test("section-marker catalog role matches its actual alpha template", () => {
-  const source = readFileSync(path.join(process.cwd(),
-    "templates/motion/compositions/section-marker.html"), "utf8");
-  assert.match(source, /small alpha overlay over the live head/);
-  assert.match(source, /background: transparent/);
+test("retired section-marker is absent from both executable files and the insertion menu", () => {
+  assert.equal(existsSync(path.join(process.cwd(),
+    "templates/motion/compositions/section-marker.html")), false);
+  assert.equal(COMPS_CATALOG.some(entry => entry.kind === "section-marker"), false);
   assert.equal(marker.ownScreen, false);
 });
 
@@ -57,9 +56,22 @@ test("actual editor insert creates free-band without migrating saved role or col
   assert.notEqual(inserted?.spec, marker.defaultSpec);
 });
 
-test("duplicating a saved marker preserves its authored anchor and color", () => {
+test("retired saved designs cannot be duplicated, edited or inserted through direct hooks", () => {
   const saved = { id: "existing", kind: "section-marker", anchor: "own-screen",
     outStart: 1, outEnd: 4, spec: { accent: "#123456", line1: "Saved" } };
+  const { planRef, edits } = editor({ graphicsTrack: [saved] });
+  const before = structuredClone(planRef.current);
+  assert.throws(() => edits.duplicateSelected(), /retired/);
+  assert.throws(() => edits.updateGraphic("existing", { spec: { line1: "Changed" } }), /retired/);
+  assert.throws(() => edits.addGraphic({ ...marker, kind: "section-marker" }), /retired/);
+  assert.deepEqual(planRef.current, before);
+  edits.removeGraphic("existing");
+  assert.deepEqual(planRef.current.graphicsTrack, []);
+});
+
+test("duplicating an admitted catalog graphic preserves authored configuration", () => {
+  const saved = { id: "existing", kind: marker.kind, anchor: "free-band",
+    outStart: 1, outEnd: 4, spec: { ...marker.defaultSpec, accent: "#123456" } };
   const { planRef, edits } = editor({ graphicsTrack: [saved] });
   edits.duplicateSelected();
   const copy = planRef.current.graphicsTrack?.[1];

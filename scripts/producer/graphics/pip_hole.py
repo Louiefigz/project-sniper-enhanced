@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""pip_hole — face-hole geometry for hole-comps (NATEHERK_STUDY.md §5 item 9).
+"""pip_hole — face-hole geometry for hole-comps (MODULE_STUDY.md §5 item 9).
 
 A HOLE-COMP renders the FRAME around a transparent rounded PIP hole (the
 canvas is masked out of the hole; only the card ring is drawn around it) and
@@ -9,12 +9,12 @@ on the face), scales it into the hole rect and overlays it BENEATH the comp —
 the comp's rounded mask then covers the rectangle's corners, so the rounding
 comes free from the comp's own alpha. This is the STATIC face-in-PIP takeover
 the operator adjudicated LEGAL FOR LONGFORM (2026-07-10; still banned for
-shorts — ``plan_lint_nateherk``). The eased shrink-to-PIP footage transform
+shorts — ``plan_lint_module``). The eased shrink-to-PIP footage transform
 remains §5 item 10 (``pip_takeover.py``, unwired).
 
 GEOMETRY IS A CONTRACT: each entry's rect/radius MUST match the comp's CSS
 hole exactly (the comp masks the canvas out of this rect; the renderer fills
-it). Change a comp, change its entry — ``test_nateherk_longform`` pins both.
+it). Change a comp, change its entry — ``test_module_longform`` pins both.
 
 This module is pure geometry (unit-testable, no ffmpeg) except
 :func:`hole_clip_fields`, which probes the base video's dims once.
@@ -22,23 +22,24 @@ This module is pure geometry (unit-testable, no ffmpeg) except
 
 from __future__ import annotations
 
-# rect = (x, y, w, h) on the 1920x1080 longform delivery canvas — measured
-# from the reference (face PIP ~28%W x 89%H right, r~24: NATEHERK_STUDY §3).
-# nateherk-takeover ALWAYS wears the hole; the scoreboard/pipeline/ledger-dark
+# rect = (x, y, w, h) on the 1920x1080 longform delivery canvas — Sniper
+# design parameters (presenter card ~28%W x 89%H on the right, r=24:
+# MODULE_STUDY §3 rank 11).
+# module-takeover ALWAYS wears the hole; the scoreboard/pipeline/ledger-dark
 # dark cards reserve the SAME right band [1344..1878] but only cut the hole +
 # draw the ring when the spec opts in via ``presenterFrame`` (see
 # ``entry_has_hole`` — the activation predicate every wire routes through).
 HOLE_BY_KIND = {
-    "nateherk-takeover": {"rect": (1344, 60, 534, 960), "radius": 24},
-    "nateherk-scoreboard": {"rect": (1344, 60, 534, 960), "radius": 24},
-    "nateherk-pipeline": {"rect": (1344, 60, 534, 960), "radius": 24},
-    "nateherk-ledger-dark": {"rect": (1344, 60, 534, 960), "radius": 24},
+    "module-takeover": {"rect": (1344, 60, 534, 960), "radius": 24},
+    "module-scoreboard": {"rect": (1344, 60, 534, 960), "radius": 24},
+    "module-pipeline": {"rect": (1344, 60, 534, 960), "radius": 24},
+    "module-ledger-dark": {"rect": (1344, 60, 534, 960), "radius": 24},
 }
 PIP_HOLE_KINDS = tuple(HOLE_BY_KIND)
 HOLE_CANVAS = (1920, 1080)
-# nateherk-takeover has no opt-out — the hole IS the comp; every other
+# module-takeover has no opt-out — the hole IS the comp; every other
 # registered kind is a plain opaque card until its spec sets presenterFrame.
-_ALWAYS_HOLE_KIND = "nateherk-takeover"
+_ALWAYS_HOLE_KIND = "module-takeover"
 
 
 def is_hole_kind(kind) -> bool:
@@ -50,7 +51,7 @@ def entry_has_hole(entry: dict) -> bool:
     """ACTIVATION predicate: is this entry's face hole live for THIS render?
 
     True iff the kind is registered AND either it is the always-hole
-    ``nateherk-takeover`` or its ``spec.presenterFrame`` is truthy. This is the
+    ``module-takeover`` or its ``spec.presenterFrame`` is truthy. This is the
     single source of truth every wire (format_for, graphics_stage, the two
     lints) keys on — so a scoreboard/pipeline/ledger-dark WITHOUT the opt-in
     behaves EXACTLY as before (opaque, free-band-legal, no own-screen gate),

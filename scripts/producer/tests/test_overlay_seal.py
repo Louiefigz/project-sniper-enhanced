@@ -1,4 +1,4 @@
-"""Adversarial controller-owned overlay preseal regressions."""
+"""Inert overlay storage/dispatch units and real retired-source refusal."""
 from __future__ import annotations
 
 import hashlib
@@ -13,6 +13,7 @@ from pathlib import Path
 from unittest import mock
 
 from _common import pl  # noqa: F401
+from _retired_r0_artifact_fixture import capture_test_metadata, resolve_test_metadata
 from headless import render_worker
 from headless.overlay_seal import (
     OverlayPrepareRequest,
@@ -32,8 +33,8 @@ BUILD_DIGEST = hashlib.sha256(b"attempt-build").hexdigest()
 def _entry(start: float = 0, anchor: str = "free-band") -> dict:
     return {"kind": "section-marker", "outStart": start,
             "outEnd": start + 2.5, "anchor": anchor, "spec": {
-                "num": "System No.1", "line1": "Familiarity",
-                "line2": "Rule", "side": "left", "accent": "#054BC9"}}
+                "num": "Part 1", "line1": "The Setup",
+                "line2": "Basics", "side": "left", "accent": "#054BC9"}}
 
 
 class OverlaySealTests(unittest.TestCase):
@@ -43,6 +44,14 @@ class OverlaySealTests(unittest.TestCase):
         self.attempt = Path(self.temp.name).resolve() / "attempt-a"
         self.attempt.mkdir(mode=0o700)
         os.chmod(self.attempt, 0o700)
+        self.capture = mock.patch('headless.overlay_seal.capture_overlay_source',
+                                  side_effect=capture_test_metadata)
+        self.resolve = mock.patch('headless.overlay_seal.resolve_overlay_source',
+                                  side_effect=resolve_test_metadata)
+        self.capture.start()
+        self.resolve.start()
+        self.addCleanup(self.capture.stop)
+        self.addCleanup(self.resolve.stop)
 
     def _request(self, entry: dict) -> OverlayPrepareRequest:
         return OverlayPrepareRequest(
@@ -64,7 +73,7 @@ class OverlaySealTests(unittest.TestCase):
         self.assertEqual(after.intent, before.intent)
         self.assertEqual(after.key, before.key)
         self.assertEqual(after.expected_copy,
-                         ("System No.1", "Familiarity", "Rule"))
+                         ("Part 1", "The Setup", "Basics"))
 
     def test_absolute_shift_reuses_seal_but_anchor_changes_key_and_format(self) -> None:
         first_locator = prepare_overlay(self._request(_entry(0)))
@@ -126,6 +135,19 @@ class OverlaySealTests(unittest.TestCase):
                            return_value={"sealed": True}):
             self.assertEqual(render_worker.main(), 0)
         self.assertEqual(json.loads(stdout.getvalue()), {"sealed": True})
+
+    def test_real_retired_source_refuses_before_snapshot_or_worker(self) -> None:
+        from headless.overlay_source_seal import capture_overlay_source
+        with mock.patch('headless.overlay_seal.capture_overlay_source',
+                        side_effect=capture_overlay_source), mock.patch(
+                            'headless.overlay_source_seal.create_snapshot') as snapshot, mock.patch(
+                                'subprocess.Popen') as process, self.assertRaisesRegex(
+                                    ValueError, 'section-marker.*retired'):
+            prepare_overlay(self._request(_entry()))
+        snapshot.assert_not_called()
+        process.assert_not_called()
+        self.assertFalse(list(self.attempt.rglob('render-input.tar')))
+        self.assertFalse(list(self.attempt.rglob('receipt.json')))
 
     def test_effective_intent_is_a_deep_canonical_copy(self) -> None:
         entry = _entry()

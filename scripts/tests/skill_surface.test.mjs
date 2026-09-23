@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const ROOT = process.cwd();
-const SKILLS = ["clipper", "producer", "producer-study", "reference-editor", "segmenter"];
+const SKILLS = ["clipper", "producer", "producer-study", "reference-editor", "segmenter", "sniper-context"];
 const COMMANDS = [
   "clip",
   "produce",
@@ -13,6 +13,7 @@ const COMMANDS = [
   "reference-edit",
   "segment",
   "setup",
+  "sniper-context",
 ];
 
 function directoriesWithSkill(relative) {

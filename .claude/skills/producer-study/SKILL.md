@@ -12,6 +12,13 @@ build phases; the operator's current scope governs which phases apply.
 
 ## Research and close functional matches
 
+For application to a particular reference shot/style explicitly targeted by the
+operator, save the shared
+[reference-shot reuse map](../../../docs/producer/REFERENCE_SHOT_REUSE.md) after
+the detailed study and before dependent native assembly. Keep reusable portions
+even when one missing behavior needs custom code. Study-only work and consulting
+the library for inspiration do not activate this project-bound requirement.
+
 For a request to understand references and plan with existing HyperFrames
 catalog items, produce source-bound findings and a capability mapping first.
 Inspect complete narrative coverage, word/visual relationships and relevant
@@ -30,19 +37,19 @@ the reference-editor qualification requirements remain authoritative for packs.
 
 For reusable planning evidence, preserve actual creator full frames and sampled
 before/after sequences beside their detailed descriptions. Use
-[the Shorts visual library](../../../docs/studies/shorts-visual-playbook/README.md)
+[the Shorts reference library](../../../resources/references/README.md)
 for the current examples and stable IDs. Include the story job, spoken/caption
 cue, visual anatomy, typography, timing confidence, when to use/avoid, candidate
 source and specific adaptation. Record actual visual inspection separately from
 code inspection. Never label a proposed catalog adaptation as a verified replica.
-Use the library's complete Nate cases for produced-story examples, preserving
+Use the library's complete sequence cases for produced-story examples, preserving
 the setup and payoff around individual treatments. Compare multiple examples of
 each directing decision. Resolve selected images to source frame indices/PTS and
 keep individual full frames beside strips; adjacent atlas text is not one image.
 Count cases, directing beats and source frames separately from unique templates.
 
-Start cross-case direction with [Format foundations](../../../docs/studies/shorts-visual-playbook/FORMAT_FOUNDATIONS.md)
-and the [expanded Caleb/Lewis cases](../../../docs/studies/shorts-visual-playbook/authentic-expansion/README.md).
+Start cross-case direction with [Format foundations](../../../resources/references/shorts/FORMAT_FOUNDATIONS.md)
+and the [expansion cases](../../../resources/references/shorts/expansion/CATALOG_MAP.md).
 Study message → viewing need → format → actual crop/pane geometry → development
 and readable hold → exit condition. Compare plausible alternatives, including
 different formats used by the same creator. Record why a split's two jobs need
@@ -59,13 +66,13 @@ reference timestamps, exact typography or a rejected format into universal prese
 
 ## Phase 1 — Deterministic fingerprints (cheap, always first)
 ```bash
-.venv/bin/python3 scripts/producer/study/study_video.py <ref> <outdir>   # cuts/min, states, audio, music
+./sniper python3 scripts/producer/study/study_video.py <ref> <outdir>   # cuts/min, states, audio, music
 # ZOOM MAP is 3 steps: extract frames at a known fps, face series, then the map:
-ffmpeg -i <ref> -vf fps=5 <frames>/f_%06d.jpg
-.venv/bin/python3 scripts/producer/study/study_zoom_faces.py <frames> <faces.json> --fps 5
-.venv/bin/python3 scripts/producer/study/study_zoom.py <ref> <frames> <faces.json> <outdir>  # punch-in cuts + animated ramps, magnitudes
+./sniper ffmpeg -i <ref> -vf fps=5 <frames>/f_%06d.jpg
+./sniper python3 scripts/producer/study/study_zoom_faces.py <frames> <faces.json> --fps 5
+./sniper python3 scripts/producer/study/study_zoom.py <ref> <frames> <faces.json> <outdir>  # punch-in cuts + animated ramps, magnitudes
 # PAIR only (transcribe BOTH in one session — same keyword set, else tokenization noise):
-.venv/bin/python3 scripts/producer/edit/study_edit_diff.py raw.json edited.json --out report.json
+./sniper python3 scripts/producer/edit/study_edit_diff.py raw.json edited.json --out report.json
 ```
 For the full per-frame event layer (cuts/zooms/pans/panels/pops + easing + OCR),
 `scripts/producer/study/study_deep.py <ref> <outdir>` runs P1 automatically —
@@ -85,8 +92,9 @@ schema in `scripts/producer/study/DEEP_SCHEMA.md`.
    staged builds, never pop-from-nothing — R9).
 
 ## Phase 3 — Write the rules
-Append findings to `docs/studies/REFERENCE_STYLE_STUDY.md` (numbered R-rules with
-evidence: timestamps, quoted words, measured values). Contradictions with
+Append findings to `docs/studies/REFERENCE_STYLE_STUDY.md` as numbered R-rules that
+record the mechanism (what changes, when, for how long, and why it helps a viewer),
+not the reference's words, branding or identity. Contradictions with
 existing doctrine get an operator-visible callout, never silently resolved.
 
 ## Phase 4 — Template specs → build

@@ -1,10 +1,13 @@
 # Requesting and producing native Shorts
 
 Ask the editing agent in normal language. Supply footage or an existing project
-and the outcome you want the viewer to understand. Either name a reference or
-let the agent choose after inspecting the message, footage and reference library.
+and the outcome you want the viewer to understand. Visuals come from the
+HyperFrames catalog by default. A reference adaptation needs the current job's
+selected reference video; custom work needs an inspected catalog gap. Read
+[visual source policy](VISUAL_SOURCE_POLICY.md) before choosing a design.
+Historical house templates and style recipes below cannot authorize execution.
 
-- “Make a Nate Herk-style Short from this recording. Show one offer improving
+- “Make a catalog-based Short from this recording. Show one offer improving
   step by step. Find useful supporting shots in my footage.”
 - “Choose the best Short treatment from this recording automatically. Find a
   standalone lesson and show the example wherever possible.”
@@ -49,6 +52,113 @@ speech, framing and any claims before choosing to display the asset. See
 
 ## Before assembly
 
+### Preserve the actual request before choosing assets
+
+Resolve the current user's edit scope, visual intensity, enabled lanes and
+source permissions before writing the strategy. For this user's produced
+real-first workflow, public asset scouting is authorized; preserve that choice.
+Do not copy another artifact's `local-only` literal. Source-first describes
+search order, while local-only restricts origins, including cached web media.
+Keep the old fallback for requests that never authorized public sources.
+
+When working from admitted source media, freeze the current intent with the
+existing request writer and author from its returned request. In an app project:
+
+```bash
+node --import tsx scripts/producer/native-short.ts prepare /absolute/project/producer
+```
+
+That CLI reads saved `project.json` intent; it has no loose-file `--intent`
+option. A no-app author can call `prepareNativeShortRequest({producerDir,
+intent, repo, manifestPath})` from `src/lib/server/native-short-request.ts`
+directly. It needs a genuine admitted manifest and canonical paths, but no
+database or `project.json`. Include the accepted creative brief, source policy,
+audio work and lane restrictions in `intent`. Bind returned `request` and
+`requestPacket: {path, sha256}` using the exact `SHORT-REQUEST.json` bytes.
+Read `AGENT-BRIEF.md` before dependent strategy. Reuse existing valid source and
+transcript admission; never manufacture a receipt or redo ASR to fix a style
+decision.
+
+Direct native imports without a packet remain supported for compatibility;
+their internal request/plan consistency is not proof of matching the user's
+conversation. The independent strategy critic must receive the actual accepted
+brief, resolved request, inspected scout evidence and proposed scene plan, and
+reject a silently narrowed source policy or a blanket no-insert decision. Do
+not claim automatic request-authority verification for an unbound manual plan.
+
+Use the shared [real-first scouting and agent review](WEB_BROLL_WORKFLOW.md#scouting-and-independent-agent-verification)
+for produced work, while preserving deliberately simple presenter-led requests.
+
+### Prepare the selected media first
+
+After the source-wide transcript review and passage selection, physically prepare
+the chosen ranges **before Studio or visual iteration**. Retain the originals as
+source evidence. Work from the small files for the selected speech and supporting
+shots; repeated views reuse the same file. Do not transcribe the clips again or
+replace canonical source timestamps with clip-local timestamps.
+
+The shared local preparation entry is:
+
+```bash
+.venv/bin/python scripts/producer/edit/selected_sources.py prepare /absolute/selection.json /absolute/new-media-package
+```
+
+`selection.json` contains `schemaVersion: 1`, `handleSeconds: 1`,
+`sources: [{file: "assets/<sha256>.mp4", path: "/absolute/original.mp4", sha256: "<sha256>"}]`
+and `ranges: [{sourceFile: "assets/<sha256>.mp4", start: 857.02, end: 864.90}]`.
+Ranges use original-source seconds. Include the output-frame-aligned end of each
+chosen cut and all selected supporting video. Overlapping handles merge. The
+current packet-copy contract accepts zero-based H.264/HEVC MP4 picture with at
+most one audio stream. Source audio must be zero-based 48 kHz mono/stereo;
+other audio clocks/layouts need a separately qualified adaptation. Unsupported
+inputs fail explicitly.
+
+Preparation uses the existing resource supervisor and heavy-work lease. It checks
+disk headroom, copies compressed picture packets without a picture encode, resets
+the presentation clock, extracts bounded float PCM working audio, and verifies
+packet identity, exact timestamp translation, color/geometry and full decode.
+Its sealed `run/selected-sources-stage.json` is reusable source preparation,
+not approval of the edited video.
+
+Bind that receipt as `preparedSources: {path, sha256}` in the native plan. Keep
+`canvas.sourceFile`, cuts, word occurrences and original `assets` unchanged.
+The shared writer stages the prepared media and emits `PREPARED-SOURCES.json`,
+which binds each executable media element back to the original source range.
+The cold reader reconstructs that mapping; missing, stale, changed or uncovered
+media fails rather than loading the entire recording. Final dialogue assembly
+uses the short float audio files and the existing normalization/mastering path.
+
+For an already authored plan, `native-short.ts prepare-media <plan.json> <new-media-directory>`
+derives all actual media ranges and writes `prepared-plan.json`. The direct
+`native-short.ts build` CLI now prepares media automatically when the plan has
+no binding, placing the package beside the project as `<project>.sources`.
+Use the returned prepared plan for subsequent visual revisions. Moving a cut
+within its verified handles reuses preparation; extending beyond coverage needs
+a new package. Frozen legacy projects remain readable. New exports now call
+`native-short.ts check-export` and require the current independent prebuild
+record; a historical read's `legacy-unreviewed` status cannot authorize a new
+render. The public `studio/native_export.py` selects the explicit Short/Long
+contract, and shared owner/SDK guards reject custom export wrappers. See
+[the enforcement audit](WORKFLOW_ENFORCEMENT_AUDIT_2026-09-16.md).
+Guided stored-proposal
+automation and native long-form authoring are separate integration surfaces;
+do not claim that every producer entry point automatically prepares clips.
+
+Studio can still need a browser-compatible preview of a prepared clip. Any
+conversion now has only that small file as input. This does not certify a codec
+for every browser or remove the shared supervision requirement for preview work.
+The legacy long-form path already prepares a cut/speed base before graphics;
+native long-form projects linked directly to full recordings share the full-source
+preview risk. The selected-range package is reusable there, but its native
+long-form project adapter is not yet connected.
+
+When the user explicitly targets a particular reference shot/style, follow the
+[shared reference-shot mapping workflow](REFERENCE_SHOT_REUSE.md). Persist the
+inspected reuse/configure/compose choices and specific custom gaps, then pass
+`--reference-map` to native Short export. Merely consulting the library or choosing
+a treatment automatically does not require that map. The same mapping core serves
+Long native preflight; it does not turn candidate discovery into visual approval.
+
 First establish whether the user wants an excerpt, cleanup/segmentation, or a
 standalone story assembled from the recording. Follow the
 [edit-scope guidance](SHORTS_JOURNEY_SELECTION_PLAYBOOK.md#establish-the-edit-the-user-wants)
@@ -70,7 +180,7 @@ when simultaneous viewing helps. This is editorial guidance, not a new automatic
 ranking feature or a claim that export checks assess narrative quality.
 
 1. Read the actual transcript and inspect source footage and individual library
-   frames. Select a self-contained message with a supported payoff. For a Nate
+   frames. Select a self-contained message with a supported payoff. For a module-card
    treatment, inspect setup, development and payoff plus a contrasting example.
    Establish the whole-Short rhythm from the retained script and actual delivery
    before assigning shot lengths; follow the pacing step below.
@@ -111,7 +221,7 @@ evidence as unfinished review.
 
 ### Visual storytelling: choose how concrete each beat should be
 
-Aaron's direction: a physical/cartoon key can explain an API key in a high-level
+Product direction: a physical/cartoon key can explain an API key in a high-level
 overview. A tutorial can show the actual credentials field. Select the visual
 from the teaching moment, audience and complete spoken point. This decision
 belongs between understanding the script and choosing assets or captures; it
@@ -160,7 +270,7 @@ and supporting-shot scouting. Existing frozen requests and exports stay intact.
 
 ### Script and delivery set the rhythm
 
-Aaron's September 12 direction: pace the whole Short coherently. A faster script
+Product direction (September 12): pace the whole Short coherently. A faster script
 and delivery need quicker visual development, caption phrasing and motion;
 a calmer performance needs more sustained, restrained treatment. The reference
 informs the visual mechanics, adapted to that performance. Do not choose B-roll
@@ -392,10 +502,11 @@ transcript hashes, admitted-source receipt, library provenance and starting
 reference documents. Its inspection statuses are pending until the agent does
 the work. Bind `SHORT-REQUEST.json`'s path/hash to `requestPacket` in the plan.
 
-For an ordinary app request, save the intent through `POST /api/producer/intent`
-and prepare with `POST /api/producer/native-short`, whose body contains only
-`{dir}`. Preparation reads the stored resolved intent; passing a replacement
-intent in that request is rejected. Native Shorts with an explicit direction
+Save the intent with `./sniper node --import tsx scripts/infra/project-intent.ts <project>
+--intent '<json>'` and prepare with `./sniper node --import tsx scripts/producer/native-short.ts
+prepare <project>/producer` (the retired app's `POST /api/producer/intent` and
+`POST /api/producer/native-short` did the same). Preparation reads the stored resolved intent;
+it takes no replacement intent. Native Shorts with an explicit direction
 and automatic supporting placement retain scouting when the separate B-roll
 inventory is empty. The agent may find useful footage inside the admitted main
 source. Source restrictions, scope limits and off/operator lanes remain binding.
@@ -536,10 +647,29 @@ as well as after it settles. The offer qualification caught future formula terms
 appearing before their spoken cue despite a technically valid export.
 
 ```sh
-node --import tsx scripts/producer/native-short.ts build /absolute/plan.json /absolute/new-project
-node --import tsx scripts/producer/native-short.ts check /absolute/new-project
-.venv/bin/python scripts/producer/studio/native_short_export.py /absolute/new-project /absolute/new-export
+./sniper node --import tsx scripts/producer/native-short.ts build /absolute/plan.json /absolute/new-project
+./sniper node --import tsx scripts/producer/native-short.ts check /absolute/new-project
+./sniper python3 scripts/producer/studio/native_export.py /absolute/new-project /absolute/new-preview --preview-only
 ```
+
+The default export stops after continuous moving previews. Inspect those clips
+with sound, revise affected content, and obtain current independent reviews
+before full picture rendering. Follow [render readiness](RENDER_READINESS.md)
+for the review bundle, coverage and conservative reuse rules. A generated clip
+or a matching hash is not a viewing or listening review.
+
+```sh
+./sniper python3 scripts/producer/studio/native_export.py /absolute/new-project /absolute/new-export --preview-reviews /absolute/motion-reviews.json
+```
+
+Native Shorts stage catalog HTML through `catalogFiles` and mount their title
+through `catalogTitle`; a legacy built-in title is not a fallback. The source
+receipt binds the current request and every visual choice. Explicit independent
+regions may be declared in `REVIEW-REGIONS.json`. Unchanged regions reuse their
+previous clips and detailed reviews; current whole-plan assessment remains
+required. Changes to shared scripts, layout, timing, media or source decisions
+invalidate broader coverage. Arbitrarily coupled component code must not be
+declared independent. Final picture export and full encoded-output QC remain.
 
 The export directory must be new and its parent must exist. An optional
 `--audio-donor /absolute/prior-export/audio/receipt.json` reuses qualified audio
@@ -567,12 +697,32 @@ completed batch picture after a later-stage failure. All current final checks
 still run. A missing cache without acquisition enabled, or changed donor
 evidence, is an explicit failure.
 
-The explicit
-`--unused-ram-advisory` option requires the operator's low-unused-RAM exception;
-it retains owned-tree, per-process, pressure, swap and cleanup checks.
+New shared `NativeRun` attempts use a capacity-derived memory policy. The job
+ceiling is the smaller of 16 GiB and one quarter of physical RAM; the single
+process ceiling is the smaller of 8 GiB and three quarters of that job ceiling.
+Limits freeze at admission and are recorded with the measured baseline.
+Admission still requires normal kernel pressure, at least 25% reported system
+headroom and 10 GiB free disk. Literal unused RAM and existing compression are
+context, because reclaimable cache and old background pressure are distinct
+from an unhealthy render.
 
-The exporter runs three sequential supervised owners: media generation, native
-reference capture, and encoded-picture/full-decode verification. Each retains
+Critical pressure, severe headroom loss, memory ceilings, missing/stale telemetry,
+lost process identity and disk reserve violations stop work immediately. Moderate
+warning pressure or headroom below 10% requires three valid observations spanning
+at least ten seconds; recovery resets that condition and long observation gaps
+cannot count as sustained evidence. Host-wide swap/compressor changes are logged
+without attributing them to the render alone. These are sampled supervisor limits,
+not an OS-enforced allocation guarantee.
+
+Callers that explicitly provide `ResourcePolicy` retain fixed-policy behavior.
+`--unused-ram-advisory` remains compatible with that route. Historical frozen
+Long-form supervisors retain their recorded policies; this change updates current
+shared Shorts and web-capture owners. See the
+[memory policy finding](../findings/RENDER_MEMORY_CAPACITY_AND_PRESSURE.md).
+
+The exporter runs sequential supervised owners: native reference capture,
+continuous moving previews, media generation after preview review, and
+encoded-picture/full-decode verification. Each retains
 the existing 600-second owner budget, shared heavy-work lease, continuous
 resource controls and mandatory cleanup. Only one owner runs at a time. The
 streaming capture CLI runs directly under its capture owner, preserving the
@@ -592,10 +742,41 @@ Only `delivery.json` status `native-short-checked-for-review` qualifies the
 technical handoff after capture, encoded checks and every owner's cleanup pass.
 Editorial authoring time belongs to the separate continuous production clock.
 
+Detailed native capture receipts use the shared `read_native_capture_receipt`
+reader with a 256 MiB limit. Both pipeline handoff and encoded-picture checks
+use that bound, including exact hashes when supplied and unchanged regular-file
+checks. Small JSON requests and stage seals keep the generic 16 MiB limit.
+Repeated per-frame typography made a valid 595-row report 32.79 MiB; the reader
+must not confuse that with unsafe file ownership. Larger Long-form reports may
+need sharding or deduplicated static metadata rather than an unbounded parser.
+
 ### Resume verification without repeating media generation
 
-The default command runs all three stages. To explicitly stop after media
-generation, use `--render-only`. A successful media owner publishes an immutable
+The normal public command now automatically selects compatible completed work:
+
+```sh
+.venv/bin/python scripts/producer/studio/native_export.py /absolute/project /absolute/new-attempt
+```
+
+Discovery is bounded to sibling attempts and immutable per-project history,
+including attempts under another output parent. Selection and request publication
+share one project reservation, so a second matching invocation cannot start fresh
+while the first is active or interrupted. Keep the same source, implementation,
+runtime, cache, capture route, audio profile and reference-map options. Changed
+inputs or policy require fresh work; a corrupt selected proof is an error.
+
+Short recovery prefers sealed media with completed native capture, then sealed
+media, independently proved SDK/batch picture, and qualified audio preparation.
+The ordinary worker consumes picture/audio donors through their existing checked
+readers. Prepared float audio avoids repeated mastering; qualified AAC avoids
+re-encoding. Failed audio never becomes an audio donor. Completed picture may
+survive a later signal, audio-quality or metadata failure, but only with the
+original complete SDK trace, packet/clock proof, input hashes and owner cleanup.
+Partial unproved frames cannot be promoted. Final encoded QC still runs.
+
+For a new project the default command stops at moving previews. With current
+`--preview-reviews`, it completes the remaining stages. To explicitly stop after
+reviewed media generation, also use `--render-only`. A successful media owner publishes an immutable
 `render-stage.json` binding the original request, project/source/tool/code pins,
 owner completion/cleanup, picture, final MP4, audio receipt and media result.
 After a later verification failure, start a fresh verification attempt:
@@ -604,15 +785,74 @@ After a later verification failure, start a fresh verification attempt:
 .venv/bin/python scripts/producer/studio/native_short_export.py /absolute/project /absolute/new-verification --verify-from /absolute/original-export/render-stage.json
 ```
 
-This preserves the sealed route/cache/audio policy, copies the exact final MP4
-and repeats current native/encoded verification with no picture or audio encode.
+This preserves the sealed route/cache/audio policy and copies the exact final
+MP4 with no picture or audio encode. Successful captures now publish a
+`capture-stage.json` seal automatically. The exporter reuses that capture when
+compatible, then repeats final encoded verification. Missing or failed capture
+requires capture again; a present invalid capture seal is a hard error.
+
+If a later verification attempt completed capture, resume that exact attempt:
+
+```sh
+.venv/bin/python scripts/producer/studio/native_short_export.py /absolute/project /absolute/new-attempt --resume-from /absolute/later-attempt
+```
+
+Explicit recovery follows the selected render/capture chain and overrides
+automatic selection. Repeated automatic recovery retains that complete chain,
+including prior donor dependencies. A legacy successful, unsealed
+capture may be sealed only after the same complete owner, request, schedule,
+JPEG, runtime and cleanup validation. A failed capture cannot be promoted.
 Do not combine it with render/donor/cache overrides. Use a new directory outside
 the project and original attempt. Changed dependencies, linked/substituted files,
 incomplete media/audio/color proof or unverified owner cleanup reject before
 verification. A collection of MP4s or partial receipts is not a reusable stage.
-Historical failures without a stage seal remain failures; never backfill them.
+Historical failures remain failures; independently proved partial picture/audio
+may be donors to a new attempt, never a backfilled successful render seal.
 If new code or source changes invalidate a seal, produce a separate authorized
 candidate through the normal path; do not silently rerender during verification.
+
+### Avoid wasted work without lowering quality
+
+The standard native Short worker prepares and checks the exact float dialogue
+master before picture rendering. A failed hum/channel/ending check stops there.
+Final delivery consumes the same hash-bound master for its first AAC candidate;
+encoded audio, exact sample clocks, AV synchronization, metadata and picture
+checks still run. Existing true-peak correction remains available if AAC
+encoding requires it. An admitted audio donor is checked directly instead of
+building an unused master. These shared audio helpers are format-neutral;
+the native Short worker currently supplies the automatic ordering.
+
+Encoded-picture comparison streams the original selected frames through the
+same color conversion and comparison thresholds. It keeps a bounded RGB buffer
+and a small owned filter script, eliminating the full selected-RGB scratch file.
+Disk admission includes that script, a bounded result receipt and the existing
+reserve. Every forward/reverse comparison and full A/V decode remain required.
+No cache eviction occurs. A hard process kill can leave the tiny filter script,
+but cannot publish a successful result.
+
+Use the [shared review bundle](NATIVE_REVIEW_BUNDLES.md) after checked delivery;
+do not copy a dated artifact's preparation script into a new production.
+Recognized text is a reusable diagnostic, separate from timing acceptance.
+Rejected timing remains rejected; neither ASR nor signal checks grant listening
+or word-synchronization approval.
+
+Follow the [optimization plan and target schedule](SHORTS_OPTIMIZATION_IMPLEMENTATION_PLAN_2026-09-15.md).
+Start the shared production journal before source review/search and end it after
+both review surfaces have been checked. Use one unique label for each overlapping
+agent/clip stage, recording failures and revisions as separate spans:
+
+```sh
+.venv/bin/python scripts/producer/stage_timing.py /absolute/production production_total start
+.venv/bin/python scripts/producer/stage_timing.py /absolute/production clip_a_asset_search start
+.venv/bin/python scripts/producer/stage_timing.py /absolute/production clip_a_asset_search end
+.venv/bin/python scripts/producer/stage_timing.py /absolute/production production_total end
+```
+
+This CLI requires an existing directory. The timing report unions overlapping
+substage intervals rather than summing them twice; incomplete or inconsistent
+clocks remain visible. Uninstrumented time is not automatically idle time.
+Telemetry is not an editorial or quality gate, and a 30-minute target never
+waives a real defect or missing proof.
 
 Keep the default streaming render route unless measured project evidence
 justifies explicit cached batches. Repeated browser startup can dominate short
@@ -650,8 +890,11 @@ retain their numeric diagnostics. Permission failures and malformed measurements
 stop immediately. The direct sampler passed eight actual codec regressions and
 a supervised native export; see the implementation receipt for scope and timings.
 
-Deliver `review.mp4`, the editable project and receipts. A technical pass is
-**ready for review**, with human editorial/listening approval still outstanding.
+Deliver `review.mp4`, the editable project and receipts, and complete the shared
+[local playback and Studio handoff](STUDIO_REVIEW_LANE.md#required-review-handoff-local-playback-and-studio).
+Open both views for the same revision; a file link alone is not the Studio UI.
+A technical pass is **ready for review**, with human editorial/listening approval
+still outstanding.
 Report actual source/output durations, planning and execution time separately,
 cache reuse, measured memory and the specific cases tested. Three examples do
 not qualify every creator style or establish raw-footage-to-finished-edit time.

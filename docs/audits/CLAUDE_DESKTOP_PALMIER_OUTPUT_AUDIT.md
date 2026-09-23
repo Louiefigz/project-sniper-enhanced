@@ -71,7 +71,7 @@ The reference-study path exposed the same shape during this audit. The 2fps
 fingerprint completed and produced 647 sampled frames, 82 unique states, and 7
 hard cuts. The deeper OCR pass then entered serial Tesseract work over 200 text
 events and had produced no final artifact after roughly 34 minutes, so it was
-stopped. Existing hash-bound Nate Herk studies already contained the fine-step
+stopped. Existing hash-bound Module studies already contained the fine-step
 card analysis. Production must reuse those studies; download/OCR is offline
 style ingestion, never a repeated job-stage gate.
 

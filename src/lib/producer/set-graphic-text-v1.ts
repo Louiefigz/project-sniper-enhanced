@@ -1,9 +1,5 @@
-import type { EditPlan, GraphicEntry } from "./edit-plan";
+import type { EditPlan } from "./edit-plan";
 import { GRAPHIC_ID_RE } from "./graphic-ids";
-import {
-  assertSurgicalPlanChange,
-  changedPlanFields,
-} from "./surgical-edit";
 
 export const SET_GRAPHIC_TEXT_MAX_LENGTH = 1000;
 
@@ -85,113 +81,17 @@ export function parseSetGraphicTextV1(value: unknown): SetGraphicTextV1 {
   };
 }
 
-function addressableTrack(plan: EditPlan, label: string): GraphicEntry[] {
-  if (!Array.isArray(plan.graphicsTrack)) {
-    throw new Error(`${label}.graphicsTrack must be an array`);
-  }
-  const seen = new Set<string>();
-  for (const value of plan.graphicsTrack) {
-    const entry = record(value, `${label}.graphicsTrack entry`);
-    if (typeof entry.id !== "string" || !GRAPHIC_ID_RE.test(entry.id)) {
-      throw new Error(`${label}.graphicsTrack contains a missing or invalid stable id`);
-    }
-    if (seen.has(entry.id)) {
-      throw new Error(`${label}.graphicsTrack contains duplicate id ${entry.id}`);
-    }
-    seen.add(entry.id);
-  }
-  return plan.graphicsTrack;
+const RETIRED = "SetGraphicTextV1 is retired with statement-card. Edit the selected HyperFrames catalog component in the native project, then refresh its reviews.";
+
+/** Historical operation decoding remains available; retired visuals cannot be edited into a candidate. */
+export function applySetGraphicTextV1<T extends EditPlan>(_plan: T, value: unknown): T {
+  parseSetGraphicTextV1(value);
+  throw new Error(RETIRED);
 }
 
-function specAndText(
-  entry: GraphicEntry,
-  label: string,
-): { spec: Record<string, unknown>; text: string | undefined } {
-  if (entry.spec === undefined) return { spec: {}, text: undefined };
-  const spec = record(entry.spec, `${label}.spec`);
-  if (spec.text !== undefined && typeof spec.text !== "string") {
-    throw new Error(`${label}.spec.text must be a string when present`);
-  }
-  return { spec, text: spec.text as string | undefined };
-}
-
-function sameValue(left: unknown, right: unknown): boolean {
-  return changedPlanFields({ value: left }, { value: right }).length === 0;
-}
-
-/** Apply one stable-id statement-card text edit without mutating the input. */
-export function applySetGraphicTextV1<T extends EditPlan>(
-  plan: T,
-  value: unknown,
-): T {
-  record(plan, "edit plan");
-  const operation = parseSetGraphicTextV1(value);
-  const track = addressableTrack(plan, "edit plan");
-  const matches = track
-    .map((entry, index) => ({ entry, index }))
-    .filter(({ entry }) => entry.id === operation.target.id);
-  if (matches.length !== 1) {
-    throw new Error(`graphic id ${operation.target.id} did not match exactly once`);
-  }
-  const { entry, index } = matches[0];
-  if (entry.kind !== "statement-card") {
-    throw new Error("SetGraphicTextV1 targets only kind=statement-card");
-  }
-  const { spec, text } = specAndText(entry, `graphic ${operation.target.id}`);
-  if (operation.expectedCurrentText !== undefined
-      && text !== operation.expectedCurrentText) {
-    throw new Error("SetGraphicTextV1 expectedCurrentText precondition failed");
-  }
-  if (text === operation.text) throw new Error("SetGraphicTextV1 would not change the plan");
-  const nextTrack = [...track];
-  nextTrack[index] = { ...entry, spec: { ...spec, text: operation.text } };
-  return { ...plan, graphicsTrack: nextTrack };
-}
-
-function changedGraphicIndexes(before: GraphicEntry[], after: GraphicEntry[]): number[] {
-  const changed: number[] = [];
-  for (let index = 0; index < before.length; index += 1) {
-    if (before[index].id !== after[index].id) {
-      throw new Error("SetGraphicTextV1 cannot change or reorder graphic ids");
-    }
-    if (!sameValue(before[index], after[index])) changed.push(index);
-  }
-  return changed;
-}
-
-/**
- * Compile an isolated candidate into SetGraphicTextV1, then prove the candidate
- * equals a deterministic reapplication of that one operation to its parent.
- */
-export function compileSetGraphicTextV1(
-  parent: EditPlan,
-  candidate: EditPlan,
-): SetGraphicTextV1 {
-  const parentRecord = record(parent, "parent edit plan");
-  const candidateRecord = record(candidate, "candidate edit plan");
-  assertSurgicalPlanChange(parentRecord, candidateRecord, { lanes: ["graphics"] });
-  const before = addressableTrack(parent, "parent edit plan");
-  const after = addressableTrack(candidate, "candidate edit plan");
-  if (before.length !== after.length) {
-    throw new Error("SetGraphicTextV1 cannot add or remove graphics");
-  }
-  const changed = changedGraphicIndexes(before, after);
-  if (changed.length !== 1) {
-    throw new Error("SetGraphicTextV1 requires exactly one changed graphic");
-  }
-  const index = changed[0];
-  const current = specAndText(before[index], `graphic ${before[index].id}`).text;
-  const desired = specAndText(after[index], `graphic ${after[index].id}`).text;
-  const operation = parseSetGraphicTextV1({
-    schemaVersion: 1,
-    operation: "SetGraphicTextV1",
-    target: { lane: "graphicsTrack", id: before[index].id },
-    text: desired,
-    ...(current !== undefined ? { expectedCurrentText: current } : {}),
-  });
-  const reapplied = applySetGraphicTextV1(parent, operation);
-  if (!sameValue(reapplied, candidate)) {
-    throw new Error("candidate changes more than graphicsTrack[id].spec.text");
-  }
-  return operation;
+/** Never compile a new operation whose only target was a removed house template. */
+export function compileSetGraphicTextV1(_parent: EditPlan, _candidate: EditPlan): SetGraphicTextV1 {
+  void _parent;
+  void _candidate;
+  throw new Error(RETIRED);
 }

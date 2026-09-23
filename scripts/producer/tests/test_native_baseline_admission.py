@@ -13,7 +13,8 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from native_render_processes import ProcessRequest, ResourceMeasurementError
-from native_render_resources import GIB, admission_reasons, parse_snapshot
+from native_work_lease import NativeWorkBusy
+from native_render_resources import GIB, ResourcePolicy, admission_reasons, parse_snapshot
 from studio.native_measurement_retry import MeasurementWindow
 from studio.native_run import NativeRun
 from studio.native_run_config import NativeRunConfig, policy_for_baseline
@@ -113,6 +114,42 @@ class NativeBaselineAdmissionTests(unittest.TestCase):
         self.assertIn('kernel memory pressure is warning', receipt['admissionReasons'])
         self.lease.complete.assert_called_once()
 
+    def test_waiting_pressure_records_no_child_then_admits_one_launch(self) -> None:
+        """A fresh healthy measurement, not elapsed waiting, authorizes the child."""
+        self.run = NativeRun('baseline', replace(self.settings, capacity_wait_seconds=10))
+        warning = replace(self.snapshot, kernel_pressure_level=2)
+        records = []
+        with patch('studio.native_run_admission.time.sleep', side_effect=lambda _: records.append(self.receipt())):
+            success, read, launch = self.execute([warning, self.snapshot])
+        self.assertTrue(success); self.assertEqual(read.call_count, 2); launch.assert_called_once()
+        self.assertEqual(records[0]['status'], 'waiting-for-capacity')
+        self.assertNotIn('pid', records[0]); self.assertIs(self.run.baseline, self.snapshot)
+
+    def test_live_lease_waits_but_unverified_cleanup_never_retries(self) -> None:
+        """Only positively identified live contention is a recoverable admission state."""
+        self.run = NativeRun('baseline', replace(self.settings, capacity_wait_seconds=10))
+        self.acquire.side_effect = [NativeWorkBusy('heavy work already active'), self.lease]
+        with patch('studio.native_run_admission.time.sleep'):
+            success, _read, launch = self.execute([self.snapshot])
+        self.assertTrue(success); launch.assert_called_once(); self.assertEqual(self.acquire.call_count, 2)
+        self.run = NativeRun('unverified', replace(self.settings, capacity_wait_seconds=10))
+        self.acquire.reset_mock(side_effect=True)
+        self.acquire.side_effect = NativeWorkBusy('heavy work cleanup unverified')
+        with patch('studio.native_run_admission.time.sleep') as sleep:
+            success, read, launch = self.execute([self.snapshot])
+        self.assertFalse(success); read.assert_not_called(); launch.assert_not_called()
+        sleep.assert_not_called(); self.acquire.assert_called_once()
+
+    def test_cancellation_while_waiting_does_not_launch(self) -> None:
+        """Queue cancellation is observed before another telemetry read or child launch."""
+        self.run = NativeRun('baseline', replace(self.settings, capacity_wait_seconds=10))
+        warning = replace(self.snapshot, kernel_pressure_level=2)
+        with patch('studio.native_run_admission.time.sleep',
+                   side_effect=lambda _: self.run.request_abort(signal.SIGTERM, None)):
+            success, _read, launch = self.execute([warning, self.snapshot])
+        self.assertFalse(success); launch.assert_not_called()
+        self.assertIn('SIGTERM', self.receipt()['abortReason'])
+
     def test_original_owner_deadline_prevents_first_baseline_read(self) -> None:
         """Creating the baseline window does not restart an exhausted run clock."""
         self.run.started = time.monotonic() - self.run.deadline - 1
@@ -167,8 +204,10 @@ class NativeBaselineAdmissionTests(unittest.TestCase):
 
     def test_fixed_and_short_policies_keep_existing_caps_and_formula(self) -> None:
         """Only the existing .25 floor / +1GiB / .4 cap compressor field may differ."""
-        self.assertIs(policy_for_baseline(self.settings, self.snapshot), self.settings.policy)
-        short = replace(self.settings, compressor_admission='short-headroom')
+        settings = replace(self.settings, policy=ResourcePolicy(
+            maximum_owned_gib=4, maximum_process_gib=3, maximum_swap_growth_gib=1))
+        self.assertIs(policy_for_baseline(settings, self.snapshot), settings.policy)
+        short = replace(settings, compressor_admission='short-headroom')
         for compressor in (2 * GIB, 23 * GIB, 30 * GIB):
             baseline = replace(self.snapshot, compressor_bytes=compressor)
             actual = policy_for_baseline(short, baseline)
@@ -181,7 +220,9 @@ class NativeBaselineAdmissionTests(unittest.TestCase):
 
     def test_baseline_policy_in_receipt_uses_the_recovered_snapshot(self) -> None:
         """The same complete baseline sets admission allowance and future swap-growth origin."""
-        self.run = NativeRun('baseline', replace(self.settings, compressor_admission='short-headroom'))
+        self.run = NativeRun('baseline', replace(self.settings, compressor_admission='short-headroom',
+            policy=ResourcePolicy(maximum_owned_gib=4, maximum_process_gib=3,
+                                  maximum_swap_growth_gib=1)))
         current = replace(self.snapshot, compressor_bytes=23 * GIB)
         success, read, _launch = self.execute([timeout_error(), current])
         self.assertTrue(success); self.assertEqual(read.call_count, 2)

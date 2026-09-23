@@ -6,7 +6,7 @@ import { CLI_SHA256 } from "./layout_observer_patch.mjs";
 
 export const POLICY = "sealed-agenda-css-layout-v1";
 export const PIPELINE_POLICY = "sealed-pipeline-css-layout-v1";
-const COMPOSITIONS = { [POLICY]: "compositions/agenda-slide.html", [PIPELINE_POLICY]: "compositions/nateherk-pipeline.html" };
+const COMPOSITIONS = { [POLICY]: "compositions/agenda-slide.html", [PIPELINE_POLICY]: "compositions/module-pipeline.html" };
 export const FILES = ["layout_observer_browser.mjs", "layout_observer_host.mjs", "layout_observer_launch.mjs", "layout_observer_loader.mjs", "layout_observer_patch.mjs"];
 const MAX_BYTES = 16 * 1024 * 1024;
 const sha = (value) => createHash("sha256").update(value).digest("hex");

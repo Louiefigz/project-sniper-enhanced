@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { applySetGraphicTextV1 } from "@/lib/producer/set-graphic-text-v1";
+import { applySetGraphicTextV1, parseSetGraphicTextV1 } from "@/lib/producer/set-graphic-text-v1";
 import type { EditPlan } from "@/lib/producer/edit-plan";
 import { parseEditRequestV1 } from "@/lib/producer/contracts/edit-request";
 import { parseProjectRevision } from "@/lib/producer/contracts/project-revision";
@@ -11,6 +11,7 @@ import {
   producerAuthorityPaths,
 } from "../producer-authority-files";
 import { commitProducerRevisionSync } from "../producer-revision-store";
+import { assertRevisionPlanObjectSync } from "../producer-plan-authority";
 import {
   bootstrapRevisionFixture,
   cleanRevisionFixture,
@@ -82,18 +83,24 @@ for (const [name, variant] of fixtures) {
     assert.equal(outcome.clauses.length, 20);
     assert.ok(outcome.clauses.every((clause) => clause.state === "committed"));
     const before = plan(20, fixture);
-    const after = input.batch.operations.reduce(
-      (current, operation) => applySetGraphicTextV1(current, operation.action),
-      before,
-    );
-    assert.equal(after.graphicsTrack?.length, 20);
-    assert.ok(after.graphicsTrack?.every(
-      (entry, index) => entry.spec?.text === `New copy ${variant}-${index + 1}`,
+    const original = structuredClone(before);
+    // Historical operation records remain readable; committing metadata grants no execution.
+    const stored = assertRevisionPlanObjectSync(paths, revision);
+    assert.deepEqual(stored, input.planObject);
+    const operations = (stored as { graphicsTrack: Array<{ action: unknown }> })
+      .graphicsTrack.map(row => parseSetGraphicTextV1(row.action));
+    assert.equal(operations.length, 20);
+    assert.ok(operations.every(
+      (operation, index) => operation.text === `New copy ${variant}-${index + 1}`,
     ));
-    assert.deepEqual(after.target, before.target);
-    assert.deepEqual(after.cutTrack, before.cutTrack);
+    assert.deepEqual(operations.map(operation => operation.target.id),
+      before.graphicsTrack?.map(entry => entry.id));
+    for (const operation of operations) {
+      assert.throws(() => applySetGraphicTextV1(before, operation), /retired/);
+    }
+    assert.deepEqual(before, original, "refused legacy operations preserve every plan field");
     assert.equal(
-      (after as Record<string, unknown>).compatibilityMarker,
+      (before as Record<string, unknown>).compatibilityMarker,
       fixture.fixtureId,
     );
   } finally {

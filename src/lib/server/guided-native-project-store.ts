@@ -12,6 +12,7 @@ import { writeNativeShortProject } from "./native-short-project";
 import { assertGuidedNativeAuthority } from "./guided-native-authority";
 import { buildGuidedNativeBinding, guidedNativeRequestMarker } from "./guided-native-binding";
 import { nativeProposalPreparationAllowed } from "./guided-native-supporting";
+import { assertNativeShortPrebuildReview } from "./native-short-prebuild-review";
 
 export interface GuidedNativeProjectDependencies {
   readGuidedProposal?: typeof readGuidedTreatmentProposal;
@@ -33,6 +34,7 @@ export async function writeGuidedNativeProject(dir: string, remainingMs: () => n
     throw new Error("Native project needs a supported reconstructed V9/V10 development candidate");
   }
   if (!visual) throw new Error("Native visual strategy and inspected crop/title/caption geometry are required before assembly");
+  assertNativeShortPrebuildReview(visual.project);
   assertAuthority(visual, proposal);
   const parent = humanCutDirectory(dir, "native-development"), directory = path.join(parent, proposal.proposalHash);
   return timedStage(dir, "native_short_project_write", async () => {

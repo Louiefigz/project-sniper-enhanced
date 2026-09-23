@@ -1,12 +1,12 @@
 # Shorts: choose the story treatment, then reuse the catalog
 
 September 10, 2026. Research and planning guidance for Aaron's Shorts workflow.
-This extends the 30-short Nate Herk study with three Lewis Mudrich reels and
-three Caleb Ralston reels. It does not qualify a rendered style pack or ship the
+This extends the 30-short Module study with three a second reference creator reels and
+three Restrained reels. It does not qualify a rendered style pack or ship the
 automatic Shorts planner. The canceled Wildfire repair remains canceled.
 
 **Later expansion on September 10:** [eight additional complete cases](shorts-visual-playbook/authentic-expansion/README.md)
-bring this current comparison set to seven Caleb and seven Lewis sources.
+bring this current comparison set to seven Restrained and seven a second reference creator sources.
 The original six-source observations and review scope below remain historical.
 The new [Format foundations guide](shorts-visual-playbook/FORMAT_FOUNDATIONS.md)
 compares when to use a split, full portrait, diagram, capture or reading format,
@@ -21,7 +21,7 @@ IDs in the storyboard; compare the same targets with the native Studio preview.
 The library records candidate source hashes and adaptation gaps separately from
 the observed creator treatment. It does not qualify new template builds.
 
-The [expanded Nate sequence library](shorts-visual-playbook/nate-sequences/README.md)
+The [expanded module sequence library](shorts-visual-playbook/module-sequences/README.md)
 adds 12 complete case breakdowns drawn from that existing 30-short corpus. Its
 full-resolution source sequences and directing guide explain each annotated
 picture, focus change, hold and handoff, with several alternatives per story job.
@@ -54,14 +54,13 @@ music, exact phonetic synchronization, complete animation timing or retention.
 Evidence is retained under
 `artifacts/shorts-style-range-study-2026-09-10/`: creator reports, coverage
 receipts, contact sheets, original source pairs and catalog implementations.
-The preceding Nate study has its own scope and transcript receipts under
-`artifacts/nate-herk-30-shorts-study-2026-09-10/`.
+The preceding module study has its own scope and transcript receipts under
+`artifacts/module-30-shorts-study-2026-09-10/`.
 
-- [Lewis source study](../../artifacts/shorts-style-range-study-2026-09-10/lewis/LEWIS_STUDY.md)
-- [Caleb source study](../../artifacts/shorts-style-range-study-2026-09-10/caleb/CALEB_STUDY.md)
+- [Restrained source study](../../artifacts/shorts-style-range-study-2026-09-10/restrained/RESTRAINED_STUDY.md)
 - [Six local review MP4s](../../artifacts/shorts-style-range-study-2026-09-10/REVIEW_FILES.md) — original video/audio combined by codec copy; both streams verified
 - [Inspected typography and catalog candidates](../../artifacts/shorts-style-range-study-2026-09-10/catalog/LOW_COMPLEXITY_CATALOG_MEMO.md)
-- [Nate 30-short study](../../artifacts/nate-herk-30-shorts-study-2026-09-10/STUDY.md)
+- [module 30-short study](../../artifacts/module-30-shorts-study-2026-09-10/STUDY.md)
 
 ## What the six references actually do
 
@@ -70,12 +69,12 @@ native boundary. Font descriptions refer to appearance, not identified families.
 
 | Reference | Opening and typography | Story and visual treatment | Transfer to our work |
 | --- | --- | --- | --- |
-| [Lewis: booking calls](https://www.instagram.com/lewismudrich/reel/DctuxY9SVrk/) — 55.6s | Large heavy uppercase white text develops, with green emphasis; clears at 2.800s. Small white phrase captions take over. | Challenges an immediate sales-call request, explains the buyer objection, keeps the ready-buyer exception, then explains trust. Real locations and approaches vary the frame. A consultation photo supports the experience claim; one temporary numbered criteria overlay develops around 33–40s. | The opening challenges a behavior. Its job ends before the explanation. Use our own real evidence for a credibility insert. The photo illustrates experience; it does not verify the numerical claim. |
-| [Lewis: consulting](https://www.instagram.com/lewismudrich/reel/Db_OZztBJI3/) — 40.2s | No large hook or added graphic observed; small white sentence-case captions. | One street/presenter composition family carries the priority argument, qualification and cash-related payoff. Walking, gestures and camera movement supply visual variation. | A clear conversation can earn a sustained view. Adding a hypothetical results chart would invent evidence. A static studio source cannot acquire this walking energy through a template. |
-| [Lewis: website clarity](https://www.instagram.com/lewismudrich/reel/DcEXdNZxEAB/) — 21.2s | Heavy green top heading, smaller white context line, numbered caption marker. Title remains through the final frame. | A two-part lesson begins inside the first instruction. The persistent heading provides its overview; the numeral and location change mark the second part. No actual website demonstration is shown. | A title may remain when it still organizes the lesson. If our source needs a concrete website example, obtain one; this reference does not make advice equivalent to demonstrated proof. |
-| [Caleb: depth](https://www.instagram.com/calebralston/reel/DdCJX0wx7P-/) — 35.4s | White sans-serif audience-specific hook on black backing, clears around 3.8s. Plain captions follow. | Presenter gestures express depth and expansion; brief listener reaction shots punctuate the explanation. Long reasoning holds remain. | The hook earns attention by identifying a viewer situation. Preserve expression and gesture rather than cover the explanation with additional cards. |
-| [Caleb: prioritization](https://www.instagram.com/calebralston/reel/DdEv8cjREOp/) — 99.5s | White bold question on red backing, clears around 8.5s as the qualification begins. | Outdoor seated delivery with many wide/closer framing changes, plus roughly 12s holds. The explanation distinguishes levels of available commitment and develops a client anecdote. No explanatory insert is necessary in the observed treatment. | Low graphic intensity can coexist with frequent reframing. The title asks a decision question; its removal gives the qualification room. There is no fixed three-second hook rule. |
-| [Caleb: 70/20/10](https://www.instagram.com/calebralston/reel/Dc_qwyeRqds/) — 98.6s | Starts with presenter and ordinary captions. A green full-screen framework reveal appears at 14.223–16.683s; short category labels later remain for roughly 13s each. | The same seated performance carries most of the argument. The framework name accumulates its three values; it is not a count-up. Later labels orient the corresponding explanation. The experimental portion receives a longer reasoning passage before its label returns. | Authentic delivery can include a full-screen card and recurring graphic structure. That does not require turning every sentence into a diagram. |
+| [a second reference creator: booking calls](https://www.instagram.com/lewismudrich/reel/DctuxY9SVrk/) — 55.6s | Large heavy uppercase white text develops, with green emphasis; clears at 2.800s. Small white phrase captions take over. | Challenges an immediate sales-call request, explains the buyer objection, keeps the ready-buyer exception, then explains trust. Real locations and approaches vary the frame. A consultation photo supports the experience claim; one temporary numbered criteria overlay develops around 33–40s. | The opening challenges a behavior. Its job ends before the explanation. Use our own real evidence for a credibility insert. The photo illustrates experience; it does not verify the numerical claim. |
+| [a second reference creator: consulting](https://www.instagram.com/lewismudrich/reel/Db_OZztBJI3/) — 40.2s | No large hook or added graphic observed; small white sentence-case captions. | One street/presenter composition family carries the priority argument, qualification and cash-related payoff. Walking, gestures and camera movement supply visual variation. | A clear conversation can earn a sustained view. Adding a hypothetical results chart would invent evidence. A static studio source cannot acquire this walking energy through a template. |
+| [a second reference creator: website clarity](https://www.instagram.com/lewismudrich/reel/DcEXdNZxEAB/) — 21.2s | Heavy green top heading, smaller white context line, numbered caption marker. Title remains through the final frame. | A two-part lesson begins inside the first instruction. The persistent heading provides its overview; the numeral and location change mark the second part. No actual website demonstration is shown. | A title may remain when it still organizes the lesson. If our source needs a concrete website example, obtain one; this reference does not make advice equivalent to demonstrated proof. |
+| [Restrained: depth](https://www.instagram.com/restrainedralston/reel/DdCJX0wx7P-/) — 35.4s | White sans-serif audience-specific hook on black backing, clears around 3.8s. Plain captions follow. | Presenter gestures express depth and expansion; brief listener reaction shots punctuate the explanation. Long reasoning holds remain. | The hook earns attention by identifying a viewer situation. Preserve expression and gesture rather than cover the explanation with additional cards. |
+| [Restrained: prioritization](https://www.instagram.com/restrainedralston/reel/DdEv8cjREOp/) — 99.5s | White bold question on red backing, clears around 8.5s as the qualification begins. | Outdoor seated delivery with many wide/closer framing changes, plus roughly 12s holds. The explanation distinguishes levels of available commitment and develops a client anecdote. No explanatory insert is necessary in the observed treatment. | Low graphic intensity can coexist with frequent reframing. The title asks a decision question; its removal gives the qualification room. There is no fixed three-second hook rule. |
+| [Restrained: 70/20/10](https://www.instagram.com/restrainedralston/reel/Dc_qwyeRqds/) — 98.6s | Starts with presenter and ordinary captions. A green full-screen framework reveal appears at 14.223–16.683s; short category labels later remain for roughly 13s each. | The same seated performance carries most of the argument. The framework name accumulates its three values; it is not a count-up. Later labels orient the corresponding explanation. The experimental portion receives a longer reasoning passage before its label returns. | Authentic delivery can include a full-screen card and recurring graphic structure. That does not require turning every sentence into a diagram. |
 
 These are editing observations. We have not established that any title caused
 better retention. We can also identify things a reference leaves unshown and
@@ -151,7 +150,7 @@ narration and holds to demonstrate five unfamiliar operations.
 
 ## Scope correction to earlier doctrine
 
-The July `CALEB_STYLE.md` describes a different three-reel cohort. Its zero-zoom,
+The July `RESTRAINED_STYLE.md` describes a different three-reel cohort. Its zero-zoom,
 caption-only findings must not become a creator-wide prohibition: the September
 sample includes repeated crop changes and an actual framework card. Likewise,
 earlier continuous-hook-shot and fixed hook-stack examples are not universal.
@@ -167,7 +166,7 @@ the stricter compiled style-pack route; ordinary research no longer implies
 building replicas or converting small-sample timing observations into constants.
 
 The automatic Shorts planner still needs the connections documented in
-`artifacts/nate-herk-30-shorts-study-2026-09-10/IMPLEMENTATION_REVIEW.md`:
+`artifacts/module-30-shorts-study-2026-09-10/IMPLEMENTATION_REVIEW.md`:
 title-formula retrieval, semantic visual directing, asset acquisition, native
 assembly and corresponding checks. Skill instructions are not those application
 changes. We should prove one complete source-to-Studio short with visual/audio

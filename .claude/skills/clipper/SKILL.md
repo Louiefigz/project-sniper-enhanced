@@ -27,8 +27,11 @@ produced short/long, hand off to `producer`.
 
 ## Where output goes
 
+In the operator's video projects folder — `$(./sniper workspace)`: the `projects` folder inside
+Sniper, or the folder chosen at install — in a `clipper/` folder per recording:
+
 ```
-~/ProjectSniper/<slug>/clipper/
+<workspace>/<slug>/clipper/
   transcript.json        # the word-level ASR result you worked from
   keep_ranges.json       # your raw KEEP decisions (editorial)
   keep_ranges.clean.json # frame-snapped + media-clamped (feeds BOTH outputs)
@@ -45,7 +48,7 @@ commands from the repo root.
 
 ```bash
 SLUG="<slug>"; CLIP="<absolute path to the clip>"
-OUT="$HOME/ProjectSniper/$SLUG/clipper"; mkdir -p "$OUT"
+OUT="$(./sniper workspace)/$SLUG/clipper"; mkdir -p "$OUT"
 ```
 
 ### 2. Transcribe word-level locally (no paid fallback)
@@ -55,7 +58,7 @@ limitations below still apply; a missing capability does not authorize paid ASR
 or relaxing the speaker/channel checks.
 
 ```bash
-.venv/bin/python3 scripts/clipper/clipper_transcribe.py "$CLIP" --provider local-whisper > "$OUT/transcript.raw.jsonl" 2> "$OUT/transcribe.log"
+./sniper python3 scripts/clipper/clipper_transcribe.py "$CLIP" --provider local-whisper > "$OUT/transcript.raw.jsonl" 2> "$OUT/transcribe.log"
 tail -n 1 "$OUT/transcript.raw.jsonl" > "$OUT/transcript.json"
 ```
 
@@ -114,13 +117,13 @@ without changing what content is kept.
 
 ```bash
 # 4a. make the ranges frame-safe → keep_ranges.clean.json
-.venv/bin/python3 scripts/clipper/clipper_normalize_ranges.py "$CLIP" "$OUT/keep_ranges.json" "$OUT/keep_ranges.clean.json"
+./sniper python3 scripts/clipper/clipper_normalize_ranges.py "$CLIP" "$OUT/keep_ranges.json" "$OUT/keep_ranges.clean.json"
 
 # 4b. Clean-cut MP4 master (cut + optional speed, two-pass loudnorm to −14 LUFS)
-.venv/bin/python3 scripts/producer/edit/render_cut.py "$CLIP" "$OUT/keep_ranges.clean.json" "$OUT/final.mp4"
+./sniper python3 scripts/producer/edit/render_cut.py "$CLIP" "$OUT/keep_ranges.clean.json" "$OUT/final.mp4"
 
 # 4c. Final Cut Pro timeline of the same cut (reuses the GUI's exact generator)
-node --import tsx scripts/clipper/clipper_fcpxml.ts "$CLIP" "$OUT/keep_ranges.clean.json" "$OUT/final.fcpxml"
+./sniper node --import tsx scripts/clipper/clipper_fcpxml.ts "$CLIP" "$OUT/keep_ranges.clean.json" "$OUT/final.fcpxml"
 ```
 
 Notes:
@@ -128,8 +131,8 @@ Notes:
   resolution and 16:9, burn nothing. Add `--speed 1.1` if the user wants a
   tighter pace.
 - `clipper_fcpxml.ts` handles the common single-cam, camera-audio case. Dual-cam
-  and lav-routed FCPXML are GUI-only; if the user needs those, point them to the
-  `/clipper` web tool.
+  and lav-routed FCPXML needed the retired web tool and are not in this release; say so
+  if the user needs them.
 - If the user only wants one deliverable, skip the other command.
 
 ### 5. Reveal + report
@@ -145,6 +148,7 @@ short.
 
 - Accepted inputs: mp4/mov/webm/mkv/avi/m4v; local audio requires the supported
   separate-lav/isolated-stereo path above. Unsupported local input fails closed.
-- Prerequisites: ffmpeg, `.venv`, installed local Whisper runtime/model. Use
-  `/setup` with the user's installation authorization when missing.
+- Prerequisites: Sniper's own tools, `.venv` and the local Whisper model, all put
+  in place by `./sniper setup`. When missing, run `./sniper doctor` (Claude Code's
+  `/setup` does the same) and explain its report; the repair is `./sniper setup`.
 - Use subscription-backed agent reasoning; no API/credit fallback by default.

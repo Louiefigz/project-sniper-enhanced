@@ -6,7 +6,6 @@ import hashlib
 import json
 import time
 import unittest
-from pathlib import Path
 
 from headless.render_layout_contract import (
     CLI_SHA256, OBSERVER_FILES, POLICY, PIPELINE_POLICY, SCOPE, canonical, role_inventory, validate_request,
@@ -14,7 +13,10 @@ from headless.render_layout_contract import (
 from headless.render_layout_result import validate_observation
 from headless.render_layout_worker import parse_worker_request
 
-ROOT = Path("/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER")
+def _declarations(defaults: dict) -> bytes:
+    """Inert historical metadata only: no template, DOM design, or script."""
+    rows = [{"id": key, "default": value} for key, value in defaults.items()]
+    return ("<html data-composition-variables='" + json.dumps(rows) + "'></html>").encode()
 
 
 def request() -> dict:
@@ -25,9 +27,12 @@ def request() -> dict:
 
 
 def documents(spec: dict | None = None) -> dict[str, bytes]:
-    """Actual current template text plus explicit TEST variables, no sealing."""
+    """Retained agenda grammar with TEST defaults; never an executable template."""
+    defaults = {"title": "TEST agenda", "eyebrow": "TEST history"}
+    defaults.update({f"{field}{index}": (f"TEST {index}" if field == "title" and index <= 3 else "")
+                     for index in range(1, 6) for field in ("num", "title", "sub")})
     return {"motion/compositions/agenda-slide.html":
-            (ROOT / "templates/motion/compositions/agenda-slide.html").read_bytes(),
+            _declarations(defaults),
             "request/variables.json": canonical(spec or {"layout": "caption-safe-upper-v1"})}
 
 
@@ -159,17 +164,19 @@ class LayoutResultTests(unittest.TestCase):
 
 
 def pipeline_documents(patch: dict | None = None) -> dict[str, bytes]:
-    """Actual pipeline source and explicit TEST-only non-preview copy."""
+    """Retained pipeline grammar as inert TEST declarations, never renderer source."""
     spec = {"layout": "caption-safe-upper-v1", "nodes": "01~One|02~Two", **(patch or {})}
-    return {"motion/compositions/nateherk-pipeline.html":
-            (ROOT / "templates/motion/compositions/nateherk-pipeline.html").read_bytes(),
+    defaults = {"eyebrow": "", "headlineLines": "", "explainer": "", "nodes": "", "footChip": "",
+                "layout": "caption-safe-upper-v1", "presenterFrame": False, "exit": "hold"}
+    return {"motion/compositions/module-pipeline.html":
+            _declarations(defaults),
             "request/variables.json": canonical(spec)}
 
 
 def pipeline_fixture() -> tuple[dict, dict, dict]:
     """Closed synthetic metadata for the new profile, not actual native proof."""
     held, expected, value = fixture()
-    held.update(profile=PIPELINE_POLICY, composition="compositions/nateherk-pipeline.html")
+    held.update(profile=PIPELINE_POLICY, composition="compositions/module-pipeline.html")
     inventory = role_inventory(pipeline_documents(), PIPELINE_POLICY)
     expected["roleInventory"] = copy.deepcopy(inventory)
     value.update(policy=PIPELINE_POLICY, request=copy.deepcopy(held), roleInventory=inventory,

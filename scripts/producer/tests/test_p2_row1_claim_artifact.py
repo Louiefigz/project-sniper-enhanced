@@ -12,7 +12,7 @@ from tests.live_p2_row1_acceptance import CLOSURE, REPO
 
 ARTIFACT = REPO / (
     "docs/producer/command-driven-editing/contracts/"
-    "p2-row1-claim-cohort-v1.json")
+    "p2-row1-claim-cohort-2026-09-23.json")
 RATES = (
     "24000/1001", "24/1", "25/1", "30000/1001",
     "30/1", "50/1", "60000/1001", "60/1",

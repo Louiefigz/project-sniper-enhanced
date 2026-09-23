@@ -1,66 +1,44 @@
-"""Real-media checks for picture-preserving transition SFX repair."""
+"""Retired transition repair refuses before probing or materializing media."""
 from __future__ import annotations
 
-import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
-from current_render_oracle import observe, prove
-from motion.transition_sfx_repair import (
-    TransitionSfxRepairRequest,
-    repair_transition_sfx,
-)
+from motion.transition_sfx_repair import TransitionSfxRepairRequest, repair_transition_sfx
 from motion.transitions import apply_transitions
-from tests.p4_exit_media import ProgramSpec, make_program, packet_hash
-
-HAVE_TOOLS = all(shutil.which(name) for name in ("ffmpeg", "ffprobe"))
 
 
-@unittest.skipUnless(HAVE_TOOLS, "ffmpeg and ffprobe required")
 class TransitionSfxRepairTests(unittest.TestCase):
-    def test_sound_only_repair_reuses_picture_and_matches_forced_control(
-        self,
-    ) -> None:
-        with tempfile.TemporaryDirectory(prefix="transition-sfx-test-") as raw:
-            root = Path(raw)
-            source, before = root / "source.mp4", root / "before.mp4"
-            repaired, forced = root / "repaired.mp4", root / "forced.mp4"
-            make_program(
-                source, ProgramSpec((160, 90), 30, 2.0, pattern="flat"))
-            old = [{"outTime": 1.0, "kind": "white-flash", "sfx": False}]
-            new = [{"outTime": 1.0, "kind": "white-flash", "sfx": True}]
-            apply_transitions(str(source), old, str(before))
-            result = repair_transition_sfx(TransitionSfxRepairRequest(
-                str(source), str(before), old, new, str(repaired)))
-            apply_transitions(str(source), new, str(forced))
-            oracle = prove(repaired, forced, root / "oracle.json")
-            observed_before = observe(before)
-            observed_after = observe(repaired)
-            self.assertTrue(result["pictureReused"])
-            self.assertEqual(packet_hash(before), packet_hash(repaired))
-            self.assertEqual(
-                observed_before.pictureFrameMd5Sha256,
-                observed_after.pictureFrameMd5Sha256)
-            self.assertNotEqual(
-                observed_before.pcmSha256, observed_after.pcmSha256)
-            self.assertTrue(oracle["passed"])
+    def test_retired_sfx_and_picture_edits_never_probe_mux_or_write(self) -> None:
+        for kind in ("white-flash", "light-leak", "zoom-pull"):
+            with self.subTest(kind=kind), tempfile.TemporaryDirectory() as raw:
+                root = Path(raw)
+                before = [{"outTime": 1, "kind": kind, "sfx": False}]
+                after = [{"outTime": 1, "kind": kind, "sfx": True}]
+                request = TransitionSfxRepairRequest(
+                    "/absent-program.mp4", "/absent-picture.mp4", before,
+                    after, str(root / "repaired.mp4"))
+                with mock.patch("motion.transition_sfx_repair.probe_duration") as probe, \
+                        mock.patch("motion.transition_sfx_repair.run_ff") as run:
+                    with self.assertRaisesRegex(ValueError, "retired"):
+                        repair_transition_sfx(request)
+                    probe.assert_not_called()
+                    run.assert_not_called()
+                self.assertEqual(list(root.iterdir()), [])
 
-    def test_visual_change_is_rejected_before_mux(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="transition-sfx-test-") as raw:
-            root = Path(raw)
-            source, before = root / "source.mp4", root / "before.mp4"
-            make_program(
-                source, ProgramSpec((160, 90), 30, 2.0, pattern="flat"))
-            old = [{"outTime": 1.0, "kind": "white-flash", "sfx": False}]
-            changed = [{
-                "outTime": 1.0, "kind": "light-leak", "sfx": True,
-            }]
-            apply_transitions(str(source), old, str(before))
-            with self.assertRaisesRegex(ValueError, "cannot change"):
-                repair_transition_sfx(TransitionSfxRepairRequest(
-                    str(source), str(before), old, changed,
-                    str(root / "repaired.mp4")))
+    def test_empty_previous_selection_rejects_before_probe(self) -> None:
+        request = TransitionSfxRepairRequest("/absent", "/absent", [],
+            [{"outTime": 1, "kind": "white-flash", "sfx": True}], "/absent")
+        with mock.patch("motion.transition_sfx_repair.probe_duration") as probe:
+            with self.assertRaisesRegex(ValueError, "non-empty"):
+                repair_transition_sfx(request)
+            probe.assert_not_called()
+
+    def test_original_transition_renderer_cannot_restore_retired_preset(self) -> None:
+        with self.assertRaisesRegex(ValueError, "retired"):
+            apply_transitions("/absent", [{"outTime": 1, "kind": "white-flash"}], "/absent")
 
 
 if __name__ == "__main__":

@@ -8,9 +8,16 @@
  * video paint state, and a play/getTime advance check. Screenshots land in
  * the configured directory. Assertions live in the Python test, not here.
  *
+ * Privacy facts (every run): every request the page makes to a host other than
+ * the loopback server, from page creation until the page is left, and whether the
+ * fresh browser profile carries Studio's analytics opt-out or Do Not Track. With
+ * config.interact the probe also presses playback/seek keys and clicks the
+ * timeline area (representative editing input), then leaves the page, which makes
+ * Studio flush any queued analytics.
+ *
  * Usage: node studio_player_probe.cjs <config.json>
  *   config: { puppeteerDir, chrome, url, shotsDir, settleMs,
- *             beats: [number, ...] }
+ *             beats: [number, ...], interact?: boolean }
  */
 const fs = require("fs");
 const path = require("path");
@@ -112,16 +119,36 @@ function beatFacts(beat) {
 }
 
 (async () => {
+  // A test run never sends anything off this Mac: every outside request is recorded, only the
+  // listed (disclosed) files are fetched, the rest are answered locally below, and Chrome cannot
+  // even resolve any other host (catches requests the interception does not see).
+  const allowExternal = new Set(config.allowExternal || []);
+  const allowHosts = [...allowExternal].map((url) => new URL(url).hostname);
+  const resolverRules = ["MAP * ~NOTFOUND", "EXCLUDE localhost", "EXCLUDE 127.0.0.1", ...allowHosts.map((h) => "EXCLUDE " + h)];
   const browser = await puppeteer.launch({
     executablePath: config.chrome,
     headless: "shell",
-    args: ["--no-sandbox", "--window-size=1800,1100"],
+    args: ["--no-sandbox", "--window-size=1800,1100",
+           "--host-resolver-rules=" + resolverRules.join(", ")],
   });
   const page = await browser.newPage();
   await page.setViewport({ width: 1800, height: 1100 });
   const pageErrors = [];
   const consoleErrors = [];
   const badResponses = [];
+  const externalRequests = [];
+  const loopback = /^(https?:\/\/(127\.0\.0\.1|localhost)[:\/]|data:|blob:|about:)/;
+  await page.setRequestInterception(true);
+  page.on("request", (req) => {
+    const url = req.url();
+    if (loopback.test(url)) return req.continue();
+    externalRequests.push(url.slice(0, 200));
+    if (allowExternal.has(url)) return req.continue();
+    return req.respond({ status: 200, contentType: "application/json", body: "{}",
+                         headers: { "access-control-allow-origin": "*",  // answers CORS preflights too
+                                    "access-control-allow-methods": "GET, POST, OPTIONS",
+                                    "access-control-allow-headers": "*" } });
+  });
   page.on("pageerror", (err) => pageErrors.push(String(err).slice(0, 300)));
   page.on("console", (msg) => {
     if (msg.type() === "error") consoleErrors.push(msg.text().slice(0, 300));
@@ -134,6 +161,10 @@ function beatFacts(beat) {
 
   const result = { hostFrameFound: false, beats: [], play: null };
   await page.goto(config.url, { waitUntil: "networkidle2", timeout: 45000 });
+  result.optOut = await page.evaluate(() => ({
+    stored: window.localStorage.getItem("hyperframes-studio:telemetryDisabled"),
+    doNotTrack: navigator.doNotTrack,
+  }));
   const frame = await findHostFrame(page);
   if (frame) {
     result.hostFrameFound = true;
@@ -157,6 +188,20 @@ function beatFacts(beat) {
     });
     result.play = { before, after };
   }
+  if (config.interact) {
+    for (const key of ["Space", "ArrowRight", "ArrowLeft", "Space"]) {
+      await page.keyboard.press(key);
+      await sleep(250);
+    }
+    for (const [x, y] of [[900, 980], [600, 1020], [1200, 1000]]) {  // the timeline area
+      await page.mouse.click(x, y);
+      await sleep(250);
+    }
+    await sleep(1500);
+    await page.goto("about:blank");  // pagehide: Studio flushes queued analytics here
+    await sleep(1500);
+  }
+  result.externalRequests = externalRequests;
   result.pageErrors = pageErrors;
   result.consoleErrors = consoleErrors;
   result.badResponses = badResponses;

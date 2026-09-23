@@ -8,9 +8,7 @@ const routes = [
   "src/app/api/producer/intent/route.ts",
   "src/app/api/producer/ingest/route.ts",
   "src/app/api/producer/ai-edit/route.ts",
-  "src/app/api/producer/render/route.ts",
   "src/app/api/producer/scene-review/route.ts",
-  "src/app/api/producer/assemble/route.ts",
   "src/app/api/producer/palmier/push/route.ts",
   "src/app/api/producer/palmier/workspace/route.ts",
   "src/app/api/producer/palmier/open/route.ts",
@@ -21,8 +19,6 @@ for (const route of routes) {
   assert.match(source(route), /guardProjectMutation\(/, `${route} must use the shared writer lease`);
 }
 for (const route of [
-  "src/app/api/producer/render/route.ts",
-  "src/app/api/producer/assemble/route.ts",
   "src/app/api/producer/palmier/push/route.ts",
 ]) {
   assert.match(source(route), /assertTemplateUsageApprovalCurrent\(/,
@@ -43,13 +39,16 @@ assert.match(source("src/app/api/producer/ai-edit/execution.ts"), /sniper-ai-edi
   "AI writes must remain isolated until governed promotion");
 assert.match(source("src/app/api/producer/auto-edit/route.ts"), /guardProjectMutation\(/,
   "Auto Edit launch must fence concurrent mutation requests");
-assert.match(source("src/app/api/producer/render/route.ts"), /finally \{[\s\S]*releaseLease\(\)/,
-  "fresh render must hold the shared writer lease through process exit and QC");
+for (const kind of ["render", "assemble"]) {
+  assert.match(source(`src/app/api/producer/${kind}/route.ts`), /reviewedRenderEntry\(/,
+    "Compatibility render URLs must delegate to the reviewed controller");
+}
+assert.match(source("src/app/api/producer/auto-edit/reviewed-render-entry.ts"), /controllerPost|reviewSavedPlan: true/,
+  "Compatibility routes cannot own a separate unchecked renderer");
 assert.match(source("src/app/api/producer/scene-review/route.ts"),
   /finally \{[\s\S]*guarded\.lease\.release\(\)/,
   "private scene review must hold the shared writer lease through process exit");
-assert.match(source("src/app/api/producer/assemble/route.ts"), /guarded\.lease\.release\(\)/,
-  "assemble must release its shared writer lease through its idempotent teardown");
+
 assert.match(source("src/app/api/producer/ai-edit/route.ts"),
   /classifyPalmierWorkspace\(prepared\.dir\)/,
   "plan-first edits must recheck managed Palmier authority under the writer lease");

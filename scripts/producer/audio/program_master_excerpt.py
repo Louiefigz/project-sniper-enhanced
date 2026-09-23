@@ -96,7 +96,23 @@ def _pcm_hash(path: str, context: tuple[str, dict | None]) -> str:
 
 def _extract(selection: HeldMasterSelection, target: Path, span: dict) -> dict:
     """Execute the real float sample trim; no loudnorm, gain, resample or fades."""
-    master = selection.master
+    return _extract_master(selection.master, target, span)
+
+
+def extract_program_range(master: object, plan: dict, frames: tuple[int, int], target: Path) -> dict:
+    """Use an actual current ordinary master without inventing a guided selection."""
+    from audio.program_master_bus import ProgramMaster, verify_program_master
+    if type(master) is not ProgramMaster:
+        raise ValueError("Program excerpt requires an actual verified full master")
+    verify_program_master(master, plan)
+    span = sample_range(frames, (master.source_bus.frame_rate, master.source_bus.frames))
+    result = _extract_master(master, target, span)
+    verify_program_master(master, plan)
+    return result
+
+
+def _extract_master(master: object, target: Path, span: dict) -> dict:
+    """Share the exact decode and sample-identity checks for either admitted caller."""
     tools = master.source_bus.admission.tools
     ffmpeg = tools["ffmpeg"]["path"]
     run_audio([ffmpeg, "-nostdin", "-v", "error", "-xerror", "-err_detect", "explode", "-n",

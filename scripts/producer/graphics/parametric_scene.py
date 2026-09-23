@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import copy
 import json
 import os
 
@@ -14,6 +15,7 @@ from graphics.scene_contract import (
     validate_scene,
 )
 from graphics.scene_lint import validate_scene_bundle
+from graphics.visual_source_receipt import subject_hash, validate_visual_sources
 
 _GRAMMARS = {
     "split-cards": ("leftText", "rightText"),
@@ -23,7 +25,7 @@ _GRAMMARS = {
 _OPTIONAL = {"accent", "accent2"}
 _ROOT_KEYS = {
     "grammar", "sceneId", "timing", "canvas", "content", "renderMode",
-    "provenance", "captionPolicy",
+    "provenance", "captionPolicy", "visualSources",
 }
 
 
@@ -159,7 +161,7 @@ tl.seek(0);window.__timelines["parametric-{suffix}"]=tl;}})();</script>
 
 def _html(brief: dict, variables: list[dict], suffix: str) -> str:
     canvas = brief["canvas"]
-    background = ("var(--nateherk-canvas)"
+    background = ("var(--module-canvas)"
                   if brief["renderMode"] == "takeover-opaque"
                   else "transparent")
     head = _html_head(canvas, background).replace(
@@ -207,6 +209,7 @@ def _scene(brief: dict, snapshot: BundleSnapshot) -> dict:
         set(variables) & _OPTIONAL)
     return {
         "schemaVersion": 1, "sceneId": brief["sceneId"], "version": 1,
+        "visualSources": brief["visualSources"],
         "timing": brief["timing"], "canvas": brief["canvas"],
         "renderMode": brief["renderMode"],
         "composition": {
@@ -232,6 +235,13 @@ def compile_parametric_scene(value: object,
                              attempt_root: str) -> tuple[dict, BundleSnapshot]:
     """Compile a closed brief into an immutable, linted scene bundle."""
     brief = _brief(value)
+    subject = {key: item for key, item in brief.items() if key != "visualSources"}
+    try:
+        validate_visual_sources(brief["visualSources"], subject, ["parametric-content"])
+        if any(row["route"] == "catalog" for row in brief["visualSources"]["decisions"]):
+            raise ValueError("Parametric scenes require current-job reference/custom evidence, not catalog identity")
+    except ValueError as error:
+        raise SceneContractError(str(error)) from error
     if os.path.lexists(attempt_root):
         raise SceneContractError("parametric attempt root must not exist")
     os.makedirs(attempt_root, mode=0o700)
@@ -243,6 +253,10 @@ def compile_parametric_scene(value: object,
         _write(os.path.join(attempt_root, "compositions", f"{name}.html"),
                _html(brief, variables, name).encode("utf-8"))
     snapshot = capture_bundle(os.path.realpath(attempt_root))
-    scene = validate_scene(_scene(brief, snapshot))
+    scene = _scene(brief, snapshot)
+    scene["visualSources"] = copy.deepcopy(brief["visualSources"])
+    scene["visualSources"]["subjectSha256"] = subject_hash(
+        {key: item for key, item in scene.items() if key != "visualSources"})
+    validate_scene(scene)
     validate_scene_bundle(scene, snapshot)
     return scene, snapshot

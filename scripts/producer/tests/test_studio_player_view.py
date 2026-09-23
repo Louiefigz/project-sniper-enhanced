@@ -14,6 +14,7 @@ and a painted (non-black) base video. Screenshots land in
 import glob
 import json
 import os
+import re
 import shutil
 import signal
 import subprocess
@@ -26,6 +27,8 @@ from _common import _HAVE_FFMPEG
 
 from graphics.graphics_render import HYPERFRAMES_BIN
 from studio.studio_project import GenerateRequest, generate_project
+from studio.managed_preview import open_preview, stop_preview
+from studio.native_runtime import install_runtime
 from studio.studio_server import pick_free_port
 
 _TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -69,25 +72,26 @@ def _skip_reason() -> str | None:
 
 
 def _player_plan() -> dict:
-    """3 real kinds at separated windows over a 12s base (like _studio_plan)."""
+    """3 real catalog entries at separated windows over a 12s base (like _studio_plan)."""
     return {
         "planVersion": 1,
-        "target": {"mode": "longform"},
+        "target": {"mode": "short"},
         "cutTrack": [
             {"sourceId": "raw-1", "start": 0.0, "end": 12.0, "speed": 1.0},
         ],
         "graphicsTrack": [
-            {"kind": "statement-card", "outStart": 1.0, "outEnd": 3.5,
+            {"kind": "line-swap", "outStart": 1.0, "outEnd": 3.5,
              "anchor": "own-screen", "reason": "thesis takeover",
-             "spec": {"variant": "classic",
-                      "text": "Ship the *system* not the tactic"}},
-            {"kind": "text-element-wide", "outStart": 4.5, "outEnd": 6.5,
+             "spec": {"lineA": "More tactics", "lineB": "One system",
+                      "swapAt": 1.2, "underlineWord": ""}},
+            {"kind": "marker-highlight", "outStart": 4.5, "outEnd": 6.5,
              "anchor": "free-band", "reason": "callout",
-             "spec": {"text": "Callout copy", "fontSize": 72}},
-            {"kind": "kinetic-quote-wide", "outStart": 7.5, "outEnd": 10.5,
+             "spec": {"text": "Callout copy", "emphasisWord": "copy",
+                      "drawAt": 1, "style": "highlight"}},
+            {"kind": "marker-highlight", "outStart": 7.5, "outEnd": 10.5,
              "anchor": "own-screen", "reason": "quote",
-             "spec": {"words": "More tactics was never the answer",
-                      "emphasisWords": "never"}},
+             "spec": {"text": "More tactics was never the answer",
+                      "emphasisWord": "never", "drawAt": 1}},
         ],
     }
 
@@ -95,9 +99,13 @@ def _player_plan() -> dict:
 def _make_base_4k(path: str) -> None:
     subprocess.run(
         ["ffmpeg", "-y", "-v", "error", "-f", "lavfi",
-         "-i", "color=c=0x336699:s=3840x2160:d=12:r=30",
+         "-i", "color=c=0x336699:s=2160x3840:d=12:r=30",
          "-c:v", "libx264", "-preset", "ultrafast", "-crf", "30",
          "-pix_fmt", "yuv420p", path], check=True)
+
+
+# The one outside file Studio loads, disclosed in manual/privacy.html.
+_DISCLOSED = frozenset({"https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/MotionPathPlugin.min.js"})
 
 
 @unittest.skipIf(_skip_reason() is not None, _skip_reason() or "")
@@ -122,17 +130,28 @@ class StudioPlayerViewTests(unittest.TestCase):
         with open(os.path.join(cls.studio_dir, "studio.manifest.json"),
                   encoding="utf-8") as handle:
             cls.manifest = json.load(handle)
+        cls._start_server()
+        cls.result = cls._run_probe()
+
+    INTERACT = False
+
+    @classmethod
+    def _start_server(cls) -> None:
+        """The stock HyperFrames preview (the player gate's historical baseline)."""
         # Keep tests out of the operator's default 3990-3999 preview range.
         cls.port = pick_free_port((41000, 41100))
+        # --foreground: without a terminal the stock CLI otherwise re-launches itself detached in
+        # a new session and exits, so the server escaped this cleanup. Its session files go to
+        # this test's folder, not the operator's ~/.local/state.
         cls.server = subprocess.Popen(
             ["node", HYPERFRAMES_BIN, "preview", cls.studio_dir,
-             "--port", str(cls.port), "--no-open"],
+             "--port", str(cls.port), "--foreground", "--no-open"],
             cwd=cls.studio_dir, stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            env={**os.environ, "XDG_STATE_HOME": os.path.join(cls.tmp, "state")},
             start_new_session=True)
         cls.addClassCleanup(cls._stop_server)
         cls._wait_ready()
-        cls.result = cls._run_probe()
 
     @classmethod
     def _stop_server(cls) -> None:
@@ -152,6 +171,10 @@ class StudioPlayerViewTests(unittest.TestCase):
             cls.server.wait(timeout=5)
 
     @classmethod
+    def _server_exited(cls) -> bool:
+        return cls.server.poll() is not None
+
+    @classmethod
     def _wait_ready(cls) -> None:
         for _ in range(60):
             try:
@@ -162,7 +185,7 @@ class StudioPlayerViewTests(unittest.TestCase):
                         return
             except OSError:
                 pass
-            if cls.server.poll() is not None:
+            if cls._server_exited():
                 raise RuntimeError("studio preview server exited early")
             import time
             time.sleep(0.5)
@@ -180,6 +203,8 @@ class StudioPlayerViewTests(unittest.TestCase):
             "shotsDir": cls.shots_dir,
             "settleMs": _SETTLE_MS,
             "beats": beats,
+            "interact": cls.INTERACT,
+            "allowExternal": sorted(_DISCLOSED),  # everything else is answered inside the probe
         }
         config_path = os.path.join(cls.tmp, "probe-config.json")
         with open(config_path, "w", encoding="utf-8") as handle:
@@ -203,6 +228,18 @@ class StudioPlayerViewTests(unittest.TestCase):
                         f"(shots: {self.shots_dir})")
         self.assertEqual(len(self.result["beats"]),
                          len(self.manifest["entries"]))
+
+    def test_server_stays_attached_for_cleanup(self) -> None:
+        # Without --foreground the stock CLI re-launches itself detached and exits; the
+        # class cleanup could then never stop the server it started.
+        self.assertFalse(self._server_exited(), "the preview server detached or exited")
+
+    def test_stock_page_attempts_analytics(self) -> None:
+        # Negative control for StudioBuyerRoutePrivacyTests: the published page tries to send
+        # analytics (the probe answers those requests locally, so none leaves this Mac), so the
+        # same probe on the adapted runtime could observe a leak.
+        self.assertTrue([url for url in self.result["externalRequests"] if "posthog" in url],
+                        "the stock Studio page sent no analytics; re-check the privacy gate's premise")
 
     def test_no_page_errors(self) -> None:
         self.assertEqual(self.result["pageErrors"], [])
@@ -286,6 +323,66 @@ class StudioPlayerViewTests(unittest.TestCase):
         self.assertIsNotNone(play)
         self.assertGreater(play["after"], play["before"],
                            "player.play() did not advance the timeline")
+
+
+
+_ANALYTICS_KEY = re.compile(r"phc_[A-Za-z0-9]{20,}")
+_SCRIPT_SRC = re.compile(r'<script[^>]+src="(/[^"]+\.js)"')
+
+class StudioBuyerRoutePrivacyTests(StudioPlayerViewTests):
+    """The player gate through the buyer's route, plus Studio's privacy gate.
+
+    Studio opens the way install/studio.command opens it (managed_preview on the
+    adapted runtime), in a fresh browser profile with no stored opt-out. The page
+    is driven through playback, seeking and editing input, then left so Studio
+    flushes any queued analytics. No analytics request may be attempted, and only
+    the disclosed download may leave the Mac.
+    """
+
+    INTERACT = True
+    test_stock_page_attempts_analytics = None  # the control belongs to the stock route only
+
+    @classmethod
+    def _start_server(cls) -> None:
+        cls.cli = str(install_runtime() / "dist" / "cli.js")
+        record = open_preview(cls.studio_dir, pick_free_port((41100, 41200)))
+        cls.addClassCleanup(stop_preview, cls.studio_dir)
+        cls.port, cls.pid = record.port, record.pid
+        cls.server_command = subprocess.run(["/bin/ps", "-o", "command=", "-p", str(record.pid)],
+                                            capture_output=True, text=True, check=False).stdout
+        cls._wait_ready()
+
+    @classmethod
+    def _server_exited(cls) -> bool:
+        try:
+            os.kill(cls.pid, 0)
+        except ProcessLookupError:
+            return True
+        return False
+
+    def _served(self, path: str) -> str:
+        with urllib.request.urlopen(f"http://127.0.0.1:{self.port}{path}", timeout=10) as response:
+            return response.read().decode("utf-8", "replace")
+
+    def test_served_by_the_adapted_runtime(self) -> None:
+        self.assertIn(f"{self.cli} preview", self.server_command)
+
+    def test_served_studio_page_has_no_analytics_key(self) -> None:
+        scripts = _SCRIPT_SRC.findall(self._served("/"))
+        self.assertTrue(scripts, "the Studio page names its bundle")
+        for script in scripts:
+            self.assertIsNone(_ANALYTICS_KEY.search(self._served(script)), f"{script} carries an analytics key")
+
+    def test_fresh_profile_has_no_opt_out(self) -> None:
+        # The absence of analytics must come from Sniper's runtime, not from a browser setting.
+        self.assertIsNone(self.result["optOut"]["stored"])
+        self.assertNotEqual(self.result["optOut"]["doNotTrack"], "1")
+
+    def test_no_analytics_request_is_attempted(self) -> None:
+        self.assertEqual([url for url in self.result["externalRequests"] if "posthog" in url], [])
+
+    def test_only_the_disclosed_download_leaves_the_mac(self) -> None:
+        self.assertLessEqual(set(self.result["externalRequests"]), _DISCLOSED)
 
 
 if __name__ == "__main__":

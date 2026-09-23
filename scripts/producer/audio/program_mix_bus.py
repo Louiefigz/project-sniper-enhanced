@@ -12,6 +12,7 @@ from audio.audio_mix_delivery import _observe_final_audio
 from audio.music_stage import resolve_music_track
 from audio.program_audio_clock import float_audio_clock
 from audio.program_finish_bus import render_finishing
+from audio.program_finish_contract import finishing_request
 from audio.render_audio_authority import run_audio
 from audio.render_audio_bus import SourceAudioBus, verify_source_bus
 from cut_preview_io import file_hash
@@ -128,6 +129,7 @@ def build_program_mix(bus: SourceAudioBus, plan: dict, directory: Path) -> Progr
     Without finishing the premaster is the pristine raw bus, exactly as before.
     With finishing the audible program is cleanup -> gain -> SFX
     (``program_finish_bus``) and the duck detector keys on the finished dialogue."""
+    finishing_request(plan, bus.samples / 48_000)
     verify_source_bus(bus, plan)
     finished = render_finishing(bus, plan, directory)
     dialogue = finished.dialogue_path if finished else bus.path

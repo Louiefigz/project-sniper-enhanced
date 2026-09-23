@@ -4,6 +4,7 @@ import { writeFileSync } from "node:fs";
 import { observeCutPreviewFile, readCutPreviewObject } from "@/app/api/producer/auto-edit/cut-preview-receipt";
 import { objectValue, stringValue, sha256 } from "@/lib/producer/contracts/validation";
 import { createHumanCutIndex, humanCutDirectory } from "./human-cut-acceptance-store";
+import { SEQUENCE_LIBRARY } from "./reference-library-paths";
 
 export interface NativeReferenceSelection { caseId: string; beatId: string }
 export interface NativeReference {
@@ -12,12 +13,12 @@ export interface NativeReference {
   images: Array<{ file: string; sha256: string; sizeBytes: number }>;
   scope: "research-reference-not-production-asset-or-qualified-template";
 }
-const LIBRARY = "docs/studies/shorts-visual-playbook/nate-sequences";
+const LIBRARY = SEQUENCE_LIBRARY;
 const INDEX = "native-references.json";
 const SCOPE = "research-reference-not-production-asset-or-qualified-template" as const;
 
 function selectedCase(selection: NativeReferenceSelection) {
-  if (!/^N\d{2}$/u.test(selection.caseId) || !new RegExp(`^${selection.caseId}-B\\d{2}$`, "u").test(selection.beatId)) {
+  if (!/^SQ\d{2}$/u.test(selection.caseId) || !new RegExp(`^${selection.caseId}-B\\d{2}$`, "u").test(selection.beatId)) {
     throw new Error("Native reference selection must name an exact curated case and beat");
   }
   const observed = readCutPreviewObject(path.join(process.cwd(), LIBRARY, "cases", `${selection.caseId}.json`));

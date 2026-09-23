@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finishing somewhere else</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <p class="kicker">Manual · 7 of 10</p>
+  <h1>Finishing somewhere else (optional)</h1>
+  <p class="lede">You do not need another editor. If you want one, here is exactly what does and does not survive the trip.</p>
+</header>
+<div class="ok">
+<p><strong>This whole page is optional.</strong> Sniper's approved
+<code>final.mp4</code> is a finished, postable video. If that is all you need, you are
+already done.</p>
+</div>
+
+<h2>Taking the video into any editor</h2>
+<p>Import <code>producer/final.mp4</code> into Premiere, Final Cut, Resolve, CapCut or
+anything else. It is an ordinary H.264 MP4 with AAC audio.</p>
+<div class="warn">
+<p><strong>What you are importing is one flat video.</strong> The graphics, captions,
+motion, transitions and audio are rendered into the picture. Your editor will
+<strong>not</strong> see separate caption tracks, editable text or individual graphic
+layers — there is nothing in an MP4 that could carry them. Anyone who tells you a
+flattened export preserves layers is wrong about the file format, not about Sniper.</p>
+<p>So: use another editor for footage-level work — colour, a music swap, topping and
+tailing, stitching it into a longer piece. Do <strong>not</strong> plan to retype a
+caption there. Change the caption in Sniper and rebuild; that takes less time.</p>
+</div>
+
+<h3>If you need the graphics editable, do it before you export</h3>
+<p>The editable graphics layer lives in Sniper, not downstream. Use
+<a href="review-and-studio.html">the Studio review lane</a>, then rebuild. That is the
+supported way to get a different graphics result.</p>
+
+<h2>Clipper: a real editable timeline for Final Cut</h2>
+<p>If what you want is a frame-accurate timeline rather than a flat video, that is what
+Clipper is for. It tightens one clip word by word and exports FCPXML, which Final Cut Pro
+opens as an actual timeline with your cuts as edits.</p>
+
+<h2>Segmenter: rough clips for your own editing</h2>
+<p>Segmenter splits a long recording into clips without re-encoding it, so there is no
+quality loss. Each clip keeps about five seconds of extra footage before and after its
+section and starts on the nearest keyframe at or before that, so neighbouring clips overlap
+by those handles (ten seconds or more). That is intentional: they are raw material for you
+to trim, not finished cuts. With several camera angles, Segmenter instead cuts each clip
+frame-accurately in sync, re-encoding at the joins (or the whole clip if a join does not
+validate).</p>
+
+<h2>Palmier Pro</h2>
+<p><span class="tag">not configured in this package</span></p>
+<p>Sniper can hand an approved video to Palmier Pro — a separate paid NLE — as one flat
+clip containing exactly the approved bytes. The qualified path is that one exact-copy
+mirror, and nothing more.</p>
+<ul>
+  <li>A native, layer-by-layer editable Palmier build exists only as an isolated
+  experiment inside the source. It is <strong>not released</strong> and is not something
+  to buy Sniper for.</li>
+  <li>This package does not configure the Palmier connection. <code>install/doctor.command</code>
+  reports it as gated.</li>
+  <li>Palmier is a separate purchase from a different company.</li>
+</ul>
+
+<p class="next"><strong>Next:</strong> <a href="troubleshooting.html">When something goes wrong &rarr;</a></p>
+<footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>
+</div>
+</body>
+</html>

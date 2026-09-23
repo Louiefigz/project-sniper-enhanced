@@ -8,7 +8,7 @@ from edit.exact_timing import PositiveRational
 from planner.treatment_contract import TreatmentContractError
 from planner.treatment_models import TreatmentState
 from planner.treatment_operations import apply_treatment_operation
-from tests.scene_fixtures import fire_sparkles_scene
+from tests.scene_fixtures import bind_test_scene_source, fire_sparkles_scene
 
 BUNDLE_HASH = "b" * 64
 
@@ -105,6 +105,7 @@ class TreatmentOperationTests(unittest.TestCase):
             "startFrame": 300, "endFrameExclusive": 480,
             "timelineMapHash": "f" * 64,
         })
+        bind_test_scene_source(added)
         add = apply_treatment_operation(
             _state(), {**_base("scene.add"), "scene": added})
         self.assertEqual(len(add.state.scenes), 2)
@@ -195,6 +196,7 @@ class TreatmentOperationTests(unittest.TestCase):
         """A stale element label cannot overwrite a different actual composition value."""
         state = _state()
         state.scenes[0]["composition"]["variables"]["rightTitle"] = "Different existing copy"
+        bind_test_scene_source(state.scenes[0])
         before = copy.deepcopy(state)
         operation = {**_base("title.setText"), "sceneId": "scene-045",
                      "elementId": "right-copy", "variable": "rightTitle",

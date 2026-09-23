@@ -38,7 +38,7 @@ detectors block-by-default instead of being born WARN-only.
    fallback while canvas-pip-list's PiP renderer is unwired"* into plans as it
    downgrades beats. Wiring it unlocks the face-bridge entrance ("the footage
    IS the transition") and the longform screenshare presenter-PIP chapter
-   format NATEHERK_CARDS rates as governing ~42% of reference runtime.
+   format MODULE_CARDS rates as governing ~42% of reference runtime.
    Interim S fix shipped separately: stop advertising `canvas-pip-list` in
    `card_form_map`/`intro_semantic_contract` (catalog/gate contradiction).
 3. **Ship-integrity S-cluster** (all S) — properties every deliverable must
@@ -64,7 +64,7 @@ detectors block-by-default instead of being born WARN-only.
 ## Tier 3 — encode the operator's own pain (from ~/ProjectSniper artifacts)
 
 - **Alarm fatigue is live:** Audit B's accent-contrast check is mathematically
-  incapable of passing the house stroked-lemon type, so every jaden short
+  incapable of passing the house stroked-lemon type, so every punch short
   exits FAIL and the operator has learned to ship over red. Merge with the
   silent-skip + scene-derived-measurement candidates into ONE accent overhaul
   (see Conflicts) — do not just relax it.

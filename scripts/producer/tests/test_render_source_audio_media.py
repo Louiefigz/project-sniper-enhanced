@@ -189,7 +189,9 @@ class OrdinarySourceFloatMediaTests(unittest.TestCase):
         final = Path(ctx.out_dir) / "final.mp4"
         sidecar = Path(str(final) + ".assembled.json")
         before = (file_sha256(str(final)), sidecar.read_bytes())
-        with patch("audio.render_audio_master.build_pass2_afilter", return_value=("volume=-30dB", "fault injection")):
+        from audio.mastering_filter import MasterFilterSelection
+        selected = MasterFilterSelection("volume=-30dB", "fault injection", {"TEST": True})
+        with patch("audio.render_audio_master.select_pass2_filter", return_value=selected):
             with self.assertRaisesRegex(RuntimeError, "unqualified; prior output preserved"):
                 renderer.master_stage(ctx, str(Path(ctx.work_dir) / "mezzanine.mp4"), None)
         self.assertEqual((file_sha256(str(final)), sidecar.read_bytes()), before)

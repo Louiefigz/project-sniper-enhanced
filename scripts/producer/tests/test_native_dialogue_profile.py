@@ -23,7 +23,7 @@ class NativeDialogueProfileTests(unittest.TestCase):
     def setUp(self) -> None:
         scratch = tempfile.TemporaryDirectory()
         self.addCleanup(scratch.cleanup)
-        self.root = Path(scratch.name)
+        self.root = Path(scratch.name).resolve()
         picture, premaster = self.root / "picture.mp4", self.root / "premaster.wav"
         picture.write_bytes(b"picture fixture")
         premaster.write_bytes(b"float fixture")
@@ -55,7 +55,7 @@ class NativeDialogueProfileTests(unittest.TestCase):
         master.write_bytes(b"float fixture")
         with patch.object(delivery, "exact_float_audio_clock", return_value={}), \
                 patch.object(delivery, "_observe_final_audio", return_value=({}, 0, "")), \
-                patch.object(delivery, "render_float_master", return_value=(master, "chain", None)) as render, \
+                patch.object(delivery, "render_float_master", return_value=(master, "chain", None, {"TEST": True})) as render, \
                 patch.object(delivery, "measure_delivery", return_value={"qualified": True}):
             delivery._master(self.request, {}, ("ffmpeg", "ffprobe"))
         self.assertIs(render.call_args.args[0].profile, NATIVE_SHORT_MASTERING_PROFILE)

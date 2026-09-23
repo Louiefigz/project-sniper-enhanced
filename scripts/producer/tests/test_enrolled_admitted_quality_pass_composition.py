@@ -11,6 +11,7 @@ from unittest.mock import patch
 from _approved_parent_loader_fixture import ApprovedParentAuthorityFixture
 from _approved_parent_loader_values import canonical
 from _common import pl  # noqa: F401
+from _retired_r0_diagnostics_fixture import historical_diagnostics, assert_retired_inspection
 from _unit_enrollment_fixture import enrollment, enrollment_proposal
 from test_quality_pass_preflight import _operation
 from headless.admitted_quality_pass_composition_types import (
@@ -47,6 +48,11 @@ _CHILD = "99999999-9999-4999-8999-999999999999"
 
 class EnrolledAdmittedQualityPassCompositionTests(unittest.TestCase):
     def setUp(self) -> None:
+        # Inert ledger/promotion seam: no current R0 execution is represented.
+        seam = patch("headless.admitted_quality_pass_composition.inspect_quality_pass_composition",
+                     side_effect=historical_diagnostics)
+        seam.start()
+        self.addCleanup(seam.stop)
         self.fixture = ApprovedParentAuthorityFixture()
         self.historical = self.fixture.root / "historical-materialization"
         self.historical.mkdir(mode=0o700)
@@ -67,6 +73,10 @@ class EnrolledAdmittedQualityPassCompositionTests(unittest.TestCase):
         authority_path = self.fixture.authority / "authority.json"
         authority_path.write_bytes(authority_raw)
         authority_path.chmod(0o600)
+
+    def test_real_retired_parent_never_dispatches_or_changes_publication(self) -> None:
+        """Real source rejection precedes any enrollment, admission, or rendering."""
+        assert_retired_inspection(self, ("unit-enrollments-v1", "operation-admissions-v3"))
 
     def tearDown(self) -> None:
         self.fixture.close()

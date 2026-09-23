@@ -41,9 +41,6 @@ const PRESET_COPY: Record<string, { label: string; summary: string }> = {
   "produced-short": { label: "Polished short", summary: "A vertical cut with captions, graphics, motion, transitions, and available cutaways." },
   "longform-produced": { label: "Polished long video", summary: "A horizontal edit with structured sections, cutaways, graphics, and a caption file." },
   "trim-only": { label: "Clean trim only", summary: "Remove pauses, retakes, and setup chatter without adding visual effects." },
-  "caleb-light": { label: "Minimal captions (Caleb)", summary: "A restrained vertical style led by clean captions." },
-  "jadenly-produced": { label: "Fast, graphic-rich (Jaden)", summary: "A fast vertical style with punch cuts and layered text." },
-  "angela-involved": { label: "Graphic-led explainer (Angela)", summary: "A bold explainer style with full-frame graphic sections." },
 };
 
 function ModeToggle({ value, disabled, confirmed, onPick }: {

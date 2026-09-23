@@ -44,10 +44,11 @@ test("all 53 previews inline sandbox-safe runtimes; public asset helper retains 
     after.update(fs.readFileSync(file));
   }
   assert.equal(before.digest("hex"), after.digest("hex"), "source files remain untouched");
-  assert.equal(assets.size, 5);
+  assert.equal(assets.size, 7);
   const expectedFiles: Record<string, string> = {
     gsap: "vendor/gsap/gsap.min.js", splitText: "vendor/gsap/SplitText.min.js",
     drawSvg: "vendor/gsap/DrawSVGPlugin.min.js", motionTokens: "motion-tokens.js", tokens: "tokens.css",
+    modulePipeline: "module-pipeline.js", agendaCaptionLayout: "agenda-caption-layout.css",
   };
   for (const url of assets) {
     const response = await request(url); const bytes = Buffer.from(await response.arrayBuffer());

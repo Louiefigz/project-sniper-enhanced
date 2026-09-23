@@ -107,22 +107,13 @@ class ProgramMixBoundaryTests(unittest.TestCase):
             receipt["receiptHash"])
         _assert_balanced(self, output)
 
-    def test_transition_direct_path_repairs_program_leg_before_sfx(self) -> None:
-        source = os.path.join(self.temp.name, "dead-right.mp4")
+    def test_retired_transition_refuses_before_source_audio_work(self) -> None:
+        source = os.path.join(self.temp.name, "unread-source.mp4")
         output = os.path.join(self.temp.name, "transitioned.mp4")
-        dead_stereo_video(source, 1)
-        with contextlib.redirect_stdout(io.StringIO()):
-            result = apply_transitions(source, [{
-                "outTime": 1.2,
-                "kind": "white-flash",
-                "sfx": True,
-            }], output)
-        receipt = result["channelNormalization"]
-        self.assertEqual(
-            receipt["decision"]["status"], "dead-channel-repaired")
-        self.assertEqual(receipt["decision"]["deadChannel"], 1)
-        self.assertEqual(result["inFrames"], result["outFrames"])
-        _assert_balanced(self, output)
+        with self.assertRaisesRegex(ValueError, "retired"):
+            apply_transitions(source, [{"outTime": 1.2,
+                              "kind": "white-flash", "sfx": True}], output)
+        self.assertFalse(os.path.exists(output))
 
     def test_multisource_cut_and_jcut_normalize_each_source_first(self) -> None:
         left = os.path.join(self.temp.name, "cut-left.mp4")

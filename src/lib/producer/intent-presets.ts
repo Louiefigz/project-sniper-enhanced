@@ -39,18 +39,17 @@ export const SCOPE_LANE_DEFAULTS: Record<Scope, Record<Lane, boolean>> = {
 // MODES["short"]["pacing_<pace>"] (dashes -> underscores). Every entry here
 // MUST have a matching pacing_* profile — the tsx test parses
 // producer_config.py so a missing/renamed profile fails loudly.
-export const PACES = ["talking-head", "client-reel", "caleb", "jadenly", "angela"] as const;
+export const PACES = ["talking-head", "client-reel", "restrained", "punch", "slideware"] as const;
 export type Pace = (typeof PACES)[number];
 
-// Measured style grammars (docs/<STYLE>_STYLE.md). target.style tells the
-// auto-edit brain WHICH grammar doc to read before authoring; target.pace
-// (same name) picks the matching pacing_<style> lint profile.
-export const STYLES = ["caleb", "jadenly", "angela"] as const;
+// Historical serialized vocabulary only. New intent rejects global styles.
+export const STYLES = ["restrained", "punch", "slideware"] as const;
 export type Style = (typeof STYLES)[number];
 
 /** How the editor should use one measured reference without copying its IP. */
-export const REFERENCE_STRATEGIES = ["mimic", "extend", "new-style"] as const;
-export type ReferenceStrategy = (typeof REFERENCE_STRATEGIES)[number];
+export const REFERENCE_STRATEGIES = ["mimic", "new-style"] as const;
+/** Includes the retired storage value so historical records can be rejected. */
+export type ReferenceStrategy = (typeof REFERENCE_STRATEGIES)[number] | "extend";
 
 // producer_config.AUDIO_ENHANCE catalog keys (mirrored by edit-plan.AudioEnhance).
 export const AUDIO_ENHANCE_PRESETS = ["voice", "voice-rnn", "voice-strong", "separate"] as const;
@@ -61,7 +60,7 @@ export interface ReferenceIntent {
   title: string;
   mode: Mode;
   strategy: ReferenceStrategy;
-  /** Existing, closed style grammar to mimic or extend. Never a new style name. */
+  /** Historical only; current selections reject this field. */
   targetStyle?: Style;
   /** Provisional human label; valid only when strategy is "new-style". */
   candidateStyleName?: string;
@@ -80,7 +79,7 @@ export interface ProjectIntent {
   /** Per-lane overrides vs the scope default (edit_scope target.lanes). */
   lanes: Partial<Record<Lane, LaneDirective>>;
   pace?: Pace;
-  /** Measured style grammar the brain must read (docs/<STYLE>_STYLE.md). */
+  /** Historical only; current intent rejects this field. */
   style?: Style;
   /** Studied asset mechanics to apply to this edit. */
   reference?: ReferenceIntent;
@@ -170,7 +169,7 @@ export function validateLaneOverrides(v: unknown): Partial<Record<Lane, LaneDire
 const REFERENCE_KEYS = new Set([
   "id", "title", "mode", "strategy", "targetStyle", "candidateStyleName",
 ]);
-const CLOSED_STYLE_NAMES = new Set(["caleb", "jaden", "jadenly", "angela"]);
+const CLOSED_STYLE_NAMES = new Set(["restrained", "punch", "slideware"]);
 
 function requiredReferenceText(value: unknown, field: string, maxLength: number): string {
   if (typeof value !== "string") throw new Error(`reference.${field} must be a string`);
@@ -188,6 +187,7 @@ export function validateReferenceIntent(v: unknown, expectedMode?: Mode): Refere
     throw new Error("reference must be an object");
   }
   const o = v as Record<string, unknown>;
+  if (o.strategy === "extend" || o.targetStyle !== undefined) throw new Error("Legacy style extension is retired; select the actual reference video using mimic or new-style");
   const unknown = Object.keys(o).filter((key) => !REFERENCE_KEYS.has(key));
   if (unknown.length) throw new Error(`reference has unknown field(s): ${unknown.sort().join(", ")}`);
   const id = requiredReferenceText(o.id, "id", 160);
@@ -205,28 +205,15 @@ export function validateReferenceIntent(v: unknown, expectedMode?: Mode): Refere
     throw new Error(`reference.strategy must be one of: ${REFERENCE_STRATEGIES.join(", ")}`);
   }
   const ref: ReferenceIntent = { id, title, mode: o.mode, strategy: o.strategy as ReferenceStrategy };
-  if (o.targetStyle !== undefined) {
-    if (!(STYLES as readonly unknown[]).includes(o.targetStyle)) {
-      throw new Error(`reference.targetStyle must be one of: ${STYLES.join(", ")}`);
-    }
-    if (ref.mode !== "short") throw new Error("reference.targetStyle is shorts-only");
-    ref.targetStyle = o.targetStyle as Style;
-  }
   if (o.candidateStyleName !== undefined) {
     ref.candidateStyleName = requiredReferenceText(o.candidateStyleName, "candidateStyleName", 120);
-  }
-  if (ref.strategy === "extend" && !ref.targetStyle) {
-    throw new Error("reference.targetStyle is required for strategy \"extend\"");
-  }
-  if (ref.strategy !== "extend" && ref.targetStyle) {
-    throw new Error(`reference.targetStyle is not allowed for strategy ${JSON.stringify(ref.strategy)}`);
   }
   if (ref.strategy === "new-style" && !ref.candidateStyleName) {
     throw new Error("reference.candidateStyleName is required for strategy \"new-style\"");
   }
   if (ref.strategy === "new-style" && ref.candidateStyleName &&
       CLOSED_STYLE_NAMES.has(ref.candidateStyleName.toLowerCase())) {
-    throw new Error("reference.candidateStyleName must name a style outside Caleb, Jaden, and Angela");
+    throw new Error("reference.candidateStyleName must name a style outside Restrained, Punch, and Slideware");
   }
   if (ref.strategy !== "new-style" && ref.candidateStyleName) {
     throw new Error(`reference.candidateStyleName is not allowed for strategy ${JSON.stringify(ref.strategy)}`);
@@ -238,6 +225,7 @@ export function validateReferenceIntent(v: unknown, expectedMode?: Mode): Refere
 export function validateIntent(v: unknown): ProjectIntent {
   if (!v || typeof v !== "object" || Array.isArray(v)) throw new Error("intent must be an object");
   const o = v as Record<string, unknown>;
+  if (o.style !== undefined) throw new Error("Global creator styles are retired; select a current-job reference or the HyperFrames catalog");
   if (o.mode !== "short" && o.mode !== "longform") {
     throw new Error(`intent.mode must be "short" or "longform", got ${JSON.stringify(o.mode)}`);
   }
@@ -268,23 +256,8 @@ export function validateIntent(v: unknown): ProjectIntent {
     }
     intent.pace = o.pace as Pace;
   }
-  if (o.style !== undefined) {
-    if (!(STYLES as readonly string[]).includes(o.style as string)) {
-      throw new Error(`intent.style must be one of: ${STYLES.join(", ")}`);
-    }
-    intent.style = o.style as Style;
-  }
   if (o.reference !== undefined) {
     intent.reference = validateReferenceIntent(o.reference, intent.mode);
-    if (intent.reference.strategy === "extend" && intent.style !== intent.reference.targetStyle) {
-      throw new Error("intent.style must equal reference.targetStyle for strategy \"extend\"");
-    }
-    if (intent.reference.strategy === "extend" && intent.pace !== intent.reference.targetStyle) {
-      throw new Error("intent.pace must equal reference.targetStyle for strategy \"extend\"");
-    }
-    if (intent.reference.strategy !== "extend" && intent.style) {
-      throw new Error(`intent.style must stay unset for reference strategy ${JSON.stringify(intent.reference.strategy)}`);
-    }
     const conflicts = intent.reference.strategy === "mimic" ? mimicLaneConflicts(intent) : [];
     if (conflicts.length) {
       throw new Error(`reference strategy "mimic" requires every engagement lane; unavailable: ${conflicts.join(", ")}`);
@@ -442,85 +415,4 @@ export const INTENT_PRESETS: IntentPreset[] = [
     ],
   },
 
-  // ── STYLE presets — the three measured grammars (style set = Styles group).
-  // will/wont cite the style docs; pace picks the matching pacing_<style>
-  // lint profile; style tells the auto-edit brain which grammar doc to read.
-  {
-    id: "caleb-light",
-    label: "Caleb light",
-    mode: "short",
-    scope: "light",
-    lanes: { motion: "off" }, // CALEB_STYLE §3 Z1: ZERO punch-ins/creep (3/3)
-    pace: "caleb",
-    style: "caleb",
-    music: false, // CALEB_STYLE §6 M1: 3/3 reels spectral-verified bed-free
-    will: [
-      "Whisper captions carry the reel: verbatim 1-5 word cues, white, pinned (CALEB_STYLE §4)",
-      "ONE thesis graphic from t=0 — hook card approximates the pinned title chip (§5, §11)",
-      "Cuts only as erasers/reactions, snapped to caption-cue starts (§2: 0-cut reels are on-style)",
-      "pacing_caleb floors: a zero-cut 36s hold passes the lint (§9)",
-      "9:16 face-aware reframe + −14 LUFS master, TP ceiling kept (§6 M2)",
-    ],
-    wont: [
-      "No zooms / punch-ins / creep — ZERO measured, ORB 0.999-1.000 (§3 Z1)",
-      "No other graphics, receipts, pills, PIP or b-roll (§7 restraint table)",
-      "No seam transitions (§7)",
-      "No karaoke / colored / boxed captions (§4 CAP2)",
-      "No music bed — the 'music likely' votes were false positives (§6 M1)",
-      "No dialogue cleanup — breath gaps stay in (§6 M3)",
-    ],
-  },
-  {
-    id: "jadenly-produced",
-    label: "Jaden produced",
-    mode: "short",
-    scope: "produced",
-    // Jaden's measured grammar uses hard punch cuts, never seam effects.
-    lanes: { transitions: "off" },
-    pace: "jadenly",
-    style: "jadenly",
-    music: false, // JADEN_STYLE recommends a bed; operator checkbox still owns opt-in
-    audioEnhance: { preset: "voice-rnn" },
-    will: [
-      "Punch-cut engine: hard tight↔wide cuts on pivot words, ~17 visible cuts/min (JADEN_STYLE §2)",
-      "Two-layer text system: whisper captions + keyword-pop lockups promoted to headroom (§3-4)",
-      "Word-locked diagram/stack builds and receipts where beats earn them (§4)",
-      "Hook carried by a graphic from frame ~0, not cut density (§1 H2)",
-      "Dead-air stripped hard + voice-rnn cleanup; 9:16 reframe + −14 LUFS master",
-    ],
-    wont: [
-      "No dissolves / white flashes / light leaks — energy is the hard punch cut (§2)",
-      "No karaoke captions — emphasis leaves the caption layer as lockups (§3)",
-      "No aliveness creep between cuts — locked tripod (§2 C5)",
-      "Music stays off until you explicitly tick Music (the style recommendation is never auto-enabled)",
-      "Won't generate or source missing assets",
-    ],
-  },
-  {
-    id: "angela-involved",
-    label: "Angela involved",
-    mode: "short",
-    scope: "full",
-    // The style's zero-zoom/zero-seam rules are operator-visible lane intent.
-    lanes: { motion: "off", transitions: "off" },
-    pace: "angela",
-    style: "angela",
-    music: false, // ANGELA_STYLE recommends a bed; operator checkbox still owns opt-in
-    will: [
-      "Takeover-deck sections: full-frame lime-canvas graphics alternate with the talking head (ANGELA_STYLE §3 AC3)",
-      "Frame 0 fully dressed + real receipts inside the first second (§2 AH1-AH2)",
-      "Cuts land ONLY at section boundaries — punctuation, not energy (§3 AC1)",
-      "Dual-mode captions: whisper on footage, pill skin on lime canvas, in-place lime shouts (§5)",
-      "Eye-count chips on every receipt + mock-OS CTA endcard (§9 checklist)",
-      "9:16 reframe + −14 LUFS master, TP ceiling kept (§7)",
-    ],
-    wont: [
-      "No punch-ins / zoom steps — ZERO in 4/4 reels, the punchIns track stays empty (§4 AZ1)",
-      "No seam transitions — 27/28 cuts are hard (§4 AZ2)",
-      "No karaoke or colored whisper captions (§5 ACAP1)",
-      "Won't mix graphic economies — takeover deck OR persistent ledger, never both (§3 AC3)",
-      "Music stays off until you explicitly tick Music (the style recommendation is never auto-enabled)",
-      "Won't fake receipts — every proof is a real pixel source (§6 E3)",
-    ],
-  },
 ];

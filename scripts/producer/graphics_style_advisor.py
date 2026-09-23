@@ -6,49 +6,17 @@ import json
 import sys
 
 from compile_timeline import compile_plan
-from edit_scope import lane_required, resolve_scope
 from graphics.intro_semantic_contract import semantic_beats
-from graphics.style_profiles import FACE_BRIDGE_PROFILE
 from graphics_planner import output_words
 
 
-def _has_face(plan: dict) -> bool:
-    bbox = plan.get("faceBBoxNorm")
-    return isinstance(bbox, (list, tuple)) and len(bbox) == 4 and all(
-        isinstance(value, (int, float)) for value in bbox)
-
-
 def recommend_style(plan: dict, beats: list[dict]) -> dict:
-    """Return a persisted target recommendation plus auditable signals."""
-    target = plan.get("target") or {}
-    shapes = sorted({str(row.get("shape")) for row in beats if row.get("shape")})
-    signals = {"semanticBeatCount": len(beats),
-               "distinctInformationShapes": len(shapes),
-               "informationShapes": shapes, "faceTrackAvailable": _has_face(plan)}
-    active = target.get("mode") == "longform" \
-        and resolve_scope(target) in ("produced", "full") \
-        and lane_required(target, "graphics")
-    if active and signals["faceTrackAvailable"] and len(beats) >= 8 \
-            and len(shapes) >= 4:
-        style = "face-bridge"
-        rationale = (f"{len(beats)} strong early semantic beats across "
-                     f"{len(shapes)} information shapes plus a tracked presenter "
-                     "earn the two-chassis evidence-dense face bridge.")
-    elif active and len(beats) >= 6 and len(shapes) >= 3:
-        style = "overlay-rich"
-        rationale = (f"{len(beats)} strong early semantic beats across "
-                     f"{len(shapes)} information shapes earn varied overlays, "
-                     "but no reliable presenter track supports the PIP chassis.")
-    else:
-        style = "cutaway-only"
-        rationale = ("The edit lacks the combined semantic density, shape variety, "
-                     "and presenter tracking required by the richer grammars.")
-    fields = {"graphicsStyle": style, "graphicsStyleRationale": rationale}
-    if style == "face-bridge":
-        fields["visualProfile"] = FACE_BRIDGE_PROFILE
-    remove = [] if style == "face-bridge" else ["visualProfile"]
-    return {"recommendedTargetFields": fields, "removeTargetFields": remove,
-            "signals": signals}
+    """Recommend catalog selection without inferring a reference style."""
+    return {"recommendedTargetFields": {"graphicsStyle": "catalog-first",
+            "graphicsStyleRationale": "Inspect the upstream HyperFrames catalog for each visual need."},
+            "removeTargetFields": ["style", "visualProfile"],
+            "signals": {"semanticBeatCount": len(beats), "sourcePolicy": "hyperframes-catalog-first-v1"}}
+
 
 
 def build_advice(plan: dict, transcripts_dir: str, manifest: dict) -> dict:

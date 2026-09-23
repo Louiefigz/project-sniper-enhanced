@@ -1,8 +1,10 @@
+import { refreshVisualSourceFixture } from "./_visual-source-fixture";
 /** Synthetic contract data only; no visual/source-quality claim. */
 import { refreshNativeAssetUseFixture } from "./_native-short-origin-fixture";
 import { writeFileSync } from "node:fs";
 import path from "node:path";
-import { fileSha256 } from "../auto-edit-hash";
+import { canonicalJson, fileSha256 } from "../auto-edit-hash";
+import { NATIVE_PREBUILD_COVERAGE, nativeShortPrebuildPlanHash, type NativePrebuildReview } from "../native-short-prebuild-review";
 import { loadDirectorCatalog } from "../native-director-library";
 import { fillLocalHookTemplate } from "../native-hook-template";
 import { buildNativeCanvas, centeredNativeCaptionView } from "../native-short-composition";
@@ -23,7 +25,7 @@ function assets(directory: string): NativeAssetBinding[] {
 
 export function nativeShortFixture(directory: string): NativeShortProjectInput {
   const bindings = assets(directory), request = { selection: "auto", supportingVideo: "source-first" } as const;
-  const copy = fillLocalHookTemplate(loadDirectorCatalog(), { anchor: "value-how-to", slots: { outcome: "test a saved plan" } });
+  const copy = fillLocalHookTemplate(loadDirectorCatalog(), { anchor: "steps-toward-goal", slots: { count: "Two", goal: "test a saved plan" } });
   const input: NativeShortProjectInput = { schemaVersion: 1, request, assets: bindings,
     canvas: { title: "TEST native contract", frameRate: "25/1", totalFrames: 50, background: "#111111",
       sourceSize: { w: 1920, h: 1080 }, sourceFile: bindings[0].file,
@@ -31,7 +33,7 @@ export function nativeShortFixture(directory: string): NativeShortProjectInput {
       occurrences: [[0, 0, 0, 0, 20, "Test", 0], [1, 0, 1, 20, 45, "words.", 0]], captionGroups: [[0], [1]],
       pictureViews: [{ startFrame: 0, endFrame: 50, crop: [500, 0, 607.5, 1080], box: [0, 0, 1080, 1920] }],
       captionViews: [centeredNativeCaptionView({ startFrame: 0, endFrame: 50, top: 1000 })],
-      text: [], shapes: [], motion: [], titleCard: { copy, lines: [copy.text], palette: "white-on-black", endFrame: 25, top: 80, fontSize: 64 } },
+      text: [], shapes: [], motion: [], titleCard: { copy, lines: [copy.text], palette: "paper-on-ink", endFrame: 25, top: 80, fontSize: 64 } },
     strategy: { schemaVersion: 1, request, selectedTreatment: "TEST presenter", selectionReason: "TEST source performs the explanation",
       rejectedTreatment: "TEST diagram has no distinct relationship to show", viewerBenefit: "TEST understand saved-plan consistency",
       hookReasonToWatch: "TEST concrete contract goal", payoff: "TEST source words only",
@@ -48,6 +50,7 @@ export function nativeShortFixture(directory: string): NativeShortProjectInput {
 
 /** Explicitly re-author synthetic fixture budgets after a test's intended revision. */
 export function refreshNativePacingFixture(input: NativeShortProjectInput): void {
+  refreshVisualSourceFixture(input);
   input.strategy.schemaVersion = 3;
   const windows = nativePacingVisualWindows(input, buildNativeCanvas(input.canvas) + (input.extension?.markup ?? ""));
   refreshNativeAssetUseFixture(input);
@@ -65,4 +68,22 @@ export function refreshNativePacingFixture(input: NativeShortProjectInput): void
       return { targetId: row.id, startFrame, endFrame: row.endFrame,
         minimumFrames: Math.min(5, row.endFrame - startFrame), reason: "TEST budget, not a comprehension claim" };
     }) };
+  refreshNativePrebuildReviewFixture(input);
+}
+
+/** TEST-only synthetic pass for structural admission tests; never a real creative approval. */
+export function refreshNativePrebuildReviewFixture(input: NativeShortProjectInput): void {
+  const directory = path.dirname(input.assets[0].path), evidence = path.join(directory, "TEST-prebuild-evidence.txt");
+  writeFileSync(evidence, "TEST synthetic evidence; no footage inspection, playback, reviewer or creative approval.");
+  const planHash = nativeShortPrebuildPlanHash(input);
+  const receipt: NativePrebuildReview = { schemaVersion: 1, scope: "native-short-full-plan", planHash,
+    reviewer: { identity: "TEST synthetic reviewer", sessionId: "TEST-review-session", plannerSessionId: "TEST-plan-session", independent: true },
+    coverage: Object.fromEntries(NATIVE_PREBUILD_COVERAGE.map(key => [key,
+      "TEST synthetic assessment only; not a production review"])) as NativePrebuildReview["coverage"],
+    evidence: [{ path: evidence, sha256: fileSha256(evidence)! }],
+    review: { schemaVersion: 1, stage: "plan", verdict: "pass", summary: "TEST structural fixture only; no creative approval",
+      materialIssues: [], findings: [] } };
+  const file = path.join(directory, `TEST-prebuild-${planHash}.json`);
+  writeFileSync(file, canonicalJson(receipt));
+  input.prebuildReview = { path: file, sha256: fileSha256(file)! };
 }

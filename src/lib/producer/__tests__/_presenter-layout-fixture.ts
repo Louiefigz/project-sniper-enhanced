@@ -43,7 +43,7 @@ export function oldOperation(type: "captions-full-program" | "music-bed-full-pro
 
 export function layoutProposal(patch: Row = {}): Row {
   return { schemaVersion: 8, summary: "TEST ONLY timed layout intent, not observed framing or approval.",
-    graphicsStyle: "cutaway-only", graphicsStyleRationale: "TEST ONLY preserve source and cut authority while describing picture geometry.",
+    graphicsStyle: "catalog-first", graphicsStyleRationale: "TEST ONLY preserve source and cut authority while describing picture geometry.",
     clauses: [{ start: 0, end: PRESENTER_RAW.length, quote: PRESENTER_RAW, disposition: "supported",
       rationale: "Use the exact submitted manual layout declaration.", operationIndices: [0] }],
     beats: [{ startAnchor: 0, endAnchorExclusive: 10, purpose: "opening", summary: "TEST ONLY presenter explanation.", supportsBeatIndices: [] }],

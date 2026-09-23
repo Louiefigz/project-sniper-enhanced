@@ -1,4 +1,5 @@
 // Pure Node/VM metadata tests. Fake DOM rectangles are not browser observations.
+import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
@@ -70,7 +71,10 @@ test("missing actual visibility cannot be dressed as safe", () => {
 });
 
 test("only the exact installed CLI bytes accept the narrow instrumentation", () => {
-  const path = "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js";
+  // Resolve the installed SDK in the checkout under test, never one machine's
+  // absolute path: an absolute literal silently read a different checkout.
+  const path = fileURLToPath(new URL(
+    "../../../templates/motion/node_modules/hyperframes/dist/cli.js", import.meta.url));
   const source = readFileSync(path, "utf8"), patched = instrument(source);
   assert.ok(patched.includes("__sniperLayoutCdp = await getCdpSession(page)"));
   assert.ok(patched.includes("ensureFrameWritten(await currentEncoder.writeFrame(buffer), i2, currentEncoder);\n            __sniperLayout.commit(i2, buffer);"));
@@ -180,7 +184,7 @@ test("unknown wrapper ancestors are not accepted as the native profile", () => {
 function pipelineFixture() {
   const fixture = domFixture(), [first, second, link] = fixture.nodes;
   fixture.nodes.splice(3, 1);
-  fixture.root.id = "npl-root"; fixture.root.dataset.compositionId = "nateherk-pipeline";
+  fixture.root.id = "npl-root"; fixture.root.dataset.compositionId = "module-pipeline";
   fixture.root.classList = { contains: () => false };
   for (const [node, role, text] of [[first, "node-1", "01TEST one"], [second, "node-2", "02TEST two"], [link, "connector-1", ""]]) {
     node.id = ""; node.dataset.sniperProtectedRole = role; node.textContent = text;
@@ -202,7 +206,7 @@ function pipelineFixture() {
 const inspectPipeline = (fixture) => JSON.parse(JSON.stringify(vm.runInNewContext(browserExpression(PIPELINE_POLICY), fixture.context)));
 
 test("separate pipeline policy cannot be selected by an agenda request or unknown token", () => {
-  const value = { ...request(), profile: PIPELINE_POLICY, composition: "compositions/nateherk-pipeline.html" };
+  const value = { ...request(), profile: PIPELINE_POLICY, composition: "compositions/module-pipeline.html" };
   assert.deepEqual(parseRequest(encoded(value)).value, value);
   for (const patch of [{ profile: POLICY }, { composition: "compositions/agenda-slide.html" }, { profile: "__proto__" }, { profile: {} }]) {
     assert.throws(() => parseRequest(encoded({ ...value, ...patch })));

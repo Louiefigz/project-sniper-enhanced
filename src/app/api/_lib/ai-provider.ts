@@ -8,6 +8,7 @@ export interface CodexSettings {
 }
 
 export interface ClaudeSettings {
+  bin: string;
   model: string;
 }
 
@@ -52,10 +53,11 @@ const SAFE_ENV_KEYS = new Set([
   "NODE_ENV",
 ]);
 
+// No CLAUDE_CODE_OAUTH_TOKEN: Sniper signs in through its own CLAUDE_CONFIG_DIR
+// (runtime/claude-config); an inherited token would be a different identity.
 const CLAUDE_ENV_KEYS = new Set([
   ...SAFE_ENV_KEYS,
   "CLAUDE_CONFIG_DIR",
-  "CLAUDE_CODE_OAUTH_TOKEN",
 ]);
 
 function enumEnv<T extends string>(name: string, values: readonly T[], fallback: T): T {
@@ -85,10 +87,31 @@ export function executionMode(): ExecutionMode {
   return enumEnv("SNIPER_EXECUTION_MODE", ["live", "local"], "live");
 }
 
+function optionalEnum<T extends string>(name: string, values: readonly T[]): T | undefined {
+  const raw = process.env[name]?.trim();
+  return raw ? enumEnv(name, values, raw as T) : undefined;
+}
+
+/**
+ * The one editor brain every downstream call uses (Producer, Segmenter, Clipper).
+ * The installer records SNIPER_PROVIDER=codex|claude and SNIPER_BRAIN_PROVIDER=
+ * codex|legacy; when both are set they must name the same provider, otherwise
+ * the app refuses instead of mixing CLIs. Neither set: Claude Code (developer default).
+ */
 export function brainProvider(): BrainProvider {
-  // Claude Code is the visible Producer editor brain by default in both modes.
-  // Codex remains an explicit opt-in for controlled comparisons/fallbacks.
-  return enumEnv("SNIPER_BRAIN_PROVIDER", ["legacy", "codex"], "legacy");
+  const brain = optionalEnum("SNIPER_BRAIN_PROVIDER", ["legacy", "codex"] as const);
+  const chosen = optionalEnum("SNIPER_PROVIDER", ["claude", "codex"] as const);
+  const fromChoice = chosen === undefined ? undefined : chosen === "codex" ? "codex" : "legacy";
+  if (brain && fromChoice && brain !== fromChoice) {
+    throw new Error(`SNIPER_PROVIDER=${chosen} and SNIPER_BRAIN_PROVIDER=${brain} select different editor `
+      + "brains; run install/use-provider.command codex|claude so every call uses one provider");
+  }
+  return brain ?? fromChoice ?? "legacy";
+}
+
+/** The pinned CLI that serves the selected brain. */
+export function subscriptionProvider(provider: BrainProvider = brainProvider()): "codex" | "claude" {
+  return provider === "codex" ? "codex" : "claude";
 }
 
 export function brainProviderLabel(provider: BrainProvider = brainProvider()): string {
@@ -105,6 +128,7 @@ export function brainModel(provider: BrainProvider = brainProvider()): string {
  */
 export function claudeSettings(): ClaudeSettings {
   return {
+    bin: safeCliValue("CLAUDE_BIN", "claude"),
     model: safeClaudeModel(safeCliValue("SNIPER_CLAUDE_MODEL", DEFAULT_CLAUDE_MODEL)),
   };
 }
@@ -157,5 +181,6 @@ export function claudeProcessEnv(source: EnvSource = process.env): NodeJS.Proces
     ([key, value]) => value !== undefined && CLAUDE_ENV_KEYS.has(key),
   )) as NodeJS.ProcessEnv;
   env.CLAUDE_CODE_DISABLE_FAST_MODE = "1";
+  env.DISABLE_AUTOUPDATER = "1";
   return env;
 }

@@ -2,7 +2,7 @@
 
 Usage: .venv/bin/python scripts/producer/tests/fixtures/create_studio_ui_fixture.py WORKSPACE
 The project must not exist. No critic, approval, or delivery receipt is created.
-The base contains the opening hook card rendered by the existing overlay lane.
+The base is the untouched synthetic color plate; graphics remain editable.
 The source is a color plate plus tone, not dialogue; its transcript is empty.
 Plan validity is checked with the real template/matrix/transcript gates, but
 is not evidence of perceptual quality or production throughput.
@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -19,6 +20,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from fingerprints import file_sha256, fingerprint_record
 from fingerprint_io import write_json_atomic
+from base_reuse import observe_inputs, seal_binding
 from graphics.template_contract import validate_entry
 from graphics_planner import output_words
 from plan_lint import lint
@@ -26,7 +28,6 @@ from plan_lint import lint
 _DURATION = 18
 _CANVAS = [1080, 1920]
 _DATE = "2026-09-06T00:00:00Z"
-_PRODUCER_ROOT = Path(__file__).resolve().parents[2]
 
 
 def _write(path: Path, value: object) -> None:
@@ -40,20 +41,20 @@ def _plan() -> dict:
     """A legal short/light plan with independent timing and copy targets."""
     return {
         "planVersion": 1, "target": {"mode": "short", "scope": "light",
-            "durationTargetS": _DURATION, "graphicsStyle": "overlay-rich"},
+            "durationTargetS": _DURATION},
         "cutTrack": [{"sourceId": "raw-1", "start": 0, "end": _DURATION, "speed": 1}],
         "reframe": {"strategy": "center"}, "captions": {"burn": False},
         "music": {"enabled": False}, "brollTrack": [],
-        "titleCards": [{"style": "hook", "text": "Studio review",
-                        "outStart": 0, "outEnd": 1}],
+        "titleCards": [],
         "graphicsTrack": [
-            {"id": "g-00000001", "kind": "text-element", "outStart": 1, "outEnd": 3.5,
+            {"id": "g-00000001", "kind": "marker-highlight", "outStart": 1, "outEnd": 3.5,
              "anchor": "free-band", "reason": "synthetic timing-control test",
-             "spec": {"text": "Review the system", "fontSize": 64}},
-            {"id": "g-00000002", "kind": "icon-badge", "outStart": 6, "outEnd": 9,
-             "anchor": "free-band", "reason": "synthetic pinned-icon preview",
-             "spec": {"icon1": "youtube", "icon2": "", "icon3": "", "icon4": "",
-                      "at1": 0.2, "label": ""}},
+             "spec": {"text": "Review the system", "emphasisWord": "system",
+                      "drawAt": 1, "style": "highlight"}},
+            {"id": "g-00000002", "kind": "line-swap", "outStart": 6, "outEnd": 9,
+             "anchor": "free-band", "reason": "synthetic paired-copy preview",
+             "spec": {"lineA": "More tactics", "lineB": "One system",
+                      "swapAt": 1.2, "underlineWord": ""}},
             {"id": "g-00000003", "kind": "hw-callout-circle", "outStart": 12,
              "outEnd": _DURATION, "anchor": "free-band",
              "reason": "synthetic supported label-copy test ending with output",
@@ -114,21 +115,20 @@ def validate_fixture_plan(plan: dict, manifest: dict, producer: Path) -> list[st
     return report.warnings
 
 
-def _base_media(source: Path, producer: Path, plan: dict) -> None:
-    """Bake the declared hook through the real overlay lane, never a final."""
-    cards = producer / "synthetic_title_cards.json"
-    _write(cards, plan["titleCards"])
-    subprocess.run([
-        sys.executable, str(_PRODUCER_ROOT / "captions" / "overlays.py"),
-        str(source / "raw-1.mp4"), str(cards), str(producer / "base_final.mp4"),
-    ], check=True, capture_output=True, timeout=45)
+def _base_media(source: Path, producer: Path) -> None:
+    """Copy the synthetic source; all catalog graphics remain editable."""
+    shutil.copyfile(source / "raw-1.mp4", producer / "base_final.mp4")
 
 
-def _project_documents(producer: Path, plan: dict, manifest: dict) -> None:
+def _project_documents(producer: Path, plan: dict, manifest: dict, inputs: dict) -> None:
     """Write initial draft metadata only after the declared base exists."""
     _write(producer / "edit_plan.json", plan)
     _write(producer / "base_plan.json", plan)
-    _write(producer / "base.fingerprint.json", fingerprint_record(plan))
+    receipt = {**fingerprint_record(plan),
+               "manifestPath": str(producer / "asset_manifest.json"),
+               "baseReuse": seal_binding(str(producer / "base_final.mp4"),
+                                         plan, inputs, "legacy-v1")}
+    _write(producer / "base.fingerprint.json", receipt)
     _write(producer / "asset_manifest.json", manifest)
     _write(producer.parent / "source" / "asset_manifest.json", manifest)
     _write(producer.parent / "project.json", {
@@ -149,8 +149,11 @@ def create(workspace: Path, name: str = "studio-ui-synthetic") -> dict:
     _source_media(source / "raw-1.mp4")
     plan, manifest = _plan(), _manifest(source)
     warnings = validate_fixture_plan(plan, manifest, producer)
-    _base_media(source, producer, plan)
-    _project_documents(producer, plan, manifest)
+    inputs = observe_inputs(manifest)
+    _base_media(source, producer)
+    if observe_inputs(manifest) != inputs:
+        raise RuntimeError("synthetic source changed while rendering its base")
+    _project_documents(producer, plan, manifest, inputs)
     _register(workspace, producer)
     return {"project": str(project), "producerDir": str(producer),
             "syntheticTestOnly": True, "planErrors": [], "planWarnings": warnings,

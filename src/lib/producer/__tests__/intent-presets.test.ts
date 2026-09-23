@@ -21,6 +21,7 @@ import {
   presetToIntent,
   resolveLanes,
   validateIntent,
+  validateReferenceIntent,
   type Lane,
 } from "../intent-presets";
 
@@ -117,9 +118,6 @@ const PRODUCER_CONFIG = readFileSync(
   assert.deepEqual(
     Object.keys(byId).sort(),
     [
-      "angela-involved",
-      "caleb-light",
-      "jadenly-produced",
       "light-short",
       "longform-produced",
       "produced-short",
@@ -141,32 +139,10 @@ const PRODUCER_CONFIG = readFileSync(
   assert.deepEqual(activeSet("trim", byId["trim-only"].lanes), []);
   assert.equal(byId["trim-only"].mode, null, "trim-only follows the Short|Long toggle");
 
-  // STYLE presets — pace/style pair up; music remains operator-opt-in.
-  // Caleb light: captions carry the reel; motion waived (CALEB_STYLE §3 Z1);
-  // no bed (§6 M1); no dialogue cleanup (§6 M3: breath gaps stay).
-  assert.deepEqual(activeSet("light", byId["caleb-light"].lanes), ["captions"]);
-  assert.equal(byId["caleb-light"].pace, "caleb");
-  assert.equal(byId["caleb-light"].style, "caleb");
-  assert.equal(byId["caleb-light"].music, false);
-  assert.equal(byId["caleb-light"].audioEnhance, undefined);
-  // Jaden recommends a bed, but selecting the style must not enable one.
-  assert.deepEqual(activeSet("produced", byId["jadenly-produced"].lanes),
-    LANES.filter((lane) => lane !== "transitions"));
-  assert.equal(byId["jadenly-produced"].pace, "jadenly");
-  assert.equal(byId["jadenly-produced"].style, "jadenly");
-  assert.equal(byId["jadenly-produced"].music, false);
-  // Angela has the same explicit-checkbox safety contract.
-  assert.equal(byId["angela-involved"].scope, "full");
-  assert.deepEqual(activeSet("full", byId["angela-involved"].lanes),
-    LANES.filter((lane) => lane !== "motion" && lane !== "transitions"));
-  assert.equal(byId["angela-involved"].pace, "angela");
-  assert.equal(byId["angela-involved"].style, "angela");
-  assert.equal(byId["angela-involved"].music, false);
-  for (const s of STYLES) {
-    const p = INTENT_PRESETS.find((x) => x.style === s);
-    assert.ok(p, `no preset carries style "${s}"`);
-    assert.equal(p!.mode, "short", `${p!.id}: style grammars are shorts-measured only`);
-    assert.equal(p!.pace, s, `${p!.id}: pace must name the pacing_${s} profile`);
+  // Historical style identifiers remain readable, but cannot select a design.
+  for (const style of STYLES) {
+    assert.ok(!INTENT_PRESETS.some(p => p.style === style));
+    assert.throws(() => validateIntent({ mode: "short", scope: "produced", style }), /retired/);
   }
 
   for (const p of INTENT_PRESETS) {
@@ -219,11 +195,29 @@ const PRODUCER_CONFIG = readFileSync(
   assert.throws(() => validateIntent({ ...good, lanes: { broll: "yes" } }), /directive/);
   assert.throws(() => validateIntent({ ...good, lanes: { broll: ["b1"] } }), /asset lists/);
   assert.throws(() => validateIntent({ ...good, pace: "fast" }), /pace/);
-  assert.throws(() => validateIntent({ ...good, style: "mrbeast" }), /style/);
-  assert.deepEqual(validateIntent({ ...good, style: "caleb", pace: "caleb" }).style, "caleb");
+  assert.throws(() => validateIntent({ ...good, style: "cinematic" }), /style/);
+  assert.throws(() => validateIntent({ ...good, style: "restrained", pace: "restrained" }), /retired/);
   assert.throws(() => validateIntent({ ...good, audioEnhance: { preset: "loud" } }), /audioEnhance/);
   assert.throws(() => validateIntent({ ...good, music: "yes" }), /music/);
-  assert.throws(() => validateIntent({ mode: "reel", scope: "light", lanes: {} }), /mode/);
+  assert.throws(() => validateIntent({ mode: "vertical", scope: "light", lanes: {} }), /mode/);
+}
+
+// 7b) Every built-in style name is closed to new-style candidates, in any case.
+{
+  const reference = { id: "ref_1", title: "Study", mode: "short", strategy: "new-style" };
+  for (const style of STYLES) {
+    for (const name of [style, style.toUpperCase()]) {
+      assert.throws(
+        () => validateReferenceIntent({ ...reference, candidateStyleName: name }),
+        /outside Restrained, Punch, and Slideware/,
+        `candidate ${name} must be rejected as a closed style`,
+      );
+    }
+  }
+  assert.equal(
+    validateReferenceIntent({ ...reference, candidateStyleName: "Quiet explainer" }).candidateStyleName,
+    "Quiet explainer",
+  );
 }
 
 // 8) Badge text.

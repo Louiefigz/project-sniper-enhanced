@@ -106,19 +106,24 @@ assert.match(baseCommands[7].script, /planner[/\\]geometry_feasibility\.py$/);
 const referenceInput: GateBundleInput = {
   ...baseInput,
   reference: {
-    profilePath: "/references/caleb/style_profile.json",
+    profilePath: "/references/restrained/style_profile.json",
     intent: {
-      id: "ref-caleb",
-      title: "Measured Caleb edit",
+      id: "ref-restrained",
+      title: "Measured Restrained edit",
       mode: "short",
-      strategy: "extend",
-      targetStyle: "caleb",
+      strategy: "mimic",
     },
   },
 };
 const referenceCommand = planningGateCommands(referenceInput).at(-1)!;
 assert.equal(referenceCommand.gate, "reference_lint");
-assert.deepEqual(referenceCommand.args.slice(-2), ["--target-style", "caleb"]);
+assert.deepEqual(referenceCommand.args.slice(-2), ["--strategy", "mimic"]);
+assert.ok(!referenceCommand.args.includes("--target-style"));
+assert.throws(() => planningGateCommands({ ...referenceInput, reference: {
+  ...referenceInput.reference!, intent: {
+    ...referenceInput.reference!.intent, strategy: "extend", targetStyle: "restrained",
+  } as unknown as NonNullable<GateBundleInput["reference"]>["intent"],
+} }), /Legacy style extension is retired/);
 
 function jsonResult(value: unknown, exit = 0) {
   return { stdout: JSON.stringify(value), stderr: "", exit, processGroupStopped: true };

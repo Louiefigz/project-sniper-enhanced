@@ -55,14 +55,9 @@ _OPENERS = frozenset({"a", "an", "the", "my", "our", "your", "his", "her",
 _STRIP_DETERMINERS = frozenset({"a", "an", "the"})
 
 
-def whiteboard_maps(words: list[dict], mode: str, state_fn,
-                    out_dur: float) -> list[dict]:
-    """whiteboard-map candidates from 3+-item coordinations in the words.
-
-    Only sentences whose zone is talking-head fire (R14 is talking-head
-    grammar); the caller gates mode/canvas."""
-    return [_map_candidate(words, span, items, (mode, out_dur))
-            for span, items in _list_scan(words, state_fn)]
+def whiteboard_maps(*args: object, **kwargs: object) -> None:
+    """Retired local-template selection; use the upstream catalog."""
+    raise ValueError("Legacy list templates are retired; select the HyperFrames catalog")
 
 
 def pip_aware_maps(ctx) -> list[dict]:
@@ -205,68 +200,14 @@ def _item_opener(cleaned: list[str], seg: tuple[int, int]) -> int | None:
     return None
 
 
-def _map_candidate(words: list[dict], span: tuple[int, int],
-                   items: list[tuple[int, int]], target: tuple) -> dict:
-    """A whiteboard-map cutaway: title = framing phrase, nodes land with speech.
-
-    ``target`` = (mode, out_dur). atN = each item's spoken start relative to
-    outStart (the chip atN convention). The window rides the SPOKEN span
-    (framing start → last item + exit pad), capped by the mode's hold ceiling
-    — a cutaway is a scene, not an overlay (the pro's ran 8.5s)."""
-    mode, out_dur = target
-    hold_max = MOTION["hold_max_s"].get(mode, MOTION["hold_max_s"]["short"])
-    out_start = float(words[span[0]]["start"])
-    last_end = float(words[items[-1][1]]["end"])
-    out_end = min(out_dur, last_end + WHITEBOARD_EXIT_PAD_S,
-                  out_start + hold_max)
-    spec: dict = {"title": phrase(words, span[0], items[0][0] - 1,
-                                  TITLE_MAX_WORDS)}
-    for n, (i, j) in enumerate(items, start=1):
-        spec[f"node{n}"] = _node_text(words, i, j)
-        spec[f"at{n}"] = round(max(0.0, float(words[i]["start"]) - out_start), 2)
-    return {"outStart": round(out_start, 3), "outEnd": round(out_end, 3),
-            "kind": "whiteboard-map", "spec": spec, "anchor": "own-screen",
-            "confidence": "high", "trigger": "enumeration",
-            "reason": f"{len(items)} listed items → whiteboard-map cutaway "
-                      "(R14: full-frame canvas; atN = spoken land times)",
-            "evidence": phrase(words, span[0], items[-1][1], 0),
-            "needsOperator": True}
+def _map_candidate(*args: object, **kwargs: object) -> None:
+    """Retired local-template selection; use the upstream catalog."""
+    raise ValueError("Legacy list templates are retired; select the HyperFrames catalog")
 
 
-def _long_list_candidate(words: list[dict], span: tuple[int, int],
-                         items: list[tuple[int, int]], target: tuple) -> dict:
-    """A legal long-list cutaway, upgrading to speaker PiP when wired."""
-    mode, out_dur = target
-    # This lane is longform-only (pip_aware_maps' caller gates mode) → 16:9;
-    # the measured matrix must also clear the PiP form before it upgrades.
-    use_pip = is_gate_executable_kind("canvas-pip-list") \
-        and is_aspect_legal_kind("canvas-pip-list", "16:9")
-    kind = "canvas-pip-list" if use_pip else "whiteboard-list"
-    total = len(items)
-    items = items[:PIP_MAX_ITEMS if use_pip else LIST_MAX_ITEMS]
-    hold_max = MOTION["hold_max_s"].get(mode, MOTION["hold_max_s"]["short"])
-    out_start = float(words[span[0]]["start"])
-    last_end = float(words[items[-1][1]]["end"])
-    out_end = min(out_dur, last_end + WHITEBOARD_EXIT_PAD_S,
-                  out_start + hold_max)
-    spec: dict = {"title": phrase(words, span[0], items[0][0] - 1,
-                                  TITLE_MAX_WORDS)}
-    for n, (i, j) in enumerate(items, start=1):
-        spec[f"item{n}"] = _node_text(words, i, j)
-        spec[f"at{n}"] = round(max(0.0, float(words[i]["start"]) - out_start), 2)
-    kept = f"first {len(items)} of {total}" if total > len(items) else str(total)
-    reason = (f"{kept} listed items → canvas-pip-list cutaway (R24: speaker "
-              "stays as a wired PiP inset; atN = spoken land times)" if use_pip
-              else f"{kept} listed items → whiteboard-list cutaway (gate-legal "
-              "fallback while canvas-pip-list's PiP renderer is unwired)")
-    row = {"outStart": round(out_start, 3), "outEnd": round(out_end, 3),
-           "kind": kind, "spec": spec, "anchor": "own-screen",
-           "confidence": "high", "trigger": "enumeration", "reason": reason,
-           "evidence": phrase(words, span[0], items[-1][1], 0),
-           "needsOperator": True}
-    if use_pip:
-        row["needsPip"] = True
-    return row
+def _long_list_candidate(*args: object, **kwargs: object) -> None:
+    """Retired local-template selection; use the upstream catalog."""
+    raise ValueError("Legacy list templates are retired; select the HyperFrames catalog")
 
 
 def phrase(words: list[dict], i: int, j: int, cap: int) -> str:

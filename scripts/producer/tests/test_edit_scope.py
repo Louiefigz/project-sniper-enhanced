@@ -1,8 +1,12 @@
 """edit_scope tests — operator scope + per-lane directive resolution."""
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from _common import *  # noqa: F401,F403
 import edit_scope as es
+import operator_intent_contract as intent_contract
+import render as renderer
 
 
 class ScopeLadderTests(unittest.TestCase):
@@ -71,6 +75,55 @@ class DirectiveOverrideTests(unittest.TestCase):
         # "trim" excludes graphics; asking auto does not resurrect it.
         lanes = es.resolve_lanes({"scope": "trim", "lanes": {"graphics": "auto"}})
         self.assertEqual(lanes["graphics"], "off")
+
+
+class CaptionDeliveryScopeTests(unittest.TestCase):
+    """The intent gate must see the caption burn the renderer will execute."""
+
+    def _plan(self, mode: str) -> dict:
+        """Return a minimal trim plan whose caption lane is disabled."""
+        return {"target": {"mode": mode, "scope": "trim", "lanes": {}}}
+
+    def test_omitted_short_burn_is_rejected_for_trim(self) -> None:
+        """An implicit short default cannot hide a caption burn from intent."""
+        plan = self._plan("short")
+        verdict = intent_contract.evaluate(plan, plan["target"])
+        self.assertFalse(verdict["ok"])
+        self.assertTrue(verdict["metrics"]["laneEvidence"]["captions"])
+        ctx = SimpleNamespace(plan=plan)
+        with patch.object(renderer, "corrected_caption_words", return_value=[]):
+            with self.assertRaisesRegex(RuntimeError, "burn is on"):
+                renderer.captions_stage.__wrapped__(ctx, None)
+
+    def test_explicit_off_skips_caption_work_and_passes_trim(self) -> None:
+        """A no-captions request reaches neither compilation nor burn work."""
+        plan = self._plan("short")
+        plan["captions"] = {"burn": False}
+        self.assertTrue(intent_contract.evaluate(plan, plan["target"])["ok"])
+        with patch.object(renderer, "corrected_caption_words") as words:
+            self.assertIsNone(renderer.captions_stage.__wrapped__(
+                SimpleNamespace(plan=plan), None))
+        words.assert_not_called()
+
+    def test_longform_burn_cannot_bypass_disabled_lane(self) -> None:
+        """Sidecar policy does not excuse an explicitly requested pixel burn."""
+        plan = self._plan("longform")
+        self.assertTrue(intent_contract.evaluate(plan, plan["target"])["ok"])
+        plan["captions"] = {"burn": True}
+        verdict = intent_contract.evaluate(plan, plan["target"])
+        self.assertFalse(verdict["ok"])
+        self.assertTrue(verdict["metrics"]["laneEvidence"]["captions"])
+
+    def test_explicit_short_track_uses_the_same_default(self) -> None:
+        """A valid track with omitted burn is visible to the disabled-lane gate."""
+        plan = self._plan("short")
+        plan["captionsTrack"] = {
+            "schemaVersion": 1, "source": "kept-transcript",
+            "defaultPolicy": "karaoke", "groups": [],
+        }
+        verdict = intent_contract.evaluate(plan, plan["target"])
+        self.assertFalse(verdict["ok"])
+        self.assertTrue(verdict["metrics"]["laneEvidence"]["captions"])
 
 
 if __name__ == "__main__":

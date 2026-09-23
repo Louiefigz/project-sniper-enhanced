@@ -13,9 +13,8 @@ This guard makes the rebuild refit-free: unless the freshly authored plan's
 VIDEO fingerprint PROVABLY matches the recorded base, ``base_final.mp4`` is
 renamed to ``base_final.prev.mp4`` so ``ensure_base`` sees state ``missing``
 (full rebuild from the plan AS WRITTEN — the refit only stages on ``stale``).
-That includes a fingerprint-less base: the editor tolerates ``unverifiable``
-(don't block a human), but an auto-authored plan almost never matches an
-unproven base — assembling onto it would silently ship the OLD timeline.
+That includes a fingerprint-less base. Assembly requires current byte-bound
+evidence; neither a human nor an auto-authored plan can reuse an unproven base.
 A matching video fingerprint keeps the base untouched, so the fast paths
 (graphics-only composite, audio-only bus rebuild) stay available.
 
@@ -35,7 +34,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # producer pkg root
 
 from assemble_lock import pid_alive
-from fingerprints import recorded_fingerprints, video_fingerprint
+from fingerprints import recorded_fingerprints
+from base_reuse import binding_current, plan_digests
 
 
 def _live_lock_pid(lock_path: str) -> int | None:
@@ -70,8 +70,9 @@ def guard(out_dir: str) -> dict:
         return {"action": "none", "reason": "no base — assemble rebuilds from scratch"}
     reason = "fresh plan vs unproven base — forcing a no-refit full rebuild"
     if os.path.exists(fingerprint):
-        recorded = recorded_fingerprints(fingerprint).get("videoFingerprint")
-        if recorded and recorded == video_fingerprint(plan):
+        record = recorded_fingerprints(fingerprint)
+        expected = plan_digests(plan, record.get("audioClockPolicy", "legacy-v1"))
+        if binding_current(base, record) and record["baseReuse"].get("videoDigest") == expected["videoDigest"]:
             return {"action": "none",
                     "reason": "video fingerprint matches — fast paths stay valid"}
         reason = "fresh plan vs stale base — forcing a no-refit full rebuild"

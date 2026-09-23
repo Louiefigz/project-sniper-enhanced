@@ -15,15 +15,23 @@ from _current_render_build_fixture import current_receipt as historical_render_v
 from _current_build_release_fixture import current_manifest, current_receipt
 from headless import prebound_compositor_build as compositor
 from headless import render_build as render
-from headless.compositor_build_manifest_v2_contract import COMPOSITOR_BUILD_V2_IMPLEMENTATION_PATHS
+from headless.compositor_build_manifest_v3_semantics import COMPOSITOR_BUILD_V3_IMPLEMENTATION_PATHS
 from headless.compositor_build_receipt_semantics import parse_compositor_build_receipt_v1
-from headless.compositor_build_receipt_v2_semantics import parse_compositor_build_receipt_v2
-from headless.render_build_manifest_v3_contract import RENDER_BUILD_V3_IMPLEMENTATION_PATHS
+from headless.compositor_build_receipt_v3_semantics import parse_compositor_build_receipt_v3
+from headless.render_build_manifest_v4_semantics import RENDER_BUILD_V4_IMPLEMENTATION_PATHS
 from headless.render_build_receipt import encode_render_build_receipt
 from headless.render_build_receipt_v2_semantics import parse_render_build_receipt_v2
-from headless.render_build_receipt_v3_semantics import parse_render_build_receipt_v3
+from headless.render_build_receipt_v4_semantics import parse_render_build_receipt_v4
 
 FROZEN_SOURCES = {
+    "headless/compositor_build_manifest_v2_contract.py": "29f24f459685a6457cc84cb2665dfa80a9189956522dacc0c080872b50df0157",
+    "headless/compositor_build_manifest_v2_semantics.py": "2dc172d64fd7c105f09b8e95bda057cb961a1b448ef0d4d34cc2cc6dd1ec2ca7",
+    "headless/compositor_build_receipt_v2_semantics.py": "5e6edd35c578354bb10f68475fba1f824d45a6ed06e81b63813ab5e0ec6ad81c",
+    "headless/render_build_manifest_v3_contract.py": "5b6e2ea67228ceb37695f78897fe68aef2aff001e7db5c657da067c3dbb03910",
+    "headless/render_build_manifest_v3_semantics.py": "02d98116ff531f2a5692ae53cebfa16e0d4707b93e8e4d4dc7d0da377d240c3b",
+    "headless/render_build_receipt_v3_semantics.py": "8a6ed9eefd8f9c719a80fd079f39ecee41fbff499f41949b507548936e242e99",
+    "tests/_pre_catalog_build_fixture.py": "299a400b407afae235c2fe0585c8584e0c52d5ca24d7a179332b8f6cf840be0b",
+
     "headless/compositor_build_manifest_v1_contract.py": "99409fa994f7da450ba2e61928f44e9c605f7de6d2fabb8bcf7f52c4b8110921",
     "headless/compositor_build_manifest_semantics.py": "592828973aff79515d24f6c48e6a7ecf3968c763fd416f060955d9dfd41c7f07",
     "headless/compositor_build_receipt_semantics.py": "3228def5b2e6a00d7ee59332d464df690487fb7415421ed00ec4ef92c8305d03",
@@ -40,20 +48,23 @@ class CurrentBuildReleaseTests(unittest.TestCase):
 
     def test_both_current_catalogs_cover_complete_static_import_closures(self) -> None:
         """Include the version validators themselves as well as renderer sources."""
-        for paths in (COMPOSITOR_BUILD_V2_IMPLEMENTATION_PATHS, RENDER_BUILD_V3_IMPLEMENTATION_PATHS):
+        for paths in (COMPOSITOR_BUILD_V3_IMPLEMENTATION_PATHS, RENDER_BUILD_V4_IMPLEMENTATION_PATHS):
             with self.subTest(first=paths[0], count=len(paths)):
                 self.assertEqual(len(paths), len(set(paths)))
                 closure = local_import_closure(paths)
                 self.assertFalse(closure - set(paths), sorted(closure - set(paths)))
                 self.assertFalse(dynamic_import_calls(closure))
-        self.assertIn("templates/motion/tokens.css", COMPOSITOR_BUILD_V2_IMPLEMENTATION_PATHS)
+        self.assertIn("templates/motion/tokens.css", COMPOSITOR_BUILD_V3_IMPLEMENTATION_PATHS)
+        for paths in (COMPOSITOR_BUILD_V3_IMPLEMENTATION_PATHS, RENDER_BUILD_V4_IMPLEMENTATION_PATHS):
+            self.assertIn("schemas/producer/visual-source-policy-v1.json", paths)
+            self.assertIn("scripts/producer/graphics/visual_source_policy.py", paths)
 
-    def test_current_compositor_writer_emits_exact_v2_and_rejects_old_context(self) -> None:
+    def test_current_compositor_writer_emits_exact_v3_and_rejects_old_context(self) -> None:
         """Current static receipt agrees with current digest, without media proof."""
         raw = compositor.compositor_build_receipt_bytes()
-        parsed = parse_compositor_build_receipt_v2(raw)
+        parsed = parse_compositor_build_receipt_v3(raw)
         self.assertEqual(parsed.build_digest, compositor.compositor_build_digest())
-        self.assertEqual(compositor.BUILD_SCHEMA_VERSION, 2)
+        self.assertEqual(compositor.BUILD_SCHEMA_VERSION, 3)
         self.assertEqual(tuple(row.path for row in parsed.manifest.implementation), compositor._IMPLEMENTATION_FILES)
         with self.assertRaises(RuntimeError):
             parse_compositor_build_receipt_v1(raw)
@@ -63,15 +74,15 @@ class CurrentBuildReleaseTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             compositor.validate_compositor_context(context)
 
-    def test_current_render_receipt_matches_independent_v3_encoding(self) -> None:
+    def test_current_render_receipt_matches_independent_v4_encoding(self) -> None:
         """The current writer, pure parser and source catalog must agree."""
         manifest = current_manifest()
         raw = encode_render_build_receipt(manifest)
         self.assertEqual(raw, current_receipt(manifest))
-        parsed = parse_render_build_receipt_v3(raw)
+        parsed = parse_render_build_receipt_v4(raw)
         self.assertEqual(parsed.build_digest, render.render_build_manifest_digest(manifest))
-        self.assertEqual(render.BUILD_SCHEMA_VERSION, 3)
-        self.assertEqual(render._IMPLEMENTATION_FILES, RENDER_BUILD_V3_IMPLEMENTATION_PATHS)
+        self.assertEqual(render.BUILD_SCHEMA_VERSION, 4)
+        self.assertEqual(render._IMPLEMENTATION_FILES, RENDER_BUILD_V4_IMPLEMENTATION_PATHS)
 
     def test_loaded_compositor_source_drift_is_not_adopted(self) -> None:
         """A fresh hash result cannot replace the original loaded release identity."""
@@ -87,14 +98,32 @@ class CurrentBuildReleaseTests(unittest.TestCase):
         parsed = parse_compositor_build_receipt_v1(raw)
         self.assertEqual(parsed.build_digest, compositor.compositor_build_manifest_digest(json.loads(raw)["manifest"]))
         with self.assertRaises(RuntimeError):
-            parse_compositor_build_receipt_v2(raw)
+            parse_compositor_build_receipt_v3(raw)
         raw = historical_render_v2()
         self.assertEqual(hashlib.sha256(raw).hexdigest(),
                          "5280a351f393361a8d94c7d72d9d1e20b6bf36738b1dddf5b010a19ba2b21d90")
         parsed = parse_render_build_receipt_v2(raw)
         self.assertEqual(parsed.build_digest, render.render_build_manifest_digest(json.loads(raw)["manifest"]))
         with self.assertRaises(RuntimeError):
-            parse_render_build_receipt_v3(raw)
+            parse_render_build_receipt_v4(raw)
+
+    def test_pre_catalog_receipts_remain_readable_but_not_current(self) -> None:
+        """Preserve V2/V3 history without allowing its policy to authorize new work."""
+        from _pre_catalog_build_fixture import current_compositor_receipt as old_compositor
+        from _pre_catalog_build_fixture import current_receipt as old_render
+        from headless.compositor_build_receipt_v2_semantics import parse_compositor_build_receipt_v2
+        from headless.render_build_receipt_v3_semantics import parse_render_build_receipt_v3
+        for raw, historical, current, compute in (
+            (old_compositor(), parse_compositor_build_receipt_v2,
+             parse_compositor_build_receipt_v3, compositor.compositor_build_manifest_digest),
+            (old_render(), parse_render_build_receipt_v3,
+             parse_render_build_receipt_v4, render.render_build_manifest_digest),
+        ):
+            parsed = historical(raw)
+            self.assertEqual(parsed.document_json, raw)
+            self.assertEqual(parsed.build_digest, compute(json.loads(parsed.manifest.document_json)))
+            with self.assertRaises(RuntimeError):
+                current(raw)
 
     def test_frozen_sources_and_fixtures_remain_exact_bytes(self) -> None:
         """Prevent compatibility tests from following a silently rewritten baseline."""

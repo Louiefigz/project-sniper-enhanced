@@ -261,9 +261,9 @@ def scan_builtin_music(builtin_dir: Optional[Path],
     """Catalog repo-bundled starter beds (``PROJECT_SNIPER/assets/music/*``).
 
     Registered AFTER the project's own ``music/`` scan so ``plan.music.assetId``
-    resolves out of the box on a project with no music folder (JADEN_STYLE.md
-    §6 M1: 6/6 reels carry a bed — the §11 reproduction shipped bed-less
-    because the manifest had no music entry). Additive: ids continue the
+    resolves out of the box on a project with no music folder (the Punch and
+    Slideware styles recommend a bed the operator can opt into —
+    PUNCH_STYLE.md §6 M1, SLIDEWARE_STYLE.md §7 AM1). Additive: ids continue the
     ``music-N`` sequence over ``existing``; a path already cataloged (the
     project's music dir IS the assets dir) is skipped. ``licensed: True`` —
     the bundled beds are synthesized in-repo (no third-party rights);

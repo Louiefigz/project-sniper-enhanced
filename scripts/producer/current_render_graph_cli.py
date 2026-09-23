@@ -31,6 +31,7 @@ from current_render_toolchain import current_toolchain_hash
 from cut_delivery_authority import base_plan_lineage_digest
 from render_stage_roots import stage_input_roots
 from stage_timing_context import timing_environment
+from render_readiness import ReadinessRequest, require_readiness
 
 _PENDING_KEYS = {
     "schemaVersion", "kind", "planSha256", "basePlanDigest",
@@ -243,6 +244,8 @@ def _commit_assemble(
 def execute(config: RunConfig) -> int:
     """Preflight immutable dependencies, run real media work, then commit."""
     validate_audio_command(config.inputs.audio_clock_policy, config.command)
+    require_readiness(ReadinessRequest(str(config.inputs.plan_path),
+        str(config.inputs.manifest_path), str(config.inputs.producer_dir)))
     previous, pending, toolchain_hash = _preflight(config)
     if _clean_graph_hit(config, previous, pending, toolchain_hash):
         return 0

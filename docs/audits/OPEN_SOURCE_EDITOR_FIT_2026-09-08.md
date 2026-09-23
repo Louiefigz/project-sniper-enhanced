@@ -23,8 +23,8 @@ calls, generated avatar calls, external uploads, or complete video renders ran.
 
 **The actual Sniper target**
 
-The comparison follows [PIPELINE.md](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/docs/PIPELINE.md:1)
-and the September 6 [executable workflow matrix](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/docs/producer/command-driven-editing/12_SHORT_LONG_EXECUTABLE_MATRIX.md:1).
+The comparison follows [PIPELINE.md](/Users/maintainer/ProjectSniperSource/docs/PIPELINE.md:1)
+and the September 6 [executable workflow matrix](/Users/maintainer/ProjectSniperSource/docs/producer/command-driven-editing/12_SHORT_LONG_EXECUTABLE_MATRIX.md:1).
 It does not treat every aspiration in older plans as shipped behavior.
 
 Sniper is intended to take real recordings through editorial decisions, clean
@@ -104,14 +104,14 @@ state and contexts; they are not a drop-in editor. The SDK fits our primary
 headless workflow more directly. [Studio integration documentation](https://hyperframes.heygen.com/packages/studio).
 
 A runtime upgrade is more than an npm version edit. Sniper's
-[scene bundle schema](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/schemas/producer/scene-bundle-v1.schema.json:60),
-[TypeScript validator](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/src/lib/producer/contracts/scene-bundle.ts:144),
+[scene bundle schema](/Users/maintainer/ProjectSniperSource/schemas/producer/scene-bundle-v1.schema.json:60),
+[TypeScript validator](/Users/maintainer/ProjectSniperSource/src/lib/producer/contracts/scene-bundle.ts:144),
 and Python bundle validator explicitly require 0.7.33. Newer SDK-generated HTML
 must be checked against the intended renderer, and a runtime migration must
 renew the applicable capability/render evidence and invalidate affected caches.
 
 There is also no undiscovered catalog windfall: Sniper already has a substantial
-[read-only upstream catalog mirror](/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/README.md:1).
+[read-only upstream catalog mirror](/Users/maintainer/ProjectSniperSource/vendor/hyperframes-catalog/README.md:1).
 The remaining work is selecting, adapting, and qualifying components for our
 plan vocabulary and geometry. Catalog availability alone does not close it.
 

@@ -14,6 +14,29 @@ export interface LocalHookCopy {
   text: string;
   scope: "local-template-fill-not-editorial-approval";
 }
+export interface UserTitleCopy {
+  text: string;
+  scope: "user-supplied-title";
+}
+export type NativeTitleCopy = LocalHookCopy | UserTitleCopy;
+
+/** Preserve explicit operator copy without attributing it to a Director formula. */
+export function createUserTitleCopy(text: string): UserTitleCopy {
+  if (typeof text !== "string" || !text.trim() || text.length > 120
+      || /[\u0000-\u001f\u007f\u0085\u2028\u2029]/u.test(text)) {
+    throw new Error("User-supplied title must be nonblank single-line copy of at most 120 characters");
+  }
+  return { text, scope: "user-supplied-title" };
+}
+
+/** Validate the same exact user-copy contract at presentation and project boundaries. */
+export function assertUserTitleCopy(copy: UserTitleCopy): void {
+  if (!copy || typeof copy !== "object" || Array.isArray(copy) || copy.scope !== "user-supplied-title"
+      || Object.keys(copy).length !== 2 || Object.keys(copy).some((key) => !["scope", "text"].includes(key))) {
+    throw new Error("User-supplied title cannot claim template or library authority");
+  }
+  createUserTitleCopy(copy.text);
+}
 
 /** Select the canonical formula before drafting; never copy a second hook catalog. */
 export function fillLocalHookTemplate(catalog: DirectorCatalog, choice: LocalHookSelection): LocalHookCopy {
@@ -29,9 +52,9 @@ export function fillLocalHookTemplate(catalog: DirectorCatalog, choice: LocalHoo
         || /[\[\]\r\n]/u.test(value)) throw new Error("Hook slot must contain explicit single-line copy");
   }
   let formula = quoted[1];
-  // The canonical how-to formula explicitly makes its obstacle clause optional.
-  if (anchor.id === "value-how-to" && !Object.hasOwn(choice.slots, "obstacle")) {
-    formula = formula.replace(" (even if [obstacle])", "");
+  // steps-toward-goal declares its timeframe clause optional (resources/director/hook-anchors.md).
+  if (anchor.id === "steps-toward-goal" && !Object.hasOwn(choice.slots, "timeframe")) {
+    formula = formula.replace(" (in [timeframe])", "");
   }
   const missing = templateSlots(formula).filter((name) => !Object.hasOwn(choice.slots, name));
   if (missing.length) throw new Error(`Missing hook template slots: ${missing.join(", ")}`);
@@ -43,7 +66,12 @@ export function fillLocalHookTemplate(catalog: DirectorCatalog, choice: LocalHoo
 }
 
 /** Presentation may wrap the selected words but cannot silently rewrite their promise. */
-export function assertHookLineBreaks(copy: LocalHookCopy, lines: string[]): void {
+export function assertHookLineBreaks(copy: NativeTitleCopy, lines: string[]): void {
+  if (copy?.scope === "user-supplied-title") {
+    assertUserTitleCopy(copy);
+  } else if (copy?.scope !== "local-template-fill-not-editorial-approval") {
+    throw new Error("Unknown native title copy scope");
+  }
   const normalize = (text: string) => text.replace(/\s+/gu, " ").trim();
   if (!Array.isArray(lines) || lines.length < 1 || lines.length > 3
       || lines.some((line) => typeof line !== "string" || !line.trim() || /[\r\n]/u.test(line))

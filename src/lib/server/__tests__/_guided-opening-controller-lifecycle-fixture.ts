@@ -24,6 +24,13 @@ interface LaunchOptions {
   sourceColor?: GuidedSourceColorV1; origin?: { clockHash: string; startedAt: string }; requestId?: string; token?: string;
 }
 
+/** Completed TEST media uses origin+1/+2/+3 seconds; none may be in the future. */
+export function completedMediaFixtureStart(observedAt = Date.now()): string {
+  const started = new Date(observedAt - 3_000);
+  started.setUTCSeconds(0, 0);
+  return started.toISOString();
+}
+
 /** Same explicit TEST OS identity as the real TEMP lease; no controller or worker is started. */
 export function launchOpeningControllerFixture(dir: string, before: string, options: LaunchOptions = {}) {
   const hash = "a".repeat(64), at = options.origin?.startedAt ?? new Date().toISOString();

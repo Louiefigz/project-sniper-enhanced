@@ -6,13 +6,15 @@ import subprocess
 import tempfile
 import time
 import unittest
+from unittest import mock
 from pathlib import Path
 
 import numpy as np
 from PIL import Image
 
 from _guided_caption_body_fixture import CaptionBodyFixture
-from _guided_caption_integration_fixture import graphic, preparation
+from _guided_caption_integration_fixture import graphic, plan_for_profile, preparation
+from assemble import AssembleJob, assemble
 from audio.audio_mix_picture import packet_signature
 from cut_preview_io import bound_json, digest, file_hash, write_new
 from guided_body_result import observe_body_media, verify_body_media_files
@@ -103,6 +105,21 @@ class SharedCaptionActualMediaTests(unittest.TestCase):
         delta = np.abs(final.astype(np.int16) - base.astype(np.int16))
         self.assertGreater(float(np.mean(delta[mask])), 10,
                            "held late-caption glyph area must visibly differ from the caption-free base")
+
+    def test_retired_fixture_plan_refused_before_any_media_or_output(self) -> None:
+        """Historical kind metadata cannot revive the assembly execution path."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            for short, retired in ((False, "statement-card"), (True, "kinetic-quote")):
+                plan = plan_for_profile(short)
+                plan["graphicsTrack"][0]["kind"] = retired
+                job = AssembleJob(str(root / "missing-base.mp4"), plan,
+                                  str(root / "must-not-exist.mp4"), None)
+                with self.subTest(kind=retired), mock.patch("subprocess.run") as run:
+                    with self.assertRaisesRegex(ValueError, "retired"):
+                        assemble(job)
+                run.assert_not_called()
+                self.assertEqual(list(root.iterdir()), [])
 
     def test_landscape_line(self) -> None:
         self._run(False)

@@ -148,7 +148,7 @@ existing final videos.
 The subsequent operator-requested commit checkpoints that existing catalog
 separately from repair commit `394029f`. Its exact SHA-256 is
 `3f25ab0810cd0dd47c074ce9eede3a79c2bcc215331cfe0117c175f68f57ac7f`.
-The semantic changes are a one-pixel reduction of the `jaden-shout-lockup`
+The semantic changes are a one-pixel reduction of the `punch-shout-lockup`
 bounding box and dimensions, plus the capability and source digests; the rest
 of the textual change is JSON formatting. The bytes were preserved without
 regenerating or relabeling their measurements.

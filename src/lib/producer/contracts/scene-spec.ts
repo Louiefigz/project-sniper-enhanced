@@ -1,3 +1,4 @@
+import { requireCatalogKind } from "../visual-source-policy";
 import {
   enumValue,
   exactKeys,
@@ -232,7 +233,10 @@ function parseProvenance(value: unknown): SceneProvenanceV1 {
 /** Parse all non-template-specific SceneSpecV1 invariants. */
 export function parseSceneSpecV1(value: unknown): SceneSpecV1 {
   const scene = objectValue(value, "SceneSpecV1");
-  exactKeys(scene, ROOT_KEYS, ROOT_KEYS, "SceneSpecV1");
+  exactKeys(scene, [...ROOT_KEYS, "visualSources"], ROOT_KEYS, "SceneSpecV1");
+  const source = objectValue(scene.composition, "scene composition");
+  if (source.type === "catalog") requireCatalogKind(source.kind);
+  if (source.type === "project" && !scene.visualSources) throw new Error("Project scenes require visualSources evidence");
   if (scene.schemaVersion !== 1
       || !Array.isArray(scene.elements) || scene.elements.length === 0
       || !Array.isArray(scene.renderUnits) || scene.renderUnits.length === 0
@@ -270,6 +274,7 @@ export function parseSceneSpecV1(value: unknown): SceneSpecV1 {
     ),
     dependencies,
     provenance: parseProvenance(scene.provenance),
+    ...(scene.visualSources ? { visualSources: objectValue(scene.visualSources, "visualSources") } : {}),
   };
 }
 

@@ -43,19 +43,19 @@ from tests.p5_review_evidence import (
     resource_snapshot,
 )
 from tests._build_manifest_import_closure import local_import_closure
-from tests.scene_fixtures import fire_sparkles_scene
+from tests.scene_fixtures import bind_test_scene_source, fire_sparkles_scene
 
 REPO = Path(__file__).parents[3]
 _ENTRYPOINTS = (
     "scripts/producer/tests/live_p5_review_repair_acceptance.py",
 )
 _DYNAMIC_FILES = (
-    "scripts/producer/tests/fixtures/fire-sparkles-bundle/bundle.json",
-    "scripts/producer/tests/fixtures/fire-sparkles-bundle/compositions/full.html",
-    "scripts/producer/tests/fixtures/fire-sparkles-bundle/compositions/scene-common.js",
-    "scripts/producer/tests/fixtures/fire-sparkles-bundle/compositions/scene.css",
-    "scripts/producer/tests/fixtures/fire-sparkles-bundle/compositions/unit-left.html",
-    "scripts/producer/tests/fixtures/fire-sparkles-bundle/compositions/unit-right.html",
+    "scripts/producer/tests/fixtures/fire-sparkles-bundle-0831/bundle.json",
+    "scripts/producer/tests/fixtures/fire-sparkles-bundle-0831/compositions/full.html",
+    "scripts/producer/tests/fixtures/fire-sparkles-bundle-0831/compositions/scene-common.js",
+    "scripts/producer/tests/fixtures/fire-sparkles-bundle-0831/compositions/scene.css",
+    "scripts/producer/tests/fixtures/fire-sparkles-bundle-0831/compositions/unit-left.html",
+    "scripts/producer/tests/fixtures/fire-sparkles-bundle-0831/compositions/unit-right.html",
     "schemas/producer/channel-normalization-receipt-v1.schema.json",
     "schemas/producer/scene-bundle-v1.schema.json",
     "schemas/producer/scene-package-v1.schema.json",
@@ -146,6 +146,7 @@ def _forced_scene(
         "zIndex": 10, "entry": "compositions/full.html",
         "compositeMode": "normal", "palmierGranularity": "unit",
     }]
+    bind_test_scene_source(control)  # Author this separate TEST oracle's unit layout.
     bindings = {
         "sceneId": scene["sceneId"],
         "entries": [{

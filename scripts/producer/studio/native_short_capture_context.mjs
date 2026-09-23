@@ -6,6 +6,7 @@ import {createHash} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import {nativeSourceCacheEntry,prepareNativeSourceCache,nativeSourceFileIdentity,nativeSourceMetadata} from './native_source_cache.mjs';
 import {nativeOriginalMediaGuard} from './native_original_media.mjs';
+import {prepareLongSources} from './native_long_sources.mjs';
 export {nativeSourceCacheEntry} from './native_source_cache.mjs';
 
 export const NATIVE_CAPTURE_BATCH_FRAMES = 48;
@@ -75,15 +76,17 @@ export async function createNativeCaptureContext(request, work, sdkOverride) {
   const {project,runtime}=request;
   const library=path.join(runtime,'dist/native-capture-library.mjs');
   const sdk=sdkOverride??await import(pathToFileURL(library).href);
-  const plan=JSON.parse(fs.readFileSync(path.join(project,'SHORT-PROJECT.json'),'utf8'));
+  const isLong=request.adapter==='native-long';
+  const plan=JSON.parse(fs.readFileSync(path.join(project,isLong?'LONG-PROJECT.json':'SHORT-PROJECT.json'),'utf8'));
   const [num,den]=plan.canvas.frameRate.split('/').map(Number),rate=num/den;
   assert.ok(Number.isSafeInteger(num)&&Number.isSafeInteger(den)&&den>0&&rate>=1&&rate<=60,'Invalid native capture clock');
   assert.ok(Number.isSafeInteger(plan.canvas.totalFrames)&&plan.canvas.totalFrames>0
-    &&plan.canvas.totalFrames/rate<=180,'Native capture exceeds Short bounds');
+    &&plan.canvas.totalFrames/rate<=(isLong?900:180),'Native capture exceeds its admitted duration');
   fs.mkdirSync(work);
   process.env.SNIPER_NATIVE_FRAME_TRANSPORT='url-v1';
   const log=Object.fromEntries(['info','warn','error','debug'].map(key=>[key,(...values)=>console.log(key,...values)]));
   return {request,project,runtime,work,sdk,plan,fps:{num,den},rate,log,cacheEntries:[],
+    width:isLong?plan.canvas.width:1080,height:isLong?plan.canvas.height:1920,
     sourceHtmlSha256:nativeCaptureHash(path.join(project,'index.html')),runtimeLibrarySha256:nativeCaptureHash(library)};
 }
 
@@ -97,12 +100,16 @@ export async function prepareNativeCaptureContext(context) {
     htmlPath:path.join(project,'index.html'),entryFile:'index.html',
     job:{config:{fps,quality:'high',format:'mp4',workers:1}},cfg:context.cfg,
     needsAlpha:false,log,assertNotAborted:()=>{},failClosedFontFetch:true});
-  assert.equal(context.result.composition.width,1080);assert.equal(context.result.composition.height,1920);
-  assert.equal(context.result.composition.duration,plan.canvas.totalFrames/rate);
-  await prepareNativeSourceCache(context);
+  assert.equal(context.result.composition.width,context.width);assert.equal(context.result.composition.height,context.height);
+  assert.ok(Math.abs(context.result.composition.duration-plan.canvas.totalFrames/rate)<=1e-6);
+  if(context.request.adapter==='native-long')await prepareLongSources(context);
+  else await prepareNativeSourceCache(context);
   const extracted=[];
   for(const video of context.result.composition.videos){
-    const cached=nativeSourceCacheEntry(context,video),metadata=await nativeSourceMetadata(context,cached.source);
+    const long=context.longExtracted?.find(row=>row.videoId===video.id);
+    const cached=long?{source:long.srcPath,entry:long.outputDir,names:[...long.framePaths.keys()],framePaths:long.framePaths,
+      keyBlob:{source:long.srcPath,mediaStart:video.mediaStart,duration:video.end-video.start}}:nativeSourceCacheEntry(context,video);
+    const metadata=await nativeSourceMetadata(context,cached.source);
     extracted.push({videoId:video.id,srcPath:cached.source,outputDir:cached.entry,framePattern:'frame_%05d.png',
       fps:rate,totalFrames:cached.names.length,metadata,framePaths:cached.framePaths});
     context.cacheEntries.push({video,keyBlob:cached.keyBlob,path:cached.entry,count:cached.names.length,
@@ -116,7 +123,7 @@ export async function prepareNativeCaptureContext(context) {
 
 /** Preserve screenshot encoding, absolute output time and original source geometry. */
 export function nativeCaptureOptions(context) {
-  return {width:1080,height:1920,fps:context.fps,format:'jpeg',quality:95,deviceScaleFactor:1,captureBeyondViewport:true,
+  return {width:context.width,height:context.height,fps:context.fps,format:'jpeg',quality:95,deviceScaleFactor:1,captureBeyondViewport:true,
     skipReadinessVideoIds:context.result.composition.videos.map(video=>video.id),
     videoMetadataHints:context.cacheEntries.map(entry=>({id:entry.video.id,width:entry.width,height:entry.height})),
     compositionDurationSeconds:context.plan.canvas.totalFrames/context.rate};
@@ -169,14 +176,14 @@ export async function captureNativeFrame(context, session, frame) {
       loaded:img.complete&&img.naturalWidth>0,display:getComputedStyle(img).display})),
     texts:[...document.querySelectorAll('.type,.caption')].filter(el=>getComputedStyle(el).visibility==='visible'&&getComputedStyle(el).display!=='none')
       .map(el=>({id:el.id,text:el.textContent,clipPath:getComputedStyle(el).clipPath}))}));
-  assert.ok(observed.fonts.length&&observed.fonts.every(font=>font.status==='loaded'));
+  assert.ok((context.request.adapter==='native-long'||observed.fonts.length)&&observed.fonts.every(font=>font.status==='loaded'));
   for(const source of payload){assert.equal(nativeCaptureHash(source.path),source.sha256);assert.ok(observed.images.some(image=>image.id===source.id&&image.loaded));}
   return {frame,time,path:captured.path,sha256:nativeCaptureHash(captured.path),payload,observed,captureTimeMs:captured.captureTimeMs};
 }
 
 export function nativeCaptureEvidence(context) {
   return {sourceHtmlSha256:context.sourceHtmlSha256,runtimeLibrarySha256:context.runtimeLibrarySha256,
-    compiledSha256:context.compiledSha256,cacheEntries:context.cacheEntries,width:1080,height:1920,frameRate:context.plan.canvas.frameRate,
+    compiledSha256:context.compiledSha256,cacheEntries:context.cacheEntries,width:context.width,height:context.height,frameRate:context.plan.canvas.frameRate,
     ...(context.sourceCacheAcquisition?{sourceCacheAcquisition:context.sourceCacheAcquisition}:{}),
     ...(context.batchPlan?{batchPlan:context.batchPlan}:{})};
 }

@@ -108,7 +108,8 @@ test("readiness contract cannot hide clauses, duplicate coverage, name imaginary
 
 test("readiness critic metadata is closed and uses unchanged independent effort with no session/peer/tools", async () => {
   const input = { packet: { proposal: { clauses: [{}], beats: [{ startAnchor: 0, endAnchorExclusive: 1 }] },
-    evidence: { anchors: [0, 30], occurrences: [[0, 0, 0, 0, 30, "TEST", 0]] } },
+    evidence: { target: { mode: "longform", width: 1920, height: 1080 },
+      anchors: [0, 30], occurrences: [[0, 0, 0, 0, 30, "TEST", 0]] } },
     criticIndex: 0, ctx: {}, cwd: "/private/tmp", schema: {}, timeoutMs: 1000 } as unknown as ProposalReadinessBrainInput;
   const result = passingReadinessResult(input), binding = { packet: input.packet, criticIndex: 0 };
   assertProposalCriticResult(result, binding);

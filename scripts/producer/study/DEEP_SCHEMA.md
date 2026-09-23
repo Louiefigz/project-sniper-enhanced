@@ -1,6 +1,6 @@
 # DEEP_SCHEMA — the canonical `deep_study.json`
 
-Produced by `study/study_deep.py <video> <out_dir> [--fps N] [--meticulous] [--semantics]
+Produced by `study/study_deep.py <video> <out_dir> [--fps N] [--meticulous] [--semantics] [--text-scope all|states]
 [--transcript words.json|captions.vtt] [--skip-captions]`. One JSON per
 reference video;
 every field below is DETERMINISTIC (pixels/audio/arithmetic) except the
@@ -12,7 +12,7 @@ analysis fps (`params.fps`), so `t = frame / params.fps`.
 {
   "video": "/abs/path.mp4",
   "generatedAt": "2026-07-10T00:00:00+00:00",
-  "params": { "fps": 30.0, "semantics": false, "meticulous": true },
+  "params": { "fps": 30.0, "semantics": false, "meticulous": true, "textScope": "all" },
   "source": { "width": 1080, "height": 1920, "fps": 30.0, "durationS": 58.2 },
 
   // P1 — study_video fingerprint (run automatically when absent)
@@ -181,3 +181,18 @@ analysis fps (`params.fps`), so `t = frame / params.fps`.
 - `unclassifiedRuns > 0` means motion happened that no rule could name — look
   at the signals arrays around it before trusting the study. Runs that start
   on an already-emitted cut/flash boundary are its settle, not unclassified.
+
+## Explicit research OCR scope
+
+`--text-scope states` preserves every native-cadence motion event, raw signal,
+classification and transcript word-lock result. It OCRs every fingerprint state
+representative but skips the up-to-90-frame OCR window for each graphic event.
+The default `all` is unchanged. Output records `params.textScope` and an explicit
+`text.graphicsSkipped` reason; an empty graphics array in this mode means
+**unmeasured per-event text timing**, not that the reference contains no graphics.
+
+`--skip-captions` separately skips the whole-video caption OCR pass and retains
+its skipped marker. Use these choices explicitly for research when full visual
+state review and an available transcript meet the current question. Do not treat
+this mode, native-cadence scanning, or state OCR as full human frame review or
+verified style qualification. Complete the reference-editor gates for that claim.

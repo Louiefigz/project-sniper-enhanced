@@ -1,0 +1,12 @@
+{
+  "version": "2026-09-18.1",
+  "source_inspection_only": true,
+  "adaptations_render_qualified": false,
+  "sources": [
+    "glass-rail",
+    "list-build",
+    "module-rail",
+    "slideware-takeover-deck",
+    "statement-card"
+  ]
+}

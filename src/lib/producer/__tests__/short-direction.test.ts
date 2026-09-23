@@ -9,7 +9,7 @@ import { assertIntentMatches } from "../../../app/api/producer/auto-edit/operato
 import type { AssetManifest } from "../types";
 
 test("requested treatment survives stored intent, launch, plan target and gate authority", () => {
-  const shortDirection = { selection: "requested", request: "Nate Herk — develop the same offer", supportingVideo: "source-first" };
+  const shortDirection = { selection: "requested", request: "Module — develop the same offer", supportingVideo: "source-first" };
   const intent = validateIntent({ mode: "short", scope: "produced", lanes: {}, shortDirection });
   const body = buildAutoEditRequest("/tmp/producer", intent);
   const parsed = parseAutoEditIntent(body)!;
@@ -56,13 +56,13 @@ test("media source restrictions survive all request paths without broadening leg
 
 test("empty, conflicting and malformed style requests never become silent automatic selection", () => {
   for (const input of [null, [], { selection: "requested", request: " ", supportingVideo: "source-first" },
-    { selection: "auto", request: "Nate", supportingVideo: "source-first" },
+    { selection: "auto", request: "module", supportingVideo: "source-first" },
     { selection: "auto", supportingVideo: "web" }, { selection: "auto", supportingVideo: "off", extra: true }]) {
     assert.throws(() => parseShortDirection(input, "short"));
   }
   assert.throws(() => parseShortDirection({ selection: "auto", supportingVideo: "off" }, "longform"), /only for short/);
   assert.equal(parseShortDirection(undefined, "short"), undefined, "Old saved jobs retain their prior identity");
-  for (const input of [{ selection: ["requested"], request: "Nate", supportingVideo: "off" },
+  for (const input of [{ selection: ["requested"], request: "module", supportingVideo: "off" },
     { selection: "auto", supportingVideo: ["off"] }]) assert.throws(() => parseShortDirection(input, "short"));
 });
 
@@ -70,10 +70,10 @@ test("style preset selection preserves source and placement restrictions", () =>
   for (const sources of ["provided-only", "local-only", "public-web"] as const) {
     const current = { selection: "auto" as const, supportingVideo: "off" as const,
       mediaPolicy: { placement: "off" as const, sources } };
-    const result = shortDirectionForStyle("Nate Herk", current);
+    const result = shortDirectionForStyle("Module", current);
     assert.deepEqual(result.mediaPolicy, current.mediaPolicy);
     assert.equal(result.supportingVideo, "off");
-    assert.equal(result.request, "Nate Herk");
+    assert.equal(result.request, "Module");
     assert.deepEqual(parseShortDirection(result, "short"), result);
   }
 });

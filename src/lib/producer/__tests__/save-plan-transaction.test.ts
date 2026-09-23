@@ -40,8 +40,8 @@ function plan(cutTrack: unknown = OLD_CUT): Record<string, unknown> {
     target: { mode: "longform" },
     cutTrack,
     graphicsTrack: [
-      { id: "g-00000001", kind: "statement-card", outStart: 15.5, outEnd: 19.5 },
-      { id: "g-00000002", kind: "statement-card", outStart: 25, outEnd: 30 },
+      { id: "g-00000001", kind: "line-swap", outStart: 15.5, outEnd: 19.5 },
+      { id: "g-00000002", kind: "line-swap", outStart: 25, outEnd: 30 },
     ],
   };
 }
@@ -121,13 +121,13 @@ async function graphicsGovernanceSurvivesOrdinarySave(): Promise<void> {
   try {
     const changed = structuredClone(item.original);
     Object.assign(changed.target as Record<string, unknown>, {
-      graphicsStyle: "overlay-rich",
+      graphicsStyle: "catalog-first",
       graphicsStyleRationale: "The kept intro needs a layered explanatory grammar.",
     });
     changed.graphicsDecisions = [{
       beatId: "intro-abc123def456", decision: "graphic",
-      kind: "statement-card", reason: "This directly expresses the thesis beat.",
-      alternativesConsidered: ["kinetic-quote-wide", "fragment-payoff"],
+      kind: "line-swap", reason: "This directly expresses the thesis beat.",
+      alternativesConsidered: ["marker-highlight", "count-up"],
       selectionReason: "The full sentence needs a stable, readable takeover.",
     }];
     (changed.graphicsTrack as Array<Record<string, unknown>>)[0].semanticBeatId =
@@ -138,7 +138,7 @@ async function graphicsGovernanceSurvivesOrdinarySave(): Promise<void> {
     const decisions = disk.graphicsDecisions as Array<Record<string, unknown>>;
     assert.equal(decisions[0].graphicId, "g-00000001",
       "save normalization preserves the controller-minted semantic binding");
-    assert.equal((disk.target as Record<string, unknown>).graphicsStyle, "overlay-rich");
+    assert.equal((disk.target as Record<string, unknown>).graphicsStyle, "catalog-first");
   } finally {
     item.dispose();
   }

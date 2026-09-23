@@ -20,6 +20,9 @@ import type { ProposalEvidence } from "../guided-proposal-evidence";
 import type { AcceptedGuidedCut } from "../guided-raw-treatment-store";
 import { canonicalJsonSha256 } from "../auto-edit-hash";
 
+/** TEST ONLY scalar catalog configuration; no rendered or source observation claim. */
+const GRAPHIC_SPEC = { type: "bars", data: "1,2", labels: "TEST A,TEST B", emphasize: 1, unit: "", accent: "#054BC9", exit: "hold" };
+
 /** Declared metadata fixture only; the real stored-evidence reader must independently observe source clocks. */
 function candidateFixture() {
   const f = presenterFixture();
@@ -90,15 +93,15 @@ test("mixed layout, music, captions and catalog operations retain the actual arr
   const manifest = { ...f.manifest, music: [{ id: "music-1", path: "/TEST/snapshot.wav", originalPath: "/TEST/original.wav",
     sourceSha256: "e".repeat(64), sourceSizeBytes: 8000, admissionReceiptPath: "/TEST/receipt.json",
     admissionReceiptSha256: "f".repeat(64), duration: 5 }] };
-  const graphic = layoutOperation({ type: "catalog-graphic", presenterLayout: null, catalogKind: "TEST-card",
-    variables: [{ name: "title", value: "TEST ONLY slide" }], startAnchor: 0, endAnchorExclusive: 2,
+  const graphic = layoutOperation({ type: "catalog-graphic", presenterLayout: null, catalogKind: "chart-story",
+    variables: Object.entries(GRAPHIC_SPEC).map(([name, value]) => ({ name, value })), startAnchor: 0, endAnchorExclusive: 2,
     presentation: { schemaVersion: 1, anchor: "own-screen", placement: "full-canvas", compositeMode: "normal",
       baseTreatment: "preserve", rationale: "TEST ONLY native full-canvas picture declaration." } });
   const output = presenterProposal([oldOperation("music-bed-full-program"), oldOperation("captions-full-program"),
     layoutOperation({ startAnchor: 2, endAnchorExclusive: 28 }), graphic]);
   const evidence = { ...f.evidence, target, musicPolicy: guidedMusicPolicy(plan, manifest),
     presenterPolicy: guidedPresenterPolicy(plan, manifest),
-    catalog: [{ kind: "TEST-card", canvas: [1920, 1080], defaults: { title: "TEST" }, fields: ["title"] }] };
+    catalog: [{ kind: "chart-story", canvas: [1920, 1080], defaults: GRAPHIC_SPEC, fields: Object.keys(GRAPHIC_SPEC) }] };
   const cut = { ...f.cut, plan: { ...f.cut.plan, value: plan }, manifest: { ...f.cut.manifest, value: manifest },
     job: { ...f.cut.job, ctx: { ...f.cut.job.ctx, intent: { ...f.cut.job.ctx.intent, music: true } } } };
   const result = buildTreatmentCandidate({ ...f, cut, evidence, output });

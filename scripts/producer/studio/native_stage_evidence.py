@@ -15,6 +15,7 @@ from cut_preview_io import MAX_JSON, bound_json, file_hash, real_directory, writ
 from studio.native_run_config import source_hashes
 
 MAX_NATIVE_FILE_BYTES = 1024 ** 4  # Stream large originals without the preview's 2 GiB cap.
+MAX_NATIVE_CAPTURE_JSON_BYTES = 256 * 1024 * 1024
 STABLE_FIELDS = ('sourceStable', 'sdkStable', 'sandboxStable', 'additionalFilesStable',
                  'leaseCleanupVerified')
 RECORD_KEYS = {'schemaVersion', 'stage', 'project', 'root', 'request', 'supervisor',
@@ -39,6 +40,11 @@ def require(value: bool, message: str) -> None:
     """Reject incomplete shared native evidence without optimizable assertions."""
     if not value:
         raise ValueError(f'Native stage evidence: {message}')
+
+
+def read_native_capture_receipt(path: Path, expected: str | None = None) -> dict:
+    """Read detailed frame proof; small requests and stage seals keep their 16 MiB limit."""
+    return bound_json(path, expected, maximum=MAX_NATIVE_CAPTURE_JSON_BYTES)
 
 
 def _hash(file: Path) -> str:

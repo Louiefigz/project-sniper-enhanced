@@ -28,7 +28,8 @@ class MasteringPolicyCacheTests(unittest.TestCase):
 
     def _record(self, version: object) -> None:
         """Write an old/new observed policy independently of the current builder."""
-        record = fingerprints.fingerprint_record(self.plan)
+        from test_base_reuse import bound_record
+        record = bound_record(self.base, self.plan)
         record.pop("masteringPolicyVersion", None)
         if version is not None:
             record["masteringPolicyVersion"] = version

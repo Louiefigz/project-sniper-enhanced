@@ -4,7 +4,7 @@
 
 Aaron's further September9 correction explicitly supersedes the earlier
 integration-preserving suggestion: use the out-of-the-box HyperFrames SDK and
-full catalog, with fresh visual judgment from the narration. Nateherk/Jaden are
+full catalog, with fresh visual judgment from the narration. Module/Punch are
 case studies only. Do not inherit the rejected visual plan or force this native
 workflow through the old Sniper graphics-only/mandatory-port boundaries. Keep
 source/cut decisions and verified audio; build a new presenter-led composition.
@@ -274,7 +274,7 @@ remains0.8.31. Old V5 full-playback testing has now failed, not remained in prog
 ## September 9 operator rejection of the current visual direction
 
 Aaron reviewed Studio V3 and explicitly rejected its amateurish, all-or-nothing
-card treatment and return to the failed Nateherk style. He expects use of the
+card treatment and return to the failed Module style. He expects use of the
 HyperFrames catalog, zooms/pull-outs, transitions, and graphics alongside his
 visible face, including roughly 2/3 or 3/4 teaching content on the left with the
 presenter in the remaining right portion. These are existing-work corrections,
@@ -282,8 +282,8 @@ not a request for another requirements or permission round.
 
 Read-only inspection of the actual `edit_plan.v3.json` in
 `/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv` confirms all57 graphic
-entries use `anchor: own-screen`;12 are `nateherk-pipeline` and2 are
-`nateherk-ledger-dark`. The plan has no camera-motion or scene-transition track.
+entries use `anchor: own-screen`;12 are `module-pipeline` and2 are
+`module-ledger-dark`. The plan has no camera-motion or scene-transition track.
 Its explicit `cutaway-only` rationale substitutes full-screen diagrams because
 the Studio view lacks a verified presenter compositor. Fourteen template specs
 explicitly disable `presenterFrame`. Graphic windows occupy48.45s of the first
@@ -3160,7 +3160,7 @@ changes. It has NOT been relabeled/rehashed as fresh. Actual graphics need fresh
 measurements. For V6 only, an exact four-field previsual with explicit graphics
 off may instead carry an empty catalog and a domain-separated omission hash
 bound to its full original target. Historical versions, inherited/expanded
-plans, other graphics ownership and Caleb's named hook exception keep the
+plans, other graphics ownership and Restrained's named hook exception keep the
 original dependency path. Requested catalog operations have no available kind
 under omission and must block. This scope-specific dependency fix is under
 adversarial/integration test; the genuine short bootstrap is next, not done.
@@ -3585,7 +3585,7 @@ may be synthesized. Synthetic media/critic results remain explicitly TEST-only.
 
 - Run14's 617.7-second synthetic opening success is historical mechanism evidence;
   it is not a finished creator video or throughput/quality guarantee.
-- C0679 is admitted at `/Users/aaronfigueroa/ProjectSniper-qual-2026-09-07/c0679-20260907`.
+- C0679 is admitted at `/Users/maintainer/ProjectSniper-qual-2026-09-07/c0679-20260907`.
   Its current 725.665-second previsual cut is not human-approved; ASR timing anomalies
   still require source-grounded review, not automatic word deletion to satisfy gates.
 - No new render, approval, complete-output benchmark, or full-suite PASS is implied
@@ -4363,7 +4363,7 @@ The two failures are concrete:
  230.5s. This is a legitimate detector failure caused by the old TEST harmonic
  bed, not a reason to relax production hum detection.
 - Eye-trace applied a fixed720px side-rail band to explicit own-screen
- `nateherk-bullet-bars` with the correct full1920x1080 bbox. The compositor
+ `module-bullet-bars` with the correct full1920x1080 bbox. The compositor
  already honors the presentation override; the auditor looked up kind geometry
  before its own-screen check. A narrow applicability fix is being tested,
  retaining full-canvas and ordinary rail checks.

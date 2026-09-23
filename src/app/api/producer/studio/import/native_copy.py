@@ -13,7 +13,7 @@ from remainder import HostParser, VOID, exact_json
 
 # Explicitly supported plain-text anatomy only. Rich text, generated lists and
 # arbitrary selectors must not be guessed into a catalog variable.
-_TEXT_BINDINGS = {"text-element": {"te-text": "text"}}
+_TEXT_BINDINGS = {"marker-highlight": {"mh-text": "text"}}
 
 
 class CompositionParser(HostParser):
@@ -45,7 +45,7 @@ class CompositionParser(HostParser):
         super().handle_starttag(tag, list(values.items()))
         field = self.bindings.get(values.get("id"))
         if field:
-            if tag != "div" or field in self.copy_values:
+            if tag != "p" or field in self.copy_values:
                 raise ValueError("Native copy selector has an unsupported shape")
             self.active, self.chunks = (len(self.stack), field), []
             self.events.append(("native-copy-leaf", field))

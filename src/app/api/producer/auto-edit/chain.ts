@@ -3,7 +3,7 @@ import path from "path";
 import { runAuditGate, type AuditGateOutcome } from "../../_lib/audit-gate";
 import { pythonInterpreter, SCRIPTS_DIR } from "../../_lib/spawn-python";
 import { dlog } from "@/lib/debug";
-import type { ReferenceIntent } from "@/lib/producer/intent-presets";
+import { validateReferenceIntent, type ReferenceIntent } from "@/lib/producer/intent-presets";
 import { AutoEditError, Send, SendRaw, lineSplitter, tailCollector } from "./stream";
 import { lookupProducerManifest } from "@/lib/server/producer-manifest";
 import { currentRenderGraphArgs } from
@@ -83,11 +83,9 @@ export function runReferenceGate(
   profilePath: string,
   reference: ReferenceIntent,
 ): Promise<ReferenceLintVerdict> {
+  validateReferenceIntent(reference);
   const args = [REFERENCE_LINT, planPath, profilePath, "--reference-id", reference.id,
     "--mode", reference.mode, "--strategy", reference.strategy];
-  if (reference.strategy === "extend" && reference.targetStyle) {
-    args.push("--target-style", reference.targetStyle);
-  }
   return new Promise((resolve) => {
     const proc = spawn(pythonInterpreter(), args, { env: stageTimingEnv() });
     let stdout = "";

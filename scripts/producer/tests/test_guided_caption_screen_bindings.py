@@ -22,7 +22,6 @@ from guided_caption_graphic_observation import GRAPHIC_POLICY, observed_executio
 from guided_caption_screen import CaptionScreenContext
 from guided_caption_screen_read import graphic_projection, observation_reader
 from guided_caption_profile import SCREENED_CAPTION_PROFILE
-from guided_opening_execution import OpeningExecutionClock
 from headless.render_layout_contract import canonical, encoded_request
 from test_guided_caption_graphic_observation import H, intent, request
 from test_render_layout_contract import fixture, documents
@@ -100,7 +99,8 @@ class ObservedScreenBindingTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 read_graphic_observation(self.proof, self.request, lambda: None)
 
-    def test_live_actual_return_not_new_disk_hash_controls_real_cold_reader(self) -> None:
+    def test_held_return_not_new_disk_hash_controls_real_cold_reader(self) -> None:
+        """Verify retained protocol evidence directly, without admitting a retired render."""
         sidecar = Path(self.proof["proofSidecar"]["path"])
         import json
         runtime = json.loads(sidecar.read_bytes())["runtimeAttestation"]
@@ -109,22 +109,21 @@ class ObservedScreenBindingTests(unittest.TestCase):
             **copy.deepcopy(runtime), "retainedInputArchive": {"TEST": "not archive proof"}}}
         actual_intent = replace(intent(), row=self.row)
         for mismatch in (False, True):
-            clock = OpeningExecutionClock(time.monotonic() + 20)
+            deadline = time.monotonic() + 20
             actual = copy.deepcopy(runtime)
             if mismatch:
                 actual["layoutObservation"]["sha256"] = "f" * 64
             with ExitStack() as stack:
-                stack.enter_context(patch.object(observer, "render_to", return_value=actual))
-                stack.enter_context(patch.object(observer, "sealed_documents", return_value=documents()))
                 stack.enter_context(patch.object(observer, "_asset", return_value=proof))
                 control = SimpleNamespace(timeout_seconds=90, image_id=self.request["imageId"])
+                local = observer.observation_request(observer.intent_record(actual_intent))
+                context = (actual, local, documents(), self.sources, control, deadline)
                 if mismatch:
                     with self.assertRaisesRegex(RuntimeError, "actual renderer return"):
-                        observer.render_observed_graphic(actual_intent, self.path, (clock, control, "TEST"))
+                        observer._verify_return(actual_intent, self.path, context)
                 else:
-                    _, metadata = observer.render_observed_graphic(actual_intent, self.path, (clock, control, "TEST"))
+                    _, metadata = observer._verify_return(actual_intent, self.path, context)
                     self.assertEqual(metadata["observation"]["sha256"], raw_sha(self.layout))
-            self.assertEqual(clock.events[-1]["status"], "failed" if mismatch else "complete")
 
     def test_opening_cannot_accept_body_request_or_other_original_input(self) -> None:
         clock = {"frameRate": "30000/1001", "width": 1920, "height": 1080, "totalFrames": 9325}

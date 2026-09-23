@@ -1,0 +1,235 @@
+{
+  "schema": "sniper-reference-library-v1",
+  "version": "2026-09-18.1",
+  "entry_count": 3,
+  "entries": [
+    {
+      "id": "ME01",
+      "version": "2026-09-18.1",
+      "title": "A short rule as one typographic lockup",
+      "scope": "original-reference-rendered-from-project-sniper-templates",
+      "story_job": "Give a rule the speaker stresses a single, memorable visual form above the speaker.",
+      "use_when": "The speaker states a rule of two to four words and stresses or repeats it.",
+      "do_not_use_when": "The rule needs a qualification to be true, or another text layer already occupies the frame.",
+      "catalog": [
+        "punch-shout-lockup"
+      ],
+      "frames": [
+        {
+          "path": "resources/references/shorts/frames/ME01-0.jpg",
+          "sha256": "9e6bcd7fe1ffba119e844dbf76180ef1a0a8ec30cf656e636284f85e34dce0dc",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 0.1,
+          "render": {
+            "composition": "templates/motion/compositions/punch-shout-lockup.html",
+            "variables": {
+              "kicker": "the rule is",
+              "payload": "MEASURE",
+              "coword": "first",
+              "kicker2": ""
+            },
+            "time_s": 0.1
+          }
+        },
+        {
+          "path": "resources/references/shorts/frames/ME01-1.jpg",
+          "sha256": "9e6bcd7fe1ffba119e844dbf76180ef1a0a8ec30cf656e636284f85e34dce0dc",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 0.5,
+          "render": {
+            "composition": "templates/motion/compositions/punch-shout-lockup.html",
+            "variables": {
+              "kicker": "the rule is",
+              "payload": "MEASURE",
+              "coword": "first",
+              "kicker2": ""
+            },
+            "time_s": 0.5
+          }
+        },
+        {
+          "path": "resources/references/shorts/frames/ME01-2.jpg",
+          "sha256": "9e6bcd7fe1ffba119e844dbf76180ef1a0a8ec30cf656e636284f85e34dce0dc",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 1.5,
+          "render": {
+            "composition": "templates/motion/compositions/punch-shout-lockup.html",
+            "variables": {
+              "kicker": "the rule is",
+              "payload": "MEASURE",
+              "coword": "first",
+              "kicker2": ""
+            },
+            "time_s": 1.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "ME02",
+      "version": "2026-09-18.1",
+      "title": "List the items, then the total they make",
+      "scope": "original-reference-rendered-from-project-sniper-templates",
+      "story_job": "Make a total believable by showing the items it is made of.",
+      "use_when": "The speaker adds up a handful of items and states the total.",
+      "do_not_use_when": "The items are estimates shown as exact amounts, or there are more than six of them.",
+      "catalog": [
+        "module-ledger-dark"
+      ],
+      "frames": [
+        {
+          "path": "resources/references/shorts/frames/ME02-0.jpg",
+          "sha256": "eaa9e5dc0ab9ac745cba2e6b023f0fe5f3c63256e7692bbf387a21552e83c5b8",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 0.5,
+          "render": {
+            "composition": "templates/motion/compositions/module-ledger-dark.html",
+            "variables": {
+              "eyebrow": "One week of lunches",
+              "headlineLines": "Five lunches|add up fast",
+              "explainer": "",
+              "barLabel": "WEEK TOTAL",
+              "barValue": "$62",
+              "barStatus": "",
+              "rows": "Monday~$12~LUNCH~process|Tuesday~$14~LUNCH~process|Wednesday~$11~LUNCH~process|Thursday~$13~LUNCH~process|Friday~$12~LUNCH~process",
+              "gridItems": "",
+              "footChip": ""
+            },
+            "time_s": 0.5
+          }
+        },
+        {
+          "path": "resources/references/shorts/frames/ME02-1.jpg",
+          "sha256": "d1ac1d02eb6722139eb6a0d1756f55237808bbaf1e4e141f0af3084fbd16565d",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 2.4,
+          "render": {
+            "composition": "templates/motion/compositions/module-ledger-dark.html",
+            "variables": {
+              "eyebrow": "One week of lunches",
+              "headlineLines": "Five lunches|add up fast",
+              "explainer": "",
+              "barLabel": "WEEK TOTAL",
+              "barValue": "$62",
+              "barStatus": "",
+              "rows": "Monday~$12~LUNCH~process|Tuesday~$14~LUNCH~process|Wednesday~$11~LUNCH~process|Thursday~$13~LUNCH~process|Friday~$12~LUNCH~process",
+              "gridItems": "",
+              "footChip": ""
+            },
+            "time_s": 2.4
+          }
+        },
+        {
+          "path": "resources/references/shorts/frames/ME02-2.jpg",
+          "sha256": "5ba28db9b88fe37f642acfc6ccd789db4a2427f89c1fedee35dc18d73a0b7444",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 5.0,
+          "render": {
+            "composition": "templates/motion/compositions/module-ledger-dark.html",
+            "variables": {
+              "eyebrow": "One week of lunches",
+              "headlineLines": "Five lunches|add up fast",
+              "explainer": "",
+              "barLabel": "WEEK TOTAL",
+              "barValue": "$62",
+              "barStatus": "",
+              "rows": "Monday~$12~LUNCH~process|Tuesday~$14~LUNCH~process|Wednesday~$11~LUNCH~process|Thursday~$13~LUNCH~process|Friday~$12~LUNCH~process",
+              "gridItems": "",
+              "footChip": ""
+            },
+            "time_s": 5.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "ME03",
+      "version": "2026-09-18.1",
+      "title": "Mark the start of a new part",
+      "scope": "original-reference-rendered-from-project-sniper-templates",
+      "story_job": "Tell the viewer the Short has moved on to its next part.",
+      "use_when": "The speaker clearly moves from one part to the next, for example from the problem to the fix.",
+      "do_not_use_when": "The Short has only one part, or the marker would cover the speaker's face.",
+      "catalog": [
+        "section-marker"
+      ],
+      "frames": [
+        {
+          "path": "resources/references/shorts/frames/ME03-0.jpg",
+          "sha256": "135b1746996bc2a2dc0ac8512351f3494d3536de991fd6c651adc6a68a999451",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 0.3,
+          "render": {
+            "composition": "templates/motion/compositions/section-marker.html",
+            "variables": {
+              "num": "Part 2",
+              "line1": "The fix",
+              "line2": "",
+              "side": "left"
+            },
+            "time_s": 0.3
+          }
+        },
+        {
+          "path": "resources/references/shorts/frames/ME03-1.jpg",
+          "sha256": "e734431e3fd5697209e1f34983db6690a67d77b79a105d4414c3cda23aef3cb5",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 0.9,
+          "render": {
+            "composition": "templates/motion/compositions/section-marker.html",
+            "variables": {
+              "num": "Part 2",
+              "line1": "The fix",
+              "line2": "",
+              "side": "left"
+            },
+            "time_s": 0.9
+          }
+        },
+        {
+          "path": "resources/references/shorts/frames/ME03-2.jpg",
+          "sha256": "e734431e3fd5697209e1f34983db6690a67d77b79a105d4414c3cda23aef3cb5",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 2.0,
+          "render": {
+            "composition": "templates/motion/compositions/section-marker.html",
+            "variables": {
+              "num": "Part 2",
+              "line1": "The fix",
+              "line2": "",
+              "side": "left"
+            },
+            "time_s": 2.0
+          }
+        }
+      ]
+    }
+  ]
+}

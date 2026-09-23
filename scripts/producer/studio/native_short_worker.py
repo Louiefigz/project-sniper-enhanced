@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import contextlib
 import os
 import re
 import sys
@@ -14,7 +15,7 @@ from stage_timing import stage_span
 from cut_preview_io import bound_json, write_new
 from studio.native_preflight import preflight
 from studio.native_runtime import digest
-from studio.native_short_delivery import finish_dialogue, native_srgb_delivery, qualify_picture, run
+from studio.native_short_delivery import finish_dialogue, native_srgb_delivery, prepare_dialogue, qualify_picture, run
 
 
 def render_command(request: dict, canvas: dict) -> list[str]:
@@ -34,7 +35,15 @@ def render_command(request: dict, canvas: dict) -> list[str]:
 
 def verify_files(request: dict) -> None:
     """Guard the executable package, SDK, inputs and tool identity between stages."""
-    for file, expected in request['pins'].items():
+    root = request.get('output')
+    span = stage_span(root, 'native_input_integrity') if root else contextlib.nullcontext()
+    with span:
+        _verify_input_bytes(request['pins'])
+
+
+def _verify_input_bytes(pins: dict[str, str]) -> None:
+    """Keep authoritative full reads; timing exposes their cost before optimization."""
+    for file, expected in pins.items():
         if digest(Path(file)) != expected:
             raise RuntimeError(f'Native export input changed: {file}')
 
@@ -123,10 +132,23 @@ def render_media(request: dict, plan: dict) -> dict:
     root, project = Path(request['output']), Path(request['project'])
     canvas = plan['canvas']
     verify_files(request)
+    from studio.native_motion_previews import require_motion_previews
+    require_motion_previews(request)
+    from studio.native_stage_evidence import read_native_capture_receipt, require
+    native = read_native_capture_receipt(root / 'native-frames.json')
+    require(native.get('status') == 'native-references-and-seek-states-pass',
+            'Short picture render requires passed upstream reference checks')
+    from studio.native_picture_references import check_samples
+    check_samples(request, {**plan, 'canvas': {'width': 1080, 'height': 1920, **canvas}})
     with stage_span(str(root), 'native_static_preflight'):
-        static = preflight(project, root / 'static')
+        options = {'reference_map': Path(request['referenceMap'])} if request.get('referenceMap') else {}
+        static = preflight(project, root / 'static', **options)
         if static['status'] != 'static-checks-pass':
             raise RuntimeError('Native static preflight blocked export')
+    with stage_span(str(root), 'native_dialogue_preparation'):
+        from studio.native_motion_previews import prepare_audio
+        prepared_audio = prepare_audio(request, plan)
+    verify_files(request)
     picture_stage = 'native_picture_reuse' if request.get('pictureDonor') else 'native_picture_render'
     with stage_span(str(root), picture_stage):
         # Stream SDK output into the supervisor log, preserving cache-hit/failure evidence.
@@ -140,7 +162,7 @@ def render_media(request: dict, plan: dict) -> dict:
             subprocess.run(render_command(request, canvas), check=True, timeout=480)
     verify_files(request)
     with stage_span(str(root), 'native_dialogue_delivery'):
-        audio = finish_dialogue(request, canvas, plan.get('audioFinishing'))
+        audio = finish_dialogue(request, canvas, plan.get('audioFinishing'), prepared_audio)
     with stage_span(str(root), 'native_color_metadata'):
         color = native_srgb_delivery(root, audio)
     verify_files(request)
@@ -171,17 +193,31 @@ def verify_media(request: dict, plan: dict) -> dict:
 
 def execute(request: dict, request_file: Path, phase: str = 'all') -> dict:
     """Keep legacy callers while exposing independently supervised execution phases."""
-    if phase not in {'all', 'render', 'capture', 'verify'}:
+    from studio.native_preview_sections import section_phase, execute_section
+    if phase not in {'all', 'render', 'capture', 'preview', 'verify'} and not section_phase(phase):
         raise ValueError('Unsupported native export phase')
     root = Path(request['output'])
     plan = bound_json(Path(request['project']) / 'SHORT-PROJECT.json')
     verify_files(request)
+    if section_phase(phase):
+        result = execute_section(request, plan, phase)
+        verify_files(request)
+        return result
+    if phase == 'preview':
+        from studio.native_motion_previews import render_previews
+        result = render_previews(request, plan)
+        verify_files(request)
+        return result
+    if phase == 'all':
+        capture_checks(request, request_file)
+        from studio.native_motion_previews import render_previews
+        render_previews(request, plan)
     if phase in {'all', 'render'}:
         media = render_media(request, plan)
         write_new(root / 'render-result.json', media)
         if phase == 'render':
             return media
-    if phase in {'all', 'capture'}:
+    if phase == 'capture':
         with stage_span(str(root), 'native_capture_and_seek_checks'):
             capture_checks(request, request_file)
         verify_files(request)
@@ -197,6 +233,8 @@ def main() -> None:
     if len(sys.argv) not in {2, 3}:
         raise ValueError('Expected request path and optional native export phase')
     request = json.loads(request_file.read_text())
+    from studio.native_export import require_owned_worker
+    require_owned_worker(request)
     os.environ['SNIPER_NODE_PATH'] = request['tools']['node']
     started = time.monotonic()
     try:

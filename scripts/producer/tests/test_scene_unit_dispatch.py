@@ -13,7 +13,7 @@ from graphics import scene_render as renderer
 from graphics import render_cache
 from graphics.scene_contract import SceneContractError
 from headless.process_runner import ProcessDeadlineError
-from scene_fixtures import fire_sparkles_scene
+from scene_fixtures import bind_test_scene_source, fire_sparkles_scene
 
 
 class SceneUnitDispatchTests(unittest.TestCase):
@@ -23,6 +23,7 @@ class SceneUnitDispatchTests(unittest.TestCase):
         """Build data-only requests; the sole render leaf never touches files."""
         self.scene = fire_sparkles_scene("a" * 64)
         self.scene["renderUnits"].reverse()
+        bind_test_scene_source(self.scene)
         self.bundle = object()
         self.cache = "/TEST-unused-scene-dispatch"
 

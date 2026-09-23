@@ -1,25 +1,22 @@
 #!/usr/bin/env python3
-"""focus_ops — image-focus operators for b-roll inserts (LIAM-4-MOVES move 3).
+"""focus_ops — image-focus operators for b-roll inserts (CM-3).
 
-Measured build spec (2026-07-11, EC2=sLgHqZSe2o0 R2 taught executions on a
-real analytics screenshot 468-500s + 2 real-use windows, n=6 —
-LOW-CONFIDENCE; EC1 uses ZERO of these ops, so the vocabulary is gated by
-treatment at the lint gate). The operator set the still-image b-roll lane
-applies ON TOP of an insert (screenshots/photos — designed cards stay
-pixel-frozen, BROLL["still_drift_pct_per_s"] / LESSON-017 own that split):
+Doctrine: docs/studies/EDITCRAFT_LESSONS.md §7.4. The operators belong to the
+produced graphics stack, so the vocabulary is gated by treatment at the lint
+gate; defaults and bands are Sniper design parameters. The operator set the
+still-image b-roll lane applies ON TOP of an insert (screenshots/photos —
+designed cards stay pixel-frozen, BROLL["still_drift_pct_per_s"] /
+LESSON-017 own that split):
 
-* HIGHLIGHT — marker-yellow (hue 50-60°) LEFT-TO-RIGHT WIPE over a region:
-  measured width 0.033→0.097 screen-w in 12 frames (0.4s) for the key
-  number, a second bigger pass 18 frames (0.6s) whole-tile — two-stage =
-  two ops, number first.
-* DARKEN-SURROUND — flat ~−25% luma on everything EXCEPT the focus region
-  (≤1-frame apply at 30fps — no ramp), hold 1-2s.
-* BLUR-SURROUND — the sibling: sharpness ×5-6 drop (LapVar 1028→161)
-  outside the sharp region, no dim.
+* HIGHLIGHT — translucent marker-colour LEFT-TO-RIGHT WIPE over a region,
+  0.4s by default (a short key-number pass; up to 0.7s for a larger region).
+  A two-stage highlight (number first, then the whole tile) is two ops.
+* DARKEN-SURROUND — flat ~−25% luma on everything EXCEPT the focus region,
+  applied within one frame (no ramp), hold ~1-2s.
+* BLUR-SURROUND — the sibling: blur outside the sharp region, no dim.
 * HUE-SHIFT-SIGNED — full-frame color fill, word-timed SIGNED semantics
-  (``MOTION["hue_shift_semantics"]``): negative = RED (~354°), positive =
-  YELLOW (64°, ~1.0s) then GREEN (114°); apply instant (demo) or a ~7-frame
-  /233ms ramp (real use), hold 1.7-4.4s.
+  (``MOTION["hue_shift_semantics"]``): negative = RED, positive = YELLOW
+  (~1.0s) then GREEN; ramped over ~233ms (7 frames @30fps), hold 0.8-4.5s.
 
 Plan shape — a ``brollTrack`` entry gains an optional ``focusOps`` array,
 times RELATIVE to the insert's ``outStart`` (comp-relative, like
@@ -27,9 +24,9 @@ times RELATIVE to the insert's ``outStart`` (comp-relative, like
 
     {"assetId": "shot-1", "outStart": 40.0, "outEnd": 46.0,
      "focusOps": [
-       {"op": "highlight", "region": [0.105, 0.336, 0.097, 0.058],
+       {"op": "highlight", "region": [0.10, 0.34, 0.10, 0.06],
         "atS": 0.5, "holdS": 2.0, "wipeS": 0.4},
-       {"op": "darken-surround", "region": [0.025, 0.253, 0.258, 0.239],
+       {"op": "darken-surround", "region": [0.03, 0.25, 0.26, 0.24],
         "atS": 3.0, "holdS": 1.5},
        {"op": "hue-shift-signed", "sign": "negative", "atS": 4.8,
         "holdS": 1.0, "rampS": 0.233}]}
@@ -133,8 +130,8 @@ def _one_op(i: int, raw: dict, insert_dur: float) -> FocusOp:
 def parse_ops(raw: object, insert_dur: float) -> tuple[FocusOp, ...]:
     """Validate a raw ``focusOps`` array (None/absent → ()).
 
-    Same-op entries may not overlap in time (the measured two-stage highlight
-    is SEQUENTIAL passes); different ops may stack (highlight over a darken).
+    Same-op entries may not overlap in time (a two-stage highlight is
+    SEQUENTIAL passes); different ops may stack (highlight over a darken).
     """
     if raw is None:
         return ()
@@ -150,7 +147,7 @@ def parse_ops(raw: object, insert_dur: float) -> tuple[FocusOp, ...]:
             if b.at_s < a.end_s - 1e-6:
                 raise ValueError(f"focusOps: two {kind!r} ops overlap "
                                  f"({a.at_s:g}+{a.hold_s:g}s then {b.at_s:g}s)"
-                                 " — the measured passes are sequential")
+                                 " — same-op passes are sequential")
     return ops
 
 
@@ -166,9 +163,9 @@ def _px_region(op: FocusOp, w: int, h: int) -> tuple[int, int, int, int]:
             max(2, _even(rw * w)), max(2, _even(rh * h)))
 
 
-# The wipe is quantized to this many width steps per second (the measured
-# execution is 12 frames @30fps for a 0.4s wipe = one step per frame; 30/s
-# reproduces it exactly at 30fps and reads as a continuous wipe at 24fps).
+# The wipe is quantized to this many width steps per second (the default
+# 0.4s wipe at 30fps is 12 steps = one step per frame; 30/s reads as a
+# continuous wipe at 24fps too).
 _WIPE_STEPS_PER_S = 30
 _WIPE_STEPS_MAX = 24
 
@@ -182,7 +179,7 @@ def _highlight(op: FocusOp, geom: tuple, t0: float,
     silently drew the FULL box for the whole window; caught by the c0679
     both-ended verify, LL-017 sibling). The wipe is therefore a LADDER of
     static drawboxes, one per width step, each enable-gated to its slice of
-    ``wipeS`` — per-frame growth at the measured cadence, still 1:1.
+    ``wipeS`` — per-frame growth at 30 steps/s, still 1:1.
     """
     hcfg = CFG["highlight"]
     rx, ry, rw, rh = _px_region(op, *geom)
@@ -204,7 +201,8 @@ def _surround(op: FocusOp, geom: tuple, t0: float,
               io: tuple[str, str]) -> list[str]:
     """Darken/blur everything OUTSIDE the focus region: treat the whole
     frame, then overlay the untouched region tile back (≤1-frame apply —
-    both filters gate on the same enable window, no ramp, as measured)."""
+    both filters gate on the same enable window — an instant apply by
+    design, no ramp)."""
     rx, ry, rw, rh = _px_region(op, *geom)
     at, end = t0 + op.at_s, t0 + op.end_s
     gate = f"enable='between(t,{at:.6f},{end:.6f})'"
@@ -222,8 +220,9 @@ def _surround(op: FocusOp, geom: tuple, t0: float,
 def _hue_uv(op: FocusOp, t0: float) -> tuple[str, str]:
     """The signed target chroma (U, V) expressions per hue_shift_semantics.
 
-    Negative = constant red. Positive = yellow for the measured first
-    ~1.0s, then a quick lerp to green (the taught two-stage positive read).
+    Negative = constant red. Positive = yellow for the first ~1.0s
+    (``positive_yellow_s``), then a quick lerp to green (the two-stage
+    positive read, EDITCRAFT_LESSONS §7.4).
     NOTE: these land INSIDE ``geq`` expressions, whose time variable is the
     UPPERCASE ``T`` (lowercase ``t`` is only the timeline/enable evaluator's
     — ffmpeg 8 rejects it inside geq; caught by the c0679 both-ended verify).

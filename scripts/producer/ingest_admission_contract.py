@@ -7,11 +7,8 @@ import os
 import stat
 from pathlib import Path
 
-from headless.external_media_probe import POLICY_VERSION
-from headless.external_media_probe_policy import (
-    MediaProbeLimits,
-    validate_probe_document,
-)
+from headless.admission_receipt import AdmissionReceiptError, validate_admission_receipt
+from headless.external_media_probe import POLICY_VERSION  # noqa: F401  historical name, re-exported
 from headless.external_media_snapshot import (
     ExternalMediaSnapshot,
     observe_external_media_snapshot,
@@ -47,34 +44,24 @@ def _real_directory(path: Path, label: str) -> None:
 
 def receipt_snapshot(receipt: object, store: Path,
                      capture: SourceVerificationCapture | None = None) -> tuple[str, str, int, str]:
-    """Validate a retained probe receipt and rehash its immutable snapshot."""
-    expected = {
-        "schemaVersion", "policy", "snapshot", "limits", "image",
-        "isolation", "network", "decoded",
-    }
-    if type(receipt) is not dict or set(receipt) != expected:
-        raise RuntimeError("external-media admission receipt is malformed")
-    snapshot, decoded = receipt.get("snapshot"), receipt.get("decoded")
-    if (type(receipt.get("schemaVersion")) is not int
-            or receipt.get("schemaVersion") != 1
-            or receipt.get("policy") != POLICY_VERSION
-            or type(snapshot) is not dict or type(decoded) is not dict):
-        raise RuntimeError("external-media admission receipt has wrong authority")
+    """Validate a retained probe receipt and rehash its immutable snapshot.
+
+    Native (v4) and historical container (v3) receipts are both accepted through
+    ``headless.admission_receipt.validate_admission_receipt``; a native receipt
+    must also carry the approved jail's attestations.
+    """
+    try:
+        _limits, decoded = validate_admission_receipt(receipt)
+    except AdmissionReceiptError as exc:
+        raise RuntimeError(str(exc)) from exc
+    snapshot = receipt.get("snapshot")
+    if type(snapshot) is not dict:
+        raise RuntimeError("external-media admission receipt lacks snapshot facts")
     path = snapshot.get("path")
     sha256 = _sha(snapshot.get("sha256"), "snapshot sha256")
-    size, facts, limits = (
-        snapshot.get("sizeBytes"), decoded.get("facts"), receipt.get("limits"))
-    if (type(path) is not str or type(size) is not int
-            or type(facts) is not dict or type(limits) is not dict):
+    size, facts = snapshot.get("sizeBytes"), decoded.get("facts")
+    if type(path) is not str or type(size) is not int or type(facts) is not dict:
         raise RuntimeError("external-media admission receipt lacks snapshot facts")
-    try:
-        parsed_limits = MediaProbeLimits(**limits)
-        if (type(parsed_limits.max_decode_seconds) is not int
-                or not 90 <= parsed_limits.max_decode_seconds <= 3600):
-            raise RuntimeError("external-media decode timeout is malformed")
-        validate_probe_document(decoded, parsed_limits)
-    except (TypeError, RuntimeError) as exc:
-        raise RuntimeError("external-media admission decode proof is malformed") from exc
     if facts.get("sizeBytes") != size:
         raise RuntimeError("external-media admission size facts disagree")
     expected_path = store / f"{sha256}.media"

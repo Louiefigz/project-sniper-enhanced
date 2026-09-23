@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>When something goes wrong</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <p class="kicker">Manual · 8 of 10</p>
+  <h1>When something goes wrong</h1>
+  <p class="lede">What to expect, what the checker tells you, and how to send something useful if you get stuck.</p>
+</header>
+<h2>First move, always</h2>
+<p>Ask your agent to run <code>./sniper doctor</code> (or double-click
+<code>install/doctor.command</code>).</p>
+<p>It asks the product's own code which browser, ffmpeg and speech model a render would actually
+use, and prints each one. It marks a line <code>FAIL</code> only
+for something that has to work, <code>GATED</code> for an optional feature that is not
+installed, and <code>INFO</code> for something worth knowing. If every required line
+passes, the install is fine and the problem is in the edit, not the setup.</p>
+<p>The <code>media admission (real sample)</code> line runs a generated sample clip through
+the same admission step your footage goes through. If it fails, Producer cannot start an edit,
+and the line says why. What this candidate does and does not do yet is listed in
+<code>PENDING-OWNER-DECISIONS.txt</code>.</p>
+
+<h2>The errors you are most likely to hit</h2>
+<table>
+<tr><th>What you see</th><th>What it means</th><th>What to do</th></tr>
+<tr><td><code>Sniper is not set up yet (or this folder moved). Run: ./sniper setup</code></td><td>Setup has
+not finished in this folder, or the folder was moved or copied since.</td><td>Ask your agent to run
+<code>./sniper setup</code>; it redoes only what is unfinished. A <code>projects</code> folder inside
+Sniper moves with it: the moved or copied folder uses its own.</td></tr>
+<tr><td><code>Another Sniper command (setup, a repair, the doctor or a removal) is using this install right now.</code></td>
+<td>Setup has not finished and something is working on the install: usually setup itself, still
+running.</td><td>Let it finish, then run your command again. If it then says Sniper is not set up,
+run <code>./sniper setup</code>.</td></tr>
+<tr><td><code>sandbox initialization failed</code> or <code>Operation not permitted</code> (Codex)</td><td>Codex
+ran a Sniper step inside its own sandbox; Sniper's video check starts its own macOS sandbox, which cannot
+start inside another one.</td><td>Approve running that step outside Codex's sandbox when Codex asks. The
+check still runs in Sniper's own sandbox.</td></tr>
+<tr><td><code>Sniper cannot be installed or repaired while one of its commands is running.</code>
+followed by <code>In use by: …</code></td><td>A Sniper command (an edit or render, the doctor, or another
+installer) is using this folder. The line names each one.</td><td>Let it finish, then run it again. Nothing was
+changed.</td></tr>
+<tr><td><code>This Mac has an Intel processor. …</code></td><td>Sniper's own tools are built for
+Apple silicon only.</td><td>Sniper needs a Mac with an M1 or later chip. Nothing was downloaded or
+changed.</td></tr>
+<tr><td><code>This Mac runs macOS … ; Sniper's tools need macOS 13.5 or later.</code></td><td>The tools
+Sniper installs need macOS 13.5 or newer (its Node is built for 13.5).</td><td>Update macOS (Software Update, in System Settings &gt;
+General, or in System Preferences on macOS 12 and earlier), then run setup again. Nothing was downloaded.</td></tr>
+<tr><td><code>Your home folder path contains a space …</code></td><td>Sniper keeps its tools in your home
+folder, and Studio cannot use a Node whose path has a space. macOS account folders never have one,
+so this means the home folder was renamed.</td><td>Use a Mac account whose home folder has no space
+in its path.</td></tr>
+<tr><td><code>Could not download … : no connection to its server</code></td><td>Setup could not reach the
+download server at all (no internet, or a network that blocks it).</td><td>Check your internet
+connection, then run setup again.</td></tr>
+<tr><td><code>Downloading [n/N] … stopped before it finished (curl error …)</code></td><td>The internet
+connection dropped while setup was downloading Sniper's tools.</td><td>Run setup again when your
+connection is stable; it resumes where it stopped and checks every file.</td></tr>
+<tr><td><code>… produced the wrong file (checksum mismatch); it was deleted.</code></td><td>A downloaded
+file did not match the SHA-256 recorded for this release — usually a network filter or proxy that
+changed it on the way.</td><td>Run setup again. If it happens again on the same file, try another
+network and run <code>install/diagnostics.command</code>.</td></tr>
+<tr><td><code>Sniper's own tools — changed since they were installed …; reinstalling them.</code></td>
+<td>A file in <code>~/.project-sniper</code> was changed or removed.</td><td>Nothing to do: the
+installer puts the tools back from the checked downloads.</td></tr>
+<tr><td><code>Sniper's own tools are not installed yet.</code> or <code>Sniper's own Node cannot be used: …</code></td>
+<td><code>~/.project-sniper</code> was removed or damaged.</td><td>Ask your agent to run
+<code>./sniper setup</code> (or double-click <code>install/install.command</code>); it checks every
+tool file and reinstalls what is missing or changed.</td></tr>
+<tr><td><code>Another Sniper installer is setting up the same tools; waiting …</code></td><td>Two
+Sniper folders are being set up at once; they share the same tools.</td><td>Nothing to do: the
+second one continues when the first has finished.</td></tr>
+<tr><td><code>no cached chrome-headless-shell found</code></td><td>The rendering browser is missing.
+Sniper never downloads one mid-render on purpose.</td><td>Run <code>./sniper setup</code> again; step
+5/8 downloads it and checks its SHA-256.</td></tr>
+<tr><td><code>WHISPER_CPP_MODEL does not exist: …</code></td><td>The speech model is missing or was moved.</td>
+<td>Run <code>./sniper setup</code> again; step 6/8 re-downloads it and checks its checksum.</td></tr>
+<tr><td><code>kernel memory pressure is warning</code> (or <code>critical</code>), <code>system memory
+headroom is below policy</code>, <code>physical memory occupied by the compressor exceeds policy</code></td>
+<td>macOS reports the Mac is short of memory, so Sniper does not start a render rather than
+slow the Mac down or fail part-way.</td><td>Quit other large apps (browsers with many tabs, other
+video or design apps), wait a moment, and run the step again.</td></tr>
+<tr><td><code>The folder path contains one of  ,  '  :  \ …</code></td><td>Those characters break the
+audio-cleanup filter, which embeds this folder's path.</td><td>Move the folder somewhere
+without them. Spaces, accents, <code>$</code> and quotes are fine.</td></tr>
+<tr><td>A render stops and reports a problem</td><td>Working as designed. Sniper stops
+rather than shipping something it could not check.</td><td>Read the message: it names
+the lane and the reason. Most are a request to pick a style or confirm a choice.</td></tr>
+<tr><td>Not enough disk space</td><td>A long render needs tens of GB of temporary space.</td>
+<td>Let running edits finish, then <code>install/clean-caches.command</code> shows what can be freed and how
+big it is, and never touches your footage, plans, finals or unsynced edits.</td></tr>
+</table>
+
+<h2>What to realistically expect</h2>
+<div class="warn">
+<p>The only timing on record is Aaron's own: he fully edits a ten-minute video — motion
+graphics, cuts, trims, audio correction, b-roll — in under three hours, and estimates
+Sniper saves him about 85% of the effort versus editing it by hand. <strong>That is one
+person's report about his own work on his own machine. It is not a promise about your
+recording, your Mac or your provider plan, and no typical buyer runtime has been
+measured.</strong> Your first edit will take longer than your tenth, because you are
+learning what to ask for.</p>
+</div>
+<ul>
+  <li>Transcription is local and roughly real-time-ish on Apple silicon; a 30-minute
+  recording is minutes, not seconds.</li>
+  <li>Planning and review happen in your conversation with your agent. They are the slow part,
+  and your plan's rate limits apply.</li>
+  <li>Rendering is CPU and disk heavy. Expect the fans.</li>
+  <li>Keep the conversation open while a render runs; if a step stops, ask your agent to run it
+  again — finished stages are reused.</li>
+</ul>
+
+<h2>Sending something useful</h2>
+<pre><code>install/diagnostics.command</code></pre>
+<p>This writes a folder to your Desktop containing structured facts only: this build's
+<code>RELEASE.json</code>, your macOS, Node and Python versions, the checker's report and the
+installer's own step log. It does <strong>not</strong> copy footage, transcripts, edit plans, keys
+or logins, and your conversation with your agent stays in your agent. Read it before you send
+it.</p>
+
+<div class="warn">
+<p><strong>Support is not settled for this candidate.</strong> There is no support address
+in this package because the support route and response commitment have not been decided.
+Do not treat any address you find in the source as a support channel.</p>
+</div>
+<footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>
+</div>
+</body>
+</html>

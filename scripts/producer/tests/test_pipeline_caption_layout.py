@@ -1,24 +1,24 @@
-"""Explicit native pipeline layout intent, not observed overlap or legibility."""
+"""Retained pipeline intent grammar and current refusal, never native visual approval."""
 from __future__ import annotations
 
 import copy
-import hashlib
 import tempfile
 import unittest
 from pathlib import Path
 
 from graphics.template_visual_contract import visual_entry_errors
-from headless.container_io import CompositionInput, create_snapshot, verify_snapshot_archive
+from graphics.template_contract import validate_entry
+from headless.render_layout_contract import PIPELINE_POLICY, role_inventory, sealed_documents
+import test_guided_caption_pipeline_observation as retained
 
-MOTION = Path(__file__).resolve().parents[3] / "templates/motion"
 
 
 class PipelineCaptionLayoutTest(unittest.TestCase):
-    """Preserve copy, default rendering and native-size constraints."""
+    """Preserve retained copy/layout grammar and current-source refusal."""
 
     def setUp(self) -> None:
         """Use the retained failing card's authored copy without changing it."""
-        self.entry = {"kind": "nateherk-pipeline", "anchor": "own-screen", "outStart": 0, "outEnd": 8,
+        self.entry = {"kind": "module-pipeline", "anchor": "own-screen", "outStart": 0, "outEnd": 8,
             "spec": {"layout": "caption-safe-upper-v1", "eyebrow": "This stage",
                      "headlineLines": "At this stage your content system|is a folder",
                      "explainer": "Ideas go in and nothing ever comes back", "footChip": "nothing comes back",
@@ -74,43 +74,40 @@ class PipelineCaptionLayoutTest(unittest.TestCase):
         self.entry["anchor"] = "free-band"
         self.assertTrue(visual_entry_errors(self.entry))
 
-    def test_native_layout_does_not_change_type_size_or_hide_copy(self) -> None:
-        """Static source checks supplement, never replace, real rendered review."""
-        html = (MOTION / "compositions/nateherk-pipeline.html").read_text()
-        native = html[html.index("/* Explicit native intent only;"):html.index("</style>")]
-        for forbidden in ("font-size", "scale(", "text-overflow", "line-clamp", "overflow: hidden", "display: none"):
-            with self.subTest(forbidden=forbidden):
-                self.assertNotIn(forbidden, native)
-        self.assertIn("width: 1728px; height: 528px", native)
-        self.assertIn('src="/nateherk-pipeline.js"', html)
-        self.assertIn('"default":"full-canvas"', html)
+    def test_retained_role_inventory_keeps_every_authored_copy_field(self) -> None:
+        """Verify lexical metadata, with no assertion about retired CSS or pixels."""
+        with tempfile.TemporaryDirectory(prefix="TEST-pipeline-roles-") as raw:
+            held = retained.PipelineObservationTests._seal(
+                retained.pipeline_intent(self.entry["spec"]), Path(raw).resolve())
+            request = retained.observer.observation_request(retained.intent_record(held))
+            documents = sealed_documents(held.snapshot, request)
+            actual = {row["id"]: row["text"] for row in role_inventory(documents, PIPELINE_POLICY)}
+        self.assertEqual(actual, {"node-1": "Ideasgo in", "node-2": "nothingever", "node-3": "comesback",
+            "connector-1": "", "connector-2": "", "eyebrow": "This stage",
+            "headline-line-1": "At this stage your content system", "headline-line-2": "is a folder",
+            "explainer": "Ideas go in and nothing ever comes back", "footnote": "nothing comes back"})
 
-    def test_native_line_boxes_reflow_metadata_without_changing_default_type(self) -> None:
-        """Real native overflow drove opt-in spacing, not smaller type or a waiver."""
-        html = (MOTION / "compositions/nateherk-pipeline.html").read_text()
-        original, native = html.split("/* Explicit native intent only;", 1)
-        self.assertIn("font-size: 110px;\n        line-height: 1.05", original)
-        self.assertIn("font-size: 34px; line-height: 1;", original)
-        self.assertIn("#npl-headline { order: 2; line-height: 1.25; }", native)
-        self.assertIn("#npl-eyebrow { order: 1; line-height: 1.25; }", native)
-        self.assertIn("grid-template-columns: minmax(0, 1fr) auto", native)
-        self.assertIn("#npl-stage:has(#npl-foot) #npl-explainer { grid-column: 1; }", native)
-        self.assertIn("#npl-stage:has(#npl-explainer) #npl-foot { grid-column: 2; }", native)
-        self.assertIn("#npl-chain { order: 5; }", native)
+    def test_current_source_policy_rejects_retained_layout_before_media(self) -> None:
+        """Historical grammar acceptance cannot authorize a retired composition."""
+        from unittest.mock import patch
+        before = copy.deepcopy(self.entry)
+        with patch("subprocess.Popen") as process:
+            with self.assertRaisesRegex(ValueError, "module-pipeline.*retired"):
+                validate_entry(self.entry)
+        process.assert_not_called()
+        self.assertEqual(self.entry, before)
 
-    def test_actual_sealed_input_includes_the_new_local_script_bytes(self) -> None:
-        """Exercise ordinary local closure capture, not an invented render archive."""
-        relative = "compositions/nateherk-pipeline.html"
-        html = (MOTION / relative).read_text()
-        with tempfile.TemporaryDirectory(prefix="sniper-native-pipeline-seal-") as raw:
-            directory = str(Path(raw).resolve())
-            sealed = create_snapshot(str(MOTION.parent.parent), CompositionInput(relative, html, duration=8),
-                                     self.entry["spec"], directory)
-            verify_snapshot_archive(sealed.path, sealed.sha256, sealed.manifest)
-            files = {row["path"]: row for row in sealed.manifest}
-            self.assertIn("motion/" + relative, files)
-            self.assertEqual(files["motion/nateherk-pipeline.js"]["sha256"],
-                             hashlib.sha256((MOTION / "nateherk-pipeline.js").read_bytes()).hexdigest())
+    def test_retained_archive_tamper_is_rejected_before_role_read(self) -> None:
+        """Historical readback still verifies actual sealed bytes and their manifest."""
+        with tempfile.TemporaryDirectory(prefix="TEST-pipeline-tamper-") as raw:
+            held = retained.PipelineObservationTests._seal(
+                retained.pipeline_intent(self.entry["spec"]), Path(raw).resolve())
+            request = retained.observer.observation_request(retained.intent_record(held))
+            archive = Path(held.snapshot.path)
+            archive.chmod(0o600)
+            archive.write_bytes(archive.read_bytes() + b"TEST mutation")
+            with self.assertRaises((RuntimeError, ValueError)):
+                sealed_documents(held.snapshot, request)
 
 
 if __name__ == "__main__":

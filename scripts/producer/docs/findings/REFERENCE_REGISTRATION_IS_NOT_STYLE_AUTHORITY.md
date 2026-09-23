@@ -42,8 +42,8 @@ is authoritative.
 
 ## Style identity boundary
 
-- `extend` may target only a closed, measured short-form grammar (`caleb`,
-  `jadenly`, or `angela`).
+- `extend` may target only a closed, measured short-form grammar (`restrained`,
+  `punch`, or `slideware`).
 - `mimic` applies one reference's mechanics without claiming membership in a
   closed grammar.
 - `new-style` records a provisional, reference-bound candidate name. One video

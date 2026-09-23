@@ -10,93 +10,23 @@ from transcript_cut_evidence import (
     SourceEvidence, file_hash, load_cut_parent, recheck_cut_parents, source_evidence, stable_hash,
 )
 from transcript_cut_quality import inspect_output
+from transcript_cut_boundaries import (
+    BOUNDARY_EPS_S, Boundary, _boundary_receipt, _neighbors, _validate_cuts,
+)
 from transcript_timing_review import ReviewInput, consume as consume_timing_reviews
 
-BOUNDARY_EPS_S, GAP_MATCH_EPS_S = 0.015, 0.05
-MAX_SEAM_SILENCE_S, MIN_REMOVAL_S = 0.75, 0.04
+GAP_MATCH_EPS_S = 0.05
+MIN_REMOVAL_S = 0.04
 REMOVAL_KINDS = {"dead_air", "false_start", "retake", "filler", "content", "other"}
 PREVISUAL_KEYS = {"planVersion", "target", "cutTrack", "cutDecisions"}
 
 
-def _inside_word(at: float, words: list[dict]) -> dict | None:
-    return next((word for word in words
-                 if word["start"] + BOUNDARY_EPS_S < at
-                 < word["end"] - BOUNDARY_EPS_S), None)
-
-
-def _neighbors(at: float, words: list[dict]) -> tuple[dict | None, dict | None]:
-    before = next((word for word in reversed(words)
-                   if word["end"] <= at + BOUNDARY_EPS_S), None)
-    after = next((word for word in words if word["start"] >= at - BOUNDARY_EPS_S), None)
-    return before, after
-
-
-def _word_receipt(word: dict | None) -> dict | None:
-    if word is None:
-        return None
-    return {"word": word["word"], "start": round(word["start"], 4),
-            "end": round(word["end"], 4)}
-
-
-def _boundary_receipt(tag: str, at: float, edge: str,
-                      source: SourceEvidence, errors: list[str]) -> dict:
-    inside = _inside_word(at, source.words)
-    before, after = _neighbors(at, source.words)
-    if inside:
-        errors.append(f"{tag}: {edge} {at:.3f}s cuts through word {inside['word']!r} "
-                      f"[{inside['start']:.3f},{inside['end']:.3f}]")
-    if edge == "start" and at > BOUNDARY_EPS_S:
-        silence = (after["start"] - at) if after else float("inf")
-        if silence > MAX_SEAM_SILENCE_S:
-            errors.append(f"{tag}: start has {silence:.3f}s before its first kept word "
-                          f"(max {MAX_SEAM_SILENCE_S}s)")
-    if edge == "end" and at < source.duration - BOUNDARY_EPS_S:
-        silence = (at - before["end"]) if before else float("inf")
-        if silence > MAX_SEAM_SILENCE_S:
-            errors.append(f"{tag}: end has {silence:.3f}s after its last kept word "
-                          f"(max {MAX_SEAM_SILENCE_S}s)")
-    return {"at": round(at, 4), "before": _word_receipt(before),
-            "after": _word_receipt(after), "insideWord": _word_receipt(inside)}
-
-
-def _validate_cuts(plan: dict, sources: dict[str, SourceEvidence], errors: list[str]
-                   ) -> tuple[list[dict], dict[str, list[tuple]]]:
-    receipts: list[dict] = []
-    by_source: dict[str, list[tuple]] = {}
-    for index, cut in enumerate(plan.get("cutTrack") or []):
-        tag, source_id = f"cutTrack[{index}]", str(cut.get("sourceId", ""))
-        source = sources.get(source_id)
-        if source is None:
-            errors.append(f"{tag}: sourceId {source_id!r} has no transcript authority")
-            continue
-        try:
-            start, end = float(cut["start"]), float(cut["end"])
-        except (KeyError, TypeError, ValueError):
-            errors.append(f"{tag}: start/end must be numeric")
-            continue
-        if not 0 <= start < end <= source.duration + BOUNDARY_EPS_S:
-            errors.append(
-                f"{tag}: [{start},{end}] outside source duration {source.duration}")
-            continue
-        if len(str(cut.get("rationale", "")).strip()) < 12:
-            errors.append(
-                f"{tag}: rationale must explain why this transcript range is kept")
-        seam = {"cutIndex": index, "sourceId": source_id,
-                "start": _boundary_receipt(tag, start, "start", source, errors),
-                "end": _boundary_receipt(tag, end, "end", source, errors)}
-        receipts.append(seam)
-        by_source.setdefault(source_id, []).append((start, end, index))
-    for source_id, ranges in by_source.items():
-        for previous, current in zip(ranges, ranges[1:]):
-            if current[0] < previous[0]:
-                errors.append(
-                    f"cutTrack[{current[2]}]: source {source_id!r} moves backward "
-                    f"after cutTrack[{previous[2]}]")
-            if current[0] < previous[1] - BOUNDARY_EPS_S:
-                errors.append(
-                    f"cutTrack[{current[2]}]: overlaps cutTrack[{previous[2]}] "
-                    f"in source {source_id!r}")
-    return receipts, by_source
+def _straddling_words(source: SourceEvidence, start: float, end: float) -> list[dict]:
+    """Words that overlap [start, end] without being contained by it."""
+    return [word for word in source.words
+            if word["end"] > start + BOUNDARY_EPS_S and word["start"] < end - BOUNDARY_EPS_S
+            and not (word["start"] >= start - BOUNDARY_EPS_S
+                     and word["end"] <= end + BOUNDARY_EPS_S)]
 
 
 def _norm(text: object) -> list[str]:
@@ -182,16 +112,37 @@ def _validate_removals(plan: dict, sources: dict[str, SourceEvidence],
                     f"cutDecisions.removals[{index}] covers more than one removed gap")
                 continue
             used.add(index)
-            gap_words = [word for word in source.words
-                         if word["start"] >= start - BOUNDARY_EPS_S
-                         and word["end"] <= end + BOUNDARY_EPS_S]
+            claimed = [word for word in source.words
+                       if word["start"] >= start - BOUNDARY_EPS_S
+                       and word["end"] <= end + BOUNDARY_EPS_S]
+            # A word the audio measures as silent throughout was never spoken there:
+            # removing that span removes silence, not the word (which whisper mis-timed).
+            gap_words = [word for word in claimed
+                         if not source.measured_silent(word["start"], word["end"])]
+            mistimed = len(claimed) - len(gap_words)
+            # A word only PARTLY inside the gap is removed in part, and belongs to neither
+            # list above: the boundary rule suppresses it when the boundary is admitted, and
+            # `claimed` never sees it. Its overlapped portion must measure silent, or the
+            # removal is cutting into speech.
+            straddling = _straddling_words(source, start, end)
+            for word in straddling:
+                # One edge of the overlap IS the cut boundary, so it sits on the silence's
+                # own edge: margin there would refuse every real cut (the level check and
+                # the dropped edge frames are the guard instead).
+                overlap = (max(start, word["start"]), min(end, word["end"]))
+                if not source.measured_silent(*overlap, margin=0.0):
+                    errors.append(
+                        f"cutDecisions.removals[{index}]: removes {overlap[1] - overlap[0]:.3f}s "
+                        f"of word {word['word']!r} [{word['start']:.3f},{word['end']:.3f}]")
             before, _ = _neighbors(start, source.words)
             _, after = _neighbors(end, source.words)
             _validate_decision(f"cutDecisions.removals[{index}]", decision,
                                gap_words, before, after, errors)
             receipts.append({"sourceId": source_id, "start": round(start, 4),
                              "end": round(end, 4), "kind": decision.get("kind"),
-                             "removedWords": len(gap_words)})
+                             "removedWords": len(gap_words),
+                             **({"mistimedWordsInMeasuredSilence": mistimed} if mistimed else {}),
+                             **({"partlyRemovedWords": len(straddling)} if straddling else {})})
     for index in range(len(decisions)):
         if index not in used:
             errors.append(
@@ -270,6 +221,10 @@ def check(plan_path: str, transcripts_dir: str, manifest_path: str,
         "cutDecisionsDigest": stable_hash(plan.get("cutDecisions") or {}),
         "cuts": len(plan.get("cutTrack") or []), "seams": seams, "removals": removals,
         "outputQuality": output_quality,
+        "audioEvidence": {source_id: {"gateDbfs": source.silence_gate_dbfs,
+                                      "silenceSpans": len(source.silence)}
+                          for source_id, source in sorted(sources.items())
+                          if source.silence_gate_dbfs is not None},
     }
     if approval_path:
         _check_approval(approval_path, receipt, errors)

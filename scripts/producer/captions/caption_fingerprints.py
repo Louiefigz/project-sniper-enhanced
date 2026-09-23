@@ -43,6 +43,7 @@ _COMPILER_SOURCES = (
     "../edit/dialogue_authority.py",
     "../edit/picture_lock_common.py",
     "../compile_timeline.py",
+    "../edit_scope.py",
     "../cross_runtime_canonical_json.py",
     "../producer_config.py",
 )

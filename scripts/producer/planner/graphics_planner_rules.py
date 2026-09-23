@@ -67,12 +67,7 @@ UNIT_NOUNS = frozenset({
 # canvas-pip-list) are NOT in this table either: they exist only under
 # graphics_style="overlay-rich" and are remapped in graphics_planner_style,
 # so the cutaway-only doctrine here stays byte-identical.
-_TEMPLATE_BY_MODE = {
-    "sequence":       ("list-build", "glass-rail"),
-    "contrast":       ("versus-split", "versus-split"),
-    "thesis":         ("kinetic-quote", "kinetic-quote"),
-    "topic-boundary": ("section-marker", "glass-takeover-bg"),
-}
+_TEMPLATE_BY_MODE = {"number": ("count-up", "chart-story"), "thesis": ("line-swap", None)}
 
 
 # =========================================================================== #
@@ -113,45 +108,21 @@ def resolve_icon(name: str) -> str | None:
     return None
 
 
-def classify_entity(text: str) -> tuple[str, str | None]:
-    """Entity → (kind, icon_file). ('reject', None) for a generic entity (R12).
+def classify_entity(text: str) -> tuple[str | None, str | None]:
+    """Entities require an inspected catalog design, never an old badge fallback."""
+    return None, resolve_icon(text)
 
-    Specific + recognizable mark → icon-badge (R12 rule 2: bare mark beats
-    chip+label). Specific but no known mark → chip-row (R12 rule 3: text is then
-    the information). Generic → rejected entirely (R12 rule 1).
-    """
-    if is_generic_entity(text):
-        return "reject", None
-    icon = resolve_icon(text)
-    return ("icon-badge", icon) if icon else ("chip-row", None)
 
 
 # =========================================================================== #
 # Trigger → template (non-entity triggers).
 # =========================================================================== #
 def template_for(trigger: str, text: str, mode: str) -> tuple[str | None, str | None]:
-    """Map a non-entity trigger to a template kind for ``mode``.
+    """Offer only a verified catalog port; other needs go to native catalog discovery."""
+    pair = _TEMPLATE_BY_MODE.get(trigger, (None, None))
+    kind = pair[mode == "longform"]
+    return kind, None if kind else "Select a matching upstream catalog component in a native project"
 
-    Returns ``(kind, note)``; ``note`` is a human hint carried into the proposal
-    (e.g. why a longform takeover needs an operator). ``(None, None)`` = the
-    planner has no template for this trigger (it becomes a rejected candidate).
-    """
-    longform = mode == "longform"
-    idx = 1 if longform else 0
-    if trigger == "enumeration":
-        last = (_clean(text).split() or [""])[-1]
-        if last in UNIT_NOUNS:
-            return "stat-card", "count governs a measure noun — read as a quantity"
-        return ("glass-rail" if longform else "list-build"), None
-    if trigger == "number":
-        return "stat-card", None
-    pair = _TEMPLATE_BY_MODE.get(trigger)
-    if not pair:
-        return None, None
-    kind = pair[idx]
-    if trigger == "topic-boundary" and longform:
-        return kind, "chapter takeover — heavier; operator confirms"
-    return kind, None
 
 
 # =========================================================================== #
@@ -159,66 +130,23 @@ def template_for(trigger: str, text: str, mode: str) -> tuple[str | None, str | 
 # the planner only expresses a PREFERENCE the brain/lint later resolves).
 # =========================================================================== #
 def anchor_for(kind: str, state: str | None, mode: str) -> tuple[str, bool]:
-    """(anchor_preference, needs_operator) for a graphic given the zone's state.
-
-    Doctrine (SKILL.md + plan_lint_motion): over a SCREEN-SHARE the screen is the
-    star — overlays are illegal, so the planner proposes a cutaway (own-screen)
-    and flags it for the operator. Over a TALKING-HEAD graphics live around the
-    face (R3 headroom / beside-face) or centered in the free band (wide cards).
-    MIXED is ambiguous → keep the talking-head preference but flag it.
-    """
-    longform = mode == "longform"
+    """Use footage geometry, never a retired template's house grammar."""
+    from graphics.visual_source_policy import require_integrated
+    require_integrated(kind)
     if state == "screen-share":
         return "own-screen", True
-    if kind in ("stinger-wipe", "glass-takeover-bg"):
-        return "own-screen", longform
-    needs = state == "mixed"
-    if longform:
-        return "free-band", needs            # 16:9 glass cards self-place
-    if kind in ("versus-split", "kinetic-quote"):
-        return "free-band", needs            # wide → centered free band
-    if kind in ("list-build", "stat-card"):
-        return "beside-face", needs
-    return "headroom", needs                 # icon-badge / chip-row (R3)
+    return ("free-band" if mode == "longform" else "headroom"), state == "mixed"
 
 
 # =========================================================================== #
 # Seed specs (minimal, valid-shaped; the brain fills detail at merge).
 # =========================================================================== #
 def seed_spec(kind: str, text: str, land_s: float) -> dict:
-    """A minimal spec for ``kind`` seeded from the spoken evidence ``text``.
-
-    Proposals are reviewed before merge, so specs carry the raw spoken words in
-    the right slot rather than invented copy — the brain refines them. ``land_s``
-    is the entity/beat's time RELATIVE to the graphic's outStart (the ``atN``
-    sync convention the templates use).
-    """
-    text = text.strip()
-    at = round(max(0.0, land_s), 2)
-    if kind == "stat-card":
-        return {"value": text, "label": "", "count_up": True}
-    if kind == "list-build":
-        return {"item1": text, "at1": at, "chip_style": "check"}
-    if kind == "glass-rail":
-        return {"eyebrow": "", "num1": "1", "title1": text, "sub1": ""}
-    if kind == "versus-split":
-        return {"leftTitle": "", "rightTitle": "", "left1": text, "right1": "",
-                "at1": at}
-    if kind == "kinetic-quote":
-        return {"quote": " ".join(text.split()[:8]), "bg": "dark", "highlight": ""}
-    if kind == "stinger-wipe":
-        return {"title": " ".join(text.split()[:5])}
-    if kind == "section-marker":
-        # Headroom section header (shorts): the brain writes the eyebrow ("System
-        # No.2") + a real title/qualifier at merge — the boundary words only seed
-        # the title slot so an un-refined marker still reads.
-        return {"num": "", "line1": " ".join(text.split()[:4]), "line2": "",
-                "readability": "plates"}
-    if kind == "glass-takeover-bg":
-        return {"eyebrow": "", "title": " ".join(text.split()[:5])}
-    if kind == "glass-lower-third":
-        return {"eyebrow": "", "titleBase": text, "titleHighlight": ""}
+    """Leave copy/data to the brain; validated catalog variables cannot be invented."""
+    from graphics.visual_source_policy import require_integrated
+    require_integrated(kind)
     return {}
+
 
 
 def merged_corrections(plan_corrections: dict | None) -> dict:

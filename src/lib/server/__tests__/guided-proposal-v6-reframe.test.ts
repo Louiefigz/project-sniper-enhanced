@@ -16,6 +16,9 @@ import type { ProposalEvidence } from "../guided-proposal-evidence";
 import type { AcceptedGuidedCut } from "../guided-raw-treatment-store";
 import type { AutoEditCtx } from "@/app/api/producer/auto-edit/stream";
 
+/** TEST ONLY scalar catalog configuration; no rendered or source observation claim. */
+const GRAPHIC_SPEC = { text: "TEST crop", emphasisWord: "crop", style: "highlight", drawAt: 0.2, accent: "#054BC9", exit: "hold" };
+
 type Row = Record<string, unknown>;
 const RAW = "Use the exact crop and caption every word with the Producer line preset.";
 const PLAN = { planVersion: 3, target: { mode: "short", scope: "light", width: 1080, height: 1920, fps: 30,
@@ -35,7 +38,7 @@ function captionOperation(patch: Row = {}): Row {
     captions: { schemaVersion: 1, preset: "producer-config-line-v1", coverage: "all-kept-transcript-words", suppression: "none" }, ...patch };
 }
 function proposal(patch: Row = {}): Row {
-  return { schemaVersion: 6, summary: "TEST ONLY manual geometry request; no source observation or approval.", graphicsStyle: "cutaway-only",
+  return { schemaVersion: 6, summary: "TEST ONLY manual geometry request; no source observation or approval.", graphicsStyle: "catalog-first",
     graphicsStyleRationale: "TEST ONLY preserve the accepted short and its explicit caption lane.",
     clauses: [{ start: 0, end: RAW.length, quote: RAW, disposition: "supported", rationale: "Both exact visual requests preserve the accepted cut.", operationIndices: [0, 1] }],
     beats: [{ startAnchor: 0, endAnchorExclusive: 1, purpose: "opening", summary: "TEST ONLY whole short.", supportsBeatIndices: [] }],
@@ -75,7 +78,7 @@ test("V6 requires exact reframe/null on every operation and rejects coercion or 
   const { reframe: _caption, ...missingCaption } = captionOperation(); void _caption;
   const invalid = [missing, cropOperation({ reframe: null }), cropOperation({ type: ["reframe-manual-short"] }),
     cropOperation({ reason: "brief" }), cropOperation({ captions: captionOperation().captions }), cropOperation({ beatIndex: 0 }),
-    cropOperation({ catalogKind: "title-card" }), cropOperation({ variables: [] }), cropOperation({ grade: "warm" }),
+    cropOperation({ catalogKind: "chart-story" }), cropOperation({ variables: [] }), cropOperation({ grade: "warm" }),
     cropOperation({ startAnchor: 0 }), cropOperation({ endAnchorExclusive: 1 }), cropOperation({ presentation: {} }),
     cropOperation({ approval: true })];
   for (const row of invalid) assert.throws(() => parseTreatmentProposalV6(proposal({ operations: [row, captionOperation()] })));
@@ -168,8 +171,8 @@ test("crop minimum mirrors the existing renderer and TS manual profile bounds", 
 
 function candidateFixture() {
   const output = proposal(), operations = output.operations as Row[];
-  operations.push({ type: "catalog-graphic", clauseIndex: 0, beatIndex: 0, catalogKind: "TEST-portrait-card",
-    variables: [{ name: "title", value: "TEST crop" }], grade: null, startAnchor: 1, endAnchorExclusive: 2,
+  operations.push({ type: "catalog-graphic", clauseIndex: 0, beatIndex: 0, catalogKind: "marker-highlight",
+    variables: Object.entries(GRAPHIC_SPEC).map(([name, value]) => ({ name, value })), grade: null, startAnchor: 1, endAnchorExclusive: 2,
     captions: null, reframe: null, reason: "TEST ONLY explain the expressly requested crop.",
     presentation: { schemaVersion: 1, anchor: "own-screen", placement: "full-canvas", compositeMode: "normal",
       baseTreatment: "preserve", rationale: "TEST ONLY exact native portrait canvas." } });
@@ -181,7 +184,7 @@ function candidateFixture() {
     timelineMapHash: "a".repeat(64), segments: [{ index: 0, sourceId: "raw-1", startFrame: 0,
       endFrameExclusive: 258, text: "TEST ONLY exact crop and all kept captions." }],
     graphicsAdvice: { "graphics_planner.py": { introSemanticBeats: [] } },
-    catalog: [{ kind: "TEST-portrait-card", canvas: [1080, 1920], defaults: { title: "TEST" }, fields: ["title"] }],
+    catalog: [{ kind: "marker-highlight", canvas: [1080, 1920], defaults: GRAPHIC_SPEC, fields: Object.keys(GRAPHIC_SPEC) }],
     captionPolicy: guidedCaptionPolicy(GUIDED_CAPTION_CONFIG_FILES.map(name => ({ name, sha256: "b".repeat(64) })))
   } as unknown as ProposalEvidence;
   return { output, evidence, cut: { plan: { value: PLAN } } as unknown as AcceptedGuidedCut };
@@ -199,7 +202,7 @@ test("V6 candidate builds crop then captions then graphics, preserving original 
   assert.deepEqual(result.candidate.cutTrack, PLAN.cutTrack); assert.deepEqual(result.candidate.cutDecisions, PLAN.cutDecisions);
   const { graphicsStyle, graphicsStyleRationale, ...lockedTarget } = result.candidate.target as Row;
   assert.deepEqual(lockedTarget, PLAN.target);
-  assert.equal(graphicsStyle, "cutaway-only"); assert.equal(graphicsStyleRationale, supplied.output.graphicsStyleRationale);
+  assert.equal(graphicsStyle, "catalog-first"); assert.equal(graphicsStyleRationale, supplied.output.graphicsStyleRationale);
   assert.equal(result.executionBindings?.graphics[0].operationIndex, 2);
   assert.equal(result.executionBindings?.candidatePlanHash, canonicalJsonSha256(result.candidate));
   assertGuidedReframeCandidate(PLAN, result.candidate, parseTreatmentProposalV6(supplied.output));

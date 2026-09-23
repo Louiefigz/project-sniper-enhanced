@@ -12,7 +12,7 @@ from pathlib import Path
 from unittest import mock
 
 from contracts.schema_validator import SchemaValidationError, validate_document
-from scene_fixtures import fire_sparkles_scene
+from scene_fixtures import bind_test_scene_source, fire_sparkles_scene
 
 from graphics.animation_map import filmstrip_frames, parse_animation_map
 from graphics.scene_bundle import capture_bundle, promote_bundle, resolve_bundle
@@ -82,6 +82,7 @@ class SceneContractTests(unittest.TestCase):
         right = next(row for row in changed["elements"]
                      if row["elementId"] == "right-copy")
         right["values"]["rightTitle"] = "New copy only"
+        bind_test_scene_source(changed)
         validate_scene_bundle(changed, self.bundle)
         with mock.patch(
                 "graphics.scene_render.live_tools_identity",
@@ -108,6 +109,7 @@ class SceneContractTests(unittest.TestCase):
         moved["timing"]["startFrame"] += 300
         moved["timing"]["endFrameExclusive"] += 300
         moved["timing"]["timelineMapHash"] = "b" * 64
+        bind_test_scene_source(moved)
         validate_scene_bundle(moved, self.bundle)
         with mock.patch(
                 "graphics.scene_render.live_tools_identity",
@@ -127,6 +129,7 @@ class SceneContractTests(unittest.TestCase):
     def test_scene_hash_rejects_nondeterministic_layer_order(self) -> None:
         broken = copy.deepcopy(self.scene)
         broken["renderUnits"][1]["zIndex"] = 10
+        bind_test_scene_source(broken)
         with self.assertRaisesRegex(SceneContractError, "zIndex"):
             scene_hash(broken)
 
@@ -152,6 +155,7 @@ class SceneContractTests(unittest.TestCase):
     def test_foreign_bundle_hash_is_rejected(self) -> None:
         broken = copy.deepcopy(self.scene)
         broken["composition"]["bundleHash"] = "f" * 64
+        bind_test_scene_source(broken)
         errors = scene_bundle_errors(broken, self.bundle)
         self.assertTrue(any("exact bundle" in error for error in errors))
 
@@ -191,8 +195,10 @@ class SceneContractTests(unittest.TestCase):
                 "kind": "asset", "id": "asset-fire",
                 "sha256": hashlib.sha256(asset).hexdigest(),
             }]
+            bind_test_scene_source(scene)
             self.assertEqual(scene_bundle_errors(scene, bundle), [])
             scene["dependencies"][0]["sha256"] = "f" * 64
+            bind_test_scene_source(scene)
             errors = scene_bundle_errors(scene, bundle)
             self.assertTrue(any("exactly one" in error for error in errors))
 

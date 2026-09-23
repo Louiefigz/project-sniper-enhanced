@@ -12,6 +12,8 @@ import { buildNativeShortProjectFiles } from "../guided-native-project";
 import { guidedNativeSourceMedia } from "../guided-native-geometry";
 import { guidedBindingFixture } from "./_guided-native-binding-fixture";
 import { refreshNativePacingFixture } from "./_native-short-project-fixture";
+import { nativeAssetUseRevisionHash } from "../native-short-asset-use";
+import { assertNativeShortPrebuildReview } from "../native-short-prebuild-review";
 
 type Fixture = ReturnType<typeof guidedBindingFixture>;
 function withFixture(run: (f: Fixture) => void, version: 9 | 10 = 10): void {
@@ -89,7 +91,10 @@ test("reserved V10 location rejects stripping every editable guided pointer and 
   f.bind(); const parent = path.join(f.producerDir, "native-development"); mkdirSync(parent);
   const built = writeNativeShortProject(f.input, path.join(parent, f.proposal.proposalHash), f.dependencies);
   rmSync(path.join(built.directory, "GUIDED-PROPOSAL.json"));
-  rehashProject(built.directory, input => { delete input.guidedBinding; delete input.requestPacket; }, "GUIDED-PROPOSAL.json");
+  rehashProject(built.directory, input => {
+    delete input.guidedBinding; delete input.requestPacket;
+    input.strategy.assetUse!.revisionHash = nativeAssetUseRevisionHash(input);
+  }, "GUIDED-PROPOSAL.json");
   assert.throws(() => readNativeShortProject(built.directory, f.dependencies), /Reserved guided native project lost/);
   const alias = path.join(f.directory, "plain-native-alias"); symlinkSync(built.directory, alias);
   assert.throws(() => readNativeShortProject(alias, f.dependencies), /Reserved guided native project lost/);
@@ -123,7 +128,7 @@ test("rehashing modified claim, crop or audio decisions does not rewrite the sav
     (input: Fixture["input"]) => { input.strategy.assetUse!.decisions[0].selection!.audio = "muted"; }]) {
     withFixture(f => {
       const built = write(f); rehashProject(built.directory, change);
-      assert.throws(() => readNativeShortProject(built.directory, f.dependencies), /binding changed|without source audio/);
+      assert.throws(() => readNativeShortProject(built.directory, f.dependencies), /binding changed|Still image use cannot claim source video timing or audio/);
     });
   }
 });
@@ -174,5 +179,36 @@ test("guided adapter rejects proposal supersession on its final publication read
       { candidateHash: canonicalJsonSha256(f.proposal.result.candidate), project: f.input, assetResolutions: f.mappings },
       { readGuidedProposal: () => ++reads === 5 ? { ...f.proposal, proposalHash: "e".repeat(64) } : f.proposal,
         prepareCaptionGroups: async () => f.input.canvas.captionGroups }), /changed during publication/);
+  } finally { f.cleanup(); }
+});
+
+test("guided adapter rejects missing or stale review before directories or caption preparation", async () => {
+  for (const missing of [true, false]) {
+    const f = guidedBindingFixture(); let captionCalls = 0;
+    try {
+      if (missing) delete f.input.prebuildReview;
+      else f.input.strategy.scenes[0].exitReason = "TEST changed exit after review";
+      await assert.rejects(writeGuidedNativeProject(f.producerDir, () => 10_000,
+        { candidateHash: canonicalJsonSha256(f.proposal.result.candidate), project: f.input, assetResolutions: f.mappings },
+        { ...f.dependencies, prepareCaptionGroups: async () => { captionCalls++; return f.input.canvas.captionGroups; } }), /prebuild review/);
+      assert.equal(captionCalls, 0);
+      assert.equal(existsSync(path.join(f.producerDir, "native-development")), false);
+    } finally { f.cleanup(); }
+  }
+});
+
+test("review evidence is checked again before the successful publication manifest", async () => {
+  const f = guidedBindingFixture(); let reads = 0;
+  const evidence = assertNativeShortPrebuildReview(f.input).evidence[0].path;
+  try {
+    await assert.rejects(writeGuidedNativeProject(f.producerDir, () => 10_000,
+      { candidateHash: canonicalJsonSha256(f.proposal.result.candidate), project: f.input, assetResolutions: f.mappings },
+      { readGuidedProposal: () => {
+        if (++reads === 4) writeFileSync(evidence, "TEST evidence changed after project staging");
+        return f.proposal;
+      }, prepareCaptionGroups: async () => f.input.canvas.captionGroups }), /review evidence changed/);
+    const directory = path.join(f.producerDir, "native-development", f.proposal.proposalHash);
+    assert.equal(existsSync(path.join(directory, "SHORT-PROJECT.json")), true);
+    assert.equal(existsSync(path.join(directory, "PROJECT-MANIFEST.json")), false);
   } finally { f.cleanup(); }
 });

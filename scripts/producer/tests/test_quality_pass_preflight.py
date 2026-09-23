@@ -7,6 +7,7 @@ import unittest
 from unittest.mock import patch
 
 from _common import pl  # noqa: F401
+from _retired_r0_lease_fixture import inert_preflight_inputs
 from _approved_parent_loader_fixture import ApprovedParentAuthorityFixture
 from _approved_parent_loader_values import canonical
 from headless.approved_parent_media import ApprovedParentVerifierContextV1
@@ -87,12 +88,12 @@ class QualityPassPreflightTests(unittest.TestCase):
             _CONTEXT,
         )
 
-    def test_exact_operation_and_current_parent_bind_but_do_not_authorize(self) -> None:
+    def test_inert_parent_candidate_wiring_does_not_authorize(self) -> None:
         fixture = self.fixture
         with patch(
             "headless.approved_parent_loader.validate_parent_media",
             return_value=fixture.base_probe(),
-        ), self._inspect(canonical(_operation(fixture))) as preflight:
+        ), inert_preflight_inputs(fixture), self._inspect(canonical(_operation(fixture))) as preflight:
             self.assertEqual(
                 preflight.operation.expected_parent, preflight.parent.parent.ref
             )
@@ -120,12 +121,24 @@ class QualityPassPreflightTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "stale or closed"):
             retained.resolve_parent(retained.parent.ref)
 
+    def test_real_retired_preflight_never_yields_or_launches_media(self) -> None:
+        fixture = self.fixture
+        before = {p: p.read_bytes() for p in fixture.authority.rglob('*') if p.is_file()}
+        with patch('subprocess.Popen') as process, patch(
+                'headless.approved_parent_loader.validate_parent_media',
+                return_value=fixture.base_probe()), self.assertRaisesRegex(
+                    ValueError, 'section-marker.*retired'):
+            with self._inspect(canonical(_operation(fixture))):
+                self.fail('retired preflight yielded')
+        process.assert_not_called()
+        self.assertEqual(before, {p: p.read_bytes() for p in fixture.authority.rglob('*') if p.is_file()})
+
     def test_historical_parent_does_not_erase_genesis_origin_requirement(self) -> None:
         fixture = self.fixture
         with patch(
             "headless.approved_parent_loader.validate_parent_media",
             return_value=fixture.base_probe(),
-        ), self._inspect(canonical(_operation(fixture))) as preflight:
+        ), inert_preflight_inputs(fixture), self._inspect(canonical(_operation(fixture))) as preflight:
             lease = preflight.parent
             commit = dataclasses.replace(
                 lease.generation.commit, expected_parent=lease.parent.ref
@@ -176,7 +189,7 @@ class QualityPassPreflightTests(unittest.TestCase):
                 with self._inspect(value):
                     pass
 
-    def test_stale_or_out_of_policy_repair_fails_during_preflight(self) -> None:
+    def test_retired_preflight_refuses_alternative_repair_values(self) -> None:
         for field, value in (("expectedOld", "#000000"), ("value", "#123456")):
             fixture = ApprovedParentAuthorityFixture()
             try:
@@ -191,18 +204,31 @@ class QualityPassPreflightTests(unittest.TestCase):
                 with self.subTest(field=field), patch(
                     "headless.approved_parent_loader.validate_parent_media",
                     return_value=fixture.base_probe(),
-                ), self.assertRaisesRegex(QualityPassPreflightError, "repair CAS"):
+                ), self.assertRaisesRegex(ValueError, "section-marker.*retired"):
                     with inspection:
                         self.fail("inapplicable repair unexpectedly passed preflight")
             finally:
                 fixture.close()
+
+    def test_candidate_repair_failure_is_wrapped_without_claiming_success(self) -> None:
+        from headless.quality_pass_preflight import _candidate
+        from headless.operation_contract import parse_headless_mp4_operation_v1
+        from headless.repair_intent import RepairIntentError
+        from _retired_r0_lease_fixture import historical_lease
+        operation = parse_headless_mp4_operation_v1(canonical(_operation(self.fixture)))
+        refusal = RepairIntentError('TEST injected repair-stage refusal')
+        with historical_lease(self.fixture) as lease, patch(
+                'headless.quality_pass_preflight.apply_repair', side_effect=refusal), self.assertRaisesRegex(
+                    QualityPassPreflightError, 'repair CAS') as caught:
+            _candidate(operation, lease)
+        self.assertIs(caught.exception.__cause__, refusal)
 
     def test_caller_exception_is_not_rewritten(self) -> None:
         fixture = self.fixture
         with patch(
             "headless.approved_parent_loader.validate_parent_media",
             return_value=fixture.base_probe(),
-        ):
+        ), inert_preflight_inputs(fixture):
             with self.assertRaisesRegex(RuntimeError, "caller failure"):
                 with self._inspect(canonical(_operation(fixture))):
                     raise RuntimeError("caller failure")

@@ -1,0 +1,16 @@
+{
+  "version": "2026-09-18.1",
+  "case_count": 2,
+  "cases": [
+    {
+      "id": "DV01",
+      "title": "Reveal each point beside the speaker on the word that names it",
+      "case_path": "resources/references/shorts/expansion/cases/DV01.json"
+    },
+    {
+      "id": "DV02",
+      "title": "Turn one page per step of the argument",
+      "case_path": "resources/references/shorts/expansion/cases/DV02.json"
+    }
+  ]
+}

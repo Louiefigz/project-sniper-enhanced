@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "sdkVersion": "0.8.31",
-  "scope": "local-native-shorts-file-transport-and-realm-compatibility",
+  "scope": "local-native-file-transport-realm-zero-clock-and-half-open-video-windows-bounded-source-work-and-studio-telemetry-off",
   "files": [
     {
       "file": "cli.js",
       "baseSha256": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
-      "sha256": "611aac212ec3e83bf53b8df10d266ee59cd9f733f64a2ea58dc6e38de8426cd5",
+      "sha256": "e565a6640e071d4abac38d7601e0ad0faa7cab9284abd73127f014e29b74afb9",
       "patches": [
         {
           "offset": 2393875,
@@ -34,6 +34,81 @@
           "text": ",\n    strictFrameDecode"
         },
         {
+          "offset": 3933193,
+          "remove": 73,
+          "text": "  const expectedFrames = options.finalFrameOnly ? 1 : nativeSourceFrameCount(duration, fps);\n  if (!Number.isFinite(startTime) || startTime < 0) {\n    throw new RangeError(\"Native extraction requires a finite nonnegative media start\");\n  }\n  const videoOutputDir = outputDirOverride ?? join13(outputDir, videoId);"
+        },
+        {
+          "offset": 3934715,
+          "remove": 77,
+          "text": "args.push(\"-ss\", String(startTime), \"-i\", videoPath, \"-frames:v\", String(expectedFrames));"
+        },
+        {
+          "offset": 3934942,
+          "remove": 35,
+          "text": "vfFilters.push(`fps=${ffmpegFps}:start_time=0`);"
+        },
+        {
+          "offset": 3937205,
+          "remove": 355,
+          "text": "  const framePaths = framePathsFromDirectory(videoOutputDir, format);\n  if (framePaths.size !== expectedFrames) {\n    throw new VideoSourceExtractionError(\n      framePaths.size === 0 ? \"zero_output\" : \"incomplete_output\", false,\n      \"Video source did not cover the requested frame clock\",\n      `Expected ${expectedFrames} frames but decoded ${framePaths.size} (start=${startTime}, duration=${duration})`\n    );\n  }"
+        },
+        {
+          "offset": 3948585,
+          "remove": 130,
+          "text": "  const requestedFrames = nativeSourceFrameCount(work.videoDuration, fpsToNumber(configuredFps));"
+        },
+        {
+          "offset": 3948799,
+          "remove": 64,
+          "text": "  if (availableFrames < requestedFrames) {\n    throw new VideoSourceExtractionError(\n      \"incomplete_output\", false, \"Source superset did not cover the requested frame clock\",\n      `Expected ${requestedFrames} frames but only ${availableFrames} are available`\n    );\n  }\n  const frameCount = requestedFrames;"
+        },
+        {
+          "offset": 3950463,
+          "remove": 0,
+          "text": "async function nativeSourceTaskMap(inputs, action) {\n  const results = [];\n  for (let index = 0; index < inputs.length; index++) {\n    results.push(await action(inputs[index], index));\n  }\n  return results;\n}\n"
+        },
+        {
+          "offset": 3953819,
+          "remove": 860,
+          "text": "  const metadataResults = await nativeSourceTaskMap(\n    resolvedVideos, async ({ video, videoPath }, index) => {\n      try {\n        const attempted = !options.collectProbeFailures && boundedTransientRetryBudget(options.maxTransientRetries) === 0 ? { result: await extractMediaMetadata(videoPath), retries: 0 } : await runVideoExtractionWithRetry(() => extractMediaMetadata(videoPath), {\n          signal,\n          maxTransientRetries: options.maxTransientRetries,\n          onRetry: () => recordTransientRetries(1)\n        });\n        return {\n          video,\n          videoPath,\n          metadata: attempted.result,\n          cacheKeyInput: cacheKeyInputs[index] ?? null\n        };\n      } catch (error) {\n        if (!options.collectProbeFailures) throw error;\n        errors.push(extractionError(video.id, error));\n        return null;\n      }\n    }\n  );\n"
+        },
+        {
+          "offset": 3958600,
+          "remove": 56,
+          "text": "    const transformParts = [\n      NATIVE_SOURCE_FRAME_CLOCK,\n      work.sdrToHdrTransfer"
+        },
+        {
+          "offset": 3966316,
+          "remove": 158,
+          "text": "  const directOutcomes = await nativeSourceTaskMap(\n    supersetPlan.direct,\n    async (miss) => [miss.work.dedupeKey, await executeDirectMiss(miss)]\n  );"
+        },
+        {
+          "offset": 3966558,
+          "remove": 118,
+          "text": "  const supersetOutcomes = await nativeSourceTaskMap(\n    supersetPlan.groups, (group) => executeSupersetGroup(group)\n  );"
+        },
+        {
+          "offset": 3973018,
+          "remove": 50,
+          "text": "globalTime < video.start || globalTime >= video.end"
+        },
+        {
+          "offset": 3973787,
+          "remove": 52,
+          "text": "entry.start <= globalTime && globalTime < entry.end"
+        },
+        {
+          "offset": 3974376,
+          "remove": 32,
+          "text": "if (globalTime < candidate.end)"
+        },
+        {
+          "offset": 3974661,
+          "remove": 50,
+          "text": "globalTime < video.start || globalTime >= video.end"
+        },
+        {
           "offset": 3980118,
           "remove": 0,
           "text": ",\n          config?.strictFrameDecode === true"
@@ -41,7 +116,7 @@
         {
           "offset": 5109675,
           "remove": 0,
-          "text": "import { NativeFrameTransport, FRAME_PREFIX } from './frame-source-transport.mjs';\n"
+          "text": "import { NativeFrameTransport, FRAME_PREFIX, NATIVE_SOURCE_FRAME_CLOCK, nativeSourceFrameCount } from './frame-source-transport.mjs';\n"
         },
         {
           "offset": 5110129,
@@ -124,16 +199,60 @@
     {
       "file": "native-capture-library.mjs",
       "from": "cli.js",
-      "baseSha256": "611aac212ec3e83bf53b8df10d266ee59cd9f733f64a2ea58dc6e38de8426cd5",
-      "sha256": "6de1f76bfc91acd2ed37e0fe77434013a71bd385ec985ce89de48895349d40cb",
+      "baseSha256": "e565a6640e071d4abac38d7601e0ad0faa7cab9284abd73127f014e29b74afb9",
+      "sha256": "2212837a69a86b71542e8602f3d37a4d3616bbde4f497c7c079da2459d8b40a3",
       "patches": [
         {
-          "offset": 11038702,
+          "offset": 11039542,
           "remove": 13236,
           "text": "\ninit_src();\ninit_fileServer2();\ninit_compileStage();\ninit_shared();\nexport { createCaptureSession, initializeSession, captureFrame, closeCaptureSession, drainBrowserPool, createFrameLookupTable, createVideoFrameInjector, createFileServer2, runCompileStage, resolveConfig, extractMediaMetadata, extractAllVideoFrames, isHdrColorSpace, VIRTUAL_TIME_SHIM };\n"
         }
       ]
+    },
+    {
+      "file": "studio/assets/index-CfQexXc6.js",
+      "baseSha256": "deda7cbe4d1798f0efab397093048a41164bd34877c01a55dd2d59a23c514bd1",
+      "sha256": "3c6fd1c682a2ffad4ebc697aff150bcceedd75513da759a0270356ff50f50e67",
+      "patches": [
+        {
+          "offset": 199602,
+          "remove": 47,
+          "text": "sniper-disabled-studio-telemetry"
+        },
+        {
+          "offset": 204648,
+          "remove": 47,
+          "text": "sniper-disabled-studio-telemetry"
+        },
+        {
+          "offset": 363940,
+          "remove": 47,
+          "text": "sniper-disabled-studio-telemetry"
+        }
+      ]
+    },
+    {
+      "file": "studio/index.js",
+      "baseSha256": "5f65556d718f25326195bfc4ad3a905c2436fe0aab008629dbfe839d0bdbdd01",
+      "sha256": "f88d6ce150718b4bd2fe656b3c3f947885597b672edd80be53d0a4a8a4481cce",
+      "patches": [
+        {
+          "offset": 74857,
+          "remove": 47,
+          "text": "sniper-disabled-studio-telemetry"
+        },
+        {
+          "offset": 79538,
+          "remove": 47,
+          "text": "sniper-disabled-studio-telemetry"
+        },
+        {
+          "offset": 349777,
+          "remove": 47,
+          "text": "sniper-disabled-studio-telemetry"
+        }
+      ]
     }
   ],
-  "transportSha256": "20de6c202787a0aa47a8227e54925a1765be871a5bb8b4167032d550b2f55784"
+  "transportSha256": "d074b5d4990aaa824887891bdb58cf80d1116be524225db8bd26466316ab152f"
 }

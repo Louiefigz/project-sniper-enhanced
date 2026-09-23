@@ -3,10 +3,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
 from pathlib import Path
+import math
 from typing import Literal
 
 from graphics.render_tools import resolve_tools
 from native_render_resources import ResourcePolicy, ResourceSnapshot
+from native_render_policy import capacity_policy
 from studio.native_runtime import digest
 
 
@@ -21,23 +23,35 @@ class NativeRunConfig:
     environment: dict[str, str]
     admission: dict
     sandbox: Path = Path(__file__).with_name('native_localhost_only.sb')
-    policy: ResourcePolicy = field(default_factory=lambda: ResourcePolicy(
-        maximum_owned_gib=4, maximum_process_gib=3, maximum_swap_growth_gib=1))
+    policy: ResourcePolicy | None = None
     deadline: float = 600
     additional_pins: dict[str, str] = field(default_factory=dict)
     success_status: str = 'rendered-awaiting-output-qc'
     unused_ram_advisory: bool = False
     compressor_admission: Literal['fixed', 'short-headroom'] = 'fixed'
+    idle_deadline: float | None = None
+    capacity_wait_seconds: float = 0
 
     def __post_init__(self) -> None:
         """Reject invalid metadata before any owner can acquire or launch heavy work."""
         if self.compressor_admission not in {'fixed', 'short-headroom'}:
             raise ValueError('Unknown native compressor admission policy')
+        if self.policy is not None and not isinstance(self.policy, ResourcePolicy):
+            raise ValueError('Native policy must be an explicit ResourcePolicy or capacity-derived default')
         self.validate_admission()
         object.__setattr__(self, 'admission', dict(self.admission))
 
     def validate_admission(self) -> None:
         """Recheck caller metadata and executable pins at each admission boundary."""
+        for value in (self.deadline, self.idle_deadline):
+            if value is not None and (type(value) not in (int, float)
+                    or not math.isfinite(value) or not 0 < value <= 21600):
+                raise ValueError('Native deadlines must be finite, positive and at most six hours')
+        if self.deadline is None:
+            raise ValueError('Native owner requires an independent deadline')
+        if type(self.capacity_wait_seconds) not in (float, int) \
+                or not math.isfinite(self.capacity_wait_seconds) or not 0 <= self.capacity_wait_seconds <= 600:
+            raise ValueError('Native capacity wait must be between zero and 600 seconds')
         if not isinstance(self.admission, dict):
             raise ValueError('Native admission must be a metadata mapping')
         _validate_output(self.admission.get('output'))
@@ -71,7 +85,9 @@ def _validate_output(value: object) -> None:
 
 
 def policy_for_baseline(settings: NativeRunConfig, baseline: ResourceSnapshot) -> ResourcePolicy:
-    """Derive the existing capped Short allowance from the owner's one fresh baseline."""
+    """Derive new capacity budgets or preserve a caller's explicit legacy allowance."""
+    if settings.policy is None:
+        return capacity_policy(baseline)
     if settings.compressor_admission == 'fixed':
         return settings.policy
     fraction = min(.4, max(.25, (baseline.compressor_bytes + 1024 ** 3) / baseline.physical_bytes))

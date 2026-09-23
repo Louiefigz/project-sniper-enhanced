@@ -1,0 +1,84 @@
+PROJECT SNIPER — END USER LICENCE (DRAFT, NOT IN FORCE)
+=======================================================
+
+THIS IS A DRAFT. It records the commercial terms selected on 17 September 2026 so
+that the package is internally consistent. It has not been finalised or reviewed by
+a lawyer, and this build is a release candidate that is not on sale. No licence is
+granted by this file.
+
+Selected terms, in plain words
+------------------------------
+1. WHAT YOU MAY DO
+   a. Install and use Project Sniper on Macs you control.
+   b. Produce videos for yourself and for your own business.
+   c. Produce videos for paying clients. Nothing in this licence limits how you
+      use, sell or monetise the videos you produce.
+
+2. WHAT YOU MAY NOT DO
+   a. Resell, sublicense, share, publish or give away Project Sniper itself, in
+      whole or in part, including this archive and any file inside it.
+   b. Reuse Project Sniper's source code inside another product you sell or
+      otherwise commercialise.
+
+3. UPDATES
+   Your purchase covers the version you downloaded. It does not include bug fixes,
+   compatibility updates or later versions.
+
+4. REFUNDS
+   Within 14 days of purchase, on request, for any reason. No conditions and no
+   requirement to contact support first. What a refund does to the licence for a
+   copy already downloaded is not settled (see below).
+
+5. THIRD-PARTY COMPONENTS
+   Project Sniper includes and installs third-party software under its own
+   licences, listed in THIRD-PARTY-NOTICES.md. Those licences govern those
+   components and some of them require that the notices file travel with the
+   software. Nothing in this licence overrides them.
+
+6. NO WARRANTY
+   Project Sniper is provided "as is", without warranty of any kind. Rendering
+   video is resource-intensive and depends on your hardware, your macOS version
+   and your third-party AI subscription, none of which the seller controls.
+
+7. WHAT THIS LICENCE DOES NOT COVER
+   Your Codex or Claude subscription is a contract between you and that provider.
+   Their pricing, model availability, usage limits and data policies apply to the
+   transcript text and the still frames Sniper sends them. See the manual page
+   "What leaves your Mac".
+
+STILL TO BE SETTLED BEFORE THIS CAN BE SOLD
+-------------------------------------------
+- Final wording, reviewed by a lawyer.
+- The effect of a refund on the licence grant.
+- A support route and a response commitment, and the support-specific terms.
+- Governing law and jurisdiction.
+
+PROPOSED WORDING FOR OWNER REVIEW (rc4) — NOT IN FORCE, NOT LEGAL ADVICE
+-----------------------------------------------------------------------
+Each bracket is an input only the owner can supply. Nothing here has been reviewed
+by a lawyer.
+
+A. EDITABLE PROJECTS YOU DELIVER TO A CLIENT (resolves a conflict with 2a)
+   2a forbids giving away any file inside Project Sniper. An editable Studio
+   project made with Sniper contains copies of Sniper's motion templates and
+   third-party runtime files. Proposed:
+   "You may give a client the videos you make and, if you choose, the editable
+   project for a video you made for them, so they can view or adjust that video.
+   The templates inside that project may be used only as part of that project. You
+   may not distribute them separately or as a template collection. Third-party files
+   in the project (listed in THIRD-PARTY-NOTICES.md) remain under their own licences."
+   PENDING: whether GSAP files may be passed to a client at all depends on the
+   publisher's answer (PENDING-OWNER-DECISIONS item 4). Until then, delivering the
+   rendered video alone is the safe default.
+
+B. REFUNDS AND THE LICENCE (choose one)
+   B1 "If you receive a refund, this licence ends and you must delete Project Sniper."
+   B2 "A refund does not end this licence for the copy you downloaded."
+
+C. SUPPORT
+   "Support: [contact route]. We aim to reply within [response time]. Support covers
+   installing and running the version you bought; it does not include new features,
+   later versions or editing your videos."
+
+D. GOVERNING LAW
+   "This licence is governed by the laws of [jurisdiction]."

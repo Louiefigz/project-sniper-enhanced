@@ -26,6 +26,10 @@ const REQUIRED_HASHES = new Map([
 ]);
 
 const REQUIRED_FILES = [
+  "schemas/producer/visual-source-policy-v1.json",
+  "vendor/hyperframes-catalog/catalog-index.json",
+  "vendor/hyperframes-catalog/hyperframes-catalog-lock.json",
+  "docs/producer/catalog-study/catalog-study.json",
   "package.json",
   "package-lock.json",
   "scripts/producer/headless/node_isolated_user.cjs",
@@ -51,6 +55,8 @@ const REQUIRED_PREFIXES = [
 ] as const;
 
 const SOURCE_PATHS = [
+  "vendor/hyperframes-catalog",
+  "docs/producer/catalog-study",
   "scripts/producer",
   "templates/motion",
   "schemas/producer",

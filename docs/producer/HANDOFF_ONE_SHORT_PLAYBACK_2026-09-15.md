@@ -2,6 +2,43 @@
 
 Updated: 2026-09-15T13:09:48+00:00
 
+## Current follow-up: POV title and render memory policy
+
+The later user requests are complete locally. The opening now reads exactly
+**“POV: You commented SKILL for an Ai video editor”**, using the existing backed
+title card through frame 139, then clearing at frame 140 (5.6 seconds). The
+previous wording was a `proof-stat-shock` hook, chosen to contrast the download
+with Aaron's qualified 60-hour effort estimate; it was not an audience-tested
+winner. The new wording records user provenance while reusing the card layout.
+
+The current shared native supervisor derives capacity-based limits: on this
+64 GiB host, 16 GiB per tree and 8 GiB per process. Moderate pressure requires
+three valid readings over ten seconds, with recovery/gap resets. Critical
+pressure, hard caps, invalid telemetry, identity loss and disk protection remain.
+Explicit fixed callers and historical Long-form policies retain their semantics.
+A separate capture-report bug was fixed with a shared 256 MiB bounded reader;
+generic JSON inputs retain their 16 MiB limit. **281 tests pass; independent
+mechanical and semantic reviews pass.** See the
+[memory-policy findings and actual timings](../findings/RENDER_MEMORY_CAPACITY_AND_PRESSURE.md).
+
+The updated 56.24-second MP4 is `one-short/replacement-pov.mp4` in the same
+[live review page](http://127.0.0.1:4005/one-short/index.html). The original video
+is preserved. New SHA-256:
+`d18daddc3591142da2c18044dc84b1120b9a0a7c021164aca3b2692e1e03afa0`.
+All 595 native capture occurrences, 537 encoded comparisons, full A/V decode,
+owned cleanup, independent six-frame title review, and sampled live opening,
+completion reset and same-file replay checks passed. Existing AAC packets were
+reused; no subjective listening approval is claimed.
+
+Evidence lives in `artifacts/img7138-editor-pov-title-2026-09-15/`: the failed
+handoff in `export-02` is preserved, with completed media/capture seals and the
+successful `verification-03/delivery.json`. Recovery reused the existing video
+and captures. `ENCODED-REVIEW.json`, `PLAYBACK-VERIFICATION.json` and
+`PUBLICATION.json` bind the current handoff. No media job remains running.
+These follow-up code changes are local and have not been committed or pushed.
+
+The following sections preserve earlier work and its original production clock.
+
 ## Production-speed follow-up — September 15, 14:00 UTC
 
 The user subsequently authorized implementation, edge-case review and shared
@@ -13,7 +50,7 @@ is unchanged. See [implementation, evidence and limits](../findings/NATIVE_STAGE
 This does not establish a new full production-time benchmark. The historical
 handoff below retains the original production clock and failure records.
 
-## Resume here
+## Earlier player-only handoff
 
 The user most recently asked: **“you're about to lose context so write a handoff sheet.”**
 The active work immediately before that request was:
@@ -27,8 +64,8 @@ The user values action and dislikes repeated permission questions. Existing auth
 
 ## Workspace and browser
 
-- Workspace root: `/Users/aaronfigueroa/development/demos/YT-Automation`
-- Actual working repository: `/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER`
+- Workspace root: `/Users/maintainer/workspace`
+- Actual working repository: `/Users/maintainer/ProjectSniperSource`
 - Current browser URL: `http://127.0.0.1:4005/one-short/index.html`
 - Existing server on port 4005 serves `artifacts/img7138-journey-shorts-2026-09-15/review/`.
 - CUA binding in the current persistent session: `reviewTab`, selected via `cua.getTab('1', {browser:'2'})`.
@@ -77,7 +114,7 @@ Actual idea: obtaining an AI editor is a starting point. Aaron describes the wor
 
 ### Source assembly (all at 1×)
 
-Original `/Users/aaronfigueroa/Downloads/IMG_7138.MOV`.
+Original `/Users/maintainer/Downloads/IMG_7138.MOV`.
 
 | Original seconds | Output frames | Purpose |
 |---|---:|---|

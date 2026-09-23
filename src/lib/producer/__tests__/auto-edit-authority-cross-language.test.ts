@@ -61,7 +61,7 @@ function doctrineFiles(repo: string): void {
   for (const relative of [
     ...PRODUCER_CORE_DOCTRINE_PATHS,
     ...PRODUCER_REFERENCED_DOCTRINE_PATHS,
-    "docs/studies/CALEB_STYLE.md",
+    "docs/studies/RESTRAINED_STYLE.md",
   ]) write(repo, relative, `DOCTRINE ${relative} — café\n`);
 }
 
@@ -80,6 +80,12 @@ function pipelineFiles(repo: string): string {
   write(repo, REGISTRY_PATH, readFileSync(path.join(process.cwd(), REGISTRY_PATH)));
   write(repo, REGISTRY_SCHEMA_PATH,
     readFileSync(path.join(process.cwd(), REGISTRY_SCHEMA_PATH)));
+  for (const relative of [
+    "schemas/producer/visual-source-policy-v1.json",
+    "vendor/hyperframes-catalog/catalog-index.json",
+    "vendor/hyperframes-catalog/hyperframes-catalog-lock.json",
+    "docs/producer/catalog-study/catalog-study.json",
+  ]) write(repo, relative, readFileSync(path.join(process.cwd(), relative)));
   write(repo, "templates/motion/tokens.css", ":root { --accent: #abcdef; }\n");
   write(repo, "templates/motion/hyperframes.json", "{}\n");
   write(repo, "templates/motion/index.html", "<main></main>\n");
@@ -132,7 +138,7 @@ function fixture(root: string): Fixture {
   write(project, "reference/reference.json", "{\"strategy\":\"mimic\"}\n");
   write(project, "reference/fingerprint.json", "{\"sha256\":\"source\"}\n");
   write(project, "reference/reference-source.json", "{\"source\":\"local\"}\n");
-  const intent = { mode: "short" as const, style: "caleb" as const, brief: "café 🎬", lanes: {} };
+  const intent = { mode: "short" as const, brief: "café 🎬", lanes: {} };
   write(project, "project.json", JSON.stringify({ origin: "raw", history: [], intent }));
   return { repo, transcript, frame, probe, ctx: {
     dir, scope: "produced", intent, planPath, manifestPath, transcriptsDir: source,
@@ -182,6 +188,8 @@ function assertAuthorityParity(fix: Fixture, ctx: AutoEditCtx): Golden {
   assert.ok(ctx.pipeline?.files.some((row) => row.path === PRELOAD_PATH));
   assert.ok(ctx.pipeline?.files.some((row) => row.path === REGISTRY_PATH));
   assert.ok(ctx.pipeline?.files.some((row) => row.path === REGISTRY_SCHEMA_PATH));
+  assert.ok(ctx.pipeline?.files.some((row) => row.path === "schemas/producer/visual-source-policy-v1.json"));
+  assert.ok(ctx.pipeline?.files.some((row) => row.path === "vendor/hyperframes-catalog/catalog-index.json"));
   assert.ok(ctx.pipeline?.files.some((row) => row.path === "tsconfig.json"));
   assert.ok(ctx.pipeline?.files.some((row) => row.path === "next.config.ts"));
   assert.ok(!ctx.pipeline?.files.some(
@@ -210,8 +218,14 @@ function assertAuthorityParity(fix: Fixture, ctx: AutoEditCtx): Golden {
     autoEditAuthoritySnapshot(legacy),
     "legacy managed markers must use the same completely sorted row contract",
   );
-  const golden = JSON.parse(readFileSync(path.join(
-    __dirname, "fixtures", "auto-edit-authority-golden.json"), "utf8")) as Golden;
+  const goldenFile = path.join(__dirname, "fixtures", "auto-edit-authority-golden.json");
+  // Regenerate the golden only from code, and only after the TypeScript/Python
+  // parity assertions above passed: SNIPER_UPDATE_AUTHORITY_GOLDEN=1.
+  if (process.env.SNIPER_UPDATE_AUTHORITY_GOLDEN === "1") {
+    writeFileSync(goldenFile, `${JSON.stringify(ts, null, 2)}\n`);
+    console.log("auto-edit-authority-golden.json regenerated after parity passed");
+  }
+  const golden = JSON.parse(readFileSync(goldenFile, "utf8")) as Golden;
   assert.deepEqual(ts, golden);
   return ts;
 }

@@ -21,7 +21,7 @@ const HARNESS_FILES = ["_guided-runtime-capsule.ts", "_guided-runtime-capsule-io
 const PYTHON_FIXTURE_FILES = ["_cut_preview_fixture.py", "_guided_body_audio.py", "_guided_body_program.py",
   "_guided_longform_program.py", "_guided_longform_check.py", "_guided_longform_treatment.py",
   "_guided_longform_treatment_check.py", "_ingest_admission_fixture.py"].map((name) => `scripts/producer/tests/${name}`);
-const STYLE_DOCS = ["docs/studies/CALEB_STYLE.md", "scripts/producer/docs/findings/JADEN_STYLE.md", "docs/studies/ANGELA_STYLE.md"];
+const STYLE_DOCS = ["docs/studies/RESTRAINED_STYLE.md", "scripts/producer/docs/findings/PUNCH_STYLE.md", "docs/studies/SLIDEWARE_STYLE.md"];
 
 function checkedPipeline(rows: PipelineInventoryRow[]): PipelineInventoryRow[] {
   if (!Array.isArray(rows) || rows.length < 1 || rows.length > MAX_SOURCE_FILES) throw new Error("TEST source inventory is unbounded");

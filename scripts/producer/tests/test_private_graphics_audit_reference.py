@@ -62,11 +62,12 @@ class PrivateReferenceBoundaryTests(unittest.TestCase):
 def _graphic_fixture(root: Path) -> tuple[dict, dict]:
     """Declare one actual takeover before preparing its immutable whole base."""
     from test_render_source_audio_media import _fixture
-    plan, manifest = _fixture(root)
-    plan["graphicsTrack"] = [{"kind": "statement-card", "anchor": "own-screen",
-        "outStart": 0.5005, "outEnd": 3.003, "exitOnCut": False,
+    plan, manifest = _fixture(root, size="90x160")
+    plan["target"].update(mode="short", width=1080, height=1920)
+    plan["graphicsTrack"] = [{"kind": "line-swap", "anchor": "own-screen",
+        "outStart": 0.5005, "outEnd": 2.9696, "exitOnCut": False,
         "reason": "TEST ONLY native compositor and graphics-free reference QC fixture.",
-        "spec": {"text": "TEST ONLY", "variant": "classic"}}]
+        "spec": {"lineA": "TEST ONLY", "lineB": "Synthetic pixels", "underlineWord": ""}}]
     return plan, manifest
 
 
@@ -87,14 +88,14 @@ class PrivateReferenceActualAssemblyTests(unittest.TestCase):
         bus = self.fixture.selection.master.source_bus
         job.graphic_frame_clock = (bus.frame_rate, bus.frames)
         asset = self.fixture.root / "TEST-synthetic-graphic.mp4"
-        ffmpeg(["-f", "lavfi", "-i", f"testsrc2=size=160x90:rate={bus.frame_rate}:duration=3",
+        ffmpeg(["-f", "lavfi", "-i", f"testsrc2=size=90x160:rate={bus.frame_rate}:duration=3",
             "-vf", "hue=s=0", "-frames:v", "90", "-c:v", "libx264", "-pix_fmt", "yuv420p", str(asset)])
         runtime = PrefixOracleRuntime(held(Path(shutil.which("ffmpeg"))),
             held(Path(shutil.which("ffprobe"))), str(self.fixture.root), 30)
 
         def render(entry: dict, order: int) -> dict:
             """Return only the deliberately generated native TEST fixture asset."""
-            self.assertEqual((entry["kind"], order), ("statement-card", 0))
+            self.assertEqual((entry["kind"], order), ("line-swap", 0))
             return {"path": str(asset), "kind": entry["kind"], "key": "TEST-only", "fmt": "mp4", "cached": False}
 
         def compose(value: GraphicsComposition) -> dict:

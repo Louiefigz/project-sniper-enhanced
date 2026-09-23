@@ -12,15 +12,21 @@ import time
 from dataclasses import asdict
 from pathlib import Path
 from datetime import datetime, timezone
+from uuid import uuid4
+from cut_preview_io import write_new
 
 from studio.native_runtime import digest
 from studio.native_owned_processes import OwnedRegistry
 from studio.native_measurement_retry import MeasurementWindow
 from studio.native_run_config import NativeRunConfig, policy_for_baseline, source_hashes
-from studio.native_run_lifecycle import NativeSignalHandlers, finalize_attempt
+from studio.native_run_lifecycle import NativeSignalHandlers, finalize_attempt, failure_category
+from studio.native_workload import ProgressWatch
+from studio.native_run_admission import acquire_capacity
+from studio.native_export import validate_export_launch, worker_environment
 
 from native_render_processes import ProcessIdentity, ProcessRequest, ResourceMeasurementError
-from native_render_resources import admission_reasons, resource_warnings, stop_reasons
+from native_render_resources import ResourceSnapshot, admission_reasons, resource_warnings, stop_reasons
+from native_render_policy import AdaptiveMemoryGuard, MODE, adaptive_admission_reasons, capacity_derivation
 from native_work_lease import NativeWorkLease
 
 
@@ -34,10 +40,11 @@ def owner_file_pins() -> dict[str, str]:
     studio = Path(__file__).resolve().parent
     files = [studio / name for name in (
         'native_run.py', 'native_owned_processes.py', 'native_measurement_retry.py',
-        'native_run_config.py', 'native_run_lifecycle.py', 'native_runtime.py')]
+        'native_run_config.py', 'native_run_lifecycle.py', 'native_runtime.py', 'native_workload.py',
+        'native_run_admission.py', 'native_export.py')]
     files += list(studio.parent.glob('native_render_*.py'))
     files += [studio.parent / name for name in (
-        'native_work_lease.py', 'headless/durable_files.py')]
+        'native_work_lease.py', 'headless/durable_files.py', 'cut_preview_io.py')]
     return {str(file): digest(file) for file in files}
 
 
@@ -51,9 +58,11 @@ class NativeRun:
         self.project, self.cli, self.root = settings.project, settings.cli, settings.root
         self.admission, self.native_env = dict(settings.admission), settings.environment
         self.deadline, self.policy = settings.deadline, settings.policy
+        self.resource_guard = None
         self.path = self.root / f'{label}.render.json'
         self.started = time.monotonic()
         self.child, self.registry, self.abort_reason = None, None, None
+        self.progress_watch = None
         self.log, self.samples = None, None
         self.receipt_owned = False
         self.lease, self.lease_identities = None, None
@@ -64,20 +73,24 @@ class NativeRun:
         self.result = {'status': 'preparing', 'startedAt': utc(), 'admission': self.admission,
                        'project': str(self.project), 'output': self.admission['output'],
                        'sdkVersion': '0.8.31', 'sourceHashesBefore': source_hashes(self.project),
-                       'renderOnlyTiming': True, 'policy': asdict(self.policy), 'args': settings.command,
+                       'renderOnlyTiming': True, 'policy': asdict(self.policy) if self.policy else None,
+                       'resourcePolicyMode': MODE if settings.policy is None else 'fixed', 'args': settings.command,
                        'nativeOverrides': self.native_env, 'runDeadlineSeconds': self.deadline,
                        'supervisorSigkillProtection': False,
-                       'unusedRamAdvisory': settings.unused_ram_advisory,
-                       'compressorAdmissionMode': settings.compressor_admission,
+                       'unusedRamAdvisory': settings.policy is None or settings.unused_ram_advisory,
+                       'compressorAdmissionMode': settings.compressor_admission if settings.policy else 'host-pressure-advisory',
                        'additionalFilePinsBefore': self.additional_pins}
 
     def persist(self, initial: bool = False) -> None:
-        """Record failures durably; an inability to write is not render success."""
-        mode = 'x' if initial or not self.receipt_owned else 'w'
-        with self.path.open(mode) as handle:
+        """Publish complete snapshots so a starting worker cannot read half-written JSON."""
+        value = json.loads(json.dumps(self.result, allow_nan=False))  # Preserve the existing tuple-to-array JSON shape.
+        if initial or not self.receipt_owned:
+            write_new(self.path, value)
             self.receipt_owned = True
-            json.dump(self.result, handle, indent=2)
-            handle.flush()
+            return
+        pending = self.path.with_name(f'.{self.path.name}.{uuid4().hex}.pending')
+        write_new(pending, value)
+        pending.replace(self.path)
 
     def request_abort(self, value: int, _frame: object) -> None:
         """Signal handlers request the same bounded cleanup as resource failures."""
@@ -86,24 +99,14 @@ class NativeRun:
     def prepare(self) -> None:
         """Own evidence and require bounded fresh telemetry before any child exists."""
         self.settings.validate_admission()
+        validate_export_launch(self.settings)
         if self.settings.admission != self.admission:
             raise ValueError('Native admission changed after owner preparation')
         self.persist(initial=True)
         if any(digest(Path(path)) != expected for path, expected in self.additional_pins.items()):
             raise RuntimeError('Prepared native input or supervision code changed before launch')
         self.signal_handlers.install()
-        self.lease = NativeWorkLease.acquire('heavy', str(self.project))
-        self.baseline = self.measure_resources(ProcessRequest())
-        self.policy = policy_for_baseline(self.settings, self.baseline)
-        self.result.update(baseline=asdict(self.baseline), policy=asdict(self.policy))
-        reasons = admission_reasons(self.baseline, self.policy)
-        if self.settings.unused_ram_advisory:
-            reasons = tuple(reason for reason in reasons
-                            if reason != 'unused physical RAM is below the reserved host margin')
-        self.result['admissionReasons'] = reasons
-        self.persist()
-        if reasons:
-            raise RuntimeError('Admission refused: ' + '; '.join(reasons))
+        acquire_capacity(self)
         self.result['logPath'] = str(self.root / f'{self.label}.render.log')
         self.persist()
         self.log = (self.root / f'{self.label}.render.log').open('xb', buffering=0)
@@ -117,11 +120,16 @@ class NativeRun:
             raise RuntimeError('Independent render-only deadline exceeded before launch')
         if owner_file_pins() != self.owner_pins:
             raise RuntimeError('Native supervision code changed during admission')
+        if any(digest(Path(path)) != expected for path, expected in self.additional_pins.items()):
+            raise RuntimeError('Native input changed while waiting for capacity')
         self.child = subprocess.Popen(
-            self.result['args'], cwd=self.project, env=self.native_env, start_new_session=True,
+            self.result['args'], cwd=self.project, env=worker_environment(self.settings, self.path), start_new_session=True,
             stdin=subprocess.DEVNULL, stdout=self.log, stderr=subprocess.STDOUT,
         )
         self.registry = OwnedRegistry(self.child.pid)
+        if self.settings.idle_deadline:
+            self.progress_watch = ProgressWatch(Path(self.result['logPath']),
+                                                time.monotonic(), self.settings.idle_deadline)
         self.record_lease_processes()
         self.result.update(status='running', pid=self.child.pid,
                            nativeLaunchedAt=utc(), ownerIdentities=self.registry.identities())
@@ -141,10 +149,14 @@ class NativeRun:
         if snapshot.identity_verified:
             self.registry.remember_measured(snapshot.processes)
             self.record_lease_processes()
-        measured = asdict(snapshot) | {'warnings': resource_warnings(snapshot, self.policy)}
+        evaluation = self.resource_guard.evaluate(snapshot) if self.resource_guard else {
+            'mode': 'fixed', 'stopReasons': stop_reasons(snapshot, self.baseline, self.policy),
+            'warnings': resource_warnings(snapshot, self.policy)}
+        measured = asdict(snapshot) | {'warnings': evaluation['warnings'], 'guard': evaluation}
         self.samples.write(json.dumps(measured) + '\n')
         self.result['latestResourceSnapshot'] = measured
-        reasons = stop_reasons(snapshot, self.baseline, self.policy)
+        self.result['resourcePolicyEvaluation'] = evaluation
+        reasons = evaluation['stopReasons']
         if reasons:
             self.abort_reason = '; '.join(reasons)
         self.result['ownerIdentities'] = [asdict(row) for row in self.registry.known.values()]
@@ -157,7 +169,7 @@ class NativeRun:
                           'warnings': measured['warnings'],
                           'abortReason': self.abort_reason}), flush=True)
 
-    def measure_resources(self, request: ProcessRequest):
+    def measure_resources(self, request: ProcessRequest) -> ResourceSnapshot:
         """Keep bounded retries and fail on missing live telemetry."""
         try:
             return MeasurementWindow(self, request).run()
@@ -177,6 +189,8 @@ class NativeRun:
                 break
             if time.monotonic() >= next_sample:
                 self.sample()
+                if self.progress_watch and not self.progress_watch.inspect(time.monotonic()):
+                    self.abort_reason = 'Native child made no measurable progress before its idle deadline'
                 next_sample = time.monotonic() + 5
             time.sleep(.5)
 
@@ -253,6 +267,7 @@ class NativeRun:
                    and self.result['additionalFilesStable'])
         success = success and self.result.get('leaseCleanupVerified', False) and self.result['additionalFilesStable']
         self.result['status'] = self.success_status if success else 'failed'
+        self.result['failureCategory'] = failure_category(self.result)
         if output.is_file():
             self.result['outputBytes'] = output.stat().st_size
         try:
@@ -270,6 +285,8 @@ class NativeRun:
             self.launch()
             self.monitor()
         except Exception as error:
+            if isinstance(error, ResourceMeasurementError):
+                self.result['failureCategory'] = 'measurement-unavailable'
             if getattr(error, 'evidence', None):
                 self.result.setdefault('measurementFailureEvidence', []).append(error.evidence)
             self.abort_reason = self.abort_reason or f'{type(error).__name__}: {error}'

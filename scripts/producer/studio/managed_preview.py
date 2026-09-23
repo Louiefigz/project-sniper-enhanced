@@ -14,10 +14,11 @@ from typing import Iterator
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from graphics.graphics_render import HYPERFRAMES_BIN
-from native_render_resources import admission_reasons, read_snapshot
+from native_render_resources import read_snapshot
+from native_render_policy import adaptive_admission_reasons, capacity_policy
 from native_work_lease import NativeWorkLease
 from studio import managed_preview_state as state
+from studio.native_runtime import install_runtime
 from studio.studio_server import (
     ServerRecord, StudioServerError, is_live_preview, launch_preview,
     pick_free_port, read_record,
@@ -53,7 +54,12 @@ def _running(project: str, record: ServerRecord) -> dict:
     return state.snapshot_owned(result)
 
 
-def _launch(lease: NativeWorkLease, project: str, port: int | None) -> ServerRecord:
+def _uses_runtime(value: dict, cli: str) -> bool:
+    """Require the exact verified SDK path, not merely a HyperFrames process name."""
+    return value['identity']['command'].partition(' ')[2].startswith(f'{cli} preview ')
+
+
+def _launch(lease: NativeWorkLease, project: str, port: int | None, cli: str) -> ServerRecord:
     """Hold heavy exclusion until the preview has a durable ready-state owner."""
     heavy = NativeWorkLease.acquire('heavy', project)
     launch_attempted = False
@@ -61,14 +67,18 @@ def _launch(lease: NativeWorkLease, project: str, port: int | None) -> ServerRec
         prior = state.read_preview(lease)
         if prior and prior['state'] == 'running':
             state.stop_registered(lease, prior)
-        reasons = admission_reasons(read_snapshot(Path(project)))
+        snapshot = read_snapshot(Path(project))
+        reasons = adaptive_admission_reasons(snapshot, capacity_policy(snapshot))
         if reasons:
             raise StudioServerError('Preview admission refused: ' + '; '.join(reasons))
         chosen = pick_free_port() if port is None else port
         state.write_preview(lease, dict(schemaVersion=1, state='launching', project=project))
         launch_attempted = True
-        record = launch_preview(HYPERFRAMES_BIN, project, chosen, open_browser=False)
-        state.write_preview(lease, _running(project, record))
+        record = launch_preview(cli, project, chosen, open_browser=False)
+        running = _running(project, record)
+        if not _uses_runtime(running, cli):
+            raise StudioServerError('Started preview does not use the qualified native runtime')
+        state.write_preview(lease, running)
         # The persistent lightweight server now belongs to preview.json. Heavy
         # exclusion covers its startup, not its idle lifetime; no media job ran.
         heavy.complete()
@@ -87,16 +97,19 @@ def open_preview(directory: str, port: int | None = None) -> ServerRecord:
     if port is not None and (type(port) is not int or not 1 <= port <= 65535):
         raise ValueError('Preview port must be an integer between 1 and 65535')
     with _control(project) as lease:
+        cli = str(install_runtime() / 'dist/cli.js')
         prior = state.read_preview(lease)
         if prior and prior['state'] == 'running':
-            if prior['project'] == project and state.matches(prior):
+            if prior['project'] == project and state.matches(prior) and _uses_runtime(prior, cli):
                 return state.record_from(prior)
         if not prior or prior['state'] == 'stopped':
             existing = read_record(project)
             if existing and is_live_preview(project, existing):
-                state.write_preview(lease, _running(project, existing))
-                return existing
-        return _launch(lease, project, port)
+                running = _running(project, existing)
+                state.write_preview(lease, running)
+                if _uses_runtime(running, cli):
+                    return existing
+        return _launch(lease, project, port, cli)
 
 
 def adopt_preview(directory: str, record: ServerRecord) -> ServerRecord:

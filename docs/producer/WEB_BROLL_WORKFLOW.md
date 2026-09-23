@@ -11,6 +11,85 @@ section and matches it to retained speech. A brand name alone does not trigger a
 hardcoded layout, imply an arbitrary repository is official, or justify unrelated
 scrolling. Use supplied B-roll first when it already demonstrates the point.
 
+## Establish the real subject before inventing its representation
+
+**Standing editing preference, September 15, 2026:** preserve the requested
+treatment. A deliberately simple presenter-led clip stays restrained. For
+produced edits that call for proof, examples and split-screen storytelling,
+search real B-roll and assets first; add illustrations for what those assets
+cannot usefully show. The Restrained style specification or a module-card
+study can inform the brief; neither is an automatic preset or a reason to
+disregard the selected intensity.
+Preserve useful existing illustrations when revising a few evidence beats.
+
+For produced Shorts and long-form, inspect existing source/supporting assets and
+prior review findings before committing to a generic illustration of an important
+named entity or factual claim. Prefer a real artifact when the job is identity,
+current state, proof or a demonstrated operation. Reuse a relevant captured page
+before recording another. Not searching is not evidence that an asset is missing.
+When a planning stage cannot acquire assets, record the specific discovery need
+for its owning stage; do not quietly turn that gap into an approved metaphor.
+
+Give the insert a visible job: establish the channel or community, then enlarge
+the exact count, offer, feature or result on its spoken cue. Keep enough original
+context to identify the source and enough time/space to read the detail. A logo
+identifies a platform; its actual page shows what exists. Audience size supports
+audience size, not revenue. Preserve the capture's date and claim limits in the
+strategy notes; do not change real interface values to match historical speech.
+
+Illustrations still help explain a proposed relationship or abstract mechanism.
+Use them alongside established real context when they explain something the page
+cannot. Record that reason in the existing storyboard. This preference does not
+force a website insert on every noun, displace an intentional useful analogy,
+override disabled lanes, or authorize browsing/capture outside the current scope.
+
+Keep production/provenance footnotes out of the finished picture unless viewers
+need the qualification to avoid a materially false impression. If `GOAL`,
+`11 MEMBERS NOW`, `AT 20 MEMBERS` and unfilled slots already communicate the
+distinction, adding “not yet achieved” or “outlined slots are not yet filled”
+only repeats it. Correct the representation when necessary; a label cannot
+turn invented evidence into real proof.
+
+### Scouting and independent agent verification
+
+For these produced edits, assign asset scouting and independent strategy review
+to separate agents when delegation is available. The scout inspects the source,
+admitted asset pool and authorized public sources. The critic checks actual
+candidates/images and the speech-to-insert decisions, not only the author's
+summary. Keep their evidence in the existing scene/asset-use/review records;
+do not create unsupported plan fields. In a controller with no browsing tools,
+the owning preparation agent scouts and admits assets before authoring; the
+tool-free critic reviews embedded evidence and returns missing needs to that
+owner. It cannot claim to search independently.
+
+For native plans, put the observed candidates and decisions in the existing
+`supportingSearch`, `assetUse` and scene records. For manifest-only long-form
+controllers, admit the real assets before kickoff; preserve actual observations
+in `manifest.broll` catalog descriptions/frames and the relevant `brollTrack`
+or `graphicsDecisions` reason fields. Those plan/manifest fields reach the
+hash-bound critic packet. A link to an external scout note alone is insufficient
+when the critic cannot open files. Do not invent a new `scoutEvidence` field.
+
+The critic must request revision for a missed useful real-entity/proof shot,
+an unsupported “nothing available” conclusion, a whole-clip no-insert exemption,
+an unexplained restriction of authorized sourcing, or redundant footer text.
+Check final encoded frames and live playback for the selected real assets and
+their readable attention targets; passing technical QC is not this review.
+Do not force real inserts into a brief that explicitly requests a simple clip
+or disables those lanes. No finite check guarantees zero future misses; record
+the evidence and enforce the existing review verdict before production.
+
+For a talk about a business's pricing, the distinct jobs are: identify the speaker
+and the business with real imagery; show the actual community, offer or current
+member count on the platform where it lives; focus verified audience counts on
+their own platform; use an honest diagram for the proposed price trigger or value
+relationship. A captured page showing today's member count and price need not
+prove a stated future goal to serve as the current-state shot. The speaker's own
+footage of their work can ground the business physically. Use the real marks of
+named tools when those tools need identification. Verify exact profile ownership,
+metric scope and capture date; do not combine cross-platform followers into a
+claim of unique people or alter counts to fit the speech.
+
 ## Choose the shot before recording
 
 1. Inspect the source/transcript and name what this insert helps the viewer see.

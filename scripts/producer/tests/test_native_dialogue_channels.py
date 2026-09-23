@@ -9,7 +9,8 @@ from unittest.mock import patch
 
 from audio.channel_normalization import ChannelAuthority, ChannelRequest, ChannelTools, SourceIdentity
 from audio.channel_normalization_receipt import decision, peak_token, seal_channel_receipt
-from studio import native_short_delivery as delivery
+from studio import native_short_dialogue as delivery
+from studio import native_short_delivery as pipeline
 from studio.native_runtime import digest
 
 
@@ -89,6 +90,34 @@ class NativeDialogueChannelsTests(unittest.TestCase):
             delivery.normalize_dialogue_reference(self.source, 1854720, self.root)
         run.assert_not_called()
         self.assertEqual(json.loads((self.root / 'channel-normalization.json').read_text())['status'], 'failed')
+
+    def test_premaster_requires_normalized_reference_before_finishing(self) -> None:
+        """The registered concat can only feed finishing through shared channel policy."""
+        normalized = self.root / 'normalized.wav'
+        request = {'output': str(self.root), 'project': str(self.root),
+                   'tools': {'ffmpeg': '/TEST/ffmpeg', 'ffprobe': '/TEST/ffprobe'}}
+        canvas = {'frameRate': '25/1', 'totalFrames': 25}
+        order = []
+        with patch.object(pipeline, 'dialogue_reference', return_value=self.source), \
+                patch.object(pipeline, 'normalize_dialogue_reference',
+                             side_effect=lambda *args: order.append('normalize') or normalized) as normalize, \
+                patch.object(pipeline, 'finish_native_audio',
+                             side_effect=lambda *args: order.append('finish') or normalized) as finish:
+            self.assertEqual(pipeline.dialogue_premaster(request, canvas, None), normalized)
+        normalize.assert_called_once_with(self.source, 48000, self.root)
+        self.assertEqual(order, ['normalize', 'finish'])
+        self.assertEqual(finish.call_args.args[0].path, str(normalized))
+
+    def test_failed_channel_policy_cannot_reach_native_finishing(self) -> None:
+        """A failed normalizer is terminal, with no unnormalized fallback."""
+        request = {'output': str(self.root), 'project': str(self.root)}
+        canvas = {'frameRate': '25/1', 'totalFrames': 25}
+        with patch.object(pipeline, 'dialogue_reference', return_value=self.source), \
+                patch.object(pipeline, 'normalize_dialogue_reference', side_effect=RuntimeError('channel policy')), \
+                patch.object(pipeline, 'finish_native_audio') as finish, \
+                self.assertRaisesRegex(RuntimeError, 'channel policy'):
+            pipeline.dialogue_premaster(request, canvas, None)
+        finish.assert_not_called()
 
 
 if __name__ == '__main__':

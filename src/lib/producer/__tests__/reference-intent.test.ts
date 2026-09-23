@@ -34,7 +34,7 @@ assert.equal(intent.reference?.candidateStyleName, "Outdoor proof reel");
 assert.equal(intent.style, undefined, "new candidates never enter the closed style enum");
 assert.throws(
   () => validateIntent({ mode: "short", scope: "produced", lanes: {}, style: "client-reel" }),
-  /intent\.style/,
+  /retired/,
 );
 
 assert.throws(() => validateReferenceIntent({ ...reference, mode: "longform" }, "short"), /must match/);
@@ -45,8 +45,8 @@ assert.throws(
   /candidateStyleName is required/,
 );
 assert.throws(
-  () => validateReferenceIntent({ ...reference, candidateStyleName: "Jaden" }),
-  /outside Caleb/,
+  () => validateReferenceIntent({ ...reference, candidateStyleName: "Punch" }),
+  /outside Restrained/,
 );
 assert.throws(
   () => validateReferenceIntent({ ...reference, strategy: "mimic" }),
@@ -54,43 +54,43 @@ assert.throws(
 );
 assert.throws(
   () => validateReferenceIntent({ ...reference, strategy: "extend", candidateStyleName: undefined }),
-  /targetStyle is required/,
+  /retired/,
 );
 assert.throws(
   () => validateReferenceIntent({
-    ...reference, strategy: "mimic", candidateStyleName: undefined, targetStyle: "caleb",
+    ...reference, strategy: "mimic", candidateStyleName: undefined, targetStyle: "restrained",
   }),
-  /targetStyle is not allowed/,
+  /retired/,
 );
 assert.throws(
-  () => validateIntent({ ...intent, style: "caleb", reference }),
-  /style must stay unset/,
+  () => validateIntent({ ...intent, style: "restrained", reference }),
+  /retired/,
 );
 const extendReference = {
-  id: "ref-caleb", title: "Caleb corpus", mode: "short" as const,
-  strategy: "extend" as const, targetStyle: "caleb" as const,
+  id: "ref-restrained", title: "Restrained corpus", mode: "short" as const,
+  strategy: "extend" as const, targetStyle: "restrained" as const,
 };
 assert.throws(
   () => validateIntent({ mode: "short", scope: "light", lanes: {}, reference: extendReference }),
-  /style must equal reference\.targetStyle/,
+  /retired/,
 );
 assert.throws(
   () => validateIntent({
-    mode: "short", scope: "light", lanes: {}, style: "caleb", pace: "angela",
+    mode: "short", scope: "light", lanes: {}, style: "restrained", pace: "slideware",
     reference: extendReference,
   }),
-  /pace must equal reference\.targetStyle/,
+  /retired/,
 );
-assert.equal(validateIntent({
-  mode: "short", scope: "light", lanes: {}, style: "caleb", pace: "caleb",
+assert.throws(() => validateIntent({
+  mode: "short", scope: "light", lanes: {}, style: "restrained", pace: "restrained",
   reference: extendReference,
-}).reference?.targetStyle, "caleb");
+}), /retired/);
 assert.throws(
   () => validateIntent({
-    mode: "short", scope: "light", lanes: {}, style: "caleb",
+    mode: "short", scope: "light", lanes: {}, style: "restrained",
     reference: { ...extendReference, strategy: "mimic", targetStyle: undefined },
   }),
-  /style must stay unset/,
+  /retired/,
 );
 const mimicReference = {
   id: "ref-mimic", title: "Literal mechanics", mode: "short" as const,
@@ -129,6 +129,9 @@ assert.deepEqual(buildAutoEditRequest("/tmp/job", intent), {
 });
 
 const parsed = parseAutoEditIntent(buildAutoEditRequest("/tmp/job", intent));
+for (const style of ["restrained", "punch", "slideware", "", null]) {
+  assert.throws(() => parseAutoEditIntent({ mode: "short", style }), /retired/);
+}
 assert.deepEqual(parsed?.reference, intent.reference);
 assert.throws(() => parseAutoEditIntent({ reference }), /mode is required/);
 assert.throws(() => parseAutoEditIntent({

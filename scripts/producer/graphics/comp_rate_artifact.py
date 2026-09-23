@@ -25,7 +25,7 @@ RELEASED_RATES = (
 )
 PROBE_FRAMES = 4
 RETAINED_RECEIPT_HASH = (
-    "8d2143163c3c2c45666e72a73af61f56f6ccb21b94fc297b57d2e5cdadf8f77b"
+    "cf4f509636a96f20a244fefc7dc76d657a8c45aa61cbadc347e67ca76b83ddc7"
 )
 _HASH_KEYS = {
     "schemaVersion", "kind", "passed", "sourceDigest", "capabilityDigest",

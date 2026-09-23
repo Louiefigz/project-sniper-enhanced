@@ -1,3 +1,4 @@
+import { assertPlanVisualSources } from "@/lib/producer/visual-source-policy";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import { dlog } from "@/lib/debug";
@@ -34,6 +35,9 @@ export async function POST(req: NextRequest) {
   }
   if (!["auto", "full-plan"].includes(String(timebase))) {
     return NextResponse.json({ error: "timebase must be auto or full-plan" }, { status: 400 });
+  }
+  try { assertPlanVisualSources(plan); } catch (error) {
+    return NextResponse.json({ error: (error as Error).message }, { status: 422 });
   }
   const producerDir = path.dirname(filePath);
   const guarded = guardProjectMutation({

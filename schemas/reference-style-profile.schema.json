@@ -36,7 +36,7 @@
     "suggestedMode": { "type": ["string", "null"], "enum": ["short", "longform", null] },
     "suggestedKnownStyle": {
       "type": ["string", "null"],
-      "enum": ["caleb", "jadenly", "angela", null]
+      "enum": ["restrained", "punch", "slideware", null]
     },
     "mechanics": {
       "type": "object",

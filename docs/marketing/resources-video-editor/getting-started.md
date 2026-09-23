@@ -17,7 +17,7 @@ You'll have your first edit in a few minutes. Here's the whole flow.
 
 The simplest way to use the editor is to **open your project in Claude Code desktop** (the app you chat with the editor in) and just say what you want:
 
-> *"Cut a Jaden-produced short from this footage."*
+> *"Cut a Punch-produced short from this footage."*
 > *"Clean-cut this long recording — just remove the silences and bad takes."*
 
 The AI loads the editor, studies your footage, makes the cuts, adds captions and

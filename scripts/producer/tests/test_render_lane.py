@@ -1,12 +1,12 @@
+"""R0 retirement rejection and independent build/cache/environment contracts."""
 from __future__ import annotations
 
 import ast
 import dataclasses
-import hashlib
-import json
 import os
 import subprocess
 import sys
+from types import SimpleNamespace
 from pathlib import Path
 from unittest import mock
 
@@ -23,13 +23,15 @@ from _render_lane_fixture import (  # noqa: E402
 )
 
 from headless.render_lane import (  # noqa: E402
-    RENDERER_MODE,
     OverlayPreparationRequest,
     RenderExecutionPolicy,
     current_render_build_digest,
     launch_overlay,
 )
-from headless.overlay_seal import OverlayPrepareRequest, prepare_overlay  # noqa: E402
+from headless.render_lane import _child_environment, _validated_build
+from headless.render_build_receipt import store_render_build
+from headless.render_runtime import current_render_build_manifest, validate_renderer_runtime
+from graphics.graphics_render import render_entry
 from headless import render_build  # noqa: E402
 from headless.render_lane_cache import (  # noqa: E402
     CacheOwnershipError,
@@ -38,89 +40,56 @@ from headless.render_lane_cache import (  # noqa: E402
 
 
 class RenderLaneTests(RenderLaneFixture):
+    def _cache_identity(self) -> tuple[str, str, str, str]:
+        """Synthetic cache ownership facts, never an admitted render request."""
+        return ("attempt-a", self.artifact.request_digest, "a" * 64, IMAGE_ID)
+
     def test_child_environment_is_closed_and_parent_is_unchanged(self) -> None:
+        """Exercise the pure environment builder without admitting retired work."""
+        binding = prepare_attempt_cache(str(self.attempt), self._cache_identity())
         poison = {"ANTHROPIC_API_KEY": "secret", "SNIPER_RENDER_IMAGE_ID": "poison"}
         with mock.patch.dict(os.environ, poison, clear=False):
             before = dict(os.environ)
-            with mock.patch(
-                "headless.render_lane.run_text", side_effect=self._fake_success
-            ) as run:
-                result = launch_overlay(
-                    RenderExecutionPolicy(RENDERER_MODE),
-                    self._request(),
-                    self._runtime(),
-                )
+            child_env = _child_environment(self._runtime(), binding, CONTAINER_NAME)
             self.assertEqual(dict(os.environ), before)
-        child = run.call_args.args[0]
-        child_env = child.environment
-        self.assertNotIn("ANTHROPIC_API_KEY", child_env)
-        self.assertNotIn("HOME", child_env)
-        self.assertNotIn("PYTHONPATH", child_env)
+        for key in ("ANTHROPIC_API_KEY", "HOME", "PYTHONPATH"):
+            self.assertNotIn(key, child_env)
         self.assertEqual(child_env["SNIPER_RENDER_IMAGE_ID"], IMAGE_ID)
         self.assertEqual(child_env["SNIPER_RENDER_CONTAINER_NAME"], CONTAINER_NAME)
-        self.assertEqual(result["rendererMode"], RENDERER_MODE)
-        self.assertEqual(
-            result["outputBinding"]["sha256"], hashlib.sha256(b"rendered").hexdigest()
-        )
-        self.assertEqual(child.cwd, str(self.attempt))
-        self.assertEqual(
-            child.command[1:6],
-            ("-I", "-S", "-B", "-X", f"pycache_prefix={child_env['TMPDIR']}/pycache"),
-        )
-        payload = json.loads(child.stdin_text)
-        self.assertNotIn("entry", payload)
-        self.assertFalse(any(key.startswith("expected") for key in payload))
-        self.assertEqual(
-            set(payload),
-            {
-                "attemptId",
-                "attemptRoot",
-                "buildDigest",
-                "cacheDir",
-                "requestDigest",
-                "sealPath",
-                "sealSha256",
-                "selectionId",
-            },
-        )
+        self.assertEqual(child_env["TMPDIR"], binding.temp_dir)
 
     def test_invalid_mode_and_image_fail_before_spawn(self) -> None:
+        """Mode rejects before touching a request; runtime approval is independent."""
+        before = tuple(self.attempt.iterdir())
         with mock.patch("headless.render_lane.run_text") as run:
             with self.assertRaisesRegex(RuntimeError, "rendererMode"):
-                launch_overlay(
-                    RenderExecutionPolicy("auto"), self._request(), self._runtime()
-                )
+                launch_overlay(RenderExecutionPolicy("auto"), None, self._runtime())
             with self.assertRaisesRegex(RuntimeError, "approval"):
-                launch_overlay(
-                    RenderExecutionPolicy(RENDERER_MODE),
-                    self._request(),
-                    self._runtime("sha256:" + "0" * 64),
-                )
+                validate_renderer_runtime(self._runtime("sha256:" + "0" * 64))
+        run.assert_not_called()
+        self.assertEqual(tuple(self.attempt.iterdir()), before)
+
+    def test_build_drift_is_rejected_without_launching_retired_work(self) -> None:
+        """A retained real build identity must still match the running tools."""
+        runtime = self._runtime()
+        build = store_render_build(str(self.attempt), current_render_build_manifest(runtime))
+        request = SimpleNamespace(attempt_root=str(self.attempt), build=build,
+                                  build_digest=build.build_digest)
+        self.assertEqual(_validated_build(request, runtime), build.build_digest)
+        Path(runtime.python).write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+        with mock.patch("headless.render_lane.run_text") as run:
+            with self.assertRaisesRegex(RuntimeError, "build drifted"):
+                _validated_build(request, runtime)
         run.assert_not_called()
 
-    def test_build_drift_before_or_during_worker_blocks_success(self) -> None:
-        request = self._request()
-        with mock.patch(
-            "headless.render_lane._validated_build",
-            side_effect=RuntimeError("admitted render build drifted"),
-        ), mock.patch("headless.render_lane.run_text") as run, self.assertRaisesRegex(
-            RuntimeError, "build drifted"
-        ):
-            launch_overlay(
-                RenderExecutionPolicy(RENDERER_MODE), request, self._runtime()
-            )
+    def test_retired_render_entry_rejects_before_subprocess_or_cache_write(self) -> None:
+        """The actual compatibility entry point enforces current source policy."""
+        before = tuple(self.attempt.iterdir())
+        with mock.patch("subprocess.run") as run:
+            with self.assertRaisesRegex(ValueError, "retired"):
+                render_entry(self._entry(), str(self.attempt / "cache"))
         run.assert_not_called()
-        with mock.patch(
-            "headless.render_lane._validated_build",
-            side_effect=[request.build_digest, RuntimeError("render build drifted")],
-        ), mock.patch(
-            "headless.render_lane.run_text", side_effect=self._fake_success
-        ), self.assertRaisesRegex(
-            RuntimeError, "build drifted"
-        ):
-            launch_overlay(
-                RenderExecutionPolicy(RENDERER_MODE), request, self._runtime()
-            )
+        self.assertEqual(tuple(self.attempt.iterdir()), before)
 
     def test_tool_byte_change_changes_build_digest(self) -> None:
         runtime = self._runtime()
@@ -213,56 +182,28 @@ class RenderLaneTests(RenderLaneFixture):
         self.assertNotIn("request_digest", fields)
         self.assertNotIn("build_digest", fields)
 
-    def test_artifact_a_cannot_launch_a_caller_forged_entry_b(self) -> None:
-        runtime = self._runtime()
-        build = current_render_build_digest(runtime)
-        forged_entry = self._entry()
-        forged_entry["spec"]["line1"] = "ENTRY-B"
-        locator = prepare_overlay(
-            OverlayPrepareRequest(
-                str(self.attempt),
-                "attempt-a",
-                self.artifact.request_digest,
-                build,
-                str(REPO_ROOT),
-                forged_entry,
-                "overlay-1",
-            )
-        )
-        request = self._request()
-        launch_request = type(request)(
-            request.authority_root,
-            request.attempt_root,
-            request.attempt_id,
-            request.build,
-            request.request,
-            request.overlay_id,
-            locator,
-        )
-        with mock.patch("headless.render_lane.run_text") as run, self.assertRaisesRegex(
-            RuntimeError, "selected request entry"
-        ):
-            launch_overlay(
-                RenderExecutionPolicy(RENDERER_MODE), launch_request, runtime
-            )
+    def test_r0_preparation_rejects_before_any_write_or_worker(self) -> None:
+        """Retired input cannot persist a build, source capsule or cache artifact."""
+        before = {str(path.relative_to(self.root)): path.read_bytes()
+                  for path in self.root.rglob("*") if path.is_file()}
+        directories = {str(path.relative_to(self.root))
+                       for path in self.root.rglob("*") if path.is_dir()}
+        with mock.patch("headless.render_lane.run_text") as run, mock.patch(
+                "headless.render_lane.store_render_build") as store:
+            with self.assertRaisesRegex(ValueError, "section-marker.*retired"):
+                self._request()
         run.assert_not_called()
+        store.assert_not_called()
+        self.assertEqual({str(path.relative_to(self.root)): path.read_bytes()
+                          for path in self.root.rglob("*") if path.is_file()}, before)
+        self.assertEqual({str(path.relative_to(self.root))
+                          for path in self.root.rglob("*") if path.is_dir()}, directories)
 
     def test_cache_is_bound_to_attempt_and_revalidates_warm(self) -> None:
-        request = self._request()
-        identity = (
-            request.attempt_id,
-            request.request.request_digest,
-            request.build_digest,
-            IMAGE_ID,
-        )
+        """Cache ownership remains testable independently of retired execution."""
+        identity = self._cache_identity()
         first = prepare_attempt_cache(str(self.attempt), identity)
-        second = prepare_attempt_cache(str(self.attempt), identity)
-        self.assertEqual(first, second)
-        wrong = (
-            "attempt-b",
-            request.request.request_digest,
-            request.build_digest,
-            IMAGE_ID,
-        )
+        self.assertEqual(first, prepare_attempt_cache(str(self.attempt), identity))
+        wrong = ("attempt-b", *identity[1:])
         with self.assertRaisesRegex(CacheOwnershipError, "does not match"):
             prepare_attempt_cache(str(self.attempt), wrong)

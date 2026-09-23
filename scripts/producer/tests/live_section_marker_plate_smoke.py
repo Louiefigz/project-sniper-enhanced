@@ -28,7 +28,7 @@ from planner.eye_trace import placement_row
 
 def entries() -> list[dict]:
     common = {"kind": "section-marker", "anchor": "free-band", "outStart": 0, "outEnd": 2.5}
-    return [{**common, "spec": {"num": "System No.1", "line1": "Current Plates", "line2": "Boundary",
+    return [{**common, "spec": {"num": "Part 1", "line1": "Current Plates", "line2": "Boundary",
                 "side": "left", "readability": "plates"}},
             {**common, "spec": {"num": "A Longer Section Label", "line1": "A Longer Chapter Name",
                 "line2": "A clear qualifier remains readable", "side": "right",

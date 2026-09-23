@@ -179,7 +179,7 @@ class MusicResolveTests(unittest.TestCase):
 
 
 class StalenessTests(unittest.TestCase):
-    """The staleness check warns iff the recorded base fingerprint drifted."""
+    """Missing and stale fingerprints stop the direct assembly route."""
 
     def _emit_capture(self, plan: dict, recorded: str | None):
         import io
@@ -200,14 +200,15 @@ class StalenessTests(unittest.TestCase):
         out = self._emit_capture(p, asm.base_fingerprint(p))
         self.assertNotIn("base_stale", out)
 
-    def test_drifted_fingerprint_warns(self) -> None:
+    def test_drifted_fingerprint_refuses(self) -> None:
         p = BaseFingerprintTests()._plan()
-        out = self._emit_capture(p, "deadbeefdeadbeef")
-        self.assertIn("base_stale", out)
+        with self.assertRaisesRegex(RuntimeError, "base is stale"):
+            self._emit_capture(p, "deadbeefdeadbeef")
 
-    def test_no_fingerprint_file_is_silent(self) -> None:
+    def test_no_fingerprint_file_refuses(self) -> None:
         p = BaseFingerprintTests()._plan()
-        self.assertEqual(self._emit_capture(p, None), "")
+        with self.assertRaisesRegex(RuntimeError, "unverifiable"):
+            self._emit_capture(p, None)
 
 
 class EofGuardTests(unittest.TestCase):
@@ -246,9 +247,11 @@ class AutoBaseDispatchTests(unittest.TestCase):
             with open(self.base, "wb") as f:
                 f.write(b"x")
         if fingerprint is not None:
+            from test_base_reuse import bound_record
+            record = bound_record(self.base, self.plan) if base else {}
             with open(self.fp, "w") as f:
                 from audio.master import MASTERING_POLICY_VERSION
-                json.dump({"fingerprint": fingerprint,
+                json.dump({**record, "fingerprint": fingerprint,
                            "masteringPolicyVersion": MASTERING_POLICY_VERSION}, f)
 
     def test_current_base_is_reused(self) -> None:
@@ -269,7 +272,9 @@ class AutoBaseDispatchTests(unittest.TestCase):
         self.assertEqual(asm._base_state(self.base, self.plan, self.fp), "unverifiable")
 
     def test_rebuild_without_manifest_fails_loudly(self) -> None:
-        self._write(base=True, fingerprint="deadbeefdeadbeef")   # stale, no manifestPath
+        self._write(base=True, fingerprint="deadbeefdeadbeef")
+        with open(self.fp, "w") as handle:
+            json.dump({"fingerprint": "deadbeefdeadbeef"}, handle)  # old, unbound receipt
         plan_path = os.path.join(self.tmp.name, "edit_plan.json")
         with open(plan_path, "w") as f:
             json.dump(self.plan, f)

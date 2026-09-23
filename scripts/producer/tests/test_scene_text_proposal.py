@@ -17,7 +17,7 @@ from graphics.scene_bundle import promote_bundle
 from graphics.scene_contract import canonical_json
 from headless.process_runner import ProcessRequest
 from studio import studio_review
-from tests.scene_fixtures import fire_sparkles_scene
+from tests.scene_fixtures import bind_test_scene_source, fire_sparkles_scene
 
 _BUNDLE = Path(__file__).parent / "fixtures/fire-sparkles-bundle"
 
@@ -46,6 +46,7 @@ class SceneTextProposalTests(unittest.TestCase):
                         "sourceSha256": None, "receipt": None}}
         other = copy.deepcopy(self.scene)
         other["sceneId"] = "scene-unchanged"
+        bind_test_scene_source(other)
         self.state = {"plan": {"cutTrack": [{"sourceId": "source-main", "srcStart": 0,
                                           "srcEnd": 60}], "music": {"enabled": False}},
                       "scenes": [self.scene, other], "fps": {"numerator": "30", "denominator": "1"},
@@ -101,6 +102,7 @@ class SceneTextProposalTests(unittest.TestCase):
         text = self.args[self.args.index("--text") + 1]
         expected["composition"]["variables"]["rightTitle"] = text
         expected["elements"][2]["values"]["rightTitle"] = text
+        bind_test_scene_source(expected)
         self.assertEqual(result["candidateScene"], expected)
         self.assertEqual(result["operationReceipt"]["invalidatedNodes"], [
             "composite:scene-045", "palmier-binding:scene-045:unit-right",

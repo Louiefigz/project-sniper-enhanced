@@ -260,6 +260,10 @@ def build_storyboard(base: ReviewBase, clips: list[ReviewClip],
     lines = [f"# {title}", "",
              f"Base: {base.src_rel} ({base.width}x{base.height}, "
              f"{sec(base.duration)}s)", ""]
+    if not clips:
+        lines += ["No graphics are authored in this plan. The base is available "
+                  "for playback review; cut changes belong in edit_plan.json, "
+                  "followed by rebuild and regeneration of this view.", ""]
     for i, clip in enumerate(clips, start=1):
         duration = sec(clip.out_end - clip.out_start)
         lines += [

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What Project Sniper is</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <p class="kicker">Manual · 1 of 10</p>
+  <h1>What Sniper is, what it includes, what it needs</h1>
+  <p class="lede">Read this before you install, so there are no surprises about what it does and what it costs to run.</p>
+</header>
+<h2>What it does</h2>
+<p>You give Sniper a recording and describe the result. It transcribes the recording
+locally, decides the cuts, writes an edit plan, checks that plan against its own rules,
+renders the video, inspects the rendered frames, and either fixes what it finds or
+tells you what it could not do. You get a finished <code>final.mp4</code> and the
+editable project behind it.</p>
+
+<h2>What is included</h2>
+<table>
+<tr><th>Tool</th><th>What it is for</th></tr>
+<tr><td><strong>Producer</strong></td><td>The main editor. Raw footage in, finished
+video out. Vertical Shorts (9:16) and full-length landscape videos (16:9).</td></tr>
+<tr><td><strong>Segmenter</strong></td><td>Chops a long recording into rough clips for
+another editor. Deliberately rough: each clip keeps about five seconds of extra footage
+before and after, and starts on the nearest keyframe before that, so neighbouring clips
+overlap by those handles. A single recording is not re-encoded, so nothing is quality-lost;
+several camera angles are cut frame-accurately instead, re-encoding at the joins.</td></tr>
+<tr><td><strong>Clipper</strong></td><td>Tightens one clip word by word and exports a
+frame-accurate Final Cut Pro timeline (FCPXML).</td></tr>
+</table>
+
+<h3>What Producer can do to a video</h3>
+<ul>
+  <li>Cut dead air, filler and bad takes, and tighten the pacing.</li>
+  <li>Reframe landscape footage to vertical, anchoring on a detected face when there is
+  a stable one, otherwise centre-cropping or blur-padding. This is a fixed frame per shot,
+  not continuous subject tracking — shots with several faces, fast movement or someone
+  leaving frame are worth checking.</li>
+  <li>Burn in captions that follow the words that survived the cut.</li>
+  <li>Add motion, graphics, transitions, b-roll placement and claim-checking cards.</li>
+  <li>Clean up dialogue and master the audio to a common streaming level (&minus;14 LUFS).</li>
+  <li>Lay a music bed under it, ducked beneath the voice. Off by default.</li>
+</ul>
+
+<h3>What it does not do</h3>
+<ul>
+  <li>It is not a one-button machine. A complete, unattended creator project has not
+  been qualified end to end. You direct it and you review the result.</li>
+  <li>It does not copy another creator's style. It can measure a video you point it at
+  and use the measurements as guidance. Reproducing a look is not a capability this
+  release claims — the internal test cohort for that is 0 of 7.</li>
+  <li>It does not promise a view count, a growth rate or a fixed number of clips per
+  recording. Choosing which moment is worth cutting is an editorial judgement.</li>
+  <li>It does not guarantee a turnaround time. See
+  <a href="troubleshooting.html">what to expect</a> for the only timing figures that
+  have actually been measured.</li>
+</ul>
+
+<h2>What you need</h2>
+<table>
+<tr><th>Requirement</th><th>Detail</th><th>Cost to you</th></tr>
+<tr><td>A Mac</td><td>Any Apple silicon Mac (M1 or later) with its free macOS updates: macOS 13.5 or newer, which
+every Apple silicon Mac can install. That is the oldest macOS Sniper's own tools run on (its Node
+needs 13.5). So far Sniper has only been run on a
+developer Mac with macOS 26 on Apple silicon; that is not yet a qualified buyer baseline. Intel
+Macs cannot run Sniper's tools.</td><td>—</td></tr>
+<tr><td>Memory</td><td>No minimum has been tested: Sniper has only run on a 64 GB Mac. Rendering
+does not start while macOS reports the Mac is short of memory, so on a Mac with less memory, close
+other large apps before a render.</td><td>—</td></tr>
+<tr><td>Disk space</td><td>About 4 GB for the install and its tools (about 1.2 GB of that in
+<code>~/.project-sniper</code>), plus room for your projects. Leave at least 20 GB free; a
+full-length render uses a lot of temporary space.</td><td>—</td></tr>
+<tr><td>An internet connection for setup</td><td>Setup downloads Sniper's own tools (Python, Node,
+whisper.cpp, tesseract, yt-dlp, git — about 300 MB, each file checked against its recorded SHA-256),
+the rendering browser, the speech model and the JavaScript packages Sniper's scripts use; Sniper's own ffmpeg comes in this
+download. Nothing needs to be
+installed beforehand: no Homebrew, Xcode, Python or Node.</td><td>Free</td></tr>
+<tr><td><strong>Your own Codex or Claude Code</strong></td><td>This is the part that
+thinks about your edit: you open the Sniper folder in Codex (ChatGPT plan) or Claude Code (Claude
+plan), desktop app or command line, signed in as you already use it, and ask. There is no extra
+Sniper processing fee and no Sniper sign-in. Sniper's own commands never call a provider. One
+optional thing can bill per use, on a key of your own: Deepgram transcription (a Deepgram key,
+and only when you approve it for an edit). If your Codex or Claude Code is itself signed in with
+an API key rather than a plan, your conversation with it bills that key, as it always
+would.</td><td><strong>You pay your provider directly. Their plan price, model access and usage
+limits apply.</strong></td></tr>
+</table>
+
+<div class="note">
+<p><strong>About the subscription.</strong> Sniper works with <em>either</em> Codex or
+Claude. Aaron, who built it, recommends Codex with GPT-6 Astra based on his own edits —
+that is his preference from his own work, not a measured comparison, and not every plan
+includes every model. Both routes are supported and documented.</p>
+</div>
+
+<div class="note">
+<p><strong>Your agent, your version.</strong> Sniper does not install or pin Codex or Claude
+Code: it works through whichever version you have. Its instructions and skills live in this folder,
+and every tool they run goes through <code>./sniper</code>, which uses Sniper's own tools
+whatever else is on your Mac. Full qualification edits through each are tracked outside this package;
+<code>PENDING-OWNER-DECISIONS.txt</code> lists what is still open.</p>
+</div>
+<footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>
+</div>
+</body>
+</html>

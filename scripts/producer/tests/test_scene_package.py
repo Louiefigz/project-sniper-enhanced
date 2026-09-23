@@ -40,10 +40,10 @@ def _package(scene: dict) -> dict:
 def _catalog_scene() -> dict:
     return wrap_catalog_scene(CatalogSceneRequest(
         entry={
-            "kind": "color-wash", "anchor": "own-screen",
+            "kind": "chart-story", "anchor": "own-screen",
             "outStart": 0.0, "outEnd": 0.8,
             "spec": {
-                "accent": "#054BC9", "accent2": "#6D3BE0", "dir": "ltr",
+                "data": "12, 28", "labels": "Before,After", "type": "bars", "emphasize": 1, "unit": "%",
             },
         },
         scene_id="scene-catalog-wash",

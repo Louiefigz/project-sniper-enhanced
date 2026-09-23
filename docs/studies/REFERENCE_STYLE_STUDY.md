@@ -1,430 +1,427 @@
-# Reference Style Study #1 — operator-supplied IG shorts (2026-07-05)
+# REFERENCE STYLE STUDY — Sniper's numbered style rules (R1 … R31)
 
-Three reference verticals studied (720×1280, ~24fps; 110s / 82s / 30s), via
-pHash unique-state extraction (86 / 74 / 25 states) + frame review. These are
-the operator's "good short" exemplars: **study spacing, what items look like,
-how graphics relate to the human.** Contact sheets + frames:
-session scratchpad `reference-shorts/`.
+Status: Sniper-authored design doctrine, rewritten for rc4 (2026-09-18). Pinned into
+every Auto Edit doctrine snapshot. The numbered rules below are identifiers: planners,
+lint messages, templates, tests and `producer_config.py` cite them as "R<n>". The
+`producer-study` skill appends new rules to this file (see "How rules are added").
 
-## The extracted grammar (rules of the road)
+How to read this document:
 
-### R1 — Captions: minimal, word-at-a-time, chest-anchored
-Single word or 2–3-word phrase on screen at once ("didn't", "break",
-"situation.", "hard.", "sauce"). SMALL — ~4–5% of frame height (≈75–95px on
-1080×1920). White sans, subtle shadow, no heavy outline box. Position:
-**chest/neck center** — directly under the chin, moving slightly with
-framing. NOT a lower-third block, NOT 2-line karaoke.
-→ Implementation: new caption style `minimal` (word-at-a-time events, chest
-band anchored relative to face bbox). Our karaoke band remains a second style.
-
-### R2 — Two-tone accent typography
-Keywords/numbers in YELLOW (serif-italic in ref-1 for elegance; bold in
-refs-2/3), base text white. e.g. "1 *Familiarity* Rule", "**2x** Month",
-"*Pictures* in Visions". Our gold #FFD400 matches; add serif-italic accent
-option to tokens.
-
-### R3 — The headroom is the graphics canvas
-Framing deliberately leaves generous headroom + side space; ALL persistent
-graphics live there: numbered section markers ("1 Familiarity Rule"), stat
-pairs ("2x Month 1x Week"), the parametric gauge widget. **The face is never
-covered — ever** (confirms operator doctrine on real exemplars).
-
-### R4 — Floating chest-level assets
-Images/screenshots float SMALL (~35% width) at chest height, face fully
-clear, while the speaker keeps talking (ref-1's document image). Assets don't
-take over the frame unless…
-
-### R5 — Focus-shift blur (NEW tactic)
-…the data deserves the whole frame: then the SPEAKER BLURS OUT and a sharp
-full-frame table/graphic renders over them (ref-2's Keyword|Traits table,
-yellow serif headers). Distinct from `blur-tease` (withholding): this is
-**focus transfer** — human recedes, data stars, human returns.
-→ Tactic `focus-shift-blur`: blur base video + overlay sharp graphic;
-trivially achievable (boxblur + our alpha overlays).
-
-### R6 — Persistent parametric widgets (NEW template class)
-Ref-3 runs a difficulty gauge (green→red bar + moving arrow) + follower pills
-(10k → 50k→100k → 200k) pinned in the headroom that UPDATE with the
-narrative. A graphic with STATE that tracks the story, not a one-shot pop.
-→ Template class `widget-*` with keyframed variable updates (hyperframes
-seek-safe keyframes support this natively).
-
-### R7 — Numbered section markers
-Big numeral + small 2-word label, headroom-center. Our `stinger-wipe`/section
-pattern maps; style per R2.
-
-### R8 — Pacing (from state counts)
-86 states / 110s (ref-1) ≈ a visual change every ~1.3s at peak — but mostly
-from caption word-flips, NOT hard cuts. The BASE shot is calm (single locked
-camera); the energy is typographic. Lesson: minimal captions at speech pace
-supply the visual cadence; hard cuts stay sparse. This inverts our current
-assumption (cut-driven cadence) for this style.
-
-## Fingerprints (study_video.py, deterministic — quantifying R8)
-| ref | cuts | cuts/min | longest static | unique states | music |
-|---|---|---|---|---|---|
-| ref-1 (110s) | 8 | 4.35 | **48.0s** | 115 | likely |
-| ref-2 (82s) | 10 | 7.33 | 23.0s | 109 | likely |
-| ref-3 (30s) | 2 | 4.05 | 20.9s | 38 | likely |
-
-R8 confirmed with numbers: ~4-7 hard cuts/min (SLOW — long-form territory) while
-states run 10-25x the cut count. The cadence is typographic, not cut-driven.
-And a CORRECTION from the machinery: all three refs run a music bed ("likely",
-loudness-floor + crest evidence) — my frame review called them speech-led. The
-style pack includes a LOW bed; music remains opt-in per operator doctrine, but
-when they ask for IG-minimal, recommend the bed.
-
-## Style pack: "IG-minimal" (to sit beside "Kallaway-kinetic")
-caption=minimal chest-anchored · accents=yellow two-tone · graphics=headroom
-widgets + chest assets · takeovers=focus-shift-blur · base cuts sparse
-(4-7 cuts/min measured) · LOW music bed (measured present in all refs;
-still opt-in per music doctrine — recommend, never auto-add).
-
-## DEEP PASS (2026-07-05, operator-demanded full-state review — 147+36 state frames)
-
-The first pass SAMPLED (18 frames); this pass reviewed every unique state of
-refs 2/3 + ref-1's mid-section. New findings the sample missed:
-
-### R9 — Progressive disclosure: EVERYTHING builds in stages
-No graphic appears fully-formed. Observed build orders, state by state:
-- **Milestone widget (ref-3)**: lone "0 Followers" pill → arrow fades in →
-  gauge marker appears → right pill enters (label DIMMED vs left = target-vs-
-  current hierarchy) → **value hand-off** (right value becomes next left) →
-  marker TRAVELS the gauge with the narrative (animated tween, mid-positions
-  captured). Widget hugs the very top: y≈130–230.
-- **Focus-shift table (ref-2)**: speaker blurs AND dims → "Keyword" header +
-  divider draw FIRST → "Traits" header → left column populates → right column
-  → long hold (5-8s) → sharp release back to speaker.
-- **Section markers (refs 1&2)**: small white eyebrow ("System No.2") appears
-  first → yellow-serif title WIPES IN below (mid-wipe states captured ≈
-  100-170ms entrances) → extends ("& Creative Direction" adds a line).
-  **TOP-LEFT anchored** (or the emptier side) — NOT centered. Structure:
-  numeral/eyebrow + yellow-serif name + white-sans qualifier.
-- **Schedule-stack (ref-2, NEW pattern)**: color-SEMANTIC rounded cards
-  (green "Ideation 8-10am" / blue "Filming 10-2pm" / coral "Distribution
-  2-3pm"), serif bold titles + small time sublabels, stacked on the side
-  OPPOSITE the speaker, staggered wipe-in entrances.
-
-### R10 — Placement law, observed everywhere
-Graphics ALWAYS occupy the emptier region, opposite the subject; the same
-marker moves sides between shots as the framing changes. (Exactly what
-placement-v2/free_space is building — now reference-evidenced.)
-
-### R11 — Real icons (operator-attested)
-The operator confirms real app icons appear in these reels; my reviewed
-sheets haven't captured the exact frames yet (likely ref-1 late states /
-hook regions). Icon library built regardless (#27); when the frames surface,
-match their icon sizing/treatment exactly.
-
-### Template corrections queued from the deep pass
-1. section-marker.html → top-left/emptier-side anchor, eyebrow-first
-   progressive build (current version is centered numeral-led — wrong).
-2. NEW template: schedule-stack.html (color-semantic cards, staggered).
-3. widget-gauge/pills → staged entrance vars (pill-first, arrow, marker) +
-   value hand-off support (current version shows all elements from frame 1).
-4. Entrance timing standard: ~100-170ms wipes/fades, never pops-from-nothing.
-
-## Build queue derived from this study (MG-3.5)
-1. Caption style `minimal` (word-at-a-time + face-relative chest anchor)
-2. `focus-shift-blur` compositing mode in graphics_stage (blur base under own-screen)
-3. Widget template class (parametric gauge / counter pills) — hyperframes keyframes
-4. Serif-italic accent tokens + headroom section-marker template
-5. Face-relative graphic anchoring (anchor: "headroom" | "chest" | "beside-face"
-   computed from faceBBoxNorm) — extends the anchor vocabulary beyond free-band/own-screen
-
-### R12 — Icon doctrine (operator verdict, 2026-07-05)
-Icons ALONE carry entity graphics — a recognizable mark in a small square
-container beats icon+pill+label (the chip text is redundant with the mark and
-with the spoken word). And GENERIC words earn no graphic at all: an "AI" chip
-while the speaker says "AI" adds zero information (worse when it borrows a
-brand's mark — two OpenAI knots for one sentence). Rules: (1) entity graphic
-only when the entity is SPECIFIC (Codex yes, "AI" no); (2) prefer icon-badge
-(square container, bare mark) over chip when the mark is recognizable;
-(3) chips reserved for entities with NO known mark (text is then the info).
+- Each rule has the heading format `### R<n> — title`, a statement, a rationale and an
+  **Encoded as** line naming where the product carries it.
+- Every number is a **Sniper design parameter** (configurable, with a stated reason).
+  Rules R1-R20 and R25-R31 are original Sniper rules written from first principles and
+  Sniper's own templates and renders; they do not describe or measure anyone else's
+  video. Rules R21-R24 restate what Sniper's earlier study of the **owner's own**
+  long-form footage (the C0679 raw and edited pair, "pair 2") established; that study
+  is historical and was not re-measured for rc4.
+- Colour and type are named by role (accent, accent face, ink); values belong to the
+  design tokens in `templates/motion/tokens.css`.
 
 ---
 
-## ZOOM ADDENDUM (2026-07-06) — the shorts' zoom grammar
+## Captions and type
 
-Ran the long-form zoom pipeline (`zoom_scale.py` whole-frame ORB similarity-scale
-+ `zoom_detect.py`) on the three reference shorts, to give the IG-minimal style
-pack the same zoom grammar the long-form study now has
-(see `docs/studies/LONGFORM_VISUAL_STUDY.md`). Artifacts:
-`scratchpad/reference-shorts/zoom/ref-{1,2,3}/data/zoom_map.json` +
-`zoom/validate_shorts.jpg` (visual proof pairs).
+### R1 — Minimal word-at-a-time captions anchored at chest height
 
-**Noise floor — honest, because the shorts have no raw baseline.** I measured it
-directly instead: ORB similarity-scale on within-shot frame pairs (which have no
-real zoom). ORB survives the compression fine (inliers p50 326–718, ok-rate
-80–91%), and the faces are 2–4× bigger than the long-form (area p50 0.043–0.080 vs
-0.019), so the signal is actually *cleaner* than the long-form baseline — except
-ref-2:
-- **ref-1, ref-3 (locked, ~1–2 Mbps):** |scale-1| noise p90 ≈ 1.1–1.2% per 0.2 s,
-  static-second median ≈ 0.02–0.04%. Punches (15–22%) clear it by 15×. Ramps
-  ≥3% trustworthy; **sub-5% ramps are detectable but marginal** (one ref-1 −4.1%
-  8.8 s creep is flagged low-confidence).
-- **ref-2 (0.87 Mbps, a standing + slightly handheld shot):** noisier — 0.2 s p90
-  ≈ 2.9%, static-second median ≈ 1.5%. **Sub-~4% ramps are NOT reliable here**, so
-  I raised the ramp gate to 3% for all three and report ref-2 ramps with a caveat
-  (its +37% "ramp" also contains the subject walking toward camera, so that
-  magnitude is a combined subject+scale change, not a pure lens zoom). All punch
-  cuts on all three are well above every floor and are visually confirmed.
+The `minimal` caption style shows **one word per event**, or a phrase of up to three
+words when adjacent words nearly touch (gap under 0.12 s). Emphasis words always stand
+alone. Size ≈ 80 px on a 1080 × 1920 canvas (about 4 % of frame height; allowed
+64-96 px). The event's vertical centre sits in the **chest band** under the chin — y
+1050-1150 on the 1920-px canvas, or 8 % of frame height below the measured face box
+when one is known. Type treatment is a thin outline and a soft shadow, **no box**. Each
+word shows for at least 0.18 s and never hangs more than 0.4 s past the end of its
+speech. Rationale: one word at a time at chest height keeps the reading point next to
+the face, so the viewer reads and watches the speaker with one fixation region; a box
+would turn a caption into a graphic.
 
-**The numbers**
+**Encoded as** `CAPTIONS["MINIMAL"]`; `captions/captions_minimal.py`.
 
-| | ref-1 (110 s) | ref-2 (82 s) | ref-3 (30 s) | long-form (ref) |
-|---|---|---|---|---|
-| Zoom events | 19 | 8 | 2 | 35 |
-| **Events/min** | **10.3** | **5.9** | **4.1** | **2.15** |
-| Punch : ramp | 17 : 2 | 6 : 2 | 2 : 0 | 21 : 14 |
-| **Punch on a cut** | **17/18 = 94%** | 6/12 = 50% | 2/2 = 100% | ~⅓ of cuts |
-| in : out | 9 : 10 | 4 : 4 | 1 : 1 | 20 : 15 |
-| in:out ratio | 0.9 | 1.0 | 1.0 | **1.33** |
-| Median magnitude | 17.7% | 18.6% | 18.2% | 20.8% |
-| in→out brackets | 3 | 0 | 0 | (the signature move) |
+### R2 — Two-tone accent
 
-### R13 — Zoom is RHYTHMIC in shorts, SEMANTIC in long-form
+Emphasis words, keywords and numbers render in the **accent colour and the accent face**
+(a secondary display face used only for emphasis); everything else uses the primary
+text style. Rationale: two tones give the viewer a second channel — "this word matters"
+— without adding another element to read.
 
-The single biggest difference between the two formats' zoom use:
+**Encoded as** `CAPTIONS["MINIMAL"]["accent"]`, `["accent_font"]`; `tokens.css` accent
+roles; `section-marker` title tier.
 
-- **The short fuses the cut track and the zoom track — nearly every cut is also a
-  re-frame.** ref-1 punches on 94% of its cuts, ref-3 on 100%. So the editor almost
-  never cuts to the *same* framing; each cut lands tighter or wider than the last.
-- **~2–5× the long-form's zoom cadence** (4–10 events/min vs 2.15) — but the **same
-  per-punch magnitude** (~18% linear). What scales up in a short is the *frequency*,
-  not the size, of the push.
-- **Direction is balanced (in:out ≈ 1.0)**, not the long-form's lean-in (1.33). The
-  shorts *alternate* tighter/wider to manufacture a constant push-pull energy;
-  they are not "pushing in on the point."
-- **The in→out bracket exists (ref-1 × 3) but is demoted from signature to texture.**
-  In the long-form the bracket is reserved for the biggest lines (hook payoff,
-  product reveal, closing callback); in the short it's just one of the alternating
-  moves that keep the frame kinetic, not a semantic marker.
-- **Ramps are rare in shorts (4 total across 3 videos).** Shot lengths are too short
-  to host a slow creep, and the hard-punch rhythm already supplies the motion; the
-  long-form's subtle 0.3–1.8%/s ramps under narration have no equivalent here.
+---
 
-**Style-pack rule:** for `IG-minimal`, treat the zoom track as **part of the cut** —
-default every hard cut to a scale change of ~15–20% linear, alternating direction to
-avoid drifting monotonically tighter, at a cadence of one reframe every ~6–10 s
-(ref-1's 10/min ceiling reads as high-energy; ref-3's 4/min as calmer). Reserve
-gradual ramps for the long-form pack, not this one. This is the inverse of the
-long-form doctrine ("cuts carry rhythm, zooms carry meaning"): in a short, **the
-zoom IS the cut**.
+## Placement
 
-### R14 — Talking-head longform: graphics are CUTAWAYS, never overlays (2026-07-06)
-Direct machine-vs-pro comparison on identical footage (intro test): at the
-agenda enumeration the pro shows NOTHING (delivery carries it); when content
-earns a graphic he CUTS AWAY to a full-frame clean white whiteboard canvas
-(hand-drawn connector, tiny nodes, massive whitespace). He never places a
-translucent panel over the subject. Rules: (1) dense graphics on talking-head
-longform = full-frame cutaway on the whiteboard-sketch canvas (whiteboard-*
-family — the OPERATOR's language; liquid-glass is the sibling brand's, keep
-for screen-share); (2) enumeration alone does not earn a graphic — story
-beats do; (3) the frame belongs to the subject or to the canvas, never both.
-Build queue: whiteboard-list, whiteboard-board siblings; MG-4 mapping:
-talking-head longform enum/list → whiteboard cutaway (needsOperator), not rail overlay.
+### R3 — The headroom is the graphics canvas
 
-### R15 — Transitions are a language, and they are audiovisual (2026-07-05)
-From the machine-vs-pro intro audit (docs/audits/INTRO_MACHINE_VS_PRO_AUDIT.md), measured
-at native fps: every world-change in the pro cut is covered by a **white flash
-(~3 frames / ~125ms: wash → full white → new shot)**, a **light-leak wash
-(150–400ms, orange/pink)**, or a **hard cut into a dark graphic world** — and the
-flash/wash moments carry **whoosh SFX** (−11 to −15 dB peaks in speech gaps vs a
-−40 dB true-pause floor). Burned text exits INSIDE the flash. Nothing pops in
-place; there are zero naked butt joints between visual worlds. SFX ≠ music — the
-no-music-by-default rule stands; whooshes ride transitions only.
+In a vertical talking-head frame, the space **above the head** is the natural home for
+persistent graphics: it is usually empty, and a graphic there never covers the face or
+the caption band. Placement measures the real top of the hair (median-background
+subtraction; a 40 %-of-face-height fallback when it cannot be measured) and uses a
+top inset of 60 px, smaller than the safe box's 250-px top because the top edge of a
+Short carries only a small platform tab.
 
-### R16 — Baseline look + reframe-on-seam; ramps recompose toward the face (2026-07-05)
-The pro's "static" talking head is already an edit: a **tight chest-up crop of the
-4K frame + warm grade**, and the framing changes at essentially every seam and
-cutaway-return (70 boundaries/299s = 14/min incl. in-cutaway cuts). Between events
-the frame is LOCKED (ORB median |dx| 0.08px/0.4s — no idle Ken Burns). Long ramps
-carry a deliberate **translation vector** (−413/−286px @1080p across a +43.8%/24.9s
-push): the zoom recomposes toward the face, never scales about a fixed center.
-Machine gap measured: 0 reframes, raw wide framing, no grade → reads amateur
-before any graphics question arises.
+**Encoded as** `MOTION["anchors"]` (`headroom`), `FREE_SPACE`
+(`headroom_top_inset`, `face_expand_up`); `planner/free_space.py`,
+`planner/graphics_anchors.py`.
 
-### R17 — Receipts beat rendered graphics (2026-07-05)
-When speech references a showable artifact, the pro CUTS TO THE ARTIFACT: his
-real YouTube channel page, his actual cartoons (3 clips × ~1.1s micro-montage),
-his product sites (slow push + page scroll), his own studio. ~16% of intro
-runtime is off the face, and most of it is receipts, not decoration. Planner
-trigger: speech names a thing that exists on disk/URL → propose receipt cutaway
-(1–4s; micro-montage for lists). Requires the operator's asset pool
-(assess-pool-FIRST doctrine now has ground truth).
+### R4 — Chest and beside-face anchors
 
-### R18 — Burned kinetic text for hook/thesis/quote lines (2026-07-05)
-The pro burns styled kinetic type for the hook ("write this sentence down"),
-the I-help sentence, key quotes, and selective caption fragments — building
-**word-by-word at 100–150ms per word, synced to speech**, with a yellow/red
-emphasis color on payoff words, and layout re-centering as words land. He does
-NOT burn full captions on longform. The word timings needed are already in our
-timeline map.
+Floating assets may sit **below the chin** (the chest band, falling back to the
+lower-third band) or **beside the face** on the emptier side at face height. These
+anchors are legal only where a face exists and require a measured face box
+(`faceBBoxNorm`); without one, lint fails the entry.
 
-### R19 — Seam-cover law (2026-07-05)
-Every retake/topic seam in the pro cut is covered by a reframe, a flash, or a
-cutaway — his own retake seam at ~4:39 is masked by a B&W quote cutaway with
-word-by-word text build. The machine's plan seams are naked butt joints on
-identical framing. Lint rule queued: a cut seam with same-framing continuation
-and no covering treatment = WARN.
+**Encoded as** `MOTION["face_anchors"]`; `plan_lint_motion` face-anchor checks.
 
-### R20 — Retention front-load: the first ~2 minutes run ~2.5x treatment density (2026-07-06)
-Operator doctrine, stated directly: "the intro has far more animations/edits than
-the rest of the video — typically the first 2 minutes or so is to increase
-retention; that's important for our editor brain to know for long form." The
-measured pro cut agrees: **10 cutaways in the first 126s (~5/min) + 5 zoom events
-in the first 60s (~5/min), settling to ~2/min for the body** — every treatment
-family (cutaways, takeovers, kinetic text, zooms, transitions) is stacked in the
-hook window, then eased to a repeatable cruise. Encoded: MODES["longform"]
-["hook_density_multiplier"] (2.35), mode-keyed hold/takeover ceilings
-(MOTION hold_max_s / takeover_max_s: longform 11.0/10.5s vs short 6.0/2.5s —
-a longform cutaway that BUILDS needs the full enumeration span), and the MG-4
-planner's 120s hook window (denser own-screen spacing in the hook, 1-per-45s
-body). Plan authors: put the thesis takeover, the first whiteboard build, and
-the receipt hits INSIDE the first two minutes; the body earns graphics only at
-chapter-scale beats.
+### R5 — Focus-shift over screen-share
 
-## Study pair 2 — "angle generator" (C0679 raw → edited, 2026-07-06)
+Over screen-share footage the screen is the subject. The only legal graphics there are
+an opaque own-screen cutaway or a **focus-shift** graphic: an alpha graphic over a
+blurred copy of the base, so the screen recedes rather than being covered.
 
-Second raw↔edited pair (654s edit / 834s raw). Full-state vision sweep (712
-states, 60 sheets, every sheet reviewed) + word-level edit diff + zoom map.
-Fingerprint: 102 cuts (9.35/min), 22 zoom events (2.02/min — R13's longform
-semantic cadence CONFIRMED as a stable prior), −28.1 LUFS quiet dynamic master
-(second data point). Full catalogs in the session study; key deltas below.
+**Encoded as** `MOTION["anchors"]` (`focus-shift`), visual-state anchor legality in
+`plan_lint_motion`.
 
-### ⚠️ R14 CONTRADICTION — operator-visible callout (never silently resolved)
-Pair 1's editor NEVER overlaid graphics on the talking head (R14). THIS edit
-overlays constantly: icon stacks in headroom, two-tier burned text at chest,
-prompt chips beside the face — and reserves full takeovers for section/canvas
-moments. R14 is therefore NOT a universal law; it is a PER-VIDEO STYLE AXIS
-(`graphics_style: cutaway-only | overlay-rich`). Both are the operator's own
-videos. Default stays cutaway-only (conservative, pair-1-proven) until the
-operator picks; the planner should carry the axis, not assume it.
+### R6 — Persistent parametric widgets
 
-### R21 — Edit-decision policy is footage-dependent, not fixed (87.1% vs 94.7%)
-Pair 2 kept 87.1% of raw words (pair 1: 94.7%): tangents/weak-alternates
-54.4s across 11 events + trims 31.9s — this edit CUTS CONTENT, not just
-retakes+pauses. Retakes: 7 events, 6 later-wins + **1 earlier-wins**
-(first counter-example — flag-don't-flip policy validated), and one
-long-range retake pair 95s apart (loser@10.6 → winner@105.8), far beyond
-retake_scan's 10-utt lookback. Brain: pause-tightening-first stays the FLOOR;
-tangent-cutting is a judgment tier above it.
+A value that the speaker develops over a stretch (a progress figure, a set of options,
+a milestone climb) is shown as a **persistent widget** that stays on screen and updates
+in place, rather than as a sequence of cards. Widgets live in the headroom (R3) and
+enter in stages (R9).
 
-### R22 — Zoom grammar, second accent: ramps carry the demo body
-Same 2/min semantic cadence, but punch:ramp = 11:11 (pair 1: 21:14) with
-LONG ramps (+30%/33s, +33%/24s) under explanations, punch-OUTs at section
-resets, and an opening 14.7s punch-OUT ramp as the hook move (depart tight →
-resolve wide). Magnitudes median 22.9%. The zoom engine already renders all
-of this; the PROPOSER should offer long smooth ramps under demo/story zones,
-not only 1.6s thesis punches.
+**Encoded as** `widget-gauge`, `widget-pills`; `planner/graphics_planner_gauge.py`.
 
-### R23 — Burned text grammar: fragment+payoff two-tier, accent = per-video token
-The highest-frequency treatment (5+ instances both halves): small white
-verbatim fragment line + LARGE bold accent payoff line building word-by-word
-beneath (green for beliefs/warnings, yellow for numbers, azure canvas titles;
-red handwritten accent on the hook). Accent color is a per-video BRAND TOKEN
-SET, never hardcoded gold. Burned text slides to the emptier side on reframes
-(R10 applies) and — ordering law — is committed BEFORE ramps in this style so
-it scales with the push (burn-before-ramp; our pipeline runs graphics after
-punch = the pair-1 ordering; this is part of the same style axis as R14).
+### R7 — Numbered section markers
 
-### R24 — Demo-by-design: canvas graphics replace screen recordings
-This "tool demo" video contains ZERO literal app screen recordings. The demo
-is DESIGNED: prompt-chip overlays with a yellow variable slot, node-map
-canvases with real brand icons (desaturate→color pop on land), value-handoff
-(a spoken sentence built center-frame SHRINKS into the canvas title, then
-connectors draw BEFORE their nodes), section takeovers with drifting ghost
-numerals, and one canvas-PiP list (speaker demoted to a ~27%-width rounded
-inset card while an 8-item list staggers in — long enumerations may keep the
-speaker present INSIDE the cutaway). Concept-stock b-roll (AI/robot/office,
-1.5–3.5s) is the tier below receipts; every b-roll boundary is covered by a
-brand-accent wash or white flash (extends R15: wash color follows the brand;
-plain white-flash-cut is a legal seam cover). The outro (~last 60s) is
-treatment-free — stop spending graphics after the last content beat.
+A section of a Short or long-form discussion may be marked by a small overlay in the
+headroom: an **eyebrow** (the section number or label), a **title** in the accent tier
+(R2) and an optional qualifier, on the side opposite the subject (R10), for about
+2.5 s. It is a small alpha overlay over the live presenter, distinct from a full-frame
+chapter card.
 
-## Study pair 3 — GPT-5.6 Sol AI segment (Nate Herk, 2026-07-15)
+**Encoded as** `section-marker` (`num` / `line1` / `line2` / `side`).
 
-Exact reference: `J_jswzXhYJA`, AI-produced section 0:00–3:07. The full card
-catalog and frame evidence live in `NATEHERK_CARDS.md`; the direct C0679
-comparison lives in `GPT56_SOL_C0679_GAP_STUDY.md`. A new 5fps sweep, every-state
-contact-sheet review, zoom map, and 12fps entrance bursts reconfirm the earlier
-study. The reusable rules below close the earlier documentation gap: this
-reference had been studied in detail, but its laws had not reached this canonical
-planner-facing file.
+### R8 — Safe-box discipline
 
-### R25 — Face-bridge is a macro-layout preset, not an overlay synonym
+All text and graphics sit inside the universal safe box — top 250, bottom 520, left
+60, right 150 px on the 1080 × 1920 canvas — so no platform's interface covers them.
+The bottom margin is the binding one (the caption and call-to-action stack of the
+platforms); the visual centre sits at x 495, left of 540, because right-hand icon rails
+are asymmetric.
 
-The AI segment uses two stable editorial chassis after 13.5s: a cream left rail
-with full-height footage on the right, and a dark full-frame canvas with the
-presenter continuously carried into a tall rounded right-side PIP. The chassis
-alternate about eight times through 187s. The face is never covered, removed, or
-reintroduced as an unrelated clip. `graphicsStyle: overlay-rich` is therefore
-insufficient: it permits floating widgets over an unchanged camera frame, which
-is not this grammar. Planner/render target: an explicit `face-bridge` treatment
-whose rail and dark-PIP geometry are stable across the entire chapter. This is
-the operator-visible adjudication of R14's contradiction, not a replacement for
-the separate `cutaway-only` preset.
+**Encoded as** `SAFE_BOX`, `VISUAL_CENTER_X`; placement clamps in `free_space`.
 
-### R26 — Tokens repeat; information anatomy does not
+---
 
-In the AI section, 20 graphic windows use 19 distinct information forms; across
-the full reference, 23 windows use 20 forms. The consistent system comes from
-palette, typography, eyebrow, connectors, PIP geometry, and build rhythm—not
-from repeating one card. Ledger, fan-out, timeline, bars, scoreboard, checklist,
-UI diff, diagram, scanner, loop, pipeline, and statement are chosen by semantic
-shape. A per-video allocator must drain compatible unused forms before reuse.
-Reference prior: roughly 0.87 distinct forms/window. Repository floors may be
-lower for feasibility, but a plan below its configured floor is not exportable.
+## Motion and build
 
-### R27 — A card is a live evidence surface, not a narration subtitle
+### R9 — Progressive disclosure
 
-The reference's factual beats show typed evidence: status values, dates,
-comparisons, deltas, thresholds, pass/fail chips, UI captures, provenance, or an
-honest limit. C0679 frequently replaced those with a heading plus a numbered
-sentence that paraphrased the speaker. For config, chronology, comparison,
-measurement, QA, vendor, and mechanism beats, the payload contract must require
-the matching evidence fields. A title-only fallback is a semantic failure even
-if it is legible and animated. Claims source and limitation modules land last.
+Graphics build in stages and enter from something **visible**: a quick 100-170 ms rise
+or wipe, or a scale-in from a visible starting scale (about 0.7-0.92), never a pop from
+nothing. Multi-part graphics build in reading order — eyebrow first, then title, then
+qualifier or items. Rationale: an element that grows from a visible state gives the eye
+a point to track; one that appears from nothing is noticed only after it is complete.
 
-### R28 — Progressive build order follows cognition
+**Encoded as** entrance timing in the composition templates; section-marker and
+schedule-stack builds; `MODULE_STUDY.md` ranks 2-4 for long-form cards.
 
-Every dense reference card begins with orientation, exposes a visual skeleton,
-then lands modules in narration order. The recurring order is eyebrow/headline
-→ container/axis/connectors → current evidence → comparison/result → receipt or
-caveat. Ghost-resolve keeps text in place; bars carry their labels at the moving
-tip; chip rows sweep at about 80–120ms/item; the card may continue evolving for
-several seconds. The first meaningful module lands within about 0.6s of entry.
-One generic fade/slide applied to the fully assembled card does not satisfy this
-rule.
+### R10 — The placement law: slide to the emptier side
 
-### R29 — Spend motion on information before camera punch-ins
+Text and panels anchor on the **emptier side of the frame, opposite the measured
+subject**; wipe direction follows the anchored side. When the subject moves between
+reframes, the graphic's side follows.
 
-The benchmark AI section measured 5 zoom events (1.6/min), median magnitude
-6.5%, maximum 13.9%. C0679 measured 31 events (2.78/min), median 11.9%, maximum
-31%, with 28 punch cuts and only 3 ramps. The reference obtains rhythm from
-chassis changes, progressive module lands, fills, scanner motion, and in-place
-statement swaps. When a semantic graphic can evolve, do not insert a punch pair
-to fill the same attention gap. Camera motion supports the information hierarchy;
-it is not a substitute for one.
+**Encoded as** `side` / `align` variables chosen from `free_space` measurements.
 
-### R30 — Decision-to-render parity is a release invariant
+### R11 — Copy is condensed speech
 
-For every graphic decision, the rendered timeline must contain exactly one row
-with the same `graphicId`, `semanticBeatId`, and `kind`. C0679's Palmier build
-changed 12 planned kinds; 8 were bound intro decisions whose ledger still named
-the richer original forms. It also inserted three unplanned body graphics. The
-existing plan lint correctly rejects this state. Any path that can export while
-that lint is failing is an authority defect, not a stylistic exception. Palmier
-mutation must be candidate-scoped, plan-hash-bound, gate-bound, and read back
-after each authorized batch.
+Graphic copy is the speaker's words, condensed: it may shorten, never add. No number,
+promise, price or claim appears that was not spoken in the kept cut.
 
-### R31 — Review the exact full candidate, not a short surrogate
+**Encoded as** `claims_contract.py` (numeric tokens and phrase grounding); LESSON-001,
+LESSON-009; `MODULE_STUDY.md` §5.6.
 
-C0679's available deterministic audit covered a 47.3s render and failed black,
-eye-trace, and composite-reference checks; the delivered master is 670s. A short
-render can validate machinery, but it cannot approve the full edit. Completion
-requires an export of the exact candidate fingerprint plus full-duration
-deterministic QC and separate composition/editorial reviews bound to that export
-hash. Reviews must explicitly check graphic variety, semantic relevance,
-presenter geometry, progressive builds, and long-gap pacing.
+### R12 — Entity legality
+
+When the speaker names something, decide whether it earns a graphic:
+
+- **Rule 1** — a **generic category** ("AI", "software", "the internet", calendar words)
+  earns **no** entity graphic; a mark for a category adds nothing and often borrows a
+  brand that was not meant.
+- **Rule 2** — a **specific** product with a recognisable mark gets the **bare mark**
+  (`icon-badge`); the mark alone beats a chip plus label.
+- **Rule 3** — a specific product **without** a known mark gets a **text chip**
+  (`chip-row`); the text is then the information.
+
+**One mark once:** the same mark may not reappear within 8 s. Marks are real marks
+only — never emoji substitutes.
+
+**Encoded as** `MOTION["generic_entity_blocklist"]`,
+`MOTION["planner"]["one_mark_window_s"] = 8.0`; `planner/graphics_planner_rules.py`,
+`planner/graphics_planner_density.py`.
+
+### R13 — Zoom changes role between formats
+
+**Long-form zoom is semantic**: a sparse second track under the cuts that lands on
+meaning.
+
+- **Rule 1** — punch **in** on the stressed beat of a claim;
+- **Rule 2** — pull **out** to wide on a section reset;
+- **Rule 3** — an in → out **bracket** for the biggest lines only (at most 3 per video);
+- **Rule 4** — a slow **ramp** (0.3-1.8 % per second) under an uncut, graphic-free
+  story stretch;
+- **Rule 5** — every zoom departs from the wide baseline (scale 1.0) and resolves back
+  to it.
+
+Long-form defaults: median push 1.21, bracket ceiling 1.51, cadence at most 6 per
+minute in the first 60 s and 5 per minute in the body (the body budget also admits the
+continuous aliveness creep).
+
+**Shorts zoom is rhythmic**: the zoom *is* the cut — most cuts land tighter or wider
+than the shot before, alternating so the video does not creep in. Median reframe 1.18,
+at most 10 per minute, one reframe every 6-10 s; ramps and brackets are occasional
+texture, not proposed automatically.
+
+Rationale: in long-form a zoom that happens often stops meaning anything, so it is
+saved for meaning; in a Short the cut rate is high and a reframe on the cut hides the
+jump while adding energy.
+
+**Encoded as** `MOTION["zoom"]` (`magnitude`, `bracket_max_per_video`, `baseline_scale`,
+`by_mode`); `planner/graphics_planner_zoom.py`; `plan_lint_motion` cadence checks.
+
+### R14 — Talking-head long-form: protect the face
+
+In the `cutaway-only` long-form grammar **no panel floats over the talking head**. The
+single exception is one lower-band card (`glass-lower-third`) off the face. Structure
+earns **full-frame cutaways**: three or more listed items earn a whiteboard, a process
+earns a list cutaway, a thesis earns a burned kinetic quote (R18), a named artifact
+earns a receipt (R17). **One attention move per moment**: a receipt and a cutaway never
+compete for the same beat. Cutaways are expensive; they are budgeted and kept out of
+the first 3 s and last 5 s. R14 is a per-video style choice, not a universal law — see
+"R14 contradiction (callout)" below.
+
+**Encoded as** `planner/graphics_planner_longform.py`,
+`planner/graphics_planner_items.py`, `planner/graphics_planner_sequences.py`.
+
+### R15 — Seam covers between worlds
+
+A change of world — presenter to full-frame graphic and back — may carry a seam cover
+so the change reads as deliberate: a **white flash** of about 3 frames, or a **light
+leak** of about 0.375 s, each with a whoosh peaking around −15 dBFS. Covers are markers,
+not decoration: at most 2 per minute, at least 1 s apart. Stock NLE transitions are not
+covers (LL-014).
+
+**Encoded as** `MOTION["transitions"]`; `motion/transitions.py`; `plan_lint_motion`
+transition checks.
+
+### R16 — The baseline look
+
+Even a static talking head is edited: a tight **chest-up recrop** of the source frame
+(default 1.28×, centred slightly above the middle at 0.44 of height; editorial band
+1.0-1.5×) and a **subtle warm grade** that never changes between events. Zoom pushes
+translate toward the face rather than scaling about the frame centre.
+
+**Encoded as** `motion/baseline_look.py` (`WARM_GRADE`), `plan.baselineLook` lint
+bands; face-relative push translation in `motion/punch_in.py`.
+
+### R17 — Receipts beat rendered graphics
+
+When the speaker names a **showable artifact** — their channel, their site, their
+product, a document — cut to the real artifact. A receipt holds about 2.5 s (1-4 s),
+replaces frames only (the voice continues underneath), and the same artifact is not
+re-shown within 30 s. A rendered card for something that could simply be shown is
+weaker evidence. Exception: when the beat's structure (several items, a comparison) is
+more than any single artifact can show, the structural graphic wins.
+
+**Encoded as** `BROLL["receipt_hold_s"]`, `BROLL["receipt_dedup_s"]`;
+`planner/graphics_planner_receipts.py`, `broll/broll_insert.py`, `broll/broll_pool.py`.
+
+### R18 — Kinetic burns for theses
+
+The sentence a section exists for is burned as a **kinetic quote** that builds word by
+word (about 130 ms between words) with one to three payoff words in the accent tier
+(R2).
+
+**Encoded as** `kinetic-quote-wide`; the R18 emphasis heuristic in
+`planner/graphics_planner_longform.py`.
+
+### R19 — Full-frame text is its own world
+
+A full-frame text takeover is opaque: captions are suppressed under it, and entering
+or leaving it is a seam (R15).
+
+**Encoded as** own-screen anchor semantics (`MOTION["anchors"]`); caption suppression
+windows in `graphics_base_effects.py`.
+
+### R20 — Front-load the hook
+
+A produced long-form's opening minute carries about **2.35×** the device density of the
+body (cuts, zooms, graphics), then eases to a repeatable cruise. Rationale: the first
+minute is where viewers decide to stay; the body must be sustainable for the remaining
+runtime.
+
+**Encoded as** `MODES.longform.hook_density_multiplier = 2.35`; region-aware still-gap
+ceilings (`hook_still_gap_s`, `max_still_gap_s`); zoom cadence split (R13).
+
+---
+
+## Pair 2 — the owner's long-form footage (R21-R24)
+
+These rules restate what Sniper's earlier study of the owner's own C0679 raw and edited
+long-form established. They are kept because the product relies on them; the study
+itself is historical.
+
+### R21 — Re-delivered blocks and the retake winner
+
+The owner's raw recording showed that a whole segment can be **re-delivered after an
+interruption**, roughly a minute after the failed attempt — far outside a
+few-utterances retake window. Sniper therefore also searches ahead **by time** (up to
+120 s) under stricter guards, and always flags such long-range finds for the operator.
+By default the **later take wins**; when an earlier take is better, the scanner flags it
+(`needsOperator`) and never flips the winner on its own.
+
+**Encoded as** `MODES.longform.retake_default = "later"`,
+`MODES.longform.retake_lookback_s = 120.0`; `retake_scan.py`; `tests/test_edit.py`.
+
+### R22 — Declare the graphics style per video
+
+The owner's own long-form edits use more than one legitimate graphic grammar
+(`cutaway-only`, `overlay-rich`, and the module `face-bridge`). A produced/full
+long-form therefore declares its style once (`target.graphicsStyle`) with a rationale,
+and the planner never guesses it. Styles do not mix within one video.
+
+**Encoded as** `graphics_planner_longform.resolve_style`, `STYLES`; `MODULE_STUDY.md`
+§4.
+
+### R23 — Two-tier burned text
+
+In the `overlay-rich` style, a thesis burns over the live presenter as **two tiers**: a
+small verbatim fragment of the setup, then a large accent payoff building word by word
+beneath it at speech cadence, slid to the emptier side (R10). The accent is a per-video
+brand token, never hardcoded. The full-frame kinetic quote (R18) is reserved for the
+single strongest thesis in each two-minute stretch; the others burn.
+
+**Encoded as** `fragment-payoff`; `planner/graphics_planner_style.py`.
+
+### R24 — Overlay-rich extras
+
+The `overlay-rich` style adds four devices:
+
+- **Concept stock**, a tier below receipts (R17): when speech is abstract and names no
+  showable artifact, a 1.5-3.5 s concept insert (default 2.5 s), at most once per 60 s,
+  body only, and always yielding to a receipt or cutaway on the same beat.
+- **Enumeration with the presenter kept present**: five or more listed items may use a
+  full-frame list with the presenter in an inset (`canvas-pip-list`) once that renderer
+  is wired; until then a full-frame whiteboard list.
+- **Chapter takeovers with a drifting ghost numeral**: the chapter ordinal settles as a
+  large soft numeral, the title lands second (`section-takeover`).
+- **A one-beat emphasis hit** of 300-500 ms, hard in and hard out (`glitch-hit`), placed
+  only by the brain or operator — no transcript signal says "hit here".
+
+**Encoded as** `BROLL["concept_hold_s"]`, `BROLL["concept_every_s"]`;
+`planner/graphics_planner_receipts.py` (concept lane),
+`planner/graphics_planner_items.py` (`PIP_MIN_ITEMS`), `section-takeover`, `glitch-hit`.
+
+---
+
+## R14 contradiction (callout)
+
+R14 (protect the face; structure goes full-frame) and R23-R24 (burn text and stack
+icons over the live presenter) contradict each other, and both are legitimate. Sniper
+resolves the contradiction **per video**, not by averaging: the graphics style is an
+axis (`cutaway-only` | `overlay-rich` | `face-bridge`) declared in the plan (R22). The
+`cutaway-only` planner is the R14 grammar; `overlay-rich` is the R23-R24 grammar;
+`face-bridge` is the module chassis grammar of `MODULE_STUDY.md` §4. Contradictions
+found in future studies get a callout like this one; they are never silently resolved.
+
+---
+
+## Additional rules (R25-R31)
+
+### R25 — Contrast follows the true background
+
+Text drawn outside a card or field has the footage as its background. Any such text
+carries its own backing (a pill, scrim or plate); contrast obligations are computed
+against the text's real background, never against a card it does not sit on.
+
+**Encoded as** `MOTION["contrast"]` (including `text_plate_sources`); LL-004, LL-033,
+LESSON-006, LESSON-046.
+
+### R26 — Graphics never cover the face
+
+A graphic whose placement would overlap the measured face is moved to a legal region
+or replaced with an anatomy that fits; if no legal region exists, placement must not
+fall back to covering the face.
+
+**Encoded as** `FREE_SPACE`, `verify_placement`; LL-034 (hardening open), LESSON-047.
+
+### R27 — Physical fit before binding
+
+A form is compatible only if its template's **measured** canvas and content box fit the
+delivery: aspect mismatch is a hard no; a hold-to-cut template must end on a cut seam or
+under a transition.
+
+**Encoded as** `templates/motion/comp_capabilities.json`,
+`graphics/comp_capabilities.is_aspect_legal_kind`; LL-036, LL-037.
+
+### R28 — Hold long enough to read twice
+
+A text graphic holds at least as long as its words take to read at a comfortable pace
+(5 words per second is the fast end) plus a margin to re-read; hook cards hold 2.5-3 s
+for up to 8 words.
+
+**Encoded as** `HOOK_CARD` (`max_words`, `hold_s`), `MOTION["hold_min_s"]`.
+
+### R29 — Every entrance has a cause
+
+A graphic appears by moving in, by popping with a sound, or by being present from
+frame 0 — never by a silent unexplained pop mid-video.
+
+**Encoded as** `MOTION["entrance_causality"]`; `EDITCRAFT_LESSONS.md` §7.2; LESSON-016.
+
+### R30 — Numbers on screen are spoken numbers
+
+Every number painted on a graphic is spoken in that graphic's window.
+
+**Encoded as** `claims_contract.py`; `MODULE_STUDY.md` §5.6.
+
+### R31 — Study mechanics, never content
+
+When a reference is studied, only its **mechanics** — timing, geometry, build order,
+grammar — may become rules or templates. Its words, branding, assets, music, colours and
+identity never enter Sniper, and a rule is written in Sniper's own terms with Sniper's
+own rationale.
+
+**Encoded as** this document's "How rules are added"; the `producer-study` and
+`reference-editor` skills.
+
+---
+
+## Template corrections queued
+
+Template changes that follow from these rules. Items keep their numbers.
+
+1. **`section-marker`** — rebuilt to anchor on the emptier side (R10) and build
+   eyebrow-first with a wipe-in title (R9, R7). Status: rebuilt. Open: its default
+   sample copy must be neutral, original placeholder text (owned by the design stream;
+   any change regenerates `comp_capabilities.json` and the reviewed
+   `MOTION["contrast"]["text_plate_sources"]` hash).
+2. **`schedule-stack`** — a stack of role-coloured rounded cards (title plus time)
+   on the side opposite the speaker, with a staggered wipe-in (R9, R10), for routine,
+   schedule or phased-plan beats. Status: built.
+
+---
+
+## How rules are added
+
+The `producer-study` skill appends rules here after studying references:
+
+- Use the next free number (currently **R32**) and the heading format `### R<n> — title`.
+- State the rule in Sniper's own words, with a rationale and an **Encoded as** line
+  (config key, template, lint rule or "doctrine only").
+- Evidence records mechanics only: timings, geometry, counts. Do not quote the
+  reference's words, name its creator or channel, or copy its titles, branding or colours
+  (R31). Do not record a measurement that was not actually made.
+- A contradiction with an existing rule gets an operator-visible callout (like the R14
+  callout), never a silent overwrite.

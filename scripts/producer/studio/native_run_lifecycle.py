@@ -63,3 +63,21 @@ def finalize_attempt(owner: NativeRun) -> None:
         if handle is not None:
             handle.close()
     owner.finish()
+
+
+def failure_category(result: dict) -> str | None:
+    """Distinguish measured pressure from unavailable telemetry and execution errors."""
+    if result.get('status') != 'failed':
+        return None
+    if result.get('cleanup', {}).get('verified') is not True:
+        return 'cleanup-unverified'
+    reason = result.get('abortReason') or ''
+    if 'signal' in reason or 'KeyboardInterrupt' in reason or reason.startswith('supervisor received SIG'):
+        return 'cancelled'
+    if result.get('failureCategory') == 'measurement-unavailable':
+        return 'measurement-unavailable'
+    if any(word in reason for word in ('kernel-warning', 'kernel memory pressure', 'low-headroom')):
+        return 'host-memory-pressure'
+    if 'footprint exceeds' in reason:
+        return 'render-memory-limit'
+    return 'renderer-failure'

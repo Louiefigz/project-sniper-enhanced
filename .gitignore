@@ -90,7 +90,11 @@ broll/*
 # multi-gigabyte evidence stores. Keep their authored findings in docs, but
 # never commit rendered media, downloaded references, or extracted frames.
 /artifacts/
+/outputs/
 /templates/motion/.sniper-native-runtime/
 /scripts/producer/artifacts/
 /docs/studies/gpt-5-6-sol-benchmark-2026-07-15/
 /docs/studies/shorts-visual-playbook/**/*.jpg
+
+# Sniper ffmpeg build output and downloaded sources (rebuilt by release/runtime_deps/build_ffmpeg.sh; pinned in sniper-ffmpeg.json)
+/release/runtime_deps/dist/

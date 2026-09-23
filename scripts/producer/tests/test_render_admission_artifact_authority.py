@@ -9,6 +9,7 @@ from pathlib import Path
 from unittest import mock
 
 from _common import pl  # noqa: F401
+from _retired_r0_artifact_fixture import inert_artifact_sources, store_test_artifact
 from test_render_admission_artifact import BUILD_A, REPO_ROOT, _entry, _request
 from headless import render_admission_artifact as artifact_module
 from headless.render_admission_artifact import (
@@ -52,21 +53,30 @@ class RenderAdmissionArtifactAuthorityTests(unittest.TestCase):
             artifact_module,
             "current_render_build_manifest",
             return_value=BUILD_A,
-        ):
-            return store_render_admission_artifact(request)
+        ), inert_artifact_sources():
+            return store_test_artifact(request)
 
-    def test_first_capture_binds_authority_before_artifact_publication(
+    def test_inert_storage_binds_authority_before_artifact_publication(
         self,
     ) -> None:
         first = self._capture("authority-mp4-v1")
         artifacts = self.authority / "render-admission-artifacts"
         before = frozenset(path.name for path in artifacts.iterdir())
-        with self.assertRaisesRegex(RuntimeError, "authority is invalid"):
+        with self.assertRaisesRegex(RuntimeError, "authority root is bound to another ID"):
             self._capture("authority-other")
         after = frozenset(path.name for path in artifacts.iterdir())
         self.assertEqual(after, before)
         self.assertIn(first.artifact_digest, after)
         self.assertFalse(any(name.startswith(".pending-") for name in after))
+
+    def test_current_admission_refuses_retired_source_without_writes(self) -> None:
+        request = RenderArtifactRequest(str(self.authority), "authority-mp4-v1",
+            _request(("overlay-1", _entry())), self.runtime)
+        with mock.patch('subprocess.Popen') as spawn, self.assertRaisesRegex(
+                ValueError, 'section-marker.*retired'):
+            store_render_admission_artifact(request)
+        spawn.assert_not_called()
+        self.assertEqual(tuple(self.authority.iterdir()), ())
 
     def test_request_subclass_cannot_override_capture_fields(self) -> None:
         request = _RequestSubclass(

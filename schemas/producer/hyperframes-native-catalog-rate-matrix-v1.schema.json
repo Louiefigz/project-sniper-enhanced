@@ -1,0 +1,228 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-sniper.local/schemas/producer/hyperframes-native-catalog-rate-matrix-v1.schema.json",
+  "title": "HyperFramesNativeCatalogRateMatrixV1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "passed",
+    "sourceDigest",
+    "capabilityDigest",
+    "rates",
+    "compositionCount",
+    "probeFrames",
+    "tools",
+    "probes",
+    "receiptHash"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "kind": {
+      "const": "hyperframes-released-rate-matrix"
+    },
+    "passed": {
+      "const": true
+    },
+    "sourceDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "capabilityDigest": {
+      "$ref": "#/$defs/sha1"
+    },
+    "rates": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/rate"
+      }
+    },
+    "compositionCount": {
+      "const": 7
+    },
+    "probeFrames": {
+      "const": 4
+    },
+    "tools": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "browser",
+        "ffmpeg",
+        "ffprobe",
+        "node"
+      ],
+      "properties": {
+        "browser": {
+          "$ref": "#/$defs/tool"
+        },
+        "ffmpeg": {
+          "$ref": "#/$defs/tool"
+        },
+        "ffprobe": {
+          "$ref": "#/$defs/tool"
+        },
+        "node": {
+          "$ref": "#/$defs/tool"
+        }
+      }
+    },
+    "probes": {
+      "type": "array",
+      "minItems": 56,
+      "maxItems": 56,
+      "items": {
+        "$ref": "#/$defs/probe"
+      }
+    },
+    "receiptHash": {
+      "$ref": "#/$defs/sha256"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "sha1": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "rate": {
+      "enum": [
+        "24000/1001",
+        "24",
+        "25",
+        "30000/1001",
+        "30",
+        "50",
+        "60000/1001",
+        "60"
+      ]
+    },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "probe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "rate",
+        "duration",
+        "stream",
+        "mediaSha256",
+        "decoded"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "chart-story",
+            "count-up",
+            "hw-callout-circle",
+            "hw-scribble-transition",
+            "line-swap",
+            "marker-highlight",
+            "ui-focus-zoom"
+          ]
+        },
+        "rate": {
+          "$ref": "#/$defs/rate"
+        },
+        "duration": {
+          "$ref": "#/$defs/rational"
+        },
+        "stream": {
+          "$ref": "#/$defs/stream"
+        },
+        "mediaSha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "decoded": {
+          "const": true
+        }
+      }
+    },
+    "rational": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "numerator",
+        "denominator"
+      ],
+      "properties": {
+        "numerator": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "denominator": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        }
+      }
+    },
+    "stream": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "codec_name",
+        "pix_fmt",
+        "width",
+        "height",
+        "r_frame_rate",
+        "avg_frame_rate",
+        "nb_read_frames"
+      ],
+      "properties": {
+        "codec_name": {
+          "const": "prores"
+        },
+        "pix_fmt": {
+          "const": "yuva444p12le"
+        },
+        "width": {
+          "enum": [
+            1080,
+            1920
+          ]
+        },
+        "height": {
+          "enum": [
+            1080,
+            1920
+          ]
+        },
+        "r_frame_rate": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*/[1-9][0-9]*$"
+        },
+        "avg_frame_rate": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*/[1-9][0-9]*$"
+        },
+        "nb_read_frames": {
+          "const": "4"
+        }
+      }
+    }
+  }
+}

@@ -272,6 +272,8 @@ def apply_repair(
     policy: AccentRepairPolicy,
 ) -> RepairApplication:
     """Apply exactly one stable-ID accent CAS to a private canonical copy."""
+    from graphics.visual_source_policy import require_plan_sources
+    require_plan_sources(plan)
     _validate_intent(intent)
     validate_parent_ref(actual_parent)
     if actual_parent != intent.expected_parent:

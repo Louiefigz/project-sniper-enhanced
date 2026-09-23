@@ -204,7 +204,7 @@ class SourceColorStagingReadTests(unittest.TestCase):
         claim_sha = f.write(f.claim_path, _raw(f.claim))
         f.context = replace(f.context, inputs=replace(f.inputs, sha256=input_sha),
                             opening=replace(f.opening, sha256=claim_sha, value=f.claim))
-        with self.assertRaisesRegex(RuntimeError, "bounded regular"):
+        with self.assertRaisesRegex(RuntimeError, "exceeds byte limit: [0-9]+ > 131072"):
             f.run()
 
     def test_expired_or_malformed_context_does_not_read_files(self) -> None:

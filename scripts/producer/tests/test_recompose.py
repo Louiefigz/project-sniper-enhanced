@@ -181,7 +181,7 @@ class WindowEmissionTests(unittest.TestCase):
 
     def test_each_rail_uses_its_own_measured_face_window(self) -> None:
         first = rail_entry(start=10.0)
-        second = rail_entry(start=30.0, kind="nateherk-rail", spec={})
+        second = rail_entry(start=30.0, kind="module-rail", spec={})
         plan = longform_plan(graphicsTrack=[first, second])
         zones = [
             {"faceBBoxNorm": [0.40, 0.20, 0.16, 0.24]},
@@ -207,8 +207,8 @@ class WindowEmissionTests(unittest.TestCase):
     def test_stamp_defaults_every_registered_free_band_rail(self) -> None:
         plan = longform_plan(graphicsTrack=[
             rail_entry(),
-            rail_entry(start=20.0, kind="nateherk-rail", spec={}),
-            rail_entry(start=30.0, kind="nateherk-bullet-bars", spec={}),
+            rail_entry(start=20.0, kind="module-rail", spec={}),
+            rail_entry(start=30.0, kind="module-bullet-bars", spec={}),
             {"outStart": 40.0, "outEnd": 46.0, "kind": "statement-card",
              "anchor": "own-screen", "reason": "beat", "spec": {}}])
         self.assertEqual(rc.stamp_recompose(plan), 3)
@@ -257,13 +257,23 @@ class WindowEmissionTests(unittest.TestCase):
 
 
 class SmoothLintTests(unittest.TestCase):
-    """plan_lint_smooth via the full lint gate — longform only."""
+    """Isolated geometry checks on inert historical rows, never render admission."""
+
+    def _report(self, plan: dict):
+        rep = pl.Report()
+        pls.check_smooth(plan, 60.0, plan["target"]["mode"], rep)
+        return rep
 
     def _errors(self, plan: dict) -> list[str]:
-        return pl.lint(plan, MANIFEST).errors
+        return self._report(plan).errors
 
     def _warnings(self, plan: dict) -> list[str]:
-        return pl.lint(plan, MANIFEST).warnings
+        return self._report(plan).warnings
+
+    def test_current_full_gate_rejects_old_rails_before_geometry(self) -> None:
+        plan = longform_plan(graphicsTrack=[rail_entry()])
+        errors = pl.lint(plan, MANIFEST).errors
+        self.assertTrue(any("retired" in error for error in errors), errors)
 
     def test_static_pop_off_seam_errors_on_longform(self) -> None:
         plan = longform_plan(punchIns=[{"outStart": 8.0, "outEnd": 9.2,
@@ -342,7 +352,7 @@ class SmoothLintTests(unittest.TestCase):
     def test_rail_with_applied_recompose_is_clean_and_exempt(self) -> None:
         plan = longform_plan(graphicsTrack=[rail_entry()])
         rc.apply_recompose(plan, 60.0)
-        rep = pl.lint(plan, MANIFEST)
+        rep = self._report(plan)
         self.assertFalse([e for e in rep.errors if "shorts grammar" in e
                           or "zoom events" in e], rep.errors)
         self.assertFalse([e for e in rep.errors if "rail recompose" in e],
@@ -379,7 +389,7 @@ class SmoothLintTests(unittest.TestCase):
             self.assertTrue(any(needle in e for e in errs), (needle, errs))
 
     def test_layout_family_discipline_warns_over_cap(self) -> None:
-        kinds = ("glass-rail", "nateherk-takeover", "glass-lower-third",
+        kinds = ("glass-rail", "module-takeover", "glass-lower-third",
                  "statement-card", "whiteboard-list")   # 5 families > cap 3
         graphics = [{"outStart": 6.0 + i * 8, "outEnd": 10.0 + i * 8,
                      "kind": k, "anchor": "own-screen", "reason": "x",
@@ -407,8 +417,8 @@ class SmoothLintTests(unittest.TestCase):
         plan = longform_plan(punchIns=[{"outStart": 6.0, "outEnd": 8.0,
                                         "zoom": 1.15, "attackS": 1.5,
                                         "releaseS": 1.5}])
-        self.assertTrue(any("releaseS" in e for e in self._errors(plan)),
-                        self._errors(plan))
+        self.assertTrue(any("releaseS" in e for e in pl.lint(plan, MANIFEST).errors),
+                        pl.lint(plan, MANIFEST).errors)
 
 
 class StampFaceBboxTests(unittest.TestCase):

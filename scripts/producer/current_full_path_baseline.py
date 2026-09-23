@@ -118,12 +118,13 @@ def _failure(results: list[subprocess.CompletedProcess[str]]) -> int:
 def run(project: Path) -> int:
     """Run the incremental canonical path and emit baseline evidence."""
     label = os.environ.get("SNIPER_BASELINE_RUN_LABEL", "")
-    plan = project / "edit_plan.json"
-    manifest = project / "asset_manifest.json"
-    out = project / "render"
-    work = project / "work"
+    producer = project / "producer"
+    plan = producer / "edit_plan.json"
+    manifest = project / "source" / "asset_manifest.json"
+    out = producer / "render"
+    work = producer / "work"
     if not plan.is_file() or not manifest.is_file():
-        raise RuntimeError("baseline project lacks edit_plan.json or asset_manifest.json")
+        raise RuntimeError("baseline project lacks producer/edit_plan.json or source/asset_manifest.json")
     out.mkdir(mode=0o700, exist_ok=True)
     work.mkdir(mode=0o700, exist_ok=True)
     journal = out / "stage_timings.jsonl"

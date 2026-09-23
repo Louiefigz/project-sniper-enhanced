@@ -58,7 +58,9 @@ class StudioImportBaselineTests(unittest.TestCase):
         before = self._snapshot()
         with patch.object(comp_hf_ids, "run_text", side_effect=AssertionError("legacy Node forbidden")):
             value = self._read()
-        self.assertEqual(len(value["instances"]), 3)
+        state = load_state(str(self.fixture.studio))
+        self.assertEqual(len(value["instances"]), len(state.manifest["entries"]))
+        self.assertEqual(len(value["instances"]), 4)
         self.assertEqual(self._snapshot(), before)
 
     def test_unknown_or_mixed_generation_refuses_before_rebuild_or_sdk(self) -> None:
@@ -93,11 +95,12 @@ class StudioImportBaselineTests(unittest.TestCase):
             self.assertEqual(sync_files.rebuild_original_instances(state), {})
 
 
-    def test_genuine_last_split_text_deletion_retains_original_head_on_import(self) -> None:
+    def test_genuine_deletion_retains_original_head_on_import(self) -> None:
         """Actual sync keeps its head dependency even after its last user is removed."""
         fixture = pending.StudioPendingEditTests()
         fixture.setUp()
         self.addCleanup(fixture.doCleanups)
+        fixture._retained_split_text_head()
         pending.fixtures._remove_slot(str(fixture.index), "gfx-01")
         code, output = pending.fixtures._run_main([str(fixture.studio), "--apply"])
         self.assertEqual(code, 0, output)

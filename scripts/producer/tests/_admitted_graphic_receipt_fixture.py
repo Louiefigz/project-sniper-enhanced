@@ -1,9 +1,12 @@
-"""Real admitted-lane fixture with only child execution replaced."""
+"""Inert completed-lane boundary for durable receipt/controller unit tests.
+
+Retired source metadata is never sent through prepare or live launch. Real
+current source admission is tested separately without this private fixture.
+"""
 
 from __future__ import annotations
 
 import contextlib
-import hashlib
 import json
 import os
 import tempfile
@@ -14,6 +17,11 @@ from unittest import mock
 
 from _current_build_release_fixture import current_manifest
 from _render_lane_proof import ProofInputs, build_full_proof
+from _retired_r0_artifact_fixture import inert_artifact_sources, store_test_artifact
+from headless.render_build_receipt import store_render_build
+from headless.render_lane_cache import prepare_attempt_cache
+from headless.resource_ledger import ResourceRequest
+from headless.durability_controller import _trace
 from headless import admitted_render_lane as lane_module
 from headless import render_admission_artifact as artifact_module
 from headless.admitted_graphic_receipt_controller import (
@@ -28,7 +36,6 @@ from headless.render_admission import (
 )
 from headless.render_admission_artifact import (
     RenderArtifactRequest,
-    store_render_admission_artifact,
 )
 from headless.render_lane import RENDERER_MODE, RenderExecutionPolicy
 from headless.render_runtime import RendererRuntime
@@ -41,10 +48,6 @@ OUTER_REQUEST_DIGEST = "c" * 64
 QUALITY_POLICY_ID = "d" * 64
 
 
-def _hash(label: str) -> str:
-    return hashlib.sha256(label.encode("ascii")).hexdigest()
-
-
 def _entry() -> dict:
     return {
         "id": "g-00000001",
@@ -53,9 +56,9 @@ def _entry() -> dict:
         "outEnd": 2.5,
         "anchor": "free-band",
         "spec": {
-            "num": "System No.1",
-            "line1": "Familiarity",
-            "line2": "Rule",
+            "num": "Part 1",
+            "line1": "The Setup",
+            "line2": "Basics",
             "side": "left",
             "accent": "#054BC9",
         },
@@ -70,13 +73,8 @@ def _request() -> dict:
     }
 
 
-@contextlib.contextmanager
-def _container_lease(_request: object) -> Iterator[str]:
-    yield CONTAINER_NAME
-
-
 class AdmittedGraphicReceiptFixture:
-    """One admitted attempt that runs real parent-side lane validation."""
+    """Historical storage/ledger unit with strict completed-result validation."""
 
     def __init__(self) -> None:
         self.temp = tempfile.TemporaryDirectory()
@@ -87,8 +85,9 @@ class AdmittedGraphicReceiptFixture:
         self.manifest = current_manifest("admitted-graphic-receipt")
         self.runtime = self._runtime()
         self._boot_patches = self._start_boot_patches()
-        self.artifact = self._store_artifact()
-        self.admitted = self._admit()
+        with inert_artifact_sources():
+            self.artifact = self._store_artifact()
+            self.admitted = self._admit()
         self.reference = self.admitted.reference
 
     def _runtime(self) -> RendererRuntime:
@@ -130,7 +129,7 @@ class AdmittedGraphicReceiptFixture:
             "current_render_build_manifest",
             return_value=self.manifest,
         ):
-            return store_render_admission_artifact(
+            return store_test_artifact(
                 RenderArtifactRequest(
                     str(self.authority_root),
                     "authority-mp4-v1",
@@ -153,7 +152,7 @@ class AdmittedGraphicReceiptFixture:
         )
         return admit_render_artifact(metadata, self.artifact, "boot-a")
 
-    def _worker(self, context: object) -> SimpleNamespace:
+    def _synthetic_result(self, context: object) -> SimpleNamespace:
         seal = context.seal
         path = Path(context.binding.cache_dir) / f"{seal.key}.mov"
         path.write_bytes(b"synthetic-parent-validated-prores-bytes")
@@ -164,7 +163,9 @@ class AdmittedGraphicReceiptFixture:
             self.runtime.image_id,
             ProofInputs(seal.expected_copy, seal.snapshot),
         )
-        # This current-lane fixture names the current image/quota contract;
+        proof["asset"]["width"], proof["asset"]["height"] = seal.dimensions
+        proof["occupancy"]["canvasPx"] = list(seal.dimensions)
+        # TEST metadata names the current image/quota contract;
         # the shared historical proof factory remains unchanged.
         runtime = proof["runtimeAttestation"]
         version_label = "io.project-sniper.hyperframes-version"
@@ -186,42 +187,47 @@ class AdmittedGraphicReceiptFixture:
         }
         return SimpleNamespace(stdout=json.dumps(result))
 
+    def _completed_boundary(self, lane: AdmittedRenderLane) -> tuple[dict, ...]:
+        """Supply a synthetic completed result; exercise real proof/ledger checks."""
+        admitted = self.admitted
+        record = admitted.admission.record
+        _trace(str(self.authority_root), record, "boot-a").append(
+            "WORKER_START", {"operation": "render-overlays", "overlayCount": 1})
+        build = store_render_build(admitted.attempt_root, self.manifest)
+        identity = (record["attemptId"], admitted.artifact.artifact_digest,
+                    build.build_digest, self.runtime.image_id)
+        binding = prepare_attempt_cache(admitted.attempt_root, identity)
+        launch = lane_module._LaunchContext(
+            admitted.attempt_root, record["attemptId"],
+            admitted.artifact.artifact_digest, build, binding)
+        artifact = admitted.artifact.overlays[0]
+        resources = ResourceRequest(admitted.attempt_root, record["attemptId"],
+            self.runtime.docker, self.runtime.docker_socket, self.runtime.image_id,
+            self.runtime.user_id)
+        context = lane_module._WorkerContext(
+            launch, SimpleNamespace(artifact=artifact), artifact.resolved,
+            binding, CONTAINER_NAME, resources)
+        return (lane._finish_worker(context, self._synthetic_result(context).stdout),)
+
     @contextlib.contextmanager
-    def controller(
-        self,
-    ) -> Iterator[
-        tuple[
-            AdmittedGraphicRenderReceiptController,
-            AdmittedRenderLane,
-            mock.Mock,
-        ]
-    ]:
+    def controller(self) -> Iterator[tuple[
+            AdmittedGraphicRenderReceiptController, AdmittedRenderLane, mock.Mock]]:
+        """Keep storage semantics real while replacing the completed-lane seam."""
         authority = GraphicRenderReceiptControllerAuthorityV1(
-            OUTER_REQUEST_DIGEST, QUALITY_POLICY_ID
-        )
-        with controller_ownership(str(self.authority_root)) as lease:
-            lane = AdmittedRenderLane(
-                self.runtime, RenderExecutionPolicy(RENDERER_MODE), lease
-            )
-            with mock.patch.object(
-                lane_module,
-                "current_render_build_manifest",
-                return_value=self.manifest,
-            ), mock.patch(
-                "headless.render_lane.current_render_build_manifest",
-                return_value=self.manifest,
+            OUTER_REQUEST_DIGEST, QUALITY_POLICY_ID)
+        with inert_artifact_sources(), controller_ownership(str(self.authority_root)) as lease:
+            lane = AdmittedRenderLane(self.runtime, RenderExecutionPolicy(RENDERER_MODE), lease)
+            with mock.patch(
+                "headless.render_lane.current_render_build_manifest", return_value=self.manifest
             ), mock.patch.object(
-                lane_module, "container_lease", side_effect=_container_lease
+                lane, "_invoke_worker", side_effect=AssertionError("TEST cannot execute R0")
             ), mock.patch.object(
-                lane, "_invoke_worker", side_effect=self._worker
-            ) as worker:
-                yield (
-                    AdmittedGraphicRenderReceiptController(lane, authority),
-                    lane,
-                    worker,
-                )
+                lane, "_launch_locked", side_effect=lambda *_: self._completed_boundary(lane)
+            ) as completed:
+                yield AdmittedGraphicRenderReceiptController(lane, authority), lane, completed
 
     def close(self) -> None:
+        """Release only this fixture's test patches and temporary files."""
         for patch in reversed(self._boot_patches):
             patch.stop()
         self.temp.cleanup()

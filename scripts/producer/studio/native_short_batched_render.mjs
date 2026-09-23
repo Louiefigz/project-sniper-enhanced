@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
+import {assertNativeRenderOwner} from './runtime/native-export-guard.mjs';
 import {createNativeCaptureContext,prepareNativeCaptureContext,withNativeCaptureSession,captureNativeFrame,
   nativeCaptureHash,nativeCaptureBatches,nativeCaptureEvidence,nativeCaptureFailure} from './native_short_capture_context.mjs';
 import {nativeCaptureQcPoints} from './native_short_capture.mjs';
@@ -107,6 +108,8 @@ export async function runNativeBatchedRender(request, dependencies={}) {
 }
 
 if(process.argv[1]&&pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url){
-  const result=await runNativeBatchedRender(JSON.parse(fs.readFileSync(process.argv[2],'utf8')));
+  const request=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+  assertNativeRenderOwner(['render',request.project,'--output',path.join(request.output,'picture.mp4')]);
+  const result=await runNativeBatchedRender(request);
   if(result.status!=='picture-encoded-awaiting-parent-qc')process.exitCode=1;
 }

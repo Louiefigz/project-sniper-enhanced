@@ -14,11 +14,13 @@ from test_guided_body_frames import fixture, rebind
 
 
 def valid_inputs(count: int = 12) -> OpeningInputs:
-    """Give every TEST statement 90 real frames, preserving all full-program bindings."""
+    """Give every current TEST chart 90 real frames, preserving all full-program bindings."""
     inputs = fixture(count)
     docs = inputs.documents
     for index, entry in enumerate(docs["candidatePlan"]["graphicsTrack"]):
-        entry["spec"]["variant"] = "classic"
+        entry["kind"] = "chart-story"
+        entry["spec"] = {"type": "bars", "data": "12,28", "labels": "First,Next",
+                         "emphasize": 1, "unit": ""}
         row = docs["frameBindings"]["graphics"][index]
         end = row["startFrame"] + 90
         row["endFrameExclusive"] = docs["occurrences"]["anchors"][f"e-{index}"] = end
@@ -42,20 +44,42 @@ class GuidedBodyTemplateTests(unittest.TestCase):
         self.assertFalse(result["deliveryApproved"])
         self.assertEqual(inputs.documents, before)
 
-    def test_late_short_card_blocks_before_any_seal_or_render(self) -> None:
+    def test_late_retired_card_blocks_before_any_seal_or_render(self) -> None:
+        """An otherwise current packet must reject a retired source in its last row."""
         inputs = valid_inputs()
-        docs = inputs.documents
-        row = docs["frameBindings"]["graphics"][-1]
-        row["endFrameExclusive"] = docs["occurrences"]["anchors"]["e-11"] = row["startFrame"] + 30
-        docs["candidatePlan"]["graphicsTrack"][-1]["outEnd"] = float(
-            Fraction(row["endFrameExclusive"], 1) / Fraction(docs["authority"]["frameRate"]))
+        inputs.documents['candidatePlan']['graphicsTrack'][-1].update(
+            kind='statement-card', spec={'variant': 'classic', 'text': 'TEST historical'})
         rebind(inputs)
+        before = copy.deepcopy(inputs.documents)
         with patch("guided_opening_graphic_proof.create_snapshot") as seal, \
                 patch("graphics.graphics_render.render_entry_at_rate") as render:
-            with self.assertRaisesRegex(ValueError, "hold|duration"):
+            with self.assertRaisesRegex(ValueError, "statement-card.*retired"):
                 inspect_full_program_graphics(inputs, lambda: None)
         seal.assert_not_called()
         render.assert_not_called()
+        self.assertEqual(inputs.documents, before)
+
+    def test_one_frame_last_row_fails_readability_before_any_seal_or_render(self) -> None:
+        """Valid preceding rows cannot hide an unreadably short final graphic."""
+        inputs = valid_inputs()
+        docs = inputs.documents
+        row = docs['frameBindings']['graphics'][-1]
+        end = row['startFrame'] + 1
+        row['endFrameExclusive'] = end
+        docs['occurrences']['anchors']['e-11'] = end
+        docs['candidatePlan']['graphicsTrack'][-1]['outEnd'] = float(
+            Fraction(end, 1) / Fraction(docs['authority']['frameRate']))
+        rebind(inputs)
+        before = copy.deepcopy(docs)
+        with patch('guided_opening_graphic_proof.create_snapshot') as seal, patch(
+                'graphics.graphics_render.render_entry_at_rate') as render, patch(
+                    'subprocess.Popen') as process, self.assertRaisesRegex(
+                        RuntimeError, 'minimum readable hold'):
+            inspect_full_program_graphics(inputs, lambda: None)
+        seal.assert_not_called()
+        render.assert_not_called()
+        process.assert_not_called()
+        self.assertEqual(inputs.documents, before)
 
     def test_late_invalid_copy_and_native_canvas_mismatch_are_not_filtered_away(self) -> None:
         inputs = valid_inputs()
@@ -83,7 +107,7 @@ class GuidedBodyTemplateTests(unittest.TestCase):
             nonlocal observations
             observations += 1
             if observations == 15:
-                inputs.documents["candidatePlan"]["graphicsTrack"][-1]["spec"]["text"] = "TEST changed"
+                inputs.documents["candidatePlan"]["graphicsTrack"][-1]["spec"]["data"] = "12,99"
         with self.assertRaisesRegex(RuntimeError, "packet changed"):
             inspect_full_program_graphics(inputs, changed)
 

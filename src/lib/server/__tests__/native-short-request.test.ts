@@ -8,9 +8,11 @@ import { NextRequest } from "next/server";
 import { prepareNativeShortRequest } from "../native-short-request";
 import { fileSha256 } from "../auto-edit-hash";
 import { refreshNativeAssetUseFixture } from "./_native-short-origin-fixture";
-import { nativeShortFixture, refreshNativePacingFixture } from "./_native-short-project-fixture";
+import { nativeShortFixture, refreshNativePacingFixture, refreshNativePrebuildReviewFixture } from "./_native-short-project-fixture";
 import { readNativeShortProject, writeNativeShortProject } from "../native-short-project";
 import { POST } from "../../../app/api/producer/native-short/route";
+import { refreshVisualSourceFixture } from "./_visual-source-fixture";
+import { assertNativeVisualSources } from "../visual-source-admission";
 import { shortDirectionInstructions } from "@/lib/producer/short-direction";
 
 function fixture() {
@@ -45,12 +47,20 @@ test("prepare is idempotent, carries whole-source search and makes no provider c
     assert.match(result.handoff, /authorizes no new provider transmission/);
     assert.equal(packet.editorialInstructions, shortDirectionInstructions(result.request));
     assert.ok(result.handoff.includes(packet.editorialInstructions));
+    assert.match(packet.editorialInstructions, /VISUAL EXPLANATION — shared directing standard v1/);
+    assert.match(packet.editorialInstructions, /SHORT FORMAT ADAPTATION/);
+    assert.match(packet.editorialInstructions, /SQ01 states a claim/);
     const pacingStage = packet.stages.indexOf("map-script-and-delivery-pacing");
     assert.ok(pacingStage > packet.stages.indexOf("select-retained-passage"));
     const representationStage = packet.stages.indexOf("choose-visual-representation");
     assert.ok(pacingStage < representationStage);
     assert.ok(representationStage < packet.stages.indexOf("plan-scenes-and-treatment"));
     assert.ok(representationStage < packet.stages.indexOf("scout-supporting-shots"));
+    assert.ok(packet.stages.indexOf("scout-supporting-shots") < packet.stages.indexOf("plan-scenes-and-treatment"));
+    assert.ok(packet.stages.indexOf("plan-scenes-and-treatment") < packet.stages.indexOf("check-full-plan-feasibility"));
+    assert.ok(packet.stages.indexOf("check-full-plan-feasibility") < packet.stages.indexOf("independent-current-plan-review"));
+    assert.ok(packet.stages.indexOf("independent-current-plan-review") < packet.stages.indexOf("assemble"));
+    assert.match(result.handoff, /opening-only Director critique do not satisfy/);
     assert.ok(packet.references.length >= 2);
     writeFileSync(f.plan.assets[0].path, "changed source");
     assert.throws(() => prepareNativeShortRequest(f.input), /changed since ingest/);
@@ -64,13 +74,17 @@ test("requested cleanup reaches the saved project and cold reader without substi
     const result = prepareNativeShortRequest({ ...f.input, intent });
     const packet = path.join(result.directory, "SHORT-REQUEST.json");
     f.plan.requestPacket = { path: packet, sha256: fileSha256(packet)! };
+    refreshVisualSourceFixture(f.plan);
     refreshNativeAssetUseFixture(f.plan);
+    refreshNativePrebuildReviewFixture(f.plan);
     const destination = path.join(f.directory, "assembled-with-cleanup");
     assert.throws(() => writeNativeShortProject(f.plan, destination), /cleanup cannot be omitted/);
     f.plan.audioFinishing = { schemaVersion: 1, rationale: "Reduce the recording's steady fan noise.",
       audioEnhance: { preset: "voice-strong" } };
+    refreshNativePrebuildReviewFixture(f.plan);
     assert.throws(() => writeNativeShortProject(f.plan, destination), /substituted/);
     f.plan.audioFinishing.audioEnhance = { preset: "voice" };
+    refreshNativePrebuildReviewFixture(f.plan);
     writeNativeShortProject(f.plan, destination);
     assert.deepEqual(readNativeShortProject(destination).audioFinishing, f.plan.audioFinishing);
   } finally { f.cleanup(); }
@@ -81,12 +95,17 @@ test("prepared request binds the real writer and cold reader to style and transc
   try {
     const result = prepareNativeShortRequest(f.input), packet = path.join(result.directory, "SHORT-REQUEST.json");
     f.plan.requestPacket = { path: packet, sha256: fileSha256(packet)! };
+    assert.throws(() => assertNativeVisualSources(f.plan), /current request packet/);
+    refreshVisualSourceFixture(f.plan);
+    assert.deepEqual(f.plan.visualSources!.request, f.plan.requestPacket);
     refreshNativeAssetUseFixture(f.plan);
+    refreshNativePrebuildReviewFixture(f.plan);
     const project = writeNativeShortProject(f.plan, path.join(f.directory, "assembled"));
     assert.deepEqual(readNativeShortProject(project.directory), f.plan);
     const instructions = JSON.parse(readFileSync(packet, "utf8")).editorialInstructions;
     assert.ok(readFileSync(path.join(project.directory, "BRIEF.md"), "utf8").includes(instructions));
-    const changed = structuredClone(f.plan); changed.request = { selection: "requested", request: "Nate", supportingVideo: "source-first" };
+    const changed = structuredClone(f.plan); changed.request = { selection: "requested", request: "module", supportingVideo: "source-first" };
+    refreshNativePrebuildReviewFixture(changed);
     assert.throws(() => writeNativeShortProject(changed, path.join(f.directory, "substituted")), /prepared style request/);
     writeFileSync(f.transcript, "changed transcript");
     assert.throws(() => readNativeShortProject(project.directory), /transcript changed/);
@@ -117,7 +136,9 @@ test("native assembly cannot silently discard requested audio work or override d
       const result = prepareNativeShortRequest({ ...f.input, intent: { ...f.intent, ...extra } });
       const packet = path.join(result.directory, "SHORT-REQUEST.json");
       f.plan.requestPacket = { path: packet, sha256: fileSha256(packet)! };
-    refreshNativeAssetUseFixture(f.plan);
+      refreshVisualSourceFixture(f.plan);
+      refreshNativeAssetUseFixture(f.plan);
+      refreshNativePrebuildReviewFixture(f.plan);
       assert.throws(() => writeNativeShortProject(f.plan, path.join(f.directory, "blocked")), /requested music|lane ownership/);
     }
   } finally { f.cleanup(); }
@@ -143,7 +164,9 @@ function suppliedPicture(f: ReturnType<typeof fixture>, include = true) {
 function bindPrepared(f: ReturnType<typeof fixture>) {
   const result = prepareNativeShortRequest(f.input), packet = path.join(result.directory, "SHORT-REQUEST.json");
   f.plan.requestPacket = { path: packet, sha256: fileSha256(packet)! };
+  refreshVisualSourceFixture(f.plan);
   refreshNativeAssetUseFixture(f.plan);
+  refreshNativePrebuildReviewFixture(f.plan);
   return JSON.parse(readFileSync(packet, "utf8"));
 }
 
@@ -157,7 +180,8 @@ test("provided picture policy and hashes survive preparation, v3 writer and cold
     const { directory } = writeNativeShortProject(f.plan, path.join(f.directory, "supplied-project"));
     assert.deepEqual(readNativeShortProject(directory), f.plan);
     writeFileSync(picture.path, "TEST changed supplied image after preparation");
-    assert.throws(() => readNativeShortProject(directory), /missing, changed|changed/);
+    assert.throws(() => readNativeShortProject(directory),
+      /missing, changed|changed|Asset origin record differs from the frozen asset identity/);
     assert.throws(() => prepareNativeShortRequest(f.input), /B-roll changed since ingest/);
   } finally { f.cleanup(); }
 });
@@ -180,6 +204,7 @@ test("labeling an unlisted image as provided cannot broaden a prepared request",
     suppliedPicture(f, false); bindPrepared(f);
     assert.throws(() => writeNativeShortProject(f.plan, path.join(f.directory, "unlisted")), /absent from the prepared request inventory/);
     f.plan.strategy.assetUse!.policy = { placement: "auto", sources: "public-web" };
+    refreshNativePrebuildReviewFixture(f.plan);
     assert.throws(() => writeNativeShortProject(f.plan, path.join(f.directory, "broadened")), /cannot broaden the requested media policy/);
   } finally { f.cleanup(); }
 });

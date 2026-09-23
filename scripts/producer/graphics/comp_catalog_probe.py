@@ -71,9 +71,9 @@ _PROBE_OVERRIDES: dict[str, dict] = {
     # The HTML's preview-only SAMPLE is not a declared asset default. Bind its
     # exact mark as probe input so sealed renders include the local SVG.
     "stroke-draw-badge": {"icon": "youtube", "label": "Subscribe"},
-    "nateherk-scoreboard": {"heroValue": "97%", "heroLabel": "PROBE VALUE"},
+    "module-scoreboard": {"heroValue": "97%", "heroLabel": "PROBE VALUE"},
     # Explicit TEST content for every present module; never the preview sample.
-    "nateherk-pipeline": {"eyebrow": "TEST CAPABILITY", "headlineLines": "The TEST sequence|has six stages",
+    "module-pipeline": {"eyebrow": "TEST CAPABILITY", "headlineLines": "The TEST sequence|has six stages",
         "explainer": "Synthetic nodes for a physical capability probe.",
         "nodes": "01~INPUT|02~CHECK|03~MAP|04~BUILD|05~REVIEW|06~OUTPUT", "activeIndex": 3,
         "footChip": "TEST FIXTURE", "moduleLands": "0.2|1.1|2.0"},

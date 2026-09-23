@@ -3,10 +3,22 @@
 > A local-first AI video editing system for Claude Code desktop, rendered files,
 > Final Cut Pro, and isolated Palmier Pro timeline experiments.
 
-Project Sniper Enhanced combines **5 focused video-editing skills**, **7 slash
-commands**, **4 GUI workspaces**, **53 registered Producer motion compositions**,
+Project Sniper Enhanced combines **5 focused video-editing skills** plus a
+read-only context skill, **9 slash commands**, **4 GUI workspaces**,
+**53 registered Producer motion compositions**,
 a deterministic render pipeline, and a production-shaped local Palmier revision
 system whose connected hybrid workflow is still under qualification.
+
+Before starting or resuming work, use
+[`/sniper-context`](.claude/commands/sniper-context.md) in Claude Code or
+`$sniper-context` in Codex. The shared
+[context skill](.claude/skills/sniper-context/SKILL.md) locates installed
+HyperFrames tools/skills, governing routes, current catalog sources and an
+explicitly selected project's handoff. The direct read-only entry is
+`python3 -B scripts/producer/context.py --project /absolute/project`.
+See [command scope and examples](docs/producer/CONTEXT_ENTRY.md).
+Current native Short/Long routes in [PIPELINE](docs/PIPELINE.md) supersede older
+graphics-only descriptions in historical documentation.
 
 Use it in whichever surface fits the job:
 
@@ -62,22 +74,19 @@ passages, priority filters, speaker attribution, and editorial notes.
 
 ## Fastest start (Claude Code desktop)
 
-**New here and not sure what to install? Open this folder in Claude Code desktop and type
-[`/setup`](./.claude/commands/setup.md).** It checks your machine, tells you exactly what is
-missing, and installs only the gaps — asking first before anything big (Homebrew packages, the
-~465 MB local speech model). Nothing installs without your yes; if everything is already present
-it just reports all-green. When it finishes, you don't start a server — you just ask for an edit:
-*"cut a Jaden-produced short from this footage."*
+**Packaged app:** install with `install/install.command`, sign in with
+`install/sign-in.command`, then type [`/setup`](./.claude/commands/setup.md) in the editor
+window: it runs the read-only install doctor and tells you which script fixes anything that
+failed. It installs nothing itself.
 
-Everything below is the same setup done by hand, for anyone who prefers to run it themselves.
+Everything below is the developer-checkout setup, done by hand.
 
 ## Start here (the easy path)
 
 **You do not need to run a live dev server.** The simplest way to use PROJECT SNIPER
 is inside **Claude Code desktop**:
 
-1. **Set up once** — type [`/setup`](./.claude/commands/setup.md) and let it install the gaps,
-   or do it by hand from [Requirements](#requirements) + [Setup](#setup): the Python `.venv`,
+1. **Set up once** — by hand from [Requirements](#requirements) + [Setup](#setup): the Python `.venv`,
    `ffmpeg`, the `claude` CLI (the default brain — you already have it in Claude Code desktop),
    and `whisper-cli` + a local model.
 2. **If Palmier is your destination, download and open Palmier Pro.** While it is
@@ -86,7 +95,7 @@ is inside **Claude Code desktop**:
    jobs do not require Palmier. Setup + Claude Desktop bridge:
    [`docs/palmier/PALMIER_MCP_SETUP.md`](./docs/palmier/PALMIER_MCP_SETUP.md).
 3. **Open this project folder in Claude Code desktop** and just ask — e.g.
-   *"cut a Jaden-produced short from this footage"* or *"clean-cut this long recording."*
+   *"cut a Punch-produced short from this footage"* or *"clean-cut this long recording."*
    Claude loads the **`producer`** skill and chooses the requested destination:
    deterministic rendered file, approved one-clip mirror, or an explicitly
    experimental isolated Palmier candidate.
@@ -126,7 +135,7 @@ invocation is easiest to verify.
 
 | Command | Use it for |
 |---|---|
-| [`/setup`](./.claude/commands/setup.md) | Check the machine and install only missing prerequisites with approval. |
+| [`/setup`](./.claude/commands/setup.md) | Run the packaged app's read-only install doctor and explain the next step. |
 | [`/produce`](./.claude/commands/produce.md) | Produce or revise a short, long-form edit, or trim-only render. |
 | [`/produce-palmier`](./.claude/commands/produce-palmier.md) | Exercise an isolated experimental editable Palmier candidate. |
 | [`/clip`](./.claude/commands/clip.md) | Tighten one clip at word level and export MP4/FCPXML. |
@@ -247,9 +256,9 @@ specific composition directly.
 <summary>All 53 registered motion compositions</summary>
 
 ```text
-agenda-slide                 angela-caption-dual-mode
-angela-receipt-cell          angela-staircase-lockup
-angela-takeover-deck         avatar-bio-card
+agenda-slide                 slideware-caption-dual-mode
+slideware-receipt-cell          slideware-staircase-lockup
+slideware-takeover-deck         avatar-bio-card
 blur-tease                   canvas-pip-list
 chart-story                  chip-row
 color-wash                   container-shape
@@ -258,13 +267,13 @@ fragment-payoff              glass-lower-third
 glass-rail                   glass-takeover-bg
 glitch-hit                   hw-callout-circle
 hw-scribble-transition       icon-badge
-icon-badge-wide              jaden-shout-lockup
+icon-badge-wide              punch-shout-lockup
 kinetic-quote                kinetic-quote-wide
 line-swap                    list-build
 logo-card                    marker-highlight
-nateherk-bullet-bars         nateherk-ledger-dark
-nateherk-pipeline            nateherk-rail
-nateherk-scoreboard          nateherk-takeover
+module-bullet-bars         module-ledger-dark
+module-pipeline            module-rail
+module-scoreboard          module-takeover
 schedule-stack               section-marker
 section-takeover             stat-card
 statement-card               stinger-wipe
@@ -363,13 +372,13 @@ connected hybrid path remains P5-blocked.
 ### SEGMENTER (`/segmenter`)
 1. **Select** your MP4 (and optional B/C-cam + lav tracks) from your local filesystem
 2. **Configure** how to segment — default coaching-show prompt or your own
-3. **Transcribe + Segment** — local whisper.cpp plus the configured Claude Code/Codex brain in local mode, or the preserved Deepgram + Anthropic path in live mode
+3. **Transcribe + Segment** — local whisper.cpp, then your selected Claude Code or Codex subscription CLI picks the segments (no API-key path)
 4. **Edit** — adjust boundaries: split with ✂️, merge with ✕, rename by clicking the title
 5. **Export** — stream-copy each kept segment to its own MP4 with ~5s pre/post-roll padding (cuts snap to keyframes; clips may overlap). Near-instant rough footage, delivered as a zip. Multicam export syncs B/C-cam + lav and re-encodes frame-accurately.
 
 ### CLIPPER (`/clipper`)
 1. **Select** a clip (single-cam, or A+B pre-synced dual-cam)
-2. **Transcribe** — local whisper.cpp for separate lavs/isolated stereo, or Deepgram when diarization is needed
+2. **Transcribe** — local whisper.cpp (separate lavs/isolated stereo); Deepgram diarization only on an explicitly authorized direct script run, never from the app
 3. **Clip** — the configured AI brain marks filler/fluff to cut at the utterance level
 4. **Edit** — fine-tune at the word level in the editor
 5. **Export** — generate an FCPXML timeline for Final Cut Pro 10.6+
@@ -388,7 +397,7 @@ cap study media at 2 GiB / 60 minutes and require at least 5 GiB of free disk.
 - **Reference-inspired study** — use this asset's measured mechanics as
   profile guidance for the next edit. This is not a verified mimic claim; P6
   remains 0/7.
-- **Extend a style** — add evidence to the closed Caleb/Jaden/Angela short-form
+- **Extend a style** — add evidence to the closed Restrained/Punch/Slideware short-form
   grammar selected by the operator.
 - **New style** — name a provisional candidate tied to this reference; it does
   not silently become a global preset.
@@ -409,7 +418,7 @@ music. Browser cookies are off unless explicitly enabled for that one fetch.
 - **Visual** (default) — perceptual-hash groups near-identical frames and keeps the *settled* frame of each run (the modal pHash, not the first), so a half-rendered fade-in frame isn't mistaken for a typo. Works on any footage, including text composited over moving video.
 - **OCR text** — groups frames by tesseract text (rapidfuzz). Only suitable for clean, static slideware; on stylized text over moving video, OCR is too noisy to group reliably.
 
-> ⚠️ Unlike SEGMENTER/CLIPPER (which only send audio + transcript text off the machine), FRAME.IO REVIEW sends **still frame images** to the Anthropic vision API — that's how it reads on-screen text. The full video is never uploaded. (Tesseract, in OCR mode, runs locally and is never sent anywhere — it only chooses which frames to send.)
+> ⚠️ FRAME.IO REVIEW (Text Review) is an optional paid add-on. Unlike SEGMENTER/CLIPPER (which transcribe locally and send transcript text to your subscription CLI), it sends **still frame images** to the Anthropic API on your own API key, and only after you tick its opt-in — that's how it reads on-screen text. The full video is never uploaded. (Tesseract, in OCR mode, runs locally and is never sent anywhere — it only chooses which frames to send.)
 
 The Python pipeline is also runnable on its own:
 ```bash
@@ -434,7 +443,8 @@ The Python pipeline is also runnable on its own:
   enable it with `SNIPER_BRAIN_PROVIDER=codex`
 - whisper.cpp — `whisper-cli` plus a local model; required for no-audio-egress transcription
 - Palmier Pro (optional) — the AI-native NLE. When it's open it serves a local MCP at `http://127.0.0.1:19789/mcp`; a Claude client can drive an isolated experimental candidate. Connected hybrid delivery remains P5-blocked. Setup (incl. the Claude Desktop bridge): [`docs/palmier/PALMIER_MCP_SETUP.md`](./docs/palmier/PALMIER_MCP_SETUP.md). The repo's checked-in `.mcp.json` auto-offers this server to Claude Code.
-- tesseract — only for FRAME.IO REVIEW's optional `--mode ocr`; the default visual mode does not need it
+- tesseract — reference study reads on-screen text with it (and FRAME.IO REVIEW's optional `--mode ocr`)
+- yt-dlp — adding a reference from a YouTube, Instagram or TikTok URL
 - macOS — file selection uses a native macOS picker (`osascript`); the app won't be able to pick files on other platforms yet
 
 ## Setup
@@ -455,11 +465,12 @@ The Next.js API routes auto-detect `.venv/bin/python3` and fall back to system `
 # macOS
 brew install ffmpeg
 brew install whisper-cpp       # local-mode transcription
-brew install tesseract        # only needed for FRAME.IO REVIEW --mode ocr
+brew install tesseract        # reference study (on-screen text) and FRAME.IO REVIEW --mode ocr
+brew install yt-dlp           # adding a reference from a URL
 
 # Ubuntu/Debian
 sudo apt install ffmpeg
-sudo apt install tesseract-ocr # only needed for FRAME.IO REVIEW --mode ocr
+sudo apt install tesseract-ocr # reference study and FRAME.IO REVIEW --mode ocr
 ```
 
 Place an existing whisper.cpp model at
@@ -473,14 +484,14 @@ a model during a GUI job.
 cp .env.local.example .env.local
 ```
 
-For the localhost Claude/Whisper workflow, API keys are optional. Fill them only
-for live providers or explicit overrides; every runtime knob is
-documented in [`.env.local.example`](./.env.local.example):
+The editing workflow needs no API key. Keys are only for the separately optional
+paid features; every runtime knob is documented in
+[`.env.local.example`](./.env.local.example):
 
-| Key | Where to get it |
+| Key | Used only by |
 |-----|----------------|
-| `DEEPGRAM_API_KEY` | [console.deepgram.com](https://console.deepgram.com) |
-| `ANTHROPIC_API_KEY` | [console.anthropic.com](https://console.anthropic.com) |
+| `ANTHROPIC_API_KEY` | Text Review (FRAME.IO REVIEW), after its per-run opt-in |
+| `DEEPGRAM_API_KEY` | a direct transcription script run with `--authorize-paid-asr deepgram` |
 
 ### 4. (Optional) Run the web GUI
 
@@ -497,16 +508,16 @@ SNIPER_BRAIN_PROVIDER=codex npm run dev:local
 
 # Production-style local server (build first):
 npm run build
-npm start           # live-provider defaults
+npm start           # no loopback lock or local request policy
 npm run start:local
 ```
 
 Open [http://localhost:3000](http://localhost:3000) and pick a tool — PRODUCER for the
 full pipeline, SEGMENTER/CLIPPER for standalone rough-cut/polish passes.
 
-To retain the original live-provider defaults instead, run `npm run dev`. See
-[`docs/audits/LOCAL_CODEX_AUDIT.md`](./docs/audits/LOCAL_CODEX_AUDIT.md) for the exact
-capability/data-egress matrix and remaining hardening work.
+`npm run dev` / `npm start` use the same subscription brain and local Whisper; they
+only drop the loopback lock and local request policy of the `:local` variants. The
+data-egress account is the packaged manual's privacy page.
 
 All four run commands (`dev`, `dev:local`, `start`, `start:local`) use the local
 Next supervisor. It gives Next a 3 GiB heap by default (override with
@@ -608,8 +619,8 @@ flat mirror instead.
   transcription and rendering stay local, while transcript/plan context is sent
   to the configured Claude Code or Codex subscription service; local mode is
   private-by-default but not offline.
-- `npm run dev` preserves Deepgram/Anthropic/Claude behavior. FRAME.IO REVIEW
-  remains an explicit Anthropic vision call in either mode.
+- No mode uses Deepgram or an Anthropic API key for editing. FRAME.IO REVIEW
+  remains an explicit, opt-in Anthropic vision call on your own key.
 
 ---
 

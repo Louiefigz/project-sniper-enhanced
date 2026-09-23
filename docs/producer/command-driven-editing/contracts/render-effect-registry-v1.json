@@ -16,6 +16,7 @@
         "audioEnhance",
         "audioGain",
         "audioAuthorityMode",
+        "audioReviewSections",
         "baselineLook",
         "brollTrack",
         "captionChapters",
@@ -423,6 +424,19 @@
       "readerFiles": ["scripts/producer/audio/music_stage.py", "scripts/producer/assemble.py"],
       "mutations": [
         {"caseId": "music-gap", "fixture": "short-basic", "pointer": "/music/gapDb", "after": 14, "expectedChangedRoots": ["plan.final"], "expectedBaseReuse": true}
+      ]
+    },
+    {
+      "effectId": "plan-audio-review-sections",
+      "document": "plan",
+      "rootFields": ["audioReviewSections"],
+      "patterns": ["/audioReviewSections/**"],
+      "classification": "authority-only",
+      "stageRoots": [],
+      "authorityEffects": ["dialogue consistency review clock; Audit B replaces user declarations with executed timeline segments, without changing rendered media; the legacy whole-plan fingerprint conservatively invalidates base reuse if the field is persisted"],
+      "readerFiles": ["scripts/producer/audit/audit_render.py", "scripts/producer/audit/dialogue_consistency.py"],
+      "mutations": [
+        {"caseId": "audio-review-sections", "fixture": "short-basic", "pointer": "/audioReviewSections", "after": [{"start": 0, "end": 1, "label": "review section"}], "expectedChangedRoots": [], "expectedBaseReuse": false}
       ]
     },
     {

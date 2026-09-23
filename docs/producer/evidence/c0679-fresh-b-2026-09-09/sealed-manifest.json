@@ -6,7 +6,7 @@
   "goalComplete": false,
   "sealedAt": "2026-09-09T23:35:45.889907+00:00",
   "source": {
-    "sourcePath": "/Users/aaronfigueroa/Downloads/C0679.MP4",
+    "sourcePath": "/Users/maintainer/Downloads/C0679.MP4",
     "sourceSha256": "06c50ce8c2e9da0a954f9301b1cba0dbfeb62ecebcdd956a034eb1597a301e14",
     "sourceBytes": 10280473262,
     "verifiedAt": "2026-09-09T23:35:38.380248+00:00",
@@ -2655,7 +2655,7 @@
       "path": "evidence-dependencies/95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78/cli.js",
       "sha256": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
       "bytes": 11039947,
-      "sourcePath": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js"
+      "sourcePath": "/Users/maintainer/ProjectSniperSource/templates/motion/node_modules/hyperframes/dist/cli.js"
     },
     {
       "path": "evidence-dependencies/7c794c4c199e1c7a311171f835ff6cde938fda419e5c66eb3b2b2e5e3cbe74c8/native_owned_processes.py",

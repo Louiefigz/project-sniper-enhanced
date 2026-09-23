@@ -2,6 +2,8 @@
 the xfade transition family from the same sprint was operator-rejected and
 removed — see test_transitions_ban.py / FAILURE_LEDGER LL-014)."""
 import unittest
+from pathlib import Path
+from unittest import mock
 
 from _common import *  # noqa: F401,F403
 
@@ -21,29 +23,35 @@ class SfxLibraryTests(unittest.TestCase):
             sfxlib.resolve("airhorn")
         self.assertIn("whoosh-soft", str(ctx.exception))
 
-    def test_sfx_slot_accepts_pack_name(self) -> None:
-        events = tr.parse_events(
-            [{"outTime": 2.0, "kind": "white-flash", "sfx": "whoosh-soft"}],
-            10.0)
-        self.assertEqual(events[0].sfx, "whoosh-soft")
+    def test_retained_sfx_event_metadata_keeps_pack_name_and_group_key(self) -> None:
+        """A historical DTO remains readable; this does not admit its visual."""
+        event = tr.TransitionEvent(2.0, "white-flash", "whoosh-soft")
+        self.assertEqual(event.sfx, "whoosh-soft")
+        self.assertEqual(tr._sfx_key(event), "whoosh-soft")
+        path, lead = sfxlib.resolve(event.sfx)
+        self.assertTrue(Path(path).is_file())
+        self.assertGreaterEqual(lead, 0)
 
-    def test_sfx_is_silent_unless_explicitly_requested(self) -> None:
-        silent = tr.parse_events(
-            [{"outTime": 2.0, "kind": "white-flash"}], 10.0)
-        audible = tr.parse_events(
-            [{"outTime": 2.0, "kind": "white-flash", "sfx": True}], 10.0)
-        self.assertFalse(silent[0].sfx)
-        self.assertTrue(audible[0].sfx)
+    def test_retained_sfx_metadata_defaults_to_silent(self) -> None:
+        """The inert event contract preserves explicit sound intent."""
+        silent = tr.TransitionEvent(2.0, "white-flash")
+        audible = tr.TransitionEvent(2.0, "white-flash", True)
+        self.assertFalse(silent.sfx)
+        self.assertTrue(audible.sfx)
 
-    def test_sfx_slot_rejects_unknown_name_and_non_bool(self) -> None:
-        with self.assertRaises(ValueError):
-            tr.parse_events([{"outTime": 2.0, "kind": "white-flash",
-                              "sfx": "airhorn"}], 10.0)
-        with self.assertRaises(ValueError):
-            tr.parse_events([{"outTime": 2.0, "kind": "white-flash",
-                              "sfx": 3}], 10.0)
+    def test_retired_transition_parse_rejects_every_sfx_intent(self) -> None:
+        """No silent, explicit or malformed SFX revives retired visual presets."""
+        for sfx in (None, False, True, "whoosh-soft", "airhorn", 3):
+            event = {"outTime": 2.0, "kind": "white-flash"}
+            if sfx is not None:
+                event["sfx"] = sfx
+            with self.subTest(sfx=sfx), mock.patch("subprocess.run") as run:
+                with self.assertRaisesRegex(ValueError, "retired"):
+                    tr.parse_events([event], 10.0)
+            run.assert_not_called()
 
     def test_grouped_audio_graph_delays_each_source(self) -> None:
+        """Inspect pure filter math for historical event metadata, never execute."""
         events = [tr.TransitionEvent(2.0, "white-flash", True),
                   tr.TransitionEvent(4.0, "light-leak", "click"),
                   tr.TransitionEvent(6.0, "light-leak", "click")]
@@ -54,7 +62,7 @@ class SfxLibraryTests(unittest.TestCase):
         self.assertIn("adelay=3990|3990", fc)          # 4.0 - 0.01 lead
         self.assertIn("amix=inputs=4:duration=first:normalize=0[aout]", fc)
 
-    def test_lint_sfx_name_validated_through_the_pack(self) -> None:
+    def test_sfx_field_linter_validates_pack_names_independently_of_visual_admission(self) -> None:
         def lint(events):
             rep = pl.Report()
             plm.check_transitions({"transitions": events}, 60.0,

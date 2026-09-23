@@ -3,6 +3,11 @@ description: Exercise an isolated experimental editable Palmier candidate
 argument-hint: <producer-dir-or-source-request>
 ---
 
+> **Not available in the packaged release.** Palmier Pro is not configured in the
+> buyer package (no MCP server is declared). If this folder contains
+> `install/`, stop: tell the operator Palmier is not
+> available and use `/produce` plus `/produce-studio` instead.
+>
 > **LEGACY.** Palmier is now an optional legacy export. The default
 > manual-control/review surface is the Studio review lane — use
 > `/produce-studio` (`docs/producer/STUDIO_REVIEW_LANE.md`).
@@ -24,7 +29,7 @@ Non-negotiable execution contract:
 1. Read Palmier with `get_projects` and `get_timeline`; never navigate or mutate
    an unbound project.
 2. Ingest/transcribe, author and gate the cut-only previsual, then start the
-   candidate-scoped lease with `.venv/bin/python3
+   candidate-scoped lease with `./sniper python3
    scripts/producer/palmier/desktop_cli.py begin`.
    Land the cut before planning the entire visual treatment.
 3. Continue in this retained session. Build the full plan from the template

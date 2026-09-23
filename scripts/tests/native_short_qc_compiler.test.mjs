@@ -73,7 +73,7 @@ test('one actual compiler call feeds every phase with full cfg, Maps, paths and 
     const base=path.join(f.request.output,'native-qc-phases',`chunk-${String(index).padStart(3,'0')}`,'context');
     for(const name of record.work.files)assert.deepEqual(fs.readFileSync(path.join(base,name)),fs.readFileSync(path.join(planRoot(f),name)));
   }
-  assert.equal((await finishNativeShortQc(f.request,planned.scheduleSha256,{sdk:f.sdk})).status,'native-references-and-seek-states-pass');
+  assert.equal((await finishNativeShortQc(f.request,planned.scheduleSha256,{sdk:f.sdk,encode:f.encode})).status,'native-references-and-seek-states-pass');
   assert.equal(state.compiles,1);assert.equal(state.metadata,planned.chunkCount+2);assert.ok(state.captures>0);
 }));
 

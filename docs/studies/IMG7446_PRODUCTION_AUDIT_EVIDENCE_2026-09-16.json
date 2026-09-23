@@ -1,0 +1,474 @@
+{
+  "schemaVersion": 1,
+  "scope": "Historical audit window, ending at render-13 launch; not completed production",
+  "productionThreadId": "01a0ab3f-c70b-7b13-8379-01a3e6a4842e",
+  "recordedAt": "2026-09-16T19:22:25.762208+00:00",
+  "researchTurn": {
+    "startedAtEpoch": 1789580107,
+    "completedAtEpoch": 1789582004,
+    "elapsedSeconds": 1897
+  },
+  "assemblyStartEpoch": 1789582094,
+  "cutoffEpoch": 1789586254.279223,
+  "assemblyElapsedSeconds": 4160.2792229652405,
+  "receiptedPhaseUnionSeconds": 1110.691687822342,
+  "outsideReceiptedPhaseSeconds": 3049.5875351428986,
+  "coverageCaveat": "Outside recorded supervisor intervals is not proven idle/removable; includes editorial work, code reading/writing, coordination, reviews, commands without these receipts and gaps. SDK trace phases are nested, not additive.",
+  "phases": [
+    {
+      "name": "Assembly, authoring and first checks",
+      "startLocal": "2026-09-16T13:08:14-05:00",
+      "endLocal": "2026-09-16T13:30:01.367335-05:00",
+      "elapsedSeconds": 1307.3673350811005
+    },
+    {
+      "name": "Audio diagnosis and iteration",
+      "startLocal": "2026-09-16T13:30:01.367335-05:00",
+      "endLocal": "2026-09-16T13:43:02.921161-05:00",
+      "elapsedSeconds": 781.5538258552551
+    },
+    {
+      "name": "Disk, telemetry and source endpoint recovery",
+      "startLocal": "2026-09-16T13:43:02.921161-05:00",
+      "endLocal": "2026-09-16T13:53:21.181394-05:00",
+      "elapsedSeconds": 618.2602331638336
+    },
+    {
+      "name": "First complete export",
+      "startLocal": "2026-09-16T13:53:21.181394-05:00",
+      "endLocal": "2026-09-16T14:00:09.892132-05:00",
+      "elapsedSeconds": 408.7107379436493
+    },
+    {
+      "name": "Encoded review, repair and relaunch",
+      "startLocal": "2026-09-16T14:00:09.892132-05:00",
+      "endLocal": "2026-09-16T14:17:34.279223-05:00",
+      "elapsedSeconds": 1044.387090921402
+    }
+  ],
+  "records": [
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/check-01/check.render.json",
+      "sha256": "fe0bb76358b0f248d0934ab6b7597b9bb1dde102fb09ff551f1370f7810e4d4b",
+      "startedAt": "2026-09-16T18:22:26.854125+00:00",
+      "completedAt": "2026-09-16T18:25:00.285835+00:00",
+      "elapsedSeconds": 153.43349591689184,
+      "status": "phase-complete-awaiting-review",
+      "abortReason": null,
+      "interval": [
+        1789582946.854125,
+        1789583100.285835
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/check-02/check.render.json",
+      "sha256": "8a18586db999ac0d515540fa63557c744a9dede9a34b08df46c51018eed098ce",
+      "startedAt": "2026-09-16T18:25:56.556413+00:00",
+      "completedAt": "2026-09-16T18:25:56.882872+00:00",
+      "elapsedSeconds": 0.32917766692116857,
+      "status": "failed",
+      "abortReason": "RuntimeError: Admission refused: kernel memory pressure is warning",
+      "interval": [
+        1789583156.556413,
+        1789583156.882872
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/check-03/check.render.json",
+      "sha256": "5d16d0b42bd251c772860bf07f78aff9e5a67f73908d424fe384461e897417a8",
+      "startedAt": "2026-09-16T18:27:08.865498+00:00",
+      "completedAt": "2026-09-16T18:27:22.256120+00:00",
+      "elapsedSeconds": 13.391397875035182,
+      "status": "phase-complete-awaiting-review",
+      "abortReason": null,
+      "interval": [
+        1789583228.865498,
+        1789583242.25612
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/check-04/check.render.json",
+      "sha256": "69010a498dd0c8642c87ee7c0aad3d252b2d369e51977fbde731133e3642bcc8",
+      "startedAt": "2026-09-16T18:51:30.107590+00:00",
+      "completedAt": "2026-09-16T18:51:43.757957+00:00",
+      "elapsedSeconds": 13.651129625039175,
+      "status": "failed",
+      "abortReason": null,
+      "interval": [
+        1789584690.10759,
+        1789584703.757957
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/check-05/check.render.json",
+      "sha256": "3c587c0e1495232b97aa282c23de14bd453f4ef308b4764fcd9b3b242ea996e1",
+      "startedAt": "2026-09-16T18:53:06.462368+00:00",
+      "completedAt": "2026-09-16T18:53:20.008619+00:00",
+      "elapsedSeconds": 13.547045582905412,
+      "status": "phase-complete-awaiting-review",
+      "abortReason": null,
+      "interval": [
+        1789584786.462368,
+        1789584800.008619
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/check-06/check.render.json",
+      "sha256": "a800fc43125d496232d6f6d818f13234a76c535a0ca55260919c27e528ec144e",
+      "startedAt": "2026-09-16T19:13:30.206143+00:00",
+      "completedAt": "2026-09-16T19:13:47.760202+00:00",
+      "elapsedSeconds": 17.556967625161633,
+      "status": "phase-complete-awaiting-review",
+      "abortReason": null,
+      "interval": [
+        1789586010.206143,
+        1789586027.760202
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/check-07/check.render.json",
+      "sha256": "d7cd48f3cdd356c65e1672372b43921c023e81320ba58efa306f51a5d3b081fa",
+      "startedAt": "2026-09-16T19:14:12.739135+00:00",
+      "completedAt": "2026-09-16T19:14:13.070396+00:00",
+      "elapsedSeconds": 0.3320981659926474,
+      "status": "failed",
+      "abortReason": "RuntimeError: Admission refused: kernel memory pressure is warning",
+      "interval": [
+        1789586052.739135,
+        1789586053.070396
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/check-08/check.render.json",
+      "sha256": "4a5cee865b5831691630f957357c7c0d46aa75e3f52cd842c751a51b0ccc5361",
+      "startedAt": "2026-09-16T19:15:11.027105+00:00",
+      "completedAt": "2026-09-16T19:15:29.901551+00:00",
+      "elapsedSeconds": 18.875407124869525,
+      "status": "phase-complete-awaiting-review",
+      "abortReason": null,
+      "interval": [
+        1789586111.027105,
+        1789586129.901551
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/check-09/check.render.json",
+      "sha256": "88f3879731547b24d26b1bf793e116c1fb8dd9ae2a0ef2fac676a2f5ae77fe79",
+      "startedAt": "2026-09-16T19:16:34.668535+00:00",
+      "completedAt": "2026-09-16T19:16:51.459631+00:00",
+      "elapsedSeconds": 16.791956250090152,
+      "status": "phase-complete-awaiting-review",
+      "abortReason": null,
+      "interval": [
+        1789586194.668535,
+        1789586211.459631
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/final-qc-01/qc.render.json",
+      "sha256": "016f73d1bba9e67791a394fb0eb5ccaa949cfec234708f8b2a00eef504179416",
+      "startedAt": "2026-09-16T19:00:25.965993+00:00",
+      "completedAt": "2026-09-16T19:01:06.849039+00:00",
+      "elapsedSeconds": 40.88379720901139,
+      "status": "objective-checks-complete-awaiting-review",
+      "abortReason": null,
+      "interval": [
+        1789585225.965993,
+        1789585266.849039
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/render-01/render.render.json",
+      "sha256": "b55faba5208a74f0ef55da1344fc5f1e4901802e416182795a1cb264cfcf81d4",
+      "startedAt": "2026-09-16T18:30:01.367335+00:00",
+      "completedAt": "2026-09-16T18:30:23.994882+00:00",
+      "elapsedSeconds": 22.628297375049442,
+      "status": "failed",
+      "abortReason": null,
+      "interval": [
+        1789583401.367335,
+        1789583423.994882
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/render-02/render.render.json",
+      "sha256": "6413f44f0a17f59e1829846176d345972aa2e716dfa177c5dc136cfafc5df5aa",
+      "startedAt": "2026-09-16T18:35:21.413632+00:00",
+      "completedAt": "2026-09-16T18:35:21.647420+00:00",
+      "elapsedSeconds": 0.23470433405600488,
+      "status": "failed",
+      "abortReason": "ResourceMeasurementError: Cannot measure native resources: /usr/sbin/sysctl",
+      "interval": [
+        1789583721.413632,
+        1789583721.64742
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/render-03/render.render.json",
+      "sha256": "dc91c6637b60cf4fa606761efddfa2e036f72522381dc6eacfd15b63e90411cd",
+      "startedAt": "2026-09-16T18:36:05.301156+00:00",
+      "completedAt": "2026-09-16T18:36:29.744968+00:00",
+      "elapsedSeconds": 24.444582916097715,
+      "status": "failed",
+      "abortReason": null,
+      "interval": [
+        1789583765.301156,
+        1789583789.744968
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/render-04/render.render.json",
+      "sha256": "dfc7ef3af027e1002a27f435f39e233544839b62f9cd55404ce96cfbf7626e0d",
+      "startedAt": "2026-09-16T18:37:04.370357+00:00",
+      "completedAt": "2026-09-16T18:37:28.219681+00:00",
+      "elapsedSeconds": 23.850096291862428,
+      "status": "failed",
+      "abortReason": null,
+      "interval": [
+        1789583824.370357,
+        1789583848.219681
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/render-05/render.render.json",
+      "sha256": "7ce4ed81832bf3d794024b7328cf4b55974d23a0f5b080d76597a2fccd466674",
+      "startedAt": "2026-09-16T18:39:08.513654+00:00",
+      "completedAt": "2026-09-16T18:39:31.833366+00:00",
+      "elapsedSeconds": 23.320437124930322,
+      "status": "failed",
+      "abortReason": null,
+      "interval": [
+        1789583948.513654,
+        1789583971.833366
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/render-06/render.render.json",
+      "sha256": "50ff1d59ef78ea709408d757f97210da46e256869072341347162b651eb7f341",
+      "startedAt": "2026-09-16T18:40:22.410844+00:00",
+      "completedAt": "2026-09-16T18:40:47.123832+00:00",
+      "elapsedSeconds": 24.713615083135664,
+      "status": "failed",
+      "abortReason": null,
+      "interval": [
+        1789584022.410844,
+        1789584047.123832
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/render-07/render.render.json",
+      "sha256": "f74b116c45f336fcfb773f23bd1007581eb1234a7cba114a20e8d057ca1fcc26",
+      "startedAt": "2026-09-16T18:41:57.359457+00:00",
+      "completedAt": "2026-09-16T18:42:21.750497+00:00",
+      "elapsedSeconds": 24.39165766700171,
+      "status": "failed",
+      "abortReason": null,
+      "interval": [
+        1789584117.359457,
+        1789584141.750497
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/render-08/render.render.json",
+      "sha256": "aa10e298d24a00864524bd83c104c1ef155766fd3a9c5ba61b5ed67f5c5f06a8",
+      "startedAt": "2026-09-16T18:43:02.921161+00:00",
+      "completedAt": "2026-09-16T18:45:04.947152+00:00",
+      "elapsedSeconds": 122.02577125001699,
+      "status": "failed",
+      "abortReason": "disk headroom for output and OS swap is below policy",
+      "interval": [
+        1789584182.921161,
+        1789584304.947152
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/render-09/render.render.json",
+      "sha256": "73a64ed7852e334430bc53dee3eff4bdf1e41b348f9a9b2619be4a238734c42a",
+      "startedAt": "2026-09-16T18:46:34.040414+00:00",
+      "completedAt": "2026-09-16T18:46:58.526321+00:00",
+      "elapsedSeconds": 24.48656141688116,
+      "status": "failed",
+      "abortReason": "MissingProcessFootprint: Owned process footprint missing; resample tree",
+      "interval": [
+        1789584394.040414,
+        1789584418.526321
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/render-10/render.render.json",
+      "sha256": "915b70e2ccf49d904e1303453482b9ed2abbff2d7afe056185456266fca0847f",
+      "startedAt": "2026-09-16T18:47:35.355107+00:00",
+      "completedAt": "2026-09-16T18:48:24.900871+00:00",
+      "elapsedSeconds": 49.5449917500373,
+      "status": "failed",
+      "abortReason": null,
+      "interval": [
+        1789584455.355107,
+        1789584504.900871
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/render-11/render.render.json",
+      "sha256": "61654e696dc04bd7f361b1e0f6f7128945eea7c51df73fbcccda5ce81f8e8cae",
+      "startedAt": "2026-09-16T18:53:21.181394+00:00",
+      "completedAt": "2026-09-16T19:00:09.892132+00:00",
+      "elapsedSeconds": 408.7074570830446,
+      "status": "phase-complete-awaiting-review",
+      "abortReason": null,
+      "interval": [
+        1789584801.181394,
+        1789585209.892132
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/render-12/render.render.json",
+      "sha256": "6a2186c48b317165afa1d08462e6101d53733c7059f4b74d3f28a69a8669347f",
+      "startedAt": "2026-09-16T19:15:43.416787+00:00",
+      "completedAt": "2026-09-16T19:15:43.751553+00:00",
+      "elapsedSeconds": 0.33581708394922316,
+      "status": "failed",
+      "abortReason": "RuntimeError: Admission refused: kernel memory pressure is warning",
+      "interval": [
+        1789586143.416787,
+        1789586143.751553
+      ]
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/snapshots-01/snapshot.render.json",
+      "sha256": "9e9bf34d64f090aa1d5e83ee812270b4f8fa644a0babb9853e3f1a16860688d9",
+      "startedAt": "2026-09-16T18:28:18.125017+00:00",
+      "completedAt": "2026-09-16T18:29:31.356011+00:00",
+      "elapsedSeconds": 73.23128629196435,
+      "status": "phase-complete-awaiting-review",
+      "abortReason": null,
+      "interval": [
+        1789583298.125017,
+        1789583371.356011
+      ]
+    }
+  ],
+  "failedRenderAttemptSeconds": 339.97653229301795,
+  "audioFailedAttemptSeconds": 143.34868645807728,
+  "firstCompletedSdkRender": {
+    "seconds": 365.291,
+    "captureSeconds": 344.926,
+    "captureFraction": 0.9442499267707115,
+    "frames": 4378,
+    "captureFramesPerSecond": 12.69257753837055,
+    "warmSourceCacheHits": 13,
+    "sourceCacheMisses": 1,
+    "sourceExtractionSeconds": 15.363,
+    "supervisedExportSeconds": 408.7074570830446,
+    "finalObjectiveQcSeconds": 40.88379720901139
+  },
+  "supportingFiles": [
+    {
+      "path": "artifacts/img7446-broll-plan-2026-09-16/WORKING-NOTES.md",
+      "sha256": "46a44564c045f92dd7dd67207bca14153dc5c1fd1cf2dfb6831b291e5465527e"
+    },
+    {
+      "path": "artifacts/img7446-broll-plan-2026-09-16/ENDPOINT-FRAME.json",
+      "sha256": "44907d64a7aca2625c1fcf813c9722af082a28c957eee054750fe2a5d2e61613"
+    },
+    {
+      "path": "artifacts/img7446-broll-plan-2026-09-16/ASSEMBLY-STRATEGY-CRITIC.md",
+      "sha256": "8f990e25e2e644de109006b1500ca6b8a59141ac3734f158287fb19be42434e9"
+    },
+    {
+      "path": "artifacts/img7446-broll-plan-2026-09-16/FINAL-EDITORIAL-REVIEW.md",
+      "sha256": "d6a0c5b4164a96b1c98920d6988c85909fe187920d7725856ae1cc61d736d1a3"
+    },
+    {
+      "path": "artifacts/img7446-broll-plan-2026-09-16/run_assembly.py",
+      "sha256": "105b1e5d92b2bf85a015aa12890b7fcdb000fcfcd7ff92f057c7ade77a655894"
+    },
+    {
+      "path": "artifacts/img7446-broll-plan-2026-09-16/qc_assembly.py",
+      "sha256": "73e0cc000c5481dcac45b5c3daf93df344db762004faf96ff176fed20fa0c6f3"
+    },
+    {
+      "path": "artifacts/img7446-broll-plan-2026-09-16/build_edit.py",
+      "sha256": "641155e485c6e8aff2f8697f41e98cfae4a2822a0db664f485d22456367c9f01"
+    },
+    {
+      "path": "artifacts/img7446-broll-plan-2026-09-16/prepare_handoff.py",
+      "sha256": "65a941181116304e57f88e463c2e01a7a2f791610d528799d8e71533e44c0514"
+    }
+  ],
+  "matchingAudioReceipts": [
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/render-08/audio-preparation/receipt.json",
+      "receiptSha256": "2379405dcd0fd93509f63a64c7d7e1433ec8c6a423d496fa0e2e4dd3493116de",
+      "inputPremasterSha256": "0bb26a5a2d104ed58bfe6cd3dd1ed2abc9495d40c89da85e554b53837f92740e",
+      "masterSha256": "a54d16730eea2b75d5f78159cdc7272d90fb27e7a1ca165c625cfc683304e04d",
+      "status": "float-master-checked-awaiting-aac"
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/render-09/audio-preparation/receipt.json",
+      "receiptSha256": "8d2677534fbc5b08d444b7b291ade4bfa775f62476c967d7246e0e148dfa958b",
+      "inputPremasterSha256": "0bb26a5a2d104ed58bfe6cd3dd1ed2abc9495d40c89da85e554b53837f92740e",
+      "masterSha256": "a54d16730eea2b75d5f78159cdc7272d90fb27e7a1ca165c625cfc683304e04d",
+      "status": "float-master-checked-awaiting-aac"
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/render-10/audio-preparation/receipt.json",
+      "receiptSha256": "5e0f349229beba3f78641f79ded97e150c18d6b0d455a3ec717ce50757ddf851",
+      "inputPremasterSha256": "0bb26a5a2d104ed58bfe6cd3dd1ed2abc9495d40c89da85e554b53837f92740e",
+      "masterSha256": "a54d16730eea2b75d5f78159cdc7272d90fb27e7a1ca165c625cfc683304e04d",
+      "status": "float-master-checked-awaiting-aac"
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/render-11/audio-preparation/receipt.json",
+      "receiptSha256": "04747641a7b95a0122da232a7d2b7633262ac0c1dc8077e042e4eb2368e6cb71",
+      "inputPremasterSha256": "0bb26a5a2d104ed58bfe6cd3dd1ed2abc9495d40c89da85e554b53837f92740e",
+      "masterSha256": "a54d16730eea2b75d5f78159cdc7272d90fb27e7a1ca165c625cfc683304e04d",
+      "status": "float-master-checked-awaiting-aac"
+    },
+    {
+      "file": "artifacts/img7446-broll-plan-2026-09-16/render-13/audio-preparation/receipt.json",
+      "receiptSha256": "18c17c8f2231841f7e7b3f9e1c59095bce4e218d04d98ebc56637a12f0433112",
+      "inputPremasterSha256": "0bb26a5a2d104ed58bfe6cd3dd1ed2abc9495d40c89da85e554b53837f92740e",
+      "masterSha256": "a54d16730eea2b75d5f78159cdc7272d90fb27e7a1ca165c625cfc683304e04d",
+      "status": "float-master-checked-awaiting-aac"
+    }
+  ],
+  "resourceObservations": [
+    {
+      "attempt": "render-08",
+      "physicalGiB": 64.0,
+      "initialKernelPressureLevel": 1,
+      "initialOwnedGiB": 0.0,
+      "samples": 23,
+      "maxSampledOwnedGiB": 2.7258472219109535,
+      "minimumSampledDiskGiB": 8.87588119506836
+    },
+    {
+      "attempt": "render-11",
+      "physicalGiB": 64.0,
+      "initialKernelPressureLevel": 1,
+      "initialOwnedGiB": 0.0,
+      "samples": 73,
+      "maxSampledOwnedGiB": 2.3924168199300766,
+      "minimumSampledDiskGiB": 28.876079559326172
+    },
+    {
+      "attempt": "render-12",
+      "physicalGiB": 64.0,
+      "initialKernelPressureLevel": 2,
+      "initialOwnedGiB": 0.0,
+      "samples": 0,
+      "maxSampledOwnedGiB": null,
+      "minimumSampledDiskGiB": null
+    }
+  ],
+  "laterObservation": {
+    "observedAt": "2026-09-16T19:26:40.104624+00:00",
+    "attempt": "render-13",
+    "status": "phase-complete-awaiting-review",
+    "startedAt": "2026-09-16T19:17:34.279223+00:00",
+    "completedAt": "2026-09-16T19:24:12.013058+00:00",
+    "elapsedSeconds": 397.77150549995713,
+    "abortReason": null,
+    "doesNotChangeBaseline": true
+  }
+}

@@ -118,6 +118,8 @@ def mirror_record(name: str, sources: CatalogSources) -> dict:
             "type": upstream["type"], "title": upstream["title"],
             "description": upstream["description"], "tags": upstream["tags"],
             "declared": upstream["declared"], "duration": upstream["duration"],
+            "source": {"path": upstream["reference"]["absolutePath"],
+                       "exists": upstream["reference"]["exists"]},
             "upstream": upstream, "study": upstream["study"],
             "integration": _reference_integration(upstream["reference"]),
             "disagreements": upstream["disagreements"]}
@@ -134,6 +136,7 @@ def local_record(kind: str, sources: CatalogSources) -> dict:
             "tags": [], "declared": _declared(
                 local["declared"], "template-data-width-height", None),
             "duration": None, "templateVariables": dict(local["variables"]),
+            "source": local["source"],
             "upstream": upstream,
             "study": upstream["study"] if upstream else None,
             "integration": _integration(kind, sources),

@@ -54,7 +54,7 @@ class MatrixAvailabilityTests(unittest.TestCase):
                 _plan([_entry()]), matrix_path=path)
             self.assertIn("source digest changed", stale.evidence)
             data["sourceDigest"] = build_artifact(data["comps"])["sourceDigest"]
-            data["comps"]["chip-row"]["aspect"] = "16:9"
+            data["comps"]["line-swap"]["aspect"] = "16:9"
             with open(path, "w", encoding="utf-8") as handle:
                 json.dump(data, handle)
             (tampered,) = plc.matrix_verdicts(
@@ -71,9 +71,9 @@ class MatrixAvailabilityTests(unittest.TestCase):
             (unknown,) = plc.matrix_verdicts(
                 _plan([_entry(kind="mystery-comp")]), matrix_path=matrix)
             (static,) = plc.matrix_verdicts(
-                _plan([_entry(kind="statement-card")]), matrix_path=matrix)
+                _plan([_entry(kind="marker-highlight")]), matrix_path=matrix)
             (errored,) = plc.matrix_verdicts(
-                _plan([_entry(kind="logo-card")]), matrix_path=matrix)
+                _plan([_entry(kind="ui-focus-zoom")]), matrix_path=matrix)
         self.assertIn("unavailable comp", unknown.evidence)
         self.assertIn("fadeClass is missing", static.evidence)
         self.assertIn("hyperframes died", errored.evidence)

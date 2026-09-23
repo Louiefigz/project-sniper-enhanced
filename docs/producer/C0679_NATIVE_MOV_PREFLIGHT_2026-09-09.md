@@ -55,7 +55,7 @@ After the user authorizes pausing the preview, or it has cleanly ended, verify
 its exact owned cleanup and lease release. Then the prepared single attempt is:
 
 ```bash
-/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/.venv/bin/python /private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_native_phase_v5.py native-mov-reference-controls-v2 /private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-mov-reference-controls-phase-v2.json
+/Users/maintainer/ProjectSniperSource/.venv/bin/python /private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/run_native_phase_v5.py native-mov-reference-controls-v2 /private/tmp/sniper-c0679-fresh-b-20260909.0Ydfxp/native-mov-reference-controls-phase-v2.json
 ```
 
 Use the existing outer host-measurement permission and inner localhost-only

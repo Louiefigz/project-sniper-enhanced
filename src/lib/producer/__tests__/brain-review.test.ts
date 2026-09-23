@@ -30,6 +30,7 @@ import type { AutoEditAuthoritySnapshot } from "../../server/auto-edit-authority
 import { fileSha256 } from "../../server/auto-edit-hash";
 import { writeQualityJson } from "../../server/auto-edit-quality-artifacts";
 import { captureAutoEditDoctrine } from "../../server/auto-edit-doctrine";
+import { visualStorytellingInstructions } from "../visual-storytelling";
 
 const testRoot = mkdtempSync(path.join(os.tmpdir(), "sniper-brain-review-"));
 const producerDir = path.join(testRoot, "producer");
@@ -161,6 +162,7 @@ function testSchemaAndParsers(): void {
 
 function testPromptsAndTools(): void {
   const plan = buildPlanReviewPrompt(ctx, 1, packet, packetValue);
+  assert.ok(plan.includes(visualStorytellingInstructions("longform", "plan-review")));
   assert.match(plan, /FRESH, INDEPENDENT/);
   assert.match(plan, /remain READ-ONLY/);
   assert.match(plan, /Never edit, create, rename, or delete/);
@@ -169,30 +171,30 @@ function testPromptsAndTools(): void {
   assert.match(plan, /BEGIN_HASH_BOUND_PLAN_REVIEW_PACKET_JSON/);
   assert.match(plan, /BEGIN_PINNED_CRITIC_CONTEXT_JSON/);
   assert.match(plan, /Do NOT perform a prior-render, implementation, code/);
-  assert.match(plan, /audit every graphicsDecisions receipt/);
-  assert.match(plan, /first-catalog-entry selection/);
-  assert.match(plan, /required beat as omit is a material defect/);
-  assert.match(plan, /maximumFeasibleDistinctKinds/);
-  assert.match(plan, /replacementWitnesses/);
-  assert.match(plan, /reuseReason must quote this beat/);
-  assert.match(plan, /require at least one real transition deliverable/);
-  assert.match(plan, /cannot waive the checked transition lane/);
+  assert.match(plan, /Inspect each catalog selection and exact kept beat/);
+  assert.match(plan, /reject retired forms, unbound copy, unjustified custom work/);
+  assert.match(plan, /evidence-backed intentional clean cuts/);
+  assert.match(plan, /legacy transition presets are retired/);
+  assert.match(plan, /moving picture\/audio review/);
   assert.ok(!plan.includes(ctx.planPath));
   assert.ok(!plan.includes(ctx.manifestPath));
   assert.ok(!plan.includes(ctx.transcriptsDir));
-  const visual = buildRenderedReviewPrompt(ctx, {
-    auditReportPath: `${ctx.dir}/audit_report.json`,
-    framePaths: [`${ctx.dir}/audit_frames/graphic-01.png`],
-  }, 1);
-  assert.match(visual, /Inspect EVERY listed frame visually/);
+  const visual = buildRenderedReviewPrompt(ctx, renderedEvidence(), 1, "composition",
+    { frames: [{ path: `${ctx.dir}/audit_frames/graphic-01.png`, labels: ["#1 graphic-01"] }], reference: [] });
+  assert.match(visual, /Inspect EVERY attached frame visually/);
+  assert.match(visual, /NO filesystem, shell, browser/);
+  assert.match(visual, /BEGIN_PINNED_RENDERED_REVIEW_EVIDENCE_JSON/);
+  assert.match(visual, /Image 1\/1: #1 graphic-01/);
+  assert.ok(visual.includes(visualStorytellingInstructions("longform", "rendered-review")));
   assert.match(visual, /missing gaze\/visual measurements/i);
   assert.match(visual, /"stage":"rendered"/);
   const revision = buildRevisionPrompt(ctx, materialReview, 3);
+  assert.ok(revision.includes(visualStorytellingInstructions("longform")));
   assert.match(revision, /only production-file mutation/);
   assert.match(revision, /Do not self-approve/);
   assert.match(revision, /cutTrack and cutDecisions.*IMMUTABLE/);
-  assert.match(revision, /Every decisionRequired Produced\/full beat must resolve/);
-  assert.match(revision, /maximumFeasibleDistinctKinds/);
+  assert.match(revision, /HyperFrames upstream catalog first/);
+  assert.match(revision, /Retired Sniper house templates cannot be selected/);
   assert.ok(revision.includes("PLAN_OWN_SCREEN_01"));
   assert.match(revision, /complete material-issue code set is exactly \["PLAN_OWN_SCREEN_01"\]/);
   assert.match(revision, /Minor\/info finding codes are observations only/);
@@ -246,6 +248,14 @@ function testPromptsAndTools(): void {
     '{"type":"object","properties":{"changedPlan":{"type":"boolean"}}}');
 }
 
+function renderedEvidence(): { auditReportPath: string; framePaths: string[] } {
+  const frame = `${ctx.dir}/audit_frames/graphic-01.png`, audit = `${ctx.dir}/audit_report.json`;
+  mkdirSync(path.dirname(frame), { recursive: true });
+  writeFileSync(frame, Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64"));
+  writeFileSync(audit, JSON.stringify({ frames: [{ path: frame }] }));
+  return { auditReportPath: audit, framePaths: [frame] };
+}
+
 async function testCodexInvocations(): Promise<void> {
   let calls = 0;
   const reviewResult = await runProducerReview({ stage: "plan", ctx, round: 1, packet }, {
@@ -270,10 +280,7 @@ async function testCodexInvocations(): Promise<void> {
     stage: "rendered",
     ctx,
     round: 1,
-    evidence: {
-      auditReportPath: `${ctx.dir}/audit_report.json`,
-      framePaths: [`${ctx.dir}/audit_frames/graphic-01.png`],
-    },
+    evidence: renderedEvidence(),
   }, {
     provider: () => "codex",
     codex: async (options) => {
@@ -285,6 +292,12 @@ async function testCodexInvocations(): Promise<void> {
       // so an Opus-xhigh vision critic isn't killed mid-reasoning.
       assert.equal(options.timeoutMs, 25 * 60 * 1000);
       assert.equal(options.cwd, ctx.dir);
+      // Tool-less, no directory access, frames attached, OS media boundary on.
+      assert.equal(options.tools, "none");
+      assert.deepEqual(options.addDirs, []);
+      assert.deepEqual(options.jail, { project: ctx.dir, review: ctx.dir });
+      assert.deepEqual(options.imagePaths, [`${ctx.dir}/audit_frames/graphic-01.png`]);
+      assert.ok(!options.prompt.includes("Rendered deliverable:"), "no video path is offered to the critic");
       return { message: renderedJson, stderr: "", ms: 11 };
     },
   });
@@ -370,16 +383,19 @@ async function testLegacyInvocation(): Promise<void> {
     stage: "rendered",
     ctx,
     round: 1,
-    evidence: {
-      auditReportPath: `${ctx.dir}/audit_report.json`,
-      framePaths: [`${ctx.dir}/audit_frames/graphic-01.png`],
-    },
+    evidence: renderedEvidence(),
   }, {
     provider: () => "legacy",
     legacy: async (invocation) => {
       calls += 1;
       assert.equal(invocation.cwd, ctx.dir);
-      assert.equal(invocation.args[invocation.args.indexOf("--allowedTools") + 1], "Read,Glob,Grep");
+      assert.equal(invocation.args[invocation.args.indexOf("--tools") + 1], "");
+      assert.equal(invocation.args[invocation.args.indexOf("--allowedTools") + 1], "");
+      assert.equal(invocation.args[invocation.args.indexOf("--input-format") + 1], "stream-json");
+      assert.ok(!invocation.args.includes("--add-dir"));
+      assert.deepEqual(invocation.jail, { project: ctx.dir, review: ctx.dir });
+      const input = JSON.parse(invocation.stdin!) as { message: { content: Array<{ type: string }> } };
+      assert.deepEqual(input.message.content.map((block) => block.type), ["text", "image"]);
       return { message: renderedJson, stderr: "", ms: 9 };
     },
   });

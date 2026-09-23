@@ -76,6 +76,24 @@ class OpeningCompositorMediaTests(unittest.TestCase):
         composite(str(base), [_clip(red, (2, 6), "24")], str(output), CompositeOptions(eof_pass=True))
         self.assertEqual(_colors(output)[6], "red", "the old inclusive endpoint is a known separate policy")
 
+    def test_ordinary_context_matches_full_timing_without_restarting_animation(self) -> None:
+        root = self.root / "ordinary-context"
+        root.mkdir()
+        base, red, green = _fixture(root, "24")
+        animation = root / "animated.mov"
+        _ffmpeg(["-i", str(red), "-i", str(green), "-filter_complex",
+                 "[0:v]trim=end_frame=4,setpts=PTS-STARTPTS[r];"
+                 "[1:v]trim=end_frame=20,setpts=PTS-STARTPTS[g];[r][g]concat=n=2:v=1:a=0[v]",
+                 "-map", "[v]", "-c:v", "qtrle", str(animation)])
+        clips = [_clip(animation, (2, 8), "24")]
+        full, window = root / "full.mp4", root / "context.mp4"
+        composite(str(base), clips, str(full), CompositeOptions(eof_pass=True))
+        composite(str(base), clips, str(window), CompositeOptions(eof_pass=True, frame_rate="24",
+                  frame_range=(3, 9), video_only=True, ordinary_timing=True))
+        self.assertEqual(_colors(window), _colors(full)[3:9])
+        # The ordinary seconds gate rounds 8/24 to .3333; frame 8 is outside it.
+        self.assertEqual(_colors(window), ["red"] * 3 + ["green"] * 2 + ["black"])
+
     def test_reversed_candidate_order_still_uses_ordinary_start_sort_and_stable_ties(self) -> None:
         root = self.root / "order"
         root.mkdir()

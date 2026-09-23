@@ -14,7 +14,8 @@ then an in-filter ``trim`` selects the exact window on the (input-seek-rebased)
 timeline before ``setpts`` applies the speed — re-encoded throughout, so the
 stream-copy truncation caveat that bites ``export_mp4.py`` does not apply here.
 
-J-CUT LEADS (LIAM-4-MOVES move 2, additive): a cutTrack range may carry
+J-CUT LEADS (continuity mechanism CM-2, docs/studies/EDITCRAFT_LESSONS.md
+§6.3; additive): a cutTrack range may carry
 ``audioLeadMs`` — the incoming segment's audio PRE-ROLL (source audio from
 before its in-point) starts that early, so sound leads picture at the seam.
 Architecture: the lead is baked into the OUTGOING part's audio TAIL (own
@@ -44,18 +45,12 @@ import shutil
 import sys
 import tempfile
 from collections.abc import Callable
-from dataclasses import dataclass
-from fractions import Fraction
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from guided_source_color_consumption import SourceColorPictureConsumption
-
+from dataclasses import replace
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from compile_timeline import Segment, TimelineMap, compile_plan  # noqa: E402
 from audio.channel_normalization import ChannelAuthority  # noqa: E402
-from audio.cut_audio_filters import exact_window_fade, CutAudioFilter, fade_suffix, source_filter  # noqa: E402
+from audio.cut_audio_filters import exact_window_fade  # noqa: E402
 from audio.cut_channel_normalization import (  # noqa: E402
     assert_cut_sources_stable,
     cut_source_receipts,
@@ -66,10 +61,19 @@ from audio.cut_channel_normalization import (  # noqa: E402
 from media_probe import (display_dims, has_audio, probe_duration,  # noqa: E402,F401
                          probe_video, probe_video_frames, run_ff, _fps_fraction)
 from producer_config import AUDIO, ENCODE  # noqa: E402
+from cut_reframe import FusedReframe  # noqa: E402
+from cut_encode_plan import (  # noqa: E402,F401
+    Profile, TailLead, EncodeJob, CutSpeedOptions, proxy_profile, _video_chain, _audio_chain,
+    _fade_suffix, _tail_chain, _tail_inputs, _tail_seek,
+)
+from cut_execution import execution_scope, run_command  # noqa: E402
 
 # Fast input-seek lands a keyframe at-or-before (src_start - this); the decoder
 # then rolls forward and the in-filter trim discards up to the exact boundary.
-PRESEEK_PAD_S = 10.0
+PRESEEK_PAD_S = 2.0
+# Retimed audio is seek-context-sensitive. Keep its qualified decode history;
+# reduced pre-roll changes float PCM at 1.25x even when picture packets match.
+RETIMED_PRESEEK_PAD_S = 10.0
 AUDIO_RATE = ENCODE["audio_rate"]        # 48000
 AUDIO_CH = ENCODE["audio_channels"]      # 2
 # Stage-1 duration assertion (frames). We assert on the VIDEO timeline
@@ -89,44 +93,6 @@ def emit(**fields) -> None:
     print(json.dumps(fields), flush=True)
 
 
-@dataclass(frozen=True)
-class Profile:
-    """Common target every segment is normalized to (from the first source)."""
-
-    width: int
-    height: int
-    fps: Fraction
-    pix_fmt: str
-
-    @property
-    def fps_arg(self) -> str:
-        """ffmpeg rational fps string, e.g. ``30000/1001``."""
-        return f"{self.fps.numerator}/{self.fps.denominator}"
-
-    @property
-    def frame_s(self) -> float:
-        """Duration of one frame in seconds."""
-        return 1.0 / float(self.fps)
-
-    @property
-    def video_timescale(self) -> int:
-        """MP4 track timescale that carries this frame rate exactly (kept
-        >= 10000 like ffmpeg's own default, so a frame is a whole tick count)."""
-        scale = self.fps.numerator
-        while scale < 10000:
-            scale *= 10
-        return scale
-
-    @property
-    def frame_ticks(self) -> int:
-        """Exact duration of one frame in ``video_timescale`` ticks."""
-        return self.video_timescale // self.fps.numerator * self.fps.denominator
-
-    def audio_samples(self, frames: int) -> int:
-        """Nearest whole 48 kHz sample count for exactly ``frames`` frames."""
-        return round(Fraction(frames * AUDIO_RATE) / self.fps)
-
-
 def decide_profile(first_source_path: str) -> Profile:
     """Phase-1 rule: the FIRST source defines the common profile; every other
     source is scaled + letterbox-padded to fit it (PRODUCER_PLAN §6)."""
@@ -135,127 +101,6 @@ def decide_profile(first_source_path: str) -> Profile:
     return Profile(width=width, height=height,
                    fps=_fps_fraction(v["r_frame_rate"]),
                    pix_fmt=v.get("pix_fmt") or ENCODE["pix_fmt"])
-
-
-def proxy_profile(profile: Profile, scale: float) -> Profile:
-    """The DOWNSCALED proxy variant of a profile (geometry contract v3 A1).
-
-    Only the canvas shrinks (even-snapped); fps and pix_fmt are untouched, so
-    every downstream trim/setpts/atempo/fps term — the segment math — runs
-    bit-identically to the full render, just onto smaller frames.
-
-    Args:
-        profile: The full-resolution common profile.
-        scale: Downscale factor in (0, 1].
-
-    Returns:
-        The proxy Profile.
-
-    Raises:
-        ValueError: On a scale outside (0, 1].
-    """
-    if not 0.0 < scale <= 1.0:
-        raise ValueError(f"proxy scale {scale} outside (0, 1]")
-    width = max(2, int(round(profile.width * scale / 2.0)) * 2)
-    height = max(2, int(round(profile.height * scale / 2.0)) * 2)
-    return Profile(width=width, height=height, fps=profile.fps,
-                   pix_fmt=profile.pix_fmt)
-
-
-def _video_chain(seg: Segment, pre_seek: float, profile: Profile) -> str:
-    """Trim the exact source window, apply speed, scale + letterbox to profile,
-    then force CFR at the profile fps."""
-    fs, fe = seg.src_start - pre_seek, seg.src_end - pre_seek
-    pw, ph = profile.width, profile.height
-    return (
-        f"[0:v]trim=start={fs:.6f}:end={fe:.6f},"
-        f"setpts=(PTS-STARTPTS)/{seg.speed},"
-        f"scale={pw}:{ph}:force_original_aspect_ratio=decrease:eval=init,"
-        f"pad={pw}:{ph}:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1,"
-        f"fps=fps={profile.fps_arg}[v]"
-    )
-
-
-def _fade_suffix(out_len: float, fade_s: float) -> str:
-    """15 ms equal-power (qsin) fade in+out at each part's edges — declicks the
-    concat joins without acrossfade's N-part duration drift (PRODUCER_PLAN §4.2;
-    the lead-specified Phase-1 join treatment). Clamped for very short parts."""
-    return fade_suffix(out_len, fade_s)
-
-
-def _audio_chain(
-    seg: Segment,
-    pre_seek: float,
-    out_len: float,
-    authority: ChannelAuthority | bool | None,
-) -> str:
-    """Trim + atempo the source audio (or synthesize silence), normalize to
-    48 kHz stereo, and taper both edges to declick the join.
-
-    ``out_len`` is the OWN audio length this part contributes — the full
-    video length, minus a J-cut tail when the next segment's lead audio is
-    appended after it (``encode_segment``'s [tail] chain). Labeled [own];
-    the caller maps it (or concats the tail) to the final [a].
-    """
-    return source_filter(CutAudioFilter(
-        seg.src_start - pre_seek, out_len, seg.speed, authority,
-        source_end=seg.src_start + out_len * seg.speed - pre_seek), "own")
-
-
-@dataclass(frozen=True)
-class TailLead:
-    """The J-cut tail of one part: the NEXT segment's audio pre-roll.
-
-    ``lead_s`` OUTPUT seconds of the next segment's source audio, ending at
-    its in-point (``src_start``), retimed by its ``speed``. ``src_path`` may
-    differ from the part's own source (multi-source cuts).
-    """
-
-    lead_s: float
-    src_path: str
-    src_start: float
-    speed: float
-
-
-@dataclass(frozen=True)
-class EncodeJob:
-    """Everything one part's encode needs beyond its Segment."""
-
-    src_path: str
-    profile: Profile
-    tail: TailLead | None = None
-    source_channels: ChannelAuthority | None = None
-    tail_channels: ChannelAuthority | None = None
-    before_encode: Callable[[], None] | None = None  # Internal original owner; never a CLI/JSON option.
-    picture_consumption: SourceColorPictureConsumption | None = None
-
-
-def _tail_chain(
-    tail: TailLead,
-    idx: int,
-    authority: ChannelAuthority | bool | None,
-) -> str:
-    """The J-cut lead piece: pre-in-point source audio → ``lead_s`` output
-    seconds, normalized + 15 ms edge-declicked (the seam's audio switch gets
-    the SAME join treatment every part boundary gets), labeled [tail]."""
-    return source_filter(CutAudioFilter(
-        tail.src_start - tail.lead_s * tail.speed, tail.lead_s,
-        tail.speed, authority, idx, idx, source_end=tail.src_start), "tail")
-
-
-def _tail_inputs(tail: TailLead, has_tail_audio: bool) -> list[str]:
-    """The extra ffmpeg input for a part's J-cut tail → (args, has_audio)."""
-    if not has_tail_audio:
-        return ["-f", "lavfi", "-t", f"{tail.lead_s + 0.5:.3f}",
-                "-i", f"anullsrc=r={AUDIO_RATE}:cl=stereo"]
-    seek = _tail_seek(tail)
-    return ((["-ss", f"{seek:.6f}"] if seek > 0 else [])
-            + ["-i", tail.src_path])
-
-
-def _tail_seek(tail: TailLead) -> float:
-    """The input-side seek applied by :func:`_tail_inputs` (0 when none)."""
-    return max(0.0, tail.src_start - tail.lead_s * tail.speed - 1.0)
 
 
 def encode_segment(seg: Segment, job: EncodeJob, out_path: str,
@@ -269,7 +114,8 @@ def encode_segment(seg: Segment, job: EncodeJob, out_path: str,
     picture_guard = job.before_encode
     from guided_source_color_consumption_hooks import capture_cut
     consumption = capture_cut((seg, job, out_path, frames_before))
-    pre_seek = max(0.0, seg.src_start - PRESEEK_PAD_S)
+    pad = PRESEEK_PAD_S if seg.speed == 1.0 else max(PRESEEK_PAD_S, RETIMED_PRESEEK_PAD_S)
+    pre_seek = max(0.0, seg.src_start - pad)
     out_len = (seg.src_end - seg.src_start) / seg.speed
     own_len = out_len - (job.tail.lead_s if job.tail else 0.0)
     src_has_audio = job.source_channels is not None
@@ -282,7 +128,7 @@ def encode_segment(seg: Segment, job: EncodeJob, out_path: str,
         cmd += ["-f", "lavfi", "-t", f"{own_len + 1.0:.3f}",
                 "-i", f"anullsrc=r={AUDIO_RATE}:cl=stereo"]
         next_idx = 2
-    fc = (_video_chain(seg, pre_seek, job.profile) + ";"
+    fc = (_video_chain(seg, pre_seek, job.profile, job.reframe) + ";"
           + _audio_chain(seg, pre_seek, own_len, job.source_channels))
     amap = "[own]"
     if job.tail is not None:
@@ -327,13 +173,18 @@ def _run_segment_picture(cmd: list[str], guard: Callable[[], None] | None,
     """
     if consumption is not None:
         from guided_source_color_consumption_hooks import run_picture_command
-        run_picture_command(consumption, cmd, (guard, run_ff))
+        run_picture_command(consumption, cmd, (guard, _run_cut_command))
         return
     if guard is not None:
         guard()
-    run_ff(cmd)
+    _run_cut_command(cmd)
     if guard is not None:
         guard()
+
+
+def _run_cut_command(command: list[str]) -> str:
+    """Observe exact cut commands without changing the existing native runner hook."""
+    return run_command(command, run_ff)
 
 
 def _clamp_part_audio(out_path: str, profile: Profile, frames_before: int) -> int:
@@ -356,7 +207,7 @@ def _clamp_part_audio(out_path: str, profile: Profile, frames_before: int) -> in
     tmp = f"{out_path}.avclamp.mp4"
     # The exact window can end up to one frame before the nominal edge fade,
     # so the declick is re-applied on the trimmed window (exact_window_fade).
-    run_ff(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+    _run_cut_command(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
             "-i", out_path, "-map", "0:v", "-map", "0:a",
             "-c:v", "copy",
             "-af", f"apad,atrim=end_sample={samples},asetpts=N/SR/TB{exact_window_fade(samples)}",
@@ -389,7 +240,7 @@ def concat_parts(parts: list[str], out_path: str, work_dir: str,
             quoted = os.path.abspath(p).replace("'", "'\\''")
             f.write(f"file '{quoted}'\n")
     ticks, scale = profile.frame_ticks, profile.video_timescale
-    run_ff(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+    _run_cut_command(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
             "-f", "concat", "-safe", "0", "-i", listfile,
             "-map", "0:v", "-map", "0:a", "-c:v", "copy",
             "-bsf:v", f"setts=pts=N*{ticks}:dts=N*{ticks}:duration={ticks}"
@@ -413,7 +264,7 @@ def _warn_off_profile(segments: list[Segment], id_to_path: dict[str, str],
             continue
         seen.add(seg.source_id)
         v = probe_video(id_to_path[seg.source_id])
-        w, h = int(v["width"]), int(v["height"])
+        w, h = display_dims(v)   # phone portrait is landscape pixels + a rotation flag
         if abs(w / h - target_ar) > 0.01:
             emit(stage="cut_speed", status="warn", reason="letterbox",
                  sourceId=seg.source_id, source_res=[w, h],
@@ -442,22 +293,6 @@ def assert_duration(out_path: str, expected_s: float, profile: Profile,
     return result
 
 
-@dataclass(frozen=True)
-class CutSpeedOptions:
-    """Optional knobs for one cut+speed render (keeps entry points ≤4 params).
-
-    Attributes:
-        work_dir: Where the per-segment parts land.
-        proxy_scale: When set, render a DOWNSCALED proxy mezzanine through the
-            SAME segment math (see :func:`proxy_profile`); ``None`` = full res.
-    """
-
-    work_dir: str
-    proxy_scale: float | None = None
-    before_encode: Callable[[], None] | None = None
-    picture_consumption: SourceColorPictureConsumption | None = None
-
-
 def render_cut_speed(plan: dict, manifest: dict, out_path: str,
                      work_dir: str) -> dict:
     """Compile the plan and render its cut+speed mezzanine into ``out_path``."""
@@ -478,6 +313,10 @@ def _cut_source_setup(plan: dict, manifest: dict, opts: CutSpeedOptions) -> tupl
     used_paths = {id_to_path[seg.source_id] for seg in tmap.segments}
     channels = observe_cut_source_set(used_paths)
     profile = decide_profile(id_to_path[tmap.segments[0].source_id])
+    if opts.reframe is not None:
+        if opts.proxy_scale is not None:
+            raise ValueError("fused reframe cannot use a proxy profile")
+        profile = opts.reframe.output_profile(profile)
     if opts.proxy_scale is not None:
         profile = proxy_profile(profile, opts.proxy_scale)
         emit(stage="cut_speed", status="proxy", scale=opts.proxy_scale,
@@ -495,12 +334,48 @@ def render_cut_speed_opts(plan: dict, manifest: dict, out_path: str,
         picture_guard()
     if options_guard is not None:
         options_guard()
-    work_dir = opts.work_dir
     tmap, id_to_path, channels, profile = _cut_source_setup(plan, manifest, opts)
     emit(stage="cut_speed", status="profile", width=profile.width,
          height=profile.height, fps=profile.fps_arg, pix_fmt=profile.pix_fmt)
-    _warn_off_profile(tmap.segments, id_to_path, profile)
+    if opts.reframe is None:
+        _warn_off_profile(tmap.segments, id_to_path, profile)
+    with execution_scope(channels, picture_guard is None and options_guard is None) as recording:
+        setup = (tmap, id_to_path, channels, profile)
+        parts, frames_done = _encode_parts(setup, opts, options_guard, recording)
+        return _finish_cut((parts, frames_done, out_path), setup,
+                           (opts, picture_guard, options_guard), recording)
+
+
+def _finish_cut(outputs: tuple, setup: tuple, guards: tuple, recording: object) -> dict:
+    """Retain all duration, source and original-owner gates before publishing."""
+    parts, frames_done, out_path = outputs
+    tmap, _id_to_path, channels, profile = setup
+    opts, picture_guard, options_guard = guards
+    work_dir = opts.work_dir
+    concat_parts(parts, out_path, work_dir, profile)
+    joined = probe_video_frames(out_path)
+    if joined != frames_done:   # the index-rebuilt clock would hide a lost/duplicated packet
+        raise RuntimeError(f"joined mezzanine carries {joined} frames but the parts hold {frames_done}")
+    assert_cut_sources_stable(channels)
+    emit(stage="cut_speed", status="concat", parts=len(parts))
+    result = assert_duration(out_path, tmap.output_duration, profile, len(parts))
+    result["channelNormalizationReceipts"] = cut_source_receipts(channels)
+    if opts.reframe is not None:
+        result["fusedReframe"] = opts.reframe.record()
+    if picture_guard is not None:
+        picture_guard()
+    if options_guard is not None:
+        options_guard()
+    result["executionReceipt"] = recording.publish(out_path)
+    emit(stage="cut_speed", status="done", **{k: v for k, v in result.items() if k != "executionReceipt"})
+    return result
+
+def _encode_parts(setup: tuple, opts: CutSpeedOptions,
+                  options_guard: Callable | None, recording: object) -> tuple[list[str], int]:
+    """Encode each part with its full command and cumulative clock observation."""
     parts: list[str] = []
+    tmap, id_to_path, channels, profile = setup
+    work_dir, picture_guard = opts.work_dir, opts.before_encode
     segs, frames_done = tmap.segments, 0
     for i, seg in enumerate(segs):
         if options_guard is not None:
@@ -515,26 +390,18 @@ def render_cut_speed_opts(plan: dict, manifest: dict, out_path: str,
         tail_channels = channels[tail.src_path] if tail else None
         job_args = (source_path, profile, tail, channels[source_path], tail_channels, picture_guard)
         job = EncodeJob(*job_args) if opts.picture_consumption is None else EncodeJob(*job_args, picture_consumption=opts.picture_consumption)
-        frames_done += encode_segment(seg, job, part, frames_done)
+        if opts.reframe is not None:
+            job = replace(job, reframe=opts.reframe)
+        recording.begin(job, frames_done)
+        frames = encode_segment(seg, job, part, frames_done)
+        recording.finish(part, frames)
+        frames_done += frames
         parts.append(part)
         emit(stage="cut_speed", status="segment", index=seg.index,
              sourceId=seg.source_id,
              out_len=round((seg.src_end - seg.src_start) / seg.speed, 4),
              **({"jcutTailS": round(tail.lead_s, 4)} if tail else {}))
-    concat_parts(parts, out_path, work_dir, profile)
-    joined = probe_video_frames(out_path)
-    if joined != frames_done:   # the index-rebuilt clock would hide a lost/duplicated packet
-        raise RuntimeError(f"joined mezzanine carries {joined} frames but the parts hold {frames_done}")
-    assert_cut_sources_stable(channels)
-    emit(stage="cut_speed", status="concat", parts=len(parts))
-    result = assert_duration(out_path, tmap.output_duration, profile, len(parts))
-    result["channelNormalizationReceipts"] = cut_source_receipts(channels)
-    if picture_guard is not None:
-        picture_guard()
-    if options_guard is not None:
-        options_guard()
-    emit(stage="cut_speed", status="done", **result)
-    return result
+    return parts, frames_done
 
 
 def main() -> int:

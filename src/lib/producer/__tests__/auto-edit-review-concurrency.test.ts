@@ -181,7 +181,7 @@ async function planningMergesConcurrentIssues(root: string): Promise<void> {
       const plan = JSON.parse(readFileSync(value.planPath, "utf8"));
       writeFileSync(value.planPath, JSON.stringify({
         ...plan, planVersion: 2,
-        graphicsTrack: [{ start: 0, end: 1, template: "statement-card" }],
+        graphicsTrack: [{ start: 0, end: 1, template: "line-swap" }],
       }));
       return {
         provider: "codex", ms: 1,

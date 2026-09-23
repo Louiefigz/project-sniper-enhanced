@@ -19,8 +19,13 @@ function configuredPath(name: string): string {
   return realpathSync(value);
 }
 
+/** The guided checkpoint renders in the approved container, which the Mac package does not provide. */
+export const GUIDED_CONTAINER_UNAVAILABLE = "The guided opening/body checkpoint workflow renders its graphics in the approved "
+  + "container renderer, which this Mac package does not include. Use Auto Edit or the native Short/Long route instead.";
+
 /** Observe explicit local controls before the durable claim. This does not contact Docker. */
 export function captureOpeningRuntimeControl(proposal: OpeningReadiness): OpeningRuntimeControlV1 {
+  if (!process.env.SNIPER_DOCKER_PATH && !process.env.SNIPER_RENDER_IMAGE_ID) throw new Error(GUIDED_CONTAINER_UNAVAILABLE);
   if (!proposal.job.ctx.pipeline) throw new Error("Opening runtime controls require the exact pinned pipeline; no current-repository fallback");
   const dockerPath = configuredPath("SNIPER_DOCKER_PATH"), dockerSocketPath = configuredPath("SNIPER_DOCKER_SOCKET");
   accessSync(dockerPath, constants.X_OK);

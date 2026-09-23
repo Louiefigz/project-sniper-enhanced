@@ -101,7 +101,7 @@ class StudioPendingFileTests(unittest.TestCase):
         with patch.object(sync_apply, "gate_verdict", side_effect=late):
             code, output = fixtures.fixtures._run_main([str(self.case.studio), "--apply"])
         self.assertEqual(code, 2, output)
-        before["studio/compositions/gfx-02-text-element-wide.html"] += fixtures.MARKER.encode()
+        before["studio/compositions/gfx-02-marker-highlight.html"] += fixtures.MARKER.encode()
         self.assertEqual(self.case._snapshot(), before)
         self.assertTrue(unsynced_changes(str(self.case.studio)))
 

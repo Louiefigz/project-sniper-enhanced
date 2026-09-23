@@ -3,12 +3,14 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import {
+  brainModel,
   brainProviderLabel,
   brainProvider,
   claudeModelArgs,
   claudeProcessEnv,
   claudeSettings,
   codexSettings,
+  subscriptionProvider,
 } from "../../../app/api/_lib/ai-provider";
 import { buildAiEditInvocation } from
   "../../../app/api/producer/ai-edit/execution";
@@ -78,6 +80,7 @@ assert.equal(authoringReasoning({
 
 // Claude Code is the visible editor default; Codex remains an explicit opt-in.
 delete process.env.SNIPER_BRAIN_PROVIDER;
+delete process.env.SNIPER_PROVIDER;
 process.env.SNIPER_EXECUTION_MODE = "local";
 assert.equal(brainProvider(), "legacy");
 process.env.SNIPER_EXECUTION_MODE = "live";
@@ -85,7 +88,40 @@ assert.equal(brainProvider(), "legacy");
 process.env.SNIPER_BRAIN_PROVIDER = "codex";
 assert.equal(brainProvider(), "codex");
 
-// Claude keeps only subscription/runtime configuration, never app provider keys.
+// The installer's SNIPER_PROVIDER and the app's SNIPER_BRAIN_PROVIDER select one
+// provider for every call; either alone is enough, a disagreement is refused.
+for (const [chosen, brain, expected] of [
+  ["codex", undefined, "codex"], ["claude", undefined, "legacy"],
+  ["codex", "codex", "codex"], ["claude", "legacy", "legacy"],
+  [undefined, "legacy", "legacy"], [undefined, "codex", "codex"],
+] as const) {
+  if (chosen === undefined) delete process.env.SNIPER_PROVIDER; else process.env.SNIPER_PROVIDER = chosen;
+  if (brain === undefined) delete process.env.SNIPER_BRAIN_PROVIDER; else process.env.SNIPER_BRAIN_PROVIDER = brain;
+  assert.equal(brainProvider(), expected, `${chosen}/${brain}`);
+  assert.equal(subscriptionProvider(), expected === "codex" ? "codex" : "claude");
+  assert.equal(brainModel(), expected === "codex" ? codexSettings().model : claudeSettings().model);
+}
+for (const [chosen, brain] of [["claude", "codex"], ["codex", "legacy"]] as const) {
+  process.env.SNIPER_PROVIDER = chosen; process.env.SNIPER_BRAIN_PROVIDER = brain;
+  assert.throws(() => brainProvider(), /select different editor brains/);
+}
+process.env.SNIPER_PROVIDER = "openai";
+delete process.env.SNIPER_BRAIN_PROVIDER;
+assert.throws(() => brainProvider(), /SNIPER_PROVIDER must be one of: claude, codex/);
+delete process.env.SNIPER_PROVIDER;
+process.env.SNIPER_BRAIN_PROVIDER = "codex";
+
+// One CLI setting per provider, validated at the boundary.
+delete process.env.CLAUDE_BIN;
+assert.equal(claudeSettings().bin, "claude");
+process.env.CLAUDE_BIN = "/opt/sniper/runtime/cli/node_modules/.bin/claude";
+assert.equal(claudeSettings().bin, "/opt/sniper/runtime/cli/node_modules/.bin/claude");
+process.env.CLAUDE_BIN = "claude\n--settings";
+assert.throws(() => claudeSettings(), /CLAUDE_BIN contains an invalid value/);
+delete process.env.CLAUDE_BIN;
+
+// Claude keeps only subscription/runtime configuration, never app provider keys
+// and never an inherited login token (Sniper signs in through CLAUDE_CONFIG_DIR).
 assert.deepEqual(
   claudeProcessEnv({
     HOME: "/Users/test",
@@ -105,8 +141,8 @@ assert.deepEqual(
     HOME: "/Users/test",
     PATH: "/usr/bin",
     CLAUDE_CONFIG_DIR: "/Users/test/.claude",
-    CLAUDE_CODE_OAUTH_TOKEN: "subscription-token",
     CLAUDE_CODE_DISABLE_FAST_MODE: "1",
+    DISABLE_AUTOUPDATER: "1",
   },
 );
 
@@ -218,7 +254,7 @@ assert.equal(cutAllowed.includes("Glob"), false);
 assert.equal(cutAllowed.includes("Grep"), false);
 assert.equal(cutArgs.includes("--safe-mode"), false);
 assert.equal(cutArgs.includes("--tools"), false);
-assert.ok(cutAllowed.split(",").includes("Skill(producer)"));
+assert.ok(!cutAllowed.split(",").includes("Skill(producer)"), "skills never load with no setting sources");
 assert.equal(cutArgs[cutArgs.indexOf("--permission-mode") + 1], "dontAsk");
 const retained = { ...ctx, brainSessionId: "session-123" };
 const firstTurn = claudeArgs(retained, "cut", "start");

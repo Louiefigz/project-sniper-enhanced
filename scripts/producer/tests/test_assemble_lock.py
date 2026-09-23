@@ -171,6 +171,7 @@ class MainLockLifecycleTests(unittest.TestCase):
         ]
         buf = io.StringIO()
         with mock.patch.object(asm, "assemble", new=fake_assemble), \
+                mock.patch("assemble_arguments.load_documents", return_value=({}, None)), \
                 mock.patch.object(sys, "argv", argv), \
                 contextlib.redirect_stdout(buf):
             asm.main()

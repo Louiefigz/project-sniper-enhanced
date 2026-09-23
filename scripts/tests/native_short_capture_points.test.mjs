@@ -54,3 +54,15 @@ test('large capture schedules fail before starting a browser', () => {
   plan.canvas.motion = Array.from({length: 1000}, (_, index) => ({startFrame: index * 3, durationFrames: 1}));
   assert.throws(() => capturePoints(plan), /bounded capture inventory/);
 });
+
+test('catalog title capture covers actual mount boundaries without a built-in title', () => {
+  const plan=fixture();delete plan.canvas.titleCard;
+  plan.canvas.frameRate='30/1';plan.canvas.totalFrames=120;
+  plan.catalogFiles=[{file:'compositions/title.html'}];
+  plan.catalogTitle={file:'compositions/title.html'};
+  plan.extension={markup:'<div id="catalog-title" data-composition-id="line-swap" data-composition-src="compositions/title.html" data-start="0" data-duration="3.5"></div>'};
+  const points=capturePoints(plan);
+  for(const frame of [0,1,52,53,54,104,105,106])assert.ok(points.includes(frame));
+  plan.extension.markup=plan.extension.markup.replace('id="catalog-title"','');
+  assert.throws(()=>capturePoints(plan),/stable IDs/);
+});

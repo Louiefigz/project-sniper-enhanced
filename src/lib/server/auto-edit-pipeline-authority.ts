@@ -1,3 +1,4 @@
+import { assertVisualSourceSnapshot, VISUAL_SOURCE_POLICY_PATH } from "@/lib/producer/visual-source-policy";
 import { createHash, randomUUID } from "node:crypto";
 import {
   existsSync,
@@ -170,6 +171,7 @@ export function restoreAutoEditPipeline(
   if (expected.schemaVersion !== SCHEMA_VERSION || !path.isAbsolute(expected.snapshotRoot)) {
     throw new Error("Pinned Producer pipeline envelope is invalid");
   }
+  assertVisualSourceSnapshot(expected.files, bytesHash(readFileSync(path.join(repositoryRoot(), VISUAL_SOURCE_POLICY_PATH))));
   const lock = parseLock(expected);
   const sorted = [...lock.files].sort((left, right) => compareText(left.path, right.path));
   assertPipelineAssetClosure(sorted);
@@ -183,6 +185,7 @@ export function restoreAutoEditPipeline(
 }
 
 export function pipelineAuthorityPath(ctx: AutoEditCtx, relative: string): string {
+  if (ctx.pipeline) assertVisualSourceSnapshot(ctx.pipeline.files, bytesHash(readFileSync(path.join(repositoryRoot(), VISUAL_SOURCE_POLICY_PATH))));
   const root = ctx.pipeline ? restoreAutoEditPipeline(ctx.pipeline).snapshotRoot : repositoryRoot();
   return path.join(root, ...relative.split("/"));
 }

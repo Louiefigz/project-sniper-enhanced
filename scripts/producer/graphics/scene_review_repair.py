@@ -6,6 +6,7 @@ import hashlib
 from dataclasses import dataclass
 
 from graphics.scene_contract import SceneContractError, canonical_json
+from graphics.visual_source_policy import require_scene_sources
 from graphics.scene_package_contract import ResolvedScenePackage
 from graphics.scene_package_render import (
     ScenePackageRenderRequest,
@@ -71,7 +72,10 @@ def _assert_hashed_receipt(
 
 
 def _revision_surface(scene: dict) -> dict:
+    require_scene_sources(scene)
     value = copy.deepcopy(scene)
+    if "visualSources" in value:
+        value["visualSources"]["subjectSha256"] = None
     value["version"] = 1
     value["composition"]["variables"] = {
         key: None for key in value["composition"]["variables"]}

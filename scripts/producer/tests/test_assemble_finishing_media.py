@@ -1,7 +1,7 @@
 """Caller-shaped evidence: render.py base -> assemble.py -> revisions, finishing on real media.
 
 This drives the actual ordinary callers (not mocks): the source-float-v2 base render admits a plan
-with cleanup, gain and an SFX seam, assemble builds the finished full-program master and delivers it,
+with cleanup and gain, assemble builds the finished full-program master and delivers it,
 then a gain revision, a non-audio revision, an invalid request and an opening excerpt are exercised.
 Numbers here are not creator listening approval.
 """
@@ -33,8 +33,6 @@ from test_program_finish_media import GAIN, decoded
 from test_render_audio_cache_media import with_synthetic_music
 from test_render_source_audio_media import _context, _fixture
 
-SEAM = [{"outTime": 1.0, "kind": "white-flash", "sfx": True}]
-
 
 def _events(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text().splitlines() if line.startswith("{")]
@@ -58,7 +56,7 @@ class CallerShapedFinishingTests(unittest.TestCase):
         fixture_plan, cls.manifest = _fixture(cls.root)
         cls.manifest = with_synthetic_music(cls.root, cls.manifest)
         cls.plan = {**fixture_plan, "audioEnhance": {"preset": "voice"},
-                    "audioGain": copy.deepcopy(GAIN), "transitions": copy.deepcopy(SEAM)}
+                    "audioGain": copy.deepcopy(GAIN), "transitions": []}
         cls.ctx = _context(cls.root, cls.plan, cls.manifest, SOURCE_FLOAT_POLICY_V2)
         cls.ctx.skip_graphics = True
         cls.output = Path(cls.ctx.out_dir)
@@ -90,9 +88,6 @@ class CallerShapedFinishingTests(unittest.TestCase):
         for stage in ("audio_enhance", "audio_gain"):
             self.assertIn(stage, skipped)
             self.assertIn("float program", skipped[stage]["reason"])
-        transitions = next(row for row in self.base_events
-                           if row.get("stage") == "transitions" and row.get("status") == "stage_done")
-        self.assertEqual(transitions["events"], 1)
         fingerprint = bound_json(self.output / "base.fingerprint.json")
         self.assertEqual(len(fingerprint.get("sourceAudioBusReceiptHash", "")), 64)
         base_master = bound_json(Path(self.ctx.source_audio_bus.directory) / "master-receipt.json")
@@ -103,10 +98,13 @@ class CallerShapedFinishingTests(unittest.TestCase):
         self.assertTrue(self.result["delivery"]["qualified"])
         self.assertFalse(self.result["programMasterReused"])
         receipt = bound_json(Path(self._pointer()["programMasterReceiptPath"]))
+        self.assertEqual(receipt["schemaVersion"], 3)
+        self.assertIn(receipt["masteringDecision"]["branch"], {"linear", "static", "dynamic"})
+        self.assertTrue(receipt["masteringFilter"].startswith(receipt["masteringDecision"]["filter"]))
         finishing = receipt["finishing"]
         self.assertEqual(finishing["settings"]["audioGain"], [{"outStart": 1.0, "outEnd": 1.5, "dB": 6.0}])
         self.assertEqual(finishing["settings"]["audioEnhance"], {"preset": "voice"})
-        self.assertEqual(finishing["sfx"]["cues"][0]["startSample"], 33_600)
+        self.assertIsNone(finishing["sfx"])
         self.assertGreater(finishing["cleanup"]["measuredLatencySamples"], 0)
         self.assertTrue(receipt["wholeProgramMeasurement"]["qualified"])
         final, master = decoded(self.job.out), decoded(receipt["masteredAudio"]["path"])

@@ -115,9 +115,9 @@ class RenderLaneFixture(unittest.TestCase):
             "outEnd": 2.5,
             "anchor": "free-band",
             "spec": {
-                "num": "System No.1",
-                "line1": "Familiarity",
-                "line2": "Rule",
+                "num": "Part 1",
+                "line1": "The Setup",
+                "line2": "Basics",
                 "side": "left",
                 "accent": "#054BC9",
             },

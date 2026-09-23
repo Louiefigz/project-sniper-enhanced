@@ -1,9 +1,13 @@
-/* PROJECT SNIPER — shared motion tokens (G4).
-   Source: scripts/producer/docs/findings/JADEN_STYLE.md §5.3 (frame-verified
-   across 6 reels): text pop-in <= 1-2 frames (<=83ms), NO fade, NO slide;
-   EXIT — THE LAW: never animated out, hard-off <=1-2f (exactly ON the next cut
-   or an instant pop at the semantic boundary). CSS twins live in tokens.css
-   (--pop-in-dur / --pop-scale-from / --instant-out-dur).
+/* PROJECT SNIPER — shared motion tokens.
+   Two build lanes share one helper so every composition moves the same way.
+
+   POP lane (short-form keyword and lockup layers) — Sniper design parameters:
+   text pops in within 2 frames (alpha switches on in one frame, a small
+   0.94 -> 1 scale settle finishes inside the 2-frame budget), with no fade and
+   no slide, so a word lands on the syllable that says it. EXIT: never
+   animated out — the layer is hard-off (0 frames) on the next cut or at its
+   window end, so no half-transparent text sits over a new shot. CSS twins live
+   in tokens.css (--pop-in-dur / --pop-scale-from / --instant-out-dur).
 
    Usage (inside a comp's paused GSAP timeline build):
      <script src="/motion-tokens.js"></script>
@@ -18,32 +22,32 @@
    parent own any static centering translate. Deterministic + seek-safe:
    sets/fromTo only, no wall clocks, no randomness.
 
-   NATEHERK pack (docs/studies/NATEHERK_STUDY.md §3 ranks 2-4 + §2 T-D) — a SEPARATE
-   grammar lane from the jaden pop law above; nothing here changes
-   popIn/instantOut. Tokens (CSS twins: --text-ramp-dur / --eyebrow-lead /
-   --skeleton-gap / --exit-blur-dur in tokens.css):
-     TEXT_RAMP_S    0.20  in-place opacity ramp; text NEVER travels more than
-                          a few px (rank 4, measured ghost->ink 120-250ms)
-     EYEBROW_LEAD_S 0.25  eyebrow precedes its headline (rank 3, band 0.08-0.5)
-     SKELETON_GAP_S 0.35  containers/hairlines land BEFORE text (rank 2)
-     EXIT_BLUR_S    0.15  graphics-layer blur+fade+recede exit (T-D
-                          67.12->67.28 ~150ms ≈ 4f @30fps; python twin:
+   MODULE lane (long-form information cards) — a SEPARATE build grammar;
+   nothing here changes popIn/instantOut. Tokens (CSS twins: --text-ramp-dur /
+   --eyebrow-lead / --skeleton-gap / --exit-blur-dur in tokens.css):
+     TEXT_RAMP_S    0.20  in-place opacity ramp; text never travels, so the
+                          reading eye stays anchored while words resolve
+     EYEBROW_LEAD_S 0.25  the eyebrow label leads its headline, so the topic
+                          is read before the claim
+     SKELETON_GAP_S 0.35  containers/hairlines land BEFORE their text, so the
+                          layout is legible before the words arrive
+     EXIT_BLUR_S    0.15  optional graphics-layer blur+fade+recede exit
+                          (~4-5 frames @30fps; python twin:
                           scripts/producer/graphics/exit_on_cut.py) */
 (function () {
   "use strict";
 
   var FPS = 30;                    // producer delivery default (CANVAS.fps_default)
-  var POP_IN_S = 2 / FPS;          // <=2 frames — the measured pop ceiling
+  var POP_IN_S = 2 / FPS;          // <=2 frames — the pop ceiling
   var POP_SCALE_FROM = 0.94;       // subtle settle; NEVER an alpha fade
-  var INSTANT_OUT_S = 0;           // exits are hard-off, THE LAW
+  var INSTANT_OUT_S = 0;           // exits are hard-off
 
-  // ---- NATEHERK pack tokens (NATEHERK_STUDY.md §3 ranks 2-4, §2 T-D) ----
+  // ---- MODULE lane tokens (see header) ----
   var TEXT_RAMP_S = 0.2;
   var EYEBROW_LEAD_S = 0.25;
   var SKELETON_GAP_S = 0.35;
   var EXIT_BLUR_S = 0.15;
-  var EXIT_BLUR_PX = 12;           // blur radius: study gives dur/alpha/scale,
-                                   // not px — 12px default, override per call
+  var EXIT_BLUR_PX = 12;           // blur radius default; override per call
 
   /** Pop `target` in at `at` seconds: alpha snaps ON (1 frame), scale settles
       0.94 -> 1 inside the 2-frame budget. */
@@ -55,14 +59,14 @@
         immediateRender: false }, t);
   }
 
-  /** Hard-off `target` at `at` seconds — 0 frames, no fade (T7/§5.3 law). */
+  /** Hard-off `target` at `at` seconds — 0 frames, no fade. */
   function instantOut(tl, target, at) {
     tl.set(target, { autoAlpha: 0 }, Math.max(0, Number(at) || 0));
   }
 
-  /** NATEHERK rank 4 — in-place opacity ramp: alpha 0 -> 1 over TEXT_RAMP_S
-      at `at`. NO travel (the study's phase-correlation shows zero drift; all
-      headlines are ghost->ink ramps). immediateRender stays DEFAULT (true):
+  /** MODULE lane — in-place opacity ramp: alpha 0 -> 1 over TEXT_RAMP_S
+      at `at`. NO travel: text resolves where it will be read.
+      immediateRender stays DEFAULT (true):
       the from-state hides the target from t=0 until its ramp — one ramp per
       target (a second fromTo on the same target would steal the initial). */
   function textRamp(tl, target, at) {
@@ -71,10 +75,10 @@
       { autoAlpha: 1, duration: TEXT_RAMP_S, ease: "power2.out" }, t);
   }
 
-  /** NATEHERK rank 2 — skeleton-first build: the container/hairline shell
+  /** MODULE lane — skeleton-first build: the container/hairline shell
       ramps at `opts.at` (default 0), its content ramps at +`opts.gapS`
-      (default SKELETON_GAP_S = 0.35 — MG-1: panel skeleton lands as one unit,
-      holds, THEN fills). Both are in-place opacity ramps (rank 4). */
+      (default SKELETON_GAP_S = 0.35: the panel lands as one unit, holds,
+      THEN fills). Both are in-place opacity ramps. */
   function skeletonFirst(tl, containerEl, contentEl, opts) {
     var o = opts || {};
     var at = Math.max(0, Number(o.at) || 0);
@@ -83,7 +87,7 @@
     textRamp(tl, contentEl, at + gap);
   }
 
-  /** NATEHERK T-D — graphics-layer-only exit: blur + fade + slight recede
+  /** MODULE lane — graphics-layer-only exit: blur + fade + slight recede
       (scale -> 0.98) over EXIT_BLUR_S ending exactly at `at + EXIT_BLUR_S`.
       Comps schedule it at D - EXIT_BLUR_S so the exit completes on the seam
       (the exitOnCut clamp point). `blurPx` optional (default EXIT_BLUR_PX). */

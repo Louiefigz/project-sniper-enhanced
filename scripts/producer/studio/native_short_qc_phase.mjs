@@ -4,6 +4,7 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import {pathToFileURL} from 'node:url';
 import {nativeCaptureQcPoints} from './native_short_capture.mjs';
+import {encodeSamples} from './native_long_capture.mjs';
 import {reuseNativeForwardQc} from './native_forward_qc.mjs';
 import {checkTypography,visualState} from './native_short_capture_checks.mjs';
 import {qcCompilerSdk,compilerPins} from './native_short_qc_compiler.mjs';
@@ -155,6 +156,7 @@ export async function finishNativeShortQc(request, expectedScheduleSha256, depen
     ...nativeCaptureEvidence(prepared.context),expectedCapturePoints:schedule.expectedCapturePoints,
     forwardReuse:prepared.forward.evidence,transport:{sessions:sessions.map(row=>row.transport),errors:0},
     phaseEvidence:{schedule:scheduleFor(request),scheduleSha256:expectedScheduleSha256,chunks}};
+  await encodeSamples(prepared.context,receipt,dependencies.encode);
   const sha256=writeQcRecord(path.join(request.output,'native-frames.json'),receipt);
   return {status:receipt.status,occurrences:frames.length,sessions:sessions.length,sha256};
 }

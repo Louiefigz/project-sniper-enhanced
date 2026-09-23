@@ -11,6 +11,7 @@ from headless.repair_intent import (
     ParentRefV1,
     RepairIntentV1,
     RepairIntentError,
+    RepairApplication,
     accent_policy,
     apply_repair,
     approved_plan_digest,
@@ -26,12 +27,12 @@ def _plan() -> dict:
     return {"planVersion": 3, "graphicsTrack": [
         {"id": "g-00000001", "kind": "section-marker",
          "outStart": 1.0, "outEnd": 3.5, "anchor": "free-band",
-         "spec": {"num": "System No.1", "line1": "Old",
-                  "line2": "Rule", "side": "left", "accent": "#054BC9"}},
+         "spec": {"num": "Part 1", "line1": "Old",
+                  "line2": "Basics", "side": "left", "accent": "#054BC9"}},
         {"id": "g-00000002", "kind": "section-marker",
          "outStart": 4.0, "outEnd": 6.5, "anchor": "free-band",
-         "spec": {"num": "System No.2", "line1": "Keep",
-                  "line2": "Rule", "side": "right", "accent": "#F5E960"}},
+         "spec": {"num": "Part 2", "line1": "Keep",
+                  "line2": "Basics", "side": "right", "accent": "#F5E960"}},
     ], "captions": {"enabled": True}}
 
 
@@ -51,30 +52,30 @@ def _intent(plan: dict) -> dict:
             "expectedOld": "#054bc9", "value": "#ffd400"}
 
 
+def _catalog_plan() -> dict:
+    """Current source policy passes; the retired effect schema stays unchanged."""
+    plan = _plan()
+    for row in plan['graphicsTrack']:
+        row['kind'] = 'line-swap'
+        row['spec'] = {'lineA': 'Review the plan', 'lineB': 'Check the result',
+                       'underlineWord': '', 'swapAt': 1.2, 'accent': '#054BC9'}
+    return plan
+
+
 class RepairIntentTests(unittest.TestCase):
-    def test_one_pointer_repair_is_controller_applied_without_source_mutation(self) -> None:
+    def test_retired_repair_stops_before_mutation_or_diff(self) -> None:
+        from unittest.mock import patch
         original = _plan()
         before = copy.deepcopy(original)
         intent = parse_repair_intent(_intent(original))
-        parent = intent.expected_parent
-        application = apply_repair(
-            intent, parent, original, current_accent_policy())
-        candidate = application.decoded_plan()
+        with patch('headless.repair_intent.changed_pointers') as diff, \
+                self.assertRaisesRegex(ValueError, 'section-marker.*retired'):
+            apply_repair(intent, intent.expected_parent, original, current_accent_policy())
+        diff.assert_not_called()
         self.assertEqual(original, before)
-        self.assertEqual(
-            candidate["graphicsTrack"][0]["spec"]["accent"],
-            "#FFD400")
-        self.assertEqual(candidate["graphicsTrack"][1],
-                         original["graphicsTrack"][1])
-        self.assertEqual(application.changed_pointers,
-                         ("/graphicsTrack/0/spec/accent",))
-        self.assertEqual(application.before_digest,
-                         approved_plan_digest(original))
-        self.assertNotEqual(application.after_digest,
-                            application.before_digest)
 
     def test_unknown_fields_indexes_bad_ids_and_noops_reject(self) -> None:
-        plan = _plan()
+        plan = _catalog_plan()
         cases = []
         extra = _intent(plan)
         extra["unexpected"] = True
@@ -96,7 +97,7 @@ class RepairIntentTests(unittest.TestCase):
                 parse_repair_intent(value)
 
     def test_stale_parent_or_plan_never_rebases(self) -> None:
-        plan = _plan()
+        plan = _catalog_plan()
         intent = parse_repair_intent(_intent(plan))
         stale_parent = dataclasses.replace(
             intent.expected_parent, commit_digest="b" * 64)
@@ -112,7 +113,7 @@ class RepairIntentTests(unittest.TestCase):
 
     def test_duplicate_or_noncanonical_track_identity_is_ineligible(self) -> None:
         for identity in ("g-00000001", "legacy-id", None):
-            plan = _plan()
+            plan = _catalog_plan()
             if identity is None:
                 plan["graphicsTrack"][1].pop("id")
             else:
@@ -127,18 +128,12 @@ class RepairIntentTests(unittest.TestCase):
                     intent, intent.expected_parent, plan,
                     current_accent_policy())
 
-    def test_wrong_kind_stale_value_and_off_token_value_reject(self) -> None:
-        base = _plan()
+    def test_catalog_kind_cannot_be_substituted_for_retired_effect(self) -> None:
+        base = _catalog_plan()
         cases = []
         wrong_kind = copy.deepcopy(base)
-        wrong_kind["graphicsTrack"][0]["kind"] = "statement-card"
+        wrong_kind["graphicsTrack"][0]["kind"] = "marker-highlight"
         cases.append((wrong_kind, _intent(wrong_kind), "section marker"))
-        stale = _intent(base)
-        stale["expectedOld"] = "#FFFFFF"
-        cases.append((base, stale, "old value"))
-        off_token = _intent(base)
-        off_token["value"] = "#123456"
-        cases.append((base, off_token, "outside accent policy"))
         for plan, document, message in cases:
             intent = parse_repair_intent(document)
             with self.subTest(message=message), \
@@ -147,8 +142,20 @@ class RepairIntentTests(unittest.TestCase):
                     intent, intent.expected_parent, plan,
                     current_accent_policy())
 
-    def test_forged_or_self_consistent_broad_policy_is_rejected(self) -> None:
+    def test_retirement_rejects_stale_value_and_off_policy_requests_without_mutation(self) -> None:
+        """Neither alternative request can reopen the retired effect executor."""
         plan = _plan()
+        before = copy.deepcopy(plan)
+        for key, value in (("expectedOld", "#FFFFFF"), ("value", "#123456")):
+            document = _intent(plan)
+            document[key] = value
+            intent = parse_repair_intent(document)
+            with self.subTest(field=key), self.assertRaisesRegex(ValueError, "section-marker.*retired"):
+                apply_repair(intent, intent.expected_parent, plan, current_accent_policy())
+            self.assertEqual(plan, before)
+
+    def test_forged_or_self_consistent_broad_policy_is_rejected(self) -> None:
+        plan = _catalog_plan()
         intent = parse_repair_intent(_intent(plan))
         valid = accent_policy(("#054BC9", "#FFD400"))
         forged = AccentRepairPolicy("0" * 64, valid.allowed_values)
@@ -158,23 +165,22 @@ class RepairIntentTests(unittest.TestCase):
                     RepairIntentError, "policy identity"):
                 apply_repair(intent, intent.expected_parent, plan, policy)
 
-    def test_current_policy_is_effect_specific_and_application_is_immutable(self) -> None:
+    def test_historical_application_bytes_are_immutable_and_not_authority(self) -> None:
+        """Read-only receipt decoding does not invoke the retired executor."""
+        import json
         plan = _plan()
-        intent = parse_repair_intent(_intent(plan))
         policy = current_accent_policy()
         self.assertEqual(policy.allowed_values, ("#054BC9", "#FFD400"))
-        application = apply_repair(intent, intent.expected_parent, plan, policy)
+        application = RepairApplication(json.dumps(plan).encode(),
+            approved_plan_digest(plan), approved_plan_digest(plan), (),
+            "g-00000001", policy.policy_id)
         candidate = application.decoded_plan()
         candidate["graphicsTrack"][0]["spec"]["accent"] = "#123456"
-        self.assertEqual(
-            application.decoded_plan()["graphicsTrack"][0]["spec"]["accent"],
-            "#FFD400")
-        self.assertEqual(
-            application.after_digest,
-            approved_plan_digest(application.decoded_plan()))
+        self.assertEqual(application.decoded_plan(), plan)
+        self.assertEqual(application.after_digest, approved_plan_digest(plan))
 
     def test_direct_dataclass_construction_cannot_bypass_validation(self) -> None:
-        plan = _plan()
+        plan = _catalog_plan()
         parsed = parse_repair_intent(_intent(plan))
         bad_parent = ParentRefV1(
             parsed.expected_parent.authority_id, True,

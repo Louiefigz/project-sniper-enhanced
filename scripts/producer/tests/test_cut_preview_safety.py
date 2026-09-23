@@ -39,7 +39,7 @@ class CutPreviewSafetyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             artifact = Path(temporary).resolve() / "value.json"
             artifact.write_bytes(b'{"safe":true}')
-            with self.assertRaisesRegex(RuntimeError, "bounded regular"):
+            with self.assertRaisesRegex(RuntimeError, "exceeds byte limit: 13 > 3"):
                 read_bytes(artifact, 3)
             real_read = os.read
             def mutate_after_read(descriptor: int, size: int) -> bytes:

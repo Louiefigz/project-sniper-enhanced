@@ -5,9 +5,8 @@ import type {
 } from "./reference-types";
 
 const MODES = new Set<ReferenceMode>(["short", "longform"]);
-const STRATEGIES = new Set<ReferenceStrategy>(["mimic", "extend", "new-style"]);
-const TARGET_STYLES = new Set(["caleb", "jadenly", "angela"]);
-const KNOWN_STYLE_NAMES = new Set(["caleb", "jaden", "jadenly", "angela"]);
+const STRATEGIES = new Set<ReferenceStrategy>(["mimic", "new-style"]);
+const KNOWN_STYLE_NAMES = new Set(["restrained", "punch", "slideware"]);
 const FIELDS = new Set(["id", "mode", "strategy", "targetStyle", "candidateStyleName"]);
 const STORED_FIELDS = new Set(["schemaVersion", "referenceId", "mode", "strategy",
   "targetStyle", "candidateStyleName", "decidedAt"]);
@@ -26,24 +25,21 @@ export function parseReferenceDecision(body: Record<string, unknown>, decidedAt 
   const id = typeof body.id === "string" ? body.id.trim() : "";
   if (!id) throw new Error("id is required");
   if (!MODES.has(body.mode as ReferenceMode)) throw new Error("mode must be short or longform");
+  if (body.strategy === "extend" || body.targetStyle != null) {
+    throw new Error("Legacy style extension is retired; select the actual reference using mimic or new-style");
+  }
   if (!STRATEGIES.has(body.strategy as ReferenceStrategy)) {
-    throw new Error("strategy must be mimic, extend, or new-style");
+    throw new Error("strategy must be mimic or new-style");
   }
   const strategy = body.strategy as ReferenceStrategy;
-  const targetStyle = optionalName(body.targetStyle, "targetStyle");
+  const targetStyle = null;
   const candidateStyleName = optionalName(body.candidateStyleName, "candidateStyleName");
-  if (strategy === "extend" && !targetStyle) throw new Error("extend requires targetStyle");
-  if (strategy === "extend" && body.mode !== "short") throw new Error("extend is shorts-only");
-  if (targetStyle && !TARGET_STYLES.has(targetStyle)) {
-    throw new Error("targetStyle must be caleb, jadenly, or angela");
-  }
   if (strategy === "new-style" && !candidateStyleName) {
     throw new Error("new-style requires candidateStyleName");
   }
   if (strategy === "new-style" && candidateStyleName && KNOWN_STYLE_NAMES.has(candidateStyleName.toLowerCase())) {
-    throw new Error("new-style candidate must be outside Caleb, Jaden, and Angela; use extend instead");
+    throw new Error("new-style candidate must be outside the retired global styles");
   }
-  if (strategy !== "extend" && targetStyle) throw new Error("targetStyle is extend-only");
   if (strategy !== "new-style" && candidateStyleName) {
     throw new Error("candidateStyleName is new-style-only");
   }

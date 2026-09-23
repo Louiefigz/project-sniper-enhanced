@@ -30,6 +30,7 @@ from fractions import Fraction
 from typing import Callable, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from cut_reframe import FusedReframe
     from guided_presenter_base import PresenterBaseContext
     from guided_source_color_base_context import SourceColorBaseContext
 
@@ -50,7 +51,7 @@ from cut_manifestation_authority import (
 )
 from cut_speed import (CutSpeedOptions, probe_duration, probe_video, probe_video_frames,
                        render_cut_speed, render_cut_speed_opts)
-from edit_scope import lane_required
+from edit_scope import caption_burn_enabled, lane_required
 from graphics.exit_on_cut import apply_exit_on_cut
 from graphics.graphics_stage import suppress_captions
 from graphics_base_effects import legacy_caption_suppression_windows
@@ -74,6 +75,7 @@ from motion.recompose import (apply_recompose, requires_recompose,
                               stamp_entry_face_bboxes)
 from motion.transitions import apply_transitions
 from template_usage_approval import require_current as require_template_usage_approval
+from render_readiness import ReadinessRequest, require_readiness, require_draft_destination, finish_draft
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -113,6 +115,8 @@ class RenderCtx:
     audio_clock_policy: str = LEGACY_AUDIO_POLICY
     audio_admission: AudioAdmission | None = None
     source_audio_bus: SourceAudioBus | None = None
+    base_reuse_inputs: dict | None = None
+    fused_reframe: FusedReframe | None = None
     presenter_base: PresenterBaseContext | None = None  # Internal live owner; never a CLI flag.
     source_color_base: SourceColorBaseContext | None = None  # Internal lifetime, not a persisted proof.
 
@@ -169,21 +173,17 @@ def cut_stage(ctx: RenderCtx) -> str:
         return mezz
     parts_dir = os.path.join(ctx.work_dir, "cut-parts")
     os.makedirs(parts_dir, exist_ok=True)
-    if picture_guard is None:
-        proof = render_cut_speed(ctx.plan, ctx.manifest, mezz, parts_dir)
-    else:
-        options = CutSpeedOptions(parts_dir, before_encode=picture_guard)
-        if ctx.source_color_base is not None:
-            options = replace(options, picture_consumption=ctx.source_color_base.consumption)
-        proof = render_cut_speed_opts(ctx.plan, ctx.manifest, mezz,
-                                     options)
-        picture_guard()
+    proof = _render_cut(ctx, (mezz, parts_dir), picture_guard)
     parts = [os.path.join(parts_dir, f"part_{row.index:04d}.mp4")
              for row in tmap.segments]
     inputs = ManifestationInputs(
         ctx.plan, os.path.join(ctx.out_dir, "timeline_map.json"), parts, mezz,
         probe_video(mezz)["r_frame_rate"], proof)
     receipt = write_manifestation(inputs)
+    if "executionReceipt" in proof:
+        from fingerprint_io import write_json_atomic
+        write_json_atomic(os.path.join(ctx.out_dir, "cut_execution.json"),
+                          proof["executionReceipt"], 2)
     if ctx.source_color_base is not None:
         ctx.source_color_base.consumption.join_cut_manifestation(receipt, tuple(parts), mezz)
     if ctx.audio_admission is not None:
@@ -193,6 +193,24 @@ def cut_stage(ctx: RenderCtx) -> str:
          receiptHash=receipt["receiptHash"], parts=len(parts))
     emit(status="stage_done", stage="cut_speed", out=mezz)
     return mezz
+
+
+def _render_cut(ctx: RenderCtx, paths: tuple[str, str],
+                picture_guard: Callable[[], None] | None) -> dict:
+    """Select the safe encode shape while retaining original picture guards."""
+    mezz, parts_dir = paths
+    from cut_reframe import select_fusion
+    ctx.fused_reframe = select_fusion(ctx, picture_guard is not None)
+    if picture_guard is None and ctx.fused_reframe is None:
+        return render_cut_speed(ctx.plan, ctx.manifest, mezz, parts_dir)
+    options = CutSpeedOptions(parts_dir, before_encode=picture_guard, reframe=ctx.fused_reframe)
+    if ctx.source_color_base is not None:
+        options = replace(options, picture_consumption=ctx.source_color_base.consumption)
+    proof = render_cut_speed_opts(ctx.plan, ctx.manifest, mezz,
+                                 options)
+    if picture_guard is not None:
+        picture_guard()
+    return proof
 
 
 def _strip_rationale(entries: list[dict]) -> list[dict]:
@@ -315,8 +333,8 @@ def punch_stage(ctx: RenderCtx, video: str) -> str:
 
     Reads ``plan.punchIns`` (already validated by the lint gate). Runs before
     overlays/captions/graphics so composited elements stay fixed while the
-    footage reframes under them (the pro's checklist stays put through his
-    punch-outs — INTRO_MACHINE_VS_PRO_AUDIT §3).
+    footage reframes under them (an on-screen checklist stays put through a
+    punch-out — audit record in INTRO_MACHINE_VS_PRO_AUDIT §3).
     """
     wins = ctx.plan.get("punchIns") or []
     if not wins:
@@ -434,12 +452,10 @@ def _reframe_manual_stage(ctx: RenderCtx, mezz: str, framed: str) -> str:
 
 @timed_stage("reframe")
 def reframe_stage(ctx: RenderCtx, mezz: str) -> str:
-    """Stage 2: 9:16 reframe (shorts). Longform/none passes through.
-
-    ``reframe.layout == 'split'`` (or a fill-mode manual ``crop``) dispatches
-    to the manual-geometry renderer; layout absent + no crop = the original
-    strategy path, byte-for-byte unchanged.
-    """
+    """Reframe with the selected layout, manual crop or measured face windows."""
+    if ctx.fused_reframe is not None:
+        from cut_reframe import finish_fused_reframe
+        return finish_fused_reframe(ctx, mezz)
     mode = ctx.plan["target"]["mode"]
     cfg = ctx.plan.get("reframe") or {}
     if cfg.get("layout", "fill") == "split" or cfg.get("crop") is not None:
@@ -547,7 +563,7 @@ def graphics_track_stage(ctx: RenderCtx, video: str,
             "--cache-dir", os.path.join(SCRIPT_DIR, "..", "..", "templates",
                                         "motion", "renders", "cache"),
             # Eye-trace placements sidecar → out_dir so Audit B finds it
-            # (audit_motion.check_eye_trace — advisory WARN, LIAM move 4).
+            # (audit_motion.check_eye_trace — advisory WARN, eye-trace CM-4).
             "--placements-out", os.path.join(ctx.out_dir,
                                              "graphics_placements.json")]
     # Verify + A3 calibration wiring (occlusion allow-vocabulary, producer
@@ -658,7 +674,7 @@ def _explicit_caption_stage(ctx: RenderCtx, tmap: TimelineMap,
                             mode: str, cap_cfg: dict) -> str | None:
     from captions.caption_render import project_render_captions
     projection = project_render_captions(ctx, tmap)
-    burn = cap_cfg.get("burn", MODES[mode]["captions_burn"])
+    burn = caption_burn_enabled(ctx.plan)
     if not burn:
         emit(status="stage_skipped", stage="captions", reason="burn off",
              captionTrack=True)
@@ -703,7 +719,7 @@ def captions_stage(ctx: RenderCtx, tmap: TimelineMap) -> str | None:
     from captions.caption_plan_pipeline import has_explicit_caption_track
     if has_explicit_caption_track(ctx.plan):
         return _explicit_caption_stage(ctx, tmap, mode, cap_cfg)
-    if not cap_cfg.get("burn", MODES[mode]["captions_burn"]):
+    if not caption_burn_enabled(ctx.plan):
         emit(status="stage_skipped", stage="captions", reason="burn off")
         return None
     words = corrected_caption_words(ctx, tmap, emit)
@@ -876,6 +892,8 @@ def _write_base_artifacts(ctx: RenderCtx, tmap: TimelineMap, report: dict) -> No
     from guided_source_color_base_context import hold_source_color_base_guard
     source_guard = hold_source_color_base_guard(ctx)
     rec = fingerprint_record(ctx.plan, ctx.audio_clock_policy)
+    from base_reuse import completed_base_binding
+    rec["baseReuse"] = completed_base_binding(ctx)
     if ctx.audio_clock_policy == SOURCE_FLOAT_POLICY_V2:
         from audio.render_audio_cache import write_source_bus_pointer
         if ctx.source_audio_bus is None:
@@ -933,6 +951,8 @@ def _checkpoint_full_render(ctx: RenderCtx) -> None:
         return
     final = os.path.join(ctx.out_dir, "final.mp4")
     record = write_assembled_sidecar(final, ctx.plan)
+    from revision_ledger import record_render
+    record_render(final, ctx.plan, record)
     emit(status="final_provenance", planHash=record["planHash"],
          authorityHash=record["authorityHash"])
 
@@ -959,6 +979,8 @@ def _burn_explicit_caption_shards(ctx: RenderCtx, tmap: TimelineMap,
 
 def render(ctx: RenderCtx, audit: bool = True) -> dict:
     """Run the full chain (+ automatic Audit B); returns the render report."""
+    from graphics.visual_source_policy import require_plan_sources
+    require_plan_sources(ctx.plan)
     from guided_presenter_base import require_presenter_base
     require_presenter_base(ctx)
     from guided_source_color_base_context import hold_source_color_base_guard, source_color_stage
@@ -970,6 +992,8 @@ def render(ctx: RenderCtx, audit: bool = True) -> dict:
     emit(stage="audio_policy", status="admitted" if ctx.audio_admission else "legacy",
          policy=ctx.audio_clock_policy, sourceFinalClockParity="pending-output-QC" if ctx.audio_admission else "unqualified")
     gate(ctx)
+    from base_reuse import prepare_base_inputs
+    prepare_base_inputs(ctx)
     tmap = compile_stage(ctx)
     cut_mezzanine = source_color_stage(source_guard, cut_stage, (ctx,))
     mezz = source_color_stage(source_guard, channels_stage, (ctx, cut_mezzanine))
@@ -1053,6 +1077,17 @@ def render(ctx: RenderCtx, audit: bool = True) -> dict:
     return report
 
 
+def publish_plan(plan_path: str, out_dir: str) -> None:
+    """Keep the rendered plan beside its output — unless it is already that file.
+
+    The agent route authors ``<project>/producer/edit_plan.json`` and renders into
+    ``<project>/producer``, so the copy would be onto itself (SameFileError).
+    """
+    target = os.path.join(os.path.abspath(out_dir), "edit_plan.json")
+    if os.path.abspath(plan_path) != target:
+        shutil.copy(plan_path, target)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="PRODUCER render orchestrator")
     ap.add_argument("plan_path")
@@ -1073,6 +1108,9 @@ def main() -> None:
                          "base.fingerprint.json (assemble.py overlays graphics after)")
     ap.add_argument("--approval-dir", default=None,
                     help="producer dir owning the template-history approval")
+    ap.add_argument("--draft-only", action="store_true",
+                    help="require separate draft admission and retain only watermarked draft.mp4")
+    ap.add_argument("--draft-font", default=None, help="font for the draft-only watermark")
     policy = ap.add_mutually_exclusive_group()
     policy.add_argument(
         "--require-source-set-admission", action="store_true",
@@ -1086,6 +1124,11 @@ def main() -> None:
 
     temp_dir = None
     try:
+        authority_dir = args.approval_dir or args.out_dir
+        if args.draft_only:
+            require_draft_destination(authority_dir, args.out_dir)
+            if args.resume or args.skip_graphics:
+                raise ValueError("Draft-only rendering cannot resume or publish a reusable base")
         with open(args.plan_path) as f:
             plan = json.load(f)
         from guided_presenter_base import require_unowned_presenter_absent
@@ -1094,6 +1137,8 @@ def main() -> None:
             manifest = json.load(f)
         validate_render_documents(plan, manifest)
         verify_execution_media_authority(plan, manifest, args.manifest_path)
+        require_readiness(ReadinessRequest(args.plan_path, args.manifest_path,
+                                           authority_dir, args.draft_only))
         require_template_usage_approval(
             args.plan_path, args.manifest_path, args.approval_dir or args.out_dir,
             os.path.dirname(os.path.abspath(args.manifest_path)))
@@ -1112,8 +1157,11 @@ def main() -> None:
                         producer_dir=args.approval_dir or args.out_dir,
                         audio_clock_policy=args.audio_clock_policy,
                         plan_path=os.path.abspath(args.plan_path))
-        shutil.copy(args.plan_path, os.path.join(args.out_dir, "edit_plan.json"))
+        publish_plan(args.plan_path, args.out_dir)
         report = render(ctx, audit=not args.no_audit)
+        if args.draft_only:
+            report = {"draft": finish_draft(args.plan_path, args.manifest_path, authority_dir, args.draft_font),
+                      "shippable": False}
         emit(status="done", **report)
     except (OSError, json.JSONDecodeError, KeyError,
             ValueError, RuntimeError) as exc:

@@ -2,6 +2,7 @@ import { spawn } from "child_process";
 import path from "path";
 import { claudeModelArgs, claudeProcessEnv } from "../../_lib/ai-provider";
 import { admitSubscriptionInvocation } from "../../_lib/subscription-invocation";
+import { providerMediaJail, type ProviderJailScope } from "../../_lib/provider-media-jail";
 import {
   PROCESS_TERM_GRACE_MS,
   shouldDetachProcessGroup,
@@ -20,6 +21,15 @@ export interface LegacyBrainInvocation {
   /** Optional combined stdout/stderr budget; old callers retain their prior behavior. */
   maxOutputBytes?: number;
   signal?: AbortSignal;
+  /** stream-json input (text + image blocks) written to stdin, then closed. */
+  stdin?: string;
+  /** Run under the OS media boundary (provider-media-jail.ts); requires `--tools ""`. */
+  jail?: ProviderJailScope;
+}
+
+function toolless(args: readonly string[]): boolean {
+  const index = args.indexOf("--tools");
+  return index >= 0 && args[index + 1] === "" && args.indexOf("--tools", index + 1) < 0;
 }
 
 export interface BrainProcessResult {
@@ -116,12 +126,17 @@ export async function runLegacyBrainProcess(
       || invocation.maxOutputBytes < 1 || invocation.maxOutputBytes > 16 * 1024 * 1024)) {
     throw new Error("Claude output budget is invalid");
   }
+  if (invocation.jail && !toolless(invocation.args)) {
+    throw new Error("The provider media boundary applies only to tool-less Claude runs");
+  }
   const admitted = await admitSubscriptionInvocation({ provider: "claude", bin: CLAUDE_BIN,
     args: invocation.args, cwd: invocation.cwd, env: claudeProcessEnv(),
     timeoutMs: invocation.timeoutMs, signal: invocation.signal });
+  const command = invocation.jail ? providerMediaJail(admitted.bin, admitted.args, invocation.jail)
+    : { bin: admitted.bin, args: [...admitted.args] };
   return new Promise((resolve, reject) => {
     const timeoutMs = admitted.remainingMs();
-    const proc = trackProcessTree(spawn(admitted.bin, admitted.args, {
+    const proc = trackProcessTree(spawn(command.bin, command.args, {
       cwd: admitted.cwd,
       env: admitted.env,
       detached: shouldDetachProcessGroup(),
@@ -180,5 +195,9 @@ export async function runLegacyBrainProcess(
     }, timeoutMs);
     invocation.signal?.addEventListener("abort", abort, { once: true });
     if (invocation.signal?.aborted) abort();
+    if (invocation.stdin !== undefined && !settled) {
+      proc.stdin.on("error", (error) => finish(stopError ?? error));
+      proc.stdin.end(invocation.stdin);
+    }
   });
 }

@@ -1,9 +1,8 @@
 """Measure macOS native-render pressure and decide whether work can continue.
 
-This module never launches or signals a render. The owning supervisor must
-enforce its decisions, verify process identities, and retain attempt evidence.
-macOS top MEM includes compressed footprint: do not add CMPRS to it or use RSS
-as a substitute. Limits are conservative policy, not a qualified SDK memory cap.
+This module never launches or signals a render; its owner enforces decisions,
+verifies identities and retains evidence. macOS top MEM includes compression:
+do not add CMPRS or substitute RSS. Limits are policy, not qualified SDK caps.
 """
 from __future__ import annotations
 
@@ -166,11 +165,11 @@ def _memory_values(raw: Mapping[str, str], request: ProcessRequest) -> dict:
         'selection': select_processes(raw['ps'], raw['top'], request), 'sampler': 'macos-top-v1'}
 
 
-def _read_command(args: list[str]) -> str:
+def _read_command(args: list[str], input_text: str | None = None) -> str:
     """Run only a bounded read-only measurement, logging failures explicitly."""
     try:
         return subprocess.run(args, capture_output=True, text=True, check=True,
-                              timeout=3).stdout
+                              timeout=3, input=input_text).stdout
     except subprocess.TimeoutExpired as error:
         LOGGER.error("Native resource measurement timed out for %s: %s", args[0], error)
         raise ResourceCommandTimeout(args, error) from error
@@ -248,19 +247,23 @@ def admission_reasons(snapshot: ResourceSnapshot,
     return tuple(reasons) + resource_warnings(snapshot, policy)
 
 
+def owned_reasons(snapshot: ResourceSnapshot, policy: ResourcePolicy) -> list[str]:
+    """Apply identical process ownership and hard footprint limits in both modes."""
+    maximum_owned = min(policy.maximum_owned_gib * GIB, snapshot.physical_bytes * 0.25)
+    checks = [
+        (not snapshot.owned_pids, "ongoing render has no measured owned process tree"),
+        (not snapshot.identity_verified, "owned root start identity was not bound"),
+        (snapshot.owned_footprint_bytes > maximum_owned, "owned render footprint exceeds policy"),
+        (snapshot.largest_owned_process_bytes > policy.maximum_process_gib * GIB,
+         "one owned process footprint exceeds policy")]
+    return [reason for failed, reason in checks if failed]
+
+
 def stop_reasons(snapshot: ResourceSnapshot, baseline: ResourceSnapshot,
                  policy: ResourcePolicy = ResourcePolicy()) -> tuple[str, ...]:
     """Return reasons for the owning supervisor to stop its verified render tree."""
     reasons = _system_reasons(snapshot, policy, policy.stop_free_percent, time.time())
-    maximum_owned = min(policy.maximum_owned_gib * GIB, snapshot.physical_bytes * 0.25)
-    if not snapshot.owned_pids:
-        reasons.append("ongoing render has no measured owned process tree")
-    if not snapshot.identity_verified:
-        reasons.append("owned root start identity was not bound")
-    if snapshot.owned_footprint_bytes > maximum_owned:
-        reasons.append("owned render footprint exceeds policy")
-    if snapshot.largest_owned_process_bytes > policy.maximum_process_gib * GIB:
-        reasons.append("one owned process footprint exceeds policy")
+    reasons += owned_reasons(snapshot, policy)
     if snapshot.swap_used_bytes - baseline.swap_used_bytes > policy.maximum_swap_growth_gib * GIB:
         reasons.append("swap growth since admission exceeds policy")
     return tuple(reasons)

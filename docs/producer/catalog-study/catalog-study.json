@@ -118,7 +118,7 @@
   "fit": "upgrade:glass-takeover-bg",
   "quality": "clean: exact-loop math",
   "aspectFlex": "9:16-ok",
-  "port": "P2 ambient dark backdrop for nateherk family"
+  "port": "P2 ambient dark backdrop for module family"
  },
  {
   "name": "avatar-cloud",
@@ -205,7 +205,7 @@
   "fit": "new:beat impact word sting",
   "quality": "clean",
   "aspectFlex": "9:16-ok",
-  "port": "P2 music-led emphasis; overlaps jaden-shout territory"
+  "port": "P2 music-led emphasis; overlaps punch-shout territory"
  },
  {
   "name": "beat-freeze-cut",
@@ -660,7 +660,7 @@
   ],
   "scrubSafe": true,
   "selfContained": true,
-  "fit": "upgrade:jaden-shout-lockup",
+  "fit": "upgrade:punch-shout-lockup",
   "quality": "clean: authored scatter table",
   "aspectFlex": "9:16-ok",
   "port": "P1 higher-energy headline slam than our current lockups"
@@ -1863,7 +1863,7 @@
   ],
   "scrubSafe": true,
   "selfContained": false,
-  "fit": "upgrade:jaden-shout-lockup",
+  "fit": "upgrade:punch-shout-lockup",
   "quality": "clean - compact, deterministic fit",
   "aspectFlex": "9:16-ok",
   "port": "P1 - punch title with impact shake; note it always self-exits (whip up), never holds"
@@ -1991,7 +1991,7 @@
   ],
   "scrubSafe": true,
   "selfContained": true,
-  "fit": "upgrade:nateherk-pipeline hand-drawn variant",
+  "fit": "upgrade:module-pipeline hand-drawn variant",
   "quality": "clean - pitfalls documented, sequenced build",
   "aspectFlex": "16:9-only",
   "port": "P1 - process-flow cutaway in whiteboard register; fits cream brand better than dark family"
@@ -2471,7 +2471,7 @@
   "fit": "upgrade:glass-lower-third style variant",
   "quality": "mixed - copy hardcoded",
   "aspectFlex": "16:9-only",
-  "port": "P1 - part of lt style pack; pairs with nateherk dark family"
+  "port": "P1 - part of lt style pack; pairs with module dark family"
  },
  {
   "name": "lt-kicker-name",
@@ -4251,7 +4251,7 @@
   "fit": "upgrade:chip-row (stateful snap machine)",
   "quality": "clean: token-driven, well-guarded parsing",
   "aspectFlex": "responsive",
-  "port": "P1: seek-exact process-status rail; overlaps nateherk-pipeline territory"
+  "port": "P1: seek-exact process-status rail; overlaps module-pipeline territory"
  },
  {
   "name": "sticky-mock-swap",
@@ -4762,7 +4762,7 @@
   ],
   "scrubSafe": true,
   "selfContained": true,
-  "fit": "upgrade:nateherk-pipeline (traveling attention beam)",
+  "fit": "upgrade:module-pipeline (traveling attention beam)",
   "quality": "clean",
   "aspectFlex": "responsive",
   "port": "P1: 3-step process with guided attention"

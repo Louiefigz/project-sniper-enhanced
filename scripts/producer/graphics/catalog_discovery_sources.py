@@ -8,6 +8,7 @@ import json
 import os
 from dataclasses import dataclass
 
+from graphics.visual_source_policy import require_integrated
 from graphics import comp_capabilities
 from graphics import comp_capability_artifact as artifact
 from graphics.template_contract import composition_dimensions, declared_variables
@@ -147,6 +148,7 @@ def reference_source(catalog_dir: str, record: dict) -> dict:
               and candidate == lexical and not os.path.islink(lexical)
               and os.path.isfile(lexical))
     return {"path": os.path.join("vendor", "hyperframes-catalog", relative),
+            "absolutePath": lexical,
             "exists": exists,
             "sizeBytes": os.path.getsize(lexical) if exists else None}
 
@@ -180,9 +182,13 @@ def load_local() -> tuple[dict[str, dict], list[str]]:
     issues: list[str] = []
     for path in artifact.composition_paths():
         kind = os.path.splitext(os.path.basename(path))[0]
+        require_integrated(kind)
         with open(path, encoding="utf-8") as handle:
             html = handle.read()
         records[kind], issue = _local_record(kind, html)
+        records[kind]["source"] = {"path": os.path.abspath(path),
+            "exists": os.path.realpath(path) == os.path.abspath(path)
+            and not os.path.islink(path) and os.path.isfile(path)}
         if issue:
             issues.append(issue)
     return records, issues

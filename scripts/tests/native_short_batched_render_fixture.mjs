@@ -2,10 +2,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import {EventEmitter} from 'node:events';
 import {NativeFrameTransport} from '../producer/studio/runtime/frame-source-transport.mjs';
+import {nativeSourceCacheIdentity} from '../producer/studio/native_source_cache.mjs';
 
 /** Exercise the real local transport contract without opening a server or decoding an image. */
 function fakeServer(calls) {
@@ -70,9 +70,8 @@ export function batchFixture(totalFrames=100) {
   const plan={canvas:{frameRate:'25/1',totalFrames,pictureViews:[{startFrame:0,endFrame:totalFrames}],captionViews:[],text:[],shapes:[],motion:[],
     occurrences:[],titleCard:{endFrame:25}},strategy:{scenes:[{startFrame:0,endFrame:totalFrames}]},expectations:[]};
   fs.writeFileSync(path.join(project,'SHORT-PROJECT.json'),JSON.stringify(plan));
-  const video={id:'source-0-0',src:'assets/source.mp4',mediaStart:0,start:0,end:totalFrames/25},stat=fs.statSync(source);
-  const keyBlob={p:source,m:Math.floor(stat.mtimeMs),s:stat.size,ms:0,d:video.end,f:'25',fmt:'png'};
-  const key=createHash('sha256').update(JSON.stringify(keyBlob)).digest('hex'),entry=path.join(cache,'hfcache-v4-'+key.slice(0,16));
+  const video={id:'source-0-0',src:'assets/source.mp4',mediaStart:0,start:0,end:totalFrames/25};
+  const {entry}=nativeSourceCacheIdentity({project,request:{cache},fps:{num:25,den:1}},video);
   fs.mkdirSync(entry);fs.writeFileSync(path.join(entry,'.hf-complete'),'TEST complete cache');
   for(let frame=0;frame<totalFrames;frame++)fs.writeFileSync(path.join(entry,`frame_${String(frame+1).padStart(5,'0')}.png`),`TEST PNG frame ${frame}`);
   const calls={compiles:[],sessions:[],frames:[],cacheEntries:[],transports:[],injectors:[],encodes:[],serverCloses:0,sessionCloses:0,poolDrains:0};

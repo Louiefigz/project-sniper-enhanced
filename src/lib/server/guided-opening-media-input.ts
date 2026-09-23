@@ -77,8 +77,8 @@ function assertOpeningPlanProfile(plan: Record<string, unknown>): void {
 
 /** Predicate parity with graphics/pip_hole.entry_has_hole; conditional holes retain their opt-out. */
 function openingEntryHasHole(entry: Record<string, unknown>): boolean {
-  if (entry.kind === "nateherk-takeover") return true;
-  if (!["nateherk-scoreboard", "nateherk-pipeline", "nateherk-ledger-dark"].includes(String(entry.kind))) return false;
+  if (entry.kind === "module-takeover") return true;
+  if (!["module-scoreboard", "module-pipeline", "module-ledger-dark"].includes(String(entry.kind))) return false;
   const spec = pythonTruthy(entry.spec) ? objectValue(entry.spec, "opening graphic spec") : {};
   return pythonTruthy(spec.presenterFrame);
 }
@@ -239,7 +239,7 @@ function cutDocumentBindings(docs: ReturnType<typeof readDocuments>, authority: 
   return request;
 }
 
-const GRAPHICS_STYLES = ["cutaway-only", "overlay-rich", "face-bridge"];
+const GRAPHICS_STYLES = ["catalog-first"];
 
 /** A v4 candidate may add ONLY the declared graphics style to the accepted target; canvas, rate, mode, scope and excerpt stay exact. */
 function styleFreeTarget(target: unknown): Record<string, unknown> {

@@ -9,6 +9,7 @@ import selectors
 import subprocess
 import time
 from pathlib import Path
+from typing import Callable
 
 from cross_runtime_canonical_json import canonical_compact_json
 
@@ -16,8 +17,9 @@ MAX_JSON = 16 * 1024 * 1024
 MAX_MEDIA = 2 * 1024 ** 3
 
 
-def run_bounded(command: list[str], maximum: int = MAX_JSON, timeout: float = 900) -> subprocess.CompletedProcess:
-    """Bound private child stdout/stderr while preserving the owned process group."""
+def run_bounded(command: list[str], maximum: int = MAX_JSON, timeout: float = 900,
+                consume_stdout: Callable[[bytes], None] | None = None) -> subprocess.CompletedProcess:
+    """Bound owned child output; optionally consume stdout without retaining it."""
     child = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     deadline, size = time.monotonic() + timeout, 0
     output = {"stdout": bytearray(), "stderr": bytearray()}
@@ -37,7 +39,7 @@ def run_bounded(command: list[str], maximum: int = MAX_JSON, timeout: float = 90
                     size += len(data)
                     if size > maximum:
                         raise RuntimeError("cut preview child exceeded its output byte bound")
-                    output[key.data].extend(data)
+                    _consume_output(output, key.data, data, consume_stdout)
         code = child.wait(timeout=max(0.001, min(5, deadline - time.monotonic())))
         return subprocess.CompletedProcess(command, code, bytes(output["stdout"]), bytes(output["stderr"]))
     finally:
@@ -46,6 +48,17 @@ def run_bounded(command: list[str], maximum: int = MAX_JSON, timeout: float = 90
             child.wait(timeout=5)
         child.stdout.close()
         child.stderr.close()
+
+
+def _consume_output(output: dict[str, bytearray], name: str, data: bytes,
+                    consumer: Callable[[bytes], None] | None) -> None:
+    """Keep streaming diagnostics bounded independently of a large RGB budget."""
+    if consumer is not None and name == 'stdout':
+        consumer(data)
+        return
+    if consumer is not None and len(output[name]) + len(data) > MAX_JSON:
+        raise RuntimeError('streamed child diagnostics exceeded their output byte bound')
+    output[name].extend(data)
 
 
 def digest(value: object) -> str:
@@ -63,7 +76,7 @@ def real_directory(path: Path) -> None:
             raise RuntimeError("cut preview directory is unsafe")
 
 
-def _identity(info: os.stat_result) -> tuple:
+def file_identity(info: os.stat_result) -> tuple[int, ...]:
     """Fields that must stay fixed for one exact read."""
     return (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns,
             info.st_ctime_ns, info.st_nlink)
@@ -71,13 +84,18 @@ def _identity(info: os.stat_result) -> tuple:
 
 def read_bytes(path: Path, maximum: int = MAX_JSON) -> bytes:
     """Read bounded bytes from one unchanged regular no-follow file."""
+    if type(maximum) is not int or maximum <= 0:
+        raise ValueError("artifact byte limit must be a positive integer")
     real_directory(path.parent)
     descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
     try:
         before = os.fstat(descriptor)
-        if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1 \
-                or not 0 < before.st_size <= maximum:
-            raise RuntimeError("cut preview artifact is not a bounded regular file")
+        if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
+            raise RuntimeError(f"artifact is not a bounded regular file (unsafe type or link count): {path}")
+        if before.st_size == 0:
+            raise RuntimeError(f"artifact is empty: {path}")
+        if before.st_size > maximum:
+            raise RuntimeError(f"artifact exceeds byte limit: {before.st_size} > {maximum}: {path}")
         chunks, remaining = [], before.st_size
         while remaining:
             data = os.read(descriptor, min(remaining, 1024 * 1024))
@@ -85,8 +103,8 @@ def read_bytes(path: Path, maximum: int = MAX_JSON) -> bytes:
                 raise RuntimeError("cut preview artifact truncated during read")
             chunks.append(data)
             remaining -= len(data)
-        if _identity(before) != _identity(os.fstat(descriptor)) \
-                or _identity(before) != _identity(path.lstat()):
+        if file_identity(before) != file_identity(os.fstat(descriptor)) \
+                or file_identity(before) != file_identity(path.lstat()):
             raise RuntimeError("cut preview artifact changed during read")
         return b"".join(chunks)
     finally:
@@ -109,17 +127,17 @@ def file_hash(path: Path, maximum: int = MAX_MEDIA) -> str:
                 raise RuntimeError("cut preview hash input was truncated")
             result.update(data)
             remaining -= len(data)
-        if _identity(before) != _identity(os.fstat(descriptor)) \
-                or _identity(before) != _identity(path.lstat()):
+        if file_identity(before) != file_identity(os.fstat(descriptor)) \
+                or file_identity(before) != file_identity(path.lstat()):
             raise RuntimeError("cut preview hash input changed")
         return result.hexdigest()
     finally:
         os.close(descriptor)
 
 
-def bound_json(path: Path, expected: str | None = None) -> dict:
-    """Parse the same exact UTF-8 bytes whose digest was checked."""
-    raw = read_bytes(path)
+def bound_json(path: Path, expected: str | None = None, *, maximum: int = MAX_JSON) -> dict:
+    """Parse exact digest-checked UTF-8 bytes within the caller's explicit limit."""
+    raw = read_bytes(path, maximum)
     if expected is not None and hashlib.sha256(raw).hexdigest() != expected:
         raise RuntimeError("cut preview input hash changed")
     value = json.loads(raw.decode("utf-8"))

@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import { runPipelineScript } from "./_pipeline_dom_fixture.mjs";
 
-const source = readFileSync(new URL("../../../templates/motion/nateherk-pipeline.js", import.meta.url), "utf8");
+const source = readFileSync(new URL("../../../templates/motion/module-pipeline.js", import.meta.url), "utf8");
 const copy = { eyebrow: "This stage", headlineLines: "At this stage your content system|is a folder",
   explainer: "Ideas go in and nothing ever comes back", footChip: "nothing comes back",
   nodes: "Ideas~go in|nothing~ever|comes~back", activeIndex: 2, exit: "hold", presenterFrame: false };
@@ -58,7 +58,7 @@ test("empty modules prune without inventing copy, while all-empty preview keeps 
   for (const name of ["eyebrow", "headline", "explainer", "foot"]) assert.equal(result.snapshot["npl-" + name].removed, true);
   const preview = runPipelineScript(source, {});
   assert.equal(preview.snapshot["npl-chain"].children.length, 6);
-  assert.equal(preview.snapshot["npl-headline"].children[0].ownText, "The chain changed.");
+  assert.equal(preview.snapshot["npl-headline"].children[0].ownText, "One job per pass.");
 });
 
 test("explicit narration lands preserve original module order and reject malformed schedules", () => {

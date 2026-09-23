@@ -393,7 +393,7 @@ def build_ass(words: list[dict], style: str = "karaoke",
         from captions.captions_minimal import build_minimal
         return build_minimal(words, cfg)
     if style == "whisper":
-        # Jaden base layer (G2) — same lazy-import shape as minimal.
+        # Punch base layer (G2) — same lazy-import shape as minimal.
         from captions.captions_whisper import build_whisper
         return build_whisper(words, cfg)
     if style not in ("karaoke", "line"):

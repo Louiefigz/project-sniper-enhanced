@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reviewing the video and the editable project</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <p class="kicker">Manual · 6 of 10</p>
+  <h1>Reviewing the video, and opening the editable project</h1>
+  <p class="lede">Every finished edit gives you two things: the video, and the project behind its graphics layer. Check both.</p>
+</header>
+<h2>1. Watch the video</h2>
+<pre><code>projects/&lt;project&gt;/producer/final.mp4</code></pre>
+<p>Open it and watch the whole thing with the sound on. Not a scrub, not a screenshot, not
+a look at the first ten seconds. The defects that matter — a clipped word at a join, a
+caption that lags, a graphic that leaves before it is readable — only show up in
+playback.</p>
+<h3>The checklist that catches real defects</h3>
+<ol>
+  <li>Does the opening make sense on its own, and does the ending answer it?</li>
+  <li>Is any word cut off at a join?</li>
+  <li>Do the captions match the words that are actually spoken?</li>
+  <li>Is every number and claim on screen something you really said?</li>
+  <li>Is the framing sensible in every shot, including where you moved?</li>
+  <li>Is the audio intelligible, and not harsh or pumping?</li>
+  <li>Does the motion stop when the content needs to be read?</li>
+</ol>
+
+<h2>2. Open the editable project</h2>
+<p>The graphics layer is a real editable project, not a flattened picture. This is the
+manual-control surface:</p>
+<pre><code>install/studio.command open projects/&lt;project&gt;/producer</code></pre>
+<p>That builds the review project from the edit plan plus the graphics-free video, serves it
+in HyperFrames Studio on this Mac and prints its local address (<code>studio: http://localhost:&lt;port&gt;/#project/studio</code>; the server listens
+on this Mac only):
+open that address in your browser, or ask your agent to open it. You move panels, change timing, adjust
+what a card says. Always go through <code>install/studio.command</code>: it runs Studio with
+this install's own settings (its Node, browser and ffmpeg, and none of the API keys in your
+shell), which running the Python environment directly would skip.</p>
+<div class="note">
+<p>Studio is a <strong>review and control</strong> surface. It previews; it does not
+render your deliverable. Your footage is never re-encoded in a browser.</p>
+</div>
+
+<h3>Folding your Studio edits back in</h3>
+<pre><code>install/studio.command sync projects/&lt;project&gt;/producer --apply</code></pre>
+<p>This writes your changes into the edit plan, after checking them and taking a backup.
+It then <strong>prints the exact rebuild command</strong> to run, which is:</p>
+<pre><code>install/studio.command rebuild projects/&lt;project&gt;/producer</code></pre>
+<p>Run it to rebuild the video; only the stages your change invalidated are redone.</p>
+<pre><code># see where the lane currently is and what to do next
+install/studio.command status projects/&lt;project&gt;/producer
+
+# shut the preview server down when you are finished
+install/studio.command stop projects/&lt;project&gt;/producer</code></pre>
+<div class="warn">
+<p><strong>Two things to know.</strong> First, syncing is not approval — after your
+graphics change, the checks and reviews run again before the result counts as finished.
+Second, Sniper <strong>refuses to overwrite Studio edits you have not synced</strong>. If
+you see that refusal, sync first. There is a <code>--force</code> flag that discards them;
+do not use it unless you mean to throw that work away.</p>
+</div>
+
+<h2>3. Both views must agree</h2>
+<p>After any adjustment, the video and the project should show the same content. If you
+changed graphics in Studio but did not rebuild, they disagree — and the video is the old
+one. Rebuild, then watch it again.</p>
+
+<h2>Where everything lives, and what to keep</h2>
+<table>
+<tr><th>Path</th><th>What it is</th><th>Keep?</th></tr>
+<tr><td><code>source/</code></td><td>Your footage and its transcripts</td><td><strong>Yes</strong> — this is your original material</td></tr>
+<tr><td><code>producer/edit_plan.json</code></td><td>The edit itself, as data</td><td><strong>Yes</strong> — this is the edit; it can rebuild the video</td></tr>
+<tr><td><code>producer/final.mp4</code></td><td>The approved video</td><td><strong>Yes</strong></td></tr>
+<tr><td><code>producer/base_final.mp4</code></td><td>The video without graphics</td><td>Optional; speeds up rebuilds</td></tr>
+<tr><td>Render caches</td><td>Regenerable working files</td><td>No — <code>install/clean-caches.command</code> lists and removes only these, and the kept downloads of Sniper's own tools (about 300 MB; without them, repairing the tools downloads them again)</td></tr>
+</table>
+<p>Back up your <code>projects</code> folder (or the folder you chose at setup). That is the whole
+of your work; everything else in the Sniper folder is replaceable.</p>
+
+<p class="next"><strong>Next:</strong> <a href="finishing.html">Finishing somewhere else &rarr;</a></p>
+<footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>
+</div>
+</body>
+</html>

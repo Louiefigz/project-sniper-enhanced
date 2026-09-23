@@ -247,28 +247,30 @@ def native_text_assignment(seed: str) -> str:
     The import bridge proves this exact assignment and rejects conflicting
     native/host edits; the final renderer keeps the original template binding.
     """
-    return ('const el = document.getElementById("te-text");\n'
+    return ('const nativeTextEl = document.getElementById("mh-text");\n'
             f'        const initialText = {attr_json(seed)};\n'
-            '        el.textContent = el.textContent === initialText '
-            '? String(vars.text) : el.textContent;')
+            '        const nativeText = nativeTextEl.textContent === initialText '
+            '? vars.text : nativeTextEl.textContent;\n'
+            '        nativeTextEl.textContent = "";\n'
+            '        const text = String(nativeText == null ? "" : nativeText).trim().replace(/\\s+/g, " ");')
 
 
 def _native_text_leaf(body: str, source: SourceComp, spec: dict) -> str:
     """Seed only the registered plain-text leaf; reject changed anatomy."""
-    if source.kind != "text-element":
+    if source.kind != "marker-highlight":
         return body
     seed = spec.get("text", source.variables["text"]["default"])
     if not isinstance(seed, str) or "\x00" in seed:
-        raise StudioProjectError("text-element: native copy requires string text without NUL")
-    assignment = (r'const el = document\.getElementById\("te-text"\);\s*'
-                  r'el\.textContent = String\(vars\.text\);')
-    body, assigned = re.subn(assignment, lambda _: native_text_assignment(seed), body)
+        raise StudioProjectError("marker-highlight: native copy requires string text without NUL")
+    assignment = 'const text = String(vars.text == null ? "" : vars.text).trim().replace(/\\s+/g, " ");'
+    assigned = body.count(assignment)
+    body = body.replace(assignment, native_text_assignment(seed))
     # A character reference survives HTML's initial CR/CRLF normalization.
     escaped = html.escape(seed).replace("\r", "&#13;")
-    body, seeded = re.subn(r'(<div id="te-text"[^>]*>)</div>',
-                          lambda match: match[1] + escaped + '</div>', body)
+    body, seeded = re.subn(r'(<p id="mh-text"[^>]*>)</p>',
+                          lambda match: match[1] + escaped + '</p>', body)
     if assigned != 1 or seeded != 1:
-        raise StudioProjectError("text-element: native copy source anatomy changed")
+        raise StudioProjectError("marker-highlight: native copy source anatomy changed")
     return body
 
 

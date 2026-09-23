@@ -23,12 +23,12 @@ class ProgramMixRegistryTests(unittest.TestCase):
         result = validate_program_mix_registry()
         self.assertEqual(result, {
             "status": "pass",
-            "consumerCount": 21,
-            "occurrenceCount": 18,
-            "programConsumers": 17,
+            "consumerCount": 22,
+            "occurrenceCount": 19,
+            "programConsumers": 18,
             "assetOnlyExemptions": 4,
             "boundaryCount": 3,
-            "dependencyCount": 17,
+            "dependencyCount": 18,
         })
 
     def test_float_concats_are_program_consumers_without_exemptions(self) -> None:
@@ -39,6 +39,7 @@ class ProgramMixRegistryTests(unittest.TestCase):
         ids = {f"{prefix}-{suffix}" for prefix in (
             "ordinary-source-float", "private-cut-preview-float")
             for suffix in ("jcut-concat", "byte-concat")}
+        ids.add("native-retained-dialogue-float-concat")
         self.assertTrue(ids <= dependencies)
         for ident in ids:
             self.assertEqual(owned[ident]["consumerKind"], "derived-program-mix")
@@ -69,7 +70,8 @@ class ProgramMixRegistryTests(unittest.TestCase):
         for row in dependency["enforcementTokens"]:
             path = root / row["path"]
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(row["token"], encoding="utf-8")
+            with path.open("a", encoding="utf-8") as handle:
+                handle.write(row["token"] + "\n")
         self.assertEqual(_dependency_errors(root, dependency), [])
         removed = dependency["enforcementTokens"][0]
         (root / removed["path"]).write_text(

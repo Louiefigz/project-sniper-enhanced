@@ -37,15 +37,15 @@ def _plan(entries: list) -> dict:
 
 
 def _entry(**overrides) -> dict:
-    entry = {"kind": "chip-row", "anchor": "free-band", "outStart": 8.0,
-             "outEnd": 11.5, "exitOnCut": True, "spec": {}}
+    entry = {"kind": "line-swap", "anchor": "free-band", "outStart": 8.0,
+             "outEnd": 11.5, "exitOnCut": True, "spec": {"lineA": "TEST first", "lineB": "TEST second", "underlineWord": "second", "swapAt": 0.5}}
     entry.update(overrides)
     return entry
 
 
 def _rendered(fmt: str = "mov") -> dict:
     return {"path": "/fake/render.mov", "cached": True, "key": "k",
-            "kind": "chip-row", "fmt": fmt, "proof": {}}
+            "kind": "line-swap", "fmt": fmt, "proof": {}}
 
 
 class DurationParityTests(unittest.TestCase):
@@ -127,11 +127,12 @@ class OversizedBboxTests(unittest.TestCase):
         verdicts, _ = self._measure([_entry()], (0, 0, 1079, 1919))
         self.assertEqual(verdicts, [])
 
-    def test_registered_rail_geometry_is_exempt(self) -> None:
+    def test_retired_rail_is_rejected_before_geometry(self) -> None:
         with mock.patch.object(cmz, "_content_bbox") as bbox_probe:
             verdicts, _ = self._measure([_entry(kind="glass-rail")],
                                         (0, 0, 1079, 1919))
-        self.assertEqual(verdicts, [])
+        self.assertEqual([row.severity for row in verdicts], ["FAIL"])
+        self.assertIn("retired", verdicts[0].evidence)
         bbox_probe.assert_not_called()
 
     def test_placed_pin_exceeding_canvas_fails(self) -> None:
@@ -143,7 +144,7 @@ class OversizedBboxTests(unittest.TestCase):
                       verdicts[0].evidence)
 
     def test_ownscreen_aspect_mismatch_fails(self) -> None:
-        # chip-row's authored canvas is 1080x1920; a longform (16:9) delivery
+        # line-swap's authored canvas is 1080x1920; a longform (16:9) delivery
         # mismatches → the composite would refuse it — caught at lint.
         plan = _plan([_entry(anchor="own-screen", exitOnCut=False)])
         plan["target"]["mode"] = "longform"
@@ -224,7 +225,7 @@ class SkipAndBudgetTests(unittest.TestCase):
 class MatrixFailFastTests(unittest.TestCase):
     """Pre-render fail-fast from the comp-capability matrix (aspect only)."""
 
-    _COMPS = {"chip-row": {"canvas": [1080, 1920],
+    _COMPS = {"line-swap": {"canvas": [1080, 1920],
                            "fadeClass": "fades-clean"}}
 
     def test_known_aspect_mismatch_fails_without_rendering(self) -> None:

@@ -227,7 +227,7 @@ unverified.** Static lint cannot establish those properties.
 - Select references by the actual story job and source performance. Support
   authentic cases as well as Nxx produced examples, an alternative example and
   explicit reasons for the treatment. The library supplies inference context;
-  it is not fine-tuning, automatic quality scoring or a “Nate versus Caleb” model.
+  it is not fine-tuning, automatic quality scoring or a “Nate versus Restrained” model.
 - Connect supported hook selection to actual recorded speech, the first picture,
   reason to stay and removal cue. The development sample adds no new hook.
 - Carry selected typography/hierarchy, reading time and face/hand clearance into

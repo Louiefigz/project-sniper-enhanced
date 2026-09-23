@@ -189,8 +189,6 @@ def _prepare_candidate(
         str(request.transcripts_dir),
         manifest,
         [state],
-        aspect="16:9",
-        style="overlay-rich",
     )
     shifts = _rebind_graphics(plan, _match_beats(previous, fresh))
     return RebindPreparation(

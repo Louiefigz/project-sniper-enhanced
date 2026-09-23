@@ -44,9 +44,9 @@ test("selected free-band, inherited, presenter-hole and additional effects are u
   const free = metadata(); free.bindings.graphics[0].presentation = { ...free.bindings.graphics[0].presentation,
     anchor: "free-band", placement: "measured-free-region" };
   assert.throws(() => assertOpeningMediaMetadata(free), /presentation/);
-  for (const entry of [{ takeoverBase: "blur" }, { exitOnCut: true }, { placement: { x: 20 } }, { kind: "nateherk-takeover" },
-    { kind: "nateherk-scoreboard", spec: { presenterFrame: true } }, { kind: "nateherk-pipeline", spec: { presenterFrame: "yes" } },
-    { kind: "nateherk-ledger-dark", spec: { presenterFrame: true } }]) {
+  for (const entry of [{ takeoverBase: "blur" }, { exitOnCut: true }, { placement: { x: 20 } }, { kind: "module-takeover" },
+    { kind: "module-scoreboard", spec: { presenterFrame: true } }, { kind: "module-pipeline", spec: { presenterFrame: "yes" } },
+    { kind: "module-ledger-dark", spec: { presenterFrame: true } }]) {
     const value = metadata(); Object.assign((value.plan.graphicsTrack as object[])[0], entry);
     assert.throws(() => assertOpeningMediaMetadata(value), /presentation/);
   }
@@ -57,7 +57,7 @@ test("body-only presentation belongs to the body renderer, not the private openi
   value.bindings.graphics[0].endFrameExclusive = 180;
   value.bindings.graphics[0].presentation = { ...value.bindings.graphics[0].presentation,
     anchor: "free-band", placement: "measured-free-region" };
-  Object.assign((value.plan.graphicsTrack as object[])[0], { kind: "nateherk-takeover", anchor: "free-band" });
+  Object.assign((value.plan.graphicsTrack as object[])[0], { kind: "module-takeover", anchor: "free-band" });
   assertOpeningMediaMetadata(value);
   assert.throws(() => assertFullProgramMediaMetadata(value), /presentation/);
   assert.throws(() => assertOpeningMediaMetadata({ ...value, reviewEndFrame: 151 }), /presentation/);
@@ -72,8 +72,8 @@ test("all-row metadata screening preserves later rows and refuses unsupported bo
   assertFullProgramMediaMetadata(value);
   assert.deepEqual(value, before);
   assert.throws(() => assertOpeningMediaMetadata(value), /eight-graphic/);
-  for (const patch of [{ kind: "nateherk-takeover" }, { exitOnCut: true },
-    { kind: "nateherk-scoreboard", spec: { presenterFrame: true } }]) {
+  for (const patch of [{ kind: "module-takeover" }, { exitOnCut: true },
+    { kind: "module-scoreboard", spec: { presenterFrame: true } }]) {
     const later = structuredClone(value);
     Object.assign((later.plan.graphicsTrack as object[])[11], patch);
     assert.throws(() => assertFullProgramMediaMetadata(later), /presentation/);
@@ -99,7 +99,7 @@ test("duplicate order or identity cannot hide an unqualified later body template
     const value = metadata(), first = value.bindings.graphics[0];
     value.bindings.graphics.push({ ...first, graphicId: "g2", order: 1, startFrame: 150,
       endFrameExclusive: 180, [field]: first[field] });
-    (value.plan.graphicsTrack as object[]).push({ id: "g2", kind: "nateherk-takeover", anchor: "own-screen" });
+    (value.plan.graphicsTrack as object[]).push({ id: "g2", kind: "module-takeover", anchor: "own-screen" });
     assert.throws(() => assertFullProgramMediaMetadata(value), /ordered unique/);
   }
 });
@@ -125,11 +125,11 @@ test("TS metadata lane/default screening agrees with the actual Python profile w
 
 test("selected presentation and conditional presenter-hole screening agree with Python", () => {
   const patches: Array<Record<string, unknown>> = [{}, { exitOnCut: false }, { exitOnCut: true }, { placement: {} },
-    { placement: { x: 0 } }, { takeoverBase: null }, { takeoverBase: false }, { kind: "nateherk-takeover" },
-    { kind: "nateherk-scoreboard", spec: { presenterFrame: false } },
-    { kind: "nateherk-scoreboard", spec: { presenterFrame: true } },
-    { kind: "nateherk-pipeline", spec: { presenterFrame: true } },
-    { kind: "nateherk-ledger-dark", spec: { presenterFrame: true } }];
+    { placement: { x: 0 } }, { takeoverBase: null }, { takeoverBase: false }, { kind: "module-takeover" },
+    { kind: "module-scoreboard", spec: { presenterFrame: false } },
+    { kind: "module-scoreboard", spec: { presenterFrame: true } },
+    { kind: "module-pipeline", spec: { presenterFrame: true } },
+    { kind: "module-ledger-dark", spec: { presenterFrame: true } }];
   const values = patches.map((patch) => {
     const value = metadata(); Object.assign((value.plan.graphicsTrack as object[])[0], patch); return value;
   });

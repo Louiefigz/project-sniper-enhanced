@@ -10,6 +10,12 @@ from dataclasses import dataclass
 from graphics.render_rate import normalize_render_rate
 from graphics.render_tools import resolve_tools
 
+# The same approved profile native Short/Long export runs under: no network
+# except loopback (the renderer's own local file server), no `open`.
+LOCALHOST_ONLY_PROFILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                      "studio", "native_localhost_only.sb")
+SANDBOX_EXEC = "/usr/bin/sandbox-exec"
+
 
 @dataclass(frozen=True)
 class RenderInvocation:
@@ -59,7 +65,10 @@ def _render_environment(runtime_dir: str, tools: dict[str, str],
 def _command(request: RenderInvocation, cli: str,
              tools: dict[str, str]) -> list[str]:
     rate = normalize_render_rate(request.fps)
+    if not os.path.isfile(SANDBOX_EXEC) or not os.path.isfile(LOCALHOST_ONLY_PROFILE):
+        raise RuntimeError("the render network boundary (sandbox-exec + native_localhost_only.sb) is unavailable")
     return [
+        SANDBOX_EXEC, "-f", LOCALHOST_ONLY_PROFILE,
         tools["node"], cli, "render", request.root,
         "-c", request.composition, "--format", request.fmt,
         "--variables", json.dumps(request.variables), "-o", request.output,
@@ -71,7 +80,7 @@ def _command(request: RenderInvocation, cli: str,
 
 def render_composition(request: RenderInvocation, cli_path: str,
                        preload_path: str) -> None:
-    """Invoke HyperFrames with no ambient credentials or render-time network."""
+    """Invoke HyperFrames with no ambient credentials; the OS denies render-time network."""
     normalize_render_rate(request.fps)
     cli = os.path.realpath(cli_path)
     if not os.path.isfile(cli):

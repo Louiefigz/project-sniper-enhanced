@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import sys
 from argparse import Namespace
 from pathlib import Path
 from types import SimpleNamespace
@@ -18,6 +19,9 @@ def write_json(path: Path, value: dict) -> None:
     path.write_text(json.dumps(value))
 
 
+STUDIO = Path(__file__).resolve().parents[1] / 'studio'
+
+
 class ShortPipelineFixture:
     """Real filesystem and shared stage seals with explicitly fake child results."""
 
@@ -31,6 +35,7 @@ class ShortPipelineFixture:
         self.cli, self.node = self.runtime / 'dist/cli.js', base / 'node'
         self.cli.write_text('TEST fake CLI, never executed')
         self.node.write_text('TEST fake node, never executed')
+        (self.runtime / 'dist/native-capture-library.mjs').write_text('TEST capture library')
         self.source = base / 'source.mp4'
         self.source.write_bytes(b'TEST source media, not decodable')
         (self.project / 'index.html').write_text('<p>TEST composition</p>')
@@ -38,11 +43,14 @@ class ShortPipelineFixture:
             'canvas': {'frameRate': '25/1', 'totalFrames': 25},
             'strategy': {'schemaVersion': 2}, 'assets': []})
         self.inputs = {str(file): digest(file) for file in (
-            self.cli, self.node, self.source, *self.project.iterdir())}
+            self.cli, self.node, self.source, *self.project.iterdir(),
+            self.runtime / 'dist/native-capture-library.mjs', Path(sys.executable).resolve(),
+            STUDIO / 'native_short_capture.mjs', STUDIO / 'native_short_worker.py',
+            STUDIO / 'native_localhost_only.sb')}
         self.request = {'schemaVersion': 1, 'project': str(self.project), 'output': str(self.root),
                         'runtime': str(self.runtime), 'tools': {'node': str(self.node)},
                         'cache': str(base / 'cache'), 'captureMode': 'sdk-streaming',
-                        'sourceCacheMode': 'existing-only', 'audioDonor': None, 'pictureDonor': None,
+                        'sourceCacheMode': 'acquire-sdk-preflight', 'audioDonor': None, 'pictureDonor': None,
                         'audioProfile': NATIVE_SHORT_MASTERING_PROFILE.identity, 'pins': self.inputs}
         self.calls: list[tuple[str, object]] = []
         self.failures: dict[str, BaseException | bool] = {}
@@ -93,6 +101,7 @@ class ShortPipelineFixture:
             status = 'failed' if failure is not None else settings.success_status
             owner.result = self.owner_record(request, settings.additional_pins, status,
                                              settings.admission['output'])
+            owner.result['args'] = list(settings.command)
             write_json(owner.path, owner.result)
             if isinstance(failure, BaseException):
                 raise failure
@@ -104,15 +113,51 @@ class ShortPipelineFixture:
         owner.execute = execute
         return owner
 
+    def write_section(self, phase: str, root: Path) -> None:
+        """Write clearly synthetic section media under real seal validation."""
+        from studio.native_preview_sections import section_windows, section_phase
+        request = json.loads((root / 'export-request.json').read_text())
+        packet, windows = section_windows(request)
+        kind, index = section_phase(phase)
+        media = root / f'{phase}.mp4'
+        media.write_bytes(b'TEST section media, not decodable')
+        window = windows[index]
+        row = {**window, 'path': str(media), 'sha256': digest(media),
+               'frames': window['endFrame'] - window['startFrame']}
+        if kind == 'package':
+            row['absoluteFrameRange'] = [window['startFrame'], window['endFrame']]
+        write_json(root / f'{phase}.json', {'schemaVersion': 1, 'packet': packet,
+                   'window': window, 'media': row, 'phase': phase})
+
     def write_phase(self, label: str, root: Path) -> None:
         """Model native phase artifacts without calling a renderer, decoder or browser."""
         if label == 'pipeline':
             self.write_media(root)
         elif label == 'capture':
-            write_json(root / 'native-frames.json', {'status': self.capture_status, 'frames': []})
+            self.write_capture(root)
+        elif label.startswith(('preview-picture-', 'preview-package-')):
+            self.write_section(label, root)
+        elif label == 'preview':
+            from studio.native_review_regions import region_packet
+            write_json(root / 'motion-previews.json', {'status': 'native-motion-previews-complete',
+                'packet': region_packet(self.request), 'clips': [], 'TEST': 'No actual preview media or review'})
         elif label == 'verification':
             write_json(root / 'checks.json', {'status': 'checks-passed-awaiting-owned-cleanup',
                 'sha256': digest(root / 'review.mp4'), 'fullAudioVideoDecodePassed': True})
+
+    def write_capture(self, root: Path) -> None:
+        """Emit bounded TEST forward/reverse JPEG bindings for real recovery admission."""
+        (root / 'seam-samples.mp4').write_bytes(b'TEST encoded sample reel')
+        rows = []
+        for index, frame in enumerate([0, 24, 0]):
+            image = root / f'pose-{index}.jpg'
+            image.write_bytes(f'TEST JPEG {frame}'.encode())
+            rows.append({'frame': frame, 'path': str(image), 'sha256': digest(image), 'repeat': index == 2})
+        write_json(root / 'native-frames.json', {'status': self.capture_status, 'frames': rows,
+            'fromEncodedOutput': False, 'project': str(self.project), 'failedSceneStates': [],
+            'width': 1080, 'height': 1920, 'frameRate': '25/1', 'expectedCapturePoints': [0, 24, 0],
+            'sourceHtmlSha256': digest(self.project / 'index.html'),
+            'runtimeLibrarySha256': digest(self.runtime / 'dist/native-capture-library.mjs')})
 
     def seal(self) -> Path:
         """Create a valid TEST completed stage for the real resume admission path."""
@@ -140,3 +185,24 @@ class ShortPipelineFixture:
                   'acquire_source_cache': False, 'audio_profile': NATIVE_SHORT_MASTERING_PROFILE.identity,
                   'verify_from': None, 'render_only': False, 'unused_ram_advisory': False}
         return Namespace(**{**values, **changes})
+
+    def terminal(self, status: str = 'failed', root: Path | None = None) -> None:
+        """Record fictional terminal discovery state, separately from actual stage authority."""
+        write_json((root or self.root) / 'delivery.json',
+                   {'status': status, 'completedAt': '2026-09-16T12:00:00Z'})
+
+    def partial_audio(self) -> Path:
+        """Retain a TEST float master with a clean failed original render owner."""
+        directory = self.root / 'audio-preparation'
+        directory.mkdir()
+        master, receipt = directory / 'program-master.wav', directory / 'receipt.json'
+        master.write_bytes(b'TEST float master')
+        write_json(receipt, {'status': 'float-master-checked-awaiting-aac', 'masterSha256': digest(master)})
+        file = self.root / 'export-request.json'
+        pins = {**self.inputs, str(file): digest(file)}
+        owner = self.owner_record(self.request, pins, 'failed', str(self.root / 'review.mp4'))
+        owner.update(exitCode=1, args=['/usr/bin/sandbox-exec', '-f', str(STUDIO / 'native_localhost_only.sb'),
+                                     sys.executable, str(STUDIO / 'native_short_worker.py'), str(file), 'render'])
+        write_json(self.root / 'pipeline.render.json', owner)
+        self.terminal()
+        return receipt

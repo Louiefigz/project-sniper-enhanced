@@ -14,10 +14,9 @@ to finished shorts** workflow: compare source moments, trim the selected ranges,
 then produce the short. Do not stop at rough topic clips when a finished short
 was requested.
 An explicitly selected native HyperFrames project follows its approved native
-direction; open Aaron's next ready review visibly in Chrome. Other rendered-file
-requests use the deterministic Producer pipeline. An editable-Palmier request
-may use the staged Desktop-native branch only as an isolated experimental candidate; connected
-hybrid delivery remains P5-blocked, so a deliverable must use the exact audited
-MP4 or its approved one-clip flat mirror. A trim-only request must not gain
+direction; open the operator's next ready review visibly in Chrome (or the
+browser the operator names). Other rendered-file requests use the deterministic
+Producer pipeline. Palmier Pro is not configured in the packaged release: for a
+Palmier request, say so and deliver the exact audited MP4 and its Studio project. A trim-only request must not gain
 graphics, motion, music, or other unrequested treatment. Run the applicable
 gates and QC before claiming completion.

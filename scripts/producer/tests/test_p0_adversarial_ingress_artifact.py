@@ -6,18 +6,19 @@ import json
 import unittest
 from pathlib import Path
 
+from headless.native_media_runtime import POLICY as JAIL_POLICY
 from live_p0_adversarial_ingress_acceptance import CASES, CLOSURE
 
 REPO = Path(__file__).parents[3]
 ARTIFACT = REPO / (
     "docs/producer/command-driven-editing/contracts/"
-    "p0-adversarial-ingress-v1.json")
+    "p0-adversarial-ingress-2026-09-23.json")
 ERROR_PATTERNS = {
-    "malformed-codec": r"Decoder .* not found",
+    "malformed-codec": r"(Decoder .* not found|no decoder found)",
     "huge-dimensions": r"DIMENSION_LIMIT",
     "huge-frame-count": r"FRAME_LIMIT",
     "truncated-stream": r"(moov atom not found|Invalid data)",
-    "decoder-timeout": r"ETIMEDOUT",
+    "decoder-timeout": r"DECODE_TIMEOUT",
     "archive-bomb": r"manifest closure is invalid",
 }
 
@@ -32,11 +33,12 @@ class P0AdversarialIngressArtifactTests(unittest.TestCase):
         self.assertEqual(
             set(value),
             {
-                "schemaVersion", "kind", "generatedAt", "approvedImageId",
+                "schemaVersion", "kind", "generatedAt", "nativeRuntime",
                 "sourceClosure", "cases", "passed",
             },
         )
-        self.assertEqual(value["schemaVersion"], 1)
+        self.assertEqual(value["schemaVersion"], 2)
+        self.assertEqual(value["nativeRuntime"]["policy"], JAIL_POLICY)  # regenerate the cohort when the jail changes
         self.assertEqual(
             value["kind"], "p0-adversarial-ingress-acceptance")
         self.assertTrue(value["passed"])
@@ -54,7 +56,7 @@ class P0AdversarialIngressArtifactTests(unittest.TestCase):
                     {
                         "caseId", "inputSha256", "status", "error",
                         "admissionReceiptPublished",
-                        "containerCleanupProved",
+                        "processCleanupProved",
                     },
                 )
                 self.assertEqual(row["status"], "rejected")
@@ -63,7 +65,7 @@ class P0AdversarialIngressArtifactTests(unittest.TestCase):
                 self.assertRegex(
                     row["error"], ERROR_PATTERNS[row["caseId"]])
                 self.assertFalse(row["admissionReceiptPublished"])
-                self.assertTrue(row["containerCleanupProved"])
+                self.assertTrue(row["processCleanupProved"])
 
 
 if __name__ == "__main__":

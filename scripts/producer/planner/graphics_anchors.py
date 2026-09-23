@@ -248,8 +248,9 @@ def resolve_offset_v2(entry: dict, mov_path: str, video_in: str,
     ``faceBBoxNorm``), probes the clip's content footprint, and centers it into the
     emptiest legal region the anchor prefers — with the previous-shot gaze point
     (``eye_trace.gaze_xy``: planner ``gazeXY``, else the face center) as an
-    ADDITIVE near-tie bias on the region ranking (LIAM move 4; never overrides
-    fit/emptiness legality). Non-face anchors return ``(0, 0)`` (unchanged
+    ADDITIVE near-tie bias on the region ranking (eye-trace CM-4,
+    EDITCRAFT_LESSONS §7.1; never overrides fit/emptiness legality).
+    Non-face anchors return ``(0, 0)`` (unchanged
     compositing). Returns ``(dx, dy, meta)`` where ``meta`` records the chosen
     region + fallback (+ the gaze read, when known) for the stage's status line.
     Raises on measurement failure so the caller can fall back to v1 loudly,

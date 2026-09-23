@@ -16,7 +16,7 @@ CONTRAST_CARD = {
     "kind": "chart-story",
     "values": {"type": "bars", "data": "10, 20", "labels": "system,",
                "emphasize": 0, "unit": "minutes"},
-    "alternatives": ["nateherk-scoreboard", "nateherk-bullet-bars"],
+    "alternatives": ["module-scoreboard", "module-bullet-bars"],
     "reason": "The TEST source explicitly compares 10 with 20 minutes, so "
               "the closing chart paints those exact spoken quantities.",
     "selection": "A numeric contrast belongs in a two-bar chart. The system "

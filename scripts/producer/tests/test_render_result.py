@@ -2,94 +2,16 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import os
-import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
 
-from _common import pl  # noqa: F401
-from _current_build_release_fixture import current_manifest
-from _render_lane_proof import IMAGE_ID, ProofInputs, build_full_proof
-from headless import render_lane
-from headless.render_lane import OverlayLaunchRequest
-from headless.overlay_seal import (OverlayPrepareRequest, OverlaySealBinding,
-                                   load_overlay, prepare_overlay)
-from headless.render_lane_cache import prepare_attempt_cache
-from headless.render_build_receipt import store_render_build
-from headless.request_artifact import store_request_artifact
-from headless.resource_ledger import ResourceRequest
-
-PRODUCER_DIR = Path(__file__).resolve().parents[1]
-REPO_ROOT = PRODUCER_DIR.parents[1]
-CONTAINER_NAME = "sniper-render-" + "d" * 32
+from _render_result_fixture import HistoricalResultFixture
 
 
-class RenderResultTests(unittest.TestCase):
-    def setUp(self) -> None:
-        self.temp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.temp.cleanup)
-        self.authority = Path(self.temp.name).resolve() / "authority"
-        self.authority.mkdir(mode=0o700)
-        (self.authority / "attempts").mkdir(mode=0o700)
-        self.attempt = self.authority / "attempts" / "attempt"
-        self.attempt.mkdir(mode=0o700)
-        entry = {"kind": "section-marker", "outStart": 0, "outEnd": 2.5,
-                 "anchor": "free-band", "spec": {
-                     "num": "System No.1", "line1": "Familiarity",
-                     "line2": "Rule", "side": "left", "accent": "#054BC9"}}
-        artifact = store_request_artifact(str(self.authority), {
-            "schemaVersion": 1, "operation": "render-overlays",
-            "overlays": [{"overlayId": "overlay-1", "entry": entry}],
-        })
-        request_digest = artifact.request_digest
-        build = store_render_build(str(self.attempt), current_manifest())
-        build_digest = build.build_digest
-        prepared = OverlayPrepareRequest(
-            str(self.attempt), "attempt", request_digest, build_digest,
-            str(REPO_ROOT), entry, "overlay-1")
-        locator = prepare_overlay(prepared)
-        self.request = OverlayLaunchRequest(
-            str(self.authority), str(self.attempt), "attempt", build,
-            artifact, "overlay-1", locator)
-        self.seal = load_overlay(locator, OverlaySealBinding(
-            str(self.attempt), "attempt", request_digest, build_digest,
-            "overlay-1"))
-        identity = (self.request.attempt_id, self.request.request.request_digest,
-                    self.request.build_digest, IMAGE_ID)
-        self.binding = prepare_attempt_cache(str(self.attempt), identity)
-        self.resources = ResourceRequest(
-            str(self.attempt), "attempt", "/docker", "/docker.sock",
-            IMAGE_ID, "501:20")
-
-    def _value(self, key: str | None = None, image_id: str = IMAGE_ID) -> dict:
-        key = key or self.seal.key
-        path = Path(self.binding.cache_dir) / f"{key}.mov"
-        path.write_bytes(b"rendered")
-        path.chmod(0o600)
-        return {"cached": False, "fmt": "mov", "fps": "30", "key": key,
-                "kind": "section-marker", "path": str(path),
-                "proof": build_full_proof(
-                    path, key, image_id,
-                    ProofInputs(self.seal.expected_copy, self.seal.snapshot))}
-
-    @staticmethod
-    def _stdout(value: dict) -> str:
-        return json.dumps(value, ensure_ascii=True, separators=(",", ":"),
-                          sort_keys=True)
-
-    @staticmethod
-    def _rewrite_sidecar(value: dict) -> None:
-        proof = value["proof"]
-        disk = {key: nested for key, nested in proof.items() if key != "sidecar"}
-        Path(proof["sidecar"]).write_text(json.dumps(disk), encoding="utf-8")
-        Path(proof["sidecar"]).chmod(0o600)
-
-    def _validate(self, value: dict) -> tuple[dict, dict]:
-        return render_lane._validated_result(
-            self._stdout(value), self.binding, self.seal,
-            (IMAGE_ID, CONTAINER_NAME, self.resources))
+class RenderResultTests(HistoricalResultFixture):
+    """Strict retained metadata checks; no executable R0 admission occurs."""
 
     def test_complete_strict_result_is_accepted(self) -> None:
         value, output = self._validate(self._value())

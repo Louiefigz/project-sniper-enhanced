@@ -1,14 +1,11 @@
 "use server";
 
-import Anthropic from "@anthropic-ai/sdk";
 import { dlog } from "@/lib/debug";
-import { brainProvider, codexSettings } from "@/app/api/_lib/ai-provider";
-import { runCodexJson } from "@/app/api/_lib/codex-cli";
+import { brainModel, brainProvider } from "@/app/api/_lib/ai-provider";
+import { runBrainJson } from "@/app/api/_lib/subscription-brain";
 
-const MODEL = "claude-sonnet-4-6";
 const CHUNK_SIZE = 50; // max clips per LLM call
-const MAX_RETRIES = 2;
-const RETRY_BASE_MS = 1000;
+const BRAIN_TIMEOUT_MS = 15 * 60 * 1000;
 
 const SYSTEM_PROMPT = `You are a video editor reviewing the final cut of a short-form clip. The numbered clips below will play back to back as a continuous video — the viewer sees ONLY these clips with no other context. There is no text on screen, no titles, no narrator — just these spoken words in sequence.
 
@@ -90,53 +87,14 @@ export interface ClipInput {
   afterContext: string | null;  // first ≤20 words of removed content after this clip
 }
 
-const VALIDATION_TOOL = {
-  name: "submit_validation" as const,
-  description:
-    "Submit the validation results for the reviewed clips. Use this tool to report any issues found.",
-  input_schema: {
-    type: "object" as const,
-    properties: {
-      all_valid: {
-        type: "boolean" as const,
-        description: "True if every clip is coherent and no issues were found.",
-      },
-      issues: {
-        type: "array" as const,
-        description: "List of problematic clips. Empty array if all_valid is true.",
-        items: {
-          type: "object" as const,
-          properties: {
-            clip_index: {
-              type: "integer" as const,
-              description: "The 0-based clip index from the input.",
-            },
-            action: {
-              type: "string" as const,
-              enum: ["REMOVE", "FLAG"],
-              description:
-                "REMOVE for clearly broken clips; FLAG for borderline clips a human should review.",
-            },
-            reason: {
-              type: "string" as const,
-              description: "Brief explanation of the issue.",
-            },
-          },
-          required: ["clip_index", "action", "reason"],
-        },
-      },
-    },
-    required: ["all_valid", "issues"],
-  },
-};
-
 interface ValidationToolInput {
   all_valid: boolean;
   issues: { clip_index: number; action: "REMOVE" | "FLAG"; reason: string }[];
 }
 
-async function callCodex(userMessage: string): Promise<{ remove: number[]; flag: number[] }> {
-  const input = await runCodexJson<ValidationToolInput>({
+/** One chunk through the selected subscription brain; no API-key client exists here. */
+async function callBrain(userMessage: string): Promise<{ remove: number[]; flag: number[] }> {
+  const { value } = await runBrainJson<ValidationToolInput>({
     prompt: [
       SYSTEM_PROMPT,
       "",
@@ -146,47 +104,9 @@ async function callCodex(userMessage: string): Promise<{ remove: number[]; flag:
       userMessage,
     ].join("\n"),
     schema: "clipper-validation",
-    timeoutMs: 15 * 60 * 1000,
+    timeoutMs: BRAIN_TIMEOUT_MS,
   });
-  return parseToolInput(input);
-}
-
-async function callWithRetry(
-  anthropic: Anthropic,
-  userMessage: string
-): Promise<{ remove: number[]; flag: number[] }> {
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    try {
-      const result = await anthropic.messages.create({
-        model: MODEL,
-        max_tokens: 4096,
-        temperature: 0,
-        thinking: { type: "adaptive" },
-        output_config: { effort: "low" },
-        system: SYSTEM_PROMPT,
-        tools: [VALIDATION_TOOL],
-        tool_choice: { type: "auto" },
-        messages: [{ role: "user", content: userMessage }],
-      });
-
-      // Extract the tool call result
-      const toolBlock = result.content.find((b) => b.type === "tool_use");
-      if (toolBlock && toolBlock.type === "tool_use") {
-        const input = toolBlock.input as ValidationToolInput;
-        return parseToolInput(input);
-      }
-
-      throw new Error("validate-assembly: response contained no tool_use block");
-    } catch (err) {
-      const status = (err as { status?: number })?.status;
-      if (status === 429 && attempt < MAX_RETRIES) {
-        await new Promise((r) => setTimeout(r, RETRY_BASE_MS * Math.pow(2, attempt)));
-        continue;
-      }
-      throw err;
-    }
-  }
-  return { remove: [], flag: [] };
+  return parseToolInput(value);
 }
 
 function parseToolInput(input: ValidationToolInput): { remove: number[]; flag: number[] } {
@@ -224,12 +144,9 @@ export async function validateAssembledOutput(
 ): Promise<ValidationResult> {
   if (clips.length === 0) return { removeClips: [], flagClips: [] };
 
-  const provider = brainProvider();
-  const model = provider === "codex" ? codexSettings().model : MODEL;
-  dlog("clipper:validate", "validate assembled output", { provider, model, clips: clips.length });
-
   try {
-    const anthropic = provider === "legacy" ? new Anthropic() : null;
+    const provider = brainProvider();
+    dlog("clipper:validate", "validate assembled output", { provider, model: brainModel(provider), clips: clips.length });
     const allRemove: number[] = [];
     const allFlag: number[] = [];
 
@@ -245,12 +162,7 @@ export async function validateAssembledOutput(
     }
 
     const results = await Promise.all(
-      chunks.map(async (chunk) => {
-        const userMessage = buildUserMessage(chunk);
-        return provider === "codex"
-          ? callCodex(userMessage)
-          : callWithRetry(anthropic!, userMessage);
-      })
+      chunks.map((chunk) => callBrain(buildUserMessage(chunk)))
     );
     for (const { remove, flag } of results) {
       allRemove.push(...remove);

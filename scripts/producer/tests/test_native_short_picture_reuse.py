@@ -11,6 +11,7 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from studio import native_short_picture_reuse as reuse
+from studio import native_short_autoresume as automatic
 from studio.native_run_config import source_hashes
 from studio.native_runtime import digest
 
@@ -125,6 +126,22 @@ class NativeShortPictureReuseTests(unittest.TestCase):
         self.assertEqual(before, {str(path): digest(path) for path in self.donor.rglob('*') if path.is_file()})
         with self.assertRaises(FileExistsError):
             reuse.reuse_native_picture(request)
+
+    def test_automatic_batch_picture_reuses_complete_original_frame_inventory(self) -> None:
+        """Discovery retains the batch route and consumes its actual independent proof."""
+        self.pipeline.update(exitCode=1, pid=10, output=str(self.donor / 'review.mp4'),
+            ownerIdentities=[{'pid': 10, 'pgid': 10, 'parent_pid': 9, 'started': 'TEST'}],
+            args=['/usr/bin/sandbox-exec', '-f', str(self.studio / 'native_localhost_only.sb'),
+                  sys.executable, str(self.studio / 'native_short_worker.py'), str(self.donor / 'export-request.json'), 'render'])
+        write_json(self.donor / 'pipeline.render.json', self.pipeline)
+        write_json(self.donor / 'delivery.json', {'status': 'failed', 'completedAt': '2026-09-16T12:00:00Z'})
+        current = {**self.previous, 'output': str(self.output), 'pins': dict(self.previous['pins'])}
+        with patch.object(automatic, 'candidate_attempts', return_value=[self.donor]), \
+                patch.object(automatic, 'STUDIO', self.studio):
+            selected = automatic.recover_automatically(current)
+        self.assertEqual(selected['recoverySelection']['reused'], 'picture')
+        self.assertEqual(selected['captureMode'], reuse.MODE)
+        self.assertFalse(reuse.reuse_native_picture(selected)['pictureRenderedAgain'])
 
     def test_audio_only_implementation_changes_do_not_invalidate_picture(self) -> None:
         self.audio.write_text('TEST ONLY fixed audio implementation')

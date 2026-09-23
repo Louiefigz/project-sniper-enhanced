@@ -1,4 +1,4 @@
-"""Image-focus operators (LIAM-4-MOVES move 3, measured 2026-07-11 EC2 R2).
+"""Image-focus operators (continuity mechanism CM-3, EDITCRAFT_LESSONS §7.4).
 
 Pins: the op vocabulary + region/window validation (executor's own parser),
 the filter grammar per op (highlight wipe / darken+blur surround / signed
@@ -77,7 +77,7 @@ class FocusOpsParseTests(unittest.TestCase):
 
 
 class FocusOpsFilterTests(unittest.TestCase):
-    """branch_parts — the measured filter grammar per op."""
+    """branch_parts — the filter grammar per op."""
 
     def _parts(self, raw: dict) -> str:
         ops = focp.parse_ops([raw], 5.0)
@@ -163,7 +163,7 @@ class FocusOpsInsertTests(unittest.TestCase):
     def test_off_band_hold_warns(self) -> None:
         rep = self._lint(lambda p: p["brollTrack"][0]["focusOps"].__setitem__(
             0, _op(holdS=3.4)))
-        self.assertTrue(any("measured band" in w for w in rep.warnings),
+        self.assertTrue(any("design band" in w for w in rep.warnings),
                         rep.warnings)
 
     def test_bad_ops_are_lint_errors(self) -> None:

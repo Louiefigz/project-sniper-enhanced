@@ -112,6 +112,9 @@ def _finite_number(value: object) -> bool:
         return False
 
 
+CLOCK_ROUNDING_TOLERANCE_S = 0.12   # ~3.5 frames at 30fps: encode rounding, not a defect
+
+
 def _parse_section(item: object, duration: float) -> ReviewSection:
     """Validate one explicit, measurable output interval without coercion."""
     if not isinstance(item, dict):
@@ -121,8 +124,15 @@ def _parse_section(item: object, duration: float) -> ReviewSection:
         raise ValueError("section start/end must be finite numeric output seconds")
     if not isinstance(label, str) or not label.strip():
         raise ValueError("section label must be a nonempty string")
-    if not 0 <= start < end <= duration:
+    if not 0 <= start < end:
         raise ValueError(f"section {label!r} exceeds output duration or has invalid bounds")
+    if end > duration:
+        # The sections are the PLAN's clock; the file is its frame-quantised encode, so the
+        # last section can end a few milliseconds past the decoded audio. Clamp that, and
+        # only refuse an overshoot too large to be rounding.
+        if end - duration > CLOCK_ROUNDING_TOLERANCE_S or start >= duration:
+            raise ValueError(f"section {label!r} exceeds output duration or has invalid bounds")
+        end = duration
     if round(end * SAMPLE_RATE) <= round(start * SAMPLE_RATE):
         raise ValueError(f"section {label!r} contains no analysis samples")
     return ReviewSection(float(start), float(end), label)

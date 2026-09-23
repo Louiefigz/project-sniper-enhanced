@@ -9,6 +9,7 @@ from graphics.composite_core import CompositeOptions, composite
 from palmier.scene_bindings import scene_binding_delta
 from planner.treatment_operations import apply_treatment_operation
 from tests.p4_exit_media import ProgramSpec, cache_media, make_program
+from tests.scene_fixtures import bind_test_scene_source
 from tests.p4_exit_scene_support import (
     SceneRunContext,
     clips,
@@ -23,6 +24,7 @@ def _execute(context: SceneRunContext, changed_scene: dict) -> dict:
         "startFrame": 30, "endFrameExclusive": 210,
         "timelineMapHash": "c" * 64,
     })
+    bind_test_scene_source(early)  # Explicit synthetic fixture authoring, before the real move.
     early_receipt = render_package(context, early, "timing-before")
     before = cache_media(context.cache)
     treatment = apply_treatment_operation(scene_state(early), {

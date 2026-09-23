@@ -35,6 +35,7 @@ class CompositeOptions:
     video_only: bool = False
     caption_tail: int | None = None  # Explicit held caption pages AFTER sorted graphics.
     presenter: PresenterGraphSpec | None = None  # Low-level opt-in; no released Producer owner.
+    ordinary_timing: bool = False  # Range review preserves ordinary graphics' seconds gates.
 
 
 @dataclass
@@ -81,7 +82,7 @@ def probe_frames(path: str, ffprobe: str = "ffprobe") -> int:
 
 def _gate(clip: dict, graph: _Graph) -> str:
     """Keep legacy gates unchanged; the private opt-in uses exact frame indices."""
-    if graph.frame_rate is not None:
+    if graph.frame_rate is not None and not clip.get("ordinaryTiming"):
         start, end = _frame_window(clip)
         return f"enable='gte(n,{start})*lt(n,{end})'"
     start, end = float(clip["outStart"]), float(clip["outEnd"])
@@ -90,7 +91,7 @@ def _gate(clip: dict, graph: _Graph) -> str:
 
 def _overlay_origin(clip: dict, graph: _Graph) -> str:
     """Maintain the original absolute animation origin without decimal truncation."""
-    if graph.frame_rate is None:
+    if graph.frame_rate is None or clip.get("ordinaryTiming"):
         return f"{float(clip['outStart']):.4f}/TB"
     start, _end = _frame_window(clip)
     rate = Fraction(graph.frame_rate)
@@ -177,6 +178,8 @@ def _range_graph(graph: str, final: str, options: CompositeOptions) -> tuple[str
 
 def _options_valid(options: CompositeOptions) -> None:
     """The development range lane must be explicit and cannot silently copy audio."""
+    if options.ordinary_timing and (options.frame_range is None or options.presenter is not None):
+        raise ValueError("ordinary timing is only for an explicit ordinary review range")
     if options.presenter is not None:
         validate_presenter_graph(options.presenter)
         if options.frame_rate != options.presenter.frame_rate or not options.video_only:
@@ -209,7 +212,9 @@ def _composite_pass(
         cmd.extend(("-i", clip["path"]))
     if options.presenter is not None:
         cmd += presenter_input_arguments(options.presenter)
-    graph, final = build_graph(clips, options.eof_pass, options.frame_rate, options.presenter)
+    timed = [{**clip, "ordinaryTiming": clip.get("compositionRole") != "caption-page"}
+             for clip in clips] if options.ordinary_timing else clips
+    graph, final = build_graph(timed, options.eof_pass, options.frame_rate, options.presenter)
     graph, final = _range_graph(graph, final, options)
     map_label, extra = final, []
     if options.ydif_file:

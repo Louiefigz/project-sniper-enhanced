@@ -14,11 +14,13 @@ import type {
   AutoEditDoctrineAuthority,
 } from "@/app/api/producer/auto-edit/stream";
 import { canonicalJsonSha256 } from "./auto-edit-hash";
+import { parseAutoEditIntent } from "@/app/api/producer/auto-edit/stream";
 
 export const PRODUCER_CORE_DOCTRINE_PATHS = [
   ".agents/skills/producer/SKILL.md",
   ".claude/skills/producer/SKILL.md",
   "docs/PIPELINE.md",
+  "docs/producer/VISUAL_SOURCE_POLICY.md",
   "scripts/producer/docs/findings/FAILURE_LEDGER.md",
   "scripts/producer/docs/findings/QC_CHECKLIST.md",
 ] as const;
@@ -31,8 +33,8 @@ export const PRODUCER_REFERENCED_DOCTRINE_PATHS = [
   "docs/studies/LONGFORM_VISUAL_STUDY.md",
   "docs/studies/MEASURED_EDIT_GRAMMAR.md",
   "docs/studies/MOTION_GRAMMAR_STUDY.md",
-  "docs/studies/NATEHERK_CARDS.md",
-  "docs/studies/NATEHERK_STUDY.md",
+  "docs/studies/MODULE_CARDS.md",
+  "docs/studies/MODULE_STUDY.md",
   "docs/studies/PACING_RHYTHM_STUDY.md",
   "docs/producer/PRODUCER_EDGE_CASES.md",
   "docs/producer/PRODUCER_PLAN.md",
@@ -43,11 +45,6 @@ export const PRODUCER_REFERENCED_DOCTRINE_PATHS = [
   "scripts/producer/docs/findings/REFERENCE_EVIDENCE_IS_NOT_TEMPLATE_AUTHORITY.md",
 ] as const;
 
-const STYLE_DOCTRINE: Record<string, string> = {
-  caleb: "docs/studies/CALEB_STYLE.md",
-  jadenly: "scripts/producer/docs/findings/JADEN_STYLE.md",
-  angela: "docs/studies/ANGELA_STYLE.md",
-};
 const SHA256 = /^[0-9a-f]{64}$/;
 const LEARNING_DIR = ".sniper-learning";
 
@@ -94,12 +91,10 @@ function safeRunId(value: string): string {
 }
 
 function sourcePaths(ctx: AutoEditCtx, additional: readonly string[] = []): string[] {
-  const selected = ctx.intent?.style ?? ctx.intent?.reference?.targetStyle;
-  const style = selected ? STYLE_DOCTRINE[selected] : undefined;
+  parseAutoEditIntent({ ...ctx.intent, scope: ctx.scope });
   return [...new Set([
     ...PRODUCER_CORE_DOCTRINE_PATHS,
     ...PRODUCER_REFERENCED_DOCTRINE_PATHS,
-    ...(style ? [style] : []),
     ...additional,
   ])].sort();
 }

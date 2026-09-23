@@ -20,6 +20,7 @@ from graphics import comp_capability_lint as lint
 from headless.process_runner import ProcessRequest, run_text
 from stage_timing import stage_span
 from studio.native_preflight_inputs import require_unchanged, source_state
+from studio.native_reference_reuse import implementation_files, reference_snapshot
 
 LOGGER = logging.getLogger(__name__)
 ROOT = Path(__file__).resolve().parents[3]
@@ -31,7 +32,13 @@ def _tools() -> dict:
     """Reuse existing official validator pins and include this adapter's sources."""
     value = lint.lint_validator_state()
     paths = {Path(__file__), RUNNER, Path(__file__).with_name('native_preflight_inputs.py'),
-             Path(__file__).with_name('native_preflight_dependencies.mjs')}
+             Path(__file__).with_name('native_preflight_dependencies.mjs'),
+             Path(__file__).with_name('native_reference_reuse.py'), *implementation_files()}
+    paths.update(ROOT / name for name in (
+        'schemas/producer/visual-source-policy-v1.json',
+        'scripts/producer/graphics/visual_source_policy.py',
+        'scripts/producer/graphics/visual_source_receipt.py',
+        'scripts/producer/graphics/visual_source_project.py'))
     value['files'].update(lint._files(paths))
     value['parents'].update(lint._parents(paths))
     value['bindingScope'] = 'SDK lint/parser bundles, lockfile, Node and adapters; not full transitive dependency attestation'
@@ -115,30 +122,34 @@ def _execute(project: Path, output: Path, original: dict, end: float) -> tuple[d
     return result, request_identity
 
 
-def preflight(project: Path, output: Path) -> dict:
+def preflight(project: Path, output: Path, reference_map: Path | None = None) -> dict:
     """Collect static issues without altering the project or replacing old results.
 
     Args:
         project: Canonical staged native project, not its immutable archive root.
         output: New evidence directory outside the project, with an existing parent.
+        reference_map: Explicit reference-match map; ordinary edits need no map.
 
     Returns:
         A timed static-only result retaining all SDK findings and input pins.
     """
     began = time.monotonic()
     real_directory(project)
+    from graphics.visual_source_project import admit_project_sources
+    admit_project_sources(project)
     real_directory(output.parent)
     if output.is_relative_to(project):
         raise ValueError('Native preflight output must be outside the project')
     output.mkdir(mode=0o700)
     with stage_span(str(output), 'native_static_preflight'):
-        return _check(project, output, began)
+        return _check(project, output, began, reference_map)
 
 
-def _check(project: Path, output: Path, began: float) -> dict:
+def _check(project: Path, output: Path, began: float, reference_map: Path | None = None) -> dict:
     """Preserve failure evidence; never turn incomplete static work into a pass."""
     try:
-        original = {'source': source_state(project), 'tools': _tools()}
+        original = {'source': source_state(project), 'tools': _tools(),
+                    'referenceMatch': reference_snapshot(project, reference_map)}
         write_new(output / 'inputs.json', original)
         result, request_identity = _execute(project, output, original, began + MAX_SECONDS)
         report = {'schemaVersion': 1, 'status': 'blocked' if result['blocked'] else 'static-checks-pass',
@@ -146,12 +157,15 @@ def _check(project: Path, output: Path, began: float) -> dict:
             'elapsedSeconds': time.monotonic() - began, 'inputsStable': True,
             'elapsedScope': 'before-publication; complete execution span is in stage_timings.jsonl',
             'sourceStateSha256': original['source']['sourceStateSha256'], 'sdk': result,
+            'referenceMatch': original['referenceMatch'],
             'mediaContentQualified': False, 'renderApproved': False, 'qualityApproved': False,
             'nextChecks': ['native-animated-samples-at-intended-export-settings',
                            'final-whole-output-audio-color-layout-and-playback-qc']}
         write_new(output / 'result.json', {**report, 'status': 'pending-validation',
             'observedStatus': report['status'], 'completionRequired': True})
         require_unchanged(project, original['source'])
+        if reference_snapshot(project, reference_map) != original['referenceMatch']:
+            raise RuntimeError('Reference match evidence changed during native preflight')
         if _tools() != original['tools'] or lint._identity(output / 'request.json') != request_identity \
                 or file_hash(output / 'request.json') != result['requestSha256']:
             raise RuntimeError('Native preflight validator or request changed before completion')
@@ -195,9 +209,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('project', type=Path)
     parser.add_argument('--output-dir', required=True, type=Path)
+    parser.add_argument('--reference-map', type=Path,
+                        help='Require current mapping evidence for this explicit reference-match request')
     args = parser.parse_args()
     try:
-        report = preflight(args.project, args.output_dir)
+        report = preflight(args.project, args.output_dir,
+                           args.reference_map.absolute() if args.reference_map else None)
         print(json.dumps({key: report[key] for key in ('status', 'elapsedSeconds',
               'renderApproved', 'qualityApproved')} | {'report': str(args.output_dir / 'result.json'),
               'completion': str(args.output_dir / 'completion.json')}))

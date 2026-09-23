@@ -63,7 +63,7 @@
     "PATH": "/opt/homebrew/Cellar/node/23.10.0_1/bin:/opt/homebrew/Cellar/ffmpeg/8.0_1/bin:/usr/bin:/bin",
     "TMPDIR": "/private/tmp",
     "LC_ALL": "C",
-    "HYPERFRAMES_BROWSER_PATH": "/Users/aaronfigueroa/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-152.0.7928.2/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+    "HYPERFRAMES_BROWSER_PATH": "/Users/maintainer/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-152.0.7928.2/chrome-headless-shell-mac-arm64/chrome-headless-shell",
     "HYPERFRAMES_FFMPEG_PATH": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffmpeg",
     "HYPERFRAMES_FFPROBE_PATH": "/opt/homebrew/Cellar/ffmpeg/8.0_1/bin/ffprobe",
     "PRODUCER_LOW_MEMORY_MODE": "true",
@@ -77,7 +77,7 @@
   "runDeadlineSeconds": 120,
   "supervisorSigkillProtection": false,
   "additionalFilePinsBefore": {
-    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "/Users/maintainer/ProjectSniperSource/templates/motion/node_modules/hyperframes/dist/cli.js": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
     "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/hyperframes/dist/frame-source-transport.mjs": "20de6c202787a0aa47a8227e54925a1765be871a5bb8b4167032d550b2f55784",
     "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/test-only-transport-48frames.html": "f8ba2922bbf5c555e3f043ec900b518707a0d9b0180a99339479df71acd41832",
     "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/fault-preload.mjs": "1cd82cbfce3cc3a6c26ca0610fb08b121b0ba24d42844b9c0a9495ab4950a051",
@@ -208,7 +208,7 @@
   "sdkStable": true,
   "sandboxStable": true,
   "additionalFilePinsAfter": {
-    "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
+    "/Users/maintainer/ProjectSniperSource/templates/motion/node_modules/hyperframes/dist/cli.js": "95be44729e244283cb685833a20b94e00c96aaafba7848b9182db01771477c78",
     "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/hyperframes/dist/frame-source-transport.mjs": "20de6c202787a0aa47a8227e54925a1765be871a5bb8b4167032d550b2f55784",
     "/private/tmp/sniper-c0679-produced-review-20260909.FCYcRv/native-presenter-v1/test-only-transport-48frames.html": "f8ba2922bbf5c555e3f043ec900b518707a0d9b0180a99339479df71acd41832",
     "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/fault-preload.mjs": "1cd82cbfce3cc3a6c26ca0610fb08b121b0ba24d42844b9c0a9495ab4950a051",

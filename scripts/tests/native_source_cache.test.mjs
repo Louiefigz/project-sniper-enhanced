@@ -83,6 +83,29 @@ test('existing-only remains a cache-miss failure with no extraction fallback',()
   assert.equal(f.extractions.length,0);assert.equal(f.calls.sessions.length,0);
 }));
 
+test('ordinary streaming preflight acquires exact cold SDK source frames before browser capture',()=>withFixture(async f=>{
+  f.request.sourceCacheMode='acquire-sdk-preflight';f.request.captureMode='sdk-streaming';
+  const context=await f.context();await prepareNativeCaptureContext(context);
+  assert.equal(f.extractions.length,1);assert.equal(f.calls.sessions.length,0);
+  assert.equal(f.calls.encodes.length,0);assert.equal(context.sourceCacheAcquisition.status,'exact-source-caches-ready');
+  assert.deepEqual(f.extractions[0][0],[f.video]);
+  assert.ok(context.cacheEntries.every(row=>row.width===3840&&row.height===2160));
+}));
+
+test('streaming preflight refuses mutated SDK windows and incomplete retained caches',async()=>{
+  await withFixture(async f=>{
+    f.request.sourceCacheMode='acquire-sdk-preflight';f.changedWindow=true;
+    await assert.rejects(()=>f.context().then(prepareNativeCaptureContext),/changed source timing/);
+    assert.equal(f.calls.sessions.length,0);
+  });
+  await withFixture(async f=>{
+    f.request.sourceCacheMode='acquire-sdk-preflight';fs.mkdirSync(f.entry);
+    fs.writeFileSync(path.join(f.entry,'retain.txt'),'TEST partial cache');
+    await assert.rejects(()=>f.context().then(prepareNativeCaptureContext),/must be preserved/);
+    assert.equal(f.extractions.length,0);
+  });
+});
+
 test('unknown modes and cold acquisition without batch mode reject before extraction',async()=>{
   await withFixture(async f=>{
     f.request.sourceCacheMode='automatic-unqualified-fallback';
@@ -160,13 +183,13 @@ test('cache identity matches the installed SDK canonical blob for integer and ra
   for(const fps of [{num:25,den:1},{num:30000,den:1001}]){
     const context={project:f.request.project,request:f.request,fps,rate:fps.num/fps.den};
     const identity=nativeSourceCacheIdentity(context,{...f.video,mediaStart:23.76}),b=identity.keyBlob;
-    const expected=sandbox.blob({videoPath:b.p,mtimeMs:b.m,size:b.s,mediaStart:b.ms,duration:b.d,fps:b.f,format:b.fmt});
+    const expected=sandbox.blob({videoPath:b.p,mtimeMs:b.m,size:b.s,mediaStart:b.ms,duration:b.d,fps:b.f,format:b.fmt,transform:b.t});
     assert.equal(JSON.stringify(b),expected);
     assert.equal(path.basename(identity.entry),'hfcache-v4-'+createHash('sha256').update(expected).digest('hex').slice(0,16));
   }
 }));
 
-test('adapter exposes existing extraction primitives while preserving every CLI byte',()=>{
+test('adapter exposes the same qualified extraction primitives in the CLI and capture library',()=>{
   const manifest=JSON.parse(fs.readFileSync('scripts/producer/studio/runtime/patches.json'));
   const stock=fs.readFileSync('templates/motion/node_modules/hyperframes/dist/cli.js');
   const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -176,7 +199,7 @@ test('adapter exposes existing extraction primitives while preserving every CLI 
     assert.equal(hash(bytes),row.sha256);return bytes;
   };
   const cliRow=manifest.files.find(row=>row.file==='cli.js'),cli=apply(stock,cliRow);
-  assert.equal(hash(cli),'611aac212ec3e83bf53b8df10d266ee59cd9f733f64a2ea58dc6e38de8426cd5');
+  assert.equal(hash(cli),'e565a6640e071d4abac38d7601e0ad0faa7cab9284abd73127f014e29b74afb9');
   const libraryRow=manifest.files.find(row=>row.file==='native-capture-library.mjs'),library=apply(cli,libraryRow);
   const patch=libraryRow.patches[0];assert.deepEqual(library.subarray(0,patch.offset),cli.subarray(0,patch.offset));
   assert.match(library.subarray(patch.offset).toString(),/export \{[^}]*extractAllVideoFrames, isHdrColorSpace,/);

@@ -77,6 +77,7 @@ export interface SceneProvenanceV1 {
 }
 
 export interface SceneSpecV1 {
+  visualSources?: Record<string, unknown>;
   schemaVersion: 1;
   sceneId: string;
   version: number;

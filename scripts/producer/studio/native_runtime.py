@@ -2,16 +2,33 @@
 
 The stock package stays untouched. No downloads, package upgrades or provider
 calls occur. A different stock SDK requires a separately qualified patch set.
+
+Locking (``scripts/infra/sniper_lock.py``): resolving the runtime holds the
+install's maintenance lock SHARED for the rest of the process, so the installer,
+uninstall and cache cleaning (EXCLUSIVE) never run under a render that uses it.
+Construction additionally holds ``runtime-build.lock`` EXCLUSIVE; a leftover
+``installing/`` folder found while holding it can only come from an interrupted
+construction and is removed before building again.
 """
 from __future__ import annotations
 
 import hashlib
 import json
 import shutil
+import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[3]
 PATCH_ROOT = Path(__file__).resolve().parent / 'runtime'
+if str(REPO / 'scripts/infra') not in sys.path:
+    sys.path.insert(0, str(REPO / 'scripts/infra'))
+import sniper_lock  # noqa: E402  (stdlib-only helper shared with the installer)
+
+BUILD_WAIT_SECONDS = 600.0
+LAST_ACTION = {"action": ""}  # what the latest install_runtime did, for the installer's log
+GUARD = 'native-export-guard.mjs'
+WRAPPER = ("#!/usr/bin/env node\nimport { admitNativeCommand } from './native-export-guard.mjs';\n"
+           "if (admitNativeCommand()) await import('./native-render-sdk.mjs');\n")
 
 
 def digest(file: Path) -> str:
@@ -38,26 +55,37 @@ def verify_runtime(directory: Path, manifest: dict) -> dict[str, str]:
     """Cold-read every adapted runtime file before reuse."""
     expected = {row['file']: row['sha256'] for row in manifest['files']}
     expected['frame-source-transport.mjs'] = manifest['transportSha256']
+    if manifest.get('exportGuardSha256'):
+        expected['native-render-sdk.mjs'] = expected['cli.js']
+        expected['cli.js'] = hashlib.sha256(WRAPPER.encode()).hexdigest()
+        expected[GUARD] = manifest['exportGuardSha256']
     for name, expected_hash in expected.items():
         if digest(directory / 'dist' / name) != expected_hash:
             raise ValueError(f'Installed native runtime changed: {name}')
     return expected
 
 
-def install_runtime() -> Path:
-    """Materialize a content-addressed runtime beside the installed dependencies."""
+def _runtime_manifest() -> tuple[dict, str]:
+    """The qualified patch manifest and the content identity of the runtime it builds."""
     manifest_path = PATCH_ROOT / 'patches.json'
     manifest = json.loads(manifest_path.read_text())
-    stock = REPO / 'templates/motion/node_modules/hyperframes'
-    if json.loads((stock / 'package.json').read_text())['version'] != manifest['sdkVersion']:
-        raise ValueError('Installed SDK version has not been qualified for native Shorts')
-    parent = REPO / 'templates/motion/.sniper-native-runtime' / digest(manifest_path)
+    manifest['exportGuardSha256'] = digest(PATCH_ROOT / GUARD)
+    identity = hashlib.sha256((digest(manifest_path) + manifest['exportGuardSha256'] + WRAPPER).encode()).hexdigest()
+    return manifest, identity
+
+
+def _construct(stock: Path, parent: Path, manifest: dict) -> Path:
+    """Build the runtime in ``installing/``, verify it, then rename it into place.
+
+    The caller holds ``runtime-build.lock``, so an ``installing/`` folder that is
+    already present was left by an interrupted construction, never by a live one.
+    """
     directory = parent / 'hyperframes'
-    if directory.exists():
-        verify_runtime(directory, manifest)
-        return directory
     parent.mkdir(parents=True, exist_ok=True)
     staging = parent / 'installing'
+    if staging.exists():
+        shutil.rmtree(staging)
+        LAST_ACTION["action"] = "rebuilt (an interrupted construction was removed)"
     staging.mkdir()  # A concurrent/incomplete install must not be overwritten.
     shutil.copyfile(stock / 'package.json', staging / 'package.json')
     shutil.copytree(stock / 'dist', staging / 'dist')
@@ -66,11 +94,76 @@ def install_runtime() -> Path:
         patched = apply_bytes(source.read_bytes(), row)
         (staging / 'dist' / row['file']).write_bytes(patched)
     shutil.copyfile(PATCH_ROOT / 'frame-source-transport.mjs', staging / 'dist/frame-source-transport.mjs')
+    (staging / 'dist/cli.js').rename(staging / 'dist/native-render-sdk.mjs')
+    (staging / 'dist/cli.js').write_text(WRAPPER)
+    shutil.copyfile(PATCH_ROOT / GUARD, staging / 'dist' / GUARD)
     verify_runtime(staging, manifest)
     (staging / 'SNIPER-RUNTIME.json').write_text(json.dumps(manifest, indent=2))
     staging.rename(directory)
     return directory
 
 
+def _verified_or_none(directory: Path, manifest: dict, repair: bool) -> Path | None:
+    """Reuse a finished runtime after a cold read; with ``repair``, drop a changed one."""
+    if not directory.exists():
+        return None
+    try:
+        verify_runtime(directory, manifest)
+    except (OSError, ValueError) as error:
+        if not repair:
+            raise
+        LAST_ACTION["action"] = f"repaired ({error})"
+        shutil.rmtree(directory)
+        return None
+    LAST_ACTION["action"] = "reused (verified)"
+    return directory
+
+
+def _with_notice(runtime: Path) -> Path:
+    """Place the Apache-2.0 modification notice inside the materialised runtime.
+
+    Verification hashes only the runtime's `dist/` files, so the notice does not
+    change the runtime identity or its qualification.
+    """
+    notice, target = PATCH_ROOT / 'NOTICE', runtime / 'NOTICE'
+    if notice.is_file() and (not target.is_file() or target.read_bytes() != notice.read_bytes()):
+        staged = runtime / '.NOTICE.tmp'
+        shutil.copyfile(notice, staged)
+        staged.replace(target)
+    return runtime
+
+
+def install_runtime(repair: bool = False, repo: Path | None = None) -> Path:
+    """Materialize a content-addressed runtime beside the installed dependencies.
+
+    Args:
+        repair: Rebuild a finished runtime whose files no longer verify, instead of
+            refusing. Only the installer passes it: it holds the maintenance lock
+            EXCLUSIVE, so no render can be using the runtime it replaces.
+        repo: Application root (tests); defaults to this checkout or package.
+
+    Raises:
+        sniper_lock.LockBusy: A maintenance step holds the install, or another
+            process kept the runtime-build lock for longer than the wait.
+        ValueError: The stock SDK or the built runtime does not verify.
+    """
+    root = repo or REPO
+    LAST_ACTION["action"] = "built"
+    manifest, identity = _runtime_manifest()
+    stock = root / 'templates/motion/node_modules/hyperframes'
+    if json.loads((stock / 'package.json').read_text())['version'] != manifest['sdkVersion']:
+        raise ValueError('Installed SDK version has not been qualified for native Shorts')
+    sniper_lock.hold_for_process(root, 'render runtime user')
+    parent = root / 'templates/motion/.sniper-native-runtime' / identity
+    found = _verified_or_none(parent / 'hyperframes', manifest, repair)
+    if found:
+        return _with_notice(found)
+    build_lock = sniper_lock.lock_file(sniper_lock.state_dir(root), sniper_lock.RUNTIME_BUILD)
+    with sniper_lock.held(build_lock, 'exclusive', 'render runtime construction', BUILD_WAIT_SECONDS):
+        found = _verified_or_none(parent / 'hyperframes', manifest, repair)
+        return _with_notice(found or _construct(stock, parent, manifest))
+
+
 if __name__ == '__main__':
-    print(install_runtime())
+    built = install_runtime(repair='--repair' in sys.argv[1:])
+    print(f"{LAST_ACTION['action']}\t{built}")

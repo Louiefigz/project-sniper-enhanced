@@ -23,9 +23,9 @@ Three studied short-form looks (plus neutral presets):
 
 | Style | Feels like |
 |---|---|
-| **Clean** *(Caleb light)* | Restrained and confident — few cuts, no gimmicks, the words carry it. |
-| **Produced** *(Jaden produced)* | Punchy and kinetic — breath-gap cuts, layered captions, high energy. |
-| **Involved** *(Angela involved)* | Slide-driven — bold on-screen graphics and takeover cards. |
+| **Clean** *(Restrained light)* | Restrained and confident — few cuts, no gimmicks, the words carry it. |
+| **Produced** *(Punch produced)* | Punchy and kinetic — breath-gap cuts, layered captions, high energy. |
+| **Involved** *(Slideware involved)* | Slide-driven — bold on-screen graphics and takeover cards. |
 
 Not sure? Start with **Clean** for talking-head clarity or **Produced** for scroll-stopping energy.
 

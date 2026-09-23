@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """deep_wordlock — P5: every event's distance to the nearest word boundary.
 
-The NATEHERK finding (word-locked seams) as a MEASUREMENT: for each detected
+The MODULE finding (word-locked seams) as a MEASUREMENT: for each detected
 event, how far is it from the nearest spoken-word boundary? A pro edit reads
 median |dt| near zero with most events inside 150ms; a sloppy one drifts.
 Boundary arithmetic is REUSED from ``planner/word_lock.py`` (the exact code
@@ -102,13 +102,16 @@ def parse_vtt_words(path: str) -> list[dict]:
     return words
 
 
-def _sibling_vtt(video: str) -> "str | None":
+def sibling_vtt(video: str) -> "str | None":
     """The first ``<stem>*.vtt`` sitting next to the video (sorted), or None."""
     stem = os.path.splitext(os.path.basename(video))[0]
     folder = os.path.dirname(os.path.abspath(video))
     names = sorted(n for n in os.listdir(folder)
                    if n.startswith(stem) and n.endswith(".vtt"))
     return os.path.join(folder, names[0]) if names else None
+
+
+_sibling_vtt = sibling_vtt
 
 
 def _words_from_payload(payload) -> list[dict]:

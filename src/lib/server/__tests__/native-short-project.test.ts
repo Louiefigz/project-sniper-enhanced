@@ -4,11 +4,12 @@ import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
 import { assembleNativeShortHtml, readNativeShortProject, writeNativeShortProject } from "../native-short-project";
-import { nativeShortFixture, refreshNativePacingFixture } from "./_native-short-project-fixture";
+import { nativeShortFixture, refreshNativePacingFixture, refreshNativePrebuildReviewFixture } from "./_native-short-project-fixture";
 import { canonicalJson, canonicalJsonSha256, fileSha256 } from "../auto-edit-hash";
 import { nativeAssetUseRevisionHash } from "../native-short-asset-use";
 import { nativeShortPacingReport } from "../native-short-pacing";
 import { buildNativeShortProjectFiles } from "../guided-native-project";
+import { createUserTitleCopy } from "../native-hook-template";
 
 function fixture() {
   const directory = realpathSync(mkdtempSync(path.join(os.tmpdir(), "sniper-short-project-")));
@@ -44,6 +45,44 @@ test("real writer and cold reader bind strategy, canonical hook, source bytes an
   } finally { f.cleanup(); }
 });
 
+test("writer and cold reader retain explicit user title without forged Director authority", () => {
+  const f = fixture();
+  try {
+    const text = "POV: You commented SKILL for an Ai video editor";
+    f.input.canvas.titleCard!.copy = createUserTitleCopy(text);
+    f.input.canvas.titleCard!.lines = ["POV: You commented", "SKILL for an", "Ai video editor"];
+    refreshNativePacingFixture(f.input);
+    const project = writeNativeShortProject(f.input, path.join(f.directory, "user-title"));
+    assert.deepEqual(readNativeShortProject(project.directory), f.input);
+    const html = readFileSync(path.join(project.directory, "index.html"), "utf8");
+    assert.match(html, /data-title-scope="user-supplied-title"/u);
+    assert.doesNotMatch(html, /data-hook-anchor|data-library-hash/u);
+    const inputFile = path.join(project.directory, "SHORT-PROJECT.json");
+    const stored = JSON.parse(readFileSync(inputFile, "utf8"));
+    stored.canvas.titleCard.copy.libraryHash = "a".repeat(64);
+    writeFileSync(inputFile, canonicalJson(stored));
+    const manifestFile = path.join(project.directory, "PROJECT-MANIFEST.json");
+    const manifest = JSON.parse(readFileSync(manifestFile, "utf8"));
+    manifest.projectHash = canonicalJsonSha256(stored);
+    manifest.files.find((row: { file: string }) => row.file === "SHORT-PROJECT.json").sha256 = fileSha256(inputFile);
+    writeFileSync(manifestFile, canonicalJson(manifest));
+    assert.throws(() => readNativeShortProject(project.directory), /authority/);
+  } finally { f.cleanup(); }
+});
+
+test("writer rejects extra canonical metadata on user-supplied copy before staging", () => {
+  const f = fixture();
+  try {
+    const copy = createUserTitleCopy("POV: Your exact supplied title");
+    f.input.canvas.titleCard!.copy = Object.assign(copy, { anchor: "steps-toward-goal" });
+    f.input.canvas.titleCard!.lines = [copy.text];
+    refreshNativePrebuildReviewFixture(f.input);
+    const destination = path.join(f.directory, "forged-title");
+    assert.throws(() => writeNativeShortProject(f.input, destination), /authority/);
+    assert.equal(existsSync(destination), false);
+  } finally { f.cleanup(); }
+});
+
 test("missing strategy files cannot be hidden by stripping the project manifest", () => {
   const f = fixture();
   try {
@@ -72,11 +111,12 @@ test("canonical JSON key order cannot change executable motion on cold reconstru
 test("requested style, canonical title and source inspection cannot be silently substituted", () => {
   const f = fixture();
   try {
-    const changed = structuredClone(f.input); changed.request = { selection: "requested", request: "Nate", supportingVideo: "source-first" };
+    const changed = structuredClone(f.input); changed.request = { selection: "requested", request: "module", supportingVideo: "source-first" };
     assert.throws(() => assembleNativeShortHtml(changed), /changed the requested/);
     changed.request = f.input.request; changed.strategy.supportingSearch.searchedSourceFiles = [];
     assert.throws(() => assembleNativeShortHtml(changed), /inspect the supplied source/);
     f.input.canvas.titleCard!.copy.text = "Invented new title";
+    refreshNativePrebuildReviewFixture(f.input);
     assert.throws(() => writeNativeShortProject(f.input, path.join(f.directory, "project")), /canonical selected template/);
   } finally { f.cleanup(); }
 });
@@ -119,6 +159,7 @@ test("new writer and cold reader preserve immutable origin evidence instead of s
     const { directory } = writeNativeShortProject(f.input, path.join(f.directory, "project"));
     const stripped = structuredClone(f.input); delete stripped.assets[0].origin;
     stripped.strategy.assetUse!.revisionHash = nativeAssetUseRevisionHash(stripped);
+    refreshNativePrebuildReviewFixture(stripped);
     assert.throws(() => writeNativeShortProject(stripped, path.join(f.directory, "stripped")), /immutable origin/);
     assert.equal(existsSync(path.join(f.directory, "stripped")), false);
     writeFileSync(f.input.assets[0].origin!.path, "TEST mutated immutable acquisition evidence");
@@ -131,10 +172,11 @@ function legacyFixture(directory: string, version: 1 | 2): void {
   const file = path.join(directory, "SHORT-PROJECT.json"), manifestFile = path.join(directory, "PROJECT-MANIFEST.json");
   const input = JSON.parse(readFileSync(file, "utf8")), manifest = JSON.parse(readFileSync(manifestFile, "utf8"));
   input.strategy.schemaVersion = version; delete input.strategy.assetUse;
+  delete input.prebuildReview; delete manifest.prebuildReview;
   for (const asset of input.assets) delete asset.origin;
   if (version === 1) delete input.strategy.pacing;
   writeFileSync(file, canonicalJson(input));
-  const removed = ["ASSET-USE-REPORT.json", ...(version === 1 ? ["PACING-REPORT.json"] : [])];
+  const removed = ["PREBUILD-REVIEW.json", "ASSET-USE-REPORT.json", ...(version === 1 ? ["PACING-REPORT.json"] : [])];
   for (const name of removed) rmSync(path.join(directory, name));
   if (version === 2) writeFileSync(path.join(directory, "PACING-REPORT.json"), canonicalJson(nativeShortPacingReport(input, assembleNativeShortHtml(input))));
   manifest.projectHash = canonicalJsonSha256(input);

@@ -120,7 +120,11 @@ class AssembleProvenanceTests(unittest.TestCase):
         base = Path(tmp, "base.mp4")
         final.write_bytes(b"prior")
         base.write_bytes(b"base")
-        job = asm.AssembleJob(str(base), _plan(), str(final), None)
+        from test_base_reuse import bound_record
+        fingerprint = Path(tmp, "base.fingerprint.json")
+        fingerprint.write_text(json.dumps(bound_record(base, _plan())))
+        job = asm.AssembleJob(str(base), _plan(), str(final), None,
+                              fingerprint_path=str(fingerprint))
 
         def composite(_job: asm.AssembleJob) -> dict:
             if fail:

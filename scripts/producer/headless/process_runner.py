@@ -31,6 +31,10 @@ class ProcessOutputLimitError(RuntimeError):
     """A byte-capped child exceeded its combined output bound and was reaped."""
 
 
+class ProcessReapError(RuntimeError):
+    """A child process group could not be proved gone after forced termination."""
+
+
 def _ledger_note(event: str, proc: subprocess.Popen | None, command: tuple[str, ...]) -> None:
     """Append one exact owned-process row when a ledger was declared; a failed write raises.
 
@@ -71,6 +75,7 @@ class ProcessRequest:
     termination_grace_seconds: float = 1.0
     max_output_bytes: int | None = None
     pass_fds: tuple[int, ...] = ()  # Internal output capabilities; caller retains closing ownership.
+    decode_output: bool = True  # False returns bounded stdout/stderr as bytes (byte-capped runs only).
 
 
 def _validate_pass_fds(descriptors: tuple[int, ...]) -> None:
@@ -97,6 +102,8 @@ def _validate(request: ProcessRequest) -> None:
             or not 0 < request.max_output_bytes <= 16 * 1024 * 1024
             or request.stdin_text != ""):
         raise RuntimeError("bounded process requires empty stdin and a valid byte cap")
+    if request.decode_output is not True and (request.decode_output is not False or request.max_output_bytes is None):
+        raise RuntimeError("undecoded output requires a byte-capped process")
     command_ok = (request.command and all(isinstance(item, str) and item
                                           for item in request.command)
                   and os.path.isabs(request.command[0]))
@@ -138,13 +145,13 @@ def _terminate_group(proc: subprocess.Popen, grace: float) -> None:
         try:
             proc.communicate(timeout=grace)
         except subprocess.TimeoutExpired as exc:
-            raise RuntimeError("child process group could not be reaped") from exc
+            raise ProcessReapError("child process group could not be reaped") from exc
     deadline = time.monotonic() + grace
     while _group_exists(group_id) and time.monotonic() < deadline:
         _signal_group(group_id, signal.SIGKILL)
         time.sleep(0.01)
     if _group_exists(group_id):
-        raise RuntimeError("child process group remains after forced reap")
+        raise ProcessReapError("child process group remains after forced reap")
 
 
 def _reap_success_descendants(proc: subprocess.Popen, grace: float) -> None:
@@ -173,7 +180,7 @@ def _close_capture_pipes(proc: subprocess.Popen) -> None:
             setattr(proc, name, None)
 
 
-def _capture_bounded(proc: subprocess.Popen, request: ProcessRequest) -> tuple[str, str]:
+def _capture_bounded(proc: subprocess.Popen, request: ProcessRequest) -> tuple[str | bytes, str | bytes]:
     """Drain both pipes under one deadline; decode UTF-8 only after full capture."""
     deadline = time.monotonic() + request.timeout_seconds
     output = {"stdout": bytearray(), "stderr": bytearray()}
@@ -184,6 +191,8 @@ def _capture_bounded(proc: subprocess.Popen, request: ProcessRequest) -> tuple[s
             selector.register(proc.stdout, selectors.EVENT_READ, "stdout")
             selector.register(proc.stderr, selectors.EVENT_READ, "stderr")
             _capture_events(selector, proc, request, (deadline, output))
+        if not request.decode_output:
+            return bytes(output["stdout"]), bytes(output["stderr"])
         return tuple(bytes(output[name]).decode("utf-8") for name in ("stdout", "stderr"))
     finally:
         _close_capture_pipes(proc)

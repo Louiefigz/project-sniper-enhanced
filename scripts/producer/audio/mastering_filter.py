@@ -22,6 +22,26 @@ class MasterFilterInput:
     profile: MasteringProfile = LEGACY_MASTERING_PROFILE
 
 
+@dataclass(frozen=True)
+class MasterFilterSelection:
+    """Actual DSP choice and observations; never delivery or listening approval."""
+
+    chain: str
+    note: str | None
+    evidence: dict
+
+
+def _decision(source: MasterFilterInput, branch: str, chain: str, details: dict) -> dict:
+    """Retain machine-readable choices without another measurement or DSP pass."""
+    return {"schemaVersion": 1, "kind": "mastering-decision",
+            "scope": "processing-observation-not-delivery-approval", "branch": branch,
+            "filter": chain, "profile": source.profile.receipt(),
+            "inputStatistics": _parse_stats(source.measured),
+            "targetIntegratedLufs": AUDIO["lufs_target"],
+            "staticTrimToleranceLu": STATIC_TRIM_TOL_LU, "gainDb": None,
+            "dryRuns": [], "convergence": "not-applicable", **details}
+
+
 def with_prefix(prefix: str | None, afilter: str) -> str:
     """Prepend an optional caller-owned channel filter without changing it."""
     return f"{prefix},{afilter}" if prefix else afilter
@@ -78,33 +98,52 @@ def _static_chain(prefix: str | None, gain_db: float, profile: MasteringProfile)
     return with_prefix(prefix, f"volume={gain_db:.2f}dB,{_tp_limiter(profile)}")
 
 
-def _static_gain_filter(source: MasterFilterInput, measured_i: float) -> tuple[str, float]:
+def _static_gain_filter(source: MasterFilterInput, measured_i: float) -> tuple[str, float, dict]:
     """Trim fixed gain against the exact program within the explicit bounded dry-run budget."""
     gain = AUDIO["lufs_target"] - measured_i
     chain = _static_chain(source.prefix, gain, source.profile)
+    runs: list[dict] = []
+    convergence = "budget-exhausted"
     for _ in range(source.profile.maximum_static_dry_runs):
         got = source.measure_chain(chain)
-        if got is None or abs(AUDIO["lufs_target"] - got) <= STATIC_TRIM_TOL_LU:
+        runs.append({"filter": chain, "gainDb": round(gain, 2), "integratedLufs": got})
+        if got is None:
+            convergence = "measurement-unavailable"
+            break
+        if abs(AUDIO["lufs_target"] - got) <= STATIC_TRIM_TOL_LU:
+            convergence = "converged"
             break
         gain += AUDIO["lufs_target"] - got
         chain = _static_chain(source.prefix, gain, source.profile)
-    return chain, round(gain, 2)
+    details = {"gainDb": round(gain, 2), "dryRuns": runs, "convergence": convergence,
+               "selectedFilterMeasured": bool(runs and runs[-1]["filter"] == chain
+                                               and runs[-1]["integratedLufs"] is not None)}
+    return chain, round(gain, 2), details
 
 
-def build_master_filter(source: MasterFilterInput) -> tuple[str, str | None]:
-    """Keep existing linear/static/dynamic dispatch shared across long-form and native Shorts."""
+def select_master_filter(source: MasterFilterInput) -> MasterFilterSelection:
+    """Keep existing DSP exact while recording its selected branch and measured gain."""
     peak = source.profile.internal_true_peak_dbtp
     base = f"loudnorm=I={AUDIO['lufs_target']}:TP={peak}:LRA={AUDIO['lra']}"
     stats = _parse_stats(source.measured)
     if stats is None or stats["measured_I"] < STATIC_MIN_I:
-        return (with_prefix(source.prefix, f"{base}:print_format=summary"),
-                "loudnorm fell back to dynamic (input stats non-finite or "
+        chain = with_prefix(source.prefix, f"{base}:print_format=summary")
+        note = ("loudnorm fell back to dynamic (input stats non-finite or "
                 "near-silent; e.g. synthetic audio)")
+        return MasterFilterSelection(chain, note, _decision(source, "dynamic", chain, {}))
     if _linear_eligible(stats, source.profile):
         part = ":".join(f"{key}={value}" for key, value in stats.items())
-        return (with_prefix(source.prefix, f"{base}:{part}:linear=true:print_format=summary"), None)
-    chain, gain = _static_gain_filter(source, stats["measured_I"])
+        chain = with_prefix(source.prefix, f"{base}:{part}:linear=true:print_format=summary")
+        return MasterFilterSelection(chain, None, _decision(source, "linear", chain, {}))
+    chain, gain, details = _static_gain_filter(source, stats["measured_I"])
     projected_tp = stats["measured_TP"] + (AUDIO["lufs_target"] - stats["measured_I"])
-    return chain, (f"loudnorm linear ineligible (stats/range or projected TP "
-                   f"{projected_tp:+.1f}; ceiling {peak}) — static "
-                   f"gain {gain:+.1f} dB + true-peak limiter (LRA preserved)")
+    note = (f"loudnorm linear ineligible (stats/range or projected TP "
+            f"{projected_tp:+.1f}; ceiling {peak}) — static "
+            f"gain {gain:+.1f} dB + true-peak limiter (LRA preserved)")
+    return MasterFilterSelection(chain, note, _decision(source, "static", chain, details))
+
+
+def build_master_filter(source: MasterFilterInput) -> tuple[str, str | None]:
+    """Preserve the public tuple API for callers that only need the DSP filter."""
+    selected = select_master_filter(source)
+    return selected.chain, selected.note

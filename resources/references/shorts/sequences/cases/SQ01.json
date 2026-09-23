@@ -1,0 +1,269 @@
+{
+  "id": "SQ01",
+  "version": "2026-09-18.1",
+  "title": "State the claim, then show the measured spread and its limit",
+  "scope": "original-reference-rendered-from-project-sniper-templates",
+  "render_aspects": [
+    "16:9"
+  ],
+  "lesson": "A claim earns belief when the measurement behind it follows at once, with what was and was not measured visible on the same screen.",
+  "opening": "The claim alone, as one short statement with one accented word.",
+  "story_arc": "Claim → the measured range and what was counted → the limit of the measurement.",
+  "payoff": "The viewer sees the spread that supports the claim and the conditions it was measured under.",
+  "catalog": [
+    "statement-card",
+    "module-scoreboard",
+    "stat-card"
+  ],
+  "beats": [
+    {
+      "id": "SQ01-B01",
+      "spoken_idea": "A scoop is not a measurement.",
+      "visible": "One statement on its own, the key word accented.",
+      "why_this_picture": "The claim is short enough to read in one glance before any evidence arrives.",
+      "composition": "statement-card",
+      "catalog_candidates": [
+        "statement-card"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ01-B01-0.jpg",
+          "sha256": "6e173fa54b0c2151b5dec337b58e6cea87629134096589653308e5aacd481e2a",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 0.4,
+          "render": {
+            "composition": "templates/motion/compositions/statement-card.html",
+            "variables": {
+              "text": "A scoop is not a *measurement*",
+              "bg": "dark",
+              "variant": "classic",
+              "eyebrow": "",
+              "iconFile": "",
+              "headlineLines": "",
+              "statements": "",
+              "evidenceSource": "",
+              "evidenceDate": ""
+            },
+            "time_s": 0.4
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ01-B01-1.jpg",
+          "sha256": "6a308101c483447ca5acae358a3a3176e7f8699cc3cab569af5253fd88746927",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 1.2,
+          "render": {
+            "composition": "templates/motion/compositions/statement-card.html",
+            "variables": {
+              "text": "A scoop is not a *measurement*",
+              "bg": "dark",
+              "variant": "classic",
+              "eyebrow": "",
+              "iconFile": "",
+              "headlineLines": "",
+              "statements": "",
+              "evidenceSource": "",
+              "evidenceDate": ""
+            },
+            "time_s": 1.2
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ01-B01-2.jpg",
+          "sha256": "6a308101c483447ca5acae358a3a3176e7f8699cc3cab569af5253fd88746927",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 2.4,
+          "render": {
+            "composition": "templates/motion/compositions/statement-card.html",
+            "variables": {
+              "text": "A scoop is not a *measurement*",
+              "bg": "dark",
+              "variant": "classic",
+              "eyebrow": "",
+              "iconFile": "",
+              "headlineLines": "",
+              "statements": "",
+              "evidenceSource": "",
+              "evidenceDate": ""
+            },
+            "time_s": 2.4
+          }
+        }
+      ],
+      "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+      "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+    },
+    {
+      "id": "SQ01-B02",
+      "spoken_idea": "I weighed ten scoops from the same bag. They ranged from seven to eleven grams.",
+      "visible": "The range lands as the hero figure; the lightest, the heaviest and the count arrive as tiles.",
+      "why_this_picture": "The spread is the evidence, and the tiles say exactly what was counted.",
+      "composition": "module-scoreboard",
+      "catalog_candidates": [
+        "module-scoreboard"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ01-B02-0.jpg",
+          "sha256": "5303bbe4ede6f98e932ab27b24ae757874de27ca1a15dec1aa9593815988f446",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 0.6,
+          "render": {
+            "composition": "templates/motion/compositions/module-scoreboard.html",
+            "variables": {
+              "eyebrow": "Ten scoops, one spoon",
+              "contextChips": "SAME BAG|SAME SPOON|KITCHEN SCALE",
+              "heroValue": "7–11 g",
+              "heroLabel": "RANGE ACROSS TEN SCOOPS",
+              "tiles": "7 g~LIGHTEST|11 g~HEAVIEST|10~SCOOPS WEIGHED",
+              "stripChips": "",
+              "limitText": ""
+            },
+            "time_s": 0.6
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ01-B02-1.jpg",
+          "sha256": "c7664cbbe250e1be46141998acd9b95772ec76852ae03a3d4210220a539e0fb6",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 1.4,
+          "render": {
+            "composition": "templates/motion/compositions/module-scoreboard.html",
+            "variables": {
+              "eyebrow": "Ten scoops, one spoon",
+              "contextChips": "SAME BAG|SAME SPOON|KITCHEN SCALE",
+              "heroValue": "7–11 g",
+              "heroLabel": "RANGE ACROSS TEN SCOOPS",
+              "tiles": "7 g~LIGHTEST|11 g~HEAVIEST|10~SCOOPS WEIGHED",
+              "stripChips": "",
+              "limitText": ""
+            },
+            "time_s": 1.4
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ01-B02-2.jpg",
+          "sha256": "c8657fba6bdce0e5f05cddf2c37888c00f3265bf308620e3942f9f7f2f692efd",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 2.6,
+          "render": {
+            "composition": "templates/motion/compositions/module-scoreboard.html",
+            "variables": {
+              "eyebrow": "Ten scoops, one spoon",
+              "contextChips": "SAME BAG|SAME SPOON|KITCHEN SCALE",
+              "heroValue": "7–11 g",
+              "heroLabel": "RANGE ACROSS TEN SCOOPS",
+              "tiles": "7 g~LIGHTEST|11 g~HEAVIEST|10~SCOOPS WEIGHED",
+              "stripChips": "",
+              "limitText": ""
+            },
+            "time_s": 2.6
+          }
+        }
+      ],
+      "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+      "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+    },
+    {
+      "id": "SQ01-B03",
+      "spoken_idea": "That is one spoon and one bag, so yours will differ. It will not be zero.",
+      "visible": "The same board gains a limit footer naming the spoon and the bag.",
+      "why_this_picture": "Putting the limit on screen stops one kitchen's numbers from reading as a universal result.",
+      "composition": "module-scoreboard",
+      "catalog_candidates": [
+        "module-scoreboard"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ01-B03-0.jpg",
+          "sha256": "b02fc8ae259c8c995eb346f00bfc16e35e481a8b8e0c1ecb7802f87311bd611b",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 2.4,
+          "render": {
+            "composition": "templates/motion/compositions/module-scoreboard.html",
+            "variables": {
+              "eyebrow": "Ten scoops, one spoon",
+              "contextChips": "SAME BAG|SAME SPOON|KITCHEN SCALE",
+              "heroValue": "7–11 g",
+              "heroLabel": "RANGE ACROSS TEN SCOOPS",
+              "tiles": "7 g~LIGHTEST|11 g~HEAVIEST|10~SCOOPS WEIGHED",
+              "stripChips": "",
+              "limitText": "One spoon, one bag of beans; yours will differ",
+              "limitLabel": "LIMIT"
+            },
+            "time_s": 2.4
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ01-B03-1.jpg",
+          "sha256": "52be3ec469b76adfbc4d993a94fa5eed34ae99da3c417e04b1eb93459deac43b",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 3.4,
+          "render": {
+            "composition": "templates/motion/compositions/module-scoreboard.html",
+            "variables": {
+              "eyebrow": "Ten scoops, one spoon",
+              "contextChips": "SAME BAG|SAME SPOON|KITCHEN SCALE",
+              "heroValue": "7–11 g",
+              "heroLabel": "RANGE ACROSS TEN SCOOPS",
+              "tiles": "7 g~LIGHTEST|11 g~HEAVIEST|10~SCOOPS WEIGHED",
+              "stripChips": "",
+              "limitText": "One spoon, one bag of beans; yours will differ",
+              "limitLabel": "LIMIT"
+            },
+            "time_s": 3.4
+          }
+        },
+        {
+          "path": "resources/references/shorts/sequences/frames/SQ01-B03-2.jpg",
+          "sha256": "52be3ec469b76adfbc4d993a94fa5eed34ae99da3c417e04b1eb93459deac43b",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 5.0,
+          "render": {
+            "composition": "templates/motion/compositions/module-scoreboard.html",
+            "variables": {
+              "eyebrow": "Ten scoops, one spoon",
+              "contextChips": "SAME BAG|SAME SPOON|KITCHEN SCALE",
+              "heroValue": "7–11 g",
+              "heroLabel": "RANGE ACROSS TEN SCOOPS",
+              "tiles": "7 g~LIGHTEST|11 g~HEAVIEST|10~SCOOPS WEIGHED",
+              "stripChips": "",
+              "limitText": "One spoon, one bag of beans; yours will differ",
+              "limitLabel": "LIMIT"
+            },
+            "time_s": 5.0
+          }
+        }
+      ],
+      "transfer": "Reuse the mechanism with the speaker's own words; never this copy.",
+      "caution": "A rendered illustration of the mechanism, not a finished-Short benchmark."
+    }
+  ]
+}

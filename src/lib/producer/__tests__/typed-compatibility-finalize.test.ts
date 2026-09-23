@@ -20,7 +20,7 @@ import { templateUsageApprovalPath } from
 
 const review: ProducerReview = {
   schemaVersion: 1, stage: "plan", verdict: "pass",
-  summary: "Only the requested statement-card copy changed.",
+  summary: "Only the requested line-swap copy changed.",
   materialIssues: [], findings: [],
 };
 
@@ -34,8 +34,8 @@ function plan(text: string, outStart = 1): Record<string, unknown> {
     target: { mode: "longform" },
     cutTrack: [{ sourceId: "raw", start: 0, end: 10 }],
     graphicsTrack: [{
-      id: "g-00000001", kind: "statement-card",
-      outStart, outEnd: 3, spec: { text, bg: "blue" },
+      id: "g-00000001", kind: "line-swap",
+      outStart, outEnd: 3, spec: { lineA: text, lineB: "TEST second line" },
     }],
   };
 }
@@ -72,7 +72,7 @@ function input(item: ReturnType<typeof fixture>) {
   };
 }
 
-async function pureTextUsesTypedPath(): Promise<void> {
+async function catalogCopyUsesCurrentReviewPath(): Promise<void> {
   const item = fixture("pass");
   try {
     writeFileSync(item.candidate, JSON.stringify(plan("After")));
@@ -81,31 +81,30 @@ async function pureTextUsesTypedPath(): Promise<void> {
       governance: async () => ({ warnings: [] }),
       critic: async () => review,
     });
-    assert.equal(result.typedCompatibility?.kind, "set-graphic-text");
-    assert.equal(result.typedCompatibility?.operation.text, "After");
-    assert.match(result.typedCompatibility?.operationHash ?? "", /^[a-f0-9]{64}$/);
+    assert.equal(result.typedCompatibility, undefined);
     const committed = JSON.parse(readFileSync(item.authority, "utf8"));
     assert.equal(committed.planVersion, 8);
-    assert.equal(committed.graphicsTrack[0].spec.text, "After");
+    assert.equal(committed.graphicsTrack[0].spec.lineA, "After");
     const marker = JSON.parse(readFileSync(
       path.join(item.dir, SURGICAL_REVIEW_FILE), "utf8",
     ));
-    assert.equal(marker.typedCompatibility.operationHash,
-      result.typedCompatibility?.operationHash);
+    assert.equal(marker.typedCompatibility, undefined);
   } finally {
     rmSync(item.dir, { recursive: true, force: true });
   }
 }
 
-async function adjacentChangeCannotFallBack(): Promise<void> {
-  const item = fixture("reject");
+async function retiredCandidateCannotFallBack(): Promise<void> {
+  const item = fixture("retired");
   try {
-    writeFileSync(item.candidate, JSON.stringify(plan("After", 2)));
+    const candidate = plan("After") as { graphicsTrack: Array<{ kind: string }> };
+    candidate.graphicsTrack[0].kind = "statement-card";
+    writeFileSync(item.candidate, JSON.stringify(candidate));
     beginSurgicalReview(item.dir, { lanes: ["graphics"] });
     await assert.rejects(finalizeSurgicalEdit(input(item), {
-      governance: async () => ({ warnings: [] }),
-      critic: async () => review,
-    }), /changes more than graphicsTrack\[id\]\.spec\.text/);
+      governance: async () => { throw new Error("must refuse before governance"); },
+      critic: async () => { throw new Error("must refuse before critic"); },
+    }), /retired/);
     assert.equal(readFileSync(item.authority, "utf8"), item.parentText);
   } finally {
     rmSync(item.dir, { recursive: true, force: true });
@@ -179,8 +178,8 @@ async function cutPublicationFailureRestoresPriorReceipt(): Promise<void> {
   }
 }
 
-pureTextUsesTypedPath()
-  .then(adjacentChangeCannotFallBack)
+catalogCopyUsesCurrentReviewPath()
+  .then(retiredCandidateCannotFallBack)
   .then(sidecarFailureRestoresPriorReceipt)
   .then(cutPublicationFailureRestoresPriorReceipt)
   .then(() => console.log("typed-compatibility-finalize.test.ts: passed"))

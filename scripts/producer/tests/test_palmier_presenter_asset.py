@@ -11,7 +11,7 @@ from palmier.presenter_asset import (PresenterRequest, _filter_graph,
 
 
 def _entry():
-    return {"id": "hole-1", "kind": "nateherk-ledger-dark",
+    return {"id": "hole-1", "kind": "module-ledger-dark",
             "anchor": "own-screen", "outStart": 1.0, "outEnd": 4.0,
             "faceCx": 0.53, "spec": {"presenterFrame": True}}
 

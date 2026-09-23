@@ -1,19 +1,19 @@
-"""Synthetic compositor V2/render V3 declarations, never actual build evidence."""
+"""Synthetic compositor V3/render V4 declarations, never actual build evidence."""
 from __future__ import annotations
 
 import hashlib
 import json
 import stat
 
-from headless.compositor_build_manifest_v2_contract import (
-    COMPOSITOR_BUILD_V2_DIGEST_DOMAIN,
-    COMPOSITOR_BUILD_V2_IMPLEMENTATION_PATHS,
-    COMPOSITOR_BUILD_V2_POLICY,
+from headless.compositor_build_manifest_v3_semantics import (
+    COMPOSITOR_BUILD_V3_DIGEST_DOMAIN,
+    COMPOSITOR_BUILD_V3_IMPLEMENTATION_PATHS,
+    COMPOSITOR_BUILD_V3_POLICY,
 )
-from headless.render_build_manifest_v3_contract import (
-    RENDER_BUILD_V3_DIGEST_DOMAIN,
-    RENDER_BUILD_V3_IMPLEMENTATION_PATHS,
-    RENDER_BUILD_V3_POLICY,
+from headless.render_build_manifest_v4_semantics import (
+    RENDER_BUILD_V4_DIGEST_DOMAIN,
+    RENDER_BUILD_V4_IMPLEMENTATION_PATHS,
+    RENDER_BUILD_V4_POLICY,
 )
 
 
@@ -30,24 +30,24 @@ def _rows(paths: tuple[str, ...], label: str) -> list[dict]:
 
 
 def current_manifest(label: str = "test") -> dict:
-    """Declare the complete current render V3 schema with synthetic tools."""
+    """Declare the complete current render V4 schema with synthetic tools."""
     roles = ("docker", "proof-ffmpeg", "proof-ffprobe", "python")
     tools = [{"label": role, "path": f"/opt/sniper/bin/{role}",
               "sha256": hashlib.sha256((label + role).encode()).hexdigest(),
               "sizeBytes": 100 + index} for index, role in enumerate(roles)]
-    return {"schemaVersion": 3, "policy": RENDER_BUILD_V3_POLICY,
+    return {"schemaVersion": 4, "policy": RENDER_BUILD_V4_POLICY,
         "imageId": "sha256:" + "1" * 64, "userId": "501:20",
         "dockerSocket": {"path": "/opt/sniper/docker.sock", "device": 1, "inode": 2,
                          "mode": stat.S_IFSOCK, "ownerUid": 501},
         "runtimeRoot": "/srv/sniper", "pipelineRoot": "/srv/sniper", "timeoutSeconds": 30,
         "pythonFlags": ["-I", "-S", "-B", "-X", "pycache_prefix=<attempt>"],
-        "implementation": _rows(RENDER_BUILD_V3_IMPLEMENTATION_PATHS, label), "tools": tools}
+        "implementation": _rows(RENDER_BUILD_V4_IMPLEMENTATION_PATHS, label), "tools": tools}
 
 
 def current_compositor_manifest(label: str = "test") -> dict:
-    """Declare compositor V2 directly, not by upgrading a retained V1 record."""
-    return {"schemaVersion": 2, "policy": COMPOSITOR_BUILD_V2_POLICY,
-            "implementation": _rows(COMPOSITOR_BUILD_V2_IMPLEMENTATION_PATHS, label)}
+    """Declare compositor V3 directly, not by upgrading a retained V1 record."""
+    return {"schemaVersion": 3, "policy": COMPOSITOR_BUILD_V3_POLICY,
+            "implementation": _rows(COMPOSITOR_BUILD_V3_IMPLEMENTATION_PATHS, label)}
 
 
 def receipt(manifest: dict, domain: bytes) -> bytes:
@@ -58,11 +58,11 @@ def receipt(manifest: dict, domain: bytes) -> bytes:
 
 
 def current_receipt(manifest: dict | None = None) -> bytes:
-    """Encode render V3 metadata for current-lane tests only."""
-    return receipt(current_manifest() if manifest is None else manifest, RENDER_BUILD_V3_DIGEST_DOMAIN)
+    """Encode render V4 metadata for current-lane tests only."""
+    return receipt(current_manifest() if manifest is None else manifest, RENDER_BUILD_V4_DIGEST_DOMAIN)
 
 
 def current_compositor_receipt(manifest: dict | None = None) -> bytes:
-    """Encode compositor V2 metadata with its independent full-document domain."""
+    """Encode compositor V3 metadata with its independent full-document domain."""
     value = current_compositor_manifest() if manifest is None else manifest
-    return receipt(value, COMPOSITOR_BUILD_V2_DIGEST_DOMAIN)
+    return receipt(value, COMPOSITOR_BUILD_V3_DIGEST_DOMAIN)

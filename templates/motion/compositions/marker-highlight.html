@@ -16,7 +16,7 @@
     components/marker-highlight.html, HeyGen demo copy stripped, colors
     retargeted to tokens.css).
     Trigger it serves: cue-timed emphasis on ONE word inside a spoken line —
-    the line settles on a cream paper panel, then a single hand-drawn marker
+    the line settles on a paper panel, then a single hand-drawn marker
     stroke (highlight/circle/underline/scribble) draws over the emphasized
     word exactly when the speaker hits it. Strictly-more-capable sibling of
     underline-circle (which annotates a screen REGION; this one carries its
@@ -48,6 +48,16 @@
         Default exit is "hold" — THE EXIT LAW: the compositor owns the seam.
       - RENDER LENGTH is the root `data-duration` ATTRIBUTE (see stat-card
         note); set it per render, comfortably past drawAt.
+
+    APACHE-2.0 NOTICE — MODIFIED FILE. This composition is derived from
+    the component "marker-highlight" of HyperFrames (https://github.com/heygen-com/hyperframes;
+    local mirror vendor/hyperframes-catalog/compositions/components/marker-highlight.html,
+    mirrored 2026-08-28 with the HyperFrames CLI 0.7.33), Copyright 2026
+    HeyGen, Inc., licensed under the Apache License, Version 2.0
+    (http://www.apache.org/licenses/LICENSE-2.0; full text shipped as
+    licenses/Apache-2.0-hyperframes.txt). MODIFIED BY PROJECT SNIPER
+    (2026-08-28): demo copy removed, colours retargeted to Sniper tokens, typed variables and contracts, exit variants; the port deltas are described above.
+    Provided on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND.
   -->
   <head>
     <meta charset="UTF-8" />
@@ -76,7 +86,7 @@
         display: flex;
         justify-content: center;
       }
-      /* Cream paper panel — the hand-drawn family's field (rail-cream tokens). */
+      /* Paper panel — the hand-drawn family's field (--rail-cream paper tokens). */
       #mh-panel {
         max-width: var(--safe-width);
         background: var(--rail-cream);

@@ -25,13 +25,13 @@ _TIMING_POLICY = {
     "glass-rail": (3.0, 0.46, 1.25, 0.42),
     "icon-badge-wide": (3.0, 0.16, 1.25, 0.42),
     "statement-card": (2.5, 0.45, 1.25, 0.15),
-    "nateherk-rail": (4.0, 0.45, 1.25, 0.0),
-    "nateherk-bullet-bars": (4.0, 0.50, 1.25, 0.0),
+    "module-rail": (4.0, 0.45, 1.25, 0.0),
+    "module-bullet-bars": (4.0, 0.50, 1.25, 0.0),
     "avatar-bio-card": (5.0, 0.70, 1.50, 0.0),
     "whiteboard-connector": (3.0, 0.30, 1.25, 0.42),
-    "nateherk-ledger-dark": (4.0, 0.50, 1.25, 0.0),
-    "nateherk-scoreboard": (0.0, 0.20, 1.25, 0.0),
-    "nateherk-pipeline": (0.0, 0.20, 1.25, 0.0),
+    "module-ledger-dark": (4.0, 0.50, 1.25, 0.0),
+    "module-scoreboard": (0.0, 0.20, 1.25, 0.0),
+    "module-pipeline": (0.0, 0.20, 1.25, 0.0),
 }
 
 
@@ -57,7 +57,7 @@ def _timing_tokens(relative: str, names: tuple[str, ...]) -> dict[str, float]:
 def _scoreboard_tokens() -> dict[str, float]:
     """Keep the established scoreboard source/token observation entrypoint."""
     names = ("LAND_DEFAULT_START_S", "LAND_DEFAULT_GAP_S", "CTX_STAGGER_S", "TILE_STAGGER_S", "CHIP_SWEEP_S")
-    return _timing_tokens("compositions/nateherk-scoreboard.html", names)
+    return _timing_tokens("compositions/module-scoreboard.html", names)
 
 
 def _parts(spec: dict, key: str) -> list[str]:
@@ -65,24 +65,40 @@ def _parts(spec: dict, key: str) -> list[str]:
     return [part.strip() for part in str(spec.get(key) or "").split("|") if part.strip()]
 
 
+def parse_module_lands(raw: object) -> list[float]:
+    """Read the template's explicit schedule without partial numeric coercion."""
+    values = re.split(r"[|,]", raw) if isinstance(raw, str) else raw
+    if not isinstance(values, list) or not values or any(isinstance(value, bool) for value in values):
+        raise ValueError("moduleLands requires a non-empty array or delimited string of finite times")
+    decimal = r"[ \t\r\n]*[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?[ \t\r\n]*"
+    if any(not isinstance(value, (str, int, float)) or
+           isinstance(value, str) and not re.fullmatch(decimal, value) for value in values):
+        raise ValueError("moduleLands requires complete ASCII decimal times")
+    try:
+        result = [float(value) for value in values]
+    except (TypeError, ValueError, OverflowError) as error:
+        raise ValueError("moduleLands contains an invalid time") from error
+    if any(not math.isfinite(value) or value < 0 for value in result) or result != sorted(set(result)):
+        raise ValueError("moduleLands must be finite, nonnegative and strictly increasing")
+    return result
+
+
 def _module_lands(raw: object, count: int, tokens: dict, label: str) -> list[float]:
     """Validate every explicit land; malformed schedules cannot become defaults."""
     if raw is None or raw == "":
         return [tokens["LAND_DEFAULT_START_S"] + index * tokens["LAND_DEFAULT_GAP_S"] for index in range(count)]
-    values = re.split(r"[|,]", raw) if isinstance(raw, str) else raw
-    if not isinstance(values, list) or len(values) != count or any(isinstance(value, bool) for value in values):
+    result = parse_module_lands(raw)
+    if len(result) != count:
         raise ValueError(f"{label} moduleLands requires exactly {count} finite times")
-    decimal = r"[ \t\r\n]*[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?[ \t\r\n]*"
-    if any(not isinstance(value, (str, int, float)) or
-           isinstance(value, str) and not re.fullmatch(decimal, value) for value in values):
-        raise ValueError(f"{label} moduleLands requires complete ASCII decimal times")
-    try:
-        result = [float(value) for value in values]
-    except (TypeError, ValueError) as error:
-        raise ValueError(f"{label} moduleLands contains an invalid time") from error
-    if any(not math.isfinite(value) or value < 0 for value in result) or result != sorted(set(result)):
-        raise ValueError(f"{label} moduleLands must be finite, nonnegative and increasing")
     return result
+
+
+def module_land_variables(spec: dict, declared: dict) -> dict:
+    """Serialize an authored numeric array to the template's declared string."""
+    raw = spec.get("moduleLands")
+    if not isinstance(raw, list) or declared.get("moduleLands", {}).get("type") != "string":
+        return spec
+    return {**spec, "moduleLands": "|".join(str(value) for value in parse_module_lands(raw))}
 
 
 def scoreboard_timing(spec: dict) -> tuple[float, float, float]:
@@ -111,7 +127,7 @@ def scoreboard_timing(spec: dict) -> tuple[float, float, float]:
 def pipeline_timing(spec: dict) -> tuple[float, float, float]:
     """Account for the actual last headline/node/foot ramp before readable dwell."""
     names = ("LAND_DEFAULT_START_S", "LAND_DEFAULT_GAP_S", "LINE_STAGGER_S", "NODE_STAGGER_S")
-    tokens = _timing_tokens("nateherk-pipeline.js", names)
+    tokens = _timing_tokens("module-pipeline.js", names)
     eyebrow, explainer, foot = (bool(str(spec.get(key) or "").strip())
                                 for key in ("eyebrow", "explainer", "footChip"))
     heads, nodes = (str(spec.get(key) or "").strip().split("|") if spec.get(key) else []
@@ -180,7 +196,9 @@ def _paired_at_values(spec: dict) -> list[float]:
 
 def _latest_reveal(spec: dict) -> float:
     values = _paired_at_values(spec)
-    for key in ("rowLands", "moduleLands", "statementLands"):
+    if spec.get("moduleLands") not in (None, ""):
+        values.extend(parse_module_lands(spec["moduleLands"]))
+    for key in ("rowLands", "statementLands"):
         values.extend(_series(spec.get(key)))
     if str(spec.get("line2", "")).strip():
         value = _number(spec.get("at3", spec.get("at2")))
@@ -234,9 +252,9 @@ def visible_timing(kind: str, spec: dict) -> tuple[float, float, float, float, f
         return None
     floor, settle, dwell, exit_runway = policy
     reveal = _latest_reveal(spec)
-    if kind == "nateherk-scoreboard":
+    if kind == "module-scoreboard":
         reveal, settle, exit_runway = scoreboard_timing(spec)
-    if kind == "nateherk-pipeline":
+    if kind == "module-pipeline":
         reveal, settle, exit_runway = pipeline_timing(spec)
     return max(floor, reveal + settle + dwell + exit_runway), reveal, settle, dwell, exit_runway
 

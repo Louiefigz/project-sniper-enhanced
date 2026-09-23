@@ -25,11 +25,13 @@ lines on POSIX.
 from __future__ import annotations
 
 import contextlib
+import argparse
 import functools
 import json
 import os
 import time
 import uuid
+from pathlib import Path
 from typing import Callable, Iterator, Protocol, TypeVar
 
 from stage_timing_context import PARENT_SPAN, timing_context, timing_metadata
@@ -144,3 +146,22 @@ def timed_stage(stage: str) -> Callable[[Callable[..., _T]], Callable[..., _T]]:
                 return fn(ctx, *args, **kwargs)
         return inner
     return wrap
+
+
+def main() -> None:
+    """Mark operator/agent work in the existing journal; never imply quality approval."""
+    parser = argparse.ArgumentParser(description='Record actual production work, including editorial phases')
+    parser.add_argument('directory', type=Path)
+    parser.add_argument('stage', help='Unique stage label; production_total surrounds the complete task')
+    parser.add_argument('event', choices=_EVENTS)
+    args = parser.parse_args()
+    if not args.directory.is_dir() or not 1 <= len(args.stage) <= 128 \
+            or any(not (char.isascii() and (char.isalnum() or char in '_-')) for char in args.stage):
+        parser.error('Use an existing directory and a bounded ASCII stage identifier')
+    recorded = journal_event(str(args.directory.resolve()), args.stage, args.event)
+    print(json.dumps({'recorded': recorded, 'qualityApproved': False,
+                      'scope': 'manual stage markers; use unique labels for parallel work'}))
+
+
+if __name__ == '__main__':
+    main()

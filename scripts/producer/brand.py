@@ -73,14 +73,10 @@ def registered_comps() -> set[str]:
     """The composition catalog: each ``*.html`` name (no extension) under
     ``compositions/``. A graphic ``kind`` must be a member — otherwise it was
     invented rather than picked from the built, style-locked templates."""
-    if not os.path.isdir(COMPOSITIONS_DIR):
-        return set()
-    return {f[:-5] for f in os.listdir(COMPOSITIONS_DIR) if f.endswith(".html")}
+    from graphics.visual_source_policy import integrated_kinds
+    return integrated_kinds()
 
 
 # Comps that render a TITLED/section graphic. A section/title beat must resolve to
 # one of these — never a freeform text overlay (the drawtext title I hand-rolled).
-TITLE_COMPS = frozenset({
-    "section-marker", "section-takeover", "statement-card", "stat-card",
-    "kinetic-quote", "kinetic-quote-wide", "fragment-payoff", "logo-card",
-})
+TITLE_COMPS = frozenset({"line-swap", "count-up"})

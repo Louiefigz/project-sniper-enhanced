@@ -3,89 +3,89 @@
   "status": "source-only-allocation-not-rendered",
   "benchmarkClockReset": false,
   "sceneCount": 53,
-  "planningDocument": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/docs/producer/C0679_B_WHOLE_VIDEO_CREATIVE_ALLOCATION_2026-09-09.md",
+  "planningDocument": "/Users/maintainer/ProjectSniperSource/docs/producer/C0679_B_WHOLE_VIDEO_CREATIVE_ALLOCATION_2026-09-09.md",
   "planningDocumentSha256": "443f156107fcc2db9fd8e021bc685d0b0c1a0dc859c440140d87109d02d1735a",
   "inputs": {
     "scene-map.json": {
-      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-fresh-native-b-2026-09-09/scene-map.json",
+      "path": "/Users/maintainer/ProjectSniperSource/artifacts/c0679-fresh-native-b-2026-09-09/scene-map.json",
       "sha256": "7755256028c4cd4ae42072329c1b521605e6ae48897835c98f29d64dc1bb414b"
     },
     "scene-spec.json": {
-      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-fresh-native-b-2026-09-09/scene-spec.json",
+      "path": "/Users/maintainer/ProjectSniperSource/artifacts/c0679-fresh-native-b-2026-09-09/scene-spec.json",
       "sha256": "2f96dc4580df98f426febc411e6442359069dd95ccec1cd0a83f1fb113919746"
     },
     "transcript.json": {
-      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-fresh-native-b-2026-09-09/transcript.json",
+      "path": "/Users/maintainer/ProjectSniperSource/artifacts/c0679-fresh-native-b-2026-09-09/transcript.json",
       "sha256": "c1fc71d4d3211e8ec72c690990e0d9aa789f949729150ff50308adaee11b8600"
     }
   },
   "aManifest": {
-    "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/artifacts/c0679-native-hyperframes-2026-09-09/PACKAGE_MANIFEST.json",
+    "path": "/Users/maintainer/ProjectSniperSource/artifacts/c0679-native-hyperframes-2026-09-09/PACKAGE_MANIFEST.json",
     "sha256": "1cc0c92dfc15530afb57c2f6d33caf62061a6034d648e43b69d2d64069c5f7c5"
   },
   "catalogSources": {
     "C1": {
-      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/yt-camera-move.html",
+      "path": "/Users/maintainer/ProjectSniperSource/vendor/hyperframes-catalog/compositions/components/yt-camera-move.html",
       "sha256": "f58d4c2fc7165cf49a701f55f80fcd88eccab5c582cf8c2ae00259523810d58a"
     },
     "C2": {
-      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/shared-axis-y.html",
+      "path": "/Users/maintainer/ProjectSniperSource/vendor/hyperframes-catalog/compositions/components/shared-axis-y.html",
       "sha256": "ae9d2f096308f18deeb5bc365219ac3fd41793dcd5a5a1675e0735a62b11c24f"
     },
     "C3": {
-      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/lt-accent-underline.html",
+      "path": "/Users/maintainer/ProjectSniperSource/vendor/hyperframes-catalog/compositions/lt-accent-underline.html",
       "sha256": "0bd8bd7c6c99f4fd30b0ab3650ba352f973a40080d9d372fe9b714f2bb5c135b"
     },
     "C4": {
-      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/flowchart.html",
+      "path": "/Users/maintainer/ProjectSniperSource/vendor/hyperframes-catalog/compositions/flowchart.html",
       "sha256": "4d7b486e72f03d1809e57ff0214f2e889882387fbe7783756cfa6d871e904d35"
     },
     "C5": {
-      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/number-pop-in.html",
+      "path": "/Users/maintainer/ProjectSniperSource/vendor/hyperframes-catalog/compositions/components/number-pop-in.html",
       "sha256": "25bb2a0a3e2dc9a067cfb016d7d8a971b70774652a0a4dca200c9173a1fc4e48"
     },
     "C6": {
-      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/comparison-split.html",
+      "path": "/Users/maintainer/ProjectSniperSource/vendor/hyperframes-catalog/compositions/components/comparison-split.html",
       "sha256": "2637b4dd260eb9ef272fad2f3b3921fe8f282cb498b8de112ec6faa76d5ef3b8"
     },
     "C7": {
-      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/panel-reveal.html",
+      "path": "/Users/maintainer/ProjectSniperSource/vendor/hyperframes-catalog/compositions/components/panel-reveal.html",
       "sha256": "0fbb1c9685a80e10e577d405544bf8db35ec1a27cb0c8bed55a4a1f5fd88d376"
     },
     "C8": {
-      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/constellation-hub.html",
+      "path": "/Users/maintainer/ProjectSniperSource/vendor/hyperframes-catalog/compositions/components/constellation-hub.html",
       "sha256": "6ebed16e6f7d2aff53507fc719639e4b9332b1882c4c4b8e3e8ff0b53011805e"
     },
     "C9": {
-      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/morph-swap.html",
+      "path": "/Users/maintainer/ProjectSniperSource/vendor/hyperframes-catalog/compositions/components/morph-swap.html",
       "sha256": "01b9248e4cbfddaafa0bb026c7e970f202196acf83082c8699efa7e8716b7f83"
     },
     "C10": {
-      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/mk-specs-list.html",
+      "path": "/Users/maintainer/ProjectSniperSource/vendor/hyperframes-catalog/compositions/mk-specs-list.html",
       "sha256": "a6c68fd7cdec5b30d043ffe89562149d3e54806bf045cc867bd068059d979fe8"
     },
     "C11": {
-      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/inline-highlight.html",
+      "path": "/Users/maintainer/ProjectSniperSource/vendor/hyperframes-catalog/compositions/components/inline-highlight.html",
       "sha256": "5063977e75ef2c36ed9ce71e0f95b244504a7c489dd540b47defabbe39c09100"
     },
     "C12": {
-      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/text-state-swap.html",
+      "path": "/Users/maintainer/ProjectSniperSource/vendor/hyperframes-catalog/compositions/components/text-state-swap.html",
       "sha256": "53eeedf34c11ee2f051e4efaafc0ae32e15f3f89bbcba2160ae026e4a36240fb"
     },
     "C13": {
-      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/grid-card-assemble.html",
+      "path": "/Users/maintainer/ProjectSniperSource/vendor/hyperframes-catalog/compositions/components/grid-card-assemble.html",
       "sha256": "8713fc92043a353732f4d9bd8832e0023a2019472d3a9cfffc566ff6fd194042"
     },
     "C14": {
-      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/marker-checklist-card.html",
+      "path": "/Users/maintainer/ProjectSniperSource/vendor/hyperframes-catalog/compositions/components/marker-checklist-card.html",
       "sha256": "c99d951e0f361447109f50b5301cbbd8bcfed621cd7a66d92d9c5a65ec1614f0"
     },
     "C15": {
-      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/outline-draw.html",
+      "path": "/Users/maintainer/ProjectSniperSource/vendor/hyperframes-catalog/compositions/components/outline-draw.html",
       "sha256": "30674e59672253a2b1596addbc3200a012a8a88c0382158d3db2612c44efa76f"
     },
     "C16": {
-      "path": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/vendor/hyperframes-catalog/compositions/components/fade-through.html",
+      "path": "/Users/maintainer/ProjectSniperSource/vendor/hyperframes-catalog/compositions/components/fade-through.html",
       "sha256": "f3355c517ee2eb808036cc8978ca7489f9569eaceef83f87eeb639b23b66147f"
     }
   },

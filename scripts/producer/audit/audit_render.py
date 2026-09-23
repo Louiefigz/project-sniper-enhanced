@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import copy
 import os
 import sys
 from dataclasses import asdict, dataclass
@@ -138,6 +139,9 @@ def _deterministic_checks(p: Probed) -> tuple[list[CheckResult], float]:
     """The measurement checks plus the output duration used for frame planning."""
     checks: list[CheckResult] = []
     plan = _load_json(os.path.join(p.out_dir, "edit_plan.json")) or {}
+    # Sealed cut lineage binds the plan exactly as saved; the audio sections
+    # derived below are for the dialogue check only and must not reach it.
+    saved_plan = copy.deepcopy(plan)
     plan.pop("audioReviewSections", None)
     tmap_data = _load_json(os.path.join(p.out_dir, "timeline_map.json"))
     if tmap_data is None:
@@ -168,7 +172,7 @@ def _deterministic_checks(p: Probed) -> tuple[list[CheckResult], float]:
     checks.extend(check_glitch_screens(p.final, duration, own_screen))
     # Motion integrity fails here; ambiguous cut-rate shortfalls remain review
     # warnings. This mirrors the upstream pacing planner; see audit_motion.
-    checks.extend(check_pacing_rendered(p.final, duration, plan, p.mode))
+    checks.extend(check_pacing_rendered(p.final, duration, saved_plan, p.mode))
     checks.extend(check_presence(p.final, plan, p.out_dir))
     checks.extend(check_smoothness(p.final, plan))
     # Placement evidence is fail-closed; once measurable, eye-trace distance
@@ -277,6 +281,9 @@ def write_reports(report: AuditReport) -> tuple[str, str]:
         json.dump(report_to_dict(report), handle, indent=2)
     with open(md_path, "w") as handle:
         handle.write(render_markdown(report))
+    if report.final_sha256 is not None:
+        from revision_ledger import record_audit
+        record_audit(report.final_path, report.final_sha256, report_to_dict(report))
     return json_path, md_path
 
 

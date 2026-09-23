@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Opt-in live acceptance for the approved external-media Docker sandbox."""
+"""Opt-in live acceptance for the native external-media admission jail."""
 from __future__ import annotations
 
 import os
@@ -28,7 +28,7 @@ def _ffmpeg(*args: str) -> None:
     )
 
 
-@unittest.skipUnless(ENABLED and HAVE_FFMPEG, "opt-in Docker/ffmpeg acceptance")
+@unittest.skipUnless(ENABLED and HAVE_FFMPEG, "opt-in native jail/ffmpeg acceptance")
 class LiveExternalMediaProbeTests(unittest.TestCase):
     """Prove real full decode and representative adversarial rejection."""
 
@@ -54,8 +54,9 @@ class LiveExternalMediaProbeTests(unittest.TestCase):
         )
         receipt = admit_external_media(str(media), str(self._store("valid")))
         self.assertTrue(receipt["decoded"]["decoded"])
-        self.assertEqual(receipt["isolation"]["networkMode"], "none")
-        self.assertTrue(receipt["network"]["hostDecoyPositive"])
+        self.assertEqual(receipt["isolation"]["network"], "denied")
+        self.assertEqual(receipt["isolation"]["processCreation"], "denied")
+        self.assertTrue(all(run["sandboxed"] for run in receipt["isolation"]["jailRuns"]))
 
     def test_reference_wrapper_retains_exact_video_authority(self) -> None:
         media = self.root / "reference.mp4"

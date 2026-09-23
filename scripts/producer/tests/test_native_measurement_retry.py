@@ -126,7 +126,7 @@ class MeasurementWindowTests(unittest.TestCase):
         self.assertEqual(record['status'], 'failed')
         self.assertEqual(len(self.owner.result['measurementFailureEvidence']), 4)
         self.assertEqual(self.owner.result['commandTimeoutMeasurementRetries'], 3)
-        self.assertEqual([call.args[0] for call in self.sleep.call_args_list], [.1, .2, .4])
+        self.assertEqual([call.args[0] for call in self.sleep.call_args_list], [.5, 1.5, 4.0])
         self.assertEqual(record['maximumSamples'], 4)
         self.assertEqual(record['maximumWindowSeconds'], 18.0)
 
@@ -137,19 +137,19 @@ class MeasurementWindowTests(unittest.TestCase):
             self.owner.started = 100
             self.sleep.side_effect = lambda delay: setattr(now, 'return_value', now.return_value + delay)
             def burst_read(*_args: object) -> object:
-                if now.return_value < 100.25:
+                if now.return_value < 101.5:
                     raise missing
                 return self.snapshot
             with patch('studio.native_measurement_retry.read_snapshot', side_effect=burst_read) as read:
                 result = MeasurementWindow(self.owner, REQUEST).run()
         self.assertIs(result, self.snapshot)
         self.assertEqual(read.call_count, 3)
-        self.assertEqual([call.args[0] for call in self.sleep.call_args_list], [.1, .2])
+        self.assertEqual([call.args[0] for call in self.sleep.call_args_list], [.5, 1.5])
         record = self.owner.result['measurementRetryWindows'][0]
         self.assertEqual(record['deadlineMonotonic'], 118)
         self.assertEqual(len(self.owner.result['measurementFailureEvidence']), 2)
-        self.assertAlmostEqual(record['attempts'][0]['retryWaitElapsedSeconds'], .1)
-        self.assertAlmostEqual(record['attempts'][1]['retryWaitElapsedSeconds'], .2)
+        self.assertAlmostEqual(record['attempts'][0]['retryWaitElapsedSeconds'], .5)
+        self.assertAlmostEqual(record['attempts'][1]['retryWaitElapsedSeconds'], 1.5)
 
     def test_original_deadline_expiring_during_backoff_prevents_another_read(self) -> None:
         """Scheduler delay cannot extend the original window or accept a late sample."""
@@ -160,7 +160,7 @@ class MeasurementWindowTests(unittest.TestCase):
                 with self.assertRaises(MeasurementWindowExpired):
                     MeasurementWindow(self.owner, REQUEST).run()
         self.assertEqual(read.call_count, 1)
-        self.sleep.assert_called_once_with(.1)
+        self.assertAlmostEqual(self.sleep.call_args.args[0], .15)
         self.assertEqual(self.owner.result['measurementRetryWindows'][0]['deadlineMonotonic'], 100.15)
 
     def test_cancellation_during_backoff_prevents_another_read(self) -> None:
@@ -222,6 +222,7 @@ class MeasurementWindowTests(unittest.TestCase):
         run.child.poll.return_value = None
         run.samples = io.StringIO()
         run.policy, run.baseline = ResourcePolicy(), self.snapshot
+        run.resource_guard = None  # This regression deliberately exercises an explicit fixed policy.
         run.registry.remember_measured = Mock()
         current = replace(self.snapshot, kernel_pressure_level=2)
         with patch('studio.native_measurement_retry.read_snapshot',

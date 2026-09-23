@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """transitions — seam-cover engine: white flashes + light-leak washes + whoosh SFX.
 
-Research (INTRO_MACHINE_VS_PRO_AUDIT.md §3/§5, REFERENCE_STYLE_STUDY.md R15,
-2026-07-05): every world-change in the pro cut is covered — zero naked butt
-joints. This stage bakes the measured transition grammar, deterministically:
+Doctrine (REFERENCE_STYLE_STUDY.md R15; audit record in
+INTRO_MACHINE_VS_PRO_AUDIT.md §3/§5): a change of world may carry a seam
+cover so it reads as deliberate — no naked butt joints between worlds. This
+stage renders the seam-cover grammar deterministically:
 
 * WHITE FLASH — ~3 frames total at the video's NATIVE fps, centered on the
   seam: one frame ramping toward white (~60%), one FULL-white frame on the
@@ -13,7 +14,7 @@ joints. This stage bakes the measured transition grammar, deterministically:
   band) warm wash that rises FAST and decays SLOW (attack 40% of the window,
   decay 60%), peaking ~78% opacity exactly on the seam. Luma uses screen-blend
   math (``255-(255-Y)*(255-L)/255``) so highlights blow out like a real leak;
-  chroma drifts orange→pink across the wash (the pro's leaks read orange first,
+  chroma drifts orange→pink across the wash (the leak reads orange first,
   pink on the tail). Envelope + drift are pure functions of T — no random.
 * WHOOSH SFX — the audit measured transitions as AUDIOVISUAL: flash/wash
   moments carry −11..−15 dB whoosh peaks against a −40 dB speech-gap floor.
@@ -32,12 +33,12 @@ this primitive only enforces hard sanity (sorted, spaced, in-range).
 
 The ffmpeg-xfade family (stock fades/wipes/slides) was REMOVED 2026-07-11 —
 operator-rejected on sight (FAILURE_LEDGER LL-014). Longform seams use ONLY
-the studied reference grammar (panel sweeps, face-bridged recomposition,
-under-panel cuts, blur-recede, seam-role zoom-pulls); flash/leak stay only
-where already measured legal.
+Sniper's seam grammar (panel sweeps, face-bridged recomposition, under-panel
+cuts, blur-recede, seam-role zoom-pulls — MODULE_STUDY.md §2,
+EDITCRAFT_LESSONS.md §2.7); flash/leak stay only at their seam role.
 
-* ZOOM-PULL (kind "zoom-pull", LIAM-4-MOVES move 1) — an EASED digital zoom
-  bridging the seam, three measured variants (punch-cut / whip / settle)
+* ZOOM-PULL (kind "zoom-pull", continuity mechanism CM-1) — an EASED digital
+  zoom bridging the seam, three variants (punch-cut / whip / settle)
   rendered by ``motion/zoom_pull.py`` (punch-engine expression reuse; the
   punch-cut's sequential light-leak/flash cover rides the same event).
   Longform-only at the lint gate; budget-counted with the other seams.
@@ -134,6 +135,8 @@ def parse_events(raw: object, duration: float) -> list[TransitionEvent]:
     ``outTime`` inside ``[EDGE_MARGIN_S, duration - EDGE_MARGIN_S]``, and the
     list SORTED with >= ``MIN_SPACING_S`` between consecutive seams.
     """
+    if raw:
+        raise ValueError("Legacy transition presets are retired; use an upstream HyperFrames catalog transition in a native project")
     if not isinstance(raw, list) or not raw:
         raise ValueError("events must be a non-empty JSON array")
     events: list[TransitionEvent] = []
@@ -150,7 +153,7 @@ def parse_events(raw: object, duration: float) -> list[TransitionEvent]:
         if isinstance(kind, str) and kind.startswith("xfade:"):
             raise ValueError(
                 f"event[{i}]: kind {kind!r} — operator-rejected (LL-014): "
-                "use the studied longform transition grammar (panel sweeps, "
+                "use Sniper's longform transition grammar (panel sweeps, "
                 "face-bridged recomposition, under-panel cuts, blur-recede, "
                 "seam-role zoom-pulls), never stock wipes/slides/dissolves")
         if kind not in KINDS:
@@ -226,8 +229,9 @@ def _leak_geq(e: TransitionEvent) -> str:
 
 
 def _cover_events(events: list[TransitionEvent]) -> list[TransitionEvent]:
-    """Synthesized flash/leak covers for punch-cut zoom-pulls (LIAM move 1:
-    the zoom completes BEFORE the seam; the cut itself is covered — zoom and
+    """Synthesized flash/leak covers for punch-cut zoom-pulls (CM-1,
+    EDITCRAFT_LESSONS §2.7: the zoom completes BEFORE the seam; the cut
+    itself is covered — zoom and
     cover are sequential, one event). SFX rides the parent event."""
     return [TransitionEvent(e.out_time, e.zoom.cover, False)
             for e in events
@@ -384,50 +388,9 @@ def _transition_audio(
 
 
 def apply_transitions(src_path: str, raw_events: object, out_path: str) -> dict:
-    """Validate the events against ``src_path`` and render them into ``out_path``.
-
-    Video re-encodes at mezzanine CRF (frame count asserted unchanged). Audio:
-    aac 192k with the whoosh mix when any event wants SFX (and the source has
-    audio), stream-copy otherwise. Returns the NDJSON-ready result dict.
-    """
-    duration = probe_duration(src_path)
-    stream = probe_video(src_path)
-    fps = _fps_float(stream["r_frame_rate"])
-    dims = (int(stream["width"]), int(stream["height"]))
-    events = parse_events(raw_events, duration)
-    in_frames = probe_video_frames(src_path)
-    src_audio = has_audio(src_path)
-    sfx_events = [e for e in events if e.sfx] if src_audio else []
-    if not src_audio and any(e.sfx for e in events):
-        emit(stage="transitions", status="warn",
-             reason="input has no audio stream; sfx skipped")
-    work = tempfile.mkdtemp(prefix="producer-transitions-")
-    try:
-        audio = _transition_audio(src_path, work, sfx_events)
-        cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-               "-i", src_path, *audio.inputs]
-        fc = build_video_filter(events, fps, dims) + audio.filter_suffix
-        cmd += ["-filter_complex", fc, "-map", "[vout]", *audio.map_args,
-                "-c:v", "libx264", "-crf", str(ENCODE["mezzanine_crf"]),
-                "-preset", ENCODE["mezzanine_preset"],
-                "-pix_fmt", ENCODE["pix_fmt"], "-fps_mode", "passthrough",
-                "-movflags", "+faststart", out_path]
-        run_ff(cmd)
-        if audio.authority is not None:
-            audio.authority.assert_stable()
-    finally:
-        shutil.rmtree(work, ignore_errors=True)
-    result = {"fps": round(fps, 3), "events": len(events),
-              "flashes": sum(1 for e in events if e.kind == "white-flash"),
-              "leaks": sum(1 for e in events if e.kind == "light-leak"),
-              "zoomPulls": sum(1 for e in events if e.kind == "zoom-pull"),
-              "sfx": len(sfx_events),
-              "whooshPeakDbfs": audio.whoosh_peak_dbfs}
-    if audio.authority is not None:
-        result["channelNormalization"] = audio.authority.receipt
-    result.update(_assert_preserved(src_path, out_path, in_frames,
-                                    check_audio=src_audio))
-    return result
+    """Reject retired visual presets before opening media or creating output."""
+    raise ValueError("Legacy transition presets are retired; use an upstream "
+                     "HyperFrames catalog transition in a native project")
 
 
 def _load_events(spec: str) -> object:

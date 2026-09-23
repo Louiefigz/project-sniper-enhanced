@@ -7,7 +7,7 @@ export type EmbeddedMedia = { data: string; sha: string; bytes: number };
 export type MediaMap = Record<string, EmbeddedMedia>;
 const IMAGE_FIELDS: Record<string, string[]> = {
   "ui-focus-zoom": ["image"], "avatar-bio-card": ["avatarSrc"], "blur-tease": ["image"],
-  "angela-receipt-cell": ["media1", "media2", "media3", "media4", "media5", "media6"],
+  "slideware-receipt-cell": ["media1", "media2", "media3", "media4", "media5", "media6"],
 };
 const MAX_TOTAL_BYTES = 8 * 1024 * 1024;
 const SVG_TAGS = new Set(["svg", "g", "path", "title", "desc", "defs", "lineargradient",

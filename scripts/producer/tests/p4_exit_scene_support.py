@@ -10,7 +10,7 @@ from graphics.scene_package_cli import run as run_scene_package
 from planner.treatment_models import TreatmentState
 from tests.p4_exit_media import write_canonical
 
-FIXTURE = Path(__file__).parent / "fixtures" / "fire-sparkles-bundle"
+FIXTURE = Path(__file__).parent / "fixtures" / "fire-sparkles-bundle-0831"  # declares the pinned SDK 0.8.31
 
 
 @dataclass(frozen=True)

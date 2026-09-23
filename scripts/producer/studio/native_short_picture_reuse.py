@@ -8,6 +8,7 @@ from pathlib import Path
 
 from studio.native_runtime import digest
 from studio.native_stage_evidence import require, verify_pins, verify_supervised_inputs
+from studio.native_selected_sources import prepared_source_pins
 
 STUDIO = Path(__file__).resolve().parent
 PICTURE_CODE = ('native_short_batched_render.mjs', 'native_short_capture_context.mjs',
@@ -40,6 +41,7 @@ def project_dependencies(project: Path) -> dict[str, str]:
     expected = {str(project / row['file']): row['sha256'] for row in manifest['files']}
     expected[str(project / 'PROJECT-MANIFEST.json')] = digest(project / 'PROJECT-MANIFEST.json')
     expected.update({asset['path']: asset['sha256'] for asset in plan['assets']})
+    expected.update(prepared_source_pins(plan))
     if plan['strategy']['schemaVersion'] >= 3:
         report = read_record(project / 'ASSET-USE-REPORT.json')
         expected.update({row['path']: row['sha256'] for row in report['originEvidenceFiles']})
@@ -155,6 +157,9 @@ def verify_picture(project: Path, donor: Path, previous: dict, receipt: dict) ->
 def picture_reuse_pins(project: Path, donor: Path) -> dict[str, str]:
     """Validate a prior attempt and return all picture dependencies/evidence to pin."""
     project, donor = project.resolve(strict=True), donor.resolve(strict=True)
+    if read_record(donor / 'export-request.json').get('captureMode') == 'sdk-streaming':
+        from studio.native_short_sdk_picture_reuse import sdk_picture_reuse_pins
+        return sdk_picture_reuse_pins(project, donor)
     for name in DONOR_FILES[:3]:
         require((donor / name).stat().st_size <= MAX_RECEIPT_BYTES, f'donor receipt exceeds 32 MiB: {name}')
     evidence = {str(donor / name): digest(donor / name) for name in DONOR_FILES}
@@ -184,6 +189,11 @@ def copy_picture(source: Path, target: Path, expected: str) -> None:
 
 def reuse_native_picture(request: dict) -> dict:
     """Copy a validated completed picture; current audio/color/native QC remain mandatory."""
+    previous = read_record(Path(request['pictureDonor']) / 'export-request.json')
+    require(previous.get('captureMode') == request.get('captureMode'), 'picture donor capture mode differs')
+    if request.get('captureMode') == 'sdk-streaming':
+        from studio.native_short_sdk_picture_reuse import reuse_sdk_picture
+        return reuse_sdk_picture(request)
     require(request.get('captureMode') == MODE, 'picture reuse requires explicit cached native batches')
     project, donor = Path(request['project']).resolve(strict=True), Path(request['pictureDonor']).resolve(strict=True)
     output = Path(request['output']).resolve(strict=True)

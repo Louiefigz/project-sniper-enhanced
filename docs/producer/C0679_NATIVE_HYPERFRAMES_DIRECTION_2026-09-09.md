@@ -1,7 +1,7 @@
 # C0679: native HyperFrames direction after operator rejection
 
 Aaron's September 9 instruction replaces the inherited visual approach. He has
-rejected the Nateherk/Jaden-derived, predominantly full-screen card treatment.
+rejected the Module/Punch-derived, predominantly full-screen card treatment.
 This is a channel built around Aaron teaching on camera. Old edits are case
 studies, not a visual-plan baseline. Existing source footage, accepted cut
 decisions, transcript evidence and independently verified audio may be reused.
@@ -318,7 +318,6 @@ Production is investigating the SDK's supported streaming route with the same
 quality and retained source-frame cache. This failed attempt remains part of
 delivery time; its source hashes were stable. Evidence: `full-native-high-v1.render.json`.
 
-See [source-motion framing review](../../../youtube-automation/docs/findings/PRESENTER_FRAMING_REQUIRES_SOURCE_MOTION_REVIEW.md)
 for the actual failure and a way to preserve panel padding while reframing.
 
 ### Two operating modes, one editing engine

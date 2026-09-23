@@ -87,8 +87,10 @@ def _discover_browser() -> str:
         if found:
             return os.path.realpath(max(found, key=_browser_rank))
     raise RuntimeError(
-        "no cached chrome-headless-shell found; run a hyperframes render once "
-        "to install it (templates/motion) or set HYPERFRAMES_BROWSER_PATH")
+        "no cached chrome-headless-shell found; in the installed app run "
+        "install/install.command to put the rendering browser back (in a developer "
+        "checkout, run a hyperframes render once in templates/motion), or set "
+        "HYPERFRAMES_BROWSER_PATH")
 
 
 def _discovered_tool(name: str) -> str:

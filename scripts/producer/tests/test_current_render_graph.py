@@ -165,9 +165,9 @@ class CurrentRenderGraphTests(unittest.TestCase):
                 {"sourceId": "raw", "start": 0, "end": 1},
                 {"sourceId": "raw", "start": 1, "end": 2}],
                 "graphicsTrack": [{
-                    "kind": "statement-card", "outStart": 0.5,
+                    "kind": "line-swap", "outStart": 0.5,
                     "outEnd": 1.8, "exitOnCut": True,
-                    "spec": {"text": "Proof"}}]}
+                    "spec": {"lineA": "Proof", "lineB": "A result", "underlineWord": "result"}}]}
             inputs = _build_inputs(root, plan)
             key = "1" * 40
             scene = inputs.cache_dir / f"{key}.mov"
@@ -176,7 +176,7 @@ class CurrentRenderGraphTests(unittest.TestCase):
             source.write_bytes(b"source authority")
             events = [{
                 "stage": "graphics", "status": "rendered",
-                "kind": "statement-card", "key": key, "fmt": "mov",
+                "kind": "line-swap", "key": key, "fmt": "mov",
             }]
             with mock.patch(
                     "current_render_graph_build.source_authority",

@@ -70,9 +70,15 @@ class CaptionFaceBandTests(unittest.TestCase):
 class HookCardFaceTests(unittest.TestCase):
     """(b) expanded face box vs the fixed 250-560 hook band."""
 
+    def _historical_hook_plan(self, **overrides) -> dict:
+        """Inert titleCard metadata for pure face geometry; never full admission."""
+        plan = _short_plan(**overrides)
+        plan['titleCards'] = [{'outStart': 0.0, 'outEnd': 2.5, 'text': 'TEST hook'}]
+        return plan
+
     def test_high_face_overlapping_band_warns_per_card(self) -> None:
         # Face y0=96px, chin=480px → expanded box reaches into [250, 560].
-        plan = _short_plan(faceBBoxNorm=[0.3, 0.05, 0.4, 0.2])
+        plan = self._historical_hook_plan(faceBBoxNorm=[0.3, 0.05, 0.4, 0.2])
         verdicts = plf.check_hook_cards(plan)
         self.assertEqual(len(verdicts), 1, verdicts)  # one per card window
         v = verdicts[0]
@@ -83,11 +89,11 @@ class HookCardFaceTests(unittest.TestCase):
 
     def test_low_face_clear_of_band_silent(self) -> None:
         # Face y0=1056px — expanded top ≈ 902px, far below the 560px band end.
-        plan = _short_plan(faceBBoxNorm=[0.3, 0.55, 0.4, 0.2])
+        plan = self._historical_hook_plan(faceBBoxNorm=[0.3, 0.55, 0.4, 0.2])
         self.assertEqual(plf.check_hook_cards(plan), [])
 
     def test_cards_without_face_box_skip_with_evidence(self) -> None:
-        (v,) = plf.check_hook_cards(_short_plan())
+        (v,) = plf.check_hook_cards(self._historical_hook_plan())
         self.assertEqual((v.gate, v.severity), ("hook_card_face", "SKIP"))
         self.assertIn("1 titleCards", v.evidence)
 
@@ -105,7 +111,7 @@ class PipHoleFaceCxTests(unittest.TestCase):
         return plan
 
     def test_live_hole_without_face_cx_warns(self) -> None:
-        entry = {"outStart": 10.0, "outEnd": 14.0, "kind": "nateherk-takeover",
+        entry = {"outStart": 10.0, "outEnd": 14.0, "kind": "module-takeover",
                  "anchor": "own-screen", "spec": {}, "reason": "credibility"}
         (v,) = plf.check_pip_hole_face_cx(self._longform(entry))
         self.assertEqual((v.gate, v.severity), ("pip_hole_face_cx", "WARN"))
@@ -113,26 +119,26 @@ class PipHoleFaceCxTests(unittest.TestCase):
         self.assertIn("stamp_face_cx", v.evidence)
 
     def test_measured_face_cx_and_inactive_hole_silent(self) -> None:
-        stamped = {"outStart": 10.0, "outEnd": 14.0, "kind": "nateherk-takeover",
+        stamped = {"outStart": 10.0, "outEnd": 14.0, "kind": "module-takeover",
                    "anchor": "own-screen", "spec": {}, "faceCx": 0.62}
         self.assertEqual(plf.check_pip_hole_face_cx(self._longform(stamped)), [])
         # A registered kind whose hole is NOT live (no presenterFrame opt-in)
         # never fills the hole, so faceCx is irrelevant.
-        opaque = {"outStart": 10.0, "outEnd": 14.0, "kind": "nateherk-scoreboard",
+        opaque = {"outStart": 10.0, "outEnd": 14.0, "kind": "module-scoreboard",
                   "anchor": "free-band", "spec": {}}
         self.assertEqual(plf.check_pip_hole_face_cx(self._longform(opaque)), [])
 
     def test_stamp_face_cx_writes_the_entry_key(self) -> None:
         plan = _short_plan(faceBBoxNorm=[0.2, 0.1, 0.4, 0.3])
-        entry = {"kind": "nateherk-takeover", "spec": {}}
+        entry = {"kind": "module-takeover", "spec": {}}
         self.assertEqual(plf.stamp_face_cx(entry, plan), 0.4)  # 0.2 + 0.4/2
         self.assertEqual(entry["faceCx"], 0.4)                 # the renderer's key
-        own = {"kind": "nateherk-takeover", "faceBBoxNorm": [0.5, 0.1, 0.3, 0.3]}
+        own = {"kind": "module-takeover", "faceBBoxNorm": [0.5, 0.1, 0.3, 0.3]}
         self.assertEqual(plf.stamp_face_cx(own, plan), 0.65)   # entry bbox wins
 
     def test_stamp_face_cx_fails_closed_without_a_face_box(self) -> None:
         with self.assertRaises(ValueError):
-            plf.stamp_face_cx({"kind": "nateherk-takeover"}, _short_plan())
+            plf.stamp_face_cx({"kind": "module-takeover"}, _short_plan())
 
 
 class GraphicBrollOverlapTests(unittest.TestCase):
@@ -183,10 +189,12 @@ class LintDispatchTests(unittest.TestCase):
     def test_lint_routes_warn_and_fail_through_gate_policy(self) -> None:
         plan = _short_plan(faceBBoxNorm=[0.25, 0.35, 0.5, 0.28])
         plan["graphicsTrack"] = [{
-            "outStart": 9.5, "outEnd": 11.0, "kind": "chip-row",
-            "anchor": "headroom", "spec": {}, "reason": "x",
+            "outStart": 9.5, "outEnd": 11.0, "kind": "marker-highlight",
+            "anchor": "headroom", "spec": {"text": "Observe the face", "emphasisWord": "face"}, "reason": "x",
             "faceBBoxNorm": [0.25, 0.35, 0.5, 0.28],
         }]
+        from graphics.template_contract import validate_entry
+        validate_entry(plan["graphicsTrack"][0])
         rep = pl.lint(plan, MANIFEST)
         self.assertTrue(any("caption_face_band:" in w for w in rep.warnings),
                         rep.warnings)

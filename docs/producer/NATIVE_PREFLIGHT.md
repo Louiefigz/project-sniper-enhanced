@@ -85,6 +85,13 @@ quality require the following checks. Static success always carries
 
 ## Where this fits in the quality-first flow
 
+For an explicitly requested reference-shot/style match, add
+`--reference-map /absolute/REFERENCE-REUSE.json` using the
+[shared mapping workflow](REFERENCE_SHOT_REUSE.md). The same optional check serves
+native Short and Long projects, validates the project/evidence binding before the
+SDK and again before completion, and records the planning report in `inputs.json`
+and `result.json`. Ordinary projects need no map and do not load the catalog.
+
 1. Reuse the accepted brief and preferences. No hard authoring deadline and no
    automatic reduction of detail, resolution, bitrate or review depth.
 2. Run this static check against the staged native project.

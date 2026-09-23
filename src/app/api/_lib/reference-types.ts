@@ -27,7 +27,7 @@ export interface ReferenceStyleProfile {
   title: string;
   source: ReferenceSourceProfile;
   suggestedMode: ReferenceMode | null;
-  suggestedKnownStyle: "caleb" | "jadenly" | "angela" | null;
+  suggestedKnownStyle: "restrained" | "punch" | "slideware" | null;
   mechanics: {
     cutsPerMin: number | null;
     shotMedianS: number | null;

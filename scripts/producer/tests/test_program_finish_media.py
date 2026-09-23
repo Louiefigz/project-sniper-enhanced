@@ -5,16 +5,18 @@ import array
 import contextlib
 import copy
 import json
-import shutil
 import tempfile
 import unittest
+from unittest import mock
 from dataclasses import replace
 from pathlib import Path
 
 import render as renderer
 from audio.audio_enhance import build_filter
-from audio.program_finish_bus import measure_chain_latency, render_finishing
+from audio.program_finish_bus import measure_chain_latency, render_finishing, _sfx_sources, _render_program
+from audio.program_finish_contract import finishing_request, SfxCue
 from audio.program_master_bus import build_program_master, verify_program_master
+from audio.program_mix_bus import build_program_mix
 from audio.program_master_cache import load_program_master
 from audio.program_master_excerpt import ExcerptRanges, extract_master_audio
 from audio.program_master_selection import SelectionContext, capture_master_selection
@@ -28,9 +30,7 @@ from test_render_source_audio_media import _context, _fixture
 
 RATE = 48_000
 GAIN = [{"outStart": 1.0, "outEnd": 1.5, "dB": 6}]
-SEAMS = [{"outTime": 1.0, "kind": "white-flash", "sfx": True},
-         {"outTime": 2.5, "kind": "white-flash", "sfx": "click"}]
-FINISHING = {"audioEnhance": {"preset": "voice"}, "audioGain": GAIN, "transitions": SEAMS}
+FINISHING = {"audioEnhance": {"preset": "voice"}, "audioGain": GAIN}
 
 
 def decoded(path: str) -> array.array:
@@ -188,15 +188,17 @@ class ProgramFinishMediaTests(unittest.TestCase):
         self.assertTrue(1.03 < early < late < target - 0.03, f"edges must ramp, not step: {early} {late}")
         self.assertEqual(finished.receipt["gain"]["rampS"], 0.05)
 
-    def test_03_sfx_sum_after_cleanup_lands_hits_on_seams_and_leaves_dialogue_clean(self) -> None:
-        plan = {**self.plan, "audioEnhance": {"preset": "voice"}, "transitions": SEAMS}
-        finished = render_finishing(self.bus, plan, self._directory())
-        self.assertNotEqual(finished.dialogue_path, finished.program_path)
-        cues = finished.receipt["sfx"]["cues"]
-        self.assertEqual([cue["startSample"] for cue in cues], [33_600, 119_520])
-        dialogue, program = decoded(finished.dialogue_path), decoded(finished.program_path)
+    def test_03_audio_kernel_synthetic_cues_sum_after_cleanup_on_exact_samples(self) -> None:
+        # Audio-kernel test only: synthetic DTOs never admit a retired visual plan.
+        plan = {**self.plan, "audioEnhance": {"preset": "voice"}}
+        directory = self._directory()
+        finished = render_finishing(self.bus, plan, directory)
+        request = replace(finishing_request(plan, self.bus.samples / RATE), sfx=(
+            SfxCue(1.0, True, 0.3, None), SfxCue(2.5, "click", 0.01, sfx_path("click"))))
+        sources = _sfx_sources(request, directory)
+        output = _render_program(self.bus, (request, finished.dialogue_path, sources), directory)
+        dialogue, program = decoded(finished.dialogue_path), decoded(output)
         self.assertEqual(len(program), 2 * self.bus.samples)
-        sources = finished.receipt["sfx"]["sources"]
         whoosh, click = decoded(sources["engine-whoosh"]["path"]), decoded(sfx_path("click"))
         self.assertEqual(sources["click"]["path"], sfx_path("click"))
         expected = array.array("f", dialogue)
@@ -221,7 +223,8 @@ class ProgramFinishMediaTests(unittest.TestCase):
         finishing = receipt["finishing"]
         self.assertEqual(finishing["settings"]["audioGain"], [{"outStart": 1.0, "outEnd": 1.5, "dB": 6.0}])
         self.assertEqual(finishing["settings"]["audioEnhance"], {"preset": "voice"})
-        self.assertEqual([cue["sfx"] for cue in finishing["settings"]["sfx"]], [True, "click"])
+        self.assertEqual(finishing["settings"]["sfx"], [])
+        self.assertIsNone(finishing["sfx"])
         self.assertEqual(finishing["order"], "cleanup->gain->sfx->music->master")
         self.assertEqual(receipt["detectorReference"]["keySource"], "finished-dialogue-without-sfx")
         self.assertEqual(receipt["detectorReference"]["keySha256"], finishing["dialogue"]["sha256"])
@@ -261,24 +264,21 @@ class ProgramFinishMediaTests(unittest.TestCase):
         self.assertEqual(file_hash(Path(self.bus.path)), self.bus.sha256)
         verify_program_master(self.plain, self.plan)
 
-    def test_06_changed_settings_or_assets_invalidate_retained_master(self) -> None:
+    def test_06_changed_settings_or_finished_stems_invalidate_retained_master(self) -> None:
         for mutate in ({"audioGain": [{"outStart": 1.0, "outEnd": 1.5, "dB": 5}]},
-                       {"audioEnhance": {"preset": "voice-strong"}}, {"audioEnhance": None},
-                       {"transitions": [SEAMS[0]]}, {"transitions": [{**SEAMS[0], "sfx": False}, SEAMS[1]]}):
+                       {"audioEnhance": {"preset": "voice-strong"}}, {"audioEnhance": None}):
             plan = {**copy.deepcopy(self.finished_plan), **mutate}
             plan = {key: value for key, value in plan.items() if value is not None}
             with self.subTest(mutate=mutate), self.assertRaisesRegex(RuntimeError, "finishing settings changed"):
                 verify_program_master(self.finished, plan)
-        whoosh = Path(self.finished.receipt["finishing"]["sfx"]["sources"]["engine-whoosh"]["path"])
-        pack = Path(sfx_path("click"))
-        for label, path in (("engine-whoosh", whoosh), ("click", pack)):
-            before = path.read_bytes()
-            try:
-                path.write_bytes(before + b"TEST ONLY sfx drift")
-                with self.subTest(label=label), self.assertRaisesRegex(RuntimeError, f"SFX source {label} bytes changed"):
-                    verify_program_master(self.finished, self.finished_plan)
-            finally:
-                path.write_bytes(before)
+        path = Path(self.finished.receipt["finishing"]["dialogue"]["path"])
+        before = path.read_bytes()
+        try:
+            path.write_bytes(before + b"TEST ONLY stem drift")
+            with self.assertRaisesRegex(RuntimeError, "bytes changed"):
+                verify_program_master(self.finished, self.finished_plan)
+        finally:
+            path.write_bytes(before)
         verify_program_master(self.finished, self.finished_plan)
 
     def test_07_opening_excerpt_is_exact_slice_of_the_finished_master(self) -> None:
@@ -300,18 +300,23 @@ class ProgramFinishMediaTests(unittest.TestCase):
         finally:
             plan_path.write_bytes(original)
 
-    def test_08_missing_sfx_asset_or_lost_click_fail_before_media_and_keep_prior_master(self) -> None:
-        thud, hidden = Path(sfx_path("thud")), Path(sfx_path("thud") + ".TEST-ONLY-hidden")
-        before = set(Path(self.bus.directory).glob(".program-master-v2-*"))
-        thud.rename(hidden)
-        try:
-            plan = {**self.plan, "transitions": [{"outTime": 1.0, "kind": "white-flash", "sfx": "thud"}]}
-            with self.assertRaisesRegex(RuntimeError, "rejects .*not built"):
-                build_program_master(self.bus, plan)
-        finally:
-            hidden.rename(thud)
-        self.assertEqual(set(Path(self.bus.directory).glob(".program-master-v2-*")), before,
-                         "an unavailable asset is refused before any master directory exists")
+    def test_08_retired_transitions_fail_before_media_and_keep_prior_master(self) -> None:
+        before = set(Path(self.bus.directory).iterdir())
+        for kind in ("white-flash", "light-leak", "zoom-pull"):
+            plan = {**self.plan, "transitions": [{"outTime": 1.0, "kind": kind, "sfx": True}]}
+            with self.subTest(kind=kind), mock.patch("subprocess.run") as run:
+                with self.assertRaisesRegex(RuntimeError, "retired"):
+                    build_program_master(self.bus, plan)
+                run.assert_not_called()
+            self.assertEqual(set(Path(self.bus.directory).iterdir()), before)
+            target = self.root / f"TEST-retired-mix-{kind}"
+            with mock.patch("audio.program_mix_bus.verify_source_bus") as verify, mock.patch("subprocess.run") as run:
+                with self.assertRaisesRegex(RuntimeError, "retired"):
+                    build_program_mix(self.bus, plan, target)
+                verify.assert_not_called()
+                run.assert_not_called()
+            self.assertFalse(target.exists())
+            self.assertEqual(set(Path(self.bus.directory).iterdir()), before)
         with self.assertRaisesRegex(RuntimeError, "could not be established"):
             measure_chain_latency(self.ffmpeg, "volume=0")
         with self.assertRaisesRegex(RuntimeError, "sample count"):

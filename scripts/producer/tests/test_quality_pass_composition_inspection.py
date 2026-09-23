@@ -10,6 +10,7 @@ from unittest.mock import patch
 from _approved_parent_loader_fixture import ApprovedParentAuthorityFixture
 from _approved_parent_loader_values import canonical
 from _common import pl  # noqa: F401
+from _retired_r0_lease_fixture import inert_preflight_inputs
 from test_quality_pass_preflight import _operation
 from headless.approved_parent_media import ApprovedParentVerifierContextV1
 from headless.quality_pass_composition_inspection import (
@@ -49,8 +50,9 @@ class QualityPassCompositionInspectionTests(unittest.TestCase):
         ):
             return inspect_quality_pass_composition(self._request(raw))
 
-    def test_r0_genesis_diagnostic_closes_lease_and_stays_blocked(self) -> None:
-        result = self._inspect()
+    def test_inert_genesis_result_closes_lease_and_stays_blocked(self) -> None:
+        with inert_preflight_inputs(self.fixture):
+            result = self._inspect()
         self.assertIs(type(result), NonAuthorizingQualityPassCompositionV1)
         self.assertEqual(result.status, R0_GENESIS_BLOCKED)
         self.assertEqual(result.parent_profile, "legacy-r0-genesis-specimen")
@@ -68,7 +70,8 @@ class QualityPassCompositionInspectionTests(unittest.TestCase):
         self.assertNotIn("parent", result.__dict__)
 
     def test_forged_authorization_boolean_never_becomes_a_capability(self) -> None:
-        result = self._inspect()
+        with inert_preflight_inputs(self.fixture):
+            result = self._inspect()
         forged = dataclasses.replace(
             result, execution_authorized=True, publication_authorized=True
         )
@@ -78,13 +81,22 @@ class QualityPassCompositionInspectionTests(unittest.TestCase):
             ):
                 require_render_start_authorized(value)
 
-    def test_repair_cas_failure_is_not_reported_as_structural_success(self) -> None:
+    def test_retired_repair_is_not_reported_as_structural_success(self) -> None:
         document = _operation(self.fixture)
         document["qualityPass"]["repairIntent"]["expectedOld"] = "#000000"
         with self.assertRaisesRegex(
-            QualityPassCompositionInspectionError, "repair CAS"
+            ValueError, "section-marker.*retired"
         ):
             self._inspect(canonical(document))
+
+    def test_real_retired_inspection_never_returns_or_launches_media(self) -> None:
+        fixture = self.fixture
+        before = {p: p.read_bytes() for p in fixture.authority.rglob('*') if p.is_file()}
+        with patch('subprocess.Popen') as process, self.assertRaisesRegex(
+                ValueError, 'section-marker.*retired'):
+            self._inspect()
+        process.assert_not_called()
+        self.assertEqual(before, {p: p.read_bytes() for p in fixture.authority.rglob('*') if p.is_file()})
 
     def test_request_rejects_aliasing_and_noncanonical_roots(self) -> None:
         request = dataclasses.replace(

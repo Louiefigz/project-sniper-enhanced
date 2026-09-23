@@ -1,5 +1,73 @@
 # CLAUDE.md — PRODUCER (`scripts/producer/`)
 
+September 22 ordinary render admission: `render_readiness.py` calls the shared
+TypeScript `plan-readiness.ts` validator before `render.py` or `assemble.py`
+starts media work. `readiness_preview.py` uses the existing native full-decode
+admission and retained receipt reader for bounded early preview evidence. Final
+and watermarked draft readiness are separate. No scope/graphics/resume exception.
+See `docs/producer/RENDER_READINESS.md` for the agent-authored review bundle.
+`ordinary_previews.py` generates/registers bounded ordinary context clips after
+deterministic draft admission. `ordinary_preview_media.py` reuses the real
+graphics-free base, ordinary compositor and whole-program master; cold base
+preparation remains full-program work. `ordinary_preview_windows.py` binds local
+reuse and context coverage. `studio/owned_inspection.py` owns each preparation or
+window with the shared native resource/cleanup supervisor. None grants a review
+or final delivery approval.
+Native Short now captures before full render, sharing `check_samples` from
+`studio/native_picture_references.py` with Long. SDK source-cache acquisition
+precedes capture; final output QC still follows encoding. `native_motion_previews.py`
+and `.mjs` automatically generate continuous moving windows and exact whole-master
+audio excerpts. `native_review_regions.py` binds their dependencies;
+`native_preview_history.py` checks completed owners and the complete retained chain.
+`native_motion_review.py` and the shared TS validator require current recorded
+independent preview reviews before full picture work. With no `--preview-reviews`,
+the export stops at previews and records editorial review as pending.
+
+Preview memory recovery: `native_preview_sections.py` supervises and seals each
+window's picture and audio package independently. `native_preview_recovery.py`
+discovers exact-input seals and independently validates restored copies in each
+worker. Cleanup and existing capacity admission separate successive owners.
+`native_render_sampling.py` brackets footprint reads inside one helper;
+`native_render_process_table.py` reads SDK-declared libproc identities without
+spawning `ps` between samples. Live missing measurements still fail closed under
+the existing retry ceiling. See `docs/findings/NATIVE_PROCESS_CHURN_AND_PREVIEW_CHECKPOINTS.md`.
+
+
+September 16 enforced native export: `studio/native_export.py` is the public
+Short/Long selector and common owner admission boundary. The installed native
+SDK CLI and capture workers require a live shared owner. `native_long_prebuild.py`
+uses the existing TS prebuild validator for complete-project review; Short new
+exports call strict `check-export`, while historical reads remain available.
+`native_export_history.py` serializes immutable per-project discovery;
+`native_long_autoresume.py` and `native_short_autoresume.py` select exact terminal
+stages without a resume flag, through their format-specific proof readers.
+Short discovery also retains qualified partial picture and float/AAC audio;
+the ordinary worker consumes these bindings before any new picture work.
+The shared review reader/bundle supports the actual long export protocol.
+Compatibility HTTP render/assemble routes delegate to the existing saved-plan
+review/QC controller. See `docs/producer/WORKFLOW_ENFORCEMENT_AUDIT_2026-09-16.md`.
+`npm test` now includes `npm run test:native` so the native Node guard, clock,
+cache and QC regressions run with the ordinary repository checks.
+
+September 16 native long reliability: `studio/native_long_export.py` is the
+landscape adapter over `native_short_pipeline.py`'s shared lifecycle.
+`native_long_contract.py` validates exact scenes/audio; `native_long_worker.py`
+orchestrates phases and reuses shared float/AAC gates; `native_long_capture.mjs` checks full-context
+seams and reverse seeks before master; `native_long_sources.mjs` admits projected
+allocations and observes real source-frame publication. `native_long_recovery.py` seals picture separately and
+resumes exact completed stages. `native_workload.py` and `native_run_admission.py`
+add bounded long-job deadlines/progress and capacity waits without weakening the
+existing resource owner. The SDK CLI/capture-library patch makes video windows
+half-open on both forward and reverse seeks and bounds source-task concurrency.
+See `docs/producer/NATIVE_LONG_EXPORT.md`
+and its implementation evidence for commands, supported scope and qualification.
+
+September 15 review handoff: Shorts and long-form require both the local checked
+MP4 review and a live editable HyperFrames Studio view by default. The owning
+interactive task follows `docs/producer/STUDIO_REVIEW_LANE.md` → "Required review
+handoff: local playback and Studio"; an export receipt or project file link alone
+does not complete that handoff.
+
 September 11 native Shorts entry points: `native-short.ts` prepares local request
 packets, builds explicit native strategies and cold-checks projects.
 `studio/native_short_export.py` owns local export, shared dialogue delivery and
@@ -8,6 +76,21 @@ work lease and resource/ownership utilities. Runtime patches and file transport
 live in `studio/runtime/`; generated `.sniper-native-runtime` caches are excluded
 from code snapshots. See `docs/producer/NATIVE_SHORTS_WORKFLOW.md` and the
 September 11 integration report for the measured three-case scope and limitations.
+
+September 16 upstream review: `src/lib/producer/visual-storytelling.ts` supplies
+the shared short/long author and critic criteria. Native Short builds use
+`src/lib/server/native-short-prebuild-review.ts` before direct/guided dependent
+assembly: strict existing plan-review pass, full authored-input digest, seven
+coverage assessments and pinned evidence. `native-short-project.ts` retains and
+cold-checks `PREBUILD-REVIEW.json`; historical projects remain explicitly
+unreviewed. Only the review reference and generated transport bindings are
+excluded from the creative digest; proposal/media checks remain independent.
+This verifies a recorded review, not reviewer identity or actual pixel quality.
+New native long exports now require the equivalent complete-project review
+through `native_long_prebuild.py`; this does not implement a creative controller.
+Follow
+`docs/producer/NATIVE_PREBUILD_STRATEGY_2026-09-10.md` for the complete brief,
+asset/transition plan, independent critique and conditional worker assignments.
 
 September 15 export recovery: `native_short_pipeline.py` coordinates sequential
 render, native-capture and encoded-verification owners. Each retains the existing
@@ -19,10 +102,49 @@ is still awaiting QC. The generic `native_run_lifecycle.py` restores owned signa
 handlers between stages. Reuse shared audio, exact clocks, resource ownership and
 these evidence helpers; keep format-specific picture checks in their adapters.
 
+September 15 optimization: `native_short_capture_resume.py` supplies automatic
+capture sealing/reuse to the standard exporter and the thin `resume_final_qc.py`
+compatibility command. `--resume-from <attempt>` retains later successful capture;
+invalid present seals fail explicitly. `audio/native_master_preparation.py` and
+`native_audio_donor.py` check the exact reusable audio before picture; shared
+final AAC/AV checks remain. `native_short_dialogue.py` owns source/clock assembly.
+`native_selected_frames.py` streams all selected RGB through the shared bounded
+pipe reader; `native_picture_references.py` keeps unchanged pixel/reverse checks;
+`native_render_storage.py` admits planned allocation plus the existing reserve.
+`native_review_{bundle,contract,html,media,recognition}.py` replaces dated review
+builders with manifest-driven preparation and separates raw ASR diagnostics from
+timing approval. Long-form geometry/clock helpers are shared; actual checked
+delivery admission currently uses the native Short receipt protocol. Production
+timings use the existing journal and union coverage report, never a quality gate.
+See `docs/producer/SHORTS_OPTIMIZATION_IMPLEMENTATION_PLAN_2026-09-15.md` for the
+target operating schedule and measured qualification limits.
+
+September 15 selected media: `edit/selected_sources.py` supervises and seals
+reusable source ranges; `selected_sources_contract.py` merges bounded handles and
+`selected_sources_media.py` preserves picture packets and extracts float audio.
+`src/lib/server/native-selected-sources.ts` binds the small assets and executable
+offsets while retaining original editorial clocks. Direct `native-short.ts build`
+prepares missing media; `prepare-media` allows explicit preparation/reuse first.
+`studio/native_selected_sources.py` shares receipt admission and selected-audio
+inputs with export. Legacy projects remain readable. Do not substitute prepared
+bytes for original source evidence or bypass the shared native work owner.
+
+September 15 native long-form preparation: `studio/long_sources.py` adds explicit
+prepare/check/managed-preview commands for separate selected-media projects.
+`long_sources_html.py` translates only media URLs/source offsets;
+`long_sources_project.py` preserves the original inventory and complete-program
+WAV, binds the shared source package, and cold-verifies the new project. See
+`docs/producer/NATIVE_LONG_SELECTED_SOURCES.md`. Working cut-base pipelines and
+qualified archived long-form exports remain on their existing paths.
+
 September 9 native-work resource rule: use `studio/managed_preview.py open`
 for authored HyperFrames projects, or the existing Studio open command which
 now delegates to it. It reuses one current preview across draft folders and
-verifies retained descendant cleanup before replacement. Do not start raw SDK
+verifies retained descendant cleanup before replacement. Managed preview uses
+the existing qualified `studio/native_runtime.py` adaptation, with exact-runtime
+identity checks before server reuse. Stock Studio can skip HTML/media handling
+in embedded browsers; export and preview must share these compatibility fixes.
+Do not start raw SDK
 preview daemons. Native rendering and browser/media QC must acquire the shared
 `native_work_lease.NativeWorkLease` heavy lane and use resource admission plus
 continuous owned-tree monitoring; release only after verified cleanup. These
@@ -92,7 +214,13 @@ in `docs/producer/PRODUCER_PLAN.md`. This file is the code map.
 
 1. **cut+speed** → `cut_speed.py` — trims the cutTrack's ranges, applies per-seg
    `speed`, concatenates to a mezzanine. Executes the cutTrack; does NOT detect
-   silence (that's the edit brain, below).
+   silence (that's the edit brain, below). `cut_encode_plan.py` owns typed jobs
+   and filter planning. `cut_reframe.py` fuses known center/portrait crops before
+   scaling for eligible large sources; tracked/manual/split/protected cases keep
+   the existing reframe pass. `cut_decode.py` selects qualified native HEVC decode
+   and records explicit software fallback; libx264 remains the encoder.
+   `cut_execution.py` writes full argv, frame-clock, source/tool/code identities
+   and completed part observations in `cut_execution.json`.
 2. **channels / baseline** → `motion/baseline_look.py` — chest-up recrop + warm grade.
 3. **face_track → reframe** → `motion/face_track.py`, `motion/reframe.py` — 9:16
    face-aware vertical cut (shorts).
@@ -205,6 +333,33 @@ should slot into the same gate (graphics / broll / motion family).
   template declares its provenance; same-named items never share capability.
   Evidence, not admission — the plan/scene adapters and gates still decide.
   Tests: `test_catalog_discovery.py`, `test_catalog_discovery_fixtures.py`.
+  `inventory` returns the entire recorded inventory with source hashes and full
+  annotations for strategy, without ranking/limit or native execution approval.
+  `test_catalog_inventory.py` covers completeness and source drift.
+- `graphics/reference_reuse_map.py` / `reference_reuse_validation.py` — explicit
+  reference-shot/style planning shared by Short and Long. Existing catalog search
+  freezes shot candidates and source bytes; authored inspections choose reuse,
+  configure, compose, bounded custom or blocked. Supports retaining a component
+  while filling its specific gap. No visual/execution approval or model calls.
+  `reference_reuse_cli.py prepare <request> --output <map>` / `check <map>`.
+  `studio/native_reference_reuse.py` binds optional `--reference-map` evidence to
+  shared native preflight and Short export/resume; absent maps load no catalog.
+  See [workflow and schema](../../docs/producer/REFERENCE_SHOT_REUSE.md).
+  Tests: `test_reference_reuse_map.py`, `test_reference_reuse_cli.py`,
+  `test_native_reference_reuse.py`.
+- `graphics/reference_study_bindings.py` — `reference_reuse_cli.py save-study`
+  retains inspected matches beyond their original project; `check-study` verifies
+  exact reference/candidate bytes without discovery. New requests opt in with
+  `studyBindings` and per-shot `studyMatch`, retaining previous inspections and
+  decisions as evidence while requiring a new adaptation decision. Tested across
+  Short → long-form in `test_reference_study_bindings.py`.
+- `native-short.ts prepare-longform` / `check-longform` reuse existing ingest,
+  intent, reference selection and shared catalog through server helpers
+  `native-longform-request`, `reference-strategy-library`,
+  `longform-reference-inputs` and `longform-strategy-packet`. They freeze the full
+  research/catalog indexes and complete selected event sequence into a local
+  1920×1080 strategy request; no provider, automatic style qualification or render.
+  See `REFERENCE_SHOT_REUSE.md`; TS test `native-longform-request.test.ts`.
 - Placement: `planner/free_space.py` (absolute free-space map, SAFE_BOX-clamped) +
   `planner/graphics_anchors.py` (`resolve_offset_v2` measures + places into the
   emptiest legal region; v1 fallback). Reuse for any placement — it already clamps
@@ -218,13 +373,13 @@ should slot into the same gate (graphics / broll / motion family).
   PROVENANCE.md); comps take `iconFile: "lucide/check"` with zero changes.
 - Render: `graphics/graphics_render.py` (hyperframes + content-hash cache),
   `graphics/graphics_stage.py` (compositing; an entry may carry
-  `"takeoverBase": "blur-desat"` — G5 jaden treatment: the FOOTAGE gaussian-
+  `"takeoverBase": "blur-desat"` — G5 punch treatment: the FOOTAGE gaussian-
   blurs + desaturates under the window, 1-frame apply/restore via enable
   gating), `graphics/exit_on_cut.py` (G4 THE EXIT LAW: `"exitOnCut": true`
   clamps an entry's outEnd to the next cutTrack seam — shared by lint,
   render.py and assemble.py so they can't drift), `graphics/pip_takeover.py`
   (longform glass takeover move). Comps are HTML under
-  `templates/motion/compositions/` (jaden pack: `jaden-shout-lockup` +
+  `templates/motion/compositions/` (punch pack: `punch-shout-lockup` +
   tokens.css `--lemon`/`--font-serif-display`/pop tokens + `motion-tokens.js`).
 
 ## Incremental graphics — the render → lock → composite loop (`assemble.py`)
@@ -235,9 +390,11 @@ graphics, our graphics are output-space overlays → the base cleanly separates:
 
 1. **BASE** — `render.py --skip-graphics <plan> <manifest> <base_dir>` masters the
    whole pipeline EXCEPT the graphics composite → `base_dir/final.mp4` +
-   `base.fingerprint.json` (a hash of every base-shaping plan field). Rendered once.
+   `base.fingerprint.json` (base-shaping plan digests plus full source/transcript
+   and completed-base byte identities, checked by `base_reuse.py`). Rendered once.
 2. **ASSEMBLE** — `assemble.py <base.mp4> <plan> <out.mp4> [--fingerprint …]`
-   renders each `graphicsTrack` entry (content-hash cached) and overlays them onto
+   defaults `--fingerprint` beside the selected base. It renders each
+   `graphicsTrack` entry (content-hash cached) and overlays them onto
    the base in ONE ffmpeg pass (audio stream-copied from the mastered base). An
    ordinary graphic edit rerenders only that clip and the composite; graphics that
    change long-form recomposition or legacy-caption suppression correctly rebuild
@@ -250,8 +407,9 @@ transitions stay video-side — their flash frames are baked into the picture) a
 `audioFingerprint` ({audioEnhance, audioGain}). `base.fingerprint.json` records
 all three; when the `base_plan.json` snapshot sits beside it (every writer
 stores both), `recorded_fingerprints` RECOMPUTES the prints from the snapshot,
-so old bases survive hash-function changes and pre-split files gain their
-prints. Hashing goes through `json_canon` (integral floats → ints, bools kept):
+for diagnostic plan compatibility. A snapshot cannot upgrade an old base into
+byte-bound authority: missing/stale `baseReuse` evidence requires a rebuild, and
+`--resume` cannot bless unproven intermediates. Hashing goes through `json_canon` (integral floats → ints, bools kept):
 the editor's save-plan writes via JS `JSON.stringify`, which collapses `30.0`
 → `30` — without canonicalization a zero-change UI save flipped the base
 fingerprint into a spurious ~3 min rebuild (fixed 2026-07-09; the graphics
@@ -264,7 +422,18 @@ split of the final label; PRE-encode frames, same 0.08 threshold;
 (2026-07-09): `graphics_stage._probe_frames` counts PACKETS, not decoded frames
 (identical 2598 on our H.264 MP4s, 0.085s vs 16.5s), and the composite encodes
 with `ENCODE["composite_preset"]` = veryfast (16.9s→9.4s; CRF 12 still governs
-quality — VideoToolbox rejected: slower AND loses CRF).
+quality — the rejected VideoToolbox path was ENCODING, which loses CRF;
+qualified native DECODING is separate and keeps the libx264 encode).
+
+**Execution and review observations** (2026-09-22): `audio/mastering_filter.py`
+records the selected branch, exact applied gain/filter, measured dry runs and
+whether that selected filter converged, exhausted its budget or was unmeasured.
+Program-master receipts use schema 3; source-float base authority is unchanged.
+`revision_ledger.py` writes immutable output-bound render and deterministic-audit
+observations beside ordinary outputs. These never grant or inherit editorial
+approval; every changed output still requires full review. Keep these hooks at
+publication boundaries, outside the shared fingerprint primitives and frozen
+headless build catalogs.
 
 **The graphics/base boundary is explicit, not mode-wide.**
 `graphics_base_effects.py` projects only long-form rail/recompose geometry and
@@ -346,7 +515,8 @@ At Palmier handoff this mastered bus replaces the NLE's raw linked audio; see
 - `motion/` — `reframe`, `reframe_split`, `face_track`, `punch_in` (zoom engine),
   `baseline_look`, `transitions` (seam covers: flash/leak ONLY — the stock
   ffmpeg-xfade family was operator-rejected and REMOVED 2026-07-11
-  (FAILURE_LEDGER LL-014); longform seams use the studied reference grammar:
+  (FAILURE_LEDGER LL-014); longform seams use Sniper's seam grammar
+  (`docs/studies/MODULE_STUDY.md` §2, `EDITCRAFT_LESSONS.md` §2.7):
   panel sweeps, face-bridged recompose, under-panel cuts, blur-recede,
   seam-role zoom-pulls — `plan_lint_motion` hard-ERRORs any `xfade:*` kind in
   every mode; the SFX slot takes `true|false|"<pack-name>"` resolved
@@ -420,7 +590,7 @@ At Palmier handoff this mastered bus replaces the NLE's raw linked audio; see
   `build` — seeded ffmpeg synthesis into `assets/sfx/` with PROVENANCE.md;
   each name carries a `lead_s` so the renderer lands the HIT on the seam).
 - `captions/` — `captions_ass` (burned karaoke; aspect-aware geometry via
-  `caption_cfg_for_aspect`), `captions_minimal`, `captions_whisper` (the jaden
+  `caption_cfg_for_aspect`), `captions_minimal`, `captions_whisper` (the punch
   base layer, `captions.style: "whisper"` — 1-3 word sentence-case replace
   cues, no karaoke, inline amber tier-A emphasis; `CAPTIONS["WHISPER"]`),
   `overlays` (hook cards),
@@ -433,15 +603,15 @@ At Palmier handoff this mastered bus replaces the NLE's raw linked audio; see
   Audit B evidence. Caption-only changes restore the proved caption-free
   composite and rebuild only dirty shard keys.
 - **`graphics/pip_takeover.py` is UNWIRED** (the ANIMATED shrink-to-PIP,
-  NATEHERK §5 item 10) — `render.py` never calls it; `plan_lint_motion` still
+  MODULE §5 item 10) — `render.py` never calls it; `plan_lint_motion` still
   HARD-REJECTS `needsPip`/`canvas-pip-list` entries. BUT the STATIC
   face-in-PIP takeover IS wired (§5 item 9, operator-adjudicated legal for
   longform 2026-07-10, banned for shorts): hole-comps
-  (`graphics/pip_hole.py` registry — `nateherk-takeover`) render the frame
+  (`graphics/pip_hole.py` registry — `module-takeover`) render the frame
   around a transparent face hole with alpha forced by
   `graphics_render.format_for`, and `graphics_stage` scales the base footage
   into the hole at composite time (`pipHole` branch). Gates in
-  `plan_lint_nateherk.py` (longform-only + own-screen; also lints the
+  `plan_lint_module.py` (longform-only + own-screen; also lints the
   `glass-rail` `spec.entrance: "rail-push"` move, §5 item 8).
 - `broll/` — `broll_pool` (operator's pool: vision cataloging + resolve),
   `broll_insert` (receipts ride on top, never touch audio).
@@ -465,18 +635,18 @@ At Palmier handoff this mastered bus replaces the NLE's raw linked audio; see
   credibility claim→PIP/card, strong beat→push, captions). Derives obligations from
   the transcript so a forgetful brain gets caught; run in the skill's planning-
   convergence loop (SKILL step 4) alongside `plan_lint`. Reads `edit_scope`.
-- `claims_contract.py` — the **Claims Contract** (truth gate, NATEHERK_STUDY
+- `claims_contract.py` — the **Claims Contract** (truth gate, MODULE_STUDY
   §5.6): pre-render, every NUMERIC token in card copy (`graphicsTrack[].spec`
   strings + `titleCards[].text`) must be SPOKEN in the card's window —
   arithmetic string/number match (K/M/B scales, spelled cardinals via lookup),
   never regex semantics; `evidence*`/`icon*` slots exempt. The brain owns
   paraphrase faithfulness (SKILL step 4b). Same CLI shape as `hook_contract`.
-- `planner/word_lock.py` — word-locked seams (NATEHERK_STUDY T-G):
+- `planner/word_lock.py` — word-locked seams (MODULE_STUDY T-G):
   `snap_to_word_boundary` / `snap_plan_seams` move `transitions[].outTime` and
   translate `graphicsTrack[]` windows onto kept-word boundaries at plan time;
   `plan_lint_motion.check_word_lock` WARNs on seams >150ms off-boundary
   (runs when `plan_lint.py` gets the optional `[transcripts_dir]` arg).
-- Narration-paced module builds (NATEHERK_STUDY §5.4): the brain picks WHICH
+- Narration-paced module builds (MODULE_STUDY §5.4): the brain picks WHICH
   kept words a card's modules land on, `graphics_copy.fill_module_lands`
   converts them to comp-relative `spec.moduleLands` (the comp schedules its
   builds off it); `plan_lint_motion` validates lands (increasing, ≥0.25s
@@ -515,7 +685,7 @@ At Palmier handoff this mastered bus replaces the NLE's raw linked audio; see
   panel WARN 0.9s — empty-chrome staging, LL-002); WCAG accent-vs-bg
   contrast ≥3:1 for cataloged kinds (`MOTION["contrast"]["kind_bg"]`,
   LL-004); left-column own-screen holds >5s WARN (LL-005); FORM SELECTION +
-  VARIETY (NATEHERK_CARDS §1.4/§2, LL-015/LL-016): `check_form_shape`
+  VARIETY (MODULE_CARDS §1.4/§2, LL-015/LL-016): `check_form_shape`
   (transcript-armed path only — comparison-shaped info, ≥2 numeric spec
   tokens + a spoken comparative marker, on a kind outside
   `MOTION["card_form_map"]["comparison"]` WARNs) and `check_variety`
@@ -609,3 +779,5 @@ At Palmier handoff this mastered bus replaces the NLE's raw linked audio; see
 - **No fallback matching** — fix upstream, don't fuzzy-match over a data mismatch.
 - Line limits (logic files): 300 lines / 50-line funcs / 4 params / 2 nesting. Data
   catalogs and comments are exempt.
+
+Long-form research OCR: `study/study_deep.py --text-scope states` retains every motion event and transcript word-lock while reading all visual state representatives. Per-event OCR timing is explicitly unmeasured; the default full text scope is unchanged. `test_study_text_scope.py` covers this boundary. See `study/DEEP_SCHEMA.md`.

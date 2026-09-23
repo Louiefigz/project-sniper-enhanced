@@ -119,6 +119,7 @@ class TemplateUsageApprovalTests(unittest.TestCase):
         from assemble import main
         with patch("assemble_arguments.parse_arguments", return_value=self._assemble_args()), \
                 patch("assemble.acquire_lock", return_value=True), patch("assemble.emit"), \
+                patch("render_readiness.require_readiness"), \
                 patch("assemble.validate_render_documents"), patch("assemble.verify_execution_media_authority"), \
                 patch("assemble.require_template_usage_approval", wraps=require_current) as approval, \
                 patch("assemble.assemble", return_value={"TEST": True}) as media:
@@ -132,6 +133,7 @@ class TemplateUsageApprovalTests(unittest.TestCase):
         os.remove(os.path.join(self.producer, APPROVAL_FILE))
         with patch("assemble_arguments.parse_arguments", return_value=self._assemble_args()), \
                 patch("assemble.acquire_lock", return_value=True), patch("assemble.emit"), \
+                patch("render_readiness.require_readiness"), \
                 patch("assemble.validate_render_documents"), patch("assemble.verify_execution_media_authority"), \
                 patch("assemble.assemble") as media, contextlib.redirect_stderr(io.StringIO()), \
                 self.assertRaises(SystemExit) as stopped:

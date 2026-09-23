@@ -1,4 +1,4 @@
-"""Production attempt-only facade regressions for admitted overlay rendering."""
+"""Retired execution refusal plus independent state/batching/identity units."""
 
 from __future__ import annotations
 
@@ -14,6 +14,7 @@ from unittest import mock
 
 from _common import pl  # noqa: F401
 from _current_build_release_fixture import current_manifest
+from _retired_r0_artifact_fixture import inert_artifact_sources, store_test_artifact
 from headless import admitted_render_lane as lane_module
 from headless import render_admission_artifact as artifact_module
 from headless.admitted_render_lane import (
@@ -48,9 +49,9 @@ def _entry(label: str, duration: float) -> dict:
         "outEnd": duration,
         "anchor": "free-band",
         "spec": {
-            "num": "System No.1",
+            "num": "Part 1",
             "line1": label,
-            "line2": "Rule",
+            "line2": "Basics",
             "side": "left",
             "accent": "#054BC9",
         },
@@ -88,33 +89,34 @@ class AdmittedRenderLaneTests(unittest.TestCase):
             "/test/ffprobe",
             30,
         )
-        with mock.patch.object(
-            artifact_module,
-            "current_render_build_manifest",
-            return_value=BUILD_A,
-        ):
-            self.artifact = store_render_admission_artifact(
-                RenderArtifactRequest(
-                    str(self.authority),
-                    "authority-mp4-v1",
-                    _request(),
-                    self.runtime,
+        with inert_artifact_sources():
+            with mock.patch.object(
+                artifact_module,
+                "current_render_build_manifest",
+                return_value=BUILD_A,
+            ):
+                self.artifact = store_test_artifact(
+                    RenderArtifactRequest(
+                        str(self.authority),
+                        "authority-mp4-v1",
+                        _request(),
+                        self.runtime,
+                    )
                 )
+            metadata = RenderAdmissionMetadata(
+                str(self.authority),
+                "authority-mp4-v1",
+                "11111111-1111-4111-8111-111111111111",
+                ATTEMPT,
+                "33333333-3333-4333-8333-333333333333",
+                "2026-07-19T12:00:00+00:00",
+                "release-test",
+                "policy-test",
+                None,
             )
-        metadata = RenderAdmissionMetadata(
-            str(self.authority),
-            "authority-mp4-v1",
-            "11111111-1111-4111-8111-111111111111",
-            ATTEMPT,
-            "33333333-3333-4333-8333-333333333333",
-            "2026-07-19T12:00:00+00:00",
-            "release-test",
-            "policy-test",
-            None,
-        )
-        self.admitted = admit_render_artifact(
-            metadata, self.artifact, "boot-a"
-        )
+            self.admitted = admit_render_artifact(
+                metadata, self.artifact, "boot-a"
+            )
         self.reference = self.admitted.reference
         self.boot = mock.patch(
             "headless.controller_ownership.read_boot_id", return_value="boot-a"
@@ -138,71 +140,92 @@ class AdmittedRenderLaneTests(unittest.TestCase):
             self.runtime, RenderExecutionPolicy(RENDERER_MODE), lease
         )
 
-    def test_prepare_imports_all_retained_overlays_without_live_source(
-        self,
-    ) -> None:
-        with controller_ownership(
-            str(self.authority)
-        ) as lease, mock.patch.object(
-            lane_module, "current_render_build_manifest", return_value=BUILD_A
-        ), mock.patch(
-            "headless.overlay_source_seal._read_composition",
-            side_effect=AssertionError("live source read"),
-        ):
+    def test_retired_sources_cannot_prepare_or_launch(self) -> None:
+        """A retained TEST ledger never grants present execution authority."""
+        with controller_ownership(str(self.authority)) as lease:
             lane = self._lane(lease)
-            first = lane.prepare(self.reference)
-            second = lane.prepare(self.reference)
-        self.assertEqual(first, second)
-        self.assertEqual(first.overlay_count, 2)
-        self.assertEqual(first.artifact_digest, self.artifact.artifact_digest)
-        seals = (
-            self.authority / "attempts" / ATTEMPT / "work" / "overlay-seals"
-        )
-        self.assertEqual(
-            len(
-                [
-                    path
-                    for path in seals.iterdir()
-                    if not path.name.startswith(".pending-")
-                ]
-            ),
-            2,
-        )
-        for directory in seals.iterdir():
-            self.assertTrue((directory / "render-input.tar").is_file())
+            for operation in (lane.prepare, lane.launch):
+                with self.subTest(operation=operation.__name__), mock.patch.object(
+                        lane, "_invoke_worker", side_effect=AssertionError("renderer forbidden")) as worker:
+                    with self.assertRaisesRegex((ValueError, RuntimeError), "retired"):
+                        operation(self.reference)
+                    worker.assert_not_called()
+        self.assertFalse((Path(self.admitted.attempt_root) / "work" / "overlay-seals").exists())
+        self.assertFalse((Path(self.admitted.attempt_root) / "work" / "graphics-cache").exists())
 
-    def test_launch_executes_every_overlay_once_and_blocks_relaunch(
-        self,
-    ) -> None:
-        rendered = []
+    def test_live_build_drift_refuses_before_persistence(self) -> None:
+        """Exercise build comparison directly, without loading retired source."""
+        lane = self._lane(mock.Mock())
+        with mock.patch.object(lane_module, "current_render_build_manifest", return_value=BUILD_B), \
+                mock.patch.object(lane_module, "store_render_build") as store:
+            with self.assertRaisesRegex(AdmittedRenderLaneError, "build"):
+                lane._validated_build(self.admitted)
+        store.assert_not_called()
+
+    def test_terminal_started_and_wrong_boot_metadata_reject(self) -> None:
+        """State guards remain testable on non-executable historical DTOs."""
+        state = self.admitted.admission.trace_state
+        lane_module._validate_admitted(self.admitted, "boot-a")
+        with self.assertRaisesRegex(AdmittedRenderLaneError, "boot"):
+            lane_module._validate_admitted(self.admitted, "boot-b")
+        for phase in ("RUNNING", "COMPLETED"):
+            admission = dataclasses.replace(self.admitted.admission,
+                                            trace_state=dataclasses.replace(state, phase=phase))
+            with self.assertRaisesRegex(AdmittedRenderLaneError, "ADMITTED"):
+                lane_module._validate_admitted(dataclasses.replace(self.admitted, admission=admission), "boot-a")
+        admission = dataclasses.replace(self.admitted.admission, terminal_manifest={"TEST": True})
+        with self.assertRaisesRegex(AdmittedRenderLaneError, "terminal"):
+            lane_module._validate_admitted(dataclasses.replace(self.admitted, admission=admission), "boot-a")
+
+    def test_unadmitted_attempt_never_reaches_worker(self) -> None:
+        """A manually created directory cannot substitute for admission."""
+        manual = "44444444-4444-4444-8444-444444444444"
+        (self.authority / "attempts" / manual).mkdir(mode=0o700)
+        with controller_ownership(str(self.authority)) as lease:
+            lane = self._lane(lease)
+            with mock.patch.object(lane, "_invoke_worker") as worker, self.assertRaises(AdmissionError):
+                lane.launch(AdmittedRenderRef(str(self.authority), manual))
+        worker.assert_not_called()
+
+    def test_expired_lease_refuses_before_artifact_read(self) -> None:
+        """An expired controller cannot dispatch even with an existing ledger."""
+        with controller_ownership(str(self.authority)) as lease:
+            lane = self._lane(lease)
+        with mock.patch.object(lane_module, "load_admitted_render") as load, \
+                self.assertRaisesRegex(RuntimeError, "expired"):
+            lane.launch(self.reference)
+        load.assert_not_called()
+
+    def test_attempt_path_replacement_refuses_identity(self) -> None:
+        """Keep inode-bound handoff rejection independent of retired rendering."""
+        from headless.durable_files import open_private_dir
+        root = Path(self.admitted.attempt_root)
+        fd = open_private_dir(str(root))
+        self.addCleanup(os.close, fd)
+        root.rename(root.with_name("displaced-attempt"))
+        root.mkdir(mode=0o700)
+        with self.assertRaisesRegex(RuntimeError, "identity changed"):
+            lane_module.validate_attempt_binding(str(self.authority), self.admitted.admission.record, fd)
+
+    def test_synthetic_batches_preserve_exactly_once_and_result_order(self) -> None:
+        """Scheduling success stays covered without any source or render admission."""
+        lane = self._lane(mock.Mock())
+        items = tuple(SimpleNamespace(name=name, artifact=SimpleNamespace(
+            resolved=SimpleNamespace(key=name))) for name in ("first", "second", "third"))
         simultaneous = threading.Barrier(2)
+        started = []
 
-        def fake_launch(prepared, _launch):
-            simultaneous.wait(timeout=2)
-            rendered.append(prepared.artifact.overlay_id)
-            return {"selectionId": prepared.artifact.overlay_id}
+        def completed(item: object, _context: object) -> dict:
+            started.append(item.name)
+            if item.name != "third":
+                simultaneous.wait(timeout=2)
+            return {"selectionId": item.name}
 
-        with controller_ownership(
-            str(self.authority)
-        ) as lease, mock.patch.object(
-            lane_module, "current_render_build_manifest", return_value=BUILD_A
-        ), mock.patch(
-            "headless.render_lane.current_render_build_manifest",
-            return_value=BUILD_A,
-        ):
-            lane = self._lane(lease)
-            with mock.patch.object(
-                lane, "_launch_one", side_effect=fake_launch
-            ):
-                results = lane.launch(self.reference)
-                with self.assertRaisesRegex(
-                    AdmittedRenderLaneError, "ADMITTED phase"
-                ):
-                    lane.launch(self.reference)
-        self.assertCountEqual(rendered, ["overlay-1", "overlay-2"])
-        self.assertEqual(
-            [row["selectionId"] for row in results], ["overlay-1", "overlay-2"]
-        )
+        with mock.patch.object(lane, "_launch_one", side_effect=completed) as worker:
+            results = lane._render_overlays(items, mock.Mock())
+        self.assertEqual(worker.call_count, 3)
+        self.assertCountEqual(started, ["first", "second", "third"])
+        self.assertEqual([row["selectionId"] for row in results], ["first", "second", "third"])
 
     def test_parallel_failure_does_not_start_the_next_batch(self) -> None:
         lane = self._lane(mock.Mock())
@@ -249,141 +272,6 @@ class AdmittedRenderLaneTests(unittest.TestCase):
         second = lane._next_batch(items[len(first) :])
         self.assertEqual([item.name for item in first], ["first"])
         self.assertEqual([item.name for item in second], ["second", "other"])
-
-    def test_real_launch_one_accepts_the_bound_build_context(self) -> None:
-        with controller_ownership(
-            str(self.authority)
-        ) as lease, mock.patch.object(
-            lane_module, "current_render_build_manifest", return_value=BUILD_A
-        ), mock.patch(
-            "headless.render_lane.current_render_build_manifest",
-            return_value=BUILD_A,
-        ):
-            lane = self._lane(lease)
-            admitted = lane_module.load_admitted_render(self.reference)
-            prepared = lane._prepare(admitted)
-            identity = (
-                ATTEMPT,
-                self.artifact.artifact_digest,
-                prepared.build.build_digest,
-                self.runtime.image_id,
-            )
-            binding = lane_module.prepare_attempt_cache(
-                admitted.attempt_root, identity
-            )
-            launch = lane_module._LaunchContext(
-                admitted.attempt_root,
-                ATTEMPT,
-                self.artifact.artifact_digest,
-                prepared.build,
-                binding,
-            )
-            with mock.patch.object(
-                lane_module, "container_lease"
-            ) as resource, mock.patch.object(
-                lane,
-                "_invoke_worker",
-                return_value=SimpleNamespace(stdout="{}"),
-            ), mock.patch.object(
-                lane, "_finish_worker", return_value={"ok": True}
-            ):
-                resource.return_value.__enter__.return_value = (
-                    "sniper-render-" + "a" * 32
-                )
-                result = lane._launch_one(prepared.overlays[0], launch)
-        self.assertEqual(result, {"ok": True})
-
-    def test_live_build_drift_rejects_before_attempt_seals_or_spawn(
-        self,
-    ) -> None:
-        with controller_ownership(
-            str(self.authority)
-        ) as lease, mock.patch.object(
-            lane_module, "current_render_build_manifest", return_value=BUILD_B
-        ):
-            lane = self._lane(lease)
-            with self.assertRaisesRegex(AdmittedRenderLaneError, "build"):
-                lane.prepare(self.reference)
-        seals = (
-            self.authority / "attempts" / ATTEMPT / "work" / "overlay-seals"
-        )
-        self.assertFalse(seals.exists())
-
-    def test_cache_preflight_failure_leaves_attempt_admitted(self) -> None:
-        cache = (
-            self.authority / "attempts" / ATTEMPT / "work" / "graphics-cache"
-        )
-        cache.mkdir(parents=True, mode=0o700)
-        os.chmod(cache.parent, 0o700)
-        os.chmod(cache, 0o700)
-        owner = cache / ".owner.json"
-        owner.write_text("{}", encoding="ascii")
-        os.chmod(owner, 0o600)
-        with controller_ownership(
-            str(self.authority)
-        ) as lease, mock.patch.object(
-            lane_module, "current_render_build_manifest", return_value=BUILD_A
-        ):
-            with self.assertRaisesRegex(RuntimeError, "owner receipt"):
-                self._lane(lease).launch(self.reference)
-        admitted = lane_module.load_admitted_render(self.reference)
-        self.assertEqual(admitted.admission.trace_state.phase, "ADMITTED")
-
-    def test_attempt_path_replacement_during_render_rejects_handoff(
-        self,
-    ) -> None:
-        attempt = self.authority / "attempts" / ATTEMPT
-        displaced = self.authority / "attempts" / "displaced-attempt"
-
-        def replace_attempt(_overlays, _launch):
-            attempt.rename(displaced)
-            attempt.mkdir(mode=0o700)
-            os.chmod(attempt, 0o700)
-            return ({"selectionId": "overlay-1"},)
-
-        with controller_ownership(
-            str(self.authority)
-        ) as lease, mock.patch.object(
-            lane_module, "current_render_build_manifest", return_value=BUILD_A
-        ), mock.patch(
-            "headless.render_lane.current_render_build_manifest",
-            return_value=BUILD_A,
-        ):
-            lane = self._lane(lease)
-            with mock.patch.object(
-                lane, "_render_overlays", side_effect=replace_attempt
-            ), self.assertRaisesRegex(RuntimeError, "identity changed"):
-                lane.launch(self.reference)
-        self.assertTrue((displaced / "trace.jsonl").is_file())
-        self.assertFalse((attempt / "trace.jsonl").exists())
-
-    def test_manual_unadmitted_attempt_never_reaches_renderer(self) -> None:
-        manual = "44444444-4444-4444-8444-444444444444"
-        attempts = self.authority / "attempts"
-        path = attempts / manual
-        path.mkdir(mode=0o700)
-        os.chmod(path, 0o700)
-        with controller_ownership(str(self.authority)) as lease:
-            lane = self._lane(lease)
-            with self.assertRaises(AdmissionError), mock.patch.object(
-                lane, "_launch_one"
-            ) as spawn:
-                lane.launch(AdmittedRenderRef(str(self.authority), manual))
-        spawn.assert_not_called()
-
-    def test_wrong_boot_and_expired_controller_lease_reject(self) -> None:
-        with controller_ownership(
-            str(self.authority)
-        ) as lease, mock.patch.object(
-            lane_module, "current_render_build_manifest", return_value=BUILD_A
-        ):
-            lane = self._lane(lease)
-            with mock.patch.object(
-                lane_module, "read_boot_id", return_value="boot-b"
-            ), self.assertRaisesRegex(AdmittedRenderLaneError, "boot"):
-                lane.prepare(self.reference)
-        with self.assertRaisesRegex(RuntimeError, "expired"):
-            lane.prepare(self.reference)
 
     def test_public_surface_has_no_loose_render_selection(self) -> None:
         fields = {

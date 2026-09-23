@@ -275,10 +275,10 @@ class CatalogFamilyRegistrationTests(unittest.TestCase):
                 self.assertEqual(catalog[kind]["dimensions"],
                                  self.CANVAS[kind][0])
 
-    def test_planner_canvas_fallback_registers_the_family(self) -> None:
+    def test_planner_uses_measured_catalog_canvases_without_house_fallback(self) -> None:
         for kind in CATALOG_KINDS:
             with self.subTest(kind=kind):
-                self.assertEqual(longform.KIND_CANVAS_FALLBACK.get(kind),
+                self.assertEqual(longform.kind_canvas().get(kind),
                                  self.CANVAS[kind][1])
 
     def test_data_kinds_join_their_information_shape_families(self) -> None:

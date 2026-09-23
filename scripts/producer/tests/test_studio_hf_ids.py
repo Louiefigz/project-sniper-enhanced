@@ -10,6 +10,8 @@ import tempfile
 import unittest
 from unittest import mock
 
+from test_studio_sync import _sync_plan
+
 from studio import StudioProjectError
 from studio import comp_hf_ids, studio_project, sync_apply, sync_files
 from studio.project_writer import ReviewBase
@@ -28,11 +30,11 @@ class StudioHfIdsTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name).resolve()
         self.plan = self.root / "edit_plan.json"
-        self.plan.write_text(json.dumps(_SAMPLES["plan"]), encoding="utf8")
+        self.plan.write_text(json.dumps(_sync_plan()), encoding="utf8")
         self.base = self.root / "base_final.mp4"
         self.base.write_bytes(b"TEST inert base, never probed or rendered")
         self.studio = self.root / "studio"
-        self.probe = ReviewBase(1080, 1920, 20.0, 30.0, "", False)
+        self.probe = ReviewBase(1080, 1920, 12.0, 30.0, "", False)
         self.request = studio_project.GenerateRequest(str(self.plan), str(self.base), str(self.studio))
         self.addCleanup(mock.patch.stopall)
         mock.patch.object(studio_project, "_probe_base", return_value=self.probe).start()
@@ -54,7 +56,7 @@ class StudioHfIdsTests(unittest.TestCase):
 
     def _legacy(self) -> None:
         """Construct a v1 view before publication with the original unchanged builder."""
-        built = studio_project._build_entries(copy.deepcopy(_SAMPLES["plan"]), self.probe.duration)
+        built = studio_project._build_entries(_sync_plan(), self.probe.duration)
         with mock.patch.object(studio_project, "GENERATOR_VERSION", "studio-project-v1"):
             studio_project._write_project(self.request, built, self.probe)
         self.allowed = {path for path in self.studio.rglob("*") if path.is_file() and not path.is_symlink()}
@@ -87,7 +89,7 @@ class StudioHfIdsTests(unittest.TestCase):
         self._legacy()
         state = load_state(str(self.studio))
         self.assertNotIn("compositionNormalizer", state.manifest)
-        file = self.studio / _SAMPLES["files"][0]["file"]
+        file = self.studio / load_state(str(self.studio)).manifest["entries"][0]["file"]
         self._change(file, file.read_text() + "\n<!-- TEST pending old edit -->")
         with mock.patch.object(comp_hf_ids, "run_text", side_effect=AssertionError("v1 must not start Node")):
             report = compute_report(load_state(str(self.studio)))
@@ -96,12 +98,13 @@ class StudioHfIdsTests(unittest.TestCase):
         self.assertTrue(any("structurally edited" in note for note in report.file_notes))
         self.assertEqual(json.loads((self.studio / "view.fingerprint.json").read_text())["generator"], "studio-project-v1")
         rebuilt = sync_files._rebuild_instance(state.manifest["entries"][0], state.plan["graphicsTrack"][0])
-        self.assertEqual(hashlib.sha256(rebuilt.encode()).hexdigest(), _SAMPLES["files"][0]["manifestSha256"])
+        self.assertEqual(hashlib.sha256(rebuilt.encode()).hexdigest(),
+                         state.manifest["files"][state.manifest["entries"][0]["file"]])
 
     def test_pending_old_view_never_normalizes_or_rebaselines(self) -> None:
         """Unresolved v1 files remain byte-for-byte pending on ordinary generation."""
         self._legacy()
-        file = self.studio / _SAMPLES["files"][0]["file"]
+        file = self.studio / load_state(str(self.studio)).manifest["entries"][0]["file"]
         self._change(file, file.read_text() + "\n<!-- TEST pending -->")
         before = {path: path.read_bytes() for path in self.allowed}
         with mock.patch.object(comp_hf_ids, "run_text", side_effect=AssertionError("No Node")):
@@ -112,10 +115,11 @@ class StudioHfIdsTests(unittest.TestCase):
     def test_script_and_text_changes_still_need_brain_review(self) -> None:
         """SDK-owned IDs never waive a genuine code or visible text mutation."""
         self._generate()
-        file = self.studio / _SAMPLES["files"][0]["file"]
+        file = self.studio / load_state(str(self.studio)).manifest["entries"][0]["file"]
         original = file.read_text()
         for changed in (original + "\n<script>throw new Error('TEST not executed')</script>",
-                        original.replace(">Review the system</div>", ">Changed TEST meaning</div>")):
+                        original.replace("You do not need more footage", "Changed TEST meaning")):
+            self.assertNotEqual(original, changed)
             self._change(file, changed)
             report = compute_report(load_state(str(self.studio)))
             self.assertFalse(report.clean)
@@ -124,9 +128,9 @@ class StudioHfIdsTests(unittest.TestCase):
     def test_changed_default_is_blocked_not_normalized_away(self) -> None:
         """No host edit means a changed panel default remains unresolved."""
         self._generate()
-        file = self.studio / _SAMPLES["files"][0]["file"]
+        file = self.studio / load_state(str(self.studio)).manifest["entries"][0]["file"]
         original = file.read_text()
-        changed = original.replace("&quot;default&quot;: 64", "&quot;default&quot;: 96", 1)
+        changed = original.replace("&quot;default&quot;: 1.2", "&quot;default&quot;: 1.6", 1)
         self.assertNotEqual(original, changed); self._change(file, changed)
         report = compute_report(load_state(str(self.studio)))
         self.assertTrue(any("unmatched declared default" in error for error in report.blockers))
@@ -147,14 +151,16 @@ class StudioHfIdsTests(unittest.TestCase):
                 generation_version(generation_fields("studio-project-v1"), state.fingerprint)
 
     def test_changed_new_view_uses_one_rebuild_batch(self) -> None:
-        """Three changed instances do not launch three parser processes."""
+        """All changed instances share one SDK parser process."""
         self._generate()
-        for row in _SAMPLES["files"]:
+        entries = load_state(str(self.studio)).manifest["entries"]
+        self.assertEqual(len(entries), 4)
+        for row in entries:
             file = self.studio / row["file"]
             self._change(file, file.read_text() + "\n<!-- TEST pending -->")
         with mock.patch.object(comp_hf_ids, "run_text", wraps=comp_hf_ids.run_text) as run:
             report = compute_report(load_state(str(self.studio)))
-        self.assertEqual(run.call_count, 1); self.assertEqual(len(report.file_notes), 3)
+        self.assertEqual(run.call_count, 1); self.assertEqual(len(report.file_notes), len(entries))
 
     def test_mixed_file_metadata_blocks_generation_and_sync_without_node(self) -> None:
         """Validate the actual two retained sidecars, not just detached examples."""

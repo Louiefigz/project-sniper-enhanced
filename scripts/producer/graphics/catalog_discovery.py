@@ -121,6 +121,23 @@ def load_catalog(paths: DiscoveryPaths | None = None) -> Catalog:
     return build_catalog(load_sources(paths or DiscoveryPaths()))
 
 
+def inventory_catalog(catalog: Catalog) -> dict:
+    """Expose every item for strategy without ranking or execution approval."""
+    from pathlib import Path
+    from cut_preview_io import file_hash
+
+    records = []
+    for record in catalog.records:
+        source = record["source"]
+        source_hash = (file_hash(Path(source["path"]), 16 * 1024 * 1024)
+                       if source["exists"] else None)
+        records.append({**record, "source": {**source, "sha256": source_hash},
+                        "executionApproved": False})
+    return {"schemaVersion": SCHEMA_VERSION, "scope": SCOPE,
+            "provenance": catalog.provenance, "total": len(records),
+            "returned": len(records), "limited": False, "items": records}
+
+
 def _word_hit(term: str, words: frozenset[str]) -> bool:
     """Whole-word match, tolerating one trailing plural ``s`` either way."""
     return (term in words or term + "s" in words

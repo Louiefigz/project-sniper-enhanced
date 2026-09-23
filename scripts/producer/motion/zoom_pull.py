@@ -1,21 +1,20 @@
 #!/usr/bin/env python3
-"""zoom_pull — seam-role zoom-pull transitions (LIAM-4-MOVES move 1).
+"""zoom_pull — seam-role zoom-pull transitions (continuity mechanism CM-1).
 
-Measured build spec (2026-07-11, EC1=Ex1R3rsdlms @23.976 + EC2=sLgHqZSe2o0
-@30; 8 windows burst-extracted at native fps + ECC scale-traced, 7 true
-instances — each variant n<3, LOW-CONFIDENCE bands live in
-``producer_config.MOTION["transitions"]["zoom_pull"]``). Three variants, all
+Doctrine: docs/studies/EDITCRAFT_LESSONS.md §2.7. The variant defaults and
+allowed bands are Sniper design parameters, deliberately configurable, in
+``producer_config.MOTION["transitions"]["zoom_pull"]``. Three variants, all
 an EASED digital zoom bridging (or resolving) a cutTrack seam:
 
-* PUNCH-CUT — a-roll punch-IN (~+20.5%, bell velocity over 0.25-0.42s) that
+* PUNCH-CUT — a-roll punch-IN (~+20%, bell velocity over 0.25-0.42s) that
   COMPLETES 0.6-1.3s BEFORE the picture cut; the cut itself is covered by a
   light-leak/flash (sequential, never simultaneous — the cover rides the
   same event via ``cover``).
 * WHIP — an accelerating zoom that SPANS the cut: ease-in ramp (~1s) into a
-  blur-masked peak AT the seam (+89-98% total), the incoming side settling
-  ease-out (+19.5% over ~0.6s) back to wide.
-* SETTLE — the incoming shot zooms OUT −6..−10% over 0.3-0.55s starting
-  0-0.55s after the cut (soft landing).
+  blur-masked peak AT the seam (the blur hides the largest upscale), the
+  incoming side settling ease-out (~+20% over ~0.6s) back to wide.
+* SETTLE — the incoming shot eases OUT from a slight zoom (under 12%) over
+  0.3-0.55s starting within ~0.55s of the cut (soft landing).
 
 PUNCH-ENGINE REUSE: the per-frame ``scale=eval=frame`` + recomputed-crop
 idiom (and its even-dim guard) comes from ``motion.punch_in`` — the same
@@ -32,7 +31,7 @@ single validator plan_lint_motion calls — executor and lint cannot drift).
 Event shape (inside plan.transitions):
     {"outTime": 120.0, "kind": "zoom-pull", "variant": "whip",
      "seamRole": "aroll->broll", "sfx": true}
-Optional per-variant overrides (validated against the measured bands):
+Optional per-variant overrides (validated against the design bands):
     punch-cut: scale, attackS, completeBeforeS, cover ("light-leak" |
                "white-flash" | false; default light-leak)
     whip:      peakScale, rampS, settleScale, settleS
@@ -62,7 +61,7 @@ def _clamp01(v: float) -> float:
 
 
 def _band(i: int, ev: dict, key: str, spec: tuple[str, str]) -> float:
-    """Resolve one override against its measured band (raises outside it).
+    """Resolve one override against its design band (raises outside it).
 
     ``spec`` = (default_key, band_key) into the variant's config dict.
     """
@@ -73,14 +72,14 @@ def _band(i: int, ev: dict, key: str, spec: tuple[str, str]) -> float:
         raise ValueError(f"event[{i}]: {key} must be a number")
     lo, hi = cfg[band_key]
     if not (lo <= float(raw) <= hi):
-        raise ValueError(f"event[{i}]: {key} {raw} outside the measured "
+        raise ValueError(f"event[{i}]: {key} {raw} outside the design "
                          f"band [{lo},{hi}] (zoom_pull.{band_key})")
     return float(raw)
 
 
 @dataclass(frozen=True)
 class ZoomPullSpec:
-    """One resolved zoom-pull: seam time, variant, measured-band params.
+    """One resolved zoom-pull: seam time, variant, design-band params.
 
     ``params`` holds the variant's resolved numbers; ``cover`` is the
     punch-cut seam cover kind ("" = none); ``seam_role`` is advisory
@@ -155,7 +154,7 @@ _PARSERS = {"punch-cut": _parse_punch_cut, "whip": _parse_whip,
 def parse_event(i: int, ev: dict, duration: float) -> ZoomPullSpec:
     """Validate one raw ``kind:"zoom-pull"`` event into a ``ZoomPullSpec``.
 
-    Raises ValueError on an unknown variant, an override outside its measured
+    Raises ValueError on an unknown variant, an override outside its design
     band, a bad seamRole, or a zoom footprint that leaves ``[0, duration]``.
     """
     variant = ev.get("variant")
@@ -252,8 +251,9 @@ def chain_filters(spec: ZoomPullSpec, width: int, height: int) -> list[str]:
 def lint_event(ev: dict, tag: str, mode: str) -> tuple[list[str], list[str]]:
     """(errors, warnings) for one plan-level zoom-pull event — the SAME
     validator the primitive runs (``parse_event``), plus the doctrine gates:
-    longform-only (studied longform seam grammar, LL-014 replacement
-    vocabulary) and the a-roll<->b-roll seam-role advisory. Density is NOT
+    longform-only (Sniper's longform seam grammar, EDITCRAFT_LESSONS §2.7;
+    the LL-014 replacement vocabulary) and the a-roll<->b-roll seam-role
+    advisory. Density is NOT
     checked here — zoom-pulls count against ``max_per_min`` in
     ``plan_lint_motion.check_transitions`` like every seam cover."""
     errors: list[str] = []
@@ -268,7 +268,7 @@ def lint_event(ev: dict, tag: str, mode: str) -> tuple[list[str], list[str]]:
         errors.append(f"{tag}: {exc}")
         return errors, warnings
     if not ev.get("seamRole"):
-        warnings.append(f"{tag}: zoom-pull without a seamRole — the measured "
+        warnings.append(f"{tag}: zoom-pull without a seamRole — the seam "
                         "grammar puts zoom-pulls at a-roll<->b-roll seams "
                         "only (MOTION['transitions']['seam_roles']); state "
                         "'aroll->broll' or 'broll->aroll'")

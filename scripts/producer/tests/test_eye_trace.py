@@ -1,4 +1,5 @@
-"""Eye-trace continuity tests (LIAM move 4 — gaze bias + Audit B advisory).
+"""Eye-trace continuity tests (continuity mechanism CM-4, EDITCRAFT_LESSONS §7.1 —
+gaze bias + Audit B advisory).
 
 Covers the four legs of the primitive:
   * GAZE READ — planner ``gazeXY`` wins, ``faceBBoxNorm`` center falls back,
@@ -255,10 +256,10 @@ class AuditCheckTests(unittest.TestCase):
 
     def test_registered_rail_must_be_flush_to_its_authored_edge(self) -> None:
         plan = {**self._PLAN, "graphicsTrack": [{
-            "kind": "nateherk-rail", "anchor": "beside-face",
+            "kind": "module-rail", "anchor": "beside-face",
             "spec": {},
         }]}
-        good = _row(None, kind="nateherk-rail", anchor="beside-face",
+        good = _row(None, kind="module-rail", anchor="beside-face",
                     region="fixed-canvas", placedBBox=[0, 0, 633, 1079],
                     canvas=[1920, 1080])
         self.assertEqual([r.status for r in self._run([good], plan)],

@@ -46,10 +46,15 @@ def observe(request: DiagnosticRequest) -> dict:
 
 
 def toolchain() -> dict:
-    """Bind actual local implementation bytes; image/tool identity is separate."""
+    """Bind actual local implementation bytes, including the native jail it runs in.
+
+    The jail launcher runs as a script and the profile/approval are data, so
+    they are added explicitly; decoder identity is recorded per run separately.
+    """
     root = Path(__file__).resolve().parents[1]
-    paths = local_python_import_closure([root / "color/diagnostic.py"])
-    paths.append(root / "headless/color_diagnostic_worker.js")
+    paths = local_python_import_closure([root / "color/diagnostic.py", root / "headless/color_diagnostic_policy.py"])
+    paths.extend(root / "headless" / name for name in (
+        "native_media_jail.py", "native_media_probe.sb", "native_media_runtime_approval.json"))
     rows = [{"path": str(path), "sha256": file_hash(path)}
             for path in sorted(set(paths))]
     return {"files": rows, "sha256": digest(rows)}

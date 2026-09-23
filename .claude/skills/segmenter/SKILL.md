@@ -27,13 +27,15 @@ single finished cut, hand off to `producer`.
 
 ## Where output goes
 
-Everything lands in a per-recording folder under the user's home:
+Everything lands in a per-recording folder in the operator's video projects folder —
+`$(./sniper workspace)`: the `projects` folder inside Sniper, or the folder chosen at install —
+in a `segments/` folder:
 
 ```
-~/ProjectSniper/<slug>/segmenter/
+<workspace>/<slug>/segments/
   transcript.json     # the ASR result you worked from
   segments.json       # your segment decisions (the cut list)
-  clips/              # one MP4 per segment, numbered + titled
+  *.mp4               # one MP4 per segment, numbered + titled
   clips.zip           # the same clips bundled
 ```
 
@@ -46,7 +48,7 @@ Pick `<slug>` from the input filename + a short descriptor, kebab-case
 
 ```bash
 SLUG="<slug>"; VIDEO="<absolute path to the recording>"
-OUT="$HOME/ProjectSniper/$SLUG/segmenter"; mkdir -p "$OUT/clips"
+OUT="$(./sniper workspace)/$SLUG/segments"; mkdir -p "$OUT"
 ```
 
 ### 2. Transcribe locally (no paid fallback)
@@ -56,7 +58,7 @@ variable, or missing local model is not permission to use a paid service. Do not
 source credential files for local transcription.
 
 ```bash
-.venv/bin/python3 scripts/transcribe.py "$VIDEO" --provider local-whisper > "$OUT/transcript.raw.jsonl" 2> "$OUT/transcribe.log"
+./sniper python3 scripts/transcribe.py "$VIDEO" --provider local-whisper > "$OUT/transcript.raw.jsonl" 2> "$OUT/transcribe.log"
 tail -n 1 "$OUT/transcript.raw.jsonl" > "$OUT/transcript.json"
 ```
 
@@ -101,11 +103,11 @@ the parts about pricing"), follow those over the default coaching-show doctrine.
 ### 4. Export the clips (deterministic)
 
 `export_mp4.py` takes the cut list **as a string argument** and writes a zip;
-unzip it into `clips/`.
+unzip it into the project's `segments/` folder.
 
 ```bash
-.venv/bin/python3 scripts/segmenter/export_mp4.py "$VIDEO" "$(cat "$OUT/segments.json")" "$OUT/clips.zip"
-unzip -o -q "$OUT/clips.zip" -d "$OUT/clips"
+./sniper python3 scripts/segmenter/export_mp4.py "$VIDEO" "$(cat "$OUT/segments.json")" "$OUT/clips.zip"
+unzip -o -q "$OUT/clips.zip" -d "$OUT"
 ```
 
 Each clip is stream-copied (no re-encode) with ~5s pre/post padding, snapped to
@@ -130,7 +132,9 @@ they contain. Keep it short.
 ## Notes
 
 - Accepted inputs: mp4/mov/webm/mkv/avi/m4v (video) or common audio files.
-- Prerequisites: ffmpeg, `.venv`, installed local Whisper runtime/model. Use
-  `/setup` with the user's installation authorization if anything is missing.
+- Prerequisites: Sniper's own tools, `.venv` and the local Whisper model, all put
+  in place by `./sniper setup`. If anything is missing, run `./sniper doctor`
+  (Claude Code's `/setup` does the same) and explain its report; the repair is
+  `./sniper setup`.
 - Use subscription-backed agent reasoning. No paid API or credit fallback is
   authorized by a local transcription or segmentation request.

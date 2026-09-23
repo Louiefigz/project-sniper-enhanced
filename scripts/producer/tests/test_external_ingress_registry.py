@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from external_ingress_registry import validate_external_ingress_registry
+from external_ingress_registry import located, validate_external_ingress_registry
 
 
 def _registry(
@@ -60,10 +60,10 @@ class ExternalIngressRegistryTests(unittest.TestCase):
             validate_external_ingress_registry(),
             {
                 "status": "pass",
-                "familyCount": 10,
-                "releasedFamilyCount": 8,
-                "occurrenceCount": 26,
-                "ownerCount": 26,
+                "familyCount": 12,
+                "releasedFamilyCount": 10,
+                "occurrenceCount": 28,
+                "ownerCount": 28,
                 "invariantCount": 5,
             },
         )
@@ -107,6 +107,28 @@ class ExternalIngressRegistryTests(unittest.TestCase):
         })
         with self.assertRaisesRegex(ValueError, "multiply-owned external"):
             self._validate_fixture(registry)
+
+
+class PackagedInstallerPathTests(unittest.TestCase):
+    """release/payload_files/<x> is <x> at the package root (the app folder) in a package, and only there."""
+
+    def test_installer_path_is_found_where_the_package_puts_it(self) -> None:
+        with tempfile.TemporaryDirectory() as folder:
+            package = Path(folder)
+            (package / "install").mkdir()
+            (package / "install/sniper_doctor.py").write_text("")
+            found = located(package, "release/payload_files/install/sniper_doctor.py")
+            self.assertEqual(found, package / "install/sniper_doctor.py")
+
+    def test_the_source_tree_never_looks_outside_itself(self) -> None:
+        with tempfile.TemporaryDirectory() as folder:
+            repo = Path(folder) / "repo"
+            (repo / "release").mkdir(parents=True)
+            (Path(folder) / "install").mkdir()
+            (Path(folder) / "install/sniper_doctor.py").write_text("")
+            found = located(repo, "release/payload_files/install/sniper_doctor.py")
+            self.assertEqual(found, repo / "release/payload_files/install/sniper_doctor.py")
+            self.assertEqual(located(repo, "scripts/x.py"), repo / "scripts/x.py")
 
 
 if __name__ == "__main__":

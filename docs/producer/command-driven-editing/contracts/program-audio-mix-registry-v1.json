@@ -12,6 +12,24 @@
   ],
   "consumers": [
     {
+      "id": "native-retained-dialogue-float-concat",
+      "path": "scripts/producer/studio/native_short_dialogue.py",
+      "sourceToken": "concat=n={len(canvas[\"cuts\"])}:v=0:a=1",
+      "expectedOccurrences": 1,
+      "consumerKind": "derived-program-mix",
+      "normalizationAuthority": "retained cuts of the same declared dialogue source are concatenated as float PCM; dialogue_premaster then requires content-bound channel normalization of that complete reference before audio finishing or loudness mastering",
+      "authorityPaths": [
+        "scripts/producer/studio/native_short_dialogue.py",
+        "scripts/producer/studio/native_short_delivery.py",
+        "scripts/producer/audio/channel_normalization.py"
+      ],
+      "testPaths": [
+        "scripts/producer/tests/test_native_dialogue_channels.py",
+        "scripts/producer/tests/test_native_audio_preparation.py"
+      ],
+      "exemption": null
+    },
+    {
       "id": "music-final-program-mix",
       "path": "scripts/producer/audio/audio_mix.py",
       "sourceToken": "[d][b]amix=inputs=2",
@@ -159,13 +177,14 @@
       "sourceToken": "amix=inputs={len(delayed) + 1}",
       "expectedOccurrences": 1,
       "consumerKind": "program-mix",
-      "normalizationAuthority": "apply_transitions observes a content-bound source receipt and injects its exact stereo filter on the program leg before amix",
+      "normalizationAuthority": "Retained internal audio preparation helper: _transition_audio injects the observed stereo filter. The public apply_transitions entry point unconditionally rejects retired visual presets before media or output work.",
       "authorityPaths": [
         "scripts/producer/audio/channel_normalization.py",
         "scripts/producer/motion/transitions.py"
       ],
       "testPaths": [
-        "scripts/producer/tests/test_channel_normalization_mix_paths.py"
+        "scripts/producer/tests/test_channel_normalization_mix_paths.py",
+        "scripts/producer/tests/test_motion.py"
       ],
       "exemption": null
     },
@@ -359,6 +378,23 @@
   ],
   "dependencies": [
     {
+      "consumerId": "native-retained-dialogue-float-concat",
+      "enforcementTokens": [
+        {
+          "path": "scripts/producer/studio/native_short_delivery.py",
+          "token": "reference = normalize_dialogue_reference(raw_reference, samples, root)"
+        },
+        {
+          "path": "scripts/producer/studio/native_short_dialogue.py",
+          "token": "verify_channel_receipt(authority.receipt)"
+        },
+        {
+          "path": "scripts/producer/studio/native_short_dialogue.py",
+          "token": "channel_filter = authority.filter_for('stereo')"
+        }
+      ]
+    },
+    {
       "consumerId": "music-final-program-mix",
       "enforcementTokens": [
         {
@@ -428,7 +464,7 @@
         },
         {
           "path": "scripts/producer/motion/transitions.py",
-          "token": "authority.assert_stable()"
+          "token": "raise ValueError(\"Legacy transition presets are retired; use an upstream \""
         }
       ]
     },

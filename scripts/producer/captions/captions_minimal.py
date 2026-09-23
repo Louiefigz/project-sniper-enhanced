@@ -8,12 +8,13 @@ distinct responsibilities). Reuses captions' low-level ASS primitives
 dispatches here for ``style='minimal'`` via a lazy import (captions imports this
 module only at call time, so there is no import cycle).
 
-The style (reference study R1/R2 — docs/studies/REFERENCE_STYLE_STUDY.md, 2026-07-05):
+The style (docs/studies/REFERENCE_STYLE_STUDY.md R1/R2):
 ONE word, or a <=3-word phrase when adjacent words nearly touch, per Dialogue
 event; chest-anchored (fixed band, or face-relative when the plan carries
 ``faceBBoxNorm``); soft drop shadow, no heavy outline box; emphasis words
-(``captions.emphasisWords``, case-insensitive) render gold in a serif-italic
-accent face as their own events (ASS can't switch font-family cleanly mid-event).
+(``captions.emphasisWords``, case-insensitive) render in the accent colour and
+accent face (R2) as their own events (ASS can't switch font-family cleanly
+mid-event).
 All config lives in ``producer_config.CAPTIONS['MINIMAL']``.
 """
 
@@ -155,7 +156,7 @@ def _minimal_style_lines(m: dict) -> list[str]:
 
 def _render_minimal_text(ws: list[dict], band_y: int) -> str:
     """One event's positioned text (verbatim words, no re-capitalization —
-    minimal mirrors the reference's as-spoken lowercase look)."""
+    minimal keeps the speaker's words exactly as transcribed, R1)."""
     text = " ".join(_escape_ass(_norm_word(w["word"])) for w in ws)
     return f"{{\\pos({VISUAL_CENTER_X},{band_y})}}{text}"
 

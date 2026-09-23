@@ -89,8 +89,8 @@ async function approvedEdit(): Promise<void> {
       target: { mode: "longform" },
       cutTrack: [{ sourceId: "source-1", start: 0, end: 10 }],
       graphicsTrack: [{
-        outStart: 2, outEnd: 5, kind: "statement-card", anchor: "own-screen",
-        reason: "Clarify the thesis", spec: { title: "One useful idea" },
+        outStart: 2, outEnd: 5, kind: "line-swap", anchor: "own-screen",
+        reason: "Clarify the thesis", spec: { lineA: "One useful idea", lineB: "One useful idea" },
       }],
     }));
     beginSurgicalReview(item.dir, { lanes: ["graphics"] });
@@ -193,7 +193,7 @@ async function cutRefitsBeforeLint(): Promise<void> {
       planVersion: 1,
       target: { mode: "longform" },
       cutTrack: [{ sourceId: "source-1", start: 10, end: 50 }],
-      graphicsTrack: [{ id: "g-1234abcd", kind: "statement-card", outStart: 15.5, outEnd: 19.5 }],
+      graphicsTrack: [{ id: "g-1234abcd", kind: "line-swap", outStart: 15.5, outEnd: 19.5 }],
     }, null, 2)}\n`;
     writeFileSync(item.planPath, original);
     writeFileSync(approvalPath, "old-cut-authority\n");
@@ -204,7 +204,7 @@ async function cutRefitsBeforeLint(): Promise<void> {
         { sourceId: "source-1", start: 10, end: 25 },
         { sourceId: "source-1", start: 30, end: 50 },
       ],
-      graphicsTrack: [{ id: "g-1234abcd", kind: "statement-card", outStart: 15.5, outEnd: 19.5 }],
+      graphicsTrack: [{ id: "g-1234abcd", kind: "line-swap", outStart: 15.5, outEnd: 19.5 }],
     }));
     beginSurgicalReview(item.dir, { lanes: ["cuts"] });
     const result = await finalizeSurgicalEdit({
@@ -256,7 +256,7 @@ async function candidatePromotesOnlyAfterReview(): Promise<void> {
       target: { mode: "longform" },
       cutTrack: [{ sourceId: "source-1", start: 0, end: 10 }],
       graphicsTrack: [{
-        outStart: 2, outEnd: 5, kind: "statement-card", anchor: "own-screen",
+        outStart: 2, outEnd: 5, kind: "line-swap", anchor: "own-screen",
         reason: "Clarify the thesis", spec: { title: "Reviewed first" },
       }],
     }));

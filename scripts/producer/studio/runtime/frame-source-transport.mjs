@@ -6,6 +6,17 @@ import { basename, dirname, extname, isAbsolute, join } from 'node:path';
 import { Readable } from 'node:stream';
 
 export const FRAME_PREFIX = '/__sniper_native_frame/';
+export const NATIVE_SOURCE_FRAME_CLOCK = 'sniper-zero-clock-v1';
+
+/** Cover every positive sample interval without adding a frame for float noise. */
+export function nativeSourceFrameCount(duration, fps) {
+  const frames = duration * fps;
+  if (!Number.isFinite(duration) || duration <= 0 || !Number.isFinite(fps) || fps <= 0
+      || !Number.isFinite(frames) || frames > Number.MAX_SAFE_INTEGER) {
+    throw new RangeError('Native extraction requires a finite positive frame clock');
+  }
+  return Math.max(1, Math.ceil(frames - 1e-7));
+}
 const IMAGE_TYPES = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg' };
 const MAX_FRAME_BYTES = 64 * 1024 * 1024;
 const MAX_REGISTERED_FRAMES = 100000;

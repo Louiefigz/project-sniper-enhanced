@@ -8,6 +8,12 @@ track 0, every `graphicsTrack` entry as a timed, panel-editable clip above it.
 The operator (or an agent through the bridge) adjusts graphics there; the
 edits are diffed back into `edit_plan.json`; `assemble.py` recomposites.
 
+A trim-only plan with no graphics also opens in this view. It shows the exact
+graphics-free base and an empty graphics layer; it does not invent a treatment.
+Cut changes still belong in `edit_plan.json`, followed by a base rebuild and
+Studio regeneration. The base clip is playback context, not an editable cut
+timeline. Unsynced Studio edits retain the same overwrite protection.
+
 **The render boundary is unchanged.** `hyperframes render` remains the only
 render use of HyperFrames (`graphics/graphics_render.py`); footage stays
 ffmpeg; Studio never renders the deliverable and footage never re-encodes in
@@ -18,13 +24,76 @@ The primary interactive entry point is the Producer skill in Codex or Claude
 Code. This lane does not require the custom Sniper web UI. Continue the same
 stored-intent, cut/review, render and QC contracts through the stage CLIs.
 
+## Required review handoff: local playback and Studio
+
+**Standing operator preference, September 15, 2026:** for Shorts and long-form,
+show both views for each ready candidate or revision unless the user explicitly
+requests a different handoff:
+
+- **Local video review:** open the existing local review page/player with the
+  exact checked MP4. Verify the current source, duration and playback; retain
+  source comparison when the review page already provides it.
+- **HyperFrames Studio:** open the matching editable project at its verified
+  live Studio URL, so the user can make small adjustments. Check the project,
+  duration, loaded footage and timeline seeking. Opening `index.html` via
+  `file://`, pasting a project path, or showing a flattened MP4 does not complete
+  this step.
+
+Use the operator's requested browser or established browser preference. Keep
+both views available in separate tabs; preserve an active review position until
+the next candidate is ready. Start a newly presented candidate at the beginning.
+Include both labeled live URLs in the handoff and record which candidate/project
+they show plus the checks actually performed in the existing review notes.
+
+### Verify the browser that receives the handoff
+
+Server readiness and media `readyState` are not playback approval. Test the
+actual delivery browser, including the in-app browser when that is where the
+operator is reviewing. A Chrome result does not establish an in-app result.
+At the opening, a middle scene, and the final spoken passage, verify that the
+current footage/caption/graphic is visible and future or expired clips are
+hidden. Seek backward as well as forward, then play continuously through cuts.
+
+Check live audio transport separately from the encoded audio checks. Repeated
+`seeking`/`waiting` events during uninterrupted playback, unexpected pauses, or
+audible chopping fail live review even if decoding, sample counts and loudness
+passed. Record the browser, continuous playback interval, observed failures and
+whether listening actually occurred. Never label signal checks or advancing
+`currentTime` as a listening pass. A user report of choppy sound reopens this
+check until the affected playback path is verified.
+
+Managed Studio must use the same qualified runtime adaptation as native export.
+Its same-document element checks are needed by embedded browser playback as
+well as capture; launching stock Studio can skip clip visibility and audio
+scheduling. Reuse that adaptation instead of adding per-project timing masks
+or changing audio synchronization tolerances to hide the failure.
+
+Reuse the managed preview entry points below: native projects use
+`managed_preview.py open`; legacy generated graphics views use
+`studio_review.py open`. Opening a ready native project needs no rerender.
+If a project is sealed as verification evidence, prepare a separate editable
+revision with its dependencies intact and record its origin before handing it
+over for edits. Preserve the checked project, MP4 and receipts.
+
+Studio exposes the layers supported by the selected project route; the legacy
+graphics view does not make baked footage editable. The checked MP4 remains the
+reference for final encoded picture and mastered audio. After Studio changes,
+label the MP4 as the previous render until the affected stages are rebuilt and
+checked, then refresh both views to the new revision.
+
+A headless exporter may finish technical QC without opening browser tabs; the
+owning interactive task completes this handoff. If either view cannot open or
+pass its checks, keep the working view available and report the missing view and
+actual failure. Do not describe the two-view handoff as complete or rerender
+solely to repair a preview-launch failure.
+
 ## The loop (one orchestrator: `scripts/producer/studio/studio_review.py`)
 
 ```bash
 PY=.venv/bin/python3
 REVIEW=scripts/producer/studio/studio_review.py
 
-$PY $REVIEW open    <producer_dir>            # generate/refresh + serve + open browser
+$PY $REVIEW open    <producer_dir>            # generate/refresh + serve (no browser opens; open the printed studio: URL)
 # ... operator edits panels/timing in Studio (persists to project files) ...
 $PY $REVIEW sync    <producer_dir>            # dry-run diff of Studio edits vs plan
 $PY $REVIEW sync    <producer_dir> --apply    # fold edits into edit_plan.json (gated)

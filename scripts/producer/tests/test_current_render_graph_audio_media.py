@@ -25,8 +25,7 @@ from audio.assemble_picture_reuse import _receipt
 from audio.render_audio_cache import load_source_bus
 from cut_preview_io import bound_json, file_hash
 from types import SimpleNamespace
-from _current_render_graph_audio_revision import audio_only_revision
-
+from _current_render_graph_audio_revision import audio_only_revision, prepare_test_review
 
 class ActualSourceAudioGraph(unittest.TestCase):
     """Record real child commands, phase timing and independent graph/output reads."""
@@ -37,15 +36,16 @@ class ActualSourceAudioGraph(unittest.TestCase):
         cls.root = Path(tempfile.mkdtemp(prefix='sniper-v2-graph-cli-', dir='/private/tmp'))
         cls.plan, cls.manifest = _fixture(cls.root)
         # One silent visual seam is part of the base picture from the start, so a later
-        # sfx flip on that seam is an audio-only revision (a NEW seam is a picture change).
-        cls.plan["transitions"] = [{"outTime": 1.0, "kind": "white-flash", "sfx": False}]
+        # Catalog transitions belong to the native project, not a legacy seam preset.
+        cls.plan["transitions"] = []
         chord = ("aevalsrc='0.04*(sin(2*PI*(220+55*floor(t/0.5))*t)"
                  "+sin(2*PI*(277.18+69.295*floor(t/0.5))*t)"
                  "+sin(2*PI*(329.63+82.4075*floor(t/0.5))*t))':s=48000:d=3")
         cls.manifest = with_synthetic_music(cls.root, cls.manifest, chord)
         cls.output = cls.root / 'producer'
         cls.output.mkdir()
-        (cls.root / 'project.json').write_text(json.dumps({'resolvedIntent': cls.plan['target']}))
+        (cls.root / 'project.json').write_text(json.dumps({
+            'origin': 'raw', 'history': [], 'resolvedIntent': cls.plan['target']}))
         (cls.output / 'edit_plan.json').write_text(json.dumps(cls.plan))
         (cls.root / 'source_plan.json').write_text(json.dumps(cls.plan))
         cls.base = cls.output / 'base.mp4'
@@ -56,11 +56,11 @@ class ActualSourceAudioGraph(unittest.TestCase):
         cls.initial = load_active(cls.output)
         cls.initial_pointer = bound_json(cls.output / 'program_audio.v2.json')
         print('retained synthetic graph fixture:', cls.root, flush=True)
-
     @classmethod
     def command(cls, phase: str, label: str, extra: tuple[str, ...] = (), check: bool = True) -> list[dict] | tuple[int, list[dict], str]:
         """Run the original real CLI and retain its exact command output."""
         plan, manifest = cls.output / 'edit_plan.json', Path(cls.manifest['_path'])
+        prepare_test_review(PROJECT, cls.output)
         out = cls.output / 'final.mp4'
         if phase == 'base':
             plan = cls.root / 'source_plan.json'
@@ -173,15 +173,14 @@ class ActualSourceAudioGraph(unittest.TestCase):
         receipt = bound_json(Path(after['programMasterReceiptPath']))
         self.assertEqual(receipt['finishing']['cleanup']['preset'], 'voice-strong')
 
-    def test_03g_music_gap_and_existing_seam_sfx_change_reuse_every_picture_node(self) -> None:
-        """Check the existing seam gains its precisely timed SFX cue."""
+    def test_03g_music_gap_change_reuses_every_picture_node(self) -> None:
+        """Check a music-gap revision reuses every picture node."""
         plan = bound_json(self.output / 'edit_plan.json')
         music = {**plan['music'], 'gapDb': 14}
-        _rows, after = self._audio_only_revision('music-sfx-revision', {'music': music,
-            'transitions': [{'outTime': 1.0, 'kind': 'white-flash', 'sfx': True}]})
+        _rows, after = self._audio_only_revision('music-gap-revision', {'music': music})
         receipt = bound_json(Path(after['programMasterReceiptPath']))
         self.assertEqual(receipt['music']['settings']['gapDb'], 14)
-        self.assertEqual(receipt['finishing']['sfx']['cues'][0]['startSample'], 33_600)
+        self.assertIsNone(receipt['finishing']['sfx'])
 
     def test_03c_deferred_reassembly_reuses_the_held_finished_master(self) -> None:
         """Unchanged audio inputs + a held ACTIVE graph: a deferred-active re-run executes the

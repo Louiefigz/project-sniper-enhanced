@@ -88,7 +88,7 @@ class CompRateOciArtifactTests(unittest.TestCase):
     def test_source_audit_requires_exact_archive_closure_and_default_spec(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw).resolve()
-            source = ROOT / "templates/motion/compositions/agenda-slide.html"
+            source = ROOT / "templates/motion/compositions/line-swap.html"
             request = _prepare_one(str(ROOT), source, "24", root / "probe")
             _request_sources(request)
             for mutation in ("manifest", "spec", "duration"):

@@ -10,13 +10,12 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 
 from audio.audio_mix_delivery import _observe_final_audio, measure_delivery
-from audio.aac_peak_candidates import (AAC_PEAK_CANDIDATE_POLICY, corrected_peak_profile,
-                                      effective_reuse_profile)
+from audio.aac_peak_candidates import AAC_PEAK_CANDIDATE_POLICY, corrected_peak_profile
 from audio.audio_mix_picture import observe_picture_source, packet_signature, verify_picture_copy
 from audio.float_master import FloatMasterInput, render_float_master
 from audio.mastering_profile import NATIVE_SHORT_MASTERING_PROFILE, MasteringProfile
-from audio.native_aac_encoding import (native_aac_arguments, native_aac_encoding_policy,
-                                       require_native_aac_policy)
+from audio.native_aac_encoding import native_aac_arguments, native_aac_encoding_policy
+from audio.native_audio_donor import admit_audio_donor, verify_audio_donor, verify_prepared_donor
 from audio.program_audio_clock import exact_aac_audio_clock, exact_float_audio_clock
 from audio.program_delivery_signal import (FloatDeliveryReference, ProgramDeliverySignalError,
                                            verify_float_delivery_signal)
@@ -46,6 +45,8 @@ class NativeDialogueDelivery:
     prior_receipt: Path | None = None
     profile: MasteringProfile = NATIVE_SHORT_MASTERING_PROFILE
     review_sections: tuple[dict, ...] = ()
+    prepared_master: tuple[Path, str] | None = None
+    prepared_donor: tuple[Path, str] | None = None
 
 
 def _stable(request: NativeDialogueDelivery) -> None:
@@ -57,14 +58,17 @@ def _stable(request: NativeDialogueDelivery) -> None:
 
 def _master(request: NativeDialogueDelivery, receipt: dict, tools: tuple[str, str]) -> Path:
     """Use the same mastering intelligence as the ordinary full-program path."""
+    if request.prepared_master is not None:
+        from audio.native_master_preparation import reuse_prepared_master
+        return reuse_prepared_master(request, receipt, tools)
     ffmpeg, ffprobe = tools
     receipt["premasterClock"] = exact_float_audio_clock(str(request.premaster), ffprobe, request.samples)
     measured, code, error = _observe_final_audio(str(request.premaster))
     if code or measured is None:
         raise RuntimeError("Native premaster decode failed: " + error)
     source = FloatMasterInput(str(request.premaster), request.samples, measured, ffmpeg, request.profile)
-    master, chain, note = render_float_master(source, request.directory)
-    receipt.update(masteringFilter=chain, masteringNote=note,
+    master, chain, note, decision = render_float_master(source, request.directory)
+    receipt.update(masteringFilter=chain, masteringNote=note, masteringDecision=decision,
         masteringPolicyVersion=MASTERING_POLICY_VERSION,
         masterClock=exact_float_audio_clock(str(master), ffprobe, request.samples),
         masterDelivery=measure_delivery(str(master)), masterSha256=file_sha256(str(master)))
@@ -123,26 +127,21 @@ def _reuse(request: NativeDialogueDelivery, receipt: dict, tools: tuple[str, str
     prior_path = request.prior_receipt
     if prior_path is None:
         raise ValueError("Native dialogue reuse requires its actual prior receipt")
-    prior_hash = file_sha256(str(prior_path))
-    prior = json.loads(prior_path.read_text())
-    required = {"masteringFilter", "masteringNote", "masteringPolicyVersion", "masterSha256"}
-    if not isinstance(prior, dict) or not required.issubset(prior):
-        raise ValueError("Native dialogue reuse receipt is incomplete or malformed")
-    effective_profile = effective_reuse_profile(prior, request.profile)
-    receipt["aacEncodingPolicy"] = require_native_aac_policy(prior, request.profile)
-    master, donor = prior_path.parent / "program-master.wav", prior_path.parent / "candidate.mp4"
-    if prior.get("status") != "audio-qualified" or prior.get("inputPremasterSha256") != request.premaster_sha256 \
-            or prior.get("masteringPolicyVersion") != MASTERING_POLICY_VERSION \
-            or prior.get("audioClock", {}).get("presentedSamples") != request.samples \
-            or file_sha256(str(master)) != prior.get("masterSha256") \
-            or file_sha256(str(donor)) != prior.get("candidateSha256"):
-        raise RuntimeError("Native dialogue reuse lacks unchanged input, policy or encoded bytes")
+    admitted = admit_audio_donor(prior_path, (request.premaster, request.premaster_sha256),
+                                 request.samples, request.profile)
+    prior, prior_hash = admitted.prior, admitted.sha256
+    effective_profile, master, donor = admitted.profile, admitted.master, admitted.candidate
+    receipt['aacEncodingPolicy'] = admitted.aac_policy
+    if request.prepared_donor is not None:
+        receipt['preparedDonorReceiptSha256'] = verify_prepared_donor(request, admitted)
     ffmpeg, ffprobe = tools
     receipt["premasterClock"] = exact_float_audio_clock(str(request.premaster), ffprobe, request.samples)
     destination = request.directory / "program-master.wav"
     shutil.copyfile(master, destination)
     for key in ("masteringFilter", "masteringNote", "masteringPolicyVersion", "masterSha256"):
         receipt[key] = prior[key]
+    if "masteringDecision" in prior:
+        receipt["masteringDecision"] = prior["masteringDecision"]
     receipt.update(masterClock=exact_float_audio_clock(str(destination), ffprobe, request.samples),
         masterDelivery=measure_delivery(str(destination)), reusedAudioReceiptSha256=prior_hash,
         additionalAacEncodes=0, masteringProfile=effective_profile.receipt())
@@ -161,8 +160,7 @@ def _reuse(request: NativeDialogueDelivery, receipt: dict, tools: tuple[str, str
     if packet_signature(str(donor), "a:0") != packet_signature(str(candidate), "a:0"):
         raise RuntimeError("Reused AAC packets or their exact presentation clock changed")
     result = _qualify(request, destination, receipt, tools)
-    if file_sha256(str(prior_path)) != prior_hash or file_sha256(str(donor)) != prior["candidateSha256"]:
-        raise RuntimeError("Native prior audio authority changed during reuse")
+    verify_audio_donor(admitted)
     receipt["aacPacketsReused"] = True
     return result
 
@@ -170,7 +168,7 @@ def _reuse(request: NativeDialogueDelivery, receipt: dict, tools: tuple[str, str
 def _retain_attempt(request: NativeDialogueDelivery, receipt: dict, attempt: dict) -> None:
     """Persist failed and passing lossless/AAC evidence without overwriting another attempt."""
     (request.directory / "receipt.json").write_text(json.dumps(attempt, indent=2, allow_nan=False) + "\n")
-    for key in ("masteringProfile", "masteringFilter", "masteringNote", "masteringPolicyVersion",
+    for key in ("masteringProfile", "masteringFilter", "masteringNote", "masteringDecision", "masteringPolicyVersion",
                 "premasterClock", "masterClock", "masterDelivery", "masterSha256", "picture",
                 "audioClock", "signal", "delivery", "candidateSha256", "aacEncodingPolicy",
                 "audioQuality", "audioReviewRequired"):
@@ -207,7 +205,8 @@ def _finish_candidates(request: NativeDialogueDelivery, receipt: dict, tools: tu
         _stable(request)
         directory = request.directory / f"attempt-{index:02d}"
         directory.mkdir(exist_ok=False)
-        current = replace(request, directory=directory, profile=profile)
+        current = replace(request, directory=directory, profile=profile,
+                          prepared_master=request.prepared_master if index == 1 else None)
         attempt = dict(candidateIndex=index, directory=str(directory), status="incomplete",
             masteringProfile=profile.receipt(), inputPremasterSha256=request.premaster_sha256,
             aacEncodeInvocations=0, aacEncodesCompleted=0)

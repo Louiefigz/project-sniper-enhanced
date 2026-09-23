@@ -69,7 +69,7 @@ class GuidedBodyFrameTests(unittest.TestCase):
                 self.assertEqual(inputs.documents, before)
 
     def test_later_hole_and_placement_intent_blocks_only_full_program(self) -> None:
-        for extra in ({"kind": "nateherk-takeover"}, {"kind": "nateherk-scoreboard", "spec": {"presenterFrame": True}},
+        for extra in ({"kind": "module-takeover"}, {"kind": "module-scoreboard", "spec": {"presenterFrame": True}},
                       {"takeoverBase": "shrink"}, {"exitOnCut": True}, {"placement": {"x": 0}}):
             inputs = fixture()
             inputs.documents["candidatePlan"]["graphicsTrack"][-1].update(extra)

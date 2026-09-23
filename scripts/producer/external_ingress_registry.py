@@ -99,6 +99,20 @@ def _matching_owners(
     ]
 
 
+# The package build ships release/payload_files/<x> (the installer and doctor) as <x> at the
+# package root, which is also the app folder, so inside an installed package such a path is
+# looked up there (release/payload.py).
+_PAYLOAD_PREFIX = "release/payload_files/"
+
+
+def located(root: Path, relative: str) -> Path:
+    """A registry path in the source tree, or where the package build put an installer file."""
+    path = root / relative
+    if path.exists() or not relative.startswith(_PAYLOAD_PREFIX) or (root / "release").exists():
+        return path
+    return root / relative[len(_PAYLOAD_PREFIX):]
+
+
 def _missing_family_paths(
     root: Path,
     family: dict,
@@ -106,7 +120,7 @@ def _missing_family_paths(
 ) -> list[str]:
     errors = []
     for relative in family[field]:
-        if not (root / relative).exists():
+        if not located(root, relative).exists():
             errors.append(
                 f"{family['id']}: missing {field} path {relative}")
     return errors

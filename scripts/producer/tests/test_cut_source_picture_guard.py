@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import unittest
-from contextlib import ExitStack
+from contextlib import ExitStack, nullcontext
 from fractions import Fraction
 from unittest.mock import Mock, patch
 
@@ -83,6 +83,9 @@ class CutPictureGuardTests(unittest.TestCase):
                  "probe_video_frames": 48, "assert_cut_sources_stable": None, "assert_duration": {"videoFrames": 48},
                  "cut_source_receipts": [], "emit": None}
         with ExitStack() as stack:
+            recorder = Mock()
+            recorder.publish.return_value = {"TEST": "native leaves stubbed"}
+            stack.enter_context(patch.object(cut, "execution_scope", return_value=nullcontext(recorder)))
             mocks = {name: stack.enter_context(patch.object(cut, name, return_value=result)) for name, result in stubs.items()}
             result = cut.render_cut_speed_opts(plan, manifest, "/TEST-nonexistent/out.mp4",
                                               cut.CutSpeedOptions("/TEST-nonexistent/work", before_encode=guard))

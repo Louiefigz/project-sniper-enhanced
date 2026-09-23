@@ -149,33 +149,9 @@ def _fit(
 # --------------------------------------------------------------------------- #
 # Card rendering
 # --------------------------------------------------------------------------- #
-def build_card_png(
-        text: str, out_path: str,
-        layout: CardLayout | None = None) -> tuple[int, int]:
-    """Render one hook card (white rounded box, black bold text) to an RGBA PNG.
-
-    The card hugs its text: card size = ink box + padding on every side. Returns
-    the ``(width, height)`` in pixels.
-    """
-    text = text.replace("\r\n", "\n").replace("\r", "\n").strip("\n")
-    layout = layout or _DEFAULT_LAYOUT
-    font, (l, t, r, b) = _fit(text, layout)
-    # Pillow may return fractional ink bounds; ceil so nothing clips.
-    card_w = math.ceil(r - l) + 2 * layout.padding
-    card_h = math.ceil(b - t) + 2 * layout.padding
-    img = Image.new("RGBA", (card_w, card_h), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
-    draw.rounded_rectangle(
-        [0, 0, card_w - 1, card_h - 1], radius=layout.radius,
-        fill=(255, 255, 255, _ALPHA))
-    # Offset by (padding - l, padding - t) so the ink box's top-left sits exactly
-    # at the padding inset — pixel-accurate centering inside the hugging card.
-    draw.multiline_text(
-        (layout.padding - l, layout.padding - t),
-        text, font=font, fill=(0, 0, 0, 255),
-        align="center", spacing=_line_spacing(font.size))
-    img.save(out_path)
-    return card_w, card_h
+def build_card_png(text: str, out_path: str, layout: CardLayout | None = None) -> tuple[int, int]:
+    """Retired card renderer; titles must use source-bound native catalog designs."""
+    raise ValueError("Legacy rounded hook cards are retired; select a HyperFrames catalog title")
 
 
 # --------------------------------------------------------------------------- #

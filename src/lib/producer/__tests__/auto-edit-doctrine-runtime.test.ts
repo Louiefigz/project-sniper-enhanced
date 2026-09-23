@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -70,9 +71,9 @@ function fixture(root: string): { repo: string; ctx: AutoEditCtx } {
     writeFileSync(destination, `PINNED ${relative}\n`);
   }
   for (const relative of [
-    "docs/studies/CALEB_STYLE.md",
-    "scripts/producer/docs/findings/JADEN_STYLE.md",
-    "docs/studies/ANGELA_STYLE.md",
+    "docs/studies/RESTRAINED_STYLE.md",
+    "scripts/producer/docs/findings/PUNCH_STYLE.md",
+    "docs/studies/SLIDEWARE_STYLE.md",
   ]) {
     const destination = path.join(repo, relative);
     mkdirSync(path.dirname(destination), { recursive: true });
@@ -150,17 +151,22 @@ function testLiveDriftKeepsPinnedPromptAuthority(root: string): void {
     buildAuthoringPrompt(pinned, "codex"),
     buildPlanReviewPrompt(pinned, 1, packet, packetValue),
     buildRevisionPrompt(pinned, materialReview(), 1),
-    buildRenderedReviewPrompt(pinned, {
-      auditReportPath: path.join(ctx.dir, "audit_report.json"),
-      framePaths: [path.join(ctx.dir, "frame-1.png")],
-    }, 1),
+    renderedPrompt(pinned),
   ];
   for (const prompt of prompts) {
     assert.ok(prompt.includes(doctrine.files[PRODUCER_CORE_DOCTRINE_PATHS[0]]));
-    assert.ok(prompt.includes(doctrine.files[PRODUCER_CORE_DOCTRINE_PATHS[3]]));
+    assert.ok(prompt.includes(doctrine.files["scripts/producer/docs/findings/FAILURE_LEDGER.md"]));
     assert.ok(!prompt.includes(liveSkill));
   }
   assert.equal(restoreAutoEditDoctrine(doctrine).doctrineHash, doctrine.doctrineHash);
+}
+
+function renderedPrompt(pinned: AutoEditCtx): string {
+  const frame = path.join(pinned.dir, "frame-1.png"), audit = path.join(pinned.dir, "audit_report.json");
+  writeFileSync(frame, Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64"));
+  writeFileSync(audit, JSON.stringify({ frames: [{ path: frame }] }));
+  return buildRenderedReviewPrompt(pinned, { auditReportPath: audit, framePaths: [frame] }, 1, "composition",
+    { frames: [{ path: frame, labels: ["#1 frame-1"] }], reference: [] });
 }
 
 function testResumeRestores(root: string): void {
@@ -184,13 +190,13 @@ function testSelectedStyleDoctrineIsPinned(root: string): void {
   const { repo, ctx } = fixture(path.join(root, "style"));
   const styled: AutoEditCtx = {
     ...ctx,
-    intent: { ...ctx.intent!, mode: "short", style: "caleb" },
+    intent: { ...ctx.intent!, mode: "short", style: "restrained" },
   };
-  const doctrine = captureAutoEditDoctrine(styled, "style-run", repo);
-  assert.equal(
-    readFileSync(doctrine.files["docs/studies/CALEB_STYLE.md"], "utf8"),
-    "PINNED docs/studies/CALEB_STYLE.md\n",
-  );
+  assert.throws(() => captureAutoEditDoctrine(styled, "style-run", repo), /retired/);
+  assert.equal(existsSync(path.join(ctx.dir, ".sniper-learning")), false);
+  const doctrine = captureAutoEditDoctrine(ctx, "catalog-run", repo);
+  assert(doctrine.files["docs/producer/VISUAL_SOURCE_POLICY.md"]);
+  assert.equal(doctrine.files["docs/studies/RESTRAINED_STYLE.md"], undefined);
 }
 
 function testPromotedReferenceTeachingsArePinned(root: string): void {
@@ -198,8 +204,8 @@ function testPromotedReferenceTeachingsArePinned(root: string): void {
   const doctrine = captureAutoEditDoctrine(ctx, "reference-teachings-run", repo);
   for (const relative of [
     "docs/studies/EDITCRAFT_LESSONS.md",
-    "docs/studies/NATEHERK_CARDS.md",
-    "docs/studies/NATEHERK_STUDY.md",
+    "docs/studies/MODULE_CARDS.md",
+    "docs/studies/MODULE_STUDY.md",
     "docs/studies/REFERENCE_STYLE_STUDY.md",
     "docs/studies/SHORTFORM_LESSONS.md",
     "scripts/producer/docs/findings/REFERENCE_EVIDENCE_IS_NOT_TEMPLATE_AUTHORITY.md",

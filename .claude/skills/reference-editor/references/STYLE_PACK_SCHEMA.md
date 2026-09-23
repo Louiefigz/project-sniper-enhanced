@@ -98,7 +98,7 @@ worklist hash printed into either review receipt:
     {
       "itemId": "event-window-0001",
       "status": "matched",
-      "templateId": "nateherk-bullet-bars",
+      "templateId": "module-bullet-bars",
       "proofPath": "/absolute/path/to/verified-settled-frame.jpg",
       "structureOnly": true
     }

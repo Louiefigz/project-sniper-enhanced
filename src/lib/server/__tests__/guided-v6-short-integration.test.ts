@@ -61,7 +61,7 @@ test("actual graphics advisors honor initial off lanes with no media or measured
   const producer = path.join(SCRIPTS_DIR, "producer"), options = { encoding: "utf8" as const, timeout: 10_000,
     env: { ...process.env, PYTHONDONTWRITEBYTECODE: "1", PYTHONPATH: producer } };
   const style = JSON.parse(execFileSync(pythonInterpreter(), [path.join(producer, "graphics_style_advisor.py"), planPath, root, manifestPath], options));
-  assert.equal(style.recommendedTargetFields.graphicsStyle, "cutaway-only");
+  assert.equal(style.recommendedTargetFields.graphicsStyle, "catalog-first");
   const advicePath = path.join(root, "TEST-advice-plan.json");
   writeFileSync(advicePath, JSON.stringify({ ...docs.plan, target: { ...docs.plan.target, ...style.recommendedTargetFields } }), { flag: "wx" });
   const advice = JSON.parse(execFileSync(pythonInterpreter(), [path.join(producer, "graphics_planner.py"), advicePath, root, manifestPath,

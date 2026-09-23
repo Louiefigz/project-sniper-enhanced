@@ -128,8 +128,8 @@ function assertCandidateClass(plan: Record<string, unknown>, captioned: boolean)
 
 function assertGraphicClass(entry: Record<string, unknown>, row: GuidedGraphicFrameBinding): void {
   const p = row.presentation, spec = active(entry.spec) ? objectValue(entry.spec, "presenter graphic spec") : {};
-  const hole = entry.kind === "nateherk-takeover"
-    || ["nateherk-scoreboard", "nateherk-pipeline", "nateherk-ledger-dark"].includes(String(entry.kind)) && active(spec.presenterFrame);
+  const hole = entry.kind === "module-takeover"
+    || ["module-scoreboard", "module-pipeline", "module-ledger-dark"].includes(String(entry.kind)) && active(spec.presenterFrame);
   if (p.schemaVersion !== 1 || p.anchor !== "own-screen" || p.placement !== "full-canvas" || p.compositeMode !== "normal"
       || p.baseTreatment !== "preserve" || entry.anchor !== "own-screen" || entry.takeoverBase != null
       || active(entry.exitOnCut) || active(entry.placement) || hole) {

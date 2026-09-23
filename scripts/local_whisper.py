@@ -9,6 +9,7 @@ utterance/word contract used by SEGMENTER, CLIPPER, and PRODUCER.
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import math
@@ -22,6 +23,8 @@ from local_asr_deadline import (LocalAsrDeadline, LocalWhisperError, configured_
                                 current_local_asr_deadline, use_local_asr_deadline)
 from local_whisper_io import hash_provenance, read_whisper_json, run_local_tool
 from local_whisper_parser import PARSER_POLICY
+from transcript_timing_quality import timing_quality_report
+from local_whisper_speech_edges import tighten_speech_edges
 from asr_policy import (PROVIDER_ENV, EXECUTION_MODE_ENV, DEEPGRAM_PROVIDER,
                         LOCAL_PROVIDER, VALID_PROVIDERS, AsrPolicyError,
                         transcription_provider as _provider)
@@ -257,9 +260,24 @@ def _transcribe_media(request: LocalTranscribeRequest, emit: Emit) -> dict:
                     runtime, wav_path, prefix, True))
         except WhisperTimingError as exc:
             raise LocalWhisperError(str(exc)) from exc
+        # whisper's token times touch end to end, so a pause is invisible until the
+        # real speech edges are measured. Keeping the unrefined transcript is the
+        # fail-closed answer: it is what every earlier release shipped.
+        unrefined = copy.deepcopy(transcript)
+        transcript, edges = tighten_speech_edges(transcript, wav_path, timeline_offset)
+        if edges.get("applied"):
+            recheck = timing_quality_report({"transcript": transcript})
+            if recheck["status"] == "pass":
+                quality = recheck
+            else:
+                transcript = unrefined
+                edges = {**edges, "applied": False,
+                         "reason": "refined timing failed the quality check: "
+                                   + ",".join(v["code"] for v in recheck["violations"])}
     if _runtime_provenance(runtime) != provenance:
         raise LocalWhisperError("whisper runtime or model changed during transcription")
-    return _completed_result(runtime, (payload, transcript, cpu, quality), provenance, duration)
+    return _completed_result(runtime, (payload, transcript, cpu, quality),
+                             {**provenance, "speechEdges": edges}, duration)
 
 
 def _completed_result(runtime: WhisperRuntime, transcription: tuple[dict, list, bool, dict],

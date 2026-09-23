@@ -27,7 +27,7 @@ from .render_admission_schema import (
     _row_map,
     _selection_directory,
 )
-from .render_build_receipt_v3_semantics import parse_render_build_receipt_v3
+from .render_build_receipt_v4_semantics import parse_render_build_receipt_v4
 from .request_artifact import (
     canonical_request_document,
     decode_request_document,
@@ -132,7 +132,7 @@ def _validate_envelope(
         and manifest.get("buildDigest") == build_digest
         and set(build) == {"buildDigest", "manifest", "schemaVersion"}
         and type(build.get("schemaVersion")) is int
-        and build.get("schemaVersion") == 3
+        and build.get("schemaVersion") == 4
         and build.get("buildDigest") == build_digest
     )
     if not valid:
@@ -184,7 +184,7 @@ def load_render_admission_artifact(
     build_manifest = build.get("manifest")
     if not isinstance(build_manifest, dict):
         raise RuntimeError("render admission artifact envelope is invalid")
-    build_digest = parse_render_build_receipt_v3(build_raw).build_digest
+    build_digest = parse_render_build_receipt_v4(build_raw).build_digest
     _validate_envelope(manifest, request_digest, build, build_digest)
     _match_raw(_manifest_row(rows, "request.json"), request_raw, 0o600)
     _match_raw(_manifest_row(rows, "render-build.json"), build_raw, 0o600)

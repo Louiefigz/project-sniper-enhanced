@@ -19,38 +19,71 @@
     "provenance"
   ],
   "properties": {
-    "schemaVersion": { "const": 1 },
-    "sceneId": { "$ref": "#/$defs/stableId" },
-    "version": { "type": "integer", "minimum": 1 },
-    "timing": { "$ref": "#/$defs/timing" },
-    "canvas": { "$ref": "#/$defs/canvas" },
+    "schemaVersion": {
+      "const": 1
+    },
+    "sceneId": {
+      "$ref": "#/$defs/stableId"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "timing": {
+      "$ref": "#/$defs/timing"
+    },
+    "canvas": {
+      "$ref": "#/$defs/canvas"
+    },
     "renderMode": {
-      "enum": ["overlay-alpha", "takeover-opaque", "presenter-hole"]
+      "enum": [
+        "overlay-alpha",
+        "takeover-opaque",
+        "presenter-hole"
+      ]
     },
     "composition": {
       "oneOf": [
-        { "$ref": "#/$defs/catalogComposition" },
-        { "$ref": "#/$defs/projectComposition" }
+        {
+          "$ref": "#/$defs/catalogComposition"
+        },
+        {
+          "$ref": "#/$defs/projectComposition"
+        }
       ]
     },
     "elements": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/element" }
+      "items": {
+        "$ref": "#/$defs/element"
+      }
     },
     "renderUnits": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/renderUnit" }
+      "items": {
+        "$ref": "#/$defs/renderUnit"
+      }
     },
     "captionPolicy": {
-      "enum": ["preserve", "suppress-overlap"]
+      "enum": [
+        "preserve",
+        "suppress-overlap"
+      ]
     },
     "dependencies": {
       "type": "array",
-      "items": { "$ref": "#/$defs/dependency" }
+      "items": {
+        "$ref": "#/$defs/dependency"
+      }
     },
-    "provenance": { "$ref": "#/$defs/provenance" }
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    },
+    "visualSources": {
+      "type": "object"
+    }
   },
   "$defs": {
     "sha256": {
@@ -70,10 +103,19 @@
     "positiveRational": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["numerator", "denominator"],
+      "required": [
+        "numerator",
+        "denominator"
+      ],
       "properties": {
-        "numerator": { "type": "string", "pattern": "^[1-9][0-9]*$" },
-        "denominator": { "type": "string", "pattern": "^[1-9][0-9]*$" }
+        "numerator": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "denominator": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        }
       }
     },
     "timing": {
@@ -86,23 +128,48 @@
         "timelineMapHash"
       ],
       "properties": {
-        "startFrame": { "type": "integer", "minimum": 0 },
-        "endFrameExclusive": { "type": "integer", "minimum": 1 },
-        "fps": { "$ref": "#/$defs/positiveRational" },
-        "timelineMapHash": { "$ref": "#/$defs/sha256" }
+        "startFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "endFrameExclusive": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "fps": {
+          "$ref": "#/$defs/positiveRational"
+        },
+        "timelineMapHash": {
+          "$ref": "#/$defs/sha256"
+        }
       }
     },
     "canvas": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["width", "height"],
+      "required": [
+        "width",
+        "height"
+      ],
       "properties": {
-        "width": { "type": "integer", "minimum": 2, "maximum": 8192 },
-        "height": { "type": "integer", "minimum": 2, "maximum": 8192 }
+        "width": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 8192
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 8192
+        }
       }
     },
     "scalar": {
-      "type": ["string", "number", "boolean"],
+      "type": [
+        "string",
+        "number",
+        "boolean"
+      ],
       "maxLength": 4000
     },
     "variables": {
@@ -110,28 +177,56 @@
       "propertyNames": {
         "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
       },
-      "additionalProperties": { "$ref": "#/$defs/scalar" }
+      "additionalProperties": {
+        "$ref": "#/$defs/scalar"
+      }
     },
     "catalogComposition": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["type", "kind", "variables"],
+      "required": [
+        "type",
+        "kind",
+        "variables"
+      ],
       "properties": {
-        "type": { "const": "catalog" },
-        "kind": { "$ref": "#/$defs/stableId" },
-        "variables": { "$ref": "#/$defs/variables" }
+        "type": {
+          "const": "catalog"
+        },
+        "kind": {
+          "$ref": "#/$defs/stableId"
+        },
+        "variables": {
+          "$ref": "#/$defs/variables"
+        }
       }
     },
     "projectComposition": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["type", "bundleId", "bundleHash", "entry", "variables"],
+      "required": [
+        "type",
+        "bundleId",
+        "bundleHash",
+        "entry",
+        "variables"
+      ],
       "properties": {
-        "type": { "const": "project" },
-        "bundleId": { "$ref": "#/$defs/stableId" },
-        "bundleHash": { "$ref": "#/$defs/sha256" },
-        "entry": { "$ref": "#/$defs/relativeHtml" },
-        "variables": { "$ref": "#/$defs/variables" }
+        "type": {
+          "const": "project"
+        },
+        "bundleId": {
+          "$ref": "#/$defs/stableId"
+        },
+        "bundleHash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "entry": {
+          "$ref": "#/$defs/relativeHtml"
+        },
+        "variables": {
+          "$ref": "#/$defs/variables"
+        }
       }
     },
     "element": {
@@ -144,8 +239,12 @@
         "values"
       ],
       "properties": {
-        "elementId": { "$ref": "#/$defs/stableId" },
-        "role": { "$ref": "#/$defs/stableId" },
+        "elementId": {
+          "$ref": "#/$defs/stableId"
+        },
+        "role": {
+          "$ref": "#/$defs/stableId"
+        },
         "exposedProperties": {
           "type": "array",
           "uniqueItems": true,
@@ -154,7 +253,9 @@
             "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
           }
         },
-        "values": { "$ref": "#/$defs/variables" }
+        "values": {
+          "$ref": "#/$defs/variables"
+        }
       }
     },
     "renderUnit": {
@@ -169,53 +270,91 @@
         "palmierGranularity"
       ],
       "properties": {
-        "unitId": { "$ref": "#/$defs/stableId" },
+        "unitId": {
+          "$ref": "#/$defs/stableId"
+        },
         "elementIds": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "items": { "$ref": "#/$defs/stableId" }
+          "items": {
+            "$ref": "#/$defs/stableId"
+          }
         },
         "zIndex": {
           "type": "integer",
           "minimum": -10000,
           "maximum": 10000
         },
-        "entry": { "$ref": "#/$defs/relativeHtml" },
-        "sharedGroupId": { "$ref": "#/$defs/stableId" },
+        "entry": {
+          "$ref": "#/$defs/relativeHtml"
+        },
+        "sharedGroupId": {
+          "$ref": "#/$defs/stableId"
+        },
         "maskDependencyUnitIds": {
           "type": "array",
           "uniqueItems": true,
-          "items": { "$ref": "#/$defs/stableId" }
+          "items": {
+            "$ref": "#/$defs/stableId"
+          }
         },
         "compositeMode": {
-          "enum": ["normal", "screen", "multiply", "declared"]
+          "enum": [
+            "normal",
+            "screen",
+            "multiply",
+            "declared"
+          ]
         },
         "palmierGranularity": {
-          "enum": ["scene", "unit"]
+          "enum": [
+            "scene",
+            "unit"
+          ]
         }
       }
     },
     "dependency": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["kind", "id", "sha256"],
+      "required": [
+        "kind",
+        "id",
+        "sha256"
+      ],
       "properties": {
-        "kind": { "$ref": "#/$defs/stableId" },
-        "id": { "$ref": "#/$defs/stableId" },
-        "sha256": { "$ref": "#/$defs/sha256" }
+        "kind": {
+          "$ref": "#/$defs/stableId"
+        },
+        "id": {
+          "$ref": "#/$defs/stableId"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
       }
     },
     "provenance": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["origin"],
+      "required": [
+        "origin"
+      ],
       "properties": {
         "origin": {
-          "enum": ["operator", "autopilot", "reference-style"]
+          "enum": [
+            "operator",
+            "autopilot",
+            "reference-style"
+          ]
         },
-        "requestId": { "$ref": "#/$defs/stableId" },
-        "stylePackHash": { "$ref": "#/$defs/sha256" }
+        "requestId": {
+          "$ref": "#/$defs/stableId"
+        },
+        "stylePackHash": {
+          "$ref": "#/$defs/sha256"
+        }
       }
     }
   }

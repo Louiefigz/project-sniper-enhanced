@@ -66,12 +66,12 @@ class _Fixture(unittest.TestCase):
         self.paths = sources.DiscoveryPaths(
             catalog_dir=str(self.catalog_dir), study_path=str(self.root / "study.json"),
             capability_path=str(self.motion / "comp_capabilities.json"))
-        self.write_mirror([_item("test-card"), _item("test-block", "block",
+        self.write_mirror([_item("count-up"), _item("test-block", "block",
                            dimensions={"width": 1920, "height": 1080}, duration=2.0)],
                           {"itemsListed": 2, "itemsInstalled": 2, "knownMissing": []})
-        self.write_source("test-card")
+        self.write_source("count-up")
         self.write_source("test-block", "block")
-        self.write_study([_study("test-card"), _study("test-block", type="block",
+        self.write_study([_study("count-up"), _study("test-block", type="block",
                                                       aspectFlex="16:9-only")])
 
     def write_mirror(self, index: list, lock: dict) -> None:
@@ -141,42 +141,42 @@ class RecordValidationTests(_Fixture):
 
     def test_malformed_and_duplicate_records_are_reported_not_used(self) -> None:
         """Verify malformed and duplicate records are reported not used."""
-        self.write_mirror([_item("test-card"), {**_item("test-card"), "title": "Later Dup"},
+        self.write_mirror([_item("count-up"), {**_item("count-up"), "title": "Later Dup"},
                            _item("../escape"), _item("test-widget", "widget"),
                            "not-a-record", {**_item("test-dims"), "dimensions": {"width": -1, "height": 9}}],
                           {"itemsListed": 6, "itemsInstalled": 6,
                            "knownMissing": [{"nope": True}]})
-        self.write_study([_study("test-card"), _study("test-card"), {"name": 7}])
+        self.write_study([_study("count-up"), _study("count-up"), {"name": 7}])
         catalog = self.catalog()
         issues = "\n".join(catalog.provenance["issues"])
-        for needle in ("duplicate name 'test-card'", "../escape", "type must be",
+        for needle in ("duplicate name 'count-up'", "../escape", "type must be",
                        "record is not an object", "positive integers",
-                       "knownMissing row ignored", "duplicate 'test-card'", "invalid name 7"):
+                       "knownMissing row ignored", "duplicate 'count-up'", "invalid name 7"):
             self.assertIn(needle, issues)
-        self.assertEqual([r["id"] for r in catalog.records], ["test-card"])
-        self.assertEqual(catalog.records[0]["title"], "Test Card")
+        self.assertEqual([r["id"] for r in catalog.records], ["count-up"])
+        self.assertEqual(catalog.records[0]["title"], "Count Up")
         self.assertIn("lock lists 6 items; the index carries 1",
                       catalog.provenance["disagreements"])
 
     def test_missing_reference_source_is_a_distinct_status(self) -> None:
         """Verify missing reference source is a distinct status."""
-        (self.catalog_dir / "compositions" / "components" / "test-card.html").unlink()
-        record = self.one("test-card")
+        (self.catalog_dir / "compositions" / "components" / "count-up.html").unlink()
+        record = self.one("count-up")
         self.assertEqual(record["integration"]["status"], cd.STATUS_REFERENCE_MISSING)
         self.assertFalse(record["upstream"]["reference"]["exists"])
         self.assertIn("lock does not record it as missing", " ".join(record["disagreements"]))
         self.assertIn("study does not record it as missing", " ".join(record["disagreements"]))
         self.assertTrue(any("nothing to read or port" in n for n in record["adaptationNotes"]))
         result = cd.search_catalog(self.catalog(), "test card")
-        self.assertIn("mirror:test-card", [r["ref"] for r in result["results"]])
+        self.assertIn("mirror:count-up", [r["ref"] for r in result["results"]])
 
     def test_historical_study_claim_does_not_override_current_evidence(self) -> None:
         """Verify historical study claim does not override current evidence."""
-        self.write_study([_study("test-card", mechanism="FILE MISSING from mirror",
+        self.write_study([_study("count-up", mechanism="FILE MISSING from mirror",
                                  scrubSafe="conditional: unverifiable", selfContained=False,
                                  variables=["CONFIG: color"], fit="unfit:missing file",
                                  port="skip: record as missing", quality="wonky: cannot audit")])
-        record = self.one("test-card")
+        record = self.one("count-up")
         self.assertEqual(record["integration"]["status"], cd.STATUS_REFERENCE)
         self.assertTrue(record["upstream"]["reference"]["exists"])
         self.assertEqual(record["disagreements"],
@@ -189,37 +189,37 @@ class RecordValidationTests(_Fixture):
 
     def test_declared_aspect_sources_and_filter(self) -> None:
         """Verify declared aspect sources and filter."""
-        block, card = self.one("test-block"), self.one("test-card")
+        block, card = self.one("test-block"), self.one("count-up")
         self.assertEqual(block["declared"], {"dimensions": [1920, 1080], "aspects": ["16:9"],
                                              "aspectSource": "index-dimensions"})
         self.assertEqual(card["declared"]["aspectSource"], "study-aspectFlex")
         self.assertEqual(card["declared"]["aspects"], ["16:9", "9:16"])
         vertical = cd.search_catalog(self.catalog(), "test",
                                      cd.SearchFilters(declared_aspect="9:16"))
-        self.assertEqual([r["ref"] for r in vertical["results"]], ["mirror:test-card"])
+        self.assertEqual([r["ref"] for r in vertical["results"]], ["mirror:count-up"])
 
 
 class CapabilityJoinTests(_Fixture):
     def setUp(self) -> None:
         """Prepare test-owned catalog evidence and restore patched roots afterward."""
         super().setUp()
-        self.write_template("test-card")
-        self.write_artifact({"test-card": dict(_ROW)})
+        self.write_template("count-up")
+        self.write_artifact({"count-up": dict(_ROW)})
 
     def test_fresh_missing_and_stale_artifacts_through_the_existing_reader(self) -> None:
         """Verify fresh missing and stale artifacts through the existing reader."""
-        fresh = self.one("local:test-card")
+        fresh = self.one("local:count-up")
         self.assertEqual(fresh["integration"]["status"], cd.STATUS_MEASURED)
         self.assertEqual(fresh["integration"]["measured"]["canvas"], [1080, 1920])
         self.assertTrue(self.catalog().provenance["capability"]["fresh"])
         (self.motion / "comp_capabilities.json").unlink()
-        missing = self.one("local:test-card")
+        missing = self.one("local:count-up")
         self.assertEqual(missing["integration"]["status"], cd.STATUS_UNMEASURED)
         self.assertIn("matrix file missing", missing["integration"]["evidence"])
         self.assertIsNone(missing["integration"]["measured"])
-        self.write_artifact({"test-card": dict(_ROW)})
-        self.write_template("test-card", note="edited after the probe")
-        stale = self.one("local:test-card")
+        self.write_artifact({"count-up": dict(_ROW)})
+        self.write_template("count-up", note="edited after the probe")
+        stale = self.one("local:count-up")
         self.assertEqual(stale["integration"]["status"], cd.STATUS_UNMEASURED)
         self.assertIn("stale", stale["integration"]["evidence"])
         self.assertEqual(stale["integration"]["qualifiedAspects"], [])
@@ -229,17 +229,17 @@ class CapabilityJoinTests(_Fixture):
 
     def test_incomplete_row_is_unmeasured_with_its_reason(self) -> None:
         """Verify incomplete row is unmeasured with its reason."""
-        self.write_artifact({"test-card": {**_ROW, "renderError": "TEST probe failed"}})
-        record = self.one("local:test-card")
+        self.write_artifact({"count-up": {**_ROW, "renderError": "TEST probe failed"}})
+        record = self.one("local:count-up")
         self.assertEqual(record["integration"]["status"], cd.STATUS_UNMEASURED)
         self.assertIn("render probe failed: TEST probe failed", record["integration"]["evidence"])
-        self.assertEqual(self.catalog().provenance["capability"]["incompleteRows"], ["test-card"])
+        self.assertEqual(self.catalog().provenance["capability"]["incompleteRows"], ["count-up"])
 
     def test_same_name_is_not_the_same_identity(self) -> None:
         """Verify same name is not the same identity."""
-        result = cd.lookup_item(self.catalog(), "test-card")
+        result = cd.lookup_item(self.catalog(), "count-up")
         self.assertEqual([r["ref"] for r in result["matches"]],
-                         ["local:test-card", "mirror:test-card"])
+                         ["local:count-up", "mirror:count-up"])
         local, mirror = result["matches"]
         self.assertEqual(local["provenance"], cd.PROVENANCE_LOCAL)
         self.assertIsNone(local["upstream"])
@@ -249,32 +249,32 @@ class CapabilityJoinTests(_Fixture):
 
     def test_port_joins_only_with_declared_provenance(self) -> None:
         """Verify port joins only with declared provenance."""
-        with patch.dict(sources.PORTED_KINDS, {"test-card": "test-card"}):
+        with patch.dict(sources.PORTED_KINDS, {"count-up": "count-up"}):
             unverified = self.catalog()
             self.assertIn("does not declare vendor/hyperframes-catalog provenance",
                           " ".join(unverified.provenance["issues"]))
             self.assertEqual(unverified.provenance["ported"], {})
-            self.write_template("test-card", note="upstream: vendor/hyperframes-catalog/x")
-            self.write_artifact({"test-card": dict(_ROW)})
-            joined = self.one("test-card")
+            self.write_template("count-up", note="upstream: vendor/hyperframes-catalog/x")
+            self.write_artifact({"count-up": dict(_ROW)})
+            joined = self.one("count-up")
             self.assertEqual(joined["provenance"], cd.PROVENANCE_PORTED)
-            self.assertEqual(joined["upstream"]["name"], "test-card")
+            self.assertEqual(joined["upstream"]["name"], "count-up")
             self.assertEqual(joined["integration"]["status"], cd.STATUS_MEASURED)
-        with patch.dict(sources.PORTED_KINDS, {"test-card": "not-indexed"}):
+        with patch.dict(sources.PORTED_KINDS, {"count-up": "not-indexed"}):
             self.assertIn("upstream name not indexed",
                           " ".join(self.catalog().provenance["issues"]))
 
     def test_measured_aspect_never_falls_back_to_declared(self) -> None:
         """Verify measured aspect never falls back to declared."""
-        self.write_template("test-card", dimensions=(1920, 1080))
-        self.write_artifact({"test-card": dict(_ROW)})      # measured 9:16 row
-        record = self.one("local:test-card")
+        self.write_template("count-up", dimensions=(1920, 1080))
+        self.write_artifact({"count-up": dict(_ROW)})      # measured 9:16 row
+        record = self.one("local:count-up")
         self.assertEqual(record["declared"]["aspects"], ["16:9"])
         self.assertEqual(record["integration"]["measured"]["aspect"], "9:16")
         self.assertEqual(record["integration"]["qualifiedAspects"], ["9:16"])
         by_declared = cd.search_catalog(self.catalog(), "test",
                                         cd.SearchFilters(declared_aspect="16:9"))
-        self.assertIn("local:test-card", [r["ref"] for r in by_declared["results"]])
+        self.assertIn("local:count-up", [r["ref"] for r in by_declared["results"]])
         self.assertTrue(any("not qualified at the other aspect" in note
                             for note in record["adaptationNotes"]))
 
@@ -288,7 +288,7 @@ class CapabilityJoinTests(_Fixture):
         before = snapshot()
         catalog = self.catalog()
         cd.search_catalog(catalog, "test card comparison", cd.SearchFilters(limit=5))
-        cd.lookup_item(catalog, "test-card")
+        cd.lookup_item(catalog, "count-up")
         self.assertEqual(snapshot(), before)
 
 

@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "id": "LG01",
+  "version": "2026-09-18.1",
+  "title": "A chapter timeline that fills in as the video advances",
+  "status": "original-reference",
+  "scope": "original-reference-rendered-from-project-sniper-templates",
+  "summary": "In a long video, a vertical timeline of chapters with the finished ones marked tells a viewer who joined late, or drifted, where the argument is and what remains.",
+  "source": {
+    "aspect": "16:9",
+    "kind": "rendered-template"
+  },
+  "beats": [
+    {
+      "id": "LG01-B01",
+      "idea": "That was chapter one. Next, change one thing at a time.",
+      "catalog_candidates": [
+        "module-rail"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/longform/frames/LG01-B01-0.jpg",
+          "sha256": "9ac628ab99eb2af785d01d4883dea55e64e73ad5a93217da9496e08942fe88cb",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 1.0,
+          "render": {
+            "composition": "templates/motion/compositions/module-rail.html",
+            "variables": {
+              "eyebrow": "Chapters",
+              "headlineLines": "Fix one thing|at a time",
+              "explainer": "",
+              "contentMode": "timeline",
+              "footChip": "",
+              "evidenceSource": "",
+              "evidenceDate": "",
+              "rows": "01~Measure what you have~result|02~Change one thing~process|03~Measure again~process"
+            },
+            "time_s": 1.0
+          }
+        },
+        {
+          "path": "resources/references/longform/frames/LG01-B01-1.jpg",
+          "sha256": "d7e70ea83a1235621629fcc511b4cf978ba27734259f842368c5c98b070dccae",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 2.5,
+          "render": {
+            "composition": "templates/motion/compositions/module-rail.html",
+            "variables": {
+              "eyebrow": "Chapters",
+              "headlineLines": "Fix one thing|at a time",
+              "explainer": "",
+              "contentMode": "timeline",
+              "footChip": "",
+              "evidenceSource": "",
+              "evidenceDate": "",
+              "rows": "01~Measure what you have~result|02~Change one thing~process|03~Measure again~process"
+            },
+            "time_s": 2.5
+          }
+        },
+        {
+          "path": "resources/references/longform/frames/LG01-B01-2.jpg",
+          "sha256": "632043d15025d72ed0505937a6cebf68259209ce221d55c3253b382eed3b21e6",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 4.0,
+          "render": {
+            "composition": "templates/motion/compositions/module-rail.html",
+            "variables": {
+              "eyebrow": "Chapters",
+              "headlineLines": "Fix one thing|at a time",
+              "explainer": "",
+              "contentMode": "timeline",
+              "footChip": "",
+              "evidenceSource": "",
+              "evidenceDate": "",
+              "rows": "01~Measure what you have~result|02~Change one thing~process|03~Measure again~process"
+            },
+            "time_s": 4.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "LG01-B02",
+      "idea": "Two chapters done. Last, measure again the same way.",
+      "catalog_candidates": [
+        "module-rail"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/longform/frames/LG01-B02-0.jpg",
+          "sha256": "9ac628ab99eb2af785d01d4883dea55e64e73ad5a93217da9496e08942fe88cb",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 1.0,
+          "render": {
+            "composition": "templates/motion/compositions/module-rail.html",
+            "variables": {
+              "eyebrow": "Chapters",
+              "headlineLines": "Fix one thing|at a time",
+              "explainer": "",
+              "contentMode": "timeline",
+              "footChip": "",
+              "evidenceSource": "",
+              "evidenceDate": "",
+              "rows": "01~Measure what you have~result|02~Change one thing~result|03~Measure again~process"
+            },
+            "time_s": 1.0
+          }
+        },
+        {
+          "path": "resources/references/longform/frames/LG01-B02-1.jpg",
+          "sha256": "bef14c9950b1b7e682e6976ae83ff3535af97f09e4c9d5369dab2fdce8121c1a",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 2.5,
+          "render": {
+            "composition": "templates/motion/compositions/module-rail.html",
+            "variables": {
+              "eyebrow": "Chapters",
+              "headlineLines": "Fix one thing|at a time",
+              "explainer": "",
+              "contentMode": "timeline",
+              "footChip": "",
+              "evidenceSource": "",
+              "evidenceDate": "",
+              "rows": "01~Measure what you have~result|02~Change one thing~result|03~Measure again~process"
+            },
+            "time_s": 2.5
+          }
+        },
+        {
+          "path": "resources/references/longform/frames/LG01-B02-2.jpg",
+          "sha256": "c22b61896105c582329b2c801d0aad0d5859d6f48335e974f981efd3ce2c6fce",
+          "dimensions": [
+            1280,
+            720
+          ],
+          "requested_time": 4.0,
+          "render": {
+            "composition": "templates/motion/compositions/module-rail.html",
+            "variables": {
+              "eyebrow": "Chapters",
+              "headlineLines": "Fix one thing|at a time",
+              "explainer": "",
+              "contentMode": "timeline",
+              "footChip": "",
+              "evidenceSource": "",
+              "evidenceDate": "",
+              "rows": "01~Measure what you have~result|02~Change one thing~result|03~Measure again~process"
+            },
+            "time_s": 4.0
+          }
+        }
+      ]
+    }
+  ]
+}

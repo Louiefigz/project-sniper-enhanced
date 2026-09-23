@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Directing the edit</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <p class="kicker">Manual · 4 of 10</p>
+  <h1>Directing the edit: scope, lanes, style, references</h1>
+  <p class="lede">How to get what you want instead of what it guessed, and where its honest limits are.</p>
+</header>
+<h2>Scope: how much production you are asking for</h2>
+<p>There are four levels, and each one includes the one before it:</p>
+<table>
+<tr><th>Ask for</th><th>You get</th></tr>
+<tr><td><strong>Trim only</strong></td><td>The base cut, nothing else.</td></tr>
+<tr><td><strong>Light</strong></td><td>The base cut plus restrained treatment.</td></tr>
+<tr><td><strong>Produced</strong></td><td>The full set of production lanes.</td></tr>
+<tr><td><strong>Full</strong></td><td>Everything, every lane on.</td></tr>
+</table>
+<p>The <strong>base cut is always on and is not a lane</strong>: pause and retake removal,
+a cold open, bounded reframing, and an audio master at &minus;14 LUFS. You cannot ask for
+"no editing".</p>
+
+<h2>Lanes: the things you switch on and off individually</h2>
+<p>Each of these is independent, and naming one beats whatever the scope would have
+implied:</p>
+<ul>
+  <li><strong>Motion</strong> — zooms and movement so the frame is not frozen.</li>
+  <li><strong>Graphics</strong> — cards, lower thirds, callouts.</li>
+  <li><strong>Transitions</strong> — covers for energy cuts and montages.</li>
+  <li><strong>Captions</strong> — burned-in subtitles following the kept words.</li>
+  <li><strong>B-roll</strong> — supporting footage over the right beats.</li>
+  <li><strong>Credibility</strong> — cards backing up a claim or a number.</li>
+  <li><strong>Music bed</strong> — ducked under the voice. <strong>Off unless you ask.</strong></li>
+  <li><strong>Dialogue cleanup</strong> — four strengths; see below.</li>
+</ul>
+<p>Say it plainly: <em>"captions and motion on, graphics off"</em>. Sniper compares what
+it planned against what you asked for on every review round, so it cannot quietly
+downgrade your selection — but it also will not add something you did not request.</p>
+
+<h3>Dialogue cleanup, specifically</h3>
+<table>
+<tr><th>Ask for</th><th>What it does</th></tr>
+<tr><td><em>"clean up the audio"</em></td><td>Cuts rumble, subtracts steady background
+(room tone, hum, air conditioning), adds presence, evens the dynamics.</td></tr>
+<tr><td><em>"strong audio cleanup"</em></td><td>The same, harder. Slightly colours the
+voice.</td></tr>
+<tr><td><em>"noise-reduction cleanup"</em></td><td>Uses a trained speech/noise separator.
+Better on messy, non-steady noise — traffic, chatter.</td></tr>
+<tr><td><em>"separate the voice from the background"</em></td><td>
+<span class="tag">not installed</span> Needs extra software this package does not ship.
+<code>install/doctor.command</code> reports it as gated. The three above all work.</td></tr>
+</table>
+
+<h2>Brand and style guidance</h2>
+<p>Sniper ships an original reference library: worked examples of editing mechanisms, each
+illustrated with frames rendered from its own templates. The editor uses it to match a
+mechanism to what your words need. Tell it the look in words and it will work inside the
+render vocabulary it actually
+has. It picks graphics and transitions from its own catalog by mechanism rather than by
+name — so <em>"we need a transition here"</em> is a real instruction, not a vague one.
+You can also hand it a design you made yourself and ask it to animate that.</p>
+
+<h2>Using a video you admire as a reference</h2>
+<p>Point it at a local video or an allowed YouTube, Instagram or TikTok link. A link is
+downloaded to this Mac with <code>yt-dlp</code>; Chrome cookies are used only if you ask your
+agent to use them for that one download (see
+<a href="privacy.html">what leaves your Mac</a>). It measures the thing — cut density,
+motion, transition rate, caption layout, pacing — on this Mac and writes two files: the raw
+measurements, and a bounded contract derived from them. When you attach the study to an
+edit, a few of its representative frames go to your provider with the edit's review.</p>
+<div class="warn">
+<p><strong>This is guidance, not replication.</strong> Measured rhythm can steer an edit.
+Reproducing a creator's look is <strong>not</strong> a capability this release claims —
+the internal qualification cohort for it is <strong>0 of 7</strong>. Treat the feature as
+"measure a rhythm I like and edit in that direction", nothing more.</p>
+<p>It will never copy the reference's words, branding, logos, fonts, footage, thumbnails
+or music. Those are off limits by design, not by policy.</p>
+</div>
+<p>Ordinary inspiration does not trigger any of this. You have to explicitly name a
+reference.</p>
+
+<h2>What it will refuse to do</h2>
+<p>When Sniper cannot do something it says so and stops. It does not fake it, and it does
+not quietly deliver less. Most stops are one of:</p>
+<ul>
+  <li>The request needs a choice you have not made (a style, a scope).</li>
+  <li>A requested lane has no asset or no capability to do the job.</li>
+  <li>A claim on screen is not supported by what you actually said.</li>
+  <li>The rendered result failed its own inspection and could not be repaired by a
+  different plan.</li>
+</ul>
+<p>Read the message. It names the lane and the reason.</p>
+
+<p class="next"><strong>Next:</strong> <a href="revisions.html">Asking for a change &rarr;</a></p>
+<footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>
+</div>
+</body>
+</html>

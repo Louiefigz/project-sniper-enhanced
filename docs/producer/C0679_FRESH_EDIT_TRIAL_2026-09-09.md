@@ -31,7 +31,7 @@ The protected source-frame cache also remains untouched.
 
 ## Permitted fresh-trial inputs
 
-The creative source is `/Users/aaronfigueroa/Downloads/C0679.MP4`.
+The creative source is `/Users/maintainer/Downloads/C0679.MP4`.
 Confirm its identity during the timed run. Do not substitute a previously cut
 presenter video or assume the earlier edit's duration or segment count.
 Carry forward the user's general brief:

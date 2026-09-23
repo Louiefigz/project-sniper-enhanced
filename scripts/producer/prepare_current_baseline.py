@@ -85,9 +85,9 @@ def _plan(spec: BaselineSpec, source: dict, ranges: tuple[FrameRange, ...],
 
 def _project(mode: str) -> dict:
     return {
-        "origin": "p0-current-baseline",
+        "origin": "raw",
         "history": [],
-        "resolvedIntent": {
+        "intent": {
             "mode": mode,
             "scope": "trim",
             "lanes": {},
@@ -125,9 +125,9 @@ def _authority(
     entries: list[dict],
 ) -> dict:
     return {
-        "planPath": plan_path.name,
+        "planPath": "producer/" + plan_path.name,
         "planSha256": hashlib.sha256(plan_path.read_bytes()).hexdigest(),
-        "manifestPath": manifest_path.name,
+        "manifestPath": "source/" + manifest_path.name,
         "manifestSha256":
             hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
         "sourceSetDigest": manifest["sourceSetAdmission"]["sourceSetDigest"],
@@ -139,12 +139,12 @@ def _fixture(spec: BaselineSpec, authority: dict) -> dict:
     return {
         "schemaVersion": 1,
         "fixtureId":
-            f"p0-current-{'short' if spec.mode == 'short' else 'lf14'}",
+            f"p0-current-catalog-v2-{'short' if spec.mode == 'short' else 'lf14'}",
         "evidenceClass": "current-full-path-baseline",
         "mode": spec.mode,
         "durationFrames": spec.frames,
         "fps": {"numerator": spec.rate[0], "denominator": spec.rate[1]},
-        "outputPaths": ["render/final.mp4"],
+        "outputPaths": ["producer/render/final.mp4"],
         "inputAuthority": authority,
     }
 
@@ -152,9 +152,10 @@ def _fixture(spec: BaselineSpec, authority: dict) -> dict:
 def prepare(project: Path, spec: BaselineSpec) -> tuple[Path, Path]:
     """Write a frame-exact plan and closed current-path fixture."""
     rate = _validated_rate(spec)
-    manifest_path = project / "asset_manifest.json"
+    manifest_dir = project / "source"
+    manifest_path = manifest_dir / "asset_manifest.json"
     manifest = json.loads(manifest_path.read_bytes())
-    entries = verify_source_set_binding(manifest, project)
+    entries = verify_source_set_binding(manifest, manifest_dir)
     sources = manifest.get("sources") or []
     if len(sources) != 1:
         raise RuntimeError("current baseline requires exactly one admitted source")
@@ -164,9 +165,11 @@ def prepare(project: Path, spec: BaselineSpec) -> tuple[Path, Path]:
     ranges = selected_ranges(
         spec.source_frame_ranges,
         spec.frames,
-        source_frame_count(project, entry),
+        source_frame_count(manifest_dir, entry),
     )
-    plan_path = project / "edit_plan.json"
+    producer = project / "producer"
+    producer.mkdir(mode=0o700, exist_ok=True)
+    plan_path = producer / "edit_plan.json"
     _write(plan_path, _plan(spec, source, ranges, rate))
     _write(project / "project.json", _project(spec.mode))
     fixture_path = project / "baseline-fixture.json"

@@ -165,44 +165,33 @@ class PlannerRulesTests(unittest.TestCase):
         self.assertFalse(gpr.is_generic_entity("Codex"))
         self.assertFalse(gpr.is_generic_entity("Eleven Labs"))
 
-    def test_classify_entity(self) -> None:
-        # Specific + cached mark -> icon-badge; specific w/o mark -> chip-row;
-        # generic -> reject (R12 rules 1/2/3).
-        self.assertEqual(gpr.classify_entity("Codex"), ("icon-badge", "codex.svg"))
-        self.assertEqual(gpr.classify_entity("HeyGen"), ("chip-row", None))
-        self.assertEqual(gpr.classify_entity("AI"), ("reject", None))
+    def test_entity_resolution_does_not_choose_a_house_badge(self) -> None:
+        self.assertEqual(gpr.classify_entity("Codex"), (None, "codex.svg"))
+        self.assertEqual(gpr.classify_entity("HeyGen"), (None, None))
+        self.assertEqual(gpr.classify_entity("AI"), (None, None))
 
     def test_resolve_icon_is_local_only(self) -> None:
         self.assertEqual(gpr.resolve_icon("gemini"), "gemini.svg")
         self.assertIsNone(gpr.resolve_icon("no-such-brand-xyz"))
 
-    def test_template_for_is_mode_aware(self) -> None:
-        self.assertEqual(gpr.template_for("number", "50 dollars", "short")[0],
-                         "stat-card")
-        self.assertEqual(gpr.template_for("enumeration", "two years", "short")[0],
-                         "stat-card")            # measure noun -> quantity
-        self.assertEqual(gpr.template_for("enumeration", "three things", "short")[0],
-                         "list-build")
-        self.assertEqual(gpr.template_for("enumeration", "three things", "longform")[0],
-                         "glass-rail")
-        self.assertEqual(gpr.template_for("contrast", "x", "short")[0], "versus-split")
-        self.assertEqual(gpr.template_for("thesis", "x", "short")[0], "kinetic-quote")
-        self.assertEqual(gpr.template_for("topic-boundary", "okay so", "short")[0],
-                         "section-marker")          # headroom header, not a wipe
-        self.assertEqual(gpr.template_for("topic-boundary", "okay so", "longform")[0],
-                         "glass-takeover-bg")
+    def test_template_for_uses_catalog_ports_or_requires_native_discovery(self) -> None:
+        self.assertEqual(gpr.template_for("number", "50 dollars", "short"), ("count-up", None))
+        self.assertEqual(gpr.template_for("number", "50 dollars", "longform"), ("chart-story", None))
+        self.assertEqual(gpr.template_for("thesis", "Actual claim", "short"), ("line-swap", None))
+        for mode in ("short", "longform"):
+            for trigger in ("enumeration", "contrast", "topic-boundary"):
+                kind, reason = gpr.template_for(trigger, "Actual spoken text", mode)
+                self.assertIsNone(kind)
+                self.assertIn("upstream catalog", reason)
 
-    def test_anchor_from_visual_state(self) -> None:
-        # Talking-head: compact graphics ride the headroom; screen-share forces a
-        # cutaway (own-screen) + operator flag; takeover kinds are own-screen.
-        self.assertEqual(gpr.anchor_for("icon-badge", None, "short"),
-                         ("headroom", False))
-        self.assertEqual(gpr.anchor_for("icon-badge", "screen-share", "short"),
-                         ("own-screen", True))
-        self.assertEqual(gpr.anchor_for("versus-split", "talking-head", "short"),
-                         ("free-band", False))
-        self.assertEqual(gpr.anchor_for("glass-takeover-bg", None, "longform"),
-                         ("own-screen", True))
+    def test_anchor_uses_admitted_ports_and_rejects_retired_kinds(self) -> None:
+        self.assertEqual(gpr.anchor_for("count-up", None, "short"), ("headroom", False))
+        self.assertEqual(gpr.anchor_for("count-up", "screen-share", "short"), ("own-screen", True))
+        self.assertEqual(gpr.anchor_for("chart-story", "talking-head", "longform"), ("free-band", False))
+        self.assertEqual(gpr.anchor_for("ui-focus-zoom", "mixed", "longform"), ("free-band", True))
+        for kind in ("icon-badge", "versus-split", "glass-takeover-bg"):
+            with self.assertRaisesRegex(ValueError, "retired"):
+                gpr.anchor_for(kind, None, "longform")
 
     def test_apply_corrections(self) -> None:
         self.assertEqual(gpr.apply_corrections("Hagen", {"Hagen": "HeyGen"}),
@@ -252,29 +241,22 @@ class PlannerAssembleTests(unittest.TestCase):
     def _assemble(self, words: list[dict], mode: str = "short") -> tuple:
         return gp.assemble(words, mode, 10.0, {}, lambda t: (None, None), 1.5)
 
-    def test_adjacent_entities_group_into_one_icon_badge(self) -> None:
-        words = _mid_sentence(("I", 0.0, 0.2), ("use", 0.3, 0.5),
-                              ("Codex", 0.6, 0.9), ("and", 1.0, 1.1),
-                              ("Gemini", 1.2, 1.6), ("daily.", 1.7, 2.0))
+    def test_adjacent_entities_cannot_select_old_icon_badges(self) -> None:
+        words = _mid_sentence(("I", 0, .2), ("use", .3, .5), ("Codex", .6, .9),
+                              ("and", 1, 1.1), ("Gemini", 1.2, 1.6), ("daily.", 1.7, 2))
         cands, _ = self._assemble(words)
-        badges = [c for c in cands if c["kind"] == "icon-badge"]
-        self.assertEqual(len(badges), 1)                # folded, not two graphics
-        self.assertIn("icon1", badges[0]["spec"])
-        self.assertIn("icon2", badges[0]["spec"])
+        self.assertEqual(cands, [])
 
-    def test_generic_entity_is_rejected_not_proposed(self) -> None:
-        words = _mid_sentence(("We", 0.0, 0.2), ("run", 0.3, 0.5),
-                              ("AI", 0.6, 0.9), ("models.", 1.0, 1.3))
-        cands, rejected = self._assemble(words)
-        self.assertFalse(any(c["kind"] in ("icon-badge", "chip-row") for c in cands))
-        self.assertTrue(any("AI" in r["evidence"] and "generic" in r["reason"]
-                            for r in rejected))
+    def test_generic_entity_is_not_proposed_as_a_house_template(self) -> None:
+        words = _mid_sentence(("We", 0, .2), ("run", .3, .5), ("AI", .6, .9), ("models.", 1, 1.3))
+        cands, _ = self._assemble(words)
+        self.assertEqual(cands, [])
 
-    def test_number_maps_to_stat_card(self) -> None:
+    def test_number_maps_to_catalog_count_up(self) -> None:
         words = _mid_sentence(("It", 0.0, 0.2), ("costs", 0.3, 0.5),
                               ("50", 0.6, 0.8), ("dollars.", 0.9, 1.2))
         cands, _ = self._assemble(words)
-        self.assertTrue(any(c["kind"] == "stat-card" for c in cands))
+        self.assertTrue(any(c["kind"] == "count-up" for c in cands))
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

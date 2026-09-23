@@ -1,22 +1,23 @@
-"""Real FFmpeg proof for the private prebound R0 compositor."""
+"""Retired R0 compositor refusal and inert clip-binding unit tests."""
 
 from __future__ import annotations
 
 import ast
 import json
-import os
-import shutil
+import dataclasses
+from unittest.mock import patch
 import tempfile
 import unittest
 from pathlib import Path
 
 from _common import pl  # noqa: F401
-from _prebound_compositor_fixture import (
-    Fixture,
-    sample_rgb,
-    transparent_overlay,
-)
-from headless.prebound_compositor import compose_prebound_candidate
+from _quality_pass_fixture import _Harness
+from test_quality_pass import _historical_candidate
+from test_prebound_clips import _clip_row, _document
+from headless.prebound_clips import parse_prebound_clips
+from headless.prebound_compositor import compose_prebound_candidate, _candidate_clip_bytes
+from headless.prebound_compositor_build import PreboundCompositorContextV1, compositor_build_digest
+from headless.repair_intent import approved_plan_digest
 from headless.prebound_compositor_media import alpha_mode
 from headless.quality_pass_types import CompositeRequestV1
 
@@ -49,67 +50,50 @@ def _import_closure(producer: Path, starts: tuple[str, ...]) -> set[str]:
 
 
 class PreboundCompositorTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls) -> None:
-        ffmpeg, ffprobe = shutil.which("ffmpeg"), shutil.which("ffprobe")
-        if not ffmpeg or not ffprobe:
-            raise unittest.SkipTest("ffmpeg/ffprobe unavailable")
-        cls.ffmpeg, cls.ffprobe = os.path.realpath(ffmpeg), os.path.realpath(ffprobe)
+    def test_retired_parent_or_candidate_refuses_before_import_write_or_media(self) -> None:
+        """Public compositor rejects either retired plan before opening its store."""
+        harness = _Harness()
+        candidate = _historical_candidate(harness)
+        plan = candidate.application.decoded_plan()
+        plan['graphicsTrack'][0].update(kind='marker-highlight',
+            spec={'text': 'TEST current source', 'emphasisWord': 'current'})
+        current_application = dataclasses.replace(candidate.application,
+            plan_json=json.dumps(plan, separators=(',', ':'), sort_keys=True).encode(),
+            after_digest=approved_plan_digest(plan))
+        cases = (candidate, dataclasses.replace(candidate, application=current_application))
+        with tempfile.TemporaryDirectory(prefix='TEST-compositor-refusal-') as root:
+            target = Path(root).resolve() / 'candidate-never-created'
+            resolver = unittest.mock.Mock(side_effect=AssertionError('artifact resolution'))
+            context = PreboundCompositorContextV1(str(target), resolver,
+                '/TEST-not-invoked/ffmpeg', '/TEST-not-invoked/ffprobe', compositor_build_digest())
+            for value in cases:
+                request = CompositeRequestV1(harness.request.request_digest,
+                                             value, harness.parent.graphics_assets)
+                with self.subTest(candidate=value.application.after_digest), patch(
+                        'headless.prebound_compositor._import_inputs') as imports, patch(
+                            'subprocess.Popen') as process, self.assertRaisesRegex(
+                                ValueError, 'section-marker.*retired'):
+                    compose_prebound_candidate(request, context)
+                imports.assert_not_called()
+                process.assert_not_called()
+                resolver.assert_not_called()
+                self.assertFalse(target.exists())
+                self.assertEqual(tuple(Path(root).iterdir()), ())
 
-    def _assert_transparent_rejected(self, fixture: Fixture, root: Path) -> None:
-        transparent = fixture.sources / "transparent.mov"
-        transparent_overlay(self.ffmpeg, transparent)
-        receipt, _receipt_path = fixture.json_ref(
-            "transparent-receipt.json", {"render": "transparent"}
-        )
-        application = fixture.composite_request().candidate.application
-        asset, mapping = fixture.graphic(
-            transparent, receipt, application.decoded_plan()
-        )
-        fixture.mapping.update(mapping)
-        bad = CompositeRequestV1(
-            fixture.request.request_digest,
-            fixture.composite_request().candidate,
-            (asset,),
-        )
-        candidate = root / "candidate-transparent"
-        candidate.mkdir(mode=0o700)
-        with self.assertRaisesRegex(RuntimeError, "alpha occupancy"):
-            compose_prebound_candidate(bad, fixture.context(candidate))
-        self.assertFalse((candidate / "assembly-receipt.json").exists())
-
-    def test_real_private_candidate_is_deterministic_and_fully_bound(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(os.path.realpath(tmp))
-            fixture = Fixture(root, self.ffmpeg, self.ffprobe)
-            results = []
-            for index in range(2):
-                candidate = root / f"candidate-{index}"
-                candidate.mkdir(mode=0o700)
-                results.append(
-                    compose_prebound_candidate(
-                        fixture.composite_request(), fixture.context(candidate)
-                    )
-                )
-                receipt = json.loads((candidate / "assembly-receipt.json").read_bytes())
-                self.assertEqual(receipt["status"], "complete-private-counterfactual")
-                self.assertTrue(receipt["compositor"]["fullDecode"]["passed"])
-                self.assertEqual(
-                    receipt["compositor"]["audio"]["baseSha256"],
-                    receipt["compositor"]["audio"]["finalSha256"],
-                )
-                self.assertFalse((candidate / "final.proxy.mp4").exists())
-                red, green, blue = sample_rgb(self.ffmpeg, candidate / "final.mp4", 1.0)
-                self.assertGreater(red, 180)
-                self.assertGreater(green, 180)
-                self.assertLess(blue, 100)
-            self.assertEqual(
-                results[0].final.artifact.sha256, results[1].final.artifact.sha256
-            )
-            self.assertEqual(
-                results[0].assembly_receipt.sha256, results[1].assembly_receipt.sha256
-            )
-            self._assert_transparent_rejected(fixture, root)
+    def test_inert_clip_rebinding_changes_only_asset_hashes(self) -> None:
+        import dataclasses
+        harness = _Harness()
+        asset = harness.parent.graphics_assets[0]
+        row = harness.parent.decoded_plan()['graphicsTrack'][0]
+        clips = parse_prebound_clips(_document([_clip_row(row, asset)]))
+        changed = dataclasses.replace(asset, receipt=dataclasses.replace(asset.receipt, sha256='e' * 64),
+            media=dataclasses.replace(asset.media, artifact=dataclasses.replace(asset.media.artifact, sha256='f' * 64)))
+        raw = _candidate_clip_bytes(clips, (changed,))
+        expected = _clip_row(row, changed)
+        self.assertEqual(json.loads(raw), [expected])
+        self.assertEqual(raw, _candidate_clip_bytes(clips, (changed,)))
+        self.assertNotEqual(raw, _candidate_clip_bytes(clips, (asset,)))
+        self.assertEqual(json.loads(clips[0].row_json), _clip_row(row, asset))
 
     def test_alpha_pixel_format_classification_is_exact(self) -> None:
         self.assertEqual(alpha_mode("yuva444p12le"), "straight")

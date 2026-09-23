@@ -48,36 +48,21 @@ class PlanLintTests(unittest.TestCase):
         manifest["sources"][0]["duration"] = 600
         self.assertEqual(pl.lint(plan, manifest).errors, [])
 
-    def test_hook_too_many_words(self) -> None:
-        plan = good_plan()
-        plan["titleCards"][0]["text"] = "a b c d e f g h i"    # 9 words
-        self.assert_fires(plan, "words (max")
-
-    def test_hook_too_many_lines(self) -> None:
-        plan = good_plan()
-        plan["titleCards"][0]["text"] = "a\nb\nc"               # 3 lines
-        self.assert_fires(plan, "lines (max")
-
-    def test_hook_line_too_long(self) -> None:
-        plan = good_plan()
-        plan["titleCards"][0]["text"] = "abcdefghijklmnopqrstuvwxyz1234"   # 30 chars
-        self.assert_fires(plan, "chars")
-
-    def test_title_card_overlap(self) -> None:
-        plan = good_plan()
-        plan["titleCards"].append({"outStart": 2.0, "outEnd": 4.0,
-                                   "text": "Second card ok", "style": "lower"})
-        self.assert_fires(plan, "overlaps another title card")
+    def test_every_legacy_title_card_is_rejected(self) -> None:
+        for text in ("TEST hook", "a b c d e f g h i", "a\nb\nc"):
+            plan = good_plan()
+            plan["titleCards"] = [{"outStart": 0, "outEnd": 2.5, "text": text, "style": "hook"}]
+            self.assert_fires(plan, "titleCards are retired")
 
     def test_broll_missing_reason(self) -> None:
         plan = good_plan()
         plan["brollTrack"][0]["reason"] = ""
         self.assert_fires(plan, "missing reason")
 
-    def test_broll_under_title_card(self) -> None:
+    def test_broll_does_not_require_a_removed_hook_overlay(self) -> None:
         plan = good_plan()
-        plan["brollTrack"][0].update({"outStart": 1.0, "outEnd": 2.0})   # under hook [0,2.5]
-        self.assert_fires(plan, "under a title card")
+        plan["brollTrack"][0].update({"outStart": 1.0, "outEnd": 2.0})
+        self.assertEqual(self._errors(plan), [])
 
     def test_music_bad_variants(self) -> None:
         plan = good_plan()
@@ -338,8 +323,8 @@ class MotionLintTests(unittest.TestCase):
              "budget": "low", "visualState": "screen-share"},
         ]
         plan["graphicsTrack"] = [
-            {"outStart": 4.0, "outEnd": 6.0, "kind": "stat-card",
-             "spec": {"value": "10+ years", "label": ""},
+            {"outStart": 4.0, "outEnd": 6.0, "kind": "count-up",
+             "spec": {"start": 0, "end": 10, "suffix": " years"},
              "anchor": "free-band",
              "reason": "restates 'ten years' — number trigger"},
         ]
@@ -373,7 +358,7 @@ class MotionLintTests(unittest.TestCase):
     def test_zone_budget_exceeded(self) -> None:
         plan = self._mg_plan()
         plan["graphicsTrack"] = [
-            {"outStart": float(s), "outEnd": float(s) + 1.2, "kind": "stat-card",
+            {"outStart": float(s), "outEnd": float(s) + 1.2, "kind": "count-up",
              "spec": {}, "anchor": "free-band", "reason": "r"}
             for s in (10.5, 12.0, 14.0, 16.0, 18.0, 20.0)]   # 6 in a 'low' zone
         self.assert_fires(plan, "budget")
@@ -384,43 +369,16 @@ class MotionLintTests(unittest.TestCase):
         plan["audioGain"] = [{"outStart": 2.0, "outEnd": 4.0, "dB": 30}]
         self.assert_fires(plan, "audioGain")
 
-    def test_missing_icon_file_rejected(self) -> None:
-        plan = self._mg_plan()
-        plan["graphicsTrack"][0]["kind"] = "chip-row"
-        plan["graphicsTrack"][0]["spec"] = {"chip1": "Codex", "icon1": "nope.svg"}
-        self.assert_fires(plan, "icon file")
-
-    def test_icon_badge_icon_files_validated(self) -> None:
-        # icon-badge (R12) carries its marks in icon1..N spec keys — the same
-        # generic startswith("icon") existence check chip-row relies on must
-        # cover the new comp. A missing mark fails the plan; real marks pass.
-        plan = self._mg_plan()
-        plan["graphicsTrack"][0]["kind"] = "icon-badge"
-        plan["graphicsTrack"][0]["spec"] = {"icon1": "codex.svg", "icon2": "nope.svg"}
-        self.assert_fires(plan, "icon file")
-        plan["graphicsTrack"][0]["spec"] = {"icon1": "codex.svg", "icon2": "gemini.svg"}
-        self.assertEqual(self._errors(plan), [])
-
-    def test_resolver_bare_names_pass_icon_check(self) -> None:
-        # icon_library.resolve_name returns bare names ("github",
-        # "lucide/check"); every icon comp's iconSrc appends ".svg" when the
-        # value has no dot. The lint gate validates through that SAME rule —
-        # it must accept the resolver's own vocabulary (seam fix 2026-07-11)
-        # while a bare name with no file behind it still fails the plan.
-        plan = self._mg_plan()
-        plan["graphicsTrack"][0]["kind"] = "chip-row"
-        plan["graphicsTrack"][0]["spec"] = {
-            "chip1": "X", "chip2": "", "chip3": "", "icon1": "github",
-            "icon2": "lucide/check"}
-        self.assertEqual(self._errors(plan), [])
-        plan["graphicsTrack"][0]["spec"] = {
-            "chip1": "X", "chip2": "", "chip3": "",
-            "icon1": "lucide/nope"}
-        self.assert_fires(plan, "icon file")
+    def test_retired_icon_designs_cannot_return_with_valid_or_missing_assets(self) -> None:
+        for kind in ("chip-row", "icon-badge"):
+            for icon in ("codex.svg", "nope.svg"):
+                plan = self._mg_plan()
+                plan["graphicsTrack"][0].update(kind=kind, spec={"icon1": icon})
+                self.assert_fires(plan, "retired")
 
     def test_corrections_type_checked(self) -> None:
         plan = self._mg_plan()
-        plan["captions"]["corrections"] = {"Hermosibot": ""}
+        plan["captions"]["corrections"] = {"Snyperbot": ""}
         self.assert_fires(plan, "non-empty strings")
 
     def test_valid_punch_ins_pass(self) -> None:

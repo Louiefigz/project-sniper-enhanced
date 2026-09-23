@@ -1,385 +1,510 @@
-# EDITCRAFT LESSONS — longform + b-roll doctrine (baked 2026-07-11)
+# EDITCRAFT LESSONS — Sniper's long-form editing-craft doctrine
 
-Two studies of the same editing teacher's craft, folded into the PRODUCER's
-deterministic pipelines:
+Status: Sniper-authored design doctrine, rewritten for rc4 (2026-09-18). Pinned into
+every Auto Edit doctrine snapshot. It is the rationale for the long-form b-roll,
+seam, audio and motion-continuity parameters in `scripts/producer/producer_config.py`
+and for Brain lessons LESSON-012 … LESSON-026 in
+`scripts/producer/docs/findings/FAILURE_LEDGER.md`. (The file keeps its historical
+name; its content is Sniper's own.)
 
-- **EC1** — a ~35-min produced education longform, MEASURED shot-by-shot
-  (158 shot/state changes traced; 5 word-timed trigger→insert
-  confirmations) plus the creator's own TAUGHT curriculum on the same
-  footage.
-- **EC2** — a second taught video (editcraft2, 872s) with the rules
-  demonstrated live on real artifacts; measured 677 visual-state events /
-  101 cuts (46.6 states/min vs 6.95 cuts/min).
+How to read this document:
 
-Every rule below carries its evidence stamp and, where it touches code, the
-exact config key / lint / LESSON-id it is encoded as. Conflicts with our
-already-measured grammars (NATEHERK / jadenly / caleb / angela / the
-production envelope) are adjudicated in §10 — **the meta-rule R12 (§9)
-governs every adjudication**.
+- Section numbers (§1 … §11 and their subsections) are identifiers cited by code
+  comments and ledger lessons. Keep them stable.
+- Every number is a **Sniper design parameter**: a configurable default with a stated
+  reason. None is a measurement of a third-party video. Where public standards inform
+  a value (accessibility contrast, loudness, audio/video synchronisation), the
+  standard is named.
+- Each section ends with **Encoded as**, naming the config key, lint rule or lesson
+  that carries the rule into the product.
+- Four mechanisms that protect continuity across a seam or inside a still are grouped
+  as the **continuity mechanisms CM-1 … CM-4** (zoom-pull seams, J-cut leads,
+  image-focus operators, eye-trace). §11 maps them.
 
-Encoding map: `scripts/producer/producer_config.py` (`BROLL`, `MODES`,
-`MOTION`, `AUDIO` additions), `scripts/producer/docs/findings/
-FAILURE_LEDGER.md` LESSON-012..026. Additive only; no default changed.
-
-**CROSS-CHECKED (2026-07-11):** two machine cross-checks (journals
-wf_5035c1e1-82e + wf_bde3eba0-7fa) re-verified the numeric citations
-against the deep-study events + VTT word timings; corrections are stamped
-inline below (see FAILURE_LEDGER LL-012/LL-013 + LESSON-027 — word-timed
-citations come from the wordLock pass, never hand-copied).
+The single principle behind this document: **every edit decision should be explicable
+from the viewer's side** — what they were looking at, what they were hearing, and what
+they needed next. A rule that cannot be explained that way does not belong here.
 
 ---
 
-## 1. The LANE SPLIT — presenter vs screen-share are different grammars
+## §1 Two footage lanes and the churn invariant
 
-**Measured (EC1, 158 shot/state changes):** presenter footage runs **15.6
-shot/state CHANGES per minute with a 39% cutaway share** — that 15.6 is
-state-change CADENCE (every visual-state/shot change counted), NOT detector
-hard cuts, which measure **≈5.8/min on the presenter lane** (machine
-cross-check 2026-07-11); screen-share footage runs **0.6 cuts/min** with
-retention carried by cursor motion + a persistent PIP + demo audio. Never
-apply one lane's pacing lint to the other.
+### §1.1 Presenter footage and screen-share footage are different grammars
 
-**Camera-hold legality (Caleb C4 reconfirmed at longform scale):** a 157s
-zero-cut hold is legal ONLY while another layer churns (cursor, PIP, demo
-audio, pills). A bare hold that long is never legal on presenter footage.
+On **presenter footage** the information is the person: face, voice, gesture. An
+unchanging frame of a talking person is easy to stop watching, so some visual element
+should change every few seconds — a cut, a punch, a card, a b-roll insert. Sniper's
+advisory rhythm for the presenter lane is about **15.6 shot or state changes per
+minute** (one every ~3.8 s), of which only about **5.8 per minute** are hard cuts; the
+rest are graphics, inserts and scale changes, and about **39 %** of changes are
+cutaways away from the presenter.
 
-**State-churn invariant (EC2 R7, CONFIRMED 4/4 grammars):** produced content
-churns *some* visual layer at ~45–90 events/min while hard cuts stay
-0–17/min (editcraft2: 46.6 states/min vs 6.95 cuts/min). Never force cut
-density to hit an energy number — pick WHICH layer churns per style.
+On **screen-share footage** the information is the moving interface. Every cut away
+from the screen destroys the viewer's spatial model of where things are, so the lane
+runs at about **0.6 cuts per minute** and keeps attention with other layers: the
+cursor, a persistent presenter PIP, the application's own sound, and sparse keyword
+pills. A long hold with **no cut at all** is legal on this lane — up to **157 s** —
+but only while at least one of those layers keeps changing. The same hold on presenter
+footage is never legal.
 
-**Encoded:** `MODES["longform"]["pacing_lanes"]` (presenter/screen-share
-lane data the brain + future lane-aware pacing lint read);
-`MODES["longform"]["pacing"]["state_churn_per_min"]` advisory band;
-LESSON-014. Roadmap: teach `plan_lint_motion`'s pacing pass to switch lane
-by the plan's visual-state map (the `visual_state` module already
-classifies talking-head / screen-share zones).
+These values are advisory defaults the brain reads; the pacing lint does not yet
+switch its ceilings by lane. The decimals are kept because consumers read them; they
+express a design intent (presenter: a change every few seconds, mostly not cuts;
+screen: almost no cuts), not a measurement.
 
-## 2. B-roll doctrine (the b-roll lane's law)
+**Encoded as** `MODES.longform.pacing_lanes`; LESSON-014.
 
-### 2.1 Trigger → insert latency (MEASURED, word-timed)
-Land every b-roll/graphic within **0–1.5s of its trigger**. The anchor is
-the **REFERENCE-PHRASE START** (the first word of the naming phrase), so an
-insert may LEAD the phrase's head noun by up to ~1.5s while still trailing
-the trigger — the band stays (0, 1.5). Five word-timed confirmations:
-MKBHD 757s→760s, Trahan ~766s→766s, "keyboard shortcuts" 489–495s→492s,
-"regret" 56–62s→57s, "14-day filmmaker" word "14-day" **1768.48s → zoom
-1769.39s (+0.91s) / graphic 1769.65s (+1.16s)** (machine-verified from the
-VTT word timing + deep-study events; an earlier hand-copied "~798s→796s"
-pair put the insert ~2s BEFORE its trigger and contradicted the very band
-it was cited to confirm — LL-013, LESSON-027).
-**Encoded:** `BROLL["trigger_latency_s"] = (0.0, 1.5)`; the receipts lane
-already lands `outStart` exactly ON the trigger word (latency 0, inside the
-band); LESSON-025.
+### §1.2 The churn invariant: some layer always moves, cuts need not
 
-### 2.2 Literal-first matching
-If the speech names a person/tool/product/site, show THAT thing (creator
-clips, phone mockup, web UI, site scroll, camera sensor). Reserve
-conceptual b-roll for emotional beats only (regret / boredom / diligence)
-and stage it as cinematic SELF-footage, never stock.
-**Corroborates** REFERENCE_STYLE_STUDY R17 ("receipts beat rendered
-graphics") and the word-locking in MEASURED_EDIT_GRAMMAR.
-**Encoded:** `BROLL["literal_first"]` + `BROLL["conceptual_only_for"]`;
-LESSON-012. Conflict with the R24 concept-stock lane adjudicated in §10.1.
+Produced content keeps **some visual layer** changing at roughly **45-90 events per
+minute** — captions, card builds, module lands, pills, cuts, inserts all count — while
+hard cuts may stay far lower. Rationale: the eye needs something new about once a
+second to stay engaged, but that novelty can live in any layer. Forcing the *cut*
+count up to reach an energy target produces choppy edits; choosing *which* layer
+churns is a style decision (captions in a restrained Short, card builds in long-form,
+cursor and pills on screen-share).
 
-### 2.3 B-roll priority ladder (EC2 R10, CONFIRMED 3rd source)
-**Motion graphics > purpose-shot b-roll > stock** ("lazy version", 3:54) —
-choose by explanatory density; animation wins where footage is too slow or
-confusing (Dude Perfect beat 4:02–4:37). Direct external confirmation of
-HyperFrames-PRIMARY ordering.
-**NEW sub-rule (education content): SELF-DEMONSTRATING B-ROLL** — apply the
-taught technique to a real on-screen artifact (the hue lesson literally
-turns the screenshot red @8:02; the cut lesson uses THIS video's timeline
-@9:31). Demo-on-real-artifact outranks metaphor illustration;
-receipts-over-claims (real tweets/analytics) now 3/3 creators.
-**Encoded:** `BROLL["priority"]`; LESSON-012.
+Scope: the band describes presenter and produced zones. Screen-share-heavy videos
+legitimately run below it; never flag them against it. A future lint that enforces the
+band must scope it by visual-state zone.
 
-### 2.4 Hold bands (MEASURED)
-| insert kind | hold |
-|---|---|
-| referenced-creator clips | 1.5–2.5s |
-| literal object/system shots | 2–4s |
-| montage-burst shots | 0.6–0.7s |
-| side-by-side comparison cards | 9–10.5s |
-| list cards | 8–12s |
-| step/title cards | 2–3s |
-| diagram cards | 2.5–8.5s |
+**Encoded as** `MODES.longform.pacing.state_churn_per_min = (45.0, 90.0)` (advisory).
 
-**Encoded:** `BROLL["hold_bands_s"]` (the brain picks the band by kind;
-the existing `MODES[*]["broll_insert_max_s"]` footage ceilings are
-unchanged — see §10.4 for the card-hold adjudication).
+---
 
-### 2.5 VO continuity law
-A-roll speech never stops under any insert — all b-roll is **video-only**;
-mute borrowed-clip audio; demo/native audio is allowed only when the demo
-IS the lesson (playthrough moments).
-**Already true in code:** `broll/broll_insert.py` composites video-only
-("receipts ride on top, never touch audio"). **Encoded:**
-`BROLL["vo_continuity"]` + `BROLL["demo_audio_exception"]`; LESSON-013.
+## §2 The b-roll lane
 
-### 2.6 Credit label law
-Borrowed third-party footage carries a lower-left **`CREDIT: <NAME>`**
-label for the insert's full duration (observed on 100% of MKBHD/Trahan
-shots). **Encoded:** `BROLL["credit_label"]`; LESSON-013. Roadmap: a
-`credit` field on brollTrack entries rendered as a chip comp.
+### §2.1 Trigger → insert latency
 
-### 2.7 Enter/exit grammar
-Hard cut in/out for ~90% of inserts; **zoom pull-in/pull-out ONLY at
-a-roll↔b-roll seams; glare/flash or whip-blur ONLY at graphic↔a-roll
-seams**. Transitions are seam markers (~10–12 events in 35 min ≈ 0.3/min),
-never intra-lane decoration.
-**Corroborates** MOTION["transitions"]["max_per_min"]=2.0 sitting far above
-the measured rate (a ceiling, not a target) and plan_lint_smooth's WARN on
-flash/leak in longform. **Encoded:** `MOTION["transitions"]["seam_roles"]`
-+ `["longform_events_per_min"]` advisory.
+An insert that illustrates a phrase lands **0 to 1.5 s after the start of the phrase
+that names it**. The anchor is the **first word of the naming phrase**, so an insert may
+lead the phrase's head noun while still trailing the trigger. Before the phrase, the
+image is a riddle; much later than 1.5 s, the viewer has moved on to the next idea and
+no longer binds the image to the words. The receipts lane lands its inserts exactly on
+the word (latency 0, inside the band).
 
-### 2.8 Insert polish law
-Every b-roll insert gets the same LUT/grade as A-roll (type-180 rotate if
-rigged overhead) and stabilization when handheld — inserts must be
-indistinguishable in polish from A-cam.
-**Encoded:** `BROLL["insert_polish"]`; LESSON-013.
+Timing claims about any reference or render are **read from word timings**, never
+recalled: a latency quoted in a document or comment comes from a word-lock pass or a
+word-timed caption file (LL-013, LESSON-027).
 
-### 2.9 B-roll acquisition loop (TAUGHT)
-Freeze editing at rough-cut → watch it → write the FULL b-roll shot list →
-shoot ALL of it in one outing → resume. Plan-then-batch, never
-shoot-per-gap. **Encoded:** LESSON-025 (operator workflow; matches our
-propose-review-fill loop where the planner emits `assetId: null` slots).
+**Encoded as** `BROLL["trigger_latency_s"] = (0.0, 1.5)`; LESSON-025.
 
-## 3. Card grammars (full-frame graphics)
+### §2.2 Literal first
 
-### 3.1 Full-frame cutaway law (RECONFIRMED)
-Every card, list, diagram, and comparison is a full-frame takeover; never
-panel a graphic over the face; around-face elements are limited to small
-pills stacked in measured free space.
-**Already law:** `feedback_pro_graphics_are_cutaways` + the own-screen
-anchor + free-space placement. Third corroboration — no change.
+When the speech names a specific person, tool, product or site, show **that thing**:
+the product's interface, the site scrolling, the object on the desk. Conceptual b-roll
+(an image standing for an idea) is reserved for emotional beats — regret, boredom,
+effort — and is staged as graded footage of the speaker's own world, not generic
+stock. Rationale: a literal image confirms the words; a metaphor asks the viewer to
+decode, and decoding competes with listening.
 
-### 3.2 Step-card template
-Every section boundary gets a full-frame dark card — viewfinder chrome
-(AUTO/RECORD corners), eyebrow "STEP #N", glitch/typewriter title build,
-**2–3s hold**, hard cut out, **riser+hit under it, new music track for the
-new chapter**. **Encoded:** hold band in `BROLL["hold_bands_s"]
-["step-card"]`; audio in §6; LESSON-026. Comp roadmap: a `step-card`
-template in `templates/motion/compositions/`.
+**Encoded as** `BROLL["literal_first"] = True`,
+`BROLL["conceptual_only_for"] = ("emotional",)`; LESSON-012.
 
-### 3.3 List-card grammar
-Dark grid bg, title with exactly ONE red keyword, items build **one per
-spoken beat** (~2–3s apart, 3 items typical); the decision variant builds
-all options then COLLAPSES to the chosen answer + red arrow + typed
-one-line reason.
-**Corroborates LL-011 progressive point reveal** (per-item word-locked
-lands are already an ERROR-gated law on longform: `MOTION["row_lands"]` +
-`plan_lint_visual.check_row_lands`). The ONE-red-keyword rule matches the
-payload-economy doctrine (LESSON-023).
+### §2.3 Priority ladder
 
-### 3.4 Comparison-card grammar
-Before/after claims get side-by-side LIVE video panels with white labels
-(ORIGINAL/ENHANCED, BEFORE/AFTER), **9–10.5s hold — long enough to actually
-hear/see the difference twice**. **Encoded:** `BROLL["hold_bands_s"]
-["comparison-card"]`; §10.4 for the ceiling adjudication.
+Choose b-roll by **explanatory density**, in this order: Sniper motion graphics that
+show structure; a purpose-shot insert of the real thing; stock footage last. When the
+thing being explained can be demonstrated on a real on-screen artifact (the actual
+document, dashboard or product), the demonstration outranks any illustration of it.
 
-### 3.5 Signature card recurs
-The brand concept card (10-step number line) appears at the hook (t11) and
-AGAIN on re-mention (t48) — encode signature cards as reusable comps keyed
-to a concept, replayed on re-mention. **Encoded:** LESSON-026 (brain
-judgment: which concept is signature); comps are already content-hash
-cached so a replay is free.
+**Encoded as** `BROLL["priority"] = ("motion-graphics", "purpose-shot", "stock")`;
+LESSON-012.
 
-### 3.6 Section recap card
-Close a long teaching section with a 2–3s card — circular face bubble
-centered on dotted black + pill title of what was just taught ("HOW TO ADD
-TEXT") — before the next step card. **Encoded:** LESSON-026.
+### §2.4 Hold bands by insert kind
 
-### 3.7 Topic-chip overture
-The intro may stack topic pills around the presenter in free space (6
-chips, ~4s) as a contents preview — free-space-placed, face never
-occluded. **Compatible** with the free-space placement engine
-(`planner/free_space.py`) as-is; a chip-row comp already exists.
+The brain picks an insert's hold from its kind. Each band is set by how long the
+viewer needs to *recognise* (a face or object) or *read* (a card) what is shown:
 
-## 4. Screen-share teaching lane
-
-### 4.1 Persistent tutorial PIP (new lane; extends pending pip_takeover #39)
-During screen-share teaching, composite a circular webcam PIP **~11% frame
-width, bottom-right, over the timeline zone (never over the content being
-taught)**; introduce it when depth increases (his: step 5 onward), omit it
-during quick cruise-through demos.
-**Encoded:** `MODES["longform"]["tutorial_pip"]` (data for the future lane;
-the ANIMATED pip_takeover remains unwired — task #39).
-
-### 4.2 Screen-rec punch-in
-Never show a full 1080 desktop — punch into the active UI region;
-split-composite two zoomed panels when comparing controls; add keycap
-callout graphics (white keycap + action label, e.g. "Q — DELETE LEFT")
-when a shortcut is spoken. **Encoded:** LESSON-014 (punch-into-UI);
-keycap-callout comp is roadmap.
-
-## 5. Captions on longform — keyword pills, not streams
-
-**EC1:** long-form emphasis layer = sparse white caption pills echoing the
-key phrase (**~8 per 35 min**: LINK IN THE DESCRIPTION, QUALITY ASSURANCE,
-CHECK FOR TYPOS…), never verbatim caption streams.
-**EC2 R11 (CONFIRMED format split):** long-form: NO continuous caption
-track; sparse short center-screen emphasis captions (≤3 words TYPICAL, not
-a hard cap — a 7-word emphasis card is observed on-style) only where the
-exact words matter (7:03–7:24 practice+sermon); shorts: continuous 1–5 word
-cues.
-Karaoke remains off-style in every measured grammar.
-**Encoded:** `MODES["longform"]["emphasis_pills"]` advisory
-(`captions_burn: False` + SRT sidecar already the longform default —
-compatible: the sidecar is closed captions, not a burned stream). Roadmap:
-a small `emphasis-caption` pill comp for the longform lane.
-
-## 6. Music + SFX doctrine
-
-**EC1 (his words, his practice):** riser+hit marks every new section;
-whoosh/pop under every graphic entrance; **trim SFX to the animation's
-entrance duration only and add a fade-in handle** to soften attack; music
-bed **~−20 dB under voice**, adjusted by ear; **new song per chapter**;
-"audio is half of the viewing experience."
-
-**EC2 R3 — emotional SFX classes (11:16–12:01):** extend the sfx vocabulary
-beyond whoosh/click/pop with **riser** (pre-payoff tension; HONESTY GATE:
-only when a real payoff follows), **hit** (payoff/emphasis; riser→hit chain
-legal), **drone** (dark/suspense mood). Map to beat types at plan time;
-keep whoosh-on-motion + highlight-sound-on-highlight as the mechanical
-layer.
-
-**EC2 R4 — music as segment architecture (12:33–14:22, practiced in his own
-master):** longform plans split by subject change and assign a music mood
-per segment; music-STOP at a major pivot = jolt (his 2:30 hits −56 LUFS on
-the pillar transition); slow fade-out = segment-closing signal; drop/quiet
-the bed under the pitch/CTA (his 4:50–5:33 runs −21..−27 LUFS); sync a
-music hit to the problem→solution pivot; prefer stems when available.
-**LONGFORM ONLY** — jadenly shorts keep a constant bed (6/6 zero-gap),
-caleb has none (§10.9).
-
-**Encoded:** `AUDIO["sfx_classes"]` + `["sfx_trim_to_entrance"]` +
-`["sfx_fade_in_handle"]`; `MODES["longform"]["music_segments"]`;
-`AUDIO["music_duck_db"]` (18–20) already brackets the taught ~−20 dB —
-corroboration, unchanged; LESSON-018, LESSON-019, LESSON-026. Roadmap:
-synthesize riser/hit/drone into `audio/sfx_library` (the pack build is
-seeded/deterministic).
-
-## 7. Motion rules on graphics + stills
-
-### 7.1 Eye-trace continuity (EC2 R1, NEW — taught 9:26–9:57 w/ self-demo)
-At every hard cut and every full-frame graphic insertion, the incoming
-frame's focal point (face, key text, highlighted element) must land near
-the outgoing frame's gaze point; violations allowed only as deliberate
-flagged jolts (his 10:08 anti-rule). Graphics placement should read the
-PREVIOUS shot's focus, not just free space.
-**Encoded:** `MOTION["eye_trace"]` (advisory + the planned wiring named:
-previous-shot focal xy as a `resolve_offset_v2` input + Audit B WARN);
-LESSON-015.
-
-### 7.2 Entrance causality (EC2 R5, GENERALIZED — adjudicates 9:02–9:24 vs
-jadenly instant-pop vs caleb frame-0 pins)
-Every graphic entrance needs a cause the viewer can perceive: (a) animated
-move-in, (b) instant pop PAIRED with an SFX (shutter/pop) or a hot bed, or
-(c) present from frame 0. **A silent unexplained mid-video pop is the only
-illegal state.** Lint spec: graphics with inDur=0 must carry an sfx slot or
-start at t=0 (longform produced lane).
-**Encoded:** `MOTION["entrance_causality"]` (the legal-cause catalog +
-lint spec); LESSON-016. Roadmap: the inDur=0 check in `plan_lint_motion`.
-
-### 7.3 Stills vs frozen cards (EC2 R6, SPLIT RULE — adjudicates taught
-6:12–6:25 vs NATEHERK pixel-frozen holds)
-Photos/screenshots inserted as b-roll get slow scale/position drift (pro
-hold band **0.5–1%/s**) or perspective moves; DESIGNED cards/dioramas stay
-**pixel-frozen** and get aliveness from build cadence instead. Never
-reintroduce drift on cards.
-**Encoded:** `BROLL["still_drift_pct_per_s"]`; LESSON-017. (The aliveness
-creep engine already exists for footage; cards stay frozen — unchanged.)
-
-### 7.4 Image-focus operators (EC2 R2, NEW — all six demoed on a real
-screenshot, 7:40–8:18)
-A still-image b-roll operator set as comp variants: **animate-key-text,
-highlight-scribble, darken/blur-surround, hue-shift (SIGNED color
-semantics: red=negative, green/yellow=positive), circle/arrow/underline,
-subject-glow**. Use on screenshots/photos, not on designed cards.
-**Encoded:** `MOTION["image_focus_ops"]` + `MOTION["hue_shift_semantics"]`
-(the comp-variant vocabulary); LESSON-017. Comp templates are roadmap.
-
-## 8. Structure + envelope refinements
-
-### 8.1 Bursts attach to montage BEATS, not positions
-Example/proof/sell beats carry the cut bursts — intro log-montage **16
-state changes/10s**, course-pitch **42 state changes/30s** (the video's
-peak). These magnitudes are visual-state/shot-change counts, NOT detector
-hard cuts — the deterministic cut detector peaks at **11/10s and 19/30s**
-on the same windows (machine cross-check 2026-07-11); any future burst
-lint must count STATE EVENTS. Each pitch-montage shot gets a white benefit
-label; a stat card ("OVER 101,446 STUDENTS") anchors the proof.
-**Refines** PRODUCTION_ENVELOPE_STUDY (front-loaded envelope): the peak is
-beat-attached, not position-attached. **Encoded:**
-`BROLL["burst"]["longform"]`; LESSON-025. The intro envelope's
-`receipt_montage_state_s` (0.8–1.5) is a DIFFERENT device (receipt
-montage) and stays unchanged — §10.2.
-
-### 8.2 A-roll islands economy (EC2 R9, CONFIRMED)
-Face prominent only **30% of runtime**; 41 a-roll bursts, median 4.5s /
-p75 6s; the two longest (12s @4:53, 22s @5:11) carry the CTA/pitch — spend
-a-roll on important, confident statements and on the ask; carry
-explanation on graphics. Matches his own taught rule (3:31) and our
-envelope doctrine. **Encoded:** LESSON-020.
-
-### 8.3 Blur-teased roadmap (EC2 R8, promoted LOW → MEDIUM)
-2nd independent sighting (jadenly H1 + editcraft2 0:10.5: four blurred
-pillar labels, revealed one per chapter with column recalls at 0:25.5,
-2:29, 8:31, 10:27): open with the video's full roadmap as a curiosity
-object with payload labels blurred/withheld, reveal progressively. Pattern
-family now MEDIUM cross-creator; his variant stretches the reveal across
-the whole video. **Encoded:** doc-only (a comp + brain move; no
-deterministic surface yet).
-
-### 8.4 Edit-order curriculum (TAUGHT)
-import/organize → chronological story assembly (bottom track = sacred
-A-roll) → color+audio enhancement BEFORE any cutting → fluff cut
-(pauses/retakes/boring, split+delete-left/right) → b-roll+graphics+effects
-in one pass → music+SFX → QA watch-through (recolor b-roll, typo check) →
-export.
-**Maps onto the pipeline:** enhance-before-cut = our `audioEnhance` runs on
-the dialogue bus pre-transitions; fluff cut = `edit/apply_pauses.py
---retakes`; QA watch-through = Audit B + FRAME.IO REVIEW (typo check).
-No change needed — corroboration of the stage order.
-
-## 9. THE META-RULE — audience-experience selector (EC2 R12, taught 0:41–2:17)
-
-Editing grammar must match what the audience came for; **disruption of the
-expected experience is the #1 retention killer**. The Sam pole (0.65
-cuts/min, pauses kept, zero graphics) and the MrBeast pole (~2s cuts) BOTH
-win. This is the doctrine behind `target.pace` / `target.treatment`: "use
-b-roll as much as possible" and "strip all pauses" apply only to the
-stimulation lane; caleb-lane restraint is not under-editing. **Any future
-taught-rule conflict gets adjudicated through this selector first.**
-**Encoded:** LESSON-021 (contractually binds the authoring brain); it is
-the adjudicator used throughout §10.
-
-## 10. Conflicts with our grammar — adjudicated
-
-| # | conflict | adjudication |
+| Kind (config key) | Hold | Reason |
 |---|---|---|
-| 10.1 | EC1 literal-first "conceptual = cinematic self-footage, **never stock**" + R10 "stock = the lazy version" vs the R24 **concept-stock lane** (`graphics_planner_receipts.concept_lane`) | Via R12: the concept-stock lane is a *style-gated* (overlay-rich only), lowest-tier, 1/60s-capped lane — the editcraft/cinematic-education grammar simply never activates it. `BROLL["priority"]` now records the ladder (motion-graphics > purpose-shot > stock) so the brain prefers a HyperFrames comp or graded self-footage before any stock fill. Lane kept, caps unchanged. |
-| 10.2 | EC1 montage-burst hold **0.6–0.7s** vs intro envelope `receipt_montage_state_s` **(0.8, 1.5)** | Different devices measured on different corpora: the envelope band is per-receipt holds in the hook's receipt montage; the 0.6–0.7s band is pitch/proof burst shots. Default unchanged; the burst band lives separately in `BROLL["burst"]["longform"]["hold_s"]`. |
-| 10.3 | EC1 body is HEAVILY edited (cards ~1/min, b-roll, montage bursts) vs `MODES["longform"]["broll_min_spacing_s"]` comment "front-loaded in the opening only" | Already corrected by the 2026-07-07 whole-video envelope measure (memory: production_envelope). The comment is stale doctrine, the NUMBER (10s spacing) is compatible with ~1 card/min bodies. Number unchanged; doctrine recorded here. |
-| 10.4 | EC1 **list cards 8–12s** / comparison cards 9–10.5s vs `MOTION["hold_max_s"]["longform"]`=11.0 / `takeover_max_s`=10.5 | Ceilings KEPT (pinned to the NATEHERK-measured reference + `tests/test_nateherk_longform.py`). A comparison card (10.5s) fits exactly; a 12s list card is legal in the editcraft grammar only with per-item progressive lands (LL-011) and requires a conscious knob raise — the band is recorded in `BROLL["hold_bands_s"]` so the brain knows the pro range. Not a measured-error correction: two references disagree, the tighter gate stands until an operator style pack asks for the looser one. |
-| 10.5 | EC2 R4 music segment architecture vs jadenly constant bed (6/6 zero-gap) / caleb no bed (3/3) | Mode+pace-scoped: encoded LONGFORM-ONLY (`MODES["longform"]["music_segments"]`); shorts style packs keep their `music` flags. Exactly R12. |
-| 10.6 | EC2 R1 eye-trace placement vs current free-space-only placement (`planner/free_space.py` places into the emptiest legal region with no memory of the previous shot) | Additive: advisory `MOTION["eye_trace"]` + LESSON-015 bind the brain now; wiring previous-shot focal xy into `resolve_offset_v2` + an Audit B WARN is the named roadmap. No behavior changed. |
-| 10.7 | EC2 R5 entrance causality vs jadenly instant-pop (≤83ms) and caleb frame-0 pins | Not a conflict — R5 was GENERALIZED to adjudicate them: pop+SFX/hot-bed and frame-0 are both legal causes. Only the silent mid-video pop is illegal (longform produced lane lint spec recorded). |
-| 10.8 | EC2 R6 drift-on-stills vs NATEHERK pixel-frozen holds | SPLIT RULE as given: stills/screenshots drift 0.5–1%/s; designed cards stay pixel-frozen. `BROLL["still_drift_pct_per_s"]` applies to photo b-roll only — the card grammar is untouched. |
-| 10.9 | EC1 seam vocabulary (zoom pulls at a-roll↔b-roll seams, flash at graphic seams, ~0.3/min) vs `plan_lint_smooth` WARNing on flash/leak in longform | Compatible: the lint already treats flashes as a WARN-worthy rarity; the measured 0.3/min sits far under `max_per_min` 2.0. `seam_roles` records WHICH seam type each cover is legal at (advisory); lint stays as-is. |
-| 10.10 | EC1 tutorial PIP (persistent webcam bubble over screen-share) vs shorts PIP ban (operator-adjudicated 2026-07-10: static face-in-PIP takeover = longform only) | Aligned: the tutorial PIP is a LONGFORM screen-share device, encoded under `MODES["longform"]` only. The shorts ban stands. |
+| `referenced-creator` — footage of a person the speaker names | 1.5-2.5 s | recognition of a face is fast; longer turns a reference into a segment about them |
+| `literal-object` — the product, site or thing named | 2.0-4.0 s | recognise, then see one detail |
+| `montage-burst` — one shot inside a burst | 0.6-0.7 s | a burst is read as a group, not shot by shot (§2.9) |
+| `comparison-card` | 9.0-10.5 s | long enough to hear the comparison and see it twice |
+| `list-card` | 8.0-12.0 s | one item per spoken item; bounded by the card ceiling (§10.4) |
+| `step-card` — a section boundary card | 2.0-3.0 s | a signpost, not content (§3) |
+| `diagram-card` | 2.5-8.5 s | scales with the number of parts |
 
-## 11. Encoded-where map
+The planner-lane constants that the receipts and illustration lanes read (receipt hold
+2.5 s, same-artifact dedup 30 s, concept hold 2.5 s at most once per 60 s,
+illustration hold 2.5 s at most once per 30 s) are documented with their rules in
+`REFERENCE_STYLE_STUDY.md` R17 and R24.
 
-| rule | encoding |
+**Encoded as** `BROLL["hold_bands_s"]`; card kinds also respect
+`MOTION["hold_max_s"]`.
+
+### §2.5 Voice continuity
+
+The presenter's speech **never stops under an insert**. Every b-roll insert is
+video-only; audio embedded in borrowed clips is muted. The single exception is a
+demonstration whose own sound *is* the point (a product playing its audio), and then
+only for the demonstration's length. Rationale: the voice is the thread the viewer
+follows through the video; an insert that interrupts it turns an illustration into an
+interruption.
+
+**Encoded as** `BROLL["vo_continuity"] = True`,
+`BROLL["demo_audio_exception"] = "playthrough"`; `broll/broll_insert.py` composites
+video-only; LESSON-013.
+
+### §2.6 Credit label for footage Sniper did not shoot
+
+When an insert uses footage the operator did not shoot (and has the right to use), a
+small credit label sits in the **lower-left corner for the insert's full duration**.
+Rationale: attribution that appears only briefly is not attribution; the lower-left
+corner is outside the caption band and the right-hand platform controls.
+
+**Encoded as** `BROLL["credit_label"] = {"corner": "lower-left", "template":
+"CREDIT: {name}", "full_duration": True}` (the comp and plan field are roadmap; the
+lesson binds the brain now); LESSON-013.
+
+### §2.7 Seam roles and zoom-pull seams (CM-1)
+
+Most inserts enter and leave on a **plain hard cut**. A seam cover is a marker of a
+change of *kind* of footage, not decoration, so each cover kind is legal only at its
+seam type:
+
+- **zoom-pull** at seams between presenter footage and b-roll (`aroll<->broll`);
+- **flash / light-leak** at seams between a full-frame graphic and presenter footage
+  (`graphic<->aroll`).
+
+Covers are rare: the long-form advisory rate is about **0.34 per minute** (roughly one
+every three minutes), always under the hard ceiling of `MOTION["transitions"]["max_per_min"]`.
+
+**CM-1 — zoom-pull seams.** An eased digital zoom bridges or resolves an
+a-roll/b-roll seam. Three variants, each with a default and an allowed band (all
+Sniper design parameters, deliberately configurable):
+
+| Variant | Shape | Defaults (band) |
+|---|---|---|
+| `punch-cut` | an eased punch-in on the outgoing shot that **completes before** the cut; the cut itself is covered by a light-leak or flash, sequentially | scale 1.205 (1.10-1.25), attack 0.33 s (0.25-0.42), completes 0.9 s before the cut (0.6-1.3), cover `light-leak` |
+| `whip` | an accelerating zoom that spans the cut, blur-masked at its peak, then an eased settle on the incoming shot | peak 1.9 (1.5-2.0), ramp 1.0 s (0.7-1.4), settle to 1.195 (1.10-1.25) over 0.6 s (0.4-0.8), blur σ 12 within ±0.12 s of the seam |
+| `settle` | the incoming shot eases out from a slight zoom just after the cut — a soft landing | from 1.08 (1.05-1.12) over 0.4 s (0.3-0.55), starting 0.1 s after the cut (≤ 0.55 s) |
+
+Rationale: the punch-cut's zoom and cover are sequential because two simultaneous
+events at one seam read as one confused event; the whip's blur hides the frame where
+the scale is largest so the viewer never sees a soft upscale; the settle is small
+(under 12 %) because it is a landing, not an emphasis. Only feature-tracked scale
+evidence may propose a zoom-pull during study; a face-width change alone can be a
+lean, not a zoom. Zoom-pulls are long-form only and count against the seam budget.
+
+**Encoded as** `MOTION["transitions"]["seam_roles"]`,
+`MOTION["transitions"]["longform_events_per_min"] = 0.34`,
+`MOTION["transitions"]["zoom_pull"]`; executed by `motion/zoom_pull.py` through
+`motion/transitions.py`; stock transitions banned (LL-014, LESSON-028).
+
+### §2.8 Insert polish and grade inheritance
+
+Every insert gets the presenter footage's grade and, when handheld, stabilisation, and
+uses the video's one motion vocabulary. Rationale: an insert that looks like it came
+from a different production reads as borrowed even when it is not; matching polish
+makes the insert part of the argument.
+
+**Encoded as** `BROLL["insert_polish"] = {"grade_matches_aroll": True,
+"stabilize_handheld": True}`; LESSON-013.
+
+### §2.9 Bursts attach to beats, not to positions
+
+A **burst** — several short inserts in quick succession — belongs to a beat whose
+content is itself a group: examples, proof, a list of results, the offer. Each shot in
+an offer montage carries a short benefit label. Bursts are never scheduled by timeline
+position ("something every N seconds"). Burst magnitudes are counted as **visual state
+events** (cuts, graphics, inserts, panel changes), never as detector hard cuts alone.
+
+| Mode | Burst parameters |
 |---|---|
-| lane split + camera-hold + churn invariant | `MODES["longform"]["pacing_lanes"]`, `pacing.state_churn_per_min`, LESSON-014 |
-| trigger latency, hold bands, burst bands, credit, VO continuity, priority, literal-first, polish, still-drift | `producer_config.BROLL` (+ receipts/illustration lanes now read their hold/gap constants from it), LESSON-012/013/017/025 |
-| step/list/comparison/signature/recap cards | `BROLL["hold_bands_s"]`, LL-011 row-lands law (already ERROR-gated), LESSON-023/026 |
-| tutorial PIP, screen-rec punch-in | `MODES["longform"]["tutorial_pip"]`, LESSON-014 |
-| keyword pills / caption format split | `MODES["longform"]["emphasis_pills"]` (R11) |
-| SFX classes + honesty gate, music segments | `AUDIO["sfx_classes"]`, `MODES["longform"]["music_segments"]`, LESSON-018/019 |
-| eye-trace, entrance causality, image-focus ops | `MOTION["eye_trace"]`, `MOTION["entrance_causality"]`, `MOTION["image_focus_ops"]`, LESSON-015/016 |
-| a-roll islands, edit order, acquisition loop | LESSON-020/025 (+ pipeline stage order already matches) |
-| R12 meta-rule | LESSON-021 — the standing conflict adjudicator |
+| short | at most 3 inserts in a 4 s window, holds 0.6-1.3 s |
+| long-form | intro montage up to 16 state events per 10 s; offer / call-to-action montage up to 42 state events per 30 s; detector-cut ceilings 11 per 10 s and 19 per 30 s; holds 0.6-0.7 s |
+
+Rationale: a group of examples shown as a group is understood as "there are many";
+the same shots spread through the video are just more inserts. The ceilings bound how
+fast a burst may run before individual shots stop registering at all.
+
+**Encoded as** `BROLL["burst"]`; the lone-insert cadence
+`MODES[*]["broll_min_spacing_s"]` still governs single inserts (§10.3,
+`SHORTFORM_LESSONS.md` §9.2); LESSON-025.
+
+---
+
+## §3 Section architecture: step cards, signature cards, recaps
+
+- **Every section boundary earns a step card**: a short card (2-3 s hold, §2.4) naming
+  the new section, with a riser-to-hit sound (§6.1) and, in long-form with music, a new
+  music segment (§6.2). Rationale: long-form viewers navigate by sections; a boundary
+  that is not marked is a boundary the viewer misses.
+- **Signature concept cards are reusable.** When a concept is central enough to be
+  named more than once, build one card for it and **replay the same card** on each
+  re-mention. Recognition is faster than reading, and repetition of the same visual
+  ties the mentions together.
+- **A long explanatory section may close with a recap card** (2-3 s): the presenter in
+  a small bubble plus a pill title of what the section established, before the next
+  step card. Rationale: a recap consolidates before the viewer is asked to hold a new
+  topic.
+
+**Encoded as** LESSON-026; step-card hold `BROLL["hold_bands_s"]["step-card"]`.
+
+---
+
+## §4 The screen-share lane
+
+Screen-share grammar (§1.1) in practice:
+
+- **Never show a full bare desktop** at delivery size — punch or crop into the active
+  interface region the narration is about. Interface text at desktop scale is
+  unreadable on a phone.
+- The **cursor is the pointer**; keep it visible and do not cut while it travels.
+- Keep the **application's own sound** when it demonstrates something; otherwise
+  voice continuity (§2.5) applies.
+- **Keyword pills** (§5) carry emphasis; captions remain the SRT sidecar.
+
+**Encoded as** LESSON-014; `MODULE_CARDS.md` §3.
+
+### §4.1 The walkthrough presenter PIP
+
+During a screen walkthrough that goes into depth, composite a circular presenter PIP
+of about **11 % of frame width** in the **bottom-right corner**, placed over the least
+important region (typically timeline or status areas) and **never over the content
+being discussed**. Introduce it when the explanation deepens; leave it out for quick
+fly-throughs. Rationale: the face restores the human thread during long screen
+stretches, and 11 % is large enough to read expression while small enough to cover
+only chrome. Long-form only; the ban on presenter PIPs in shorts stands.
+
+**Encoded as** `MODES.longform.tutorial_pip = {"width_frac": 0.11, "corner":
+"bottom-right", "avoid": "content-zone", "introduce_on": "depth-increase"}` (the key
+keeps its historical name).
+
+---
+
+## §5 Keyword pills, not captions
+
+The long-form emphasis layer is **sparse**: a small centred pill echoing the exact key
+phrase, typically up to **three words**, about **one every four minutes**
+(0.25 per minute), and only where the precise words matter (a name to remember, a
+term being defined, a number to write down). It is never a verbatim caption stream —
+the SRT sidecar remains the caption track. "Three words" is typical, not a cap: a
+longer phrase is legal when the exact wording is the point. Rationale: emphasis works
+by contrast; frequent emphasis is no emphasis.
+
+**Encoded as** `MODES.longform.emphasis_pills = {"per_min": 0.25, "words_typical": 3}`.
+
+---
+
+## §6 Audio craft
+
+### §6.1 Sound effects: a mechanical layer and an emotional layer
+
+Sound effects fall into two layers:
+
+- **Mechanical** — `whoosh`, `click`, `pop`: the sound of something moving or
+  appearing on screen (a whoosh under a motion, a click under a highlight).
+- **Emotional** — `riser`, `hit`, `drone`, mapped to beat types at plan time: a
+  **riser** builds tension before a payoff; a **hit** lands the payoff or a section
+  arrival (every new section gets riser → hit); a **drone** carries a dark or
+  suspenseful mood.
+
+**The riser honesty gate:** a riser is legal **only when a real payoff follows**.
+Tension without release teaches the viewer that the sound means nothing. A riser → hit
+chain is legal.
+
+Every effect is **trimmed to the entrance it accompanies** and given a short
+**fade-in handle** so its attack is not a click. Rationale: an effect longer than its
+motion is heard as a separate event.
+
+**Encoded as** `AUDIO["sfx_classes"]`, `AUDIO["sfx_trim_to_entrance"]`,
+`AUDIO["sfx_fade_in_handle"]`; `audio/sfx_library` ships the mechanical layer;
+LESSON-018.
+
+### §6.2 Music as segment architecture (long-form)
+
+In long-form, music follows the structure: split by subject change, **one mood per
+segment**, a **new track per chapter** entering on the section card's riser and hit. A
+**music stop** is a deliberate jolt reserved for a major pivot; a **slow fade-out**
+closes a segment; the bed **drops or ducks under the offer or call to action** so the
+ask is heard clearly. The bed sits about **20 dB under the voice**, inside Sniper's duck
+band of 18-20 dB. Rationale: at that level music is felt as atmosphere and does not
+compete with speech intelligibility. Short-form style packs keep their own music rules
+(a constant bed for punch, none for restrained).
+
+**Encoded as** `MODES.longform.music_segments` (`bed_under_voice_db = 20.0`),
+`AUDIO["music_duck_db"] = (18.0, 20.0)`, `AUDIO["music_gap_db"]`; `audio/audio_mix.py`
+executes the bed; LESSON-019.
+
+### §6.3 J-cut leads (CM-2)
+
+The default seam is a **late-in-pause** cut: picture changes shortly before the next
+word, with no audio lead (the edit brain picks those boundaries). About one seam in
+five may carry a true **J-cut**: the incoming segment's audio starts **before** its
+picture. Sniper's default lead is **80 ms**, with a preferred band of **65-95 ms** and a
+hard maximum of **300 ms**; the outgoing part must keep at least **0.1 s** of its own
+audio.
+
+Rationale: a short audio lead makes a cut feel pulled forward by the speech rather
+than imposed on it. The preferred band sits close to the audio-before-video
+acceptability limit published in ITU-R BT.1359 (about 90 ms), so a lead in the band
+reads as momentum rather than a sync error; beyond about 300 ms the lead is heard as
+two sentences overlapping. Leads outside the band WARN; beyond the maximum they ERROR.
+The lead is baked into the **outgoing** part's audio tail so every part keeps audio
+length equal to video length and A/V sync is never shifted.
+
+**Encoded as** `AUDIO["jcut"] = {"lead_default_ms": 80, "lead_band_ms": (65, 95),
+"lead_max_ms": 300, "prev_min_residual_s": 0.1}`; `cutTrack[i].audioLeadMs`;
+`compile_timeline.parse_audio_lead` (validator shared by lint and `cut_speed.py`).
+
+---
+
+## §7 Motion continuity
+
+### §7.1 Eye-trace (CM-4)
+
+At a hard cut or a full-frame graphic entrance, the viewer's eyes are still where the
+previous shot put them. Land the incoming focal point — a face, the key text, the
+highlighted element — **near the outgoing gaze point** when there is a free choice.
+When placing a graphic, read the **previous** shot's focus, not only the free space. A
+deliberate jolt is legal but must be flagged in the plan (`deliberateJolt`).
+
+This is a **tie-breaker**, never a rule that overrides legibility or fit: designed
+anchors, emptiness and safe margins win first. Sniper applies it as a small additive
+bias on the placement score (**0.05**, against region scores that typically range
+0.1-0.5) and as an **advisory** Audit B warning when a landed graphic's centre is more
+than **0.45** normalised screen units from the gaze point.
+
+**Encoded as** `MOTION["eye_trace"] = {"audit": "warn", "jolt_flag_key":
+"deliberateJolt", "bias_weight": 0.05, "warn_dist_frac": 0.45}`;
+`planner/eye_trace.py`, `planner/graphics_anchors.resolve_offset_v2`,
+`audit/audit_motion.check_eye_trace`; LESSON-015.
+
+### §7.2 Entrance causality
+
+Every graphic entrance needs a **cause the viewer can perceive**: an animated move-in,
+an instant pop **paired** with a sound effect or an energetic music bed, or presence
+from frame 0. A silent, unexplained pop in the middle of a video is the only illegal
+state — it reads as a rendering glitch. This one rule reconciles styles that look
+opposite: restrained Shorts pin their graphic from frame 0, punch Shorts pop with sound,
+long-form cards build in.
+
+**Encoded as** `MOTION["entrance_causality"] = {"legal": ("move-in", "pop+sfx",
+"frame0")}` (lint roadmap: `inDur = 0` needs an SFX slot or t = 0); LESSON-016.
+
+### §7.3 Stills drift, cards do not
+
+Movement is split by asset class. **Photos and screenshots** inserted as b-roll get a
+slow scale or position drift of about **0.5-1 % per second**, or an image-focus operator
+(§7.4). **Designed cards stay pixel-still**; their aliveness comes from their build
+cadence (module lands), never from drift. Rationale: a still photo held without motion
+reads as a frozen frame; a designed card that drifts makes its text harder to read and
+looks like a mistake.
+
+**Encoded as** `BROLL["still_drift_pct_per_s"] = (0.5, 1.0)`; LESSON-017.
+
+### §7.4 Image-focus operators (CM-3)
+
+A still screenshot or photo can direct attention to one region without a cut. The
+operator vocabulary has six named operations — animate the key text, highlight
+scribble, darken the surround, signed hue shift, circle / arrow / underline, subject
+glow — of which four are executable today:
+
+| Operator | What it does | Defaults (band) |
+|---|---|---|
+| `highlight` | a translucent marker-colour box wipes left to right over the region | alpha 0.4, wipe 0.4 s (0.3-0.7) |
+| `darken-surround` | everything outside the region drops to 75 % luma, applied within one frame | hold 0.8-2.5 s |
+| `blur-surround` | everything outside the region blurs (σ 8), no dimming | — |
+| `hue-shift-signed` | a full-frame colour wash whose sign carries meaning | mix 0.65, ramp 0.233 s, hold 0.8-4.5 s |
+
+**Signed colour semantics:** red for a negative reading, green (after a brief yellow
+of about 1 s) for a positive one. Rationale: the colour lands the evaluation before the
+viewer has parsed the numbers; the yellow step keeps a positive wash from reading as a
+warning.
+
+These operators apply to screenshots and photos only — never to designed cards (§7.3)
+— and belong to the produced graphics stack: a treatment with its graphics lane off may
+not carry them.
+
+**Encoded as** `MOTION["image_focus_ops"]`, `MOTION["hue_shift_semantics"]`,
+`MOTION["focus_ops"]`; executed by `broll/focus_ops.py` on `brollTrack[].focusOps`;
+validated by the same parser in `plan_lint_broll.check_focus_ops`; LL-017; LESSON-017.
+
+---
+
+## §8 Production and presence
+
+### §8.1 Plan the b-roll, then shoot it in one batch
+
+Freeze the story at rough cut, write the **complete shot list** from the kept
+transcript (every literal-first insert, every burst beat, every demonstration), and
+capture it in one session. Then place each insert within the latency band (§2.1),
+starting the cutaway on the action frame, and attach bursts to example, proof and offer
+beats (§2.9). Rationale: b-roll captured before the cut is locked illustrates a story
+that no longer exists; b-roll captured piecemeal does not match itself.
+
+**Encoded as** LESSON-025.
+
+### §8.2 A-roll islands
+
+Spend presenter face time on **confident statements and the ask**; carry explanation
+on graphics and inserts. Presenter islands between inserts are typically a few seconds
+long, and the longest ones belong to the call to action. In a produced explanatory
+long-form it is on-style for the presenter to be the dominant picture for only around a
+third of the runtime. Rationale: the face persuades, the graphic explains; using the
+face to explain a process wastes both.
+
+**Encoded as** LESSON-020.
+
+---
+
+## §9 The audience-experience meta-rule
+
+When two craft rules conflict, adjudicate **first** by what the audience came for. The
+grammar must match the experience the viewer expects from this video; breaking that
+expectation costs more attention than any single craft improvement gains.
+Stimulation rules ("use b-roll as much as possible", "remove every pause") never bleed
+into the restraint poles, and **restraint is not under-editing**: a restrained edit is
+exactly as deliberate, just in fewer layers.
+
+**Encoded as** `target.pace` / `target.treatment` selection; LESSON-021.
+
+---
+
+## §10 Conflict table
+
+| ID | Conflict | Adjudication |
+|---|---|---|
+| §10.1 | Stimulation rules versus restraint poles | §9 decides: the operator's pace and treatment win; stimulation defaults never apply inside `restrained` or `clean-cut` |
+| §10.2 | Burst (§2.9) versus the intro receipt montage | Different devices. The intro envelope's receipt montage holds each receipt 0.8-1.5 s (`MODES.longform.pacing.receipt_montage_state_s`) and is unchanged; a burst is a beat-attached group with its own ceilings |
+| §10.3 | "B-roll only in the intro" versus b-roll in the body | The body carries b-roll too. Lone inserts keep the long-form cadence (`broll_min_spacing_s = 10.0`); bursts are the beat-attached exception |
+| §10.4 | `list-card` hold band (up to 12 s) versus the long-form card hold ceiling (11 s) | **The ceiling stands.** Card kinds are capped by `MOTION["hold_max_s"]["longform"] = 11.0`; a list that needs longer is split or moved to a rail with per-row lands |
+
+---
+
+## §11 Encoded-where map
+
+| Rule | Config / code | Lesson |
+|---|---|---|
+| §1.1 lane split | `MODES.longform.pacing_lanes` | LESSON-014 |
+| §1.2 churn invariant | `MODES.longform.pacing.state_churn_per_min` | — |
+| §2.1 latency | `BROLL["trigger_latency_s"]`; receipts lane | LESSON-025, LESSON-027 |
+| §2.2-§2.3 literal first, priority | `BROLL["literal_first"]`, `["conceptual_only_for"]`, `["priority"]` | LESSON-012 |
+| §2.4 holds | `BROLL["hold_bands_s"]`, `MOTION["hold_max_s"]` | — |
+| §2.5-§2.6, §2.8 voice, credit, polish | `BROLL["vo_continuity"]`, `["credit_label"]`, `["insert_polish"]` | LESSON-013 |
+| §2.7 seam roles | `MOTION["transitions"]["seam_roles"]`, `["longform_events_per_min"]` | LESSON-028 |
+| §2.9 bursts | `BROLL["burst"]` | LESSON-025 |
+| §3 sections | step-card hold band | LESSON-026 |
+| §4.1 walkthrough PIP | `MODES.longform.tutorial_pip` | LESSON-014 |
+| §5 pills | `MODES.longform.emphasis_pills` | — |
+| §6.1 SFX | `AUDIO["sfx_classes"]`, `["sfx_trim_to_entrance"]`, `["sfx_fade_in_handle"]` | LESSON-018 |
+| §6.2 music | `MODES.longform.music_segments`, `AUDIO["music_duck_db"]` | LESSON-019 |
+| §7.1 eye-trace | `MOTION["eye_trace"]` | LESSON-015 |
+| §7.2 entrances | `MOTION["entrance_causality"]` | LESSON-016 |
+| §7.3 stills vs cards | `BROLL["still_drift_pct_per_s"]` | LESSON-017 |
+| §7.4 focus operators | `MOTION["image_focus_ops"]`, `["hue_shift_semantics"]`, `["focus_ops"]` | LESSON-017 |
+| §8.1 plan-then-batch | — | LESSON-025 |
+| §8.2 A-roll islands | — | LESSON-020 |
+| §9 meta-rule | `target.pace`, `target.treatment` | LESSON-021 |
+
+### The continuity mechanisms
+
+| ID | Mechanism | Section | Config | Executor | Tests |
+|---|---|---|---|---|---|
+| CM-1 | zoom-pull seams | §2.7 | `MOTION["transitions"]["zoom_pull"]` | `motion/zoom_pull.py` via `motion/transitions.py` | `tests/test_zoom_pull.py` |
+| CM-2 | J-cut leads | §6.3 | `AUDIO["jcut"]` | `cut_speed.py`, `compile_timeline.parse_audio_lead` | `tests/test_jcut.py` |
+| CM-3 | image-focus operators | §7.4 | `MOTION["focus_ops"]` | `broll/focus_ops.py` via `broll/broll_insert.py` | `tests/test_focus_ops.py` |
+| CM-4 | eye-trace | §7.1 | `MOTION["eye_trace"]` | `planner/eye_trace.py`, `audit/audit_motion.py` | `tests/test_eye_trace.py` |

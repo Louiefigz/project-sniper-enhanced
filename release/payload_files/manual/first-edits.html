@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your first three edits</title>
+<link rel="stylesheet" href="manual.css">
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <p class="kicker">Manual · 3 of 10</p>
+  <h1>Your first three edits</h1>
+  <p class="lede">A short test clip you record, then a full-length video, then a vertical Short from your own recording. Do them in this order.</p>
+</header>
+<h2>How you drive it</h2>
+<p>Open the Sniper folder in your own Codex or Claude Code and describe what you want. Sniper's
+editing instructions and skills live in that folder, so your agent picks them up automatically,
+and it runs Sniper's tools through <code>./sniper</code>. There is no app to open.</p>
+
+<div class="note">
+<p><strong>Every video Producer edits is checked first.</strong> Before a Producer edit reads a file, it
+copies it into the project and decodes it in a macOS sandbox (Segmenter and Clipper read your file
+directly, without this check). <code>./sniper doctor</code> shows this working on
+its <em>media admission (real sample)</em> line; if that line fails, fix it before your first edit.</p>
+</div>
+
+<div class="warn">
+<p><strong>There is no sample clip in this candidate.</strong> No footage has been cleared
+for redistribution, so nothing is shipped rather than shipping something Sniper does not
+have the rights to. Record your own test clip instead — it takes two minutes.</p>
+</div>
+
+<h2>Before edit one — record a test clip</h2>
+<p>Use your phone or your Mac's camera. Sit facing the camera, and read the script below
+naturally, <strong>including the one deliberate mistake</strong>: say the marked line
+wrong, pause, then say it again correctly. Leave a two-second silence where it says so.
+That gives the first edit something real to remove.</p>
+<pre><code>Hi, this is my first test of Project Sniper.
+I'm recording this to check that my install works from start to finish.
+[pause for two seconds]
+The goal today is simple: remove the silences, and the take I get wrong.
+Here's the line I'll get wrong on purpose — the quick brown fox jumps over the lazy cat.
+[pause]
+The quick brown fox jumps over the lazy dog.
+If the finished clip has no long pauses and only the second version of that line,
+the edit worked. That's the end of the test.</code></pre>
+<p>Save it as <code>~/Movies/test-clip.mp4</code> (or change the path in the request
+below). About 45 seconds is right.</p>
+
+<h2>Edit one — the smallest possible thing</h2>
+<p>The point is to prove the machinery works end to end before you spend an hour on a
+real video. Ask for the cheapest possible edit: no graphics, no music, no b-roll.</p>
+<pre><code>Trim-only clean cut of ~/Movies/test-clip.mp4 — remove the silences
+and bad takes, nothing else. No graphics, no music, no captions.</code></pre>
+<p><strong>What should happen:</strong> it transcribes locally, proposes the cuts, checks
+them, renders, inspects the result, and gives you a path. <strong>Where the result
+is:</strong></p>
+<pre><code>projects/test-clip-&lt;date&gt;/producer/final.mp4</code></pre>
+<p><strong>Review it:</strong> open it and watch the whole thing with the sound on. The
+two-second pause should be gone, and only the correct "lazy dog" line should remain. Listen
+for a word clipped at a cut. That is the one defect a trim-only edit can introduce, and
+it is the thing you are checking for.</p>
+<p>If this works, the install is good. If it does not, run
+<code>install/doctor.command</code> before trying anything larger.</p>
+
+<h2>Edit two — a full-length video, with the lanes you choose</h2>
+<p>Full-length means 16:9. There are no styles here; you pick which production lanes you
+want on. Ask for the ones you want by name:</p>
+<pre><code>Edit ~/Movies/lesson.mp4 as a full-length 16:9 video.
+Turn on: cuts, captions, motion, graphics, transitions, audio cleanup.
+Leave b-roll and music off. Keep every claim on screen matched to what
+I actually said.</code></pre>
+<p>An unchecked lane stays out of scope — it is not quietly added. A lane you asked for
+still has to pass its own checks, and if one cannot run you are told which and why
+instead of getting a silently thinner edit.</p>
+<p><strong>Start with a real but short one.</strong> A ten-minute video is a reasonable
+first full-length attempt. Expect this to take a while; see
+<a href="troubleshooting.html">what to expect</a>.</p>
+<p><strong>Review it properly:</strong> watch the whole export start to finish with
+audio, then open the editable project — <a href="review-and-studio.html">both views</a>,
+not just one.</p>
+
+<h2>Edit three — a vertical Short from your own recording</h2>
+<p>Shorts are 9:16 and are where the styles live. You can describe the treatment you want,
+or let it choose after looking at your footage.</p>
+<pre><code>Make the strongest Short from ~/Movies/lesson.mp4.
+Find one standalone idea that makes sense on its own — a clear opening,
+real evidence in the middle, and an ending that answers the opening.
+Presenter-led, close crop, readable centred captions.
+Keep it under 90 seconds.</code></pre>
+<p>Other requests that work, because they are things the editor actually reasons about:</p>
+<ul>
+  <li><em>"Choose the best treatment from this recording automatically."</em></li>
+  <li><em>"The best 3 Shorts from this recording"</em> — it compares moments across the
+  whole source rather than slicing it up by topic.</li>
+  <li><em>"Show the formula developing, then hold the finished result long enough to
+  read it."</em></li>
+  <li><em>"When I mention a product, show its real website scrolled to that feature."</em></li>
+</ul>
+<p><strong>Check these five things on the finished Short</strong>, because they are the
+defects that actually happen:</p>
+<ol>
+  <li>It says one complete thought. It does not start mid-sentence or stop mid-idea.</li>
+  <li>No word is clipped at a cut.</li>
+  <li>The captions match the words that survived, and are readable at phone size.</li>
+  <li>You are framed sensibly the whole way through, including any shot where you moved.</li>
+  <li>The audio is intelligible and not harsh.</li>
+</ol>
+
+<p class="next"><strong>Next:</strong> <a href="directing.html">Directing the edit &rarr;</a></p>
+<footer class="foot"><p><a href="../START-HERE.html">&larr; Back to Start here</a></p></footer>
+</div>
+</body>
+</html>

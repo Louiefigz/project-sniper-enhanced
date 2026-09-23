@@ -37,7 +37,7 @@ class CapabilityRefreshTests(unittest.TestCase):
         """Exercise the coordinator with explicit synthetic static/native leaves."""
         with tempfile.TemporaryDirectory() as temporary, ExitStack() as stack:
             root = Path(temporary).resolve()
-            source = Path(artifact.COMPOSITIONS_DIR, "agenda-slide.html")
+            source = Path(artifact.COMPOSITIONS_DIR, "line-swap.html")
             prior = root / "comp_capabilities.json"
             prior.write_bytes(b"old-artifact-must-be-backed-up\n")
             output = root / "attempt"
@@ -48,11 +48,11 @@ class CapabilityRefreshTests(unittest.TestCase):
             state = {"motionSourceDigest": "synthetic-source", "rootLintValidator": {"TEST": "lint"}}
             stack.enter_context(patch.object(refresh, "source_state", return_value=state))
             lint = {"sourceState": {"motionSourceDigest": "synthetic-source",
-                "validator": state["rootLintValidator"], "entries": [{"kind": "agenda-slide"}]}}
+                "validator": state["rootLintValidator"], "entries": [{"kind": "line-swap"}]}}
             stack.enter_context(patch.object(refresh, "preflight_root_lint", return_value=lint))
             stack.enter_context(patch.object(refresh, "_preflight"))
             stack.enter_context(patch.object(refresh, "composition_paths", return_value=[str(source)]))
-            stack.enter_context(patch.object(artifact, "composition_kinds", return_value={"agenda-slide"}))
+            stack.enter_context(patch.object(artifact, "composition_kinds", return_value={"line-swap"}))
             for module in (refresh, artifact):
                 stack.enter_context(patch.object(module, "current_source_digest", return_value="synthetic-source"))
             stack.enter_context(patch.object(refresh, "container_lease", return_value=nullcontext("owned-test")))
@@ -66,8 +66,8 @@ class CapabilityRefreshTests(unittest.TestCase):
             self.assertEqual((output / "previous-comp_capabilities.json").read_bytes(), b"old-artifact-must-be-backed-up\n")
             loaded, error = artifact.load_artifact(str(prior))
             self.assertFalse(error)
-            self.assertIsNone(artifact.capability_row_issue(loaded["agenda-slide"]))
-            self.assertTrue((output / "agenda-slide/actual-render-result.json").is_file())
+            self.assertIsNone(artifact.capability_row_issue(loaded["line-swap"]))
+            self.assertTrue((output / "line-swap/actual-render-result.json").is_file())
             self.assertTrue((output / "source-after.json").is_file())
 
     def test_prior_elapsed_time_is_not_reset_at_probe_boundary(self) -> None:
@@ -94,7 +94,7 @@ def synthetic_render(entry: dict, cache: str, rate: str) -> dict:
 def synthetic_measure(value: dict, _path: str, _frames: int, _terminal: dict) -> None:
     """Closed known measurement shape, not evidence of any actual render."""
     value.update(terminalAlpha={"maxAlpha8": 255, "meanAlpha8": 255.0}, fadeClass="hold-to-cut",
-                 contentBBox=[0, 0, 1919, 1079], contentDims=[1919, 1079])
+                 contentBBox=[0, 0, 1079, 1919], contentDims=[1079, 1919])
 
 
 if __name__ == "__main__":

@@ -70,6 +70,17 @@ class SourcePictureTransformTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "source/history"):
             compile_source_picture_transform(replace(context, authority=changed), intent, no_authority_guard)
 
+    def test_a_static_ffmpeg_may_hold_libavfilter_but_zimg_is_always_separate(self) -> None:
+        context, intent = transform_fixture()
+        static = copy.deepcopy(context.tools)
+        static["libavfilter"] = dict(static["ffmpeg"])   # libavfilter linked into the ffmpeg executable
+        compile_source_picture_transform(replace(context, tools=static), intent, no_authority_guard)
+        for alias in ("ffmpeg", "libavfilter"):
+            tools = copy.deepcopy(context.tools)
+            tools["libzimg"] = dict(tools[alias])
+            with self.assertRaisesRegex(ValueError, "cannot alias one path"):
+                compile_source_picture_transform(replace(context, tools=tools), intent, no_authority_guard)
+
     def test_observation_source_probe_raw_records_and_execution_are_bound(self) -> None:
         """None of the independently retained original observation refs is lost."""
         context, intent = transform_fixture()

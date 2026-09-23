@@ -118,7 +118,7 @@
   "fit": "upgrade:glass-takeover-bg",
   "quality": "clean: exact-loop math",
   "aspectFlex": "9:16-ok",
-  "port": "P2 ambient dark backdrop for nateherk family"
+  "port": "P2 ambient dark backdrop for module family"
  },
  {
   "name": "avatar-cloud",
@@ -205,7 +205,7 @@
   "fit": "new:beat impact word sting",
   "quality": "clean",
   "aspectFlex": "9:16-ok",
-  "port": "P2 music-led emphasis; overlaps jaden-shout territory"
+  "port": "P2 music-led emphasis; overlaps punch-shout territory"
  },
  {
   "name": "beat-freeze-cut",
@@ -660,7 +660,7 @@
   ],
   "scrubSafe": true,
   "selfContained": true,
-  "fit": "upgrade:jaden-shout-lockup",
+  "fit": "upgrade:punch-shout-lockup",
   "quality": "clean: authored scatter table",
   "aspectFlex": "9:16-ok",
   "port": "P1 higher-energy headline slam than our current lockups"

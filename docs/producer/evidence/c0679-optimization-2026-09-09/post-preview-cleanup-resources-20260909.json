@@ -19,7 +19,7 @@
   "preview": {
     "preview": {
       "identity": {
-        "command": "/opt/homebrew/Cellar/node/23.10.0_1/bin/node /Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/hyperframes/dist/cli.js preview . --port 41058 --foreground --no-open",
+        "command": "/opt/homebrew/Cellar/node/23.10.0_1/bin/node /Users/maintainer/ProjectSniperSource/templates/motion/node_modules/hyperframes/dist/cli.js preview . --port 41058 --foreground --no-open",
         "pgid": 53236,
         "pid": 53236,
         "started": "Wed Sep  9 08:55:58 2026"

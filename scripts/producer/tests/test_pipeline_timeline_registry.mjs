@@ -5,9 +5,9 @@ import { runInNewContext } from "node:vm";
 import { test } from "node:test";
 import { runPipelineScript } from "./_pipeline_dom_fixture.mjs";
 
-const html = readFileSync(new URL("../../../templates/motion/compositions/nateherk-pipeline.html", import.meta.url), "utf8");
-const source = readFileSync(new URL("../../../templates/motion/nateherk-pipeline.js", import.meta.url), "utf8");
-const external = '<script src="/nateherk-pipeline.js"></script>';
+const html = readFileSync(new URL("../../../templates/motion/compositions/module-pipeline.html", import.meta.url), "utf8");
+const source = readFileSync(new URL("../../../templates/motion/module-pipeline.js", import.meta.url), "utf8");
+const external = '<script src="/module-pipeline.js"></script>';
 
 function scripts() {
   const offset = html.indexOf(external);
@@ -15,7 +15,7 @@ function scripts() {
   const before = [...html.slice(0, offset).matchAll(/<script>([\s\S]*?)<\/script>/g)].at(-1)?.[1];
   const after = [...html.slice(offset + external.length).matchAll(/<script>([\s\S]*?)<\/script>/g)][0]?.[1];
   assert.ok(before?.includes("window.__timelines"), "real registry bootstrap must precede external script");
-  assert.ok(after?.includes("nateherk-pipeline"), "actual registration assertion must follow external script");
+  assert.ok(after?.includes("module-pipeline"), "actual registration assertion must follow external script");
   return { before, after };
 }
 
@@ -42,7 +42,7 @@ test("postscript refuses missing registration and malformed or playing timelines
   for (const value of invalid) {
     const window = {};
     runInNewContext(before, { window });
-    window.__timelines["nateherk-pipeline"] = value;
+    window.__timelines["module-pipeline"] = value;
     assert.throws(() => runInNewContext(after, { window }), /paused timeline was not registered/);
   }
 });

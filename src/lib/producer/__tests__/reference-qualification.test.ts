@@ -9,7 +9,7 @@ import {
 } from "../reference-qualification";
 
 assert.equal(referenceExecutionClass("mimic"), "reference-inspired");
-assert.equal(referenceExecutionClass("extend"), "measured-style-extension");
+assert.throws(() => referenceExecutionClass("extend"), /retired/);
 assert.equal(referenceExecutionClass("new-style"), "provisional-style-candidate");
 assert.equal(VERIFIED_MIMIC_RELEASED, false);
 assert.deepEqual(VERIFIED_MIMIC_BLOCKERS, [

@@ -46,9 +46,9 @@ def cue_is_chrome(text: str) -> bool:
     """True when a cue text reads as UI chrome / a file path, not speech.
 
     Two arithmetic signals (LL-012 — token membership + path-char check,
-    never regex semantics): path characters (``/``, ``\\``, ``_`` — 0 of 967
-    genuine caption lines carry any; file paths and filenames always do) and
-    membership of any token in the UI-chrome wordlist.
+    never regex semantics): path characters (``/``, ``\\``, ``_`` — spoken
+    captions practically never carry them; file paths and filenames always
+    do) and membership of any token in the UI-chrome wordlist.
     """
     if "/" in text or "\\" in text or "_" in text:
         return True
@@ -176,9 +176,9 @@ def caption_stats(video: str, info: VideoInfo) -> dict:
         return {"detected": False, "sampledFps": DEEP["caption_fps"]}
     # UI-CHROME GATE (LL-012): a screen-share app churns menu/file text
     # exactly like captions turn over, so the turnover pick alone false-
-    # positives on screen-share footage (EC1/EC2 read "detected" caption
-    # systems out of editor chrome + file paths). Reject LOUDLY, keeping
-    # the evidence in the readout.
+    # positives on screen-share footage (two reference deep studies read
+    # "detected" caption systems out of editor chrome + file paths).
+    # Reject LOUDLY, keeping the evidence in the readout.
     chrome_frac = chrome_cue_fraction([c["text"] for c in cues])
     if chrome_frac >= DEEP["caption_chrome_max_frac"]:
         return {"detected": False, "rejected": "ui-chrome",

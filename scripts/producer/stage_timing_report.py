@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from collections import defaultdict
 from pathlib import Path
 
@@ -52,8 +53,11 @@ def _legacy(row: dict, state: dict) -> None:
     if elapsed < 0:
         state["issues"].append({"kind": "legacy-clock-regression", "stage": stage})
         return
-    state["spans"].append({"stage": stage, "elapsedMs": elapsed,
-                           "status": "unknown", "attribution": "legacy-stage-stack"})
+    span = {"stage": stage, "elapsedMs": elapsed,
+            "status": "unknown", "attribution": "legacy-stage-stack"}
+    if _number(start.get("ts")) and _number(row.get("ts")):
+        span.update(ts=start["ts"], endTs=row["ts"])
+    state["spans"].append(span)
 
 
 def _consume(row: dict, state: dict) -> None:
@@ -115,7 +119,51 @@ def summarize_timings(rows: list[dict]) -> dict:
         "executionStatusCounts": statuses,
         "allRecordedSpansPaired": not incomplete and not state["issues"],
         "workflowCoverage": "not-established-by-telemetry-alone",
+        "recordedWindow": workflow_coverage(state["spans"]),
     }
+
+
+def _interval(span: dict) -> tuple[float, float] | None:
+    """Reject wall-clock steps and absent timestamps instead of estimating gaps."""
+    values = (span.get('ts'), span.get('endTs'), span.get('elapsedMs'))
+    if any(isinstance(value, bool) or not isinstance(value, (int, float))
+           or not math.isfinite(value) for value in values):
+        return None
+    start, end, elapsed = values
+    if end < start or abs((end - start) * 1000 - elapsed) > 2000:
+        return None
+    return start, end
+
+
+def union_seconds(intervals: list[tuple[float, float]]) -> float:
+    """Count overlapping/nested intervals once, including touching boundaries."""
+    total, end = 0.0, -math.inf
+    for start, stop in sorted(intervals):
+        total += max(0.0, stop - max(start, end))
+        end = max(end, stop)
+    return total
+
+
+def workflow_coverage(spans: list[dict]) -> dict:
+    """Report a declared production_total window and its recorded substage coverage.
+
+    This quantifies telemetry coverage, not idle time, editorial completion or
+    quality. Multiple windows need separate reports to avoid mixing productions.
+    """
+    windows = [span for span in spans if span.get('stage') == 'production_total']
+    if len(windows) != 1 or _interval(windows[0]) is None:
+        return {'status': 'unavailable', 'reason': 'one complete stable production_total span required'}
+    start, end = _interval(windows[0])
+    children = [span for span in spans if span is not windows[0]]
+    intervals = [_interval(span) for span in children]
+    valid = [(max(start, item[0]), min(end, item[1])) for item in intervals
+             if item and item[0] < end and item[1] > start]
+    covered = union_seconds(valid)
+    return {'status': 'recorded-window', 'startedAtEpoch': start, 'endedAtEpoch': end,
+            'elapsedSeconds': end - start, 'recordedSubstageSeconds': covered,
+            'outsideRecordedSubstagesSeconds': max(0.0, end - start - covered),
+            'excludedInvalidIntervals': sum(item is None for item in intervals),
+            'qualityApproved': False, 'outsideScope': 'unattributed, not proven idle or removable'}
 
 
 def main() -> None:

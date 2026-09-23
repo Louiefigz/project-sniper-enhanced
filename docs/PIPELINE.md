@@ -1,10 +1,107 @@
 # THE PIPELINE — footage in, approved Sniper final out
+## Current visual source rule
+
+Read `docs/producer/VISUAL_SOURCE_POLICY.md` before visual planning or execution.
+Use the complete HyperFrames catalog first. Retired house templates and global
+style presets cannot execute, including renamed release variants. Reference
+adaptations need this job’s selected reference; custom work needs an inspected
+capability or quality gap. Native Shorts stage `catalogFiles` and `catalogTitle`.
+This source rule replaces historical template/style recipes below.
+
 
 **This is the canonical statement of where PROJECT SNIPER is going.** Every other
 doc (skills, CLAUDE.md, READMEs) points here. If another doc contradicts this
 one, this one wins — fix the other doc.
 
-## Latest operator direction — September 9, 2026
+## Latest operator direction — September 19, 2026: no UI, the buyer's own agent
+
+Buyers use Sniper only by opening its folder in their **own Codex or Claude Code**, signed in
+to their own subscription. There is no Sniper web UI, no Sniper-installed copy of Codex or
+Claude and no Sniper sign-in; the Auto Edit controller that spawned the provider CLI and the
+guided checkpoint/Native Director routes belong to the retired web app and are not buyer
+routes. Where this document or another describes them, the agent route below governs.
+
+The agent route, which every Short and long-form edit now takes:
+
+1. Every engine command runs through `./sniper` from the Sniper folder (its own tools,
+   settings and maintenance lock). Setup is `./sniper setup`; `./sniper doctor` checks it.
+2. Ingest into the project's `source/` folder
+   (`./sniper python3 scripts/producer/ingest.py <footage> --out <project>/source/asset_manifest.json`),
+   then save the operator's request as the stored intent:
+   `./sniper node --import tsx scripts/infra/project-intent.ts <project> --intent …`.
+3. The agent authors `edit_plan.json` under the Producer skill, runs the full gate bundle and
+   converges the plan with independent critics that are fresh subagents, not the author.
+4. For an ordinary plan, mint separate `--draft` admission, then generate bounded
+   moving clips with `./sniper python3 scripts/producer/ordinary_previews.py
+   <project>/producer <project>/source/asset_manifest.json <new-preview-attempt>`.
+   On revisions, pass `--previous <prior-attempt>/ordinary-previews.json` so unchanged
+   preparation and clips can be verified and reused. Inspect and revise those clips.
+   Record the current reviews and decoded preview evidence under
+   [render readiness](producer/RENDER_READINESS.md), then mint admission from those
+   records and the deterministic gates (all scopes, including graphics-off):
+   `./sniper node --import tsx scripts/infra/mint-delivery-approval.ts <project>/producer`.
+5. For native Short/Long, the first export stops after continuous moving previews.
+   Inspect picture, motion, neighboring context and the actual mastered audio;
+   record independent region reviews, revise, and rerun with `--preview-reviews`.
+   Render/assemble or complete the native export, then Audit B on the exact output and the Audit C
+   rendered review by a fresh subagent (Producer skill steps 7–7.5).
+6. Hand off the encoded video and the matching Studio project (`install/studio.command`).
+
+On this route, **final** means the output of step 5 whose Audit B passed and whose Audit C
+review found no unresolved material issue, recorded in the conversation's handoff with the
+measurements. The controller's `.sniper-qc-approved.json` promotion receipt is not produced
+here and is not required. Human playback review remains the operator's.
+
+September 22 enforcement: ordinary `render.py` and `assemble.py` now reject absent,
+failed or stale readiness before full media work. Separate draft admission permits only
+watermarked draft output or the owned bounded ordinary-preview command. Its cold
+preparation still requires a full graphics-free base and whole-program audio master;
+only composed context windows are bounded. Native Short and Long retain their current prebuild review
+contracts and run native reference/seek checks plus encoded sample checks before continuous
+moving previews. Full picture encoding additionally requires current recorded preview
+reviews. Dependency-current preview clips and detailed reviews can be reused; whole-plan
+assessment and final encoded QC remain required. The agent makes
+the revisions; engine commands validate supplied evidence and never invoke a provider.
+
+## Operator direction — September 9, 2026
+
+**September 16 long export reliability:** new eligible native landscape edits
+use the [shared long exporter](producer/NATIVE_LONG_EXPORT.md), including early
+audio and full-context encoded seam checks, future disk allocation, frame-based
+deadlines, bounded capacity waiting and separately reusable picture/media stages.
+Use the shared command instead of a dated per-video export wrapper. The pinned
+native runtime now uses exclusive video end times to prevent an outgoing frame
+from appearing on the exact next cut. Keep current source/approval history and
+the required editorial, listening, full-output and Studio reviews.
+
+The public `studio/native_export.py` command selects the declared Short/Long
+adapter. Shared owner and native SDK entry points enforce that route, current
+recorded prebuild review and long seam checks. Compatible long attempts are
+discovered automatically, including across output parents. The compatibility
+HTTP render/assemble URLs entered the saved-plan Auto Edit review/QC controller (retired web
+app; not a buyer route since September 19).
+See the [workflow enforcement audit](producer/WORKFLOW_ENFORCEMENT_AUDIT_2026-09-16.md)
+for tested boundaries, intentional compatibility changes and remaining limits.
+
+**September 15 review handoff correction:** Shorts, long-form and revisions
+default to both a visible local encoded-video review and the matching editable
+HyperFrames Studio project. Follow the shared
+[handoff requirement](producer/STUDIO_REVIEW_LANE.md#required-review-handoff-local-playback-and-studio)
+for opening, verification and keeping both views current after adjustments.
+
+**September 16 visual-storytelling correction:** all future Shorts and long-form
+work must plan, within its requested treatment and enabled lanes, varied real footage, smooth presenter/layout continuity, purposeful
+full-screen and simultaneous footage, contextual products, complete business
+beat coverage and readable brand/destination holds before assembly. Follow the
+[standing directing requirements](producer/NATIVE_PREBUILD_STRATEGY_2026-09-10.md#standing-directing-requirements-september-16-2026).
+The shared author/reviewer module `src/lib/producer/visual-storytelling.ts` carries
+these criteria into existing automated revision gates. Native agent-led assembly
+must resolve the same material issues against the current candidate before
+handoff. Independent strategy and continuous-motion review remain distinct from
+technical render checks; neither prompts nor CLI checks guarantee editorial quality.
+New native Short builds additionally reject missing, failed or stale full-plan
+prebuild reviews before direct/guided assembly. See the same prebuild document
+for the recorded-review trust boundary and the separate native long-form scope.
 
 The explicit performance goal is a completely edited 10-minute video delivered
 in **120 minutes or less without sacrificing quality**. Count source review,
@@ -19,10 +116,18 @@ Agent-selected transition effects come from the HyperFrames catalog by default,
 including an unspecific request such as "we need a transition here." Agent-selected
 graphics and animation templates are catalog-first too: inspect the complete
 catalog and choose the mechanism for the narration, using current native SDK
-authoring. Do not silently substitute old Sniper/Nateherk/Jaden presets or a
+authoring. Do not silently substitute old Sniper/Module/Punch presets or a
 hand-built equivalent because it is familiar. Those studies are references only.
 User-supplied designs, including Claude-created presentation/animation designs,
 are an explicit alternative to incorporate and animate as requested.
+
+When the operator explicitly targets a particular reference shot/style, preserve
+its inspected shot-to-catalog choices in the
+[shared reference reuse map](producer/REFERENCE_SHOT_REUSE.md). Prefer existing
+pieces, configuration and composition; justify bounded custom work by the target's
+specific capability or quality gap. The optional native preflight/export binding
+checks planning evidence for Short and Long. Ordinary inspiration does not activate
+reference matching, and map readiness does not approve visual similarity or execution.
 
 For the active C0679 work, fresh native HyperFrames composition replaces the old
 visual-plan baseline and the legacy graphics-only/mandatory-port restrictions
@@ -52,9 +157,8 @@ That budget is an acceptance target, not a measured delivery estimate.
 
 **Primary interactive path:** give the brief to the Producer skill in Codex or
 Claude Code, use the existing local stage CLIs, and review/adjust graphics in
-HyperFrames Studio. The custom `/producer` page is optional compatibility UI,
-not a prerequisite. Preserve the same stored intent, admission, independent
-review, approval and whole-output QC on both paths. Use subscription-backed
+HyperFrames Studio. There is no `/producer` page for buyers (September 19). Preserve the
+stored intent, admission, independent review, approval and whole-output QC. Use subscription-backed
 agent tools and local processing; no paid fallback without explicit approval.
 
 ```
@@ -66,9 +170,9 @@ raw footage
 │                                                              │
 │  SHORT (9:16)                LONG (16:9)                     │
 │  pick a STYLE:               pick your ITEMS (checklist):    │
-│   · Caleb light               ☑ motion      ☑ captions       │
-│   · Jaden produced            ☑ graphics    ☑ broll          │
-│   · Angela involved           ☑ transitions ☑ credibility    │
+│   · Restrained light               ☑ motion      ☑ captions       │
+│   · Punch produced            ☑ graphics    ☑ broll          │
+│   · Slideware involved           ☑ transitions ☑ credibility    │
 │   (+ generics: Light short,   ☑ music bed   ☑ audio enhance  │
 │    Produced short, Trim only, → full workflow = all checked  │
 │    talking-head pace)         → or just certain items        │
@@ -109,6 +213,11 @@ and reference library. Strategy and source-first supporting-footage scouting
 precede assembly. The optional app prepares the same local brief as the CLI;
 the conversational agent owns editorial decisions. Export uses the shared
 native canvas, monitored runtime and long-form audio/timing utilities.
+After passage selection, [prepare the selected media first](producer/NATIVE_SHORTS_WORKFLOW.md#prepare-the-selected-media-first).
+Direct native Short builds now stage small source sections and preserve original
+transcript/cut clocks through a verified mapping. The original recordings remain
+source evidence. Native long-form has the explicit preparation path below;
+stored-guided automation remains separate integration work.
 
 For shorts extracted from long footage, use Producer's
 [long-form to finished shorts workflow](producer/PRODUCER_README.md#long-form-to-finished-shorts):
@@ -116,19 +225,33 @@ compare source-bound standalone moments, trim only the selected ranges, then
 apply the adopted visual-storytelling guidance. Topic segmentation is optional;
 ranked selection precedes graphic production and intermediate clip exports.
 
-Measured style grammars (each has a studied doc + a `pacing_<style>` lint
-profile):
+Built-in short-form styles (each is a Sniper style specification with a
+`pacing_<style>` lint profile):
 
-| Preset | Scope | Grammar doc |
+| Preset | Scope | Style specification |
 |---|---|---|
-| **Caleb light** | light | `docs/studies/CALEB_STYLE.md` — restraint pole, whisper cues |
-| **Jaden produced** | produced | `docs/studies/JADEN_STYLE.md` — breath-gap punch-cuts, two-layer text |
-| **Angela involved** | full | `docs/studies/ANGELA_STYLE.md` — lime takeover-deck slideware |
+| **Restrained light** | light | `docs/studies/RESTRAINED_STYLE.md` — one steady frame and a frame-one thesis card; plain captions carry the pace |
+| **Punch produced** | produced | `scripts/producer/docs/findings/PUNCH_STYLE.md` — hard cuts between wide and tight framings on key words; keyword lockups over small captions |
+| **Slideware involved** | full | `docs/studies/SLIDEWARE_STYLE.md` — full-frame slide sections alternate with the speaker; real evidence, no camera motion |
 
 Plus the generic presets (**Light short · Produced short · Trim only**) and the
 **talking-head pace** toggle (slow, sustained graphics — paces like longform).
 
 ### Longs (16:9) — a checklist of items
+
+For a reference-driven long-form edit, the local agent can now
+[prepare a complete 16:9 strategy packet](producer/REFERENCE_SHOT_REUSE.md#prepare-a-169-long-form-strategy-session)
+with `native-short.ts prepare-longform`. It reuses the Shorts research library,
+complete catalog index, selected full reference study and saved inspected matches.
+Whole-video structure and shot planning remain editorial work; the packet does
+not impose an educational genre or transfer Shorts pacing/geometry. Check the
+packet again before reusing it in another reasoning session.
+
+For native projects referencing longer source recordings, use
+[selected-footage preparation](producer/NATIVE_LONG_SELECTED_SOURCES.md) after
+passage selection and before preview/render work. It writes a separate project
+and preserves the authored timeline and complete-program narration. Existing
+cut-base projects and qualified long-form export packages keep their working path.
 
 No styles here (grammars are shorts-measured). Instead the operator checks
 exactly the items they want; the card derives the smallest covering scope +
@@ -158,7 +281,7 @@ produces two layers of evidence:
 
 Aspect supplies only a **Short/Long suggestion**. The operator must confirm the
 mode and persist one strategy in `reference.json`: `mimic`, `extend` (a closed
-Caleb/Jaden/Angela short grammar), or `new-style` (a provisional name tied to
+Restrained/Punch/Slideware short grammar), or `new-style` (a provisional name tied to
 this reference). Auto-edit accepts the reference only when the submitted intent
 still matches that server-side decision. The authored plan must carry
 `target.referenceId`, `target.referenceStrategy`, and the confirmed mode; the
@@ -225,8 +348,9 @@ another isolated candidate. The render/QC loop caps at three candidates.
 Missing evidence or a system-level block fails closed instead of approving or
 blindly retrying.
 
-Only an all-pass candidate is promoted to `<producer>/final.mp4`. Promotion
-writes `.sniper-qc-approved.json` last, binding the approved plan hash, manifest
+In the retired app's controller, only an all-pass candidate was promoted to
+`<producer>/final.mp4` (the agent route's final is defined at the top of this document).
+Promotion wrote `.sniper-qc-approved.json` last, binding the approved plan hash, manifest
 hash, final bytes, QC round, and review artifacts. Project status and resume do
 not treat an unapproved candidate or arbitrary `final.mp4` as finished.
 

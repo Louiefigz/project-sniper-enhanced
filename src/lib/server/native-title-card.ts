@@ -1,13 +1,21 @@
-/** Backed upper title cards adapted from inspected A02 and the operator's reference. */
-import { assertHookLineBreaks, type LocalHookCopy } from "./native-hook-template";
+/** Backed upper title card: short lines on an opaque backing so the opening reads over any footage. */
+import { assertHookLineBreaks, type NativeTitleCopy } from "./native-hook-template";
 
+/**
+ * Sniper's neutral title pairs (chosen 2026-09-18). Two polarities let the card oppose the
+ * footage behind it: dark ink on warm paper over dark or busy shots, paper on near-black over
+ * bright ones. Slate is a desaturated cool mid-dark that separates from skin tones and warm
+ * interiors without reading as a brand accent. Off-white and near-black soften the largest
+ * light and dark areas. Every pair is at least 11:1 by the WCAG 2 contrast formula below
+ * (computed from these hex values, not measured on screens); render still enforces 4.5:1.
+ */
 export const NATIVE_TITLE_PALETTES = {
-  "white-on-black": { ink: "#ffffff", backing: "#111111" },
-  "white-on-red": { ink: "#ffffff", backing: "#b81732" },
-  "red-on-white": { ink: "#b81732", backing: "#ffffff" },
+  "ink-on-paper": { ink: "#1d1f24", backing: "#f6f4ef" },
+  "paper-on-ink": { ink: "#f6f4ef", backing: "#1d1f24" },
+  "white-on-slate": { ink: "#ffffff", backing: "#2e3a4b" },
 } as const;
 export interface NativeTitleCard {
-  copy: LocalHookCopy;
+  copy: NativeTitleCopy;
   lines: string[];
   palette: keyof typeof NATIVE_TITLE_PALETTES;
   endFrame: number;
@@ -48,9 +56,11 @@ export function renderNativeTitleCard(card: NativeTitleCard, clock: NativeTitleC
   const pair = NATIVE_TITLE_PALETTES[card.palette];
   const lineStyle = `display:table;margin:0 auto;padding:12px 22px;max-width:920px;white-space:nowrap;`
     + `color:${pair.ink};background:${pair.backing};border-radius:16px;`;
+  const provenance = card.copy.scope === "user-supplied-title" ? ' data-title-scope="user-supplied-title"'
+    : ` data-hook-anchor="${escape(card.copy.anchor)}" data-library-hash="${escape(card.copy.libraryHash)}"`;
   return `<div id="native-title-card" data-hf-id="hf-native-title-card" class="clip native-title-card"`
     + ` data-start="0" data-duration="${card.endFrame * den / num}" data-track-index="5"`
-    + ` data-hook-anchor="${escape(card.copy.anchor)}" data-library-hash="${escape(card.copy.libraryHash)}"`
+    + provenance
     + ` style="position:absolute;left:80px;top:${card.top}px;width:920px;z-index:5;text-align:center;`
     + `font:700 ${card.fontSize}px/1.1 Inter;">`
     + card.lines.map((line, index) => `<span id="native-title-line-${index}" data-hf-id="hf-native-title-line-${index}" style="${lineStyle}">${escape(line)}</span>`).join("")

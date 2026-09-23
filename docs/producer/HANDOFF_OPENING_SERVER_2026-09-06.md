@@ -2,7 +2,7 @@
 
 Implementation paused at the user's request for a handoff. Do not start jobs merely by reading this document. This is application-development state, not a video-editing instruction or approval.
 
-Repository: `/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER`. The worktree contains substantial user and other-agent changes. Preserve them; do not reset, overwrite, or assume these new files are committed.
+Repository: `/Users/maintainer/ProjectSniperSource`. The worktree contains substantial user and other-agent changes. Preserve them; do not reset, overwrite, or assume these new files are committed.
 
 ## Outcome and current limits
 
@@ -106,10 +106,10 @@ Reobserve these controls; they were valid previously, not assumed forever. Docke
 
 ```sh
 env SNIPER_DOCKER_PATH=/usr/local/bin/docker \
-  SNIPER_DOCKER_SOCKET=/Users/aaronfigueroa/.docker/run/docker.sock \
+  SNIPER_DOCKER_SOCKET=/Users/maintainer/.docker/run/docker.sock \
   SNIPER_RENDER_IMAGE_ID=sha256:bc56d3860d2ec1c843f7184bcecd21137aa79fe9fe19c90a67136d3052222ba8 \
   SNIPER_RENDER_UID_GID=501:20 \
-  SNIPER_RUNTIME_REPO_ROOT=/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER \
+  SNIPER_RUNTIME_REPO_ROOT=/Users/maintainer/ProjectSniperSource \
   /usr/bin/time -p node --import tsx src/lib/server/__tests__/_guided-opening-media-fixture.ts --run-worker --cleanup-cas-faults
 ```
 

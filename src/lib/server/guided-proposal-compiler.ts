@@ -1,3 +1,4 @@
+import { VISUAL_SOURCE_INSTRUCTIONS } from "@/lib/producer/visual-source-policy";
 import type { AutoEditCtx } from "@/app/api/producer/auto-edit/stream";
 import path from "node:path";
 import { observeCutPreviewFile } from "@/app/api/producer/auto-edit/cut-preview-receipt";
@@ -11,12 +12,14 @@ import { GUIDED_CAPTION_CONFIG_FILES } from "./guided-proposal-captions";
 import { CURRENT_TREATMENT_PROPOSAL_VERSION } from "@/lib/producer/contracts/treatment-proposal-v5";
 import { buildNativeProposalPrompt } from "./guided-native-prompt";
 import { nativeReferenceImages, readNativeReferences } from "./guided-native-references";
+import { visualStorytellingInstructions } from "@/lib/producer/visual-storytelling";
 
 export const PROPOSAL_SCHEMA_PATH = `schemas/producer/treatment-proposal-v${CURRENT_TREATMENT_PROPOSAL_VERSION}.schema.json`;
 const OUTPUT_LIMIT = 1024 * 1024, PROMPT_LIMIT = 512 * 1024;
 const EXECUTOR_FILES = ["package.json", "package-lock.json", "tsconfig.json", "next.config.ts", "src/app/api/_lib/codex-cli.ts",
   "src/app/api/_lib/ai-provider.ts", "src/app/api/producer/auto-edit/brain-review-process.ts",
   "src/lib/producer/contracts/raw-treatment-v1.ts", "src/lib/producer/contracts/treatment-proposal-v2.ts",
+  "src/lib/producer/visual-storytelling.ts",
   "src/lib/server/guided-proposal-compiler.ts", "src/lib/server/guided-proposal-candidate.ts",
   "src/lib/server/guided-proposal-evidence.ts", "src/lib/server/guided-proposal-inputs.ts",
   "src/lib/server/guided-proposal-speech.ts",
@@ -37,8 +40,8 @@ const V9_FILES = ["src/lib/producer/contracts/treatment-proposal-v9.ts", "src/li
   "src/lib/server/guided-native-project.ts", "src/lib/server/guided-native-project-store.ts", "src/lib/server/guided-native-captions.ts",
   "scripts/producer/studio/native_caption_groups.py", "scripts/producer/captions/captions_whisper.py",
   "scripts/producer/captions/captions_minimal.py", "scripts/producer/captions/captions_ass.py", "scripts/producer/producer_config.py"];
-const DIRECTOR_FILES = ["schemas/producer/native-director-v1.schema.json", "schemas/producer/native-director-review-v1.schema.json",
-  "src/lib/producer/contracts/native-director-v1.ts", "src/lib/server/native-director-library.ts",
+const DIRECTOR_FILES = ["schemas/producer/native-director-v2.schema.json", "schemas/producer/native-director-review-v1.schema.json",
+  "src/lib/producer/contracts/native-director-v1.ts", "src/lib/producer/contracts/native-director-v2.ts", "src/lib/server/native-director-library.ts",
   "src/lib/server/native-director-validation.ts", "src/lib/server/native-director-prompt.ts", "src/lib/server/native-director-store.ts"];
 const V10_FILES = [...V9_FILES, "src/lib/producer/contracts/treatment-proposal-v10.ts", "src/lib/server/guided-native-supporting.ts"];
 
@@ -71,8 +74,8 @@ export function proposalCompilerAuthority(cut: AcceptedGuidedCut, options: { ver
 /** Condensed autopilot rules 3a/3b/3c the deterministic renderer gates actually enforce. No new authority. */
 function longformDoctrine(evidence: ProposalEvidence): string {
   if (evidence.schemaVersion < 4) return "";
-  return `\nV4 adds the produced/full long-form decisions the deterministic renderer gates require; a missing one is a hard failure, not a style note.
-State graphicsStyle ("cutaway-only" or "overlay-rich") with a substantive graphicsStyleRationale explaining why that grammar fits THIS edit. The deterministic advisor's recommendedTargetFields in evidence.graphicsAdvice is input, not authority, and a silent inherited default is invalid. face-bridge needs an unimplemented visual-profile/presenter-hole authority here: choosing it is retained as a blocker, not executed.
+  return `${VISUAL_SOURCE_INSTRUCTIONS}\nV4 adds the produced/full long-form decisions the deterministic renderer gates require; a missing one is a hard failure, not a style note.
+Set graphicsStyle="catalog-first" with a rationale for this edit. Unsupported compatibility needs require native catalog authoring.
 Every evidence.graphicsAdvice["graphics_planner.py"].introSemanticBeats row with decisionRequired=true is a transcript-bound obligation even when candidates were pruned: give it exactly one beatDecisions row bound to one catalog-graphic operationIndex. Start from formAllocation.recommendedAssignment, which is a deterministic maximum-distinct witness, not catalog rank; kind MUST come from that beat's compatibleKinds and MUST equal the operation's catalogKind. Persist alternativesConsidered naming 2 OTHER compatible kinds when the beat exposes 3 or more, plus a 20+ character transcript-specific selectionReason and reason. One graphic discharges exactly one beat: never reuse or duplicate a binding, and never invent filler to reach a floor.
 The bound operation's anchor window must be on screen at the beat's exact outStart and hold at least minimumGraphicHoldS seconds, extended further when the template's build/reveal needs to settle; the floor is not a target. A hold-to-cut graphic must end on a real cut seam (an anchor that is also a segment boundary) or at the program end. Every catalog-graphic operation also needs its own purposeful reason (8+ characters) saying what it earns.
 Author no transitions. Every evidence.introSeams row (an internal cut boundary inside the ${evidence.hookWindowS ?? 60}s hook window) needs exactly one hookSeamDecisions row: decision "clean-hook", a 20+ character reason, and 12+ characters of transcript evidence for THAT seam. An unresolved seam is not an editorial decision.
@@ -111,7 +114,7 @@ Choose openingEndAnchor for a cleanEnds endpoint within60–75s or the entire sh
 Audio must preserve-full-program; the later opening uses one shared mastered full-program bus, never excerpt normalization. Color policy must agree with exact grade operations, otherwise preserve. Unresolved audio/color intent blocks instead of disappearing.
 If blockers prevent a coherent proposal, empty beats/operations and null opening bounds are allowed, while clauses must still exhaust the raw request. Return JSON only. Independent semantic, visual, audio, asset, renderer and human opening review remain pending.`;
   const presentation = evidence.schemaVersion >= 3 ? "\nV3 requires presentation on EVERY operation: null except catalog graphics. For graphics choose explicitly from evidence.presentationPolicy, including its paired anchor/placement, normal composite, preserve base and a substantive rationale. Own-screen hides the source picture; free-band requires actual measured free-region placement later. No implicit anchor, crop, blur, resize or alpha/geometry qualification. Controller retains exact integer frame bindings outside the legacy seconds-only plan; no boundary rounding choices belong to the provider." : "";
-  const prompt = `${rules}${presentation}${longformDoctrine(evidence)}\n\nINPUT_DATA_JSON\n${canonicalJson({ rawIntent, evidence })}`;
+  const prompt = `${rules}${presentation}${longformDoctrine(evidence)}\n\n${visualStorytellingInstructions(evidence.target.mode)}\n\nINPUT_DATA_JSON\n${canonicalJson({ rawIntent, evidence })}`;
   if (Buffer.byteLength(prompt, "utf8") > PROMPT_LIMIT) throw new Error("Full-program evidence exceeds 512 KiB; no silent truncation or partial-story compilation");
   return prompt;
 }

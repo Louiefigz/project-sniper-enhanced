@@ -1,0 +1,67 @@
+Project Sniper — adapted HyperFrames runtime: licence and modification notice
+=============================================================================
+
+This directory contains material derived from HyperFrames 0.8.31
+(https://github.com/heygen-com/hyperframes, npm package "hyperframes"),
+Copyright 2026 HeyGen, Inc., licensed under the Apache License, Version 2.0.
+You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
+The full licence text ships with Project Sniper as
+licenses/Apache-2.0-hyperframes.txt and is installed with the upstream packages
+(templates/motion/node_modules/@hyperframes/*/LICENSE).
+
+Upstream NOTICE: as checked on 2026-09-18, HyperFrames publishes no NOTICE
+file (the repository root has LICENSE and CREDITS.md; the installed npm
+packages carry only the LICENSE above). There is therefore no upstream NOTICE
+text to reproduce here. The copyright line above is taken from the upstream
+LICENSE.
+
+MODIFIED BY PROJECT SNIPER
+--------------------------
+patches.json holds exact byte patches. Each patch replaces a span of an
+upstream file with new text; that text contains portions of the original
+upstream code together with Project Sniper's changes. native_runtime.py
+applies the patches to a COPY of the installed package's dist/ directory under
+templates/motion/.sniper-native-runtime/<identity>/hyperframes/; the installed
+package in templates/motion/node_modules/hyperframes is never changed.
+
+The following upstream files were modified by Project Sniper (September 2026):
+
+  dist/cli.js                      28 patches (runtime realm checks, file-backed
+                                   frame transport, zero-anchored source
+                                   extraction clock, half-open video windows,
+                                   sequential source work). In the adapted
+                                   runtime this patched file is renamed
+                                   dist/native-render-sdk.mjs.
+  dist/hyperframe.runtime.iife.js  2 patches (same-document realm checks)
+  dist/hyperframe-runtime.js       2 patches (same content as the file above)
+  dist/hyperframe.manifest.json    1 patch  (records the patched runtime hash)
+  dist/native-capture-library.mjs  new file derived from the patched
+                                   dist/cli.js (1 patch: library entry instead
+                                   of the command-line entry point)
+  dist/studio/assets/index-CfQexXc6.js
+                                   3 patches (Studio page analytics off: the
+                                   analytics project key is replaced, so the
+                                   page's own "key configured" check fails and
+                                   no usage events are sent)
+  dist/studio/index.js             3 patches (the same change in the Studio
+                                   library entry)
+
+Added by Project Sniper (not upstream code): dist/cli.js in the adapted runtime
+is replaced by a three-line wrapper written by native_runtime.py;
+frame-source-transport.mjs and native-export-guard.mjs are Project Sniper
+files copied into the adapted runtime's dist/.
+
+WHY THE NOTICE IS NOT INSIDE THE PATCHED FILES
+----------------------------------------------
+native_runtime.py verifies the SHA-256 of every adapted file against
+patches.json before the runtime is used, and the runtime identity is a hash of
+patches.json. Writing a notice into the patched bytes would change those
+hashes and invalidate the qualification of the adapted runtime. This NOTICE,
+shipped beside patches.json, is the modification notice for those files; the
+adapted runtime directory also carries SNIPER-RUNTIME.json, the patch manifest
+that lists every modified file and its hashes.
+
+Warranty: the upstream code is provided under the Apache License, Version 2.0,
+on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND. Project
+Sniper's modifications are not an upstream release and are not endorsed by
+HeyGen, Inc.

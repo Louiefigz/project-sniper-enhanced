@@ -194,6 +194,18 @@ class SceneReviewRepairTests(unittest.TestCase):
             ["unit-left", "unit-right"])
         self.assertEqual(result["execution"]["unitRenderCount"], 0)
 
+    def test_stale_source_subject_rejects_before_render(self) -> None:
+        request, after = _request()
+        request.current.scene["visualSources"]["subjectSha256"] = "0" * 64
+        with self.assertRaisesRegex(SceneContractError, "authored design changed"):
+            self._run(request, after)
+
+    def test_changed_source_decision_is_not_a_copy_repair(self) -> None:
+        request, after = _request()
+        request.current.scene["visualSources"]["decisions"][0]["gap"] += " Different decision."
+        with self.assertRaisesRegex(SceneContractError, "structure, timing, or authority"):
+            self._run(request, after)
+
     def test_unrelated_unit_cache_miss_fails_closed(self) -> None:
         request, after = _request(left_cached=False)
         with self.assertRaisesRegex(

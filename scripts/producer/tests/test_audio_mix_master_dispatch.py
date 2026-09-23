@@ -149,6 +149,7 @@ class SharedMasterMediaTests(unittest.TestCase):
             self.assertTrue(result["ok"], result)
             self.assertFalse(result["linear"])
             self.assertIn("static gain", result["mastering_note"])
+            self.assertEqual(result["mastering_decision"]["branch"], "static")
             samples = _left_samples(output)
             difference = 20 * math.log10(_window_rms(samples, 4.5, 7.5)
                                          / _window_rms(samples, 0.5, 3.5))
@@ -171,6 +172,8 @@ class SharedMasterMediaTests(unittest.TestCase):
             result = audio_mix.mix_master(str(source), str(bed), str(output), 16)
             self.assertFalse(result["ok"], result)
             self.assertFalse(result["published"])
+            self.assertEqual(result["mastering_decision"]["convergence"], "budget-exhausted")
+            self.assertFalse(result["mastering_decision"]["selectedFilterMeasured"])
             self.assertIn("static gain", result["mastering_note"])
             self.assertEqual(file_sha256(str(output)), previous)
             candidate = result["unapprovedCandidate"]

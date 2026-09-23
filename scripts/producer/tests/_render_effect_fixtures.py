@@ -124,7 +124,7 @@ def fixture(name: str) -> tuple[dict, dict]:
         }]
     elif name == "longform-presenter":
         plan["graphicsTrack"] = [{
-            "kind": "nateherk-scoreboard", "anchor": "own-screen",
+            "kind": "module-scoreboard", "anchor": "own-screen",
             "outStart": 1.0, "outEnd": 3.0,
             "spec": {"presenterFrame": False},
         }]

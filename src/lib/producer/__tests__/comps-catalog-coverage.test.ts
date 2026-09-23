@@ -39,7 +39,7 @@ test("every editor default spec satisfies the renderer template contract", () =>
       kind: entry.kind,
       spec: entry.defaultSpec,
       // Editor samples must clear the longest registered completion floor
-      // (avatar credibility = 5s; Nate modular cards = 4s).
+      // (avatar credibility = 5s; module modular cards = 4s).
       outStart: index * 7,
       outEnd: index * 7 + 6,
     })),

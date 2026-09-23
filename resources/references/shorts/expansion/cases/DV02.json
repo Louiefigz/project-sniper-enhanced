@@ -1,0 +1,273 @@
+{
+  "id": "DV02",
+  "version": "2026-09-18.1",
+  "title": "Turn one page per step of the argument",
+  "scope": "original-reference-rendered-from-project-sniper-templates",
+  "message": "A three-part argument reads well as a short deck: one page per part, a constant header and a caption pill that says which part the viewer is on.",
+  "arc": "Header and page one → page two → page three.",
+  "execution": "Keep the header fixed, turn the page on the spoken transition, and put no more than two short rows on a page.",
+  "avoid": "Pages that turn before the speaker finishes the point, or pages with more than two rows.",
+  "typography": "An all-caps header of three words or fewer; rows of two to five words.",
+  "catalog": [
+    "slideware-takeover-deck",
+    "statement-card",
+    "module-rail"
+  ],
+  "beats": [
+    {
+      "id": "DV02-B01",
+      "message_paraphrase": "First, read it aloud once and time every section.",
+      "composition": "slideware-takeover-deck",
+      "catalog_candidates": [
+        "slideware-takeover-deck"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/expansion/frames/DV02-B01-0.jpg",
+          "sha256": "27c259f99ba05f8a50f8052e2863e877ec88a2c962ff7963377b83da7d72f633",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 0.5,
+          "render": {
+            "composition": "templates/motion/compositions/slideware-takeover-deck.html",
+            "variables": {
+              "header": "REHEARSE A TALK",
+              "headerInk": "white",
+              "slide1": "Read it aloud once|Time every section",
+              "slide2": "Cut what you skipped|Rework where you stumbled",
+              "slide3": "Say it to one person|Watch where they look away",
+              "pill1": "Part 1",
+              "pill2": "Part 2",
+              "pill3": "Part 3",
+              "pageAt2": 2.0,
+              "pageAt3": 4.0
+            },
+            "time_s": 0.5
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/DV02-B01-1.jpg",
+          "sha256": "27c259f99ba05f8a50f8052e2863e877ec88a2c962ff7963377b83da7d72f633",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 1.0,
+          "render": {
+            "composition": "templates/motion/compositions/slideware-takeover-deck.html",
+            "variables": {
+              "header": "REHEARSE A TALK",
+              "headerInk": "white",
+              "slide1": "Read it aloud once|Time every section",
+              "slide2": "Cut what you skipped|Rework where you stumbled",
+              "slide3": "Say it to one person|Watch where they look away",
+              "pill1": "Part 1",
+              "pill2": "Part 2",
+              "pill3": "Part 3",
+              "pageAt2": 2.0,
+              "pageAt3": 4.0
+            },
+            "time_s": 1.0
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/DV02-B01-2.jpg",
+          "sha256": "27c259f99ba05f8a50f8052e2863e877ec88a2c962ff7963377b83da7d72f633",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 1.7,
+          "render": {
+            "composition": "templates/motion/compositions/slideware-takeover-deck.html",
+            "variables": {
+              "header": "REHEARSE A TALK",
+              "headerInk": "white",
+              "slide1": "Read it aloud once|Time every section",
+              "slide2": "Cut what you skipped|Rework where you stumbled",
+              "slide3": "Say it to one person|Watch where they look away",
+              "pill1": "Part 1",
+              "pill2": "Part 2",
+              "pill3": "Part 3",
+              "pageAt2": 2.0,
+              "pageAt3": 4.0
+            },
+            "time_s": 1.7
+          }
+        }
+      ]
+    },
+    {
+      "id": "DV02-B02",
+      "message_paraphrase": "Then cut what you skipped and rework where you stumbled.",
+      "composition": "slideware-takeover-deck",
+      "catalog_candidates": [
+        "slideware-takeover-deck"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/expansion/frames/DV02-B02-0.jpg",
+          "sha256": "eaa91e67f12d6c72e680b2aa90078f097786269cb961b27657d38b6887aba9d8",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 2.3,
+          "render": {
+            "composition": "templates/motion/compositions/slideware-takeover-deck.html",
+            "variables": {
+              "header": "REHEARSE A TALK",
+              "headerInk": "white",
+              "slide1": "Read it aloud once|Time every section",
+              "slide2": "Cut what you skipped|Rework where you stumbled",
+              "slide3": "Say it to one person|Watch where they look away",
+              "pill1": "Part 1",
+              "pill2": "Part 2",
+              "pill3": "Part 3",
+              "pageAt2": 2.0,
+              "pageAt3": 4.0
+            },
+            "time_s": 2.3
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/DV02-B02-1.jpg",
+          "sha256": "93b011b9749204f114ff390f5463d358189c9b57defb2a3483deb2d7b255978b",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 2.8,
+          "render": {
+            "composition": "templates/motion/compositions/slideware-takeover-deck.html",
+            "variables": {
+              "header": "REHEARSE A TALK",
+              "headerInk": "white",
+              "slide1": "Read it aloud once|Time every section",
+              "slide2": "Cut what you skipped|Rework where you stumbled",
+              "slide3": "Say it to one person|Watch where they look away",
+              "pill1": "Part 1",
+              "pill2": "Part 2",
+              "pill3": "Part 3",
+              "pageAt2": 2.0,
+              "pageAt3": 4.0
+            },
+            "time_s": 2.8
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/DV02-B02-2.jpg",
+          "sha256": "93b011b9749204f114ff390f5463d358189c9b57defb2a3483deb2d7b255978b",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 3.6,
+          "render": {
+            "composition": "templates/motion/compositions/slideware-takeover-deck.html",
+            "variables": {
+              "header": "REHEARSE A TALK",
+              "headerInk": "white",
+              "slide1": "Read it aloud once|Time every section",
+              "slide2": "Cut what you skipped|Rework where you stumbled",
+              "slide3": "Say it to one person|Watch where they look away",
+              "pill1": "Part 1",
+              "pill2": "Part 2",
+              "pill3": "Part 3",
+              "pageAt2": 2.0,
+              "pageAt3": 4.0
+            },
+            "time_s": 3.6
+          }
+        }
+      ]
+    },
+    {
+      "id": "DV02-B03",
+      "message_paraphrase": "Finally, say it to one person and watch where they look away.",
+      "composition": "slideware-takeover-deck",
+      "catalog_candidates": [
+        "slideware-takeover-deck"
+      ],
+      "source_frames": [
+        {
+          "path": "resources/references/shorts/expansion/frames/DV02-B03-0.jpg",
+          "sha256": "448e601976f76b9bcb0862668f7c9e3f66b8693b45cbc64781a7ee6914a5447c",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 4.3,
+          "render": {
+            "composition": "templates/motion/compositions/slideware-takeover-deck.html",
+            "variables": {
+              "header": "REHEARSE A TALK",
+              "headerInk": "white",
+              "slide1": "Read it aloud once|Time every section",
+              "slide2": "Cut what you skipped|Rework where you stumbled",
+              "slide3": "Say it to one person|Watch where they look away",
+              "pill1": "Part 1",
+              "pill2": "Part 2",
+              "pill3": "Part 3",
+              "pageAt2": 2.0,
+              "pageAt3": 4.0
+            },
+            "time_s": 4.3
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/DV02-B03-1.jpg",
+          "sha256": "69583e29cd4e63f94f42006dd2b0233dc3d90de36b338a9f4fc0ccf27d855bec",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 4.9,
+          "render": {
+            "composition": "templates/motion/compositions/slideware-takeover-deck.html",
+            "variables": {
+              "header": "REHEARSE A TALK",
+              "headerInk": "white",
+              "slide1": "Read it aloud once|Time every section",
+              "slide2": "Cut what you skipped|Rework where you stumbled",
+              "slide3": "Say it to one person|Watch where they look away",
+              "pill1": "Part 1",
+              "pill2": "Part 2",
+              "pill3": "Part 3",
+              "pageAt2": 2.0,
+              "pageAt3": 4.0
+            },
+            "time_s": 4.9
+          }
+        },
+        {
+          "path": "resources/references/shorts/expansion/frames/DV02-B03-2.jpg",
+          "sha256": "69583e29cd4e63f94f42006dd2b0233dc3d90de36b338a9f4fc0ccf27d855bec",
+          "dimensions": [
+            720,
+            1280
+          ],
+          "requested_time": 5.7,
+          "render": {
+            "composition": "templates/motion/compositions/slideware-takeover-deck.html",
+            "variables": {
+              "header": "REHEARSE A TALK",
+              "headerInk": "white",
+              "slide1": "Read it aloud once|Time every section",
+              "slide2": "Cut what you skipped|Rework where you stumbled",
+              "slide3": "Say it to one person|Watch where they look away",
+              "pill1": "Part 1",
+              "pill2": "Part 2",
+              "pill3": "Part 3",
+              "pageAt2": 2.0,
+              "pageAt3": 4.0
+            },
+            "time_s": 5.7
+          }
+        }
+      ]
+    }
+  ]
+}

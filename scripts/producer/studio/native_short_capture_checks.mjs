@@ -1,5 +1,6 @@
 /** Shared native layout/word-state checks on the real capture session. */
 import assert from 'node:assert/strict';
+import {catalogCapturePoints,checkCatalogMounts} from './native_catalog_checks.mjs';
 
 /** Compare semantic paint state separately from subpixel browser antialiasing. */
 export async function visualState(page) {
@@ -27,7 +28,8 @@ export function capturePoints(plan) {
   for (const view of [...input.pictureViews, ...input.captionViews, ...input.text, ...input.shapes]) {
     boundary(view.startFrame); boundary(view.endFrame);
   }
-  boundary(input.titleCard.endFrame);
+  if(input.titleCard)boundary(input.titleCard.endFrame);
+  for(const frame of catalogCapturePoints(plan))boundary(frame);
   for (const cue of input.motion) { boundary(cue.startFrame); boundary(cue.startFrame + cue.durationFrames); }
   for (const word of input.occurrences) { boundary(word[3]); boundary(word[4]); }
   for (const check of plan.expectations ?? []) boundary(check.frame);
@@ -45,7 +47,7 @@ function rgb(hex) {
 export async function checkTypography(page, frame, plan) {
   const input = plan.canvas, [num, den] = input.frameRate.split('/').map(Number), time = frame * den / num;
   const state = await page.evaluate(() => ({
-    titleClip: getComputedStyle(document.getElementById('native-title-card')).clipPath,
+    titleClip: document.getElementById('native-title-card') ? getComputedStyle(document.getElementById('native-title-card')).clipPath : null,
     lines: [...document.querySelectorAll('[id^="native-title-line-"]')].map(el => ({
       text: el.textContent, left: el.getBoundingClientRect().left, right: el.getBoundingClientRect().right,
       scroll: el.scrollWidth, client: el.clientWidth })),
@@ -65,7 +67,9 @@ export async function checkTypography(page, frame, plan) {
     && row.top === input.captionViews[Number(row.id.split('-').at(-1))].box[1]), 'Caption placement/fit differs from strategy');
   assert.ok(state.captions.filter(row => row.start <= time && time < row.end - 1e-8 && row.clip !== 'inset(100%)').length <= 1,
     `More than one phrase owns frame ${frame}`);
-  assert.equal(state.titleClip === 'inset(100%)', frame >= input.titleCard.endFrame);
+  if(input.titleCard)assert.equal(state.titleClip === 'inset(100%)', frame >= input.titleCard.endFrame);
+  else assert.equal(state.titleClip,null,'Catalog title must not stack a built-in title');
+  await checkCatalogMounts(page,frame,plan);
   for (const word of state.words) {
     const correction = input.captionCorrections?.find(row => row.occurrenceId === word.id);
     assert.equal(word.text, correction?.displayText ?? input.occurrences[word.id][5], `Caption text ${word.id} at frame ${frame}`);

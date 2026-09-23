@@ -56,8 +56,9 @@ function allowedTools(ctx: AutoEditCtx, stage: AuthoringStage): string {
   const patterns = stage === "cut"
     ? claudeCutAuthoringBashPatterns(ctx) : claudeAuthoringBashPatterns(ctx);
   const bash = patterns.map((command) => `Bash(${command})`);
+  // No Skill(...) entry: authoring runs with no setting sources, so skills never load;
+  // the prompt names the pinned doctrine files to read instead.
   return [
-    "Skill(producer)",
     ...bash,
     `Edit(/${ctx.planPath})`,
     `Write(/${ctx.planPath})`,

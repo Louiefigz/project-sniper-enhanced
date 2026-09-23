@@ -132,10 +132,11 @@ DEEP = {
     "caption_chrome_max_frac": 0.06,  # UI-CHROME GATE (LL-012): reject the
                                   # caption verdict when >= this fraction of
                                   # cues read as UI chrome / file paths.
-                                  # Calibrated: EC1/EC2 screen-share false
-                                  # positives measure 0.125 / 0.175; 967
-                                  # genuine caption lines (EC1 VTT) measure
-                                  # 0.000 — 2x margin on both sides.
+                                  # Sniper design parameter: the synthetic
+                                  # screen-share fixtures in
+                                  # tests/test_study_deep.py measure 0.125 /
+                                  # 0.175 and the synthetic genuine caption
+                                  # lines 0.000 — a 2x margin both sides.
 
     # ---- P5 word lock ------------------------------------------------------
     "word_lock_tol_s": 0.15,      # mirrors MOTION["word_lock"] (150ms)
@@ -146,15 +147,15 @@ DEEP = {
 }
 
 # UI-CHROME WORDLIST (LL-012, data catalog) — tokens that mark a "caption"
-# cue as editor/app chrome or a filename, not speech. Grounded in the EC1/EC2
-# screen-share false positives AND pruned against 967 genuine caption lines
-# (the EC1 VTT): every token here has ZERO hits in the genuine corpus even
-# though that video is an editing tutorial (speakable UI words like
-# "effects" / "transitions" / "color" / "timeline" are deliberately absent —
-# genuine captions of a tutorial DO say them). Membership is arithmetic
+# cue as editor/app chrome or a filename, not speech: app-panel labels and
+# file-extension / colorimetry tokens that a speaker practically never says
+# as a whole caption. Speakable UI words ("effects" / "transitions" /
+# "color" / "timeline" / "import") are deliberately ABSENT — genuine
+# captions of an editing walkthrough DO say them (pinned by the synthetic
+# GENUINE list in tests/test_study_deep.py). Membership is arithmetic
 # (lowercased alnum token in set), never regex semantics.
 UI_CHROME_TOKENS = frozenset({
-    # app-chrome labels observed in the false positives
+    # app-chrome panel and dialog labels
     "stickers", "aspect", "ratio", "projects", "users", "movies",
     "stock", "download", "resolution", "fps", "file", "files",
     # file-extension / colorimetry tokens

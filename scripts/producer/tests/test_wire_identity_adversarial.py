@@ -51,7 +51,7 @@ from test_generation_verification import (
 )
 from test_quality_pass_contract import _approved, _document, _plan
 from test_repair_intent import _intent as repair_document
-from test_repair_intent import _plan as repair_plan
+from test_repair_intent import _catalog_plan as repair_plan
 
 
 class _AlwaysEqualString(str):

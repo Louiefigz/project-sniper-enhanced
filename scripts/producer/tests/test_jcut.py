@@ -1,11 +1,11 @@
-"""J-cut leads (LIAM-4-MOVES move 2, measured 2026-07-11, n=176 seams).
+"""J-cut leads (continuity mechanism CM-2, EDITCRAFT_LESSONS §6.3).
 
 ``cutTrack[i].audioLeadMs`` = the incoming segment's audio PRE-ROLL starts
 this early — baked into the OUTGOING part's audio tail by cut_speed so every
 part keeps audio == video length exactly (the concat demuxer offsets whole
 files; unequal lengths would desync — probed empirically). These tests pin:
 the compile-time validator (single source for lint + renderer), the additive
-default (absent = today's joins), the lint bounds + measured-band WARN, the
+default (absent = today's joins), the lint bounds + preferred-band WARN, the
 tail-chain window math, and an ffmpeg end-to-end RMS probe showing the
 incoming audio really arrives before the picture cut.
 """

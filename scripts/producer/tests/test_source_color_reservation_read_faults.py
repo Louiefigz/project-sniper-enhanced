@@ -47,7 +47,7 @@ class SourceColorReservationReadFaultTests(unittest.TestCase):
         f.reference = (f.reservation_path, f.write(f.reservation_path, raw))
         self.assertEqual(f.run().value, f.reservation)
         f.write(f.input_path, b" " * (129 * 1024) + f.input_path.read_bytes())
-        with self.assertRaisesRegex(RuntimeError, "bounded regular"):
+        with self.assertRaisesRegex(RuntimeError, "exceeds byte limit: [0-9]+ > 131072"):
             f.run()
 
     def test_aliased_reservation_is_not_opened_and_fault_writer_rejects_dependencies(self) -> None:

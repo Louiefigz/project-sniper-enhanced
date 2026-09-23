@@ -9,6 +9,8 @@ import { assembleNativeShortHtml, readNativeShortProject, writeNativeShortProjec
 import { assertNativeShortStory, nativeShortStoryReport, nativeStoryRevisionHash, type NativeStoryVisualJob } from "../native-short-story";
 import { executeNativeShortCommand } from "../../../../scripts/producer/native-short";
 import { assetUseFixture, withAssetUse, type AssetUseFixture } from "./_native-short-asset-use-fixture";
+import { refreshNativePrebuildReviewFixture } from "./_native-short-project-fixture";
+import { refreshVisualSourceFixture } from "./_visual-source-fixture";
 
 function author(f: AssetUseFixture, kind: NativeStoryVisualJob["kind"] = "presenter-performance"): void {
   const input = f.input, pacing = input.strategy.pacing!;
@@ -40,6 +42,9 @@ function author(f: AssetUseFixture, kind: NativeStoryVisualJob["kind"] = "presen
     }) };
   Object.assign(pacing, nativePacingBindings(input)); f.refresh();
   input.strategy.story.revisionHash = nativeStoryRevisionHash(input);
+  // TEST source decisions bind the completed authored geometry before prebuild review.
+  refreshVisualSourceFixture(input);
+  refreshNativePrebuildReviewFixture(input);
 }
 
 function rebind(f: AssetUseFixture): void {
@@ -51,6 +56,8 @@ test("legacy absence remains explicit unplanned in reports and the actual check 
   try {
     const html = assembleNativeShortHtml(f.input);
     assert.equal(nativeShortStoryReport(f.input, html).status, "unplanned");
+    refreshVisualSourceFixture(f.input);
+    refreshNativePrebuildReviewFixture(f.input);
     const project = writeNativeShortProject(f.input, path.join(f.directory, "legacy")).directory;
     assert.equal(existsSync(path.join(project, "STORY-REPORT.json")), false);
     assert.equal(readNativeShortProject(project).strategy.story, undefined);

@@ -1,6 +1,6 @@
 # A creator label is too broad to choose a Short's format
 
-The September 10 reference expansion added four Caleb Ralston and four Lewis
+The September 10 reference expansion added four Restrained Ralston and four Lewis
 Mudrich reels, bringing that current comparison set to seven each. The extra
 examples changed the useful question from “which creator style?” to “what does
 the viewer need to see during this thought?”

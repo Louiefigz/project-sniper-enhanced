@@ -7,7 +7,7 @@ the right semantic decision and still ship the wrong visual. The rendered
 timeline—not the planning document—is the product.
 
 In C0679, the source plan selected several rich information forms, including
-`nateherk-bullet-bars` and `nateherk-ledger-dark`. The Palmier live build later
+`module-bullet-bars` and `module-ledger-dark`. The Palmier live build later
 replaced 12 planned kinds with simpler fallbacks and added three unplanned
 graphics. Eight intro decision rows still named the original kinds, so plan
 intent and render truth diverged in machine-readable data.

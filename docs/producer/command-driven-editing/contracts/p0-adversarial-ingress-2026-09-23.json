@@ -1,0 +1,84 @@
+{
+  "cases": [
+    {
+      "admissionReceiptPublished": false,
+      "caseId": "malformed-codec",
+      "error": "external-media decode rejected: DECODER_EXIT_234: DECODER_EXIT_234: [vist#0:0/none @ 0x9bec38180] Decoding requested, but no decoder found for: none\nError opening output file -.\nError opening output files: Invalid argument",
+      "inputSha256": "314908207f98259a53b5f1d06e7775638f03c75df8b967748f43e9ddfef5bdb9",
+      "processCleanupProved": true,
+      "status": "rejected"
+    },
+    {
+      "admissionReceiptPublished": false,
+      "caseId": "huge-dimensions",
+      "error": "external-media decode rejected: DIMENSION_LIMIT: DIMENSION_LIMIT",
+      "inputSha256": "05096ed5ab5366423df43043049c2db7a28c09a84ef1a65dea4052d76c5fb54d",
+      "processCleanupProved": true,
+      "status": "rejected"
+    },
+    {
+      "admissionReceiptPublished": false,
+      "caseId": "huge-frame-count",
+      "error": "external-media decode rejected: FRAME_LIMIT: FRAME_LIMIT",
+      "inputSha256": "2bd0563265f9ee3cedb9d0120f0617dcab88f058750a7788620058ca64b3c51a",
+      "processCleanupProved": true,
+      "status": "rejected"
+    },
+    {
+      "admissionReceiptPublished": false,
+      "caseId": "truncated-stream",
+      "error": "external-media decode rejected: DECODER_EXIT_1: DECODER_EXIT_1: [mov,mp4,m4a,3gp,3g2,mj2 @ 0x97082c000] moov atom not found\n/private/var/folders/3m/8rxbwgds5z7c3r72ccfqb9280000gn/T/sniper-p0-adversarial-u3om5k_1/truncated-stream-store/d9f044389fb77f5b4246a07da9651a1fdfe583457ae76e12bfcce2a7493fb802.media: Invalid data found when processing input",
+      "inputSha256": "d9f044389fb77f5b4246a07da9651a1fdfe583457ae76e12bfcce2a7493fb802",
+      "processCleanupProved": true,
+      "status": "rejected"
+    },
+    {
+      "admissionReceiptPublished": false,
+      "caseId": "decoder-timeout",
+      "error": "external-media decode rejected: DECODE_TIMEOUT: DECODE_TIMEOUT: exceeded 90 s",
+      "inputSha256": "2f7c6ca2e2a649acf90eb6834f7ed8b840c35c08d436eda37e306348eaebd17b",
+      "processCleanupProved": true,
+      "status": "rejected"
+    },
+    {
+      "admissionReceiptPublished": false,
+      "caseId": "archive-bomb",
+      "error": "sealed render manifest closure is invalid",
+      "inputSha256": "aba3a1549379a3efce58d22bb4c04c464ce5c66f4ac65bf9e18e0403973e5c6a",
+      "processCleanupProved": true,
+      "status": "rejected"
+    }
+  ],
+  "generatedAt": "2026-09-23T03:03:54.601135+00:00",
+  "kind": "p0-adversarial-ingress-acceptance",
+  "nativeRuntime": {
+    "closureSha256": "0db00d0c000c065b02801f731f42caac334afa0f4a988394e18d806ca83e3576",
+    "ffmpeg": "ffmpeg version 8.0.3 Copyright (c) 2000-2026 the FFmpeg developers",
+    "launcherSha256": "4bb73a0e1346e95d3081214aa1f82de98c16b80d7ca68e51ae511551fc2eb89d",
+    "platform": {
+      "machine": "arm64",
+      "macos": "26.5.2",
+      "release": "25.5.0",
+      "system": "Darwin"
+    },
+    "policy": "sniper-native-media-jail-v2",
+    "profileSha256": "103a525303cfd858a721fdd6026b25d0ddab84851df62a51c7a920f05c428e08"
+  },
+  "passed": true,
+  "schemaVersion": 2,
+  "sourceClosure": {
+    "scripts/producer/headless/external_media_probe.py": "7a8acb47c24b00f69318682a92b06fb87c98e4e9267a5e88465e0aae0dbfcb91",
+    "scripts/producer/headless/external_media_probe_native.py": "19f56caf8790aadc9e08ef96095eb0591ffbc185ed6ca3a8c5780a15811592c2",
+    "scripts/producer/headless/external_media_probe_policy.py": "f1849aeaca79bb60084db84c20bf97fea75706ff139b4e7eccfa44cbc5019bf2",
+    "scripts/producer/headless/external_media_snapshot.py": "e939015401608e99b6996a6e8b29c1e7e788938e38ba137e72d22f61d7bb4b35",
+    "scripts/producer/headless/native_macho.py": "aecc89e4075d44e2c44ff7e4cdd4e3ceff0e05bfa1897ba0170e85de1ce6dad3",
+    "scripts/producer/headless/native_media_jail.py": "4bb73a0e1346e95d3081214aa1f82de98c16b80d7ca68e51ae511551fc2eb89d",
+    "scripts/producer/headless/native_media_probe.sb": "4d1a8e3d6aaf07462a30000a7e022a918c9fa758ffcf0adeb5447d9cec5c7dc0",
+    "scripts/producer/headless/native_media_runtime.py": "7b082980850d513a285d6694f4e239ff73febecbcb4cfae04a7ca381aa880fcb",
+    "scripts/producer/headless/native_media_runtime_approval.json": "95e618b96020e366d718afe2ff15e1728ea4de48f1556e8503585acdda980317",
+    "scripts/producer/headless/native_media_sandbox.py": "b726c88401eb950757577c0841c9e8958d7fed63cb58f7de0ff96d013190968d",
+    "scripts/producer/headless/native_media_watchdog.py": "e121b02f0ff4524eeff1ccc99c9efba7c9dc87a072b71019808233962ed10c9e",
+    "scripts/producer/headless/sealed_archive.py": "3896610aa65f3dad589779bdf599ac1e8a1a0de19e5ef78b8fc01740879dc78f",
+    "scripts/producer/tests/live_p0_adversarial_ingress_acceptance.py": "2a438eabcc9b2fd9553493f77b596e7ce324fe725166dc52e6b2c0f7db660f07"
+  }
+}

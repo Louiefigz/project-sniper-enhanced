@@ -1,7 +1,7 @@
 {
   "url": "http://127.0.0.1:41058/#project/native-presenter-v1",
-  "chrome": "/Users/aaronfigueroa/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-152.0.7928.2/chrome-headless-shell-mac-arm64/chrome-headless-shell",
-  "puppeteerDir": "/Users/aaronfigueroa/development/demos/YT-Automation/PROJECT_SNIPER/templates/motion/node_modules/puppeteer-core",
+  "chrome": "/Users/maintainer/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-152.0.7928.2/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "puppeteerDir": "/Users/maintainer/ProjectSniperSource/templates/motion/node_modules/puppeteer-core",
   "output": "/private/tmp/sniper-native-frame-transport-20260909.wsUupP/current-studio-full-source-v1.browser.json",
   "diagnosticsOnly": false
 }

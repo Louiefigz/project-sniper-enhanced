@@ -1,3 +1,4 @@
+import { assertPlanVisualSources } from "@/lib/producer/visual-source-policy";
 import { readFileSync, rmSync } from "fs";
 import { createHash } from "crypto";
 import type { ProducerReview } from "../auto-edit/review-contract";
@@ -120,6 +121,7 @@ function parsedPlan(text: string, label: string): Record<string, unknown> {
 
 function normalizePlan(planPath: string): Record<string, unknown> {
   const parsed = parsedPlan(readFileSync(planPath, "utf8"), "edited plan");
+  assertPlanVisualSources(parsed);
   const graphics = reconcileGraphicIds(parsed as EditPlan).plan;
   const captions = reconcileCaptionPlanAuthority(graphics).plan;
   atomicWriteFileSync(planPath, `${JSON.stringify(captions, null, 1)}\n`);

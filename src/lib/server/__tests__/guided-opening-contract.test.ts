@@ -10,20 +10,22 @@ import { canonicalJsonSha256 } from "../auto-edit-hash";
 import type { ProposalEvidence } from "../guided-proposal-evidence";
 import type { AcceptedGuidedCut } from "../guided-raw-treatment-store";
 
+// Contract-only fixture: real catalog identity and defaults, no rendering or quality claim.
+const catalogDefaults = { lineA: "A real point", lineB: "A clearer point", swapAt: 1.5, underlineWord: "", accent: "#054BC9", exit: "hold" };
 const presentation = { schemaVersion: 1, anchor: "own-screen", placement: "full-canvas", compositeMode: "normal", baseTreatment: "preserve", rationale: "TEST explicit full-screen semantic card." };
 function pureProposal() {
   return { schemaVersion: 3, summary: "TEST ONLY explicit presentation and independent frame windows",
     clauses: [{ start: 0, end: 9, quote: "Add title", disposition: "supported", rationale: "Exact cue", operationIndices: [0] }],
     beats: [{ startAnchor: 0, endAnchorExclusive: 5, purpose: "opening", summary: "TEST program", supportsBeatIndices: [] }],
-    operations: [{ type: "catalog-graphic", clauseIndex: 0, beatIndex: 0, catalogKind: "title-card", variables: [{ name: "title", value: "A real point" }],
+    operations: [{ type: "catalog-graphic", clauseIndex: 0, beatIndex: 0, catalogKind: "line-swap", variables: Object.entries(catalogDefaults).map(([name, value]) => ({ name, value })),
       grade: null, startAnchor: 1, endAnchorExclusive: 2, presentation }],
     openingEndAnchor: 3, continuityEndAnchor: 4, audioPolicy: "preserve-full-program", colorPolicy: "preserve" };
 }
 function pureInput() {
-  const target = { mode: "longform", width: 1920, height: 1080 };
+  const target = { mode: "longform", width: 1080, height: 1920 };
   const evidence = { schemaVersion: 3, frameRate: "30000/1001", totalFrames: 17983, target,
     segments: [{ index: 0, sourceId: "s", startFrame: 0, endFrameExclusive: 17983, text: "TEST ten-minute program" }],
-    catalog: [{ kind: "title-card", canvas: [1920, 1080], fields: ["title"], defaults: { title: "Example" } }],
+    catalog: [{ kind: "line-swap", canvas: [1080, 1920], fields: Object.keys(catalogDefaults), defaults: { ...catalogDefaults } }],
     anchors: [0, 30, 75, 1800, 2100, 17983], cleanEnds: [1800], occurrences: [[0, 0, 0, 30, 75, "Point.", 0]],
     presentationPolicy: PROPOSAL_PRESENTATION_POLICY, timelineMapHash: "a".repeat(64) } as unknown as ProposalEvidence;
   const cut = { plan: { value: { target, cutTrack: [{ sourceId: "s", start: 0, end: 600 }], cutDecisions: {} } } } as unknown as AcceptedGuidedCut;
@@ -88,4 +90,13 @@ test("only schema3 exact empty asset defaults mean no asset; nonempty and legacy
   assert.match(buildTreatmentCandidate({ ...input, evidence: nonemptyDefault }).blockers[0].reason, /separately resolved asset/);
   const legacy = { ...input.output, schemaVersion: 2, operations: input.output.operations.map(({ presentation: _drop, ...row }) => { void _drop; return row; }) };
   assert.match(buildTreatmentCandidate({ ...input, output: legacy, evidence: { ...input.evidence, schemaVersion: 2 } }).blockers[0].reason, /separately resolved asset/);
+});
+
+test("retired catalog identities cannot become candidates through caller evidence", () => {
+  const input = pureInput();
+  input.output.operations[0].catalogKind = "title-card";
+  input.evidence.catalog[0].kind = "title-card";
+  const result = buildTreatmentCandidate(input);
+  assert.equal(result.candidate, null);
+  assert.match(result.blockers[0].reason, /retired|catalog/i);
 });

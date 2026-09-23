@@ -20,6 +20,9 @@ const ANCHORS = ["package.json", "package-lock.json", "tsconfig.json", "next.con
   "src/lib/producer/TEST.ts", "src/lib/server/TEST.ts"];
 const LEGACY_CONTROLLERS = ["guided-opening-launch-store", "guided-opening-launcher", "guided-opening-controller",
   "guided-opening-execution", "opening-handoff-clock"].map(name => `src/lib/server/${name}.ts`);
+const CATALOG_SOURCES = ["schemas/producer/visual-source-policy-v1.json",
+  "vendor/hyperframes-catalog/catalog-index.json", "vendor/hyperframes-catalog/hyperframes-catalog-lock.json",
+  "docs/producer/catalog-study/catalog-study.json"];
 
 /** Every publication is new-only under the already canonical disposable TEST root. */
 function publish(root: string, relative: string, bytes: Buffer | string): void {
@@ -39,7 +42,8 @@ function originalBytes(relative: string): Buffer {
 export function sourceColorPipelineFixture(t: TestContext, extraSources: readonly string[] = []) {
   const f = sourceColorIntentFixture(t), repository = path.join(f.root, "TEST-repository");
   fs.mkdirSync(repository, { mode: 0o700 });
-  const sourceNames = [...new Set([...GUIDED_SOURCE_COLOR_TS_FILES, ...SOURCE_COLOR_CAPTURE_HOLES, ...LEGACY_CONTROLLERS, ...extraSources])];
+  const sourceNames = [...new Set([...GUIDED_SOURCE_COLOR_TS_FILES, ...SOURCE_COLOR_CAPTURE_HOLES,
+    ...LEGACY_CONTROLLERS, ...CATALOG_SOURCES, ...extraSources])];
   for (const relative of sourceNames) publish(repository, relative, originalBytes(relative));
   for (const relative of ANCHORS.filter(name => !sourceNames.includes(name))) publish(repository, relative, `TEST inert capture anchor ${relative}\n`);
   const model = "scripts/producer/audio/models/bd.rnnn"; publish(repository, model, originalBytes(model));
